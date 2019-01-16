@@ -68,8 +68,8 @@ public class CommandLineOptionsTest {
         this.target.parse(new String[]{"-new=" + this.baseDir + "/new", "-old=" + this.baseDir + "/old", "-setting=" + this.baseDir + "/setting.json"});
         assertEquals(new File(this.baseDir, "new"), this.target.getNewDir());
         assertEquals(new File(this.baseDir, "old"), this.target.getOldDir());
-        assertEquals(1, this.target.getComparisonKeys().get("sample1.csv").size());
-        assertEquals("key", this.target.getComparisonKeys().get("sample1.csv").get(0));
+        assertEquals(1, this.target.getComparisonKeys().get("sample1").size());
+        assertEquals("key", this.target.getComparisonKeys().get("sample1").get(0));
     }
 
     @Test
@@ -77,8 +77,8 @@ public class CommandLineOptionsTest {
         this.target.parse(new String[]{"@" + this.baseDir + "/param.txt"});
         assertEquals(new File(this.baseDir, "new"), this.target.getNewDir().getAbsoluteFile());
         assertEquals(new File(this.baseDir, "old"), this.target.getOldDir().getAbsoluteFile());
-        assertEquals(1, this.target.getComparisonKeys().get("sample1.csv").size());
-        assertEquals("key", this.target.getComparisonKeys().get("sample1.csv").get(0));
+        assertEquals(1, this.target.getComparisonKeys().get("sample1").size());
+        assertEquals("key", this.target.getComparisonKeys().get("sample1").get(0));
     }
 
     @Test
