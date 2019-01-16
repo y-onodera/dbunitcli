@@ -31,14 +31,14 @@ public class CompareResult {
         this.diffs.addAll(results);
     }
 
-    public  IDataSet toIDataSet() throws DataSetException {
+    public  IDataSet toIDataSet(String tableName) throws DataSetException {
         DefaultDataSet result = new DefaultDataSet();
-        result.addTable(this.toITable());
+        result.addTable(this.toITable(tableName));
         return result;
     }
 
-    public ITable toITable() throws DataSetException {
-        DefaultTable result = new DefaultTable("COMPARE_SCHEMA_RESULT", COLUMNS);
+    public ITable toITable(String tableName) throws DataSetException {
+        DefaultTable result = new DefaultTable(tableName, COLUMNS);
         for (CompareDiff diff : diffs) {
             result.addRow(new Object[]{oldDir
                     , newDir
@@ -51,5 +51,9 @@ public class CompareResult {
             });
         }
         return result;
+    }
+
+    public boolean existDiff() {
+        return diffs.size() > 0;
     }
 }

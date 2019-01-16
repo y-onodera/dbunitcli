@@ -4,7 +4,7 @@ import example.y.onodera.dbunitcli.dataset.ComparableCSVDataSet;
 import example.y.onodera.dbunitcli.dataset.CompareResult;
 import org.dbunit.Assertion;
 import org.dbunit.DatabaseUnitException;
-import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.csv.CsvDataSetWriter;
 
 public class Application {
@@ -19,12 +19,15 @@ public class Application {
         ComparableCSVDataSet newData = new ComparableCSVDataSet(options.getNewDir(), options.getEncoding());
         CompareResult result = oldData.compare(newData, options.getComparisonKeys());
         CsvDataSetWriter writer = new CsvDataSetWriter(options.getResultDir());
-        writer.write(result.toIDataSet());
         if (options.getExpected() != null) {
             ComparableCSVDataSet expect = new ComparableCSVDataSet(options.getExpected());
-            Assertion.assertEquals(result.toITable(), expect.getTable("COMPARE_SCHEMA_RESULT"));
+            final ITable expectedTable = expect.getTables()[0];
+            final String expectedTableName = expectedTable.getTableMetaData().getTableName();
+            writer.write(result.toIDataSet(expectedTableName));
+            Assertion.assertEquals(result.toITable(expectedTableName), expectedTable);
         } else {
-            if (result.toITable().getRowCount() > 0) {
+            if (result.existDiff()) {
+                writer.write(result.toIDataSet("COMPARE_RESULT"));
                 System.exit(1);
             }
         }
