@@ -75,7 +75,14 @@ public class ComparableTable implements ITable {
         ITableMetaData oldMetaData = this.getTableMetaData();
         ITableMetaData newMetaData = newTable.getTableMetaData();
         result.addAll(CompareDiff.defineColumn(oldMetaData, newMetaData));
-        result.addAll(CompareDiff.defineRow(this, newTable, comparisonKeys.get(oldMetaData.getTableName())));
+        List<String> key = comparisonKeys
+                .entrySet()
+                .stream()
+                .filter(it -> oldMetaData.getTableName().contains(it.getKey()))
+                .findAny()
+                .get()
+                .getValue();
+        result.addAll(CompareDiff.defineRow(this, newTable, key));
         return result;
     }
 
