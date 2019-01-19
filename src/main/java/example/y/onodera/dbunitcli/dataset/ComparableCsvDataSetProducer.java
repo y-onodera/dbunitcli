@@ -23,7 +23,7 @@ public class ComparableCsvDataSetProducer implements IDataSetProducer {
     private static final Logger logger = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
     private IDataSetConsumer consumer = new DefaultConsumer();
     private File[] src;
-    private String encoding = "UTF-8";
+    private String encoding = System.getProperty("file.encoding");
 
     public ComparableCsvDataSetProducer(File srcDir, String encoding) throws DataSetException {
         if (!srcDir.isDirectory()) {

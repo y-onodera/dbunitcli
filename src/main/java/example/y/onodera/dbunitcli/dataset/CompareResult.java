@@ -11,12 +11,12 @@ public class CompareResult {
     static private final Column[] COLUMNS = new Column[]{
             new Column("OLD_PATH", DataType.UNKNOWN)
             , new Column("NEW_PATH", DataType.UNKNOWN)
-            , new Column("TARGET", DataType.UNKNOWN)
+            , new Column("TARGET_NAME", DataType.UNKNOWN)
             , new Column("DIFF", DataType.UNKNOWN)
-            , new Column("OLD_DEF", DataType.UNKNOWN)
-            , new Column("NEW_DEF", DataType.UNKNOWN)
-            , new Column("COLUMN_INDEX", DataType.UNKNOWN)
-            , new Column("ROWS", DataType.UNKNOWN)
+            , new Column("OLD_VALUE", DataType.UNKNOWN)
+            , new Column("NEW_VALUE", DataType.UNKNOWN)
+            , new Column("COLUMN_INDEX", DataType.NUMERIC)
+            , new Column("DIFF_ROWS", DataType.NUMERIC)
     };
 
     private List<CompareDiff> diffs = Lists.newArrayList();

@@ -99,7 +99,7 @@ public class CommandLineOptionsTest {
     @Test
     public void parseDefaultEncodingWindows31J() throws CmdLineException {
         this.target.parse(new String[]{"-new=" + this.baseDir + "/new", "-old=" + this.baseDir + "/old", "-setting=" + this.baseDir + "/setting.json"});
-        assertEquals("windows-31j", this.target.getEncoding());
+        assertEquals(System.getProperty("file.encoding"), this.target.getEncoding());
     }
 
     @Test
@@ -107,7 +107,7 @@ public class CommandLineOptionsTest {
         this.target.parse(new String[]{"-new=" + this.baseDir + "/new"
                 , "-old=" + this.baseDir + "/old"
                 , "-setting=" + this.baseDir + "/setting.json"
-                , "-encoding=UTF-8"});
-        assertEquals("UTF-8", this.target.getEncoding());
+                , "-encoding=windows-31j"});
+        assertEquals("windows-31j", this.target.getEncoding());
     }
 }

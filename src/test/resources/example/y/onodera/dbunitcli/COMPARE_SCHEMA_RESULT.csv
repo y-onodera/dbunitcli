@@ -1,7 +1,0 @@
-OLD_PATH, NEW_PATH, TARGET, DIFF, OLD_DEF, NEW_DEF, COLUMN_INDEX, ROWS
-"C:\\dev\\workspace\\dbunitcli\\target\\test-classes\\example\\y\\onodera\\dbunitcli\\old","C:\\dev\\workspace\\dbunitcli\\target\\test-classes\\example\\y\\onodera\\dbunitcli\\new","sample1","COLUMNS_COUNT","5","6","0","0"
-"C:\\dev\\workspace\\dbunitcli\\target\\test-classes\\example\\y\\onodera\\dbunitcli\\old","C:\\dev\\workspace\\dbunitcli\\target\\test-classes\\example\\y\\onodera\\dbunitcli\\new","sample1","COLUMNS_MODIFY","ChangeColumn","","4","0"
-"C:\\dev\\workspace\\dbunitcli\\target\\test-classes\\example\\y\\onodera\\dbunitcli\\old","C:\\dev\\workspace\\dbunitcli\\target\\test-classes\\example\\y\\onodera\\dbunitcli\\new","sample1","COLUMNS_ADD","AddColumn",null,"0","0"
-"C:\\dev\\workspace\\dbunitcli\\target\\test-classes\\example\\y\\onodera\\dbunitcli\\old","C:\\dev\\workspace\\dbunitcli\\target\\test-classes\\example\\y\\onodera\\dbunitcli\\new","sample1","MODIFY_VALUE","value2","value2","2","1"
-"C:\\dev\\workspace\\dbunitcli\\target\\test-classes\\example\\y\\onodera\\dbunitcli\\old","C:\\dev\\workspace\\dbunitcli\\target\\test-classes\\example\\y\\onodera\\dbunitcli\\new","sample1","KEY_DELETE",null,null,"0","1"
-"C:\\dev\\workspace\\dbunitcli\\target\\test-classes\\example\\y\\onodera\\dbunitcli\\old","C:\\dev\\workspace\\dbunitcli\\target\\test-classes\\example\\y\\onodera\\dbunitcli\\new","sample1","KEY_ADD",null,null,"0","1"

@@ -70,7 +70,7 @@ public class ComparableTable implements ITable {
         return this.values.get(i)[j];
     }
 
-    public Collection<CompareDiff> compareSchema(ComparableTable newTable, Map<String, List<String>> comparisonKeys) throws DataSetException {
+    public Collection<CompareDiff> compare(ComparableTable newTable, Map<String, List<String>> comparisonKeys) throws DataSetException {
         List<CompareDiff> result = Lists.newArrayList();
         ITableMetaData oldMetaData = this.getTableMetaData();
         ITableMetaData newMetaData = newTable.getTableMetaData();
@@ -85,5 +85,4 @@ public class ComparableTable implements ITable {
         result.addAll(CompareDiff.defineRow(this, newTable, key));
         return result;
     }
-
 }

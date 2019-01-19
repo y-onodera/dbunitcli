@@ -18,7 +18,7 @@ public class CommandLineOptions {
     private static final Logger logger = LoggerFactory.getLogger(CommandLineOptions.class);
 
     @Option(name = "-encoding", usage = "csv file encoding")
-    private String encoding = "windows-31j";
+    private String encoding = System.getProperty("file.encoding");
 
     @Option(name = "-old", usage = "directory old files at", required = true)
     private File oldDir;

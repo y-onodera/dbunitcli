@@ -1,0 +1,8 @@
+{
+  "settings":[
+     {"file":"columnadd","keys":["key"]}
+    ,{"file":"columndrop","keys":["key"]}
+    ,{"file":"new","keys":["key"]}
+    ,{"file":"drop","keys":["key"]}
+  ]
+}

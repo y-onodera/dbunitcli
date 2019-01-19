@@ -4,6 +4,7 @@ import example.y.onodera.dbunitcli.dataset.ComparableCSVDataSet;
 import example.y.onodera.dbunitcli.dataset.CompareResult;
 import org.dbunit.Assertion;
 import org.dbunit.DatabaseUnitException;
+import org.dbunit.assertion.DefaultFailureHandler;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.csv.CsvDataSetWriter;
 
@@ -24,7 +25,7 @@ public class Application {
             final ITable expectedTable = expect.getTables()[0];
             final String expectedTableName = expectedTable.getTableMetaData().getTableName();
             writer.write(result.toIDataSet(expectedTableName));
-            Assertion.assertEquals(result.toITable(expectedTableName), expectedTable);
+            Assertion.assertEquals(expectedTable, result.toITable(expectedTableName), new DefaultFailureHandler());
         } else {
             if (result.existDiff()) {
                 writer.write(result.toIDataSet("COMPARE_RESULT"));

@@ -1,5 +1,6 @@
 package example.y.onodera.dbunitcli.dataset;
 
+import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -40,19 +41,50 @@ public class CompareDiff {
         return builder().setDiff(columnsCount);
     }
 
+    public static List<CompareDiff> tables(ComparableCSVDataSet oldData, ComparableCSVDataSet newData, Map<String, List<String>> comparisonKeys) throws DataSetException {
+        List<CompareDiff> results = Lists.newArrayList();
+        results.addAll(tableCount(oldData, newData));
+        Set<String> oldTables = Sets.newHashSet(oldData.getTableNames());
+        Set<String> newTables = Sets.newHashSet(newData.getTableNames());
+        results.addAll(deleteTable(Sets.filter(oldTables, Predicates.not(Predicates.in(newTables)))));
+        results.addAll(addTable(Sets.filter(newTables, Predicates.not(Predicates.in(oldTables)))));
+        for (String tableName : Sets.intersection(oldTables, newTables)) {
+            ComparableTable oldTable = oldData.getTable(tableName);
+            ComparableTable newTable = newData.getTable(tableName);
+            results.addAll(oldTable.compare(newTable, comparisonKeys));
+        }
+        return results;
+    }
+
+    public static List<CompareDiff> tableCount(ComparableCSVDataSet oldData, ComparableCSVDataSet newData) throws DataSetException {
+        List<CompareDiff> results = Lists.newArrayList();
+        final int oldTableCounts = oldData.getTables().length;
+        final int newTableCounts = newData.getTables().length;
+        if (oldTableCounts != newTableCounts) {
+            results.add(getBuilder(Type.TABLE_COUNT)
+                    .setOldDef(String.valueOf(oldTableCounts))
+                    .setNewDef(String.valueOf(newTableCounts))
+                    .build());
+        }
+        return results;
+    }
+
     public static Collection<CompareDiff> deleteTable(Set<String> dropTables) {
-        return tableDiff(dropTables, Type.TABLE_DELETE);
-    }
-
-    public static Collection<CompareDiff> addTable(Set<String> dropTables) {
-        return tableDiff(dropTables, Type.TABLE_ADD);
-    }
-
-    public static Collection<CompareDiff> tableDiff(Set<String> diffTables, Type tableDiff) {
         List<CompareDiff> result = Lists.newArrayList();
-        diffTables.stream()
-                .forEach(name -> result.add(getBuilder(tableDiff)
+        dropTables.stream()
+                .forEach(name -> result.add(getBuilder(Type.TABLE_DELETE)
                         .setTargetName(name)
+                        .setOldDef(name)
+                        .build()));
+        return result;
+    }
+
+    public static Collection<CompareDiff> addTable(Set<String> addTables) {
+        List<CompareDiff> result = Lists.newArrayList();
+        addTables.stream()
+                .forEach(name -> result.add(getBuilder(Type.TABLE_ADD)
+                        .setTargetName(name)
+                        .setNewDef(name)
                         .build()));
         return result;
     }
@@ -93,7 +125,7 @@ public class CompareDiff {
                 Column newColumn = newMetaData.getColumns()[oldColumns + i];
                 result.add(getBuilder(Type.COLUMNS_ADD)
                         .setTargetName(oldMetaData.getTableName())
-                        .setOldDef(newColumn.getColumnName())
+                        .setNewDef(newColumn.getColumnName())
                         .setColumnIndex(i)
                         .build());
             }
@@ -118,12 +150,7 @@ public class CompareDiff {
                 Object[] newRow = newRowLists.get(key);
                 for (int i = 0, j = oldRow.length; i < j; i++) {
                     if (!Objects.equals(oldRow[i], newRow[i])) {
-                        final Integer current = modifyValues.get(Integer.valueOf(i));
-                        if (current != null) {
-                            modifyValues.put(Integer.valueOf(i), Integer.valueOf(current.intValue() + 1));
-                        } else {
-                            modifyValues.put(Integer.valueOf(i), Integer.valueOf(1));
-                        }
+                        modifyValues.merge(i, 1, (oldVal, initVal) -> oldVal + initVal);
                     }
                 }
             } else {
@@ -134,8 +161,8 @@ public class CompareDiff {
             for (Map.Entry<Integer, Integer> entry : modifyValues.entrySet()) {
                 result.add(getBuilder(Type.MODIFY_VALUE)
                         .setTargetName(oldTable.getTableMetaData().getTableName())
-                        .setOldDef(oldTable.getTableMetaData().getColumns()[entry.getKey().intValue()].getColumnName())
-                        .setNewDef(newTable.getTableMetaData().getColumns()[entry.getKey().intValue()].getColumnName())
+                        .setOldDef(oldTable.getTableMetaData().getColumns()[entry.getKey()].getColumnName())
+                        .setNewDef(newTable.getTableMetaData().getColumns()[entry.getKey()].getColumnName())
                         .setColumnIndex(entry.getKey())
                         .setRows(entry.getValue())
                         .build());
@@ -145,12 +172,16 @@ public class CompareDiff {
             result.add(getBuilder(Type.KEY_DELETE)
                     .setTargetName(oldTable.getTableMetaData().getTableName())
                     .setRows(deleteRows)
+                    .setOldDef(String.valueOf(deleteRows))
+                    .setNewDef("0")
                     .build());
         }
         if (addRows.size() > 0) {
             result.add(getBuilder(Type.KEY_ADD)
                     .setTargetName(oldTable.getTableMetaData().getTableName())
                     .setRows(addRows.size())
+                    .setOldDef("0")
+                    .setNewDef(String.valueOf(deleteRows))
                     .build());
         }
         return result;
@@ -163,6 +194,7 @@ public class CompareDiff {
         if (oldRows != newRows) {
             result.add(getBuilder(Type.ROWS_COUNT)
                     .setTargetName(oldTable.getTableMetaData().getTableName())
+                    .setRows(Math.abs(oldRows - newRows))
                     .setOldDef(String.valueOf(oldRows))
                     .setNewDef(String.valueOf(newRows))
                     .build());
