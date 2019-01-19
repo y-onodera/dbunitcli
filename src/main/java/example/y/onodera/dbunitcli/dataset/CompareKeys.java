@@ -16,6 +16,10 @@ public class CompareKeys {
         }
     }
 
+    public CompareKeys(List<String> aKeys) {
+        this.keys.addAll(aKeys);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -40,6 +40,9 @@ public class ComparableTable implements ITable {
         for (int rowNum = 0, total = this.values.size(); rowNum < total; rowNum++) {
             result.put(this.getKey(rowNum, keys), this.getRow(rowNum, columnLength));
         }
+        if (result.size() < this.getRowCount()) {
+            throw new AssertionError("comparison keys not unique:" + keys.toString());
+        }
         return result;
     }
 
@@ -49,6 +52,9 @@ public class ComparableTable implements ITable {
 
     public Object[] getRow(int rowNum, int columnLength) {
         Object[] row = this.values.get(rowNum);
+        if (row.length < columnLength) {
+            throw new AssertionError(columnLength + " is larger than columnLength:" + row.length);
+        }
         Object[] resultRow = new Object[columnLength];
         for (int i = 0, j = columnLength; i < j; i++) {
             resultRow[i] = row[i];

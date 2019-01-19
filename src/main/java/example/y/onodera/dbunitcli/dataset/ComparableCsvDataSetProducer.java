@@ -41,7 +41,7 @@ public class ComparableCsvDataSetProducer implements IDataSetProducer {
     }
 
     @Override
-    public void setConsumer(IDataSetConsumer aConsumer) throws DataSetException {
+    public void setConsumer(IDataSetConsumer aConsumer) {
         consumer = aConsumer;
     }
 
