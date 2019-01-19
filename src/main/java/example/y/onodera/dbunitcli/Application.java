@@ -1,10 +1,13 @@
 package example.y.onodera.dbunitcli;
 
 import example.y.onodera.dbunitcli.dataset.ComparableCSVDataSet;
+import example.y.onodera.dbunitcli.dataset.ComparableDataSet;
 import example.y.onodera.dbunitcli.dataset.CompareResult;
+import example.y.onodera.dbunitcli.dataset.DataSetCompareBuilder;
 import org.dbunit.Assertion;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.assertion.DefaultFailureHandler;
+import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.csv.CsvDataSetWriter;
 
@@ -16,9 +19,14 @@ public class Application {
         } catch (Exception exp) {
             System.exit(2);
         }
-        ComparableCSVDataSet oldData = new ComparableCSVDataSet(options.getOldDir(), options.getEncoding());
-        ComparableCSVDataSet newData = new ComparableCSVDataSet(options.getNewDir(), options.getEncoding());
-        CompareResult result = oldData.compare(newData, options.getComparisonKeys());
+        ComparableDataSet oldData = options.oldDataSet();
+        ComparableDataSet newData = options.newDataSet();
+        CompareResult result = new DataSetCompareBuilder()
+                .newDataSet(newData)
+                .oldDataSet(oldData)
+                .comparisonKeys(options.getComparisonKeys())
+                .build()
+                .exec();
         CsvDataSetWriter writer = new CsvDataSetWriter(options.getResultDir());
         if (options.getExpected() != null) {
             ComparableCSVDataSet expect = new ComparableCSVDataSet(options.getExpected());
@@ -33,4 +41,5 @@ public class Application {
             }
         }
     }
+
 }

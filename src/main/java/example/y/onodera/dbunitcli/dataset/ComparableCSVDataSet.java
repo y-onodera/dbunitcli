@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ComparableCSVDataSet extends CachedDataSet {
+public class ComparableCSVDataSet extends AbstractComparableDataSet {
     private static final Logger logger = LoggerFactory.getLogger(ComparableCSVDataSet.class);
 
     private final String srcDir;
@@ -27,16 +27,9 @@ public class ComparableCSVDataSet extends CachedDataSet {
         this.srcDir = aSrcFile.getParent();
     }
 
-    public String getSrcDir() {
+    @Override
+    public String getSrc() {
         return srcDir;
     }
 
-    @Override
-    public ComparableTable getTable(String tableName) throws DataSetException {
-        return new ComparableTable(super.getTable(tableName));
-    }
-
-    public CompareResult compare(ComparableCSVDataSet newData, Map<String, List<String>> comparisonKeys) throws DataSetException {
-        return new CompareResult(this.getSrcDir(), newData.getSrcDir(), CompareDiff.tables(this, newData, comparisonKeys));
-    }
 }

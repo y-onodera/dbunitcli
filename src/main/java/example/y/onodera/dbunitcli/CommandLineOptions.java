@@ -2,6 +2,9 @@ package example.y.onodera.dbunitcli;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import example.y.onodera.dbunitcli.dataset.ComparableCSVDataSet;
+import example.y.onodera.dbunitcli.dataset.ComparableDataSet;
+import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -102,5 +105,13 @@ public class CommandLineOptions {
 
     public File getExpected() {
         return expected;
+    }
+
+    public ComparableDataSet oldDataSet() throws DataSetException {
+        return new ComparableCSVDataSet(this.getOldDir(), this.getEncoding());
+    }
+
+    public ComparableDataSet newDataSet() throws DataSetException {
+        return new ComparableCSVDataSet(this.getNewDir(), this.getEncoding());
     }
 }
