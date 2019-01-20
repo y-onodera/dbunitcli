@@ -76,9 +76,6 @@ public class ComparableTable implements ITable {
 
     public Object getValue(int i, int j) {
         Object[] row = this.values.get(i);
-        if (row.length <= j) {
-            return "";
-        }
         return row[j];
     }
 

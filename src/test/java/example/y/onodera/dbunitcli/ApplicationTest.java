@@ -26,6 +26,26 @@ public class ApplicationTest {
     }
 
     @Test
+    public void testCompareCsvToXlsx() throws DatabaseUnitException {
+        Application.main(new String[]{"@" + this.baseDir + "/paramCsvToXlsxCompare.txt"});
+    }
+
+    @Test
+    public void testCompareXlsxToCsv() throws DatabaseUnitException {
+        Application.main(new String[]{"@" + this.baseDir + "/paramXlsxToCsvCompare.txt"});
+    }
+
+    @Test
+    public void testCompareXlsxToXls() throws DatabaseUnitException {
+        Application.main(new String[]{"@" + this.baseDir + "/paramXlsxToXlsCompare.txt"});
+    }
+
+    @Test
+    public void testCompareXlsToXlsx() throws DatabaseUnitException {
+        Application.main(new String[]{"@" + this.baseDir + "/paramXlsToXlsxCompare.txt"});
+    }
+
+    @Test
     public void testFailedResultDiffNotExpected() throws DatabaseUnitException {
         this.exit.expectSystemExitWithStatus(1);
         Application.main(new String[]{"@" + this.baseDir + "/paramDiffNotExpected.txt"});

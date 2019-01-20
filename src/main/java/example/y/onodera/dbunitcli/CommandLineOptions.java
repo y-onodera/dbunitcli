@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import example.y.onodera.dbunitcli.dataset.ComparableCSVDataSet;
 import example.y.onodera.dbunitcli.dataset.ComparableDataSet;
+import example.y.onodera.dbunitcli.dataset.ComparableXlsDataSet;
+import example.y.onodera.dbunitcli.dataset.ComparableXlsxDataSet;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -26,8 +28,14 @@ public class CommandLineOptions {
     @Option(name = "-old", usage = "directory old files at", required = true)
     private File oldDir;
 
+    @Option(name = "-oldsource", usage = "csv | xlx | xlsx : default csv")
+    private String oldsource = "csv";
+
     @Option(name = "-new", usage = "directory new files at", required = true)
     private File newDir;
+
+    @Option(name = "-newsource", usage = "csv | xlx | xlsx : default csv")
+    private String newsource = "csv";
 
     @Option(name = "-result", usage = "directory result files at")
     private File resultDir = new File("").getAbsoluteFile();
@@ -75,11 +83,23 @@ public class CommandLineOptions {
     }
 
     private void assertDirectoryExists(CmdLineParser parser) throws CmdLineException {
-        if (!this.newDir.exists() || !this.newDir.isDirectory()) {
-            throw new CmdLineException(parser, "newDir is not exist directory", new IllegalArgumentException(this.newDir.toString()));
+        if ("csv".equals(this.newsource)) {
+            if (!this.newDir.exists() || !this.newDir.isDirectory()) {
+                throw new CmdLineException(parser, "new is not exist directory", new IllegalArgumentException(this.newDir.toString()));
+            }
+        } else {
+            if (!this.newDir.exists() || !this.newDir.isFile()) {
+                throw new CmdLineException(parser, "new is not exist file", new IllegalArgumentException(this.newDir.toString()));
+            }
         }
-        if (!this.oldDir.exists() || !this.oldDir.isDirectory()) {
-            throw new CmdLineException(parser, "oldDir is not exist directory", new IllegalArgumentException(this.oldDir.toString()));
+        if ("csv".equals(this.oldsource)) {
+            if (!this.oldDir.exists() || !this.oldDir.isDirectory()) {
+                throw new CmdLineException(parser, "old is not exist directory", new IllegalArgumentException(this.oldDir.toString()));
+            }
+        }else{
+            if (!this.oldDir.exists() || !this.oldDir.isFile()) {
+                throw new CmdLineException(parser, "old is not exist file", new IllegalArgumentException(this.oldDir.toString()));
+            }
         }
     }
 
@@ -108,10 +128,24 @@ public class CommandLineOptions {
     }
 
     public ComparableDataSet oldDataSet() throws DataSetException {
-        return new ComparableCSVDataSet(this.getOldDir(), this.getEncoding());
+        switch (this.oldsource) {
+            case "xlsx":
+                return new ComparableXlsxDataSet(this.oldDir);
+            case "xls":
+                return new ComparableXlsDataSet(this.oldDir);
+            default:
+                return new ComparableCSVDataSet(this.getOldDir(), this.getEncoding());
+        }
     }
 
     public ComparableDataSet newDataSet() throws DataSetException {
-        return new ComparableCSVDataSet(this.getNewDir(), this.getEncoding());
+        switch (this.newsource) {
+            case "xlsx":
+                return new ComparableXlsxDataSet(this.newDir);
+            case "xls":
+                return new ComparableXlsDataSet(this.newDir);
+            default:
+                return new ComparableCSVDataSet(this.getNewDir(), this.getEncoding());
+        }
     }
 }

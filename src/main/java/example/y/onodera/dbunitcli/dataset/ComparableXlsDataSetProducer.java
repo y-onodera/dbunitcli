@@ -243,6 +243,10 @@ public class ComparableXlsDataSetProducer implements IDataSetProducer, HSSFListe
                 } else {
                     if (metaData.getColumns().length < this.rowValues.size()) {
                         throw new AssertionError(this.rowValues + " large items than header:" + Arrays.toString(this.metaData.getColumns()));
+                    } else if (this.rowValues.size() < metaData.getColumns().length) {
+                        for (int i = this.rowValues.size(), j = metaData.getColumns().length; i < j; i++) {
+                            this.rowValues.add("");
+                        }
                     }
                     this.consumer.row(this.rowValues.toArray(new Object[this.rowValues.size()]));
                 }
