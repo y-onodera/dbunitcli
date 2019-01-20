@@ -69,11 +69,17 @@ public class ComparableTable implements ITable {
 
     @Override
     public Object getValue(int i, String s) throws DataSetException {
-        return this.delegate.getValue(i, s);
+        Object[] row = this.values.get(i);
+        int j = this.delegate.getTableMetaData().getColumnIndex(s);
+        return this.getValue(i, j);
     }
 
     public Object getValue(int i, int j) {
-        return this.values.get(i)[j];
+        Object[] row = this.values.get(i);
+        if (row.length <= j) {
+            return "";
+        }
+        return row[j];
     }
 
 }

@@ -52,20 +52,20 @@ public class ComparableCsvDataSetProducer implements IDataSetProducer {
         this.consumer.startDataSet();
         for (File file : this.src) {
             try {
-                this.produceFromFile(file, this.encoding);
+                this.produceFromFile(file);
             } catch (CsvParserException | DataSetException e) {
-                throw new DataSetException("error producing dataset for table '" + file.toString() + "'", e);
+                throw new DataSetException("error producing dataSet for table '" + file.toString() + "'", e);
             }
         }
         this.consumer.endDataSet();
     }
 
-    private void produceFromFile(File theDataFile, String aEncoding) throws DataSetException, CsvParserException {
+    private void produceFromFile(File theDataFile) throws DataSetException, CsvParserException {
         logger.debug("produceFromFile(theDataFile={}) - start", theDataFile);
 
         try {
             List readData = new CsvParserImpl().parse(
-                    new BufferedReader(new InputStreamReader(new FileInputStream(theDataFile), aEncoding))
+                    new BufferedReader(new InputStreamReader(new FileInputStream(theDataFile), this.encoding))
                     , theDataFile.toString());
             List readColumns = ((List) readData.get(0));
             Column[] columns = new Column[readColumns.size()];
