@@ -28,6 +28,7 @@ import org.xml.sax.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.util.Arrays;
 import java.util.List;
 
 public class ComparableXlsxDataSetProducer implements IDataSetProducer {
@@ -117,7 +118,7 @@ public class ComparableXlsxDataSetProducer implements IDataSetProducer {
                     this.consumer.startTable(metaData);
                 } else {
                     if (metaData.getColumns().length < this.rowValues.size()) {
-                        throw new AssertionError(this.rowValues + " large columns than header:" + this.metaData.getColumns());
+                        throw new AssertionError(this.rowValues + " large items than header:" + Arrays.toString(this.metaData.getColumns()));
                     }
                     this.consumer.row(this.rowValues.toArray(new Object[this.rowValues.size()]));
                 }

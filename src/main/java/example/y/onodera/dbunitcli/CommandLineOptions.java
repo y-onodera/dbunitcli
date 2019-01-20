@@ -76,10 +76,10 @@ public class CommandLineOptions {
 
     private void assertDirectoryExists(CmdLineParser parser) throws CmdLineException {
         if (!this.newDir.exists() || !this.newDir.isDirectory()) {
-            throw new CmdLineException(parser, "newDir is not exist directory", new IllegalArgumentException("newDir is not exist directory"));
+            throw new CmdLineException(parser, "newDir is not exist directory", new IllegalArgumentException(this.newDir.toString()));
         }
         if (!this.oldDir.exists() || !this.oldDir.isDirectory()) {
-            throw new CmdLineException(parser, "oldDir is not exist directory", new IllegalArgumentException("oldDir is not exist directory"));
+            throw new CmdLineException(parser, "oldDir is not exist directory", new IllegalArgumentException(this.oldDir.toString()));
         }
     }
 
