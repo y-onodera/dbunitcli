@@ -28,13 +28,13 @@ public class CommandLineOptions {
     @Option(name = "-old", usage = "directory old files at", required = true)
     private File oldDir;
 
-    @Option(name = "-oldsource", usage = "csv | xlx | xlsx : default csv")
+    @Option(name = "-oldsource", usage = "csv | xls | xlsx : default csv")
     private String oldsource = "csv";
 
     @Option(name = "-new", usage = "directory new files at", required = true)
     private File newDir;
 
-    @Option(name = "-newsource", usage = "csv | xlx | xlsx : default csv")
+    @Option(name = "-newsource", usage = "csv | xls | xlsx : default csv")
     private String newsource = "csv";
 
     @Option(name = "-result", usage = "directory result files at")
@@ -58,6 +58,52 @@ public class CommandLineOptions {
         }
         assertDirectoryExists(parser);
         populateSettings(parser);
+    }
+
+    public String getEncoding() {
+        return this.encoding;
+    }
+
+    public File getOldDir() {
+        return this.oldDir;
+    }
+
+    public File getNewDir() {
+        return this.newDir;
+    }
+
+    public File getResultDir() {
+        return this.resultDir;
+    }
+
+    public Map<String, List<String>> getComparisonKeys() {
+        return this.comparisonKeys;
+    }
+
+    public File getExpected() {
+        return this.expected;
+    }
+
+    public ComparableDataSet oldDataSet() throws DataSetException {
+        switch (this.oldsource) {
+            case "xlsx":
+                return new ComparableXlsxDataSet(this.getOldDir());
+            case "xls":
+                return new ComparableXlsDataSet(this.getOldDir());
+            default:
+                return new ComparableCSVDataSet(this.getOldDir(), this.getEncoding());
+        }
+    }
+
+    public ComparableDataSet newDataSet() throws DataSetException {
+        switch (this.newsource) {
+            case "xlsx":
+                return new ComparableXlsxDataSet(this.getNewDir());
+            case "xls":
+                return new ComparableXlsDataSet(this.getNewDir());
+            default:
+                return new ComparableCSVDataSet(this.getNewDir(), this.getEncoding());
+        }
     }
 
     private void populateSettings(CmdLineParser parser) throws CmdLineException {
@@ -100,52 +146,6 @@ public class CommandLineOptions {
             if (!this.oldDir.exists() || !this.oldDir.isFile()) {
                 throw new CmdLineException(parser, "old is not exist file", new IllegalArgumentException(this.oldDir.toString()));
             }
-        }
-    }
-
-    public String getEncoding() {
-        return encoding;
-    }
-
-    public File getOldDir() {
-        return oldDir;
-    }
-
-    public File getNewDir() {
-        return newDir;
-    }
-
-    public File getResultDir() {
-        return resultDir;
-    }
-
-    public Map<String, List<String>> getComparisonKeys() {
-        return comparisonKeys;
-    }
-
-    public File getExpected() {
-        return expected;
-    }
-
-    public ComparableDataSet oldDataSet() throws DataSetException {
-        switch (this.oldsource) {
-            case "xlsx":
-                return new ComparableXlsxDataSet(this.oldDir);
-            case "xls":
-                return new ComparableXlsDataSet(this.oldDir);
-            default:
-                return new ComparableCSVDataSet(this.getOldDir(), this.getEncoding());
-        }
-    }
-
-    public ComparableDataSet newDataSet() throws DataSetException {
-        switch (this.newsource) {
-            case "xlsx":
-                return new ComparableXlsxDataSet(this.newDir);
-            case "xls":
-                return new ComparableXlsDataSet(this.newDir);
-            default:
-                return new ComparableCSVDataSet(this.getNewDir(), this.getEncoding());
         }
     }
 }

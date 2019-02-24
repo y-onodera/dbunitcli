@@ -4,9 +4,7 @@ import com.google.common.collect.Lists;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTable;
-import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.datatype.DataType;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,7 +12,6 @@ import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -43,30 +40,24 @@ public class ComparableTableTest {
 
     @Test
     public void getRows_result_has_argument_column_length() throws DataSetException {
-        final Collection<Object[]> actual = this.target.getRows(3, Lists.newArrayList("COLUMN1", "COLUMN2")).values();
-        Iterator<Object[]> it = actual.iterator();
-        assertArrayEquals(new Object[]{"1", "a", "あ"}, it.next());
-        assertArrayEquals(new Object[]{"1", "b", "あ"}, it.next());
-        assertArrayEquals(new Object[]{"2", "a", "い"}, it.next());
+        final Collection<Map.Entry<Integer, Object[]>> actual = this.target.getRows(Lists.newArrayList("COLUMN1", "COLUMN2")).values();
+        Iterator<Map.Entry<Integer, Object[]>> it = actual.iterator();
+        assertArrayEquals(new Object[]{"1", "a", "あ", 1}, it.next().getValue());
+        assertArrayEquals(new Object[]{"1", "b", "あ", 1}, it.next().getValue());
+        assertArrayEquals(new Object[]{"2", "a", "い", 2}, it.next().getValue());
         assertFalse(it.hasNext());
     }
 
     @Test
     public void getRows_throw_error_if_keys_not_unique() throws DataSetException {
         expectedException.expect(AssertionError.class);
-        this.target.getRows(3, Lists.newArrayList("COLUMN1")).values();
+        this.target.getRows(Lists.newArrayList("COLUMN1")).values();
     }
 
     @Test
     public void getRows_throw_exception_if_argument_column_not_exists() throws DataSetException {
         expectedException.expect(DataSetException.class);
-        this.target.getRows(3, Lists.newArrayList("COLUMN1", "COLUMNA")).values();
-    }
-
-    @Test
-    public void getRows_throw_exception_if_argument_columnLength_too_much() throws DataSetException {
-        expectedException.expect(AssertionError.class);
-        this.target.getRows(5, Lists.newArrayList("COLUMN1", "COLUMN2")).values();
+        this.target.getRows(Lists.newArrayList("COLUMN1", "COLUMNA")).values();
     }
 
     @Test

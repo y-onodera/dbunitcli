@@ -1,14 +1,6 @@
-package example.y.onodera.dbunitcli.dataset;
+package example.y.onodera.dbunitcli.compare;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.ITableMetaData;
-
-import java.util.*;
+import org.dbunit.dataset.ITable;
 
 public class CompareDiff {
 
@@ -24,6 +16,8 @@ public class CompareDiff {
 
     private final int rows;
 
+    private final ITable detailRows;
+
     public CompareDiff(Builder builder) {
         this.targetName = builder.getTargetName();
         this.diff = builder.getDiff();
@@ -31,6 +25,7 @@ public class CompareDiff {
         this.newDef = builder.getNewDef();
         this.columnIndex = builder.getColumnIndex();
         this.rows = builder.getRows();
+        this.detailRows = builder.getDetailRows();
     }
 
     public static Builder builder() {
@@ -65,6 +60,10 @@ public class CompareDiff {
         return rows;
     }
 
+    public ITable getDetailRows() {
+        return detailRows;
+    }
+
     public static enum Type {
         TABLE_COUNT, TABLE_DELETE, TABLE_ADD, COLUMNS_COUNT, COLUMNS_MODIFY, COLUMNS_DELETE, COLUMNS_ADD, ROWS_COUNT, KEY_DELETE, KEY_ADD, MODIFY_VALUE
     }
@@ -82,6 +81,8 @@ public class CompareDiff {
         private int columnIndex;
 
         private int rows;
+
+        private ITable detailRows;
 
         public CompareDiff build() {
             return new CompareDiff(this);
@@ -138,6 +139,15 @@ public class CompareDiff {
 
         public Builder setRows(int rows) {
             this.rows = rows;
+            return this;
+        }
+
+        public ITable getDetailRows() {
+            return detailRows;
+        }
+
+        public Builder setDetailRows(ITable detailRows) {
+            this.detailRows = detailRows;
             return this;
         }
     }

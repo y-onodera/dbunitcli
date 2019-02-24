@@ -1,4 +1,4 @@
-package example.y.onodera.dbunitcli.dataset;
+package example.y.onodera.dbunitcli.compare;
 
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.*;
@@ -31,10 +31,8 @@ public class CompareResult {
         this.diffs.addAll(results);
     }
 
-    public  IDataSet toIDataSet(String tableName) throws DataSetException {
-        DefaultDataSet result = new DefaultDataSet();
-        result.addTable(this.toITable(tableName));
-        return result;
+    public ITable toITable() throws DataSetException {
+        return this.toITable("COMPARE_RESULT");
     }
 
     public ITable toITable(String tableName) throws DataSetException {
@@ -56,4 +54,5 @@ public class CompareResult {
     public boolean existDiff() {
         return diffs.size() > 0;
     }
+
 }

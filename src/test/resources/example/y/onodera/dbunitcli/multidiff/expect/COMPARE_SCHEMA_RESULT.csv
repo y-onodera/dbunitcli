@@ -11,7 +11,7 @@ OLD_PATH, NEW_PATH, TARGET_NAME, DIFF, OLD_VALUE, NEW_VALUE, COLUMN_INDEX, DIFF_
 "target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\old","target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\new","columndrop","COLUMNS_DELETE","ChangeColumn",null,"5","0"
 "target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\old","target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\new","columndrop","ROWS_COUNT","1","2","0","1"
 "target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\old","target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\new","columndrop","KEY_DELETE","1","0","0","1"
-"target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\old","target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\new","columndrop","KEY_ADD","0","1","0","2"
+"target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\old","target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\new","columndrop","KEY_ADD","0","2","0","2"
 "target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\old","target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\new","columnadd","COLUMNS_COUNT","5","6","0","0"
 "target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\old","target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\new","columnadd","COLUMNS_MODIFY","ChangeColumn","","4","0"
 "target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\old","target\\test-classes\\example\\y\\onodera\\dbunitcli\\multidiff\\new","columnadd","COLUMNS_ADD",null,"AddColumn","0","0"
