@@ -21,6 +21,8 @@ public class DataSetCompare implements Compare {
 
     private Map<String, List<String>> comparisonKeys;
 
+    private Map<String, List<String>> excludeColumns;
+
     private IDataSetWriter writer;
 
     private List<CompareDiff> results;
@@ -31,8 +33,14 @@ public class DataSetCompare implements Compare {
         this.oldDataSet = builder.getOldDataSet();
         this.newDataSet = builder.getNewDataSet();
         this.comparisonKeys = builder.getComparisonKeys();
+        this.excludeColumns = builder.getExcludeColumns();
         this.writer = builder.getDataSetWriter();
         this.results = Lists.newArrayList();
+        for (String table : this.excludeColumns.keySet()) {
+            if(this.oldDataSet.contains(table)){
+
+            }
+        }
         this.result = this.exec();
     }
 

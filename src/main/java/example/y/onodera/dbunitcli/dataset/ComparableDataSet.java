@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 public interface ComparableDataSet extends IDataSet, IDataSetConsumer {
+
     String getSrc();
 
     @Override
     ComparableTable getTable(String tableName) throws DataSetException;
+
+    boolean contains(String tableName);
 
 }

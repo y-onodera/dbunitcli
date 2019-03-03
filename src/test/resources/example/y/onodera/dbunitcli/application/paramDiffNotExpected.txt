@@ -1,0 +1,4 @@
+-old=target/test-classes/example/y/onodera/dbunitcli/application/multidiff/old
+-new=target/test-classes/example/y/onodera/dbunitcli/application/multidiff/new
+-setting=target/test-classes/example/y/onodera/dbunitcli/application/multidiff/setting.json
+-result=target/test-classes/example/y/onodera/dbunitcli/application/multidiff/result_notExpected

@@ -1,0 +1,4 @@
+key,value1,value2,value3,AddColumn
+1,same,newVal,,
+3,,,,
+4,same1,same2,same3,

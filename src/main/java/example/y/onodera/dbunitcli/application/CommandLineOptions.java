@@ -1,11 +1,8 @@
-package example.y.onodera.dbunitcli;
+package example.y.onodera.dbunitcli.application;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import example.y.onodera.dbunitcli.dataset.ComparableCSVDataSet;
-import example.y.onodera.dbunitcli.dataset.ComparableDataSet;
-import example.y.onodera.dbunitcli.dataset.ComparableXlsDataSet;
-import example.y.onodera.dbunitcli.dataset.ComparableXlsxDataSet;
+import example.y.onodera.dbunitcli.dataset.*;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -48,6 +45,10 @@ public class CommandLineOptions {
 
     private Map<String, List<String>> comparisonKeys = Maps.newHashMap();
 
+    private Map<String, List<String>> excludeColumns = Maps.newHashMap();
+
+    private ComparableDataSetLoader comparableDataSetLoader = new ComparableDataSetLoader();
+
     public void parse(String[] args) throws CmdLineException {
         CmdLineParser parser = new CmdLineParser(this);
 
@@ -80,30 +81,20 @@ public class CommandLineOptions {
         return this.comparisonKeys;
     }
 
+    public Map<String, List<String>> getExcludeColumns() {
+        return this.excludeColumns;
+    }
+
     public File getExpected() {
         return this.expected;
     }
 
     public ComparableDataSet oldDataSet() throws DataSetException {
-        switch (this.oldsource) {
-            case "xlsx":
-                return new ComparableXlsxDataSet(this.getOldDir());
-            case "xls":
-                return new ComparableXlsDataSet(this.getOldDir());
-            default:
-                return new ComparableCSVDataSet(this.getOldDir(), this.getEncoding());
-        }
+        return this.comparableDataSetLoader.loadDataSet(this.getOldDir(), this.getEncoding(), this.oldsource, this.excludeColumns);
     }
 
     public ComparableDataSet newDataSet() throws DataSetException {
-        switch (this.newsource) {
-            case "xlsx":
-                return new ComparableXlsxDataSet(this.getNewDir());
-            case "xls":
-                return new ComparableXlsDataSet(this.getNewDir());
-            default:
-                return new ComparableCSVDataSet(this.getNewDir(), this.getEncoding());
-        }
+        return this.comparableDataSetLoader.loadDataSet(this.getNewDir(), this.getEncoding(), this.newsource, this.excludeColumns);
     }
 
     private void populateSettings(CmdLineParser parser) throws CmdLineException {
@@ -116,16 +107,32 @@ public class CommandLineOptions {
                     .forEach(v -> {
                         JsonObject json = v.asJsonObject();
                         final String file = json.getString("file");
-                        JsonArray array = json.getJsonArray("keys");
-                        List<String> keys = Lists.newArrayList();
-                        for (int i = 0, j = array.size(); i < j; i++) {
-                            keys.add(array.getString(i));
-                        }
-                        comparisonKeys.put(file, keys);
+                        this.addComparisonKeys(json, file);
+                        this.addExcludeColumns(json, file);
                     });
         } catch (UnsupportedEncodingException | FileNotFoundException e) {
             throw new CmdLineException(parser, e);
         }
+    }
+
+    private void addExcludeColumns(JsonObject json, String file) {
+        if (json.containsKey("exclude")) {
+            JsonArray excludeArray = json.getJsonArray("exclude");
+            List<String> columns = Lists.newArrayList();
+            for (int i = 0, j = excludeArray.size(); i < j; i++) {
+                columns.add(excludeArray.getString(i));
+            }
+            excludeColumns.put(file, columns);
+        }
+    }
+
+    private void addComparisonKeys(JsonObject json, String file) {
+        JsonArray keyArray = json.getJsonArray("keys");
+        List<String> keys = Lists.newArrayList();
+        for (int i = 0, j = keyArray.size(); i < j; i++) {
+            keys.add(keyArray.getString(i));
+        }
+        comparisonKeys.put(file, keys);
     }
 
     private void assertDirectoryExists(CmdLineParser parser) throws CmdLineException {
@@ -142,7 +149,7 @@ public class CommandLineOptions {
             if (!this.oldDir.exists() || !this.oldDir.isDirectory()) {
                 throw new CmdLineException(parser, "old is not exist directory", new IllegalArgumentException(this.oldDir.toString()));
             }
-        }else{
+        } else {
             if (!this.oldDir.exists() || !this.oldDir.isFile()) {
                 throw new CmdLineException(parser, "old is not exist file", new IllegalArgumentException(this.oldDir.toString()));
             }

@@ -12,6 +12,7 @@ public class DataSetCompareBuilder {
     private ComparableDataSet oldDataSet;
     private ComparableDataSet newDataSet;
     private Map<String, List<String>> comparisonKeys = Maps.newHashMap();
+    private Map<String,List<String>> excludeColumns = Maps.newHashMap();
     private IDataSetWriter dataSetWriter;
 
     public DataSetCompareBuilder oldDataSet(ComparableDataSet dataSet) {
@@ -26,6 +27,11 @@ public class DataSetCompareBuilder {
 
     public DataSetCompareBuilder comparisonKeys(Map<String, List<String>> comparisonKeys) {
         this.comparisonKeys = comparisonKeys;
+        return this;
+    }
+
+    public DataSetCompareBuilder excludeColumns(Map<String,List<String>> excludeColumns) {
+        this.excludeColumns = excludeColumns;
         return this;
     }
 
@@ -44,6 +50,10 @@ public class DataSetCompareBuilder {
 
     public Map<String, List<String>> getComparisonKeys() {
         return comparisonKeys;
+    }
+
+    public Map<String, List<String>> getExcludeColumns() {
+        return excludeColumns;
     }
 
     public IDataSetWriter getDataSetWriter() {

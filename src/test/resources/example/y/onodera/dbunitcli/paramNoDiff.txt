@@ -1,4 +1,0 @@
--old=target/test-classes/example/y/onodera/dbunitcli/nodiff/old
--new=target/test-classes/example/y/onodera/dbunitcli/nodiff/new
--setting=target/test-classes/example/y/onodera/dbunitcli/nodiff/setting.json
--result=target/test-classes/example/y/onodera/dbunitcli/nodiff/result

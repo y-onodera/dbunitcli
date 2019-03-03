@@ -1,5 +1,0 @@
--old=target/test-classes/example/y/onodera/dbunitcli/nodiff/old
--new=target/test-classes/example/y/onodera/dbunitcli/nodiff/new
--setting=target/test-classes/example/y/onodera/dbunitcli/nodiff/setting.json
--result=target/test-classes/example/y/onodera/dbunitcli/nodiff/result
--expect=target/test-classes/example/y/onodera/dbunitcli/nodiff/expect/COMPARE_SCHEMA_RESULT.csv

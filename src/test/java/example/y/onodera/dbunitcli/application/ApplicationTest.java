@@ -1,7 +1,7 @@
-package example.y.onodera.dbunitcli;
+package example.y.onodera.dbunitcli.application;
 
+import example.y.onodera.dbunitcli.application.Application;
 import org.dbunit.DatabaseUnitException;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
@@ -43,6 +43,11 @@ public class ApplicationTest {
     @Test
     public void testCompareXlsToXlsx() throws DatabaseUnitException {
         Application.main(new String[]{"@" + this.baseDir + "/paramXlsToXlsxCompare.txt"});
+    }
+
+    @Test
+    public void testCompareFilter() throws DatabaseUnitException {
+        Application.main(new String[]{"@" + this.baseDir + "/paramColumnFilter.txt"});
     }
 
     @Test

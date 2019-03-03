@@ -1,4 +1,4 @@
-package example.y.onodera.dbunitcli;
+package example.y.onodera.dbunitcli.application;
 
 import example.y.onodera.dbunitcli.dataset.ComparableCSVDataSet;
 import example.y.onodera.dbunitcli.dataset.ComparableDataSet;
@@ -26,6 +26,7 @@ public class Application {
                 .newDataSet(newData)
                 .oldDataSet(oldData)
                 .comparisonKeys(options.getComparisonKeys())
+                .excludeColumns(options.getExcludeColumns())
                 .dataSetWriter(new CsvDataSetWriterWrapper(writer))
                 .build()
                 .result();
@@ -40,5 +41,4 @@ public class Application {
             }
         }
     }
-
 }
