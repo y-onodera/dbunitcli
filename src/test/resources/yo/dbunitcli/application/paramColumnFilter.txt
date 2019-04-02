@@ -1,5 +1,5 @@
--old=target/test-classes/example/y/onodera/dbunitcli/application/filter/old
--new=target/test-classes/example/y/onodera/dbunitcli/application/filter/new
--setting=target/test-classes/example/y/onodera/dbunitcli/application/filter/setting.json
--result=target/test-classes/example/y/onodera/dbunitcli/application/filter/expected
--expect=target/test-classes/example/y/onodera/dbunitcli/application/filter/expect/COMPARE_RESULT.csv
+-old=target/test-classes/yo/dbunitcli/application/filter/old
+-new=target/test-classes/yo/dbunitcli/application/filter/new
+-setting=target/test-classes/yo/dbunitcli/application/filter/setting.json
+-result=target/test-classes/yo/dbunitcli/application/filter/expected
+-expect=target/test-classes/yo/dbunitcli/application/filter/expect/COMPARE_RESULT.csv

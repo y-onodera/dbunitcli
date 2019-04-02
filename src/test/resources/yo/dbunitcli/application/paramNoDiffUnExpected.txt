@@ -1,5 +1,5 @@
--old=target/test-classes/example/y/onodera/dbunitcli/application/nodiff/old
--new=target/test-classes/example/y/onodera/dbunitcli/application/nodiff/new
--setting=target/test-classes/example/y/onodera/dbunitcli/application/nodiff/setting.json
--result=target/test-classes/example/y/onodera/dbunitcli/application/nodiff/result
--expect=target/test-classes/example/y/onodera/dbunitcli/application/nodiff/expect/COMPARE_SCHEMA_RESULT.csv
+-old=target/test-classes/yo/dbunitcli/application/nodiff/old
+-new=target/test-classes/yo/dbunitcli/application/nodiff/new
+-setting=target/test-classes/yo/dbunitcli/application/nodiff/setting.json
+-result=target/test-classes/yo/dbunitcli/application/nodiff/result
+-expect=target/test-classes/yo/dbunitcli/application/nodiff/expect/COMPARE_SCHEMA_RESULT.csv

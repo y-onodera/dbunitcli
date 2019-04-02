@@ -1,6 +1,6 @@
--old=target/test-classes/example/y/onodera/dbunitcli/application/csv2xlsx/multifile.xlsx
+-old=target/test-classes/yo/dbunitcli/application/csv2xlsx/multifile.xlsx
 -oldsource=xlsx
--new=target/test-classes/example/y/onodera/dbunitcli/application/csv2xlsx/multifile.xls
+-new=target/test-classes/yo/dbunitcli/application/csv2xlsx/multifile.xls
 -newsource=xls
--setting=target/test-classes/example/y/onodera/dbunitcli/application/csv2xlsx/setting.json
--result=target/test-classes/example/y/onodera/dbunitcli/application/csv2xlsx/result
+-setting=target/test-classes/yo/dbunitcli/application/csv2xlsx/setting.json
+-result=target/test-classes/yo/dbunitcli/application/csv2xlsx/result
