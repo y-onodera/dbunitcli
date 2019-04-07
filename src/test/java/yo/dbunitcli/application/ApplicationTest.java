@@ -32,6 +32,11 @@ public class ApplicationTest {
     }
 
     @Test
+    public void testSuccessNoDiffWithCommonSetting() throws DatabaseUnitException {
+        Application.main(new String[]{"@" + this.baseDir + "/paramNoDiffWithCommonSetting.txt"});
+    }
+
+    @Test
     public void testComparePatternMatch() throws DatabaseUnitException {
         Application.main(new String[]{"@" + this.baseDir + "/paramPatternMatch.txt"});
     }

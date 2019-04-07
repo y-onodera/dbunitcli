@@ -1,0 +1,4 @@
+-old=target/test-classes/yo/dbunitcli/application/nodiff/old
+-new=target/test-classes/yo/dbunitcli/application/nodiff/new
+-setting=target/test-classes/yo/dbunitcli/application/nodiff/settingCommon.json
+-result=target/test-classes/yo/dbunitcli/application/nodiff/resultCommon

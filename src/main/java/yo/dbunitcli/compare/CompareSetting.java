@@ -12,9 +12,12 @@ public class CompareSetting {
 
     private Map<String, List<String>> pattern = Maps.newHashMap();
 
+    private List<String> common = Lists.newArrayList();
+
     public CompareSetting(Builder builder) {
         this.byName.putAll(builder.byName);
         this.pattern.putAll(builder.pattern);
+        this.common.addAll(builder.common);
     }
 
     public static Builder builder() {
@@ -22,14 +25,17 @@ public class CompareSetting {
     }
 
     public List<String> get(String tableName) {
+        List<String> result = Lists.newArrayList(this.common);
         if (this.byName.containsKey(tableName)) {
-            return this.byName.get(tableName);
+            result.addAll(this.byName.get(tableName));
+            return result;
         }
-        return this.pattern.entrySet().stream()
+        result.addAll(this.pattern.entrySet().stream()
                 .filter(it -> tableName.contains(it.getKey()))
                 .map(Map.Entry::getValue)
                 .findAny()
-                .orElse(Lists.newArrayList());
+                .orElse(Lists.newArrayList()));
+        return result;
     }
 
     public int byNameSize() {
@@ -40,6 +46,8 @@ public class CompareSetting {
         private Map<String, List<String>> byName = Maps.newHashMap();
 
         private Map<String, List<String>> pattern = Maps.newHashMap();
+
+        private List<String> common = Lists.newArrayList();
 
         public CompareSetting build() {
             return new CompareSetting(this);
@@ -61,6 +69,11 @@ public class CompareSetting {
 
         public Builder addPattern(String name, List<String> keys) {
             this.pattern.put(name, keys);
+            return this;
+        }
+
+        public Builder addCommon(List<String> columns) {
+            this.common.addAll(columns);
             return this;
         }
     }

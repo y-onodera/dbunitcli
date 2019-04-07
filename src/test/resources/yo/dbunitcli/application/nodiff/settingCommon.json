@@ -1,0 +1,21 @@
+{
+  "settings": [
+    {
+      "name": "sample2",
+      "exclude": [
+        "column1"
+      ]
+    }
+  ],
+  "commonSettings": [
+    {
+      "keys": [
+        "key1",
+        "key2"
+      ],
+      "exclude": [
+        "column2"
+      ]
+    }
+  ]
+}

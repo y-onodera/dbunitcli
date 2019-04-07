@@ -103,7 +103,7 @@ public class CommandLineOptions {
     }
 
     public IDataSetWriter writer() {
-        if("xlsx".equals(this.resultType)){
+        if ("xlsx".equals(this.resultType)) {
             return new XlsxDataSetWriter(this.getResultDir());
         }
         return new CsvDataSetWriterWrapper(new CsvDataSetWriter(this.getResultDir()));
@@ -112,27 +112,59 @@ public class CommandLineOptions {
     private void populateSettings(CmdLineParser parser) throws CmdLineException {
         try {
             JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(this.comparisonKeySetting), "windows-31j"));
-            jsonReader.read()
-                    .asJsonObject()
-                    .getJsonArray("settings")
-                    .stream()
-                    .forEach(v -> {
-                        JsonObject json = v.asJsonObject();
-                        if (json.containsKey("name")) {
-                            String file = json.getString("name");
-                            CompareSetting.Strategy strategy = CompareSetting.Strategy.BY_NAME;
-                            this.addComparisonKeys(strategy, json, file);
-                            this.addExcludeColumns(strategy, json, file);
-                        } else if (json.containsKey("pattern")) {
-                            String file = json.getString("pattern");
-                            CompareSetting.Strategy strategy = CompareSetting.Strategy.PATTERN;
-                            this.addComparisonKeys(strategy, json, file);
-                            this.addExcludeColumns(strategy, json, file);
-                        }
-                    });
+            JsonObject setting = jsonReader.read()
+                    .asJsonObject();
+            this.configureSetting(setting);
+            this.configureCommonSetting(setting);
         } catch (UnsupportedEncodingException | FileNotFoundException e) {
             throw new CmdLineException(parser, e);
         }
+    }
+
+    private void configureCommonSetting(JsonObject setting) {
+        if(!setting.containsKey("commonSettings")){
+            return;
+        }
+        setting.getJsonArray("commonSettings")
+                .stream()
+                .forEach(v -> {
+                    JsonObject json = v.asJsonObject();
+                    if (json.containsKey("exclude")) {
+                        JsonArray excludeArray = json.getJsonArray("exclude");
+                        List<String> columns = Lists.newArrayList();
+                        for (int i = 0, j = excludeArray.size(); i < j; i++) {
+                            columns.add(excludeArray.getString(i));
+                        }
+                        this.excludeColumns.addCommon(columns);
+                    }
+                    if (json.containsKey("keys")) {
+                        JsonArray excludeArray = json.getJsonArray("keys");
+                        List<String> columns = Lists.newArrayList();
+                        for (int i = 0, j = excludeArray.size(); i < j; i++) {
+                            columns.add(excludeArray.getString(i));
+                        }
+                        this.comparisonKeys.addCommon(columns);
+                    }
+                });
+    }
+
+    private void configureSetting(JsonObject setting) {
+        setting.getJsonArray("settings")
+                .stream()
+                .forEach(v -> {
+                    JsonObject json = v.asJsonObject();
+                    if (json.containsKey("name")) {
+                        String file = json.getString("name");
+                        CompareSetting.Strategy strategy = CompareSetting.Strategy.BY_NAME;
+                        this.addComparisonKeys(strategy, json, file);
+                        this.addExcludeColumns(strategy, json, file);
+                    } else if (json.containsKey("pattern")) {
+                        String file = json.getString("pattern");
+                        CompareSetting.Strategy strategy = CompareSetting.Strategy.PATTERN;
+                        this.addComparisonKeys(strategy, json, file);
+                        this.addExcludeColumns(strategy, json, file);
+                    }
+                });
     }
 
     private void addExcludeColumns(CompareSetting.Strategy strategy, JsonObject json, String file) {
