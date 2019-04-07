@@ -20,10 +20,6 @@ public class CompareKeys {
         this.keys.addAll(aKeys);
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -44,7 +40,4 @@ public class CompareKeys {
                 '}';
     }
 
-    public static class Builder {
-
-    }
 }
