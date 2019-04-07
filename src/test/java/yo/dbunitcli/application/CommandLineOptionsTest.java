@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import yo.dbunitcli.application.CommandLineOptions;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -69,10 +68,10 @@ public class CommandLineOptionsTest {
         this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/filter/setting.json"});
         assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewDir());
         assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldDir());
-        assertEquals(4, this.target.getComparisonKeys().size());
+        assertEquals(2, this.target.getComparisonKeys().byNameSize());
         assertEquals(1, this.target.getComparisonKeys().get("columnadd").size());
         assertEquals("key", this.target.getComparisonKeys().get("columnadd").get(0));
-        assertEquals(2, this.target.getExcludeColumns().size());
+        assertEquals(2, this.target.getExcludeColumns().byNameSize());
         assertEquals(2, this.target.getExcludeColumns().get("columnadd").size());
         assertEquals("AddColumn", this.target.getExcludeColumns().get("columnadd").get(0));
         assertEquals("ChangeColumn", this.target.getExcludeColumns().get("columnadd").get(1));

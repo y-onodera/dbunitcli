@@ -26,7 +26,6 @@ public class Application {
                 .newDataSet(newData)
                 .oldDataSet(oldData)
                 .comparisonKeys(options.getComparisonKeys())
-                .excludeColumns(options.getExcludeColumns())
                 .dataSetWriter(new CsvDataSetWriterWrapper(writer))
                 .build()
                 .result();

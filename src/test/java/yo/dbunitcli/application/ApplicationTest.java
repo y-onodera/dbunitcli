@@ -13,6 +13,7 @@ public class ApplicationTest {
     public ExpectedException expectedException = ExpectedException.none();
     @Rule
     public ExpectedSystemExit exit = ExpectedSystemExit.none();
+
     private String baseDir = this.getClass().getResource(".").getPath();
 
     @Test
@@ -23,6 +24,11 @@ public class ApplicationTest {
     @Test
     public void testSuccessNoDiffExpected() throws DatabaseUnitException {
         Application.main(new String[]{"@" + this.baseDir + "/paramNoDiff.txt"});
+    }
+
+    @Test
+    public void testComparePatternMatch() throws DatabaseUnitException {
+        Application.main(new String[]{"@" + this.baseDir + "/paramPatternMatch.txt"});
     }
 
     @Test

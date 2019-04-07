@@ -1,0 +1,4 @@
+testkey,columnA,columnB,columnC
+keyA,val1,val2,
+keyB,val1,,
+keyD,val1,,val3

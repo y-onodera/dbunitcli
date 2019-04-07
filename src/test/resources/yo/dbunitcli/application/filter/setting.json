@@ -1,8 +1,6 @@
 {
   "settings":[
-     {"file":"columnadd","keys":["key"],"exclude":["AddColumn","ChangeColumn"]}
-    ,{"file":"columndrop","keys":["key"],"exclude":["","AddColumn","ChangeColumn"]}
-    ,{"file":"new","keys":["key"]}
-    ,{"file":"drop","keys":["key"]}
+     {"name":"columnadd","keys":["key"],"exclude":["AddColumn","ChangeColumn"]}
+    ,{"name":"columndrop","keys":["key"],"exclude":["","AddColumn","ChangeColumn"]}
   ]
 }

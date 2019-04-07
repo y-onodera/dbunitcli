@@ -19,9 +19,7 @@ public class DataSetCompare implements Compare {
 
     private ComparableDataSet newDataSet;
 
-    private Map<String, List<String>> comparisonKeys;
-
-    private Map<String, List<String>> excludeColumns;
+    private CompareSetting comparisonKeys;
 
     private IDataSetWriter writer;
 
@@ -33,14 +31,8 @@ public class DataSetCompare implements Compare {
         this.oldDataSet = builder.getOldDataSet();
         this.newDataSet = builder.getNewDataSet();
         this.comparisonKeys = builder.getComparisonKeys();
-        this.excludeColumns = builder.getExcludeColumns();
         this.writer = builder.getDataSetWriter();
         this.results = Lists.newArrayList();
-        for (String table : this.excludeColumns.keySet()) {
-            if(this.oldDataSet.contains(table)){
-
-            }
-        }
         this.result = this.exec();
     }
 
@@ -98,23 +90,17 @@ public class DataSetCompare implements Compare {
         for (String tableName : Sets.intersection(oldTables, newTables)) {
             ComparableTable oldTable = this.oldDataSet.getTable(tableName);
             ComparableTable newTable = this.newDataSet.getTable(tableName);
-            this.compareTable(oldTable, newTable, comparisonKeys, writer);
+            this.compareTable(oldTable, newTable, writer);
         }
     }
 
-    protected void compareTable(ComparableTable oldTable, ComparableTable newTable, Map<String, List<String>> comparisonKeys, IDataSetWriter writer) throws DataSetException {
+    protected void compareTable(ComparableTable oldTable, ComparableTable newTable, IDataSetWriter writer) throws DataSetException {
         ITableMetaData oldMetaData = oldTable.getTableMetaData();
         ITableMetaData newMetaData = newTable.getTableMetaData();
         this.compareColumnCount(oldMetaData, newMetaData);
         this.searchModifyAndDeleteColumns(oldMetaData, newMetaData);
         this.searchAddColumns(oldMetaData, newMetaData);
-        List<String> key = comparisonKeys
-                .entrySet()
-                .stream()
-                .filter(it -> oldMetaData.getTableName().contains(it.getKey()))
-                .findAny()
-                .get()
-                .getValue();
+        List<String> key = this.comparisonKeys.get(oldMetaData.getTableName());
         this.rowCount(oldTable, newTable);
         this.compareRow(oldTable, newTable, key, writer);
     }
@@ -201,17 +187,16 @@ public class DataSetCompare implements Compare {
             }
         }
         if (modifyValues.size() > 0) {
+            final ITableMetaData origin = oldTable.getTableMetaData();
+            final List<Column> originColumns = Lists.newArrayList(origin.getColumns()).subList(0, columnLength);
+            Column[] columns = originColumns.toArray(new Column[columnLength]);
+            DefaultTableMetaData metaData = new DefaultTableMetaData(origin.getTableName() + "$MODIFY", columns);
+            DefaultTable diffDetailTable = new DefaultTable(metaData);
             for (Map.Entry<Integer, List<CompareKeys>> entry : modifyValues.entrySet()) {
-                final ITableMetaData origin = oldTable.getTableMetaData();
-                final List<Column> originColumns = Lists.newArrayList(origin.getColumns()).subList(0, columnLength);
-                Column[] columns = originColumns.toArray(new Column[columnLength]);
-                DefaultTableMetaData metaData = new DefaultTableMetaData(origin.getTableName() + "$MODIFY", columns);
-                DefaultTable diffDetailTable = new DefaultTable(metaData);
                 for (CompareKeys targetKey : entry.getValue()) {
                     diffDetailTable.addRow(oldTable.get(targetKey, keys, columnLength));
                     diffDetailTable.addRow(newTable.get(targetKey, keys, columnLength));
                 }
-                writer.write(diffDetailTable);
                 this.results.add(getBuilder(CompareDiff.Type.MODIFY_VALUE)
                         .setTargetName(oldTable.getTableMetaData().getTableName())
                         .setOldDef(oldTable.getTableMetaData().getColumns()[entry.getKey()].getColumnName())
@@ -220,6 +205,7 @@ public class DataSetCompare implements Compare {
                         .setRows(entry.getValue().size())
                         .build());
             }
+            writer.write(diffDetailTable);
         }
         if (deleteRows.size() > 0) {
             DefaultTable diffDetailTable = toDiffTable(oldTable, "$DELETE");

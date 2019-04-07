@@ -2,6 +2,7 @@ package yo.dbunitcli.application;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import yo.dbunitcli.compare.CompareSetting;
 import yo.dbunitcli.dataset.*;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
@@ -43,9 +44,9 @@ public class CommandLineOptions {
     @Option(name = "-expect", usage = "expected diff")
     private File expected;
 
-    private Map<String, List<String>> comparisonKeys = Maps.newHashMap();
+    private CompareSetting.Builder comparisonKeys = CompareSetting.builder();
 
-    private Map<String, List<String>> excludeColumns = Maps.newHashMap();
+    private CompareSetting.Builder excludeColumns = CompareSetting.builder();
 
     private ComparableDataSetLoader comparableDataSetLoader = new ComparableDataSetLoader();
 
@@ -77,12 +78,12 @@ public class CommandLineOptions {
         return this.resultDir;
     }
 
-    public Map<String, List<String>> getComparisonKeys() {
-        return this.comparisonKeys;
+    public CompareSetting getComparisonKeys() {
+        return this.comparisonKeys.build();
     }
 
-    public Map<String, List<String>> getExcludeColumns() {
-        return this.excludeColumns;
+    public CompareSetting getExcludeColumns() {
+        return this.excludeColumns.build();
     }
 
     public File getExpected() {
@@ -90,11 +91,11 @@ public class CommandLineOptions {
     }
 
     public ComparableDataSet oldDataSet() throws DataSetException {
-        return this.comparableDataSetLoader.loadDataSet(this.getOldDir(), this.getEncoding(), this.oldsource, this.excludeColumns);
+        return this.comparableDataSetLoader.loadDataSet(this.getOldDir(), this.getEncoding(), this.oldsource, this.excludeColumns.build());
     }
 
     public ComparableDataSet newDataSet() throws DataSetException {
-        return this.comparableDataSetLoader.loadDataSet(this.getNewDir(), this.getEncoding(), this.newsource, this.excludeColumns);
+        return this.comparableDataSetLoader.loadDataSet(this.getNewDir(), this.getEncoding(), this.newsource, this.excludeColumns.build());
     }
 
     private void populateSettings(CmdLineParser parser) throws CmdLineException {
@@ -106,33 +107,43 @@ public class CommandLineOptions {
                     .stream()
                     .forEach(v -> {
                         JsonObject json = v.asJsonObject();
-                        final String file = json.getString("file");
-                        this.addComparisonKeys(json, file);
-                        this.addExcludeColumns(json, file);
+                        if (json.containsKey("name")) {
+                            String file = json.getString("name");
+                            CompareSetting.Strategy strategy = CompareSetting.Strategy.BY_NAME;
+                            this.addComparisonKeys(strategy, json, file);
+                            this.addExcludeColumns(strategy, json, file);
+                        } else if (json.containsKey("pattern")) {
+                            String file = json.getString("pattern");
+                            CompareSetting.Strategy strategy = CompareSetting.Strategy.PATTERN;
+                            this.addComparisonKeys(strategy, json, file);
+                            this.addExcludeColumns(strategy, json, file);
+                        }
                     });
         } catch (UnsupportedEncodingException | FileNotFoundException e) {
             throw new CmdLineException(parser, e);
         }
     }
 
-    private void addExcludeColumns(JsonObject json, String file) {
+    private void addExcludeColumns(CompareSetting.Strategy strategy, JsonObject json, String file) {
         if (json.containsKey("exclude")) {
             JsonArray excludeArray = json.getJsonArray("exclude");
             List<String> columns = Lists.newArrayList();
             for (int i = 0, j = excludeArray.size(); i < j; i++) {
                 columns.add(excludeArray.getString(i));
             }
-            excludeColumns.put(file, columns);
+            excludeColumns.add(strategy, file, columns);
         }
     }
 
-    private void addComparisonKeys(JsonObject json, String file) {
-        JsonArray keyArray = json.getJsonArray("keys");
-        List<String> keys = Lists.newArrayList();
-        for (int i = 0, j = keyArray.size(); i < j; i++) {
-            keys.add(keyArray.getString(i));
+    private void addComparisonKeys(CompareSetting.Strategy strategy, JsonObject json, String file) {
+        if (json.containsKey("keys")) {
+            JsonArray keyArray = json.getJsonArray("keys");
+            List<String> keys = Lists.newArrayList();
+            for (int i = 0, j = keyArray.size(); i < j; i++) {
+                keys.add(keyArray.getString(i));
+            }
+            comparisonKeys.add(strategy, file, keys);
         }
-        comparisonKeys.put(file, keys);
     }
 
     private void assertDirectoryExists(CmdLineParser parser) throws CmdLineException {

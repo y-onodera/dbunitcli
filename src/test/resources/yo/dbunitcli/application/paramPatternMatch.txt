@@ -1,0 +1,5 @@
+-old=target/test-classes/yo/dbunitcli/application/pattern/old
+-new=target/test-classes/yo/dbunitcli/application/pattern/new
+-setting=target/test-classes/yo/dbunitcli/application/pattern/setting.json
+-result=target/test-classes/yo/dbunitcli/application/pattern/result
+-expect=target/test-classes/yo/dbunitcli/application/pattern/expect/COMPARE_RESULT.csv

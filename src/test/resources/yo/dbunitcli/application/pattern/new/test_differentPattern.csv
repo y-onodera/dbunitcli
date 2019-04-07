@@ -1,0 +1,4 @@
+key,columnA,columnB,columnC
+keyA,val1,val2,val3
+keyB,,,
+keyC,val1,,val3

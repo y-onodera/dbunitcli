@@ -1,22 +1,19 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.filter.IColumnFilter;
+import yo.dbunitcli.compare.CompareSetting;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
 
 public class ComparableXlsxDataSet extends AbstractComparableDataSet {
     private File src;
 
     public ComparableXlsxDataSet(File source) throws DataSetException {
-        super(new ComparableXlsxDataSetProducer(source), Maps.newHashMap());
+        super(new ComparableXlsxDataSetProducer(source));
         this.src = source;
     }
 
-    public ComparableXlsxDataSet(File aFile, Map<String,IColumnFilter> excludeColumns) throws DataSetException {
+    public ComparableXlsxDataSet(File aFile, CompareSetting excludeColumns) throws DataSetException {
         super(new ComparableXlsxDataSetProducer(aFile), excludeColumns);
         this.src = aFile;
     }

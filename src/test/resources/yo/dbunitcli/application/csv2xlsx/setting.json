@@ -1,5 +1,16 @@
 {
-  "settings":[
-     {"file":"multi","keys":["key"]}
+  "settings": [
+    {
+      "name": "multi1",
+      "keys": [
+        "key"
+      ]
+    },
+    {
+      "name": "multi2",
+      "keys": [
+        "key"
+      ]
+    }
   ]
 }

@@ -1,5 +1,18 @@
 {
-  "settings":[
-     {"file":"sample","keys":["key1","key2"]}
+  "settings": [
+    {
+      "name": "sample",
+      "keys": [
+        "key1",
+        "key2"
+      ]
+    },
+    {
+      "name": "sample2",
+      "keys": [
+        "key1",
+        "key2"
+      ]
+    }
   ]
 }

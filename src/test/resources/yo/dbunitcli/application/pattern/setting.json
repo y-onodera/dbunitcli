@@ -1,0 +1,28 @@
+{
+  "settings": [
+    {
+      "pattern": "test",
+      "keys": [
+        "testkey"
+      ]
+    },
+    {
+      "name": "test_differentPattern",
+      "keys": [
+        "key"
+      ]
+    },
+    {
+      "pattern": "test_",
+      "exclude": [
+        "columnB"
+      ]
+    },
+    {
+      "name": "test",
+      "exclude": [
+        "column2"
+      ]
+    }
+  ]
+}
