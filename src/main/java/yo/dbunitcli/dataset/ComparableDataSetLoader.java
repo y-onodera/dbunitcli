@@ -17,4 +17,14 @@ public class ComparableDataSetLoader {
                 return new ComparableCSVDataSet(aDir, aEncoding, excludeColumns);
         }
     }
+
+    public ComparableDataSet loadDataSet(File file) throws DataSetException {
+        final String fileName = file.getName();
+        if(fileName.endsWith(".xlsx")){
+            return new ComparableXlsxDataSet(file);
+        }else if(fileName.endsWith(".xls")){
+            return new ComparableXlsDataSet(file);
+        }
+        return new ComparableCSVDataSet(file);
+    }
 }

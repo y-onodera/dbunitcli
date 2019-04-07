@@ -22,6 +22,11 @@ public class ApplicationTest {
     }
 
     @Test
+    public void testResultXlsx() throws DatabaseUnitException {
+        Application.main(new String[]{"@" + this.baseDir + "/paramResultDiffXlsx.txt"});
+    }
+
+    @Test
     public void testSuccessNoDiffExpected() throws DatabaseUnitException {
         Application.main(new String[]{"@" + this.baseDir + "/paramNoDiff.txt"});
     }

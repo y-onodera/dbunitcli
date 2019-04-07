@@ -1,0 +1,6 @@
+-old=target/test-classes/yo/dbunitcli/application/multidiff/old
+-new=target/test-classes/yo/dbunitcli/application/multidiff/new
+-setting=target/test-classes/yo/dbunitcli/application/multidiff/setting.json
+-result=target/test-classes/yo/dbunitcli/application/multidiff/result
+-resultType=xlsx
+-expect=target/test-classes/yo/dbunitcli/application/multidiff/expect/COMPARE_SCHEMA_RESULT.csv

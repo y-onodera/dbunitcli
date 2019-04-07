@@ -2,6 +2,7 @@ package yo.dbunitcli.application;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.dbunit.dataset.csv.CsvDataSetWriter;
 import yo.dbunitcli.compare.CompareSetting;
 import yo.dbunitcli.dataset.*;
 import org.dbunit.dataset.DataSetException;
@@ -43,6 +44,9 @@ public class CommandLineOptions {
 
     @Option(name = "-expect", usage = "expected diff")
     private File expected;
+
+    @Option(name = "-resultType", usage = "csv | xlsx : default csv")
+    private String resultType = "csv";
 
     private CompareSetting.Builder comparisonKeys = CompareSetting.builder();
 
@@ -96,6 +100,13 @@ public class CommandLineOptions {
 
     public ComparableDataSet newDataSet() throws DataSetException {
         return this.comparableDataSetLoader.loadDataSet(this.getNewDir(), this.getEncoding(), this.newsource, this.excludeColumns.build());
+    }
+
+    public IDataSetWriter writer() {
+        if("xlsx".equals(this.resultType)){
+            return new XlsxDataSetWriter(this.getResultDir());
+        }
+        return new CsvDataSetWriterWrapper(new CsvDataSetWriter(this.getResultDir()));
     }
 
     private void populateSettings(CmdLineParser parser) throws CmdLineException {

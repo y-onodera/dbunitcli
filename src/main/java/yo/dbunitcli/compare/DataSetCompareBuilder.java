@@ -1,12 +1,8 @@
 package yo.dbunitcli.compare;
 
-import com.google.common.collect.Maps;
+import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.IDataSetWriter;
-import org.dbunit.dataset.DataSetException;
-
-import java.util.List;
-import java.util.Map;
 
 public class DataSetCompareBuilder {
     private ComparableDataSet oldDataSet;

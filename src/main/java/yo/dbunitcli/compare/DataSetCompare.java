@@ -1,15 +1,20 @@
 package yo.dbunitcli.compare;
 
 import com.google.common.base.Predicates;
-import com.google.common.collect.*;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.dbunit.dataset.*;
+import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.CompareKeys;
 import yo.dbunitcli.dataset.IDataSetWriter;
-import org.dbunit.dataset.*;
-import org.dbunit.dataset.datatype.DataType;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import static yo.dbunitcli.compare.CompareDiff.getBuilder;
 
@@ -45,7 +50,10 @@ public class DataSetCompare implements Compare {
         this.compareTableCount();
         this.compareTables(writer);
         CompareResult compareResult = new CompareResult(oldDataSet.getSrc(), newDataSet.getSrc(), results);
-        writer.write(compareResult.toITable());
+        final ITable table = compareResult.toITable();
+        writer.open(table.getTableMetaData().getTableName());
+        writer.write(table);
+        writer.close();
         return compareResult;
     }
 
@@ -186,6 +194,10 @@ public class DataSetCompare implements Compare {
                 deleteRows.add(rowNum);
             }
         }
+        if (modifyValues.size() == 0 && deleteRows.size() == 0 && addRows.size() == 0) {
+            return;
+        }
+        writer.open(oldTable.getTableMetaData().getTableName());
         if (modifyValues.size() > 0) {
             final ITableMetaData origin = oldTable.getTableMetaData();
             final List<Column> originColumns = Lists.newArrayList(origin.getColumns()).subList(0, columnLength);
@@ -239,6 +251,7 @@ public class DataSetCompare implements Compare {
                     .setDetailRows(diffDetailTable)
                     .build());
         }
+        writer.close();
     }
 
     protected void rowCount(ComparableTable oldTable, ComparableTable newTable) {
