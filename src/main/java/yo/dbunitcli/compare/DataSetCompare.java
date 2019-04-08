@@ -204,10 +204,14 @@ public class DataSetCompare implements Compare {
             Column[] columns = originColumns.toArray(new Column[columnLength]);
             DefaultTableMetaData metaData = new DefaultTableMetaData(origin.getTableName() + "$MODIFY", columns);
             DefaultTable diffDetailTable = new DefaultTable(metaData);
+            Set<CompareKeys> writeRows = Sets.newHashSet();
             for (Map.Entry<Integer, List<CompareKeys>> entry : modifyValues.entrySet()) {
                 for (CompareKeys targetKey : entry.getValue()) {
-                    diffDetailTable.addRow(oldTable.get(targetKey, keys, columnLength));
-                    diffDetailTable.addRow(newTable.get(targetKey, keys, columnLength));
+                    if (!writeRows.contains(targetKey)) {
+                        diffDetailTable.addRow(oldTable.get(targetKey, keys, columnLength));
+                        diffDetailTable.addRow(newTable.get(targetKey, keys, columnLength));
+                        writeRows.add(targetKey);
+                    }
                 }
                 this.results.add(getBuilder(CompareDiff.Type.MODIFY_VALUE)
                         .setTargetName(oldTable.getTableMetaData().getTableName())
