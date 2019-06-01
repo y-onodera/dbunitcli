@@ -42,7 +42,7 @@ public class ComparableCsvDataSetProducer implements IDataSetProducer {
 
     @Override
     public void setConsumer(IDataSetConsumer aConsumer) {
-        consumer = aConsumer;
+        this.consumer = aConsumer;
     }
 
     @Override
