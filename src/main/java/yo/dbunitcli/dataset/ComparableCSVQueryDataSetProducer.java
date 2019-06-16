@@ -29,7 +29,7 @@ public class ComparableCSVQueryDataSetProducer implements IDataSetProducer {
         if (!srcDir.isDirectory()) {
             throw new DataSetException("'" + srcDir + "' should be a directory");
         }
-        this.src = srcDir.listFiles();
+        this.src = srcDir.listFiles(File::isFile);
         this.encoding = encoding;
     }
 

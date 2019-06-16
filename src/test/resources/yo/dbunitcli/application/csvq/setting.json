@@ -1,0 +1,10 @@
+{
+  "settings": [
+    {
+      "name": "joinQuery",
+      "keys": [
+        "key"
+      ]
+    }
+  ]
+}

@@ -62,6 +62,11 @@ public class ApplicationTest {
     }
 
     @Test
+    public void testCompareCsvqToCsvq() throws DatabaseUnitException {
+        Application.main(new String[]{"@" + this.baseDir + "/paramCsvqToCsvqCompare.txt"});
+    }
+
+    @Test
     public void testCompareFilter() throws DatabaseUnitException {
         Application.main(new String[]{"@" + this.baseDir + "/paramColumnFilter.txt"});
     }

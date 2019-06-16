@@ -1,21 +1,23 @@
 package yo.dbunitcli.application;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.dbunit.dataset.csv.CsvDataSetWriter;
-import yo.dbunitcli.compare.CompareSetting;
-import yo.dbunitcli.dataset.*;
 import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.csv.CsvDataSetWriter;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.compare.CompareSetting;
+import yo.dbunitcli.dataset.*;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import java.io.*;
 import java.util.List;
-import java.util.Map;
-import javax.json.*;
+import java.util.Objects;
 
 public class CommandLineOptions {
 
@@ -27,13 +29,13 @@ public class CommandLineOptions {
     @Option(name = "-old", usage = "directory old files at", required = true)
     private File oldDir;
 
-    @Option(name = "-oldsource", usage = "csv | xls | xlsx : default csv")
+    @Option(name = "-oldsource", usage = "csv | csvq | xls | xlsx : default csv")
     private String oldsource = "csv";
 
     @Option(name = "-new", usage = "directory new files at", required = true)
     private File newDir;
 
-    @Option(name = "-newsource", usage = "csv | xls | xlsx : default csv")
+    @Option(name = "-newsource", usage = "csv | csvq | xls | xlsx : default csv")
     private String newsource = "csv";
 
     @Option(name = "-result", usage = "directory result files at")
@@ -95,15 +97,15 @@ public class CommandLineOptions {
     }
 
     public ComparableDataSet oldDataSet() throws DataSetException {
-        return this.comparableDataSetLoader.loadDataSet(this.getOldDir(), this.getEncoding(), this.oldsource, this.excludeColumns.build());
+        return this.comparableDataSetLoader.loadDataSet(this.getOldDir(), this.getEncoding(), DataSourceType.fromString(this.oldsource), this.excludeColumns.build());
     }
 
     public ComparableDataSet newDataSet() throws DataSetException {
-        return this.comparableDataSetLoader.loadDataSet(this.getNewDir(), this.getEncoding(), this.newsource, this.excludeColumns.build());
+        return this.comparableDataSetLoader.loadDataSet(this.getNewDir(), this.getEncoding(), DataSourceType.fromString(this.newsource), this.excludeColumns.build());
     }
 
     public IDataSetWriter writer() {
-        if ("xlsx".equals(this.resultType)) {
+        if (DataSourceType.XLSX.isEqual(this.resultType)) {
             return new XlsxDataSetWriter(this.getResultDir());
         }
         return new CsvDataSetWriterWrapper(new CsvDataSetWriter(this.getResultDir()));
@@ -122,7 +124,7 @@ public class CommandLineOptions {
     }
 
     private void configureCommonSetting(JsonObject setting) {
-        if(!setting.containsKey("commonSettings")){
+        if (!setting.containsKey("commonSettings")) {
             return;
         }
         setting.getJsonArray("commonSettings")
@@ -190,7 +192,7 @@ public class CommandLineOptions {
     }
 
     private void assertDirectoryExists(CmdLineParser parser) throws CmdLineException {
-        if ("csv".equals(this.newsource)) {
+        if (DataSourceType.fromString(this.newsource).isNeedDir()) {
             if (!this.newDir.exists() || !this.newDir.isDirectory()) {
                 throw new CmdLineException(parser, "new is not exist directory", new IllegalArgumentException(this.newDir.toString()));
             }
@@ -199,7 +201,7 @@ public class CommandLineOptions {
                 throw new CmdLineException(parser, "new is not exist file", new IllegalArgumentException(this.newDir.toString()));
             }
         }
-        if ("csv".equals(this.oldsource)) {
+        if (DataSourceType.fromString(this.oldsource).isNeedDir()) {
             if (!this.oldDir.exists() || !this.oldDir.isDirectory()) {
                 throw new CmdLineException(parser, "old is not exist directory", new IllegalArgumentException(this.oldDir.toString()));
             }
@@ -207,6 +209,38 @@ public class CommandLineOptions {
             if (!this.oldDir.exists() || !this.oldDir.isFile()) {
                 throw new CmdLineException(parser, "old is not exist file", new IllegalArgumentException(this.oldDir.toString()));
             }
+        }
+    }
+
+    public static enum DataSourceType {
+        CSV("csv", true),
+        CSVQ("csvq", true),
+        XLS("xls", false),
+        XLSX("xlsx", false);
+
+        private final String name;
+        private final boolean needDir;
+
+        DataSourceType(String name, boolean needDir) {
+            this.name = name;
+            this.needDir = needDir;
+        }
+
+        public static DataSourceType fromString(String name) {
+            for (DataSourceType type : DataSourceType.values()) {
+                if (type.isEqual(name)) {
+                    return type;
+                }
+            }
+            throw new IllegalArgumentException("unknown type:" + name);
+        }
+
+        public boolean isEqual(String type) {
+            return Objects.equals(this.name, type);
+        }
+
+        public boolean isNeedDir() {
+            return needDir;
         }
     }
 }
