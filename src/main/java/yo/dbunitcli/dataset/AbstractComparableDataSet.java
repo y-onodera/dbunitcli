@@ -6,27 +6,27 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.stream.IDataSetProducer;
-import yo.dbunitcli.compare.CompareSetting;
+import yo.dbunitcli.compare.ColumnSetting;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class AbstractComparableDataSet extends CachedDataSet implements ComparableDataSet {
 
-    private CompareSetting compareSetting;
+    private ColumnSetting compareSetting;
 
     public AbstractComparableDataSet(IDataSetProducer producer) throws DataSetException {
-        this(producer, CompareSetting.builder().build());
+        this(producer, ColumnSetting.builder().build());
     }
 
-    public AbstractComparableDataSet(IDataSetProducer producer, CompareSetting excludeColumns) throws DataSetException {
+    public AbstractComparableDataSet(IDataSetProducer producer, ColumnSetting excludeColumns) throws DataSetException {
         super(producer);
         this.compareSetting = excludeColumns;
     }
 
     @Override
     public ComparableTable getTable(String tableName) throws DataSetException {
-        List<Column> excludeColumns = this.compareSetting.get(tableName).stream().map(it -> new Column(it, DataType.UNKNOWN)).collect(Collectors.toList());
+        List<Column> excludeColumns = this.compareSetting.getColumns(tableName).stream().map(it -> new Column(it, DataType.UNKNOWN)).collect(Collectors.toList());
         if (excludeColumns.size() > 0) {
             return ComparableFilterTable.createFrom(super.getTable(tableName), this.toFilter(excludeColumns));
         }

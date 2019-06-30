@@ -1,14 +1,14 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.DataSetException;
-import yo.dbunitcli.application.CommandLineOptions;
-import yo.dbunitcli.compare.CompareSetting;
+import yo.dbunitcli.application.DataSourceType;
+import yo.dbunitcli.compare.ColumnSetting;
 
 import java.io.File;
 
 public class ComparableDataSetLoader {
 
-    public ComparableDataSet loadDataSet(File aDir, String aEncoding, CommandLineOptions.DataSourceType aSource, CompareSetting excludeColumns) throws DataSetException {
+    public ComparableDataSet loadDataSet(File aDir, String aEncoding, DataSourceType aSource, ColumnSetting excludeColumns) throws DataSetException {
         switch (aSource) {
             case XLSX:
                 return new ComparableXlsxDataSet(aDir, excludeColumns);

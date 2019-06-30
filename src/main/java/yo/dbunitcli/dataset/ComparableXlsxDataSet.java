@@ -1,7 +1,7 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.DataSetException;
-import yo.dbunitcli.compare.CompareSetting;
+import yo.dbunitcli.compare.ColumnSetting;
 
 import java.io.File;
 
@@ -13,7 +13,7 @@ public class ComparableXlsxDataSet extends AbstractComparableDataSet {
         this.src = source;
     }
 
-    public ComparableXlsxDataSet(File aFile, CompareSetting excludeColumns) throws DataSetException {
+    public ComparableXlsxDataSet(File aFile, ColumnSetting excludeColumns) throws DataSetException {
         super(new ComparableXlsxDataSetProducer(aFile), excludeColumns);
         this.src = aFile;
     }

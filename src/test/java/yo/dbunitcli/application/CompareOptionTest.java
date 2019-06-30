@@ -10,18 +10,18 @@ import java.io.File;
 
 import static org.junit.Assert.*;
 
-public class CommandLineOptionsTest {
+public class CompareOptionTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     private String baseDir = this.getClass().getResource(".").getPath();
 
-    private CommandLineOptions target;
+    private CompareOption target;
 
     @Before
     public void setUp() {
-        this.target = new CommandLineOptions();
+        this.target = new CompareOption();
     }
 
     @Test
@@ -69,12 +69,12 @@ public class CommandLineOptionsTest {
         assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewDir());
         assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldDir());
         assertEquals(2, this.target.getComparisonKeys().byNameSize());
-        assertEquals(1, this.target.getComparisonKeys().get("columnadd").size());
-        assertEquals("key", this.target.getComparisonKeys().get("columnadd").get(0));
+        assertEquals(1, this.target.getComparisonKeys().getColumns("columnadd").size());
+        assertEquals("key", this.target.getComparisonKeys().getColumns("columnadd").get(0));
         assertEquals(2, this.target.getExcludeColumns().byNameSize());
-        assertEquals(2, this.target.getExcludeColumns().get("columnadd").size());
-        assertEquals("AddColumn", this.target.getExcludeColumns().get("columnadd").get(0));
-        assertEquals("ChangeColumn", this.target.getExcludeColumns().get("columnadd").get(1));
+        assertEquals(2, this.target.getExcludeColumns().getColumns("columnadd").size());
+        assertEquals("AddColumn", this.target.getExcludeColumns().getColumns("columnadd").get(0));
+        assertEquals("ChangeColumn", this.target.getExcludeColumns().getColumns("columnadd").get(1));
     }
 
     @Test
@@ -82,8 +82,8 @@ public class CommandLineOptionsTest {
         this.target.parse(new String[]{"@" + this.baseDir + "/paramResultDiffValidExpected.txt"});
         assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewDir().getAbsoluteFile());
         assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldDir().getAbsoluteFile());
-        assertEquals(1, this.target.getComparisonKeys().get("columnadd").size());
-        assertEquals("key", this.target.getComparisonKeys().get("columnadd").get(0));
+        assertEquals(1, this.target.getComparisonKeys().getColumns("columnadd").size());
+        assertEquals("key", this.target.getComparisonKeys().getColumns("columnadd").get(0));
     }
 
     @Test

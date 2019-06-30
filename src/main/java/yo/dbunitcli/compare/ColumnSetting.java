@@ -6,7 +6,7 @@ import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 
-public class CompareSetting {
+public class ColumnSetting {
 
     private Map<String, List<String>> byName = Maps.newHashMap();
 
@@ -14,7 +14,7 @@ public class CompareSetting {
 
     private List<String> common = Lists.newArrayList();
 
-    public CompareSetting(Builder builder) {
+    public ColumnSetting(Builder builder) {
         this.byName.putAll(builder.byName);
         this.pattern.putAll(builder.pattern);
         this.common.addAll(builder.common);
@@ -24,7 +24,7 @@ public class CompareSetting {
         return new Builder();
     }
 
-    public List<String> get(String tableName) {
+    public List<String> getColumns(String tableName) {
         List<String> result = Lists.newArrayList(this.common);
         if (this.byName.containsKey(tableName)) {
             result.addAll(this.byName.get(tableName));
@@ -49,8 +49,8 @@ public class CompareSetting {
 
         private List<String> common = Lists.newArrayList();
 
-        public CompareSetting build() {
-            return new CompareSetting(this);
+        public ColumnSetting build() {
+            return new ColumnSetting(this);
         }
 
         public Builder add(Strategy strategy, String name, List<String> keys) {

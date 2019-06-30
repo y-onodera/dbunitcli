@@ -7,7 +7,7 @@ import yo.dbunitcli.dataset.IDataSetWriter;
 public class DataSetCompareBuilder {
     private ComparableDataSet oldDataSet;
     private ComparableDataSet newDataSet;
-    private CompareSetting comparisonKeys;
+    private ColumnSetting comparisonKeys;
     private IDataSetWriter dataSetWriter;
 
     public DataSetCompareBuilder oldDataSet(ComparableDataSet dataSet) {
@@ -20,7 +20,7 @@ public class DataSetCompareBuilder {
         return this;
     }
 
-    public DataSetCompareBuilder comparisonKeys(CompareSetting comparisonKeys) {
+    public DataSetCompareBuilder comparisonKeys(ColumnSetting comparisonKeys) {
         this.comparisonKeys = comparisonKeys;
         return this;
     }
@@ -38,7 +38,7 @@ public class DataSetCompareBuilder {
         return newDataSet;
     }
 
-    public CompareSetting getComparisonKeys() {
+    public ColumnSetting getComparisonKeys() {
         return comparisonKeys;
     }
 

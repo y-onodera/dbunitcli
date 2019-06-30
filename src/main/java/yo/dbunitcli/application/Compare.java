@@ -12,12 +12,12 @@ import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetLoader;
 import yo.dbunitcli.dataset.IDataSetWriter;
 
-public class Application {
+public class Compare {
 
-    private static final Logger logger = LoggerFactory.getLogger(Application.class);
+    private static final Logger logger = LoggerFactory.getLogger(Compare.class);
 
     public static void main(String[] args) throws DatabaseUnitException {
-        CommandLineOptions options = new CommandLineOptions();
+        CompareOption options = new CompareOption();
         try {
             options.parse(args);
         } catch (Exception exp) {

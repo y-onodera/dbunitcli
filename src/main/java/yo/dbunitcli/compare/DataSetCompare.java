@@ -20,11 +20,13 @@ import static yo.dbunitcli.compare.CompareDiff.getBuilder;
 
 public class DataSetCompare implements Compare {
 
+    private static final String RESULT_TABLE_NAME = "COMPARE_RESULT";
+
     private ComparableDataSet oldDataSet;
 
     private ComparableDataSet newDataSet;
 
-    private CompareSetting comparisonKeys;
+    private ColumnSetting comparisonKeys;
 
     private IDataSetWriter writer;
 
@@ -47,11 +49,11 @@ public class DataSetCompare implements Compare {
     }
 
     protected CompareResult exec() throws DataSetException {
+        writer.open(RESULT_TABLE_NAME);
         this.compareTableCount();
         this.compareTables(writer);
         CompareResult compareResult = new CompareResult(oldDataSet.getSrc(), newDataSet.getSrc(), results);
-        final ITable table = compareResult.toITable();
-        writer.open(table.getTableMetaData().getTableName());
+        final ITable table = compareResult.toITable(RESULT_TABLE_NAME);
         writer.write(table);
         writer.close();
         return compareResult;
@@ -109,7 +111,7 @@ public class DataSetCompare implements Compare {
         this.searchModifyAndDeleteColumns(oldMetaData, newMetaData);
         this.searchAddColumns(oldMetaData, newMetaData);
         this.rowCount(oldTable, newTable);
-        List<String> key = this.comparisonKeys.get(oldMetaData.getTableName());
+        List<String> key = this.comparisonKeys.getColumns(oldMetaData.getTableName());
         if (key.size() > 0) {
             this.compareRow(oldTable, newTable, key, writer);
         }
@@ -199,7 +201,6 @@ public class DataSetCompare implements Compare {
         if (modifyValues.size() == 0 && deleteRows.size() == 0 && addRows.size() == 0) {
             return;
         }
-        writer.open(oldTable.getTableMetaData().getTableName());
         if (modifyValues.size() > 0) {
             final ITableMetaData origin = oldTable.getTableMetaData();
             final List<Column> originColumns = Lists.newArrayList(origin.getColumns()).subList(0, columnLength);
@@ -232,7 +233,7 @@ public class DataSetCompare implements Compare {
                 row = Lists.asList(Integer.valueOf(rowNum), row).toArray(new Object[row.length + 1]);
                 diffDetailTable.addRow(row);
             }
-            writer.write(new SortedTable(diffDetailTable));
+            writer.write(diffDetailTable);
             this.results.add(getBuilder(CompareDiff.Type.KEY_DELETE)
                     .setTargetName(oldTable.getTableMetaData().getTableName())
                     .setRows(deleteRows.size())
@@ -248,7 +249,7 @@ public class DataSetCompare implements Compare {
                 Object[] convertRow = Lists.asList(Integer.valueOf(row.getKey()), row.getValue()).toArray(new Object[row.getValue().length + 1]);
                 diffDetailTable.addRow(convertRow);
             }
-            writer.write(new SortedTable(diffDetailTable));
+            writer.write(diffDetailTable);
             this.results.add(getBuilder(CompareDiff.Type.KEY_ADD)
                     .setTargetName(oldTable.getTableMetaData().getTableName())
                     .setRows(addRows.size())
@@ -257,7 +258,6 @@ public class DataSetCompare implements Compare {
                     .setDetailRows(diffDetailTable)
                     .build());
         }
-        writer.close();
     }
 
     protected void rowCount(ComparableTable oldTable, ComparableTable newTable) {

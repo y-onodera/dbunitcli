@@ -1,10 +1,7 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import yo.dbunitcli.compare.CompareSetting;
+import yo.dbunitcli.compare.ColumnSetting;
 
 import java.io.File;
 
@@ -22,7 +19,7 @@ public class ComparableCSVDataSet extends AbstractComparableDataSet {
         this.srcDir = aSrcFile.getPath();
     }
 
-    public ComparableCSVDataSet(File aDir, String aEncoding, CompareSetting excludeColumns) throws DataSetException {
+    public ComparableCSVDataSet(File aDir, String aEncoding, ColumnSetting excludeColumns) throws DataSetException {
         super(new ComparableCsvDataSetProducer(aDir, aEncoding), excludeColumns);
         this.srcDir = aDir.getPath();
     }

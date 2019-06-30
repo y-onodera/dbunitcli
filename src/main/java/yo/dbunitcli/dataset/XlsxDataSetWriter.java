@@ -5,6 +5,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultDataSet;
 import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.SortedTable;
 import org.dbunit.dataset.excel.XlsDataSetWriter;
 
 import java.io.File;
@@ -31,12 +32,15 @@ public class XlsxDataSetWriter extends XlsDataSetWriter implements IDataSetWrite
 
     @Override
     public void write(ITable aTable) throws DataSetException {
-        this.dataSet.addTable(aTable);
+        this.dataSet.addTable(new SortedTable(aTable));
     }
 
     @Override
     public void close() throws DataSetException {
         try {
+            if (!this.resultDir.exists()) {
+                this.resultDir.mkdirs();
+            }
             this.write(this.dataSet, new FileOutputStream(new File(this.resultDir, this.filename)));
         } catch (IOException | DataSetException e) {
             throw new DataSetException(e);

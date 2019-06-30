@@ -31,10 +31,6 @@ public class CompareResult {
         this.diffs.addAll(results);
     }
 
-    public ITable toITable() throws DataSetException {
-        return this.toITable("COMPARE_RESULT");
-    }
-
     public ITable toITable(String tableName) throws DataSetException {
         DefaultTable result = new DefaultTable(tableName, COLUMNS);
         for (CompareDiff diff : diffs) {
