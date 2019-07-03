@@ -49,11 +49,11 @@ public class DataSetCompare implements Compare {
     }
 
     protected CompareResult exec() throws DataSetException {
-        writer.open(RESULT_TABLE_NAME);
         this.compareTableCount();
         this.compareTables(writer);
         CompareResult compareResult = new CompareResult(oldDataSet.getSrc(), newDataSet.getSrc(), results);
         final ITable table = compareResult.toITable(RESULT_TABLE_NAME);
+        writer.open(table.getTableMetaData().getTableName());
         writer.write(table);
         writer.close();
         return compareResult;
@@ -201,6 +201,7 @@ public class DataSetCompare implements Compare {
         if (modifyValues.size() == 0 && deleteRows.size() == 0 && addRows.size() == 0) {
             return;
         }
+        writer.open(oldTable.getTableMetaData().getTableName());
         if (modifyValues.size() > 0) {
             final ITableMetaData origin = oldTable.getTableMetaData();
             final List<Column> originColumns = Lists.newArrayList(origin.getColumns()).subList(0, columnLength);
@@ -258,6 +259,7 @@ public class DataSetCompare implements Compare {
                     .setDetailRows(diffDetailTable)
                     .build());
         }
+        writer.close();
     }
 
     protected void rowCount(ComparableTable oldTable, ComparableTable newTable) {
