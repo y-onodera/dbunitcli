@@ -64,7 +64,7 @@ abstract public class CommandLineOption {
         if (DataSourceType.XLSX.isEqual(this.resultType)) {
             return new XlsxDataSetWriter(this.getResultDir());
         }
-        return new CsvDataSetWriterWrapper(this.getResultDir());
+        return new CsvDataSetWriterWrapper(this.getResultDir(), this.outputEncoding);
     }
 
     public ComparableDataSetLoader getComparableDataSetLoader() {
