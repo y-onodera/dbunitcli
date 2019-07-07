@@ -1,6 +1,12 @@
 package yo.dbunitcli.application;
 
 import com.google.common.collect.Lists;
+import org.dbunit.DatabaseUnitException;
+import org.dbunit.database.DatabaseConfig;
+import org.dbunit.database.DatabaseConnection;
+import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.ext.oracle.Oracle10DataTypeFactory;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -15,6 +21,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
 
@@ -77,9 +86,9 @@ abstract public class CommandLineOption {
         return new CsvDataSetWriterWrapper(this.getResultDir(), this.outputEncoding);
     }
 
-    public ComparableDataSetLoader getComparableDataSetLoader() {
+    public ComparableDataSetLoader getComparableDataSetLoader() throws DataSetException {
         if (this.jdbcProp != null) {
-            return new ComparableDataSetLoader(this.jdbcProp.get("url").toString(), this.jdbcProp.get("user").toString(), this.jdbcProp.get("pass").toString());
+            return new ComparableDataSetLoader(this.createIDatabaseConnection());
         }
         return new ComparableDataSetLoader();
     }
@@ -93,6 +102,24 @@ abstract public class CommandLineOption {
         }
         assertDirectoryExists(parser);
         populateSettings(parser);
+    }
+
+    public IDatabaseConnection createIDatabaseConnection() throws DataSetException {
+        String url = this.jdbcProp.get("url").toString();
+        String user = this.jdbcProp.get("user").toString();
+        String pass = this.jdbcProp.get("pass").toString();
+        try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Connection conn = DriverManager.getConnection(url, user, pass);
+            IDatabaseConnection result = new DatabaseConnection(conn, user);
+            DatabaseConfig config = result.getConfig();
+            config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new Oracle10DataTypeFactory());
+            config.setProperty(DatabaseConfig.FEATURE_ALLOW_EMPTY_FIELDS, Boolean.TRUE);
+            config.setProperty(DatabaseConfig.FEATURE_SKIP_ORACLE_RECYCLEBIN_TABLES, Boolean.TRUE);
+            return result;
+        } catch (ClassNotFoundException | SQLException | DatabaseUnitException ex) {
+            throw new DataSetException(ex);
+        }
     }
 
     abstract protected void assertDirectoryExists(CmdLineParser parser) throws CmdLineException;
