@@ -19,7 +19,7 @@ import java.sql.*;
 
 public class ComparableCSVQueryDataSetProducer implements IDataSetProducer {
 
-    private static final Logger logger = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
+    private static final Logger logger = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
     private static final String URL = "jdbc:h2:mem:h2test";
     private IDataSetConsumer consumer = new DefaultConsumer();
     private File[] src;

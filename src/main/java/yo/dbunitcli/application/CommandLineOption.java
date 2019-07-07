@@ -16,6 +16,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.*;
 import java.util.List;
+import java.util.Properties;
 
 abstract public class CommandLineOption {
 
@@ -34,14 +35,21 @@ abstract public class CommandLineOption {
     @Option(name = "-outputEncoding", usage = "output csv file encoding")
     private String outputEncoding = "UTF-8";
 
+    @Option(name = "-jdbcProperties", usage = "user connect database key[url,user,pass]")
+    private File jdbcProperties;
+
+    private Properties jdbcProp;
+
     private ColumnSetting.Builder comparisonKeys = ColumnSetting.builder();
 
     private ColumnSetting.Builder excludeColumns = ColumnSetting.builder();
 
-    private ComparableDataSetLoader comparableDataSetLoader = new ComparableDataSetLoader();
-
     public String getEncoding() {
         return this.encoding;
+    }
+
+    public String getOutputEncoding() {
+        return outputEncoding;
     }
 
     public File getResultDir() {
@@ -68,7 +76,10 @@ abstract public class CommandLineOption {
     }
 
     public ComparableDataSetLoader getComparableDataSetLoader() {
-        return this.comparableDataSetLoader;
+        if (this.jdbcProp != null) {
+            return new ComparableDataSetLoader(this.jdbcProp.get("url").toString(), this.jdbcProp.get("user").toString(), this.jdbcProp.get("pass").toString());
+        }
+        return new ComparableDataSetLoader();
     }
 
     public void parse(String[] args) throws CmdLineException {
@@ -85,7 +96,8 @@ abstract public class CommandLineOption {
     abstract protected void assertDirectoryExists(CmdLineParser parser) throws CmdLineException;
 
     protected void assertFileParameter(CmdLineParser parser, String source, File dir, String s) throws CmdLineException {
-        if (DataSourceType.fromString(source).isNeedDir()) {
+        final DataSourceType dataSourceType = DataSourceType.fromString(source);
+        if (dataSourceType.isNeedDir()) {
             if (!dir.exists() || !dir.isDirectory()) {
                 throw new CmdLineException(parser, s + " is not exist directory", new IllegalArgumentException(dir.toString()));
             }
@@ -94,16 +106,28 @@ abstract public class CommandLineOption {
                 throw new CmdLineException(parser, s + " is not exist file", new IllegalArgumentException(dir.toString()));
             }
         }
+        if (dataSourceType == DataSourceType.TABLE || dataSourceType == DataSourceType.SQL) {
+            if (this.jdbcProperties == null) {
+                throw new CmdLineException(parser, dataSourceType + " need jdbcProperties option", new IllegalArgumentException());
+            }
+            if (!this.jdbcProperties.exists()) {
+                throw new CmdLineException(parser, this.jdbcProperties.toString() + " is not exist file", new IllegalArgumentException(this.jdbcProperties.toString()));
+            }
+        }
     }
 
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         try {
+            if (this.jdbcProperties != null) {
+                this.jdbcProp = new Properties();
+                this.jdbcProp.load(new FileInputStream(this.jdbcProperties));
+            }
             JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(this.setting), "windows-31j"));
             JsonObject setting = jsonReader.read()
                     .asJsonObject();
             this.configureSetting(setting);
             this.configureCommonSetting(setting);
-        } catch (UnsupportedEncodingException | FileNotFoundException e) {
+        } catch (IOException e) {
             throw new CmdLineException(parser, e);
         }
     }

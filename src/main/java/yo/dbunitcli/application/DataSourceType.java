@@ -3,6 +3,8 @@ package yo.dbunitcli.application;
 import java.util.Objects;
 
 public enum DataSourceType {
+    TABLE("table", false),
+    SQL("sql", true),
     CSV("csv", true),
     CSVQ("csvq", true),
     XLS("xls", false),

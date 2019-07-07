@@ -23,21 +23,15 @@ public class ComparableCsvDataSetProducer implements IDataSetProducer {
     private static final Logger logger = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
     private IDataSetConsumer consumer = new DefaultConsumer();
     private File[] src;
-    private String encoding = System.getProperty("file.encoding");
+    private String encoding;
 
-    public ComparableCsvDataSetProducer(File srcDir, String encoding) throws DataSetException {
-        if (!srcDir.isDirectory()) {
-            throw new DataSetException("'" + srcDir + "' should be a directory");
+    public ComparableCsvDataSetProducer(File src, String encoding) throws DataSetException {
+        if (src.isDirectory()) {
+            this.src = src.listFiles((file, s) -> s.endsWith(".csv"));
+        } else {
+            this.src = new File[]{src};
         }
-        this.src = srcDir.listFiles((file, s) -> s.endsWith(".csv"));
         this.encoding = encoding;
-    }
-
-    public ComparableCsvDataSetProducer(File aSrcFile) throws DataSetException {
-        if (!aSrcFile.isFile()) {
-            throw new DataSetException("'" + aSrcFile.toString() + "' should be a file");
-        }
-        this.src = new File[]{aSrcFile};
     }
 
     @Override

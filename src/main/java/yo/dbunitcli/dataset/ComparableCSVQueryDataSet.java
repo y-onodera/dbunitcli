@@ -14,11 +14,6 @@ public class ComparableCSVQueryDataSet extends AbstractComparableDataSet {
         this.srcDir = aSrcDir.getPath();
     }
 
-    public ComparableCSVQueryDataSet(File aSrcFile) throws DataSetException {
-        super(new ComparableCSVQueryDataSetProducer(aSrcFile));
-        this.srcDir = aSrcFile.getPath();
-    }
-
     public ComparableCSVQueryDataSet(File aDir, String aEncoding, ColumnSetting excludeColumns) throws DataSetException {
         super(new ComparableCSVQueryDataSetProducer(aDir, aEncoding), excludeColumns);
         this.srcDir = aDir.getPath();
