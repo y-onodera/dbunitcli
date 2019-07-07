@@ -1,6 +1,6 @@
 package yo.dbunitcli.dataset;
 
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultDataSet;
@@ -11,6 +11,11 @@ import org.dbunit.dataset.excel.XlsDataSetWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class XlsxDataSetWriter extends XlsDataSetWriter implements IDataSetWriter {
 
@@ -19,6 +24,8 @@ public class XlsxDataSetWriter extends XlsDataSetWriter implements IDataSetWrite
     private String filename;
 
     private DefaultDataSet dataSet;
+
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
     public XlsxDataSetWriter(File resultDir) {
         this.resultDir = resultDir;
@@ -45,6 +52,12 @@ public class XlsxDataSetWriter extends XlsDataSetWriter implements IDataSetWrite
         } catch (IOException | DataSetException e) {
             throw new DataSetException(e);
         }
+    }
+
+    @Override
+    protected void setDateCell(Cell cell, Date value, Workbook workbook) {
+        cell.setCellType(CellType.STRING);
+        cell.setCellValue(sdf.format(value));
     }
 
     @Override
