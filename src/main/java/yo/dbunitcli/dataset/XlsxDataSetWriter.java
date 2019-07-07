@@ -20,8 +20,8 @@ public class XlsxDataSetWriter extends XlsDataSetWriter implements IDataSetWrite
     @Override
     protected Workbook createWorkbook() {
         Workbook result = new XSSFWorkbook();
-        Font font = result.createFont();
-        font.setFontName("MS ゴシック");
+        Font font = result.getFontAt(0);
+        font.setFontName("МＳ　ゴシック");
         font.setFontHeightInPoints((short) 8);
         return result;
     }

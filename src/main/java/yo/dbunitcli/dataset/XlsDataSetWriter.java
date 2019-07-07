@@ -62,11 +62,11 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
 
     @Override
     protected void setNumericCell(Cell cell, BigDecimal value, Workbook workbook) {
-        if (value.scale() < 16) {
+        if (value.toPlainString().length() < 16) {
             super.setNumericCell(cell, value, workbook);
         } else {
+            cell.setCellType(CellType.STRING);
             cell.setCellValue(value.toPlainString());
-            cell.getColumnIndex();
         }
     }
 
@@ -79,8 +79,8 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
     @Override
     protected Workbook createWorkbook() {
         Workbook result = super.createWorkbook();
-        Font font = result.createFont();
-        font.setFontName("MS ゴシック");
+        Font font = result.getFontAt(0);
+        font.setFontName("МＳ　ゴシック");
         font.setFontHeightInPoints((short) 8);
         return result;
     }
