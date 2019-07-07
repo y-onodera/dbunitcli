@@ -5,10 +5,7 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import yo.dbunitcli.compare.ColumnSetting;
-import yo.dbunitcli.dataset.ComparableDataSetLoader;
-import yo.dbunitcli.dataset.CsvDataSetWriterWrapper;
-import yo.dbunitcli.dataset.IDataSetWriter;
-import yo.dbunitcli.dataset.XlsxDataSetWriter;
+import yo.dbunitcli.dataset.*;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -74,6 +71,8 @@ abstract public class CommandLineOption {
     public IDataSetWriter writer() {
         if (DataSourceType.XLSX.isEqual(this.resultType)) {
             return new XlsxDataSetWriter(this.getResultDir());
+        } else if (DataSourceType.XLS.isEqual(this.resultType)) {
+            return new XlsDataSetWriter(this.getResultDir());
         }
         return new CsvDataSetWriterWrapper(this.getResultDir(), this.outputEncoding);
     }
