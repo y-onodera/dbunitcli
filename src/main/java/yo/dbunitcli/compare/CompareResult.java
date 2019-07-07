@@ -1,7 +1,10 @@
 package yo.dbunitcli.compare;
 
 import com.google.common.collect.Lists;
-import org.dbunit.dataset.*;
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.DefaultTable;
+import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.datatype.DataType;
 
 import java.util.List;

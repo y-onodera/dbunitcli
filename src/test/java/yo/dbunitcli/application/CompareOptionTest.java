@@ -8,7 +8,7 @@ import org.kohsuke.args4j.CmdLineException;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class CompareOptionTest {
 

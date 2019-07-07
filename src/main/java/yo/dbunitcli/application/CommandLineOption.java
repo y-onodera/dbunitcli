@@ -1,20 +1,23 @@
 package yo.dbunitcli.application;
 
 import com.google.common.collect.Lists;
-import org.dbunit.dataset.csv.CsvDataSetWriter;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.compare.ColumnSetting;
-import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.dataset.ComparableDataSetLoader;
+import yo.dbunitcli.dataset.CsvDataSetWriterWrapper;
+import yo.dbunitcli.dataset.IDataSetWriter;
+import yo.dbunitcli.dataset.XlsxDataSetWriter;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Properties;
 

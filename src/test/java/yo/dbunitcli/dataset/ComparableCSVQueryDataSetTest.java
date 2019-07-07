@@ -1,7 +1,6 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.ITable;
 import org.junit.Assert;
 import org.junit.Test;
 

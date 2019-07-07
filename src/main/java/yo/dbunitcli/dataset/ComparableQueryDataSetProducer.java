@@ -2,14 +2,15 @@ package yo.dbunitcli.dataset;
 
 import com.google.common.io.Files;
 import org.dbunit.database.IDatabaseConnection;
-import org.dbunit.dataset.*;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.ITable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.sql.*;
+import java.sql.SQLException;
 
 public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer {
     private static final Logger logger = LoggerFactory.getLogger(ComparableQueryDataSetProducer.class);
