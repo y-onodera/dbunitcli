@@ -189,6 +189,9 @@ abstract public class CommandLineOption {
     }
 
     protected void configureSetting(JsonObject setting) {
+        if (!setting.containsKey("settings")) {
+            return;
+        }
         setting.getJsonArray("settings")
                 .stream()
                 .forEach(v -> {
@@ -214,7 +217,7 @@ abstract public class CommandLineOption {
             for (int i = 0, j = excludeArray.size(); i < j; i++) {
                 columns.add(excludeArray.getString(i));
             }
-            excludeColumns.add(strategy, file, columns);
+            this.excludeColumns.add(strategy, file, columns);
         }
     }
 
@@ -225,7 +228,7 @@ abstract public class CommandLineOption {
             for (int i = 0, j = keyArray.size(); i < j; i++) {
                 keys.add(keyArray.getString(i));
             }
-            comparisonKeys.add(strategy, file, keys);
+            this.comparisonKeys.add(strategy, file, keys);
         }
     }
 
