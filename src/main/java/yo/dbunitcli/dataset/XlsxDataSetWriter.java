@@ -1,5 +1,6 @@
 package yo.dbunitcli.dataset;
 
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -18,6 +19,10 @@ public class XlsxDataSetWriter extends XlsDataSetWriter implements IDataSetWrite
 
     @Override
     protected Workbook createWorkbook() {
-        return new XSSFWorkbook();
+        Workbook result = new XSSFWorkbook();
+        Font font = result.createFont();
+        font.setFontName("MS ゴシック");
+        font.setFontHeightInPoints((short) 8);
+        return result;
     }
 }

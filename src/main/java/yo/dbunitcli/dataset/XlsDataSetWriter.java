@@ -2,19 +2,24 @@ package yo.dbunitcli.dataset;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultDataSet;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.SortedTable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter implements IDataSetWriter {
+    private static final Logger logger = LoggerFactory.getLogger(XlsDataSetWriter.class);
 
     private final File resultDir;
 
@@ -22,7 +27,7 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
 
     private DefaultDataSet dataSet;
 
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public XlsDataSetWriter(File resultDir) {
         this.resultDir = resultDir;
@@ -56,8 +61,27 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
     }
 
     @Override
+    protected void setNumericCell(Cell cell, BigDecimal value, Workbook workbook) {
+        if (value.scale() < 16) {
+            super.setNumericCell(cell, value, workbook);
+        } else {
+            cell.setCellValue(value.toPlainString());
+            cell.getColumnIndex();
+        }
+    }
+
+    @Override
     protected void setDateCell(Cell cell, Date value, Workbook workbook) {
         cell.setCellType(CellType.STRING);
         cell.setCellValue(sdf.format(value));
+    }
+
+    @Override
+    protected Workbook createWorkbook() {
+        Workbook result = super.createWorkbook();
+        Font font = result.createFont();
+        font.setFontName("MS ゴシック");
+        font.setFontHeightInPoints((short) 8);
+        return result;
     }
 }
