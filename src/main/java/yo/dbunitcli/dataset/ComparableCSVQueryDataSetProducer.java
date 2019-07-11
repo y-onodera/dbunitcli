@@ -20,7 +20,7 @@ import java.sql.*;
 public class ComparableCSVQueryDataSetProducer implements IDataSetProducer {
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
-    private static final String URL = "jdbc:h2:mem:h2test";
+    private static final String URL = "jdbc:h2:mem:test;ALIAS_COLUMN_NAME=TRUE";
     private IDataSetConsumer consumer = new DefaultConsumer();
     private File[] src;
     private String encoding = System.getProperty("file.encoding");
@@ -31,13 +31,6 @@ public class ComparableCSVQueryDataSetProducer implements IDataSetProducer {
         }
         this.src = srcDir.listFiles(File::isFile);
         this.encoding = encoding;
-    }
-
-    public ComparableCSVQueryDataSetProducer(File aSrcFile) throws DataSetException {
-        if (!aSrcFile.isFile()) {
-            throw new DataSetException("'" + aSrcFile.toString() + "' should be a file");
-        }
-        this.src = new File[]{aSrcFile};
     }
 
     @Override
