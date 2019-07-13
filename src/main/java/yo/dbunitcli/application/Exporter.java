@@ -25,7 +25,7 @@ public class Exporter {
         String resultFile = "result";
         if (args[0].startsWith("@")) {
             resultFile = new File(args[0].replace("@", "")).getName();
-            resultFile = resultFile.substring(0, resultFile.lastIndexOf(".") - 1);
+            resultFile = resultFile.substring(0, resultFile.lastIndexOf("."));
         }
         writer.open(resultFile);
         for (String tableName : dataSet.getTableNames()) {
