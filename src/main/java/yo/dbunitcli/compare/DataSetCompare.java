@@ -204,16 +204,13 @@ public class DataSetCompare implements Compare {
         writer.open(oldTable.getTableMetaData().getTableName());
         if (modifyValues.size() > 0) {
             final ITableMetaData origin = oldTable.getTableMetaData();
-            final List<Column> originColumns = Lists.newArrayList(origin.getColumns()).subList(0, columnLength);
-            Column[] columns = originColumns.toArray(new Column[columnLength]);
-            DefaultTableMetaData metaData = new DefaultTableMetaData(origin.getTableName() + "$MODIFY", columns);
-            DefaultTable diffDetailTable = new DefaultTable(metaData);
+            DiffTable diffDetailTable = DiffTable.from(origin, columnLength);
             Set<CompareKeys> writeRows = Sets.newHashSet();
             for (Map.Entry<Integer, List<CompareKeys>> entry : modifyValues.entrySet()) {
                 for (CompareKeys targetKey : entry.getValue()) {
                     if (!writeRows.contains(targetKey)) {
-                        diffDetailTable.addRow(oldTable.get(targetKey, keys, columnLength));
-                        diffDetailTable.addRow(newTable.get(targetKey, keys, columnLength));
+                        diffDetailTable.addRow(oldTable.get(targetKey, keys, columnLength)
+                                , newTable.get(targetKey, keys, columnLength));
                         writeRows.add(targetKey);
                     }
                 }
@@ -225,7 +222,7 @@ public class DataSetCompare implements Compare {
                         .setRows(entry.getValue().size())
                         .build());
             }
-            writer.write(diffDetailTable);
+            writer.write(new SortedTable(diffDetailTable));
         }
         if (deleteRows.size() > 0) {
             DefaultTable diffDetailTable = toDiffTable(oldTable, "$DELETE");
@@ -234,7 +231,7 @@ public class DataSetCompare implements Compare {
                 row = Lists.asList(Integer.valueOf(rowNum), row).toArray(new Object[row.length + 1]);
                 diffDetailTable.addRow(row);
             }
-            writer.write(diffDetailTable);
+            writer.write(new SortedTable(diffDetailTable));
             this.results.add(getBuilder(CompareDiff.Type.KEY_DELETE)
                     .setTargetName(oldTable.getTableMetaData().getTableName())
                     .setRows(deleteRows.size())
@@ -250,7 +247,7 @@ public class DataSetCompare implements Compare {
                 Object[] convertRow = Lists.asList(Integer.valueOf(row.getKey()), row.getValue()).toArray(new Object[row.getValue().length + 1]);
                 diffDetailTable.addRow(convertRow);
             }
-            writer.write(diffDetailTable);
+            writer.write(new SortedTable(diffDetailTable));
             this.results.add(getBuilder(CompareDiff.Type.KEY_ADD)
                     .setTargetName(oldTable.getTableMetaData().getTableName())
                     .setRows(addRows.size())
