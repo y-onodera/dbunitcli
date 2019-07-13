@@ -19,7 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter implements IDataSetWriter {
-    private static final Logger logger = LoggerFactory.getLogger(XlsDataSetWriter.class);
 
     private final File resultDir;
 
