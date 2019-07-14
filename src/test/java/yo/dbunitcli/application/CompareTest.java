@@ -73,6 +73,7 @@ public class CompareTest {
     @Test
     public void testFailedResultDiffNotExpected() throws DatabaseUnitException {
         this.exit.expectSystemExitWithStatus(1);
+        this.expectedException.expect(AssertionError.class);
         Compare.main(new String[]{"@" + this.baseDir + "/paramDiffNotExpected.txt"});
     }
 

@@ -222,7 +222,7 @@ public class DataSetCompare implements Compare {
                         .setRows(entry.getValue().size())
                         .build());
             }
-            writer.write(new SortedTable(diffDetailTable, keys.toArray(new String[keys.size()])));
+            writer.write(diffDetailTable);
         }
         if (deleteRows.size() > 0) {
             DefaultTable diffDetailTable = toDiffTable(oldTable, "$DELETE");
@@ -231,7 +231,7 @@ public class DataSetCompare implements Compare {
                 row = Lists.asList(Integer.valueOf(rowNum), row).toArray(new Object[row.length + 1]);
                 diffDetailTable.addRow(row);
             }
-            writer.write(new SortedTable(diffDetailTable, keys.toArray(new String[keys.size()])));
+            writer.write(diffDetailTable);
             this.results.add(getBuilder(CompareDiff.Type.KEY_DELETE)
                     .setTargetName(oldTable.getTableMetaData().getTableName())
                     .setRows(deleteRows.size())
@@ -247,7 +247,7 @@ public class DataSetCompare implements Compare {
                 Object[] convertRow = Lists.asList(Integer.valueOf(row.getKey()), row.getValue()).toArray(new Object[row.getValue().length + 1]);
                 diffDetailTable.addRow(convertRow);
             }
-            writer.write(new SortedTable(diffDetailTable, keys.toArray(new String[keys.size()])));
+            writer.write(diffDetailTable);
             this.results.add(getBuilder(CompareDiff.Type.KEY_ADD)
                     .setTargetName(oldTable.getTableMetaData().getTableName())
                     .setRows(addRows.size())

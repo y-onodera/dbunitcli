@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTable;
+import org.dbunit.dataset.RowOutOfBoundsException;
 import org.dbunit.dataset.datatype.DataType;
 import org.junit.Before;
 import org.junit.Rule;
@@ -71,7 +72,7 @@ public class ComparableTableTest {
     }
 
     @Test
-    public void getRow_result_has_argument_column_length() {
+    public void getRow_result_has_argument_column_length() throws RowOutOfBoundsException {
         assertArrayEquals(new Object[]{"1", "a", "あ"}, this.target.getRow(0, 3));
         assertArrayEquals(new Object[]{"1", "b", "あ"}, this.target.getRow(1, 3));
         assertArrayEquals(new Object[]{"2", "a", "い"}, this.target.getRow(2, 3));
@@ -91,7 +92,7 @@ public class ComparableTableTest {
     }
 
     @Test
-    public void getValue_return_argument_row_and_column_length_value() {
+    public void getValue_return_argument_row_and_column_length_value() throws RowOutOfBoundsException {
         assertEquals("2", this.target.getValue(2, 0));
         assertEquals("a", this.target.getValue(0, 1));
         assertEquals("b", this.target.getValue(1, 1));

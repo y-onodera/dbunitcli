@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.ITableMetaData;
+import org.dbunit.dataset.RowOutOfBoundsException;
 
 import java.lang.reflect.Field;
 import java.util.AbstractMap;
@@ -60,7 +61,7 @@ public class ComparableTable implements ITable {
         return new CompareKeys(this, rowNum, keys);
     }
 
-    public Object[] getRow(int rowNum, int columnLength) {
+    public Object[] getRow(int rowNum, int columnLength) throws RowOutOfBoundsException {
         Object[] row = getRow(rowNum);
         if (row.length < columnLength) {
             throw new AssertionError(columnLength + " is larger than columnLength:" + row.length);
@@ -84,12 +85,15 @@ public class ComparableTable implements ITable {
         return this.getValue(i, j);
     }
 
-    public Object getValue(int i, int j) {
+    public Object getValue(int i, int j) throws RowOutOfBoundsException {
         Object[] row = this.getRow(i);
         return row[j] == null ? "" : row[j];
     }
 
-    public Object[] getRow(int rowNum) {
+    public Object[] getRow(int rowNum) throws RowOutOfBoundsException {
+        if (rowNum < 0 || rowNum >= this.values.size()) {
+            throw new RowOutOfBoundsException("rowNum " + rowNum + " is out of range;current row size is " + this.values.size());
+        }
         return this.values.get(rowNum);
     }
 
