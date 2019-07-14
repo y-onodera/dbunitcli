@@ -5,6 +5,7 @@ import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.SortedTable;
 import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.dbunit.dataset.stream.IDataSetProducer;
@@ -40,7 +41,8 @@ public class ComparableDBDataSetProducer implements IDataSetProducer {
         this.consumer.startDataSet();
         try {
             for (String tableName : Files.readLines(this.src, Charset.forName(this.encoding))) {
-                this.executeTable(this.connection.createTable(tableName));
+                ITable table = this.connection.createTable(tableName);
+                this.executeTable(new SortedTable(table, table.getTableMetaData().getPrimaryKeys()));
             }
         } catch (SQLException | IOException e) {
             throw new DataSetException(e);
