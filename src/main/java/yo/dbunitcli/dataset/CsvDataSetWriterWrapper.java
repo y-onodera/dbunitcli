@@ -21,7 +21,7 @@ public class CsvDataSetWriterWrapper implements IDataSetWriter {
 
     @Override
     public void write(ITable aTable) throws DataSetException {
-        this.writer.write(new DefaultDataSet(new SortedTable(aTable)));
+        this.writer.write(new DefaultDataSet(aTable));
     }
 
     private static class ExCsvDataSetWriter extends CsvDataSetWriter {

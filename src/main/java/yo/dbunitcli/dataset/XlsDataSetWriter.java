@@ -40,7 +40,7 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
 
     @Override
     public void write(ITable aTable) throws DataSetException {
-        this.dataSet.addTable(new SortedTable(aTable));
+        this.dataSet.addTable(aTable);
     }
 
     @Override
