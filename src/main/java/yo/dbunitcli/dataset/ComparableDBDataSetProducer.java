@@ -41,8 +41,9 @@ public class ComparableDBDataSetProducer implements IDataSetProducer {
         this.consumer.startDataSet();
         try {
             for (String tableName : Files.readLines(this.src, Charset.forName(this.encoding))) {
-                ITable table = this.connection.createTable(tableName);
-                this.executeTable(new SortedTable(table, table.getTableMetaData().getPrimaryKeys()));
+                final SortedTable table = new SortedTable(this.connection.createTable(tableName));
+                table.setUseComparable(true);
+                this.executeTable(table);
             }
         } catch (SQLException | IOException e) {
             throw new DataSetException(e);
