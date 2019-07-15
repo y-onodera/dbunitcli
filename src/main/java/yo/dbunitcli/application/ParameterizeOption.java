@@ -41,7 +41,7 @@ public class ParameterizeOption extends CommandLineOption {
     public String[] createArgs(Map<String, Object> aParam) {
         ST st = new ST(this.templateArgs, '$', '$');
         aParam.entrySet().forEach(it -> st.add(it.getKey(), it.getValue()));
-        return st.render().split(System.lineSeparator());
+        return st.render().split("\\r?\\n");
     }
 
     public Command createCommand() {
