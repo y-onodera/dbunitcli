@@ -1,12 +1,11 @@
 package yo.dbunitcli.application;
 
-import org.dbunit.DatabaseUnitException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.rules.ExpectedException;
 
-public class ExporterTest {
+public class ExportTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
     @Rule
@@ -15,13 +14,13 @@ public class ExporterTest {
     private String baseDir = this.getClass().getResource(".").getPath();
 
     @Test
-    public void testFromCsvToXlsx() throws DatabaseUnitException {
-        Exporter.main(new String[]{"@" + this.baseDir + "/paramFromCsvToXlsx.txt"});
+    public void testFromCsvToXlsx() throws Exception {
+        Export.main(new String[]{"@" + this.baseDir + "/paramFromCsvToXlsx.txt"});
     }
 
     @Test
-    public void testFromCsvqToCsv() throws DatabaseUnitException {
-        Exporter.main(new String[]{"@" + this.baseDir + "/paramFromCsvqToCsv.txt"});
+    public void testFromCsvqToCsv() throws Exception {
+        Export.main(new String[]{"@" + this.baseDir + "/paramFromCsvqToCsv.txt"});
     }
 
 }

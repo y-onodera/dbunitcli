@@ -4,18 +4,14 @@ import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.compare.ColumnSetting;
 
 import java.io.File;
+import java.util.Map;
 
 public class ComparableCSVQueryDataSet extends AbstractComparableDataSet {
 
     private final String srcDir;
 
-    public ComparableCSVQueryDataSet(File aSrcDir, String aEncoding) throws DataSetException {
-        super(new ComparableCSVQueryDataSetProducer(aSrcDir, aEncoding));
-        this.srcDir = aSrcDir.getPath();
-    }
-
-    public ComparableCSVQueryDataSet(File aDir, String aEncoding, ColumnSetting excludeColumns) throws DataSetException {
-        super(new ComparableCSVQueryDataSetProducer(aDir, aEncoding), excludeColumns);
+    public ComparableCSVQueryDataSet(File aDir, String aEncoding, ColumnSetting excludeColumns, Map<String, Object> parameter) throws DataSetException {
+        super(new ComparableCSVQueryDataSetProducer(aDir, aEncoding, parameter), excludeColumns);
         this.srcDir = aDir.getPath();
     }
 

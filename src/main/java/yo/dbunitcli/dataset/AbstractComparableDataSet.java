@@ -1,5 +1,6 @@
 package yo.dbunitcli.dataset;
 
+import com.google.common.collect.Lists;
 import org.dbunit.dataset.CachedDataSet;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
@@ -9,6 +10,7 @@ import org.dbunit.dataset.stream.IDataSetProducer;
 import yo.dbunitcli.compare.ColumnSetting;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class AbstractComparableDataSet extends CachedDataSet implements ComparableDataSet {
@@ -22,6 +24,16 @@ public abstract class AbstractComparableDataSet extends CachedDataSet implements
     public AbstractComparableDataSet(IDataSetProducer producer, ColumnSetting excludeColumns) throws DataSetException {
         super(producer);
         this.compareSetting = excludeColumns;
+    }
+
+    @Override
+    public List<Map<String, Object>> toMap() throws DataSetException {
+        List<Map<String, Object>> result = Lists.newArrayList();
+        for (String tableName : this.getTableNames()) {
+            ComparableTable table = this.getTable(tableName);
+            result.addAll(table.toMap());
+        }
+        return result;
     }
 
     @Override

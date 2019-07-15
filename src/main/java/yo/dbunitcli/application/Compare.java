@@ -13,18 +13,28 @@ import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetLoader;
 import yo.dbunitcli.dataset.IDataSetWriter;
 
-public class Compare {
+import java.util.Map;
+
+public class Compare implements Command<CompareOption> {
 
     private static final Logger logger = LoggerFactory.getLogger(Compare.class);
 
-    public static void main(String[] args) throws DatabaseUnitException {
-        CompareOption options = new CompareOption();
-        try {
-            options.parse(args);
-        } catch (Exception exp) {
-            logger.error("option parse failed.", exp);
-            System.exit(2);
-        }
+    public static void main(String[] args) throws Exception {
+        new Compare().exec(args);
+    }
+
+    @Override
+    public CompareOption getOptions() {
+        return new CompareOption();
+    }
+
+    @Override
+    public CompareOption getOptions(Map<String, Object> param) {
+        return new CompareOption(param);
+    }
+
+    @Override
+    public void exec(CompareOption options) throws DatabaseUnitException {
         ComparableDataSet oldData = options.oldDataSet();
         ComparableDataSet newData = options.newDataSet();
         IDataSetWriter writer = options.writer();
@@ -44,8 +54,7 @@ public class Compare {
             Assertion.assertEquals(expectedTable, result.toITable(expectedTableName), new DefaultFailureHandler());
         } else {
             if (result.existDiff()) {
-                logger.info("unexpected diff found.");
-                System.exit(1);
+                throw new AssertionError("unexpected diff found.");
             }
         }
         logger.info("compare success.");

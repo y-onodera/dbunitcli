@@ -1,0 +1,6 @@
+-src=target/test-classes/yo/dbunitcli/application/param/$src$
+-srcType=$srcType$
+-setting=target/test-classes/yo/dbunitcli/application/param/setting.json
+-result=target/test-classes/yo/dbunitcli/application/param/result
+-resultType=$resultType$
+-outputEncoding=$outputEncoding$

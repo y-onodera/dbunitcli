@@ -1,5 +1,6 @@
 package yo.dbunitcli.application;
 
+import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.operation.CloseConnectionOperation;
 import org.dbunit.operation.DatabaseOperation;
@@ -9,6 +10,7 @@ import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.ComparableDataSet;
 
 import java.io.File;
+import java.util.Map;
 
 public class ImportOption extends CommandLineOption {
 
@@ -20,6 +22,14 @@ public class ImportOption extends CommandLineOption {
 
     @Option(name = "-op", usage = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT", required = true)
     private String operation;
+
+    public ImportOption() {
+        this(Maps.newHashMap());
+    }
+
+    public ImportOption(Map<String, Object> param) {
+        super(param);
+    }
 
     @Override
     protected void assertDirectoryExists(CmdLineParser parser) throws CmdLineException {

@@ -1,10 +1,8 @@
 package yo.dbunitcli.dataset;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.ITable;
-import org.dbunit.dataset.ITableMetaData;
-import org.dbunit.dataset.RowOutOfBoundsException;
+import org.dbunit.dataset.*;
 
 import java.lang.reflect.Field;
 import java.util.AbstractMap;
@@ -31,6 +29,19 @@ public class ComparableTable implements ITable {
         this.values = values;
     }
 
+    public List<Map<String, Object>> toMap() throws DataSetException {
+        List<Map<String, Object>> result = Lists.newArrayList();
+        Column[] columns = this.getTableMetaData().getColumns();
+        for (int rowNum = 0, total = this.values.size(); rowNum < total; rowNum++) {
+            Object[] row = this.getRow(rowNum);
+            Map<String, Object> map = Maps.newHashMap();
+            for (int i = 0, j = row.length; i < j; i++) {
+                map.put(columns[i].getColumnName(), row[i]);
+            }
+            result.add(map);
+        }
+        return result;
+    }
 
     @Override
     public ITableMetaData getTableMetaData() {

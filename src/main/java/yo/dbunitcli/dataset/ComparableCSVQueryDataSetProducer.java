@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.io.Files;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
@@ -14,23 +13,25 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.sql.*;
+import java.util.Map;
 
-public class ComparableCSVQueryDataSetProducer implements IDataSetProducer {
+public class ComparableCSVQueryDataSetProducer implements IDataSetProducer, QueryReader {
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
     private static final String URL = "jdbc:h2:mem:test;ALIAS_COLUMN_NAME=TRUE";
     private IDataSetConsumer consumer = new DefaultConsumer();
     private File[] src;
     private String encoding = System.getProperty("file.encoding");
+    private final Map<String, Object> parameter;
 
-    public ComparableCSVQueryDataSetProducer(File srcDir, String encoding) throws DataSetException {
+    public ComparableCSVQueryDataSetProducer(File srcDir, String encoding, Map<String, Object> parameter) throws DataSetException {
         if (!srcDir.isDirectory()) {
             throw new DataSetException("'" + srcDir + "' should be a directory");
         }
         this.src = srcDir.listFiles(File::isFile);
         this.encoding = encoding;
+        this.parameter = parameter;
     }
 
     @Override
@@ -54,10 +55,10 @@ public class ComparableCSVQueryDataSetProducer implements IDataSetProducer {
 
     }
 
-    private void executeQuery(File aFile) throws SQLException, DataSetException, IOException {
+    protected void executeQuery(File aFile) throws SQLException, DataSetException, IOException {
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt = conn.createStatement();
-             ResultSet rst = stmt.executeQuery(Files.asCharSource(aFile, Charset.forName(this.encoding)).read());
+             ResultSet rst = stmt.executeQuery(this.readQuery(aFile));
         ) {
             ResultSetMetaData metaData = rst.getMetaData();
             Column[] columns = new Column[metaData.getColumnCount()];
@@ -84,4 +85,15 @@ public class ComparableCSVQueryDataSetProducer implements IDataSetProducer {
             this.consumer.endTable();
         }
     }
+
+    @Override
+    public Map<String, Object> getParameter() {
+        return this.parameter;
+    }
+
+    @Override
+    public String getEncoding() {
+        return this.encoding;
+    }
+
 }

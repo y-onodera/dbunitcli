@@ -1,0 +1,5 @@
+-param=target/test-classes/yo/dbunitcli/application/param/csv
+-paramType=csv
+-setting=target/test-classes/yo/dbunitcli/application/param/setting.json
+-template=target/test-classes/yo/dbunitcli/application/param/template.txt
+-cmd=export

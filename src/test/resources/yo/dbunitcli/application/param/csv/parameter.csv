@@ -1,0 +1,6 @@
+src,srcType,resultType,outputEncoding,table
+srcq,csvq,csv,windows-31j,src2/sample2.csv
+src1,csv,csv,windows-31j,
+src2,csv,csv,utf-8,
+src2,csv,xls,,
+src1,csv,xlsx,,

@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 abstract public class CommandLineOption {
@@ -38,11 +39,11 @@ abstract public class CommandLineOption {
     @Option(name = "-resultType", usage = "csv | xlsx : default csv")
     private String resultType = "csv";
 
-    @Option(name = "-setting", usage = "file define comparison settings", required = true)
-    private File setting;
-
     @Option(name = "-outputEncoding", usage = "output csv file encoding")
     private String outputEncoding = "UTF-8";
+
+    @Option(name = "-setting", usage = "file define comparison settings", required = true)
+    private File setting;
 
     @Option(name = "-jdbcProperties", usage = "user connect database key[url,user,pass]")
     private File jdbcProperties;
@@ -52,6 +53,12 @@ abstract public class CommandLineOption {
     private ColumnSetting.Builder comparisonKeys = ColumnSetting.builder();
 
     private ColumnSetting.Builder excludeColumns = ColumnSetting.builder();
+
+    private final Map<String, Object> parameter;
+
+    public CommandLineOption(Map<String, Object> param) {
+        this.parameter = param;
+    }
 
     public String getEncoding() {
         return this.encoding;
@@ -88,20 +95,21 @@ abstract public class CommandLineOption {
 
     public ComparableDataSetLoader getComparableDataSetLoader() throws DataSetException {
         if (this.jdbcProp != null) {
-            return new ComparableDataSetLoader(this.createIDatabaseConnection());
+            return new ComparableDataSetLoader(this.createIDatabaseConnection(), this.parameter);
         }
-        return new ComparableDataSetLoader();
+        return new ComparableDataSetLoader(this.parameter);
     }
 
-    public void parse(String[] args) throws CmdLineException {
+    public void parse(String[] args) throws Exception {
         CmdLineParser parser = new CmdLineParser(this);
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
             throw e;
         }
-        assertDirectoryExists(parser);
-        populateSettings(parser);
+        this.assertDirectoryExists(parser);
+        this.loadJdbcTemplate();
+        this.populateSettings(parser);
     }
 
     public IDatabaseConnection createIDatabaseConnection() throws DataSetException {
@@ -145,12 +153,15 @@ abstract public class CommandLineOption {
         }
     }
 
+    protected void loadJdbcTemplate() throws IOException {
+        if (this.jdbcProperties != null) {
+            this.jdbcProp = new Properties();
+            this.jdbcProp.load(new FileInputStream(this.jdbcProperties));
+        }
+    }
+
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         try {
-            if (this.jdbcProperties != null) {
-                this.jdbcProp = new Properties();
-                this.jdbcProp.load(new FileInputStream(this.jdbcProperties));
-            }
             JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(this.setting), "windows-31j"));
             JsonObject setting = jsonReader.read()
                     .asJsonObject();
@@ -159,6 +170,28 @@ abstract public class CommandLineOption {
         } catch (IOException e) {
             throw new CmdLineException(parser, e);
         }
+    }
+
+    protected void configureSetting(JsonObject setting) {
+        if (!setting.containsKey("settings")) {
+            return;
+        }
+        setting.getJsonArray("settings")
+                .stream()
+                .forEach(v -> {
+                    JsonObject json = v.asJsonObject();
+                    if (json.containsKey("name")) {
+                        String file = json.getString("name");
+                        ColumnSetting.Strategy strategy = ColumnSetting.Strategy.BY_NAME;
+                        this.addComparisonKeys(strategy, json, file);
+                        this.addExcludeColumns(strategy, json, file);
+                    } else if (json.containsKey("pattern")) {
+                        String file = json.getString("pattern");
+                        ColumnSetting.Strategy strategy = ColumnSetting.Strategy.PATTERN;
+                        this.addComparisonKeys(strategy, json, file);
+                        this.addExcludeColumns(strategy, json, file);
+                    }
+                });
     }
 
     protected void configureCommonSetting(JsonObject setting) {
@@ -184,28 +217,6 @@ abstract public class CommandLineOption {
                             columns.add(excludeArray.getString(i));
                         }
                         this.comparisonKeys.addCommon(columns);
-                    }
-                });
-    }
-
-    protected void configureSetting(JsonObject setting) {
-        if (!setting.containsKey("settings")) {
-            return;
-        }
-        setting.getJsonArray("settings")
-                .stream()
-                .forEach(v -> {
-                    JsonObject json = v.asJsonObject();
-                    if (json.containsKey("name")) {
-                        String file = json.getString("name");
-                        ColumnSetting.Strategy strategy = ColumnSetting.Strategy.BY_NAME;
-                        this.addComparisonKeys(strategy, json, file);
-                        this.addExcludeColumns(strategy, json, file);
-                    } else if (json.containsKey("pattern")) {
-                        String file = json.getString("pattern");
-                        ColumnSetting.Strategy strategy = ColumnSetting.Strategy.PATTERN;
-                        this.addComparisonKeys(strategy, json, file);
-                        this.addExcludeColumns(strategy, json, file);
                     }
                 });
     }
