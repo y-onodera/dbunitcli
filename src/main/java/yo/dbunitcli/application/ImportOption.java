@@ -7,7 +7,7 @@ import org.dbunit.operation.DatabaseOperation;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.ImportDataSet;
 
 import java.io.File;
 import java.util.Map;
@@ -36,8 +36,8 @@ public class ImportOption extends CommandLineOption {
         this.assertFileParameter(parser, this.srcType, this.src, "src");
     }
 
-    public ComparableDataSet targetDataSet() throws DataSetException {
-        return this.getComparableDataSetLoader().loadDataSet(this.src, this.getEncoding(), DataSourceType.fromString(this.srcType), this.getExcludeColumns());
+    public ImportDataSet targetDataSet() throws DataSetException {
+        return new ImportDataSet(this.getComparableDataSetLoader().loadDataSet(this.src, this.getEncoding(), DataSourceType.fromString(this.srcType), this.getExcludeColumns()));
     }
 
     public DatabaseOperation operation() {
