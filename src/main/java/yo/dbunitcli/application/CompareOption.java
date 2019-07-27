@@ -15,13 +15,13 @@ public class CompareOption extends CommandLineOption {
     @Option(name = "-old", usage = "directory old files at", required = true)
     private File oldDir;
 
-    @Option(name = "-oldsource", usage = "table | sql | csv | csvq | xls | xlsx : default csv")
+    @Option(name = "-oldsource", usage = "table | sql | csv | csvq | xls | xlsx | reg : default csv")
     private String oldsource = "csv";
 
     @Option(name = "-new", usage = "directory new files at", required = true)
     private File newDir;
 
-    @Option(name = "-newsource", usage = "table | sql | csv | csvq | xls | xlsx : default csv")
+    @Option(name = "-newsource", usage = "table | sql | csv | csvq | xls | xlsx | reg : default csv")
     private String newsource = "csv";
 
     @Option(name = "-expect", usage = "expected diff")
@@ -48,11 +48,21 @@ public class CompareOption extends CommandLineOption {
     }
 
     public ComparableDataSet oldDataSet() throws DataSetException {
-        return this.getComparableDataSetLoader().loadDataSet(this.getOldDir(), this.getEncoding(), DataSourceType.fromString(this.oldsource), this.getExcludeColumns());
+        return this.getComparableDataSetLoader().loadDataSet(
+                this.getDataSetParamBuilder()
+                        .setSrc(this.getOldDir())
+                        .setSource(DataSourceType.fromString(this.oldsource))
+                        .build()
+        );
     }
 
     public ComparableDataSet newDataSet() throws DataSetException {
-        return this.getComparableDataSetLoader().loadDataSet(this.getNewDir(), this.getEncoding(), DataSourceType.fromString(this.newsource), this.getExcludeColumns());
+        return this.getComparableDataSetLoader().loadDataSet(
+                this.getDataSetParamBuilder()
+                        .setSrc(this.getNewDir())
+                        .setSource(DataSourceType.fromString(this.newsource))
+                        .build()
+        );
     }
 
     @Override

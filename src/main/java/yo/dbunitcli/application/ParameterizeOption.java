@@ -35,7 +35,12 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     public List<Map<String, Object>> loadParams() throws DataSetException {
-        return this.getComparableDataSetLoader().loadParam(this.param, this.getEncoding(), DataSourceType.fromString(this.paramType));
+        return this.getComparableDataSetLoader().loadParam(
+                this.getDataSetParamBuilder()
+                        .setSrc(this.param)
+                        .setSource(DataSourceType.fromString(this.paramType))
+                        .build()
+        );
     }
 
     public String[] createArgs(Map<String, Object> aParam) {

@@ -34,7 +34,7 @@ public class ExportOption extends CommandLineOption {
         super.parse(args);
     }
 
-    public String getResultFileName(){
+    public String getResultFileName() {
         String resultFile = "result";
         if (args[0].startsWith("@")) {
             resultFile = new File(args[0].replace("@", "")).getName();
@@ -44,7 +44,12 @@ public class ExportOption extends CommandLineOption {
     }
 
     public ComparableDataSet targetDataSet() throws DataSetException {
-        return this.getComparableDataSetLoader().loadDataSet(this.src, this.getEncoding(), DataSourceType.fromString(this.srcType), this.getExcludeColumns());
+        return this.getComparableDataSetLoader().loadDataSet(
+                this.getDataSetParamBuilder()
+                        .setSrc(this.src)
+                        .setSource(DataSourceType.fromString(this.srcType))
+                        .build()
+        );
     }
 
     @Override

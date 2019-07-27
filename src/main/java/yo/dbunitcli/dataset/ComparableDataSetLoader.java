@@ -33,25 +33,27 @@ public class ComparableDataSetLoader {
         this.parameter = parameter;
     }
 
-    public List<Map<String, Object>> loadParam(File aFile, String aEncoding, DataSourceType aSource) throws DataSetException {
-        ComparableDataSet dataset = this.loadDataSet(aFile, aEncoding, aSource, ColumnSetting.builder().build());
-        return dataset.toMap();
+    public List<Map<String, Object>> loadParam(ComparableDataSetLoaderParam param) throws DataSetException {
+        ComparableDataSet dataSet = this.loadDataSet(param);
+        return dataSet.toMap();
     }
 
-    public ComparableDataSet loadDataSet(File aDir, String aEncoding, DataSourceType aSource, ColumnSetting excludeColumns) throws DataSetException {
-        switch (aSource) {
+    public ComparableDataSet loadDataSet(ComparableDataSetLoaderParam param) throws DataSetException {
+        switch (param.getSource()) {
             case TABLE:
-                return new ComparableDBDataSet(this.connection, aDir, aEncoding, excludeColumns);
+                return new ComparableDBDataSet(this.connection, param.getSrc(), param.getEncoding(), param.getExcludeColumns());
             case SQL:
-                return new ComparableQueryDataSet(this.connection, aDir, aEncoding, excludeColumns, this.parameter);
+                return new ComparableQueryDataSet(this.connection, param.getSrc(), param.getEncoding(), param.getExcludeColumns(), this.parameter);
             case XLSX:
-                return new ComparableXlsxDataSet(aDir, excludeColumns);
+                return new ComparableXlsxDataSet(param.getSrc(), param.getExcludeColumns());
             case XLS:
-                return new ComparableXlsDataSet(aDir, excludeColumns);
+                return new ComparableXlsDataSet(param.getSrc(), param.getExcludeColumns());
             case CSVQ:
-                return new ComparableCSVQueryDataSet(aDir, aEncoding, excludeColumns, this.parameter);
+                return new ComparableCSVQueryDataSet(param.getSrc(), param.getEncoding(), param.getExcludeColumns(), this.parameter);
             case CSV:
-                return new ComparableCSVDataSet(aDir, aEncoding, excludeColumns);
+                return new ComparableCSVDataSet(param.getSrc(), param.getEncoding(), param.getExcludeColumns());
+            case REGSP:
+                return new ComparableRegexSplitDataSet(param.getHeaderSplitPattern(), param.getDataSplitPattern(), param.getSrc(), param.getEncoding(), param.getExcludeColumns());
         }
         return null;
     }

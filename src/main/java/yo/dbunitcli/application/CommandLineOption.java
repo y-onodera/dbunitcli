@@ -45,8 +45,14 @@ abstract public class CommandLineOption {
     @Option(name = "-setting", usage = "file define comparison settings", required = true)
     private File setting;
 
-    @Option(name = "-jdbcProperties", usage = "user connect database key[url,user,pass]")
+    @Option(name = "-jdbcProperties", usage = "use connect database. [url=,user=,pass=]")
     private File jdbcProperties;
+
+    @Option(name = "-regDataSplit", usage = "regex to use split data row")
+    private String regDataSplit;
+
+    @Option(name = "-regHeaderSplit", usage = "regex to use split header row")
+    private String regHeaderSplit;
 
     private Properties jdbcProp;
 
@@ -66,6 +72,14 @@ abstract public class CommandLineOption {
 
     public String getOutputEncoding() {
         return outputEncoding;
+    }
+
+    public String getRegDataSplit() {
+        return regDataSplit;
+    }
+
+    public String getRegHeaderSplit() {
+        return regHeaderSplit;
     }
 
     public File getResultDir() {
@@ -91,6 +105,14 @@ abstract public class CommandLineOption {
             return new XlsDataSetWriter(this.getResultDir());
         }
         return new CsvDataSetWriterWrapper(this.getResultDir(), this.outputEncoding);
+    }
+
+    public ComparableDataSetLoaderParam.Builder getDataSetParamBuilder() {
+        return ComparableDataSetLoaderParam.builder()
+                .setEncoding(this.getEncoding())
+                .setExcludeColumns(this.getExcludeColumns())
+                .setHeaderSplitPattern(this.getRegHeaderSplit())
+                .setDataSplitPattern(this.getRegDataSplit());
     }
 
     public ComparableDataSetLoader getComparableDataSetLoader() throws DataSetException {

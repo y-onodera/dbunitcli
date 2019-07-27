@@ -11,7 +11,7 @@ public interface ComparableDataSet extends IDataSet, IDataSetConsumer {
 
     String getSrc();
 
-    List<Map<String,Object>> toMap() throws DataSetException;
+    List<Map<String, Object>> toMap() throws DataSetException;
 
     @Override
     ComparableTable getTable(String tableName) throws DataSetException;

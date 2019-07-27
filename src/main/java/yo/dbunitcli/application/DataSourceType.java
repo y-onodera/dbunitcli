@@ -7,6 +7,7 @@ public enum DataSourceType {
     SQL("sql", true),
     CSV("csv", true),
     CSVQ("csvq", true),
+    REGSP("reg", true),
     XLS("xls", false),
     XLSX("xlsx", false);
 

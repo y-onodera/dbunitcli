@@ -37,7 +37,12 @@ public class ImportOption extends CommandLineOption {
     }
 
     public ImportDataSet targetDataSet() throws DataSetException {
-        return new ImportDataSet(this.getComparableDataSetLoader().loadDataSet(this.src, this.getEncoding(), DataSourceType.fromString(this.srcType), this.getExcludeColumns()));
+        return new ImportDataSet(this.getComparableDataSetLoader().loadDataSet(
+                this.getDataSetParamBuilder()
+                        .setSrc(this.src)
+                        .setSource(DataSourceType.fromString(this.srcType))
+                        .build()
+        ));
     }
 
     public DatabaseOperation operation() {

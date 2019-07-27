@@ -14,6 +14,11 @@ public class ExportTest {
     private String baseDir = this.getClass().getResource(".").getPath();
 
     @Test
+    public void testFromRegexToXlsx() throws Exception {
+        Export.main(new String[]{"@" + this.baseDir + "/paramFromRegexToXlsx.txt"});
+    }
+
+    @Test
     public void testFromCsvToXlsx() throws Exception {
         Export.main(new String[]{"@" + this.baseDir + "/paramFromCsvToXlsx.txt"});
     }
