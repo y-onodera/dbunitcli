@@ -1,9 +1,9 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
 import org.junit.Assert;
 import org.junit.Test;
+import yo.dbunitcli.application.Parameter;
 import yo.dbunitcli.compare.ColumnSetting;
 
 import java.io.File;
@@ -12,7 +12,7 @@ public class ComparableCSVQueryDataSetTest {
 
     @Test
     public void createDataSetFromSigleFile() throws DataSetException {
-        ComparableCSVQueryDataSet actual = new ComparableCSVQueryDataSet(new File(this.getClass().getResource("csvquery").getFile(), "singlefile"), "UTF8", ColumnSetting.builder().build(), Maps.newHashMap());
+        ComparableCSVQueryDataSet actual = new ComparableCSVQueryDataSet(new File(this.getClass().getResource("csvquery").getFile(), "singlefile"), "UTF8", ColumnSetting.builder().build(), Parameter.none());
         Assert.assertEquals(1, actual.getTables().length);
         ComparableTable actualTable = actual.getTable("joinQuery");
         Assert.assertEquals("joinQuery", actualTable.getTableMetaData().getTableName());
@@ -34,7 +34,7 @@ public class ComparableCSVQueryDataSetTest {
 
     @Test
     public void createDataSetFromMultiFile() throws DataSetException {
-        ComparableCSVQueryDataSet actual = new ComparableCSVQueryDataSet(new File(this.getClass().getResource("csvquery").getFile(), "multifile"), "UTF8", ColumnSetting.builder().build(), Maps.newHashMap());
+        ComparableCSVQueryDataSet actual = new ComparableCSVQueryDataSet(new File(this.getClass().getResource("csvquery").getFile(), "multifile"), "UTF8", ColumnSetting.builder().build(), Parameter.none());
         Assert.assertEquals(2, actual.getTables().length);
         ComparableTable actualTable = actual.getTable("joinQuery");
         Assert.assertEquals("joinQuery", actualTable.getTableMetaData().getTableName());

@@ -11,8 +11,10 @@ public class ParameterizeExecute {
         } catch (Exception exp) {
             throw new AssertionError("option parse failed.", exp);
         }
+        int row = 1;
         for (Map<String, Object> param : options.loadParams()) {
-            options.createCommand().exec(options, param);
+            options.createCommand().exec(options, new Parameter(row, param));
+            row++;
         }
     }
 

@@ -60,9 +60,9 @@ abstract public class CommandLineOption {
 
     private ColumnSetting.Builder excludeColumns = ColumnSetting.builder();
 
-    private final Map<String, Object> parameter;
+    private final Parameter parameter;
 
-    public CommandLineOption(Map<String, Object> param) {
+    public CommandLineOption(Parameter param) {
         this.parameter = param;
     }
 
@@ -96,6 +96,10 @@ abstract public class CommandLineOption {
 
     public ColumnSetting getExcludeColumns() {
         return this.excludeColumns.build();
+    }
+
+    public Parameter getParameter() {
+        return parameter;
     }
 
     public IDataSetWriter writer() {

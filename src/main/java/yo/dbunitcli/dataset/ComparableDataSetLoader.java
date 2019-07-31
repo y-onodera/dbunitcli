@@ -1,10 +1,8 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Maps;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
-import yo.dbunitcli.application.DataSourceType;
-import yo.dbunitcli.compare.ColumnSetting;
+import yo.dbunitcli.application.Parameter;
 
 import java.io.File;
 import java.util.List;
@@ -14,21 +12,21 @@ public class ComparableDataSetLoader {
 
     private final IDatabaseConnection connection;
 
-    private final Map<String, Object> parameter;
+    private final Parameter parameter;
 
     public ComparableDataSetLoader() {
-        this(null, Maps.newHashMap());
+        this(null, Parameter.none());
     }
 
-    public ComparableDataSetLoader(Map<String, Object> parameter) {
+    public ComparableDataSetLoader(Parameter parameter) {
         this(null, parameter);
     }
 
     public ComparableDataSetLoader(IDatabaseConnection connection) {
-        this(connection, Maps.newHashMap());
+        this(connection, Parameter.none());
     }
 
-    public ComparableDataSetLoader(IDatabaseConnection iDatabaseConnection, Map<String, Object> parameter) {
+    public ComparableDataSetLoader(IDatabaseConnection iDatabaseConnection, Parameter parameter) {
         this.connection = iDatabaseConnection;
         this.parameter = parameter;
     }

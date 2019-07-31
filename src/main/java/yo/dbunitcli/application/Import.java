@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.Map;
 
 public class Import implements Command<ImportOption> {
 
@@ -21,7 +20,7 @@ public class Import implements Command<ImportOption> {
     }
 
     @Override
-    public ImportOption getOptions(Map<String, Object> param) {
+    public ImportOption getOptions(Parameter param) {
         return new ImportOption(param);
     }
 

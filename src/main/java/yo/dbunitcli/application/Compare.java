@@ -29,7 +29,7 @@ public class Compare implements Command<CompareOption> {
     }
 
     @Override
-    public CompareOption getOptions(Map<String, Object> param) {
+    public CompareOption getOptions(Parameter param) {
         return new CompareOption(param);
     }
 

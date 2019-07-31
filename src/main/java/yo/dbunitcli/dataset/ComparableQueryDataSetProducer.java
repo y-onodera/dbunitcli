@@ -5,6 +5,7 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.application.Parameter;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,9 +15,9 @@ import java.util.Map;
 public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer implements QueryReader {
     private static final Logger logger = LoggerFactory.getLogger(ComparableQueryDataSetProducer.class);
     private File[] srcFiles;
-    private final Map<String, Object> parameter;
+    private final Parameter parameter;
 
-    public ComparableQueryDataSetProducer(IDatabaseConnection connection, File srcDir, String encoding, Map<String, Object> parameter) throws DataSetException {
+    public ComparableQueryDataSetProducer(IDatabaseConnection connection, File srcDir, String encoding, Parameter parameter) throws DataSetException {
         super(connection, srcDir, encoding);
         if (!this.src.isDirectory()) {
             throw new DataSetException("'" + srcDir + "' should be a directory");
@@ -47,7 +48,7 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
 
     @Override
     public Map<String, Object> getParameter() {
-        return this.parameter;
+        return this.parameter.getMap();
     }
 
     @Override

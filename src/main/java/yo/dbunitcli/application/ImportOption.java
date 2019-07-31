@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.operation.CloseConnectionOperation;
 import org.dbunit.operation.DatabaseOperation;
@@ -10,7 +9,6 @@ import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.ImportDataSet;
 
 import java.io.File;
-import java.util.Map;
 
 public class ImportOption extends CommandLineOption {
 
@@ -24,10 +22,10 @@ public class ImportOption extends CommandLineOption {
     private String operation;
 
     public ImportOption() {
-        this(Maps.newHashMap());
+        this(Parameter.none());
     }
 
-    public ImportOption(Map<String, Object> param) {
+    public ImportOption(Parameter param) {
         super(param);
     }
 

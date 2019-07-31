@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -8,7 +7,6 @@ import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.ComparableDataSet;
 
 import java.io.File;
-import java.util.Map;
 
 public class CompareOption extends CommandLineOption {
 
@@ -40,10 +38,10 @@ public class CompareOption extends CommandLineOption {
     }
 
     public CompareOption() {
-        super(Maps.newHashMap());
+        super(Parameter.none());
     }
 
-    public CompareOption(Map<String, Object> param) {
+    public CompareOption(Parameter param) {
         super(param);
     }
 

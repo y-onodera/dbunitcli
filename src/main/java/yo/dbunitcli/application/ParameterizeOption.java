@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
@@ -31,7 +30,7 @@ public class ParameterizeOption extends CommandLineOption {
     private String templateArgs;
 
     public ParameterizeOption() {
-        super(Maps.newHashMap());
+        super(Parameter.none());
     }
 
     public List<Map<String, Object>> loadParams() throws DataSetException {
@@ -43,9 +42,10 @@ public class ParameterizeOption extends CommandLineOption {
         );
     }
 
-    public String[] createArgs(Map<String, Object> aParam) {
+    public String[] createArgs(Parameter aParam) {
         ST st = new ST(this.templateArgs, '$', '$');
-        aParam.entrySet().forEach(it -> st.add(it.getKey(), it.getValue()));
+        st.add("rowNomber", aParam.getRowNumber());
+        aParam.getMap().entrySet().forEach(it -> st.add(it.getKey(), it.getValue()));
         return st.render().split("\\r?\\n");
     }
 

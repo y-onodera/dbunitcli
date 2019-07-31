@@ -10,6 +10,7 @@ import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.dbunit.dataset.stream.IDataSetProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.application.Parameter;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,9 +24,9 @@ public class ComparableCSVQueryDataSetProducer implements IDataSetProducer, Quer
     private IDataSetConsumer consumer = new DefaultConsumer();
     private File[] src;
     private String encoding = System.getProperty("file.encoding");
-    private final Map<String, Object> parameter;
+    private final Parameter parameter;
 
-    public ComparableCSVQueryDataSetProducer(File srcDir, String encoding, Map<String, Object> parameter) throws DataSetException {
+    public ComparableCSVQueryDataSetProducer(File srcDir, String encoding, Parameter parameter) throws DataSetException {
         if (!srcDir.isDirectory()) {
             throw new DataSetException("'" + srcDir + "' should be a directory");
         }
@@ -88,7 +89,7 @@ public class ComparableCSVQueryDataSetProducer implements IDataSetProducer, Quer
 
     @Override
     public Map<String, Object> getParameter() {
-        return this.parameter;
+        return this.parameter.getMap();
     }
 
     @Override

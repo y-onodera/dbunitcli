@@ -21,7 +21,7 @@ public class Export implements Command<ExportOption>{
     }
 
     @Override
-    public ExportOption getOptions(Map<String, Object> param) {
+    public ExportOption getOptions(Parameter param) {
         return new ExportOption(param);
     }
 

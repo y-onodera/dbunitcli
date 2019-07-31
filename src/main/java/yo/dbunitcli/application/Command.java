@@ -9,14 +9,14 @@ public interface Command<T extends CommandLineOption> {
         this.exec(options);
     }
 
-    default void exec(ParameterizeOption options, Map<String, Object> param) throws Exception {
+    default void exec(ParameterizeOption options, Parameter param) throws Exception {
         T option = this.parseOption(options.createArgs(param), getOptions(param));
         this.exec(option);
     }
 
     T getOptions();
 
-    T getOptions(Map<String, Object> param);
+    T getOptions(Parameter param);
 
     void exec(T options) throws Exception;
 
