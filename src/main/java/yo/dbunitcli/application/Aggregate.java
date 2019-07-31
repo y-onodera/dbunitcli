@@ -20,7 +20,10 @@ public class Aggregate {
         List<IDataSet> dataSets = Lists.newArrayList();
         int row = 1;
         for (Map<String, Object> param : options.loadParams()) {
-            ComparableDataSet dataSet = new ExportOption(new Parameter(row, param)).targetDataSet();
+            final Parameter param1 = new Parameter(row, param);
+            ExportOption exp = new ExportOption(param1);
+            exp.parse(options.createArgs(param1));
+            ComparableDataSet dataSet = exp.targetDataSet();
             dataSets.add(dataSet);
             row++;
         }
