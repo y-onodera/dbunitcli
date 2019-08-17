@@ -26,7 +26,7 @@ public class DBDataSetWriter implements IDataSetWriter {
     @Override
     public void write(ITable aTable) throws DataSetException {
         try {
-            this.operation.execute(this.connection, new DefaultDataSet(aTable));
+            this.operation.execute(this.connection, new DefaultDataSet(new UnknownBlankToNullITable(aTable)));
         } catch (SQLException | DatabaseUnitException e) {
             throw new DataSetException(e);
         }
