@@ -67,7 +67,7 @@ public class ComparableXlsxDataSetProducer implements IDataSetProducer {
                     processSheet(styles, strings, new SheetToTable(sheetName, this.consumer), stream);
                 }
             }
-        } catch (IOException | SAXException | OpenXML4JException | ParserConfigurationException e) {
+        } catch (IOException | SAXException | OpenXML4JException e) {
             throw new DataSetException(e);
         }
     }
@@ -76,7 +76,7 @@ public class ComparableXlsxDataSetProducer implements IDataSetProducer {
             Styles styles,
             SharedStrings strings,
             XSSFSheetXMLHandler.SheetContentsHandler sheetHandler,
-            InputStream sheetInputStream) throws IOException, SAXException, ParserConfigurationException {
+            InputStream sheetInputStream) throws IOException, SAXException {
         DataFormatter formatter = new DataFormatter();
         InputSource sheetSource = new InputSource(sheetInputStream);
         try {
