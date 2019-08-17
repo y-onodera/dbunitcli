@@ -1,7 +1,10 @@
 package yo.dbunitcli.dataset;
 
+import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
+
+import java.sql.SQLException;
 
 public interface IDataSetWriter {
 

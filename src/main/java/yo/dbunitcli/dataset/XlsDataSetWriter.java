@@ -49,7 +49,9 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
             if (!this.resultDir.exists()) {
                 this.resultDir.mkdirs();
             }
-            this.write(this.dataSet, new FileOutputStream(new File(this.resultDir, getFilename())));
+            try (FileOutputStream out = new FileOutputStream(new File(this.resultDir, getFilename()))) {
+                this.write(this.dataSet, out);
+            }
         } catch (IOException | DataSetException e) {
             throw new DataSetException(e);
         }

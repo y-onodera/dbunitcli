@@ -21,7 +21,7 @@ public class Aggregate {
         int row = 1;
         for (Map<String, Object> param : options.loadParams()) {
             final Parameter param1 = new Parameter(row, param);
-            ExportOption exp = new ExportOption(param1);
+            ConvertOption exp = new ConvertOption(param1);
             exp.parse(options.createArgs(param1));
             ComparableDataSet dataSet = exp.targetDataSet();
             dataSets.add(dataSet);

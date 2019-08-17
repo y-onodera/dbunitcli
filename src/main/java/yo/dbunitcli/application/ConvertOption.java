@@ -8,7 +8,7 @@ import yo.dbunitcli.dataset.ComparableDataSet;
 
 import java.io.File;
 
-public class ExportOption extends CommandLineOption {
+public class ConvertOption extends CommandLineOption {
 
     @Option(name = "-src", usage = "export target", required = true)
     private File src;
@@ -18,11 +18,11 @@ public class ExportOption extends CommandLineOption {
 
     private String[] args;
 
-    public ExportOption() {
+    public ConvertOption() {
         super(Parameter.none());
     }
 
-    public ExportOption(Parameter param) {
+    public ConvertOption(Parameter param) {
         super(param);
     }
 

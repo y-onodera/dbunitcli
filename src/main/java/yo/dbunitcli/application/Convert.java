@@ -5,28 +5,26 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.IDataSetWriter;
 
-import java.util.Map;
+public class Convert implements Command<ConvertOption>{
 
-public class Export implements Command<ExportOption>{
-
-    private static final Logger logger = LoggerFactory.getLogger(Export.class);
+    private static final Logger logger = LoggerFactory.getLogger(Convert.class);
 
     public static void main(String[] args) throws Exception {
-        new Export().exec(args);
+        new Convert().exec(args);
     }
 
     @Override
-    public ExportOption getOptions() {
-        return new ExportOption();
+    public ConvertOption getOptions() {
+        return new ConvertOption();
     }
 
     @Override
-    public ExportOption getOptions(Parameter param) {
-        return new ExportOption(param);
+    public ConvertOption getOptions(Parameter param) {
+        return new ConvertOption(param);
     }
 
     @Override
-    public void exec(ExportOption options) throws Exception {
+    public void exec(ConvertOption options) throws Exception {
         ComparableDataSet dataSet = options.targetDataSet();
         IDataSetWriter writer = options.writer();
         writer.open(options.getResultFileName());

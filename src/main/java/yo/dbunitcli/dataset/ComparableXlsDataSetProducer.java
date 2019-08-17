@@ -70,8 +70,8 @@ public class ComparableXlsDataSetProducer implements IDataSetProducer, HSSFListe
     public void produce() throws DataSetException {
         logger.debug("produceFromFile(theDataFile={}) - start", src);
 
-        try {
-            this.fs = new POIFSFileSystem(this.src);
+        try (POIFSFileSystem newFs = new POIFSFileSystem(this.src)) {
+            this.fs = newFs;
             MissingRecordAwareHSSFListener listener = new MissingRecordAwareHSSFListener(this);
             this.formatListener = new FormatTrackingHSSFListener(listener);
 
@@ -153,7 +153,7 @@ public class ComparableXlsDataSetProducer implements IDataSetProducer, HSSFListe
                 LabelRecord labelRec = (LabelRecord) record;
                 thisRow = labelRec.getRow();
                 thisColumn = labelRec.getColumn();
-                thisStr = labelRec.getValue() ;
+                thisStr = labelRec.getValue();
                 break;
             case LabelSSTRecord.sid:
                 LabelSSTRecord labelSSTRec = (LabelSSTRecord) record;

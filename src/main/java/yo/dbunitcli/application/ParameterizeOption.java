@@ -24,7 +24,7 @@ public class ParameterizeOption extends CommandLineOption {
     @Option(name = "-template", usage = "template file. data driven target argument", required = true)
     private File template;
 
-    @Option(name = "-cmd", usage = "compare | exp | imp :data driven target cmd", required = true)
+    @Option(name = "-cmd", usage = "compare | convert :data driven target cmd", required = true)
     private String cmd;
 
     private String templateArgs;
@@ -53,10 +53,8 @@ public class ParameterizeOption extends CommandLineOption {
         switch (this.cmd) {
             case "compare":
                 return new Compare();
-            case "export":
-                return new Export();
-            case "import":
-                return new Import();
+            case "convert":
+                return new Convert();
             default:
                 throw new IllegalArgumentException("no executable command : " + this.cmd);
         }

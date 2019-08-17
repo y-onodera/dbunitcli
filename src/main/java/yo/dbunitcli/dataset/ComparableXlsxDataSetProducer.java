@@ -54,8 +54,7 @@ public class ComparableXlsxDataSetProducer implements IDataSetProducer {
     public void produce() throws DataSetException {
         logger.debug("produceFromFile(theDataFile={}) - start", src);
 
-        try {
-            OPCPackage pkg = OPCPackage.open(this.src);
+        try (OPCPackage pkg = OPCPackage.open(this.src)) {
             ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);
             XSSFReader xssfReader = new XSSFReader(pkg);
             StylesTable styles = xssfReader.getStylesTable();

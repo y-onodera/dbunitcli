@@ -7,6 +7,8 @@ import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.ext.oracle.Oracle10DataTypeFactory;
+import org.dbunit.operation.CloseConnectionOperation;
+import org.dbunit.operation.DatabaseOperation;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -25,7 +27,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 abstract public class CommandLineOption {
@@ -53,6 +54,9 @@ abstract public class CommandLineOption {
 
     @Option(name = "-regHeaderSplit", usage = "regex to use split header row")
     private String regHeaderSplit;
+
+    @Option(name = "-op", usage = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
+    private String operation;
 
     private Properties jdbcProp;
 
@@ -102,11 +106,13 @@ abstract public class CommandLineOption {
         return parameter;
     }
 
-    public IDataSetWriter writer() {
+    public IDataSetWriter writer() throws DataSetException {
         if (DataSourceType.XLSX.isEqual(this.resultType)) {
             return new XlsxDataSetWriter(this.getResultDir());
         } else if (DataSourceType.XLS.isEqual(this.resultType)) {
             return new XlsDataSetWriter(this.getResultDir());
+        } else if (DataSourceType.TABLE.isEqual(this.resultType)) {
+            return new DBDataSetWriter(this.createIDatabaseConnection(), this.operation);
         }
         return new CsvDataSetWriterWrapper(this.getResultDir(), this.outputEncoding);
     }
@@ -269,5 +275,4 @@ abstract public class CommandLineOption {
             this.comparisonKeys.add(strategy, file, keys);
         }
     }
-
 }
