@@ -13,6 +13,7 @@ import java.sql.SQLException;
 public class DBDataSetWriter implements IDataSetWriter {
     private final DatabaseOperation operation;
     private final IDatabaseConnection connection;
+    private DefaultDataSet iDataSet;
 
     public DBDataSetWriter(IDatabaseConnection iDatabaseConnection, String operation) {
         this.operation = Operation.valueOf(operation).op;
@@ -21,19 +22,21 @@ public class DBDataSetWriter implements IDataSetWriter {
 
     @Override
     public void open(String tableName) {
+        iDataSet = new DefaultDataSet();
     }
 
     @Override
     public void write(ITable aTable) throws DataSetException {
-        try {
-            this.operation.execute(this.connection, new DefaultDataSet(new UnknownBlankToNullITable(aTable)));
-        } catch (SQLException | DatabaseUnitException e) {
-            throw new DataSetException(e);
-        }
+        iDataSet.addTable(new UnknownBlankToNullITable(aTable));
     }
 
     @Override
-    public void close() {
+    public void close() throws DataSetException {
+        try {
+            this.operation.execute(this.connection, iDataSet);
+        } catch (SQLException | DatabaseUnitException e) {
+            throw new DataSetException(e);
+        }
     }
 
     enum Operation {
@@ -48,6 +51,4 @@ public class DBDataSetWriter implements IDataSetWriter {
             this.op = new CloseConnectionOperation(op);
         }
     }
-
-
 }
