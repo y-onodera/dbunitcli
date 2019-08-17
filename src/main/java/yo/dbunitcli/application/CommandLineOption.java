@@ -37,7 +37,7 @@ abstract public class CommandLineOption {
     @Option(name = "-result", usage = "directory result files at")
     private File resultDir = new File("").getAbsoluteFile();
 
-    @Option(name = "-resultType", usage = "csv | xlsx : default csv")
+    @Option(name = "-resultType", usage = "csv | xls | xlsx | table : default csv")
     private String resultType = "csv";
 
     @Option(name = "-outputEncoding", usage = "output csv file encoding")
