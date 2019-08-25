@@ -21,6 +21,8 @@ import static yo.dbunitcli.compare.CompareDiff.getBuilder;
 public class DataSetCompare implements Compare {
 
     private static final String RESULT_TABLE_NAME = "COMPARE_RESULT";
+    private static final String COLUMN_NAME_ROW_INDEX = "$ROW_INDEX";
+    private static final Column COLUMN_ROW_INDEX = new Column(COLUMN_NAME_ROW_INDEX, DataType.NUMERIC);
 
     private ComparableDataSet oldDataSet;
 
@@ -231,7 +233,7 @@ public class DataSetCompare implements Compare {
                 row = Lists.asList(Integer.valueOf(rowNum), row).toArray(new Object[row.length + 1]);
                 diffDetailTable.addRow(row);
             }
-            writer.write(diffDetailTable);
+            writer.write(new SortedTable(diffDetailTable, new Column[]{COLUMN_ROW_INDEX}));
             this.results.add(getBuilder(CompareDiff.Type.KEY_DELETE)
                     .setTargetName(oldTable.getTableMetaData().getTableName())
                     .setRows(deleteRows.size())
@@ -247,7 +249,7 @@ public class DataSetCompare implements Compare {
                 Object[] convertRow = Lists.asList(Integer.valueOf(row.getKey()), row.getValue()).toArray(new Object[row.getValue().length + 1]);
                 diffDetailTable.addRow(convertRow);
             }
-            writer.write(diffDetailTable);
+            writer.write(new SortedTable(diffDetailTable, new Column[]{COLUMN_ROW_INDEX}));
             this.results.add(getBuilder(CompareDiff.Type.KEY_ADD)
                     .setTargetName(oldTable.getTableMetaData().getTableName())
                     .setRows(addRows.size())
@@ -274,8 +276,8 @@ public class DataSetCompare implements Compare {
 
     private DefaultTable toDiffTable(ComparableTable oldTable, String aTableName) throws DataSetException {
         ITableMetaData origin = oldTable.getTableMetaData();
-        Column[] columns = Lists.asList(new Column("$ROW_INDEX", DataType.NUMERIC), origin.getColumns()).toArray(new Column[origin.getColumns().length + 1]);
-        DefaultTableMetaData metaData = new DefaultTableMetaData(origin.getTableName() + aTableName, columns, new String[]{"$ROW_INDEX"});
+        Column[] columns = Lists.asList(COLUMN_ROW_INDEX, origin.getColumns()).toArray(new Column[origin.getColumns().length + 1]);
+        DefaultTableMetaData metaData = new DefaultTableMetaData(origin.getTableName() + aTableName, columns, new String[]{COLUMN_NAME_ROW_INDEX});
         return new DefaultTable(metaData);
     }
 }

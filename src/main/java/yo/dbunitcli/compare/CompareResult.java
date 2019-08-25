@@ -1,10 +1,7 @@
 package yo.dbunitcli.compare;
 
 import com.google.common.collect.Lists;
-import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTable;
-import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 
 import java.util.List;
@@ -20,6 +17,12 @@ public class CompareResult {
             , new Column("NEW_VALUE", DataType.UNKNOWN)
             , new Column("COLUMN_INDEX", DataType.NUMERIC)
             , new Column("DIFF_ROWS", DataType.NUMERIC)
+    };
+
+    static private final Column[] SORT_KEYS = new Column[]{
+            new Column("TARGET_NAME", DataType.UNKNOWN)
+            , new Column("DIFF", DataType.UNKNOWN)
+            , new Column("COLUMN_INDEX", DataType.NUMERIC)
     };
 
     private List<CompareDiff> diffs = Lists.newArrayList();
@@ -47,7 +50,7 @@ public class CompareResult {
                     , diff.getRows()
             });
         }
-        return result;
+        return new SortedTable(result, SORT_KEYS);
     }
 
     public boolean existDiff() {
