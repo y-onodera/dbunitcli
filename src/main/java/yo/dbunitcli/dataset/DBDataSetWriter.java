@@ -13,7 +13,6 @@ import java.sql.SQLException;
 public class DBDataSetWriter implements IDataSetWriter {
     private final DatabaseOperation operation;
     private final IDatabaseConnection connection;
-    private DefaultDataSet iDataSet;
 
     public DBDataSetWriter(IDatabaseConnection iDatabaseConnection, String operation) {
         this.operation = Operation.valueOf(operation).op;
@@ -22,20 +21,36 @@ public class DBDataSetWriter implements IDataSetWriter {
 
     @Override
     public void open(String tableName) {
-        iDataSet = new DefaultDataSet();
+        try {
+            this.connection.getConnection().setAutoCommit(false);
+        } catch (SQLException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
     public void write(ITable aTable) throws DataSetException {
+        DefaultDataSet iDataSet = new DefaultDataSet();
         iDataSet.addTable(new UnknownBlankToNullITable(aTable));
+        try {
+            this.operation.execute(this.connection, iDataSet);
+        } catch (SQLException | DatabaseUnitException e) {
+            throw new DataSetException(e);
+        }
     }
 
     @Override
     public void close() throws DataSetException {
         try {
-            this.operation.execute(this.connection, iDataSet);
-        } catch (SQLException | DatabaseUnitException e) {
+             this.connection.getConnection().commit();
+        } catch (SQLException e) {
             throw new DataSetException(e);
+        } finally {
+            try {
+                this.connection.close();
+            } catch (SQLException e) {
+                throw new DataSetException(e);
+            }
         }
     }
 
