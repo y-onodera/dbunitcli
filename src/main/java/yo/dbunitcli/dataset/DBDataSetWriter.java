@@ -29,9 +29,9 @@ public class DBDataSetWriter implements IDataSetWriter {
     }
 
     @Override
-    public void write(ITable aTable) throws DataSetException {
+    public void write(ITable aTable) throws DataSetException, SQLException {
         DefaultDataSet iDataSet = new DefaultDataSet();
-        iDataSet.addTable(new UnknownBlankToNullITable(aTable));
+        iDataSet.addTable(new UnknownBlankToNullITable(new ResultSetMetaDataITableWrapper(this.connection, aTable)));
         try {
             this.operation.execute(this.connection, iDataSet);
         } catch (SQLException | DatabaseUnitException e) {
@@ -42,7 +42,7 @@ public class DBDataSetWriter implements IDataSetWriter {
     @Override
     public void close() throws DataSetException {
         try {
-             this.connection.getConnection().commit();
+            this.connection.getConnection().commit();
         } catch (SQLException e) {
             throw new DataSetException(e);
         } finally {
