@@ -64,6 +64,6 @@ public class ResultSetMetaDataITableWrapper implements ITable {
             sb.append(column.getColumnName());
             i++;
         }
-        return sb.append(" FROM ").append(metaData.getTableName()).append(";").toString();
+        return sb.append(" FROM ").append(metaData.getTableName()).append(" WHERE 1 = 2;").toString();
     }
 }
