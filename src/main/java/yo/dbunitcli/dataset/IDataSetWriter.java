@@ -12,7 +12,7 @@ public interface IDataSetWriter {
         // default no implementation
     }
 
-    void write(ITable aTable) throws DataSetException, SQLException;
+    void write(ITable aTable) throws DataSetException;
 
     default void close() throws DataSetException {
         // default no implementation

@@ -5,7 +5,6 @@ import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultDataSet;
 import org.dbunit.dataset.ITable;
-import org.dbunit.operation.CloseConnectionOperation;
 import org.dbunit.operation.DatabaseOperation;
 
 import java.sql.SQLException;
@@ -13,44 +12,29 @@ import java.sql.SQLException;
 public class DBDataSetWriter implements IDataSetWriter {
     private final DatabaseOperation operation;
     private final IDatabaseConnection connection;
+    private final DefaultDataSet iDataSet;
 
     public DBDataSetWriter(IDatabaseConnection iDatabaseConnection, String operation) {
         this.operation = Operation.valueOf(operation).op;
         this.connection = iDatabaseConnection;
+        this.iDataSet = new DefaultDataSet();
     }
 
     @Override
     public void open(String tableName) {
-        try {
-            this.connection.getConnection().setAutoCommit(false);
-        } catch (SQLException e) {
-            throw new AssertionError(e);
-        }
     }
 
     @Override
-    public void write(ITable aTable) throws DataSetException, SQLException {
-        DefaultDataSet iDataSet = new DefaultDataSet();
-        iDataSet.addTable(new UnknownBlankToNullITable(new ResultSetMetaDataITableWrapper(this.connection, aTable)));
-        try {
-            this.operation.execute(this.connection, iDataSet);
-        } catch (SQLException | DatabaseUnitException e) {
-            throw new DataSetException(e);
-        }
+    public void write(ITable aTable) throws DataSetException {
+        iDataSet.addTable(new UnknownBlankToNullITable(aTable));
     }
 
     @Override
     public void close() throws DataSetException {
         try {
-            this.connection.getConnection().commit();
-        } catch (SQLException e) {
+            this.operation.execute(this.connection, iDataSet);
+        } catch (SQLException | DatabaseUnitException e) {
             throw new DataSetException(e);
-        } finally {
-            try {
-                this.connection.close();
-            } catch (SQLException e) {
-                throw new DataSetException(e);
-            }
         }
     }
 
@@ -63,7 +47,7 @@ public class DBDataSetWriter implements IDataSetWriter {
         private final DatabaseOperation op;
 
         Operation(DatabaseOperation op) {
-            this.op = new CloseConnectionOperation(op);
+            this.op = DatabaseOperation.CLOSE_CONNECTION(DatabaseOperation.TRANSACTION(op));
         }
     }
 }
