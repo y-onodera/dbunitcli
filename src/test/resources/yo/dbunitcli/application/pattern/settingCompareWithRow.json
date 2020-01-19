@@ -1,0 +1,22 @@
+{
+  "settings": [
+    {
+      "pattern": "test"
+    },
+    {
+      "name": "test_differentPattern"
+    },
+    {
+      "pattern": "test_",
+      "exclude": [
+        "columnB"
+      ]
+    },
+    {
+      "name": "test",
+      "exclude": [
+        "column2"
+      ]
+    }
+  ]
+}

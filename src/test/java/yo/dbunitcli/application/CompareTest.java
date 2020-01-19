@@ -40,6 +40,16 @@ public class CompareTest {
     }
 
     @Test
+    public void testCompareIgnoreNoSettingTables() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramTableNoMatch.txt"});
+    }
+
+    @Test
+    public void testCompareWithRowNum() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareWithRow.txt"});
+    }
+
+    @Test
     public void testCompareCsvToXlsx() throws Exception {
         Compare.main(new String[]{"@" + this.baseDir + "/paramCsvToXlsxCompare.txt"});
     }

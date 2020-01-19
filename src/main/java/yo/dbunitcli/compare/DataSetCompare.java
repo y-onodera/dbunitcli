@@ -113,8 +113,8 @@ public class DataSetCompare implements Compare {
         this.searchModifyAndDeleteColumns(oldMetaData, newMetaData);
         this.searchAddColumns(oldMetaData, newMetaData);
         this.rowCount(oldTable, newTable);
-        List<String> key = this.comparisonKeys.getColumns(oldMetaData.getTableName());
-        if (key.size() > 0) {
+        if (this.comparisonKeys.includeSetting(oldMetaData.getTableName())) {
+            List<String> key = this.comparisonKeys.getColumns(oldMetaData.getTableName());
             this.compareRow(oldTable, newTable, key, writer);
         }
     }

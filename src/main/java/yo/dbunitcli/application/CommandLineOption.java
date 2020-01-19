@@ -273,6 +273,8 @@ abstract public class CommandLineOption {
                 keys.add(keyArray.getString(i));
             }
             this.comparisonKeys.add(strategy, file, keys);
+        } else {
+            this.comparisonKeys.add(strategy, file, Lists.newArrayList());
         }
     }
 }

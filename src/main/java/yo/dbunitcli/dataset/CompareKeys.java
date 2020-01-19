@@ -11,8 +11,12 @@ public class CompareKeys {
     private final List<String> keys = Lists.newArrayList();
 
     public CompareKeys(ITable table, int i, List<String> compareColumns) throws DataSetException {
-        for (String column : compareColumns) {
-            keys.add(table.getValue(i, column).toString());
+        if (compareColumns.size() > 0) {
+            for (String column : compareColumns) {
+                keys.add(table.getValue(i, column).toString());
+            }
+        } else {
+            keys.add(String.valueOf(i));
         }
     }
 

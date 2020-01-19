@@ -24,6 +24,11 @@ public class ColumnSetting {
         return new Builder();
     }
 
+    public boolean includeSetting(String tableName) {
+        return this.byName.containsKey(tableName)
+                || this.pattern.entrySet().stream().anyMatch(it -> tableName.contains(it.getKey()));
+    }
+
     public List<String> getColumns(String tableName) {
         List<String> result = Lists.newArrayList(this.common);
         if (this.byName.containsKey(tableName)) {
