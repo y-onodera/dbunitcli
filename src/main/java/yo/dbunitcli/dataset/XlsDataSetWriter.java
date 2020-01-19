@@ -16,6 +16,7 @@ import java.util.Date;
 
 public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter implements IDataSetWriter {
 
+    private static Logger logger = LoggerFactory.getLogger(XlsDataSetWriter.class);
     private final File resultDir;
 
     private String filename;
@@ -36,16 +37,19 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
 
     @Override
     public void write(ITable aTable) throws DataSetException {
+        logger.info("addTable {}", aTable.getTableMetaData().getTableName());
         this.dataSet.addTable(aTable);
     }
 
     @Override
     public void close() throws DataSetException {
+        File writeTo = new File(this.resultDir, getFilename());
+        logger.info("writeToFile(fileName={}) - start", writeTo);
         try {
             if (!this.resultDir.exists()) {
                 this.resultDir.mkdirs();
             }
-            try (FileOutputStream out = new FileOutputStream(new File(this.resultDir, getFilename()))) {
+            try (FileOutputStream out = new FileOutputStream(writeTo)) {
                 this.write(this.dataSet, out);
             }
         } catch (IOException | DataSetException e) {
@@ -61,6 +65,7 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
             for (ITableIterator iterator = dataSet.iterator(); iterator.next(); ++index) {
                 ITable table = iterator.getTable();
                 ITableMetaData metaData = table.getTableMetaData();
+                logger.info("writeToSheet(sheetName={}) - start", metaData.getTableName());
                 Sheet sheet = workbook.createSheet(metaData.getTableName());
                 workbook.setSheetName(index, metaData.getTableName());
                 Row headerRow = sheet.createRow(0);

@@ -41,7 +41,7 @@ public class ComparableCsvDataSetProducer implements IDataSetProducer {
 
     @Override
     public void produce() throws DataSetException {
-        logger.debug("produce() - start");
+        logger.info("produce() - start");
 
         this.consumer.startDataSet();
         for (File file : this.src) {
@@ -55,7 +55,7 @@ public class ComparableCsvDataSetProducer implements IDataSetProducer {
     }
 
     private void produceFromFile(File theDataFile) throws DataSetException, CsvParserException {
-        logger.debug("produceFromFile(theDataFile={}) - start", theDataFile);
+        logger.info("produceFromFile(theDataFile={}) - start", theDataFile);
 
         try {
             List readData = new CsvParserImpl().parse(

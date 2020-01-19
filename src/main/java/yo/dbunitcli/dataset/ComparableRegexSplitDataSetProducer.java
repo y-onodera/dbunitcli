@@ -44,7 +44,7 @@ public class ComparableRegexSplitDataSetProducer implements IDataSetProducer {
 
     @Override
     public void produce() throws DataSetException {
-        logger.debug("produce() - start");
+        logger.info("produce() - start");
 
         this.consumer.startDataSet();
         for (File file : this.src) {
@@ -59,6 +59,7 @@ public class ComparableRegexSplitDataSetProducer implements IDataSetProducer {
     }
 
     protected void executeQuery(File aFile) throws DataSetException, IOException {
+        logger.info("produceFromFile(theDataFile={}) - start", aFile);
         int lineNum = 0;
         for (String s : Files.readLines(aFile, Charset.forName(this.getEncoding()))) {
             if (lineNum == 0) {

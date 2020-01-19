@@ -12,6 +12,8 @@ import org.dbunit.operation.DatabaseOperation;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.compare.ColumnSetting;
 import yo.dbunitcli.dataset.*;
 
@@ -30,6 +32,8 @@ import java.util.List;
 import java.util.Properties;
 
 abstract public class CommandLineOption {
+
+    private static Logger logger = LoggerFactory.getLogger(CommandLineOption.class);
 
     @Option(name = "-encoding", usage = "csv file encoding")
     private String encoding = System.getProperty("file.encoding");
@@ -107,6 +111,8 @@ abstract public class CommandLineOption {
     }
 
     public IDataSetWriter writer() throws DataSetException {
+        logger.info("create DataSetWriter type:{} DBOperation:{} resultDir:{} encoding:{}"
+                , this.resultType, this.operation, this.resultDir, this.outputEncoding);
         if (DataSourceType.XLSX.isEqual(this.resultType)) {
             return new XlsxDataSetWriter(this.getResultDir());
         } else if (DataSourceType.XLS.isEqual(this.resultType)) {

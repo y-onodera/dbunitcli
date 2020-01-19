@@ -28,7 +28,7 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
 
     @Override
     public void produce() throws DataSetException {
-        logger.debug("produce() - start");
+        logger.info("produce() - start");
         this.consumer.startDataSet();
         for (File file : this.srcFiles) {
             try {
@@ -41,8 +41,10 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     }
 
     protected void executeQuery(File aFile) throws SQLException, DataSetException, IOException {
+        String query = this.readQuery(aFile);
+        logger.info("produceFromQuery(query={}) - start", query);
         String tableName = aFile.getName().substring(0, aFile.getName().indexOf("."));
-        ITable table = this.connection.createQueryTable(tableName, readQuery(aFile));
+        ITable table = this.connection.createQueryTable(tableName, query);
         this.executeTable(table);
     }
 

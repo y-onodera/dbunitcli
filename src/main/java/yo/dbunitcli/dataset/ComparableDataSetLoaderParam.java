@@ -1,5 +1,6 @@
 package yo.dbunitcli.dataset;
 
+import com.google.common.base.Objects;
 import yo.dbunitcli.application.DataSourceType;
 import yo.dbunitcli.compare.ColumnSetting;
 
@@ -44,6 +45,36 @@ public class ComparableDataSetLoaderParam {
 
     public String getDataSplitPattern() {
         return dataSplitPattern;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ComparableDataSetLoaderParam that = (ComparableDataSetLoaderParam) o;
+        return Objects.equal(src, that.src) &&
+                Objects.equal(encoding, that.encoding) &&
+                source == that.source &&
+                Objects.equal(excludeColumns, that.excludeColumns) &&
+                Objects.equal(headerSplitPattern, that.headerSplitPattern) &&
+                Objects.equal(dataSplitPattern, that.dataSplitPattern);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(src, encoding, source, excludeColumns, headerSplitPattern, dataSplitPattern);
+    }
+
+    @Override
+    public String toString() {
+        return "ComparableDataSetLoaderParam{" +
+                "src=" + src +
+                ", encoding='" + encoding + '\'' +
+                ", source=" + source +
+                ", excludeColumns=" + excludeColumns +
+                ", headerSplitPattern='" + headerSplitPattern + '\'' +
+                ", dataSplitPattern='" + dataSplitPattern + '\'' +
+                '}';
     }
 
     public static Builder builder() {

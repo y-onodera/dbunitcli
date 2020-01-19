@@ -42,7 +42,7 @@ public class ComparableCSVQueryDataSetProducer implements IDataSetProducer, Quer
 
     @Override
     public void produce() throws DataSetException {
-        logger.debug("produce() - start");
+        logger.info("produce() - start");
 
         this.consumer.startDataSet();
         for (File file : this.src) {
@@ -57,9 +57,11 @@ public class ComparableCSVQueryDataSetProducer implements IDataSetProducer, Quer
     }
 
     protected void executeQuery(File aFile) throws SQLException, DataSetException, IOException {
+        String query = this.readQuery(aFile);
+        logger.info("produceFromQuery(query={}) - start", query);
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt = conn.createStatement();
-             ResultSet rst = stmt.executeQuery(this.readQuery(aFile));
+             ResultSet rst = stmt.executeQuery(query)
         ) {
             ResultSetMetaData metaData = rst.getMetaData();
             Column[] columns = new Column[metaData.getColumnCount()];

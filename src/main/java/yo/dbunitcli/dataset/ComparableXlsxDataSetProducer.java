@@ -52,7 +52,7 @@ public class ComparableXlsxDataSetProducer implements IDataSetProducer {
 
     @Override
     public void produce() throws DataSetException {
-        logger.debug("produceFromFile(theDataFile={}) - start", src);
+        logger.info("produceFromFile(theDataFile={}) - start", src);
 
         try (OPCPackage pkg = OPCPackage.open(this.src)) {
             ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);
@@ -63,7 +63,7 @@ public class ComparableXlsxDataSetProducer implements IDataSetProducer {
             while (iterator.hasNext()) {
                 try (InputStream stream = iterator.next()) {
                     String sheetName = iterator.getSheetName();
-                    logger.debug("produceFromSheet - start", sheetName + " [index=" + index + "]:");
+                    logger.info("produceFromSheet - start {} [index={}]", sheetName, index++);
                     processSheet(styles, strings, new SheetToTable(sheetName, this.consumer), stream);
                 }
             }

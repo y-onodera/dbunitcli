@@ -2,6 +2,8 @@ package yo.dbunitcli.dataset;
 
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.Parameter;
 
 import java.io.File;
@@ -10,6 +12,7 @@ import java.util.Map;
 
 public class ComparableDataSetLoader {
 
+    private static Logger logger = LoggerFactory.getLogger(ComparableDataSetLoader.class);
     private final IDatabaseConnection connection;
 
     private final Parameter parameter;
@@ -20,10 +23,6 @@ public class ComparableDataSetLoader {
 
     public ComparableDataSetLoader(Parameter parameter) {
         this(null, parameter);
-    }
-
-    public ComparableDataSetLoader(IDatabaseConnection connection) {
-        this(connection, Parameter.none());
     }
 
     public ComparableDataSetLoader(IDatabaseConnection iDatabaseConnection, Parameter parameter) {
@@ -37,6 +36,7 @@ public class ComparableDataSetLoader {
     }
 
     public ComparableDataSet loadDataSet(ComparableDataSetLoaderParam param) throws DataSetException {
+        logger.info("create DataSetLoader from {}", param);
         switch (param.getSource()) {
             case TABLE:
                 return new ComparableDBDataSet(this.connection, param.getSrc(), param.getEncoding(), param.getExcludeColumns());

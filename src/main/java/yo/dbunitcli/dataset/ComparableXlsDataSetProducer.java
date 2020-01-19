@@ -68,7 +68,7 @@ public class ComparableXlsDataSetProducer implements IDataSetProducer, HSSFListe
 
     @Override
     public void produce() throws DataSetException {
-        logger.debug("produceFromFile(theDataFile={}) - start", src);
+        logger.info("produceFromFile(theDataFile={}) - start", src);
 
         try (POIFSFileSystem newFs = new POIFSFileSystem(this.src)) {
             this.fs = newFs;
@@ -118,6 +118,7 @@ public class ComparableXlsDataSetProducer implements IDataSetProducer, HSSFListe
                         this.orderedBSRs = BoundSheetRecord.orderByBofPosition(this.boundSheetRecords);
                     }
                     this.tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
+                    logger.info("produceFromSheet - start {} [index={}]", this.tableName, this.sheetIndex);
                 }
                 break;
 

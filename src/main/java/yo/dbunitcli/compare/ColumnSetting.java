@@ -1,5 +1,6 @@
 package yo.dbunitcli.compare;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -45,6 +46,30 @@ public class ColumnSetting {
 
     public int byNameSize() {
         return this.byName.size();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ColumnSetting that = (ColumnSetting) o;
+        return Objects.equal(byName, that.byName) &&
+                Objects.equal(pattern, that.pattern) &&
+                Objects.equal(common, that.common);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(byName, pattern, common);
+    }
+
+    @Override
+    public String toString() {
+        return "ColumnSetting{" +
+                "byName=" + byName +
+                ", pattern=" + pattern +
+                ", common=" + common +
+                '}';
     }
 
     public static class Builder {

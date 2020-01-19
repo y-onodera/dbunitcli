@@ -42,7 +42,6 @@ public class CsvDataSetWriterWrapper implements IDataSetWriter {
         @Override
         public void startTable(ITableMetaData metaData) throws DataSetException {
             this.activeTableName = metaData.getTableName();
-            logger.debug("startTable(metaData={}) - start", metaData);
 
             try {
                 this.activeMetaData = metaData;
@@ -51,6 +50,7 @@ public class CsvDataSetWriterWrapper implements IDataSetWriter {
                 f.set(this, metaData);
                 final File directory = new File(this.getTheDirectory());
                 File file = new File(directory, this.activeTableName + ".csv");
+                logger.info("writeToFile(fileName={}) - start", file);
                 if (!directory.exists()) {
                     directory.mkdirs();
                 }

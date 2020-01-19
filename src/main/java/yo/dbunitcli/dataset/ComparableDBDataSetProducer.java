@@ -37,7 +37,7 @@ public class ComparableDBDataSetProducer implements IDataSetProducer {
 
     @Override
     public void produce() throws DataSetException {
-        logger.debug("produce() - start");
+        logger.info("produce() - start");
         this.consumer.startDataSet();
         try {
             for (String tableName : Files.readLines(this.src, Charset.forName(this.encoding))) {
@@ -52,6 +52,7 @@ public class ComparableDBDataSetProducer implements IDataSetProducer {
     }
 
     protected void executeTable(ITable table) throws DataSetException {
+        logger.info("produceFromDB(table={}) - start", table.getTableMetaData().getTableName());
         this.consumer.startTable(table.getTableMetaData());
         Column[] columns = table.getTableMetaData().getColumns();
         for (int row = 0, j = table.getRowCount(); row < j; row++) {
