@@ -8,8 +8,6 @@ import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.ext.mssql.MsSqlDataTypeFactory;
 import org.dbunit.ext.oracle.Oracle10DataTypeFactory;
-import org.dbunit.operation.CloseConnectionOperation;
-import org.dbunit.operation.DatabaseOperation;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -141,11 +139,7 @@ abstract public class CommandLineOption {
 
     public void parse(String[] args) throws Exception {
         CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            throw e;
-        }
+        parser.parseArgument(args);
         this.assertDirectoryExists(parser);
         this.loadJdbcTemplate();
         this.populateSettings(parser);
@@ -230,7 +224,6 @@ abstract public class CommandLineOption {
             return;
         }
         setting.getJsonArray("settings")
-                .stream()
                 .forEach(v -> {
                     JsonObject json = v.asJsonObject();
                     if (json.containsKey("name")) {
@@ -252,7 +245,6 @@ abstract public class CommandLineOption {
             return;
         }
         setting.getJsonArray("commonSettings")
-                .stream()
                 .forEach(v -> {
                     JsonObject json = v.asJsonObject();
                     if (json.containsKey("exclude")) {
