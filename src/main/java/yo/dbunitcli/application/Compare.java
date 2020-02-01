@@ -13,8 +13,6 @@ import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetLoader;
 import yo.dbunitcli.dataset.IDataSetWriter;
 
-import java.util.Map;
-
 public class Compare implements Command<CompareOption> {
 
     private static final Logger logger = LoggerFactory.getLogger(Compare.class);

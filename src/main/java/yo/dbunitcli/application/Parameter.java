@@ -22,10 +22,10 @@ public class Parameter {
     }
 
     public int getRowNumber() {
-        return rowNumber;
+        return this.rowNumber;
     }
 
     public Map<String, Object> getMap() {
-        return map;
+        return this.map;
     }
 }

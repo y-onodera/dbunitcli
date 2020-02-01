@@ -1,7 +1,5 @@
 package yo.dbunitcli.application;
 
-import java.util.Map;
-
 public interface Command<T extends CommandLineOption> {
 
     default void exec(String[] args) throws Exception {

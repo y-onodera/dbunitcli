@@ -94,7 +94,7 @@ abstract public class CommandLineOption {
     }
 
     public File getSetting() {
-        return setting;
+        return this.setting;
     }
 
     public ColumnSetting getComparisonKeys() {
@@ -106,7 +106,7 @@ abstract public class CommandLineOption {
     }
 
     public Parameter getParameter() {
-        return parameter;
+        return this.parameter;
     }
 
     public IDataSetWriter writer() throws DataSetException {
