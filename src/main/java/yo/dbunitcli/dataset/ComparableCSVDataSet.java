@@ -1,7 +1,6 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.DataSetException;
-import yo.dbunitcli.compare.ColumnSetting;
 
 import java.io.File;
 
@@ -14,9 +13,11 @@ public class ComparableCSVDataSet extends AbstractComparableDataSet {
         this.srcDir = aSrcDir.getPath();
     }
 
-    public ComparableCSVDataSet(File aDir, String aEncoding, ColumnSetting excludeColumns) throws DataSetException {
-        super(new ComparableCsvDataSetProducer(aDir, aEncoding), excludeColumns);
-        this.srcDir = aDir.getPath();
+    public ComparableCSVDataSet(ComparableDataSetLoaderParam param) throws DataSetException {
+        super(new ComparableCsvDataSetProducer(param.getSrc(), param.getEncoding())
+                , param.getExcludeColumns()
+                , param.getOrderColumns());
+        this.srcDir = param.getSrc().getPath();
     }
 
     @Override

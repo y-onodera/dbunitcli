@@ -67,6 +67,8 @@ abstract public class CommandLineOption {
 
     private ColumnSetting.Builder excludeColumns = ColumnSetting.builder();
 
+    private ColumnSetting.Builder orderColumns = ColumnSetting.builder();
+
     private final Parameter parameter;
 
     public CommandLineOption(Parameter param) {
@@ -78,15 +80,15 @@ abstract public class CommandLineOption {
     }
 
     public String getOutputEncoding() {
-        return outputEncoding;
+        return this.outputEncoding;
     }
 
     public String getRegDataSplit() {
-        return regDataSplit;
+        return this.regDataSplit;
     }
 
     public String getRegHeaderSplit() {
-        return regHeaderSplit;
+        return this.regHeaderSplit;
     }
 
     public File getResultDir() {
@@ -103,6 +105,10 @@ abstract public class CommandLineOption {
 
     public ColumnSetting getExcludeColumns() {
         return this.excludeColumns.build();
+    }
+
+    public ColumnSetting getOrderColumns() {
+        return this.orderColumns.build();
     }
 
     public Parameter getParameter() {
@@ -126,6 +132,7 @@ abstract public class CommandLineOption {
         return ComparableDataSetLoaderParam.builder()
                 .setEncoding(this.getEncoding())
                 .setExcludeColumns(this.getExcludeColumns())
+                .setOrderColumns(this.getOrderColumns())
                 .setHeaderSplitPattern(this.getRegHeaderSplit())
                 .setDataSplitPattern(this.getRegDataSplit());
     }
@@ -231,11 +238,13 @@ abstract public class CommandLineOption {
                         ColumnSetting.Strategy strategy = ColumnSetting.Strategy.BY_NAME;
                         this.addComparisonKeys(strategy, json, file);
                         this.addExcludeColumns(strategy, json, file);
+                        this.addSortColumns(strategy, json, file);
                     } else if (json.containsKey("pattern")) {
                         String file = json.getString("pattern");
                         ColumnSetting.Strategy strategy = ColumnSetting.Strategy.PATTERN;
                         this.addComparisonKeys(strategy, json, file);
                         this.addExcludeColumns(strategy, json, file);
+                        this.addSortColumns(strategy, json, file);
                     }
                 });
     }
@@ -247,46 +256,44 @@ abstract public class CommandLineOption {
         setting.getJsonArray("commonSettings")
                 .forEach(v -> {
                     JsonObject json = v.asJsonObject();
-                    if (json.containsKey("exclude")) {
-                        JsonArray excludeArray = json.getJsonArray("exclude");
-                        List<String> columns = Lists.newArrayList();
-                        for (int i = 0, j = excludeArray.size(); i < j; i++) {
-                            columns.add(excludeArray.getString(i));
-                        }
-                        this.excludeColumns.addCommon(columns);
-                    }
-                    if (json.containsKey("keys")) {
-                        JsonArray excludeArray = json.getJsonArray("keys");
-                        List<String> columns = Lists.newArrayList();
-                        for (int i = 0, j = excludeArray.size(); i < j; i++) {
-                            columns.add(excludeArray.getString(i));
-                        }
-                        this.comparisonKeys.addCommon(columns);
-                    }
+                    addCommonSettings(json, "keys", this.comparisonKeys);
+                    addCommonSettings(json, "exclude", this.excludeColumns);
+                    addCommonSettings(json, "order", this.orderColumns);
                 });
     }
 
-    protected void addExcludeColumns(ColumnSetting.Strategy strategy, JsonObject json, String file) {
-        if (json.containsKey("exclude")) {
-            JsonArray excludeArray = json.getJsonArray("exclude");
+    protected void addCommonSettings(JsonObject json, String key, ColumnSetting.Builder targetSetting) {
+        if (json.containsKey(key)) {
+            JsonArray array = json.getJsonArray(key);
             List<String> columns = Lists.newArrayList();
-            for (int i = 0, j = excludeArray.size(); i < j; i++) {
-                columns.add(excludeArray.getString(i));
+            for (int i = 0, j = array.size(); i < j; i++) {
+                columns.add(array.getString(i));
             }
-            this.excludeColumns.add(strategy, file, columns);
+            targetSetting.addCommon(columns);
         }
     }
 
     protected void addComparisonKeys(ColumnSetting.Strategy strategy, JsonObject json, String file) {
-        if (json.containsKey("keys")) {
-            JsonArray keyArray = json.getJsonArray("keys");
+        this.comparisonKeys.add(strategy, file, Lists.newArrayList());
+        this.addSettings(strategy, json, file, "keys", this.comparisonKeys);
+    }
+
+    protected void addExcludeColumns(ColumnSetting.Strategy strategy, JsonObject json, String file) {
+        this.addSettings(strategy, json, file, "exclude", this.excludeColumns);
+    }
+
+    protected void addSortColumns(ColumnSetting.Strategy strategy, JsonObject json, String file) {
+        this.addSettings(strategy, json, file, "order", this.orderColumns);
+    }
+
+    protected void addSettings(ColumnSetting.Strategy strategy, JsonObject json, String file, String key, ColumnSetting.Builder comparisonKeys) {
+        if (json.containsKey(key)) {
+            JsonArray keyArray = json.getJsonArray(key);
             List<String> keys = Lists.newArrayList();
             for (int i = 0, j = keyArray.size(); i < j; i++) {
                 keys.add(keyArray.getString(i));
             }
-            this.comparisonKeys.add(strategy, file, keys);
-        } else {
-            this.comparisonKeys.add(strategy, file, Lists.newArrayList());
+            comparisonKeys.add(strategy, file, keys);
         }
     }
 }

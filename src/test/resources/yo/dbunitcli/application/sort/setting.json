@@ -1,0 +1,6 @@
+{
+  "settings":[
+     {"name":"columnadd","order":["key"],"exclude":["AddColumn","ChangeColumn"]}
+    ,{"name":"columndrop","order":["key"],"exclude":["","AddColumn","ChangeColumn"]}
+  ]
+}

@@ -39,19 +39,19 @@ public class ComparableDataSetLoader {
         logger.info("create DataSetLoader from {}", param);
         switch (param.getSource()) {
             case TABLE:
-                return new ComparableDBDataSet(this.connection, param.getSrc(), param.getEncoding(), param.getExcludeColumns());
+                return new ComparableDBDataSet(this.connection, param);
             case SQL:
-                return new ComparableQueryDataSet(this.connection, param.getSrc(), param.getEncoding(), param.getExcludeColumns(), this.parameter);
+                return new ComparableQueryDataSet(this.connection, this.parameter, param);
             case XLSX:
-                return new ComparableXlsxDataSet(param.getSrc(), param.getExcludeColumns());
+                return new ComparableXlsxDataSet(param);
             case XLS:
-                return new ComparableXlsDataSet(param.getSrc(), param.getExcludeColumns());
+                return new ComparableXlsDataSet(param);
             case CSVQ:
-                return new ComparableCSVQueryDataSet(param.getSrc(), param.getEncoding(), param.getExcludeColumns(), this.parameter);
+                return new ComparableCSVQueryDataSet(param, this.parameter);
             case CSV:
-                return new ComparableCSVDataSet(param.getSrc(), param.getEncoding(), param.getExcludeColumns());
+                return new ComparableCSVDataSet(param);
             case REGSP:
-                return new ComparableRegexSplitDataSet(param.getHeaderSplitPattern(), param.getDataSplitPattern(), param.getSrc(), param.getEncoding(), param.getExcludeColumns());
+                return new ComparableRegexSplitDataSet(param);
         }
         return null;
     }

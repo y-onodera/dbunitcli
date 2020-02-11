@@ -17,13 +17,16 @@ public abstract class AbstractComparableDataSet extends CachedDataSet implements
 
     private ColumnSetting compareSetting;
 
+    private ColumnSetting orderSetting;
+
     public AbstractComparableDataSet(IDataSetProducer producer) throws DataSetException {
-        this(producer, ColumnSetting.builder().build());
+        this(producer, ColumnSetting.builder().build(), ColumnSetting.builder().build());
     }
 
-    public AbstractComparableDataSet(IDataSetProducer producer, ColumnSetting excludeColumns) throws DataSetException {
+    public AbstractComparableDataSet(IDataSetProducer producer, ColumnSetting excludeColumns, ColumnSetting orderColumns) throws DataSetException {
         super(producer);
         this.compareSetting = excludeColumns;
+        this.orderSetting = orderColumns;
     }
 
     @Override
@@ -38,11 +41,23 @@ public abstract class AbstractComparableDataSet extends CachedDataSet implements
 
     @Override
     public ComparableTable getTable(String tableName) throws DataSetException {
-        List<Column> excludeColumns = this.compareSetting.getColumns(tableName).stream().map(it -> new Column(it, DataType.UNKNOWN)).collect(Collectors.toList());
+        List<Column> excludeColumns = this.compareSetting.getColumns(tableName)
+                .stream()
+                .map(it -> new Column(it, DataType.UNKNOWN))
+                .collect(Collectors.toList());
         if (excludeColumns.size() > 0) {
-            return ComparableFilterTable.createFrom(super.getTable(tableName), this.toFilter(excludeColumns));
+            return ComparableFilterTable.createFrom(super.getTable(tableName)
+                    , this.orderColumns(tableName)
+                    , this.toFilter(excludeColumns));
         }
-        return ComparableTable.createFrom(super.getTable(tableName));
+        return ComparableTable.createFrom(super.getTable(tableName), this.orderColumns(tableName));
+    }
+
+    private Column[] orderColumns(String tableName) {
+        return this.orderSetting.getColumns(tableName)
+                .stream()
+                .map(it -> new Column(it, DataType.UNKNOWN))
+                .toArray(Column[]::new);
     }
 
     @Override

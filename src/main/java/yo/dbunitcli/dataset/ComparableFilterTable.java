@@ -12,18 +12,18 @@ public class ComparableFilterTable extends ComparableTable {
 
     private final List<Integer> filterColumnIndex = Lists.newArrayList();
 
-    public static ComparableTable createFrom(ITable table, IColumnFilter iColumnFilter) throws DataSetException {
+    public static ComparableTable createFrom(ITable table, Column[] orderColumns, IColumnFilter iColumnFilter) throws DataSetException {
         try {
-            return new ComparableFilterTable(table, getOriginRows(table), iColumnFilter);
+            return new ComparableFilterTable(table, getOriginRows(table), orderColumns, iColumnFilter);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new DataSetException(e);
         }
     }
 
-    public ComparableFilterTable(ITable table, List<Object[]> values, IColumnFilter iColumnFilter) throws DataSetException {
-        super(new ColumnFilterTable(table, iColumnFilter), values);
+    public ComparableFilterTable(ITable table, List<Object[]> values, Column[] orderColumns, IColumnFilter iColumnFilter) throws DataSetException {
+        super(new ColumnFilterTable(table, iColumnFilter), values, orderColumns);
         Set<Column> noFilter = Sets.newHashSet(table.getTableMetaData().getColumns());
-        Set<Column> filtered = Sets.newHashSet(getDelegate().getTableMetaData().getColumns());
+        Set<Column> filtered = Sets.newHashSet(getDelegateMetaData().getColumns());
         for (Column column : Sets.difference(noFilter, filtered)) {
             this.filterColumnIndex.add(table.getTableMetaData().getColumnIndex(column.getColumnName()));
         }

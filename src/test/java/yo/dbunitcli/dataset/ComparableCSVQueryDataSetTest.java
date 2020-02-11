@@ -11,8 +11,12 @@ import java.io.File;
 public class ComparableCSVQueryDataSetTest {
 
     @Test
-    public void createDataSetFromSigleFile() throws DataSetException {
-        ComparableCSVQueryDataSet actual = new ComparableCSVQueryDataSet(new File(this.getClass().getResource("csvquery").getFile(), "singlefile"), "UTF8", ColumnSetting.builder().build(), Parameter.none());
+    public void createDataSetFromSingleFile() throws DataSetException {
+        ComparableCSVQueryDataSet actual = new ComparableCSVQueryDataSet(ComparableDataSetLoaderParam
+                .builder()
+                .setSrc(new File(this.getClass().getResource("csvquery").getFile(), "singlefile"))
+                .setEncoding("UTF8")
+                .build(), Parameter.none());
         Assert.assertEquals(1, actual.getTables().length);
         ComparableTable actualTable = actual.getTable("joinQuery");
         Assert.assertEquals("joinQuery", actualTable.getTableMetaData().getTableName());
@@ -34,7 +38,11 @@ public class ComparableCSVQueryDataSetTest {
 
     @Test
     public void createDataSetFromMultiFile() throws DataSetException {
-        ComparableCSVQueryDataSet actual = new ComparableCSVQueryDataSet(new File(this.getClass().getResource("csvquery").getFile(), "multifile"), "UTF8", ColumnSetting.builder().build(), Parameter.none());
+        ComparableCSVQueryDataSet actual = new ComparableCSVQueryDataSet(ComparableDataSetLoaderParam
+                .builder()
+                .setSrc(new File(this.getClass().getResource("csvquery").getFile(), "multifile"))
+                .setEncoding("UTF8")
+                .build(), Parameter.none());
         Assert.assertEquals(2, actual.getTables().length);
         ComparableTable actualTable = actual.getTable("joinQuery");
         Assert.assertEquals("joinQuery", actualTable.getTableMetaData().getTableName());

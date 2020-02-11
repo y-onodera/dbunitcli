@@ -80,6 +80,11 @@ public class CompareTest {
     }
 
     @Test
+    public void testCompareSort() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramColumnSort.txt"});
+    }
+
+    @Test
     public void testFailedResultDiffNotExpected() throws Exception {
         this.exit.expectSystemExitWithStatus(1);
         this.expectedException.expect(AssertionError.class);

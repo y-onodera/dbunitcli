@@ -11,40 +11,46 @@ public class ComparableDataSetLoaderParam {
     private final String encoding;
     private final DataSourceType source;
     private final ColumnSetting excludeColumns;
+    private final ColumnSetting orderColumns;
     private final String headerSplitPattern;
     private final String dataSplitPattern;
 
-    public ComparableDataSetLoaderParam(File src, String encoding, DataSourceType source, ColumnSetting excludeColumns, String headerSplitPattern, String dataSplitPattern) {
-        this.src = src;
-        this.encoding = encoding;
-        this.source = source;
-        this.excludeColumns = excludeColumns;
-        this.headerSplitPattern = headerSplitPattern;
-        this.dataSplitPattern = dataSplitPattern;
+    public ComparableDataSetLoaderParam(Builder builder) {
+        this.src = builder.getSrc();
+        this.encoding = builder.getEncoding();
+        this.source = builder.getSource();
+        this.excludeColumns = builder.getExcludeColumns();
+        this.orderColumns = builder.getOrderColumns();
+        this.headerSplitPattern = builder.getHeaderSplitPattern();
+        this.dataSplitPattern = builder.getDataSplitPattern();
     }
 
     public File getSrc() {
-        return src;
+        return this.src;
     }
 
     public String getEncoding() {
-        return encoding;
+        return this.encoding;
     }
 
     public DataSourceType getSource() {
-        return source;
+        return this.source;
     }
 
     public ColumnSetting getExcludeColumns() {
-        return excludeColumns;
+        return this.excludeColumns;
+    }
+
+    public ColumnSetting getOrderColumns() {
+        return this.orderColumns;
     }
 
     public String getHeaderSplitPattern() {
-        return headerSplitPattern;
+        return this.headerSplitPattern;
     }
 
     public String getDataSplitPattern() {
-        return dataSplitPattern;
+        return this.dataSplitPattern;
     }
 
     @Override
@@ -52,28 +58,23 @@ public class ComparableDataSetLoaderParam {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ComparableDataSetLoaderParam that = (ComparableDataSetLoaderParam) o;
-        return Objects.equal(src, that.src) &&
-                Objects.equal(encoding, that.encoding) &&
-                source == that.source &&
-                Objects.equal(excludeColumns, that.excludeColumns) &&
-                Objects.equal(headerSplitPattern, that.headerSplitPattern) &&
-                Objects.equal(dataSplitPattern, that.dataSplitPattern);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(src, encoding, source, excludeColumns, headerSplitPattern, dataSplitPattern);
+        return Objects.equal(this.src, that.src) &&
+                Objects.equal(this.encoding, that.encoding) &&
+                this.source == that.source &&
+                Objects.equal(this.excludeColumns, that.excludeColumns) &&
+                Objects.equal(this.headerSplitPattern, that.headerSplitPattern) &&
+                Objects.equal(this.dataSplitPattern, that.dataSplitPattern);
     }
 
     @Override
     public String toString() {
         return "ComparableDataSetLoaderParam{" +
-                "src=" + src +
-                ", encoding='" + encoding + '\'' +
-                ", source=" + source +
-                ", excludeColumns=" + excludeColumns +
-                ", headerSplitPattern='" + headerSplitPattern + '\'' +
-                ", dataSplitPattern='" + dataSplitPattern + '\'' +
+                "src=" + this.src +
+                ", encoding='" + this.encoding + '\'' +
+                ", source=" + this.source +
+                ", excludeColumns=" + this.excludeColumns +
+                ", headerSplitPattern='" + this.headerSplitPattern + '\'' +
+                ", dataSplitPattern='" + this.dataSplitPattern + '\'' +
                 '}';
     }
 
@@ -86,12 +87,47 @@ public class ComparableDataSetLoaderParam {
         private String encoding;
         private DataSourceType source;
         private ColumnSetting excludeColumns;
+        private ColumnSetting orderColumns;
         private String headerSplitPattern;
         private String dataSplitPattern;
 
         public Builder setSrc(File src) {
             this.src = src;
             return this;
+        }
+
+        public File getSrc() {
+            return this.src;
+        }
+
+        public String getEncoding() {
+            return this.encoding;
+        }
+
+        public DataSourceType getSource() {
+            return this.source;
+        }
+
+        public ColumnSetting getExcludeColumns() {
+            if (this.excludeColumns == null) {
+                return ColumnSetting.builder().build();
+            }
+            return this.excludeColumns;
+        }
+
+        public ColumnSetting getOrderColumns() {
+            if (this.orderColumns == null) {
+                return ColumnSetting.builder().build();
+            }
+            return this.orderColumns;
+        }
+
+        public String getHeaderSplitPattern() {
+            return this.headerSplitPattern;
+        }
+
+        public String getDataSplitPattern() {
+            return this.dataSplitPattern;
         }
 
         public Builder setEncoding(String encoding) {
@@ -109,6 +145,11 @@ public class ComparableDataSetLoaderParam {
             return this;
         }
 
+        public Builder setOrderColumns(ColumnSetting orderColumns) {
+            this.orderColumns = orderColumns;
+            return this;
+        }
+
         public Builder setHeaderSplitPattern(String headerSplitPattern) {
             this.headerSplitPattern = headerSplitPattern;
             return this;
@@ -120,7 +161,7 @@ public class ComparableDataSetLoaderParam {
         }
 
         public ComparableDataSetLoaderParam build() {
-            return new ComparableDataSetLoaderParam(src, encoding, source, excludeColumns, headerSplitPattern, dataSplitPattern);
+            return new ComparableDataSetLoaderParam(this);
         }
     }
 }

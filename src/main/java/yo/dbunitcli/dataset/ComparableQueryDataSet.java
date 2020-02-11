@@ -3,16 +3,17 @@ package yo.dbunitcli.dataset;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.application.Parameter;
-import yo.dbunitcli.compare.ColumnSetting;
 
 import java.io.File;
 
 public class ComparableQueryDataSet extends AbstractComparableDataSet {
     private final File src;
 
-    public ComparableQueryDataSet(IDatabaseConnection connection, File aSrc, String aEncoding, ColumnSetting excludeColumns, Parameter parameter) throws DataSetException {
-        super(new ComparableQueryDataSetProducer(connection, aSrc, aEncoding, parameter), excludeColumns);
-        this.src = aSrc;
+    public ComparableQueryDataSet(IDatabaseConnection connection, Parameter parameter, ComparableDataSetLoaderParam param) throws DataSetException {
+        super(new ComparableQueryDataSetProducer(connection, param.getSrc(), param.getEncoding(), parameter)
+                , param.getExcludeColumns()
+                , param.getOrderColumns());
+        this.src = param.getSrc();
     }
 
     @Override

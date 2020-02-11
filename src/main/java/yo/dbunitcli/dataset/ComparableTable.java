@@ -3,30 +3,45 @@ package yo.dbunitcli.dataset;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.dbunit.dataset.*;
+import org.dbunit.dataset.datatype.DataType;
+import org.dbunit.dataset.datatype.TypeCastException;
 
 import java.lang.reflect.Field;
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class ComparableTable implements ITable {
 
-    private final ITable delegate;
+    private Integer[] _indexes;
+
+    private Comparator rowComparator;
 
     private final List<Object[]> values;
 
-    public static ComparableTable createFrom(ITable delegate) throws DataSetException {
+    private ITableMetaData delegateMetaData;
+
+    public static ComparableTable createFrom(ITable table, Column[] orderColumns) throws DataSetException {
         try {
-            return new ComparableTable(delegate, getOriginRows(delegate));
+            return new ComparableTable(table, getOriginRows(table), orderColumns);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new DataSetException(e);
         }
     }
 
-    protected ComparableTable(ITable delegate, List<Object[]> values) {
-        this.delegate = delegate;
+    protected ComparableTable(ITable delegate, List<Object[]> values, Column[] orderColumns) {
+        this.delegateMetaData = delegate.getTableMetaData();
         this.values = values;
+        if (orderColumns.length > 0) {
+            this.rowComparator = new SortedTable.AbstractRowComparator(delegate, orderColumns) {
+                @Override
+                protected int compare(Column column, Object o, Object o1) throws TypeCastException {
+                    String stringValue1 = DataType.asString(o);
+                    String stringValue2 = DataType.asString(o1);
+                    int result = stringValue1.compareTo(stringValue2);
+                    return result;
+                }
+            };
+        }
     }
 
     public List<Map<String, Object>> toMap() throws DataSetException {
@@ -45,7 +60,7 @@ public class ComparableTable implements ITable {
 
     @Override
     public ITableMetaData getTableMetaData() {
-        return delegate.getTableMetaData();
+        return this.delegateMetaData;
     }
 
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(List<String> keys) throws DataSetException {
@@ -86,13 +101,12 @@ public class ComparableTable implements ITable {
 
     @Override
     public int getRowCount() {
-        return this.delegate.getRowCount();
+        return values.size();
     }
 
     @Override
     public Object getValue(int i, String s) throws DataSetException {
-        Object[] row = this.getRow(i);
-        int j = this.delegate.getTableMetaData().getColumnIndex(s);
+        int j = this.delegateMetaData.getColumnIndex(s);
         return this.getValue(i, j);
     }
 
@@ -105,20 +119,31 @@ public class ComparableTable implements ITable {
         if (rowNum < 0 || rowNum >= this.values.size()) {
             throw new RowOutOfBoundsException("rowNum " + rowNum + " is out of range;current row size is " + this.values.size());
         }
-        return this.values.get(rowNum);
+        return this.values.get(this.getOriginalRowIndex(rowNum));
     }
 
-    protected ITable getDelegate() {
-        return delegate;
-    }
-
-    protected List<Object[]> getValues() {
-        return values;
+    protected ITableMetaData getDelegateMetaData() {
+        return this.delegateMetaData;
     }
 
     protected static List<Object[]> getOriginRows(ITable delegate) throws NoSuchFieldException, IllegalAccessException {
         Field f = delegate.getClass().getDeclaredField("_rowList");
         f.setAccessible(true);
         return (List<Object[]>) f.get(delegate);
+    }
+
+    protected int getOriginalRowIndex(int row) {
+        if (this.rowComparator == null) {
+            return row;
+        }
+        if (this._indexes == null) {
+            Integer[] indexes = new Integer[this.getRowCount()];
+            for (int i = 0; i < indexes.length; ++i) {
+                indexes[i] = i;
+            }
+            Arrays.sort(indexes, this.rowComparator);
+            this._indexes = indexes;
+        }
+        return this._indexes[row];
     }
 }
