@@ -1,9 +1,13 @@
 package yo.dbunitcli.application;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.rules.ExpectedException;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 public class CompareTest {
 
@@ -12,7 +16,13 @@ public class CompareTest {
     @Rule
     public ExpectedSystemExit exit = ExpectedSystemExit.none();
 
-    private String baseDir = this.getClass().getResource(".").getPath();
+    private String baseDir;
+
+    @Before
+    public void setUp() throws UnsupportedEncodingException {
+        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(),"MS932");
+    }
+
 
     @Test
     public void testSuccessResultDiffExpected() throws Exception {

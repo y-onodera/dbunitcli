@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,13 +16,14 @@ public class CompareOptionTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private String baseDir = this.getClass().getResource(".").getPath();
+    private String baseDir;
 
     private CompareOption target;
 
     @Before
-    public void setUp() {
+    public void setUp() throws UnsupportedEncodingException {
         this.target = new CompareOption();
+        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(),"MS932");
     }
 
     @Test
