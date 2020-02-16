@@ -24,6 +24,10 @@ public class DBDataSetWriter implements IDataSetWriter {
     }
 
     @Override
+    public void cleanupDirectory() {
+    }
+
+    @Override
     public void open(String tableName) {
     }
 

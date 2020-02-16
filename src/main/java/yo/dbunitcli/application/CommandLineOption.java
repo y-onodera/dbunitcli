@@ -83,6 +83,10 @@ abstract public class CommandLineOption {
         return this.resultDir;
     }
 
+    public String getResultType() {
+        return this.resultType;
+    }
+
     public File getSetting() {
         return this.setting;
     }
@@ -104,16 +108,7 @@ abstract public class CommandLineOption {
     }
 
     public IDataSetWriter writer() throws DataSetException {
-        logger.info("create DataSetWriter type:{} DBOperation:{} resultDir:{} encoding:{}"
-                , this.resultType, this.operation, this.resultDir, this.outputEncoding);
-        if (DataSourceType.XLSX.isEqual(this.resultType)) {
-            return new XlsxDataSetWriter(this.getResultDir());
-        } else if (DataSourceType.XLS.isEqual(this.resultType)) {
-            return new XlsDataSetWriter(this.getResultDir());
-        } else if (DataSourceType.TABLE.isEqual(this.resultType)) {
-            return new DBDataSetWriter(this.createIDatabaseConnection(), this.operation);
-        }
-        return new CsvDataSetWriterWrapper(this.getResultDir(), this.outputEncoding);
+        return this.getDataSetWriter(this.getResultDir());
     }
 
     public ComparableDataSetLoaderParam.Builder getDataSetParamBuilder() {
@@ -195,6 +190,19 @@ abstract public class CommandLineOption {
         }
     }
 
+    protected IDataSetWriter getDataSetWriter(File resultDir) throws DataSetException {
+        logger.info("create DataSetWriter type:{} DBOperation:{} resultDir:{} encoding:{}"
+                , this.resultType, this.operation, resultDir, this.outputEncoding);
+        if (DataSourceType.XLSX.isEqual(this.resultType)) {
+            return new XlsxDataSetWriter(resultDir);
+        } else if (DataSourceType.XLS.isEqual(this.resultType)) {
+            return new XlsDataSetWriter(resultDir);
+        } else if (DataSourceType.TABLE.isEqual(this.resultType)) {
+            return new DBDataSetWriter(this.createIDatabaseConnection(), this.operation);
+        }
+        return new CsvDataSetWriterWrapper(resultDir, this.outputEncoding);
+    }
+
     protected void loadJdbcTemplate() throws IOException {
         if (this.jdbcProperties != null) {
             this.jdbcProp = new Properties();
@@ -213,4 +221,5 @@ abstract public class CommandLineOption {
             throw new CmdLineException(parser, e);
         }
     }
+
 }

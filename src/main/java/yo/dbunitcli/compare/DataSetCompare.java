@@ -48,6 +48,7 @@ public class DataSetCompare implements Compare {
     }
 
     protected CompareResult exec() throws DataSetException {
+        this.writer.cleanupDirectory();
         this.compareTableCount();
         this.compareTables(this.writer);
         CompareResult compareResult = new CompareResult(this.oldDataSet.getSrc(), this.newDataSet.getSrc(), this.results);

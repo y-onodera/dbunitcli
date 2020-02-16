@@ -1,0 +1,5 @@
+$MODIFY,$ROW_AFTER_SORT,$ROW_ORIGINAL,$DIFF_COLUMN_INDEXES,key,column1,column2,column3
+"NEW","1","1","column1[1]","2","あ
+いうえお","test","5"
+"OLD","1","1","column1[1]","2","あ
+いうえお","test","5"

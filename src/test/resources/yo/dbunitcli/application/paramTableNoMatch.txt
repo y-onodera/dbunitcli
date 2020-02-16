@@ -2,4 +2,4 @@
 -new=target/test-classes/yo/dbunitcli/application/pattern/new
 -setting=target/test-classes/yo/dbunitcli/application/pattern/settingNoMatch.json
 -result=target/test-classes/yo/dbunitcli/application/pattern/result_setting_no_match
--expect=target/test-classes/yo/dbunitcli/application/pattern/expect/COMPARE_RESULT_SETTING_NO_MATCH.csv
+-expect=target/test-classes/yo/dbunitcli/application/pattern/expect/result_setting_no_match

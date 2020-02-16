@@ -9,6 +9,8 @@ import java.util.Map;
 
 public class ColumnSetting {
 
+    public static final String ALL_MATCH_PATTERN = "*";
+
     private Map<String, List<String>> byName = Maps.newHashMap();
 
     private Map<String, List<String>> pattern = Maps.newHashMap();
@@ -27,7 +29,7 @@ public class ColumnSetting {
 
     public boolean includeSetting(String tableName) {
         return this.byName.containsKey(tableName)
-                || this.pattern.entrySet().stream().anyMatch(it -> tableName.contains(it.getKey()));
+                || this.pattern.entrySet().stream().anyMatch(it -> it.getKey().equals(ALL_MATCH_PATTERN) || tableName.contains(it.getKey()));
     }
 
     public List<String> getColumns(String tableName) {
@@ -36,11 +38,16 @@ public class ColumnSetting {
             result.addAll(this.byName.get(tableName));
             return result;
         }
-        result.addAll(this.pattern.entrySet().stream()
+        List<String> patternResult = this.pattern.entrySet().stream()
                 .filter(it -> tableName.contains(it.getKey()))
                 .map(Map.Entry::getValue)
                 .findAny()
-                .orElse(Lists.newArrayList()));
+                .orElse(Lists.newArrayList());
+        if (this.pattern.containsKey(ALL_MATCH_PATTERN) && patternResult.size() == 0) {
+            result.addAll(this.pattern.get(ALL_MATCH_PATTERN));
+        } else {
+            result.addAll(patternResult);
+        }
         return result;
     }
 

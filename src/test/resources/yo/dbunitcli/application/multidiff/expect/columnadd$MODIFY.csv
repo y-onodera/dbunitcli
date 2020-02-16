@@ -1,0 +1,3 @@
+$MODIFY,$ROW_AFTER_SORT,$ROW_ORIGINAL,$DIFF_COLUMN_INDEXES,key,value1,value2,value3,ChangeColumn
+"NEW","0","0","value2[2]","1","same","newVal","",""
+"OLD","0","0","value2[2]","1","same","oldVal","",""

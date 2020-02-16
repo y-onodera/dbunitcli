@@ -20,6 +20,14 @@ public class CsvDataSetWriterWrapper implements IDataSetWriter {
     }
 
     @Override
+    public void cleanupDirectory() {
+        final File directory = new File(this.writer.getTheDirectory());
+        if (directory.exists()) {
+            directory.delete();
+        }
+    }
+
+    @Override
     public void write(ITable aTable) throws DataSetException {
         this.writer.write(new DefaultDataSet(aTable));
     }

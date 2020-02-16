@@ -30,6 +30,13 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
     }
 
     @Override
+    public void cleanupDirectory() {
+        if (this.resultDir.exists()) {
+            this.resultDir.delete();
+        }
+    }
+
+    @Override
     public void open(String aFileName) {
         this.filename = aFileName;
         this.dataSet = new DefaultDataSet();

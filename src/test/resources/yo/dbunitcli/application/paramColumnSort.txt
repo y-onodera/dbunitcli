@@ -2,4 +2,4 @@
 -new=target/test-classes/yo/dbunitcli/application/sort/new
 -setting=target/test-classes/yo/dbunitcli/application/sort/setting.json
 -result=target/test-classes/yo/dbunitcli/application/sort/result
--expect=target/test-classes/yo/dbunitcli/application/sort/expect/COMPARE_RESULT.csv
+-expect=target/test-classes/yo/dbunitcli/application/sort/expect
