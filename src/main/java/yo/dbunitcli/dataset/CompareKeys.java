@@ -9,19 +9,52 @@ import java.util.Objects;
 
 public class CompareKeys {
     private final List<String> keys = Lists.newArrayList();
+    private final int rowNum;
+    private final int oldRowNum;
+    private final int newRowNum;
 
-    public CompareKeys(ITable table, int i, List<String> compareColumns) throws DataSetException {
+    public CompareKeys(ITable table, int aRowNum, List<String> compareColumns) throws DataSetException {
+        this.rowNum = aRowNum;
+        this.oldRowNum = this.rowNum;
+        this.newRowNum = this.rowNum;
         if (compareColumns.size() > 0) {
             for (String column : compareColumns) {
-                keys.add(table.getValue(i, column).toString());
+                keys.add(table.getValue(aRowNum, column).toString());
             }
         } else {
-            keys.add(String.valueOf(i));
+            keys.add(String.valueOf(aRowNum));
         }
     }
 
-    public CompareKeys(List<String> aKeys) {
+    public CompareKeys(int aRowNum, List<String> aKeys) {
+        this(aRowNum, aRowNum, aRowNum, aKeys);
+    }
+
+    public CompareKeys(int rowNum, int originalOldRowNum, int originalNewRowNum, List<String> aKeys) {
+        this.rowNum = rowNum;
+        this.oldRowNum = originalOldRowNum;
+        this.newRowNum = originalNewRowNum;
         this.keys.addAll(aKeys);
+    }
+
+    public int getRowNum() {
+        return this.rowNum;
+    }
+
+    public int getOldRowNum() {
+        return oldRowNum;
+    }
+
+    public int getNewRowNum() {
+        return newRowNum;
+    }
+
+    public CompareKeys oldRowNum(int aOriginalRowNum) {
+        return new CompareKeys(this.rowNum, aOriginalRowNum, this.newRowNum, this.keys);
+    }
+
+    public CompareKeys newRowNum(int aNewRowNum) {
+        return new CompareKeys(this.rowNum, this.oldRowNum, aNewRowNum, this.keys);
     }
 
     @Override
@@ -41,7 +74,9 @@ public class CompareKeys {
     public String toString() {
         return "CompareKeys{" +
                 "keys=" + keys +
+                ", rowNum=" + rowNum +
+                ", oldRowNum=" + oldRowNum +
+                ", newRowNum=" + newRowNum +
                 '}';
     }
-
 }

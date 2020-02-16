@@ -64,11 +64,11 @@ public class ComparableTableTest {
     @Test
     public void getKey_return_argument_column() throws DataSetException {
         CompareKeys actual = this.target.getKey(0, Lists.newArrayList("COLUMN1", "COLUMN2"));
-        assertEquals(new CompareKeys(Lists.newArrayList("1", "a")), actual);
+        assertEquals(new CompareKeys(0, Lists.newArrayList("1", "a")), actual);
         actual = this.target.getKey(1, Lists.newArrayList("COLUMN1", "COLUMN2"));
-        assertEquals(new CompareKeys(Lists.newArrayList("1", "b")), actual);
+        assertEquals(new CompareKeys(1, Lists.newArrayList("1", "b")), actual);
         actual = this.target.getKey(2, Lists.newArrayList("COLUMN1", "COLUMN2"));
-        assertEquals(new CompareKeys(Lists.newArrayList("2", "a")), actual);
+        assertEquals(new CompareKeys(2, Lists.newArrayList("2", "a")), actual);
     }
 
     @Test

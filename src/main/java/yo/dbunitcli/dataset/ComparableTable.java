@@ -14,7 +14,7 @@ public class ComparableTable implements ITable {
 
     private Integer[] _indexes;
 
-    private Comparator rowComparator;
+    private Comparator<Object> rowComparator;
 
     private final List<Object[]> values;
 
@@ -22,26 +22,16 @@ public class ComparableTable implements ITable {
 
     public static ComparableTable createFrom(ITable table, Column[] orderColumns) throws DataSetException {
         try {
-            return new ComparableTable(table, getOriginRows(table), orderColumns);
+            return new ComparableTable(table.getTableMetaData(), getOriginRows(table), getComparator(table, orderColumns));
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new DataSetException(e);
         }
     }
 
-    protected ComparableTable(ITable delegate, List<Object[]> values, Column[] orderColumns) {
-        this.delegateMetaData = delegate.getTableMetaData();
+    protected ComparableTable(ITableMetaData delegateMetaData, List<Object[]> values, Comparator<Object> comparator) {
+        this.delegateMetaData = delegateMetaData;
         this.values = values;
-        if (orderColumns.length > 0) {
-            this.rowComparator = new SortedTable.AbstractRowComparator(delegate, orderColumns) {
-                @Override
-                protected int compare(Column column, Object o, Object o1) throws TypeCastException {
-                    String stringValue1 = DataType.asString(o);
-                    String stringValue2 = DataType.asString(o1);
-                    int result = stringValue1.compareTo(stringValue2);
-                    return result;
-                }
-            };
-        }
+        this.rowComparator = comparator;
     }
 
     public List<Map<String, Object>> toMap() throws DataSetException {
@@ -66,7 +56,7 @@ public class ComparableTable implements ITable {
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(List<String> keys) throws DataSetException {
         Map<CompareKeys, Map.Entry<Integer, Object[]>> result = Maps.newHashMap();
         for (int rowNum = 0, total = this.values.size(); rowNum < total; rowNum++) {
-            result.put(this.getKey(rowNum, keys), new AbstractMap.SimpleEntry(rowNum, this.getRow(rowNum)));
+            result.put(this.getKey(rowNum, keys), new AbstractMap.SimpleEntry<>(this.getOriginalRowIndex(rowNum), this.getRow(rowNum)));
         }
         if (result.size() < this.getRowCount()) {
             throw new AssertionError("comparison keys not unique:" + keys.toString());
@@ -84,7 +74,7 @@ public class ComparableTable implements ITable {
     }
 
     public CompareKeys getKey(int rowNum, List<String> keys) throws DataSetException {
-        return new CompareKeys(this, rowNum, keys);
+        return new CompareKeys(this, rowNum, keys).oldRowNum(this.getOriginalRowIndex(rowNum));
     }
 
     public Object[] getRow(int rowNum, int columnLength) throws RowOutOfBoundsException {
@@ -93,9 +83,7 @@ public class ComparableTable implements ITable {
             throw new AssertionError(columnLength + " is larger than columnLength:" + row.length);
         }
         Object[] resultRow = new Object[columnLength];
-        for (int i = 0, j = columnLength; i < j; i++) {
-            resultRow[i] = row[i];
-        }
+        System.arraycopy(row, 0, resultRow, 0, columnLength);
         return resultRow;
     }
 
@@ -122,14 +110,16 @@ public class ComparableTable implements ITable {
         return this.values.get(this.getOriginalRowIndex(rowNum));
     }
 
-    protected ITableMetaData getDelegateMetaData() {
-        return this.delegateMetaData;
+    protected void addRow(Object[] row) {
+        this.values.add(row);
     }
 
-    protected static List<Object[]> getOriginRows(ITable delegate) throws NoSuchFieldException, IllegalAccessException {
-        Field f = delegate.getClass().getDeclaredField("_rowList");
-        f.setAccessible(true);
-        return (List<Object[]>) f.get(delegate);
+    protected void replaceValue(int row, int column, Object newValue) throws RowOutOfBoundsException {
+        this.getRow(row)[column] = newValue;
+    }
+
+    protected ITableMetaData getDelegateMetaData() {
+        return this.delegateMetaData;
     }
 
     protected int getOriginalRowIndex(int row) {
@@ -146,4 +136,25 @@ public class ComparableTable implements ITable {
         }
         return this._indexes[row];
     }
+
+    protected static List<Object[]> getOriginRows(ITable delegate) throws NoSuchFieldException, IllegalAccessException {
+        Field f = delegate.getClass().getDeclaredField("_rowList");
+        f.setAccessible(true);
+        return (List<Object[]>) f.get(delegate);
+    }
+
+    protected static Comparator<Object> getComparator(ITable delegate, Column[] orderColumns) {
+        if (orderColumns.length > 0) {
+            return new SortedTable.AbstractRowComparator(delegate, orderColumns) {
+                @Override
+                protected int compare(Column column, Object o, Object o1) throws TypeCastException {
+                    String stringValue1 = DataType.asString(o);
+                    String stringValue2 = DataType.asString(o1);
+                    return stringValue1.compareTo(stringValue2);
+                }
+            };
+        }
+        return null;
+    }
+
 }

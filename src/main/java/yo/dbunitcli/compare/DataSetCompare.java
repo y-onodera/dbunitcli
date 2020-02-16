@@ -52,12 +52,12 @@ public class DataSetCompare implements Compare {
 
     protected CompareResult exec() throws DataSetException {
         this.compareTableCount();
-        this.compareTables(writer);
-        CompareResult compareResult = new CompareResult(oldDataSet.getSrc(), newDataSet.getSrc(), results);
+        this.compareTables(this.writer);
+        CompareResult compareResult = new CompareResult(this.oldDataSet.getSrc(), this.newDataSet.getSrc(), this.results);
         final ITable table = compareResult.toITable(RESULT_TABLE_NAME);
-        writer.open(table.getTableMetaData().getTableName());
-        writer.write(table);
-        writer.close();
+        this.writer.open(table.getTableMetaData().getTableName());
+        this.writer.write(table);
+        this.writer.close();
         return compareResult;
     }
 
@@ -83,7 +83,7 @@ public class DataSetCompare implements Compare {
     protected void searchAddTables(Set<String> oldTables, Set<String> newTables) {
         Set<String> addTables = Sets.filter(newTables, Predicates.not(Predicates.in(oldTables)));
         addTables.stream()
-                .forEach(name -> results.add(getBuilder(CompareDiff.Type.TABLE_ADD)
+                .forEach(name -> this.results.add(getBuilder(CompareDiff.Type.TABLE_ADD)
                         .setTargetName(name)
                         .setNewDef(name)
                         .build()));
@@ -92,7 +92,7 @@ public class DataSetCompare implements Compare {
     protected void searchDeleteTables(Set<String> oldTables, Set<String> newTables) {
         Set<String> deleteTables = Sets.filter(oldTables, Predicates.not(Predicates.in(newTables)));
         deleteTables.stream()
-                .forEach(name -> results.add(getBuilder(CompareDiff.Type.TABLE_DELETE)
+                .forEach(name -> this.results.add(getBuilder(CompareDiff.Type.TABLE_DELETE)
                         .setTargetName(name)
                         .setOldDef(name)
                         .build()));
@@ -174,19 +174,21 @@ public class DataSetCompare implements Compare {
         }
     }
 
-    protected void compareRow(ComparableTable oldTable, ComparableTable newTable, List<String> keys, IDataSetWriter writer) throws DataSetException {
+    protected void compareRow(ComparableTable oldTable, ComparableTable newTable, List<String> keyNames, IDataSetWriter writer) throws DataSetException {
         final int oldRows = oldTable.getRowCount();
         final int columnLength = Math.min(newTable.getTableMetaData().getColumns().length, oldTable.getTableMetaData().getColumns().length);
-        Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists = newTable.getRows(keys);
+        Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists = newTable.getRows(keyNames);
         Map<Integer, List<CompareKeys>> modifyValues = Maps.newHashMap();
         List<Integer> deleteRows = Lists.newArrayList();
         Set<CompareKeys> addRows = Sets.newHashSet(newRowLists.keySet());
         for (int rowNum = 0; rowNum < oldRows; rowNum++) {
             Object[] oldRow = oldTable.getRow(rowNum, columnLength);
-            CompareKeys key = oldTable.getKey(rowNum, keys);
+            CompareKeys key = oldTable.getKey(rowNum, keyNames);
             if (newRowLists.containsKey(key)) {
                 addRows.remove(key);
-                Object[] newRow = newRowLists.get(key).getValue();
+                Map.Entry<Integer, Object[]> rowEntry = newRowLists.get(key);
+                key = key.newRowNum(rowEntry.getKey());
+                Object[] newRow = rowEntry.getValue();
                 for (int i = 0, j = oldRow.length; i < j; i++) {
                     if (!Objects.equals(oldRow[i], newRow[i])) {
                         if (modifyValues.containsKey(i)) {
@@ -204,33 +206,45 @@ public class DataSetCompare implements Compare {
             return;
         }
         writer.open(oldTable.getTableMetaData().getTableName());
+        this.writeModifyValues(oldTable, newTable, keyNames, writer, columnLength, modifyValues);
+        this.writeDeleteRows(oldTable, writer, deleteRows);
+        this.writeAddRows(newTable, writer, newRowLists, addRows);
+        writer.close();
+    }
+
+    protected void writeModifyValues(ComparableTable oldTable, ComparableTable newTable, List<String> keyNames, IDataSetWriter writer, int columnLength, Map<Integer, List<CompareKeys>> modifyValues) throws DataSetException {
         if (modifyValues.size() > 0) {
             final ITableMetaData origin = oldTable.getTableMetaData();
             DiffTable diffDetailTable = DiffTable.from(origin, columnLength);
-            Set<CompareKeys> writeRows = Sets.newHashSet();
-            for (Map.Entry<Integer, List<CompareKeys>> entry : modifyValues.entrySet()) {
-                for (CompareKeys targetKey : entry.getValue()) {
-                    if (!writeRows.contains(targetKey)) {
-                        diffDetailTable.addRow(oldTable.get(targetKey, keys, columnLength)
-                                , newTable.get(targetKey, keys, columnLength));
-                        writeRows.add(targetKey);
+            List<CompareKeys> writeRows = Lists.newArrayList();
+            for (Map.Entry<Integer, List<CompareKeys>> modifyColumns : modifyValues.entrySet()) {
+                for (CompareKeys compareKey : modifyColumns.getValue()) {
+                    if (!writeRows.contains(compareKey)) {
+                        diffDetailTable.addRow(compareKey, modifyColumns.getKey(), oldTable.get(compareKey, keyNames, columnLength)
+                                , newTable.get(compareKey, keyNames, columnLength));
+                        writeRows.add(compareKey);
+                    } else {
+                        diffDetailTable.addDiffColumn(compareKey, keyNames, modifyColumns.getKey());
                     }
                 }
                 this.results.add(getBuilder(CompareDiff.Type.MODIFY_VALUE)
                         .setTargetName(oldTable.getTableMetaData().getTableName())
-                        .setOldDef(oldTable.getTableMetaData().getColumns()[entry.getKey()].getColumnName())
-                        .setNewDef(newTable.getTableMetaData().getColumns()[entry.getKey()].getColumnName())
-                        .setColumnIndex(entry.getKey())
-                        .setRows(entry.getValue().size())
+                        .setOldDef(oldTable.getTableMetaData().getColumns()[modifyColumns.getKey()].getColumnName())
+                        .setNewDef(newTable.getTableMetaData().getColumns()[modifyColumns.getKey()].getColumnName())
+                        .setColumnIndex(modifyColumns.getKey())
+                        .setRows(modifyColumns.getValue().size())
                         .build());
             }
             writer.write(diffDetailTable);
         }
+    }
+
+    protected void writeDeleteRows(ComparableTable oldTable, IDataSetWriter writer, List<Integer> deleteRows) throws DataSetException {
         if (deleteRows.size() > 0) {
             DefaultTable diffDetailTable = toDiffTable(oldTable, "$DELETE");
             for (int rowNum : deleteRows) {
                 Object[] row = oldTable.getRow(rowNum);
-                row = Lists.asList(Integer.valueOf(rowNum), row).toArray(new Object[row.length + 1]);
+                row = Lists.asList(rowNum, row).toArray(new Object[row.length + 1]);
                 diffDetailTable.addRow(row);
             }
             writer.write(new SortedTable(diffDetailTable, new Column[]{COLUMN_ROW_INDEX}));
@@ -242,23 +256,25 @@ public class DataSetCompare implements Compare {
                     .setDetailRows(diffDetailTable)
                     .build());
         }
+    }
+
+    protected void writeAddRows(ComparableTable newTable, IDataSetWriter writer, Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists, Set<CompareKeys> addRows) throws DataSetException {
         if (addRows.size() > 0) {
             DefaultTable diffDetailTable = toDiffTable(newTable, "$ADD");
             for (CompareKeys targetKey : addRows) {
                 Map.Entry<Integer, Object[]> row = newRowLists.get(targetKey);
-                Object[] convertRow = Lists.asList(Integer.valueOf(row.getKey()), row.getValue()).toArray(new Object[row.getValue().length + 1]);
+                Object[] convertRow = Lists.asList(row.getKey(), row.getValue()).toArray(new Object[row.getValue().length + 1]);
                 diffDetailTable.addRow(convertRow);
             }
             writer.write(new SortedTable(diffDetailTable, new Column[]{COLUMN_ROW_INDEX}));
             this.results.add(getBuilder(CompareDiff.Type.KEY_ADD)
-                    .setTargetName(oldTable.getTableMetaData().getTableName())
+                    .setTargetName(newTable.getTableMetaData().getTableName())
                     .setRows(addRows.size())
                     .setOldDef("0")
                     .setNewDef(String.valueOf(addRows.size()))
                     .setDetailRows(diffDetailTable)
                     .build());
         }
-        writer.close();
     }
 
     protected void rowCount(ComparableTable oldTable, ComparableTable newTable) {
