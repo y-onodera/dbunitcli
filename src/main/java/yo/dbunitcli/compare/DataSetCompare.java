@@ -232,13 +232,13 @@ public class DataSetCompare implements Compare {
                         .setRows(modifyColumns.getValue().size())
                         .build());
             }
-            writer.write(diffDetailTable);
+            writer.write(new SortedTable(diffDetailTable, diffDetailTable.getTableMetaData().getPrimaryKeys()));
         }
     }
 
     protected void writeDeleteRows(ComparableTable oldTable, IDataSetWriter writer, List<Integer> deleteRows) throws DataSetException {
         if (deleteRows.size() > 0) {
-            DefaultTable diffDetailTable = toDiffTable(oldTable, "$DELETE");
+            DefaultTable diffDetailTable = toITable(oldTable, "$DELETE");
             for (int rowNum : deleteRows) {
                 Object[] row = oldTable.getRow(rowNum);
                 row = Lists.asList(rowNum, row).toArray(new Object[row.length + 1]);
@@ -257,7 +257,7 @@ public class DataSetCompare implements Compare {
 
     protected void writeAddRows(ComparableTable newTable, IDataSetWriter writer, Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists, Set<CompareKeys> addRows) throws DataSetException {
         if (addRows.size() > 0) {
-            DefaultTable diffDetailTable = toDiffTable(newTable, "$ADD");
+            DefaultTable diffDetailTable = toITable(newTable, "$ADD");
             for (CompareKeys targetKey : addRows) {
                 Map.Entry<Integer, Object[]> row = newRowLists.get(targetKey);
                 Object[] convertRow = Lists.asList(row.getKey(), row.getValue()).toArray(new Object[row.getValue().length + 1]);
@@ -287,7 +287,7 @@ public class DataSetCompare implements Compare {
         }
     }
 
-    private DefaultTable toDiffTable(ComparableTable oldTable, String aTableName) throws DataSetException {
+    private DefaultTable toITable(ComparableTable oldTable, String aTableName) throws DataSetException {
         ITableMetaData origin = oldTable.getTableMetaData();
         Column[] columns = Lists.asList(COLUMN_ROW_INDEX, origin.getColumns()).toArray(new Column[origin.getColumns().length + 1]);
         DefaultTableMetaData metaData = new DefaultTableMetaData(origin.getTableName() + aTableName, columns, new String[]{COLUMN_NAME_ROW_INDEX});

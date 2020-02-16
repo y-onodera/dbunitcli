@@ -23,15 +23,12 @@ public class DiffTable extends ComparableTable {
                 , new Column("$ROW_ORIGINAL", DataType.UNKNOWN)
                 , new Column("$DIFF_COLUMN_INDEXES", DataType.UNKNOWN)
         ).toArray(new Column[columnLength + 4]);
-        Column[] primaryKeys = metaData.getPrimaryKeys();
-        if (primaryKeys.length > 0) {
-            primaryKeys = Lists.newArrayList(columns[1], columns[0]).toArray(new Column[2]);
-        }
+        Column[] primaryKeys = Lists.newArrayList(columns[1], columns[0]).toArray(new Column[2]);
         DefaultTableMetaData newMetaData = new DefaultTableMetaData(metaData.getTableName() + "$MODIFY", columns, primaryKeys);
         return new DiffTable(newMetaData);
     }
 
-    private DiffTable(ITableMetaData metaData) {
+    private DiffTable(ITableMetaData metaData) throws DataSetException {
         super(metaData, Lists.newArrayList(), null);
     }
 
