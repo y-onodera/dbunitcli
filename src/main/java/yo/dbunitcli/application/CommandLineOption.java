@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import com.google.common.collect.Lists;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseConnection;
@@ -13,21 +12,14 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.ColumnSetting;
 import yo.dbunitcli.dataset.*;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Properties;
 
 abstract public class CommandLineOption {
@@ -63,13 +55,9 @@ abstract public class CommandLineOption {
 
     private Properties jdbcProp;
 
-    private ColumnSetting.Builder comparisonKeys = ColumnSetting.builder();
-
-    private ColumnSetting.Builder excludeColumns = ColumnSetting.builder();
-
-    private ColumnSetting.Builder orderColumns = ColumnSetting.builder();
-
     private final Parameter parameter;
+
+    private ColumnSettings columnSettings;
 
     public CommandLineOption(Parameter param) {
         this.parameter = param;
@@ -100,15 +88,15 @@ abstract public class CommandLineOption {
     }
 
     public ColumnSetting getComparisonKeys() {
-        return this.comparisonKeys.build();
+        return this.columnSettings.getComparisonKeys();
     }
 
     public ColumnSetting getExcludeColumns() {
-        return this.excludeColumns.build();
+        return this.columnSettings.getExcludeColumns();
     }
 
     public ColumnSetting getOrderColumns() {
-        return this.orderColumns.build();
+        return this.columnSettings.getOrderColumns();
     }
 
     public Parameter getParameter() {
@@ -216,84 +204,9 @@ abstract public class CommandLineOption {
 
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         try {
-            JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(this.setting), "windows-31j"));
-            JsonObject setting = jsonReader.read()
-                    .asJsonObject();
-            this.configureSetting(setting);
-            this.configureCommonSetting(setting);
+            this.columnSettings = ColumnSettings.builder().build(this.setting);
         } catch (IOException e) {
             throw new CmdLineException(parser, e);
-        }
-    }
-
-    protected void configureSetting(JsonObject setting) {
-        if (!setting.containsKey("settings")) {
-            return;
-        }
-        setting.getJsonArray("settings")
-                .forEach(v -> {
-                    JsonObject json = v.asJsonObject();
-                    if (json.containsKey("name")) {
-                        String file = json.getString("name");
-                        ColumnSetting.Strategy strategy = ColumnSetting.Strategy.BY_NAME;
-                        this.addComparisonKeys(strategy, json, file);
-                        this.addExcludeColumns(strategy, json, file);
-                        this.addSortColumns(strategy, json, file);
-                    } else if (json.containsKey("pattern")) {
-                        String file = json.getString("pattern");
-                        ColumnSetting.Strategy strategy = ColumnSetting.Strategy.PATTERN;
-                        this.addComparisonKeys(strategy, json, file);
-                        this.addExcludeColumns(strategy, json, file);
-                        this.addSortColumns(strategy, json, file);
-                    }
-                });
-    }
-
-    protected void configureCommonSetting(JsonObject setting) {
-        if (!setting.containsKey("commonSettings")) {
-            return;
-        }
-        setting.getJsonArray("commonSettings")
-                .forEach(v -> {
-                    JsonObject json = v.asJsonObject();
-                    addCommonSettings(json, "keys", this.comparisonKeys);
-                    addCommonSettings(json, "exclude", this.excludeColumns);
-                    addCommonSettings(json, "order", this.orderColumns);
-                });
-    }
-
-    protected void addCommonSettings(JsonObject json, String key, ColumnSetting.Builder targetSetting) {
-        if (json.containsKey(key)) {
-            JsonArray array = json.getJsonArray(key);
-            List<String> columns = Lists.newArrayList();
-            for (int i = 0, j = array.size(); i < j; i++) {
-                columns.add(array.getString(i));
-            }
-            targetSetting.addCommon(columns);
-        }
-    }
-
-    protected void addComparisonKeys(ColumnSetting.Strategy strategy, JsonObject json, String file) {
-        this.comparisonKeys.add(strategy, file, Lists.newArrayList());
-        this.addSettings(strategy, json, file, "keys", this.comparisonKeys);
-    }
-
-    protected void addExcludeColumns(ColumnSetting.Strategy strategy, JsonObject json, String file) {
-        this.addSettings(strategy, json, file, "exclude", this.excludeColumns);
-    }
-
-    protected void addSortColumns(ColumnSetting.Strategy strategy, JsonObject json, String file) {
-        this.addSettings(strategy, json, file, "order", this.orderColumns);
-    }
-
-    protected void addSettings(ColumnSetting.Strategy strategy, JsonObject json, String file, String key, ColumnSetting.Builder comparisonKeys) {
-        if (json.containsKey(key)) {
-            JsonArray keyArray = json.getJsonArray(key);
-            List<String> keys = Lists.newArrayList();
-            for (int i = 0, j = keyArray.size(); i < j; i++) {
-                keys.add(keyArray.getString(i));
-            }
-            comparisonKeys.add(strategy, file, keys);
         }
     }
 }

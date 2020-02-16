@@ -57,24 +57,31 @@ public class ComparableDataSetLoaderParam {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ComparableDataSetLoaderParam that = (ComparableDataSetLoaderParam) o;
-        return Objects.equal(this.src, that.src) &&
-                Objects.equal(this.encoding, that.encoding) &&
-                this.source == that.source &&
-                Objects.equal(this.excludeColumns, that.excludeColumns) &&
-                Objects.equal(this.headerSplitPattern, that.headerSplitPattern) &&
-                Objects.equal(this.dataSplitPattern, that.dataSplitPattern);
+        return Objects.equal(src, that.src) &&
+                Objects.equal(encoding, that.encoding) &&
+                source == that.source &&
+                Objects.equal(excludeColumns, that.excludeColumns) &&
+                Objects.equal(orderColumns, that.orderColumns) &&
+                Objects.equal(headerSplitPattern, that.headerSplitPattern) &&
+                Objects.equal(dataSplitPattern, that.dataSplitPattern);
     }
 
     @Override
     public String toString() {
         return "ComparableDataSetLoaderParam{" +
-                "src=" + this.src +
-                ", encoding='" + this.encoding + '\'' +
-                ", source=" + this.source +
-                ", excludeColumns=" + this.excludeColumns +
-                ", headerSplitPattern='" + this.headerSplitPattern + '\'' +
-                ", dataSplitPattern='" + this.dataSplitPattern + '\'' +
+                "src=" + src +
+                ", encoding='" + encoding + '\'' +
+                ", source=" + source +
+                ", excludeColumns=" + excludeColumns +
+                ", orderColumns=" + orderColumns +
+                ", headerSplitPattern='" + headerSplitPattern + '\'' +
+                ", dataSplitPattern='" + dataSplitPattern + '\'' +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(src, encoding, source, excludeColumns, orderColumns, headerSplitPattern, dataSplitPattern);
     }
 
     public static Builder builder() {
