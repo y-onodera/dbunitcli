@@ -28,6 +28,11 @@ public class ConvertTest {
     }
 
     @Test
+    public void testNoSetting() throws Exception {
+        Convert.main(new String[]{"@" + this.baseDir + "/paramFromRegexToXlsxNoSetting.txt"});
+    }
+
+    @Test
     public void testFromCsvToXlsx() throws Exception {
         Convert.main(new String[]{"@" + this.baseDir + "/paramFromCsvToXlsx.txt"});
     }

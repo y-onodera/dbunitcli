@@ -38,7 +38,7 @@ abstract public class CommandLineOption {
     @Option(name = "-outputEncoding", usage = "output csv file encoding")
     private String outputEncoding = "UTF-8";
 
-    @Option(name = "-setting", usage = "file define comparison settings", required = true)
+    @Option(name = "-setting", usage = "file define comparison settings")
     private File setting;
 
     @Option(name = "-jdbcProperties", usage = "use connect database. [url=,user=,pass=]")
@@ -204,7 +204,11 @@ abstract public class CommandLineOption {
 
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         try {
-            this.columnSettings = ColumnSettings.builder().build(this.setting);
+            if (this.setting != null) {
+                this.columnSettings = ColumnSettings.builder().build(this.setting);
+            } else {
+                this.columnSettings = ColumnSettings.builder().build();
+            }
         } catch (IOException e) {
             throw new CmdLineException(parser, e);
         }

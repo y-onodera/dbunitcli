@@ -55,7 +55,7 @@ public class ColumnSettings {
                     .build();
         }
 
-        protected ColumnSettings build() {
+        public ColumnSettings build() {
             return new ColumnSettings(this);
         }
 

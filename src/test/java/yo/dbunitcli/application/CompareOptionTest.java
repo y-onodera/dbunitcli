@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import yo.dbunitcli.dataset.ColumnSetting;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -38,13 +39,6 @@ public class CompareOptionTest {
         this.expectedException.expect(Exception.class);
         this.expectedException.expectMessage("Option \"-new\" is required");
         this.target.parse(new String[]{"-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"});
-    }
-
-    @Test
-    public void parseRequiredSettingFile() throws Exception {
-        this.expectedException.expect(Exception.class);
-        this.expectedException.expectMessage("Option \"-setting\" is required");
-        this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-old=" + this.baseDir + "/multidiff/old"});
     }
 
     @Test
@@ -117,4 +111,14 @@ public class CompareOptionTest {
                 , "-encoding=windows-31j"});
         assertEquals("windows-31j", this.target.getEncoding());
     }
+
+    @Test
+    public void parseNoSettingFile() throws Exception {
+        this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-old=" + this.baseDir + "/multidiff/old"});
+        assertEquals(ColumnSetting.builder().build(), this.target.getComparisonKeys());
+        assertEquals(ColumnSetting.builder().build(), this.target.getExcludeColumns());
+        assertEquals(ColumnSetting.builder().build(), this.target.getOrderColumns());
+    }
+
+
 }
