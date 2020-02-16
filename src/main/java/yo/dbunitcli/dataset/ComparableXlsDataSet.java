@@ -1,7 +1,6 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.DataSetException;
-import yo.dbunitcli.compare.ColumnSetting;
 
 import java.io.File;
 

@@ -4,7 +4,6 @@ import org.dbunit.dataset.DataSetException;
 import org.junit.Assert;
 import org.junit.Test;
 import yo.dbunitcli.application.Parameter;
-import yo.dbunitcli.compare.ColumnSetting;
 
 import java.io.File;
 

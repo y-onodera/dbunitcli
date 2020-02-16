@@ -7,7 +7,6 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.stream.IDataSetProducer;
-import yo.dbunitcli.compare.ColumnSetting;
 
 import java.util.List;
 import java.util.Map;

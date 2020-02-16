@@ -13,7 +13,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.compare.ColumnSetting;
+import yo.dbunitcli.dataset.ColumnSetting;
 import yo.dbunitcli.dataset.*;
 
 import javax.json.Json;

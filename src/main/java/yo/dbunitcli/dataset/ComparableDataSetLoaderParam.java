@@ -2,7 +2,6 @@ package yo.dbunitcli.dataset;
 
 import com.google.common.base.Objects;
 import yo.dbunitcli.application.DataSourceType;
-import yo.dbunitcli.compare.ColumnSetting;
 
 import java.io.File;
 
