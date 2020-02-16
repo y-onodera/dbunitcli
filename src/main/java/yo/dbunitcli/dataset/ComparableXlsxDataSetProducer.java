@@ -39,10 +39,14 @@ import java.util.List;
 public class ComparableXlsxDataSetProducer implements IDataSetProducer {
     private static final Logger logger = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
     private IDataSetConsumer consumer = new DefaultConsumer();
-    private File src;
+    private File[] src;
 
-    public ComparableXlsxDataSetProducer(File file) {
-        this.src = file;
+    public ComparableXlsxDataSetProducer(File src) {
+        if (src.isDirectory()) {
+            this.src = src.listFiles((file, s) -> s.endsWith(".xlsx"));
+        } else {
+            this.src = new File[]{src};
+        }
     }
 
     @Override
@@ -52,23 +56,25 @@ public class ComparableXlsxDataSetProducer implements IDataSetProducer {
 
     @Override
     public void produce() throws DataSetException {
-        logger.info("produceFromFile(theDataFile={}) - start", src);
+        for (File sourceFile : this.src) {
+            logger.info("produceFromFile(theDataFile={}) - start", sourceFile);
 
-        try (OPCPackage pkg = OPCPackage.open(this.src)) {
-            ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);
-            XSSFReader xssfReader = new XSSFReader(pkg);
-            StylesTable styles = xssfReader.getStylesTable();
-            XSSFReader.SheetIterator iterator = XSSFReader.SheetIterator.class.cast(xssfReader.getSheetsData());
-            int index = 0;
-            while (iterator.hasNext()) {
-                try (InputStream stream = iterator.next()) {
-                    String sheetName = iterator.getSheetName();
-                    logger.info("produceFromSheet - start {} [index={}]", sheetName, index++);
-                    processSheet(styles, strings, new SheetToTable(sheetName, this.consumer), stream);
+            try (OPCPackage pkg = OPCPackage.open(sourceFile)) {
+                ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);
+                XSSFReader xssfReader = new XSSFReader(pkg);
+                StylesTable styles = xssfReader.getStylesTable();
+                XSSFReader.SheetIterator iterator = XSSFReader.SheetIterator.class.cast(xssfReader.getSheetsData());
+                int index = 0;
+                while (iterator.hasNext()) {
+                    try (InputStream stream = iterator.next()) {
+                        String sheetName = iterator.getSheetName();
+                        logger.info("produceFromSheet - start {} [index={}]", sheetName, index++);
+                        processSheet(styles, strings, new SheetToTable(sheetName, this.consumer), stream);
+                    }
                 }
+            } catch (IOException | SAXException | OpenXML4JException e) {
+                throw new DataSetException(e);
             }
-        } catch (IOException | SAXException | OpenXML4JException e) {
-            throw new DataSetException(e);
         }
     }
 

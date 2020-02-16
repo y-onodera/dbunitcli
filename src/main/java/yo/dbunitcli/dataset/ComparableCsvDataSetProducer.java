@@ -25,7 +25,7 @@ public class ComparableCsvDataSetProducer implements IDataSetProducer {
     private File[] src;
     private String encoding;
 
-    public ComparableCsvDataSetProducer(File src, String encoding)  {
+    public ComparableCsvDataSetProducer(File src, String encoding) {
         if (src.isDirectory()) {
             this.src = src.listFiles((file, s) -> s.endsWith(".csv"));
         } else {

@@ -29,7 +29,7 @@ public class ComparableXlsDataSetProducer implements IDataSetProducer, HSSFListe
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
     private IDataSetConsumer consumer = new DefaultConsumer();
-    private File src;
+    private File[] src;
     private POIFSFileSystem fs;
     private String tableName;
     private List<String> rowValues = Lists.newArrayList();
@@ -57,7 +57,11 @@ public class ComparableXlsDataSetProducer implements IDataSetProducer, HSSFListe
     private List<BoundSheetRecord> boundSheetRecords = new ArrayList<>();
 
     public ComparableXlsDataSetProducer(File src) {
-        this.src = src;
+        if (src.isDirectory()) {
+            this.src = src.listFiles((file, s) -> s.endsWith(".xls"));
+        } else {
+            this.src = new File[]{src};
+        }
     }
 
     @Override
@@ -68,26 +72,28 @@ public class ComparableXlsDataSetProducer implements IDataSetProducer, HSSFListe
 
     @Override
     public void produce() throws DataSetException {
-        logger.info("produceFromFile(theDataFile={}) - start", src);
+        for (File sourceFile : this.src) {
+            logger.info("produceFromFile(theDataFile={}) - start", sourceFile);
 
-        try (POIFSFileSystem newFs = new POIFSFileSystem(this.src)) {
-            this.fs = newFs;
-            MissingRecordAwareHSSFListener listener = new MissingRecordAwareHSSFListener(this);
-            this.formatListener = new FormatTrackingHSSFListener(listener);
+            try (POIFSFileSystem newFs = new POIFSFileSystem(sourceFile)) {
+                this.fs = newFs;
+                MissingRecordAwareHSSFListener listener = new MissingRecordAwareHSSFListener(this);
+                this.formatListener = new FormatTrackingHSSFListener(listener);
 
-            HSSFEventFactory factory = new HSSFEventFactory();
-            HSSFRequest request = new HSSFRequest();
+                HSSFEventFactory factory = new HSSFEventFactory();
+                HSSFRequest request = new HSSFRequest();
 
-            this.workbookBuildingListener = new EventWorkbookBuilder.SheetRecordCollectingListener(formatListener);
-            request.addListenerForAllRecords(this.workbookBuildingListener);
-            this.consumer.startDataSet();
-            factory.processWorkbookEvents(request, this.fs);
-            if (this.isStartTable) {
-                this.consumer.endTable();
+                this.workbookBuildingListener = new EventWorkbookBuilder.SheetRecordCollectingListener(formatListener);
+                request.addListenerForAllRecords(this.workbookBuildingListener);
+                this.consumer.startDataSet();
+                factory.processWorkbookEvents(request, this.fs);
+                if (this.isStartTable) {
+                    this.consumer.endTable();
+                }
+                this.consumer.endDataSet();
+            } catch (IOException e) {
+                throw new DataSetException(e);
             }
-            this.consumer.endDataSet();
-        } catch (IOException e) {
-            throw new DataSetException(e);
         }
     }
 
