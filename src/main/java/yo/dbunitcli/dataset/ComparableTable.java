@@ -34,6 +34,10 @@ public class ComparableTable implements ITable {
         this.rowComparator = comparator;
     }
 
+    public boolean isSorted() {
+        return this.rowComparator != null;
+    }
+
     public List<Map<String, Object>> toMap() throws DataSetException {
         List<Map<String, Object>> result = Lists.newArrayList();
         Column[] columns = this.getTableMetaData().getColumns();
@@ -123,7 +127,7 @@ public class ComparableTable implements ITable {
     }
 
     protected int getOriginalRowIndex(int row) {
-        if (this.rowComparator == null) {
+        if (!this.isSorted()) {
             return row;
         }
         if (this._indexes == null) {

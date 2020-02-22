@@ -1,11 +1,9 @@
 package yo.dbunitcli.compare;
 
 import com.google.common.collect.Lists;
-import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTableMetaData;
-import org.dbunit.dataset.ITableMetaData;
+import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
+import org.dbunit.dataset.datatype.TypeCastException;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.CompareKeys;
 
@@ -19,8 +17,8 @@ public class DiffTable extends ComparableTable {
         Column[] columns = toList(
                 metaData.getColumns()
                 , new Column("$MODIFY", DataType.UNKNOWN)
-                , new Column(COLUMN_ROW_AFTER_SORT, DataType.UNKNOWN)
-                , new Column("$ROW_ORIGINAL", DataType.UNKNOWN)
+                , new Column(COLUMN_ROW_AFTER_SORT, DataType.NUMERIC)
+                , new Column("$ROW_ORIGINAL", DataType.NUMERIC)
                 , new Column("$DIFF_COLUMN_INDEXES", DataType.UNKNOWN)
         ).toArray(new Column[columnLength + 4]);
         Column[] primaryKeys = Lists.newArrayList(columns[1], columns[0]).toArray(new Column[2]);
@@ -28,21 +26,21 @@ public class DiffTable extends ComparableTable {
         return new DiffTable(newMetaData);
     }
 
-    private DiffTable(ITableMetaData metaData) throws DataSetException {
+    private DiffTable(ITableMetaData metaData) {
         super(metaData, Lists.newArrayList(), null);
     }
 
     public void addRow(CompareKeys compareKeys, Integer key, Object[] oldRow, Object[] newRow) throws DataSetException {
-        this.addRow(toList(oldRow
-                , "OLD"
-                , String.valueOf(compareKeys.getRowNum())
-                , String.valueOf(compareKeys.getOldRowNum())
-                , getIndexColumn(key))
-                .toArray(new Object[oldRow.length + 4]));
         this.addRow(toList(newRow,
                 "NEW"
-                , String.valueOf(compareKeys.getRowNum())
-                , String.valueOf(compareKeys.getNewRowNum())
+                , compareKeys.getRowNum()
+                , compareKeys.getNewRowNum()
+                , getIndexColumn(key))
+                .toArray(new Object[oldRow.length + 4]));
+        this.addRow(toList(oldRow
+                , "OLD"
+                , compareKeys.getRowNum()
+                , compareKeys.getOldRowNum()
                 , getIndexColumn(key))
                 .toArray(new Object[oldRow.length + 4]));
     }
@@ -67,9 +65,10 @@ public class DiffTable extends ComparableTable {
     }
 
     protected String getIndexColumn(Integer key) throws DataSetException {
-        return String.format("%s[%d]", this.getTableMetaData().getColumns()[key.intValue() + 4].getColumnName(), key);
+        return String.format("%s[%d]", this.getTableMetaData().getColumns()[key + 4].getColumnName(), key);
     }
 
+    @SafeVarargs
     protected static <T> List<T> toList(T[] otherValues, T... newValues) {
         List<T> result = Lists.newArrayList(newValues);
         result.addAll(Lists.newArrayList(otherValues));

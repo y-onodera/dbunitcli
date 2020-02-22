@@ -233,7 +233,9 @@ public class DataSetCompare implements Compare {
                         .setRows(modifyColumns.getValue().size())
                         .build());
             }
-            writer.write(new SortedTable(diffDetailTable, diffDetailTable.getTableMetaData().getPrimaryKeys()));
+            SortedTable sortedTable = new SortedTable(diffDetailTable, diffDetailTable.getTableMetaData().getPrimaryKeys());
+            sortedTable.setUseComparable(true);
+            writer.write(sortedTable);
         }
     }
 
