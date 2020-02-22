@@ -20,7 +20,7 @@ public class CompareTest {
 
     @Before
     public void setUp() throws UnsupportedEncodingException {
-        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(),"MS932");
+        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(),"UTF-8");
     }
 
 

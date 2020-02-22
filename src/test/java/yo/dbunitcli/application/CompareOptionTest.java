@@ -24,7 +24,7 @@ public class CompareOptionTest {
     @Before
     public void setUp() throws UnsupportedEncodingException {
         this.target = new CompareOption();
-        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(),"MS932");
+        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(),"UTF-8");
     }
 
     @Test
