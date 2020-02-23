@@ -45,11 +45,11 @@ public class ParameterizeOption extends CommandLineOption {
     public String[] createArgs(Parameter aParam) {
         ST st = new ST(this.templateArgs, '$', '$');
         st.add("rowNumber", aParam.getRowNumber());
-        aParam.getMap().entrySet().forEach(it -> st.add(it.getKey(), it.getValue()));
+        aParam.getMap().forEach(st::add);
         return st.render().split("\\r?\\n");
     }
 
-    public Command createCommand() {
+    public Command<?> createCommand() {
         switch (this.cmd) {
             case "compare":
                 return new Compare();
