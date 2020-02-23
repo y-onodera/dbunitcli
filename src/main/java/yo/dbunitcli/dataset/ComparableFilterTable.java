@@ -13,20 +13,23 @@ public class ComparableFilterTable extends ComparableTable {
 
     private final List<Integer> filterColumnIndex = Lists.newArrayList();
 
-    public static ComparableTable createFrom(ITable table, Column[] orderColumns, IColumnFilter iColumnFilter) throws DataSetException {
+    public static ComparableTable createFrom(ITable table, Column[] orderColumns, ColumnExpression additionalExpression, IColumnFilter iColumnFilter) throws DataSetException {
         try {
-            return new ComparableFilterTable(table.getTableMetaData(), getOriginRows(table), getComparator(table, orderColumns), iColumnFilter);
+            return new ComparableFilterTable(table.getTableMetaData()
+                    , additionalExpression.apply(new FilteredTableMetaData(table.getTableMetaData(), iColumnFilter))
+                    , getOriginRows(table)
+                    , getComparator(table, orderColumns));
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new DataSetException(e);
         }
     }
 
-    public ComparableFilterTable(ITableMetaData tableMetaData, List<Object[]> values, Comparator<Object> comparator, IColumnFilter iColumnFilter) throws DataSetException {
-        super(new ColumnFilterTable(new DefaultTable(tableMetaData), iColumnFilter).getTableMetaData(), values, comparator);
-        Set<Column> noFilter = Sets.newHashSet(tableMetaData.getColumns());
-        Set<Column> filtered = Sets.newHashSet(getDelegateMetaData().getColumns());
+    protected ComparableFilterTable(ITableMetaData originMetaData, AddExpressionTableMetaData tableMetaData, List<Object[]> values, Comparator<Object> comparator) throws DataSetException {
+        super(tableMetaData, values, comparator);
+        Set<Column> noFilter = Sets.newHashSet(originMetaData.getColumns());
+        Set<Column> filtered = Sets.newHashSet(tableMetaData.getColumns());
         for (Column column : Sets.difference(noFilter, filtered)) {
-            this.filterColumnIndex.add(tableMetaData.getColumnIndex(column.getColumnName()));
+            this.filterColumnIndex.add(originMetaData.getColumnIndex(column.getColumnName()));
         }
     }
 

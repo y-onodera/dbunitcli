@@ -14,18 +14,15 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractComparableDataSet extends CachedDataSet implements ComparableDataSet {
 
-    private ColumnSetting compareSetting;
-
-    private ColumnSetting orderSetting;
+    private final ColumnSettings compareSettings;
 
     public AbstractComparableDataSet(IDataSetProducer producer) throws DataSetException {
-        this(producer, ColumnSetting.builder().build(), ColumnSetting.builder().build());
+        this(producer, ComparableDataSetLoaderParam.builder().build());
     }
 
-    public AbstractComparableDataSet(IDataSetProducer producer, ColumnSetting excludeColumns, ColumnSetting orderColumns) throws DataSetException {
+    public AbstractComparableDataSet(IDataSetProducer producer, ComparableDataSetLoaderParam param) throws DataSetException {
         super(producer);
-        this.compareSetting = excludeColumns;
-        this.orderSetting = orderColumns;
+        this.compareSettings = param.getColumnSettings();
     }
 
     @Override
@@ -40,23 +37,16 @@ public abstract class AbstractComparableDataSet extends CachedDataSet implements
 
     @Override
     public ComparableTable getTable(String tableName) throws DataSetException {
-        List<Column> excludeColumns = this.compareSetting.getColumns(tableName)
-                .stream()
-                .map(it -> new Column(it, DataType.UNKNOWN))
-                .collect(Collectors.toList());
+        List<Column> excludeColumns = this.compareSettings.getExcludeColumns(tableName);
         if (excludeColumns.size() > 0) {
             return ComparableFilterTable.createFrom(super.getTable(tableName)
                     , this.orderColumns(tableName)
+                    , this.columnExpression(tableName)
                     , this.toFilter(excludeColumns));
         }
-        return ComparableTable.createFrom(super.getTable(tableName), this.orderColumns(tableName));
-    }
-
-    private Column[] orderColumns(String tableName) {
-        return this.orderSetting.getColumns(tableName)
-                .stream()
-                .map(it -> new Column(it, DataType.UNKNOWN))
-                .toArray(Column[]::new);
+        return ComparableTable.createFrom(super.getTable(tableName)
+                , this.orderColumns(tableName)
+                , this.columnExpression(tableName));
     }
 
     @Override
@@ -69,9 +59,17 @@ public abstract class AbstractComparableDataSet extends CachedDataSet implements
         }
     }
 
+    private ColumnExpression columnExpression(String tableName) {
+        return this.compareSettings.getExpression(tableName);
+    }
+
+    private Column[] orderColumns(String tableName) {
+        return this.compareSettings.getOrderColumns(tableName);
+    }
+
     private DefaultColumnFilter toFilter(List<Column> excludeColumns) {
         DefaultColumnFilter result = new DefaultColumnFilter();
-        result.excludeColumns(excludeColumns.toArray(new Column[excludeColumns.size()]));
+        result.excludeColumns(excludeColumns.toArray(new Column[0]));
         return result;
     }
 }

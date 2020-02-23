@@ -1,0 +1,4 @@
+package,Class,method1,method2,value1,value2
+jp.co.some.company,SomeClass,true,true,1,2
+jp.co.some.company,AnotherClass,false,true,2,3
+jp.co.some.company.sub,OtherClass,true,false,3,4

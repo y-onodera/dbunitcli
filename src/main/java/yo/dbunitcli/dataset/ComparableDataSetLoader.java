@@ -6,13 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.Parameter;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
 public class ComparableDataSetLoader {
 
     private static Logger logger = LoggerFactory.getLogger(ComparableDataSetLoader.class);
+
     private final IDatabaseConnection connection;
 
     private final Parameter parameter;
@@ -31,8 +31,7 @@ public class ComparableDataSetLoader {
     }
 
     public List<Map<String, Object>> loadParam(ComparableDataSetLoaderParam param) throws DataSetException {
-        ComparableDataSet dataSet = this.loadDataSet(param);
-        return dataSet.toMap();
+        return this.loadDataSet(param).toMap();
     }
 
     public ComparableDataSet loadDataSet(ComparableDataSetLoaderParam param) throws DataSetException {
@@ -54,15 +53,5 @@ public class ComparableDataSetLoader {
                 return new ComparableRegexSplitDataSet(param);
         }
         return null;
-    }
-
-    public ComparableDataSet loadDataSet(File file, String encoding) throws DataSetException {
-        final String fileName = file.getName();
-        if (fileName.endsWith(".xlsx")) {
-            return new ComparableXlsxDataSet(file);
-        } else if (fileName.endsWith(".xls")) {
-            return new ComparableXlsDataSet(file);
-        }
-        return new ComparableCSVDataSet(file, encoding);
     }
 }

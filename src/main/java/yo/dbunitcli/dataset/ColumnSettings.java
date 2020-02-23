@@ -1,13 +1,16 @@
 package yo.dbunitcli.dataset;
 
 import com.google.common.collect.Lists;
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.datatype.DataType;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import java.io.*;
+import javax.json.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ColumnSettings {
 
@@ -17,10 +20,13 @@ public class ColumnSettings {
 
     private final ColumnSetting orderColumns;
 
+    private final ColumnSetting expressionColumns;
+
     public ColumnSettings(Builder builder) {
         this.comparisonKeys = builder.comparisonKeys.build();
         this.excludeColumns = builder.excludeColumns.build();
         this.orderColumns = builder.orderColumns.build();
+        this.expressionColumns = builder.expressionColumns.build();
     }
 
     public static Builder builder() {
@@ -39,6 +45,30 @@ public class ColumnSettings {
         return orderColumns;
     }
 
+    public ColumnSetting getExpressionColumns() {
+        return expressionColumns;
+    }
+
+    public List<Column> getExcludeColumns(String tableName) {
+        return this.getExcludeColumns()
+                .getColumns(tableName)
+                .stream()
+                .map(it -> new Column(it, DataType.UNKNOWN))
+                .collect(Collectors.toList());
+    }
+
+    public Column[] getOrderColumns(String tableName) {
+        return this.getOrderColumns()
+                .getColumns(tableName)
+                .stream()
+                .map(it -> new Column(it, DataType.UNKNOWN))
+                .toArray(Column[]::new);
+    }
+
+    public ColumnExpression getExpression(String tableName) {
+        return this.getExpressionColumns().getExpression(tableName);
+    }
+
     public static class Builder {
         private ColumnSetting.Builder comparisonKeys = ColumnSetting.builder();
 
@@ -46,8 +76,10 @@ public class ColumnSettings {
 
         private ColumnSetting.Builder orderColumns = ColumnSetting.builder();
 
+        private ColumnSetting.Builder expressionColumns = ColumnSetting.builder();
+
         public ColumnSettings build(File setting) throws IOException {
-            JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(setting), "windows-31j"));
+            JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(setting), "MS932"));
             JsonObject settingJson = jsonReader.read()
                     .asJsonObject();
             return this.configureSetting(settingJson)
@@ -67,20 +99,20 @@ public class ColumnSettings {
                     .forEach(v -> {
                         JsonObject json = v.asJsonObject();
                         if (json.containsKey("name")) {
-                            String file = json.getString("name");
-                            ColumnSetting.Strategy strategy = ColumnSetting.Strategy.BY_NAME;
-                            this.addComparisonKeys(strategy, json, file);
-                            this.addExcludeColumns(strategy, json, file);
-                            this.addSortColumns(strategy, json, file);
+                            this.addSettings(json, "name", ColumnSetting.Strategy.BY_NAME);
                         } else if (json.containsKey("pattern")) {
-                            String file = json.getString("pattern");
-                            ColumnSetting.Strategy strategy = ColumnSetting.Strategy.PATTERN;
-                            this.addComparisonKeys(strategy, json, file);
-                            this.addExcludeColumns(strategy, json, file);
-                            this.addSortColumns(strategy, json, file);
+                            this.addSettings(json, "pattern", ColumnSetting.Strategy.PATTERN);
                         }
                     });
             return this;
+        }
+
+        protected void addSettings(JsonObject json, String name, ColumnSetting.Strategy strategy) {
+            String file = json.getString(name);
+            this.addComparisonKeys(strategy, json, file);
+            this.addExcludeColumns(strategy, json, file);
+            this.addSortColumns(strategy, json, file);
+            this.addExpression(expressionColumns.getExpressionBuilder(strategy, file), json);
         }
 
         protected Builder configureCommonSetting(JsonObject setting) {
@@ -90,9 +122,10 @@ public class ColumnSettings {
             setting.getJsonArray("commonSettings")
                     .forEach(v -> {
                         JsonObject json = v.asJsonObject();
-                        addCommonSettings(json, "keys", this.comparisonKeys);
-                        addCommonSettings(json, "exclude", this.excludeColumns);
-                        addCommonSettings(json, "order", this.orderColumns);
+                        this.addCommonSettings(json, "keys", this.comparisonKeys);
+                        this.addCommonSettings(json, "exclude", this.excludeColumns);
+                        this.addCommonSettings(json, "order", this.orderColumns);
+                        this.addExpression(this.expressionColumns.getCommonExpressionBuilder(), json);
                     });
             return this;
         }
@@ -129,6 +162,22 @@ public class ColumnSettings {
                     keys.add(keyArray.getString(i));
                 }
                 comparisonKeys.add(strategy, file, keys);
+            }
+        }
+
+        protected void addExpression(ColumnExpression.Builder builder, JsonObject json) {
+            this.addExpression(builder, json, ColumnExpression.ParameterType.STRING);
+            this.addExpression(builder, json, ColumnExpression.ParameterType.BOOLEAN);
+            this.addExpression(builder, json, ColumnExpression.ParameterType.NUMBER);
+        }
+
+        protected void addExpression(ColumnExpression.Builder builder, JsonObject settingJson, ColumnExpression.ParameterType type) {
+            if (settingJson.containsKey(type.keyName())) {
+                JsonArray stringExpressions = settingJson.getJsonArray(type.keyName());
+                for (int i = 0, j = stringExpressions.size(); i < j; i++) {
+                    stringExpressions.getJsonObject(i)
+                            .forEach((key, value) -> builder.addExpression(type, key, ((JsonString)value).getString()));
+                }
             }
         }
     }

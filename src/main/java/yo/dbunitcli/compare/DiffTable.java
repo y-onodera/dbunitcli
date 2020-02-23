@@ -1,9 +1,12 @@
 package yo.dbunitcli.compare;
 
 import com.google.common.collect.Lists;
-import org.dbunit.dataset.*;
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.DefaultTableMetaData;
+import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
-import org.dbunit.dataset.datatype.TypeCastException;
+import yo.dbunitcli.dataset.ColumnExpression;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.CompareKeys;
 
@@ -26,8 +29,8 @@ public class DiffTable extends ComparableTable {
         return new DiffTable(newMetaData);
     }
 
-    private DiffTable(ITableMetaData metaData) {
-        super(metaData, Lists.newArrayList(), null);
+    private DiffTable(ITableMetaData metaData) throws DataSetException {
+        super(ColumnExpression.builder().build().apply(metaData), Lists.newArrayList(), null);
     }
 
     public void addRow(CompareKeys compareKeys, Integer key, Object[] oldRow, Object[] newRow) throws DataSetException {

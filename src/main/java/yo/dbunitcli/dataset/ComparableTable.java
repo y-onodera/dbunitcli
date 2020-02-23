@@ -3,7 +3,6 @@ package yo.dbunitcli.dataset;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.dbunit.dataset.*;
-import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.datatype.TypeCastException;
 
 import java.lang.reflect.Field;
@@ -14,22 +13,28 @@ public class ComparableTable implements ITable {
 
     private Integer[] _indexes;
 
-    private Comparator<Object> rowComparator;
+    private final Comparator<Object> rowComparator;
 
     private final List<Object[]> values;
 
-    private ITableMetaData delegateMetaData;
+    private final AddExpressionTableMetaData addExpressionTableMetaData;
 
-    public static ComparableTable createFrom(ITable table, Column[] orderColumns) throws DataSetException {
+    public static ComparableTable createFrom(ITable table) throws DataSetException {
+        return createFrom(table, new Column[0], ColumnExpression.builder().build());
+    }
+
+    public static ComparableTable createFrom(ITable table, Column[] orderColumns, ColumnExpression additionalExpression) throws DataSetException {
         try {
-            return new ComparableTable(table.getTableMetaData(), getOriginRows(table), getComparator(table, orderColumns));
+            return new ComparableTable(additionalExpression.apply(table.getTableMetaData())
+                    , getOriginRows(table)
+                    , getComparator(table, orderColumns));
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new DataSetException(e);
         }
     }
 
-    protected ComparableTable(ITableMetaData delegateMetaData, List<Object[]> values, Comparator<Object> comparator) {
-        this.delegateMetaData = delegateMetaData;
+    protected ComparableTable(AddExpressionTableMetaData tableMetaData, List<Object[]> values, Comparator<Object> comparator) {
+        this.addExpressionTableMetaData = tableMetaData;
         this.values = values;
         this.rowComparator = comparator;
     }
@@ -54,7 +59,7 @@ public class ComparableTable implements ITable {
 
     @Override
     public ITableMetaData getTableMetaData() {
-        return this.delegateMetaData;
+        return this.addExpressionTableMetaData;
     }
 
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(List<String> keys) throws DataSetException {
@@ -98,7 +103,7 @@ public class ComparableTable implements ITable {
 
     @Override
     public Object getValue(int i, String s) throws DataSetException {
-        int j = this.delegateMetaData.getColumnIndex(s);
+        int j = this.addExpressionTableMetaData.getColumnIndex(s);
         return this.getValue(i, j);
     }
 
@@ -111,7 +116,7 @@ public class ComparableTable implements ITable {
         if (rowNum < 0 || rowNum >= this.values.size()) {
             throw new RowOutOfBoundsException("rowNum " + rowNum + " is out of range;current row size is " + this.values.size());
         }
-        return this.values.get(this.getOriginalRowIndex(rowNum));
+        return addExpressionTableMetaData.applyExpression(this.values.get(this.getOriginalRowIndex(rowNum)));
     }
 
     protected void addRow(Object[] row) {
@@ -122,8 +127,8 @@ public class ComparableTable implements ITable {
         this.getRow(row)[column] = newValue;
     }
 
-    protected ITableMetaData getDelegateMetaData() {
-        return this.delegateMetaData;
+    protected ITableMetaData getAddExpressionTableMetaData() {
+        return this.addExpressionTableMetaData;
     }
 
     protected int getOriginalRowIndex(int row) {
@@ -152,9 +157,7 @@ public class ComparableTable implements ITable {
             return new SortedTable.AbstractRowComparator(delegate, orderColumns) {
                 @Override
                 protected int compare(Column column, Object o, Object o1) throws TypeCastException {
-                    String stringValue1 = DataType.asString(o);
-                    String stringValue2 = DataType.asString(o1);
-                    return stringValue1.compareTo(stringValue2);
+                    return column.getDataType().compare(o, o1);
                 }
             };
         }

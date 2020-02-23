@@ -13,9 +13,7 @@ public class ComparableXlsxDataSet extends AbstractComparableDataSet {
     }
 
     public ComparableXlsxDataSet(ComparableDataSetLoaderParam param) throws DataSetException {
-        super(new ComparableXlsxDataSetProducer(param.getSrc())
-                , param.getExcludeColumns()
-                , param.getOrderColumns());
+        super(new ComparableXlsxDataSetProducer(param.getSrc()), param);
         this.src = param.getSrc();
     }
 

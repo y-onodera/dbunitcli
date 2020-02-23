@@ -95,12 +95,8 @@ abstract public class CommandLineOption {
         return this.columnSettings.getComparisonKeys();
     }
 
-    public ColumnSetting getExcludeColumns() {
-        return this.columnSettings.getExcludeColumns();
-    }
-
-    public ColumnSetting getOrderColumns() {
-        return this.columnSettings.getOrderColumns();
+    public ColumnSettings getColumnSettings() {
+        return this.columnSettings;
     }
 
     public Parameter getParameter() {
@@ -114,8 +110,7 @@ abstract public class CommandLineOption {
     public ComparableDataSetLoaderParam.Builder getDataSetParamBuilder() {
         return ComparableDataSetLoaderParam.builder()
                 .setEncoding(this.getEncoding())
-                .setExcludeColumns(this.getExcludeColumns())
-                .setOrderColumns(this.getOrderColumns())
+                .setColumnSettings(this.getColumnSettings())
                 .setHeaderSplitPattern(this.getRegHeaderSplit())
                 .setDataSplitPattern(this.getRegDataSplit());
     }

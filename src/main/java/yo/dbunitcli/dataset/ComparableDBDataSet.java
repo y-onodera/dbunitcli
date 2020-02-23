@@ -10,9 +10,7 @@ public class ComparableDBDataSet extends AbstractComparableDataSet {
     private final File src;
 
     public ComparableDBDataSet(IDatabaseConnection connection, ComparableDataSetLoaderParam param) throws DataSetException {
-        super(new ComparableDBDataSetProducer(connection, param.getSrc(), param.getEncoding())
-                , param.getExcludeColumns()
-                , param.getOrderColumns());
+        super(new ComparableDBDataSetProducer(connection, param.getSrc(), param.getEncoding()), param);
         this.src = param.getSrc();
     }
 

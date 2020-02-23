@@ -9,8 +9,7 @@ public class ComparableDataSetLoaderParam {
     private final File src;
     private final String encoding;
     private final DataSourceType source;
-    private final ColumnSetting excludeColumns;
-    private final ColumnSetting orderColumns;
+    private final ColumnSettings columnSettings;
     private final String headerSplitPattern;
     private final String dataSplitPattern;
 
@@ -18,10 +17,13 @@ public class ComparableDataSetLoaderParam {
         this.src = builder.getSrc();
         this.encoding = builder.getEncoding();
         this.source = builder.getSource();
-        this.excludeColumns = builder.getExcludeColumns();
-        this.orderColumns = builder.getOrderColumns();
+        this.columnSettings = builder.getColumnSettings();
         this.headerSplitPattern = builder.getHeaderSplitPattern();
         this.dataSplitPattern = builder.getDataSplitPattern();
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public File getSrc() {
@@ -36,12 +38,8 @@ public class ComparableDataSetLoaderParam {
         return this.source;
     }
 
-    public ColumnSetting getExcludeColumns() {
-        return this.excludeColumns;
-    }
-
-    public ColumnSetting getOrderColumns() {
-        return this.orderColumns;
+    public ColumnSettings getColumnSettings() {
+        return this.columnSettings;
     }
 
     public String getHeaderSplitPattern() {
@@ -60,8 +58,7 @@ public class ComparableDataSetLoaderParam {
         return Objects.equal(src, that.src) &&
                 Objects.equal(encoding, that.encoding) &&
                 source == that.source &&
-                Objects.equal(excludeColumns, that.excludeColumns) &&
-                Objects.equal(orderColumns, that.orderColumns) &&
+                Objects.equal(columnSettings, that.columnSettings) &&
                 Objects.equal(headerSplitPattern, that.headerSplitPattern) &&
                 Objects.equal(dataSplitPattern, that.dataSplitPattern);
     }
@@ -72,8 +69,7 @@ public class ComparableDataSetLoaderParam {
                 "src=" + src +
                 ", encoding='" + encoding + '\'' +
                 ", source=" + source +
-                ", excludeColumns=" + excludeColumns +
-                ", orderColumns=" + orderColumns +
+                ", columnSettings=" + columnSettings +
                 ", headerSplitPattern='" + headerSplitPattern + '\'' +
                 ", dataSplitPattern='" + dataSplitPattern + '\'' +
                 '}';
@@ -81,19 +77,14 @@ public class ComparableDataSetLoaderParam {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(src, encoding, source, excludeColumns, orderColumns, headerSplitPattern, dataSplitPattern);
-    }
-
-    public static Builder builder() {
-        return new Builder();
+        return Objects.hashCode(src, encoding, source, columnSettings, headerSplitPattern, dataSplitPattern);
     }
 
     public static class Builder {
         private File src;
         private String encoding;
         private DataSourceType source;
-        private ColumnSetting excludeColumns;
-        private ColumnSetting orderColumns;
+        private ColumnSettings columnSettings;
         private String headerSplitPattern;
         private String dataSplitPattern;
 
@@ -114,18 +105,11 @@ public class ComparableDataSetLoaderParam {
             return this.source;
         }
 
-        public ColumnSetting getExcludeColumns() {
-            if (this.excludeColumns == null) {
-                return ColumnSetting.builder().build();
+        public ColumnSettings getColumnSettings() {
+            if (this.columnSettings == null) {
+                return ColumnSettings.builder().build();
             }
-            return this.excludeColumns;
-        }
-
-        public ColumnSetting getOrderColumns() {
-            if (this.orderColumns == null) {
-                return ColumnSetting.builder().build();
-            }
-            return this.orderColumns;
+            return this.columnSettings;
         }
 
         public String getHeaderSplitPattern() {
@@ -146,13 +130,8 @@ public class ComparableDataSetLoaderParam {
             return this;
         }
 
-        public Builder setExcludeColumns(ColumnSetting excludeColumns) {
-            this.excludeColumns = excludeColumns;
-            return this;
-        }
-
-        public Builder setOrderColumns(ColumnSetting orderColumns) {
-            this.orderColumns = orderColumns;
+        public Builder setColumnSettings(ColumnSettings columnSettings) {
+            this.columnSettings = columnSettings;
             return this;
         }
 
@@ -169,5 +148,6 @@ public class ComparableDataSetLoaderParam {
         public ComparableDataSetLoaderParam build() {
             return new ComparableDataSetLoaderParam(this);
         }
+
     }
 }

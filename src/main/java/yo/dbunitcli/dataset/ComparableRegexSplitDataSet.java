@@ -12,8 +12,7 @@ public class ComparableRegexSplitDataSet extends AbstractComparableDataSet {
                         , param.getDataSplitPattern()
                         , param.getSrc()
                         , param.getEncoding())
-                , param.getExcludeColumns()
-                , param.getOrderColumns());
+                , param);
         this.src = param.getSrc();
     }
 

@@ -78,8 +78,7 @@ public class CompareOption extends CommandLineOption {
                 this.getDataSetParamBuilder()
                         .setSrc(this.getResultDir())
                         .setSource(DataSourceType.fromString(this.getResultType()))
-                        .setExcludeColumns(this.expectDetailSettings.getExcludeColumns())
-                        .setOrderColumns(this.expectDetailSettings.getOrderColumns())
+                        .setColumnSettings(this.expectDetailSettings)
                         .setEncoding(this.getOutputEncoding())
                         .build()
         );
@@ -90,8 +89,7 @@ public class CompareOption extends CommandLineOption {
                 this.getDataSetParamBuilder()
                         .setSrc(this.getExpected())
                         .setSource(DataSourceType.fromString(this.getResultType()))
-                        .setExcludeColumns(this.expectDetailSettings.getExcludeColumns())
-                        .setOrderColumns(this.expectDetailSettings.getOrderColumns())
+                        .setColumnSettings(this.expectDetailSettings)
                         .setEncoding(this.getOutputEncoding())
                         .build()
         );
