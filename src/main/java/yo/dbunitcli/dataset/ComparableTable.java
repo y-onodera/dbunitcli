@@ -44,17 +44,28 @@ public class ComparableTable implements ITable {
     }
 
     public List<Map<String, Object>> toMap() throws DataSetException {
+        return this.toMap(false);
+    }
+
+    public List<Map<String, Object>> toMap(boolean includeMetaData) throws DataSetException {
         List<Map<String, Object>> result = Lists.newArrayList();
         String tableName = this.getTableMetaData().getTableName();
         Column[] columns = this.getTableMetaData().getColumns();
         for (int rowNum = 0, total = this.values.size(); rowNum < total; rowNum++) {
             Object[] row = this.getRow(rowNum);
             Map<String, Object> map = Maps.newHashMap();
-            map.put("_tableName", tableName);
             for (int i = 0, j = row.length; i < j; i++) {
                 map.put(columns[i].getColumnName(), row[i]);
             }
-            result.add(map);
+            if (includeMetaData) {
+                Map<String, Object> withMetaDataMap = Maps.newHashMap();
+                withMetaDataMap.put("tableName", tableName);
+                withMetaDataMap.put("columns", columns);
+                withMetaDataMap.put("row", map);
+                result.add(withMetaDataMap);
+            } else {
+                result.add(map);
+            }
         }
         return result;
     }

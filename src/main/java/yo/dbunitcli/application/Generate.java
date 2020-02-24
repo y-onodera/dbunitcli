@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class Generate implements Command<GenerateOption> {
+
     private static final Logger logger = LoggerFactory.getLogger(Generate.class);
 
     public static void main(String[] strings) throws Exception {

@@ -14,6 +14,9 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
+import org.stringtemplate.v4.StringRenderer;
 import yo.dbunitcli.dataset.*;
 
 import java.io.File;
@@ -224,4 +227,14 @@ abstract public class CommandLineOption {
         }
     }
 
+    protected STGroup createSTGroup(File groupFile) {
+        STGroup stGroup;
+        if (groupFile == null) {
+            stGroup = new STGroup('$', '$');
+        } else {
+            stGroup = new STGroupFile(groupFile.getAbsolutePath(), '$', '$');
+        }
+        stGroup.registerRenderer(String.class, new StringRenderer());
+        return stGroup;
+    }
 }

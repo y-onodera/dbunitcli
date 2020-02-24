@@ -12,6 +12,7 @@ public class ComparableDataSetLoaderParam {
     private final ColumnSettings columnSettings;
     private final String headerSplitPattern;
     private final String dataSplitPattern;
+    private final boolean mapIncludeMetaData;
 
     public ComparableDataSetLoaderParam(Builder builder) {
         this.src = builder.getSrc();
@@ -20,6 +21,7 @@ public class ComparableDataSetLoaderParam {
         this.columnSettings = builder.getColumnSettings();
         this.headerSplitPattern = builder.getHeaderSplitPattern();
         this.dataSplitPattern = builder.getDataSplitPattern();
+        this.mapIncludeMetaData = builder.getMapIncludeMetaData();
     }
 
     public static Builder builder() {
@@ -50,17 +52,27 @@ public class ComparableDataSetLoaderParam {
         return this.dataSplitPattern;
     }
 
+    public boolean isMapIncludeMetaData() {
+        return mapIncludeMetaData;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ComparableDataSetLoaderParam that = (ComparableDataSetLoaderParam) o;
-        return Objects.equal(src, that.src) &&
+        return mapIncludeMetaData == that.mapIncludeMetaData &&
+                Objects.equal(src, that.src) &&
                 Objects.equal(encoding, that.encoding) &&
                 source == that.source &&
                 Objects.equal(columnSettings, that.columnSettings) &&
                 Objects.equal(headerSplitPattern, that.headerSplitPattern) &&
                 Objects.equal(dataSplitPattern, that.dataSplitPattern);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(src, encoding, source, columnSettings, headerSplitPattern, dataSplitPattern, mapIncludeMetaData);
     }
 
     @Override
@@ -72,12 +84,8 @@ public class ComparableDataSetLoaderParam {
                 ", columnSettings=" + columnSettings +
                 ", headerSplitPattern='" + headerSplitPattern + '\'' +
                 ", dataSplitPattern='" + dataSplitPattern + '\'' +
+                ", mapIncludeMetaData=" + mapIncludeMetaData +
                 '}';
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(src, encoding, source, columnSettings, headerSplitPattern, dataSplitPattern);
     }
 
     public static class Builder {
@@ -87,6 +95,7 @@ public class ComparableDataSetLoaderParam {
         private ColumnSettings columnSettings;
         private String headerSplitPattern;
         private String dataSplitPattern;
+        private boolean mapIncludeMetaData;
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -120,6 +129,10 @@ public class ComparableDataSetLoaderParam {
             return this.dataSplitPattern;
         }
 
+        public boolean getMapIncludeMetaData() {
+            return this.mapIncludeMetaData;
+        }
+
         public Builder setEncoding(String encoding) {
             this.encoding = encoding;
             return this;
@@ -142,6 +155,11 @@ public class ComparableDataSetLoaderParam {
 
         public Builder setDataSplitPattern(String dataSplitPattern) {
             this.dataSplitPattern = dataSplitPattern;
+            return this;
+        }
+
+        public Builder setMapIncludeMetaData(boolean includeMetaData) {
+            this.mapIncludeMetaData = includeMetaData;
             return this;
         }
 

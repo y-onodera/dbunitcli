@@ -13,6 +13,8 @@ public interface ComparableDataSet extends IDataSet, IDataSetConsumer {
 
     List<Map<String, Object>> toMap() throws DataSetException;
 
+    List<Map<String, Object>> toMap(boolean includeMetaData) throws DataSetException;
+
     @Override
     ComparableTable getTable(String tableName) throws DataSetException;
 

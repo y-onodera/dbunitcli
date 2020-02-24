@@ -50,7 +50,7 @@ public class GenerateOption extends ConvertOption {
         final ComparableDataSet dataSet = this.targetDataSet();
         switch (this.getUnit()) {
             case RECORD:
-                return dataSet.toMap().stream().map(it -> {
+                return dataSet.toMap(true).stream().map(it -> {
                     it.put("_paramMap", getParameter().getMap());
                     return it;
                 });
@@ -106,12 +106,7 @@ public class GenerateOption extends ConvertOption {
     @Override
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         super.populateSettings(parser);
-        if (this.templateGroup == null) {
-            this.stGroup = new STGroup('$', '$');
-        } else {
-            this.stGroup = new STGroupFile(this.templateGroup.getAbsolutePath(), '$', '$');
-        }
-        this.stGroup.registerRenderer(String.class, new StringRenderer());
+        this.stGroup = this.createSTGroup(this.templateGroup);
         try {
             this.templateString = Files.asCharSource(this.template, Charset.forName(getEncoding()))
                     .read();
