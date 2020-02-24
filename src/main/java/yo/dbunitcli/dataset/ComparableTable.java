@@ -20,12 +20,16 @@ public class ComparableTable implements ITable {
     private final AddExpressionTableMetaData addExpressionTableMetaData;
 
     public static ComparableTable createFrom(ITable table) throws DataSetException {
-        return createFrom(table, new Column[0], ColumnExpression.builder().build());
+        return createFrom(table, new Column[0], new Column[0], ColumnExpression.builder().build());
     }
 
-    public static ComparableTable createFrom(ITable table, Column[] orderColumns, ColumnExpression additionalExpression) throws DataSetException {
+    public static ComparableTable createFrom(ITable table, Column[] keyColumns, Column[] orderColumns, ColumnExpression additionalExpression) throws DataSetException {
         try {
-            return new ComparableTable(additionalExpression.apply(table.getTableMetaData())
+            AddExpressionTableMetaData tableMetaData = additionalExpression.apply(table.getTableMetaData());
+            if (keyColumns.length > 0) {
+                tableMetaData = tableMetaData.changePrimaryKey(keyColumns);
+            }
+            return new ComparableTable(tableMetaData
                     , getOriginRows(table)
                     , getComparator(table, orderColumns));
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -50,6 +54,7 @@ public class ComparableTable implements ITable {
     public List<Map<String, Object>> toMap(boolean includeMetaData) throws DataSetException {
         List<Map<String, Object>> result = Lists.newArrayList();
         String tableName = this.getTableMetaData().getTableName();
+        Column[] primaryKeys = this.getTableMetaData().getPrimaryKeys();
         Column[] columns = this.getTableMetaData().getColumns();
         for (int rowNum = 0, total = this.values.size(); rowNum < total; rowNum++) {
             Object[] row = this.getRow(rowNum);
@@ -61,6 +66,7 @@ public class ComparableTable implements ITable {
                 Map<String, Object> withMetaDataMap = Maps.newHashMap();
                 withMetaDataMap.put("tableName", tableName);
                 withMetaDataMap.put("columns", columns);
+                withMetaDataMap.put("primaryKeys", primaryKeys);
                 withMetaDataMap.put("row", map);
                 result.add(withMetaDataMap);
             } else {
@@ -138,10 +144,6 @@ public class ComparableTable implements ITable {
 
     protected void replaceValue(int row, int column, Object newValue) throws RowOutOfBoundsException {
         this.getRow(row)[column] = newValue;
-    }
-
-    protected ITableMetaData getAddExpressionTableMetaData() {
-        return this.addExpressionTableMetaData;
     }
 
     protected int getOriginalRowIndex(int row) {

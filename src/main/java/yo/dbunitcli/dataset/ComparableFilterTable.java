@@ -13,10 +13,14 @@ public class ComparableFilterTable extends ComparableTable {
 
     private final List<Integer> filterColumnIndex = Lists.newArrayList();
 
-    public static ComparableTable createFrom(ITable table, Column[] orderColumns, ColumnExpression additionalExpression, IColumnFilter iColumnFilter) throws DataSetException {
+    public static ComparableTable createFrom(ITable table, Column[] keyColumns, Column[] orderColumns, ColumnExpression additionalExpression, IColumnFilter iColumnFilter) throws DataSetException {
         try {
+            AddExpressionTableMetaData tableMetaData = additionalExpression.apply(new FilteredTableMetaData(table.getTableMetaData(), iColumnFilter));
+            if (keyColumns.length > 0) {
+                tableMetaData = tableMetaData.changePrimaryKey(keyColumns);
+            }
             return new ComparableFilterTable(table.getTableMetaData()
-                    , additionalExpression.apply(new FilteredTableMetaData(table.getTableMetaData(), iColumnFilter))
+                    , tableMetaData
                     , getOriginRows(table)
                     , getComparator(table, orderColumns));
         } catch (NoSuchFieldException | IllegalAccessException e) {

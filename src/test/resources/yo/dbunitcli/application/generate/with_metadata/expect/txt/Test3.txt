@@ -1,0 +1,11 @@
+insert into Test3 (PrimaryKey ,PrimaryKey2 ,ColumnA ,ColumnB ) values ('1' ,'1' ,'ああ' ,'10000' );
+insert into Test3 (PrimaryKey ,PrimaryKey2 ,ColumnA ,ColumnB ) values ('1' ,'2' ,'テスト' ,'' );
+insert into Test3 (PrimaryKey ,PrimaryKey2 ,ColumnA ,ColumnB ) values ('29' ,'1' ,'' ,'' );
+
+update Test3 set (PrimaryKey = '1' ,PrimaryKey2 = '1' ,ColumnA = 'ああ' ,ColumnB = '10000' ) where PrimaryKey = '1' and PrimaryKey2 = '1' ;
+update Test3 set (PrimaryKey = '1' ,PrimaryKey2 = '2' ,ColumnA = 'テスト' ,ColumnB = '' ) where PrimaryKey = '1' and PrimaryKey2 = '2' ;
+update Test3 set (PrimaryKey = '29' ,PrimaryKey2 = '1' ,ColumnA = '' ,ColumnB = '' ) where PrimaryKey = '29' and PrimaryKey2 = '1' ;
+
+delete from Test3 where PrimaryKey = '1' and PrimaryKey2 = '1' ;
+delete from Test3 where PrimaryKey = '1' and PrimaryKey2 = '2' ;
+delete from Test3 where PrimaryKey = '29' and PrimaryKey2 = '1' ;

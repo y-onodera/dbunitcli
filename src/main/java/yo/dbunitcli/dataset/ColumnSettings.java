@@ -49,6 +49,14 @@ public class ColumnSettings {
         return expressionColumns;
     }
 
+    public Column[] getComparisonKeys(String tableName) {
+        return this.getComparisonKeys()
+                .getColumns(tableName)
+                .stream()
+                .map(it -> new Column(it, DataType.UNKNOWN))
+                .toArray(Column[]::new);
+    }
+
     public List<Column> getExcludeColumns(String tableName) {
         return this.getExcludeColumns()
                 .getColumns(tableName)

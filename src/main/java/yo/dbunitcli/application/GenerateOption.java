@@ -60,9 +60,10 @@ public class GenerateOption extends ConvertOption {
                             try {
                                 Map<String, Object> param = new HashMap<>();
                                 param.put("_paramMap", getParameter().getMap());
-                                param.put("tableName", it);
                                 ComparableTable table = dataSet.getTable(it);
+                                param.put("tableName", it);
                                 param.put("columns", table.getTableMetaData().getColumns());
+                                param.put("primaryKeys", table.getTableMetaData().getPrimaryKeys());
                                 param.put("rows", table.toMap());
                                 return param;
                             } catch (DataSetException e) {
@@ -74,7 +75,7 @@ public class GenerateOption extends ConvertOption {
         Map<String, Object> param = new HashMap<>();
         param.put("_paramMap", getParameter().getMap());
         for (String tableName : dataSet.getTableNames()) {
-            param.put(tableName, dataSet.getTable(tableName).toMap());
+            param.put(tableName, dataSet.getTable(tableName).toMap(true));
         }
         return Stream.of(param);
     }

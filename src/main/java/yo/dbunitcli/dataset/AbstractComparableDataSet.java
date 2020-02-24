@@ -46,11 +46,13 @@ public abstract class AbstractComparableDataSet extends CachedDataSet implements
         List<Column> excludeColumns = this.compareSettings.getExcludeColumns(tableName);
         if (excludeColumns.size() > 0) {
             return ComparableFilterTable.createFrom(super.getTable(tableName)
+                    , this.keyColumns(tableName)
                     , this.orderColumns(tableName)
                     , this.columnExpression(tableName)
                     , this.toFilter(excludeColumns));
         }
         return ComparableTable.createFrom(super.getTable(tableName)
+                , this.keyColumns(tableName)
                 , this.orderColumns(tableName)
                 , this.columnExpression(tableName));
     }
@@ -65,15 +67,19 @@ public abstract class AbstractComparableDataSet extends CachedDataSet implements
         }
     }
 
-    private ColumnExpression columnExpression(String tableName) {
+    protected ColumnExpression columnExpression(String tableName) {
         return this.compareSettings.getExpression(tableName);
     }
 
-    private Column[] orderColumns(String tableName) {
+    protected Column[] keyColumns(String tableName) {
+        return this.compareSettings.getComparisonKeys(tableName);
+    }
+
+    protected Column[] orderColumns(String tableName) {
         return this.compareSettings.getOrderColumns(tableName);
     }
 
-    private DefaultColumnFilter toFilter(List<Column> excludeColumns) {
+    protected DefaultColumnFilter toFilter(List<Column> excludeColumns) {
         DefaultColumnFilter result = new DefaultColumnFilter();
         result.excludeColumns(excludeColumns.toArray(new Column[0]));
         return result;

@@ -13,10 +13,14 @@ public class AddExpressionTableMetaData extends AbstractTableMetaData {
     private final ColumnExpression additionalExpression;
 
     public AddExpressionTableMetaData(ITableMetaData delegate, ColumnExpression additionalExpression) throws DataSetException {
-        this.tableName = delegate.getTableName();
-        this.primaryKeys = delegate.getPrimaryKeys();
+        this(delegate.getTableName(), delegate.getPrimaryKeys(), additionalExpression.merge(delegate.getColumns()), additionalExpression);
+    }
+
+    public AddExpressionTableMetaData(String tableName, Column[] primaryKeys, Column[] columns, ColumnExpression additionalExpression) {
+        this.tableName = tableName;
+        this.primaryKeys = primaryKeys;
+        this.columns = columns;
         this.additionalExpression = additionalExpression;
-        this.columns = this.additionalExpression.merge(delegate.getColumns());
     }
 
     @Override
@@ -51,5 +55,9 @@ public class AddExpressionTableMetaData extends AbstractTableMetaData {
             }
         }
         return result;
+    }
+
+    public AddExpressionTableMetaData changePrimaryKey(Column[] keyColumns) {
+        return new AddExpressionTableMetaData(this.tableName, keyColumns, this.columns, this.additionalExpression);
     }
 }

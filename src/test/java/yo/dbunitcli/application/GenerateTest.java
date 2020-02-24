@@ -32,7 +32,7 @@ public class GenerateTest {
     @Test
     public void testGenerateTxt() throws Exception {
         Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateTxt.txt"});
-        this.subDirectory = "generate";
+        this.subDirectory = "generate/row";
         assertGenerateFileEquals("SomeClassTest.txt");
         assertGenerateFileEquals("OtherClassTest.txt");
         assertGenerateFileEquals( "AnotherClassTest.txt");
@@ -42,6 +42,15 @@ public class GenerateTest {
     public void testGenerateTxtPerTable() throws Exception {
         Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateTxtPerTable.txt"});
         this.subDirectory = "generate/table";
+        assertGenerateFileEquals("Test1.txt");
+        assertGenerateFileEquals("Test2.txt");
+        assertGenerateFileEquals( "Test3.txt");
+    }
+
+    @Test
+    public void testGenerateTxtWithMetaData() throws Exception {
+        Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateTxtWithMetaData.txt"});
+        this.subDirectory = "generate/with_metadata";
         assertGenerateFileEquals("Test1.txt");
         assertGenerateFileEquals("Test2.txt");
         assertGenerateFileEquals( "Test3.txt");
