@@ -3,5 +3,5 @@
 -regHeaderSplit=,Time,
 -regDataSplit=,\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}
 -setting=target/test-classes/yo/dbunitcli/application/regex2xlsx/setting.json
--result=target/test-classes/yo/dbunitcli/application/export/result
+-result=target/test-classes/yo/dbunitcli/application/regex2xlsx/result
 -resultType=xlsx

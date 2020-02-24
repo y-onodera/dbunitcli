@@ -1,4 +1,4 @@
-package $package$;
+package $row.package$;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -9,21 +9,21 @@ import org.junit.rules.ExpectedException;
 /**
 * マルチバイト文字列確認用テキスト
 */
-public class $Class$Test extends AbstractTestSuperClass {
+public class $row.Class$Test extends AbstractTestSuperClass {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
     @Rule
     public ExpectedSystemExit exit = ExpectedSystemExit.none();
 
-    private $Class$ target = new $Class$();
+    private $row.Class$ target = new $row.Class$();
 
     @Before
     public void setUp() {
         super.setUp();
     }
 
-$if(method1)$
+$if(row.method1)$
     /**
     * テストメソッド1
     */
@@ -32,12 +32,12 @@ $if(method1)$
         this.exit.expectSystemExitWithStatus(1);
         this.expectedException.expect(AssertionError.class);
         target.someMethod();
-        $expression$;
-        $assert$;
+        $row.expression$;
+        $row.assert$;
     }
 
 $endif$
-$if(method2)$
+$if(row.method2)$
     /**
     * テストメソッド2
     */
@@ -46,8 +46,8 @@ $if(method2)$
         this.exit.expectSystemExitWithStatus(1);
         this.expectedException.expect(AssertionError.class);
         target.someMethod2();
-        int actual = $value1$ * $value2$ * 2;
-        assertEquals($value4$ ,actual);
+        int actual = $row.value1$ * $row.value2$ * 2;
+        assertEquals($row.value4$ ,actual);
     }
 
 $endif$

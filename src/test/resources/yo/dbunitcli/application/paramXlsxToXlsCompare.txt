@@ -3,4 +3,4 @@
 -new=target/test-classes/yo/dbunitcli/application/csv2xlsx/multifile.xls
 -newsource=xls
 -setting=target/test-classes/yo/dbunitcli/application/csv2xlsx/setting.json
--result=target/test-classes/yo/dbunitcli/application/csv2xlsx/result
+-result=target/test-classes/yo/dbunitcli/application/xlsx2xls/result

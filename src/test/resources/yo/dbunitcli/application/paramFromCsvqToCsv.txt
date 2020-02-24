@@ -2,4 +2,4 @@
 -src=target/test-classes/yo/dbunitcli/application/csvq/old
 -outputEncoding=Shift-Jis
 -setting=target/test-classes/yo/dbunitcli/application/csvq/setting.json
--result=target/test-classes/yo/dbunitcli/application/export/csvq/result
+-result=target/test-classes/yo/dbunitcli/application/csvq/result

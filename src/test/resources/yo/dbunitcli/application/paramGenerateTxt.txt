@@ -3,4 +3,4 @@
 -setting=target/test-classes/yo/dbunitcli/application/generate/templateSettings.json
 -template=target/test-classes/yo/dbunitcli/application/generate/template.txt
 -outputEncoding=MS932
--resultPath=target/test-classes/yo/dbunitcli/application/generate/result/$Class$Test.txt
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/result/$row.Class$Test.txt
