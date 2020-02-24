@@ -1,0 +1,67 @@
+package jp.co.somecompany;
+
+import java.math.BigDecimal;
+
+/**
+* マルチバイト文字列確認用テキスト
+*/
+public class Test3 {
+
+    /**
+    * 金額1
+    */
+    private BigDecimal gk1;
+
+    /**
+    * 金額2
+    */
+    private BigDecimal gk2;
+
+    /**
+    * 金額3
+    */
+    private BigDecimal gk3;
+
+    /**
+    * @return gk1
+    */
+    public BigDecimal getGk1() {
+        return this.gk1;
+    }
+
+    /**
+    * @param value set to gk1
+    */
+    public void setGk1(BigDecimal aGk1) {
+        this.gk1 = aGk1;
+    }
+
+    /**
+    * @return gk2
+    */
+    public BigDecimal getGk2() {
+        return this.gk2;
+    }
+
+    /**
+    * @param value set to gk2
+    */
+    public void setGk2(BigDecimal aGk2) {
+        this.gk2 = aGk2;
+    }
+
+    /**
+    * @return gk3
+    */
+    public BigDecimal getGk3() {
+        return this.gk3;
+    }
+
+    /**
+    * @param value set to gk3
+    */
+    public void setGk3(BigDecimal aGk3) {
+        this.gk3 = aGk3;
+    }
+
+}

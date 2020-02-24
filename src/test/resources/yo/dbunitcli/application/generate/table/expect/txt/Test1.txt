@@ -1,0 +1,105 @@
+package jp.co.somecompany;
+
+import java.math.BigDecimal;
+
+/**
+* マルチバイト文字列確認用テキスト
+*/
+public class Test1 {
+
+    /**
+    * 文字列値
+    */
+    private String stringValue;
+
+    /**
+    * 真偽値
+    */
+    private Boolean booleanValue;
+
+    /**
+    * 数値1
+    */
+    private Long longValue;
+
+    /**
+    * 数値2
+    */
+    private Integer intValue;
+
+    /**
+    * 数値3
+    */
+    private BigDecimal bigDecimalValue;
+
+    /**
+    * @return stringValue
+    */
+    public String getStringValue() {
+        return this.stringValue;
+    }
+
+    /**
+    * @param value set to stringValue
+    */
+    public void setStringValue(String aStringValue) {
+        this.stringValue = aStringValue;
+    }
+
+    /**
+    * @return booleanValue
+    */
+    public Boolean getBooleanValue() {
+        return this.booleanValue;
+    }
+
+    /**
+    * @param value set to booleanValue
+    */
+    public void setBooleanValue(Boolean aBooleanValue) {
+        this.booleanValue = aBooleanValue;
+    }
+
+    /**
+    * @return longValue
+    */
+    public Long getLongValue() {
+        return this.longValue;
+    }
+
+    /**
+    * @param value set to longValue
+    */
+    public void setLongValue(Long aLongValue) {
+        this.longValue = aLongValue;
+    }
+
+    /**
+    * @return intValue
+    */
+    public Integer getIntValue() {
+        return this.intValue;
+    }
+
+    /**
+    * @param value set to intValue
+    */
+    public void setIntValue(Integer aIntValue) {
+        this.intValue = aIntValue;
+    }
+
+    /**
+    * @return bigDecimalValue
+    */
+    public BigDecimal getBigDecimalValue() {
+        return this.bigDecimalValue;
+    }
+
+    /**
+    * @param value set to bigDecimalValue
+    */
+    public void setBigDecimalValue(BigDecimal aBigDecimalValue) {
+        this.bigDecimalValue = aBigDecimalValue;
+    }
+
+}

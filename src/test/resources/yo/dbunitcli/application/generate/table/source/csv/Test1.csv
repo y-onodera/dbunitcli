@@ -1,0 +1,6 @@
+comment,name,dataType
+文字列値,stringValue,String
+真偽値,booleanValue,Boolean
+数値1,longValue,Long
+数値2,intValue,Integer
+数値3,bigDecimalValue,BigDecimal

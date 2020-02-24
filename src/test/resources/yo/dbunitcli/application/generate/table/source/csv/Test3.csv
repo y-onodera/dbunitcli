@@ -1,0 +1,4 @@
+comment,name,dataType
+金額1,gk1,BigDecimal
+金額2,gk2,BigDecimal
+金額3,gk3,BigDecimal

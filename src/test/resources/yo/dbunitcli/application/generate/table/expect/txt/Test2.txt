@@ -1,0 +1,67 @@
+package jp.co.somecompany;
+
+import java.math.BigDecimal;
+
+/**
+* マルチバイト文字列確認用テキスト
+*/
+public class Test2 {
+
+    /**
+    * 数値
+    */
+    private BigDecimal bigDecimalValue;
+
+    /**
+    * 文字列値
+    */
+    private String stringValue;
+
+    /**
+    * 真偽値
+    */
+    private Boolean booleanValue;
+
+    /**
+    * @return bigDecimalValue
+    */
+    public BigDecimal getBigDecimalValue() {
+        return this.bigDecimalValue;
+    }
+
+    /**
+    * @param value set to bigDecimalValue
+    */
+    public void setBigDecimalValue(BigDecimal aBigDecimalValue) {
+        this.bigDecimalValue = aBigDecimalValue;
+    }
+
+    /**
+    * @return stringValue
+    */
+    public String getStringValue() {
+        return this.stringValue;
+    }
+
+    /**
+    * @param value set to stringValue
+    */
+    public void setStringValue(String aStringValue) {
+        this.stringValue = aStringValue;
+    }
+
+    /**
+    * @return booleanValue
+    */
+    public Boolean getBooleanValue() {
+        return this.booleanValue;
+    }
+
+    /**
+    * @param value set to booleanValue
+    */
+    public void setBooleanValue(Boolean aBooleanValue) {
+        this.booleanValue = aBooleanValue;
+    }
+
+}

@@ -1,0 +1,23 @@
+field(row) ::= <<
+    /**
+    * $row.comment$
+    */
+    private $row.dataType$ $row.name$;
+
+>>
+accessor(row) ::= <<
+    /**
+    * @return $row.name$
+    */
+    public $row.dataType$ get$row.name; format="cap"$() {
+        return this.$row.name$;
+    }
+
+    /**
+    * @param value set to $row.name$
+    */
+    public void set$row.name; format="cap"$($row.dataType$ a$row.name; format="cap"$) {
+        this.$row.name$ = a$row.name; format="cap"$;
+    }
+
+>>

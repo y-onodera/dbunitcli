@@ -1,0 +1,8 @@
+-srcType=csv
+-src=target/test-classes/yo/dbunitcli/application/generate/table/source/csv
+-template=target/test-classes/yo/dbunitcli/application/generate/table/template.txt
+-templateGroup=target/test-classes/yo/dbunitcli/application/generate/table/templateGroup.stg
+-unit=table
+-outputEncoding=UTF-8
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/table/result/$tableName$.txt
+-P=package=jp.co.somecompany

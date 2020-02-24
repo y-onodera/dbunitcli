@@ -1,4 +1,4 @@
-package $package$;
+package jp.co.some.company;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -7,48 +7,44 @@ import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.rules.ExpectedException;
 
 /**
-* ãƒãƒ«ãƒãƒã‚¤ãƒˆæ–‡å­—åˆ—ç¢ºèªç”¨ãƒ†ã‚­ã‚¹ãƒˆ
+* ƒ}ƒ‹ƒ`ƒoƒCƒg•¶š—ñŠm”F—pƒeƒLƒXƒg
 */
-public class $Class$Test extends AbstractTestSuperClass {
+public class SomeClassTest extends AbstractTestSuperClass {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
     @Rule
     public ExpectedSystemExit exit = ExpectedSystemExit.none();
 
-    private $Class$ target = new $Class$();
+    private SomeClass target = new SomeClass();
 
     @Before
     public void setUp() {
         super.setUp();
     }
 
-$if(method1)$
     /**
-    * ãƒ†ã‚¹ãƒˆãƒ¡ã‚½ãƒƒãƒ‰1
+    * ƒeƒXƒgƒƒ\ƒbƒh1
     */
     @override
     public void someMethodTest(){
         this.exit.expectSystemExitWithStatus(1);
         this.expectedException.expect(AssertionError.class);
         target.someMethod();
-        $expression$;
-        $assert$;
+        int actual = 2 * 1;
+        assertEquals(actual ,2);
     }
 
-$endif$
-$if(method2)$
     /**
-    * ãƒ†ã‚¹ãƒˆãƒ¡ã‚½ãƒƒãƒ‰2
+    * ƒeƒXƒgƒƒ\ƒbƒh2
     */
     @override
     public void someMethod2Test(){
         this.exit.expectSystemExitWithStatus(1);
         this.expectedException.expect(AssertionError.class);
         target.someMethod2();
-        int actual = $value1$ * $value2$ * 2;
-        assertEquals($value4$ ,actual);
+        int actual = 1 * 2 * 2;
+        assertEquals(4 ,actual);
     }
 
-$endif$
 }

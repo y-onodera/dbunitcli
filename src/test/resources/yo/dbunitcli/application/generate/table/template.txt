@@ -1,0 +1,12 @@
+package $_paramMap.package$;
+
+import java.math.BigDecimal;
+
+/**
+* マルチバイト文字列確認用テキスト
+*/
+public class $tableName$ {
+
+$rows:{row | $field(row)$
+}$$rows:{row |$accessor(row)$
+}$}
