@@ -1,5 +1,6 @@
 package yo.dbunitcli.application;
 
+import com.google.common.collect.Maps;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseConnection;
@@ -10,6 +11,7 @@ import org.dbunit.ext.oracle.Oracle10DataTypeFactory;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.spi.MapOptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.*;
@@ -20,6 +22,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Properties;
 
 abstract public class CommandLineOption {
@@ -52,6 +55,9 @@ abstract public class CommandLineOption {
 
     @Option(name = "-op", usage = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
     private String operation;
+
+    @Option(name = "-P", handler = MapOptionHandler.class)
+    Map<String, String> inputParam = Maps.newHashMap();
 
     private Properties jdbcProp;
 
@@ -128,6 +134,7 @@ abstract public class CommandLineOption {
         this.assertDirectoryExists(parser);
         this.loadJdbcTemplate();
         this.populateSettings(parser);
+        this.parameter.getMap().putAll(this.inputParam);
     }
 
     public IDatabaseConnection createIDatabaseConnection() throws DataSetException {

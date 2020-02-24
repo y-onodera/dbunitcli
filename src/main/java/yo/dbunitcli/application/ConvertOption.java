@@ -19,7 +19,7 @@ public class ConvertOption extends CommandLineOption {
     private String[] args;
 
     public ConvertOption() {
-        super(Parameter.none());
+        this(Parameter.none());
     }
 
     public ConvertOption(Parameter param) {

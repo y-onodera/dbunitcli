@@ -55,6 +55,8 @@ public class ParameterizeOption extends CommandLineOption {
                 return new Compare();
             case "convert":
                 return new Convert();
+            case "generate":
+                return new Generate();
             default:
                 throw new IllegalArgumentException("no executable command : " + this.cmd);
         }
