@@ -5,6 +5,8 @@ import java.util.Objects;
 public enum DataSourceType {
     TABLE("table", false),
     SQL("sql", true),
+    FILE("file", true),
+    DIR("dir", true),
     CSV("csv", true),
     CSVQ("csvq", true),
     REGSP("reg", true),

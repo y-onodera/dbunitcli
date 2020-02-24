@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.base.Objects;
 import yo.dbunitcli.application.DataSourceType;
 
 import java.io.File;
@@ -13,6 +12,7 @@ public class ComparableDataSetLoaderParam {
     private final String headerSplitPattern;
     private final String dataSplitPattern;
     private final boolean mapIncludeMetaData;
+    private final String targetFileName;
 
     public ComparableDataSetLoaderParam(Builder builder) {
         this.src = builder.getSrc();
@@ -22,6 +22,7 @@ public class ComparableDataSetLoaderParam {
         this.headerSplitPattern = builder.getHeaderSplitPattern();
         this.dataSplitPattern = builder.getDataSplitPattern();
         this.mapIncludeMetaData = builder.getMapIncludeMetaData();
+        this.targetFileName = builder.getTargetFileName();
     }
 
     public static Builder builder() {
@@ -56,23 +57,8 @@ public class ComparableDataSetLoaderParam {
         return mapIncludeMetaData;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ComparableDataSetLoaderParam that = (ComparableDataSetLoaderParam) o;
-        return mapIncludeMetaData == that.mapIncludeMetaData &&
-                Objects.equal(src, that.src) &&
-                Objects.equal(encoding, that.encoding) &&
-                source == that.source &&
-                Objects.equal(columnSettings, that.columnSettings) &&
-                Objects.equal(headerSplitPattern, that.headerSplitPattern) &&
-                Objects.equal(dataSplitPattern, that.dataSplitPattern);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(src, encoding, source, columnSettings, headerSplitPattern, dataSplitPattern, mapIncludeMetaData);
+    public String getTargetFileName() {
+        return this.targetFileName;
     }
 
     @Override
@@ -85,6 +71,7 @@ public class ComparableDataSetLoaderParam {
                 ", headerSplitPattern='" + headerSplitPattern + '\'' +
                 ", dataSplitPattern='" + dataSplitPattern + '\'' +
                 ", mapIncludeMetaData=" + mapIncludeMetaData +
+                ", targetFileName='" + targetFileName + '\'' +
                 '}';
     }
 
@@ -96,6 +83,7 @@ public class ComparableDataSetLoaderParam {
         private String headerSplitPattern;
         private String dataSplitPattern;
         private boolean mapIncludeMetaData;
+        private String targetFileName;
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -160,6 +148,15 @@ public class ComparableDataSetLoaderParam {
 
         public Builder setMapIncludeMetaData(boolean includeMetaData) {
             this.mapIncludeMetaData = includeMetaData;
+            return this;
+        }
+
+        public String getTargetFileName() {
+            return this.targetFileName;
+        }
+
+        public Builder setTargetFileName(String targetFileName) {
+            this.targetFileName = targetFileName;
             return this;
         }
 
