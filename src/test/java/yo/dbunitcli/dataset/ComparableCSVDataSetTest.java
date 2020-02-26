@@ -4,21 +4,31 @@ package yo.dbunitcli.dataset;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 public class ComparableCSVDataSetTest {
 
+    private String resource;
+
+    @Before
+    public void setUp() throws UnsupportedEncodingException {
+        this.resource = URLDecoder.decode(this.getClass().getResource(".").getPath(), "UTF-8");
+    }
+
     @Test
     public void createEmptyDataSetFromNoFileDirectory() throws DataSetException {
-        ComparableCSVDataSet actual = new ComparableCSVDataSet(new File(this.getClass().getResource(".").getFile(), "nofile"), "windows-31j");
+        ComparableCSVDataSet actual = new ComparableCSVDataSet(new File(this.resource, "nofile"), "windows-31j");
         Assert.assertEquals(actual.getTables().length, 0);
     }
 
     @Test
     public void createDataSetFromShiftJisFile() throws DataSetException {
-        ComparableCSVDataSet actual = new ComparableCSVDataSet(new File(this.getClass().getResource(".").getFile(), "singlefile"), "windows-31j");
+        ComparableCSVDataSet actual = new ComparableCSVDataSet(new File(this.resource, "singlefile"), "windows-31j");
         Assert.assertEquals(1, actual.getTables().length);
         ITable actualTable = actual.getTables()[0];
         Assert.assertEquals("single", actualTable.getTableMetaData().getTableName());
@@ -44,7 +54,7 @@ public class ComparableCSVDataSetTest {
 
     @Test
     public void createDataSetFromUTF8File() throws DataSetException {
-        ComparableCSVDataSet actual = new ComparableCSVDataSet(new File(this.getClass().getResource(".").getFile(), "multifile"), "UTF8");
+        ComparableCSVDataSet actual = new ComparableCSVDataSet(new File(this.resource, "multifile"), "UTF8");
         Assert.assertEquals(2, actual.getTables().length);
         ComparableTable actualTable = actual.getTable("multi1");
         Assert.assertEquals("multi1", actualTable.getTableMetaData().getTableName());

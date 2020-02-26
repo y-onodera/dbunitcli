@@ -2,18 +2,28 @@ package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.DataSetException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import yo.dbunitcli.application.Parameter;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 public class ComparableCSVQueryDataSetTest {
+
+    private String resource;
+
+    @Before
+    public void setUp() throws UnsupportedEncodingException {
+        this.resource = URLDecoder.decode(this.getClass().getResource(".").getPath(), "UTF-8");
+    }
 
     @Test
     public void createDataSetFromSingleFile() throws DataSetException {
         ComparableCSVQueryDataSet actual = new ComparableCSVQueryDataSet(ComparableDataSetLoaderParam
                 .builder()
-                .setSrc(new File(this.getClass().getResource("csvquery").getFile(), "singlefile"))
+                .setSrc(new File(this.resource, "csvquery/singlefile"))
                 .setEncoding("UTF8")
                 .build(), Parameter.none());
         Assert.assertEquals(1, actual.getTables().length);
@@ -39,7 +49,7 @@ public class ComparableCSVQueryDataSetTest {
     public void createDataSetFromMultiFile() throws DataSetException {
         ComparableCSVQueryDataSet actual = new ComparableCSVQueryDataSet(ComparableDataSetLoaderParam
                 .builder()
-                .setSrc(new File(this.getClass().getResource("csvquery").getFile(), "multifile"))
+                .setSrc(new File(this.resource, "csvquery/multifile"))
                 .setEncoding("UTF8")
                 .build(), Parameter.none());
         Assert.assertEquals(2, actual.getTables().length);

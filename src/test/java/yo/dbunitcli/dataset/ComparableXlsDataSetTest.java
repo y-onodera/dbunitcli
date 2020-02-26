@@ -2,15 +2,26 @@ package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.DataSetException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 public class ComparableXlsDataSetTest {
+
+    private String resource;
+
+    @Before
+    public void setUp() throws UnsupportedEncodingException {
+        this.resource = URLDecoder.decode(this.getClass().getResource(".").getPath(), "UTF-8");
+    }
+
     @Test
     public void createDataSetFromFile() throws DataSetException, IOException {
-        ComparableDataSet actual = new ComparableXlsDataSet(new File(this.getClass().getResource(".").getFile(), "multifile.xls"));
+        ComparableDataSet actual = new ComparableXlsDataSet(new File(this.resource, "multifile.xls"));
         Assert.assertEquals(2, actual.getTableNames().length);
         ComparableTable actualTable = actual.getTable("multi1");
         Assert.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
