@@ -40,13 +40,15 @@ public class ComparableXlsxDataSetProducer implements IDataSetProducer {
     private static final Logger logger = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
     private IDataSetConsumer consumer = new DefaultConsumer();
     private File[] src;
+    private final TableNameFilter filter;
 
-    public ComparableXlsxDataSetProducer(File src) {
-        if (src.isDirectory()) {
-            this.src = src.listFiles((file, s) -> s.endsWith(".xlsx"));
+    public ComparableXlsxDataSetProducer(ComparableDataSetLoaderParam param) {
+        if (param.getSrc().isDirectory()) {
+            this.src = param.getSrc().listFiles((file, s) -> s.endsWith(".xlsx"));
         } else {
-            this.src = new File[]{src};
+            this.src = new File[]{param.getSrc()};
         }
+        this.filter = param.getTableNameFilter();
     }
 
     @Override
@@ -68,8 +70,10 @@ public class ComparableXlsxDataSetProducer implements IDataSetProducer {
                 while (iterator.hasNext()) {
                     try (InputStream stream = iterator.next()) {
                         String sheetName = iterator.getSheetName();
-                        logger.info("produceFromSheet - start {} [index={}]", sheetName, index++);
-                        processSheet(styles, strings, new SheetToTable(sheetName, this.consumer), stream);
+                        if (this.filter.predicate(sheetName)) {
+                            logger.info("produceFromSheet - start {} [index={}]", sheetName, index++);
+                            processSheet(styles, strings, new SheetToTable(sheetName, this.consumer), stream);
+                        }
                     }
                 }
             } catch (IOException | SAXException | OpenXML4JException e) {

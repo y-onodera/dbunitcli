@@ -9,12 +9,11 @@ public class ComparableCSVDataSet extends AbstractComparableDataSet {
     private final String srcDir;
 
     public ComparableCSVDataSet(File aSrcDir, String aEncoding) throws DataSetException {
-        super(new ComparableCsvDataSetProducer(aSrcDir, aEncoding));
-        this.srcDir = aSrcDir.getPath();
+        this(ComparableDataSetLoaderParam.builder().setSrc(aSrcDir).setEncoding(aEncoding).build());
     }
 
     public ComparableCSVDataSet(ComparableDataSetLoaderParam param) throws DataSetException {
-        super(new ComparableCsvDataSetProducer(param.getSrc(), param.getEncoding()), param);
+        super(new ComparableCsvDataSetProducer(param), param);
         this.srcDir = param.getSrc().getPath();
     }
 

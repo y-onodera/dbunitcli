@@ -7,13 +7,12 @@ import java.io.File;
 public class ComparableXlsxDataSet extends AbstractComparableDataSet {
     private File src;
 
-    public ComparableXlsxDataSet(File source) throws DataSetException {
-        super(new ComparableXlsxDataSetProducer(source));
-        this.src = source;
+    public ComparableXlsxDataSet(File src) throws DataSetException {
+        this(ComparableDataSetLoaderParam.builder().setSrc(src).build());
     }
 
     public ComparableXlsxDataSet(ComparableDataSetLoaderParam param) throws DataSetException {
-        super(new ComparableXlsxDataSetProducer(param.getSrc()), param);
+        super(new ComparableXlsxDataSetProducer(param), param);
         this.src = param.getSrc();
     }
 

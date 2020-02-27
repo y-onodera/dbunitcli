@@ -9,12 +9,11 @@ public class ComparableXlsDataSet extends AbstractComparableDataSet {
     private final File src;
 
     public ComparableXlsDataSet(File src) throws DataSetException {
-        super(new ComparableXlsDataSetProducer(src));
-        this.src = src;
+        this(ComparableDataSetLoaderParam.builder().setSrc(src).build());
     }
 
     public ComparableXlsDataSet(ComparableDataSetLoaderParam param) throws DataSetException {
-        super(new ComparableXlsDataSetProducer(param.getSrc()), param);
+        super(new ComparableXlsDataSetProducer(param), param);
         this.src = param.getSrc();
     }
 

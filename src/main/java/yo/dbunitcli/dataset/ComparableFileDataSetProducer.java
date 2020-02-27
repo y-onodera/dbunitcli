@@ -33,15 +33,11 @@ public class ComparableFileDataSetProducer implements IDataSetProducer {
     };
     private IDataSetConsumer consumer = new DefaultConsumer();
     private final File src;
-    private String targetName;
-    private Pattern pattern;
+    private final TableNameFilter filter;
 
-    public ComparableFileDataSetProducer(File src, String targetName) {
-        this.src = src.getAbsoluteFile();
-        this.targetName = targetName;
-        if (!Strings.isNullOrEmpty(this.targetName)) {
-            this.pattern = Pattern.compile(this.targetName);
-        }
+    public ComparableFileDataSetProducer(ComparableDataSetLoaderParam param) {
+        this.src = param.getSrc().getAbsoluteFile();
+        this.filter = param.getTableNameFilter();
     }
 
     @Override
@@ -58,7 +54,7 @@ public class ComparableFileDataSetProducer implements IDataSetProducer {
         try {
             Files.walk(this.src.toPath())
                     .filter(fileTypeFilter())
-                    .filter(path -> pattern == null || pattern.matcher(path.toString()).find())
+                    .filter(path -> this.filter.predicate(path.toString()))
                     .forEach(path -> {
                         this.produceFromFile(path.toFile());
                     });

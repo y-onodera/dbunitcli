@@ -55,13 +55,15 @@ public class ComparableXlsDataSetProducer implements IDataSetProducer, HSSFListe
     private int sheetIndex = -1;
     private BoundSheetRecord[] orderedBSRs;
     private List<BoundSheetRecord> boundSheetRecords = new ArrayList<>();
+    private final TableNameFilter filter;
 
-    public ComparableXlsDataSetProducer(File src) {
-        if (src.isDirectory()) {
-            this.src = src.listFiles((file, s) -> s.endsWith(".xls"));
+    public ComparableXlsDataSetProducer(ComparableDataSetLoaderParam param) {
+        if (param.getSrc().isDirectory()) {
+            this.src = param.getSrc().listFiles((file, s) -> s.endsWith(".xls"));
         } else {
-            this.src = new File[]{src};
+            this.src = new File[]{param.getSrc()};
         }
+        this.filter = param.getTableNameFilter();
     }
 
     @Override

@@ -56,8 +56,11 @@ abstract public class CommandLineOption {
     @Option(name = "-regHeaderSplit", usage = "regex to use split header row")
     private String regHeaderSplit;
 
-    @Option(name = "-regTargetFile", usage = "regex to traversal file tree")
-    private String regTargetFile;
+    @Option(name = "-regInclude", usage = "regex to include table")
+    private String regInclude;
+
+    @Option(name = "-regExclude", usage = "regex to exclude table")
+    private String regExclude;
 
     @Option(name = "-op", usage = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
     private String operation;
@@ -91,8 +94,12 @@ abstract public class CommandLineOption {
         return this.regHeaderSplit;
     }
 
-    public String getRegTargetFile() {
-        return regTargetFile;
+    public String getRegInclude() {
+        return regInclude;
+    }
+
+    public String getRegExclude() {
+        return regExclude;
     }
 
     public File getResultDir() {
@@ -129,7 +136,9 @@ abstract public class CommandLineOption {
                 .setColumnSettings(this.getColumnSettings())
                 .setHeaderSplitPattern(this.getRegHeaderSplit())
                 .setDataSplitPattern(this.getRegDataSplit())
-                .setTargetFileName(this.getRegTargetFile());
+                .setRegInclude(this.getRegInclude())
+                .setRegExclude(this.getRegExclude())
+                ;
     }
 
     public ComparableDataSetLoader getComparableDataSetLoader() throws DataSetException {

@@ -23,18 +23,20 @@ public class ComparableRegexSplitDataSetProducer implements IDataSetProducer {
     private static final Logger logger = LoggerFactory.getLogger(ComparableRegexSplitDataSetProducer.class);
     private IDataSetConsumer consumer = new DefaultConsumer();
     private final File[] src;
-    private String encoding = System.getProperty("file.encoding");
+    private final String encoding;
     private final Pattern dataSplitPattern;
     private final Pattern headerSplitPattern;
+    private final TableNameFilter filter;
 
-    public ComparableRegexSplitDataSetProducer(String headerRegex, String regex, File srcDir, String aEncoding) throws DataSetException {
-        if (!srcDir.isDirectory()) {
-            throw new DataSetException("'" + srcDir + "' should be a directory");
+    public ComparableRegexSplitDataSetProducer(ComparableDataSetLoaderParam param) throws DataSetException {
+        if (!param.getSrc().isDirectory()) {
+            throw new DataSetException("'" + param.getSrc() + "' should be a directory");
         }
-        this.src = srcDir.listFiles(File::isFile);
-        this.encoding = aEncoding;
-        this.headerSplitPattern = Pattern.compile(headerRegex);
-        this.dataSplitPattern = Pattern.compile(regex);
+        this.src = param.getSrc().listFiles(File::isFile);
+        this.encoding = param.getEncoding();
+        this.headerSplitPattern = Pattern.compile(param.getHeaderSplitPattern());
+        this.dataSplitPattern = Pattern.compile(param.getDataSplitPattern());
+        this.filter = param.getTableNameFilter();
     }
 
     @Override
@@ -48,10 +50,12 @@ public class ComparableRegexSplitDataSetProducer implements IDataSetProducer {
 
         this.consumer.startDataSet();
         for (File file : this.src) {
-            try {
-                this.executeQuery(file);
-            } catch (IOException e) {
-                throw new DataSetException(e);
+            if (this.filter.predicate(file.getAbsolutePath())) {
+                try {
+                    this.executeQuery(file);
+                } catch (IOException e) {
+                    throw new DataSetException(e);
+                }
             }
         }
         this.consumer.endDataSet();

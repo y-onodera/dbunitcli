@@ -8,10 +8,7 @@ public class ComparableRegexSplitDataSet extends AbstractComparableDataSet {
     private final File src;
 
     public ComparableRegexSplitDataSet(ComparableDataSetLoaderParam param) throws DataSetException {
-        super(new ComparableRegexSplitDataSetProducer(param.getHeaderSplitPattern()
-                        , param.getDataSplitPattern()
-                        , param.getSrc()
-                        , param.getEncoding())
+        super(new ComparableRegexSplitDataSetProducer(param)
                 , param);
         this.src = param.getSrc();
     }

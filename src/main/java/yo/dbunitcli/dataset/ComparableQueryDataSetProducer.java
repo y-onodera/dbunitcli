@@ -17,10 +17,10 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     private File[] srcFiles;
     private final Parameter parameter;
 
-    public ComparableQueryDataSetProducer(IDatabaseConnection connection, File srcDir, String encoding, Parameter parameter) throws DataSetException {
-        super(connection, srcDir, encoding);
+    public ComparableQueryDataSetProducer(IDatabaseConnection connection, ComparableDataSetLoaderParam param, Parameter parameter) throws DataSetException {
+        super(connection, param);
         if (!this.src.isDirectory()) {
-            throw new DataSetException("'" + srcDir + "' should be a directory");
+            throw new DataSetException("'" + this.src + "' should be a directory");
         }
         this.srcFiles = this.src.listFiles(File::isFile);
         this.parameter = parameter;
@@ -31,10 +31,12 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
         logger.info("produce() - start");
         this.consumer.startDataSet();
         for (File file : this.srcFiles) {
-            try {
-                this.executeQuery(file);
-            } catch (SQLException | IOException e) {
-                throw new DataSetException(e);
+            if (this.filter.predicate(file.getAbsolutePath())) {
+                try {
+                    this.executeQuery(file);
+                } catch (SQLException | IOException e) {
+                    throw new DataSetException(e);
+                }
             }
         }
         this.consumer.endDataSet();

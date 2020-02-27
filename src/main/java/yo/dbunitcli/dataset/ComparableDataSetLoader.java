@@ -52,7 +52,6 @@ public class ComparableDataSetLoader {
             case REGSP:
                 return new ComparableRegexSplitDataSet(param);
             case FILE:
-                return new ComparableFileDataSet(param);
             case DIR:
                 return new ComparableFileDataSet(param);
         }

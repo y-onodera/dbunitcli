@@ -6,8 +6,8 @@ import java.util.function.Predicate;
 
 public class ComparableDirectoryDataSetProducer extends ComparableFileDataSetProducer {
 
-    public ComparableDirectoryDataSetProducer(File src, String targetName) {
-        super(src, targetName);
+    public ComparableDirectoryDataSetProducer(ComparableDataSetLoaderParam param) {
+        super(param);
     }
 
     @Override

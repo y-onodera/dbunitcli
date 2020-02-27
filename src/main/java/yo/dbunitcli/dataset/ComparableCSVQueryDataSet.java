@@ -8,7 +8,7 @@ public class ComparableCSVQueryDataSet extends AbstractComparableDataSet {
     private final String srcDir;
 
     public ComparableCSVQueryDataSet(ComparableDataSetLoaderParam param, Parameter parameter) throws DataSetException {
-        super(new ComparableCSVQueryDataSetProducer(param.getSrc(), param.getEncoding(), parameter), param);
+        super(new ComparableCSVQueryDataSetProducer(param, parameter), param);
         this.srcDir = param.getSrc().getPath();
     }
 

@@ -13,10 +13,10 @@ public class ComparableFileDataSet extends AbstractComparableDataSet {
     }
 
     protected static ComparableFileDataSetProducer getProducer(ComparableDataSetLoaderParam param) {
-        if(param.getSource() == DataSourceType.DIR){
-            return new ComparableDirectoryDataSetProducer(param.getSrc(), param.getTargetFileName());
+        if (param.getSource() == DataSourceType.DIR) {
+            return new ComparableDirectoryDataSetProducer(param);
         }
-        return new ComparableFileDataSetProducer(param.getSrc(), param.getTargetFileName());
+        return new ComparableFileDataSetProducer(param);
     }
 
     @Override

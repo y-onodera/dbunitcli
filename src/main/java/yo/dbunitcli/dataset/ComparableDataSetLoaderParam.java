@@ -12,7 +12,8 @@ public class ComparableDataSetLoaderParam {
     private final String headerSplitPattern;
     private final String dataSplitPattern;
     private final boolean mapIncludeMetaData;
-    private final String targetFileName;
+    private final String regInclude;
+    private final String regExclude;
 
     public ComparableDataSetLoaderParam(Builder builder) {
         this.src = builder.getSrc();
@@ -22,7 +23,8 @@ public class ComparableDataSetLoaderParam {
         this.headerSplitPattern = builder.getHeaderSplitPattern();
         this.dataSplitPattern = builder.getDataSplitPattern();
         this.mapIncludeMetaData = builder.getMapIncludeMetaData();
-        this.targetFileName = builder.getTargetFileName();
+        this.regInclude = builder.getRegInclude();
+        this.regExclude = builder.getRegExclude();
     }
 
     public static Builder builder() {
@@ -53,26 +55,12 @@ public class ComparableDataSetLoaderParam {
         return this.dataSplitPattern;
     }
 
+    public TableNameFilter getTableNameFilter() {
+        return new TableNameFilter(this.regInclude, this.regExclude);
+    }
+
     public boolean isMapIncludeMetaData() {
         return mapIncludeMetaData;
-    }
-
-    public String getTargetFileName() {
-        return this.targetFileName;
-    }
-
-    @Override
-    public String toString() {
-        return "ComparableDataSetLoaderParam{" +
-                "src=" + src +
-                ", encoding='" + encoding + '\'' +
-                ", source=" + source +
-                ", columnSettings=" + columnSettings +
-                ", headerSplitPattern='" + headerSplitPattern + '\'' +
-                ", dataSplitPattern='" + dataSplitPattern + '\'' +
-                ", mapIncludeMetaData=" + mapIncludeMetaData +
-                ", targetFileName='" + targetFileName + '\'' +
-                '}';
     }
 
     public static class Builder {
@@ -83,7 +71,8 @@ public class ComparableDataSetLoaderParam {
         private String headerSplitPattern;
         private String dataSplitPattern;
         private boolean mapIncludeMetaData;
-        private String targetFileName;
+        private String regInclude;
+        private String regExclude;
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -121,6 +110,14 @@ public class ComparableDataSetLoaderParam {
             return this.mapIncludeMetaData;
         }
 
+        public String getRegInclude() {
+            return this.regInclude;
+        }
+
+        public String getRegExclude() {
+            return this.regExclude;
+        }
+
         public Builder setEncoding(String encoding) {
             this.encoding = encoding;
             return this;
@@ -146,17 +143,18 @@ public class ComparableDataSetLoaderParam {
             return this;
         }
 
-        public Builder setMapIncludeMetaData(boolean includeMetaData) {
-            this.mapIncludeMetaData = includeMetaData;
+        public Builder setRegInclude(String regInclude) {
+            this.regInclude = regInclude;
             return this;
         }
 
-        public String getTargetFileName() {
-            return this.targetFileName;
+        public Builder setRegExclude(String regExclude) {
+            this.regExclude = regExclude;
+            return this;
         }
 
-        public Builder setTargetFileName(String targetFileName) {
-            this.targetFileName = targetFileName;
+        public Builder setMapIncludeMetaData(boolean includeMetaData) {
+            this.mapIncludeMetaData = includeMetaData;
             return this;
         }
 

@@ -24,14 +24,16 @@ public class ComparableCsvDataSetProducer implements IDataSetProducer {
     private IDataSetConsumer consumer = new DefaultConsumer();
     private File[] src;
     private String encoding;
+    private final TableNameFilter filter;
 
-    public ComparableCsvDataSetProducer(File src, String encoding) {
-        if (src.isDirectory()) {
-            this.src = src.listFiles((file, s) -> s.endsWith(".csv"));
+    public ComparableCsvDataSetProducer(ComparableDataSetLoaderParam param) {
+        if (param.getSrc().isDirectory()) {
+            this.src = param.getSrc().listFiles((file, s) -> s.endsWith(".csv"));
         } else {
-            this.src = new File[]{src};
+            this.src = new File[]{param.getSrc()};
         }
-        this.encoding = encoding;
+        this.encoding = param.getEncoding();
+        this.filter = param.getTableNameFilter();
     }
 
     @Override
@@ -45,10 +47,12 @@ public class ComparableCsvDataSetProducer implements IDataSetProducer {
 
         this.consumer.startDataSet();
         for (File file : this.src) {
-            try {
-                this.produceFromFile(file);
-            } catch (CsvParserException | DataSetException e) {
-                throw new DataSetException("error producing dataSet for table '" + file.toString() + "'", e);
+            if (this.filter.predicate(file.getAbsolutePath())) {
+                try {
+                    this.produceFromFile(file);
+                } catch (CsvParserException | DataSetException e) {
+                    throw new DataSetException("error producing dataSet for table '" + file.toString() + "'", e);
+                }
             }
         }
         this.consumer.endDataSet();

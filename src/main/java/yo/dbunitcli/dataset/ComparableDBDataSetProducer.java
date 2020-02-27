@@ -19,15 +19,17 @@ import java.sql.SQLException;
 
 public class ComparableDBDataSetProducer implements IDataSetProducer {
     private static final Logger logger = LoggerFactory.getLogger(ComparableDBDataSetProducer.class);
-    protected IDatabaseConnection connection;
+    protected final IDatabaseConnection connection;
     protected IDataSetConsumer consumer = new DefaultConsumer();
-    protected File src;
+    protected final File src;
     protected String encoding = System.getProperty("file.encoding");
+    protected final TableNameFilter filter;
 
-    public ComparableDBDataSetProducer(IDatabaseConnection connection, File src, String encoding) throws DataSetException {
+    public ComparableDBDataSetProducer(IDatabaseConnection connection, ComparableDataSetLoaderParam param) throws DataSetException {
         this.connection = connection;
-        this.src = src;
-        this.encoding = encoding;
+        this.src = param.getSrc();
+        this.encoding = param.getEncoding();
+        this.filter = param.getTableNameFilter();
     }
 
     @Override
@@ -41,9 +43,11 @@ public class ComparableDBDataSetProducer implements IDataSetProducer {
         this.consumer.startDataSet();
         try {
             for (String tableName : Files.readLines(this.src, Charset.forName(this.encoding))) {
-                final SortedTable table = new SortedTable(this.connection.createTable(tableName));
-                table.setUseComparable(true);
-                this.executeTable(table);
+                if (this.filter.predicate(tableName)) {
+                    final SortedTable table = new SortedTable(this.connection.createTable(tableName));
+                    table.setUseComparable(true);
+                    this.executeTable(table);
+                }
             }
         } catch (SQLException | IOException e) {
             throw new DataSetException(e);

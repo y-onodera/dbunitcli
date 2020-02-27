@@ -25,13 +25,15 @@ public class ComparableCSVQueryDataSetProducer implements IDataSetProducer, Quer
     private File[] src;
     private String encoding = System.getProperty("file.encoding");
     private final Parameter parameter;
+    private final TableNameFilter filter;
 
-    public ComparableCSVQueryDataSetProducer(File srcDir, String encoding, Parameter parameter) throws DataSetException {
-        if (!srcDir.isDirectory()) {
-            throw new DataSetException("'" + srcDir + "' should be a directory");
+    public ComparableCSVQueryDataSetProducer(ComparableDataSetLoaderParam param, Parameter parameter) throws DataSetException {
+        if (!param.getSrc().isDirectory()) {
+            throw new DataSetException("'" + param.getSrc() + "' should be a directory");
         }
-        this.src = srcDir.listFiles(File::isFile);
-        this.encoding = encoding;
+        this.src = param.getSrc().listFiles(File::isFile);
+        this.encoding = param.getEncoding();
+        this.filter = param.getTableNameFilter();
         this.parameter = parameter;
     }
 
