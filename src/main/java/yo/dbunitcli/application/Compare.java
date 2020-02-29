@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.compare.CompareResult;
 import yo.dbunitcli.compare.DataSetCompareBuilder;
 import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.IDataSetWriter;
+import yo.dbunitcli.dataset.writer.IDataSetWriter;
 
 public class Compare implements Command<CompareOption> {
 

@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.dataset.writer.IDataSetWriter;
 
 import java.util.List;
 import java.util.Map;

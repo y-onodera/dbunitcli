@@ -8,7 +8,7 @@ import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.ColumnSetting;
 import yo.dbunitcli.dataset.ColumnSettings;
 import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.IDataSetWriter;
+import yo.dbunitcli.dataset.writer.IDataSetWriter;
 
 import java.io.File;
 import java.io.IOException;

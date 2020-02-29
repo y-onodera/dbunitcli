@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset;
+package yo.dbunitcli.dataset.writer;
 
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Workbook;

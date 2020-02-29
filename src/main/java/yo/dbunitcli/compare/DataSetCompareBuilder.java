@@ -3,7 +3,7 @@ package yo.dbunitcli.compare;
 import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.dataset.ColumnSetting;
 import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.IDataSetWriter;
+import yo.dbunitcli.dataset.writer.IDataSetWriter;
 
 public class DataSetCompareBuilder {
     private ComparableDataSet oldDataSet;

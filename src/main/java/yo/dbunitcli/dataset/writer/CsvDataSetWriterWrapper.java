@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset;
+package yo.dbunitcli.dataset.writer;
 
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.csv.CsvDataSetWriter;

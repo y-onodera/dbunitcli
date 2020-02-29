@@ -18,6 +18,7 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 import org.stringtemplate.v4.StringRenderer;
 import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.dataset.writer.*;
 
 import java.io.File;
 import java.io.FileInputStream;
