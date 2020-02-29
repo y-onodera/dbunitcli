@@ -1,6 +1,7 @@
-package yo.dbunitcli.dataset;
+package yo.dbunitcli.dataset.producer;
 
-import java.io.File;
+import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+
 import java.nio.file.Path;
 import java.util.function.Predicate;
 

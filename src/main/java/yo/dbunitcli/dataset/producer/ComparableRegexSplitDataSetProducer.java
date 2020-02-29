@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset;
+package yo.dbunitcli.dataset.producer;
 
 import com.google.common.io.Files;
 import org.dbunit.dataset.Column;
@@ -8,18 +8,18 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
-import org.dbunit.dataset.stream.IDataSetProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.sql.SQLException;
-import java.util.Map;
 import java.util.regex.Pattern;
 
-public class ComparableRegexSplitDataSetProducer implements IDataSetProducer {
+public class ComparableRegexSplitDataSetProducer implements ComparableDataSetProducer {
     private static final Logger logger = LoggerFactory.getLogger(ComparableRegexSplitDataSetProducer.class);
     private IDataSetConsumer consumer = new DefaultConsumer();
     private final File[] src;
@@ -27,16 +27,24 @@ public class ComparableRegexSplitDataSetProducer implements IDataSetProducer {
     private final Pattern dataSplitPattern;
     private final Pattern headerSplitPattern;
     private final TableNameFilter filter;
+    private final ComparableDataSetLoaderParam param;
 
-    public ComparableRegexSplitDataSetProducer(ComparableDataSetLoaderParam param) throws DataSetException {
-        if (!param.getSrc().isDirectory()) {
-            throw new DataSetException("'" + param.getSrc() + "' should be a directory");
+    public ComparableRegexSplitDataSetProducer(ComparableDataSetLoaderParam param) {
+        this.param = param;
+        if (this.param.getSrc().isDirectory()) {
+            this.src = this.param.getSrc().listFiles(File::isFile);
+        } else {
+            this.src = new File[]{this.param.getSrc()};
         }
-        this.src = param.getSrc().listFiles(File::isFile);
-        this.encoding = param.getEncoding();
-        this.headerSplitPattern = Pattern.compile(param.getHeaderSplitPattern());
-        this.dataSplitPattern = Pattern.compile(param.getDataSplitPattern());
-        this.filter = param.getTableNameFilter();
+        this.encoding = this.param.getEncoding();
+        this.headerSplitPattern = Pattern.compile(this.param.getHeaderSplitPattern());
+        this.dataSplitPattern = Pattern.compile(this.param.getDataSplitPattern());
+        this.filter = this.param.getTableNameFilter();
+    }
+
+    @Override
+    public ComparableDataSetLoaderParam getParam() {
+        return this.param;
     }
 
     @Override

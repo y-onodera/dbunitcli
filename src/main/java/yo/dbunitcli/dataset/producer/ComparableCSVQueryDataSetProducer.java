@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset;
+package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
@@ -7,34 +7,56 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
-import org.dbunit.dataset.stream.IDataSetProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.Parameter;
+import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.QueryReader;
+import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.Map;
 
-public class ComparableCSVQueryDataSetProducer implements IDataSetProducer, QueryReader {
+public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProducer, QueryReader {
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
     private static final String URL = "jdbc:h2:mem:test;ALIAS_COLUMN_NAME=TRUE";
     private IDataSetConsumer consumer = new DefaultConsumer();
-    private File[] src;
-    private String encoding = System.getProperty("file.encoding");
+    private final File[] src;
+    private final String encoding;
     private final Parameter parameter;
     private final TableNameFilter filter;
+    private final ComparableDataSetLoaderParam param;
 
-    public ComparableCSVQueryDataSetProducer(ComparableDataSetLoaderParam param, Parameter parameter) throws DataSetException {
-        if (!param.getSrc().isDirectory()) {
-            throw new DataSetException("'" + param.getSrc() + "' should be a directory");
+
+    public ComparableCSVQueryDataSetProducer(ComparableDataSetLoaderParam param, Parameter parameter) {
+        this.param = param;
+        if (this.param.getSrc().isDirectory()) {
+            this.src = this.param.getSrc().listFiles(File::isFile);
+        } else {
+            this.src = new File[]{this.param.getSrc()};
         }
-        this.src = param.getSrc().listFiles(File::isFile);
         this.encoding = param.getEncoding();
         this.filter = param.getTableNameFilter();
         this.parameter = parameter;
+    }
+
+    @Override
+    public ComparableDataSetLoaderParam getParam() {
+        return this.param;
+    }
+
+    @Override
+    public Map<String, Object> getParameter() {
+        return this.parameter.getMap();
+    }
+
+    @Override
+    public String getEncoding() {
+        return this.encoding;
     }
 
     @Override
@@ -45,17 +67,17 @@ public class ComparableCSVQueryDataSetProducer implements IDataSetProducer, Quer
     @Override
     public void produce() throws DataSetException {
         logger.info("produce() - start");
-
         this.consumer.startDataSet();
         for (File file : this.src) {
-            try {
-                this.executeQuery(file);
-            } catch (SQLException | IOException e) {
-                throw new DataSetException(e);
+            if (this.filter.predicate(file.getAbsolutePath())) {
+                try {
+                    this.executeQuery(file);
+                } catch (SQLException | IOException e) {
+                    throw new DataSetException(e);
+                }
             }
         }
         this.consumer.endDataSet();
-
     }
 
     protected void executeQuery(File aFile) throws SQLException, DataSetException, IOException {
@@ -67,7 +89,6 @@ public class ComparableCSVQueryDataSetProducer implements IDataSetProducer, Quer
         ) {
             ResultSetMetaData metaData = rst.getMetaData();
             Column[] columns = new Column[metaData.getColumnCount()];
-
             for (int i = 1; i <= metaData.getColumnCount(); i++) {
                 String columnName = metaData.getColumnName(i);
                 columnName = columnName.trim();
@@ -90,15 +111,4 @@ public class ComparableCSVQueryDataSetProducer implements IDataSetProducer, Quer
             this.consumer.endTable();
         }
     }
-
-    @Override
-    public Map<String, Object> getParameter() {
-        return this.parameter.getMap();
-    }
-
-    @Override
-    public String getEncoding() {
-        return this.encoding;
-    }
-
 }

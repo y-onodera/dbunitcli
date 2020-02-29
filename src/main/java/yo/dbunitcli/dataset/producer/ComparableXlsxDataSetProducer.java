@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset;
+package yo.dbunitcli.dataset.producer;
 
 import com.google.common.collect.Lists;
 import org.apache.poi.ooxml.util.SAXHelper;
@@ -21,13 +21,15 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
-import org.dbunit.dataset.stream.IDataSetProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
+import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.TableNameFilter;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
@@ -36,19 +38,26 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-public class ComparableXlsxDataSetProducer implements IDataSetProducer {
+public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer {
     private static final Logger logger = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
     private IDataSetConsumer consumer = new DefaultConsumer();
-    private File[] src;
+    private final File[] src;
     private final TableNameFilter filter;
+    private ComparableDataSetLoaderParam param;
 
     public ComparableXlsxDataSetProducer(ComparableDataSetLoaderParam param) {
-        if (param.getSrc().isDirectory()) {
-            this.src = param.getSrc().listFiles((file, s) -> s.endsWith(".xlsx"));
+        this.param = param;
+        if (this.param.getSrc().isDirectory()) {
+            this.src = this.param.getSrc().listFiles((file, s) -> s.endsWith(".xlsx"));
         } else {
-            this.src = new File[]{param.getSrc()};
+            this.src = new File[]{this.param.getSrc()};
         }
-        this.filter = param.getTableNameFilter();
+        this.filter = this.param.getTableNameFilter();
+    }
+
+    @Override
+    public ComparableDataSetLoaderParam getParam() {
+        return this.param;
     }
 
     @Override

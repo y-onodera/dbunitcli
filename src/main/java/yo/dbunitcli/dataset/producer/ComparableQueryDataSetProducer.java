@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset;
+package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
@@ -6,6 +6,8 @@ import org.dbunit.dataset.ITable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.Parameter;
+import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.QueryReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,16 +15,18 @@ import java.sql.SQLException;
 import java.util.Map;
 
 public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer implements QueryReader {
+
     private static final Logger logger = LoggerFactory.getLogger(ComparableQueryDataSetProducer.class);
     private File[] srcFiles;
     private final Parameter parameter;
 
-    public ComparableQueryDataSetProducer(IDatabaseConnection connection, ComparableDataSetLoaderParam param, Parameter parameter) throws DataSetException {
+    public ComparableQueryDataSetProducer(IDatabaseConnection connection, ComparableDataSetLoaderParam param, Parameter parameter) {
         super(connection, param);
-        if (!this.src.isDirectory()) {
-            throw new DataSetException("'" + this.src + "' should be a directory");
+        if (this.getParam().getSrc().isDirectory()) {
+            this.srcFiles = this.getParam().getSrc().listFiles(File::isFile);
+        } else {
+            this.srcFiles = new File[]{this.getParam().getSrc()};
         }
-        this.srcFiles = this.src.listFiles(File::isFile);
         this.parameter = parameter;
     }
 

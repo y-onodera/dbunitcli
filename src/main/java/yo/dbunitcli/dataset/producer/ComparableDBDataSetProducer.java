@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset;
+package yo.dbunitcli.dataset.producer;
 
 import com.google.common.io.Files;
 import org.dbunit.database.IDatabaseConnection;
@@ -8,28 +8,37 @@ import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.SortedTable;
 import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
-import org.dbunit.dataset.stream.IDataSetProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
 
-public class ComparableDBDataSetProducer implements IDataSetProducer {
+public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     private static final Logger logger = LoggerFactory.getLogger(ComparableDBDataSetProducer.class);
     protected final IDatabaseConnection connection;
     protected IDataSetConsumer consumer = new DefaultConsumer();
-    protected final File src;
-    protected String encoding = System.getProperty("file.encoding");
+    private final File src;
+    protected final String encoding;
     protected final TableNameFilter filter;
+    private final ComparableDataSetLoaderParam param;
 
-    public ComparableDBDataSetProducer(IDatabaseConnection connection, ComparableDataSetLoaderParam param) throws DataSetException {
+    public ComparableDBDataSetProducer(IDatabaseConnection connection, ComparableDataSetLoaderParam param) {
         this.connection = connection;
-        this.src = param.getSrc();
-        this.encoding = param.getEncoding();
-        this.filter = param.getTableNameFilter();
+        this.param = param;
+        this.src = this.param.getSrc();
+        this.encoding = this.param.getEncoding();
+        this.filter = this.param.getTableNameFilter();
+    }
+
+    @Override
+    public ComparableDataSetLoaderParam getParam() {
+        return this.param;
     }
 
     @Override

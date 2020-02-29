@@ -1,6 +1,5 @@
-package yo.dbunitcli.dataset;
+package yo.dbunitcli.dataset.producer;
 
-import com.google.common.base.Strings;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
@@ -8,9 +7,11 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
-import org.dbunit.dataset.stream.IDataSetProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,9 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
-public class ComparableFileDataSetProducer implements IDataSetProducer {
+public class ComparableFileDataSetProducer implements ComparableDataSetProducer {
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableFileDataSetProducer.class);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -34,10 +34,17 @@ public class ComparableFileDataSetProducer implements IDataSetProducer {
     private IDataSetConsumer consumer = new DefaultConsumer();
     private final File src;
     private final TableNameFilter filter;
+    private final ComparableDataSetLoaderParam param;
 
     public ComparableFileDataSetProducer(ComparableDataSetLoaderParam param) {
-        this.src = param.getSrc().getAbsoluteFile();
-        this.filter = param.getTableNameFilter();
+        this.param = param;
+        this.src = this.param.getSrc().getAbsoluteFile();
+        this.filter = this.param.getTableNameFilter();
+    }
+
+    @Override
+    public ComparableDataSetLoaderParam getParam() {
+        return this.param;
     }
 
     @Override

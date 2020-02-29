@@ -5,25 +5,28 @@ import org.dbunit.dataset.CachedDataSet;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
-import org.dbunit.dataset.stream.IDataSetProducer;
 
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractComparableDataSet extends CachedDataSet implements ComparableDataSet {
-
-    private final ColumnSettings compareSettings;
+public class ComparableDataSetImpl extends CachedDataSet implements ComparableDataSet {
 
     private final ComparableDataSetLoaderParam param;
 
-    public AbstractComparableDataSet(IDataSetProducer producer) throws DataSetException {
-        this(producer, ComparableDataSetLoaderParam.builder().build());
+    private final ColumnSettings compareSettings;
+
+    private final ComparableDataSetProducer producer;
+
+    public ComparableDataSetImpl(ComparableDataSetProducer producer) throws DataSetException {
+        super(producer);
+        this.producer = producer;
+        this.param = this.producer.getParam();
+        this.compareSettings = this.param.getColumnSettings();
     }
 
-    public AbstractComparableDataSet(IDataSetProducer producer, ComparableDataSetLoaderParam param) throws DataSetException {
-        super(producer);
-        this.param = param;
-        this.compareSettings = this.param.getColumnSettings();
+    @Override
+    public String getSrc() {
+        return this.producer.getSrc();
     }
 
     @Override
