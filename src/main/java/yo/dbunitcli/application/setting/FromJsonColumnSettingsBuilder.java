@@ -24,6 +24,9 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
     @Override
     public ColumnSettings build(File setting) throws IOException {
+        if (setting == null) {
+            return ColumnSettings.NONE;
+        }
         JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(setting), "MS932"));
         JsonObject settingJson = jsonReader.read()
                 .asJsonObject();

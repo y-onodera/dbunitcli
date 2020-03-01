@@ -197,11 +197,7 @@ abstract public class CommandLineOption {
 
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         try {
-            if (this.setting != null) {
-                this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
-            } else {
-                this.columnSettings = ColumnSettings.NONE;
-            }
+            this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
         } catch (IOException e) {
             throw new CmdLineException(parser, e);
         }
