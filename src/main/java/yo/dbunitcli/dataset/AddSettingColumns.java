@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class AddSettingColumns {
 
@@ -52,8 +53,8 @@ public class AddSettingColumns {
         List<String> patternResult = this.pattern.entrySet().stream()
                 .filter(it -> tableName.contains(it.getKey()))
                 .map(Map.Entry::getValue)
-                .findAny()
-                .orElse(Lists.newArrayList());
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
         if (this.pattern.containsKey(ALL_MATCH_PATTERN) && patternResult.size() == 0) {
             result.addAll(this.pattern.get(ALL_MATCH_PATTERN));
         } else {
