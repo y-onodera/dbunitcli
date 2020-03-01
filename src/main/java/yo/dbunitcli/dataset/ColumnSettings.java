@@ -7,13 +7,13 @@ import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.datatype.TypeCastException;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.filter.IColumnFilter;
+import org.dbunit.dataset.filter.IRowFilter;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ColumnSettings {
@@ -21,7 +21,8 @@ public class ColumnSettings {
     public static ColumnSettings NONE = new ColumnSettings(AddSettingColumns.NONE
             , AddSettingColumns.NONE
             , AddSettingColumns.NONE
-            , AddSettingColumns.NONE);
+            , AddSettingColumns.NONE
+            , RowFilter.NONE);
 
     private final AddSettingColumns comparisonKeys;
 
@@ -31,18 +32,27 @@ public class ColumnSettings {
 
     private final AddSettingColumns expressionColumns;
 
+    private final RowFilter filterExpressions;
+
     public ColumnSettings(Builder builder) {
         this(builder.getComparisonKeys()
                 , builder.getExcludeColumns()
                 , builder.getOrderColumns()
-                , builder.getExpressionColumns());
+                , builder.getExpressionColumns()
+                , builder.getFilterExpressions()
+        );
     }
 
-    private ColumnSettings(AddSettingColumns comparisonKeys, AddSettingColumns excludeColumns, AddSettingColumns orderColumns, AddSettingColumns expressionColumns) {
+    private ColumnSettings(AddSettingColumns comparisonKeys
+            , AddSettingColumns excludeColumns
+            , AddSettingColumns orderColumns
+            , AddSettingColumns expressionColumns
+            , RowFilter filterExpressions) {
         this.comparisonKeys = comparisonKeys;
         this.excludeColumns = excludeColumns;
         this.orderColumns = orderColumns;
         this.expressionColumns = expressionColumns;
+        this.filterExpressions = filterExpressions;
     }
 
     public AddSettingColumns getComparisonKeys() {
@@ -108,14 +118,18 @@ public class ColumnSettings {
             if (keyColumns.length > 0) {
                 tableMetaData = tableMetaData.changePrimaryKey(keyColumns);
             }
-            List<Integer> filterColumnIndex = this.getFilterColumnIndex(originMetaData, tableMetaData);
             return new ComparableTable(tableMetaData
-                    , filterColumnIndex
+                    , this.getFilterColumnIndex(originMetaData, tableMetaData)
                     , this.getOriginRows(table)
-                    , this.getComparator(table, this.getOrderColumns(originMetaData.getTableName())));
+                    , this.getComparator(table)
+                    , this.getRowFilter(tableMetaData));
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new DataSetException(e);
         }
+    }
+
+    private Predicate<Map<String ,Object>> getRowFilter(AddSettingTableMetaData tableMetaData) {
+        return this.filterExpressions.getRowFilter(tableMetaData.getTableName());
     }
 
     protected List<Integer> getFilterColumnIndex(ITableMetaData originMetaData, AddSettingTableMetaData tableMetaData) throws DataSetException {
@@ -134,7 +148,8 @@ public class ColumnSettings {
         return (List<Object[]>) f.get(delegate);
     }
 
-    protected Comparator<Object> getComparator(ITable delegate, Column[] orderColumns) {
+    protected Comparator<Object> getComparator(ITable delegate) {
+        Column[] orderColumns = this.getOrderColumns(delegate.getTableMetaData().getTableName());
         if (orderColumns.length > 0) {
             return new SortedTable.AbstractRowComparator(delegate, orderColumns) {
                 @Override
@@ -161,5 +176,7 @@ public class ColumnSettings {
         AddSettingColumns getOrderColumns();
 
         AddSettingColumns getExpressionColumns();
+
+        RowFilter getFilterExpressions();
     }
 }

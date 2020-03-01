@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import org.dbunit.dataset.*;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 
 public class ComparableTable implements ITable {
@@ -19,18 +20,32 @@ public class ComparableTable implements ITable {
 
     private final List<Integer> filterColumnIndex;
 
+    private final List<Integer> filteredRowIndexes;
+
+    private final Column[] primaryKeys;
+
+    private final Column[] columns;
+
     protected ComparableTable(ITableMetaData metaData) throws DataSetException {
         this(ColumnExpression.builder().build().apply(metaData)
                 , Lists.newArrayList()
                 , Lists.newArrayList()
+                , null
                 , null);
     }
 
-    protected ComparableTable(AddSettingTableMetaData tableMetaData, List<Integer> filterColumnIndex, List<Object[]> values, Comparator<Object> comparator) throws DataSetException {
+    protected ComparableTable(AddSettingTableMetaData tableMetaData
+            , List<Integer> filterColumnIndex
+            , List<Object[]> values
+            , Comparator<Object> comparator
+            , Predicate<Map<String, Object>> rowFilter) throws DataSetException {
         this.addSettingTableMetaData = tableMetaData;
+        this.primaryKeys = this.addSettingTableMetaData.getPrimaryKeys();
+        this.columns = this.addSettingTableMetaData.getColumns();
         this.filterColumnIndex = filterColumnIndex;
         this.values = values;
         this.rowComparator = comparator;
+        this.filteredRowIndexes = this.filteredRows(rowFilter);
     }
 
     public boolean isSorted() {
@@ -44,19 +59,13 @@ public class ComparableTable implements ITable {
     public List<Map<String, Object>> toMap(boolean includeMetaData) throws DataSetException {
         List<Map<String, Object>> result = Lists.newArrayList();
         String tableName = this.getTableMetaData().getTableName();
-        Column[] primaryKeys = this.getTableMetaData().getPrimaryKeys();
-        Column[] columns = this.getTableMetaData().getColumns();
-        for (int rowNum = 0, total = this.values.size(); rowNum < total; rowNum++) {
-            Object[] row = this.getRow(rowNum);
-            Map<String, Object> map = Maps.newHashMap();
-            for (int i = 0, j = row.length; i < j; i++) {
-                map.put(columns[i].getColumnName(), row[i]);
-            }
+        for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
+            Map<String, Object> map = getRowToMap(rowNum);
             if (includeMetaData) {
                 Map<String, Object> withMetaDataMap = Maps.newHashMap();
                 withMetaDataMap.put("tableName", tableName);
-                withMetaDataMap.put("columns", columns);
-                withMetaDataMap.put("primaryKeys", primaryKeys);
+                withMetaDataMap.put("columns", this.columns);
+                withMetaDataMap.put("primaryKeys", this.primaryKeys);
                 withMetaDataMap.put("row", map);
                 result.add(withMetaDataMap);
             } else {
@@ -66,6 +75,15 @@ public class ComparableTable implements ITable {
         return result;
     }
 
+    public Map<String, Object> getRowToMap(int rowNum) throws RowOutOfBoundsException {
+        Object[] row = this.getRow(rowNum);
+        Map<String, Object> map = Maps.newHashMap();
+        for (int i = 0, j = row.length; i < j; i++) {
+            map.put(this.columns[i].getColumnName(), row[i]);
+        }
+        return map;
+    }
+
     @Override
     public ITableMetaData getTableMetaData() {
         return this.addSettingTableMetaData;
@@ -73,7 +91,7 @@ public class ComparableTable implements ITable {
 
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(List<String> keys) throws DataSetException {
         Map<CompareKeys, Map.Entry<Integer, Object[]>> result = Maps.newHashMap();
-        for (int rowNum = 0, total = this.values.size(); rowNum < total; rowNum++) {
+        for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
             result.put(this.getKey(rowNum, keys), new AbstractMap.SimpleEntry<>(this.getOriginalRowIndex(rowNum), this.getRow(rowNum)));
         }
         if (result.size() < this.getRowCount()) {
@@ -83,7 +101,7 @@ public class ComparableTable implements ITable {
     }
 
     public Object[] get(CompareKeys targetKey, List<String> keys, int columnLength) throws DataSetException {
-        for (int rowNum = 0, total = this.values.size(); rowNum < total; rowNum++) {
+        for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
             if (targetKey.equals(this.getKey(rowNum, keys))) {
                 return getRow(rowNum, columnLength);
             }
@@ -107,6 +125,9 @@ public class ComparableTable implements ITable {
 
     @Override
     public int getRowCount() {
+        if (this.filteredRowIndexes != null) {
+            return this.filteredRowIndexes.size();
+        }
         return values.size();
     }
 
@@ -122,8 +143,8 @@ public class ComparableTable implements ITable {
     }
 
     public Object[] getRow(int rowNum) throws RowOutOfBoundsException {
-        if (rowNum < 0 || rowNum >= this.values.size()) {
-            throw new RowOutOfBoundsException("rowNum " + rowNum + " is out of range;current row size is " + this.values.size());
+        if (rowNum < 0 || rowNum >= this.getRowCount()) {
+            throw new RowOutOfBoundsException("rowNum " + rowNum + " is out of range;current row size is " + this.getRowCount());
         }
         return this.filterValues(addSettingTableMetaData.applyExpression(this.values.get(this.getOriginalRowIndex(rowNum))));
     }
@@ -151,12 +172,30 @@ public class ComparableTable implements ITable {
         return result;
     }
 
-    protected int getOriginalRowIndex(int row) {
+    protected List<Integer> filteredRows(Predicate<Map<String, Object>> rowFilter) throws RowOutOfBoundsException {
+        if (rowFilter == null) {
+            return null;
+        }
+        int fullSize = this.values.size();
+        List<Integer> filteredRowIndexes = new ArrayList<Integer>();
+        for (int row = 0; row < fullSize; ++row) {
+            if (rowFilter.test(this.getRowToMap(row))) {
+                filteredRowIndexes.add(row);
+            }
+        }
+        return filteredRowIndexes;
+    }
+
+    protected int getOriginalRowIndex(int noFilter) {
+        int row = noFilter;
+        if (this.filteredRowIndexes != null) {
+            row = this.filteredRowIndexes.get(noFilter);
+        }
         if (!this.isSorted()) {
             return row;
         }
         if (this._indexes == null) {
-            Integer[] indexes = new Integer[this.getRowCount()];
+            Integer[] indexes = new Integer[this.values.size()];
             for (int i = 0; i < indexes.length; ++i) {
                 indexes[i] = i;
             }

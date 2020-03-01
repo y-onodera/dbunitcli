@@ -1,0 +1,22 @@
+{
+  "settings": [
+    {
+      "pattern": "test",
+      "filter": [
+        "(columnA ?: '' == 'val1') || (column1 ?: ''  == 'val1')"
+      ]
+    },
+    {
+      "name": "test_differentPattern",
+      "filter": [
+        "not empty(columnB)"
+      ]
+    },
+    {
+      "pattern": "test_same",
+      "filter": [
+        "columnC == 'val3'"
+      ]
+    }
+  ]
+}

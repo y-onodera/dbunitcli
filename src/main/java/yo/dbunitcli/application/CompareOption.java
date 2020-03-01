@@ -95,7 +95,7 @@ public class CompareOption extends CommandLineOption {
     }
 
     public AddSettingColumns getExpectedComparisonKeys() {
-        if (this.expectDetailSettings.getComparisonKeys().equals(AddSettingColumns.builder().build())) {
+        if (this.expectDetailSettings.getComparisonKeys().equals(AddSettingColumns.NONE)) {
             return AddSettingColumns.builder()
                     .addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList())
                     .build();

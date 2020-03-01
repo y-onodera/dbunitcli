@@ -1,0 +1,3 @@
+$MODIFY,$ROW_AFTER_SORT,$ROW_ORIGINAL,$DIFF_COLUMN_INDEXES,testkey,columnA,columnB,columnC
+"NEW","0","0","testkey[0],columnB[2]","keyA","val1","val2","val3"
+"OLD","0","2","testkey[0],columnB[2]","keyD","val1","","val3"

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import yo.dbunitcli.dataset.ColumnExpression;
 import yo.dbunitcli.dataset.AddSettingColumns;
 import yo.dbunitcli.dataset.ColumnSettings;
+import yo.dbunitcli.dataset.RowFilter;
 
 import javax.json.*;
 import java.io.File;
@@ -21,6 +22,8 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     private AddSettingColumns.Builder orderColumns = AddSettingColumns.builder();
 
     private AddSettingColumns.Builder expressionColumns = AddSettingColumns.builder();
+
+    private RowFilter.Builder filterExpressions = RowFilter.builder();
 
     @Override
     public ColumnSettings build(File setting) throws IOException {
@@ -55,6 +58,11 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         return this.expressionColumns.build();
     }
 
+    @Override
+    public RowFilter getFilterExpressions() {
+        return this.filterExpressions.build();
+    }
+
     protected FromJsonColumnSettingsBuilder configureSetting(JsonObject setting) {
         if (!setting.containsKey("settings")) {
             return this;
@@ -72,11 +80,12 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     }
 
     protected void addSettings(JsonObject json, String name, AddSettingColumns.Strategy strategy) {
-        String file = json.getString(name);
-        this.addComparisonKeys(strategy, json, file);
-        this.addExcludeColumns(strategy, json, file);
-        this.addSortColumns(strategy, json, file);
-        this.addExpression(expressionColumns.getExpressionBuilder(strategy, file), json);
+        String key = json.getString(name);
+        this.addComparisonKeys(strategy, json, key);
+        this.addExcludeColumns(strategy, json, key);
+        this.addSortColumns(strategy, json, key);
+        this.addExpression(this.expressionColumns.getExpressionBuilder(strategy, key), json);
+        this.addFilterExpression(strategy, json, key);
     }
 
     protected ColumnSettings.Builder configureCommonSetting(JsonObject setting) {
@@ -90,6 +99,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
                     this.addCommonSettings(json, "exclude", this.excludeColumns);
                     this.addCommonSettings(json, "order", this.orderColumns);
                     this.addExpression(this.expressionColumns.getCommonExpressionBuilder(), json);
+                    this.addFilterExpression(json);
                 });
         return this;
     }
@@ -137,11 +147,33 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
     protected void addExpression(ColumnExpression.Builder builder, JsonObject settingJson, ColumnExpression.ParameterType type) {
         if (settingJson.containsKey(type.keyName())) {
-            JsonArray stringExpressions = settingJson.getJsonArray(type.keyName());
-            for (int i = 0, j = stringExpressions.size(); i < j; i++) {
-                stringExpressions.getJsonObject(i)
-                        .forEach((key, value) -> builder.addExpression(type, key, ((JsonString) value).getString()));
+            this.addExpression(builder, settingJson.getJsonArray(type.keyName()), type);
+        }
+    }
+
+    protected void addExpression(ColumnExpression.Builder builder, JsonArray expressions, ColumnExpression.ParameterType aType) {
+        for (int i = 0, j = expressions.size(); i < j; i++) {
+            expressions.getJsonObject(i)
+                    .forEach((key, value) -> builder.addExpression(aType, key, ((JsonString) value).getString()));
+        }
+    }
+
+    protected void addFilterExpression(AddSettingColumns.Strategy strategy, JsonObject settingJson, String key) {
+        if (settingJson.containsKey("filter")) {
+            JsonArray expressions = settingJson.getJsonArray("filter");
+            for (int i = 0, j = expressions.size(); i < j; i++) {
+                this.filterExpressions.add(strategy, key, expressions.getString(i));
             }
         }
     }
+
+    protected void addFilterExpression(JsonObject settingJson) {
+        if (settingJson.containsKey("filter")) {
+            JsonArray expressions = settingJson.getJsonArray("filter");
+            for (int i = 0, j = expressions.size(); i < j; i++) {
+                this.filterExpressions.addCommon(expressions.getString(i));
+            }
+        }
+    }
+
 }

@@ -60,6 +60,11 @@ public class CompareTest {
     }
 
     @Test
+    public void testCompareWithRowFilter() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareWithFilterRow.txt"});
+    }
+
+    @Test
     public void testCompareCsvToXlsx() throws Exception {
         Compare.main(new String[]{"@" + this.baseDir + "/paramCsvToXlsxCompare.txt"});
     }
