@@ -2,8 +2,10 @@ package yo.dbunitcli.dataset;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.TypeCastException;
+import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -19,17 +21,23 @@ public class ComparableTable implements ITable {
 
     private final AddExpressionTableMetaData addExpressionTableMetaData;
 
-    public static ComparableTable createFrom(ITable table) throws DataSetException {
-        return createFrom(table, new Column[0], new Column[0], ColumnExpression.builder().build());
-    }
+    private final List<Integer> filterColumnIndex;
 
-    public static ComparableTable createFrom(ITable table, Column[] keyColumns, Column[] orderColumns, ColumnExpression additionalExpression) throws DataSetException {
+    public static ComparableTable createFrom(ITable table, Column[] keyColumns, Column[] orderColumns, ColumnExpression additionalExpression, IColumnFilter iColumnFilter) throws DataSetException {
         try {
-            AddExpressionTableMetaData tableMetaData = additionalExpression.apply(table.getTableMetaData());
+            ITableMetaData originMetaData = table.getTableMetaData();
+            AddExpressionTableMetaData tableMetaData = additionalExpression.apply(originMetaData, iColumnFilter);
             if (keyColumns.length > 0) {
                 tableMetaData = tableMetaData.changePrimaryKey(keyColumns);
             }
+            Set<Column> noFilter = Sets.newHashSet(originMetaData.getColumns());
+            Set<Column> filtered = Sets.newHashSet(tableMetaData.getColumns());
+            List<Integer> filterColumnIndex = Lists.newArrayList();
+            for (Column column : Sets.difference(noFilter, filtered)) {
+                filterColumnIndex.add(originMetaData.getColumnIndex(column.getColumnName()));
+            }
             return new ComparableTable(tableMetaData
+                    , filterColumnIndex
                     , getOriginRows(table)
                     , getComparator(table, orderColumns));
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -37,8 +45,16 @@ public class ComparableTable implements ITable {
         }
     }
 
-    protected ComparableTable(AddExpressionTableMetaData tableMetaData, List<Object[]> values, Comparator<Object> comparator) {
+    protected ComparableTable(ITableMetaData metaData) throws DataSetException {
+        this(ColumnExpression.builder().build().apply(metaData)
+                , Lists.newArrayList()
+                , Lists.newArrayList()
+                , null);
+    }
+
+    protected ComparableTable(AddExpressionTableMetaData tableMetaData, List<Integer> filterColumnIndex, List<Object[]> values, Comparator<Object> comparator) throws DataSetException {
         this.addExpressionTableMetaData = tableMetaData;
+        this.filterColumnIndex = filterColumnIndex;
         this.values = values;
         this.rowComparator = comparator;
     }
@@ -135,7 +151,19 @@ public class ComparableTable implements ITable {
         if (rowNum < 0 || rowNum >= this.values.size()) {
             throw new RowOutOfBoundsException("rowNum " + rowNum + " is out of range;current row size is " + this.values.size());
         }
-        return addExpressionTableMetaData.applyExpression(this.values.get(this.getOriginalRowIndex(rowNum)));
+        Object[] noFilter = addExpressionTableMetaData.applyExpression(this.values.get(this.getOriginalRowIndex(rowNum)));
+        if (this.filterColumnIndex.size() == 0) {
+            return noFilter;
+        }
+        Object[] result = new Object[noFilter.length - this.filterColumnIndex.size()];
+        int index = 0;
+        for (int i = 0, j = noFilter.length; i < j; i++) {
+            if (!this.filterColumnIndex.contains(i)) {
+                result[index] = noFilter[i];
+                index++;
+            }
+        }
+        return result;
     }
 
     protected void addRow(Object[] row) {
@@ -178,5 +206,4 @@ public class ComparableTable implements ITable {
         }
         return null;
     }
-
 }

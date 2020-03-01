@@ -2,6 +2,8 @@ package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.datatype.DataType;
+import org.dbunit.dataset.filter.DefaultColumnFilter;
+import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,6 +81,16 @@ public class ColumnSettings {
 
     public ColumnExpression getExpressionColumns(String tableName) {
         return this.getExpressionColumns().getExpression(tableName);
+    }
+
+    public IColumnFilter getExcludeColumnFilter(String tableName) {
+        List<Column> columns = this.getExcludeColumns(tableName);
+        if (columns.size() == 0) {
+            return null;
+        }
+        DefaultColumnFilter result = new DefaultColumnFilter();
+        result.excludeColumns(columns.toArray(new Column[0]));
+        return result;
     }
 
     public interface Builder {

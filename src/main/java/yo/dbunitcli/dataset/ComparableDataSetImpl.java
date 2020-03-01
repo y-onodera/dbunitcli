@@ -5,6 +5,7 @@ import org.dbunit.dataset.CachedDataSet;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
+import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.util.List;
 import java.util.Map;
@@ -46,18 +47,11 @@ public class ComparableDataSetImpl extends CachedDataSet implements ComparableDa
 
     @Override
     public ComparableTable getTable(String tableName) throws DataSetException {
-        List<Column> excludeColumns = this.compareSettings.getExcludeColumns(tableName);
-        if (excludeColumns.size() > 0) {
-            return ComparableFilterTable.createFrom(super.getTable(tableName)
-                    , this.keyColumns(tableName)
-                    , this.orderColumns(tableName)
-                    , this.columnExpression(tableName)
-                    , this.toFilter(excludeColumns));
-        }
         return ComparableTable.createFrom(super.getTable(tableName)
                 , this.keyColumns(tableName)
                 , this.orderColumns(tableName)
-                , this.columnExpression(tableName));
+                , this.columnExpression(tableName)
+                , this.columnFilter(tableName));
     }
 
     @Override
@@ -82,9 +76,8 @@ public class ComparableDataSetImpl extends CachedDataSet implements ComparableDa
         return this.compareSettings.getOrderColumns(tableName);
     }
 
-    protected DefaultColumnFilter toFilter(List<Column> excludeColumns) {
-        DefaultColumnFilter result = new DefaultColumnFilter();
-        result.excludeColumns(excludeColumns.toArray(new Column[0]));
-        return result;
+    protected IColumnFilter columnFilter(String tableName) {
+        return this.compareSettings.getExcludeColumnFilter(tableName);
     }
+
 }

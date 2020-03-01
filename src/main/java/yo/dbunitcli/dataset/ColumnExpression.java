@@ -7,8 +7,10 @@ import com.google.common.collect.Sets;
 import org.apache.commons.jexl3.*;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.FilteredTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
+import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -34,6 +36,13 @@ public class ColumnExpression {
 
     public ColumnExpression add(ColumnExpression other) {
         return builder().add(this).add(other).build();
+    }
+
+    public AddExpressionTableMetaData apply(ITableMetaData originMetaData, IColumnFilter iColumnFilter) throws DataSetException {
+        if (iColumnFilter == null) {
+            return this.apply(originMetaData);
+        }
+        return this.apply(new FilteredTableMetaData(originMetaData, iColumnFilter));
     }
 
     public AddExpressionTableMetaData apply(ITableMetaData delegateMetaData) throws DataSetException {

@@ -30,7 +30,7 @@ public class DiffTable extends ComparableTable {
     }
 
     private DiffTable(ITableMetaData metaData) throws DataSetException {
-        super(ColumnExpression.builder().build().apply(metaData), Lists.newArrayList(), null);
+        super(metaData);
     }
 
     public void addRow(CompareKeys compareKeys, Integer key, Object[] oldRow, Object[] newRow) throws DataSetException {
