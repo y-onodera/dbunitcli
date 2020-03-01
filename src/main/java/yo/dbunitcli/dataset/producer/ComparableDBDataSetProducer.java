@@ -18,12 +18,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.stream.Stream;
 
 public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     private static final Logger logger = LoggerFactory.getLogger(ComparableDBDataSetProducer.class);
     protected final IDatabaseConnection connection;
     protected IDataSetConsumer consumer = new DefaultConsumer();
-    private final File src;
+    protected final File[] src;
     protected final String encoding;
     protected final TableNameFilter filter;
     private final ComparableDataSetParam param;
@@ -31,7 +33,11 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     public ComparableDBDataSetProducer(IDatabaseConnection connection, ComparableDataSetParam param) {
         this.connection = connection;
         this.param = param;
-        this.src = this.param.getSrc();
+        if (this.getParam().getSrc().isDirectory()) {
+            this.src = this.getParam().getSrc().listFiles(File::isFile);
+        } else {
+            this.src = new File[]{this.getParam().getSrc()};
+        }
         this.encoding = this.param.getEncoding();
         this.filter = this.param.getTableNameFilter();
     }
@@ -42,7 +48,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     @Override
-    public void setConsumer(IDataSetConsumer iDataSetConsumer) throws DataSetException {
+    public void setConsumer(IDataSetConsumer iDataSetConsumer) {
         this.consumer = iDataSetConsumer;
     }
 
@@ -50,17 +56,26 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     public void produce() throws DataSetException {
         logger.info("produce() - start");
         this.consumer.startDataSet();
-        try {
-            for (String tableName : Files.readLines(this.src, Charset.forName(this.encoding))) {
-                if (this.filter.predicate(tableName)) {
-                    final SortedTable table = new SortedTable(this.connection.createTable(tableName));
-                    table.setUseComparable(true);
-                    this.executeTable(table);
-                }
-            }
-        } catch (SQLException | IOException e) {
-            throw new DataSetException(e);
-        }
+        Stream.of(this.src)
+                .map(it -> {
+                    try {
+                        return Files.readLines(it, Charset.forName(this.encoding));
+                    } catch (IOException e) {
+                        throw new AssertionError(e);
+                    }
+                })
+                .flatMap(Collection::stream)
+                .filter(this.filter::predicate)
+                .distinct()
+                .forEach(tableName -> {
+                    try {
+                        final SortedTable table = new SortedTable(this.connection.createTable(tableName));
+                        table.setUseComparable(true);
+                        this.executeTable(table);
+                    } catch (SQLException | DataSetException e) {
+                        throw new AssertionError(e);
+                    }
+                });
         this.consumer.endDataSet();
     }
 

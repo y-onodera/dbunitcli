@@ -17,16 +17,10 @@ import java.util.Map;
 public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer implements QueryReader {
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableQueryDataSetProducer.class);
-    private File[] srcFiles;
     private final Parameter parameter;
 
     public ComparableQueryDataSetProducer(IDatabaseConnection connection, ComparableDataSetParam param, Parameter parameter) {
         super(connection, param);
-        if (this.getParam().getSrc().isDirectory()) {
-            this.srcFiles = this.getParam().getSrc().listFiles(File::isFile);
-        } else {
-            this.srcFiles = new File[]{this.getParam().getSrc()};
-        }
         this.parameter = parameter;
     }
 
@@ -34,7 +28,7 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     public void produce() throws DataSetException {
         logger.info("produce() - start");
         this.consumer.startDataSet();
-        for (File file : this.srcFiles) {
+        for (File file : this.src) {
             if (this.filter.predicate(file.getAbsolutePath())) {
                 try {
                     this.executeQuery(file);
