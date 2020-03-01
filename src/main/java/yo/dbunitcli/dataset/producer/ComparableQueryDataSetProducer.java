@@ -6,7 +6,7 @@ import org.dbunit.dataset.ITable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.Parameter;
-import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.QueryReader;
 
 import java.io.File;
@@ -20,7 +20,7 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     private File[] srcFiles;
     private final Parameter parameter;
 
-    public ComparableQueryDataSetProducer(IDatabaseConnection connection, ComparableDataSetLoaderParam param, Parameter parameter) {
+    public ComparableQueryDataSetProducer(IDatabaseConnection connection, ComparableDataSetParam param, Parameter parameter) {
         super(connection, param);
         if (this.getParam().getSrc().isDirectory()) {
             this.srcFiles = this.getParam().getSrc().listFiles(File::isFile);

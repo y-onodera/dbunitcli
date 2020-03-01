@@ -143,8 +143,8 @@ abstract public class CommandLineOption {
         return new ComparableDataSetLoader(this.getDatabaseConnectionLoader(), this.parameter);
     }
 
-    protected ComparableDataSetLoaderParam.Builder getDataSetParamBuilder() {
-        return ComparableDataSetLoaderParam.builder()
+    protected ComparableDataSetParam.Builder getDataSetParamBuilder() {
+        return ComparableDataSetParam.builder()
                 .setEncoding(this.getEncoding())
                 .setColumnSettings(this.getColumnSettings())
                 .setHeaderSplitPattern(this.getRegHeaderSplit())

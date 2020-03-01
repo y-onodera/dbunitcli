@@ -22,11 +22,11 @@ public class ComparableDataSetLoader {
         this.parameter = parameter;
     }
 
-    public List<Map<String, Object>> loadParam(ComparableDataSetLoaderParam param) throws DataSetException {
+    public List<Map<String, Object>> loadParam(ComparableDataSetParam param) throws DataSetException {
         return this.loadDataSet(param).toMap();
     }
 
-    public ComparableDataSet loadDataSet(ComparableDataSetLoaderParam param) throws DataSetException {
+    public ComparableDataSet loadDataSet(ComparableDataSetParam param) throws DataSetException {
         logger.info("create DataSetLoader from {}", param);
         switch (param.getSource()) {
             case TABLE:

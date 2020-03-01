@@ -2,27 +2,27 @@ package yo.dbunitcli.dataset;
 
 import java.io.File;
 
-public class ComparableDataSetLoaderParam {
+public class ComparableDataSetParam {
     private final File src;
     private final String encoding;
     private final DataSourceType source;
     private final ColumnSettings columnSettings;
     private final String headerSplitPattern;
     private final String dataSplitPattern;
-    private final boolean mapIncludeMetaData;
     private final String regInclude;
     private final String regExclude;
+    private final boolean mapIncludeMetaData;
 
-    public ComparableDataSetLoaderParam(Builder builder) {
+    public ComparableDataSetParam(Builder builder) {
         this.src = builder.getSrc();
         this.encoding = builder.getEncoding();
         this.source = builder.getSource();
         this.columnSettings = builder.getColumnSettings();
         this.headerSplitPattern = builder.getHeaderSplitPattern();
         this.dataSplitPattern = builder.getDataSplitPattern();
-        this.mapIncludeMetaData = builder.getMapIncludeMetaData();
         this.regInclude = builder.getRegInclude();
         this.regExclude = builder.getRegExclude();
+        this.mapIncludeMetaData = builder.getMapIncludeMetaData();
     }
 
     public static Builder builder() {
@@ -156,8 +156,8 @@ public class ComparableDataSetLoaderParam {
             return this;
         }
 
-        public ComparableDataSetLoaderParam build() {
-            return new ComparableDataSetLoaderParam(this);
+        public ComparableDataSetParam build() {
+            return new ComparableDataSetParam(this);
         }
 
     }

@@ -4,9 +4,9 @@ import org.dbunit.dataset.DataSetException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
-import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
 import yo.dbunitcli.dataset.ComparableTable;
 
 import java.io.File;
@@ -27,7 +27,7 @@ public class ComparableCSVQueryDataSetProducerTest {
         File src = new File(this.resource, "csvquery/singlefile/joinQuery.txt");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCSVQueryDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .build()
@@ -57,7 +57,7 @@ public class ComparableCSVQueryDataSetProducerTest {
         File src = new File(this.resource, "csvquery/singlefile");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCSVQueryDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .build()
@@ -87,7 +87,7 @@ public class ComparableCSVQueryDataSetProducerTest {
         File src = new File(this.resource, "csvquery/multifile");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCSVQueryDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .build()
@@ -133,7 +133,7 @@ public class ComparableCSVQueryDataSetProducerTest {
         File src = new File(this.resource, "csvquery/multifile");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCSVQueryDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setRegInclude("detailQuery")
                                 .setEncoding("UTF8")
@@ -164,7 +164,7 @@ public class ComparableCSVQueryDataSetProducerTest {
         File src = new File(this.resource, "csvquery/multifile");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCSVQueryDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setRegExclude("detailQuery")
                                 .setEncoding("UTF8")

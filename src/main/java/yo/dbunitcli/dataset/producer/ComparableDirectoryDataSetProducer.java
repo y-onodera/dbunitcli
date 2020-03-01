@@ -1,13 +1,13 @@
 package yo.dbunitcli.dataset.producer;
 
-import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.nio.file.Path;
 import java.util.function.Predicate;
 
 public class ComparableDirectoryDataSetProducer extends ComparableFileDataSetProducer {
 
-    public ComparableDirectoryDataSetProducer(ComparableDataSetLoaderParam param) {
+    public ComparableDirectoryDataSetProducer(ComparableDataSetParam param) {
         super(param);
     }
 

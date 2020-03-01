@@ -2,19 +2,16 @@ package yo.dbunitcli.dataset;
 
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.CachedDataSet;
-import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.filter.DefaultColumnFilter;
-import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.util.List;
 import java.util.Map;
 
 public class ComparableDataSetImpl extends CachedDataSet implements ComparableDataSet {
 
-    private final ComparableDataSetLoaderParam param;
-
     private final ColumnSettings compareSettings;
+
+    private final ComparableDataSetParam param;
 
     private final ComparableDataSetProducer producer;
 
@@ -47,11 +44,7 @@ public class ComparableDataSetImpl extends CachedDataSet implements ComparableDa
 
     @Override
     public ComparableTable getTable(String tableName) throws DataSetException {
-        return ComparableTable.createFrom(super.getTable(tableName)
-                , this.keyColumns(tableName)
-                , this.orderColumns(tableName)
-                , this.columnExpression(tableName)
-                , this.columnFilter(tableName));
+        return this.compareSettings.apply(super.getTable(tableName));
     }
 
     @Override
@@ -63,21 +56,4 @@ public class ComparableDataSetImpl extends CachedDataSet implements ComparableDa
             return false;
         }
     }
-
-    protected ColumnExpression columnExpression(String tableName) {
-        return this.compareSettings.getExpressionColumns(tableName);
-    }
-
-    protected Column[] keyColumns(String tableName) {
-        return this.compareSettings.getComparisonKeys(tableName);
-    }
-
-    protected Column[] orderColumns(String tableName) {
-        return this.compareSettings.getOrderColumns(tableName);
-    }
-
-    protected IColumnFilter columnFilter(String tableName) {
-        return this.compareSettings.getExcludeColumnFilter(tableName);
-    }
-
 }

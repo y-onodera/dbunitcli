@@ -38,15 +38,15 @@ public class ColumnExpression {
         return builder().add(this).add(other).build();
     }
 
-    public AddExpressionTableMetaData apply(ITableMetaData originMetaData, IColumnFilter iColumnFilter) throws DataSetException {
+    public AddSettingTableMetaData apply(ITableMetaData originMetaData, IColumnFilter iColumnFilter) throws DataSetException {
         if (iColumnFilter == null) {
             return this.apply(originMetaData);
         }
         return this.apply(new FilteredTableMetaData(originMetaData, iColumnFilter));
     }
 
-    public AddExpressionTableMetaData apply(ITableMetaData delegateMetaData) throws DataSetException {
-        return new AddExpressionTableMetaData(delegateMetaData, this);
+    public AddSettingTableMetaData apply(ITableMetaData delegateMetaData) throws DataSetException {
+        return new AddSettingTableMetaData(delegateMetaData, this);
     }
 
     public Collection<? extends Column> getColumns() {

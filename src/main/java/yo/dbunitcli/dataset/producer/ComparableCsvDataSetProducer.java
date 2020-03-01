@@ -14,7 +14,7 @@ import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
 
@@ -27,9 +27,9 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private final File[] src;
     private final String encoding;
     private final TableNameFilter filter;
-    private final ComparableDataSetLoaderParam param;
+    private final ComparableDataSetParam param;
 
-    public ComparableCsvDataSetProducer(ComparableDataSetLoaderParam param) {
+    public ComparableCsvDataSetProducer(ComparableDataSetParam param) {
         this.param = param;
         if (this.param.getSrc().isDirectory()) {
             this.src = this.param.getSrc().listFiles((file, s) -> s.endsWith(".csv"));
@@ -41,7 +41,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     }
 
     @Override
-    public ComparableDataSetLoaderParam getParam() {
+    public ComparableDataSetParam getParam() {
         return this.param;
     }
 

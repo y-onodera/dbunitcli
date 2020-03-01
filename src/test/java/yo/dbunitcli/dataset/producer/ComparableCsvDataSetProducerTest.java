@@ -7,9 +7,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
-import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
-import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -29,7 +28,7 @@ public class ComparableCsvDataSetProducerTest {
         File src = new File(this.resource, "nofile");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("windows-31j")
                                 .build()));
@@ -42,7 +41,7 @@ public class ComparableCsvDataSetProducerTest {
         File src = new File(this.resource, "singlefile");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("windows-31j")
                                 .build()));
@@ -75,7 +74,7 @@ public class ComparableCsvDataSetProducerTest {
         File src = new File(this.resource, "multifile");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .build()));
@@ -128,7 +127,7 @@ public class ComparableCsvDataSetProducerTest {
         File src = new File(this.resource, "multifile");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .setRegInclude("multi1")
@@ -162,7 +161,7 @@ public class ComparableCsvDataSetProducerTest {
         File src = new File(this.resource, "multifile");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .setRegExclude("multi2")
@@ -196,7 +195,7 @@ public class ComparableCsvDataSetProducerTest {
         File src = new File(this.resource, "multifile/multi1.csv");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .build()));

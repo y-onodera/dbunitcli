@@ -6,17 +6,17 @@ import org.dbunit.dataset.*;
 import java.util.Arrays;
 import java.util.Map;
 
-public class AddExpressionTableMetaData extends AbstractTableMetaData {
+public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final String tableName;
     private final Column[] primaryKeys;
     private final Column[] columns;
     private final ColumnExpression additionalExpression;
 
-    public AddExpressionTableMetaData(ITableMetaData delegate, ColumnExpression additionalExpression) throws DataSetException {
+    public AddSettingTableMetaData(ITableMetaData delegate, ColumnExpression additionalExpression) throws DataSetException {
         this(delegate.getTableName(), delegate.getPrimaryKeys(), additionalExpression.merge(delegate.getColumns()), additionalExpression);
     }
 
-    public AddExpressionTableMetaData(String tableName, Column[] primaryKeys, Column[] columns, ColumnExpression additionalExpression) {
+    public AddSettingTableMetaData(String tableName, Column[] primaryKeys, Column[] columns, ColumnExpression additionalExpression) {
         this.tableName = tableName;
         this.primaryKeys = primaryKeys;
         this.columns = columns;
@@ -57,7 +57,7 @@ public class AddExpressionTableMetaData extends AbstractTableMetaData {
         return result;
     }
 
-    public AddExpressionTableMetaData changePrimaryKey(Column[] keyColumns) {
-        return new AddExpressionTableMetaData(this.tableName, keyColumns, this.columns, this.additionalExpression);
+    public AddSettingTableMetaData changePrimaryKey(Column[] keyColumns) {
+        return new AddSettingTableMetaData(this.tableName, keyColumns, this.columns, this.additionalExpression);
     }
 }

@@ -8,5 +8,5 @@ public interface ComparableDataSetProducer extends IDataSetProducer {
         return this.getParam().getSrc().getPath();
     }
 
-    ComparableDataSetLoaderParam getParam();
+    ComparableDataSetParam getParam();
 }

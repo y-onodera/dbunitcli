@@ -5,8 +5,7 @@ import org.dbunit.dataset.ITable;
 import org.junit.Assert;
 import org.junit.Test;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
-import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
-import yo.dbunitcli.dataset.producer.ComparableDirectoryDataSetProducer;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.io.File;
 
@@ -17,7 +16,7 @@ public class ComparableDirectoryDataSetProducerTest {
         File src = new File(".", "src/test/java");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableDirectoryDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setRegInclude("yo[/\\\\]+dbunitcli[/\\\\]+")
                                 .setRegExclude("application")

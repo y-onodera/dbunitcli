@@ -1,13 +1,19 @@
 package yo.dbunitcli.dataset;
 
-import org.dbunit.dataset.Column;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
+import org.dbunit.dataset.datatype.TypeCastException;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ColumnSettings {
@@ -91,6 +97,53 @@ public class ColumnSettings {
         DefaultColumnFilter result = new DefaultColumnFilter();
         result.excludeColumns(columns.toArray(new Column[0]));
         return result;
+    }
+
+    public ComparableTable apply(ITable table) throws DataSetException {
+        try {
+            ITableMetaData originMetaData = table.getTableMetaData();
+            AddSettingTableMetaData tableMetaData = this.getExpressionColumns(originMetaData.getTableName())
+                    .apply(originMetaData, this.getExcludeColumnFilter(originMetaData.getTableName()));
+            Column[] keyColumns = this.getComparisonKeys(originMetaData.getTableName());
+            if (keyColumns.length > 0) {
+                tableMetaData = tableMetaData.changePrimaryKey(keyColumns);
+            }
+            List<Integer> filterColumnIndex = this.getFilterColumnIndex(originMetaData, tableMetaData);
+            return new ComparableTable(tableMetaData
+                    , filterColumnIndex
+                    , this.getOriginRows(table)
+                    , this.getComparator(table, this.getOrderColumns(originMetaData.getTableName())));
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new DataSetException(e);
+        }
+    }
+
+    protected List<Integer> getFilterColumnIndex(ITableMetaData originMetaData, AddSettingTableMetaData tableMetaData) throws DataSetException {
+        Set<Column> noFilter = Sets.newHashSet(originMetaData.getColumns());
+        Set<Column> filtered = Sets.newHashSet(tableMetaData.getColumns());
+        List<Integer> filterColumnIndex = Lists.newArrayList();
+        for (Column column : Sets.difference(noFilter, filtered)) {
+            filterColumnIndex.add(originMetaData.getColumnIndex(column.getColumnName()));
+        }
+        return filterColumnIndex;
+    }
+
+    protected List<Object[]> getOriginRows(ITable delegate) throws NoSuchFieldException, IllegalAccessException {
+        Field f = delegate.getClass().getDeclaredField("_rowList");
+        f.setAccessible(true);
+        return (List<Object[]>) f.get(delegate);
+    }
+
+    protected Comparator<Object> getComparator(ITable delegate, Column[] orderColumns) {
+        if (orderColumns.length > 0) {
+            return new SortedTable.AbstractRowComparator(delegate, orderColumns) {
+                @Override
+                protected int compare(Column column, Object o, Object o1) throws TypeCastException {
+                    return column.getDataType().compare(o, o1);
+                }
+            };
+        }
+        return null;
     }
 
     public interface Builder {

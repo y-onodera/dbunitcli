@@ -5,9 +5,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
-import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
-import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -27,7 +26,7 @@ public class ComparableXlsxDataSetProducerTest {
         File src = new File(this.resource, "multifile.xlsx");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .build()));
@@ -81,7 +80,7 @@ public class ComparableXlsxDataSetProducerTest {
         File src = new File(this.resource, "multifile.xlsx");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .setRegInclude("multi1")
@@ -116,7 +115,7 @@ public class ComparableXlsxDataSetProducerTest {
         File src = new File(this.resource, "multifile.xlsx");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .setRegExclude("multi2")

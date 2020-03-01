@@ -10,7 +10,7 @@ import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
 
@@ -27,9 +27,9 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     private final Pattern dataSplitPattern;
     private final Pattern headerSplitPattern;
     private final TableNameFilter filter;
-    private final ComparableDataSetLoaderParam param;
+    private final ComparableDataSetParam param;
 
-    public ComparableRegexSplitDataSetProducer(ComparableDataSetLoaderParam param) {
+    public ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) {
         this.param = param;
         if (this.param.getSrc().isDirectory()) {
             this.src = this.param.getSrc().listFiles(File::isFile);
@@ -43,7 +43,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     }
 
     @Override
-    public ComparableDataSetLoaderParam getParam() {
+    public ComparableDataSetParam getParam() {
         return this.param;
     }
 

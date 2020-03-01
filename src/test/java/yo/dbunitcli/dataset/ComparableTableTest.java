@@ -33,11 +33,7 @@ public class ComparableTableTest {
 
     @Before
     public void setUp() throws DataSetException {
-        this.target = ComparableTable.createFrom(this.table
-                , new Column[0]
-                , new Column[0]
-                , ColumnExpression.builder().build()
-                , null);
+        this.target = ColumnSettings.NONE.apply(this.table);
         this.table.addRow(new Object[]{"1", "a", "あ", 1});
         this.table.addRow(new Object[]{"1", "b", "あ", 1});
         this.table.addRow(new Object[]{"2", "a", "い", 2});

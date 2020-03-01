@@ -2,12 +2,8 @@ package yo.dbunitcli.dataset;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.dbunit.dataset.*;
-import org.dbunit.dataset.datatype.TypeCastException;
-import org.dbunit.dataset.filter.IColumnFilter;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 
@@ -19,31 +15,9 @@ public class ComparableTable implements ITable {
 
     private final List<Object[]> values;
 
-    private final AddExpressionTableMetaData addExpressionTableMetaData;
+    private final AddSettingTableMetaData addSettingTableMetaData;
 
     private final List<Integer> filterColumnIndex;
-
-    public static ComparableTable createFrom(ITable table, Column[] keyColumns, Column[] orderColumns, ColumnExpression additionalExpression, IColumnFilter iColumnFilter) throws DataSetException {
-        try {
-            ITableMetaData originMetaData = table.getTableMetaData();
-            AddExpressionTableMetaData tableMetaData = additionalExpression.apply(originMetaData, iColumnFilter);
-            if (keyColumns.length > 0) {
-                tableMetaData = tableMetaData.changePrimaryKey(keyColumns);
-            }
-            Set<Column> noFilter = Sets.newHashSet(originMetaData.getColumns());
-            Set<Column> filtered = Sets.newHashSet(tableMetaData.getColumns());
-            List<Integer> filterColumnIndex = Lists.newArrayList();
-            for (Column column : Sets.difference(noFilter, filtered)) {
-                filterColumnIndex.add(originMetaData.getColumnIndex(column.getColumnName()));
-            }
-            return new ComparableTable(tableMetaData
-                    , filterColumnIndex
-                    , getOriginRows(table)
-                    , getComparator(table, orderColumns));
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new DataSetException(e);
-        }
-    }
 
     protected ComparableTable(ITableMetaData metaData) throws DataSetException {
         this(ColumnExpression.builder().build().apply(metaData)
@@ -52,8 +26,8 @@ public class ComparableTable implements ITable {
                 , null);
     }
 
-    protected ComparableTable(AddExpressionTableMetaData tableMetaData, List<Integer> filterColumnIndex, List<Object[]> values, Comparator<Object> comparator) throws DataSetException {
-        this.addExpressionTableMetaData = tableMetaData;
+    protected ComparableTable(AddSettingTableMetaData tableMetaData, List<Integer> filterColumnIndex, List<Object[]> values, Comparator<Object> comparator) throws DataSetException {
+        this.addSettingTableMetaData = tableMetaData;
         this.filterColumnIndex = filterColumnIndex;
         this.values = values;
         this.rowComparator = comparator;
@@ -94,7 +68,7 @@ public class ComparableTable implements ITable {
 
     @Override
     public ITableMetaData getTableMetaData() {
-        return this.addExpressionTableMetaData;
+        return this.addSettingTableMetaData;
     }
 
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(List<String> keys) throws DataSetException {
@@ -138,7 +112,7 @@ public class ComparableTable implements ITable {
 
     @Override
     public Object getValue(int i, String s) throws DataSetException {
-        int j = this.addExpressionTableMetaData.getColumnIndex(s);
+        int j = this.addSettingTableMetaData.getColumnIndex(s);
         return this.getValue(i, j);
     }
 
@@ -151,7 +125,18 @@ public class ComparableTable implements ITable {
         if (rowNum < 0 || rowNum >= this.values.size()) {
             throw new RowOutOfBoundsException("rowNum " + rowNum + " is out of range;current row size is " + this.values.size());
         }
-        Object[] noFilter = addExpressionTableMetaData.applyExpression(this.values.get(this.getOriginalRowIndex(rowNum)));
+        return this.filterValues(addSettingTableMetaData.applyExpression(this.values.get(this.getOriginalRowIndex(rowNum))));
+    }
+
+    protected void addRow(Object[] row) {
+        this.values.add(row);
+    }
+
+    protected void replaceValue(int row, int column, Object newValue) throws RowOutOfBoundsException {
+        this.getRow(row)[column] = newValue;
+    }
+
+    protected Object[] filterValues(Object[] noFilter) {
         if (this.filterColumnIndex.size() == 0) {
             return noFilter;
         }
@@ -164,14 +149,6 @@ public class ComparableTable implements ITable {
             }
         }
         return result;
-    }
-
-    protected void addRow(Object[] row) {
-        this.values.add(row);
-    }
-
-    protected void replaceValue(int row, int column, Object newValue) throws RowOutOfBoundsException {
-        this.getRow(row)[column] = newValue;
     }
 
     protected int getOriginalRowIndex(int row) {
@@ -187,23 +164,5 @@ public class ComparableTable implements ITable {
             this._indexes = indexes;
         }
         return this._indexes[row];
-    }
-
-    protected static List<Object[]> getOriginRows(ITable delegate) throws NoSuchFieldException, IllegalAccessException {
-        Field f = delegate.getClass().getDeclaredField("_rowList");
-        f.setAccessible(true);
-        return (List<Object[]>) f.get(delegate);
-    }
-
-    protected static Comparator<Object> getComparator(ITable delegate, Column[] orderColumns) {
-        if (orderColumns.length > 0) {
-            return new SortedTable.AbstractRowComparator(delegate, orderColumns) {
-                @Override
-                protected int compare(Column column, Object o, Object o1) throws TypeCastException {
-                    return column.getDataType().compare(o, o1);
-                }
-            };
-        }
-        return null;
     }
 }

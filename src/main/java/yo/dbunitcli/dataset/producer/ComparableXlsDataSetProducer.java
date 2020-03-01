@@ -17,7 +17,7 @@ import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
 
@@ -58,9 +58,9 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
     private BoundSheetRecord[] orderedBSRs;
     private List<BoundSheetRecord> boundSheetRecords = new ArrayList<>();
     private final TableNameFilter filter;
-    private final ComparableDataSetLoaderParam param;
+    private final ComparableDataSetParam param;
 
-    public ComparableXlsDataSetProducer(ComparableDataSetLoaderParam param) {
+    public ComparableXlsDataSetProducer(ComparableDataSetParam param) {
         this.param = param;
         if (this.param.getSrc().isDirectory()) {
             this.src = this.param.getSrc().listFiles((file, s) -> s.endsWith(".xls"));
@@ -71,7 +71,7 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
     }
 
     @Override
-    public ComparableDataSetLoaderParam getParam() {
+    public ComparableDataSetParam getParam() {
         return this.param;
     }
 

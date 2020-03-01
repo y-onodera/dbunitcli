@@ -5,9 +5,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
-import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
-import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +27,7 @@ public class ComparableXlsDataSetProducerTest {
         File src = new File(this.resource, "multifile.xls");
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsDataSetProducer(
-                        ComparableDataSetLoaderParam.builder()
+                        ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .build()));

@@ -10,7 +10,7 @@ import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
 
@@ -26,9 +26,9 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     private final File src;
     protected final String encoding;
     protected final TableNameFilter filter;
-    private final ComparableDataSetLoaderParam param;
+    private final ComparableDataSetParam param;
 
-    public ComparableDBDataSetProducer(IDatabaseConnection connection, ComparableDataSetLoaderParam param) {
+    public ComparableDBDataSetProducer(IDatabaseConnection connection, ComparableDataSetParam param) {
         this.connection = connection;
         this.param = param;
         this.src = this.param.getSrc();
@@ -37,7 +37,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     @Override
-    public ComparableDataSetLoaderParam getParam() {
+    public ComparableDataSetParam getParam() {
         return this.param;
     }
 

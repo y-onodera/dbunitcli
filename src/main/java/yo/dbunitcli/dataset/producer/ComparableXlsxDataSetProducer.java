@@ -27,7 +27,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
 
@@ -43,9 +43,9 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     private IDataSetConsumer consumer = new DefaultConsumer();
     private final File[] src;
     private final TableNameFilter filter;
-    private ComparableDataSetLoaderParam param;
+    private ComparableDataSetParam param;
 
-    public ComparableXlsxDataSetProducer(ComparableDataSetLoaderParam param) {
+    public ComparableXlsxDataSetProducer(ComparableDataSetParam param) {
         this.param = param;
         if (this.param.getSrc().isDirectory()) {
             this.src = this.param.getSrc().listFiles((file, s) -> s.endsWith(".xlsx"));
@@ -56,7 +56,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public ComparableDataSetLoaderParam getParam() {
+    public ComparableDataSetParam getParam() {
         return this.param;
     }
 
