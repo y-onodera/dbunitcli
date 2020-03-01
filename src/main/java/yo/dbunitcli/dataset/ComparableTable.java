@@ -10,57 +10,40 @@ import java.util.function.Predicate;
 
 public class ComparableTable implements ITable {
 
-    private Integer[] _indexes;
-
-    private final Comparator<Object> rowComparator;
-
-    private final List<Object[]> values;
-
     private final AddSettingTableMetaData addSettingTableMetaData;
-
-    private final List<Integer> filterColumnIndex;
-
-    private final List<Integer> filteredRowIndexes;
 
     private final Column[] primaryKeys;
 
     private final Column[] columns;
 
+    private final RowResolver rowResolver;
+
     protected ComparableTable(ITableMetaData metaData) throws DataSetException {
         this(ColumnExpression.builder().build().apply(metaData)
-                , Lists.newArrayList()
                 , Lists.newArrayList()
                 , null
                 , null);
     }
 
     protected ComparableTable(AddSettingTableMetaData tableMetaData
-            , List<Integer> filterColumnIndex
             , List<Object[]> values
             , Comparator<Object> comparator
-            , Predicate<Map<String, Object>> rowFilter) throws DataSetException {
+            , Predicate<Map<String, Object>> rowFilter) throws RowOutOfBoundsException {
         this.addSettingTableMetaData = tableMetaData;
         this.primaryKeys = this.addSettingTableMetaData.getPrimaryKeys();
         this.columns = this.addSettingTableMetaData.getColumns();
-        this.filterColumnIndex = filterColumnIndex;
-        this.values = values;
-        this.rowComparator = comparator;
-        this.filteredRowIndexes = this.filteredRows(rowFilter);
+        this.rowResolver = new RowResolver(values, comparator, rowFilter, this.addSettingTableMetaData);
     }
 
-    public boolean isSorted() {
-        return this.rowComparator != null;
-    }
-
-    public List<Map<String, Object>> toMap() throws DataSetException {
+    public List<Map<String, Object>> toMap() throws RowOutOfBoundsException {
         return this.toMap(false);
     }
 
-    public List<Map<String, Object>> toMap(boolean includeMetaData) throws DataSetException {
+    public List<Map<String, Object>> toMap(boolean includeMetaData) throws RowOutOfBoundsException {
         List<Map<String, Object>> result = Lists.newArrayList();
         String tableName = this.getTableMetaData().getTableName();
         for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
-            Map<String, Object> map = getRowToMap(rowNum);
+            Map<String, Object> map = this.rowResolver.getRowToMap(rowNum);
             if (includeMetaData) {
                 Map<String, Object> withMetaDataMap = Maps.newHashMap();
                 withMetaDataMap.put("tableName", tableName);
@@ -73,15 +56,6 @@ public class ComparableTable implements ITable {
             }
         }
         return result;
-    }
-
-    public Map<String, Object> getRowToMap(int rowNum) throws RowOutOfBoundsException {
-        Object[] row = this.getRow(rowNum);
-        Map<String, Object> map = Maps.newHashMap();
-        for (int i = 0, j = row.length; i < j; i++) {
-            map.put(this.columns[i].getColumnName(), row[i]);
-        }
-        return map;
     }
 
     @Override
@@ -98,6 +72,11 @@ public class ComparableTable implements ITable {
             throw new AssertionError("comparison keys not unique:" + keys.toString());
         }
         return result;
+    }
+
+    @Override
+    public int getRowCount() {
+        return this.rowResolver.getRowCount();
     }
 
     public Object[] get(CompareKeys targetKey, List<String> keys, int columnLength) throws DataSetException {
@@ -123,85 +102,28 @@ public class ComparableTable implements ITable {
         return resultRow;
     }
 
-    @Override
-    public int getRowCount() {
-        if (this.filteredRowIndexes != null) {
-            return this.filteredRowIndexes.size();
-        }
-        return values.size();
+    public Object[] getRow(int rowNum) throws RowOutOfBoundsException {
+        return this.rowResolver.getRow(rowNum);
     }
 
     @Override
     public Object getValue(int i, String s) throws DataSetException {
-        int j = this.addSettingTableMetaData.getColumnIndex(s);
-        return this.getValue(i, j);
+        return this.rowResolver.getValue(i, s);
     }
 
     public Object getValue(int i, int j) throws RowOutOfBoundsException {
-        Object[] row = this.getRow(i);
-        return row[j] == null ? "" : row[j];
-    }
-
-    public Object[] getRow(int rowNum) throws RowOutOfBoundsException {
-        if (rowNum < 0 || rowNum >= this.getRowCount()) {
-            throw new RowOutOfBoundsException("rowNum " + rowNum + " is out of range;current row size is " + this.getRowCount());
-        }
-        return this.filterValues(addSettingTableMetaData.applyExpression(this.values.get(this.getOriginalRowIndex(rowNum))));
-    }
-
-    protected void addRow(Object[] row) {
-        this.values.add(row);
+        return this.rowResolver.getValue(i, j);
     }
 
     protected void replaceValue(int row, int column, Object newValue) throws RowOutOfBoundsException {
-        this.getRow(row)[column] = newValue;
+        this.rowResolver.replaceValue(row,column,newValue);
     }
 
-    protected Object[] filterValues(Object[] noFilter) {
-        if (this.filterColumnIndex.size() == 0) {
-            return noFilter;
-        }
-        Object[] result = new Object[noFilter.length - this.filterColumnIndex.size()];
-        int index = 0;
-        for (int i = 0, j = noFilter.length; i < j; i++) {
-            if (!this.filterColumnIndex.contains(i)) {
-                result[index] = noFilter[i];
-                index++;
-            }
-        }
-        return result;
-    }
-
-    protected List<Integer> filteredRows(Predicate<Map<String, Object>> rowFilter) throws RowOutOfBoundsException {
-        if (rowFilter == null) {
-            return null;
-        }
-        int fullSize = this.values.size();
-        List<Integer> filteredRowIndexes = new ArrayList<Integer>();
-        for (int row = 0; row < fullSize; ++row) {
-            if (rowFilter.test(this.getRowToMap(row))) {
-                filteredRowIndexes.add(row);
-            }
-        }
-        return filteredRowIndexes;
+    protected void addRow(Object[] row) {
+        this.rowResolver.add(row);
     }
 
     protected int getOriginalRowIndex(int noFilter) {
-        int row = noFilter;
-        if (this.filteredRowIndexes != null) {
-            row = this.filteredRowIndexes.get(noFilter);
-        }
-        if (!this.isSorted()) {
-            return row;
-        }
-        if (this._indexes == null) {
-            Integer[] indexes = new Integer[this.values.size()];
-            for (int i = 0; i < indexes.length; ++i) {
-                indexes[i] = i;
-            }
-            Arrays.sort(indexes, this.rowComparator);
-            this._indexes = indexes;
-        }
-        return this._indexes[row];
+        return this.rowResolver.getRowIndex(noFilter);
     }
 }

@@ -1,7 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.datatype.TypeCastException;
@@ -14,7 +12,6 @@ import java.lang.reflect.Field;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -114,14 +111,8 @@ public class ColumnSettings {
     public ComparableTable apply(ITable table) throws DataSetException {
         try {
             ITableMetaData originMetaData = table.getTableMetaData();
-            AddSettingTableMetaData tableMetaData = this.getExpressionColumns(originMetaData.getTableName())
-                    .apply(originMetaData, this.getExcludeColumnFilter(originMetaData.getTableName()));
-            Column[] keyColumns = this.getComparisonKeys(originMetaData.getTableName());
-            if (keyColumns.length > 0) {
-                tableMetaData = tableMetaData.changePrimaryKey(keyColumns);
-            }
+            AddSettingTableMetaData tableMetaData = this.getAddSettingTableMetaData(originMetaData);
             return new ComparableTable(tableMetaData
-                    , this.getFilterColumnIndex(originMetaData, tableMetaData)
                     , this.getOriginRows(table)
                     , this.getComparator(table)
                     , this.getRowFilter(tableMetaData));
@@ -130,18 +121,11 @@ public class ColumnSettings {
         }
     }
 
-    private Predicate<Map<String, Object>> getRowFilter(AddSettingTableMetaData tableMetaData) {
-        return this.filterExpressions.getRowFilter(tableMetaData.getTableName());
-    }
-
-    protected List<Integer> getFilterColumnIndex(ITableMetaData originMetaData, AddSettingTableMetaData tableMetaData) throws DataSetException {
-        Set<Column> noFilter = Sets.newHashSet(originMetaData.getColumns());
-        Set<Column> filtered = Sets.newHashSet(tableMetaData.getColumns());
-        List<Integer> filterColumnIndex = Lists.newArrayList();
-        for (Column column : Sets.difference(noFilter, filtered)) {
-            filterColumnIndex.add(originMetaData.getColumnIndex(column.getColumnName()));
-        }
-        return filterColumnIndex;
+    protected AddSettingTableMetaData getAddSettingTableMetaData(ITableMetaData originMetaData) throws DataSetException {
+        return this.getExpressionColumns(originMetaData.getTableName())
+                .apply(originMetaData
+                        , this.getExcludeColumnFilter(originMetaData.getTableName())
+                        , this.getComparisonKeys(originMetaData.getTableName()));
     }
 
     protected List<Object[]> getOriginRows(ITable delegate) throws NoSuchFieldException, IllegalAccessException {
@@ -161,6 +145,10 @@ public class ColumnSettings {
             };
         }
         return null;
+    }
+
+    protected Predicate<Map<String, Object>> getRowFilter(AddSettingTableMetaData tableMetaData) {
+        return this.filterExpressions.getRowFilter(tableMetaData.getTableName());
     }
 
     public interface Builder {

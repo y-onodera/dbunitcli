@@ -1,26 +1,37 @@
 package yo.dbunitcli.dataset;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.dbunit.dataset.*;
+import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final String tableName;
     private final Column[] primaryKeys;
     private final Column[] columns;
     private final ColumnExpression additionalExpression;
+    private final List<Integer> filterColumnIndex = Lists.newArrayList();
 
-    public AddSettingTableMetaData(ITableMetaData delegate, ColumnExpression additionalExpression) throws DataSetException {
-        this(delegate.getTableName(), delegate.getPrimaryKeys(), additionalExpression.merge(delegate.getColumns()), additionalExpression);
-    }
-
-    public AddSettingTableMetaData(String tableName, Column[] primaryKeys, Column[] columns, ColumnExpression additionalExpression) {
-        this.tableName = tableName;
+    public AddSettingTableMetaData(ITableMetaData delegate, Column[] primaryKeys, IColumnFilter iColumnFilter, ColumnExpression additionalExpression) throws DataSetException {
+        this.tableName = delegate.getTableName();
         this.primaryKeys = primaryKeys;
-        this.columns = columns;
+        if (iColumnFilter != null) {
+            this.columns = additionalExpression.merge(new FilteredTableMetaData(delegate, iColumnFilter).getColumns());
+        } else {
+            this.columns = additionalExpression.merge(delegate.getColumns());
+        }
         this.additionalExpression = additionalExpression;
+        Set<Column> noFilter = Sets.newHashSet(delegate.getColumns());
+        Set<Column> filtered = Sets.newHashSet(this.getColumns());
+        for (Column column : Sets.difference(noFilter, filtered)) {
+            this.filterColumnIndex.add(delegate.getColumnIndex(column.getColumnName()));
+        }
     }
 
     @Override
@@ -38,7 +49,11 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         return this.primaryKeys;
     }
 
-    public Object[] applyExpression(Object[] objects) {
+    public Object[] applySetting(Object[] objects) {
+        return this.filterColumn(this.applyExpression(objects));
+    }
+
+    protected Object[] applyExpression(Object[] objects) {
         if (this.additionalExpression.size() == 0) {
             return objects;
         }
@@ -57,7 +72,18 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         return result;
     }
 
-    public AddSettingTableMetaData changePrimaryKey(Column[] keyColumns) {
-        return new AddSettingTableMetaData(this.tableName, keyColumns, this.columns, this.additionalExpression);
+    protected Object[] filterColumn(Object[] noFilter) {
+        if (this.filterColumnIndex.size() == 0) {
+            return noFilter;
+        }
+        Object[] result = new Object[noFilter.length - this.filterColumnIndex.size()];
+        int index = 0;
+        for (int i = 0, j = noFilter.length; i < j; i++) {
+            if (!this.filterColumnIndex.contains(i)) {
+                result[index] = noFilter[i];
+                index++;
+            }
+        }
+        return result;
     }
 }

@@ -38,15 +38,16 @@ public class ColumnExpression {
         return builder().add(this).add(other).build();
     }
 
-    public AddSettingTableMetaData apply(ITableMetaData originMetaData, IColumnFilter iColumnFilter) throws DataSetException {
-        if (iColumnFilter == null) {
-            return this.apply(originMetaData);
-        }
-        return this.apply(new FilteredTableMetaData(originMetaData, iColumnFilter));
+    public AddSettingTableMetaData apply(ITableMetaData delegateMetaData) throws DataSetException {
+        return this.apply(delegateMetaData, null, delegateMetaData.getPrimaryKeys());
     }
 
-    public AddSettingTableMetaData apply(ITableMetaData delegateMetaData) throws DataSetException {
-        return new AddSettingTableMetaData(delegateMetaData, this);
+    public AddSettingTableMetaData apply(ITableMetaData originMetaData, IColumnFilter iColumnFilter, Column[] comparisonKeys) throws DataSetException {
+        Column[] primaryKey = originMetaData.getPrimaryKeys();
+        if (comparisonKeys.length > 0) {
+            primaryKey = comparisonKeys;
+        }
+        return new AddSettingTableMetaData(originMetaData, primaryKey, iColumnFilter, this);
     }
 
     public Collection<? extends Column> getColumns() {
