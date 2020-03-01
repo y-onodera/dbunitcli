@@ -3,22 +3,20 @@ package yo.dbunitcli.dataset;
 import java.util.Objects;
 
 public enum DataSourceType {
-    TABLE("table", false),
-    SQL("sql", true),
-    FILE("file", true),
-    DIR("dir", true),
-    CSV("csv", true),
-    CSVQ("csvq", true),
-    REGSP("reg", true),
-    XLS("xls", false),
-    XLSX("xlsx", false);
+    TABLE("table"),
+    SQL("sql"),
+    FILE("file"),
+    DIR("dir"),
+    CSV("csv"),
+    CSVQ("csvq"),
+    REGSP("reg"),
+    XLS("xls"),
+    XLSX("xlsx");
 
     private final String name;
-    private final boolean needDir;
 
-    DataSourceType(String name, boolean needDir) {
+    DataSourceType(String name) {
         this.name = name;
-        this.needDir = needDir;
     }
 
     public static DataSourceType fromString(String name) {
@@ -34,7 +32,4 @@ public enum DataSourceType {
         return Objects.equals(this.name, type);
     }
 
-    public boolean isNeedDir() {
-        return needDir;
-    }
 }

@@ -161,11 +161,7 @@ abstract public class CommandLineOption {
 
     protected void assertFileParameter(CmdLineParser parser, String source, File dir, String s) throws CmdLineException {
         final DataSourceType dataSourceType = DataSourceType.fromString(source);
-        if (dataSourceType.isNeedDir()) {
-            this.assertDirectoryExists(parser, dir, s);
-        } else {
-            this.assertFileExists(parser, dir, s);
-        }
+        this.assertFileExists(parser, dir, s);
         if (dataSourceType == DataSourceType.TABLE || dataSourceType == DataSourceType.SQL) {
             if (this.jdbcProperties == null) {
                 throw new CmdLineException(parser, dataSourceType + " need jdbcProperties option", new IllegalArgumentException());
@@ -177,14 +173,8 @@ abstract public class CommandLineOption {
     }
 
     protected void assertFileExists(CmdLineParser parser, File dir, String s) throws CmdLineException {
-        if (!dir.exists() || !dir.isFile()) {
-            throw new CmdLineException(parser, s + " is not exist file", new IllegalArgumentException(dir.toString()));
-        }
-    }
-
-    protected void assertDirectoryExists(CmdLineParser parser, File dir, String s) throws CmdLineException {
-        if (!dir.exists() || !dir.isDirectory()) {
-            throw new CmdLineException(parser, s + " is not exist directory", new IllegalArgumentException(dir.toString()));
+        if (!dir.exists()) {
+            throw new CmdLineException(parser, s + " is not exist", new IllegalArgumentException(dir.toString()));
         }
     }
 
