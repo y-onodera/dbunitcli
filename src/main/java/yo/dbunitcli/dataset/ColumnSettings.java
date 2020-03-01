@@ -7,12 +7,14 @@ import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.datatype.TypeCastException;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.filter.IColumnFilter;
-import org.dbunit.dataset.filter.IRowFilter;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -128,7 +130,7 @@ public class ColumnSettings {
         }
     }
 
-    private Predicate<Map<String ,Object>> getRowFilter(AddSettingTableMetaData tableMetaData) {
+    private Predicate<Map<String, Object>> getRowFilter(AddSettingTableMetaData tableMetaData) {
         return this.filterExpressions.getRowFilter(tableMetaData.getTableName());
     }
 
