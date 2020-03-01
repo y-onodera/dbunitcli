@@ -4,11 +4,12 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import javax.json.JsonObject;
 import java.util.List;
 import java.util.Map;
 
-public class ColumnSetting {
+public class AddSettingColumns {
+
+    public static final AddSettingColumns NONE = AddSettingColumns.builder().build();
 
     public static final String ALL_MATCH_PATTERN = "*";
 
@@ -24,7 +25,7 @@ public class ColumnSetting {
 
     private ColumnExpression commonExpression;
 
-    public ColumnSetting(Builder builder) {
+    public AddSettingColumns(Builder builder) {
         this.byName.putAll(builder.byName);
         builder.byNameExpression.forEach((key, value) -> this.byNameExpression.put(key, value.build()));
         this.pattern.putAll(builder.pattern);
@@ -37,7 +38,7 @@ public class ColumnSetting {
         return new Builder();
     }
 
-    public boolean includeSetting(String tableName) {
+    public boolean hasAdditionalSetting(String tableName) {
         return this.byName.containsKey(tableName)
                 || this.pattern.entrySet().stream().anyMatch(it -> it.getKey().equals(ALL_MATCH_PATTERN) || tableName.contains(it.getKey()));
     }
@@ -80,7 +81,7 @@ public class ColumnSetting {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ColumnSetting that = (ColumnSetting) o;
+        AddSettingColumns that = (AddSettingColumns) o;
         return Objects.equal(byName, that.byName) &&
                 Objects.equal(pattern, that.pattern) &&
                 Objects.equal(byNameExpression, that.byNameExpression) &&
@@ -108,8 +109,8 @@ public class ColumnSetting {
 
         private ColumnExpression.Builder commonExpression = ColumnExpression.builder();
 
-        public ColumnSetting build() {
-            return new ColumnSetting(this);
+        public AddSettingColumns build() {
+            return new AddSettingColumns(this);
         }
 
         public Builder add(Strategy strategy, String name, List<String> keys) {

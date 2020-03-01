@@ -4,7 +4,8 @@ import com.google.common.collect.Lists;
 import org.dbunit.dataset.CompositeDataSet;
 import org.dbunit.dataset.IDataSet;
 import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.writer.IDataSetWriter;
+import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.writer.IDataSetWriter;
 
 import java.util.List;
 import java.util.Map;

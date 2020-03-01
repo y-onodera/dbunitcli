@@ -7,8 +7,8 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
-import org.stringtemplate.v4.STGroupFile;
-import org.stringtemplate.v4.StringRenderer;
+import yo.dbunitcli.dataset.DataSourceType;
+import yo.dbunitcli.dataset.Parameter;
 
 import java.io.File;
 import java.io.IOException;

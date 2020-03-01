@@ -3,7 +3,8 @@ package yo.dbunitcli.application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.writer.IDataSetWriter;
+import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.writer.IDataSetWriter;
 
 public class Convert implements Command<ConvertOption>{
 

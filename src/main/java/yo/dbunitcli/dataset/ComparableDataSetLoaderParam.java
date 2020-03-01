@@ -1,7 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import yo.dbunitcli.application.DataSourceType;
-
 import java.io.File;
 
 public class ComparableDataSetLoaderParam {
@@ -93,7 +91,7 @@ public class ComparableDataSetLoaderParam {
 
         public ColumnSettings getColumnSettings() {
             if (this.columnSettings == null) {
-                return ColumnSettings.builder().build();
+                return ColumnSettings.NONE;
             }
             return this.columnSettings;
         }

@@ -7,7 +7,7 @@ import com.google.common.collect.Sets;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.dataset.*;
-import yo.dbunitcli.dataset.writer.IDataSetWriter;
+import yo.dbunitcli.writer.IDataSetWriter;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class DataSetCompare implements Compare {
 
     private ComparableDataSet newDataSet;
 
-    private ColumnSetting comparisonKeys;
+    private AddSettingColumns comparisonKeys;
 
     private IDataSetWriter writer;
 
@@ -112,7 +112,7 @@ public class DataSetCompare implements Compare {
         this.searchModifyAndDeleteColumns(oldMetaData, newMetaData);
         this.searchAddColumns(oldMetaData, newMetaData);
         this.rowCount(oldTable, newTable);
-        if (this.comparisonKeys.includeSetting(oldMetaData.getTableName())) {
+        if (this.comparisonKeys.hasAdditionalSetting(oldMetaData.getTableName())) {
             List<String> key = this.comparisonKeys.getColumns(oldMetaData.getTableName());
             this.compareRow(oldTable, newTable, key, writer);
         }

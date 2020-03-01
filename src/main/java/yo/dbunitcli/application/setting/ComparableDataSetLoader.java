@@ -1,6 +1,5 @@
-package yo.dbunitcli.application;
+package yo.dbunitcli.application.setting;
 
-import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,20 +13,12 @@ public class ComparableDataSetLoader {
 
     private static Logger logger = LoggerFactory.getLogger(ComparableDataSetLoader.class);
 
-    private final IDatabaseConnection connection;
+    private final DatabaseConnectionLoader connectionLoader;
 
     private final Parameter parameter;
 
-    public ComparableDataSetLoader() {
-        this(null, Parameter.none());
-    }
-
-    public ComparableDataSetLoader(Parameter parameter) {
-        this(null, parameter);
-    }
-
-    public ComparableDataSetLoader(IDatabaseConnection iDatabaseConnection, Parameter parameter) {
-        this.connection = iDatabaseConnection;
+    public ComparableDataSetLoader(DatabaseConnectionLoader connectionLoader, Parameter parameter) {
+        this.connectionLoader = connectionLoader;
         this.parameter = parameter;
     }
 
@@ -39,9 +30,9 @@ public class ComparableDataSetLoader {
         logger.info("create DataSetLoader from {}", param);
         switch (param.getSource()) {
             case TABLE:
-                return new ComparableDataSetImpl(new ComparableDBDataSetProducer(this.connection, param));
+                return new ComparableDataSetImpl(new ComparableDBDataSetProducer(this.connectionLoader.loadConnection(), param));
             case SQL:
-                return new ComparableDataSetImpl(new ComparableQueryDataSetProducer(this.connection, param, this.parameter));
+                return new ComparableDataSetImpl(new ComparableQueryDataSetProducer(this.connectionLoader.loadConnection(), param, this.parameter));
             case XLSX:
                 return new ComparableDataSetImpl(new ComparableXlsxDataSetProducer(param));
             case XLS:
@@ -57,6 +48,6 @@ public class ComparableDataSetLoader {
             case DIR:
                 return new ComparableDataSetImpl(new ComparableDirectoryDataSetProducer(param));
         }
-        return null;
+        throw new UnsupportedOperationException(param.getSource().name());
     }
 }

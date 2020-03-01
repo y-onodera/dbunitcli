@@ -5,7 +5,7 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.application.Parameter;
+import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
 import yo.dbunitcli.dataset.QueryReader;
 

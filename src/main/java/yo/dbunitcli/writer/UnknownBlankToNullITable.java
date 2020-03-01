@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset.writer;
+package yo.dbunitcli.writer;
 
 import com.google.common.collect.Maps;
 import org.dbunit.dataset.Column;

@@ -7,11 +7,10 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
-import org.stringtemplate.v4.STGroupFile;
-import org.stringtemplate.v4.StringRenderer;
 import org.stringtemplate.v4.misc.ErrorManager;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.dataset.Parameter;
 
 import java.io.File;
 import java.io.IOException;

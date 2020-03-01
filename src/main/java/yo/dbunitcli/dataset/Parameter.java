@@ -1,4 +1,4 @@
-package yo.dbunitcli.application;
+package yo.dbunitcli.dataset;
 
 import com.google.common.collect.Maps;
 

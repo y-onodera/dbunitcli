@@ -5,6 +5,8 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.DataSourceType;
+import yo.dbunitcli.dataset.Parameter;
 
 import java.io.File;
 

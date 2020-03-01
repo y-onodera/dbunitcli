@@ -5,10 +5,9 @@ import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import yo.dbunitcli.dataset.ColumnSetting;
-import yo.dbunitcli.dataset.ColumnSettings;
-import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.writer.IDataSetWriter;
+import yo.dbunitcli.application.setting.FromJsonColumnSettingsBuilder;
+import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.writer.IDataSetWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,17 +94,17 @@ public class CompareOption extends CommandLineOption {
         );
     }
 
-    public ColumnSetting getExpectedComparisonKeys() {
-        if (this.expectDetailSettings.getComparisonKeys().equals(ColumnSetting.builder().build())) {
-            return ColumnSetting.builder()
-                    .addPattern(ColumnSetting.ALL_MATCH_PATTERN, Lists.newArrayList())
+    public AddSettingColumns getExpectedComparisonKeys() {
+        if (this.expectDetailSettings.getComparisonKeys().equals(AddSettingColumns.builder().build())) {
+            return AddSettingColumns.builder()
+                    .addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList())
                     .build();
         }
         return this.expectDetailSettings.getComparisonKeys();
     }
 
     public IDataSetWriter expectedDiffWriter() throws DataSetException {
-        return this.getDataSetWriter(new File(this.getResultDir(), "expectedDiff"));
+        return this.writer(new File(this.getResultDir(), "expectedDiff"));
     }
 
     @Override
@@ -113,9 +112,9 @@ public class CompareOption extends CommandLineOption {
         super.populateSettings(parser);
         try {
             if (this.expectDetail != null) {
-                this.expectDetailSettings = ColumnSettings.builder().build(this.expectDetail);
+                this.expectDetailSettings = new FromJsonColumnSettingsBuilder().build(this.expectDetail);
             } else {
-                this.expectDetailSettings = ColumnSettings.builder().build();
+                this.expectDetailSettings = new FromJsonColumnSettingsBuilder().build();
             }
         } catch (IOException e) {
             throw new CmdLineException(parser, e);

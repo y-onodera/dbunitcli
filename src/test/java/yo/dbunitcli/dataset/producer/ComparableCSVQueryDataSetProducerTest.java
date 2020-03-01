@@ -4,11 +4,10 @@ import org.dbunit.dataset.DataSetException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import yo.dbunitcli.application.Parameter;
+import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
 import yo.dbunitcli.dataset.ComparableDataSetLoaderParam;
 import yo.dbunitcli.dataset.ComparableTable;
-import yo.dbunitcli.dataset.producer.ComparableCSVQueryDataSetProducer;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;

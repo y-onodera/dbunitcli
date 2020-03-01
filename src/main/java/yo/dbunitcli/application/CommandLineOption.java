@@ -1,37 +1,28 @@
 package yo.dbunitcli.application;
 
 import com.google.common.collect.Maps;
-import org.dbunit.DatabaseUnitException;
-import org.dbunit.database.DatabaseConfig;
-import org.dbunit.database.DatabaseConnection;
-import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.ext.mssql.MsSqlDataTypeFactory;
-import org.dbunit.ext.oracle.Oracle10DataTypeFactory;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 import org.stringtemplate.v4.StringRenderer;
+import yo.dbunitcli.application.setting.ComparableDataSetLoader;
+import yo.dbunitcli.application.setting.DatabaseConnectionLoader;
+import yo.dbunitcli.application.setting.FromJsonColumnSettingsBuilder;
+import yo.dbunitcli.application.setting.DataSetWriterLoader;
 import yo.dbunitcli.dataset.*;
-import yo.dbunitcli.dataset.writer.*;
+import yo.dbunitcli.writer.IDataSetWriter;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 
 abstract public class CommandLineOption {
-
-    private static Logger logger = LoggerFactory.getLogger(CommandLineOption.class);
 
     @Option(name = "-encoding", usage = "csv file encoding")
     private String encoding = System.getProperty("file.encoding");
@@ -69,9 +60,9 @@ abstract public class CommandLineOption {
     @Option(name = "-P", handler = MapOptionHandler.class)
     Map<String, String> inputParam = Maps.newHashMap();
 
-    private Properties jdbcProp;
-
     private final Parameter parameter;
+
+    private Properties jdbcProp;
 
     private ColumnSettings columnSettings;
 
@@ -115,7 +106,7 @@ abstract public class CommandLineOption {
         return this.setting;
     }
 
-    public ColumnSetting getComparisonKeys() {
+    public AddSettingColumns getComparisonKeys() {
         return this.columnSettings.getComparisonKeys();
     }
 
@@ -127,28 +118,6 @@ abstract public class CommandLineOption {
         return this.parameter;
     }
 
-    public IDataSetWriter writer() throws DataSetException {
-        return this.getDataSetWriter(this.getResultDir());
-    }
-
-    public ComparableDataSetLoaderParam.Builder getDataSetParamBuilder() {
-        return ComparableDataSetLoaderParam.builder()
-                .setEncoding(this.getEncoding())
-                .setColumnSettings(this.getColumnSettings())
-                .setHeaderSplitPattern(this.getRegHeaderSplit())
-                .setDataSplitPattern(this.getRegDataSplit())
-                .setRegInclude(this.getRegInclude())
-                .setRegExclude(this.getRegExclude())
-                ;
-    }
-
-    public ComparableDataSetLoader getComparableDataSetLoader() throws DataSetException {
-        if (this.jdbcProp != null) {
-            return new ComparableDataSetLoader(this.createIDatabaseConnection(), this.parameter);
-        }
-        return new ComparableDataSetLoader(this.parameter);
-    }
-
     public void parse(String[] args) throws Exception {
         CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(args);
@@ -158,36 +127,34 @@ abstract public class CommandLineOption {
         this.parameter.getMap().putAll(this.inputParam);
     }
 
-    public IDatabaseConnection createIDatabaseConnection() throws DataSetException {
-        String url = this.jdbcProp.get("url").toString();
-        String user = this.jdbcProp.get("user").toString();
-        String pass = this.jdbcProp.get("pass").toString();
-        IDatabaseConnection result;
-        try {
-            if (url.contains("jdbc:oracle:thin")) {
-                Class.forName("oracle.jdbc.driver.OracleDriver");
-                Connection conn = DriverManager.getConnection(url, user, pass);
-                result = new DatabaseConnection(conn, user);
-                DatabaseConfig config = result.getConfig();
-                config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new Oracle10DataTypeFactory());
-                config.setProperty(DatabaseConfig.FEATURE_ALLOW_EMPTY_FIELDS, Boolean.TRUE);
-                config.setProperty(DatabaseConfig.FEATURE_SKIP_ORACLE_RECYCLEBIN_TABLES, Boolean.TRUE);
-                config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, Boolean.TRUE);
-            } else if (url.contains("jdbc:sqlserver")) {
-                Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-                Connection conn = DriverManager.getConnection(url, user, pass);
-                result = new DatabaseConnection(conn, conn.getCatalog());
-                DatabaseConfig config = result.getConfig();
-                config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new MsSqlDataTypeFactory());
-                config.setProperty(DatabaseConfig.FEATURE_ALLOW_EMPTY_FIELDS, Boolean.TRUE);
-                config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, Boolean.TRUE);
-            } else {
-                throw new UnsupportedOperationException("unknown url :" + url);
-            }
-            return result;
-        } catch (ClassNotFoundException | SQLException | DatabaseUnitException ex) {
-            throw new DataSetException(ex);
-        }
+    public IDataSetWriter writer() throws DataSetException {
+        return this.writer(this.resultDir);
+    }
+
+    public IDataSetWriter writer(File outputTo) throws DataSetException {
+        return new DataSetWriterLoader().get(this.getDatabaseConnectionLoader()
+                , this.resultType
+                , this.operation
+                , outputTo
+                , this.outputEncoding);
+    }
+
+    protected ComparableDataSetLoader getComparableDataSetLoader() throws DataSetException {
+        return new ComparableDataSetLoader(this.getDatabaseConnectionLoader(), this.parameter);
+    }
+
+    protected ComparableDataSetLoaderParam.Builder getDataSetParamBuilder() {
+        return ComparableDataSetLoaderParam.builder()
+                .setEncoding(this.getEncoding())
+                .setColumnSettings(this.getColumnSettings())
+                .setHeaderSplitPattern(this.getRegHeaderSplit())
+                .setDataSplitPattern(this.getRegDataSplit())
+                .setRegInclude(this.getRegInclude())
+                .setRegExclude(this.getRegExclude());
+    }
+
+    protected DatabaseConnectionLoader getDatabaseConnectionLoader() {
+        return new DatabaseConnectionLoader(this.jdbcProp);
     }
 
     abstract protected void assertDirectoryExists(CmdLineParser parser) throws CmdLineException;
@@ -195,13 +162,9 @@ abstract public class CommandLineOption {
     protected void assertFileParameter(CmdLineParser parser, String source, File dir, String s) throws CmdLineException {
         final DataSourceType dataSourceType = DataSourceType.fromString(source);
         if (dataSourceType.isNeedDir()) {
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new CmdLineException(parser, s + " is not exist directory", new IllegalArgumentException(dir.toString()));
-            }
+            this.assertDirectoryExists(parser, dir, s);
         } else {
-            if (!dir.exists() || !dir.isFile()) {
-                throw new CmdLineException(parser, s + " is not exist file", new IllegalArgumentException(dir.toString()));
-            }
+            this.assertFileExists(parser, dir, s);
         }
         if (dataSourceType == DataSourceType.TABLE || dataSourceType == DataSourceType.SQL) {
             if (this.jdbcProperties == null) {
@@ -213,17 +176,16 @@ abstract public class CommandLineOption {
         }
     }
 
-    protected IDataSetWriter getDataSetWriter(File resultDir) throws DataSetException {
-        logger.info("create DataSetWriter type:{} DBOperation:{} resultDir:{} encoding:{}"
-                , this.resultType, this.operation, resultDir, this.outputEncoding);
-        if (DataSourceType.XLSX.isEqual(this.resultType)) {
-            return new XlsxDataSetWriter(resultDir);
-        } else if (DataSourceType.XLS.isEqual(this.resultType)) {
-            return new XlsDataSetWriter(resultDir);
-        } else if (DataSourceType.TABLE.isEqual(this.resultType)) {
-            return new DBDataSetWriter(this.createIDatabaseConnection(), this.operation);
+    protected void assertFileExists(CmdLineParser parser, File dir, String s) throws CmdLineException {
+        if (!dir.exists() || !dir.isFile()) {
+            throw new CmdLineException(parser, s + " is not exist file", new IllegalArgumentException(dir.toString()));
         }
-        return new CsvDataSetWriterWrapper(resultDir, this.outputEncoding);
+    }
+
+    protected void assertDirectoryExists(CmdLineParser parser, File dir, String s) throws CmdLineException {
+        if (!dir.exists() || !dir.isDirectory()) {
+            throw new CmdLineException(parser, s + " is not exist directory", new IllegalArgumentException(dir.toString()));
+        }
     }
 
     protected void loadJdbcTemplate() throws IOException {
@@ -236,9 +198,9 @@ abstract public class CommandLineOption {
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         try {
             if (this.setting != null) {
-                this.columnSettings = ColumnSettings.builder().build(this.setting);
+                this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
             } else {
-                this.columnSettings = ColumnSettings.builder().build();
+                this.columnSettings = ColumnSettings.NONE;
             }
         } catch (IOException e) {
             throw new CmdLineException(parser, e);

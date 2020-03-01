@@ -1,14 +1,14 @@
 package yo.dbunitcli.compare;
 
 import org.dbunit.dataset.DataSetException;
-import yo.dbunitcli.dataset.ColumnSetting;
+import yo.dbunitcli.dataset.AddSettingColumns;
 import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.writer.IDataSetWriter;
+import yo.dbunitcli.writer.IDataSetWriter;
 
 public class DataSetCompareBuilder {
     private ComparableDataSet oldDataSet;
     private ComparableDataSet newDataSet;
-    private ColumnSetting comparisonKeys;
+    private AddSettingColumns comparisonKeys;
     private IDataSetWriter dataSetWriter;
 
     public DataSetCompareBuilder oldDataSet(ComparableDataSet dataSet) {
@@ -21,7 +21,7 @@ public class DataSetCompareBuilder {
         return this;
     }
 
-    public DataSetCompareBuilder comparisonKeys(ColumnSetting comparisonKeys) {
+    public DataSetCompareBuilder comparisonKeys(AddSettingColumns comparisonKeys) {
         this.comparisonKeys = comparisonKeys;
         return this;
     }
@@ -39,7 +39,7 @@ public class DataSetCompareBuilder {
         return newDataSet;
     }
 
-    public ColumnSetting getComparisonKeys() {
+    public AddSettingColumns getComparisonKeys() {
         return comparisonKeys;
     }
 

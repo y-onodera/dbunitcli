@@ -71,7 +71,7 @@ public class ComparableDataSetImpl extends CachedDataSet implements ComparableDa
     }
 
     protected ColumnExpression columnExpression(String tableName) {
-        return this.compareSettings.getExpression(tableName);
+        return this.compareSettings.getExpressionColumns(tableName);
     }
 
     protected Column[] keyColumns(String tableName) {

@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import yo.dbunitcli.dataset.ColumnSetting;
+import yo.dbunitcli.dataset.AddSettingColumns;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -115,9 +115,9 @@ public class CompareOptionTest {
     @Test
     public void parseNoSettingFile() throws Exception {
         this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-old=" + this.baseDir + "/multidiff/old"});
-        assertEquals(ColumnSetting.builder().build(), this.target.getComparisonKeys());
-        assertEquals(ColumnSetting.builder().build(), this.target.getColumnSettings().getExcludeColumns());
-        assertEquals(ColumnSetting.builder().build(), this.target.getColumnSettings().getOrderColumns());
+        assertEquals(AddSettingColumns.NONE, this.target.getComparisonKeys());
+        assertEquals(AddSettingColumns.NONE, this.target.getColumnSettings().getExcludeColumns());
+        assertEquals(AddSettingColumns.NONE, this.target.getColumnSettings().getOrderColumns());
     }
 
 

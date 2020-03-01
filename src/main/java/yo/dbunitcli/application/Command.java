@@ -1,5 +1,7 @@
 package yo.dbunitcli.application;
 
+import yo.dbunitcli.dataset.Parameter;
+
 public interface Command<T extends CommandLineOption> {
 
     default void exec(String[] args) throws Exception {

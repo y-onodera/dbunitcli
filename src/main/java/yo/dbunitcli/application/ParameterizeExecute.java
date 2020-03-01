@@ -1,5 +1,7 @@
 package yo.dbunitcli.application;
 
+import yo.dbunitcli.dataset.Parameter;
+
 import java.util.Map;
 
 public class ParameterizeExecute {

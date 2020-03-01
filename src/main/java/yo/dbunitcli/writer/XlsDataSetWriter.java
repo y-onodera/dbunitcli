@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset.writer;
+package yo.dbunitcli.writer;
 
 import org.apache.poi.ss.usermodel.*;
 import org.dbunit.dataset.*;

@@ -1,4 +1,4 @@
-package yo.dbunitcli.application;
+package yo.dbunitcli.dataset;
 
 import java.util.Objects;
 
