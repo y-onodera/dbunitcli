@@ -9,11 +9,9 @@ import org.kohsuke.args4j.spi.MapOptionHandler;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 import org.stringtemplate.v4.StringRenderer;
-import yo.dbunitcli.application.setting.ComparableDataSetLoader;
-import yo.dbunitcli.application.setting.DatabaseConnectionLoader;
-import yo.dbunitcli.application.setting.FromJsonColumnSettingsBuilder;
-import yo.dbunitcli.application.setting.DataSetWriterLoader;
+import yo.dbunitcli.application.setting.*;
 import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.mapper.xlsx.XlsxSchema;
 import yo.dbunitcli.writer.IDataSetWriter;
 
 import java.io.File;
@@ -38,6 +36,9 @@ abstract public class CommandLineOption {
 
     @Option(name = "-setting", usage = "file define comparison settings")
     private File setting;
+
+    @Option(name = "-xlsxSchema", usage = "xlsx schema")
+    private File xlsxSchemaSource;
 
     @Option(name = "-jdbcProperties", usage = "use connect database. [url=,user=,pass=]")
     private File jdbcProperties;
@@ -65,6 +66,8 @@ abstract public class CommandLineOption {
     private Properties jdbcProp;
 
     private ColumnSettings columnSettings;
+
+    private XlsxSchema xlsxSchema;
 
     public CommandLineOption(Parameter param) {
         this.parameter = param;
@@ -147,6 +150,7 @@ abstract public class CommandLineOption {
         return ComparableDataSetParam.builder()
                 .setEncoding(this.getEncoding())
                 .setColumnSettings(this.getColumnSettings())
+                .setXlsxSchema(this.xlsxSchema)
                 .setHeaderSplitPattern(this.getRegHeaderSplit())
                 .setDataSplitPattern(this.getRegDataSplit())
                 .setRegInclude(this.getRegInclude())
@@ -188,6 +192,7 @@ abstract public class CommandLineOption {
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         try {
             this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
+            this.xlsxSchema = new FromJsonXlsxSchemaBuilder().build(this.xlsxSchemaSource);
         } catch (IOException e) {
             throw new CmdLineException(parser, e);
         }

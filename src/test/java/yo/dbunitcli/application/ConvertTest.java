@@ -1,5 +1,6 @@
 package yo.dbunitcli.application;
 
+import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -8,6 +9,7 @@ import org.junit.rules.ExpectedException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.List;
 
 public class ConvertTest {
     @Rule
@@ -42,4 +44,8 @@ public class ConvertTest {
         Convert.main(new String[]{"@" + this.baseDir + "/paramFromCsvqToCsv.txt"});
     }
 
+    @Test
+    public void testXlsxWithSchemaToCsv() throws Exception {
+        Convert.main(new String[]{"@" + this.baseDir + "/paramXlsxWithSchemaToCsv.txt"});
+    }
 }

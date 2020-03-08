@@ -1,6 +1,5 @@
 package yo.dbunitcli.application.setting;
 
-import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

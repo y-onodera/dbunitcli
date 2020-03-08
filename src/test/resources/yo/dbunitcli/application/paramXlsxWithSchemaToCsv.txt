@@ -1,0 +1,5 @@
+-src=src/test/resources/yo/dbunitcli/application/xlsxwithschema/ComplexLayout.xlsx
+-srcType=xlsx
+-xlsxSchema=src/test/resources/yo/dbunitcli/application/xlsxwithschema/ComplexLayoutSchema.json
+-result=target/test-classes/yo/dbunitcli/application/xlsxwithschema/result
+-outputEncoding=MS932

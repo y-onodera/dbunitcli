@@ -1,0 +1,42 @@
+{
+  "rows": [
+    {
+      "tableName": "テーブル一覧",
+      "sheetName": "テーブル一覧",
+      "header": ["No","論理名称","物理名称","備考"],
+      "dataStart": 4,
+      "columnIndex": [0,2,12,22],
+      "breakKey": ["論理名称"]
+    },
+    {
+      "tableName": "業務ドメイン",
+      "sheetName": "業務ドメイン",
+      "header": ["No","論理名称","物理名称","データ型","桁数","初期値","PK","IDX1","IDX2","NN","備考"],
+      "dataStart": 4,
+      "columnIndex": [0,2,11,20,25,27,30,32,34,36,38],
+      "breakKey": ["論理名称"]
+    }
+  ],
+  "cells": [
+    {
+      "tableName": "ユーザマスタ概要",
+      "sheetName": "ユーザマスタ",
+      "header": ["論理名称","物理名称","システムID","システム名称","改訂日","改訂者"],
+      "rows": [
+        {"cellAddress": ["O1","O2","AC1","AC2","AQ1","AQ2"]}
+      ]
+    },
+    {
+      "tableName": "ユーザマスタ",
+      "sheetName": "ユーザマスタ",
+      "header": ["No","論理名称","物理名称","データ型","桁数","初期値","PK","IDX1","IDX2","NN","備考"],
+      "rows": [
+        {"cellAddress": ["A5","C5","L5","U5","Z5","AB5","AE5","AG5","AI5","AK5","AM5"]},
+        {"cellAddress": ["A6","C6","L6","U6","Z6","AB6","AE6","AG6","AI6","AK6","AM6"]},
+        {"cellAddress": ["A7","C7","L7","U7","Z7","AB7","AE7","AG7","AI7","AK7","AM7"]},
+        {"cellAddress": ["A8","C8","L8","U8","Z8","AB8","AE8","AG8","AI8","AK8","AM8"]},
+        {"cellAddress": ["A9","C9","L9","U9","Z9","AB9","AE9","AG9","AI9","AK9","AM9"]}
+      ]
+    }
+  ]
+}

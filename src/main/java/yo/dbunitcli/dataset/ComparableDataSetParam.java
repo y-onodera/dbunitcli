@@ -1,5 +1,7 @@
 package yo.dbunitcli.dataset;
 
+import yo.dbunitcli.mapper.xlsx.XlsxSchema;
+
 import java.io.File;
 
 public class ComparableDataSetParam {
@@ -12,6 +14,7 @@ public class ComparableDataSetParam {
     private final String regInclude;
     private final String regExclude;
     private final boolean mapIncludeMetaData;
+    private final XlsxSchema xlsxSchema;
 
     public ComparableDataSetParam(Builder builder) {
         this.src = builder.getSrc();
@@ -23,6 +26,7 @@ public class ComparableDataSetParam {
         this.regInclude = builder.getRegInclude();
         this.regExclude = builder.getRegExclude();
         this.mapIncludeMetaData = builder.getMapIncludeMetaData();
+        this.xlsxSchema = builder.getXlsxSchema();
     }
 
     public static Builder builder() {
@@ -58,7 +62,11 @@ public class ComparableDataSetParam {
     }
 
     public boolean isMapIncludeMetaData() {
-        return mapIncludeMetaData;
+        return this.mapIncludeMetaData;
+    }
+
+    public XlsxSchema getXlsxSchema() {
+        return this.xlsxSchema;
     }
 
     public static class Builder {
@@ -71,6 +79,7 @@ public class ComparableDataSetParam {
         private boolean mapIncludeMetaData;
         private String regInclude;
         private String regExclude;
+        private XlsxSchema xlsxSchema = XlsxSchema.DEFAULT;
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -116,6 +125,10 @@ public class ComparableDataSetParam {
             return this.regExclude;
         }
 
+        public XlsxSchema getXlsxSchema() {
+            return this.xlsxSchema;
+        }
+
         public Builder setEncoding(String encoding) {
             this.encoding = encoding;
             return this;
@@ -153,6 +166,11 @@ public class ComparableDataSetParam {
 
         public Builder setMapIncludeMetaData(boolean includeMetaData) {
             this.mapIncludeMetaData = includeMetaData;
+            return this;
+        }
+
+        public Builder setXlsxSchema(XlsxSchema xlsxSchema) {
+            this.xlsxSchema = xlsxSchema;
             return this;
         }
 
