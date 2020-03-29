@@ -17,13 +17,13 @@ public class CompareOption extends CommandLineOption {
     @Option(name = "-old", usage = "directory old files at", required = true)
     private File oldDir;
 
-    @Option(name = "-oldsource", usage = "table | sql | csv | csvq | xls | xlsx | reg : default csv")
+    @Option(name = "-oldsource", usage = "table | sql | csv | csvq | xls | xlsx | reg ")
     private String oldsource = "csv";
 
     @Option(name = "-new", usage = "directory new files at", required = true)
     private File newDir;
 
-    @Option(name = "-newsource", usage = "table | sql | csv | csvq | xls | xlsx | reg : default csv")
+    @Option(name = "-newsource", usage = "table | sql | csv | csvq | xls | xlsx | reg ")
     private String newsource = "csv";
 
     @Option(name = "-expect", usage = "expected diff")

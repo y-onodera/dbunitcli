@@ -1,5 +1,6 @@
 package yo.dbunitcli.application;
 
+import org.kohsuke.args4j.CmdLineException;
 import yo.dbunitcli.dataset.Parameter;
 
 public interface Command<T extends CommandLineOption> {

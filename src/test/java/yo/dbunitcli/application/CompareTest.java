@@ -23,7 +23,6 @@ public class CompareTest {
         this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(),"UTF-8");
     }
 
-
     @Test
     public void testSuccessResultDiffExpected() throws Exception {
         Compare.main(new String[]{"@" + this.baseDir + "/paramResultDiffValidExpected.txt"});

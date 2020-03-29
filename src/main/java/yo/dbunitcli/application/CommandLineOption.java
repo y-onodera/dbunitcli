@@ -28,7 +28,7 @@ abstract public class CommandLineOption {
     @Option(name = "-result", usage = "directory result files at")
     private File resultDir = new File("").getAbsoluteFile();
 
-    @Option(name = "-resultType", usage = "csv | xls | xlsx | table : default csv")
+    @Option(name = "-resultType", usage = "csv | xls | xlsx | table ")
     private String resultType = "csv";
 
     @Option(name = "-outputEncoding", usage = "output csv file encoding")
@@ -37,7 +37,7 @@ abstract public class CommandLineOption {
     @Option(name = "-setting", usage = "file define comparison settings")
     private File setting;
 
-    @Option(name = "-xlsxSchema", usage = "xlsx schema")
+    @Option(name = "-xlsxSchema", usage = "schema use read xlsx")
     private File xlsxSchemaSource;
 
     @Option(name = "-jdbcProperties", usage = "use connect database. [url=,user=,pass=]")
@@ -123,11 +123,19 @@ abstract public class CommandLineOption {
 
     public void parse(String[] args) throws Exception {
         CmdLineParser parser = new CmdLineParser(this);
-        parser.parseArgument(args);
-        this.assertDirectoryExists(parser);
-        this.loadJdbcTemplate();
-        this.populateSettings(parser);
-        this.parameter.getMap().putAll(this.inputParam);
+        try {
+            parser.parseArgument(args);
+            this.assertDirectoryExists(parser);
+            this.loadJdbcTemplate();
+            this.populateSettings(parser);
+            this.parameter.getMap().putAll(this.inputParam);
+        } catch (CmdLineException cx) {
+            System.out.println("usage:");
+            parser.printSingleLineUsage(System.out);
+            System.out.println();
+            parser.printUsage(System.out);
+            throw cx;
+        }
     }
 
     public IDataSetWriter writer() throws DataSetException {

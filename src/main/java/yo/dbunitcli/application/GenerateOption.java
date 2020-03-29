@@ -2,6 +2,8 @@ package yo.dbunitcli.application;
 
 import com.google.common.io.Files;
 import org.dbunit.dataset.DataSetException;
+import org.jxls.common.Context;
+import org.jxls.util.JxlsHelper;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -12,8 +14,7 @@ import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.Parameter;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,11 +28,17 @@ public class GenerateOption extends ConvertOption {
     @Option(name = "-templateGroup", usage = "StringTemplate4 templateGroup file.")
     private File templateGroup;
 
+    @Option(name = "-templateEncoding", usage = "template txt file encoding")
+    private String templateEncoding = System.getProperty("file.encoding");
+
     @Option(name = "-resultPath", usage = "Path to generate file", required = true)
     private String resultPath;
 
-    @Option(name = "-unit", usage = "generate per record or table or dataset")
+    @Option(name = "-unit", usage = "record | table | dataset :generate per record or table or dataset")
     private String unit = "record";
+
+    @Option(name = "-generateType", usage = "txt | xlsx :generate planTxt or xlsx")
+    private String generateType = "txt";
 
     private STGroup stGroup;
 
@@ -43,6 +50,30 @@ public class GenerateOption extends ConvertOption {
 
     public GenerateOption(Parameter param) {
         super(param);
+    }
+
+    public String getResultPath() {
+        return this.resultPath;
+    }
+
+    public File getTemplate() {
+        return this.template;
+    }
+
+    public String getTemplateEncoding() {
+        return templateEncoding;
+    }
+
+    public String templateString() {
+        return this.templateString;
+    }
+
+    public GenerateUnit getUnit() {
+        return GenerateUnit.valueOf(this.unit.toUpperCase());
+    }
+
+    public String getGenerateType() {
+        return this.generateType;
     }
 
     public Stream<Map<String, Object>> parameterStream() throws DataSetException {
@@ -79,10 +110,6 @@ public class GenerateOption extends ConvertOption {
         return Stream.of(param);
     }
 
-    public GenerateUnit getUnit() {
-        return GenerateUnit.valueOf(this.unit.toUpperCase());
-    }
-
     public String resultPath(Map<String, Object> param) {
         ST resultPath = new ST(this.stGroup, this.getResultPath());
         param.forEach(resultPath::add);
@@ -90,28 +117,32 @@ public class GenerateOption extends ConvertOption {
     }
 
     public void write(File resultFile, Map<String, Object> param) throws IOException {
-        ST result = new ST(this.stGroup, this.templateString());
-        param.forEach(result::add);
-        result.write(resultFile, ErrorManager.DEFAULT_ERROR_LISTENER, this.getOutputEncoding());
-    }
-
-    public String getResultPath() {
-        return this.resultPath;
-    }
-
-    public String templateString() {
-        return this.templateString;
+        if (this.getGenerateType().equals("txt")) {
+            ST result = new ST(this.stGroup, this.templateString());
+            param.forEach(result::add);
+            result.write(resultFile, ErrorManager.DEFAULT_ERROR_LISTENER, this.getOutputEncoding());
+        } else {
+            try (InputStream is = new FileInputStream(this.getTemplate())) {
+                try (OutputStream os = new FileOutputStream(resultFile)) {
+                    Context context = new Context();
+                    context.putVar("param", param);
+                    JxlsHelper.getInstance().processTemplate(is, os, context);
+                }
+            }
+        }
     }
 
     @Override
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         super.populateSettings(parser);
         this.stGroup = this.createSTGroup(this.templateGroup);
-        try {
-            this.templateString = Files.asCharSource(this.template, Charset.forName(getEncoding()))
-                    .read();
-        } catch (IOException e) {
-            throw new CmdLineException(parser, e);
+        if (this.getGenerateType().equals("txt")) {
+            try {
+                this.templateString = Files.asCharSource(this.template, Charset.forName(this.getTemplateEncoding()))
+                        .read();
+            } catch (IOException e) {
+                throw new CmdLineException(parser, e);
+            }
         }
     }
 

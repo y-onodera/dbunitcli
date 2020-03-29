@@ -30,35 +30,40 @@ public class GenerateTest {
     }
 
     @Test
+    public void testGenerateXlsx() throws Exception {
+        Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateXlsx.txt"});
+    }
+
+    @Test
     public void testGenerateTxt() throws Exception {
         Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateTxt.txt"});
         this.subDirectory = "generate/row";
-        assertGenerateFileEquals("SomeClassTest.txt");
-        assertGenerateFileEquals("OtherClassTest.txt");
-        assertGenerateFileEquals( "AnotherClassTest.txt");
+        assertGenerateFileEquals("SomeClassTest.txt", "MS932");
+        assertGenerateFileEquals("OtherClassTest.txt", "MS932");
+        assertGenerateFileEquals("AnotherClassTest.txt", "MS932");
     }
 
     @Test
     public void testGenerateTxtPerTable() throws Exception {
         Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateTxtPerTable.txt"});
         this.subDirectory = "generate/table";
-        assertGenerateFileEquals("Test1.txt");
-        assertGenerateFileEquals("Test2.txt");
-        assertGenerateFileEquals( "Test3.txt");
+        assertGenerateFileEquals("Test1.txt", "UTF-8");
+        assertGenerateFileEquals("Test2.txt", "UTF-8");
+        assertGenerateFileEquals("Test3.txt", "UTF-8");
     }
 
     @Test
     public void testGenerateTxtWithMetaData() throws Exception {
         Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateTxtWithMetaData.txt"});
         this.subDirectory = "generate/with_metadata";
-        assertGenerateFileEquals("Test1.txt");
-        assertGenerateFileEquals("Test2.txt");
-        assertGenerateFileEquals( "Test3.txt");
+        assertGenerateFileEquals("Test1.txt", "UTF-8");
+        assertGenerateFileEquals("Test2.txt", "UTF-8");
+        assertGenerateFileEquals("Test3.txt", "UTF-8");
     }
 
-    private void assertGenerateFileEquals(String target) throws IOException {
-        String expect = Files.asCharSource(new File(this.baseDir + this.subDirectory + "/expect/txt", target), Charset.forName("MS932")).read();
-        String actual = Files.asCharSource(new File(this.baseDir + this.subDirectory + "/result", target), Charset.forName("MS932")).read();
+    private void assertGenerateFileEquals(String target, String encode) throws IOException {
+        String expect = Files.asCharSource(new File(this.baseDir + this.subDirectory + "/expect/txt", target), Charset.forName(encode)).read();
+        String actual = Files.asCharSource(new File(this.baseDir + this.subDirectory + "/result", target), Charset.forName(encode)).read();
         Assert.assertEquals(expect, actual);
     }
 }

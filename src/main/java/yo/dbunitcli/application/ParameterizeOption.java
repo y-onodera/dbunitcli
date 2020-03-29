@@ -21,10 +21,10 @@ public class ParameterizeOption extends CommandLineOption {
     @Option(name = "-param", usage = "directory or file extract data driven parameter at", required = true)
     private File param;
 
-    @Option(name = "-paramType", usage = "table | sql | csv | csvq | xls | xlsx | : default csv")
+    @Option(name = "-paramType", usage = "table | sql | csv | csvq | xls | xlsx | ")
     private String paramType = "csv";
 
-    @Option(name = "-includeMetaData", usage = "whether param include tableName and columns or not : default false")
+    @Option(name = "-includeMetaData", usage = "whether param include tableName and columns or not ")
     private boolean includeMetaData = false;
 
     @Option(name = "-template", usage = "template file. data driven target argument", required = true)

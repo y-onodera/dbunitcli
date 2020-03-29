@@ -1,0 +1,6 @@
+-srcType=csv
+-src=src/test/resources/yo/dbunitcli/application/generate/table/source/csv
+-template=src/test/resources/yo/dbunitcli/application/generate/table/template.xlsx
+-unit=table
+-generateType=xlsx
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/table/result/xlsx/$tableName$.xlsx

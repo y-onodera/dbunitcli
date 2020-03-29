@@ -1,6 +1,6 @@
 comment,name,dataType
-譁�蟄怜�怜､,stringValue,String
-逵溷⊃蛟､,booleanValue,Boolean
-謨ｰ蛟､1,longValue,Long
-謨ｰ蛟､2,intValue,Integer
-謨ｰ蛟､3,bigDecimalValue,BigDecimal
+文字列値,stringValue,String
+真偽値,booleanValue,Boolean
+数値1,longValue,Long
+数値2,intValue,Integer
+数値3,bigDecimalValue,BigDecimal

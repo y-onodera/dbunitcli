@@ -1,6 +1,8 @@
--old=target/test-classes/yo/dbunitcli/application/csv2xlsx/csv
--new=target/test-classes/yo/dbunitcli/application/csv2xlsx/multifile.xlsx
+-old=src/test/resources/yo/dbunitcli/application/csv2xlsx/csv
+-encoding=UTF-8
+-new=src/test/resources/yo/dbunitcli/application/csv2xlsx/multifile.xlsx
 -newsource=xlsx
--setting=target/test-classes/yo/dbunitcli/application/csv2xlsx/setting.json
--result=target/test-classes/yo/dbunitcli/application/csv2xlsx/result
--expect=target/test-classes/yo/dbunitcli/application/csv2xlsx/expect
+-setting=src/test/resources/yo/dbunitcli/application/csv2xlsx/setting.json
+-expect=src/test/resources/yo/dbunitcli/application/csv2xlsx/expectxlsx2csv
+-result=target/test-classes/yo/dbunitcli/application/compare/csv2xlsx/result
+-outputEncoding=UTF-8

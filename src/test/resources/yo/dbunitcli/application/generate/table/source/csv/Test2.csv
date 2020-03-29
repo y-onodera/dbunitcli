@@ -1,4 +1,4 @@
 comment,name,dataType
-謨ｰ蛟､,bigDecimalValue,BigDecimal
-譁�蟄怜�怜､,stringValue,String
-逵溷⊃蛟､,booleanValue,Boolean
+数値,bigDecimalValue,BigDecimal
+文字列値,stringValue,String
+真偽値,booleanValue,Boolean
