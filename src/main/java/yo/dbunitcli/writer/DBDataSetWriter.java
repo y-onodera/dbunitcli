@@ -17,9 +17,9 @@ public class DBDataSetWriter implements IDataSetWriter {
     private final IDatabaseConnection connection;
     private final DefaultDataSet iDataSet;
 
-    public DBDataSetWriter(IDatabaseConnection iDatabaseConnection, String operation) {
-        this.operation = Operation.valueOf(operation).op;
-        this.connection = iDatabaseConnection;
+    public DBDataSetWriter(DataSetWriterParam param) throws DataSetException {
+        this.operation = Operation.valueOf(param.getOperation()).op;
+        this.connection = param.getDatabaseConnectionLoader().loadConnection();
         this.iDataSet = new DefaultDataSet();
     }
 

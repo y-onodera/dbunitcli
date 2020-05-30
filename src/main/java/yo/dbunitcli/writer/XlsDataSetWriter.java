@@ -16,6 +16,10 @@ import java.util.Date;
 
 public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter implements IDataSetWriter {
 
+    public static enum TableExportType {
+        SHEET, BOOK
+    }
+
     private static Logger logger = LoggerFactory.getLogger(XlsDataSetWriter.class);
     private final File resultDir;
 
@@ -25,8 +29,14 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
 
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    public XlsDataSetWriter(File resultDir) {
-        this.resultDir = resultDir;
+    private final TableExportType tableExport;
+
+    private final boolean exportEmptyTable;
+
+    public XlsDataSetWriter(DataSetWriterParam param) {
+        this.resultDir = param.getResultDir();
+        this.tableExport = TableExportType.valueOf(param.getExcelTable());
+        this.exportEmptyTable = param.isExportEmptyTable();
     }
 
     @Override
@@ -38,14 +48,26 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
 
     @Override
     public void open(String aFileName) {
-        this.filename = aFileName;
-        this.dataSet = new DefaultDataSet();
+        if (this.tableExport == TableExportType.SHEET) {
+            this.filename = aFileName;
+            this.dataSet = new DefaultDataSet();
+        }
     }
 
     @Override
     public void write(ITable aTable) throws DataSetException {
-        logger.info("addTable {}", aTable.getTableMetaData().getTableName());
-        this.dataSet.addTable(aTable);
+        if (!this.exportEmptyTable && aTable.getRowCount() == 0) {
+            return;
+        }
+        if (this.tableExport == TableExportType.SHEET) {
+            logger.info("addTable {}", aTable.getTableMetaData().getTableName());
+            this.dataSet.addTable(aTable);
+        } else {
+            this.filename = aTable.getTableMetaData().getTableName();
+            this.dataSet = new DefaultDataSet();
+            this.dataSet.addTable(aTable);
+            this.close();
+        }
     }
 
     @Override

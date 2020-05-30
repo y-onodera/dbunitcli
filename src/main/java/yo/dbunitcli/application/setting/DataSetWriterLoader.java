@@ -6,24 +6,21 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.writer.*;
 
-import java.io.File;
-
 public class DataSetWriterLoader {
 
     private static Logger logger = LoggerFactory.getLogger(DataSetWriterLoader.class);
 
-    public IDataSetWriter get(DatabaseConnectionLoader connectionLoader, String resultType, String operation, File resultDir, String outputEncoding) throws DataSetException {
-        logger.info("create DataSetWriter type:{} DBOperation:{} resultDir:{} encoding:{}"
-                , resultType, operation, resultDir, outputEncoding);
-        if (DataSourceType.TABLE.isEqual(resultType)) {
-            return new DBDataSetWriter(connectionLoader.loadConnection(), operation);
-        } else if (DataSourceType.XLSX.isEqual(resultType)) {
-            return new XlsxDataSetWriter(resultDir);
-        } else if (DataSourceType.XLS.isEqual(resultType)) {
-            return new XlsDataSetWriter(resultDir);
-        } else if (DataSourceType.CSV.isEqual(resultType)) {
-            return new CsvDataSetWriterWrapper(resultDir, outputEncoding);
+    public IDataSetWriter get(DataSetWriterParam param) throws DataSetException {
+        logger.info("create DataSetWriter param:{}", param);
+        if (DataSourceType.TABLE.isEqual(param.getResultType())) {
+            return new DBDataSetWriter(param);
+        } else if (DataSourceType.XLSX.isEqual(param.getResultType())) {
+            return new XlsxDataSetWriter(param);
+        } else if (DataSourceType.XLS.isEqual(param.getResultType())) {
+            return new XlsDataSetWriter(param);
+        } else if (DataSourceType.CSV.isEqual(param.getResultType())) {
+            return new CsvDataSetWriterWrapper(param);
         }
-        throw new UnsupportedOperationException(resultType);
+        throw new UnsupportedOperationException(param.getResultType());
     }
 }

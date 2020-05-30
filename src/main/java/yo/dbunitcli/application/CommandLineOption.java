@@ -12,6 +12,7 @@ import org.stringtemplate.v4.StringRenderer;
 import yo.dbunitcli.application.setting.*;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.mapper.xlsx.XlsxSchema;
+import yo.dbunitcli.writer.DataSetWriterParam;
 import yo.dbunitcli.writer.IDataSetWriter;
 
 import java.io.File;
@@ -60,6 +61,12 @@ abstract public class CommandLineOption {
 
     @Option(name = "-P", handler = MapOptionHandler.class)
     Map<String, String> inputParam = Maps.newHashMap();
+
+    @Option(name = "-excelTable", usage = "SHEET or BOOK")
+    private String excelTable = "SHEET";
+
+    @Option(name = "-exportEmptyTable", usage = "if true then empty table is not export")
+    private boolean exportEmptyTable = true;
 
     private final Parameter parameter;
 
@@ -143,14 +150,19 @@ abstract public class CommandLineOption {
     }
 
     public IDataSetWriter writer(File outputTo) throws DataSetException {
-        return new DataSetWriterLoader().get(this.getDatabaseConnectionLoader()
-                , this.resultType
-                , this.operation
-                , outputTo
-                , this.outputEncoding);
+        return new DataSetWriterLoader().get(
+                DataSetWriterParam.builder()
+                        .setResultType(this.resultType)
+                        .setOperation(this.operation)
+                        .setDatabaseConnectionLoader(this.getDatabaseConnectionLoader())
+                        .setResultDir(outputTo)
+                        .setOutputEncoding(this.outputEncoding)
+                        .setExcelTable(this.excelTable)
+                        .setExportEmptyTable(this.exportEmptyTable)
+                        .build());
     }
 
-    protected ComparableDataSetLoader getComparableDataSetLoader() throws DataSetException {
+    protected ComparableDataSetLoader getComparableDataSetLoader() {
         return new ComparableDataSetLoader(this.getDatabaseConnectionLoader(), this.parameter);
     }
 

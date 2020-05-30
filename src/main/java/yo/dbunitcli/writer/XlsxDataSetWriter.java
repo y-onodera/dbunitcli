@@ -8,8 +8,8 @@ import java.io.File;
 
 public class XlsxDataSetWriter extends XlsDataSetWriter implements IDataSetWriter {
 
-    public XlsxDataSetWriter(File resultDir) {
-        super(resultDir);
+    public XlsxDataSetWriter(DataSetWriterParam param) {
+        super(param);
     }
 
     @Override
