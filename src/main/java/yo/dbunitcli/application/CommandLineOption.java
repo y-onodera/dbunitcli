@@ -5,6 +5,7 @@ import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.spi.BooleanOptionHandler;
 import org.kohsuke.args4j.spi.MapOptionHandler;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -65,7 +66,7 @@ abstract public class CommandLineOption {
     @Option(name = "-excelTable", usage = "SHEET or BOOK")
     private String excelTable = "SHEET";
 
-    @Option(name = "-exportEmptyTable", usage = "if true then empty table is not export")
+    @Option(name = "-exportEmptyTable", handler = BooleanOptionHandler.class,usage = "if true then empty table is not export")
     private boolean exportEmptyTable = true;
 
     private final Parameter parameter;
