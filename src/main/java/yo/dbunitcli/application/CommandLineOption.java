@@ -66,8 +66,8 @@ abstract public class CommandLineOption {
     @Option(name = "-excelTable", usage = "SHEET or BOOK")
     private String excelTable = "SHEET";
 
-    @Option(name = "-exportEmptyTable", handler = BooleanOptionHandler.class,usage = "if true then empty table is not export")
-    private boolean exportEmptyTable = true;
+    @Option(name = "-exportEmptyTable", usage = "if true then empty table is not export")
+    private String exportEmptyTable = "true";
 
     private final Parameter parameter;
 
@@ -159,7 +159,7 @@ abstract public class CommandLineOption {
                         .setResultDir(outputTo)
                         .setOutputEncoding(this.outputEncoding)
                         .setExcelTable(this.excelTable)
-                        .setExportEmptyTable(this.exportEmptyTable)
+                        .setExportEmptyTable(Boolean.parseBoolean(this.exportEmptyTable))
                         .build());
     }
 
