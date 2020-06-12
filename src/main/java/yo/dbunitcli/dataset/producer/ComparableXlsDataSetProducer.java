@@ -82,11 +82,16 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
 
     @Override
     public void produce() throws DataSetException {
+        this.consumer.startDataSet();
         for (File sourceFile : this.src) {
             logger.info("produceFromFile(theDataFile={}) - start", sourceFile);
 
             try (POIFSFileSystem newFs = new POIFSFileSystem(sourceFile)) {
+                this.isStartTable = false;
                 this.fs = newFs;
+                this.sheetIndex = -1;
+                this.boundSheetRecords = new ArrayList<>();
+                this.orderedBSRs = null;
                 MissingRecordAwareHSSFListener listener = new MissingRecordAwareHSSFListener(this);
                 this.formatListener = new FormatTrackingHSSFListener(listener);
 
@@ -95,16 +100,15 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
 
                 this.workbookBuildingListener = new EventWorkbookBuilder.SheetRecordCollectingListener(formatListener);
                 request.addListenerForAllRecords(this.workbookBuildingListener);
-                this.consumer.startDataSet();
                 factory.processWorkbookEvents(request, this.fs);
                 if (this.isStartTable) {
                     this.consumer.endTable();
                 }
-                this.consumer.endDataSet();
             } catch (IOException e) {
                 throw new DataSetException(e);
             }
         }
+        this.consumer.endDataSet();
     }
 
     @Override
