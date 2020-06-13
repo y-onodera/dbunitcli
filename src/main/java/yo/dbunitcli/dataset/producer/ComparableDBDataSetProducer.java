@@ -2,10 +2,7 @@ package yo.dbunitcli.dataset.producer;
 
 import com.google.common.io.Files;
 import org.dbunit.database.IDatabaseConnection;
-import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.ITable;
-import org.dbunit.dataset.SortedTable;
+import org.dbunit.dataset.*;
 import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
@@ -29,6 +26,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     protected final String encoding;
     protected final TableNameFilter filter;
     private final ComparableDataSetParam param;
+    private IDataSet databaseDataSet;
 
     public ComparableDBDataSetProducer(IDatabaseConnection connection, ComparableDataSetParam param) {
         this.connection = connection;
@@ -56,6 +54,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     public void produce() throws DataSetException {
         logger.info("produce() - start");
         this.consumer.startDataSet();
+        this.loadJdbcMetadata();
         Stream.of(this.src)
                 .map(it -> {
                     try {
@@ -69,7 +68,12 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                 .distinct()
                 .forEach(tableName -> {
                     try {
-                        final SortedTable table = new SortedTable(this.connection.createTable(tableName));
+                        ITable originTable = this.connection.createTable(tableName);
+                        ITableMetaData metaData = originTable.getTableMetaData();
+                        if (this.databaseDataSet != null) {
+                            metaData = this.databaseDataSet.getTableMetaData(tableName);
+                        }
+                        final SortedTable table = new SortedTable(originTable, metaData);
                         table.setUseComparable(true);
                         this.executeTable(table);
                     } catch (SQLException | DataSetException e) {
@@ -77,6 +81,16 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                     }
                 });
         this.consumer.endDataSet();
+    }
+
+    protected void loadJdbcMetadata() {
+        if (this.getParam().isUseJdbcMetaData()) {
+            try {
+                this.databaseDataSet = connection.createDataSet();
+            } catch (SQLException e) {
+                throw new AssertionError(e);
+            }
+        }
     }
 
     protected void executeTable(ITable table) throws DataSetException {

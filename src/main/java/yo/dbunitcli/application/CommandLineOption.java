@@ -45,6 +45,9 @@ abstract public class CommandLineOption {
     @Option(name = "-jdbcProperties", usage = "use connect database. [url=,user=,pass=]")
     private File jdbcProperties;
 
+    @Option(name = "-useJdbcMetaData", usage = "default false. whether load metaData from jdbc or not")
+    private String useJdbcMetaData = "false";
+
     @Option(name = "-regDataSplit", usage = "regex to use split data row")
     private String regDataSplit;
 
@@ -169,6 +172,7 @@ abstract public class CommandLineOption {
 
     protected ComparableDataSetParam.Builder getDataSetParamBuilder() {
         return ComparableDataSetParam.builder()
+                .setUseJdbcMetaData(Boolean.parseBoolean(this.useJdbcMetaData))
                 .setEncoding(this.getEncoding())
                 .setColumnSettings(this.getColumnSettings())
                 .setXlsxSchema(this.xlsxSchema)
