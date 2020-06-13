@@ -28,7 +28,6 @@ public class ComparableXlsxDataSetProducerTest {
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
-                                .setEncoding("UTF8")
                                 .build()));
 
         Assert.assertEquals(src.getPath(), actual.getSrc());
@@ -82,7 +81,6 @@ public class ComparableXlsxDataSetProducerTest {
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
-                                .setEncoding("UTF8")
                                 .setRegInclude("multi1")
                                 .build()));
 
@@ -117,7 +115,6 @@ public class ComparableXlsxDataSetProducerTest {
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
-                                .setEncoding("UTF8")
                                 .setRegExclude("multi2")
                                 .build()));
 

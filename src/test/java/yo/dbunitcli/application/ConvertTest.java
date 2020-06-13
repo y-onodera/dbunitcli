@@ -1,15 +1,20 @@
 package yo.dbunitcli.application;
 
-import com.google.common.collect.Lists;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.rules.ExpectedException;
+import yo.dbunitcli.dataset.ComparableDataSetImpl;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
+import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
+import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.List;
 
 public class ConvertTest {
     @Rule
@@ -21,31 +26,105 @@ public class ConvertTest {
 
     @Before
     public void setUp() throws UnsupportedEncodingException {
-        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(),"UTF-8");
+        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(), "UTF-8");
     }
 
     @Test
     public void testFromRegexToXlsx() throws Exception {
         Convert.main(new String[]{"@" + this.baseDir + "/paramFromRegexToXlsx.txt"});
+        File src = new File(this.baseDir + "/regex2xlsx/result/paramFromRegexToXlsx.xlsx");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .build()));
+        Assert.assertEquals(1, actual.getTableNames().length);
+        Assert.assertEquals("dirty", actual.getTableNames()[0]);
     }
 
     @Test
     public void testNoSetting() throws Exception {
         Convert.main(new String[]{"@" + this.baseDir + "/paramFromRegexToXlsxNoSetting.txt"});
+        File src = new File(this.baseDir + "/regex2xlsx/result/paramFromRegexToXlsxNoSetting.xlsx");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .build()));
+        Assert.assertEquals(1, actual.getTableNames().length);
+        Assert.assertEquals("dirty", actual.getTableNames()[0]);
     }
 
     @Test
     public void testFromCsvToXlsx() throws Exception {
         Convert.main(new String[]{"@" + this.baseDir + "/paramFromCsvToXlsx.txt"});
+        File src = new File(this.baseDir + "/csv2xlsx/result/paramFromCsvToXlsx.xlsx");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .build()));
+        Assert.assertEquals(2, actual.getTableNames().length);
+        Assert.assertEquals("multi1", actual.getTableNames()[0]);
+        Assert.assertEquals("multi2", actual.getTableNames()[1]);
+    }
+
+    @Test
+    public void testFromCsvToMultiXlsx() throws Exception {
+        Convert.main(new String[]{"@" + this.baseDir + "/paramFromCsvToMultiXlsx.txt"});
+        File src = new File(this.baseDir + "/csv2xlsx/resultmultixlsx");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .build()));
+        Assert.assertEquals(2, actual.getTableNames().length);
+        Assert.assertEquals("multi1", actual.getTableNames()[0]);
+        Assert.assertEquals("multi2", actual.getTableNames()[1]);
+    }
+
+    @Test
+    public void testFromCsvToMultiXls() throws Exception {
+        Convert.main(new String[]{"@" + this.baseDir + "/paramFromCsvToMultiXls.txt"});
+        File src = new File(this.baseDir + "/csv2xlsx/resultmultixls");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .build()));
+        Assert.assertEquals(2, actual.getTableNames().length);
+        Assert.assertEquals("multi1", actual.getTableNames()[0]);
+        Assert.assertEquals("multi2", actual.getTableNames()[1]);
     }
 
     @Test
     public void testFromCsvqToCsv() throws Exception {
         Convert.main(new String[]{"@" + this.baseDir + "/paramFromCsvqToCsv.txt"});
+        File src = new File(this.baseDir + "/csvq/result");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableCsvDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setEncoding("Shift-Jis")
+                                .build()));
+        Assert.assertEquals(1, actual.getTableNames().length);
+        Assert.assertEquals("joinQuery", actual.getTableNames()[0]);
     }
 
     @Test
     public void testXlsxWithSchemaToCsv() throws Exception {
         Convert.main(new String[]{"@" + this.baseDir + "/paramXlsxWithSchemaToCsv.txt"});
+        File src = new File(this.baseDir + "/xlsxwithschema/result");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableCsvDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setEncoding("Shift-Jis")
+                                .build()));
+        Assert.assertEquals(4, actual.getTableNames().length);
+        Assert.assertEquals("テーブル一覧", actual.getTableNames()[0]);
+        Assert.assertEquals("ユーザマスタ", actual.getTableNames()[1]);
+        Assert.assertEquals("ユーザマスタ概要", actual.getTableNames()[2]);
+        Assert.assertEquals("業務ドメイン", actual.getTableNames()[3]);
     }
 }

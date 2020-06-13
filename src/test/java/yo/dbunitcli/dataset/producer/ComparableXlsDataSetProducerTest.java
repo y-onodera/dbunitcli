@@ -29,7 +29,6 @@ public class ComparableXlsDataSetProducerTest {
                 new ComparableXlsDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
-                                .setEncoding("UTF8")
                                 .build()));
         Assert.assertEquals(2, actual.getTableNames().length);
         ComparableTable actualTable = actual.getTable("multi1");
