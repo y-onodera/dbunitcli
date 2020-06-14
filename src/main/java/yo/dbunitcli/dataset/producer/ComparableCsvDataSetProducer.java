@@ -28,6 +28,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private final String encoding;
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
+    private final boolean loadData;
 
     public ComparableCsvDataSetProducer(ComparableDataSetParam param) {
         this.param = param;
@@ -38,6 +39,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         }
         this.encoding = this.param.getEncoding();
         this.filter = this.param.getTableNameFilter();
+        this.loadData = this.param.isLoadData();
     }
 
     @Override
@@ -74,8 +76,10 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
                     , theDataFile.toString());
             ITableMetaData metaData = this.createTableMetaData(theDataFile, readData.get(0));
             this.consumer.startTable(metaData);
-            for (int i = 1; i < readData.size(); i++) {
-                this.consumer.row(this.loadData(readData, i));
+            if (this.loadData) {
+                for (int i = 1; i < readData.size(); i++) {
+                    this.consumer.row(this.loadData(readData, i));
+                }
             }
             this.consumer.endTable();
         } catch (PipelineException | IOException | IllegalInputCharacterException e) {

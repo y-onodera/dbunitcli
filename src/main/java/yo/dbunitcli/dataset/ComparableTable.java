@@ -42,15 +42,17 @@ public class ComparableTable implements ITable {
     public List<Map<String, Object>> toMap(boolean includeMetaData) throws RowOutOfBoundsException {
         List<Map<String, Object>> result = Lists.newArrayList();
         String tableName = this.getTableMetaData().getTableName();
+        Map<String, Object> withMetaDataMap = Maps.newHashMap();
+        if (includeMetaData) {
+            withMetaDataMap.put("tableName", tableName);
+            withMetaDataMap.put("columns", this.columns);
+            withMetaDataMap.put("primaryKeys", this.primaryKeys);
+            result.add(withMetaDataMap);
+        }
         for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
             Map<String, Object> map = this.rowResolver.getRowToMap(rowNum);
             if (includeMetaData) {
-                Map<String, Object> withMetaDataMap = Maps.newHashMap();
-                withMetaDataMap.put("tableName", tableName);
-                withMetaDataMap.put("columns", this.columns);
-                withMetaDataMap.put("primaryKeys", this.primaryKeys);
                 withMetaDataMap.put("row", map);
-                result.add(withMetaDataMap);
             } else {
                 result.add(map);
             }

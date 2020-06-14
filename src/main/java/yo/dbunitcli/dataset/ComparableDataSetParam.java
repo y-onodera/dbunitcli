@@ -16,6 +16,7 @@ public class ComparableDataSetParam {
     private final boolean mapIncludeMetaData;
     private final XlsxSchema xlsxSchema;
     private final boolean useJdbcMetaData;
+    private final boolean loadData;
 
     public ComparableDataSetParam(Builder builder) {
         this.src = builder.getSrc();
@@ -29,6 +30,7 @@ public class ComparableDataSetParam {
         this.mapIncludeMetaData = builder.getMapIncludeMetaData();
         this.xlsxSchema = builder.getXlsxSchema();
         this.useJdbcMetaData = builder.isUseJdbcMetaData();
+        this.loadData = builder.isLoadData();
     }
 
     public static Builder builder() {
@@ -75,6 +77,10 @@ public class ComparableDataSetParam {
         return this.useJdbcMetaData;
     }
 
+    public boolean isLoadData() {
+        return loadData;
+    }
+
     public static class Builder {
         private File src;
         private String encoding;
@@ -87,6 +93,7 @@ public class ComparableDataSetParam {
         private String regExclude;
         private XlsxSchema xlsxSchema = XlsxSchema.DEFAULT;
         private boolean useJdbcMetaData;
+        private boolean loadData = true;
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -140,6 +147,10 @@ public class ComparableDataSetParam {
             return useJdbcMetaData;
         }
 
+        public boolean isLoadData() {
+            return this.loadData;
+        }
+
         public Builder setEncoding(String encoding) {
             this.encoding = encoding;
             return this;
@@ -187,6 +198,11 @@ public class ComparableDataSetParam {
 
         public Builder setUseJdbcMetaData(boolean useJdbcMetaData) {
             this.useJdbcMetaData = useJdbcMetaData;
+            return this;
+        }
+
+        public Builder setLoadData(boolean loadData) {
+            this.loadData = loadData;
             return this;
         }
 

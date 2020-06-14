@@ -37,6 +37,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     private final TableNameFilter filter;
     private final XlsxSchema schema;
     private ComparableDataSetParam param;
+    private final boolean loadData;
 
     public ComparableXlsxDataSetProducer(ComparableDataSetParam param) {
         this.param = param;
@@ -47,6 +48,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
         }
         this.filter = this.param.getTableNameFilter();
         this.schema = this.param.getXlsxSchema();
+        this.loadData = this.param.isLoadData();
     }
 
     @Override
@@ -75,7 +77,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
                         String sheetName = iterator.getSheetName();
                         if (this.filter.predicate(sheetName) && this.schema.contains(sheetName)) {
                             logger.info("produceFromSheet - start {} [index={}]", sheetName, index++);
-                            processSheet(styles, strings, new XlsxSchemaHandler(this.consumer, sheetName, this.schema), stream);
+                            processSheet(styles, strings, new XlsxSchemaHandler(this.consumer, sheetName, this.schema, this.loadData), stream);
                         }
                     }
                 }

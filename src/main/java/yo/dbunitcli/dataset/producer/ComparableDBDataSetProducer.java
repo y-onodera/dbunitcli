@@ -27,6 +27,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     protected final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private IDataSet databaseDataSet;
+    private final boolean loadData;
 
     public ComparableDBDataSetProducer(IDatabaseConnection connection, ComparableDataSetParam param) {
         this.connection = connection;
@@ -38,6 +39,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         }
         this.encoding = this.param.getEncoding();
         this.filter = this.param.getTableNameFilter();
+        this.loadData = this.param.isLoadData();
     }
 
     @Override
@@ -68,12 +70,13 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                 .distinct()
                 .forEach(tableName -> {
                     try {
-                        ITable originTable = this.connection.createTable(tableName);
-                        ITableMetaData metaData = originTable.getTableMetaData();
+                        ITable originTable;
                         if (this.databaseDataSet != null) {
-                            metaData = this.databaseDataSet.getTableMetaData(tableName);
+                            originTable = this.databaseDataSet.getTable(tableName);
+                        } else {
+                            originTable = this.connection.createTable(tableName);
                         }
-                        final SortedTable table = new SortedTable(originTable, metaData);
+                        final SortedTable table = new SortedTable(originTable);
                         table.setUseComparable(true);
                         this.executeTable(table);
                     } catch (SQLException | DataSetException e) {
@@ -96,14 +99,16 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     protected void executeTable(ITable table) throws DataSetException {
         logger.info("produceFromDB(table={}) - start", table.getTableMetaData().getTableName());
         this.consumer.startTable(table.getTableMetaData());
-        Column[] columns = table.getTableMetaData().getColumns();
-        for (int row = 0, j = table.getRowCount(); row < j; row++) {
-            Object[] rows = new Object[columns.length];
-            int columnIndex = 0;
-            for (Column column : columns) {
-                rows[columnIndex++] = table.getValue(row, column.getColumnName());
+        if (this.loadData) {
+            Column[] columns = table.getTableMetaData().getColumns();
+            for (int row = 0, j = table.getRowCount(); row < j; row++) {
+                Object[] rows = new Object[columns.length];
+                int columnIndex = 0;
+                for (Column column : columns) {
+                    rows[columnIndex++] = table.getValue(row, column.getColumnName());
+                }
+                this.consumer.row(rows);
             }
-            this.consumer.row(rows);
         }
         this.consumer.endTable();
     }

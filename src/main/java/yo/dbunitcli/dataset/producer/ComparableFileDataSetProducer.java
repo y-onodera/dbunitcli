@@ -35,11 +35,13 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     private final File src;
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
+    private final boolean loadData;
 
     public ComparableFileDataSetProducer(ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrc().getAbsoluteFile();
         this.filter = this.param.getTableNameFilter();
+        this.loadData = this.param.isLoadData();
     }
 
     @Override
@@ -58,15 +60,17 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
         this.consumer.startDataSet();
         ITableMetaData metaData = new DefaultTableMetaData(this.src.getName(), COLUMNS, new String[]{"PATH"});
         this.consumer.startTable(metaData);
-        try {
-            Files.walk(this.src.toPath())
-                    .filter(fileTypeFilter())
-                    .filter(path -> this.filter.predicate(path.toString()))
-                    .forEach(path -> {
-                        this.produceFromFile(path.toFile());
-                    });
-        } catch (IOException | AssertionError e) {
-            throw new DataSetException("error producing dataSet for '" + this.src.toString() + "'", e);
+        if (this.loadData) {
+            try {
+                Files.walk(this.src.toPath())
+                        .filter(fileTypeFilter())
+                        .filter(path -> this.filter.predicate(path.toString()))
+                        .forEach(path -> {
+                            this.produceFromFile(path.toFile());
+                        });
+            } catch (IOException | AssertionError e) {
+                throw new DataSetException("error producing dataSet for '" + this.src.toString() + "'", e);
+            }
         }
         this.consumer.endTable();
         this.consumer.endDataSet();

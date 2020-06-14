@@ -28,6 +28,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     private final Pattern headerSplitPattern;
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
+    private final boolean loadData;
 
     public ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) {
         this.param = param;
@@ -40,6 +41,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
         this.headerSplitPattern = Pattern.compile(this.param.getHeaderSplitPattern());
         this.dataSplitPattern = Pattern.compile(this.param.getDataSplitPattern());
         this.filter = this.param.getTableNameFilter();
+        this.loadData = this.param.isLoadData();
     }
 
     @Override
@@ -86,6 +88,9 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
                 String tableName = aFile.getName().substring(0, aFile.getName().indexOf("."));
                 ITableMetaData tableMetaData = new DefaultTableMetaData(tableName, columns);
                 this.consumer.startTable(tableMetaData);
+                if (!this.loadData) {
+                    break;
+                }
             } else {
                 Object[] row = this.dataSplitPattern.split(s);
                 this.consumer.row(row);

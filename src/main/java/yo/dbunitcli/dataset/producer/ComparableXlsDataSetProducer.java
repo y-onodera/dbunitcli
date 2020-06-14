@@ -59,6 +59,7 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
     private List<BoundSheetRecord> boundSheetRecords = new ArrayList<>();
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
+    private final boolean loadData;
 
     public ComparableXlsDataSetProducer(ComparableDataSetParam param) {
         this.param = param;
@@ -68,6 +69,7 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
             this.src = new File[]{this.param.getSrc()};
         }
         this.filter = this.param.getTableNameFilter();
+        this.loadData = this.param.isLoadData();
     }
 
     @Override
@@ -253,7 +255,7 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
                     this.metaData = new DefaultTableMetaData(this.tableName, columns);
                     this.consumer.startTable(metaData);
                     this.isStartTable = true;
-                } else {
+                } else if (this.loadData) {
                     if (metaData.getColumns().length < this.rowValues.size()) {
                         throw new AssertionError(this.rowValues + " large items than header:" + Arrays.toString(this.metaData.getColumns()));
                     } else if (this.rowValues.size() < metaData.getColumns().length) {

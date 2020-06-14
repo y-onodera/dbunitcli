@@ -1,0 +1,5 @@
+setting(row) ::= <<
+    {
+      "name" : "$table.tableName$" ,"keys":[$table.primaryKeys:{column | "$column.columnName$"}; separator=" ,"$]
+    }
+>>

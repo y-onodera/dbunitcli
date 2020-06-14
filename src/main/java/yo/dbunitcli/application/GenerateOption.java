@@ -1,5 +1,6 @@
 package yo.dbunitcli.application;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import org.dbunit.dataset.DataSetException;
 import org.jxls.common.Context;
@@ -17,12 +18,13 @@ import yo.dbunitcli.dataset.Parameter;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 public class GenerateOption extends ConvertOption {
 
-    @Option(name = "-template", usage = "template file. encoding must be UTF-8. generate file convert outputEncoding", required = true)
+    @Option(name = "-template", usage = "template file. encoding must be UTF-8. generate file convert outputEncoding")
     private File template;
 
     @Option(name = "-templateGroup", usage = "StringTemplate4 templateGroup file.")
@@ -37,7 +39,7 @@ public class GenerateOption extends ConvertOption {
     @Option(name = "-unit", usage = "record | table | dataset :generate per record or table or dataset")
     private String unit = "record";
 
-    @Option(name = "-generateType", usage = "txt | xlsx :generate planTxt or xlsx")
+    @Option(name = "-generateType", usage = "txt | xlsx | settings | sql :generate planTxt or xlsx")
     private String generateType = "txt";
 
     private STGroup stGroup;
@@ -72,8 +74,8 @@ public class GenerateOption extends ConvertOption {
         return GenerateUnit.valueOf(this.unit.toUpperCase());
     }
 
-    public String getGenerateType() {
-        return this.generateType;
+    public GenerateType getGenerateType() {
+        return GenerateType.fromString(this.generateType);
     }
 
     public Stream<Map<String, Object>> parameterStream() throws DataSetException {
@@ -104,9 +106,8 @@ public class GenerateOption extends ConvertOption {
         }
         Map<String, Object> param = new HashMap<>();
         param.put("_paramMap", getParameter().getMap());
-        for (String tableName : dataSet.getTableNames()) {
-            param.put(tableName, dataSet.getTable(tableName).toMap(true));
-        }
+        List<String> tableNames = Lists.newArrayList();
+        param.put("dataSet", dataSet.toMap(true));
         return Stream.of(param);
     }
 
@@ -117,7 +118,7 @@ public class GenerateOption extends ConvertOption {
     }
 
     public void write(File resultFile, Map<String, Object> param) throws IOException {
-        if (this.getGenerateType().equals("txt")) {
+        if (this.getGenerateType() == GenerateType.TXT || this.getGenerateType() == GenerateType.SETTINGS) {
             ST result = new ST(this.stGroup, this.templateString());
             param.forEach(result::add);
             result.write(resultFile, ErrorManager.DEFAULT_ERROR_LISTENER, this.getOutputEncoding());
@@ -135,8 +136,17 @@ public class GenerateOption extends ConvertOption {
     @Override
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         super.populateSettings(parser);
+        if (this.getGenerateType() == GenerateType.SETTINGS) {
+            this.template = new File(this.getClass().getClassLoader().getResource("settingTemplate.txt").getPath());
+            this.templateGroup = new File(this.getClass().getClassLoader().getResource("settingTemplate.stg").getPath());
+            this.templateEncoding = "UTF-8";
+            this.unit = "dataset";
+            this.setOutputEncoding("UTF-8");
+            this.setUseJdbcMetaData("true");
+            this.setLoadData("false");
+        }
         this.stGroup = this.createSTGroup(this.templateGroup);
-        if (this.getGenerateType().equals("txt")) {
+        if (this.getGenerateType() == GenerateType.TXT || this.getGenerateType() == GenerateType.SETTINGS) {
             try {
                 this.templateString = Files.asCharSource(this.template, Charset.forName(this.getTemplateEncoding()))
                         .read();
@@ -149,13 +159,26 @@ public class GenerateOption extends ConvertOption {
     @Override
     protected void assertDirectoryExists(CmdLineParser parser) throws CmdLineException {
         super.assertDirectoryExists(parser);
-        if (!this.template.exists() || !this.template.isFile()) {
-            throw new CmdLineException(parser, this.template + " is not exist file"
-                    , new IllegalArgumentException(this.template.toString()));
+        if (this.getGenerateType() != GenerateType.SETTINGS) {
+            if (!this.template.exists() || !this.template.isFile()) {
+                throw new CmdLineException(parser, this.template + " is not exist file"
+                        , new IllegalArgumentException(this.template.toString()));
+            }
         }
     }
 
     public enum GenerateUnit {
         RECORD, TABLE, DATASET
+    }
+
+    public enum GenerateType {
+        XLSX, TXT, SETTINGS;
+
+        static GenerateType fromString(String name) {
+            return Stream.of(GenerateType.values())
+                    .filter(it -> it.name().equals(name.toUpperCase()))
+                    .findFirst()
+                    .get();
+        }
     }
 }

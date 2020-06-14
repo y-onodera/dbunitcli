@@ -39,6 +39,9 @@ abstract public class CommandLineOption {
     @Option(name = "-setting", usage = "file define comparison settings")
     private File setting;
 
+    @Option(name = "-loadData", usage = "default true. if false data row didn't load")
+    private String loadData = "true";
+
     @Option(name = "-xlsxSchema", usage = "schema use read xlsx")
     private File xlsxSchemaSource;
 
@@ -128,6 +131,18 @@ abstract public class CommandLineOption {
         return this.columnSettings;
     }
 
+    public void setOutputEncoding(String outputEncoding) {
+        this.outputEncoding = outputEncoding;
+    }
+
+    public void setLoadData(String loadData) {
+        this.loadData = loadData;
+    }
+
+    public void setUseJdbcMetaData(String useJdbcMetaData) {
+        this.useJdbcMetaData = useJdbcMetaData;
+    }
+
     public Parameter getParameter() {
         return this.parameter;
     }
@@ -175,6 +190,7 @@ abstract public class CommandLineOption {
                 .setUseJdbcMetaData(Boolean.parseBoolean(this.useJdbcMetaData))
                 .setEncoding(this.getEncoding())
                 .setColumnSettings(this.getColumnSettings())
+                .setLoadData(Boolean.parseBoolean(this.loadData))
                 .setXlsxSchema(this.xlsxSchema)
                 .setHeaderSplitPattern(this.getRegHeaderSplit())
                 .setDataSplitPattern(this.getRegDataSplit())

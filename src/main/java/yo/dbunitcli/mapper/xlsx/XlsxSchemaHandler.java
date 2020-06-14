@@ -13,11 +13,13 @@ public class XlsxSchemaHandler implements XSSFSheetXMLHandler.SheetContentsHandl
     private final XlsxCellsToTableBuilder randomCellRecordBuilder;
     private int currentRow = -1;
     private int currentCol = -1;
+    private final boolean loadData;
 
-    public XlsxSchemaHandler(IDataSetConsumer delegate, String sheetName, XlsxSchema schema) {
+    public XlsxSchemaHandler(IDataSetConsumer delegate, String sheetName, XlsxSchema schema, boolean loadData) {
         this.delegate = delegate;
         this.rowsTableBuilder = schema.getRowsTableBuilder(sheetName);
         this.randomCellRecordBuilder = schema.getCellRecordBuilder(sheetName);
+        this.loadData = loadData;
     }
 
     @Override
@@ -63,8 +65,10 @@ public class XlsxSchemaHandler implements XSSFSheetXMLHandler.SheetContentsHandl
             }
             for (String tableName : this.randomCellRecordBuilder.getTableNames()) {
                 delegate.startTable(this.randomCellRecordBuilder.getTableMetaData(tableName));
-                for (Object[] row : this.randomCellRecordBuilder.getRows(tableName)) {
-                    delegate.row(row);
+                if (this.loadData) {
+                    for (Object[] row : this.randomCellRecordBuilder.getRows(tableName)) {
+                        delegate.row(row);
+                    }
                 }
                 delegate.endTable();
             }

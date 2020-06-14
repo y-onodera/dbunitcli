@@ -9,11 +9,7 @@ import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.Parameter;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.QueryReader;
-import yo.dbunitcli.dataset.TableNameFilter;
+import yo.dbunitcli.dataset.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +26,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     private final Parameter parameter;
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
-
+    private final boolean loadData;
 
     public ComparableCSVQueryDataSetProducer(ComparableDataSetParam param, Parameter parameter) {
         this.param = param;
@@ -42,6 +38,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
         this.encoding = param.getEncoding();
         this.filter = param.getTableNameFilter();
         this.parameter = parameter;
+        this.loadData = this.param.isLoadData();
     }
 
     @Override
@@ -97,16 +94,18 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
             String tableName = aFile.getName().substring(0, aFile.getName().indexOf("."));
             ITableMetaData tableMetaData = new DefaultTableMetaData(tableName, columns);
             this.consumer.startTable(tableMetaData);
-            while (rst.next()) {
-                Object[] row = new Object[metaData.getColumnCount()];
-                for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                    if (rst.getString(i) != null) {
-                        row[i - 1] = rst.getString(i);
-                    } else {
-                        row[i - 1] = "";
+            if (this.loadData) {
+                while (rst.next()) {
+                    Object[] row = new Object[metaData.getColumnCount()];
+                    for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                        if (rst.getString(i) != null) {
+                            row[i - 1] = rst.getString(i);
+                        } else {
+                            row[i - 1] = "";
+                        }
                     }
+                    this.consumer.row(row);
                 }
-                this.consumer.row(row);
             }
             this.consumer.endTable();
         }
