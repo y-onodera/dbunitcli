@@ -5,7 +5,6 @@ import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.spi.BooleanOptionHandler;
 import org.kohsuke.args4j.spi.MapOptionHandler;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -121,6 +120,10 @@ abstract public class CommandLineOption {
 
     public File getSetting() {
         return this.setting;
+    }
+
+    public String getOperation() {
+        return operation;
     }
 
     public AddSettingColumns getComparisonKeys() {

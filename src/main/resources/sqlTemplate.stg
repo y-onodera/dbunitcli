@@ -1,0 +1,12 @@
+insert() ::= <<
+$rows:{row |insert into $tableName$ ($columns:{column | $column.columnName$ }; separator=","$) values ($columns:{column | '$row.(column.columnName)$' }; separator=","$);
+}$
+>>
+delete() ::= <<
+$rows:{row |delete from $tableName$ where $primaryKeys:{column | $column.columnName$ = '$row.(column.columnName)$' }; separator="and "$;
+}$
+>>
+update() ::= <<
+$rows:{row |update $tableName$ set $columns:{column | $column.columnName$ = '$row.(column.columnName)$' }; separator=","$ where $primaryKeys:{column | $column.columnName$ = '$row.(column.columnName)$' }; separator="and "$;
+}$
+>>

@@ -47,7 +47,7 @@ public class DBDataSetWriter implements IDataSetWriter {
         }
     }
 
-    enum Operation {
+    public static enum Operation {
         INSERT(DatabaseOperation.INSERT),
         UPDATE(DatabaseOperation.UPDATE),
         DELETE(DatabaseOperation.DELETE),

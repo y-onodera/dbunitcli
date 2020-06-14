@@ -68,6 +68,31 @@ public class GenerateTest {
         assertGenerateFileEquals("settings.json", "UTF-8");
     }
 
+    @Test
+    public void testGenerateInsert() throws Exception {
+        Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateInsert.txt"});
+    }
+
+    @Test
+    public void testGenerateDelete() throws Exception {
+        Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateDelete.txt"});
+    }
+
+    @Test
+    public void testGenerateCleanInsert() throws Exception {
+        Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateCleanInsert.txt"});
+    }
+
+    @Test
+    public void testGenerateRefresh() throws Exception {
+        Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateRefresh.txt"});
+    }
+
+    @Test
+    public void testGenerateUpdate() throws Exception {
+        Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateUpdate.txt"});
+    }
+
     private void assertGenerateFileEquals(String target, String encode) throws IOException {
         String expect = Files.asCharSource(new File(this.baseDir + this.subDirectory + "/expect/txt", target), Charset.forName(encode)).read();
         String actual = Files.asCharSource(new File(this.baseDir + this.subDirectory + "/result", target), Charset.forName(encode)).read();

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.dbunit.dataset.DataSetException;
+import org.dbunit.operation.DatabaseOperation;
 import org.jxls.common.Context;
 import org.jxls.util.JxlsHelper;
 import org.kohsuke.args4j.CmdLineException;
@@ -15,7 +16,9 @@ import org.stringtemplate.v4.misc.ErrorManager;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.writer.DBDataSetWriter;
 
+import javax.json.JsonPatch;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -120,7 +123,10 @@ public class GenerateOption extends ConvertOption {
     }
 
     public void write(File resultFile, Map<String, Object> param) throws IOException {
-        if (this.getGenerateType() == GenerateType.TXT || this.getGenerateType() == GenerateType.SETTINGS) {
+        if (this.getGenerateType() == GenerateType.TXT
+                || this.getGenerateType() == GenerateType.SETTINGS
+                || this.getGenerateType() == GenerateType.SQL
+        ) {
             ST result = new ST(this.stGroup, this.templateString());
             param.forEach(result::add);
             result.write(resultFile, ErrorManager.DEFAULT_ERROR_LISTENER, this.getOutputEncoding());
@@ -155,6 +161,21 @@ public class GenerateOption extends ConvertOption {
             } catch (IOException | URISyntaxException e) {
                 throw new CmdLineException(parser, e);
             }
+        } else if (this.getGenerateType() == GenerateType.SQL) {
+            this.unit = "table";
+            this.setUseJdbcMetaData("true");
+            this.stGroup = this.createSTGroup(new File("sqlTemplate.stg"));
+            try {
+                this.templateString = Resources.asCharSource(this.getClass()
+                                .getClassLoader()
+                                .getResource(this.getSqlTemplate())
+                                .toURI()
+                                .toURL()
+                        , Charset.forName("UTF-8"))
+                        .read();
+            } catch (IOException | URISyntaxException e) {
+                throw new CmdLineException(parser, e);
+            }
         } else {
             this.stGroup = this.createSTGroup(this.templateGroup);
             if (this.getGenerateType() == GenerateType.TXT) {
@@ -168,10 +189,25 @@ public class GenerateOption extends ConvertOption {
         }
     }
 
+    protected String getSqlTemplate() {
+        switch (DBDataSetWriter.Operation.valueOf(this.getOperation())) {
+            case INSERT:
+                return "insertTemplate.txt";
+            case DELETE:
+                return "deleteTemplate.txt";
+            case UPDATE:
+                return "updateTemplate.txt";
+            default:
+                return "deleteInsertTemplate.txt";
+        }
+    }
+
     @Override
     protected void assertDirectoryExists(CmdLineParser parser) throws CmdLineException {
         super.assertDirectoryExists(parser);
-        if (this.getGenerateType() != GenerateType.SETTINGS) {
+        if (this.getGenerateType() != GenerateType.SETTINGS
+                && this.getGenerateType() != GenerateType.SQL
+        ) {
             if (!this.template.exists() || !this.template.isFile()) {
                 throw new CmdLineException(parser, this.template + " is not exist file"
                         , new IllegalArgumentException(this.template.toString()));
@@ -184,7 +220,7 @@ public class GenerateOption extends ConvertOption {
     }
 
     public enum GenerateType {
-        XLSX, TXT, SETTINGS;
+        XLSX, TXT, SETTINGS, SQL;
 
         static GenerateType fromString(String name) {
             return Stream.of(GenerateType.values())
