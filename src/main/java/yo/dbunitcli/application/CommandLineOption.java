@@ -244,7 +244,11 @@ abstract public class CommandLineOption {
         if (groupFile == null) {
             stGroup = new STGroup('$', '$');
         } else {
-            stGroup = new STGroupFile(groupFile.getAbsolutePath(), '$', '$');
+            if (groupFile.exists()) {
+                stGroup = new STGroupFile(groupFile.getAbsolutePath(), '$', '$');
+            } else {
+                stGroup = new STGroupFile(groupFile.getName(), '$', '$');
+            }
         }
         stGroup.registerRenderer(String.class, new StringRenderer());
         return stGroup;

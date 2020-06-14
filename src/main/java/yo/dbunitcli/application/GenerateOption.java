@@ -2,6 +2,7 @@ package yo.dbunitcli.application;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import com.google.common.io.Resources;
 import org.dbunit.dataset.DataSetException;
 import org.jxls.common.Context;
 import org.jxls.util.JxlsHelper;
@@ -16,6 +17,7 @@ import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.Parameter;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
@@ -137,21 +139,31 @@ public class GenerateOption extends ConvertOption {
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         super.populateSettings(parser);
         if (this.getGenerateType() == GenerateType.SETTINGS) {
-            this.template = new File(this.getClass().getClassLoader().getResource("settingTemplate.txt").getPath());
-            this.templateGroup = new File(this.getClass().getClassLoader().getResource("settingTemplate.stg").getPath());
-            this.templateEncoding = "UTF-8";
             this.unit = "dataset";
             this.setOutputEncoding("UTF-8");
             this.setUseJdbcMetaData("true");
             this.setLoadData("false");
-        }
-        this.stGroup = this.createSTGroup(this.templateGroup);
-        if (this.getGenerateType() == GenerateType.TXT || this.getGenerateType() == GenerateType.SETTINGS) {
+            this.stGroup = this.createSTGroup(new File("settingTemplate.stg"));
             try {
-                this.templateString = Files.asCharSource(this.template, Charset.forName(this.getTemplateEncoding()))
+                this.templateString = Resources.asCharSource(this.getClass()
+                                .getClassLoader()
+                                .getResource("settingTemplate.txt")
+                                .toURI()
+                                .toURL()
+                        , Charset.forName("UTF-8"))
                         .read();
-            } catch (IOException e) {
+            } catch (IOException | URISyntaxException e) {
                 throw new CmdLineException(parser, e);
+            }
+        } else {
+            this.stGroup = this.createSTGroup(this.templateGroup);
+            if (this.getGenerateType() == GenerateType.TXT) {
+                try {
+                    this.templateString = Files.asCharSource(this.template, Charset.forName(this.getTemplateEncoding()))
+                            .read();
+                } catch (IOException e) {
+                    throw new CmdLineException(parser, e);
+                }
             }
         }
     }
