@@ -253,7 +253,7 @@ abstract public class CommandLineOption {
                 stGroup = new STGroupFile(groupFile.getName(), '$', '$');
             }
         }
-        stGroup.registerRenderer(String.class, new StringRenderer());
+        stGroup.registerRenderer(String.class, new SqlEscapeStringRenderer());
         return stGroup;
     }
 }
