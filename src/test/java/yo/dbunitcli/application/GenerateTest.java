@@ -71,26 +71,46 @@ public class GenerateTest {
     @Test
     public void testGenerateInsert() throws Exception {
         Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateInsert.txt"});
+        this.subDirectory = "generate/sql/insert";
+        assertGenerateFileEquals("Test1.sql", "UTF-8");
+        assertGenerateFileEquals("Test2.sql", "UTF-8");
+        assertGenerateFileEquals("Test3.sql", "UTF-8");
     }
 
     @Test
     public void testGenerateDelete() throws Exception {
         Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateDelete.txt"});
+        this.subDirectory = "generate/sql/delete";
+        assertGenerateFileEquals("Test1.sql", "UTF-8");
+        assertGenerateFileEquals("Test2.sql", "UTF-8");
+        assertGenerateFileEquals("Test3.sql", "UTF-8");
     }
 
     @Test
     public void testGenerateCleanInsert() throws Exception {
         Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateCleanInsert.txt"});
+        this.subDirectory = "generate/sql/clean-insert";
+        assertGenerateFileEquals("Test1.sql", "UTF-8");
+        assertGenerateFileEquals("Test2.sql", "UTF-8");
+        assertGenerateFileEquals("Test3.sql", "UTF-8");
     }
 
     @Test
     public void testGenerateRefresh() throws Exception {
         Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateRefresh.txt"});
+        this.subDirectory = "generate/sql/refresh";
+        assertGenerateFileEquals("Test1.sql", "UTF-8");
+        assertGenerateFileEquals("Test2.sql", "UTF-8");
+        assertGenerateFileEquals("Test3.sql", "UTF-8");
     }
 
     @Test
     public void testGenerateUpdate() throws Exception {
         Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateUpdate.txt"});
+        this.subDirectory = "generate/sql/update";
+        assertGenerateFileEquals("Test1.sql", "UTF-8");
+        assertGenerateFileEquals("Test2.sql", "UTF-8");
+        assertGenerateFileEquals("Test3.sql", "UTF-8");
     }
 
     private void assertGenerateFileEquals(String target, String encode) throws IOException {

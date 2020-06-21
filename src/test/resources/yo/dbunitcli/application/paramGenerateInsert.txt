@@ -4,4 +4,4 @@
 -setting=target/test-classes/yo/dbunitcli/application/generate/with_metadata/settings.json
 -generateType=sql
 -op=INSERT
--resultPath=target/test-classes/yo/dbunitcli/application/generate/sql/insert/result/$tableName$.json
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/sql/insert/result

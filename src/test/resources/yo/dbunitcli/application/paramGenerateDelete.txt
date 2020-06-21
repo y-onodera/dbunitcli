@@ -4,4 +4,4 @@
 -setting=target/test-classes/yo/dbunitcli/application/generate/with_metadata/settings.json
 -generateType=sql
 -op=DELETE
--resultPath=target/test-classes/yo/dbunitcli/application/generate/sql/delete/result/$tableName$.json
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/sql/delete/result

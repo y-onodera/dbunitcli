@@ -4,4 +4,4 @@
 -setting=target/test-classes/yo/dbunitcli/application/generate/with_metadata/settings.json
 -generateType=sql
 -op=CLEAN_INSERT
--resultPath=target/test-classes/yo/dbunitcli/application/generate/sql/clean-insert/result/$tableName$.json
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/sql/clean-insert/result

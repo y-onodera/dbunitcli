@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.operation.DatabaseOperation;
 import org.jxls.common.Context;
 import org.jxls.util.JxlsHelper;
 import org.kohsuke.args4j.CmdLineException;
@@ -18,7 +17,6 @@ import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.writer.DBDataSetWriter;
 
-import javax.json.JsonPatch;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -162,6 +160,7 @@ public class GenerateOption extends ConvertOption {
                 throw new CmdLineException(parser, e);
             }
         } else if (this.getGenerateType() == GenerateType.SQL) {
+            this.resultPath = this.resultPath + "/$tableName$.sql";
             this.unit = "table";
             this.setUseJdbcMetaData("true");
             this.stGroup = this.createSTGroup(new File("sqlTemplate.stg"));
