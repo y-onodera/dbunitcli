@@ -49,13 +49,17 @@ public class ComparableTable implements ITable {
             withMetaDataMap.put("primaryKeys", this.primaryKeys);
             result.add(withMetaDataMap);
         }
+        List<Map<String, Object>> rowMap = Lists.newArrayList();
         for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
             Map<String, Object> map = this.rowResolver.getRowToMap(rowNum);
             if (includeMetaData) {
-                withMetaDataMap.put("row", map);
+                rowMap.add(map);
             } else {
                 result.add(map);
             }
+        }
+        if (includeMetaData) {
+            withMetaDataMap.put("row", rowMap);
         }
         return result;
     }
@@ -118,7 +122,7 @@ public class ComparableTable implements ITable {
     }
 
     protected void replaceValue(int row, int column, Object newValue) throws RowOutOfBoundsException {
-        this.rowResolver.replaceValue(row,column,newValue);
+        this.rowResolver.replaceValue(row, column, newValue);
     }
 
     protected void addRow(Object[] row) {
