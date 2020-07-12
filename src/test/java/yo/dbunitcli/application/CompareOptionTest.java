@@ -24,7 +24,7 @@ public class CompareOptionTest {
     @Before
     public void setUp() throws UnsupportedEncodingException {
         this.target = new CompareOption();
-        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(),"UTF-8");
+        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(), "UTF-8");
     }
 
     @Test
@@ -85,7 +85,7 @@ public class CompareOptionTest {
     @Test
     public void parseDefaultResultDirEqualsCurrentDir() throws Exception {
         this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"});
-        assertEquals(new File("").getAbsoluteFile(), this.target.getResultDir());
+        assertEquals(new File(".").getAbsoluteFile(), this.target.getResultDir().getAbsoluteFile());
     }
 
     @Test

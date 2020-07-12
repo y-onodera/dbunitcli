@@ -28,7 +28,7 @@ public class Convert implements Command<ConvertOption>{
     public void exec(ConvertOption options) throws Exception {
         ComparableDataSet dataSet = options.targetDataSet();
         IDataSetWriter writer = options.writer();
-        writer.open(options.getResultFileName());
+        writer.open(options.getResultPath());
         for (String tableName : dataSet.getTableNames()) {
             writer.write(dataSet.getTable(tableName));
         }

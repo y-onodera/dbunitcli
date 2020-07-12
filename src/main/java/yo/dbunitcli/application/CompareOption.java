@@ -75,7 +75,7 @@ public class CompareOption extends CommandLineOption {
     public ComparableDataSet resultDataSet() throws DataSetException {
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
-                        .setSrc(this.getResultDir())
+                        .setSrc(this.getResultFile())
                         .setSource(DataSourceType.fromString(this.getResultType()))
                         .setColumnSettings(this.expectDetailSettings)
                         .setEncoding(this.getOutputEncoding())

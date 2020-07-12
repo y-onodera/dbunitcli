@@ -29,7 +29,7 @@ public class Generate implements Command<GenerateOption> {
     public void exec(GenerateOption options) throws Exception {
         options.parameterStream()
                 .forEach(param -> {
-                            File resultFile = new File(".", options.resultPath(param));
+                            File resultFile = new File(options.getResultDir(), options.resultPath(param));
                             if (!resultFile.getParentFile().exists()) {
                                 resultFile.getParentFile().mkdirs();
                             }

@@ -27,7 +27,10 @@ abstract public class CommandLineOption {
     private String encoding = System.getProperty("file.encoding");
 
     @Option(name = "-result", usage = "directory result files at")
-    private File resultDir = new File("").getAbsoluteFile();
+    private File resultDir = new File(".");
+
+    @Option(name = "-resultPath", usage = "result file relative path from -result=dir.")
+    private String resultPath;
 
     @Option(name = "-resultType", usage = "csv | xls | xlsx | table ")
     private String resultType = "csv";
@@ -82,6 +85,8 @@ abstract public class CommandLineOption {
 
     private XlsxSchema xlsxSchema;
 
+    private String[] args;
+
     public CommandLineOption(Parameter param) {
         this.parameter = param;
     }
@@ -114,6 +119,14 @@ abstract public class CommandLineOption {
         return this.resultDir;
     }
 
+    public String getResultPath() {
+        return this.resultPath;
+    }
+
+    public File getResultFile() {
+        return new File(this.resultDir, this.resultPath);
+    }
+
     public String getResultType() {
         return this.resultType;
     }
@@ -134,6 +147,10 @@ abstract public class CommandLineOption {
         return this.columnSettings;
     }
 
+    public void setResultPath(String resultPath) {
+        this.resultPath = resultPath;
+    }
+
     public void setOutputEncoding(String outputEncoding) {
         this.outputEncoding = outputEncoding;
     }
@@ -151,6 +168,7 @@ abstract public class CommandLineOption {
     }
 
     public void parse(String[] args) throws Exception {
+        this.args = args;
         CmdLineParser parser = new CmdLineParser(this);
         try {
             parser.parseArgument(args);
@@ -168,7 +186,7 @@ abstract public class CommandLineOption {
     }
 
     public IDataSetWriter writer() throws DataSetException {
-        return this.writer(this.resultDir);
+        return this.writer(this.getResultDir());
     }
 
     public IDataSetWriter writer(File outputTo) throws DataSetException {
@@ -235,11 +253,23 @@ abstract public class CommandLineOption {
 
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         try {
+            if (Strings.isNullOrEmpty(this.resultPath)) {
+                this.setResultPath(this.resultName());
+            }
             this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
             this.xlsxSchema = new FromJsonXlsxSchemaBuilder().build(this.xlsxSchemaSource);
         } catch (IOException e) {
             throw new CmdLineException(parser, e);
         }
+    }
+
+    protected String resultName() {
+        String resultFile = "result";
+        if (args[0].startsWith("@")) {
+            resultFile = new File(args[0].replace("@", "")).getName();
+            resultFile = resultFile.substring(0, resultFile.lastIndexOf("."));
+        }
+        return resultFile;
     }
 
     protected STGroup createSTGroup(File groupFile) {
@@ -249,7 +279,7 @@ abstract public class CommandLineOption {
         return this.createSTGroup(groupFile.getAbsolutePath());
     }
 
-    public STGroup createSTGroup(String fileName) {
+    protected STGroup createSTGroup(String fileName) {
         STGroup stGroup;
         if (Strings.isNullOrEmpty(fileName)) {
             stGroup = new STGroup('$', '$');
@@ -259,5 +289,4 @@ abstract public class CommandLineOption {
         stGroup.registerRenderer(String.class, new SqlEscapeStringRenderer());
         return stGroup;
     }
-
 }

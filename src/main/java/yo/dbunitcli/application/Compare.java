@@ -9,6 +9,8 @@ import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.writer.IDataSetWriter;
 
+import java.io.File;
+
 public class Compare implements Command<CompareOption> {
 
     private static final Logger logger = LoggerFactory.getLogger(Compare.class);
@@ -31,7 +33,7 @@ public class Compare implements Command<CompareOption> {
     public void exec(CompareOption options) throws DatabaseUnitException {
         ComparableDataSet oldData = options.oldDataSet();
         ComparableDataSet newData = options.newDataSet();
-        IDataSetWriter writer = options.writer();
+        IDataSetWriter writer = options.writer(options.getResultFile());
         CompareResult result = new DataSetCompareBuilder()
                 .newDataSet(newData)
                 .oldDataSet(oldData)

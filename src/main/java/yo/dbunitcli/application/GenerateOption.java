@@ -1,6 +1,7 @@
 package yo.dbunitcli.application;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.dbunit.dataset.DataSetException;
@@ -36,9 +37,6 @@ public class GenerateOption extends ConvertOption {
     @Option(name = "-templateEncoding", usage = "template txt file encoding")
     private String templateEncoding = System.getProperty("file.encoding");
 
-    @Option(name = "-resultPath", usage = "Path to generate file", required = true)
-    private String resultPath;
-
     @Option(name = "-unit", usage = "record | table | dataset :generate per record or table or dataset")
     private String unit = "record";
 
@@ -66,10 +64,6 @@ public class GenerateOption extends ConvertOption {
         super(param);
     }
 
-    public String getResultPath() {
-        return this.resultPath;
-    }
-
     public File getTemplate() {
         return this.template;
     }
@@ -91,7 +85,7 @@ public class GenerateOption extends ConvertOption {
     }
 
     public Stream<Map<String, Object>> parameterStream() throws DataSetException {
-        this.getParameter().getMap().computeIfAbsent("commit", it -> commit);
+        this.getParameter().getMap().put("commit", Boolean.valueOf(this.commit));
         return this.getUnit().parameterStream(this.getParameter().getMap(), this.targetDataSet());
     }
 
@@ -150,22 +144,30 @@ public class GenerateOption extends ConvertOption {
     }
 
     protected String getResultSqlFilePath() {
-        return this.resultPath + "/" + this.sqlFilePrefix + "$tableName$" + this.sqlFileSuffix + ".sql";
+        return this.getResultPath() + "/" + this.sqlFilePrefix + "$tableName$" + this.sqlFileSuffix + ".sql";
     }
 
     public enum GenerateUnit {
         RECORD {
             @Override
             public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws DataSetException {
-                return dataSet.toMap(true).stream().map(it -> {
-                    it.put("_paramMap", map);
-                    return it;
-                });
+                return dataSet.toMap(true).stream()
+                        .flatMap(it -> ((List<Map<String, Object>>) it.get("row")).stream()
+                                .map(row -> {
+                                    Map<String, Object> result = Maps.newHashMap();
+                                    result.putAll(it);
+                                    result.put("row", row);
+                                    result.put("_paramMap", map);
+                                    return result;
+                                })
+                        );
             }
         },
+
         TABLE {
             @Override
-            public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws DataSetException {
+            public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws
+                    DataSetException {
                 return Stream.of(dataSet.getTableNames())
                         .map(it -> {
                             try {
@@ -227,7 +229,7 @@ public class GenerateOption extends ConvertOption {
         SQL {
             @Override
             protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
-                option.resultPath = option.getResultSqlFilePath();
+                option.setResultPath(option.getResultSqlFilePath());
                 option.unit = "table";
                 option.setUseJdbcMetaData("true");
                 option.stGroup = option.createSTGroup("sql/sqlTemplate.stg");

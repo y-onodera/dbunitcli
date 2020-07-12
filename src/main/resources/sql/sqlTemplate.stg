@@ -13,6 +13,4 @@ $rows:{row |update $tableName$ set $columns:{column | $column.columnName$ = '$ro
 deleteAll() ::= <<
 delete from $tableName$;
 >>
-commit() ::= <<
-$if(_paramMap.commit)$commit;$endif$
->>
+commit() ::= <<$if(_paramMap.commit)$commit;$endif$>>

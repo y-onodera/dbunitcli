@@ -18,8 +18,6 @@ public class ConvertOption extends CommandLineOption {
     @Option(name = "-srcType", usage = "table | sql | csv | csvq | xls | xlsx ")
     private String srcType = "csv";
 
-    private String[] args;
-
     public ConvertOption() {
         this(Parameter.none());
     }
@@ -30,17 +28,7 @@ public class ConvertOption extends CommandLineOption {
 
     @Override
     public void parse(String[] args) throws Exception {
-        this.args = args;
         super.parse(args);
-    }
-
-    public String getResultFileName() {
-        String resultFile = "result";
-        if (args[0].startsWith("@")) {
-            resultFile = new File(args[0].replace("@", "")).getName();
-            resultFile = resultFile.substring(0, resultFile.lastIndexOf("."));
-        }
-        return resultFile;
     }
 
     public ComparableDataSet targetDataSet() throws DataSetException {
