@@ -10,3 +10,9 @@ update() ::= <<
 $rows:{row |update $tableName$ set $columns:{column | $column.columnName$ = '$row.(column.columnName); format="escapeSql"$' }; separator=","$ where $primaryKeys:{column | $column.columnName$ = '$row.(column.columnName); format="escapeSql"$' }; separator="and "$;
 }$
 >>
+deleteAll() ::= <<
+delete from $tableName$;
+>>
+commit() ::= <<
+$if(_paramMap.commit)$commit;$endif$
+>>

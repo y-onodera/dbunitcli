@@ -1,0 +1,10 @@
+-srcType=csv
+-src=target/test-classes/yo/dbunitcli/application/generate/with_metadata/source/csv
+-encoding=UTF-8
+-setting=target/test-classes/yo/dbunitcli/application/generate/with_metadata/settings.json
+-generateType=sql
+-op=INSERT
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/sql/no-commit/result
+-commit=false
+-sqlFilePrefix=Insert_
+-sqlFileSuffix=_NoCommit

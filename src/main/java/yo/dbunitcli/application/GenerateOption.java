@@ -45,6 +45,15 @@ public class GenerateOption extends ConvertOption {
     @Option(name = "-generateType", usage = "txt | xlsx | settings | sql :generate planTxt or xlsx")
     private String generateType = "txt";
 
+    @Option(name = "-commit", usage = "default commit;whether commit or not generate sql")
+    private String commit = "true";
+
+    @Option(name = "-sqlFileSuffix", usage = "generate sqlFile fileName suffix")
+    private String sqlFileSuffix = "";
+
+    @Option(name = "-sqlFilePrefix", usage = "generate sqlFile fileName prefix")
+    private String sqlFilePrefix = "";
+
     private STGroup stGroup;
 
     private String templateString;
@@ -82,36 +91,8 @@ public class GenerateOption extends ConvertOption {
     }
 
     public Stream<Map<String, Object>> parameterStream() throws DataSetException {
-        final ComparableDataSet dataSet = this.targetDataSet();
-        switch (this.getUnit()) {
-            case RECORD:
-                return dataSet.toMap(true).stream().map(it -> {
-                    it.put("_paramMap", getParameter().getMap());
-                    return it;
-                });
-            case TABLE:
-                return Stream.of(dataSet.getTableNames())
-                        .map(it -> {
-                            try {
-                                Map<String, Object> param = new HashMap<>();
-                                param.put("_paramMap", getParameter().getMap());
-                                ComparableTable table = dataSet.getTable(it);
-                                param.put("tableName", it);
-                                param.put("columns", table.getTableMetaData().getColumns());
-                                param.put("primaryKeys", table.getTableMetaData().getPrimaryKeys());
-                                param.put("rows", table.toMap());
-                                return param;
-                            } catch (DataSetException e) {
-                                throw new AssertionError(e);
-                            }
-                        });
-            case DATASET:
-        }
-        Map<String, Object> param = new HashMap<>();
-        param.put("_paramMap", getParameter().getMap());
-        List<String> tableNames = Lists.newArrayList();
-        param.put("dataSet", dataSet.toMap(true));
-        return Stream.of(param);
+        this.getParameter().getMap().computeIfAbsent("commit", it -> commit);
+        return this.getUnit().parameterStream(this.getParameter().getMap(), this.targetDataSet());
     }
 
     public String resultPath(Map<String, Object> param) {
@@ -121,83 +102,27 @@ public class GenerateOption extends ConvertOption {
     }
 
     public void write(File resultFile, Map<String, Object> param) throws IOException {
-        if (this.getGenerateType() == GenerateType.TXT
-                || this.getGenerateType() == GenerateType.SETTINGS
-                || this.getGenerateType() == GenerateType.SQL
-        ) {
-            ST result = new ST(this.stGroup, this.templateString());
-            param.forEach(result::add);
-            result.write(resultFile, ErrorManager.DEFAULT_ERROR_LISTENER, this.getOutputEncoding());
-        } else {
-            try (InputStream is = new FileInputStream(this.getTemplate())) {
-                try (OutputStream os = new FileOutputStream(resultFile)) {
-                    Context context = new Context();
-                    context.putVar("param", param);
-                    JxlsHelper.getInstance().processTemplate(is, os, context);
-                }
-            }
-        }
+        this.getGenerateType().write(this, resultFile, param);
     }
 
     @Override
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         super.populateSettings(parser);
-        if (this.getGenerateType() == GenerateType.SETTINGS) {
-            this.unit = "dataset";
-            this.setOutputEncoding("UTF-8");
-            this.setUseJdbcMetaData("true");
-            this.setLoadData("false");
-            this.stGroup = this.createSTGroup(new File("settingTemplate.stg"));
-            try {
-                this.templateString = Resources.asCharSource(this.getClass()
-                                .getClassLoader()
-                                .getResource("settingTemplate.txt")
-                                .toURI()
-                                .toURL()
-                        , Charset.forName("UTF-8"))
-                        .read();
-            } catch (IOException | URISyntaxException e) {
-                throw new CmdLineException(parser, e);
-            }
-        } else if (this.getGenerateType() == GenerateType.SQL) {
-            this.resultPath = this.resultPath + "/$tableName$.sql";
-            this.unit = "table";
-            this.setUseJdbcMetaData("true");
-            this.stGroup = this.createSTGroup(new File("sqlTemplate.stg"));
-            try {
-                this.templateString = Resources.asCharSource(this.getClass()
-                                .getClassLoader()
-                                .getResource(this.getSqlTemplate())
-                                .toURI()
-                                .toURL()
-                        , Charset.forName("UTF-8"))
-                        .read();
-            } catch (IOException | URISyntaxException e) {
-                throw new CmdLineException(parser, e);
-            }
-        } else {
-            this.stGroup = this.createSTGroup(this.templateGroup);
-            if (this.getGenerateType() == GenerateType.TXT) {
-                try {
-                    this.templateString = Files.asCharSource(this.template, Charset.forName(this.getTemplateEncoding()))
-                            .read();
-                } catch (IOException e) {
-                    throw new CmdLineException(parser, e);
-                }
-            }
-        }
+        this.getGenerateType().populateSettings(this, parser);
     }
 
     protected String getSqlTemplate() {
         switch (DBDataSetWriter.Operation.valueOf(this.getOperation())) {
             case INSERT:
-                return "insertTemplate.txt";
+                return "sql/insertTemplate.txt";
             case DELETE:
-                return "deleteTemplate.txt";
+                return "sql/deleteTemplate.txt";
             case UPDATE:
-                return "updateTemplate.txt";
+                return "sql/updateTemplate.txt";
+            case CLEAN_INSERT:
+                return "sql/cleanInsertTemplate.txt";
             default:
-                return "deleteInsertTemplate.txt";
+                return "sql/deleteInsertTemplate.txt";
         }
     }
 
@@ -214,12 +139,105 @@ public class GenerateOption extends ConvertOption {
         }
     }
 
+    protected String readClassPathResource(String path) throws IOException, URISyntaxException {
+        return Resources.asCharSource(this.getClass()
+                        .getClassLoader()
+                        .getResource(path)
+                        .toURI()
+                        .toURL()
+                , Charset.forName("UTF-8"))
+                .read();
+    }
+
+    protected String getResultSqlFilePath() {
+        return this.resultPath + "/" + this.sqlFilePrefix + "$tableName$" + this.sqlFileSuffix + ".sql";
+    }
+
     public enum GenerateUnit {
-        RECORD, TABLE, DATASET
+        RECORD {
+            @Override
+            public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws DataSetException {
+                return dataSet.toMap(true).stream().map(it -> {
+                    it.put("_paramMap", map);
+                    return it;
+                });
+            }
+        },
+        TABLE {
+            @Override
+            public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws DataSetException {
+                return Stream.of(dataSet.getTableNames())
+                        .map(it -> {
+                            try {
+                                Map<String, Object> param = new HashMap<>();
+                                param.put("_paramMap", map);
+                                ComparableTable table = dataSet.getTable(it);
+                                param.put("tableName", it);
+                                param.put("columns", table.getTableMetaData().getColumns());
+                                param.put("primaryKeys", table.getTableMetaData().getPrimaryKeys());
+                                param.put("rows", table.toMap());
+                                return param;
+                            } catch (DataSetException e) {
+                                throw new AssertionError(e);
+                            }
+                        });
+            }
+        },
+        DATASET;
+
+        public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws DataSetException {
+            Map<String, Object> param = new HashMap<>();
+            param.put("_paramMap", map);
+            List<String> tableNames = Lists.newArrayList();
+            param.put("dataSet", dataSet.toMap(true));
+            return Stream.of(param);
+
+        }
     }
 
     public enum GenerateType {
-        XLSX, TXT, SETTINGS, SQL;
+        TXT,
+        XLSX {
+            @Override
+            protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
+                try (InputStream is = new FileInputStream(option.getTemplate())) {
+                    try (OutputStream os = new FileOutputStream(resultFile)) {
+                        Context context = new Context();
+                        context.putVar("param", param);
+                        JxlsHelper.getInstance().processTemplate(is, os, context);
+                    }
+                }
+            }
+        },
+        SETTINGS {
+            @Override
+            protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
+                option.unit = "dataset";
+                option.setOutputEncoding("UTF-8");
+                option.setUseJdbcMetaData("true");
+                option.setLoadData("false");
+                option.stGroup = option.createSTGroup("settings/settingTemplate.stg");
+                try {
+                    option.templateString = option.readClassPathResource("settings/settingTemplate.txt");
+                } catch (IOException | URISyntaxException e) {
+                    throw new CmdLineException(parser, e);
+                }
+            }
+        },
+        SQL {
+            @Override
+            protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
+                option.resultPath = option.getResultSqlFilePath();
+                option.unit = "table";
+                option.setUseJdbcMetaData("true");
+                option.stGroup = option.createSTGroup("sql/sqlTemplate.stg");
+                try {
+                    option.templateString = option.readClassPathResource(option.getSqlTemplate());
+                } catch (IOException | URISyntaxException e) {
+                    throw new CmdLineException(parser, e);
+                }
+            }
+        };
 
         static GenerateType fromString(String name) {
             return Stream.of(GenerateType.values())
@@ -227,5 +245,24 @@ public class GenerateOption extends ConvertOption {
                     .findFirst()
                     .get();
         }
+
+        protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
+            option.stGroup = option.createSTGroup(option.templateGroup);
+            if (this == GenerateType.TXT) {
+                try {
+                    option.templateString = Files.asCharSource(option.template, Charset.forName(option.getTemplateEncoding()))
+                            .read();
+                } catch (IOException e) {
+                    throw new CmdLineException(parser, e);
+                }
+            }
+        }
+
+        protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
+            ST result = new ST(option.stGroup, option.templateString());
+            param.forEach(result::add);
+            result.write(resultFile, ErrorManager.DEFAULT_ERROR_LISTENER, option.getOutputEncoding());
+        }
     }
+
 }

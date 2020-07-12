@@ -1,5 +1,6 @@
 package yo.dbunitcli.application;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
@@ -8,7 +9,6 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
-import org.stringtemplate.v4.StringRenderer;
 import yo.dbunitcli.application.setting.*;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.mapper.xlsx.XlsxSchema;
@@ -65,14 +65,14 @@ abstract public class CommandLineOption {
     @Option(name = "-op", usage = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
     private String operation;
 
-    @Option(name = "-P", handler = MapOptionHandler.class)
-    Map<String, String> inputParam = Maps.newHashMap();
-
     @Option(name = "-excelTable", usage = "SHEET or BOOK")
     private String excelTable = "SHEET";
 
     @Option(name = "-exportEmptyTable", usage = "if true then empty table is not export")
     private String exportEmptyTable = "true";
+
+    @Option(name = "-P", handler = MapOptionHandler.class)
+    private Map<String, String> inputParam = Maps.newHashMap();
 
     private final Parameter parameter;
 
@@ -243,17 +243,21 @@ abstract public class CommandLineOption {
     }
 
     protected STGroup createSTGroup(File groupFile) {
-        STGroup stGroup;
         if (groupFile == null) {
+            return this.createSTGroup("");
+        }
+        return this.createSTGroup(groupFile.getAbsolutePath());
+    }
+
+    public STGroup createSTGroup(String fileName) {
+        STGroup stGroup;
+        if (Strings.isNullOrEmpty(fileName)) {
             stGroup = new STGroup('$', '$');
         } else {
-            if (groupFile.exists()) {
-                stGroup = new STGroupFile(groupFile.getAbsolutePath(), '$', '$');
-            } else {
-                stGroup = new STGroupFile(groupFile.getName(), '$', '$');
-            }
+            stGroup = new STGroupFile(fileName, '$', '$');
         }
         stGroup.registerRenderer(String.class, new SqlEscapeStringRenderer());
         return stGroup;
     }
+
 }

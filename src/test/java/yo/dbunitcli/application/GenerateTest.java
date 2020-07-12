@@ -78,6 +78,15 @@ public class GenerateTest {
     }
 
     @Test
+    public void testGenerateInsertNoCommit() throws Exception {
+        Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateInsertNoCommit.txt"});
+        this.subDirectory = "generate/sql/no-commit";
+        assertGenerateFileEquals("Insert_Test1_NoCommit.sql", "UTF-8");
+        assertGenerateFileEquals("Insert_Test2_NoCommit.sql", "UTF-8");
+        assertGenerateFileEquals("Insert_Test3_NoCommit.sql", "UTF-8");
+    }
+
+    @Test
     public void testGenerateDelete() throws Exception {
         Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateDelete.txt"});
         this.subDirectory = "generate/sql/delete";
