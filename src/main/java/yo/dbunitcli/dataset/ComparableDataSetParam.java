@@ -3,6 +3,7 @@ package yo.dbunitcli.dataset;
 import yo.dbunitcli.mapper.xlsx.XlsxSchema;
 
 import java.io.File;
+import java.util.function.Function;
 
 public class ComparableDataSetParam {
     private final File src;
@@ -17,6 +18,7 @@ public class ComparableDataSetParam {
     private final XlsxSchema xlsxSchema;
     private final boolean useJdbcMetaData;
     private final boolean loadData;
+    private final String headerName;
 
     public ComparableDataSetParam(Builder builder) {
         this.src = builder.getSrc();
@@ -31,6 +33,7 @@ public class ComparableDataSetParam {
         this.xlsxSchema = builder.getXlsxSchema();
         this.useJdbcMetaData = builder.isUseJdbcMetaData();
         this.loadData = builder.isLoadData();
+        this.headerName = builder.getHeaderName();
     }
 
     public static Builder builder() {
@@ -78,7 +81,11 @@ public class ComparableDataSetParam {
     }
 
     public boolean isLoadData() {
-        return loadData;
+        return this.loadData;
+    }
+
+    public String getHeaderName() {
+        return this.headerName;
     }
 
     public static class Builder {
@@ -94,6 +101,7 @@ public class ComparableDataSetParam {
         private XlsxSchema xlsxSchema = XlsxSchema.DEFAULT;
         private boolean useJdbcMetaData;
         private boolean loadData = true;
+        private String headerName;
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -151,6 +159,17 @@ public class ComparableDataSetParam {
             return this.loadData;
         }
 
+        public String getHeaderName() {
+            return this.headerName;
+        }
+
+        public Builder ifMatch(boolean condition, Function<Builder, Builder> function) {
+            if (!condition) {
+                return this;
+            }
+            return function.apply(this);
+        }
+
         public Builder setEncoding(String encoding) {
             this.encoding = encoding;
             return this;
@@ -203,6 +222,11 @@ public class ComparableDataSetParam {
 
         public Builder setLoadData(boolean loadData) {
             this.loadData = loadData;
+            return this;
+        }
+
+        public Builder setHeaderName(String headerName) {
+            this.headerName = headerName;
             return this;
         }
 

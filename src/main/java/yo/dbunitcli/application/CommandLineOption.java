@@ -44,6 +44,9 @@ abstract public class CommandLineOption {
     @Option(name = "-loadData", usage = "default true. if false data row didn't load")
     private String loadData = "true";
 
+    @Option(name = "-headerName", usage = "comma separate header name. if set,all rows treat data rows")
+    private String headerName;
+
     @Option(name = "-xlsxSchema", usage = "schema use read xlsx")
     private File xlsxSchemaSource;
 
@@ -212,6 +215,7 @@ abstract public class CommandLineOption {
                 .setEncoding(this.getEncoding())
                 .setColumnSettings(this.getColumnSettings())
                 .setLoadData(Boolean.parseBoolean(this.loadData))
+                .setHeaderName(this.headerName)
                 .setXlsxSchema(this.xlsxSchema)
                 .setHeaderSplitPattern(this.getRegHeaderSplit())
                 .setDataSplitPattern(this.getRegDataSplit())

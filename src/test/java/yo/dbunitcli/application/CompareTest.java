@@ -89,6 +89,16 @@ public class CompareTest {
     }
 
     @Test
+    public void testCompareNoHeaderRegexTxtToCsv() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramNoHeaderRegexTxtToCsvCompare.txt"});
+    }
+
+    @Test
+    public void testCompareNoHeaderRegexTxtToNoHeaderCsv() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramNoHeaderRegexTxtToNoHeaderCsvCompare.txt"});
+    }
+
+    @Test
     public void testCompareFilter() throws Exception {
         Compare.main(new String[]{"@" + this.baseDir + "/paramColumnFilter.txt"});
     }

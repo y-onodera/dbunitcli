@@ -1,5 +1,7 @@
 package yo.dbunitcli.dataset.producer;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
@@ -19,6 +21,7 @@ import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
@@ -29,6 +32,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final boolean loadData;
+    private String[] headerNames;
 
     public ComparableCsvDataSetProducer(ComparableDataSetParam param) {
         this.param = param;
@@ -40,6 +44,10 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         this.encoding = this.param.getEncoding();
         this.filter = this.param.getTableNameFilter();
         this.loadData = this.param.isLoadData();
+        String headerName = this.param.getHeaderName();
+        if (!Strings.isNullOrEmpty(headerName)) {
+            this.headerNames = headerName.split(",");
+        }
     }
 
     @Override
@@ -74,10 +82,17 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             List<List<Object>> readData = new CsvParserImpl().parse(
                     new BufferedReader(new InputStreamReader(new FileInputStream(theDataFile), this.encoding))
                     , theDataFile.toString());
-            ITableMetaData metaData = this.createTableMetaData(theDataFile, readData.get(0));
+            ITableMetaData metaData;
+            int startRow = 1;
+            if (this.headerNames == null) {
+                metaData = this.createTableMetaData(theDataFile, readData.get(0));
+            } else {
+                metaData = this.createTableMetaData(theDataFile, Lists.newArrayList(this.headerNames));
+                startRow = 0;
+            }
             this.consumer.startTable(metaData);
             if (this.loadData) {
-                for (int i = 1; i < readData.size(); i++) {
+                for (int i = startRow; i < readData.size(); i++) {
                     this.consumer.row(this.loadData(readData, i));
                 }
             }

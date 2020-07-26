@@ -1,5 +1,6 @@
 package yo.dbunitcli.application;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
@@ -20,11 +21,17 @@ public class CompareOption extends CommandLineOption {
     @Option(name = "-oldsource", usage = "table | sql | csv | csvq | xls | xlsx | reg ")
     private String oldsource = "csv";
 
+    @Option(name = "-oldHeaderName", usage = "set comma separate header name if old has no header ")
+    private String oldHeaderName;
+
     @Option(name = "-new", usage = "directory new files at", required = true)
     private File newDir;
 
     @Option(name = "-newsource", usage = "table | sql | csv | csvq | xls | xlsx | reg ")
     private String newsource = "csv";
+
+    @Option(name = "-newHeaderName", usage = "set comma separate header name if new has no header ")
+    private String newHeaderName;
 
     @Option(name = "-expect", usage = "expected diff")
     private File expected;
@@ -59,6 +66,8 @@ public class CompareOption extends CommandLineOption {
                 this.getDataSetParamBuilder()
                         .setSrc(this.getOldDir())
                         .setSource(DataSourceType.fromString(this.oldsource))
+                        .ifMatch(!Strings.isNullOrEmpty(this.oldHeaderName)
+                                , it -> it.setHeaderName(this.oldHeaderName))
                         .build()
         );
     }
@@ -68,6 +77,8 @@ public class CompareOption extends CommandLineOption {
                 this.getDataSetParamBuilder()
                         .setSrc(this.getNewDir())
                         .setSource(DataSourceType.fromString(this.newsource))
+                        .ifMatch(!Strings.isNullOrEmpty(this.newHeaderName)
+                                , it -> it.setHeaderName(this.newHeaderName))
                         .build()
         );
     }
