@@ -134,7 +134,8 @@ public class AddSettingColumns {
             if (patternExpression.containsKey(name)) {
                 return patternExpression.get(name);
             } else {
-                return patternExpression.put(name, ColumnExpression.builder());
+                patternExpression.put(name, ColumnExpression.builder());
+                return patternExpression.get(name);
             }
         }
 

@@ -143,6 +143,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         this.addExpression(builder, json, ColumnExpression.ParameterType.STRING);
         this.addExpression(builder, json, ColumnExpression.ParameterType.BOOLEAN);
         this.addExpression(builder, json, ColumnExpression.ParameterType.NUMBER);
+        this.addExpression(builder, json, ColumnExpression.ParameterType.SQL_FUNCTION);
     }
 
     protected void addExpression(ColumnExpression.Builder builder, JsonObject settingJson, ColumnExpression.ParameterType type) {

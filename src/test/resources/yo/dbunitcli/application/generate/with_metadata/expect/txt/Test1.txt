@@ -1,10 +1,10 @@
-insert into Test1 (Key ,Column1 ,Column2 ,Column3 ) values ('1' ,'ああ' ,'10000' ,'false' );
-insert into Test1 (Key ,Column1 ,Column2 ,Column3 ) values ('15' ,'テスト' ,'' ,'true' );
-insert into Test1 (Key ,Column1 ,Column2 ,Column3 ) values ('29' ,'' ,'' ,'' );
+insert into Test1 (Key ,Column1 ,Column2 ,Column3 ,now ) values ('1' ,'ああ' ,'10000' ,'false' ,'sysdate()' );
+insert into Test1 (Key ,Column1 ,Column2 ,Column3 ,now ) values ('15' ,'テスト' ,'' ,'true' ,'sysdate()' );
+insert into Test1 (Key ,Column1 ,Column2 ,Column3 ,now ) values ('29' ,'' ,'' ,'' ,'sysdate()' );
 
-update Test1 set (Key = '1' ,Column1 = 'ああ' ,Column2 = '10000' ,Column3 = 'false' ) where Key = '1' ;
-update Test1 set (Key = '15' ,Column1 = 'テスト' ,Column2 = '' ,Column3 = 'true' ) where Key = '15' ;
-update Test1 set (Key = '29' ,Column1 = '' ,Column2 = '' ,Column3 = '' ) where Key = '29' ;
+update Test1 set (Key = '1' ,Column1 = 'ああ' ,Column2 = '10000' ,Column3 = 'false' ,now = 'sysdate()' ) where Key = '1' ;
+update Test1 set (Key = '15' ,Column1 = 'テスト' ,Column2 = '' ,Column3 = 'true' ,now = 'sysdate()' ) where Key = '15' ;
+update Test1 set (Key = '29' ,Column1 = '' ,Column2 = '' ,Column3 = '' ,now = 'sysdate()' ) where Key = '29' ;
 
 delete from Test1 where Key = '1' ;
 delete from Test1 where Key = '15' ;

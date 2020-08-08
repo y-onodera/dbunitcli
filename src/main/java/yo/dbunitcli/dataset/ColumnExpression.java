@@ -24,10 +24,13 @@ public class ColumnExpression {
 
     private Map<String, String> numberExpression = Maps.newLinkedHashMap();
 
+    private Map<String, String> sqlFunction = Maps.newLinkedHashMap();
+
     public ColumnExpression(Builder builder) {
         this.stringExpression.putAll(builder.stringExpression);
         this.booleanExpression.putAll(builder.booleanExpression);
         this.numberExpression.putAll(builder.numberExpression);
+        this.sqlFunction.putAll(builder.sqlFunction);
     }
 
     public static Builder builder() {
@@ -55,6 +58,7 @@ public class ColumnExpression {
         this.stringExpression.keySet().forEach(key -> result.add(new Column(key, DataType.NVARCHAR)));
         this.booleanExpression.keySet().forEach(key -> result.add(new Column(key, DataType.BOOLEAN)));
         this.numberExpression.keySet().forEach(key -> result.add(new Column(key, DataType.NUMERIC)));
+        this.sqlFunction.keySet().forEach(key -> result.add(new Column(key, DataType.NUMERIC)));
         return result;
     }
 
@@ -73,13 +77,19 @@ public class ColumnExpression {
     }
 
     public int size() {
-        return this.stringExpression.size() + this.booleanExpression.size() + this.numberExpression.size();
+        return this.stringExpression.size()
+                + this.booleanExpression.size()
+                + this.numberExpression.size()
+                + this.sqlFunction.size()
+                ;
     }
 
     public boolean contains(String columnName) {
         return this.stringExpression.containsKey(columnName)
                 || this.booleanExpression.containsKey(columnName)
-                || this.numberExpression.containsKey(columnName);
+                || this.numberExpression.containsKey(columnName)
+                || this.sqlFunction.containsKey(columnName)
+                ;
     }
 
     public Object evaluate(String columnName, Map<String, Object> param) {
@@ -89,6 +99,8 @@ public class ColumnExpression {
             return jexl.createExpression(this.stringExpression.get(columnName)).evaluate(jc);
         } else if (this.booleanExpression.containsKey(columnName)) {
             return Boolean.parseBoolean(jexl.createExpression(this.booleanExpression.get(columnName)).evaluate(jc).toString());
+        } else if (this.sqlFunction.containsKey(columnName)) {
+            return jexl.createExpression(this.sqlFunction.get(columnName)).evaluate(jc).toString();
         }
         return new BigDecimal(jexl.createExpression(this.numberExpression.get(columnName)).evaluate(jc).toString());
     }
@@ -124,10 +136,13 @@ public class ColumnExpression {
 
         private Map<String, String> numberExpression = Maps.newLinkedHashMap();
 
+        private Map<String, String> sqlFunction = Maps.newLinkedHashMap();
+
         public Builder add(ColumnExpression columnExpression) {
             return this.addStringExpression(columnExpression.stringExpression)
                     .addBooleanExpression(columnExpression.booleanExpression)
-                    .addNumberExpression(columnExpression.numberExpression);
+                    .addNumberExpression(columnExpression.numberExpression)
+                    .addSqlFunction(columnExpression.sqlFunction);
         }
 
         public ColumnExpression build() {
@@ -144,6 +159,8 @@ public class ColumnExpression {
                     return;
                 case NUMBER:
                     this.addNumberExpression(key, value);
+                case SQL_FUNCTION:
+                    this.addSqlFunction(key, value);
             }
         }
 
@@ -162,6 +179,11 @@ public class ColumnExpression {
             return this;
         }
 
+        private Builder addSqlFunction(Map<String, String> sqlFunction) {
+            sqlFunction.forEach(this::addSqlFunction);
+            return this;
+        }
+
         protected void addStringExpression(String key, String value) {
             this.stringExpression.put(key, value);
         }
@@ -174,10 +196,19 @@ public class ColumnExpression {
             this.numberExpression.put(key, value);
         }
 
+        protected void addSqlFunction(String key, String value) {
+            this.sqlFunction.put(key, value);
+        }
+
     }
 
     public enum ParameterType {
-        STRING, BOOLEAN, NUMBER;
+        STRING, BOOLEAN, NUMBER, SQL_FUNCTION {
+            @Override
+            public String keyName() {
+                return "sqlFunction";
+            }
+        };
 
         public String keyName() {
             return this.name().toLowerCase() + "Expression";
