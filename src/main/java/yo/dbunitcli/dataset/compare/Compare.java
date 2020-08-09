@@ -1,4 +1,4 @@
-package yo.dbunitcli.compare;
+package yo.dbunitcli.dataset.compare;
 
 import org.dbunit.dataset.DataSetException;
 

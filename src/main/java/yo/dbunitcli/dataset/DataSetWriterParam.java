@@ -1,6 +1,4 @@
-package yo.dbunitcli.writer;
-
-import yo.dbunitcli.application.setting.DatabaseConnectionLoader;
+package yo.dbunitcli.dataset;
 
 import java.io.File;
 

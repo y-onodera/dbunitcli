@@ -8,7 +8,6 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import yo.dbunitcli.application.setting.FromJsonColumnSettingsBuilder;
 import yo.dbunitcli.dataset.*;
-import yo.dbunitcli.writer.IDataSetWriter;
 
 import java.io.File;
 import java.io.IOException;

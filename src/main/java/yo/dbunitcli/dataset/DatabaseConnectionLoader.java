@@ -1,4 +1,4 @@
-package yo.dbunitcli.application.setting;
+package yo.dbunitcli.dataset;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConfig;

@@ -1,4 +1,4 @@
-package yo.dbunitcli.compare;
+package yo.dbunitcli.dataset.compare;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
@@ -7,14 +7,13 @@ import com.google.common.collect.Sets;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.dataset.*;
-import yo.dbunitcli.writer.IDataSetWriter;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static yo.dbunitcli.compare.CompareDiff.getBuilder;
+import static yo.dbunitcli.dataset.compare.CompareDiff.getBuilder;
 
 public class DataSetCompare implements Compare {
 

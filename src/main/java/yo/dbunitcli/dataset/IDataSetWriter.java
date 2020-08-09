@@ -1,4 +1,4 @@
-package yo.dbunitcli.writer;
+package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;

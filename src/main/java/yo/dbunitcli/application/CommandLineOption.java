@@ -11,9 +11,7 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 import yo.dbunitcli.application.setting.*;
 import yo.dbunitcli.dataset.*;
-import yo.dbunitcli.mapper.xlsx.XlsxSchema;
-import yo.dbunitcli.writer.DataSetWriterParam;
-import yo.dbunitcli.writer.IDataSetWriter;
+import yo.dbunitcli.dataset.producer.xlsx.XlsxSchema;
 
 import java.io.File;
 import java.io.FileInputStream;

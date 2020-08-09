@@ -1,9 +1,9 @@
-package yo.dbunitcli.compare;
+package yo.dbunitcli.dataset.compare;
 
 import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.dataset.AddSettingColumns;
 import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.writer.IDataSetWriter;
+import yo.dbunitcli.dataset.IDataSetWriter;
 
 public class DataSetCompareBuilder {
     private ComparableDataSet oldDataSet;

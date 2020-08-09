@@ -1,10 +1,10 @@
-package yo.dbunitcli.writer;
+package yo.dbunitcli.dataset.writer;
 
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-
-import java.io.File;
+import yo.dbunitcli.dataset.DataSetWriterParam;
+import yo.dbunitcli.dataset.IDataSetWriter;
 
 public class XlsxDataSetWriter extends XlsDataSetWriter implements IDataSetWriter {
 

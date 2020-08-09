@@ -1,10 +1,12 @@
-package yo.dbunitcli.writer;
+package yo.dbunitcli.dataset.writer;
 
 import org.apache.poi.ss.usermodel.*;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.dataset.DataSetWriterParam;
+import yo.dbunitcli.dataset.IDataSetWriter;
 
 import java.io.File;
 import java.io.FileOutputStream;

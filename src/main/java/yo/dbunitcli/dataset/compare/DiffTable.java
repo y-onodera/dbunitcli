@@ -1,4 +1,4 @@
-package yo.dbunitcli.compare;
+package yo.dbunitcli.dataset.compare;
 
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.Column;

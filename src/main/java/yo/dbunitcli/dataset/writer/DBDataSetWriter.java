@@ -1,4 +1,4 @@
-package yo.dbunitcli.writer;
+package yo.dbunitcli.dataset.writer;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.IDatabaseConnection;
@@ -8,6 +8,8 @@ import org.dbunit.dataset.ITable;
 import org.dbunit.operation.DatabaseOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.dataset.DataSetWriterParam;
+import yo.dbunitcli.dataset.IDataSetWriter;
 
 import java.sql.SQLException;
 

@@ -22,8 +22,7 @@ import org.xml.sax.XMLReader;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
-import yo.dbunitcli.mapper.xlsx.XlsxSchema;
-import yo.dbunitcli.mapper.xlsx.XlsxSchemaHandler;
+import yo.dbunitcli.dataset.producer.xlsx.XlsxSchema;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
@@ -77,7 +76,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
                         String sheetName = iterator.getSheetName();
                         if (this.filter.predicate(sheetName) && this.schema.contains(sheetName)) {
                             logger.info("produceFromSheet - start {} [index={}]", sheetName, index++);
-                            processSheet(styles, strings, new XlsxSchemaHandler(this.consumer, sheetName, this.schema, this.loadData), stream);
+                            processSheet(styles, strings, this.schema.createHandler(this.consumer, sheetName, this.loadData), stream);
                         }
                     }
                 }

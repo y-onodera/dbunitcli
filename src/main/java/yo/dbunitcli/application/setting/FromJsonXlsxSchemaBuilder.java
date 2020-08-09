@@ -2,9 +2,9 @@ package yo.dbunitcli.application.setting;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import yo.dbunitcli.mapper.xlsx.XlsxCellsTableDefine;
-import yo.dbunitcli.mapper.xlsx.XlsxRowsTableDefine;
-import yo.dbunitcli.mapper.xlsx.XlsxSchema;
+import yo.dbunitcli.dataset.producer.xlsx.XlsxCellsTableDefine;
+import yo.dbunitcli.dataset.producer.xlsx.XlsxRowsTableDefine;
+import yo.dbunitcli.dataset.producer.xlsx.XlsxSchema;
 
 import javax.json.Json;
 import javax.json.JsonArray;

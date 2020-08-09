@@ -16,7 +16,7 @@ import org.stringtemplate.v4.misc.ErrorManager;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.Parameter;
-import yo.dbunitcli.writer.DBDataSetWriter;
+import yo.dbunitcli.dataset.writer.DBDataSetWriter;
 
 import java.io.*;
 import java.net.URISyntaxException;

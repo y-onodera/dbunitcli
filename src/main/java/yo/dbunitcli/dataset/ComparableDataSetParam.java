@@ -1,6 +1,6 @@
 package yo.dbunitcli.dataset;
 
-import yo.dbunitcli.mapper.xlsx.XlsxSchema;
+import yo.dbunitcli.dataset.producer.xlsx.XlsxSchema;
 
 import java.io.File;
 import java.util.function.Function;

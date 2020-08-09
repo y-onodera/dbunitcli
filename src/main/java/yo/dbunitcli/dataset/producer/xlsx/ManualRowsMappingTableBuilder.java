@@ -1,4 +1,4 @@
-package yo.dbunitcli.mapper.xlsx;
+package yo.dbunitcli.dataset.producer.xlsx;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;

@@ -1,4 +1,4 @@
-package yo.dbunitcli.mapper.xlsx;
+package yo.dbunitcli.dataset.producer.xlsx;
 
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;

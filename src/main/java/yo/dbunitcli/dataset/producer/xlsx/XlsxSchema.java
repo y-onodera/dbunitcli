@@ -1,6 +1,8 @@
-package yo.dbunitcli.mapper.xlsx;
+package yo.dbunitcli.dataset.producer.xlsx;
 
 import com.google.common.collect.Maps;
+import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
+import org.dbunit.dataset.stream.IDataSetConsumer;
 
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,10 @@ public interface XlsxSchema {
 
     default boolean contains(String sheetName) {
         return true;
+    }
+
+    default XSSFSheetXMLHandler.SheetContentsHandler createHandler(IDataSetConsumer consumer, String sheetName, boolean loadData) {
+        return new XlsxSchemaHandler(consumer, sheetName, this, loadData);
     }
 
     default XlsxRowsToTableBuilder getRowsTableBuilder(String sheetName) {
