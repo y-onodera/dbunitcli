@@ -1,10 +1,7 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
-import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
@@ -24,13 +21,6 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableFileDataSetProducer.class);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    private static Column[] COLUMNS = new Column[]{new Column("PATH", DataType.NVARCHAR)
-            , new Column("NAME", DataType.NVARCHAR)
-            , new Column("DIR", DataType.NVARCHAR)
-            , new Column("RELATIVE_PATH", DataType.NVARCHAR)
-            , new Column("SIZE_KB", DataType.NUMERIC)
-            , new Column("LAST_MODIFIED", DataType.NVARCHAR)
-    };
     private IDataSetConsumer consumer = new DefaultConsumer();
     private final File src;
     private final TableNameFilter filter;
@@ -58,7 +48,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     public void produce() throws DataSetException {
         logger.info("produce() - start");
         this.consumer.startDataSet();
-        ITableMetaData metaData = new DefaultTableMetaData(this.src.getName(), COLUMNS, new String[]{"PATH"});
+        ITableMetaData metaData = new ComparableFileTableMetaData(this.src.getName());
         this.consumer.startTable(metaData);
         if (this.loadData) {
             try {
