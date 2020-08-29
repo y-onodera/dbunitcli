@@ -247,7 +247,9 @@ public class DataSetCompare implements Compare {
                 row = Lists.asList(rowNum, row).toArray(new Object[row.length + 1]);
                 diffDetailTable.addRow(row);
             }
-            writer.write(new SortedTable(diffDetailTable, new Column[]{COLUMN_ROW_INDEX}));
+            SortedTable sortedTable = new SortedTable(diffDetailTable, new Column[]{COLUMN_ROW_INDEX});
+            sortedTable.setUseComparable(true);
+            writer.write(sortedTable);
             this.results.add(getBuilder(CompareDiff.Type.KEY_DELETE)
                     .setTargetName(oldTable.getTableMetaData().getTableName())
                     .setRows(deleteRows.size())
@@ -266,7 +268,9 @@ public class DataSetCompare implements Compare {
                 Object[] convertRow = Lists.asList(row.getKey(), row.getValue()).toArray(new Object[row.getValue().length + 1]);
                 diffDetailTable.addRow(convertRow);
             }
-            writer.write(new SortedTable(diffDetailTable, new Column[]{COLUMN_ROW_INDEX}));
+            SortedTable sortedTable = new SortedTable(diffDetailTable, new Column[]{COLUMN_ROW_INDEX});
+            sortedTable.setUseComparable(true);
+            writer.write(sortedTable);
             this.results.add(getBuilder(CompareDiff.Type.KEY_ADD)
                     .setTargetName(newTable.getTableMetaData().getTableName())
                     .setRows(addRows.size())
