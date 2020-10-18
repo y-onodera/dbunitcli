@@ -25,7 +25,7 @@ public class ParameterizeOption extends CommandLineOption {
     private String paramType = "csv";
 
     @Option(name = "-includeMetaData", usage = "whether param include tableName and columns or not ")
-    private boolean includeMetaData = false;
+    private String includeMetaData = "false";
 
     @Option(name = "-template", usage = "template file. data driven target argument", required = true)
     private File template;
@@ -49,7 +49,7 @@ public class ParameterizeOption extends CommandLineOption {
                 this.getDataSetParamBuilder()
                         .setSrc(this.param)
                         .setSource(DataSourceType.fromString(this.paramType))
-                        .setMapIncludeMetaData(this.includeMetaData)
+                        .setMapIncludeMetaData(Boolean.parseBoolean(this.includeMetaData))
                         .build()
         );
     }
