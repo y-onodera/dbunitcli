@@ -8,6 +8,7 @@ import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.rules.ExpectedException;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
@@ -95,6 +96,34 @@ public class ConvertTest {
         Assert.assertEquals(2, actual.getTableNames().length);
         Assert.assertEquals("multi1", actual.getTableNames()[0]);
         Assert.assertEquals("multi2", actual.getTableNames()[1]);
+    }
+
+    @Test
+    public void testParamFromFixedFileToCsv() throws Exception {
+        Convert.main(new String[]{"@" + this.baseDir + "/paramFromFixedFileToCsv.txt"});
+        File src = new File(this.baseDir + "/fixed2csv/result");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableCsvDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setEncoding("UTF-8")
+                                .build()));
+        Assert.assertEquals(1, actual.getTableNames().length);
+        Assert.assertEquals("固定長ファイル", actual.getTableNames()[0]);
+        ComparableTable table = actual.getTable("固定長ファイル");
+        Assert.assertEquals(4, table.getRowCount());
+        Assert.assertEquals("a1a", table.getValue(0,"半角"));
+        Assert.assertEquals("a  ", table.getValue(1,"半角"));
+        Assert.assertEquals("   ", table.getValue(2,"半角"));
+        Assert.assertEquals("   ", table.getValue(3,"半角"));
+        Assert.assertEquals("123                                               ", table.getValue(0,"数値"));
+        Assert.assertEquals("                                                  ", table.getValue(1,"数値"));
+        Assert.assertEquals("123                                               ", table.getValue(2,"数値"));
+        Assert.assertEquals("                                                  ", table.getValue(3,"数値"));
+        Assert.assertEquals("あさぼらけ", table.getValue(0,"全角"));
+        Assert.assertEquals("      有明の", table.getValue(1,"全角"));
+        Assert.assertEquals("              1", table.getValue(2,"全角"));
+        Assert.assertEquals("         月と", table.getValue(3,"全角"));
     }
 
     @Test

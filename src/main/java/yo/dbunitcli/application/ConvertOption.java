@@ -15,7 +15,7 @@ public class ConvertOption extends CommandLineOption {
     @Option(name = "-src", usage = "export target", required = true)
     private File src;
 
-    @Option(name = "-srcType", usage = "table | sql | csv | csvq | xls | xlsx ")
+    @Option(name = "-srcType", usage = "table | sql | csv | csvq | xls | xlsx | fixed | reg | file | dir")
     private String srcType = "csv";
 
     public ConvertOption() {

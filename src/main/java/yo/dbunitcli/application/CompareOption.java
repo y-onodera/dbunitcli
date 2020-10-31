@@ -17,7 +17,7 @@ public class CompareOption extends CommandLineOption {
     @Option(name = "-old", usage = "directory old files at", required = true)
     private File oldDir;
 
-    @Option(name = "-oldsource", usage = "table | sql | csv | csvq | xls | xlsx | reg ")
+    @Option(name = "-oldsource", usage = "table | sql | csv | csvq | xls | xlsx | fixed | reg | file | dir")
     private String oldsource = "csv";
 
     @Option(name = "-oldHeaderName", usage = "set comma separate header name if old has no header ")
@@ -26,7 +26,7 @@ public class CompareOption extends CommandLineOption {
     @Option(name = "-new", usage = "directory new files at", required = true)
     private File newDir;
 
-    @Option(name = "-newsource", usage = "table | sql | csv | csvq | xls | xlsx | reg ")
+    @Option(name = "-newsource", usage = "table | sql | csv | csvq | xls | xlsx | fixed | reg | file | dir")
     private String newsource = "csv";
 
     @Option(name = "-newHeaderName", usage = "set comma separate header name if new has no header ")

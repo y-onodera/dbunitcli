@@ -3,13 +3,24 @@ package yo.dbunitcli.dataset;
 import java.util.Objects;
 
 public enum DataSourceType {
-    TABLE("table"),
-    SQL("sql"),
+    TABLE("table") {
+        @Override
+        public boolean fromDatabase() {
+            return true;
+        }
+    },
+    SQL("sql") {
+        @Override
+        public boolean fromDatabase() {
+            return true;
+        }
+    },
     FILE("file"),
     DIR("dir"),
     CSV("csv"),
     CSVQ("csvq"),
     REGSP("reg"),
+    FIXED("fixed"),
     XLS("xls"),
     XLSX("xlsx");
 
@@ -32,4 +43,7 @@ public enum DataSourceType {
         return Objects.equals(this.name, type);
     }
 
+    public boolean fromDatabase() {
+        return false;
+    }
 }

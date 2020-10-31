@@ -60,6 +60,9 @@ abstract public class CommandLineOption {
     @Option(name = "-regHeaderSplit", usage = "regex to use split header row")
     private String regHeaderSplit;
 
+    @Option(name = "-fixedLength", usage = "comma separate column Lengths")
+    private String fixedLength;
+
     @Option(name = "-regInclude", usage = "regex to include table")
     private String regInclude;
 
@@ -106,6 +109,10 @@ abstract public class CommandLineOption {
 
     public String getRegHeaderSplit() {
         return this.regHeaderSplit;
+    }
+
+    public String getFixedLength() {
+        return fixedLength;
     }
 
     public String getRegInclude() {
@@ -217,6 +224,7 @@ abstract public class CommandLineOption {
                 .setXlsxSchema(this.xlsxSchema)
                 .setHeaderSplitPattern(this.getRegHeaderSplit())
                 .setDataSplitPattern(this.getRegDataSplit())
+                .setFixedLength(this.getFixedLength())
                 .setRegInclude(this.getRegInclude())
                 .setRegExclude(this.getRegExclude());
     }
@@ -230,7 +238,7 @@ abstract public class CommandLineOption {
     protected void assertFileParameter(CmdLineParser parser, String source, File dir, String s) throws CmdLineException {
         final DataSourceType dataSourceType = DataSourceType.fromString(source);
         this.assertFileExists(parser, dir, s);
-        if (dataSourceType == DataSourceType.TABLE || dataSourceType == DataSourceType.SQL) {
+        if (dataSourceType.fromDatabase()) {
             if (this.jdbcProperties == null) {
                 throw new CmdLineException(parser, dataSourceType + " need jdbcProperties option", new IllegalArgumentException());
             }

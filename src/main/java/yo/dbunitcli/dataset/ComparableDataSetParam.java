@@ -19,6 +19,7 @@ public class ComparableDataSetParam {
     private final boolean useJdbcMetaData;
     private final boolean loadData;
     private final String headerName;
+    private final String fixedLength;
 
     public ComparableDataSetParam(Builder builder) {
         this.src = builder.getSrc();
@@ -34,6 +35,7 @@ public class ComparableDataSetParam {
         this.useJdbcMetaData = builder.isUseJdbcMetaData();
         this.loadData = builder.isLoadData();
         this.headerName = builder.getHeaderName();
+        this.fixedLength = builder.getFixedLength();
     }
 
     public static Builder builder() {
@@ -88,6 +90,10 @@ public class ComparableDataSetParam {
         return this.headerName;
     }
 
+    public String getFixedLength() {
+        return this.fixedLength;
+    }
+
     public static class Builder {
         private File src;
         private String encoding;
@@ -102,6 +108,7 @@ public class ComparableDataSetParam {
         private boolean useJdbcMetaData;
         private boolean loadData = true;
         private String headerName;
+        private String fixedLength;
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -161,6 +168,10 @@ public class ComparableDataSetParam {
 
         public String getHeaderName() {
             return this.headerName;
+        }
+
+        public String getFixedLength() {
+            return this.fixedLength;
         }
 
         public Builder ifMatch(boolean condition, Function<Builder, Builder> function) {
@@ -227,6 +238,11 @@ public class ComparableDataSetParam {
 
         public Builder setHeaderName(String headerName) {
             this.headerName = headerName;
+            return this;
+        }
+
+        public Builder setFixedLength(String fixedLength) {
+            this.fixedLength = fixedLength;
             return this;
         }
 

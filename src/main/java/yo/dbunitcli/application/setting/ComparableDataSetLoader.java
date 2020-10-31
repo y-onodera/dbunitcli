@@ -43,6 +43,8 @@ public class ComparableDataSetLoader {
                 return new ComparableDataSetImpl(new ComparableCsvDataSetProducer(param));
             case REGSP:
                 return new ComparableDataSetImpl(new ComparableRegexSplitDataSetProducer(param));
+            case FIXED:
+                return new ComparableDataSetImpl(new ComparableFixedFileDataSetProducer(param));
             case FILE:
                 return new ComparableDataSetImpl(new ComparableFileDataSetProducer(param));
             case DIR:
