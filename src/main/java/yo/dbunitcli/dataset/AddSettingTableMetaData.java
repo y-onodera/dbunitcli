@@ -30,7 +30,9 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         Set<Column> noFilter = Sets.newHashSet(delegate.getColumns());
         Set<Column> filtered = Sets.newHashSet(this.getColumns());
         for (Column column : Sets.difference(noFilter, filtered)) {
-            this.filterColumnIndex.add(delegate.getColumnIndex(column.getColumnName()));
+            if(!this.additionalExpression.contains(column.getColumnName())) {
+                this.filterColumnIndex.add(delegate.getColumnIndex(column.getColumnName()));
+            }
         }
     }
 

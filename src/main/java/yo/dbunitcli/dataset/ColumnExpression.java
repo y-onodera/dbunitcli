@@ -69,6 +69,8 @@ public class ColumnExpression {
             for (Column column : this.getColumns()) {
                 if (!columnNames.contains(column.getColumnName())) {
                     columnList.add(column);
+                } else {
+                    columnList.replaceAll(it -> it.getColumnName().equals(column.getColumnName()) ? column : it);
                 }
             }
             return columnList.toArray(new Column[0]);
