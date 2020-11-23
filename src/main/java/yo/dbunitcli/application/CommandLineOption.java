@@ -18,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 abstract public class CommandLineOption {
 
@@ -50,6 +51,15 @@ abstract public class CommandLineOption {
 
     @Option(name = "-jdbcProperties", usage = "use connect database. [url=,user=,pass=]")
     private File jdbcProperties;
+
+    @Option(name = "-jdbcUrl", usage = "use connect database. override jdbcProperties value")
+    private String jdbcUrl;
+
+    @Option(name = "-jdbcUser", usage = "use connect database. override jdbcProperties value")
+    private String jdbcUser;
+
+    @Option(name = "-jdbcPass", usage = "use connect database. override jdbcProperties value")
+    private String jdbcPass;
 
     @Option(name = "-useJdbcMetaData", usage = "default false. whether load metaData from jdbc or not")
     private String useJdbcMetaData = "false";
@@ -96,7 +106,6 @@ abstract public class CommandLineOption {
     private XlsxSchema xlsxSchema;
 
     private String[] args;
-
 
     public CommandLineOption(Parameter param) {
         this.parameter = param;
@@ -257,11 +266,14 @@ abstract public class CommandLineOption {
         final DataSourceType dataSourceType = DataSourceType.fromString(source);
         this.assertFileExists(parser, dir, s);
         if (dataSourceType.fromDatabase()) {
-            if (this.jdbcProperties == null) {
-                throw new CmdLineException(parser, dataSourceType + " need jdbcProperties option", new IllegalArgumentException());
-            }
-            if (!this.jdbcProperties.exists()) {
-                throw new CmdLineException(parser, this.jdbcProperties.toString() + " is not exist file", new IllegalArgumentException(this.jdbcProperties.toString()));
+            if (Stream.of(this.jdbcUrl, this.jdbcUser, this.jdbcPass)
+                    .anyMatch(Strings::isNullOrEmpty)) {
+                if (this.jdbcProperties == null) {
+                    throw new CmdLineException(parser, dataSourceType + " need jdbcProperties option", new IllegalArgumentException());
+                }
+                if (!this.jdbcProperties.exists()) {
+                    throw new CmdLineException(parser, this.jdbcProperties.toString() + " is not exist file", new IllegalArgumentException(this.jdbcProperties.toString()));
+                }
             }
         }
     }
@@ -276,6 +288,15 @@ abstract public class CommandLineOption {
         if (this.jdbcProperties != null) {
             this.jdbcProp = new Properties();
             this.jdbcProp.load(new FileInputStream(this.jdbcProperties));
+            if (!Strings.isNullOrEmpty(this.jdbcUrl)) {
+                this.jdbcProp.put("url", this.jdbcUrl);
+            }
+            if (!Strings.isNullOrEmpty(this.jdbcUser)) {
+                this.jdbcProp.put("user", this.jdbcUser);
+            }
+            if (!Strings.isNullOrEmpty(this.jdbcPass)) {
+                this.jdbcProp.put("pass", this.jdbcPass);
+            }
         }
     }
 
