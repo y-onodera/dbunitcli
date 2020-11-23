@@ -1,8 +1,10 @@
 SELECT
+    -- table1 columns
     table1.key
     ,table1.column1
     ,table1.column2
     ,table1.column3
+    // table2 columns
     ,table2.columna
     ,table2.columnb
     ,table2.columnc
