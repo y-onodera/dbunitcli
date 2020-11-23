@@ -78,6 +78,12 @@ abstract public class CommandLineOption {
     @Option(name = "-exportEmptyTable", usage = "if true then empty table is not export")
     private String exportEmptyTable = "true";
 
+    @Option(name = "-templateVarStart", usage = "StringTemplate expression start char.default '$'")
+    private char templateVarStart = '$';
+
+    @Option(name = "-templateVarStop", usage = "StringTemplate expression stop char.default '$'\"")
+    private char templateVarStop = '$';
+
     @Option(name = "-P", handler = MapOptionHandler.class)
     private Map<String, String> inputParam = Maps.newHashMap();
 
@@ -90,6 +96,7 @@ abstract public class CommandLineOption {
     private XlsxSchema xlsxSchema;
 
     private String[] args;
+
 
     public CommandLineOption(Parameter param) {
         this.parameter = param;
@@ -155,6 +162,18 @@ abstract public class CommandLineOption {
         return this.columnSettings;
     }
 
+    public char getTemplateVarStart() {
+        return templateVarStart;
+    }
+
+    public char getTemplateVarStop() {
+        return templateVarStop;
+    }
+
+    public Parameter getParameter() {
+        return this.parameter;
+    }
+
     public void setResultPath(String resultPath) {
         this.resultPath = resultPath;
     }
@@ -169,10 +188,6 @@ abstract public class CommandLineOption {
 
     public void setUseJdbcMetaData(String useJdbcMetaData) {
         this.useJdbcMetaData = useJdbcMetaData;
-    }
-
-    public Parameter getParameter() {
-        return this.parameter;
     }
 
     public void parse(String[] args) throws Exception {
@@ -226,7 +241,10 @@ abstract public class CommandLineOption {
                 .setDataSplitPattern(this.getRegDataSplit())
                 .setFixedLength(this.getFixedLength())
                 .setRegInclude(this.getRegInclude())
-                .setRegExclude(this.getRegExclude());
+                .setRegExclude(this.getRegExclude())
+                .setTemplateVarStart(this.getTemplateVarStart())
+                .setTemplateVarStop(this.getTemplateVarStop())
+                ;
     }
 
     protected DatabaseConnectionLoader getDatabaseConnectionLoader() {
@@ -248,9 +266,9 @@ abstract public class CommandLineOption {
         }
     }
 
-    protected void assertFileExists(CmdLineParser parser, File dir, String s) throws CmdLineException {
-        if (!dir.exists()) {
-            throw new CmdLineException(parser, s + " is not exist", new IllegalArgumentException(dir.toString()));
+    protected void assertFileExists(CmdLineParser parser, File file, String s) throws CmdLineException {
+        if (!file.exists()) {
+            throw new CmdLineException(parser, s + " is not exist", new IllegalArgumentException(file.toString()));
         }
     }
 
@@ -292,9 +310,9 @@ abstract public class CommandLineOption {
     protected STGroup createSTGroup(String fileName) {
         STGroup stGroup;
         if (Strings.isNullOrEmpty(fileName)) {
-            stGroup = new STGroup('$', '$');
+            stGroup = new STGroup(this.templateVarStart, this.templateVarStop);
         } else {
-            stGroup = new STGroupFile(fileName, '$', '$');
+            stGroup = new STGroupFile(fileName, this.templateVarStart, this.templateVarStop);
         }
         stGroup.registerRenderer(String.class, new SqlEscapeStringRenderer());
         return stGroup;

@@ -21,7 +21,7 @@ public class ParameterizeOption extends CommandLineOption {
     @Option(name = "-param", usage = "directory or file extract data driven parameter at", required = true)
     private File param;
 
-    @Option(name = "-paramType", usage = "table | sql | csv | csvq | xls | xlsx | ")
+    @Option(name = "-paramType", usage = "table | sql | csv | csvq | xls | xlsx | fixed | reg | file | dir")
     private String paramType = "csv";
 
     @Option(name = "-includeMetaData", usage = "whether param include tableName and columns or not ")
@@ -69,6 +69,8 @@ public class ParameterizeOption extends CommandLineOption {
                 return new Convert();
             case "generate":
                 return new Generate();
+            case "run":
+                return new Run();
             default:
                 throw new IllegalArgumentException("no executable command : " + this.cmd);
         }

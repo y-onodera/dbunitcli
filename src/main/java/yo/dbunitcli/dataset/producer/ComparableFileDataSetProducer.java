@@ -1,5 +1,6 @@
 package yo.dbunitcli.dataset.producer;
 
+import com.google.common.base.Strings;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.stream.DefaultConsumer;
@@ -67,7 +68,10 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     }
 
     protected Predicate<Path> fileTypeFilter() {
-        return path -> path.toFile().isFile();
+        if (Strings.isNullOrEmpty(this.param.getExtension())) {
+            return path -> path.toFile().isFile();
+        }
+        return path -> path.toFile().isFile() && path.endsWith(this.param.getExtension());
     }
 
     protected void produceFromFile(File file) {

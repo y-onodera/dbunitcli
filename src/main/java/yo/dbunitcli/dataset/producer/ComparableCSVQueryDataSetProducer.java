@@ -10,6 +10,7 @@ import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.fileprocessor.QueryReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +55,16 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     @Override
     public String getEncoding() {
         return this.encoding;
+    }
+
+    @Override
+    public char getTemplateVarStart() {
+        return this.getParam().getTemplateVarStart();
+    }
+
+    @Override
+    public char getTemplateVarStop() {
+        return this.getParam().getTemplateVarStop();
     }
 
     @Override

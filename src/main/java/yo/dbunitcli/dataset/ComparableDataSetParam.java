@@ -20,6 +20,9 @@ public class ComparableDataSetParam {
     private final boolean loadData;
     private final String headerName;
     private final String fixedLength;
+    private final char templateVarStart;
+    private final char templateVarStop;
+    private final String extension;
 
     public ComparableDataSetParam(Builder builder) {
         this.src = builder.getSrc();
@@ -30,12 +33,15 @@ public class ComparableDataSetParam {
         this.dataSplitPattern = builder.getDataSplitPattern();
         this.regInclude = builder.getRegInclude();
         this.regExclude = builder.getRegExclude();
-        this.mapIncludeMetaData = builder.getMapIncludeMetaData();
+        this.mapIncludeMetaData = builder.isMapIncludeMetaData();
         this.xlsxSchema = builder.getXlsxSchema();
         this.useJdbcMetaData = builder.isUseJdbcMetaData();
         this.loadData = builder.isLoadData();
         this.headerName = builder.getHeaderName();
         this.fixedLength = builder.getFixedLength();
+        this.templateVarStart = builder.getTemplateVarStart();
+        this.templateVarStop = builder.getTemplateVarStop();
+        this.extension = builder.getExtension();
     }
 
     public static Builder builder() {
@@ -94,6 +100,18 @@ public class ComparableDataSetParam {
         return this.fixedLength;
     }
 
+    public char getTemplateVarStart() {
+        return templateVarStart;
+    }
+
+    public char getTemplateVarStop() {
+        return templateVarStop;
+    }
+
+    public String getExtension() {
+        return extension;
+    }
+
     public static class Builder {
         private File src;
         private String encoding;
@@ -109,6 +127,9 @@ public class ComparableDataSetParam {
         private boolean loadData = true;
         private String headerName;
         private String fixedLength;
+        private char templateVarStart;
+        private char templateVarStop;
+        private String extension;
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -142,7 +163,7 @@ public class ComparableDataSetParam {
             return this.dataSplitPattern;
         }
 
-        public boolean getMapIncludeMetaData() {
+        public boolean isMapIncludeMetaData() {
             return this.mapIncludeMetaData;
         }
 
@@ -172,6 +193,18 @@ public class ComparableDataSetParam {
 
         public String getFixedLength() {
             return this.fixedLength;
+        }
+
+        public char getTemplateVarStart() {
+            return templateVarStart;
+        }
+
+        public char getTemplateVarStop() {
+            return templateVarStop;
+        }
+
+        public String getExtension() {
+            return extension;
         }
 
         public Builder ifMatch(boolean condition, Function<Builder, Builder> function) {
@@ -246,9 +279,23 @@ public class ComparableDataSetParam {
             return this;
         }
 
+        public Builder setTemplateVarStart(char templateVarStart) {
+            this.templateVarStart = templateVarStart;
+            return this;
+        }
+
+        public Builder setTemplateVarStop(char templateVarStop) {
+            this.templateVarStop = templateVarStop;
+            return this;
+        }
+
+        public Builder setExtension(String extension) {
+            this.extension = extension;
+            return this;
+        }
+
         public ComparableDataSetParam build() {
             return new ComparableDataSetParam(this);
         }
-
     }
 }

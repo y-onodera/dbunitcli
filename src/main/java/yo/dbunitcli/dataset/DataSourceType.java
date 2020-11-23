@@ -24,10 +24,10 @@ public enum DataSourceType {
     XLS("xls"),
     XLSX("xlsx");
 
-    private final String name;
+    private final String type;
 
     DataSourceType(String name) {
-        this.name = name;
+        this.type = name;
     }
 
     public static DataSourceType fromString(String name) {
@@ -40,10 +40,14 @@ public enum DataSourceType {
     }
 
     public boolean isEqual(String type) {
-        return Objects.equals(this.name, type);
+        return Objects.equals(this.type, type);
     }
 
     public boolean fromDatabase() {
         return false;
+    }
+
+    public String getType() {
+        return type;
     }
 }
