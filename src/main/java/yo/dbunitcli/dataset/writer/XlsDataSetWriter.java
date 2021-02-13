@@ -1,5 +1,6 @@
 package yo.dbunitcli.dataset.writer;
 
+import jdk.internal.joptsimple.internal.Strings;
 import org.apache.poi.ss.usermodel.*;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
@@ -124,7 +125,10 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
                             } else if (value instanceof Long) {
                                 this.setDateCell(cell, new Date((Long) value), workbook);
                             } else {
-                                cell.setCellValue(DataType.asString(value));
+                                String stringValue = DataType.asString(value);
+                                if (!Strings.isNullOrEmpty(stringValue)) {
+                                    cell.setCellValue(stringValue);
+                                }
                             }
                         }
                     }
