@@ -19,11 +19,11 @@ import java.util.Date;
 
 public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter implements IDataSetWriter {
 
-    public static enum TableExportType {
+    public enum TableExportType {
         SHEET, BOOK
     }
 
-    private static Logger logger = LoggerFactory.getLogger(XlsDataSetWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(XlsDataSetWriter.class);
     private final File resultDir;
 
     private String filename;
