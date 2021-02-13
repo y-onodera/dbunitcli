@@ -1,0 +1,10 @@
+{
+  "import":[
+    {"path":"sub/import1.json"}
+   ,{"path":"sub/import2.json"}
+  ],
+  "settings":[
+    {"name":"columndrop"}
+   ,{"name":"new"}
+  ]
+}

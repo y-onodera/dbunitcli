@@ -1,0 +1,6 @@
+{
+  "settings":[
+    {"name":"columnadd","exclude":["AddColumn","ChangeColumn"]}
+   ,{"name":"drop"}
+  ]
+}

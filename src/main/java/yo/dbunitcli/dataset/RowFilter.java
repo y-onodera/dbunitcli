@@ -84,11 +84,33 @@ public class RowFilter {
             }
         }
 
-        protected void addSetting(String key, String expression, Map<String, Set<String>> byName) {
-            if (!byName.containsKey(key)) {
-                byName.put(key, new HashSet<>());
+        public void appendTo(Builder other) {
+            this.byName.forEach((key, value1) -> {
+                if (other.byName.containsKey(key)) {
+                    Set<String> value = other.byName.get(key);
+                    value.addAll(value1);
+                    other.byName.put(key, value);
+                } else {
+                    other.byName.put(key, value1);
+                }
+            });
+            this.pattern.forEach((key, value1) -> {
+                if (other.pattern.containsKey(key)) {
+                    Set<String> value = other.pattern.get(key);
+                    value.addAll(value1);
+                    other.pattern.put(key, value);
+                } else {
+                    other.pattern.put(key, value1);
+                }
+            });
+            other.commonExpressions.addAll(this.commonExpressions);
+        }
+
+        protected void addSetting(String key, String expression, Map<String, Set<String>> filters) {
+            if (!filters.containsKey(key)) {
+                filters.put(key, new HashSet<>());
             }
-            byName.get(key).add(expression);
+            filters.get(key).add(expression);
         }
     }
 }

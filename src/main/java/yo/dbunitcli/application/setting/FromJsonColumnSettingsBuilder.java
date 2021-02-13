@@ -30,12 +30,16 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         if (setting == null) {
             return ColumnSettings.NONE;
         }
+        return this.load(setting).build();
+    }
+
+    public FromJsonColumnSettingsBuilder load(File setting) throws IOException {
         JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(setting), "MS932"));
         JsonObject settingJson = jsonReader.read()
                 .asJsonObject();
         return this.configureSetting(settingJson)
                 .configureCommonSetting(settingJson)
-                .build();
+                .importSetting(settingJson, setting);
     }
 
     @Override
@@ -88,7 +92,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         this.addFilterExpression(strategy, json, key);
     }
 
-    protected ColumnSettings.Builder configureCommonSetting(JsonObject setting) {
+    protected FromJsonColumnSettingsBuilder configureCommonSetting(JsonObject setting) {
         if (!setting.containsKey("commonSettings")) {
             return this;
         }
@@ -102,6 +106,26 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
                     this.addFilterExpression(json);
                 });
         return this;
+    }
+
+    protected FromJsonColumnSettingsBuilder importSetting(JsonObject setting, File file) throws IOException {
+        if (!setting.containsKey("import")) {
+            return this;
+        }
+        for (JsonValue v : setting.getJsonArray("import")) {
+            JsonObject json = v.asJsonObject();
+            new FromJsonColumnSettingsBuilder().load(new File(file.getParent(), json.getString("path")))
+                    .appendTo(this);
+        }
+        return this;
+    }
+
+    private void appendTo(FromJsonColumnSettingsBuilder other) {
+        this.comparisonKeys.appendTo(other.comparisonKeys);
+        this.excludeColumns.appendTo(other.excludeColumns);
+        this.orderColumns.appendTo(other.orderColumns);
+        this.expressionColumns.appendExpressionTo(other.expressionColumns);
+        this.filterExpressions.appendTo(other.filterExpressions);
     }
 
     protected void addCommonSettings(JsonObject json, String key, AddSettingColumns.Builder targetSetting) {

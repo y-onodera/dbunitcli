@@ -7,7 +7,6 @@ import com.google.common.collect.Sets;
 import org.apache.commons.jexl3.*;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.FilteredTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.filter.IColumnFilter;
@@ -181,7 +180,7 @@ public class ColumnExpression {
             return this;
         }
 
-        private Builder addSqlFunction(Map<String, String> sqlFunction) {
+        public Builder addSqlFunction(Map<String, String> sqlFunction) {
             sqlFunction.forEach(this::addSqlFunction);
             return this;
         }
@@ -202,6 +201,21 @@ public class ColumnExpression {
             this.sqlFunction.put(key, value);
         }
 
+        public Map<String, String> getStringExpression() {
+            return this.stringExpression;
+        }
+
+        public Map<String, String> getBooleanExpression() {
+            return this.booleanExpression;
+        }
+
+        public Map<String, String> getNumberExpression() {
+            return this.numberExpression;
+        }
+
+        public Map<String, String> getSqlFunction() {
+            return this.sqlFunction;
+        }
     }
 
     public enum ParameterType {

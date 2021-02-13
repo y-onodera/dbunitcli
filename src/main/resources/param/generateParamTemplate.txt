@@ -1,0 +1,10 @@
+-srcType=$srcType$
+-src=$src$
+-encoding=$encoding$
+-setting=$setting$
+-generateType=$generateType$
+-template=$template$
+-templateGroup=$templateGroup$
+-templateEncoding=$templateEncoding$
+-outputEncoding=$outputEncoding$
+-resultPath=$resultPath$

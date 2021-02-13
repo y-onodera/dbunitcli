@@ -109,6 +109,11 @@ public class CompareTest {
     }
 
     @Test
+    public void testSettingMerge() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramSettingMerge.txt"});
+    }
+
+    @Test
     public void testFailedResultDiffNotExpected() throws Exception {
         this.exit.expectSystemExitWithStatus(1);
         this.expectedException.expect(AssertionError.class);

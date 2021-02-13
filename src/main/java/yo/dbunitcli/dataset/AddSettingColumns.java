@@ -14,17 +14,17 @@ public class AddSettingColumns {
 
     public static final String ALL_MATCH_PATTERN = "*";
 
-    private Map<String, List<String>> byName = Maps.newHashMap();
+    private final Map<String, List<String>> byName = Maps.newHashMap();
 
-    private Map<String, List<String>> pattern = Maps.newHashMap();
+    private final Map<String, List<String>> pattern = Maps.newHashMap();
 
-    private Map<String, ColumnExpression> byNameExpression = Maps.newHashMap();
+    private final Map<String, ColumnExpression> byNameExpression = Maps.newHashMap();
 
-    private Map<String, ColumnExpression> patternExpression = Maps.newHashMap();
+    private final Map<String, ColumnExpression> patternExpression = Maps.newHashMap();
 
-    private List<String> common = Lists.newArrayList();
+    private final List<String> common = Lists.newArrayList();
 
-    private ColumnExpression commonExpression;
+    private final ColumnExpression commonExpression;
 
     public AddSettingColumns(Builder builder) {
         this.byName.putAll(builder.byName);
@@ -98,17 +98,17 @@ public class AddSettingColumns {
 
 
     public static class Builder {
-        private Map<String, List<String>> byName = Maps.newHashMap();
+        private final Map<String, List<String>> byName = Maps.newHashMap();
 
-        private Map<String, ColumnExpression.Builder> byNameExpression = Maps.newHashMap();
+        private final Map<String, ColumnExpression.Builder> byNameExpression = Maps.newHashMap();
 
-        private Map<String, List<String>> pattern = Maps.newHashMap();
+        private final Map<String, List<String>> pattern = Maps.newHashMap();
 
-        private Map<String, ColumnExpression.Builder> patternExpression = Maps.newHashMap();
+        private final Map<String, ColumnExpression.Builder> patternExpression = Maps.newHashMap();
 
-        private List<String> common = Lists.newArrayList();
+        private final List<String> common = Lists.newArrayList();
 
-        private ColumnExpression.Builder commonExpression = ColumnExpression.builder();
+        private final ColumnExpression.Builder commonExpression = ColumnExpression.builder();
 
         public AddSettingColumns build() {
             return new AddSettingColumns(this);
@@ -133,10 +133,9 @@ public class AddSettingColumns {
         protected ColumnExpression.Builder getExpressionBuilder(String name, Map<String, ColumnExpression.Builder> patternExpression) {
             if (patternExpression.containsKey(name)) {
                 return patternExpression.get(name);
-            } else {
-                patternExpression.put(name, ColumnExpression.builder());
-                return patternExpression.get(name);
             }
+            patternExpression.put(name, ColumnExpression.builder());
+            return patternExpression.get(name);
         }
 
         public Builder addByName(String name, List<String> keys) {
@@ -158,6 +157,72 @@ public class AddSettingColumns {
             return this.commonExpression;
         }
 
+        public Map<String, List<String>> getByName() {
+            return byName;
+        }
+
+        public Map<String, ColumnExpression.Builder> getByNameExpression() {
+            return byNameExpression;
+        }
+
+        public Map<String, List<String>> getPattern() {
+            return pattern;
+        }
+
+        public Map<String, ColumnExpression.Builder> getPatternExpression() {
+            return patternExpression;
+        }
+
+        public List<String> getCommon() {
+            return common;
+        }
+
+        public void appendTo(Builder other) {
+            this.getByName().forEach((key, value1) -> {
+                if (other.getByName().containsKey(key)) {
+                    List<String> value = other.getByName().get(key);
+                    value.addAll(value1);
+                    other.addByName(key, value.stream()
+                            .distinct()
+                            .collect(Collectors.toList()));
+                } else {
+                    other.addByName(key, value1);
+                }
+            });
+            this.getPattern().forEach((key, value1) -> {
+                if (other.getPattern().containsKey(key)) {
+                    List<String> value = other.getPattern().get(key);
+                    value.addAll(value1);
+                    other.addPattern(key, value.stream()
+                            .distinct()
+                            .collect(Collectors.toList()));
+                } else {
+                    other.addPattern(key, value1);
+                }
+            });
+            other.addCommon(this.getCommon()
+                    .stream()
+                    .filter(it -> !other.getCommon().contains(it))
+                    .collect(Collectors.toList()));
+        }
+
+        public void appendExpressionTo(Builder other) {
+            this.getByNameExpression().forEach((key, value) -> other.getExpressionBuilder(Strategy.BY_NAME, key)
+                    .addStringExpression(value.getStringExpression())
+                    .addNumberExpression(value.getNumberExpression())
+                    .addBooleanExpression(value.getBooleanExpression())
+                    .addSqlFunction(value.getSqlFunction()));
+            this.getPatternExpression().forEach((key, value) -> other.getExpressionBuilder(Strategy.PATTERN, key)
+                    .addStringExpression(value.getStringExpression())
+                    .addNumberExpression(value.getNumberExpression())
+                    .addBooleanExpression(value.getBooleanExpression())
+                    .addSqlFunction(value.getSqlFunction()));
+            other.getCommonExpressionBuilder()
+                    .addStringExpression(this.getCommonExpressionBuilder().getStringExpression())
+                    .addNumberExpression(this.getCommonExpressionBuilder().getNumberExpression())
+                    .addBooleanExpression(this.getCommonExpressionBuilder().getBooleanExpression())
+                    .addSqlFunction(this.getCommonExpressionBuilder().getSqlFunction());
+        }
     }
 
     public enum Strategy {

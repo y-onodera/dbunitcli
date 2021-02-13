@@ -1,0 +1,8 @@
+{
+  "settings": [
+      {"name":"columndrop","exclude":["","AddColumn","ChangeColumn"]}
+  ],
+  "commonSettings": [
+    {"order":["key"]}
+  ]
+}
