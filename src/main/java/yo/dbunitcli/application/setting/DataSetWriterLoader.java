@@ -13,7 +13,7 @@ import yo.dbunitcli.dataset.writer.XlsxDataSetWriter;
 
 public class DataSetWriterLoader {
 
-    private static Logger logger = LoggerFactory.getLogger(DataSetWriterLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataSetWriterLoader.class);
 
     public IDataSetWriter get(DataSetWriterParam param) throws DataSetException {
         logger.info("create DataSetWriter param:{}", param);

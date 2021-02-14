@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class ComparableDataSetLoader {
 
-    private static Logger logger = LoggerFactory.getLogger(ComparableDataSetLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(ComparableDataSetLoader.class);
 
     private final DatabaseConnectionLoader connectionLoader;
 

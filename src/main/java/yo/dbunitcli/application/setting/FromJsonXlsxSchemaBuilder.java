@@ -18,9 +18,9 @@ import java.util.stream.Stream;
 
 public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
 
-    private Map<String, List<XlsxRowsTableDefine>> rowsTableDefMap = Maps.newHashMap();
+    private final Map<String, List<XlsxRowsTableDefine>> rowsTableDefMap = Maps.newHashMap();
 
-    private Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap = Maps.newHashMap();
+    private final Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap = Maps.newHashMap();
 
     public XlsxSchema build(File schema) throws FileNotFoundException, UnsupportedEncodingException {
         if (schema == null) {
@@ -49,9 +49,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
             return this;
         }
         setting.getJsonArray("rows")
-                .forEach(v -> {
-                    this.loadRowsSetting(v.asJsonObject());
-                });
+                .forEach(v -> this.loadRowsSetting(v.asJsonObject()));
         return this;
     }
 
@@ -75,9 +73,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
             return this;
         }
         setting.getJsonArray("cells")
-                .forEach(v -> {
-                    this.loadCellsSetting(v.asJsonObject());
-                });
+                .forEach(v -> this.loadCellsSetting(v.asJsonObject()));
         return this;
     }
 

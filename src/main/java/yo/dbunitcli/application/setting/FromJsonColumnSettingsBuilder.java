@@ -15,15 +15,15 @@ import java.util.List;
 
 public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
-    private AddSettingColumns.Builder comparisonKeys = AddSettingColumns.builder();
+    private final AddSettingColumns.Builder comparisonKeys = AddSettingColumns.builder();
 
-    private AddSettingColumns.Builder excludeColumns = AddSettingColumns.builder();
+    private final AddSettingColumns.Builder excludeColumns = AddSettingColumns.builder();
 
-    private AddSettingColumns.Builder orderColumns = AddSettingColumns.builder();
+    private final AddSettingColumns.Builder orderColumns = AddSettingColumns.builder();
 
-    private AddSettingColumns.Builder expressionColumns = AddSettingColumns.builder();
+    private final AddSettingColumns.Builder expressionColumns = AddSettingColumns.builder();
 
-    private RowFilter.Builder filterExpressions = RowFilter.builder();
+    private final RowFilter.Builder filterExpressions = RowFilter.builder();
 
     @Override
     public ColumnSettings build(File setting) throws IOException {
