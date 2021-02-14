@@ -1,6 +1,6 @@
 package yo.dbunitcli.dataset.writer;
 
-import jdk.internal.joptsimple.internal.Strings;
+import com.google.common.base.Strings;
 import org.apache.poi.ss.usermodel.*;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
