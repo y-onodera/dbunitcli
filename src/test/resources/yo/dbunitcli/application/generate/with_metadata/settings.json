@@ -1,7 +1,7 @@
 {
   "settings": [
     {
-      "name":"Test1","keys": ["Key"],"sqlFunction":[{"now": "'sysdate()'"}]
+      "name":"Test1","keys": ["Key"],"numberExpression":[{"Column2": "Column2"}],"sqlFunction":[{"now": "'sysdate()'"}]
     },
     {
       "name":"Test2","keys": ["PrimaryKey"]

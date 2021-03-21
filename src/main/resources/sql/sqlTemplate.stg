@@ -1,4 +1,5 @@
-value(row ,column) ::=<<$if (column.dataType.number)$$row.(column.columnName)$$else$'$row.(column.columnName); format="escapeSql"$'$endif$>>
+DropEmpty ::= ["": [], default: key]
+value(row ,column) ::=<<$if (!DropEmpty.(row.(column.columnName)))$null$elseif (column.dataType.number)$$row.(column.columnName)$$else$'$row.(column.columnName); format="escapeSql"$'$endif$>>
 insert() ::= <<
 $rows:{row |insert into $tableName$ ($columns:{column | $column.columnName$ }; separator=","$) values ($columns:{column | $value(row,column)$ }; separator=","$);
 }$
