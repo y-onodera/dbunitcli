@@ -69,6 +69,17 @@ public class ComparableTable implements ITable {
         return this.addSettingTableMetaData;
     }
 
+    public Column[] getColumnsExcludeKey() throws DataSetException {
+        List<Column> primaryKey = Arrays.asList(this.getTableMetaData().getPrimaryKeys());
+        Column[] columns = this.getTableMetaData().getColumns();
+        List<Column> list = new ArrayList<>();
+        for (Column it : columns) {
+            if (!primaryKey.contains(it)) {
+                list.add(it);
+            }
+        }
+        return  list.toArray(new Column[0]);
+    }
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(List<String> keys) throws DataSetException {
         Map<CompareKeys, Map.Entry<Integer, Object[]>> result = Maps.newHashMap();
         for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
@@ -132,4 +143,5 @@ public class ComparableTable implements ITable {
     protected int getOriginalRowIndex(int noFilter) {
         return this.rowResolver.getRowIndex(noFilter);
     }
+
 }

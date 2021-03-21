@@ -175,8 +175,9 @@ public class GenerateOption extends ConvertOption {
                                 param.put("_paramMap", map);
                                 ComparableTable table = dataSet.getTable(it);
                                 param.put("tableName", it);
-                                param.put("columns", table.getTableMetaData().getColumns());
                                 param.put("primaryKeys", table.getTableMetaData().getPrimaryKeys());
+                                param.put("columns", table.getTableMetaData().getColumns());
+                                param.put("columnsExcludeKey", table.getColumnsExcludeKey());
                                 param.put("rows", table.toMap());
                                 return param;
                             } catch (DataSetException e) {
