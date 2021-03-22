@@ -1,15 +1,15 @@
 package yo.dbunitcli.fileprocessor;
 
+import org.apache.tools.ant.taskdefs.SQLExec;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 
 import java.io.File;
-import java.io.IOException;
-import java.sql.Statement;
+import java.io.PrintStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SqlRunner implements QueryReader {
     private final IDatabaseConnection connection;
@@ -47,40 +47,33 @@ public class SqlRunner implements QueryReader {
     }
 
     public void run(List<File> targetFiles) throws DataSetException {
-        for (File target : targetFiles) {
-            this.run(target);
-        }
-    }
-
-    public void run(File target) throws DataSetException {
         try {
-            this.connection.getConnection().setAutoCommit(false);
-            for (String sql : this.loadSqlList(target)) {
-                Statement statement = null;
-                try {
-                    statement = this.connection.getConnection().createStatement();
-                    statement.execute(sql);
-                } catch (Throwable ex) {
-                    this.connection.getConnection().rollback();
-                    throw ex;
-                } finally {
-                    if (statement != null) {
-                        statement.close();
+            for (File target : targetFiles) {
+                Connection conn = connection.getConnection();
+                SQLExec exec = new SQLExec() {
+                    @Override
+                    protected Connection getConnection() {
+                        return conn;
                     }
+
+                    @Override
+                    protected void execSQL(String sql, PrintStream out) throws SQLException {
+                        super.execSQL(applyParameter(sql), out);
+                    }
+                };
+                exec.setExpandProperties(false);
+                exec.setEncoding(this.getEncoding());
+                exec.setSrc(target);
+                if(target.getName().endsWith("plsql")){
+                    exec.setDelimiter(SQLExec.DelimiterType.ROW);
+                    exec.setKeepformat(true);
                 }
+                exec.execute();
+                connection.close();
             }
-            this.connection.getConnection().commit();
         } catch (Throwable var30) {
             throw new DataSetException(var30);
         }
-    }
-
-    protected List<String> loadSqlList(File aTargetFile) throws IOException {
-        return Stream.of(this.readQuery(aTargetFile)
-                .split(";"))
-                .map(it -> it.replace("commit", ""))
-                .filter(it -> it.trim().length() > 0)
-                .collect(Collectors.toList());
     }
 
 }
