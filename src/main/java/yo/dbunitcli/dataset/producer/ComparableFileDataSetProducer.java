@@ -71,7 +71,8 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
         if (Strings.isNullOrEmpty(this.param.getExtension())) {
             return path -> path.toFile().isFile();
         }
-        return path -> path.toFile().isFile() && path.endsWith(this.param.getExtension());
+        return path -> path.toFile().isFile()
+                && path.toString().toUpperCase().endsWith(this.param.getExtension().toUpperCase());
     }
 
     protected void produceFromFile(File file) {

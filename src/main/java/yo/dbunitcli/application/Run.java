@@ -4,6 +4,10 @@ import yo.dbunitcli.dataset.Parameter;
 
 public class Run implements Command<RunOption> {
 
+    public static void main(String[] strings) throws Exception {
+        new Run().exec(strings);
+    }
+
     @Override
     public RunOption getOptions() {
         return this.getOptions(Parameter.NONE);

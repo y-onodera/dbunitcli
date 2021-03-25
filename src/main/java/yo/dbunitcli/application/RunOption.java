@@ -44,6 +44,7 @@ public class RunOption extends CommandLineOption {
                         .setSrc(this.src)
                         .setSource(DataSourceType.FILE)
                         .setExtension(this.scriptType)
+                        .setMapIncludeMetaData(false)
                         .build())
                 .toMap()
                 .stream()
@@ -57,7 +58,7 @@ public class RunOption extends CommandLineOption {
     }
 
     public SqlRunner runner() throws DataSetException {
-        return new SqlRunner(this.getDatabaseConnectionLoader().loadConnection()
+        return new SqlRunner(this.getDatabaseConnectionLoader()
                 , this.getParameter().getMap()
                 , this.getEncoding()
                 , this.getTemplateVarStart()

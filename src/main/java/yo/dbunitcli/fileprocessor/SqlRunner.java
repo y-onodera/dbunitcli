@@ -1,8 +1,8 @@
 package yo.dbunitcli.fileprocessor;
 
 import org.apache.tools.ant.taskdefs.SQLExec;
-import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
+import yo.dbunitcli.dataset.DatabaseConnectionLoader;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -12,14 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 public class SqlRunner implements QueryReader {
-    private final IDatabaseConnection connection;
+    private final DatabaseConnectionLoader connectionLoader;
     private final Map<String, Object> parameter;
     private final String encoding;
     private final char templateVarStart;
     private final char templateVarStop;
 
-    public SqlRunner(IDatabaseConnection connection, Map<String, Object> parameter, String encoding, char templateVarStart, char templateVarStop) {
-        this.connection = connection;
+    public SqlRunner(DatabaseConnectionLoader connectionLoader, Map<String, Object> parameter, String encoding, char templateVarStart, char templateVarStop) {
+        this.connectionLoader = connectionLoader;
         this.parameter = parameter;
         this.encoding = encoding;
         this.templateVarStart = templateVarStart;
@@ -49,7 +49,8 @@ public class SqlRunner implements QueryReader {
     public void run(List<File> targetFiles) throws DataSetException {
         try {
             for (File target : targetFiles) {
-                Connection conn = connection.getConnection();
+                Connection conn = connectionLoader.loadConnection().getConnection();
+                conn.setAutoCommit(false);
                 SQLExec exec = new SQLExec() {
                     @Override
                     protected Connection getConnection() {
@@ -69,7 +70,6 @@ public class SqlRunner implements QueryReader {
                     exec.setKeepformat(true);
                 }
                 exec.execute();
-                connection.close();
             }
         } catch (Throwable var30) {
             throw new DataSetException(var30);
