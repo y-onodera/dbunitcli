@@ -23,6 +23,7 @@ public class ComparableDataSetParam {
     private final char templateVarStart;
     private final char templateVarStop;
     private final String extension;
+    private final String templateParameterAttribute;
 
     public ComparableDataSetParam(Builder builder) {
         this.src = builder.getSrc();
@@ -39,6 +40,7 @@ public class ComparableDataSetParam {
         this.loadData = builder.isLoadData();
         this.headerName = builder.getHeaderName();
         this.fixedLength = builder.getFixedLength();
+        this.templateParameterAttribute = builder.getTemplateParameterAttribute();
         this.templateVarStart = builder.getTemplateVarStart();
         this.templateVarStop = builder.getTemplateVarStop();
         this.extension = builder.getExtension();
@@ -112,6 +114,10 @@ public class ComparableDataSetParam {
         return extension;
     }
 
+    public String getTemplateParameterAttribute() {
+        return this.templateParameterAttribute;
+    }
+
     public static class Builder {
         private File src;
         private String encoding;
@@ -130,6 +136,7 @@ public class ComparableDataSetParam {
         private char templateVarStart;
         private char templateVarStop;
         private String extension;
+        private String templateParameterAttribute;
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -193,6 +200,10 @@ public class ComparableDataSetParam {
 
         public String getFixedLength() {
             return this.fixedLength;
+        }
+
+        public String getTemplateParameterAttribute() {
+            return this.templateParameterAttribute;
         }
 
         public char getTemplateVarStart() {
@@ -276,6 +287,11 @@ public class ComparableDataSetParam {
 
         public Builder setFixedLength(String fixedLength) {
             this.fixedLength = fixedLength;
+            return this;
+        }
+
+        public Builder  setTemplateParameterAttribute(String templateParameterAttribute) {
+            this.templateParameterAttribute = templateParameterAttribute;
             return this;
         }
 

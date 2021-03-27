@@ -88,6 +88,9 @@ abstract public class CommandLineOption {
     @Option(name = "-exportEmptyTable", usage = "if true then empty table is not export")
     private String exportEmptyTable = "true";
 
+    @Option(name = "-templateParameterAttribute", usage = "attributeName that is used to for access parameter in StringTemplate expression default 'param'.")
+    private String templateParameterAttribute = "param";
+
     @Option(name = "-templateVarStart", usage = "StringTemplate expression start char.default '$'")
     private char templateVarStart = '$';
 
@@ -171,6 +174,10 @@ abstract public class CommandLineOption {
         return this.columnSettings;
     }
 
+    public String getTemplateParameterAttribute() {
+        return templateParameterAttribute;
+    }
+
     public char getTemplateVarStart() {
         return templateVarStart;
     }
@@ -251,6 +258,7 @@ abstract public class CommandLineOption {
                 .setFixedLength(this.getFixedLength())
                 .setRegInclude(this.getRegInclude())
                 .setRegExclude(this.getRegExclude())
+                .setTemplateParameterAttribute(this.getTemplateParameterAttribute())
                 .setTemplateVarStart(this.getTemplateVarStart())
                 .setTemplateVarStop(this.getTemplateVarStop())
                 ;

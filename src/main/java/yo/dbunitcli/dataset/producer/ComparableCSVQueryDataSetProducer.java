@@ -58,6 +58,11 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     }
 
     @Override
+    public String getTemplateParameterAttribute() {
+        return this.getParam().getTemplateParameterAttribute();
+    }
+
+    @Override
     public char getTemplateVarStart() {
         return this.getParam().getTemplateVarStart();
     }

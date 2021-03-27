@@ -51,6 +51,11 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     }
 
     @Override
+    public String getTemplateParameterAttribute() {
+        return this.getParam().getTemplateParameterAttribute();
+    }
+
+    @Override
     public char getTemplateVarStart() {
         return this.getParam().getTemplateVarStart();
     }

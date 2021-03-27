@@ -7,6 +7,9 @@ import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.producer.ComparableFileTableMetaData;
+import yo.dbunitcli.fileprocessor.AntRunner;
+import yo.dbunitcli.fileprocessor.CmdRunner;
+import yo.dbunitcli.fileprocessor.Runner;
 import yo.dbunitcli.fileprocessor.SqlRunner;
 
 import java.io.File;
@@ -57,17 +60,28 @@ public class RunOption extends CommandLineOption {
         this.assertFileParameter(parser, DataSourceType.FILE.getType(), this.src, "src");
     }
 
-    public SqlRunner runner() throws DataSetException {
-        return new SqlRunner(this.getDatabaseConnectionLoader()
-                , this.getParameter().getMap()
-                , this.getEncoding()
-                , this.getTemplateVarStart()
-                , this.getTemplateVarStop()
-        );
+    public Runner runner() throws DataSetException {
+        return this.getScriptType().createRunner(this);
     }
 
     static enum ScriptType {
-        CMD("cmd"), SQL("sql"), BAT("bat");
+        CMD("cmd"), BAT("bat"), SQL("sql") {
+            @Override
+            public Runner createRunner(RunOption aOption) {
+                return new SqlRunner(aOption.getDatabaseConnectionLoader()
+                        , aOption.getParameter().getMap()
+                        , aOption.getEncoding()
+                        , aOption.getTemplateVarStart()
+                        , aOption.getTemplateVarStop()
+                        , aOption.getTemplateParameterAttribute()
+                );
+            }
+        }, Ant("xml") {
+            @Override
+            public Runner createRunner(RunOption aOption) {
+                return new AntRunner(aOption.getParameter().getMap());
+            }
+        };
 
         private final String type;
 
@@ -80,6 +94,15 @@ public class RunOption extends CommandLineOption {
                     .filter(it -> it.type.equals(type))
                     .findFirst()
                     .get();
+        }
+
+        public Runner createRunner(RunOption aOption) {
+            return new CmdRunner(aOption.getParameter().getMap()
+                    , aOption.getEncoding()
+                    , aOption.getTemplateVarStart()
+                    , aOption.getTemplateVarStop()
+                    , aOption.getTemplateParameterAttribute()
+            );
         }
     }
 }
