@@ -20,12 +20,6 @@ public interface Runner {
                 logger.info(s);
                 super.print(s);
             }
-
-            @Override
-            public void println(String x) {
-                logger.info(x);
-                super.println(x);
-            }
         });
         try {
             runScript(targetFiles);

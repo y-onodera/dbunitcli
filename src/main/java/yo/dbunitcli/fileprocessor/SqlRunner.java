@@ -86,11 +86,6 @@ public class SqlRunner implements Runner, QueryReader {
             protected void runStatements(Reader reader, PrintStream out) throws SQLException, IOException {
                 super.runStatements(new StringReader(applyParameter(CharStreams.toString(reader))), out);
             }
-
-            @Override
-            protected void execSQL(String sql, PrintStream out) throws SQLException {
-                super.execSQL(applyParameter(sql), out);
-            }
         };
         exec.setExpandProperties(false);
         exec.setEncoding(this.getEncoding());
