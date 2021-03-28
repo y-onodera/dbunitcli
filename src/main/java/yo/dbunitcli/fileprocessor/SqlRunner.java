@@ -65,7 +65,10 @@ public class SqlRunner implements Runner, QueryReader {
                 SQLExec exec = this.createExecInstance(conn);
                 exec.setSrc(target);
                 if (target.getName().endsWith("plsql")) {
-                    exec.setDelimiter(SQLExec.DelimiterType.ROW);
+                    SQLExec.DelimiterType delimiterType = new SQLExec.DelimiterType();
+                    delimiterType.setValue("row");
+                    exec.setDelimiterType(delimiterType);
+                    exec.setDelimiter("/");
                     exec.setKeepformat(true);
                 }
                 exec.execute();
