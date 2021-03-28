@@ -5,6 +5,7 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.fileprocessor.QueryReader;
@@ -56,13 +57,8 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     }
 
     @Override
-    public char getTemplateVarStart() {
-        return this.getParam().getTemplateVarStart();
-    }
-
-    @Override
-    public char getTemplateVarStop() {
-        return this.getParam().getTemplateVarStop();
+    public STGroup getSTGroup() {
+        return this.getParam().getSTGroup();
     }
 
     protected void executeQuery(File aFile) throws SQLException, DataSetException, IOException {

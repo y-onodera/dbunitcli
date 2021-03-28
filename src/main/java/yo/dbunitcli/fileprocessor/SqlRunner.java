@@ -3,6 +3,7 @@ package yo.dbunitcli.fileprocessor;
 import com.google.common.io.CharStreams;
 import org.apache.tools.ant.taskdefs.SQLExec;
 import org.dbunit.dataset.DataSetException;
+import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.dataset.DatabaseConnectionLoader;
 
 import java.io.*;
@@ -15,20 +16,18 @@ public class SqlRunner implements Runner, QueryReader {
     private final DatabaseConnectionLoader connectionLoader;
     private final Map<String, Object> parameter;
     private final String encoding;
-    private final char templateVarStart;
-    private final char templateVarStop;
     private final String templateParameterAttribute;
+    private final STGroup sTGroup;
 
     public SqlRunner(DatabaseConnectionLoader connectionLoader
             , Map<String, Object> parameter
             , String encoding
-            , char templateVarStart, char templateVarStop
+            , STGroup sTGroup
             , String templateParameterAttribute) {
         this.connectionLoader = connectionLoader;
         this.parameter = parameter;
         this.encoding = encoding;
-        this.templateVarStart = templateVarStart;
-        this.templateVarStop = templateVarStop;
+        this.sTGroup = sTGroup;
         this.templateParameterAttribute = templateParameterAttribute;
     }
 
@@ -48,13 +47,8 @@ public class SqlRunner implements Runner, QueryReader {
     }
 
     @Override
-    public char getTemplateVarStart() {
-        return this.templateVarStart;
-    }
-
-    @Override
-    public char getTemplateVarStop() {
-        return this.templateVarStop;
+    public STGroup getSTGroup() {
+        return this.sTGroup;
     }
 
     @Override

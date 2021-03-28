@@ -30,9 +30,6 @@ public class ParameterizeOption extends CommandLineOption {
     @Option(name = "-template", usage = "template file. data driven target argument", required = true)
     private File template;
 
-    @Option(name = "-templateGroup", usage = "StringTemplate4 templateGroup file.")
-    private File templateGroup;
-
     @Option(name = "-cmd", usage = "compare | convert :data driven target cmd", required = true)
     private String cmd;
 
@@ -84,7 +81,7 @@ public class ParameterizeOption extends CommandLineOption {
     @Override
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         super.populateSettings(parser);
-        this.stGroup = this.createSTGroup(this.templateGroup);
+        this.stGroup = this.createSTGroup();
         try {
             this.templateArgs = Files.asCharSource(this.template, Charset.forName(getEncoding())).read();
         } catch (IOException e) {

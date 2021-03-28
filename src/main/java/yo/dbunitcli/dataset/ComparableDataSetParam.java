@@ -1,5 +1,6 @@
 package yo.dbunitcli.dataset;
 
+import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.dataset.producer.xlsx.XlsxSchema;
 
 import java.io.File;
@@ -20,9 +21,8 @@ public class ComparableDataSetParam {
     private final boolean loadData;
     private final String headerName;
     private final String fixedLength;
-    private final char templateVarStart;
-    private final char templateVarStop;
     private final String extension;
+    private final STGroup sTGroup;
     private final String templateParameterAttribute;
 
     public ComparableDataSetParam(Builder builder) {
@@ -41,8 +41,7 @@ public class ComparableDataSetParam {
         this.headerName = builder.getHeaderName();
         this.fixedLength = builder.getFixedLength();
         this.templateParameterAttribute = builder.getTemplateParameterAttribute();
-        this.templateVarStart = builder.getTemplateVarStart();
-        this.templateVarStop = builder.getTemplateVarStop();
+        this.sTGroup = builder.getSTGroup();
         this.extension = builder.getExtension();
     }
 
@@ -102,20 +101,16 @@ public class ComparableDataSetParam {
         return this.fixedLength;
     }
 
-    public char getTemplateVarStart() {
-        return templateVarStart;
-    }
-
-    public char getTemplateVarStop() {
-        return templateVarStop;
-    }
-
     public String getExtension() {
         return extension;
     }
 
     public String getTemplateParameterAttribute() {
         return this.templateParameterAttribute;
+    }
+
+    public STGroup getSTGroup() {
+        return this.sTGroup;
     }
 
     public static class Builder {
@@ -133,10 +128,9 @@ public class ComparableDataSetParam {
         private boolean loadData = true;
         private String headerName;
         private String fixedLength;
-        private char templateVarStart;
-        private char templateVarStop;
         private String extension;
         private String templateParameterAttribute;
+        private STGroup sTGroup;
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -206,12 +200,11 @@ public class ComparableDataSetParam {
             return this.templateParameterAttribute;
         }
 
-        public char getTemplateVarStart() {
-            return templateVarStart;
-        }
-
-        public char getTemplateVarStop() {
-            return templateVarStop;
+        public STGroup getSTGroup() {
+            if (this.sTGroup == null) {
+                return new STGroup();
+            }
+            return this.sTGroup;
         }
 
         public String getExtension() {
@@ -290,18 +283,13 @@ public class ComparableDataSetParam {
             return this;
         }
 
-        public Builder  setTemplateParameterAttribute(String templateParameterAttribute) {
+        public Builder setTemplateParameterAttribute(String templateParameterAttribute) {
             this.templateParameterAttribute = templateParameterAttribute;
             return this;
         }
 
-        public Builder setTemplateVarStart(char templateVarStart) {
-            this.templateVarStart = templateVarStart;
-            return this;
-        }
-
-        public Builder setTemplateVarStop(char templateVarStop) {
-            this.templateVarStop = templateVarStop;
+        public Builder setSTGroup(STGroup stGroup) {
+            this.sTGroup = stGroup;
             return this;
         }
 
@@ -313,5 +301,6 @@ public class ComparableDataSetParam {
         public ComparableDataSetParam build() {
             return new ComparableDataSetParam(this);
         }
+
     }
 }

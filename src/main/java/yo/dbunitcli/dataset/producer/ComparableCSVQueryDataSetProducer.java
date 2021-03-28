@@ -9,7 +9,11 @@ import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.*;
+import org.stringtemplate.v4.STGroup;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.dataset.TableNameFilter;
 import yo.dbunitcli.fileprocessor.QueryReader;
 
 import java.io.File;
@@ -63,13 +67,8 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     }
 
     @Override
-    public char getTemplateVarStart() {
-        return this.getParam().getTemplateVarStart();
-    }
-
-    @Override
-    public char getTemplateVarStop() {
-        return this.getParam().getTemplateVarStop();
+    public STGroup getSTGroup() {
+        return this.getParam().getSTGroup();
     }
 
     @Override

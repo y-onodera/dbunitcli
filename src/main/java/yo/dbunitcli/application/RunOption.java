@@ -71,8 +71,7 @@ public class RunOption extends CommandLineOption {
                 return new SqlRunner(aOption.getDatabaseConnectionLoader()
                         , aOption.getParameter().getMap()
                         , aOption.getEncoding()
-                        , aOption.getTemplateVarStart()
-                        , aOption.getTemplateVarStop()
+                        , aOption.createSTGroup()
                         , aOption.getTemplateParameterAttribute()
                 );
             }
@@ -99,8 +98,7 @@ public class RunOption extends CommandLineOption {
         public Runner createRunner(RunOption aOption) {
             return new CmdRunner(aOption.getParameter().getMap()
                     , aOption.getEncoding()
-                    , aOption.getTemplateVarStart()
-                    , aOption.getTemplateVarStop()
+                    , aOption.createSTGroup()
                     , aOption.getTemplateParameterAttribute()
             );
         }

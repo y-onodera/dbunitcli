@@ -88,6 +88,9 @@ abstract public class CommandLineOption {
     @Option(name = "-exportEmptyTable", usage = "if true then empty table is not export")
     private String exportEmptyTable = "true";
 
+    @Option(name = "-templateGroup", usage = "StringTemplate4 templateGroup file.")
+    private File templateGroup;
+
     @Option(name = "-templateParameterAttribute", usage = "attributeName that is used to for access parameter in StringTemplate expression default 'param'.")
     private String templateParameterAttribute = "param";
 
@@ -175,15 +178,7 @@ abstract public class CommandLineOption {
     }
 
     public String getTemplateParameterAttribute() {
-        return templateParameterAttribute;
-    }
-
-    public char getTemplateVarStart() {
-        return templateVarStart;
-    }
-
-    public char getTemplateVarStop() {
-        return templateVarStop;
+        return this.templateParameterAttribute;
     }
 
     public Parameter getParameter() {
@@ -204,6 +199,10 @@ abstract public class CommandLineOption {
 
     public void setUseJdbcMetaData(String useJdbcMetaData) {
         this.useJdbcMetaData = useJdbcMetaData;
+    }
+
+    public void setTemplateGroup(File templateGroup) {
+        this.templateGroup = templateGroup;
     }
 
     public void parse(String[] args) throws Exception {
@@ -259,8 +258,7 @@ abstract public class CommandLineOption {
                 .setRegInclude(this.getRegInclude())
                 .setRegExclude(this.getRegExclude())
                 .setTemplateParameterAttribute(this.getTemplateParameterAttribute())
-                .setTemplateVarStart(this.getTemplateVarStart())
-                .setTemplateVarStop(this.getTemplateVarStop())
+                .setSTGroup(this.createSTGroup())
                 ;
     }
 
@@ -329,6 +327,10 @@ abstract public class CommandLineOption {
         return resultFile;
     }
 
+    protected STGroup createSTGroup() {
+        return this.createSTGroup(this.templateGroup);
+    }
+
     protected STGroup createSTGroup(File groupFile) {
         if (groupFile == null) {
             return this.createSTGroup("");
@@ -346,4 +348,5 @@ abstract public class CommandLineOption {
         stGroup.registerRenderer(String.class, new SqlEscapeStringRenderer());
         return stGroup;
     }
+
 }

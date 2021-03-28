@@ -31,9 +31,6 @@ public class GenerateOption extends ConvertOption {
     @Option(name = "-template", usage = "template file. encoding must be UTF-8. generate file convert outputEncoding")
     private File template;
 
-    @Option(name = "-templateGroup", usage = "StringTemplate4 templateGroup file.")
-    private File templateGroup;
-
     @Option(name = "-templateEncoding", usage = "template txt file encoding")
     private String templateEncoding = System.getProperty("file.encoding");
 
@@ -250,7 +247,7 @@ public class GenerateOption extends ConvertOption {
         }
 
         protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
-            option.stGroup = option.createSTGroup(option.templateGroup);
+            option.stGroup = option.createSTGroup();
             if (this == GenerateType.TXT) {
                 try {
                     option.templateString = Files.asCharSource(option.template, Charset.forName(option.getTemplateEncoding()))
