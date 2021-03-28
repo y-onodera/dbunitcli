@@ -17,15 +17,16 @@ public interface QueryReader {
         return this.applyParameter(query);
     }
 
-    default String applyParameter(String query) {
-        getParameter().forEach((k, v) -> {
-            String token = k;
+    default String applyParameter(String target) {
+        String query = target;
+        for (Map.Entry<String, Object> entry : getParameter().entrySet()) {
+            String token = entry.getKey();
             if (!Strings.isNullOrEmpty(this.getTemplateParameterAttribute())) {
-                token = this.getTemplateParameterAttribute() + k;
+                token = this.getTemplateParameterAttribute() + entry.getKey();
             }
             token = getTemplateVarStart() + token + getTemplateVarStop();
-            query.replace(token, v.toString());
-        });
+            query = query.replace(token, entry.getValue().toString());
+        }
         if (getParameter().size() > 0) {
             ST st = new ST(getSTGroup(), query);
             if (Strings.isNullOrEmpty(this.getTemplateParameterAttribute())) {
