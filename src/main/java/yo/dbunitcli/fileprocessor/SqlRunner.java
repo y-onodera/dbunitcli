@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class SqlRunner implements Runner, QueryReader {
-    private static final Pattern SQLPlUS_SET = Pattern.compile("SET\\s+(DEFINE|ECHO|TIMING|SERVEROUTPUT)\\s+(ON|OFF).*$", Pattern.CASE_INSENSITIVE);
-    private static final Pattern SQLPLUS_SPOOL = Pattern.compile("SPOOL\\s.*$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SQLPlUS_SET = Pattern.compile("SET\\s+(DEFINE|ECHO|TIMING|SERVEROUTPUT)\\s+(ON|OFF).*\\n", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SQLPLUS_SPOOL = Pattern.compile("SPOOL\\s.*\\n", Pattern.CASE_INSENSITIVE);
     private final DatabaseConnectionLoader connectionLoader;
     private final Map<String, Object> parameter;
     private final String encoding;
@@ -90,9 +90,12 @@ public class SqlRunner implements Runner, QueryReader {
                 statement = SQLPlUS_SET.matcher(statement).replaceAll("");
                 statement = SQLPLUS_SPOOL.matcher(statement).replaceAll("");
                 boolean dbmsOutput = statement.contains("dbms_output");
-                super.runStatements(new StringReader(statement), out);
-                if (dbmsOutput) {
-                    printDbmsOutputResults(conn);
+                try {
+                    super.runStatements(new StringReader(statement), out);
+                } finally {
+                    if (dbmsOutput) {
+                        printDbmsOutputResults(conn);
+                    }
                 }
             }
         };
@@ -113,15 +116,15 @@ public class SqlRunner implements Runner, QueryReader {
         boolean hasMore = true;
         stmt.registerOutParameter(1, Types.VARCHAR);
         stmt.registerOutParameter(2, Types.INTEGER);
-
+        StringBuilder sb = new StringBuilder();
         while (hasMore) {
-            boolean status = stmt.execute();
+            stmt.execute();
             hasMore = (stmt.getInt(2) == 0);
-
             if (hasMore) {
-                System.err.println(stmt.getString(1));
+                sb.append(stmt.getString(1));
             }
         }
+        System.err.println(sb.toString());
         stmt.close();
     }
 }
