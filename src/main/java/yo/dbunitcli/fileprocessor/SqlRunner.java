@@ -7,12 +7,17 @@ import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.dataset.DatabaseConnectionLoader;
 
 import java.io.*;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class SqlRunner implements Runner, QueryReader {
+    private static final Pattern SQLPlUS_SET = Pattern.compile("SET\\s+(DEFINE|ECHO|TIMING|SERVEROUTPUT)\\s+(ON|OFF).*$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SQLPLUS_SPOOL = Pattern.compile("SPOOL\\s.*$", Pattern.CASE_INSENSITIVE);
     private final DatabaseConnectionLoader connectionLoader;
     private final Map<String, Object> parameter;
     private final String encoding;
@@ -81,7 +86,14 @@ public class SqlRunner implements Runner, QueryReader {
 
             @Override
             protected void runStatements(Reader reader, PrintStream out) throws SQLException, IOException {
-                super.runStatements(new StringReader(applyParameter(CharStreams.toString(reader))), out);
+                String statement = applyParameter(CharStreams.toString(reader));
+                statement = SQLPlUS_SET.matcher(statement).replaceAll("");
+                statement = SQLPLUS_SPOOL.matcher(statement).replaceAll("");
+                boolean dbmsOutput = statement.contains("dbms_output");
+                super.runStatements(new StringReader(statement), out);
+                if (dbmsOutput) {
+                    printDbmsOutputResults(conn);
+                }
             }
         };
         exec.setExpandProperties(false);
@@ -95,4 +107,21 @@ public class SqlRunner implements Runner, QueryReader {
         return conn;
     }
 
+    private void printDbmsOutputResults(Connection conn) throws java.sql.SQLException {
+        String getLineSql = "begin dbms_output.get_line(?,?); end;";
+        CallableStatement stmt = conn.prepareCall(getLineSql);
+        boolean hasMore = true;
+        stmt.registerOutParameter(1, Types.VARCHAR);
+        stmt.registerOutParameter(2, Types.INTEGER);
+
+        while (hasMore) {
+            boolean status = stmt.execute();
+            hasMore = (stmt.getInt(2) == 0);
+
+            if (hasMore) {
+                System.err.println(stmt.getString(1));
+            }
+        }
+        stmt.close();
+    }
 }
