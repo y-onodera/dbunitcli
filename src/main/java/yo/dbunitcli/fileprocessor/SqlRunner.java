@@ -16,8 +16,9 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class SqlRunner implements Runner, QueryReader {
-    private static final Pattern SQLPlUS_SET = Pattern.compile("SET\\s+(DEFINE|ECHO|TIMING|SERVEROUTPUT)\\s+(ON|OFF).*\\n", Pattern.CASE_INSENSITIVE);
-    private static final Pattern SQLPLUS_SPOOL = Pattern.compile("SPOOL\\s.*\\n", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SQLPLUS_SET = Pattern.compile("SET\\s+(DEFINE|ECHO|PAUSE|TIMING|SERVEROUTPUT)\\s+(ON|OFF).*\\n", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SQLPLUS_SPOOL_OR_PROMPT = Pattern.compile("(SPOOL|PROMPT)\\s.*\\n", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SQLPLUS_EXIT_OR_COMMIT = Pattern.compile("(EXIT|COMMIT)(\\s|\\s*;)", Pattern.CASE_INSENSITIVE);
     private final DatabaseConnectionLoader connectionLoader;
     private final Map<String, Object> parameter;
     private final String encoding;
@@ -87,8 +88,9 @@ public class SqlRunner implements Runner, QueryReader {
             @Override
             protected void runStatements(Reader reader, PrintStream out) throws SQLException, IOException {
                 String statement = applyParameter(CharStreams.toString(reader));
-                statement = SQLPlUS_SET.matcher(statement).replaceAll("");
-                statement = SQLPLUS_SPOOL.matcher(statement).replaceAll("");
+                statement = SQLPLUS_SET.matcher(statement).replaceAll("");
+                statement = SQLPLUS_SPOOL_OR_PROMPT.matcher(statement).replaceAll("");
+                statement = SQLPLUS_EXIT_OR_COMMIT.matcher(statement).replaceAll("");
                 boolean dbmsOutput = statement.contains("dbms_output");
                 try {
                     super.runStatements(new StringReader(statement), out);
