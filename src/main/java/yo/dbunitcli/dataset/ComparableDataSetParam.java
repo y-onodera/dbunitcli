@@ -1,6 +1,6 @@
 package yo.dbunitcli.dataset;
 
-import org.stringtemplate.v4.STGroup;
+import yo.dbunitcli.TemplateRender;
 import yo.dbunitcli.dataset.producer.xlsx.XlsxSchema;
 
 import java.io.File;
@@ -22,8 +22,7 @@ public class ComparableDataSetParam {
     private final String headerName;
     private final String fixedLength;
     private final String extension;
-    private final STGroup sTGroup;
-    private final String templateParameterAttribute;
+    private final TemplateRender templateRender;
 
     public ComparableDataSetParam(Builder builder) {
         this.src = builder.getSrc();
@@ -40,8 +39,7 @@ public class ComparableDataSetParam {
         this.loadData = builder.isLoadData();
         this.headerName = builder.getHeaderName();
         this.fixedLength = builder.getFixedLength();
-        this.templateParameterAttribute = builder.getTemplateParameterAttribute();
-        this.sTGroup = builder.getSTGroup();
+        this.templateRender = builder.getStTemplateLoader();
         this.extension = builder.getExtension();
     }
 
@@ -105,12 +103,8 @@ public class ComparableDataSetParam {
         return extension;
     }
 
-    public String getTemplateParameterAttribute() {
-        return this.templateParameterAttribute;
-    }
-
-    public STGroup getSTGroup() {
-        return this.sTGroup;
+    public TemplateRender getStTemplateLoader() {
+        return templateRender;
     }
 
     public static class Builder {
@@ -129,8 +123,7 @@ public class ComparableDataSetParam {
         private String headerName;
         private String fixedLength;
         private String extension;
-        private String templateParameterAttribute;
-        private STGroup sTGroup;
+        private TemplateRender templateRender;
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -196,15 +189,11 @@ public class ComparableDataSetParam {
             return this.fixedLength;
         }
 
-        public String getTemplateParameterAttribute() {
-            return this.templateParameterAttribute;
-        }
-
-        public STGroup getSTGroup() {
-            if (this.sTGroup == null) {
-                return new STGroup();
+        public TemplateRender getStTemplateLoader() {
+            if (this.templateRender == null) {
+                return new TemplateRender();
             }
-            return this.sTGroup;
+            return templateRender;
         }
 
         public String getExtension() {
@@ -283,13 +272,8 @@ public class ComparableDataSetParam {
             return this;
         }
 
-        public Builder setTemplateParameterAttribute(String templateParameterAttribute) {
-            this.templateParameterAttribute = templateParameterAttribute;
-            return this;
-        }
-
-        public Builder setSTGroup(STGroup stGroup) {
-            this.sTGroup = stGroup;
+        public Builder setSTTemplateLoader(TemplateRender templateRender) {
+            this.templateRender = templateRender;
             return this;
         }
 

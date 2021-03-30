@@ -7,9 +7,8 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
-import org.stringtemplate.v4.STGroup;
-import org.stringtemplate.v4.STGroupFile;
 import yo.dbunitcli.DatabaseConnectionLoader;
+import yo.dbunitcli.TemplateRender;
 import yo.dbunitcli.application.setting.*;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.producer.xlsx.XlsxSchema;
@@ -88,6 +87,12 @@ abstract public class CommandLineOption {
 
     @Option(name = "-exportEmptyTable", usage = "if true then empty table is not export")
     private String exportEmptyTable = "true";
+
+    @Option(name = "-template", usage = "template file. generate file convert outputEncoding")
+    private File template;
+
+    @Option(name = "-templateEncoding", usage = "template file encoding.default is encoding option")
+    private String templateEncoding;
 
     @Option(name = "-templateGroup", usage = "StringTemplate4 templateGroup file.")
     private File templateGroup;
@@ -178,12 +183,16 @@ abstract public class CommandLineOption {
         return this.columnSettings;
     }
 
-    public String getTemplateParameterAttribute() {
-        return this.templateParameterAttribute;
-    }
-
     public Parameter getParameter() {
         return this.parameter;
+    }
+
+    public File getTemplate() {
+        return this.template;
+    }
+
+    public String getTemplateEncoding() {
+        return Strings.isNullOrEmpty(this.templateEncoding) ? this.encoding : this.templateEncoding;
     }
 
     public void setResultPath(String resultPath) {
@@ -200,10 +209,6 @@ abstract public class CommandLineOption {
 
     public void setUseJdbcMetaData(String useJdbcMetaData) {
         this.useJdbcMetaData = useJdbcMetaData;
-    }
-
-    public void setTemplateGroup(File templateGroup) {
-        this.templateGroup = templateGroup;
     }
 
     public void parse(String[] args) throws Exception {
@@ -258,13 +263,22 @@ abstract public class CommandLineOption {
                 .setFixedLength(this.getFixedLength())
                 .setRegInclude(this.getRegInclude())
                 .setRegExclude(this.getRegExclude())
-                .setTemplateParameterAttribute(this.getTemplateParameterAttribute())
-                .setSTGroup(this.createSTGroup())
+                .setSTTemplateLoader(this.getSTTemplateLoader())
                 ;
     }
 
     protected DatabaseConnectionLoader getDatabaseConnectionLoader() {
         return new DatabaseConnectionLoader(this.jdbcProp);
+    }
+
+    protected TemplateRender getSTTemplateLoader() {
+        return TemplateRender.builder()
+                .setTemplateGroup(this.templateGroup)
+                .setTemplateVarStart(this.templateVarStart)
+                .setTemplateVarStop(this.templateVarStop)
+                .setTemplateParameterAttribute(this.templateParameterAttribute)
+                .setEncoding(this.getTemplateEncoding())
+                .build();
     }
 
     abstract protected void assertDirectoryExists(CmdLineParser parser) throws CmdLineException;
@@ -292,19 +306,23 @@ abstract public class CommandLineOption {
     }
 
     protected void loadJdbcTemplate() throws IOException {
+        this.jdbcProp = new Properties();
         if (this.jdbcProperties != null) {
-            this.jdbcProp = new Properties();
             this.jdbcProp.load(new FileInputStream(this.jdbcProperties));
-            if (!Strings.isNullOrEmpty(this.jdbcUrl)) {
-                this.jdbcProp.put("url", this.jdbcUrl);
-            }
-            if (!Strings.isNullOrEmpty(this.jdbcUser)) {
-                this.jdbcProp.put("user", this.jdbcUser);
-            }
-            if (!Strings.isNullOrEmpty(this.jdbcPass)) {
-                this.jdbcProp.put("pass", this.jdbcPass);
-            }
         }
+        if (!Strings.isNullOrEmpty(this.jdbcUrl)) {
+            this.jdbcProp.put("url", this.jdbcUrl);
+        }
+        if (!Strings.isNullOrEmpty(this.jdbcUser)) {
+            this.jdbcProp.put("user", this.jdbcUser);
+        }
+        if (!Strings.isNullOrEmpty(this.jdbcPass)) {
+            this.jdbcProp.put("pass", this.jdbcPass);
+        }
+    }
+
+    protected String loadTemplateString() throws IOException {
+        return this.getSTTemplateLoader().toString(this.getTemplate());
     }
 
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
@@ -326,28 +344,6 @@ abstract public class CommandLineOption {
             resultFile = resultFile.substring(0, resultFile.lastIndexOf("."));
         }
         return resultFile;
-    }
-
-    protected STGroup createSTGroup() {
-        return this.createSTGroup(this.templateGroup);
-    }
-
-    protected STGroup createSTGroup(File groupFile) {
-        if (groupFile == null) {
-            return this.createSTGroup("");
-        }
-        return this.createSTGroup(groupFile.getAbsolutePath());
-    }
-
-    protected STGroup createSTGroup(String fileName) {
-        STGroup stGroup;
-        if (Strings.isNullOrEmpty(fileName)) {
-            stGroup = new STGroup(this.templateVarStart, this.templateVarStop);
-        } else {
-            stGroup = new STGroupFile(fileName, this.templateVarStart, this.templateVarStop);
-        }
-        stGroup.registerRenderer(String.class, new SqlEscapeStringRenderer());
-        return stGroup;
     }
 
 }

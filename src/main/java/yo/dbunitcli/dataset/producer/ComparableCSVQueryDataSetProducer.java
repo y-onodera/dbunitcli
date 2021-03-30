@@ -9,19 +9,18 @@ import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.stringtemplate.v4.STGroup;
+import yo.dbunitcli.TemplateRender;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.TableNameFilter;
-import yo.dbunitcli.fileprocessor.QueryReader;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.Map;
 
-public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProducer, QueryReader {
+public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProducer {
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
     private static final String URL = "jdbc:h2:mem:test;ALIAS_COLUMN_NAME=TRUE";
@@ -51,24 +50,12 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
         return this.param;
     }
 
-    @Override
     public Map<String, Object> getParameter() {
         return this.parameter.getMap();
     }
 
-    @Override
-    public String getEncoding() {
-        return this.encoding;
-    }
-
-    @Override
-    public String getTemplateParameterAttribute() {
-        return this.getParam().getTemplateParameterAttribute();
-    }
-
-    @Override
-    public STGroup getSTGroup() {
-        return this.getParam().getSTGroup();
+    public TemplateRender getTemplateLoader() {
+        return this.getParam().getStTemplateLoader();
     }
 
     @Override
@@ -93,7 +80,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     }
 
     protected void executeQuery(File aFile) throws SQLException, DataSetException, IOException {
-        String query = this.readQuery(aFile);
+        String query = this.getTemplateLoader().render(aFile, this.getParameter());
         logger.info("produceFromQuery(query={}) - start", query);
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt = conn.createStatement();

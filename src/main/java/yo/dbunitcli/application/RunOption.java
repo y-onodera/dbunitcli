@@ -70,9 +70,7 @@ public class RunOption extends CommandLineOption {
             public Runner createRunner(RunOption aOption) {
                 return new SqlRunner(aOption.getDatabaseConnectionLoader()
                         , aOption.getParameter().getMap()
-                        , aOption.getEncoding()
-                        , aOption.createSTGroup()
-                        , aOption.getTemplateParameterAttribute()
+                        , aOption.getSTTemplateLoader()
                 );
             }
         }, Ant("xml") {
@@ -97,9 +95,7 @@ public class RunOption extends CommandLineOption {
 
         public Runner createRunner(RunOption aOption) {
             return new CmdRunner(aOption.getParameter().getMap()
-                    , aOption.getEncoding()
-                    , aOption.createSTGroup()
-                    , aOption.getTemplateParameterAttribute()
+                    , aOption.getSTTemplateLoader()
             );
         }
     }

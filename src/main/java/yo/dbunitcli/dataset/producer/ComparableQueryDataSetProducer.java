@@ -5,17 +5,16 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.stringtemplate.v4.STGroup;
+import yo.dbunitcli.TemplateRender;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.Parameter;
-import yo.dbunitcli.fileprocessor.QueryReader;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
 
-public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer implements QueryReader {
+public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer {
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableQueryDataSetProducer.class);
     private final Parameter parameter;
@@ -41,28 +40,16 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
         this.consumer.endDataSet();
     }
 
-    @Override
     public Map<String, Object> getParameter() {
         return this.parameter.getMap();
     }
 
-    @Override
-    public String getEncoding() {
-        return this.encoding;
-    }
-
-    @Override
-    public String getTemplateParameterAttribute() {
-        return this.getParam().getTemplateParameterAttribute();
-    }
-
-    @Override
-    public STGroup getSTGroup() {
-        return this.getParam().getSTGroup();
+    public TemplateRender getTemplateLoader() {
+        return this.getParam().getStTemplateLoader();
     }
 
     protected void executeQuery(File aFile) throws SQLException, DataSetException, IOException {
-        String query = this.readQuery(aFile);
+        String query = this.getTemplateLoader().render(aFile, this.getParameter());
         logger.info("produceFromQuery(query={}) - start", query);
         String tableName = aFile.getName().substring(0, aFile.getName().indexOf("."));
         ITable table = this.connection.createQueryTable(tableName, query);

@@ -2,7 +2,7 @@ package yo.dbunitcli.fileprocessor;
 
 import com.google.common.base.Strings;
 import org.dbunit.dataset.DataSetException;
-import org.stringtemplate.v4.STGroup;
+import yo.dbunitcli.TemplateRender;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,28 +11,23 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Map;
 
-public class CmdRunner implements Runner, QueryReader {
+public class CmdRunner implements Runner {
 
     private final Map<String, Object> parameter;
-    private final String encoding;
-    private final STGroup sTGroup;
-    private final String templateParameterAttribute;
+    private final TemplateRender templateRender;
 
     public CmdRunner(Map<String, Object> parameter
-            , String encoding
-            , STGroup sTGroup
-            , String templateParameterAttribute) {
+            , TemplateRender templateRender) {
         this.parameter = parameter;
-        this.encoding = encoding;
-        this.sTGroup = sTGroup;
-        this.templateParameterAttribute = templateParameterAttribute;
+        this.templateRender = templateRender;
     }
 
     @Override
     public void runScript(Collection<File> targetFiles) throws DataSetException {
         try {
             for (File target : targetFiles) {
-                ProcessBuilder pb = new ProcessBuilder(this.readQuery(target));
+                ProcessBuilder pb = new ProcessBuilder(this.getTemplateLoader()
+                        .render(target, this.getParameter()));
                 // 標準エラー出力を標準出力にマージする
                 pb.redirectErrorStream(true);
                 Process process = pb.start();
@@ -56,23 +51,11 @@ public class CmdRunner implements Runner, QueryReader {
         }
     }
 
-    @Override
     public Map<String, Object> getParameter() {
         return this.parameter;
     }
 
-    @Override
-    public String getEncoding() {
-        return this.encoding;
-    }
-
-    @Override
-    public String getTemplateParameterAttribute() {
-        return this.templateParameterAttribute;
-    }
-
-    @Override
-    public STGroup getSTGroup() {
-        return this.sTGroup;
+    public TemplateRender getTemplateLoader() {
+        return this.templateRender;
     }
 }

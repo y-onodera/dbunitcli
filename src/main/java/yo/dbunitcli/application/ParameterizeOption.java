@@ -1,18 +1,14 @@
 package yo.dbunitcli.application;
 
-import com.google.common.io.Files;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.Parameter;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
@@ -27,13 +23,8 @@ public class ParameterizeOption extends CommandLineOption {
     @Option(name = "-includeMetaData", usage = "whether param include tableName and columns or not ")
     private String includeMetaData = "false";
 
-    @Option(name = "-template", usage = "template file. data driven target argument", required = true)
-    private File template;
-
     @Option(name = "-cmd", usage = "compare | convert :data driven target cmd", required = true)
     private String cmd;
-
-    private STGroup stGroup;
 
     private String templateArgs;
 
@@ -52,10 +43,10 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     public String[] createArgs(Parameter aParam) {
-        ST st = new ST(this.stGroup, this.templateArgs);
-        st.add("rowNumber", aParam.getRowNumber());
-        aParam.getMap().forEach(st::add);
-        return st.render().split("\\r?\\n");
+        aParam.getMap().put("rowNumber", aParam.getRowNumber());
+        return this.getSTTemplateLoader()
+                .render(this.templateArgs, aParam.getMap())
+                .split("\\r?\\n");
     }
 
     public Command<?> createCommand() {
@@ -81,9 +72,8 @@ public class ParameterizeOption extends CommandLineOption {
     @Override
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         super.populateSettings(parser);
-        this.stGroup = this.createSTGroup();
         try {
-            this.templateArgs = Files.asCharSource(this.template, Charset.forName(getEncoding())).read();
+            this.templateArgs = this.loadTemplateString();
         } catch (IOException e) {
             throw new CmdLineException(parser, e);
         }

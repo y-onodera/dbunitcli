@@ -28,12 +28,6 @@ import java.util.stream.Stream;
 
 public class GenerateOption extends ConvertOption {
 
-    @Option(name = "-template", usage = "template file. encoding must be UTF-8. generate file convert outputEncoding")
-    private File template;
-
-    @Option(name = "-templateEncoding", usage = "template txt file encoding")
-    private String templateEncoding = System.getProperty("file.encoding");
-
     @Option(name = "-unit", usage = "record | table | dataset :generate per record or table or dataset")
     private String unit = "record";
 
@@ -59,14 +53,6 @@ public class GenerateOption extends ConvertOption {
 
     public GenerateOption(Parameter param) {
         super(param);
-    }
-
-    public File getTemplate() {
-        return this.template;
-    }
-
-    public String getTemplateEncoding() {
-        return templateEncoding;
     }
 
     public String templateString() {
@@ -123,9 +109,9 @@ public class GenerateOption extends ConvertOption {
         if (this.getGenerateType() != GenerateType.SETTINGS
                 && this.getGenerateType() != GenerateType.SQL
         ) {
-            if (!this.template.exists() || !this.template.isFile()) {
-                throw new CmdLineException(parser, this.template + " is not exist file"
-                        , new IllegalArgumentException(this.template.toString()));
+            if (!this.getTemplate().exists() || !this.getTemplate().isFile()) {
+                throw new CmdLineException(parser, this.getTemplate() + " is not exist file"
+                        , new IllegalArgumentException(this.getTemplate().toString()));
             }
         }
     }
@@ -216,7 +202,7 @@ public class GenerateOption extends ConvertOption {
                 option.setOutputEncoding("UTF-8");
                 option.setUseJdbcMetaData("true");
                 option.setLoadData("false");
-                option.stGroup = option.createSTGroup("settings/settingTemplate.stg");
+                option.stGroup = option.getSTTemplateLoader().createSTGroup("settings/settingTemplate.stg");
                 try {
                     option.templateString = option.readClassPathResource("settings/settingTemplate.txt");
                 } catch (IOException | URISyntaxException e) {
@@ -230,7 +216,7 @@ public class GenerateOption extends ConvertOption {
                 option.setResultPath(option.getResultSqlFilePath());
                 option.unit = "table";
                 option.setUseJdbcMetaData("true");
-                option.stGroup = option.createSTGroup("sql/sqlTemplate.stg");
+                option.stGroup = option.getSTTemplateLoader().createSTGroup("sql/sqlTemplate.stg");
                 try {
                     option.templateString = option.readClassPathResource(option.getSqlTemplate());
                 } catch (IOException | URISyntaxException e) {
@@ -247,11 +233,10 @@ public class GenerateOption extends ConvertOption {
         }
 
         protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
-            option.stGroup = option.createSTGroup();
+            option.stGroup = option.getSTTemplateLoader().createSTGroup();
             if (this == GenerateType.TXT) {
                 try {
-                    option.templateString = Files.asCharSource(option.template, Charset.forName(option.getTemplateEncoding()))
-                            .read();
+                    option.templateString = option.loadTemplateString();
                 } catch (IOException e) {
                     throw new CmdLineException(parser, e);
                 }

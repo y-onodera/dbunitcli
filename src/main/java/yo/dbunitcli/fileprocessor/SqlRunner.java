@@ -3,8 +3,8 @@ package yo.dbunitcli.fileprocessor;
 import com.google.common.io.CharStreams;
 import org.apache.tools.ant.taskdefs.SQLExec;
 import org.dbunit.dataset.DataSetException;
-import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.DatabaseConnectionLoader;
+import yo.dbunitcli.TemplateRender;
 
 import java.io.*;
 import java.sql.CallableStatement;
@@ -15,46 +15,28 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class SqlRunner implements Runner, QueryReader {
+public class SqlRunner implements Runner {
     private static final Pattern SQLPLUS_SET = Pattern.compile("SET\\s+(DEFINE|ECHO|PAUSE|TIMING|SERVEROUTPUT)\\s+(ON|OFF).*\\n", Pattern.CASE_INSENSITIVE);
     private static final Pattern SQLPLUS_SPOOL_OR_PROMPT = Pattern.compile("(SPOOL|PROMPT)\\s.*\\n", Pattern.CASE_INSENSITIVE);
     private static final Pattern SQLPLUS_EXIT_OR_COMMIT = Pattern.compile("(EXIT|COMMIT)(\\s|\\s*;)", Pattern.CASE_INSENSITIVE);
     private final DatabaseConnectionLoader connectionLoader;
     private final Map<String, Object> parameter;
-    private final String encoding;
-    private final String templateParameterAttribute;
-    private final STGroup sTGroup;
+    private final TemplateRender templateRender;
 
     public SqlRunner(DatabaseConnectionLoader connectionLoader
             , Map<String, Object> parameter
-            , String encoding
-            , STGroup sTGroup
-            , String templateParameterAttribute) {
+            , TemplateRender templateRender) {
         this.connectionLoader = connectionLoader;
         this.parameter = parameter;
-        this.encoding = encoding;
-        this.sTGroup = sTGroup;
-        this.templateParameterAttribute = templateParameterAttribute;
+        this.templateRender = templateRender;
     }
 
-    @Override
     public Map<String, Object> getParameter() {
         return this.parameter;
     }
 
-    @Override
-    public String getEncoding() {
-        return this.encoding;
-    }
-
-    @Override
-    public String getTemplateParameterAttribute() {
-        return this.templateParameterAttribute;
-    }
-
-    @Override
-    public STGroup getSTGroup() {
-        return this.sTGroup;
+    public TemplateRender getTemplateLoader() {
+        return this.templateRender;
     }
 
     @Override
@@ -87,7 +69,7 @@ public class SqlRunner implements Runner, QueryReader {
 
             @Override
             protected void runStatements(Reader reader, PrintStream out) throws SQLException, IOException {
-                String statement = applyParameter(CharStreams.toString(reader));
+                String statement = getTemplateLoader().render(CharStreams.toString(reader), getParameter());
                 statement = SQLPLUS_SET.matcher(statement).replaceAll("");
                 statement = SQLPLUS_SPOOL_OR_PROMPT.matcher(statement).replaceAll("");
                 statement = SQLPLUS_EXIT_OR_COMMIT.matcher(statement).replaceAll("");
@@ -102,7 +84,7 @@ public class SqlRunner implements Runner, QueryReader {
             }
         };
         exec.setExpandProperties(false);
-        exec.setEncoding(this.getEncoding());
+        exec.setEncoding(this.getTemplateLoader().getEncoding());
         return exec;
     }
 
