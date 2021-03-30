@@ -9,6 +9,7 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
+import yo.dbunitcli.DatabaseConnectionLoader;
 import yo.dbunitcli.application.setting.*;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.producer.xlsx.XlsxSchema;

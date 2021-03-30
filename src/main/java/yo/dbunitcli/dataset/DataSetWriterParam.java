@@ -1,5 +1,7 @@
 package yo.dbunitcli.dataset;
 
+import yo.dbunitcli.DatabaseConnectionLoader;
+
 import java.io.File;
 
 public class DataSetWriterParam {

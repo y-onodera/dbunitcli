@@ -4,7 +4,7 @@ import com.google.common.io.CharStreams;
 import org.apache.tools.ant.taskdefs.SQLExec;
 import org.dbunit.dataset.DataSetException;
 import org.stringtemplate.v4.STGroup;
-import yo.dbunitcli.dataset.DatabaseConnectionLoader;
+import yo.dbunitcli.DatabaseConnectionLoader;
 
 import java.io.*;
 import java.sql.CallableStatement;
