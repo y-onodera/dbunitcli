@@ -1,4 +1,4 @@
-package yo.dbunitcli.application.setting;
+package yo.dbunitcli.dataset.writer;
 
 import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
@@ -6,10 +6,6 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.DataSetWriterParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.IDataSetWriter;
-import yo.dbunitcli.dataset.writer.CsvDataSetWriterWrapper;
-import yo.dbunitcli.dataset.writer.DBDataSetWriter;
-import yo.dbunitcli.dataset.writer.XlsDataSetWriter;
-import yo.dbunitcli.dataset.writer.XlsxDataSetWriter;
 
 public class DataSetWriterLoader {
 

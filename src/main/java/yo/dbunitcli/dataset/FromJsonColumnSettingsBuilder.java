@@ -1,10 +1,6 @@
-package yo.dbunitcli.application.setting;
+package yo.dbunitcli.dataset;
 
 import com.google.common.collect.Lists;
-import yo.dbunitcli.dataset.ColumnExpression;
-import yo.dbunitcli.dataset.AddSettingColumns;
-import yo.dbunitcli.dataset.ColumnSettings;
-import yo.dbunitcli.dataset.RowFilter;
 
 import javax.json.*;
 import java.io.File;

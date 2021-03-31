@@ -1,11 +1,10 @@
-package yo.dbunitcli.application.setting;
+package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.dataset.*;
-import yo.dbunitcli.dataset.producer.*;
 
 import java.util.List;
 import java.util.Map;

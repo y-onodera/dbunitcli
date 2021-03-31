@@ -6,7 +6,7 @@ import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import yo.dbunitcli.application.setting.FromJsonColumnSettingsBuilder;
+import yo.dbunitcli.dataset.FromJsonColumnSettingsBuilder;
 import yo.dbunitcli.dataset.*;
 
 import java.io.File;

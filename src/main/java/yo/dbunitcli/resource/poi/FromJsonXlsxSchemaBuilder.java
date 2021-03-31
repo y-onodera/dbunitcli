@@ -1,10 +1,7 @@
-package yo.dbunitcli.application.setting;
+package yo.dbunitcli.resource.poi;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import yo.dbunitcli.resource.poi.XlsxCellsTableDefine;
-import yo.dbunitcli.resource.poi.XlsxRowsTableDefine;
-import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import javax.json.Json;
 import javax.json.JsonArray;
