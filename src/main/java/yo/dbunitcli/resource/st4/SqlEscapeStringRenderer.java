@@ -1,4 +1,4 @@
-package yo.dbunitcli.application;
+package yo.dbunitcli.resource.st4;
 
 import org.stringtemplate.v4.StringRenderer;
 

@@ -2,7 +2,7 @@ package yo.dbunitcli.fileprocessor;
 
 import com.google.common.base.Strings;
 import org.dbunit.dataset.DataSetException;
-import yo.dbunitcli.TemplateRender;
+import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.BufferedReader;
 import java.io.File;

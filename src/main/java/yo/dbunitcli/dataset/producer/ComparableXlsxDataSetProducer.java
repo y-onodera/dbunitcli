@@ -22,7 +22,7 @@ import org.xml.sax.XMLReader;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
-import yo.dbunitcli.dataset.producer.xlsx.XlsxSchema;
+import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;

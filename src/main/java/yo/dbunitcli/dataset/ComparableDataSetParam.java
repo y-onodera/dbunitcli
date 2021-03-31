@@ -1,7 +1,7 @@
 package yo.dbunitcli.dataset;
 
-import yo.dbunitcli.TemplateRender;
-import yo.dbunitcli.dataset.producer.xlsx.XlsxSchema;
+import yo.dbunitcli.resource.st4.TemplateRender;
+import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import java.io.File;
 import java.util.function.Function;

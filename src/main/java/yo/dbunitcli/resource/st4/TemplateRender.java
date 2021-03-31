@@ -1,11 +1,10 @@
-package yo.dbunitcli;
+package yo.dbunitcli.resource.st4;
 
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
-import yo.dbunitcli.application.SqlEscapeStringRenderer;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +26,7 @@ public class TemplateRender {
     public TemplateRender() {
         this(new Builder());
     }
+
     public TemplateRender(Builder builder) {
         this.encoding = builder.getEncoding();
         this.templateGroup = builder.getTemplateGroup();

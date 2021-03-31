@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset.producer.xlsx;
+package yo.dbunitcli.resource.poi;
 
 import com.google.common.collect.Maps;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;

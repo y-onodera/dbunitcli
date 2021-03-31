@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset.producer.xlsx;
+package yo.dbunitcli.resource.poi;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;

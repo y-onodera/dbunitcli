@@ -1,4 +1,4 @@
-package yo.dbunitcli;
+package yo.dbunitcli.resource.jdbc;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConfig;

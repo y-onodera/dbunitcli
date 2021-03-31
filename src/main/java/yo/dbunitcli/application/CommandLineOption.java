@@ -7,11 +7,11 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
-import yo.dbunitcli.DatabaseConnectionLoader;
-import yo.dbunitcli.TemplateRender;
+import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
+import yo.dbunitcli.resource.st4.TemplateRender;
 import yo.dbunitcli.application.setting.*;
 import yo.dbunitcli.dataset.*;
-import yo.dbunitcli.dataset.producer.xlsx.XlsxSchema;
+import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import java.io.File;
 import java.io.FileInputStream;

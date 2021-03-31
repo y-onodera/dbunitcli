@@ -3,7 +3,7 @@ package yo.dbunitcli.application.setting;
 import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.DatabaseConnectionLoader;
+import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.producer.*;
 

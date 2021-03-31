@@ -3,8 +3,8 @@ package yo.dbunitcli.fileprocessor;
 import com.google.common.io.CharStreams;
 import org.apache.tools.ant.taskdefs.SQLExec;
 import org.dbunit.dataset.DataSetException;
-import yo.dbunitcli.DatabaseConnectionLoader;
-import yo.dbunitcli.TemplateRender;
+import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
+import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.*;
 import java.sql.CallableStatement;
