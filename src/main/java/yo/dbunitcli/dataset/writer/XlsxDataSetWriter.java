@@ -21,7 +21,7 @@ public class XlsxDataSetWriter extends XlsDataSetWriter implements IDataSetWrite
     protected Workbook createWorkbook() {
         Workbook result = new SXSSFWorkbook();
         Font font = result.getFontAt(0);
-        font.setFontName("МＳ　ゴシック");
+        font.setFontName("МＳ ゴシック");
         font.setFontHeightInPoints((short) 8);
         return result;
     }

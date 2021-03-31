@@ -163,7 +163,7 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
     protected Workbook createWorkbook() {
         Workbook result = super.createWorkbook();
         Font font = result.getFontAt(0);
-        font.setFontName("МＳ　ゴシック");
+        font.setFontName("МＳ ゴシック");
         font.setFontHeightInPoints((short) 8);
         return result;
     }
