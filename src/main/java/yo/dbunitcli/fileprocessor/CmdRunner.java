@@ -26,7 +26,7 @@ public class CmdRunner implements Runner {
     public void runScript(Collection<File> targetFiles) throws DataSetException {
         try {
             for (File target : targetFiles) {
-                ProcessBuilder pb = new ProcessBuilder(this.getTemplateLoader()
+                ProcessBuilder pb = new ProcessBuilder(this.getTemplateRender()
                         .render(target, this.getParameter()));
                 // 標準エラー出力を標準出力にマージする
                 pb.redirectErrorStream(true);
@@ -55,7 +55,7 @@ public class CmdRunner implements Runner {
         return this.parameter;
     }
 
-    public TemplateRender getTemplateLoader() {
+    public TemplateRender getTemplateRender() {
         return this.templateRender;
     }
 }

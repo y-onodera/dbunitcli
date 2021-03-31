@@ -2,7 +2,6 @@ package yo.dbunitcli.application;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.dbunit.dataset.DataSetException;
 import org.jxls.common.Context;
@@ -202,7 +201,7 @@ public class GenerateOption extends ConvertOption {
                 option.setOutputEncoding("UTF-8");
                 option.setUseJdbcMetaData("true");
                 option.setLoadData("false");
-                option.stGroup = option.getSTTemplateLoader().createSTGroup("settings/settingTemplate.stg");
+                option.stGroup = option.getTemplateRender().createSTGroup("settings/settingTemplate.stg");
                 try {
                     option.templateString = option.readClassPathResource("settings/settingTemplate.txt");
                 } catch (IOException | URISyntaxException e) {
@@ -216,7 +215,7 @@ public class GenerateOption extends ConvertOption {
                 option.setResultPath(option.getResultSqlFilePath());
                 option.unit = "table";
                 option.setUseJdbcMetaData("true");
-                option.stGroup = option.getSTTemplateLoader().createSTGroup("sql/sqlTemplate.stg");
+                option.stGroup = option.getTemplateRender().createSTGroup("sql/sqlTemplate.stg");
                 try {
                     option.templateString = option.readClassPathResource(option.getSqlTemplate());
                 } catch (IOException | URISyntaxException e) {
@@ -233,7 +232,7 @@ public class GenerateOption extends ConvertOption {
         }
 
         protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
-            option.stGroup = option.getSTTemplateLoader().createSTGroup();
+            option.stGroup = option.getTemplateRender().createSTGroup();
             if (this == GenerateType.TXT) {
                 try {
                     option.templateString = option.loadTemplateString();

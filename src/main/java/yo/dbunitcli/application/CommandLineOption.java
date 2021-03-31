@@ -263,7 +263,7 @@ abstract public class CommandLineOption {
                 .setFixedLength(this.getFixedLength())
                 .setRegInclude(this.getRegInclude())
                 .setRegExclude(this.getRegExclude())
-                .setSTTemplateLoader(this.getSTTemplateLoader())
+                .setSTTemplateLoader(this.getTemplateRender())
                 ;
     }
 
@@ -271,7 +271,7 @@ abstract public class CommandLineOption {
         return new DatabaseConnectionLoader(this.jdbcProp);
     }
 
-    protected TemplateRender getSTTemplateLoader() {
+    protected TemplateRender getTemplateRender() {
         return TemplateRender.builder()
                 .setTemplateGroup(this.templateGroup)
                 .setTemplateVarStart(this.templateVarStart)
@@ -322,7 +322,7 @@ abstract public class CommandLineOption {
     }
 
     protected String loadTemplateString() throws IOException {
-        return this.getSTTemplateLoader().toString(this.getTemplate());
+        return this.getTemplateRender().toString(this.getTemplate());
     }
 
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {

@@ -35,7 +35,7 @@ public class SqlRunner implements Runner {
         return this.parameter;
     }
 
-    public TemplateRender getTemplateLoader() {
+    public TemplateRender getTemplateRender() {
         return this.templateRender;
     }
 
@@ -69,7 +69,7 @@ public class SqlRunner implements Runner {
 
             @Override
             protected void runStatements(Reader reader, PrintStream out) throws SQLException, IOException {
-                String statement = getTemplateLoader().render(CharStreams.toString(reader), getParameter());
+                String statement = getTemplateRender().render(CharStreams.toString(reader), getParameter());
                 statement = SQLPLUS_SET.matcher(statement).replaceAll("");
                 statement = SQLPLUS_SPOOL_OR_PROMPT.matcher(statement).replaceAll("");
                 statement = SQLPLUS_EXIT_OR_COMMIT.matcher(statement).replaceAll("");
@@ -84,7 +84,7 @@ public class SqlRunner implements Runner {
             }
         };
         exec.setExpandProperties(false);
-        exec.setEncoding(this.getTemplateLoader().getEncoding());
+        exec.setEncoding(this.getTemplateRender().getEncoding());
         return exec;
     }
 

@@ -44,7 +44,7 @@ public class ParameterizeOption extends CommandLineOption {
 
     public String[] createArgs(Parameter aParam) {
         aParam.getMap().put("rowNumber", aParam.getRowNumber());
-        return this.getSTTemplateLoader()
+        return this.getTemplateRender()
                 .render(this.templateArgs, aParam.getMap())
                 .split("\\r?\\n");
     }
