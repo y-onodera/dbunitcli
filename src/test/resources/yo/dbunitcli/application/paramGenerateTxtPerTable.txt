@@ -4,6 +4,7 @@
 -template=target/test-classes/yo/dbunitcli/application/generate/table/template.txt
 -templateGroup=target/test-classes/yo/dbunitcli/application/generate/table/templateGroup.stg
 -templateEncoding=UTF-8
+-templateParameterAttribute=
 -unit=table
 -outputEncoding=UTF-8
 -resultPath=target/test-classes/yo/dbunitcli/application/generate/table/result/$tableName$.txt

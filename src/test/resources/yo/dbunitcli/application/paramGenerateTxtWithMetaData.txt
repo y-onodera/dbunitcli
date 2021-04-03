@@ -4,6 +4,7 @@
 -setting=target/test-classes/yo/dbunitcli/application/generate/with_metadata/settings.json
 -template=target/test-classes/yo/dbunitcli/application/generate/with_metadata/template.txt
 -templateEncoding=UTF-8
+-templateParameterAttribute=
 -unit=table
 -outputEncoding=UTF-8
 -resultPath=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/$tableName$.txt

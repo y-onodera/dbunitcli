@@ -177,6 +177,10 @@ abstract public class CommandLineOption {
         return operation;
     }
 
+    public String getTemplateParameterAttribute() {
+        return templateParameterAttribute;
+    }
+
     public AddSettingColumns getComparisonKeys() {
         return this.columnSettings.getComparisonKeys();
     }
@@ -195,6 +199,18 @@ abstract public class CommandLineOption {
 
     public String getTemplateEncoding() {
         return Strings.isNullOrEmpty(this.templateEncoding) ? this.encoding : this.templateEncoding;
+    }
+
+    public void setTemplateParameterAttribute(String templateParameterAttribute) {
+        this.templateParameterAttribute = templateParameterAttribute;
+    }
+
+    public void setTemplateVarStart(char templateVarStart) {
+        this.templateVarStart = templateVarStart;
+    }
+
+    public void setTemplateVarStop(char templateVarStop) {
+        this.templateVarStop = templateVarStop;
     }
 
     public void setResultPath(String resultPath) {

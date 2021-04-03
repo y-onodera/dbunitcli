@@ -5,6 +5,7 @@ import com.google.common.io.Files;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
+import org.stringtemplate.v4.misc.ErrorManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,11 +70,7 @@ public class TemplateRender {
     public String replaceParameter(String target, Map<String, Object> parameter) {
         String result = target;
         for (Map.Entry<String, Object> entry : parameter.entrySet()) {
-            String token = entry.getKey();
-            if (!Strings.isNullOrEmpty(this.getTemplateParameterAttribute())) {
-                token = this.getTemplateParameterAttribute() + entry.getKey();
-            }
-            token = this.getTemplateVarStart() + token + this.getTemplateVarStop();
+            String token = getAttributeName(entry.getKey());
             result = result.replace(token, entry.getValue().toString());
         }
         return result;
@@ -122,6 +119,25 @@ public class TemplateRender {
         return stGroup;
     }
 
+    public void write(String templateString, Map<String, Object> param, File resultFile, String outputEncoding) throws IOException {
+        this.write(this.createSTGroup(), templateString, param, resultFile, outputEncoding);
+    }
+
+    public void write(STGroup stGroup, String templateString, Map<String, Object> param, File resultFile, String outputEncoding) throws IOException {
+        ST result = new ST(stGroup == null ? this.createSTGroup() : stGroup, templateString);
+        param.forEach(result::add);
+        result.write(resultFile, ErrorManager.DEFAULT_ERROR_LISTENER, outputEncoding);
+    }
+
+    public String getAttributeName(String name) {
+        String token = name;
+        if (!Strings.isNullOrEmpty(this.getTemplateParameterAttribute())) {
+            token = this.getTemplateParameterAttribute() + name;
+        }
+        token = this.getTemplateVarStart() + token + this.getTemplateVarStop();
+        return token;
+    }
+
     public static class Builder {
 
         private File templateGroup;
@@ -132,7 +148,7 @@ public class TemplateRender {
 
         private char templateVarStop = '$';
 
-        private String encoding =System.getProperty("file.encoding");
+        private String encoding = System.getProperty("file.encoding");
 
         public File getTemplateGroup() {
             return templateGroup;

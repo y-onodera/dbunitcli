@@ -1,5 +1,6 @@
 package yo.dbunitcli.application;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
@@ -16,6 +17,8 @@ import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.writer.DBDataSetWriter;
+import yo.dbunitcli.resource.poi.JxlsTemplateRender;
+import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -41,8 +44,6 @@ public class GenerateOption extends ConvertOption {
 
     @Option(name = "-sqlFilePrefix", usage = "generate sqlFile fileName prefix")
     private String sqlFilePrefix = "";
-
-    private STGroup stGroup;
 
     private String templateString;
 
@@ -72,9 +73,7 @@ public class GenerateOption extends ConvertOption {
     }
 
     public String resultPath(Map<String, Object> param) {
-        ST resultPath = new ST(this.stGroup, this.getResultPath());
-        param.forEach(resultPath::add);
-        return resultPath.render();
+        return this.getTemplateRender().render(this.getResultPath(), param);
     }
 
     public void write(File resultFile, Map<String, Object> param) throws IOException {
@@ -126,7 +125,8 @@ public class GenerateOption extends ConvertOption {
     }
 
     protected String getResultSqlFilePath() {
-        return this.getResultPath() + "/" + this.sqlFilePrefix + "$tableName$" + this.sqlFileSuffix + ".sql";
+        String tableName = this.getTemplateRender().getAttributeName("tableName");
+        return this.getResultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
     }
 
     public enum GenerateUnit {
@@ -176,7 +176,6 @@ public class GenerateOption extends ConvertOption {
             List<String> tableNames = Lists.newArrayList();
             param.put("dataSet", dataSet.toMap(true));
             return Stream.of(param);
-
         }
     }
 
@@ -185,13 +184,10 @@ public class GenerateOption extends ConvertOption {
         XLSX {
             @Override
             protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
-                try (InputStream is = new FileInputStream(option.getTemplate())) {
-                    try (OutputStream os = new FileOutputStream(resultFile)) {
-                        Context context = new Context();
-                        context.putVar("param", param);
-                        JxlsHelper.getInstance().processTemplate(is, os, context);
-                    }
-                }
+                JxlsTemplateRender.builder()
+                        .setTemplateParameterAttribute(option.getTemplateParameterAttribute())
+                        .build()
+                        .render(option.getTemplate(), resultFile, param);
             }
         },
         SETTINGS {
@@ -201,12 +197,19 @@ public class GenerateOption extends ConvertOption {
                 option.setOutputEncoding("UTF-8");
                 option.setUseJdbcMetaData("true");
                 option.setLoadData("false");
-                option.stGroup = option.getTemplateRender().createSTGroup("settings/settingTemplate.stg");
                 try {
                     option.templateString = option.readClassPathResource("settings/settingTemplate.txt");
                 } catch (IOException | URISyntaxException e) {
                     throw new CmdLineException(parser, e);
                 }
+            }
+
+            @Override
+            protected STGroup getStGroup() {
+                return new TemplateRender.Builder()
+                        .setTemplateParameterAttribute(null)
+                        .build()
+                        .createSTGroup("settings/settingTemplate.stg");
             }
         },
         SQL {
@@ -215,12 +218,19 @@ public class GenerateOption extends ConvertOption {
                 option.setResultPath(option.getResultSqlFilePath());
                 option.unit = "table";
                 option.setUseJdbcMetaData("true");
-                option.stGroup = option.getTemplateRender().createSTGroup("sql/sqlTemplate.stg");
                 try {
                     option.templateString = option.readClassPathResource(option.getSqlTemplate());
                 } catch (IOException | URISyntaxException e) {
                     throw new CmdLineException(parser, e);
                 }
+            }
+
+            @Override
+            protected STGroup getStGroup() {
+                return new TemplateRender.Builder()
+                        .setTemplateParameterAttribute(null)
+                        .build()
+                        .createSTGroup("sql/sqlTemplate.stg");
             }
         };
 
@@ -232,20 +242,26 @@ public class GenerateOption extends ConvertOption {
         }
 
         protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
-            option.stGroup = option.getTemplateRender().createSTGroup();
             if (this == GenerateType.TXT) {
                 try {
-                    option.templateString = option.loadTemplateString();
+                    option.templateString = option.getTemplateRender()
+                            .toString(option.getTemplate());
                 } catch (IOException e) {
                     throw new CmdLineException(parser, e);
                 }
             }
         }
 
+        protected STGroup getStGroup() {
+            return null;
+        }
+
         protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
-            ST result = new ST(option.stGroup, option.templateString());
-            param.forEach(result::add);
-            result.write(resultFile, ErrorManager.DEFAULT_ERROR_LISTENER, option.getOutputEncoding());
+            option.getTemplateRender().write(getStGroup()
+                    , option.templateString()
+                    , param
+                    , resultFile
+                    , option.getOutputEncoding());
         }
     }
 
