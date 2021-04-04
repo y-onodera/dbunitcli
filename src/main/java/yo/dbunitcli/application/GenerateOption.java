@@ -248,5 +248,4 @@ public class GenerateOption extends ConvertOption {
                     , option.getOutputEncoding());
         }
     }
-
 }

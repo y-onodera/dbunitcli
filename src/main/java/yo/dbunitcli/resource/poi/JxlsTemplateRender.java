@@ -32,7 +32,9 @@ public class JxlsTemplateRender {
                 } else {
                     context.putVar(this.getTemplateParameterAttribute(), param);
                 }
-                JxlsHelper.getInstance().processTemplate(is, os, context);
+                JxlsHelper.getInstance()
+                        .setEvaluateFormulas(true)
+                        .processTemplate(is, os, context);
             }
         }
     }

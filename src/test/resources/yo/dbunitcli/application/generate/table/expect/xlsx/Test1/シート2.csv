@@ -1,0 +1,6 @@
+"項目名(参照)","型(参照)","コメント(参照)","項目名","型","コメント"
+stringValue,String,文字列値,stringValue,String,文字列値
+booleanValue,Boolean,真偽値,booleanValue,Boolean,真偽値
+longValue,Long,数値1,longValue,Long,数値1
+intValue,Integer,数値2,intValue,Integer,数値2
+bigDecimalValue,BigDecimal,数値3,bigDecimalValue,BigDecimal,数値3

@@ -1,0 +1,30 @@
+{
+  "rows": [
+    {
+      "tableName": "シート1",
+      "sheetName": "シート1",
+      "header": ["項目名","型","コメント"],
+      "dataStart": 3,
+      "columnIndex": [0,1,2],
+      "breakKey": ["項目名"]
+    },
+    {
+      "tableName": "シート2",
+      "sheetName": "シート2",
+      "header": ["項目名(参照)","型(参照)","コメント(参照)","項目名","型","コメント"],
+      "dataStart": 3,
+      "columnIndex": [0,1,2,3,4,5],
+      "breakKey": ["項目名(参照)"]
+    }
+  ],
+  "cells": [
+    {
+      "tableName": "クラス名",
+      "sheetName": "シート1",
+      "header": ["クラス名"],
+      "rows": [
+        {"cellAddress": ["B1"]}
+      ]
+    }
+  ]
+}

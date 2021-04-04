@@ -32,6 +32,11 @@ public class GenerateTest {
     @Test
     public void testGenerateXlsx() throws Exception {
         Generate.main(new String[]{"@" + this.baseDir + "/paramGenerateXlsx.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/generate/table/expect/xlsx/compareResult.txt"
+                ,"-old="+this.baseDir+"/generate/table/expect/xlsx/Test1"
+                ,"-new="+this.baseDir+"/generate/table/result/xlsx/Test1.xlsx"
+                ,"-result="+this.baseDir+"/generate/table/result/xlsx/Test1"
+        });
     }
 
     @Test
