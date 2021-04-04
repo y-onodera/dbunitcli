@@ -6,6 +6,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.resource.Files;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +74,7 @@ public class ParameterizeOption extends CommandLineOption {
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         super.populateSettings(parser);
         try {
-            this.templateArgs = this.loadTemplateString();
+            this.templateArgs = Files.read(this.getTemplate(), this.getTemplateEncoding());
         } catch (IOException e) {
             throw new CmdLineException(parser, e);
         }

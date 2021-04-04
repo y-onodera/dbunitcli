@@ -9,6 +9,7 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.dataset.writer.DataSetWriterLoader;
+import yo.dbunitcli.resource.Files;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.poi.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -337,10 +338,6 @@ abstract public class CommandLineOption {
         if (!Strings.isNullOrEmpty(this.jdbcPass)) {
             this.jdbcProp.put("pass", this.jdbcPass);
         }
-    }
-
-    protected String loadTemplateString() throws IOException {
-        return this.getTemplateRender().toString(this.getTemplate());
     }
 
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {

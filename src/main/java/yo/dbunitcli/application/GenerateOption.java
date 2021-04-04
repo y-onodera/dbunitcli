@@ -1,28 +1,23 @@
 package yo.dbunitcli.application;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.io.Resources;
 import org.dbunit.dataset.DataSetException;
-import org.jxls.common.Context;
-import org.jxls.util.JxlsHelper;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
-import org.stringtemplate.v4.misc.ErrorManager;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.writer.DBDataSetWriter;
+import yo.dbunitcli.resource.Files;
 import yo.dbunitcli.resource.poi.JxlsTemplateRender;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,16 +109,6 @@ public class GenerateOption extends ConvertOption {
         }
     }
 
-    protected String readClassPathResource(String path) throws IOException, URISyntaxException {
-        return Resources.asCharSource(this.getClass()
-                        .getClassLoader()
-                        .getResource(path)
-                        .toURI()
-                        .toURL()
-                , Charset.forName("UTF-8"))
-                .read();
-    }
-
     protected String getResultSqlFilePath() {
         String tableName = this.getTemplateRender().getAttributeName("tableName");
         return this.getResultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
@@ -198,7 +183,7 @@ public class GenerateOption extends ConvertOption {
                 option.setUseJdbcMetaData("true");
                 option.setLoadData("false");
                 try {
-                    option.templateString = option.readClassPathResource("settings/settingTemplate.txt");
+                    option.templateString = Files.readClasspathResource("settings/settingTemplate.txt");
                 } catch (IOException | URISyntaxException e) {
                     throw new CmdLineException(parser, e);
                 }
@@ -219,7 +204,7 @@ public class GenerateOption extends ConvertOption {
                 option.unit = "table";
                 option.setUseJdbcMetaData("true");
                 try {
-                    option.templateString = option.readClassPathResource(option.getSqlTemplate());
+                    option.templateString = Files.readClasspathResource(option.getSqlTemplate());
                 } catch (IOException | URISyntaxException e) {
                     throw new CmdLineException(parser, e);
                 }
@@ -244,8 +229,7 @@ public class GenerateOption extends ConvertOption {
         protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
             if (this == GenerateType.TXT) {
                 try {
-                    option.templateString = option.getTemplateRender()
-                            .toString(option.getTemplate());
+                    option.templateString = Files.read(option.getTemplate(), option.getTemplateEncoding());
                 } catch (IOException e) {
                     throw new CmdLineException(parser, e);
                 }

@@ -1,15 +1,14 @@
 package yo.dbunitcli.resource.st4;
 
 import com.google.common.base.Strings;
-import com.google.common.io.Files;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 import org.stringtemplate.v4.misc.ErrorManager;
+import yo.dbunitcli.resource.Files;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Map;
 
 public class TemplateRender {
@@ -57,7 +56,7 @@ public class TemplateRender {
     }
 
     public String render(File aFile, Map<String, Object> parameter) throws IOException {
-        return this.render(this.toString(aFile), parameter);
+        return this.render(Files.read(aFile, this.getEncoding()), parameter);
     }
 
     public String render(String target, Map<String, Object> parameter) {
@@ -70,16 +69,9 @@ public class TemplateRender {
     public String replaceParameter(String target, Map<String, Object> parameter) {
         String result = target;
         for (Map.Entry<String, Object> entry : parameter.entrySet()) {
-            String token = getAttributeName(entry.getKey());
-            result = result.replace(token, entry.getValue().toString());
+            result = result.replace(this.getAttributeName(entry.getKey()), entry.getValue().toString());
         }
         return result;
-    }
-
-    public String toString(File aFile) throws IOException {
-        return Files
-                .asCharSource(aFile, Charset.forName(this.getEncoding()))
-                .read();
     }
 
     public ST createST(String result) {
