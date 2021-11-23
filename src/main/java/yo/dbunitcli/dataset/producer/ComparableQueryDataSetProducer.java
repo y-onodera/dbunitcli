@@ -5,9 +5,9 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.resource.st4.TemplateRender;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,11 +49,17 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     }
 
     protected void executeQuery(File aFile) throws SQLException, DataSetException, IOException {
-        String query = this.getTemplateLoader().render(aFile, this.getParameter());
+        String query = this.loadQuery(aFile);
         logger.info("produceFromQuery(query={}) - start", query);
         String tableName = aFile.getName().substring(0, aFile.getName().indexOf("."));
         ITable table = this.connection.createQueryTable(tableName, query);
         this.executeTable(table);
+    }
+
+    protected String loadQuery(File aFile) throws IOException {
+        return this.getTemplateLoader()
+                .render(aFile, this.getParameter())
+                .replace(";","");
     }
 
 }

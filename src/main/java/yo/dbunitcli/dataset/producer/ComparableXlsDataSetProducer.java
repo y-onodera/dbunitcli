@@ -5,8 +5,8 @@ import org.apache.poi.hssf.eventusermodel.*;
 import org.apache.poi.hssf.eventusermodel.dummyrecord.LastCellOfRowDummyRecord;
 import org.apache.poi.hssf.eventusermodel.dummyrecord.MissingCellDummyRecord;
 import org.apache.poi.hssf.model.HSSFFormulaParser;
-import org.apache.poi.hssf.record.*;
 import org.apache.poi.hssf.record.Record;
+import org.apache.poi.hssf.record.*;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.dbunit.dataset.Column;
@@ -192,7 +192,6 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
                 break;
             case NoteRecord.sid:
                 // note ignore
-                thisColumn = -1;
                 break;
             case NumberRecord.sid:
                 NumberRecord numRec = (NumberRecord) record;
@@ -205,7 +204,6 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
                 break;
             case RKRecord.sid:
                 // rk ignore
-                thisColumn = -1;
                 break;
             default:
                 break;
@@ -264,7 +262,9 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
                             this.rowValues.add("");
                         }
                     }
-                    this.consumer.row(this.rowValues.toArray(new Object[this.rowValues.size()]));
+                    if (this.rowValues.stream().anyMatch(it -> it != null && !it.equals(""))) {
+                        this.consumer.row(this.rowValues.toArray(new Object[this.rowValues.size()]));
+                    }
                 }
             } catch (DataSetException e) {
                 throw new AssertionError(e);
