@@ -5,6 +5,7 @@ import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultDataSet;
 import org.dbunit.dataset.ITable;
+import org.dbunit.operation.CompositeOperation;
 import org.dbunit.operation.DatabaseOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,7 @@ import yo.dbunitcli.dataset.IDataSetWriter;
 import java.sql.SQLException;
 
 public class DBDataSetWriter implements IDataSetWriter {
-    private static Logger logger = LoggerFactory.getLogger(DBDataSetWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(DBDataSetWriter.class);
     private final DatabaseOperation operation;
     private final IDatabaseConnection connection;
     private final DefaultDataSet iDataSet;
@@ -49,12 +50,12 @@ public class DBDataSetWriter implements IDataSetWriter {
         }
     }
 
-    public static enum Operation {
+    public  enum Operation {
         INSERT(DatabaseOperation.INSERT),
         UPDATE(DatabaseOperation.UPDATE),
         DELETE(DatabaseOperation.DELETE),
         REFRESH(DatabaseOperation.REFRESH),
-        CLEAN_INSERT(DatabaseOperation.CLEAN_INSERT),
+        CLEAN_INSERT(new CompositeOperation(DatabaseOperation.TRUNCATE_TABLE, DatabaseOperation.INSERT)),
         ;
         private final DatabaseOperation op;
 
