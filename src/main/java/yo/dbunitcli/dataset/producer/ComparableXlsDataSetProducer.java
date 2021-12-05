@@ -87,6 +87,9 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
     public void produce() throws DataSetException {
         this.consumer.startDataSet();
         for (File sourceFile : this.src) {
+            if(!filter.predicate(sourceFile.getName())){
+                continue;
+            }
             logger.info("produceFromFile(theDataFile={}) - start", sourceFile);
 
             try (POIFSFileSystem newFs = new POIFSFileSystem(sourceFile)) {

@@ -7,6 +7,8 @@ import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 
+import java.util.stream.Stream;
+
 public class XlsxSchemaHandler implements XSSFSheetXMLHandler.SheetContentsHandler {
     private final IDataSetConsumer delegate;
     private final XlsxRowsToTableBuilder rowsTableBuilder;
@@ -37,7 +39,7 @@ public class XlsxSchemaHandler implements XSSFSheetXMLHandler.SheetContentsHandl
                 }
                 this.delegate.startTable(this.rowsTableBuilder.startNewTable());
             } else if (this.rowsTableBuilder.hasRow(rowNum)) {
-                delegate.row(this.rowsTableBuilder.currentRow());
+                this.addRowToTable(this.rowsTableBuilder.currentRow());
             }
             this.rowsTableBuilder.clearRowValue();
         } catch (DataSetException e) {
@@ -67,7 +69,7 @@ public class XlsxSchemaHandler implements XSSFSheetXMLHandler.SheetContentsHandl
                 delegate.startTable(this.randomCellRecordBuilder.getTableMetaData(tableName));
                 if (this.loadData) {
                     for (Object[] row : this.randomCellRecordBuilder.getRows(tableName)) {
-                        delegate.row(row);
+                        this.addRowToTable(row);
                     }
                 }
                 delegate.endTable();
@@ -76,4 +78,11 @@ public class XlsxSchemaHandler implements XSSFSheetXMLHandler.SheetContentsHandl
             throw new RuntimeException(e);
         }
     }
+
+    protected void addRowToTable(Object[] row) throws DataSetException {
+        if (Stream.of(row).anyMatch(it -> it != null && !it.toString().equals(""))) {
+            this.delegate.row(row);
+        }
+    }
+
 }

@@ -51,7 +51,7 @@ public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
         int thisCol = reference.getCol();
         int missedCols = thisCol - currentCol - 1;
         for (int i = 0; i < missedCols; i++) {
-            this.rowValues.add(null);
+            this.rowValues.add("");
         }
         this.rowValues.add(formattedValue);
     }
