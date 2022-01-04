@@ -7,6 +7,7 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
+import yo.dbunitcli.application.component.TemplateOption;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.dataset.writer.DataSetWriterLoader;
@@ -90,24 +91,6 @@ abstract public class CommandLineOption {
     @Option(name = "-exportEmptyTable", usage = "if true then empty table is not export")
     private String exportEmptyTable = "true";
 
-    @Option(name = "-template", usage = "template file. generate file convert outputEncoding")
-    private File template;
-
-    @Option(name = "-templateEncoding", usage = "template file encoding.default is encoding option")
-    private String templateEncoding;
-
-    @Option(name = "-templateGroup", usage = "StringTemplate4 templateGroup file.")
-    private File templateGroup;
-
-    @Option(name = "-templateParameterAttribute", usage = "attributeName that is used to for access parameter in StringTemplate expression default 'param'.")
-    private String templateParameterAttribute = "param";
-
-    @Option(name = "-templateVarStart", usage = "StringTemplate expression start char.default '$'")
-    private char templateVarStart = '$';
-
-    @Option(name = "-templateVarStop", usage = "StringTemplate expression stop char.default '$'\"")
-    private char templateVarStop = '$';
-
     @Option(name = "-P", handler = MapOptionHandler.class)
     private Map<String, String> inputParam = Maps.newHashMap();
 
@@ -118,6 +101,8 @@ abstract public class CommandLineOption {
     private ColumnSettings columnSettings;
 
     private XlsxSchema xlsxSchema;
+
+    private TemplateOption templateOption;
 
     private String[] args;
 
@@ -177,10 +162,6 @@ abstract public class CommandLineOption {
         return operation;
     }
 
-    public String getTemplateParameterAttribute() {
-        return templateParameterAttribute;
-    }
-
     public AddSettingColumns getComparisonKeys() {
         return this.columnSettings.getComparisonKeys();
     }
@@ -189,28 +170,12 @@ abstract public class CommandLineOption {
         return this.columnSettings;
     }
 
+    public TemplateOption getTemplateOption() {
+        return templateOption;
+    }
+
     public Parameter getParameter() {
         return this.parameter;
-    }
-
-    public File getTemplate() {
-        return this.template;
-    }
-
-    public String getTemplateEncoding() {
-        return Strings.isNullOrEmpty(this.templateEncoding) ? this.encoding : this.templateEncoding;
-    }
-
-    public void setTemplateParameterAttribute(String templateParameterAttribute) {
-        this.templateParameterAttribute = templateParameterAttribute;
-    }
-
-    public void setTemplateVarStart(char templateVarStart) {
-        this.templateVarStart = templateVarStart;
-    }
-
-    public void setTemplateVarStop(char templateVarStop) {
-        this.templateVarStop = templateVarStop;
     }
 
     public void setResultPath(String resultPath) {
@@ -233,7 +198,9 @@ abstract public class CommandLineOption {
         this.args = args;
         CmdLineParser parser = new CmdLineParser(this);
         try {
-            parser.parseArgument(args);
+            this.templateOption = new TemplateOption(this.encoding);
+            String[] restArgs = this.templateOption.parseArgument(args);
+            parser.parseArgument(restArgs);
             this.assertDirectoryExists(parser);
             this.loadJdbcTemplate();
             this.populateSettings(parser);
@@ -290,13 +257,7 @@ abstract public class CommandLineOption {
     }
 
     protected TemplateRender getTemplateRender() {
-        return TemplateRender.builder()
-                .setTemplateGroup(this.templateGroup)
-                .setTemplateVarStart(this.templateVarStart)
-                .setTemplateVarStop(this.templateVarStop)
-                .setTemplateParameterAttribute(this.templateParameterAttribute)
-                .setEncoding(this.getTemplateEncoding())
-                .build();
+        return this.templateOption.getTemplateRender();
     }
 
     abstract protected void assertDirectoryExists(CmdLineParser parser) throws CmdLineException;

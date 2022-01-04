@@ -74,7 +74,7 @@ public class ParameterizeOption extends CommandLineOption {
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         super.populateSettings(parser);
         try {
-            this.templateArgs = Files.read(this.getTemplate(), this.getTemplateEncoding());
+            this.templateArgs = Files.read(this.getTemplateOption().getTemplate(), this.getTemplateOption().getTemplateEncoding());
         } catch (IOException e) {
             throw new CmdLineException(parser, e);
         }

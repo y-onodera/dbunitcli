@@ -102,9 +102,10 @@ public class GenerateOption extends ConvertOption {
         if (this.getGenerateType() != GenerateType.SETTINGS
                 && this.getGenerateType() != GenerateType.SQL
         ) {
-            if (!this.getTemplate().exists() || !this.getTemplate().isFile()) {
-                throw new CmdLineException(parser, this.getTemplate() + " is not exist file"
-                        , new IllegalArgumentException(this.getTemplate().toString()));
+            File template = this.getTemplateOption().getTemplate();
+            if (!template.exists() || !template.isFile()) {
+                throw new CmdLineException(parser, template + " is not exist file"
+                        , new IllegalArgumentException(template.toString()));
             }
         }
     }
@@ -170,9 +171,9 @@ public class GenerateOption extends ConvertOption {
             @Override
             protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
                 JxlsTemplateRender.builder()
-                        .setTemplateParameterAttribute(option.getTemplateParameterAttribute())
+                        .setTemplateParameterAttribute(option.getTemplateOption().getTemplateParameterAttribute())
                         .build()
-                        .render(option.getTemplate(), resultFile, param);
+                        .render(option.getTemplateOption().getTemplate(), resultFile, param);
             }
         },
         SETTINGS {
@@ -229,7 +230,7 @@ public class GenerateOption extends ConvertOption {
         protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
             if (this == GenerateType.TXT) {
                 try {
-                    option.templateString = Files.read(option.getTemplate(), option.getTemplateEncoding());
+                    option.templateString = Files.read(option.getTemplateOption().getTemplate(), option.getTemplateOption().getTemplateEncoding());
                 } catch (IOException e) {
                     throw new CmdLineException(parser, e);
                 }
