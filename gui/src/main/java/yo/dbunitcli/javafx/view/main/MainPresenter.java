@@ -64,6 +64,7 @@ public class MainPresenter {
                 Label label = new Label();
                 label.setText(((NamedOptionDef) it.option).name());
                 TextField text = new TextField();
+                text.setText(it.printDefaultValue());
                 this.commandPane.add(label, "width 150,cell 0 " + row);
                 this.commandPane.add(text, "width 200,cell 1 " + row++);
             }
