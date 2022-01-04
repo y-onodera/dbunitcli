@@ -1,0 +1,9 @@
+-srcType=csv
+-src=src/test/resources/yo/dbunitcli/application/generate/row/source/csv
+-encoding=UTF-8
+-setting=src/test/resources/yo/dbunitcli/application/generate/row/templateSettings.json
+-template=src/test/resources/yo/dbunitcli/application/generate/row/template.txt
+-templateEncoding=UTF-8
+-templateParameterAttribute=
+-outputEncoding=MS932
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/row/result/$row.Class$Test.txt

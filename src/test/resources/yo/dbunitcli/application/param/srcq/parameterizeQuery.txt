@@ -1,5 +1,0 @@
-SELECT
-    *
-FROM
-    CSVREAD('target/test-classes/yo/dbunitcli/application/param/$param.table$',null,'charset=UTF-8') table1
-;

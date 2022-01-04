@@ -1,0 +1,9 @@
+SELECT
+    key,value1,value2
+FROM
+    CSVREAD('src/test/resources/yo/dbunitcli/dataset/producer/csvquery/csv/detail.csv',null,'charset=UTF-8')
+WHERE
+    detailno = 1
+ORDER BY
+    key
+;

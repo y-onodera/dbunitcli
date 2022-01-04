@@ -1,5 +1,0 @@
--old=target/test-classes/yo/dbunitcli/application/pattern/old
--new=target/test-classes/yo/dbunitcli/application/pattern/new
--setting=target/test-classes/yo/dbunitcli/application/pattern/settingCompareWithFilterRow.json
--result=target/test-classes/yo/dbunitcli/application/pattern/result_filter_row_compare
--expect=target/test-classes/yo/dbunitcli/application/pattern/expect/result_filter_row_compare

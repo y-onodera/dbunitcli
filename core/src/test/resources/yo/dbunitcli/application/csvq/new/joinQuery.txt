@@ -1,0 +1,19 @@
+
+SELECT
+    table1.key
+    ,table1.column1
+    ,table1.column2
+    ,table1.column3
+    ,table2.columna
+    ,table2.columnb
+    ,table2.columnc
+
+FROM
+    CSVREAD('src/test/resources/yo/dbunitcli/application/csvq/new/csv/multi1.csv',null,'charset=UTF-8') table1
+    inner join
+    CSVREAD('src/test/resources/yo/dbunitcli/application/csvq/new/csv/multi2.csv',null,'charset=UTF-8') table2
+    on table1.key = table2.key
+
+ORDER BY
+    table1.key desc
+;

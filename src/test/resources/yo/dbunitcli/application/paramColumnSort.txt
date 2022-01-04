@@ -1,5 +1,0 @@
--old=target/test-classes/yo/dbunitcli/application/sort/old
--new=target/test-classes/yo/dbunitcli/application/sort/new
--setting=target/test-classes/yo/dbunitcli/application/sort/setting.json
--result=target/test-classes/yo/dbunitcli/application/sort/result
--expect=target/test-classes/yo/dbunitcli/application/sort/expect

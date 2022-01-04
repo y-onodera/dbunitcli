@@ -1,0 +1,7 @@
+-oldsource=csvq
+-old=src/test/resources/yo/dbunitcli/application/csvq/old
+-newsource=csvq
+-new=src/test/resources/yo/dbunitcli/application/csvq/new
+-setting=src/test/resources/yo/dbunitcli/application/csvq/setting.json
+-result=target/test-classes/yo/dbunitcli/application/csvq/compare/result
+-expect=src/test/resources/yo/dbunitcli/application/csvq/expect

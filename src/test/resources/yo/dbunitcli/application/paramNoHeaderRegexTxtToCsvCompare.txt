@@ -1,7 +1,0 @@
--oldsource=reg
--old=target/test-classes/yo/dbunitcli/application/compare/regex/noheader
--oldHeaderName=Contents,Option
--regDataSplit=,\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}
--newsource=csv
--new=target/test-classes/yo/dbunitcli/application/compare/csv/header
--result=target/test-classes/yo/dbunitcli/application/compare/regex/noheader/result

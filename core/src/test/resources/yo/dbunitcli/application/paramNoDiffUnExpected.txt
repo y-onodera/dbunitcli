@@ -1,0 +1,5 @@
+-old=src/test/resources/yo/dbunitcli/application/nodiff/old
+-new=src/test/resources/yo/dbunitcli/application/nodiff/new
+-setting=src/test/resources/yo/dbunitcli/application/nodiff/setting.json
+-result=target/test-classes/yo/dbunitcli/application/nodiff/result
+-expect=src/test/resources/yo/dbunitcli/application/nodiff/expect/COMPARE_SCHEMA_RESULT.csv

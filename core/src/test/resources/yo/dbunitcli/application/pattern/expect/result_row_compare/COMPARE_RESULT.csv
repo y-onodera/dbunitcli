@@ -1,0 +1,7 @@
+OLD_PATH,NEW_PATH,TARGET_NAME,DIFF,OLD_VALUE,NEW_VALUE,COLUMN_INDEX,DIFF_ROWS
+"src\\test\\resources\\yo\\dbunitcli\\application\\pattern\\old","src\\test\\resources\\yo\\dbunitcli\\application\\pattern\\new","test_differentPattern","MODIFY_VALUE","key","key","0","1"
+"src\\test\\resources\\yo\\dbunitcli\\application\\pattern\\old","src\\test\\resources\\yo\\dbunitcli\\application\\pattern\\new","test_differentPattern","MODIFY_VALUE","columnA","columnA","1","1"
+"src\\test\\resources\\yo\\dbunitcli\\application\\pattern\\old","src\\test\\resources\\yo\\dbunitcli\\application\\pattern\\new","test_differentPattern","MODIFY_VALUE","columnC","columnC","2","1"
+"src\\test\\resources\\yo\\dbunitcli\\application\\pattern\\old","src\\test\\resources\\yo\\dbunitcli\\application\\pattern\\new","test_samePattern","MODIFY_VALUE","testkey","testkey","0","1"
+"src\\test\\resources\\yo\\dbunitcli\\application\\pattern\\old","src\\test\\resources\\yo\\dbunitcli\\application\\pattern\\new","test_samePattern","MODIFY_VALUE","columnA","columnA","1","1"
+"src\\test\\resources\\yo\\dbunitcli\\application\\pattern\\old","src\\test\\resources\\yo\\dbunitcli\\application\\pattern\\new","test_samePattern","MODIFY_VALUE","columnC","columnC","2","1"
