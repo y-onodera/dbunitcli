@@ -1,4 +1,4 @@
-package yo.dbunitcli.application.component;
+package yo.dbunitcli.application.argument;
 
 import com.google.common.collect.Lists;
 import org.junit.Test;
@@ -7,7 +7,6 @@ import org.kohsuke.args4j.CmdLineParser;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

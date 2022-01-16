@@ -1,4 +1,4 @@
-package yo.dbunitcli.application.component;
+package yo.dbunitcli.application.argument;
 
 import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.ComparableDataSetParam;

@@ -1,4 +1,4 @@
-package yo.dbunitcli.application.component;
+package yo.dbunitcli.application.argument;
 
 import com.google.common.base.Strings;
 import org.kohsuke.args4j.CmdLineException;
@@ -62,22 +62,6 @@ public class TemplateRenderOption extends PrefixArgumentsParser implements Compa
 
     public String getTemplateEncoding() {
         return Strings.isNullOrEmpty(this.templateEncoding) ? this.encoding : this.templateEncoding;
-    }
-
-    public void setTemplateParameterAttribute(String templateParameterAttribute) {
-        this.templateParameterAttribute = templateParameterAttribute;
-    }
-
-    public void setTemplateVarStart(char templateVarStart) {
-        this.templateVarStart = templateVarStart;
-    }
-
-    public void setTemplateVarStop(char templateVarStop) {
-        this.templateVarStop = templateVarStop;
-    }
-
-    public void setTemplateEncoding(String templateEncoding) {
-        this.templateEncoding = templateEncoding;
     }
 
     public TemplateRender getTemplateRender() {

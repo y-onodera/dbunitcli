@@ -1,9 +1,9 @@
-package yo.dbunitcli.application.component;
+package yo.dbunitcli.application.argument;
 
 import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
-public class RegexOption extends PrefixArgumentsParser implements ComparableDataSetParamOption{
+public class RegexOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
 
     @Option(name = "-regDataSplit", usage = "regex to use split data row")
     private String regDataSplit;
@@ -19,14 +19,6 @@ public class RegexOption extends PrefixArgumentsParser implements ComparableData
     public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
         return builder.setDataSplitPattern(this.regDataSplit)
                 .setHeaderSplitPattern(this.regHeaderSplit);
-    }
-
-    public String getRegDataSplit() {
-        return this.regDataSplit;
-    }
-
-    public String getRegHeaderSplit() {
-        return this.regHeaderSplit;
     }
 
 }

@@ -1,4 +1,4 @@
-package yo.dbunitcli.application.component;
+package yo.dbunitcli.application.argument;
 
 import com.google.common.base.Strings;
 import org.kohsuke.args4j.CmdLineException;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class JdbcOption extends PrefixArgumentsParser implements ComparableDataSetParamOption{
+public class JdbcOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
 
     @Option(name = "-jdbcProperties", usage = "use connect database. [url=,user=,pass=]")
     private File jdbcProperties;
@@ -39,10 +39,6 @@ public class JdbcOption extends PrefixArgumentsParser implements ComparableDataS
         super(prefix);
     }
 
-    public String getUseJdbcMetaData() {
-        return useJdbcMetaData;
-    }
-
     public Properties getJdbcProp() {
         return jdbcProp;
     }
@@ -53,10 +49,6 @@ public class JdbcOption extends PrefixArgumentsParser implements ComparableDataS
 
     public DatabaseConnectionLoader getDatabaseConnectionLoader() {
         return new DatabaseConnectionLoader(this.getJdbcProp());
-    }
-
-    public void setUseJdbcMetaData(String useJdbcMetaData) {
-        this.useJdbcMetaData = useJdbcMetaData;
     }
 
     @Override

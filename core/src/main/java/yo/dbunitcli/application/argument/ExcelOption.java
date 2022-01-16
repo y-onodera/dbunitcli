@@ -1,4 +1,4 @@
-package yo.dbunitcli.application.component;
+package yo.dbunitcli.application.argument;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -9,7 +9,7 @@ import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import java.io.File;
 
-public class ExcelOption extends PrefixArgumentsParser implements ComparableDataSetParamOption{
+public class ExcelOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
 
     @Option(name = "-xlsxSchema", usage = "schema use read xlsx")
     private File xlsxSchemaSource;
@@ -24,9 +24,9 @@ public class ExcelOption extends PrefixArgumentsParser implements ComparableData
     }
 
     @Override
-    public void setUpComponent(CmdLineParser parser,String[] args) throws CmdLineException {
+    public void setUpComponent(CmdLineParser parser, String[] args) throws CmdLineException {
         try {
-            this.xlsxSchema = new FromJsonXlsxSchemaBuilder().build(this.getXlsxSchemaSource());
+            this.xlsxSchema = new FromJsonXlsxSchemaBuilder().build(this.xlsxSchemaSource);
         } catch (Exception e) {
             throw new CmdLineException(parser, e.getMessage(), e);
         }
@@ -35,14 +35,6 @@ public class ExcelOption extends PrefixArgumentsParser implements ComparableData
     @Override
     public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
         return builder.setXlsxSchema(this.xlsxSchema);
-    }
-
-    public XlsxSchema getXlsxSchema() {
-        return xlsxSchema;
-    }
-
-    public File getXlsxSchemaSource() {
-        return xlsxSchemaSource;
     }
 
     public String getExcelTable() {

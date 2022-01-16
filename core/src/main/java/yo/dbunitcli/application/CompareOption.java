@@ -5,8 +5,8 @@ import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import yo.dbunitcli.application.component.DataSetLoadOption;
-import yo.dbunitcli.application.component.DataSetWriteOption;
+import yo.dbunitcli.application.argument.DataSetLoadOption;
+import yo.dbunitcli.application.argument.DataSetWriteOption;
 import yo.dbunitcli.dataset.*;
 
 import java.io.File;

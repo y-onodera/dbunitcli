@@ -4,7 +4,7 @@ import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import yo.dbunitcli.application.component.TemplateRenderOption;
+import yo.dbunitcli.application.argument.TemplateRenderOption;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.producer.ComparableFileTableMetaData;

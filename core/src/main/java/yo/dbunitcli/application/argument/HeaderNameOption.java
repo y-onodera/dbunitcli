@@ -1,9 +1,9 @@
-package yo.dbunitcli.application.component;
+package yo.dbunitcli.application.argument;
 
 import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
-public class HeaderNameOption extends PrefixArgumentsParser implements ComparableDataSetParamOption{
+public class HeaderNameOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
 
     @Option(name = "-headerName", usage = "comma separate header name. if set,all rows treat data rows")
     private String headerName;

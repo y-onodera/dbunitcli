@@ -1,4 +1,4 @@
-package yo.dbunitcli.application.component;
+package yo.dbunitcli.application.argument;
 
 import com.google.common.base.Strings;
 import org.kohsuke.args4j.CmdLineException;
