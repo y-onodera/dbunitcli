@@ -36,17 +36,8 @@ public class RunOption extends CommandLineOption {
         super(param);
     }
 
-    @Override
-    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
-        super.setUpComponent(parser, expandArgs);
-        this.templateOption.parseArgument(expandArgs);
-        if (!this.src.exists()) {
-            throw new CmdLineException(parser, src + " is not exist", new IllegalArgumentException(src.toString()));
-        }
-    }
-
     public File getSrc() {
-        return src;
+        return this.src;
     }
 
     public ScriptType getScriptType() {
@@ -67,9 +58,17 @@ public class RunOption extends CommandLineOption {
                 .collect(Collectors.toList());
     }
 
-
     public Runner runner() {
         return this.getScriptType().createRunner(this);
+    }
+
+    @Override
+    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+        super.setUpComponent(parser, expandArgs);
+        this.templateOption.parseArgument(expandArgs);
+        if (!this.src.exists()) {
+            throw new CmdLineException(parser, src + " is not exist", new IllegalArgumentException(src.toString()));
+        }
     }
 
     enum ScriptType {

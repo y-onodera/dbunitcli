@@ -9,7 +9,7 @@ import yo.dbunitcli.dataset.Parameter;
 
 public class ConvertOption extends CommandLineOption {
 
-    private DataSetLoadOption src = new DataSetLoadOption("src");
+    private DataSetLoadOption src = new DataSetLoadOption("");
 
     public ConvertOption() {
         this(Parameter.none());
