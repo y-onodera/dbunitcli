@@ -3,11 +3,11 @@ package yo.dbunitcli.application;
 import org.dbunit.DatabaseUnitException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.compare.CompareResult;
-import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.IDataSetWriter;
 import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.dataset.compare.CompareResult;
+import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
 
 public class Compare implements Command<CompareOption> {
 
@@ -31,7 +31,7 @@ public class Compare implements Command<CompareOption> {
     public void exec(CompareOption options) throws DatabaseUnitException {
         ComparableDataSet oldData = options.oldDataSet();
         ComparableDataSet newData = options.newDataSet();
-        IDataSetWriter writer = options.writer(options.getResultFile());
+        IDataSetWriter writer = options.writer();
         CompareResult result = new DataSetCompareBuilder()
                 .newDataSet(newData)
                 .oldDataSet(oldData)

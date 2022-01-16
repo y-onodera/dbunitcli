@@ -1,7 +1,8 @@
 package yo.dbunitcli.dataset;
 
-import yo.dbunitcli.resource.st4.TemplateRender;
+import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.poi.XlsxSchema;
+import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.util.function.Function;
@@ -23,6 +24,7 @@ public class ComparableDataSetParam {
     private final String fixedLength;
     private final String extension;
     private final TemplateRender templateRender;
+    private final DatabaseConnectionLoader databaseConnectionLoader;
 
     public ComparableDataSetParam(Builder builder) {
         this.src = builder.getSrc();
@@ -41,6 +43,7 @@ public class ComparableDataSetParam {
         this.fixedLength = builder.getFixedLength();
         this.templateRender = builder.getStTemplateLoader();
         this.extension = builder.getExtension();
+        this.databaseConnectionLoader = builder.getDatabaseConnectionLoader();
     }
 
     public static Builder builder() {
@@ -107,6 +110,10 @@ public class ComparableDataSetParam {
         return templateRender;
     }
 
+    public DatabaseConnectionLoader getDatabaseConnectionLoader() {
+        return this.databaseConnectionLoader;
+    }
+
     public static class Builder {
         private File src;
         private String encoding;
@@ -124,6 +131,7 @@ public class ComparableDataSetParam {
         private String fixedLength;
         private String extension;
         private TemplateRender templateRender;
+        private DatabaseConnectionLoader databaseConnectionLoader;
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -198,6 +206,10 @@ public class ComparableDataSetParam {
 
         public String getExtension() {
             return extension;
+        }
+
+        public DatabaseConnectionLoader getDatabaseConnectionLoader() {
+            return this.databaseConnectionLoader;
         }
 
         public Builder ifMatch(boolean condition, Function<Builder, Builder> function) {
@@ -279,6 +291,11 @@ public class ComparableDataSetParam {
 
         public Builder setExtension(String extension) {
             this.extension = extension;
+            return this;
+        }
+
+        public Builder setDatabaseConnectionLoader(DatabaseConnectionLoader databaseConnectionLoader) {
+            this.databaseConnectionLoader = databaseConnectionLoader;
             return this;
         }
 

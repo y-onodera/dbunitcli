@@ -3,7 +3,6 @@ package yo.dbunitcli.dataset.producer;
 import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.dataset.*;
 
 import java.util.List;
@@ -13,12 +12,9 @@ public class ComparableDataSetLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableDataSetLoader.class);
 
-    private final DatabaseConnectionLoader connectionLoader;
-
     private final Parameter parameter;
 
-    public ComparableDataSetLoader(DatabaseConnectionLoader connectionLoader, Parameter parameter) {
-        this.connectionLoader = connectionLoader;
+    public ComparableDataSetLoader(Parameter parameter) {
         this.parameter = parameter;
     }
 
@@ -34,9 +30,9 @@ public class ComparableDataSetLoader {
     private ComparableDataSetProducer getComparableDataSetProducer(ComparableDataSetParam param) throws DataSetException {
         switch (param.getSource()) {
             case TABLE:
-                return new ComparableDBDataSetProducer(this.connectionLoader.loadConnection(), param);
+                return new ComparableDBDataSetProducer(param);
             case SQL:
-                return new ComparableQueryDataSetProducer(this.connectionLoader.loadConnection(), param, this.parameter);
+                return new ComparableQueryDataSetProducer(param, this.parameter);
             case XLSX:
                 return new ComparableXlsxDataSetProducer(param);
             case XLS:

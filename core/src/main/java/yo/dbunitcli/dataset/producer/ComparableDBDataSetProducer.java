@@ -29,8 +29,8 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     private IDataSet databaseDataSet;
     private final boolean loadData;
 
-    public ComparableDBDataSetProducer(IDatabaseConnection connection, ComparableDataSetParam param) {
-        this.connection = connection;
+    public ComparableDBDataSetProducer(ComparableDataSetParam param) throws DataSetException {
+        this.connection = param.getDatabaseConnectionLoader().loadConnection();
         this.param = param;
         if (this.getParam().getSrc().isDirectory()) {
             this.src = this.getParam().getSrc().listFiles(File::isFile);

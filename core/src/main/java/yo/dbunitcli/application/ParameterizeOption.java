@@ -4,25 +4,20 @@ import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import yo.dbunitcli.dataset.DataSourceType;
+import yo.dbunitcli.application.component.DataSetLoadOption;
+import yo.dbunitcli.application.component.TemplateRenderOption;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.resource.Files;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 public class ParameterizeOption extends CommandLineOption {
 
-    @Option(name = "-param", usage = "directory or file extract data driven parameter at", required = true)
-    private File param;
+    private DataSetLoadOption param = new DataSetLoadOption("param");
 
-    @Option(name = "-paramType", usage = "table | sql | csv | csvq | xls | xlsx | fixed | reg | file | dir")
-    private String paramType = "csv";
-
-    @Option(name = "-includeMetaData", usage = "whether param include tableName and columns or not ")
-    private String includeMetaData = "false";
+    private TemplateRenderOption templateOption = new TemplateRenderOption("");
 
     @Option(name = "-cmd", usage = "compare | convert :data driven target cmd", required = true)
     private String cmd;
@@ -33,19 +28,21 @@ public class ParameterizeOption extends CommandLineOption {
         super(Parameter.none());
     }
 
+    @Override
+    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+        super.setUpComponent(parser, expandArgs);
+        this.param.parseArgument(expandArgs);
+        this.templateOption.parseArgument(expandArgs);
+        this.populateSettings(parser);
+    }
+
     public List<Map<String, Object>> loadParams() throws DataSetException {
-        return this.getComparableDataSetLoader().loadParam(
-                this.getDataSetParamBuilder()
-                        .setSrc(this.param)
-                        .setSource(DataSourceType.fromString(this.paramType))
-                        .setMapIncludeMetaData(Boolean.parseBoolean(this.includeMetaData))
-                        .build()
-        );
+        return this.getComparableDataSetLoader().loadParam(this.param.getParam().build());
     }
 
     public String[] createArgs(Parameter aParam) {
         aParam.getMap().put("rowNumber", aParam.getRowNumber());
-        return this.getTemplateRender()
+        return this.templateOption.getTemplateRender()
                 .render(this.templateArgs, aParam.getMap())
                 .split("\\r?\\n");
     }
@@ -65,16 +62,9 @@ public class ParameterizeOption extends CommandLineOption {
         }
     }
 
-    @Override
-    protected void assertDirectoryExists(CmdLineParser parser) throws CmdLineException {
-        this.assertFileParameter(parser, this.paramType, this.param, "param");
-    }
-
-    @Override
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
-        super.populateSettings(parser);
         try {
-            this.templateArgs = Files.read(this.getTemplateOption().getTemplate(), this.getTemplateOption().getTemplateEncoding());
+            this.templateArgs = Files.read(this.templateOption.getTemplate(), this.templateOption.getTemplateEncoding());
         } catch (IOException e) {
             throw new CmdLineException(parser, e);
         }

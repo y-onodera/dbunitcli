@@ -31,40 +31,40 @@ public class CompareOptionTest {
     @Test
     public void parseRequiredOldFileDir() throws Exception {
         this.expectedException.expect(Exception.class);
-        this.expectedException.expectMessage("Option \"-old\" is required");
+        this.expectedException.expectMessage("Option \"-src\" is required");
         this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-setting=" + this.baseDir + "/multidiff/setting.json"});
     }
 
     @Test
     public void parseRequiredNewFileDir() throws Exception {
         this.expectedException.expect(Exception.class);
-        this.expectedException.expectMessage("Option \"-new\" is required");
+        this.expectedException.expectMessage("Option \"-src\" is required");
         this.target.parse(new String[]{"-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"});
     }
 
     @Test
     public void parseRequiredOldFileDirExists() throws Exception {
         this.expectedException.expect(Exception.class);
-        this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-old=" + this.baseDir + "/notExists", "-setting=" + this.baseDir + "/multidiff/setting.json"});
+        this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/notExists", "-setting=" + this.baseDir + "/multidiff/setting.json"});
     }
 
     @Test
     public void parseRequiredNewFileDirExists() throws Exception {
         this.expectedException.expect(Exception.class);
-        this.target.parse(new String[]{"-new=" + this.baseDir + "/notExists", "-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"});
+        this.target.parse(new String[]{"-new.src=" + this.baseDir + "/notExists", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"});
     }
 
     @Test
     public void parseRequiredSettingFileExists() throws Exception {
         this.expectedException.expect(Exception.class);
-        this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/NotExists.json"});
+        this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/NotExists.json"});
     }
 
     @Test
     public void parseSettingTargetDirAndSettingFiles() throws Exception {
-        this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/filter/setting.json"});
-        assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewDir());
-        assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldDir());
+        this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/filter/setting.json"});
+        assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewData().getParam().getSrc());
+        assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldData().getParam().getSrc());
         assertEquals(2, this.target.getComparisonKeys().byNameSize());
         assertEquals(1, this.target.getComparisonKeys().getColumns("columnadd").size());
         assertEquals("key", this.target.getComparisonKeys().getColumns("columnadd").get(0));
@@ -77,45 +77,30 @@ public class CompareOptionTest {
     @Test
     public void parseArgumentsLoadableFromParameterFile() throws Exception {
         this.target.parse(new String[]{"@" + this.baseDir + "/paramResultDiffValidExpected.txt"});
-        assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewDir().getAbsoluteFile());
-        assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldDir().getAbsoluteFile());
+        assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewData().getParam().getSrc().getAbsoluteFile());
+        assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldData().getParam().getSrc().getAbsoluteFile());
         assertEquals(1, this.target.getComparisonKeys().getColumns("columnadd").size());
         assertEquals("key", this.target.getComparisonKeys().getColumns("columnadd").get(0));
     }
 
     @Test
     public void parseDefaultResultDirEqualsCurrentDir() throws Exception {
-        this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"});
-        assertEquals(new File(".").getAbsoluteFile(), this.target.getResultDir().getAbsoluteFile());
+        this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"});
+        assertEquals(new File(".").getAbsoluteFile(), this.target.getWriteOption().getResultDir().getAbsoluteFile());
     }
 
     @Test
     public void parseResultDirChangeableCommandLineParameter() throws Exception {
-        this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new"
-                , "-old=" + this.baseDir + "/multidiff/old"
+        this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new"
+                , "-old.src=" + this.baseDir + "/multidiff/old"
                 , "-setting=" + this.baseDir + "/multidiff/setting.json"
                 , "-result=" + this.baseDir + "/result"});
-        assertEquals(new File(this.baseDir, "result"), this.target.getResultDir());
-    }
-
-    @Test
-    public void parseDefaultEncodingIsSystemFileEncoding() throws Exception {
-        this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"});
-        assertEquals(System.getProperty("file.encoding"), this.target.getEncoding());
-    }
-
-    @Test
-    public void parseEncodingChangeableCommandLineParameter() throws Exception {
-        this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new"
-                , "-old=" + this.baseDir + "/multidiff/old"
-                , "-setting=" + this.baseDir + "/multidiff/setting.json"
-                , "-encoding=windows-31j"});
-        assertEquals("windows-31j", this.target.getEncoding());
+        assertEquals(new File(this.baseDir, "result"), this.target.getWriteOption().getResultDir());
     }
 
     @Test
     public void parseNoSettingFile() throws Exception {
-        this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-old=" + this.baseDir + "/multidiff/old"});
+        this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old"});
         assertEquals(AddSettingColumns.NONE, this.target.getComparisonKeys());
         assertEquals(AddSettingColumns.NONE, this.target.getColumnSettings().getExcludeColumns());
         assertEquals(AddSettingColumns.NONE, this.target.getColumnSettings().getOrderColumns());

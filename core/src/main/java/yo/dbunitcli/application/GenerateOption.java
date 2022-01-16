@@ -7,7 +7,10 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.stringtemplate.v4.STGroup;
+import yo.dbunitcli.application.component.DataSetLoadOption;
+import yo.dbunitcli.application.component.TemplateRenderOption;
 import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.writer.DBDataSetWriter;
@@ -23,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class GenerateOption extends ConvertOption {
+public class GenerateOption extends CommandLineOption {
 
     @Option(name = "-unit", usage = "record | table | dataset :generate per record or table or dataset")
     private String unit = "record";
@@ -39,6 +42,10 @@ public class GenerateOption extends ConvertOption {
 
     @Option(name = "-sqlFilePrefix", usage = "generate sqlFile fileName prefix")
     private String sqlFilePrefix = "";
+
+    private DataSetLoadOption src = new DataSetLoadOption("src");
+
+    private TemplateRenderOption templateOption = new TemplateRenderOption("");
 
     private String templateString;
 
@@ -68,7 +75,7 @@ public class GenerateOption extends ConvertOption {
     }
 
     public String resultPath(Map<String, Object> param) {
-        return this.getTemplateRender().render(this.getResultPath(), param);
+        return this.templateOption.getTemplateRender().render(this.getResultPath(), param);
     }
 
     public void write(File resultFile, Map<String, Object> param) throws IOException {
@@ -76,13 +83,26 @@ public class GenerateOption extends ConvertOption {
     }
 
     @Override
-    protected void populateSettings(CmdLineParser parser) throws CmdLineException {
-        super.populateSettings(parser);
+    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+        super.setUpComponent(parser, expandArgs);
+        this.src.parseArgument(expandArgs);
+        this.templateOption.parseArgument(expandArgs);
         this.getGenerateType().populateSettings(this, parser);
     }
 
+    public ComparableDataSet targetDataSet() throws DataSetException {
+        ComparableDataSetParam.Builder builder = this.src.getParam();
+        if (this.getGenerateType() == GenerateType.SETTINGS) {
+            builder.setUseJdbcMetaData(true);
+            builder.setLoadData(false);
+        } else if (this.getGenerateType() == GenerateType.SQL) {
+            builder.setUseJdbcMetaData(true);
+        }
+        return this.getComparableDataSetLoader().loadDataSet(builder.build());
+    }
+
     protected String getSqlTemplate() {
-        switch (DBDataSetWriter.Operation.valueOf(this.getOperation())) {
+        switch (DBDataSetWriter.Operation.valueOf(this.getWriteOption().getJdbcOption().getOperation())) {
             case INSERT:
                 return "sql/insertTemplate.txt";
             case DELETE:
@@ -96,23 +116,16 @@ public class GenerateOption extends ConvertOption {
         }
     }
 
-    @Override
-    protected void assertDirectoryExists(CmdLineParser parser) throws CmdLineException {
-        super.assertDirectoryExists(parser);
-        if (this.getGenerateType() != GenerateType.SETTINGS
-                && this.getGenerateType() != GenerateType.SQL
-        ) {
-            File template = this.getTemplateOption().getTemplate();
-            if (!template.exists() || !template.isFile()) {
-                throw new CmdLineException(parser, template + " is not exist file"
-                        , new IllegalArgumentException(template.toString()));
-            }
+    protected String getResultPath() {
+        if (getGenerateType() == GenerateType.SQL) {
+            String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
+            return this.getWriteOption().getResultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
         }
+        return this.getWriteOption().getResultPath();
     }
 
-    protected String getResultSqlFilePath() {
-        String tableName = this.getTemplateRender().getAttributeName("tableName");
-        return this.getResultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
+    public File getResultDir() {
+        return this.getWriteOption().getResultDir();
     }
 
     public enum GenerateUnit {
@@ -171,18 +184,15 @@ public class GenerateOption extends ConvertOption {
             @Override
             protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
                 JxlsTemplateRender.builder()
-                        .setTemplateParameterAttribute(option.getTemplateOption().getTemplateParameterAttribute())
+                        .setTemplateParameterAttribute(option.templateOption.getTemplateParameterAttribute())
                         .build()
-                        .render(option.getTemplateOption().getTemplate(), resultFile, param);
+                        .render(option.templateOption.getTemplate(), resultFile, param);
             }
         },
         SETTINGS {
             @Override
             protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
                 option.unit = "dataset";
-                option.setOutputEncoding("UTF-8");
-                option.setUseJdbcMetaData("true");
-                option.setLoadData("false");
                 try {
                     option.templateString = Files.readClasspathResource("settings/settingTemplate.txt");
                 } catch (IOException | URISyntaxException e) {
@@ -201,9 +211,7 @@ public class GenerateOption extends ConvertOption {
         SQL {
             @Override
             protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
-                option.setResultPath(option.getResultSqlFilePath());
                 option.unit = "table";
-                option.setUseJdbcMetaData("true");
                 try {
                     option.templateString = Files.readClasspathResource(option.getSqlTemplate());
                 } catch (IOException | URISyntaxException e) {
@@ -228,9 +236,14 @@ public class GenerateOption extends ConvertOption {
         }
 
         protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
+            File template = option.templateOption.getTemplate();
+            if (!template.exists() || !template.isFile()) {
+                throw new CmdLineException(parser, template + " is not exist file"
+                        , new IllegalArgumentException(template.toString()));
+            }
             if (this == GenerateType.TXT) {
                 try {
-                    option.templateString = Files.read(option.getTemplateOption().getTemplate(), option.getTemplateOption().getTemplateEncoding());
+                    option.templateString = Files.read(template, option.templateOption.getTemplateEncoding());
                 } catch (IOException e) {
                     throw new CmdLineException(parser, e);
                 }
@@ -242,11 +255,15 @@ public class GenerateOption extends ConvertOption {
         }
 
         protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
-            option.getTemplateRender().write(getStGroup()
+            String outputEncoding = option.getWriteOption().getOutputEncoding();
+            if (option.getGenerateType() == SETTINGS) {
+                outputEncoding = "UTF-8";
+            }
+            option.templateOption.getTemplateRender().write(getStGroup()
                     , option.templateString()
                     , param
                     , resultFile
-                    , option.getOutputEncoding());
+                    , outputEncoding);
         }
     }
 }

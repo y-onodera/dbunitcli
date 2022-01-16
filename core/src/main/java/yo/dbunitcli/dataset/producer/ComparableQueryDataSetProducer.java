@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.slf4j.Logger;
@@ -19,8 +18,8 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     private static final Logger logger = LoggerFactory.getLogger(ComparableQueryDataSetProducer.class);
     private final Parameter parameter;
 
-    public ComparableQueryDataSetProducer(IDatabaseConnection connection, ComparableDataSetParam param, Parameter parameter) {
-        super(connection, param);
+    public ComparableQueryDataSetProducer(ComparableDataSetParam param, Parameter parameter) throws DataSetException {
+        super(param);
         this.parameter = parameter;
     }
 
@@ -59,7 +58,7 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     protected String loadQuery(File aFile) throws IOException {
         return this.getTemplateLoader()
                 .render(aFile, this.getParameter())
-                .replace(";","");
+                .replace(";", "");
     }
 
 }

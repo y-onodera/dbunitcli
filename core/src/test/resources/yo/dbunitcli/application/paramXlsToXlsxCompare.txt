@@ -1,6 +1,6 @@
--old=src/test/resources/yo/dbunitcli/application/csv2xlsx/multifile.xls
--oldsource=xls
--new=src/test/resources/yo/dbunitcli/application/csv2xlsx/multifile.xlsx
--newsource=xlsx
+-old.src=src/test/resources/yo/dbunitcli/application/csv2xlsx/multifile.xls
+-old.srcType=xls
+-new.src=src/test/resources/yo/dbunitcli/application/csv2xlsx/multifile.xlsx
+-new.srcType=xlsx
 -setting=src/test/resources/yo/dbunitcli/application/csv2xlsx/setting.json
 -result=target/test-classes/yo/dbunitcli/application/xls2xlsx/result

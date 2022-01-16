@@ -1,12 +1,12 @@
 package yo.dbunitcli.application;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import yo.dbunitcli.dataset.FromJsonColumnSettingsBuilder;
+import yo.dbunitcli.application.component.DataSetLoadOption;
+import yo.dbunitcli.application.component.DataSetWriteOption;
 import yo.dbunitcli.dataset.*;
 
 import java.io.File;
@@ -14,23 +14,8 @@ import java.io.IOException;
 
 public class CompareOption extends CommandLineOption {
 
-    @Option(name = "-old", usage = "directory old files at", required = true)
-    private File oldDir;
-
-    @Option(name = "-oldsource", usage = "table | sql | csv | csvq | xls | xlsx | fixed | reg | file | dir")
-    private String oldsource = "csv";
-
-    @Option(name = "-oldHeaderName", usage = "set comma separate header name if old has no header ")
-    private String oldHeaderName;
-
-    @Option(name = "-new", usage = "directory new files at", required = true)
-    private File newDir;
-
-    @Option(name = "-newsource", usage = "table | sql | csv | csvq | xls | xlsx | fixed | reg | file | dir")
-    private String newsource = "csv";
-
-    @Option(name = "-newHeaderName", usage = "set comma separate header name if new has no header ")
-    private String newHeaderName;
+    @Option(name = "-setting", usage = "file comparison settings")
+    private File setting;
 
     @Option(name = "-expect", usage = "expected diff")
     private File expected;
@@ -38,19 +23,13 @@ public class CompareOption extends CommandLineOption {
     @Option(name = "-expectDetail", usage = "file define expected diff comparison settings")
     private File expectDetail;
 
+    private DataSetLoadOption oldData = new DataSetLoadOption("old");
+
+    private DataSetLoadOption newData = new DataSetLoadOption("new");
+
     private ColumnSettings expectDetailSettings;
 
-    public File getOldDir() {
-        return this.oldDir;
-    }
-
-    public File getNewDir() {
-        return this.newDir;
-    }
-
-    public File getExpected() {
-        return this.expected;
-    }
+    private ColumnSettings columnSettings;
 
     public CompareOption() {
         super(Parameter.none());
@@ -60,46 +39,62 @@ public class CompareOption extends CommandLineOption {
         super(param);
     }
 
-    public ComparableDataSet oldDataSet() throws DataSetException {
-        return this.getComparableDataSetLoader().loadDataSet(
-                this.getDataSetParamBuilder()
-                        .setSrc(this.getOldDir())
-                        .setSource(DataSourceType.fromString(this.oldsource))
-                        .ifMatch(!Strings.isNullOrEmpty(this.oldHeaderName)
-                                , it -> it.setHeaderName(this.oldHeaderName))
-                        .build()
-        );
+    public File getExpected() {
+        return this.expected;
+    }
+
+    public DataSetLoadOption getOldData() {
+        return oldData;
+    }
+
+    public DataSetLoadOption getNewData() {
+        return newData;
+    }
+
+    @Override
+    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+        super.setUpComponent(parser, expandArgs);
+        this.newData.parseArgument(expandArgs);
+        this.oldData.parseArgument(expandArgs);
+        this.populateSettings(parser);
+    }
+
+    public AddSettingColumns getComparisonKeys() {
+        return this.columnSettings.getComparisonKeys();
+    }
+
+    public ColumnSettings getColumnSettings() {
+        return this.columnSettings;
     }
 
     public ComparableDataSet newDataSet() throws DataSetException {
-        return this.getComparableDataSetLoader().loadDataSet(
-                this.getDataSetParamBuilder()
-                        .setSrc(this.getNewDir())
-                        .setSource(DataSourceType.fromString(this.newsource))
-                        .ifMatch(!Strings.isNullOrEmpty(this.newHeaderName)
-                                , it -> it.setHeaderName(this.newHeaderName))
-                        .build()
-        );
+        return this.getComparableDataSetLoader().loadDataSet(this.newData.getParam().build());
+    }
+
+    public ComparableDataSet oldDataSet() throws DataSetException {
+        return this.getComparableDataSetLoader().loadDataSet(this.oldData.getParam().build());
     }
 
     public ComparableDataSet resultDataSet() throws DataSetException {
+        DataSetWriteOption writeOption = this.getWriteOption();
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
-                        .setSrc(this.getResultFile())
-                        .setSource(DataSourceType.fromString(this.getResultType()))
                         .setColumnSettings(this.expectDetailSettings)
-                        .setEncoding(this.getOutputEncoding())
+                        .setSrc(writeOption.getResultFile())
+                        .setSource(DataSourceType.fromString(writeOption.getResultType()))
+                        .setEncoding(writeOption.getOutputEncoding())
                         .build()
         );
     }
 
     public ComparableDataSet expectDataSet() throws DataSetException {
+        DataSetWriteOption writeOption = this.getWriteOption();
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
                         .setSrc(this.getExpected())
-                        .setSource(DataSourceType.fromString(this.getResultType()))
                         .setColumnSettings(this.expectDetailSettings)
-                        .setEncoding(this.getOutputEncoding())
+                        .setSource(DataSourceType.fromString(writeOption.getResultType()))
+                        .setEncoding(writeOption.getOutputEncoding())
                         .build()
         );
     }
@@ -114,13 +109,12 @@ public class CompareOption extends CommandLineOption {
     }
 
     public IDataSetWriter expectedDiffWriter() throws DataSetException {
-        return this.writer(new File(this.getResultDir(), "expectedDiff"));
+        return this.writer(new File(this.getWriteOption().getResultDir(), "expectedDiff"));
     }
 
-    @Override
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
-        super.populateSettings(parser);
         try {
+            this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
             if (this.expectDetail != null) {
                 this.expectDetailSettings = new FromJsonColumnSettingsBuilder().build(this.expectDetail);
             } else {
@@ -130,11 +124,4 @@ public class CompareOption extends CommandLineOption {
             throw new CmdLineException(parser, e);
         }
     }
-
-    @Override
-    protected void assertDirectoryExists(CmdLineParser parser) throws CmdLineException {
-        assertFileParameter(parser, this.newsource, this.newDir, "new");
-        assertFileParameter(parser, this.oldsource, this.oldDir, "old");
-    }
-
 }

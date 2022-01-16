@@ -36,8 +36,8 @@ public class GenerateTest {
     public void testGenerateXlsx() throws Exception {
         Generate.main(new String[]{"@" + this.testResourcesDir + "/paramGenerateXlsx.txt"});
         Compare.main(new String[]{"@" + this.testResourcesDir + "/generate/table/expect/xlsx/compareResult.txt"
-                , "-old=" + this.testResourcesDir + "/generate/table/expect/xlsx/Test1"
-                , "-new=" + this.baseDir + "/generate/table/result/xlsx/Test1.xlsx"
+                , "-old.src=" + this.testResourcesDir + "/generate/table/expect/xlsx/Test1"
+                , "-new.src=" + this.baseDir + "/generate/table/result/xlsx/Test1.xlsx"
                 , "-result=" + this.baseDir + "/generate/table/result/xlsx/Test1"
         });
     }

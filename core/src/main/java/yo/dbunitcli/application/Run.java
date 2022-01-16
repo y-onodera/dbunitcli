@@ -10,7 +10,7 @@ public class Run implements Command<RunOption> {
 
     @Override
     public RunOption getOptions() {
-        return this.getOptions(Parameter.NONE);
+        return new RunOption();
     }
 
     @Override

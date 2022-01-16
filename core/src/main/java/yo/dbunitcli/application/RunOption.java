@@ -4,6 +4,7 @@ import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import yo.dbunitcli.application.component.TemplateRenderOption;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.producer.ComparableFileTableMetaData;
@@ -25,12 +26,23 @@ public class RunOption extends CommandLineOption {
     @Option(name = "-scriptType", usage = "sql | bat | cmd")
     private String scriptType = "sql";
 
+    private TemplateRenderOption templateOption = new TemplateRenderOption("");
+
     public RunOption() {
         super(Parameter.none());
     }
 
     public RunOption(Parameter param) {
         super(param);
+    }
+
+    @Override
+    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+        super.setUpComponent(parser, expandArgs);
+        this.templateOption.parseArgument(expandArgs);
+        if (!this.src.exists()) {
+            throw new CmdLineException(parser, src + " is not exist", new IllegalArgumentException(src.toString()));
+        }
     }
 
     public File getSrc() {
@@ -55,10 +67,6 @@ public class RunOption extends CommandLineOption {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    protected void assertDirectoryExists(CmdLineParser parser) throws CmdLineException {
-        this.assertFileParameter(parser, DataSourceType.FILE.getType(), this.src, "src");
-    }
 
     public Runner runner() {
         return this.getScriptType().createRunner(this);
@@ -68,9 +76,9 @@ public class RunOption extends CommandLineOption {
         CMD("cmd"), BAT("bat"), SQL("sql") {
             @Override
             public Runner createRunner(RunOption aOption) {
-                return new SqlRunner(aOption.getDatabaseConnectionLoader()
+                return new SqlRunner(aOption.getWriteOption().getJdbcOption().getDatabaseConnectionLoader()
                         , aOption.getParameter().getMap()
-                        , aOption.getTemplateRender()
+                        , aOption.templateOption.getTemplateRender()
                 );
             }
         }, Ant("xml") {
@@ -95,7 +103,7 @@ public class RunOption extends CommandLineOption {
 
         public Runner createRunner(RunOption aOption) {
             return new CmdRunner(aOption.getParameter().getMap()
-                    , aOption.getTemplateRender()
+                    , aOption.templateOption.getTemplateRender()
             );
         }
     }
