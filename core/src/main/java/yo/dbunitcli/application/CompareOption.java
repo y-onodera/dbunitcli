@@ -80,7 +80,7 @@ public class CompareOption extends CommandLineOption {
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
                         .setColumnSettings(this.expectDetailSettings)
-                        .setSrc(writeOption.getResultFile())
+                        .setSrc(writeOption.getResultDir())
                         .setSource(DataSourceType.fromString(writeOption.getResultType()))
                         .setEncoding(writeOption.getOutputEncoding())
                         .build()
