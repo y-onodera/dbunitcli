@@ -60,7 +60,7 @@ public class DataSetLoadOption extends PrefixArgumentsParser {
 
     @Override
     public void setUpComponent(CmdLineParser parser, String[] args) throws CmdLineException {
-        this.assertFileParameter(parser, this.srcType, this.src);
+        this.assertFileExists(parser, this.src);
         this.populateSettings(parser);
         DataSourceType type = DataSourceType.fromString(this.srcType);
         this.builder.setSource(type)
@@ -91,13 +91,6 @@ public class DataSetLoadOption extends PrefixArgumentsParser {
 
     public ComparableDataSetParam.Builder getParam() {
         return this.builder;
-    }
-
-    protected void assertFileParameter(CmdLineParser parser, String source, File dir) throws CmdLineException {
-        this.assertFileExists(parser, dir);
-        if (DataSourceType.fromString(source).isUseDatabase()) {
-            this.jdbcOption.validate(parser);
-        }
     }
 
     protected void assertFileExists(CmdLineParser parser, File file) throws CmdLineException {
