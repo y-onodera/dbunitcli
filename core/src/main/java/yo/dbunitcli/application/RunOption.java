@@ -14,8 +14,8 @@ import yo.dbunitcli.fileprocessor.Runner;
 import yo.dbunitcli.fileprocessor.SqlRunner;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RunOption extends CommandLineOption {
@@ -23,8 +23,8 @@ public class RunOption extends CommandLineOption {
     @Option(name = "-src", usage = "directory script exists or file should be run", required = true)
     private File src;
 
-    @Option(name = "-scriptType", usage = "sql | bat | cmd")
-    private String scriptType = "sql";
+    @Option(name = "-scriptType")
+    private ScriptType scriptType = ScriptType.sql;
 
     private TemplateRenderOption templateOption = new TemplateRenderOption("");
 
@@ -41,15 +41,15 @@ public class RunOption extends CommandLineOption {
     }
 
     public ScriptType getScriptType() {
-        return ScriptType.fromString(this.scriptType);
+        return this.scriptType;
     }
 
     public List<File> targetFiles() throws DataSetException {
         return this.getComparableDataSetLoader().loadDataSet(
                         this.getDataSetParamBuilder()
                                 .setSrc(this.src)
-                                .setSource(DataSourceType.FILE)
-                                .setExtension(this.scriptType)
+                                .setSource(DataSourceType.file)
+                                .setExtension(this.scriptType.getExtension())
                                 .setMapIncludeMetaData(false)
                                 .build())
                 .toMap()
@@ -63,7 +63,7 @@ public class RunOption extends CommandLineOption {
     }
 
     @Override
-    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         this.templateOption.parseArgument(expandArgs);
         if (!this.src.exists()) {
@@ -71,8 +71,18 @@ public class RunOption extends CommandLineOption {
         }
     }
 
+    @Override
+    public OptionParam expandOption(Map<String, String> args) {
+        OptionParam result = new OptionParam(this.getPrefix(), args);
+        result.put("-src", this.src);
+        result.put("-scriptType", this.scriptType, ScriptType.class);
+        result.putAll(this.templateOption.expandOption(args));
+        result.putAll(super.expandOption(args));
+        return result;
+    }
+
     enum ScriptType {
-        CMD("cmd"), BAT("bat"), SQL("sql") {
+        cmd, bat, sql {
             @Override
             public Runner createRunner(RunOption aOption) {
                 return new SqlRunner(aOption.getWriteOption().getJdbcOption().getDatabaseConnectionLoader()
@@ -80,30 +90,26 @@ public class RunOption extends CommandLineOption {
                         , aOption.templateOption.getTemplateRender()
                 );
             }
-        }, Ant("xml") {
+        }, ant {
             @Override
             public Runner createRunner(RunOption aOption) {
                 return new AntRunner(aOption.getParameter().getMap());
             }
+
+            @Override
+            public String getExtension() {
+                return "xml";
+            }
         };
-
-        private final String type;
-
-        ScriptType(String type) {
-            this.type = type;
-        }
-
-        static ScriptType fromString(String type) {
-            return Arrays.stream(ScriptType.values())
-                    .filter(it -> it.type.equals(type))
-                    .findFirst()
-                    .get();
-        }
 
         public Runner createRunner(RunOption aOption) {
             return new CmdRunner(aOption.getParameter().getMap()
                     , aOption.templateOption.getTemplateRender()
             );
+        }
+
+        public String getExtension() {
+            return this.toString();
         }
     }
 }

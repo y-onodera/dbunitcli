@@ -1,6 +1,7 @@
 package yo.dbunitcli.application;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -11,6 +12,8 @@ import yo.dbunitcli.dataset.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class CompareOption extends CommandLineOption {
 
@@ -52,11 +55,23 @@ public class CompareOption extends CommandLineOption {
     }
 
     @Override
-    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         this.newData.parseArgument(expandArgs);
         this.oldData.parseArgument(expandArgs);
         this.populateSettings(parser);
+    }
+
+    @Override
+    public OptionParam expandOption(Map<String, String> args) {
+        OptionParam result = new OptionParam(this.getPrefix(), args);
+        result.put("-setting", this.setting);
+        result.putAll(this.newData.expandOption(args));
+        result.putAll(this.oldData.expandOption(args));
+        result.put("-expect", this.expected);
+        result.put("-expectDetail", this.expectDetail);
+        result.putAll(super.expandOption(args));
+        return result;
     }
 
     public AddSettingColumns getComparisonKeys() {
@@ -81,7 +96,7 @@ public class CompareOption extends CommandLineOption {
                 this.getDataSetParamBuilder()
                         .setColumnSettings(this.expectDetailSettings)
                         .setSrc(writeOption.getResultDir())
-                        .setSource(DataSourceType.fromString(writeOption.getResultType()))
+                        .setSource(writeOption.getResultType())
                         .setEncoding(writeOption.getOutputEncoding())
                         .build()
         );
@@ -93,7 +108,7 @@ public class CompareOption extends CommandLineOption {
                 this.getDataSetParamBuilder()
                         .setSrc(this.getExpected())
                         .setColumnSettings(this.expectDetailSettings)
-                        .setSource(DataSourceType.fromString(writeOption.getResultType()))
+                        .setSource(writeOption.getResultType())
                         .setEncoding(writeOption.getOutputEncoding())
                         .build()
         );

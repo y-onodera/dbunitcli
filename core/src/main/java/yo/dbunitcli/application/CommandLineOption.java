@@ -1,5 +1,6 @@
 package yo.dbunitcli.application;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
@@ -17,6 +18,7 @@ import yo.dbunitcli.dataset.writer.DataSetWriterLoader;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 abstract public class CommandLineOption extends PrefixArgumentsParser {
@@ -26,17 +28,13 @@ abstract public class CommandLineOption extends PrefixArgumentsParser {
 
     private final Parameter parameter;
 
-    private DataSetWriteOption writeOption;
+    private DataSetWriteOption writeOption = new DataSetWriteOption("result");
 
     private String resultFile = "result";
 
     public CommandLineOption(Parameter param) {
         super("");
         this.parameter = param;
-    }
-
-    public Parameter getParameter() {
-        return this.parameter;
     }
 
     public void parse(String[] args) throws Exception {
@@ -47,6 +45,17 @@ abstract public class CommandLineOption extends PrefixArgumentsParser {
             this.resultFile = this.resultFile.substring(0, this.resultFile.lastIndexOf("."));
         }
         this.parseArgument(expandArgs);
+    }
+
+    @Override
+    public OptionParam expandOption(Map<String, String> args) {
+        OptionParam result = super.expandOption(args);
+        result.putAll(this.writeOption.expandOption(args));
+        return result;
+    }
+
+    public Parameter getParameter() {
+        return this.parameter;
     }
 
     public DataSetWriteOption getWriteOption() {
@@ -61,8 +70,8 @@ abstract public class CommandLineOption extends PrefixArgumentsParser {
         return new DataSetWriterLoader().get(this.writeOption.getParam().setResultDir(outputTo).build());
     }
 
-    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
-        this.writeOption = new DataSetWriteOption("result", this.resultFile);
+    @Override
+    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         this.writeOption.parseArgument(expandArgs);
         this.parameter.getMap().putAll(this.inputParam);
     }
@@ -79,5 +88,9 @@ abstract public class CommandLineOption extends PrefixArgumentsParser {
         Method expand = CmdLineParser.class.getDeclaredMethod("expandAtFiles", String[].class);
         expand.setAccessible(true);
         return (String[]) expand.invoke(parser, (Object) args);
+    }
+
+    protected String getResultPath() {
+        return Strings.isNullOrEmpty(this.writeOption.getResultPath()) ? this.resultFile : this.writeOption.getResultPath();
     }
 }

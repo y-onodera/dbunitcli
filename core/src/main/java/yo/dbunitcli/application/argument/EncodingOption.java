@@ -6,24 +6,24 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class HeaderNameOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
+public class EncodingOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
 
-    @Option(name = "-headerName", usage = "comma separate header name. if set,all rows treat data rows")
-    private String headerName;
+    @Option(name = "-encoding", usage = "csv file encoding")
+    private String encoding = System.getProperty("file.encoding");
 
-    public HeaderNameOption(String prefix) {
+    public EncodingOption(String prefix) {
         super(prefix);
     }
 
     @Override
     public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
-        return builder.setHeaderName(this.headerName);
+        return builder.setEncoding(this.encoding);
     }
 
     @Override
     public OptionParam expandOption(Map<String, String> args) {
         OptionParam result = super.expandOption(args);
-        result.put("-headerName", this.headerName);
+        result.put("-encoding", this.encoding);
         return result;
     }
 

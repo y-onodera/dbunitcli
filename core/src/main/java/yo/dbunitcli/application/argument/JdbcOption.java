@@ -4,16 +4,17 @@ import com.google.common.base.Strings;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class JdbcOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
+public class JdbcOption extends PrefixArgumentsParser {
 
     @Option(name = "-jdbcProperties", usage = "use connect database. [url=,user=,pass=]")
     private File jdbcProperties;
@@ -27,12 +28,6 @@ public class JdbcOption extends PrefixArgumentsParser implements ComparableDataS
     @Option(name = "-jdbcPass", usage = "use connect database. override jdbcProperties value")
     private String jdbcPass;
 
-    @Option(name = "-useJdbcMetaData", usage = "default false. whether load metaData from jdbc or not")
-    private String useJdbcMetaData = "false";
-
-    @Option(name = "-op", usage = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
-    private String operation;
-
     private Properties jdbcProp;
 
     public JdbcOption(String prefix) {
@@ -43,18 +38,8 @@ public class JdbcOption extends PrefixArgumentsParser implements ComparableDataS
         return jdbcProp;
     }
 
-    public String getOperation() {
-        return operation;
-    }
-
     public DatabaseConnectionLoader getDatabaseConnectionLoader() {
         return new DatabaseConnectionLoader(this.getJdbcProp());
-    }
-
-    @Override
-    public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
-        return builder.setUseJdbcMetaData(Boolean.parseBoolean(this.useJdbcMetaData))
-                .setDatabaseConnectionLoader(this.getDatabaseConnectionLoader());
     }
 
     @Override
@@ -64,9 +49,22 @@ public class JdbcOption extends PrefixArgumentsParser implements ComparableDataS
         } catch (IOException e) {
             throw new CmdLineException(parser, e.getMessage(), e);
         }
+        this.validate(parser);
     }
 
-    public void validate(CmdLineParser parser) throws CmdLineException {
+    @Override
+    public OptionParam expandOption(Map<String, String> args) {
+        OptionParam result = super.expandOption(args);
+        result.put("-jdbcProperties", this.jdbcProperties);
+        if (Strings.isNullOrEmpty(result.get("-jdbcProperties"))) {
+            result.put("-jdbcUrl", this.jdbcUrl);
+            result.put("-jdbcUser", this.jdbcUser);
+            result.put("-jdbcPass", this.jdbcPass);
+        }
+        return result;
+    }
+
+    protected void validate(CmdLineParser parser) throws CmdLineException {
         if (Stream.of(this.jdbcUrl, this.jdbcUser, this.jdbcPass)
                 .anyMatch(Strings::isNullOrEmpty)) {
             if (this.jdbcProperties == null) {

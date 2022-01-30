@@ -7,6 +7,8 @@ import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.Parameter;
 
+import java.util.Map;
+
 public class ConvertOption extends CommandLineOption {
 
     private DataSetLoadOption src = new DataSetLoadOption("");
@@ -20,9 +22,17 @@ public class ConvertOption extends CommandLineOption {
     }
 
     @Override
-    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         this.src.parseArgument(expandArgs);
+    }
+
+    @Override
+    public OptionParam expandOption(Map<String, String> args) {
+        OptionParam result = new OptionParam(this.getPrefix(), args);
+        result.putAll(this.src.expandOption(args));
+        result.putAll(super.expandOption(args));
+        return result;
     }
 
     public ComparableDataSet targetDataSet() throws DataSetException {

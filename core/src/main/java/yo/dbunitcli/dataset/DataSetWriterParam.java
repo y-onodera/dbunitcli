@@ -1,13 +1,14 @@
 package yo.dbunitcli.dataset;
 
+import yo.dbunitcli.dataset.writer.DBDataSetWriter;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.File;
 
 public class DataSetWriterParam {
     private final DatabaseConnectionLoader databaseConnectionLoader;
-    private final String resultType;
-    private final String operation;
+    private final DataSourceType resultType;
+    private final DBDataSetWriter.Operation operation;
     private final File resultDir;
     private final String outputEncoding;
     private final String excelTable;
@@ -27,28 +28,28 @@ public class DataSetWriterParam {
         return this.databaseConnectionLoader;
     }
 
-    public String getResultType() {
-        return resultType;
+    public DataSourceType getResultType() {
+        return this.resultType;
     }
 
-    public String getOperation() {
-        return operation;
+    public DBDataSetWriter.Operation getOperation() {
+        return this.operation;
     }
 
     public File getResultDir() {
-        return resultDir;
+        return this.resultDir;
     }
 
     public String getOutputEncoding() {
-        return outputEncoding;
+        return this.outputEncoding;
     }
 
     public String getExcelTable() {
-        return excelTable;
+        return this.excelTable;
     }
 
     public boolean isExportEmptyTable() {
-        return exportEmptyTable;
+        return this.exportEmptyTable;
     }
 
     @Override
@@ -70,8 +71,8 @@ public class DataSetWriterParam {
 
     public static class Builder {
         private DatabaseConnectionLoader databaseConnectionLoader;
-        private String resultType;
-        private String operation;
+        private DataSourceType resultType;
+        private DBDataSetWriter.Operation operation;
         private File resultDir;
         private String outputEncoding;
         private String excelTable;
@@ -90,20 +91,20 @@ public class DataSetWriterParam {
             return this;
         }
 
-        public String getResultType() {
+        public DataSourceType getResultType() {
             return resultType;
         }
 
-        public Builder setResultType(String resultType) {
+        public Builder setResultType(DataSourceType resultType) {
             this.resultType = resultType;
             return this;
         }
 
-        public String getOperation() {
+        public DBDataSetWriter.Operation getOperation() {
             return operation;
         }
 
-        public Builder setOperation(String operation) {
+        public Builder setOperation(DBDataSetWriter.Operation operation) {
             this.operation = operation;
             return this;
         }

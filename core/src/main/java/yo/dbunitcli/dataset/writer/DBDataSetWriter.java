@@ -21,7 +21,7 @@ public class DBDataSetWriter implements IDataSetWriter {
     private final DefaultDataSet iDataSet;
 
     public DBDataSetWriter(DataSetWriterParam param) throws DataSetException {
-        this.operation = Operation.valueOf(param.getOperation()).op;
+        this.operation = param.getOperation().op;
         this.connection = param.getDatabaseConnectionLoader().loadConnection();
         this.iDataSet = new DefaultDataSet();
     }
@@ -50,7 +50,7 @@ public class DBDataSetWriter implements IDataSetWriter {
         }
     }
 
-    public  enum Operation {
+    public enum Operation {
         INSERT(DatabaseOperation.INSERT),
         UPDATE(DatabaseOperation.UPDATE),
         DELETE(DatabaseOperation.DELETE),

@@ -13,15 +13,15 @@ public class DataSetWriterLoader {
 
     public IDataSetWriter get(DataSetWriterParam param) throws DataSetException {
         logger.info("create DataSetWriter param:{}", param);
-        if (DataSourceType.TABLE.isEqual(param.getResultType())) {
+        if (DataSourceType.table == param.getResultType()) {
             return new DBDataSetWriter(param);
-        } else if (DataSourceType.XLSX.isEqual(param.getResultType())) {
+        } else if (DataSourceType.xlsx == param.getResultType()) {
             return new XlsxDataSetWriter(param);
-        } else if (DataSourceType.XLS.isEqual(param.getResultType())) {
+        } else if (DataSourceType.xls == param.getResultType()) {
             return new XlsDataSetWriter(param);
-        } else if (DataSourceType.CSV.isEqual(param.getResultType())) {
+        } else if (DataSourceType.csv == param.getResultType()) {
             return new CsvDataSetWriterWrapper(param);
         }
-        throw new UnsupportedOperationException(param.getResultType());
+        throw new UnsupportedOperationException(param.getResultType().toString());
     }
 }

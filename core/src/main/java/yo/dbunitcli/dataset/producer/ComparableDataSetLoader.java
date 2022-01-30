@@ -29,25 +29,25 @@ public class ComparableDataSetLoader {
 
     private ComparableDataSetProducer getComparableDataSetProducer(ComparableDataSetParam param) throws DataSetException {
         switch (param.getSource()) {
-            case TABLE:
+            case table:
                 return new ComparableDBDataSetProducer(param);
-            case SQL:
+            case sql:
                 return new ComparableQueryDataSetProducer(param, this.parameter);
-            case XLSX:
+            case xlsx:
                 return new ComparableXlsxDataSetProducer(param);
-            case XLS:
+            case xls:
                 return new ComparableXlsDataSetProducer(param);
-            case CSVQ:
+            case csvq:
                 return new ComparableCSVQueryDataSetProducer(param, this.parameter);
-            case CSV:
+            case csv:
                 return new ComparableCsvDataSetProducer(param);
-            case REGSP:
+            case reg:
                 return new ComparableRegexSplitDataSetProducer(param);
-            case FIXED:
+            case fixed:
                 return new ComparableFixedFileDataSetProducer(param);
-            case FILE:
+            case file:
                 return new ComparableFileDataSetProducer(param);
-            case DIR:
+            case dir:
                 return new ComparableDirectoryDataSetProducer(param);
         }
         throw new UnsupportedOperationException(param.getSource().name());

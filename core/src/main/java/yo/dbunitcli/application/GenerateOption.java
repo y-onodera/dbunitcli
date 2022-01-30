@@ -28,11 +28,12 @@ import java.util.stream.Stream;
 
 public class GenerateOption extends CommandLineOption {
 
-    @Option(name = "-unit", usage = "record | table | dataset :generate per record or table or dataset")
-    private String unit = "record";
 
-    @Option(name = "-generateType", usage = "txt | xlsx | settings | sql :generate planTxt or xlsx")
-    private String generateType = "txt";
+    @Option(name = "-generateType")
+    private GenerateType generateType = GenerateType.txt;
+
+    @Option(name = "-unit")
+    private GenerateUnit unit = GenerateUnit.record;
 
     @Option(name = "-commit", usage = "default commit;whether commit or not generate sql")
     private String commit = "true";
@@ -42,6 +43,9 @@ public class GenerateOption extends CommandLineOption {
 
     @Option(name = "-sqlFilePrefix", usage = "generate sqlFile fileName prefix")
     private String sqlFilePrefix = "";
+
+    @Option(name = "-op")
+    private DBDataSetWriter.Operation operation;
 
     private DataSetLoadOption src = new DataSetLoadOption("src");
 
@@ -62,11 +66,11 @@ public class GenerateOption extends CommandLineOption {
     }
 
     public GenerateUnit getUnit() {
-        return GenerateUnit.valueOf(this.unit.toUpperCase());
+        return this.unit;
     }
 
     public GenerateType getGenerateType() {
-        return GenerateType.fromString(this.generateType);
+        return this.generateType;
     }
 
     public Stream<Map<String, Object>> parameterStream() throws DataSetException {
@@ -83,26 +87,47 @@ public class GenerateOption extends CommandLineOption {
     }
 
     @Override
-    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         this.src.parseArgument(expandArgs);
         this.templateOption.parseArgument(expandArgs);
         this.getGenerateType().populateSettings(this, parser);
     }
 
+    @Override
+    public OptionParam expandOption(Map<String, String> args) {
+        OptionParam result = new OptionParam(this.getPrefix(), args);
+        result.putAll(this.src.expandOption(args));
+        result.put("-generateType", this.generateType, GenerateType.class);
+        if (result.hasValue("-generateType")
+                && !(GenerateType.valueOf(result.get("-generateType")) == GenerateType.sql
+                || GenerateType.valueOf(result.get("-generateType")) == GenerateType.settings)) {
+            result.put("-unit", this.unit, GenerateUnit.class);
+        }
+        if (result.hasValue("-generateType") && GenerateType.valueOf(result.get("-generateType")) == GenerateType.sql) {
+            result.put("-commit", this.commit);
+            result.put("-op", this.operation, DBDataSetWriter.Operation.class);
+            result.put("-sqlFilePrefix", this.sqlFilePrefix);
+            result.put("-sqlFileSuffix", this.sqlFileSuffix);
+        }
+        result.putAll(this.templateOption.expandOption(args));
+        result.putAll(super.expandOption(args));
+        return result;
+    }
+
     public ComparableDataSet targetDataSet() throws DataSetException {
         ComparableDataSetParam.Builder builder = this.src.getParam();
-        if (this.getGenerateType() == GenerateType.SETTINGS) {
+        if (this.getGenerateType() == GenerateType.settings) {
             builder.setUseJdbcMetaData(true);
             builder.setLoadData(false);
-        } else if (this.getGenerateType() == GenerateType.SQL) {
+        } else if (this.getGenerateType() == GenerateType.sql) {
             builder.setUseJdbcMetaData(true);
         }
         return this.getComparableDataSetLoader().loadDataSet(builder.build());
     }
 
     protected String getSqlTemplate() {
-        switch (DBDataSetWriter.Operation.valueOf(this.getWriteOption().getJdbcOption().getOperation())) {
+        switch (this.operation) {
             case INSERT:
                 return "sql/insertTemplate.txt";
             case DELETE:
@@ -117,11 +142,11 @@ public class GenerateOption extends CommandLineOption {
     }
 
     protected String getResultPath() {
-        if (getGenerateType() == GenerateType.SQL) {
+        if (getGenerateType() == GenerateType.sql) {
             String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
-            return this.getWriteOption().getResultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
+            return super.getResultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
         }
-        return this.getWriteOption().getResultPath();
+        return super.getResultPath();
     }
 
     public File getResultDir() {
@@ -129,7 +154,7 @@ public class GenerateOption extends CommandLineOption {
     }
 
     public enum GenerateUnit {
-        RECORD {
+        record {
             @Override
             public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws DataSetException {
                 return dataSet.toMap(true).stream()
@@ -145,7 +170,7 @@ public class GenerateOption extends CommandLineOption {
             }
         },
 
-        TABLE {
+        table {
             @Override
             public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws
                     DataSetException {
@@ -167,7 +192,7 @@ public class GenerateOption extends CommandLineOption {
                         });
             }
         },
-        DATASET;
+        dataset;
 
         public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws DataSetException {
             Map<String, Object> param = new HashMap<>();
@@ -179,8 +204,8 @@ public class GenerateOption extends CommandLineOption {
     }
 
     public enum GenerateType {
-        TXT,
-        XLSX {
+        txt,
+        xlsx {
             @Override
             protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
                 JxlsTemplateRender.builder()
@@ -189,10 +214,10 @@ public class GenerateOption extends CommandLineOption {
                         .render(option.templateOption.getTemplate(), resultFile, param);
             }
         },
-        SETTINGS {
+        settings {
             @Override
             protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
-                option.unit = "dataset";
+                option.unit = GenerateUnit.dataset;
                 try {
                     option.templateString = Files.readClasspathResource("settings/settingTemplate.txt");
                 } catch (IOException | URISyntaxException e) {
@@ -208,10 +233,10 @@ public class GenerateOption extends CommandLineOption {
                         .createSTGroup("settings/settingTemplate.stg");
             }
         },
-        SQL {
+        sql {
             @Override
             protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
-                option.unit = "table";
+                option.unit = GenerateUnit.table;
                 try {
                     option.templateString = Files.readClasspathResource(option.getSqlTemplate());
                 } catch (IOException | URISyntaxException e) {
@@ -228,20 +253,13 @@ public class GenerateOption extends CommandLineOption {
             }
         };
 
-        static GenerateType fromString(String name) {
-            return Stream.of(GenerateType.values())
-                    .filter(it -> it.name().equals(name.toUpperCase()))
-                    .findFirst()
-                    .get();
-        }
-
         protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
             File template = option.templateOption.getTemplate();
             if (!template.exists() || !template.isFile()) {
                 throw new CmdLineException(parser, template + " is not exist file"
                         , new IllegalArgumentException(template.toString()));
             }
-            if (this == GenerateType.TXT) {
+            if (this == GenerateType.txt) {
                 try {
                     option.templateString = Files.read(template, option.templateOption.getTemplateEncoding());
                 } catch (IOException e) {
@@ -256,7 +274,7 @@ public class GenerateOption extends CommandLineOption {
 
         protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
             String outputEncoding = option.getWriteOption().getOutputEncoding();
-            if (option.getGenerateType() == SETTINGS) {
+            if (option.getGenerateType() == settings) {
                 outputEncoding = "UTF-8";
             }
             option.templateOption.getTemplateRender().write(getStGroup()

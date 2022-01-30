@@ -1,20 +1,22 @@
 package yo.dbunitcli.application.argument;
 
-import com.google.common.base.Strings;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.DataSetWriterParam;
+import yo.dbunitcli.dataset.DataSourceType;
+import yo.dbunitcli.dataset.writer.DBDataSetWriter;
 
 import java.io.File;
+import java.util.Map;
 
 public class DataSetWriteOption extends PrefixArgumentsParser {
 
     @Option(name = "-result", usage = "directory result files at")
     private File resultDir = new File(".");
 
-    @Option(name = "-resultType", usage = "csv | xls | xlsx | table ")
-    private String resultType = "csv";
+    @Option(name = "-resultType")
+    private DataSourceType resultType = DataSourceType.csv;
 
     @Option(name = "-exportEmptyTable", usage = "if true then empty table is not export")
     private String exportEmptyTable = "true";
@@ -25,40 +27,72 @@ public class DataSetWriteOption extends PrefixArgumentsParser {
     @Option(name = "-outputEncoding", usage = "output csv file encoding")
     private String outputEncoding = "UTF-8";
 
-    private final String defaultResultPath;
+    @Option(name = "-op", usage = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
+    private DBDataSetWriter.Operation operation;
+
+    @Option(name = "-excelTable", usage = "SHEET or BOOK")
+    private String excelTable = "SHEET";
 
     private final JdbcOption jdbcOption;
 
-    private final ExcelOption excelOption;
-
     private final DataSetWriterParam.Builder builder;
 
-    public DataSetWriteOption(String prefix, String resultFile) {
+    public DataSetWriteOption(String prefix) {
         super(prefix);
-        this.defaultResultPath = resultFile;
         this.jdbcOption = new JdbcOption(prefix);
-        this.excelOption = new ExcelOption(prefix);
         this.builder = DataSetWriterParam.builder();
     }
 
     @Override
-    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
-        this.jdbcOption.parseArgument(expandArgs);
-        this.excelOption.parseArgument(expandArgs);
-        this.builder.setResultType(this.resultType)
-                .setOutputEncoding(this.outputEncoding)
-                .setExportEmptyTable(Boolean.parseBoolean(this.exportEmptyTable))
-                .setOperation(this.jdbcOption.getOperation())
-                .setDatabaseConnectionLoader(this.jdbcOption.getDatabaseConnectionLoader())
-                .setExcelTable(this.excelOption.getExcelTable());
+        this.builder.setResultType(this.resultType);
+        if (this.resultType == DataSourceType.table) {
+            this.jdbcOption.parseArgument(expandArgs);
+            this.builder.setOperation(this.operation)
+                    .setDatabaseConnectionLoader(this.jdbcOption.getDatabaseConnectionLoader());
+        } else {
+            this.builder.setExportEmptyTable(Boolean.parseBoolean(this.exportEmptyTable));
+            if (this.resultType == DataSourceType.csv) {
+                this.builder.setOutputEncoding(this.outputEncoding);
+            } else {
+                this.builder.setExcelTable(this.excelTable);
+            }
+        }
+    }
+
+    @Override
+    public OptionParam expandOption(Map<String, String> args) {
+        OptionParam result = super.expandOption(args);
+        result.put("-resultType", this.resultType,DataSourceType.class);
+        if (!result.hasValue("-resultType")) {
+            return result;
+        }
+        try {
+            DataSourceType type = DataSourceType.valueOf(result.get("-resultType"));
+            if (type == DataSourceType.table) {
+                result.put("-op", this.operation,DBDataSetWriter.Operation.class);
+                result.putAll(this.jdbcOption.expandOption(args));
+            } else {
+                result.put("-result", this.resultDir);
+                result.put("-resultPath", this.resultPath);
+                result.put("-exportEmptyTable", this.exportEmptyTable);
+                if (type == DataSourceType.csv) {
+                    result.put("-outputEncoding", this.outputEncoding);
+                } else {
+                    result.put("-excelTable", this.excelTable);
+                }
+            }
+        } catch (Throwable th) {
+        }
+        return result;
     }
 
     public DataSetWriterParam.Builder getParam() {
         return builder;
     }
 
-    public String getResultType() {
+    public DataSourceType getResultType() {
         return resultType;
     }
 
@@ -71,11 +105,7 @@ public class DataSetWriteOption extends PrefixArgumentsParser {
     }
 
     public String getResultPath() {
-        return Strings.isNullOrEmpty(this.resultPath) ? this.defaultResultPath : this.resultPath;
-    }
-
-    public File getResultFile() {
-        return new File(this.resultDir, this.getResultPath());
+        return this.resultPath;
     }
 
     public String getOutputEncoding() {

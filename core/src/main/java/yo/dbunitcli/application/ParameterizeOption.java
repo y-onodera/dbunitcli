@@ -19,7 +19,7 @@ public class ParameterizeOption extends CommandLineOption {
 
     private TemplateRenderOption templateOption = new TemplateRenderOption("");
 
-    @Option(name = "-cmd", usage = "compare | convert :data driven target cmd", required = true)
+    @Option(name = "-cmd", usage = "data driven target cmd", required = true)
     private String cmd;
 
     private String templateArgs;
@@ -29,11 +29,20 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     @Override
-    protected void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         this.param.parseArgument(expandArgs);
         this.templateOption.parseArgument(expandArgs);
         this.populateSettings(parser);
+    }
+
+    @Override
+    public OptionParam expandOption(Map<String, String> args) {
+        OptionParam result = new OptionParam(this.getPrefix(), args);
+        result.putAll(this.param.expandOption(args));
+        result.putAll(this.templateOption.expandOption(args));
+        result.putAll(super.expandOption(args));
+        return result;
     }
 
     public List<Map<String, Object>> loadParams() throws DataSetException {

@@ -8,14 +8,12 @@ import yo.dbunitcli.resource.poi.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import java.io.File;
+import java.util.Map;
 
 public class ExcelOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
 
     @Option(name = "-xlsxSchema", usage = "schema use read xlsx")
     private File xlsxSchemaSource;
-
-    @Option(name = "-excelTable", usage = "SHEET or BOOK")
-    private String excelTable = "SHEET";
 
     private XlsxSchema xlsxSchema;
 
@@ -33,11 +31,15 @@ public class ExcelOption extends PrefixArgumentsParser implements ComparableData
     }
 
     @Override
+    public OptionParam expandOption(Map<String, String> args) {
+        OptionParam result = super.expandOption(args);
+        result.put("-xlsxSchema", this.xlsxSchemaSource);
+        return result;
+    }
+
+    @Override
     public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
         return builder.setXlsxSchema(this.xlsxSchema);
     }
 
-    public String getExcelTable() {
-        return excelTable;
-    }
 }
