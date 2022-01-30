@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import org.controlsfx.control.SearchableComboBox;
 import org.tbee.javafx.scene.layout.MigPane;
+import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.argument.ArgumentsParser;
 
 import java.lang.reflect.InvocationTargetException;
@@ -56,6 +57,16 @@ public class MainPresenter {
 
     @FXML
     public void execCmd() {
+        try {
+            Class<?> clazz = Class.forName("yo.dbunitcli.application." + this.selectedCommand);
+            String[] args = this.inputToArg().entrySet()
+                    .stream()
+                    .map(it -> it.getKey() + "=" + it.getValue())
+                    .toArray(String[]::new);
+            ((Command) clazz.getDeclaredConstructor().newInstance()).exec(args);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
