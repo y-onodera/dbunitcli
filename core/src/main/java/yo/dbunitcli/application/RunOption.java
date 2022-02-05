@@ -74,7 +74,7 @@ public class RunOption extends CommandLineOption {
     @Override
     public OptionParam expandOption(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
-        result.put("-src", this.src);
+        result.putFile("-src", this.src);
         result.put("-scriptType", this.scriptType, ScriptType.class);
         result.putAll(this.templateOption.expandOption(args));
         result.putAll(super.expandOption(args));

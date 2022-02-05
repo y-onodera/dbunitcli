@@ -1,0 +1,13 @@
+.toolbar {
+	-fx-background-color: #7a0ed9;
+	-fx-background-insets: -1 -5 -1 -1;
+	-fx-background-radius: 0 0 0 0;
+}
+.toolbar .button {
+	-fx-background-color: #7a0ed9;
+}
+.menu-label {
+	-fx-font-family: 'Visby Round CF Bold';
+	-fx-font-size: 16;
+	-fx-text-fill: white;
+}

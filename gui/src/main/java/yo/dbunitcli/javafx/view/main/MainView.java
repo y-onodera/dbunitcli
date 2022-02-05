@@ -10,7 +10,6 @@ public class MainView extends FXMLView {
 
     public void open(Stage stage) {
         Scene scene = new Scene(this.getView());
-        stage.setTitle("DbunitGui");
         stage.setScene(scene);
         stage.setResizable(true);
         stage.show();

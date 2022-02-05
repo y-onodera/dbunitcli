@@ -16,7 +16,6 @@ public class DataSetLoadOptionTest {
             , "-srcType=csv"
             , "-setting=setting.js"
             , "-loadData=true"
-            , "-encoding=UTF-8"
             , "-regInclude=*.\\.csv"
             , "-regExclude=*.\\.csv"};
 

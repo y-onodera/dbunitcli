@@ -81,7 +81,7 @@ public interface ArgumentsParser {
 
     class OptionParam {
 
-        private HashBasedTable<String, String, Class> options = HashBasedTable.create();
+        private HashBasedTable<String, String, Attribute> options = HashBasedTable.create();
 
         private ArrayList<String> keys = Lists.newArrayList();
 
@@ -98,29 +98,40 @@ public interface ArgumentsParser {
             other.options
                     .rowKeySet()
                     .forEach(it -> {
-                        Map.Entry<String, Class> entry = other.options.row(it).entrySet().iterator().next();
+                        Map.Entry<String, Attribute> entry = other.options.row(it).entrySet().iterator().next();
                         put(it, entry.getKey(), entry.getValue());
                     });
 
         }
 
         public void put(String key, char value) {
-            this.put(key, String.valueOf(value), String.class);
+            this.put(key, String.valueOf(value), new Attribute(ParamType.TEXT));
         }
 
         public void put(String key, String value) {
-            this.put(key, value, String.class);
+            this.put(key, value, new Attribute(ParamType.TEXT));
         }
 
-        public void put(String key, File value) {
-            this.put(key, value == null ? "" : value.getPath(), File.class);
+        public void putFile(String key, File value) {
+            this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.FILE));
+        }
+
+        public void putDir(String key, File value) {
+            this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.DIR));
+        }
+
+        public void putFirOrDir(String key, File value) {
+            this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.FILE_OR_DIR));
         }
 
         public <T extends Enum<?>> void put(String key, T value, Class<T> type) {
-            this.put(key, value == null ? "" : value.toString(), type);
+            this.put(key, value == null ? "" : value.toString(), new Attribute(ParamType.ENUM,
+                    Arrays.stream(type.getEnumConstants())
+                            .map(Object::toString)
+                            .collect(Collectors.toSet())));
         }
 
-        public void put(String key, String value, Class type) {
+        public void put(String key, String value, Attribute type) {
             if (Strings.isNullOrEmpty(this.args.get(withPrefix(key)))) {
                 this.options.put(withPrefix(key), this.args.getOrDefault(key, Strings.nullToEmpty(value)), type);
             } else {
@@ -133,7 +144,7 @@ public interface ArgumentsParser {
             return this.keys;
         }
 
-        public Map.Entry<String, Class> getColumn(String key) {
+        public Map.Entry<String, Attribute> getColumn(String key) {
             if (this.options.containsRow(withPrefix(key))) {
                 return this.options.row(withPrefix(key)).entrySet().iterator().next();
             } else if (this.options.containsRow(key)) {
@@ -162,5 +173,33 @@ public interface ArgumentsParser {
             return key.replace("-", "-" + this.prefix + ".");
         }
 
+    }
+
+    class Attribute {
+
+        private ParamType type;
+
+        private Set<String> selectOption;
+
+        public Attribute(ParamType type) {
+            this(type, Sets.newHashSet());
+        }
+
+        public Attribute(ParamType type, Set<String> selectOption) {
+            this.type = type;
+            this.selectOption = selectOption;
+        }
+
+        public ParamType getType() {
+            return type;
+        }
+
+        public Set<String> getSelectOption() {
+            return selectOption;
+        }
+    }
+
+    enum ParamType {
+        TEXT, ENUM, FILE, DIR, FILE_OR_DIR,
     }
 }

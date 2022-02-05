@@ -65,11 +65,11 @@ public class CompareOption extends CommandLineOption {
     @Override
     public OptionParam expandOption(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
-        result.put("-setting", this.setting);
+        result.putFile("-setting", this.setting);
         result.putAll(this.newData.expandOption(args));
         result.putAll(this.oldData.expandOption(args));
-        result.put("-expect", this.expected);
-        result.put("-expectDetail", this.expectDetail);
+        result.putFile("-expect", this.expected);
+        result.putFile("-expectDetail", this.expectDetail);
         result.putAll(super.expandOption(args));
         return result;
     }

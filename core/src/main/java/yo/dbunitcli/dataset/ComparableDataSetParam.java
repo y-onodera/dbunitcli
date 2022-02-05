@@ -1,5 +1,6 @@
 package yo.dbunitcli.dataset;
 
+import com.google.common.base.Objects;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -112,6 +113,42 @@ public class ComparableDataSetParam {
 
     public DatabaseConnectionLoader getDatabaseConnectionLoader() {
         return this.databaseConnectionLoader;
+    }
+
+    @Override
+    public String toString() {
+        return "ComparableDataSetParam{" +
+                "src=" + src +
+                ", encoding='" + encoding + '\'' +
+                ", source=" + source +
+                ", columnSettings=" + columnSettings +
+                ", headerSplitPattern='" + headerSplitPattern + '\'' +
+                ", dataSplitPattern='" + dataSplitPattern + '\'' +
+                ", regInclude='" + regInclude + '\'' +
+                ", regExclude='" + regExclude + '\'' +
+                ", mapIncludeMetaData=" + mapIncludeMetaData +
+                ", xlsxSchema=" + xlsxSchema +
+                ", useJdbcMetaData=" + useJdbcMetaData +
+                ", loadData=" + loadData +
+                ", headerName='" + headerName + '\'' +
+                ", fixedLength='" + fixedLength + '\'' +
+                ", extension='" + extension + '\'' +
+                ", templateRender=" + templateRender +
+                ", databaseConnectionLoader=" + databaseConnectionLoader +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ComparableDataSetParam)) return false;
+        ComparableDataSetParam that = (ComparableDataSetParam) o;
+        return mapIncludeMetaData == that.mapIncludeMetaData && useJdbcMetaData == that.useJdbcMetaData && loadData == that.loadData && Objects.equal(src, that.src) && Objects.equal(encoding, that.encoding) && source == that.source && Objects.equal(columnSettings, that.columnSettings) && Objects.equal(headerSplitPattern, that.headerSplitPattern) && Objects.equal(dataSplitPattern, that.dataSplitPattern) && Objects.equal(regInclude, that.regInclude) && Objects.equal(regExclude, that.regExclude) && Objects.equal(xlsxSchema, that.xlsxSchema) && Objects.equal(headerName, that.headerName) && Objects.equal(fixedLength, that.fixedLength) && Objects.equal(extension, that.extension) && Objects.equal(templateRender, that.templateRender) && Objects.equal(databaseConnectionLoader, that.databaseConnectionLoader);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(src, encoding, source, columnSettings, headerSplitPattern, dataSplitPattern, regInclude, regExclude, mapIncludeMetaData, xlsxSchema, useJdbcMetaData, loadData, headerName, fixedLength, extension, templateRender, databaseConnectionLoader);
     }
 
     public static class Builder {

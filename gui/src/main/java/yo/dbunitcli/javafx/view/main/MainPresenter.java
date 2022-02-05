@@ -1,22 +1,28 @@
 package yo.dbunitcli.javafx.view.main;
 
-import com.google.common.base.Enums;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import io.github.palexdev.materialfx.controls.MFXButton;
+import io.github.palexdev.materialfx.controls.MFXComboBox;
+import io.github.palexdev.materialfx.controls.MFXTextField;
+import io.github.palexdev.materialfx.enums.FloatMode;
+import io.github.palexdev.materialfx.font.MFXFontIcon;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import org.controlsfx.control.SearchableComboBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.tbee.javafx.scene.layout.MigPane;
 import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.argument.ArgumentsParser;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -34,16 +40,14 @@ public class MainPresenter {
     private MigPane commandPane;
 
     @FXML
-    private Label labelSelectType;
-
-    @FXML
-    private SearchableComboBox<String> commandTypeSelect;
+    private MFXComboBox<String> commandTypeSelect;
 
     private String selectedCommand;
 
     private ArgumentsParser parser;
 
-    private Map<Label, Node> argument = Maps.newHashMap();
+    private Map<String, Node> argument = Maps.newHashMap();
+
 
     @FXML
     void initialize() {
@@ -51,8 +55,13 @@ public class MainPresenter {
         for (String cmdType : this.commandTypes()) {
             this.commandTypeSelect.getItems().add(cmdType);
         }
-        this.commandTypeSelect.getSelectionModel().select(0);
+        this.commandTypeSelect.getSelectionModel().selectFirst();
         this.selectedCommand = this.commandTypeSelect.getSelectionModel().getSelectedItem();
+    }
+
+    @FXML
+    public void close(ActionEvent actionEvent) {
+        Platform.exit();
     }
 
     @FXML
@@ -86,27 +95,84 @@ public class MainPresenter {
         this.clearInputFields();
         int row = 1;
         for (String key : option.keySet()) {
-            Label label = new Label();
-            label.setText(key);
-            this.commandPane.add(label, "width 150,cell 0 " + row);
-            Map.Entry<String, Class> entry = option.getColumn(key);
-            if (entry.getValue().isEnum()) {
-                ChoiceBox<String> select = new ChoiceBox<>(FXCollections.observableArrayList(
-                        Arrays.stream(entry.getValue().getEnumConstants())
-                                .map(Object::toString)
-                                .collect(Collectors.toSet()))
-                );
-                select.getSelectionModel().select(entry.getKey());
-                this.commandPane.add(select, "width 200,cell 1 " + row++);
-                this.argument.put(label, select);
+            Map.Entry<String, ArgumentsParser.Attribute> entry = option.getColumn(key);
+            if (entry.getValue().getType() == ArgumentsParser.ParamType.ENUM) {
+                MFXComboBox<String> select = new MFXComboBox<>(FXCollections.observableArrayList(
+                        entry.getValue().getSelectOption()
+                ));
+                select.getSelectionModel().selectItem(entry.getKey());
+                select.setFloatingText(key);
+                select.setFloatMode(FloatMode.INLINE);
+                this.commandPane.add(select, "cell 0 " + row++);
+                this.argument.put(key, select);
                 select.getSelectionModel().selectedItemProperty().addListener((observable, newVal, oldVal) -> resetInput());
             } else {
-                TextField text = new TextField();
+                MFXTextField text = new MFXTextField();
                 text.setText(option.get(key));
-                this.commandPane.add(text, "width 200,cell 1 " + row++);
-                this.argument.put(label, text);
+                text.setFloatingText(key);
+                text.setFloatMode(FloatMode.INLINE);
+                this.commandPane.add(text, "width 250,cell 0 " + row);
+                this.argument.put(key, text);
+                if (entry.getValue().getType() == ArgumentsParser.ParamType.DIR) {
+                    MFXButton fileChoice = createDirectoryChoiceButton(text);
+                    text.setTrailingIcon(fileChoice);
+                } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE) {
+                    MFXButton fileChoice = this.createFileChoiceButton(text);
+                    text.setTrailingIcon(fileChoice);
+                } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE_OR_DIR) {
+                    MFXButton dirChoice = createDirectoryChoiceButton(text);
+                    MFXButton fileChoice = this.createFileChoiceButton(text);
+                    HBox hBox = new HBox();
+                    hBox.getChildren().addAll(fileChoice, dirChoice);
+                    text.setTrailingIcon(hBox);
+                }
+                row++;
             }
         }
+    }
+
+    private MFXButton createDirectoryChoiceButton(MFXTextField text) {
+        MFXButton fileChoice = new MFXButton();
+        MFXFontIcon folderIcon = new MFXFontIcon("mfx-folder", 32);
+        fileChoice.setGraphic(folderIcon);
+        fileChoice.setText("");
+        fileChoice.setOnAction(event -> {
+            File choice = openDirChooser();
+            if (choice != null) {
+                text.setText(choice.getAbsolutePath());
+            }
+        });
+        return fileChoice;
+    }
+
+    private MFXButton createFileChoiceButton(MFXTextField text) {
+        MFXButton fileChoice = new MFXButton();
+        MFXFontIcon fileIcon = new MFXFontIcon("mfx-file", 32);
+        fileChoice.setGraphic(fileIcon);
+        fileChoice.setText("");
+        fileChoice.setOnAction(event -> {
+            File choice = openFileChooser();
+            if (choice != null) {
+                text.setText(choice.getAbsolutePath());
+            }
+        });
+        return fileChoice;
+    }
+
+    private File openFileChooser() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File("."));
+        Stage stage = new Stage();
+        stage.initOwner(commandTypeSelect.getScene().getWindow());
+        return fileChooser.showOpenDialog(stage);
+    }
+
+    private File openDirChooser() {
+        DirectoryChooser fileChooser = new DirectoryChooser();
+        fileChooser.setInitialDirectory(new File("."));
+        Stage stage = new Stage();
+        stage.initOwner(commandTypeSelect.getScene().getWindow());
+        return fileChooser.showDialog(stage);
     }
 
     private Map<String, String> inputToArg() {
@@ -114,12 +180,12 @@ public class MainPresenter {
                 .stream()
                 .filter(it -> {
                     if (it.getValue() instanceof TextField) {
-                        return !Strings.isNullOrEmpty(it.getKey().getText()) && !Strings.isNullOrEmpty(((TextField) it.getValue()).getText());
+                        return !Strings.isNullOrEmpty(it.getKey()) && !Strings.isNullOrEmpty(((TextField) it.getValue()).getText());
                     }
-                    return !Strings.isNullOrEmpty(it.getKey().getText())
+                    return !Strings.isNullOrEmpty(it.getKey())
                             && !Strings.isNullOrEmpty(((ChoiceBox) it.getValue()).getSelectionModel().getSelectedItem().toString());
                 })
-                .collect(Collectors.toMap(it -> it.getKey().getText(), it -> {
+                .collect(Collectors.toMap(it -> it.getKey(), it -> {
                     if (it.getValue() instanceof TextField) {
                         return ((TextField) it.getValue()).getText();
                     }
@@ -132,7 +198,7 @@ public class MainPresenter {
     }
 
     private void clearInputFields() {
-        this.commandPane.getChildren().removeIf(node -> !this.commandTypeSelect.equals(node) && !this.labelSelectType.equals(node));
+        this.commandPane.getChildren().removeIf(node -> !this.commandTypeSelect.equals(node));
         this.argument = Maps.newHashMap();
     }
 

@@ -3,6 +3,7 @@ package yo.dbunitcli.javafx.application;
 import com.airhacks.afterburner.injection.Injector;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import yo.dbunitcli.javafx.view.main.MainView;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class DbUnitGuiApplication extends Application {
         if (unnamed.size() > 0) {
         } else {
         }
+        stage.initStyle(StageStyle.TRANSPARENT);
         this.mainView = new MainView();
         this.mainView.open(stage);
     }

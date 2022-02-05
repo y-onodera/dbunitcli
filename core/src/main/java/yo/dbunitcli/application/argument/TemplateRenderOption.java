@@ -70,8 +70,8 @@ public class TemplateRenderOption extends PrefixArgumentsParser implements Compa
     public OptionParam expandOption(Map<String, String> args) {
         OptionParam result = super.expandOption(args);
         result.put("-templateEncoding", this.encoding);
-        result.put("-template", this.template);
-        result.put("-templateGroup", this.templateGroup);
+        result.putFile("-template", this.template);
+        result.putFile("-templateGroup", this.templateGroup);
         result.put("-templateParameterAttribute", this.templateParameterAttribute);
         result.put("-templateVarStart", this.templateVarStart);
         result.put("-templateVarStop", this.templateVarStop);

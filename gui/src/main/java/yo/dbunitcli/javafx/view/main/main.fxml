@@ -1,34 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import io.github.palexdev.materialfx.controls.MFXComboBox?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.control.SplitPane?>
 <?import org.tbee.javafx.scene.layout.fxml.MigPane?>
+<?import io.github.palexdev.materialfx.controls.MFXButton?>
+<?import io.github.palexdev.materialfx.controls.MFXScrollPane?>
 <?import javafx.scene.control.Label?>
+<?import io.github.palexdev.materialfx.font.MFXFontIcon?>
 <?import javafx.scene.control.Button?>
-<?import org.controlsfx.control.SearchableComboBox?>
-<?import javafx.scene.control.ScrollPane?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity"
             minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="500.0" prefWidth="600.0"
             xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="yo.dbunitcli.javafx.view.main.MainPresenter">
     <BorderPane id="borderMain" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="425.0"
-                prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                prefWidth="550.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                 AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <top>
-            <fx:include source="../menu/menu.fxml"/>
+            <HBox alignment="CENTER" styleClass="toolbar" HBox.hgrow="ALWAYS">
+                <MigPane cols="[500,grow]push[]">
+                    <Label styleClass="menu-label" text="DBUnit CLI Param Editor"/>
+                    <Button onAction="#close" MigPane.cc="align right">
+                        <graphic>
+                            <MFXFontIcon description="mfx-x-light" color="white" size="16"/>
+                        </graphic>
+                    </Button>
+                </MigPane>
+            </HBox>
         </top>
         <center>
-            <ScrollPane>
-                <MigPane fx:id="commandPane" cols="[150][200][45,right]" rows="[]" prefWidth="425.0">
-                    <Label fx:id="labelSelectType" text="command"/>
-                    <SearchableComboBox fx:id="commandTypeSelect" onAction="#selectCommandType" MigPane.cc="wrap"/>
+            <MFXScrollPane>
+                <MigPane fx:id="commandPane" cols="[300][100,right]" rows="[30]" prefWidth="550.0">
+                    <MFXComboBox floatingText="command" floatMode="INLINE" fx:id="commandTypeSelect"
+                                 onAction="#selectCommandType" MigPane.cc="wrap"/>
                 </MigPane>
-            </ScrollPane>
+            </MFXScrollPane>
         </center>
         <bottom>
-            <MigPane cols="[grow]" rows="[30]" maxHeight="40" prefWidth="420.0">
-                <Button fx:id="exec" mnemonicParsing="false" text="exec" onAction="#execCmd" MigPane.cc="align right"/>
+            <MigPane cols="[grow]" rows="[50]" maxHeight="50" prefWidth="550.0">
+                <MFXButton fx:id="exec" buttonType="RAISED" mnemonicParsing="false" text="exec" onAction="#execCmd"
+                           MigPane.cc="center"/>
             </MigPane>
         </bottom>
     </BorderPane>

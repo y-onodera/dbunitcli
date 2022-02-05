@@ -74,7 +74,7 @@ public class DataSetWriteOption extends PrefixArgumentsParser {
                 result.put("-op", this.operation,DBDataSetWriter.Operation.class);
                 result.putAll(this.jdbcOption.expandOption(args));
             } else {
-                result.put("-result", this.resultDir);
+                result.putDir("-result", this.resultDir);
                 result.put("-resultPath", this.resultPath);
                 result.put("-exportEmptyTable", this.exportEmptyTable);
                 if (type == DataSourceType.csv) {
