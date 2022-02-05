@@ -37,8 +37,12 @@
             </MFXScrollPane>
         </center>
         <bottom>
-            <MigPane cols="[grow]" rows="[50]" maxHeight="50" prefWidth="550.0">
+            <MigPane cols="push[70][70][70]push" rows="[50]" maxHeight="50" prefWidth="550.0">
+                <MFXButton fx:id="reset" buttonType="RAISED" mnemonicParsing="false" text="reset" onAction="#reset"
+                           MigPane.cc="center"/>
                 <MFXButton fx:id="exec" buttonType="RAISED" mnemonicParsing="false" text="exec" onAction="#execCmd"
+                           MigPane.cc="center"/>
+                <MFXButton fx:id="save" buttonType="RAISED" mnemonicParsing="false" text="save" onAction="#saveFile"
                            MigPane.cc="center"/>
             </MigPane>
         </bottom>

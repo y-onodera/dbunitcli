@@ -1,5 +1,6 @@
 package yo.dbunitcli.javafx.view.main;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import io.github.palexdev.materialfx.controls.MFXButton;
@@ -10,6 +11,7 @@ import io.github.palexdev.materialfx.font.MFXFontIcon;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -22,7 +24,9 @@ import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.argument.ArgumentsParser;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -55,13 +59,17 @@ public class MainPresenter {
         for (String cmdType : this.commandTypes()) {
             this.commandTypeSelect.getItems().add(cmdType);
         }
-        this.commandTypeSelect.getSelectionModel().selectFirst();
-        this.selectedCommand = this.commandTypeSelect.getSelectionModel().getSelectedItem();
+        this.reset(new ActionEvent());
     }
 
     @FXML
     public void close(ActionEvent actionEvent) {
         Platform.exit();
+    }
+
+    @FXML
+    public void reset(ActionEvent actionEvent) {
+        this.commandTypeSelect.selectFirst();
     }
 
     @FXML
@@ -79,12 +87,35 @@ public class MainPresenter {
     }
 
     @FXML
+    public void saveFile(ActionEvent actionEvent) throws IOException {
+        String content = this.inputToArg().entrySet()
+                .stream()
+                .map(it -> it.getKey() + "=" + it.getValue())
+                .collect(Collectors.joining("\r\n"));
+        FileChooser fileSave = new FileChooser();
+        fileSave.setTitle("Save Parameter File");
+        fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("(*.txt)", "*.txt"));
+        fileSave.setInitialDirectory(new File("."));
+        File file = fileSave.showSaveDialog(commandTypeSelect.getScene().getWindow());
+        if (!file.getParentFile().exists()) {
+            Files.createDirectories(file.getParentFile().toPath());
+        }
+        if (!file.exists()) {
+            Files.createFile(file.toPath());
+        }
+        Files.writeString(file.toPath(), content, Charsets.UTF_8);
+    }
+
+    @FXML
     public void selectCommandType() throws NoSuchMethodException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        String cmdType = commandTypeSelect.getSelectionModel().getSelectedItem();
-        if (Objects.equals(this.commandTypeSelect, cmdType) || Strings.isNullOrEmpty(cmdType)) {
+        String currentSelect = this.selectedCommand;
+        this.selectedCommand = this.commandTypeSelect.getSelectionModel().getSelectedItem();
+        if (Objects.equals(this.commandTypeSelect, currentSelect)) {
+            return;
+        } else if (Strings.isNullOrEmpty(this.selectedCommand)) {
+            this.clearInputFields();
             return;
         }
-        this.selectedCommand = this.commandTypeSelect.getSelectionModel().getSelectedItem();
         Class<?> clazz = Class.forName("yo.dbunitcli.application." + this.selectedCommand + "Option");
         this.parser = (ArgumentsParser) clazz.getDeclaredConstructor().newInstance();
         this.resetInput();
@@ -114,16 +145,14 @@ public class MainPresenter {
                 this.commandPane.add(text, "width 250,cell 0 " + row);
                 this.argument.put(key, text);
                 if (entry.getValue().getType() == ArgumentsParser.ParamType.DIR) {
-                    MFXButton fileChoice = createDirectoryChoiceButton(text);
+                    MFXButton fileChoice = this.createDirectoryChoiceButton(text);
                     text.setTrailingIcon(fileChoice);
                 } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE) {
                     MFXButton fileChoice = this.createFileChoiceButton(text);
                     text.setTrailingIcon(fileChoice);
                 } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE_OR_DIR) {
-                    MFXButton dirChoice = createDirectoryChoiceButton(text);
-                    MFXButton fileChoice = this.createFileChoiceButton(text);
                     HBox hBox = new HBox();
-                    hBox.getChildren().addAll(fileChoice, dirChoice);
+                    hBox.getChildren().addAll(this.createDirectoryChoiceButton(text), this.createFileChoiceButton(text));
                     text.setTrailingIcon(hBox);
                 }
                 row++;
@@ -132,30 +161,28 @@ public class MainPresenter {
     }
 
     private MFXButton createDirectoryChoiceButton(MFXTextField text) {
-        MFXButton fileChoice = new MFXButton();
-        MFXFontIcon folderIcon = new MFXFontIcon("mfx-folder", 32);
-        fileChoice.setGraphic(folderIcon);
-        fileChoice.setText("");
-        fileChoice.setOnAction(event -> {
+        return this.createChoiceButton(new MFXFontIcon("mfx-folder", 32), event -> {
             File choice = openDirChooser();
             if (choice != null) {
                 text.setText(choice.getAbsolutePath());
             }
         });
-        return fileChoice;
     }
 
     private MFXButton createFileChoiceButton(MFXTextField text) {
-        MFXButton fileChoice = new MFXButton();
-        MFXFontIcon fileIcon = new MFXFontIcon("mfx-file", 32);
-        fileChoice.setGraphic(fileIcon);
-        fileChoice.setText("");
-        fileChoice.setOnAction(event -> {
+        return createChoiceButton(new MFXFontIcon("mfx-file", 32), event -> {
             File choice = openFileChooser();
             if (choice != null) {
                 text.setText(choice.getAbsolutePath());
             }
         });
+    }
+
+    private MFXButton createChoiceButton(MFXFontIcon folderIcon, EventHandler<ActionEvent> actionEventEventHandler) {
+        MFXButton fileChoice = new MFXButton();
+        fileChoice.setGraphic(folderIcon);
+        fileChoice.setText("");
+        fileChoice.setOnAction(actionEventEventHandler);
         return fileChoice;
     }
 
