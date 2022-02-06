@@ -164,7 +164,12 @@ public class MainPresenter {
                     select.setFloatingText(key);
                     select.setFloatMode(FloatMode.INLINE);
                     select.getSelectionModel().selectItem(entry.getKey());
-                    this.commandPane.add(select, "width 80,cell 0 " + row);
+                    if (entry.getValue().isRequired()) {
+                        VBox vbox = addRequiredValidation(validator, select);
+                        this.commandPane.add(vbox, "cell 0 " + row);
+                    } else {
+                        this.commandPane.add(select, "width 80,cell 0 " + row);
+                    }
                     this.argument.put(key, select);
                     select.getSelectionModel().selectedItemProperty().addListener((observable, newVal, oldVal) -> resetInput(select));
                 }
@@ -175,28 +180,7 @@ public class MainPresenter {
                 text.setFloatingText(key);
                 text.setFloatMode(FloatMode.INLINE);
                 if (entry.getValue().isRequired()) {
-                    Label validationLabel = new Label();
-                    validationLabel.setText("required input");
-                    validationLabel.getStyleClass().add("validationLabel");
-                    text.getValidator().validProperty().addListener((observable, oldVal, newVal) -> {
-                        if (newVal) {
-                            text.pseudoClassStateChanged(INVALID_PSEUDO_CLASS, false);
-                        }
-                    });
-                    text.delegateFocusedProperty().addListener((observable, oldVal, newVal) -> {
-                        if (oldVal && !newVal) {
-                            List<Constraint> constraints = text.validate();
-                            if (!constraints.isEmpty()) {
-                                text.pseudoClassStateChanged(INVALID_PSEUDO_CLASS, true);
-                            }
-                        }
-                    });
-                    text.getValidator().constraint(Constraint.of(Severity.ERROR, validationLabel.getText()
-                            , BooleanExpression.booleanExpression(text.textProperty().isEmpty().not())));
-                    validator.dependsOn(text.getValidator());
-                    VBox vbox = new VBox();
-                    vbox.setPrefWidth(400);
-                    vbox.getChildren().addAll(text, validationLabel);
+                    VBox vbox = addRequiredValidation(validator, text);
                     this.commandPane.add(vbox, "cell 0 " + row);
                 } else {
                     this.commandPane.add(text, "cell 0 " + row);
@@ -214,6 +198,32 @@ public class MainPresenter {
             }
             row++;
         }
+    }
+
+    private VBox addRequiredValidation(MFXValidator validator, MFXTextField text) {
+        Label validationLabel = new Label();
+        validationLabel.setText("required input");
+        validationLabel.getStyleClass().add("validationLabel");
+        text.getValidator().validProperty().addListener((observable, oldVal, newVal) -> {
+            if (newVal) {
+                text.pseudoClassStateChanged(INVALID_PSEUDO_CLASS, false);
+            }
+        });
+        text.delegateFocusedProperty().addListener((observable, oldVal, newVal) -> {
+            if (oldVal && !newVal) {
+                List<Constraint> constraints = text.validate();
+                if (!constraints.isEmpty()) {
+                    text.pseudoClassStateChanged(INVALID_PSEUDO_CLASS, true);
+                }
+            }
+        });
+        text.getValidator().constraint(Constraint.of(Severity.ERROR, validationLabel.getText()
+                , BooleanExpression.booleanExpression(text.textProperty().isEmpty().not())));
+        validator.dependsOn(text.getValidator());
+        VBox vbox = new VBox();
+        vbox.setPrefWidth(400);
+        vbox.getChildren().addAll(text, validationLabel);
+        return vbox;
     }
 
     private StackPane createDirectoryChoiceButton(MFXTextField text) {
