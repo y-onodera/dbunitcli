@@ -11,7 +11,6 @@ import yo.dbunitcli.dataset.FromJsonColumnSettingsBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class DataSetLoadOption extends PrefixArgumentsParser {
@@ -66,8 +65,8 @@ public class DataSetLoadOption extends PrefixArgumentsParser {
     @Override
     public OptionParam expandOption(Map<String, String> args) {
         OptionParam result = super.expandOption(args);
-        result.put("-srcType", this.srcType, DataSourceType.class);
-        result.putFirOrDir("-src", this.src);
+        result.put("-srcType", this.srcType, DataSourceType.class, true);
+        result.putFileOrDir("-src", this.src, true);
         result.putFile("-setting", this.setting);
         result.put("-loadData", this.loadData);
         result.put("-includeMetaData", this.includeMetaData);

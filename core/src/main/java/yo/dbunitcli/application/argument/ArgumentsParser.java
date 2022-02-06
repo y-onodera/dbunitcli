@@ -105,30 +105,56 @@ public interface ArgumentsParser {
         }
 
         public void put(String key, char value) {
-            this.put(key, String.valueOf(value), new Attribute(ParamType.TEXT));
+            this.put(key, value, false);
+        }
+
+        public void put(String key, char value, boolean required) {
+            this.put(key, String.valueOf(value), new Attribute(ParamType.TEXT, required));
         }
 
         public void put(String key, String value) {
-            this.put(key, value, new Attribute(ParamType.TEXT));
+            this.put(key, value, false);
+        }
+
+        public void put(String key, String value, boolean required) {
+            this.put(key, value, new Attribute(ParamType.TEXT, required));
         }
 
         public void putFile(String key, File value) {
-            this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.FILE));
+            this.putFile(key, value, false);
+        }
+
+        public void putFile(String key, File value, boolean required) {
+            this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.FILE, required));
         }
 
         public void putDir(String key, File value) {
-            this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.DIR));
+            this.putDir(key, value, false);
         }
 
-        public void putFirOrDir(String key, File value) {
-            this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.FILE_OR_DIR));
+        public void putDir(String key, File value, boolean required) {
+            this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.DIR, required));
+        }
+
+        public void putFileOrDir(String key, File value) {
+            this.putFileOrDir(key, value, false);
+        }
+
+        public void putFileOrDir(String key, File value, boolean required) {
+            this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.FILE_OR_DIR, required));
         }
 
         public <T extends Enum<?>> void put(String key, T value, Class<T> type) {
+            this.put(key, value, type, false);
+        }
+
+        public <T extends Enum<?>> void put(String key, T value, Class<T> type, boolean required) {
             this.put(key, value == null ? "" : value.toString(), new Attribute(ParamType.ENUM,
                     Arrays.stream(type.getEnumConstants())
                             .map(Object::toString)
-                            .collect(Collectors.toSet())));
+                            .collect(Collectors.toCollection(ArrayList::new))
+                    , required)
+            );
         }
 
         public void put(String key, String value, Attribute type) {
@@ -179,23 +205,30 @@ public interface ArgumentsParser {
 
         private ParamType type;
 
-        private Set<String> selectOption;
+        private ArrayList<String> selectOption;
 
-        public Attribute(ParamType type) {
-            this(type, Sets.newHashSet());
+        private final boolean required;
+
+        public Attribute(ParamType type, boolean required) {
+            this(type, Lists.newArrayList(), required);
         }
 
-        public Attribute(ParamType type, Set<String> selectOption) {
+        public Attribute(ParamType type, ArrayList<String> selectOption, boolean required) {
             this.type = type;
             this.selectOption = selectOption;
+            this.required = required;
         }
 
         public ParamType getType() {
             return type;
         }
 
-        public Set<String> getSelectOption() {
+        public ArrayList<String> getSelectOption() {
             return selectOption;
+        }
+
+        public boolean isRequired() {
+            return required;
         }
     }
 

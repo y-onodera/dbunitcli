@@ -7,7 +7,6 @@
 <?import io.github.palexdev.materialfx.controls.MFXScrollPane?>
 <?import javafx.scene.control.Label?>
 <?import io.github.palexdev.materialfx.font.MFXFontIcon?>
-<?import javafx.scene.control.Button?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity"
             minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="500.0" prefWidth="600.0"
@@ -20,30 +19,30 @@
             <HBox alignment="CENTER" styleClass="toolbar" HBox.hgrow="ALWAYS">
                 <MigPane cols="[500,grow]push[]">
                     <Label styleClass="menu-label" text="DBUnit CLI Param Editor"/>
-                    <Button onAction="#close" MigPane.cc="align right">
+                    <MFXButton text="" onAction="#close" MigPane.cc="align right">
                         <graphic>
                             <MFXFontIcon description="mfx-x-light" color="white" size="16"/>
                         </graphic>
-                    </Button>
+                    </MFXButton>
                 </MigPane>
             </HBox>
         </top>
         <center>
             <MFXScrollPane>
-                <MigPane fx:id="commandPane" cols="[300][100,right]" rows="[30]" prefWidth="550.0">
+                <MigPane fx:id="commandPane" cols="[300,grow][100,right]" rows="[30,shrink]" prefWidth="550.0">
                     <MFXComboBox floatingText="command" floatMode="INLINE" fx:id="commandTypeSelect"
                                  onAction="#selectCommandType" MigPane.cc="wrap"/>
                 </MigPane>
             </MFXScrollPane>
         </center>
         <bottom>
-            <MigPane cols="push[70][70][70]push" rows="[50]" maxHeight="50" prefWidth="550.0">
-                <MFXButton fx:id="reset" buttonType="RAISED" mnemonicParsing="false" text="reset" onAction="#reset"
-                           MigPane.cc="center"/>
-                <MFXButton fx:id="exec" buttonType="RAISED" mnemonicParsing="false" text="exec" onAction="#execCmd"
-                           MigPane.cc="center"/>
-                <MFXButton fx:id="save" buttonType="RAISED" mnemonicParsing="false" text="save" onAction="#saveFile"
-                           MigPane.cc="center"/>
+            <MigPane cols="push[35][35][35]" rows="[50]" maxHeight="50" prefWidth="550.0" styleClass="bottom-background">
+                <MFXButton fx:id="reset" rippleColor="white" buttonType="FLAT" styleClass="text-button" mnemonicParsing="false" text="reset" onAction="#reset"
+                           MigPane.cc="right"/>
+                <MFXButton fx:id="exec" rippleColor="white" buttonType="RAISED" styleClass="outline-button" mnemonicParsing="false" text="exec" onAction="#execCmd"
+                           MigPane.cc="right"/>
+                <MFXButton fx:id="save" rippleColor="white" buttonType="RAISED" styleClass="contain-button" mnemonicParsing="false" text="save" onAction="#saveFile"
+                           MigPane.cc="right" rippleAnimateShadow=""/>
             </MigPane>
         </bottom>
     </BorderPane>

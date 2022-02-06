@@ -8,14 +8,22 @@ import io.github.palexdev.materialfx.controls.MFXComboBox;
 import io.github.palexdev.materialfx.controls.MFXTextField;
 import io.github.palexdev.materialfx.enums.FloatMode;
 import io.github.palexdev.materialfx.font.MFXFontIcon;
+import io.github.palexdev.materialfx.validation.Constraint;
+import io.github.palexdev.materialfx.validation.MFXValidator;
+import io.github.palexdev.materialfx.validation.Severity;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
 import javafx.collections.FXCollections;
+import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -27,11 +35,14 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class MainPresenter {
+
+    private static final PseudoClass INVALID_PSEUDO_CLASS = PseudoClass.getPseudoClass("invalid");
 
     private static final String[] COMMAND_TYPES = {
             "Convert"
@@ -39,6 +50,11 @@ public class MainPresenter {
             , "Generate"
             , "Run"
     };
+
+    @FXML
+    public MFXButton exec;
+    @FXML
+    public MFXButton reset;
 
     @FXML
     private MigPane commandPane;
@@ -97,6 +113,9 @@ public class MainPresenter {
         fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("(*.txt)", "*.txt"));
         fileSave.setInitialDirectory(new File("."));
         File file = fileSave.showSaveDialog(commandTypeSelect.getScene().getWindow());
+        if (file == null) {
+            return;
+        }
         if (!file.getParentFile().exists()) {
             Files.createDirectories(file.getParentFile().toPath());
         }
@@ -113,54 +132,91 @@ public class MainPresenter {
         if (Objects.equals(this.commandTypeSelect, currentSelect)) {
             return;
         } else if (Strings.isNullOrEmpty(this.selectedCommand)) {
-            this.clearInputFields();
+            this.clearInputFields(this.commandTypeSelect);
             return;
         }
         Class<?> clazz = Class.forName("yo.dbunitcli.application." + this.selectedCommand + "Option");
         this.parser = (ArgumentsParser) clazz.getDeclaredConstructor().newInstance();
-        this.resetInput();
+        this.resetInput(this.commandTypeSelect);
     }
 
-    private void resetInput() {
+    private void resetInput(MFXComboBox<String> selected) {
         ArgumentsParser.OptionParam option = parser.expandOption(this.inputToArg());
-        this.clearInputFields();
+        this.clearInputFields(selected);
         int row = 1;
+        MFXValidator validator = new MFXValidator();
+        validator.validProperty().addListener((observable, oldVal, newVal) -> {
+            if (!newVal) {
+                exec.setDisable(true);
+            } else {
+                exec.setDisable(false);
+            }
+        });
         for (String key : option.keySet()) {
             Map.Entry<String, ArgumentsParser.Attribute> entry = option.getColumn(key);
             if (entry.getValue().getType() == ArgumentsParser.ParamType.ENUM) {
-                MFXComboBox<String> select = new MFXComboBox<>(FXCollections.observableArrayList(
-                        entry.getValue().getSelectOption()
-                ));
-                select.getSelectionModel().selectItem(entry.getKey());
-                select.setFloatingText(key);
-                select.setFloatMode(FloatMode.INLINE);
-                this.commandPane.add(select, "cell 0 " + row++);
-                this.argument.put(key, select);
-                select.getSelectionModel().selectedItemProperty().addListener((observable, newVal, oldVal) -> resetInput());
+                if (selected.getFloatingText().equals(key)) {
+                    this.argument.put(key, selected);
+                } else {
+                    MFXComboBox<String> select = new MFXComboBox<>(FXCollections.observableArrayList(
+                            entry.getValue().getSelectOption()
+                    ));
+                    select.setFloatingText(key);
+                    select.setFloatMode(FloatMode.INLINE);
+                    select.getSelectionModel().selectItem(entry.getKey());
+                    this.commandPane.add(select, "width 80,cell 0 " + row);
+                    this.argument.put(key, select);
+                    select.getSelectionModel().selectedItemProperty().addListener((observable, newVal, oldVal) -> resetInput(select));
+                }
             } else {
                 MFXTextField text = new MFXTextField();
+                text.setPrefWidth(400);
                 text.setText(option.get(key));
                 text.setFloatingText(key);
                 text.setFloatMode(FloatMode.INLINE);
-                this.commandPane.add(text, "width 250,cell 0 " + row);
+                if (entry.getValue().isRequired()) {
+                    Label validationLabel = new Label();
+                    validationLabel.setText("required input");
+                    validationLabel.getStyleClass().add("validationLabel");
+                    text.getValidator().validProperty().addListener((observable, oldVal, newVal) -> {
+                        if (newVal) {
+                            text.pseudoClassStateChanged(INVALID_PSEUDO_CLASS, false);
+                        }
+                    });
+                    text.delegateFocusedProperty().addListener((observable, oldVal, newVal) -> {
+                        if (oldVal && !newVal) {
+                            List<Constraint> constraints = text.validate();
+                            if (!constraints.isEmpty()) {
+                                text.pseudoClassStateChanged(INVALID_PSEUDO_CLASS, true);
+                            }
+                        }
+                    });
+                    text.getValidator().constraint(Constraint.of(Severity.ERROR, validationLabel.getText()
+                            , BooleanExpression.booleanExpression(text.textProperty().isEmpty().not())));
+                    validator.dependsOn(text.getValidator());
+                    VBox vbox = new VBox();
+                    vbox.setPrefWidth(400);
+                    vbox.getChildren().addAll(text, validationLabel);
+                    this.commandPane.add(vbox, "cell 0 " + row);
+                } else {
+                    this.commandPane.add(text, "cell 0 " + row);
+                }
                 this.argument.put(key, text);
                 if (entry.getValue().getType() == ArgumentsParser.ParamType.DIR) {
-                    MFXButton fileChoice = this.createDirectoryChoiceButton(text);
-                    text.setTrailingIcon(fileChoice);
+                    text.setTrailingIcon(this.createDirectoryChoiceButton(text));
                 } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE) {
-                    MFXButton fileChoice = this.createFileChoiceButton(text);
-                    text.setTrailingIcon(fileChoice);
+                    text.setTrailingIcon(this.createFileChoiceButton(text));
                 } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE_OR_DIR) {
                     HBox hBox = new HBox();
                     hBox.getChildren().addAll(this.createDirectoryChoiceButton(text), this.createFileChoiceButton(text));
                     text.setTrailingIcon(hBox);
                 }
-                row++;
             }
+            row++;
         }
     }
 
-    private MFXButton createDirectoryChoiceButton(MFXTextField text) {
+    private StackPane createDirectoryChoiceButton(MFXTextField text) {
         return this.createChoiceButton(new MFXFontIcon("mfx-folder", 32), event -> {
             File choice = openDirChooser();
             if (choice != null) {
@@ -169,7 +225,7 @@ public class MainPresenter {
         });
     }
 
-    private MFXButton createFileChoiceButton(MFXTextField text) {
+    private StackPane createFileChoiceButton(MFXTextField text) {
         return createChoiceButton(new MFXFontIcon("mfx-file", 32), event -> {
             File choice = openFileChooser();
             if (choice != null) {
@@ -178,12 +234,21 @@ public class MainPresenter {
         });
     }
 
-    private MFXButton createChoiceButton(MFXFontIcon folderIcon, EventHandler<ActionEvent> actionEventEventHandler) {
+    private StackPane createChoiceButton(MFXFontIcon folderIcon, EventHandler<ActionEvent> actionEventEventHandler) {
         MFXButton fileChoice = new MFXButton();
         fileChoice.setGraphic(folderIcon);
         fileChoice.setText("");
         fileChoice.setOnAction(actionEventEventHandler);
-        return fileChoice;
+        fileChoice.setAlignment(Pos.TOP_CENTER);
+        fileChoice.setPrefHeight(50);
+        TextField textField = new TextField("open");
+        textField.setMaxWidth(45);
+        textField.setPrefHeight(10);
+        textField.setAlignment(Pos.BOTTOM_CENTER);
+        StackPane stack = new StackPane();
+        stack.setAlignment(Pos.BOTTOM_CENTER);
+        stack.getChildren().addAll(fileChoice, textField);
+        return stack;
     }
 
     private File openFileChooser() {
@@ -224,8 +289,8 @@ public class MainPresenter {
         return COMMAND_TYPES;
     }
 
-    private void clearInputFields() {
-        this.commandPane.getChildren().removeIf(node -> !this.commandTypeSelect.equals(node));
+    private void clearInputFields(MFXComboBox<String> selected) {
+        this.commandPane.getChildren().removeIf(node -> !this.commandTypeSelect.equals(node) && !selected.equals(node));
         this.argument = Maps.newHashMap();
     }
 

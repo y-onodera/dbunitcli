@@ -1,5 +1,6 @@
 package yo.dbunitcli.application.argument;
 
+import com.google.common.base.Objects;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -64,14 +65,15 @@ public class DataSetWriteOption extends PrefixArgumentsParser {
     @Override
     public OptionParam expandOption(Map<String, String> args) {
         OptionParam result = super.expandOption(args);
-        result.put("-resultType", this.resultType,DataSourceType.class);
+        result.put("-resultType", ResultType.valueOf(this.resultType.toString()), ResultType.class);
         if (!result.hasValue("-resultType")) {
             return result;
         }
         try {
             DataSourceType type = DataSourceType.valueOf(result.get("-resultType"));
             if (type == DataSourceType.table) {
-                result.put("-op", this.operation,DBDataSetWriter.Operation.class);
+                result.put("-op", this.operation == null ? DBDataSetWriter.Operation.CLEAN_INSERT : this.operation
+                        , DBDataSetWriter.Operation.class);
                 result.putAll(this.jdbcOption.expandOption(args));
             } else {
                 result.putDir("-result", this.resultDir);
@@ -110,6 +112,10 @@ public class DataSetWriteOption extends PrefixArgumentsParser {
 
     public String getOutputEncoding() {
         return this.outputEncoding;
+    }
+
+    public enum ResultType {
+        csv, xls, xlsx, table;
     }
 
 }
