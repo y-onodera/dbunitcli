@@ -1,0 +1,6 @@
+-param.src=src/test/resources/yo/dbunitcli/application/param/csv/parameterwithcmd.csv
+-param.srcType=csv
+-setting=src/test/resources/yo/dbunitcli/application/param/setting.json
+-template=src/test/resources/yo/dbunitcli/application/param/templateParameterizeCmd.txt
+-templateParameterAttribute=
+-cmd=convert

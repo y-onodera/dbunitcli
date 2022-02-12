@@ -1,4 +1,4 @@
--param.src=src/test/resources/yo/dbunitcli/application/param/csv
+-param.src=src/test/resources/yo/dbunitcli/application/param/csv/parameter.csv
 -param.srcType=csv
 -setting=src/test/resources/yo/dbunitcli/application/param/setting.json
 -template=src/test/resources/yo/dbunitcli/application/param/template.txt

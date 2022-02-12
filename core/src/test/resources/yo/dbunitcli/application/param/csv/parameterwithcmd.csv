@@ -1,0 +1,6 @@
+cmd,src,srcType,resultType,outputEncoding,table
+convert,srcq,csvq,csv,windows-31j,src2/sample2.csv
+convert,src1,csv,csv,windows-31j,
+convert,src2,csv,csv,utf-8,
+convert,src2,csv,xls,,
+convert,src1,csv,xlsx,,

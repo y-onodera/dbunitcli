@@ -136,10 +136,6 @@ public interface ArgumentsParser {
             this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.DIR, required));
         }
 
-        public void putFileOrDir(String key, File value) {
-            this.putFileOrDir(key, value, false);
-        }
-
         public void putFileOrDir(String key, File value, boolean required) {
             this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.FILE_OR_DIR, required));
         }

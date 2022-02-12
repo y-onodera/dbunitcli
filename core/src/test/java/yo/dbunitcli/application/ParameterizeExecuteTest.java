@@ -28,4 +28,10 @@ public class ParameterizeExecuteTest {
         ParameterizeExecute.main(new String[]{"@" + this.baseDir + "/paramDataDrivenExport.txt"});
     }
 
+    @Test
+    public void testDataDrivenExecute() throws Exception {
+        ParameterizeExecute.main(new String[]{"@" + this.baseDir + "/paramDataDrivenExecute.txt"});
+    }
+
+
 }

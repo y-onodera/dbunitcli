@@ -12,6 +12,7 @@ import yo.dbunitcli.resource.Files;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class ParameterizeOption extends CommandLineOption {
 
@@ -19,7 +20,7 @@ public class ParameterizeOption extends CommandLineOption {
 
     private TemplateRenderOption templateOption = new TemplateRenderOption("");
 
-    @Option(name = "-cmd", usage = "data driven target cmd", required = true)
+    @Option(name = "-cmd", usage = "data driven target cmd")
     private String cmd;
 
     private String templateArgs;
@@ -39,6 +40,7 @@ public class ParameterizeOption extends CommandLineOption {
     @Override
     public OptionParam expandOption(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
+        result.put("-cmd", this.cmd);
         result.putAll(this.param.expandOption(args));
         result.putAll(this.templateOption.expandOption(args));
         result.putAll(super.expandOption(args));
@@ -56,8 +58,10 @@ public class ParameterizeOption extends CommandLineOption {
                 .split("\\r?\\n");
     }
 
-    public Command<?> createCommand() {
-        switch (this.cmd) {
+    public Command<?> createCommand(Map<String, Object> param) {
+        String cmdType = Optional.of(this.cmd)
+                .orElseGet(() -> param.get("-cmd").toString());
+        switch (cmdType) {
             case "compare":
                 return new Compare();
             case "convert":
@@ -67,7 +71,7 @@ public class ParameterizeOption extends CommandLineOption {
             case "run":
                 return new Run();
             default:
-                throw new IllegalArgumentException("no executable command : " + this.cmd);
+                throw new IllegalArgumentException("no executable command : " + cmdType);
         }
     }
 
