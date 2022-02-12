@@ -141,8 +141,12 @@ public class MainPresenter {
     }
 
     private void resetInput(MFXComboBox<String> selected) {
+        this.resetInput(selected, selected);
+    }
+
+    private void resetInput(MFXComboBox<String> selected, Node form) {
         ArgumentsParser.OptionParam option = parser.expandOption(this.inputToArg());
-        this.clearInputFields(selected);
+        this.clearInputFields(form);
         int row = 1;
         MFXValidator validator = new MFXValidator();
         validator.validProperty().addListener((observable, oldVal, newVal) -> {
@@ -167,11 +171,14 @@ public class MainPresenter {
                     if (entry.getValue().isRequired()) {
                         VBox vbox = addRequiredValidation(validator, select);
                         this.commandPane.add(vbox, "cell 0 " + row);
+                        select.getSelectionModel().selectedItemProperty()
+                                .addListener((observable, newVal, oldVal) -> resetInput(select, vbox));
                     } else {
                         this.commandPane.add(select, "width 80,cell 0 " + row);
+                        select.getSelectionModel().selectedItemProperty()
+                                .addListener((observable, newVal, oldVal) -> resetInput(select));
                     }
                     this.argument.put(key, select);
-                    select.getSelectionModel().selectedItemProperty().addListener((observable, newVal, oldVal) -> resetInput(select));
                 }
             } else {
                 MFXTextField text = new MFXTextField();
@@ -299,7 +306,7 @@ public class MainPresenter {
         return COMMAND_TYPES;
     }
 
-    private void clearInputFields(MFXComboBox<String> selected) {
+    private void clearInputFields(Node selected) {
         this.commandPane.getChildren().removeIf(node -> !this.commandTypeSelect.equals(node) && !selected.equals(node));
         this.argument = Maps.newHashMap();
     }
