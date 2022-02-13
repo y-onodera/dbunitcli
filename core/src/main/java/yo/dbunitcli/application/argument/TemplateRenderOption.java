@@ -16,7 +16,7 @@ public class TemplateRenderOption extends PrefixArgumentsParser implements Compa
     @Option(name = "-encoding", usage = "template file encoding")
     private String encoding = System.getProperty("file.encoding");
 
-    @Option(name = "-template", usage = "template file. generate file convert outputEncoding")
+    @Option(name = "-template", usage = "template file")
     private File template;
 
     @Option(name = "-templateEncoding", usage = "template file encoding.default is encoding option")

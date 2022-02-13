@@ -15,7 +15,8 @@ public class ParameterizeExecute {
         }
         int row = 1;
         for (Map<String, Object> param : options.loadParams()) {
-            options.createCommand(param).exec(options, new Parameter(row, param));
+            Parameter parameter = new Parameter(row, param);
+            options.createCommand(param).exec(options.createArgs(parameter), parameter);
             row++;
         }
     }
