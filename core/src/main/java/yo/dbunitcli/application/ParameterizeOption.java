@@ -61,6 +61,10 @@ public class ParameterizeOption extends CommandLineOption {
     public Command<?> createCommand(Map<String, Object> param) {
         String cmdType = Optional.of(this.cmd)
                 .orElseGet(() -> param.get("-cmd").toString());
+        return this.createCommand(cmdType);
+    }
+
+    protected Command<? extends CommandLineOption> createCommand(String cmdType) {
         switch (cmdType) {
             case "compare":
                 return new Compare();

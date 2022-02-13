@@ -35,6 +35,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,10 +57,8 @@ public class MainPresenter {
     public MFXButton exec;
     @FXML
     public MFXButton reset;
-
     @FXML
     private MigPane commandPane;
-
     @FXML
     private MFXComboBox<String> commandTypeSelect;
 
@@ -72,6 +72,7 @@ public class MainPresenter {
     @FXML
     void initialize() {
         this.commandTypeSelect.getItems().add("");
+        this.commandTypeSelect.setEditable(true);
         for (String cmdType : this.commandTypes()) {
             this.commandTypeSelect.getItems().add(cmdType);
         }
@@ -86,6 +87,7 @@ public class MainPresenter {
     @FXML
     public void reset(ActionEvent actionEvent) {
         this.commandTypeSelect.selectFirst();
+        this.exec.setDisable(true);
     }
 
     @FXML
@@ -133,6 +135,7 @@ public class MainPresenter {
             return;
         } else if (Strings.isNullOrEmpty(this.selectedCommand)) {
             this.clearInputFields(this.commandTypeSelect);
+            this.exec.setDisable(true);
             return;
         }
         Class<?> clazz = Class.forName("yo.dbunitcli.application." + this.selectedCommand + "Option");
@@ -167,6 +170,7 @@ public class MainPresenter {
                     ));
                     select.setFloatingText(key);
                     select.setFloatMode(FloatMode.INLINE);
+                    select.setEditable(true);
                     select.getSelectionModel().selectItem(entry.getKey());
                     if (entry.getValue().isRequired()) {
                         VBox vbox = addRequiredValidation(validator, select);
@@ -237,7 +241,7 @@ public class MainPresenter {
         return this.createChoiceButton(new MFXFontIcon("mfx-folder", 32), event -> {
             File choice = openDirChooser();
             if (choice != null) {
-                text.setText(choice.getAbsolutePath());
+                text.setText(relativize(choice));
             }
         });
     }
@@ -246,9 +250,16 @@ public class MainPresenter {
         return createChoiceButton(new MFXFontIcon("mfx-file", 32), event -> {
             File choice = openFileChooser();
             if (choice != null) {
-                text.setText(choice.getAbsolutePath());
+                text.setText(relativize(choice));
             }
         });
+    }
+
+    private String relativize(File choice) {
+        return Path.of(new File(".").getAbsolutePath())
+                .relativize(Path.of(choice.getAbsolutePath()))
+                .toString()
+                .replace("\\", "/");
     }
 
     private StackPane createChoiceButton(MFXFontIcon folderIcon, EventHandler<ActionEvent> actionEventEventHandler) {

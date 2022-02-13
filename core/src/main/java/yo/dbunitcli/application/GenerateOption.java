@@ -97,8 +97,8 @@ public class GenerateOption extends CommandLineOption {
     @Override
     public OptionParam expandOption(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
-        result.putAll(this.src.expandOption(args));
         result.put("-generateType", this.generateType, GenerateType.class);
+        result.putAll(this.src.expandOption(args));
         if (result.hasValue("-generateType")
                 && !(GenerateType.valueOf(result.get("-generateType")) == GenerateType.sql
                 || GenerateType.valueOf(result.get("-generateType")) == GenerateType.settings)) {
