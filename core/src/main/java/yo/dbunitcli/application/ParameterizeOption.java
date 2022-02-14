@@ -53,7 +53,6 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     public String[] createArgs(Parameter aParam) throws IOException {
-        aParam.getMap().put("rowNumber", aParam.getRowNumber());
         return this.templateOption.getTemplateRender()
                 .render(getTemplateArgs(aParam.getMap()), aParam.getMap())
                 .split("\\r?\\n");

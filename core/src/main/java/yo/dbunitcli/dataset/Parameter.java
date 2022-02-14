@@ -15,14 +15,11 @@ public class Parameter {
     public Parameter(int rowNumber, Map<String, Object> map) {
         this.rowNumber = rowNumber;
         this.map.putAll(map);
+        this.map.put("rowNumber", this.rowNumber);
     }
 
     public static Parameter none() {
         return NONE;
-    }
-
-    public int getRowNumber() {
-        return this.rowNumber;
     }
 
     public Map<String, Object> getMap() {
