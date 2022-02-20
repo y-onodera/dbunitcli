@@ -1,0 +1,9 @@
+-scriptType=sql
+-src=src/test/resources/yo/dbunitcli/application/db/sql/ddl
+-jdbcUser=admin
+-jdbcPass=admin
+-jdbcUrl=jdbc:postgresql://localhost:5433/test
+-templateEncoding=MS932
+-templateVarStart=$
+-templateVarStop=$
+-templateParameterAttribute=param
