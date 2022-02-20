@@ -25,13 +25,14 @@ public class ConvertOption extends CommandLineOption {
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         this.src.parseArgument(expandArgs);
+        this.getWriteOption().parseArgument(expandArgs);
     }
 
     @Override
     public OptionParam expandOption(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putAll(this.src.expandOption(args));
-        result.putAll(super.expandOption(args));
+        result.putAll(this.getWriteOption().expandOption(args));
         return result;
     }
 

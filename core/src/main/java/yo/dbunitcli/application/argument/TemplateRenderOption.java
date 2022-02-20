@@ -1,6 +1,5 @@
 package yo.dbunitcli.application.argument;
 
-import com.google.common.base.Strings;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -8,19 +7,12 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TemplateRenderOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
 
     @Option(name = "-encoding", usage = "template file encoding")
     private String encoding = System.getProperty("file.encoding");
-
-    @Option(name = "-template", usage = "template file")
-    private File template;
-
-    @Option(name = "-templateEncoding", usage = "template file encoding.default is encoding option")
-    private String templateEncoding;
 
     @Option(name = "-templateGroup", usage = "StringTemplate4 templateGroup file.")
     private File templateGroup;
@@ -48,12 +40,8 @@ public class TemplateRenderOption extends PrefixArgumentsParser implements Compa
         return templateParameterAttribute;
     }
 
-    public File getTemplate() {
-        return this.template;
-    }
-
     public String getTemplateEncoding() {
-        return Strings.isNullOrEmpty(this.templateEncoding) ? this.encoding : this.templateEncoding;
+        return this.encoding;
     }
 
     public TemplateRender getTemplateRender() {
@@ -68,9 +56,8 @@ public class TemplateRenderOption extends PrefixArgumentsParser implements Compa
 
     @Override
     public OptionParam expandOption(Map<String, String> args) {
-        OptionParam result = super.expandOption(args);
-        result.put("-templateEncoding", this.encoding);
-        result.putFile("-template", this.template);
+        OptionParam result = new OptionParam(this.getPrefix(), args);
+        result.put("-encoding", this.encoding);
         result.putFile("-templateGroup", this.templateGroup);
         result.put("-templateParameterAttribute", this.templateParameterAttribute);
         result.put("-templateVarStart", this.templateVarStart);
@@ -80,11 +67,10 @@ public class TemplateRenderOption extends PrefixArgumentsParser implements Compa
 
     @Override
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
-        super.setUpComponent(parser, expandArgs);
-        if (this.template != null) {
-            if (!template.exists() || !template.isFile()) {
-                throw new CmdLineException(parser, template + " is not exist file"
-                        , new IllegalArgumentException(template.toString()));
+        if (this.templateGroup != null) {
+            if (!this.templateGroup.exists() || !this.templateGroup.isFile()) {
+                throw new CmdLineException(parser, this.templateGroup + " is not exist file"
+                        , new IllegalArgumentException(this.templateGroup.toString()));
             }
         }
     }

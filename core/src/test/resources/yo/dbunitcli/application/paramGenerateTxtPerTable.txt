@@ -3,7 +3,7 @@
 -encoding=MS932
 -template=src/test/resources/yo/dbunitcli/application/generate/table/template.txt
 -templateGroup=src/test/resources/yo/dbunitcli/application/generate/table/templateGroup.stg
--templateEncoding=UTF-8
+-template.encoding=UTF-8
 -templateParameterAttribute=
 -unit=table
 -outputEncoding=UTF-8

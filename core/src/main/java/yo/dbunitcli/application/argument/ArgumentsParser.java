@@ -68,12 +68,9 @@ public interface ArgumentsParser {
         };
     }
 
-    default void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
-    }
+    void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException;
 
-    default OptionParam expandOption(Map<String, String> args) {
-        return new OptionParam(this.getPrefix(), args);
-    }
+    OptionParam expandOption(Map<String, String> args);
 
     default String getPrefix() {
         return "";

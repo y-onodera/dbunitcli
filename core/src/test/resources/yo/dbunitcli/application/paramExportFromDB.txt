@@ -1,0 +1,8 @@
+-srcType=table
+-src=src/test/resources/yo/dbunitcli/application/db/table
+-jdbcUser=admin
+-jdbcPass=admin
+-jdbcUrl=jdbc:postgresql://localhost:5433/test
+-result=target/test-classes/yo/dbunitcli/application/db/result
+-resultType=xlsx
+-exportEmptyTable=true

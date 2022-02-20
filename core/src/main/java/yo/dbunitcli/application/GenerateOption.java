@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 
 public class GenerateOption extends CommandLineOption {
 
-
     @Option(name = "-generateType")
     private GenerateType generateType = GenerateType.txt;
 
@@ -47,9 +46,15 @@ public class GenerateOption extends CommandLineOption {
     @Option(name = "-op")
     private DBDataSetWriter.Operation operation;
 
+    @Option(name = "-outputEncoding", usage = "output file encoding")
+    private String outputEncoding = "UTF-8";
+
+    @Option(name = "-template", usage = "template file")
+    private File template;
+
     private DataSetLoadOption src = new DataSetLoadOption("src");
 
-    private TemplateRenderOption templateOption = new TemplateRenderOption("");
+    private TemplateRenderOption templateOption = new TemplateRenderOption("template");
 
     private String templateString;
 
@@ -89,6 +94,7 @@ public class GenerateOption extends CommandLineOption {
     @Override
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
+        this.getWriteOption().parseArgument(expandArgs);
         this.src.parseArgument(expandArgs);
         this.templateOption.parseArgument(expandArgs);
         this.getGenerateType().populateSettings(this, parser);
@@ -97,12 +103,13 @@ public class GenerateOption extends CommandLineOption {
     @Override
     public OptionParam expandOption(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
-        result.put("-generateType", this.generateType, GenerateType.class);
         result.putAll(this.src.expandOption(args));
+        result.put("-generateType", this.generateType, GenerateType.class);
         if (result.hasValue("-generateType")
-                && !(GenerateType.valueOf(result.get("-generateType")) == GenerateType.sql
-                || GenerateType.valueOf(result.get("-generateType")) == GenerateType.settings)) {
+                && GenerateType.valueOf(result.get("-generateType")) == GenerateType.txt
+                || GenerateType.valueOf(result.get("-generateType")) == GenerateType.xlsx) {
             result.put("-unit", this.unit, GenerateUnit.class);
+            result.putFile("-template", this.template, true);
         }
         if (result.hasValue("-generateType") && GenerateType.valueOf(result.get("-generateType")) == GenerateType.sql) {
             result.put("-commit", this.commit);
@@ -111,7 +118,11 @@ public class GenerateOption extends CommandLineOption {
             result.put("-sqlFileSuffix", this.sqlFileSuffix);
         }
         result.putAll(this.templateOption.expandOption(args));
-        result.putAll(super.expandOption(args));
+        if (result.hasValue("-generateType")
+                && !(GenerateType.valueOf(result.get("-generateType")) == GenerateType.sql
+                || GenerateType.valueOf(result.get("-generateType")) == GenerateType.settings)) {
+            result.put("-outputEncoding", this.outputEncoding);
+        }
         return result;
     }
 
@@ -211,7 +222,7 @@ public class GenerateOption extends CommandLineOption {
                 JxlsTemplateRender.builder()
                         .setTemplateParameterAttribute(option.templateOption.getTemplateParameterAttribute())
                         .build()
-                        .render(option.templateOption.getTemplate(), resultFile, param);
+                        .render(option.template, resultFile, param);
             }
         },
         settings {
@@ -254,7 +265,7 @@ public class GenerateOption extends CommandLineOption {
         };
 
         protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
-            File template = option.templateOption.getTemplate();
+            File template = option.template;
             if (!template.exists() || !template.isFile()) {
                 throw new CmdLineException(parser, template + " is not exist file"
                         , new IllegalArgumentException(template.toString()));
@@ -273,15 +284,11 @@ public class GenerateOption extends CommandLineOption {
         }
 
         protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
-            String outputEncoding = option.getWriteOption().getOutputEncoding();
-            if (option.getGenerateType() == settings) {
-                outputEncoding = "UTF-8";
-            }
             option.templateOption.getTemplateRender().write(getStGroup()
                     , option.templateString()
                     , param
                     , resultFile
-                    , outputEncoding);
+                    , option.outputEncoding);
         }
     }
 }

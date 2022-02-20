@@ -4,6 +4,7 @@ import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import yo.dbunitcli.application.argument.JdbcOption;
 import yo.dbunitcli.application.argument.TemplateRenderOption;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.Parameter;
@@ -27,6 +28,8 @@ public class RunOption extends CommandLineOption {
     private ScriptType scriptType = ScriptType.sql;
 
     private TemplateRenderOption templateOption = new TemplateRenderOption("");
+
+    private JdbcOption jdbcOption = new JdbcOption("");
 
     public RunOption() {
         super(Parameter.none());
@@ -66,6 +69,7 @@ public class RunOption extends CommandLineOption {
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         this.templateOption.parseArgument(expandArgs);
+        this.jdbcOption.parseArgument(expandArgs);
         if (!this.src.exists()) {
             throw new CmdLineException(parser, src + " is not exist", new IllegalArgumentException(src.toString()));
         }
@@ -77,7 +81,9 @@ public class RunOption extends CommandLineOption {
         result.put("-scriptType", this.scriptType, ScriptType.class);
         result.putFile("-src", this.src);
         result.putAll(this.templateOption.expandOption(args));
-        result.putAll(super.expandOption(args));
+        if (result.get("-scriptType").equals(ScriptType.sql.name())) {
+            result.putAll(this.jdbcOption.expandOption(args));
+        }
         return result;
     }
 
@@ -85,7 +91,7 @@ public class RunOption extends CommandLineOption {
         cmd, bat, sql {
             @Override
             public Runner createRunner(RunOption aOption) {
-                return new SqlRunner(aOption.getWriteOption().getJdbcOption().getDatabaseConnectionLoader()
+                return new SqlRunner(aOption.jdbcOption.getDatabaseConnectionLoader()
                         , aOption.getParameter().getMap()
                         , aOption.templateOption.getTemplateRender()
                 );

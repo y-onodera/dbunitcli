@@ -3,6 +3,9 @@ package yo.dbunitcli.fileprocessor;
 import com.google.common.io.CharStreams;
 import org.apache.tools.ant.taskdefs.SQLExec;
 import org.dbunit.dataset.DataSetException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
@@ -16,6 +19,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class SqlRunner implements Runner {
+    private static final Logger logger = LoggerFactory.getLogger(SqlRunner.class);
     private static final Pattern SQLPLUS_SET = Pattern.compile("SET\\s+(DEFINE|ECHO|PAUSE|TIMING|SERVEROUTPUT)\\s+(ON|OFF).*\\n", Pattern.CASE_INSENSITIVE);
     private static final Pattern SQLPLUS_SPOOL_OR_PROMPT = Pattern.compile("(SPOOL|PROMPT)\\s.*\\n", Pattern.CASE_INSENSITIVE);
     private static final Pattern SQLPLUS_EXIT_OR_COMMIT = Pattern.compile("(EXIT|COMMIT)(\\s|\\s*;)", Pattern.CASE_INSENSITIVE);
@@ -41,8 +45,8 @@ public class SqlRunner implements Runner {
 
     @Override
     public void runScript(Collection<File> targetFiles) throws DataSetException {
-        try {
-            for (File target : targetFiles) {
+        for (File target : targetFiles) {
+            try {
                 Connection conn = this.getConnection();
                 SQLExec exec = this.createExecInstance(conn);
                 exec.setSrc(target);
@@ -54,9 +58,10 @@ public class SqlRunner implements Runner {
                     exec.setKeepformat(true);
                 }
                 exec.execute();
+            } catch (Throwable var30) {
+                logger.error("error " + target.getName(), var30);
+                throw new DataSetException(var30);
             }
-        } catch (Throwable var30) {
-            throw new DataSetException(var30);
         }
     }
 

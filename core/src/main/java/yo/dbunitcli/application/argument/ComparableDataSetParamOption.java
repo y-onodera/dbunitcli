@@ -16,6 +16,18 @@ public interface ComparableDataSetParamOption extends ArgumentsParser {
 
     ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder);
 
+    @Override
+    default void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+        // nothing
+    }
+
+    ;
+
+    @Override
+    default OptionParam expandOption(Map<String, String> args) {
+        return new OptionParam(this.getPrefix(), args);
+    }
+
     class None implements ComparableDataSetParamOption {
 
         @Override

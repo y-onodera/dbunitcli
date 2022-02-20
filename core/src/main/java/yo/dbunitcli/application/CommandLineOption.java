@@ -47,13 +47,6 @@ abstract public class CommandLineOption extends PrefixArgumentsParser {
         this.parseArgument(expandArgs);
     }
 
-    @Override
-    public OptionParam expandOption(Map<String, String> args) {
-        OptionParam result = super.expandOption(args);
-        result.putAll(this.writeOption.expandOption(args));
-        return result;
-    }
-
     public Parameter getParameter() {
         return this.parameter;
     }
@@ -72,7 +65,6 @@ abstract public class CommandLineOption extends PrefixArgumentsParser {
 
     @Override
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
-        this.writeOption.parseArgument(expandArgs);
         this.parameter.getMap().putAll(this.inputParam);
     }
 

@@ -32,7 +32,7 @@ public class ExcelOption extends PrefixArgumentsParser implements ComparableData
 
     @Override
     public OptionParam expandOption(Map<String, String> args) {
-        OptionParam result = super.expandOption(args);
+        OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putFile("-xlsxSchema", this.xlsxSchemaSource);
         return result;
     }

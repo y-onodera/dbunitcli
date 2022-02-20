@@ -19,13 +19,16 @@ public class ParameterizeOption extends CommandLineOption {
 
     private DataSetLoadOption param = new DataSetLoadOption("param");
 
-    private TemplateRenderOption templateOption = new TemplateRenderOption("");
+    private TemplateRenderOption templateOption = new TemplateRenderOption("template");
 
     @Option(name = "-cmd", usage = "data driven target cmd")
     private String cmd;
 
     @Option(name = "-cmdParam", usage = "parameterFile for cmd")
     private String cmdParam;
+
+    @Option(name = "-template", usage = "template file")
+    private File template;
 
     public ParameterizeOption() {
         super(Parameter.none());
@@ -44,6 +47,7 @@ public class ParameterizeOption extends CommandLineOption {
         result.putAll(this.param.expandOption(args));
         result.put("-cmd", this.cmd);
         result.put("-cmdParam", this.cmdParam);
+        result.putFile("-template", this.template, true);
         result.putAll(this.templateOption.expandOption(args));
         return result;
     }
@@ -78,7 +82,7 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     protected String getTemplateArgs(Map<String, Object> param) throws IOException {
-        File template = this.templateOption.getTemplate();
+        File template = this.template;
         if (!Strings.isNullOrEmpty(this.cmdParam)) {
             template = new File(this.templateOption.getTemplateRender().render(this.cmdParam, param));
         }

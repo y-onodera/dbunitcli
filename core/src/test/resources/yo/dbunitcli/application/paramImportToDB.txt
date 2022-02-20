@@ -1,0 +1,7 @@
+-srcType=xlsx
+-src=src/test/resources/yo/dbunitcli/application/db/file
+-jdbcUser=admin
+-jdbcPass=admin
+-jdbcUrl=jdbc:postgresql://localhost:5433/test
+-resultType=table
+-op=CLEAN_INSERT

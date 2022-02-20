@@ -11,7 +11,7 @@ public class DataSourceTypeOptionFactory {
     public ComparableDataSetParamOption create(String prefix, DataSourceType type) {
         switch (type) {
             case table:
-                return new JdbcLoadOption(prefix);
+                return ComparableDataSetParamOption.join(new EncodingOption(prefix), new JdbcLoadOption(prefix));
             case sql:
                 return ComparableDataSetParamOption.join(new EncodingOption(prefix), new JdbcLoadOption(prefix), new TemplateRenderOption(prefix));
             case xls:
@@ -44,7 +44,7 @@ public class DataSourceTypeOptionFactory {
 
         @Override
         public OptionParam expandOption(Map<String, String> args) {
-            OptionParam result = super.expandOption(args);
+            OptionParam result = new OptionParam(this.getPrefix(), args);
             result.put("-fixedLength", this.fixedLength);
             return result;
         }

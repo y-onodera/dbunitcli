@@ -46,7 +46,6 @@ public class DataSetWriteOption extends PrefixArgumentsParser {
 
     @Override
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
-        super.setUpComponent(parser, expandArgs);
         this.builder.setResultType(this.resultType);
         if (this.resultType == DataSourceType.table) {
             this.jdbcOption.parseArgument(expandArgs);
@@ -64,7 +63,7 @@ public class DataSetWriteOption extends PrefixArgumentsParser {
 
     @Override
     public OptionParam expandOption(Map<String, String> args) {
-        OptionParam result = super.expandOption(args);
+        OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-resultType", ResultType.valueOf(this.resultType.toString()), ResultType.class);
         if (!result.hasValue("-resultType")) {
             return result;

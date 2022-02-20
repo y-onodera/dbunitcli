@@ -64,7 +64,7 @@ public class DataSetLoadOption extends PrefixArgumentsParser {
 
     @Override
     public OptionParam expandOption(Map<String, String> args) {
-        OptionParam result = super.expandOption(args);
+        OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-srcType", this.srcType, DataSourceType.class, true);
         result.putFileOrDir("-src", this.src, true);
         result.putFile("-setting", this.setting);

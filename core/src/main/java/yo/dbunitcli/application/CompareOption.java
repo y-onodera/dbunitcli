@@ -60,6 +60,7 @@ public class CompareOption extends CommandLineOption {
         this.newData.parseArgument(expandArgs);
         this.oldData.parseArgument(expandArgs);
         this.populateSettings(parser);
+        this.getWriteOption().parseArgument(expandArgs);
     }
 
     @Override
@@ -70,7 +71,7 @@ public class CompareOption extends CommandLineOption {
         result.putAll(this.oldData.expandOption(args));
         result.putFile("-expect", this.expected);
         result.putFile("-expectDetail", this.expectDetail);
-        result.putAll(super.expandOption(args));
+        result.putAll(this.getWriteOption().expandOption(args));
         return result;
     }
 

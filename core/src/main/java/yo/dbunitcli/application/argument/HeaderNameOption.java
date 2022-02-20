@@ -22,7 +22,7 @@ public class HeaderNameOption extends PrefixArgumentsParser implements Comparabl
 
     @Override
     public OptionParam expandOption(Map<String, String> args) {
-        OptionParam result = super.expandOption(args);
+        OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-headerName", this.headerName);
         return result;
     }

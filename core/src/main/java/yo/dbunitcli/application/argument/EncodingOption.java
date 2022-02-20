@@ -22,7 +22,7 @@ public class EncodingOption extends PrefixArgumentsParser implements ComparableD
 
     @Override
     public OptionParam expandOption(Map<String, String> args) {
-        OptionParam result = super.expandOption(args);
+        OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-encoding", this.encoding);
         return result;
     }

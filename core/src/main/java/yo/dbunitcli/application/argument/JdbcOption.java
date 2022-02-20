@@ -54,7 +54,7 @@ public class JdbcOption extends PrefixArgumentsParser {
 
     @Override
     public OptionParam expandOption(Map<String, String> args) {
-        OptionParam result = super.expandOption(args);
+        OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putFile("-jdbcProperties", this.jdbcProperties);
         if (Strings.isNullOrEmpty(result.get("-jdbcProperties"))) {
             result.put("-jdbcUrl", this.jdbcUrl);
