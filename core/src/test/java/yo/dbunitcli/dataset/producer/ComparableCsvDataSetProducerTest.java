@@ -9,6 +9,7 @@ import org.junit.Test;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.dataset.DataSourceType;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -30,6 +31,7 @@ public class ComparableCsvDataSetProducerTest {
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
+                                .setSource(DataSourceType.csv)
                                 .setSrc(src)
                                 .setEncoding("windows-31j")
                                 .build()));
@@ -43,6 +45,7 @@ public class ComparableCsvDataSetProducerTest {
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
+                                .setSource(DataSourceType.csv)
                                 .setSrc(src)
                                 .setEncoding("windows-31j")
                                 .build()));
@@ -76,6 +79,7 @@ public class ComparableCsvDataSetProducerTest {
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
+                                .setSource(DataSourceType.csv)
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .build()));
@@ -129,6 +133,7 @@ public class ComparableCsvDataSetProducerTest {
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
+                                .setSource(DataSourceType.csv)
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .setRegInclude("multi1")
@@ -163,6 +168,7 @@ public class ComparableCsvDataSetProducerTest {
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
+                                .setSource(DataSourceType.csv)
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .setRegExclude("multi2")

@@ -1,11 +1,14 @@
 package yo.dbunitcli.dataset;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class ComparableDataSetParam {
@@ -113,6 +116,18 @@ public class ComparableDataSetParam {
 
     public DatabaseConnectionLoader getDatabaseConnectionLoader() {
         return this.databaseConnectionLoader;
+    }
+
+    public File[] getSrcFiles() {
+        if (this.getSrc().isDirectory()) {
+            String end = "." + Strings.nullToEmpty(Optional.ofNullable(this.extension)
+                            .orElse(this.source.getExtension()))
+                    .toUpperCase();
+            File[] result = this.getSrc().listFiles((file) -> file.isFile() && file.getName().toUpperCase().endsWith(end));
+            Arrays.sort(result);
+            return result;
+        }
+        return new File[]{this.getSrc()};
     }
 
     @Override
@@ -242,7 +257,7 @@ public class ComparableDataSetParam {
         }
 
         public String getExtension() {
-            return extension;
+            return this.extension;
         }
 
         public DatabaseConnectionLoader getDatabaseConnectionLoader() {

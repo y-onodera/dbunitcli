@@ -9,6 +9,7 @@ import org.junit.rules.ExpectedException;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
@@ -80,6 +81,7 @@ public class ConvertTest {
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
+                                .setSource(DataSourceType.xlsx)
                                 .setSrc(src)
                                 .build()));
         Assert.assertEquals(2, actual.getTableNames().length);
@@ -94,6 +96,7 @@ public class ConvertTest {
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsDataSetProducer(
                         ComparableDataSetParam.builder()
+                                .setSource(DataSourceType.xls)
                                 .setSrc(src)
                                 .build()));
         Assert.assertEquals(2, actual.getTableNames().length);
@@ -108,6 +111,7 @@ public class ConvertTest {
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
+                                .setSource(DataSourceType.csv)
                                 .setSrc(src)
                                 .setEncoding("UTF-8")
                                 .build()));
@@ -136,6 +140,7 @@ public class ConvertTest {
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
+                                .setSource(DataSourceType.csv)
                                 .setSrc(src)
                                 .setEncoding("Shift-Jis")
                                 .build()));
@@ -150,6 +155,7 @@ public class ConvertTest {
         ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
+                                .setSource(DataSourceType.csv)
                                 .setSrc(src)
                                 .setEncoding("Shift-Jis")
                                 .build()));

@@ -2,14 +2,32 @@ package yo.dbunitcli.dataset;
 
 public enum DataSourceType {
     table,
-    sql ,
+    sql,
     file,
     dir,
-    csv ,
+    csv {
+        @Override
+        public String getExtension() {
+            return this.name();
+        }
+    },
     csvq,
     reg,
     fixed,
-    xls,
-    xlsx;
+    xls {
+        @Override
+        public String getExtension() {
+            return this.name();
+        }
+    },
+    xlsx {
+        @Override
+        public String getExtension() {
+            return this.name();
+        }
+    };
 
+    public String getExtension() {
+        return null;
+    }
 }

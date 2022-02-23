@@ -21,7 +21,6 @@ import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
@@ -36,11 +35,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
 
     public ComparableCsvDataSetProducer(ComparableDataSetParam param) {
         this.param = param;
-        if (this.param.getSrc().isDirectory()) {
-            this.src = this.param.getSrc().listFiles((file, s) -> s.endsWith(".csv"));
-        } else {
-            this.src = new File[]{this.param.getSrc()};
-        }
+        this.src = this.param.getSrcFiles();
         this.encoding = this.param.getEncoding();
         this.filter = this.param.getTableNameFilter();
         this.loadData = this.param.isLoadData();
