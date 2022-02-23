@@ -2,4 +2,4 @@
 -new.src=src/test/resources/yo/dbunitcli/application/pattern/new
 -setting=src/test/resources/yo/dbunitcli/application/pattern/settingNoMatch.json
 -result=target/test-classes/yo/dbunitcli/application/pattern/result_setting_no_match
--expect=src/test/resources/yo/dbunitcli/application/pattern/expect/result_setting_no_match
+-expect.src=src/test/resources/yo/dbunitcli/application/pattern/expect/result_setting_no_match

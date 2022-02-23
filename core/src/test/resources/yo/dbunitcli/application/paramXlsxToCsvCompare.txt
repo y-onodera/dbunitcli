@@ -4,5 +4,6 @@
 -new.src=src/test/resources/yo/dbunitcli/application/csv2xlsx/csv
 -setting=src/test/resources/yo/dbunitcli/application/csv2xlsx/setting.json
 -result=target/test-classes/yo/dbunitcli/application/compare/xlsx2csv/result
--expect=src/test/resources/yo/dbunitcli/application/xlsx2csv/expect
+-expect.src=src/test/resources/yo/dbunitcli/application/xlsx2csv/expect
+-expect.setting=src/test/resources/yo/dbunitcli/application/expectsetting.json
 -outputEncoding=UTF-8

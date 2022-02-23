@@ -3,6 +3,7 @@
 -new.src=src/test/resources/yo/dbunitcli/application/csv2xlsx/multifile.xlsx
 -new.srcType=xlsx
 -setting=src/test/resources/yo/dbunitcli/application/csv2xlsx/setting.json
--expect=src/test/resources/yo/dbunitcli/application/csv2xlsx/expectxlsx2csv
+-expect.src=src/test/resources/yo/dbunitcli/application/csv2xlsx/expectxlsx2csv
+-expect.setting=src/test/resources/yo/dbunitcli/application/expectsetting.json
 -result=target/test-classes/yo/dbunitcli/application/compare/csv2xlsx/result
 -outputEncoding=UTF-8

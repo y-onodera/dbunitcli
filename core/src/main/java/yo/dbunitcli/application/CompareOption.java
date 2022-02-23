@@ -1,7 +1,6 @@
 package yo.dbunitcli.application;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -12,7 +11,7 @@ import yo.dbunitcli.dataset.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.Map;
 
 public class CompareOption extends CommandLineOption {
@@ -20,17 +19,11 @@ public class CompareOption extends CommandLineOption {
     @Option(name = "-setting", usage = "file comparison settings")
     private File setting;
 
-    @Option(name = "-expect", usage = "expected diff")
-    private File expected;
-
-    @Option(name = "-expectDetail", usage = "file define expected diff comparison settings")
-    private File expectDetail;
+    private DataSetLoadOption expectData = new DataSetLoadOption("expect");
 
     private DataSetLoadOption oldData = new DataSetLoadOption("old");
 
     private DataSetLoadOption newData = new DataSetLoadOption("new");
-
-    private ColumnSettings expectDetailSettings;
 
     private ColumnSettings columnSettings;
 
@@ -42,16 +35,16 @@ public class CompareOption extends CommandLineOption {
         super(param);
     }
 
-    public File getExpected() {
-        return this.expected;
-    }
-
     public DataSetLoadOption getOldData() {
-        return oldData;
+        return this.oldData;
     }
 
     public DataSetLoadOption getNewData() {
-        return newData;
+        return this.newData;
+    }
+
+    public DataSetLoadOption getExpectData() {
+        return this.expectData;
     }
 
     @Override
@@ -59,6 +52,16 @@ public class CompareOption extends CommandLineOption {
         super.setUpComponent(parser, expandArgs);
         this.newData.parseArgument(expandArgs);
         this.oldData.parseArgument(expandArgs);
+        if (Arrays.stream(expandArgs).anyMatch(it -> it.startsWith("-expect.src"))) {
+            this.expectData.parseArgument(expandArgs);
+            if (!Arrays.stream(expandArgs).anyMatch(it -> it.startsWith("-expect.setting"))) {
+                this.expectData.getParam().setColumnSettings(ColumnSettings.NONE.replaceComparisonKeys(
+                        AddSettingColumns.builder()
+                                .addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList())
+                                .build()
+                ));
+            }
+        }
         this.populateSettings(parser);
         this.getWriteOption().parseArgument(expandArgs);
     }
@@ -69,9 +72,8 @@ public class CompareOption extends CommandLineOption {
         result.putFile("-setting", this.setting);
         result.putAll(this.newData.expandOption(args));
         result.putAll(this.oldData.expandOption(args));
-        result.putFile("-expect", this.expected);
-        result.putFile("-expectDetail", this.expectDetail);
         result.putAll(this.getWriteOption().expandOption(args));
+        result.putAll(this.expectData.expandOption(args));
         return result;
     }
 
@@ -95,7 +97,7 @@ public class CompareOption extends CommandLineOption {
         DataSetWriteOption writeOption = this.getWriteOption();
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
-                        .setColumnSettings(this.expectDetailSettings)
+                        .setColumnSettings(this.expectData.getParam().getColumnSettings())
                         .setSrc(writeOption.getResultDir())
                         .setSource(writeOption.getResultType())
                         .setEncoding(writeOption.getOutputEncoding())
@@ -104,24 +106,7 @@ public class CompareOption extends CommandLineOption {
     }
 
     public ComparableDataSet expectDataSet() throws DataSetException {
-        DataSetWriteOption writeOption = this.getWriteOption();
-        return this.getComparableDataSetLoader().loadDataSet(
-                this.getDataSetParamBuilder()
-                        .setSrc(this.getExpected())
-                        .setColumnSettings(this.expectDetailSettings)
-                        .setSource(writeOption.getResultType())
-                        .setEncoding(writeOption.getOutputEncoding())
-                        .build()
-        );
-    }
-
-    public AddSettingColumns getExpectedComparisonKeys() {
-        if (this.expectDetailSettings.getComparisonKeys().equals(AddSettingColumns.NONE)) {
-            return AddSettingColumns.builder()
-                    .addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList())
-                    .build();
-        }
-        return this.expectDetailSettings.getComparisonKeys();
+        return this.getComparableDataSetLoader().loadDataSet(this.expectData.getParam().build());
     }
 
     public IDataSetWriter expectedDiffWriter() throws DataSetException {
@@ -131,11 +116,6 @@ public class CompareOption extends CommandLineOption {
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {
         try {
             this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
-            if (this.expectDetail != null) {
-                this.expectDetailSettings = new FromJsonColumnSettingsBuilder().build(this.expectDetail);
-            } else {
-                this.expectDetailSettings = new FromJsonColumnSettingsBuilder().build();
-            }
         } catch (IOException e) {
             throw new CmdLineException(parser, e);
         }

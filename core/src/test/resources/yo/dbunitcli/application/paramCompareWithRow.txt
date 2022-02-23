@@ -2,4 +2,5 @@
 -new.src=src/test/resources/yo/dbunitcli/application/pattern/new
 -setting=src/test/resources/yo/dbunitcli/application/pattern/settingCompareWithRow.json
 -result=target/test-classes/yo/dbunitcli/application/pattern/result_row_compare
--expect=src/test/resources/yo/dbunitcli/application/pattern/expect/result_row_compare
+-expect.src=src/test/resources/yo/dbunitcli/application/pattern/expect/result_row_compare
+-expect.setting=src/test/resources/yo/dbunitcli/application/expectsetting.json

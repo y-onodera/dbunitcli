@@ -39,11 +39,11 @@ public class Compare implements Command<CompareOption> {
                 .dataSetWriter(writer)
                 .build()
                 .result();
-        if (options.getExpected() != null) {
+        if (options.getExpectData().getParam().getSrc() != null) {
             if (new DataSetCompareBuilder()
                     .newDataSet(options.resultDataSet())
                     .oldDataSet(options.expectDataSet())
-                    .comparisonKeys(options.getExpectedComparisonKeys())
+                    .comparisonKeys(options.getExpectData().getParam().getColumnSettings().getComparisonKeys())
                     .dataSetWriter(options.expectedDiffWriter())
                     .build()
                     .result().existDiff()) {

@@ -55,19 +55,27 @@ public class ColumnSettings {
     }
 
     public AddSettingColumns getComparisonKeys() {
-        return comparisonKeys;
+        return this.comparisonKeys;
     }
 
     public AddSettingColumns getExcludeColumns() {
-        return excludeColumns;
+        return this.excludeColumns;
     }
 
     public AddSettingColumns getOrderColumns() {
-        return orderColumns;
+        return this.orderColumns;
     }
 
     public AddSettingColumns getExpressionColumns() {
-        return expressionColumns;
+        return this.expressionColumns;
+    }
+
+    public ColumnSettings replaceComparisonKeys(AddSettingColumns adComparisonKeys) {
+        return new ColumnSettings(adComparisonKeys
+                , this.excludeColumns
+                , this.orderColumns
+                , this.expressionColumns
+                , this.filterExpressions);
     }
 
     public Column[] getComparisonKeys(String tableName) {

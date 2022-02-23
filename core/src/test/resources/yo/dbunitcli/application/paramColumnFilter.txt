@@ -2,4 +2,5 @@
 -new.src=src/test/resources/yo/dbunitcli/application/filter/new
 -setting=src/test/resources/yo/dbunitcli/application/filter/setting.json
 -result=target/test-classes/yo/dbunitcli/application/filter/result
--expect=src/test/resources/yo/dbunitcli/application/filter/expect
+-expect.src=src/test/resources/yo/dbunitcli/application/filter/expect
+-expect.setting=src/test/resources/yo/dbunitcli/application/expectsetting.json

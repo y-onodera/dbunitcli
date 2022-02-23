@@ -1,0 +1,18 @@
+{
+  "settings": [
+    {
+      "name": "COMPARE_RESULT",
+      "stringExpression": [
+        {
+          "OLD_PATH": "get('OLD_PATH').replace('\\\\','/')"
+        },
+        {
+          "NEW_PATH": "get('NEW_PATH').replace('\\\\','/')"
+        }
+      ]
+    },
+    {
+      "pattern": "*"
+    }
+  ]
+}
