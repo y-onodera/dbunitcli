@@ -24,8 +24,6 @@ public class DBIntegrationTest {
 
     private String baseDir;
 
-    private String subDirectory;
-
     @Before
     public void setUp() throws UnsupportedEncodingException {
         this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(), "UTF-8");
@@ -49,7 +47,7 @@ public class DBIntegrationTest {
 
     @Test
     public void test4_runSql() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationRunDml.txt"});
+        Run.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationRunDml.txt"});
     }
 
     @Test
