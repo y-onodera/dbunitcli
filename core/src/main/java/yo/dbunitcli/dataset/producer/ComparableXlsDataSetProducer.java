@@ -101,6 +101,7 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
                 factory.processWorkbookEvents(request, newFs);
                 if (this.isStartTable) {
                     this.consumer.endTable();
+                    this.loadRandomCellTable();
                 }
             } catch (IOException e) {
                 throw new DataSetException(e);
@@ -130,17 +131,7 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
                             }
                         }
                         if (this.randomCellRecordBuilder != null) {
-                            for (String tableName : this.randomCellRecordBuilder.getTableNames()) {
-                                this.consumer.startTable(this.randomCellRecordBuilder.getTableMetaData(tableName));
-                                if (this.loadData) {
-                                    for (Object[] row : this.randomCellRecordBuilder.getRows(tableName)) {
-                                        if (Stream.of(row).anyMatch(it -> it != null && !it.toString().equals(""))) {
-                                            this.consumer.row(row);
-                                        }
-                                    }
-                                }
-                                this.consumer.endTable();
-                            }
+                            this.loadRandomCellTable();
                         }
                     } catch (DataSetException e) {
                         throw new RuntimeException(e);
@@ -267,9 +258,7 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
                     this.isStartTable = true;
                 } else if (this.rowsTableBuilder.hasRow(this.lastRowNumber)) {
                     if (this.rowsTableBuilder.hasRow(this.lastRowNumber)) {
-                        if (Stream.of(this.rowsTableBuilder.currentRow()).anyMatch(it -> it != null && !it.toString().equals(""))) {
-                            this.consumer.row(this.rowsTableBuilder.currentRow());
-                        }
+                        this.addRow(this.rowsTableBuilder.currentRow());
                     }
                 }
                 this.rowsTableBuilder.clearRowValue();
@@ -279,4 +268,23 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
         }
 
     }
+
+    protected void addRow(Object[] row) throws DataSetException {
+        if (Stream.of(row).anyMatch(it -> it != null && !it.toString().equals(""))) {
+            this.consumer.row(row);
+        }
+    }
+
+    protected void loadRandomCellTable() throws DataSetException {
+        for (String tableName : this.randomCellRecordBuilder.getTableNames()) {
+            this.consumer.startTable(this.randomCellRecordBuilder.getTableMetaData(tableName));
+            if (this.loadData) {
+                for (Object[] row : this.randomCellRecordBuilder.getRows(tableName)) {
+                    this.addRow(row);
+                }
+            }
+            this.consumer.endTable();
+        }
+    }
+
 }
