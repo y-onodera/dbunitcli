@@ -126,6 +126,7 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
                         if (this.rowsTableBuilder != null) {
                             if (this.rowsTableBuilder.isNowProcessing()) {
                                 this.consumer.endTable();
+                                this.isStartTable = false;
                             }
                         }
                         if (this.randomCellRecordBuilder != null) {
@@ -182,7 +183,7 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
                 FormulaRecord formulaRec = (FormulaRecord) record;
                 thisRow = formulaRec.getRow();
                 thisColumn = formulaRec.getColumn();
-                if (Double.isNaN(formulaRec.getValue())) {
+                if (formulaRec.hasCachedResultString()) {
                     // Formula result is a string
                     // This is stored in the next record
                     this.outputNextStringRecord = true;
