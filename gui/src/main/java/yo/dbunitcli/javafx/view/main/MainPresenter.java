@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXComboBox;
 import io.github.palexdev.materialfx.controls.MFXTextField;
+import io.github.palexdev.materialfx.enums.ButtonType;
 import io.github.palexdev.materialfx.enums.FloatMode;
 import io.github.palexdev.materialfx.font.MFXFontIcon;
 import io.github.palexdev.materialfx.validation.Constraint;
@@ -209,6 +210,10 @@ public class MainPresenter {
             }
             row++;
         }
+        MFXButton more = new MFXButton("more");
+        more.setButtonType(ButtonType.RAISED);
+        more.getStyleClass().add("text-button");
+        this.commandPane.add(more, "align right,cell 1 " + row);
     }
 
     private VBox addRequiredValidation(MFXValidator validator, MFXTextField text) {
