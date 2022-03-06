@@ -9,7 +9,6 @@ import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;

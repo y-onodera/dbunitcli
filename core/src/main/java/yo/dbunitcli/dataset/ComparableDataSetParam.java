@@ -9,6 +9,7 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ComparableDataSetParam {
@@ -279,6 +280,10 @@ public class ComparableDataSetParam {
         public Builder setSource(DataSourceType source) {
             this.source = source;
             return this;
+        }
+
+        public Builder editColumnSettings(Consumer<ColumnSettings.Editor> function) {
+            return this.setColumnSettings(this.getColumnSettings().apply(function));
         }
 
         public Builder setColumnSettings(ColumnSettings columnSettings) {

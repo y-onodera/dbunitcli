@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -70,12 +71,14 @@ public class ColumnSettings {
         return this.expressionColumns;
     }
 
-    public ColumnSettings replaceComparisonKeys(AddSettingColumns adComparisonKeys) {
-        return new ColumnSettings(adComparisonKeys
-                , this.excludeColumns
-                , this.orderColumns
-                , this.expressionColumns
-                , this.filterExpressions);
+    public ColumnSettings apply(Consumer<ColumnSettings.Editor> function) {
+        Editor editor = new Editor();
+        function.accept(editor);
+        return new ColumnSettings(this.comparisonKeys.apply(editor.keyEdit)
+                , this.excludeColumns.apply(editor.excludeEdit)
+                , this.orderColumns.apply(editor.orderEdit)
+                , this.expressionColumns.apply(editor.expressionEdit)
+                , this.filterExpressions.apply(editor.filterEdit));
     }
 
     public Column[] getComparisonKeys(String tableName) {
@@ -176,5 +179,43 @@ public class ColumnSettings {
         AddSettingColumns getExpressionColumns();
 
         RowFilter getFilterExpressions();
+    }
+
+    public static class Editor {
+        private Consumer<AddSettingColumns.Builder> keyEdit = (it) -> {
+        };
+        private Consumer<AddSettingColumns.Builder> excludeEdit = (it) -> {
+        };
+        private Consumer<AddSettingColumns.Builder> orderEdit = (it) -> {
+        };
+        private Consumer<AddSettingColumns.Builder> expressionEdit = (it) -> {
+        };
+        private Consumer<RowFilter.Builder> filterEdit = (it) -> {
+        };
+
+        public Editor setKeyEdit(Consumer<AddSettingColumns.Builder> key) {
+            this.keyEdit = key;
+            return this;
+        }
+
+        public Editor setExcludeEdit(Consumer<AddSettingColumns.Builder> exclude) {
+            this.excludeEdit = exclude;
+            return this;
+        }
+
+        public Editor setOrderEdit(Consumer<AddSettingColumns.Builder> order) {
+            this.orderEdit = order;
+            return this;
+        }
+
+        public Editor setExpressionEdit(Consumer<AddSettingColumns.Builder> expression) {
+            this.expressionEdit = expression;
+            return this;
+        }
+
+        public Editor setFilterEdit(Consumer<RowFilter.Builder> filter) {
+            this.filterEdit = filter;
+            return this;
+        }
     }
 }

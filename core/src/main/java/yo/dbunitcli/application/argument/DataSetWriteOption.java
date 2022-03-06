@@ -1,6 +1,5 @@
 package yo.dbunitcli.application.argument;
 
-import com.google.common.base.Objects;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;

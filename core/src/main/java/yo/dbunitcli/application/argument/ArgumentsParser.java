@@ -6,7 +6,6 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.NamedOptionDef;
 import org.kohsuke.args4j.spi.OptionHandler;
-import yo.dbunitcli.dataset.DataSourceType;
 
 import java.io.File;
 import java.util.*;
@@ -228,4 +227,5 @@ public interface ArgumentsParser {
     enum ParamType {
         TEXT, ENUM, FILE, DIR, FILE_OR_DIR,
     }
+
 }

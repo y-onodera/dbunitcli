@@ -19,11 +19,11 @@ public class CompareOption extends CommandLineOption {
     @Option(name = "-setting", usage = "file comparison settings")
     private File setting;
 
-    private DataSetLoadOption expectData = new DataSetLoadOption("expect");
+    private final DataSetLoadOption expectData = new DataSetLoadOption("expect");
 
-    private DataSetLoadOption oldData = new DataSetLoadOption("old");
+    private final DataSetLoadOption oldData = new DataSetLoadOption("old");
 
-    private DataSetLoadOption newData = new DataSetLoadOption("new");
+    private final DataSetLoadOption newData = new DataSetLoadOption("new");
 
     private ColumnSettings columnSettings;
 
@@ -54,11 +54,9 @@ public class CompareOption extends CommandLineOption {
         this.oldData.parseArgument(expandArgs);
         if (Arrays.stream(expandArgs).anyMatch(it -> it.startsWith("-expect.src"))) {
             this.expectData.parseArgument(expandArgs);
-            if (!Arrays.stream(expandArgs).anyMatch(it -> it.startsWith("-expect.setting"))) {
-                this.expectData.getParam().setColumnSettings(ColumnSettings.NONE.replaceComparisonKeys(
-                        AddSettingColumns.builder()
-                                .addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList())
-                                .build()
+            if (Arrays.stream(expandArgs).noneMatch(it -> it.startsWith("-expect.setting"))) {
+                this.expectData.getParam().editColumnSettings(editor -> editor.setKeyEdit(it ->
+                        it.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList())
                 ));
             }
         }

@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,12 @@ public class RowFilter {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public RowFilter apply(Consumer<RowFilter.Builder> editor) {
+        RowFilter.Builder builder = builder().add(this);
+        editor.accept(builder);
+        return builder.build();
     }
 
     public Predicate<Map<String, Object>> getRowFilter(String tableName) {
@@ -68,6 +75,13 @@ public class RowFilter {
 
         private Map<String, Set<String>> pattern = Maps.newHashMap();
 
+        public Builder add(RowFilter rowFilter) {
+            this.byName.putAll(rowFilter.byName);
+            this.pattern.putAll(rowFilter.pattern);
+            this.commonExpressions.addAll(rowFilter.commonExpressions);
+            return this;
+        }
+
         public RowFilter build() {
             return new RowFilter(this);
         }
@@ -82,28 +96,6 @@ public class RowFilter {
             } else if (strategy == AddSettingColumns.Strategy.PATTERN) {
                 addSetting(key, expression, this.pattern);
             }
-        }
-
-        public void appendTo(Builder other) {
-            this.byName.forEach((key, value1) -> {
-                if (other.byName.containsKey(key)) {
-                    Set<String> value = other.byName.get(key);
-                    value.addAll(value1);
-                    other.byName.put(key, value);
-                } else {
-                    other.byName.put(key, value1);
-                }
-            });
-            this.pattern.forEach((key, value1) -> {
-                if (other.pattern.containsKey(key)) {
-                    Set<String> value = other.pattern.get(key);
-                    value.addAll(value1);
-                    other.pattern.put(key, value);
-                } else {
-                    other.pattern.put(key, value1);
-                }
-            });
-            other.commonExpressions.addAll(this.commonExpressions);
         }
 
         protected void addSetting(String key, String expression, Map<String, Set<String>> filters) {

@@ -117,11 +117,11 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     }
 
     private void appendTo(FromJsonColumnSettingsBuilder other) {
-        this.comparisonKeys.appendTo(other.comparisonKeys);
-        this.excludeColumns.appendTo(other.excludeColumns);
-        this.orderColumns.appendTo(other.orderColumns);
-        this.expressionColumns.appendExpressionTo(other.expressionColumns);
-        this.filterExpressions.appendTo(other.filterExpressions);
+        other.comparisonKeys.add(this.comparisonKeys.build());
+        other.excludeColumns.add(this.excludeColumns.build());
+        other.orderColumns.add(this.orderColumns.build());
+        other.expressionColumns.add(this.expressionColumns.build());
+        other.filterExpressions.add(this.filterExpressions.build());
     }
 
     protected void addCommonSettings(JsonObject json, String key, AddSettingColumns.Builder targetSetting) {

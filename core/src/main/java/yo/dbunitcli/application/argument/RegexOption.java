@@ -3,7 +3,6 @@ package yo.dbunitcli.application.argument;
 import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class RegexOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
