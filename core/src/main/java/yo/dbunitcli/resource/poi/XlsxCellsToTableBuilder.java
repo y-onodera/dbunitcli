@@ -24,7 +24,7 @@ public class XlsxCellsToTableBuilder {
 
     private final Map<String, List<XlsxCellsTableDefine>> columnDefine = Maps.newHashMap();
 
-    private final Map<String, List<Object[]>> row = Maps.newHashMap();
+    private final Map<String, List<String[]>> row = Maps.newHashMap();
 
     public XlsxCellsToTableBuilder(List<XlsxCellsTableDefine> tableDefines) {
         this.tableNames = new String[tableDefines.size()];
@@ -39,9 +39,9 @@ public class XlsxCellsToTableBuilder {
                 this.columnDefine.get(cellAddress).add(def);
             }
             this.row.put(def.getTableName(), new ArrayList<>());
-            List<Object[]> targetRows = this.row.get(def.getTableName());
+            List<String[]> targetRows = this.row.get(def.getTableName());
             for (int rowIndex = 0, rowCount = def.rowCount(); rowIndex < rowCount; rowIndex++) {
-                targetRows.add(rowIndex, new Object[def.columnCount()]);
+                targetRows.add(rowIndex, new String[def.columnCount()]);
             }
         }
     }
@@ -71,7 +71,7 @@ public class XlsxCellsToTableBuilder {
         return this.tableMetaDataMap.get(tableName);
     }
 
-    public List<Object[]> getRows(String tableName) {
+    public List<String[]> getRows(String tableName) {
         return row.get(tableName);
     }
 }

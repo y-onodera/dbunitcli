@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class XlsxRowsTableDefine {
-    private String tableName;
+    private final String tableName;
     private final ITableMetaData tableMetaData;
-    private Integer dataStartRow;
-    private Integer[] cellIndexes;
-    private String[] breakKey;
+    private final Integer dataStartRow;
+    private final Integer[] cellIndexes;
+    private final String[] breakKey;
 
     public XlsxRowsTableDefine(Builder builder) {
         this.tableName = builder.getTableName();
@@ -30,7 +30,7 @@ public class XlsxRowsTableDefine {
     }
 
     public String getTableName() {
-        return tableName;
+        return this.tableName;
     }
 
     public ITableMetaData getTableMetaData() {
@@ -38,15 +38,15 @@ public class XlsxRowsTableDefine {
     }
 
     public Integer getDataStartRow() {
-        return dataStartRow;
+        return this.dataStartRow;
     }
 
     public Integer[] getCellIndexes() {
-        return cellIndexes;
+        return this.cellIndexes;
     }
 
     public String[] getBreakKey() {
-        return breakKey;
+        return this.breakKey;
     }
 
     public static Builder builder() {
@@ -56,29 +56,29 @@ public class XlsxRowsTableDefine {
 
     public static class Builder {
         private String tableName;
-        private List<String> header = Lists.newArrayList();
+        private final List<String> header = Lists.newArrayList();
         private Integer dataStartRow;
-        private List<Integer> cellIndexes = Lists.newArrayList();
-        private List<String> breakKey = Lists.newArrayList();
+        private final List<Integer> cellIndexes = Lists.newArrayList();
+        private final List<String> breakKey = Lists.newArrayList();
 
         public String getTableName() {
-            return tableName;
+            return this.tableName;
         }
 
         public List<String> getHeader() {
-            return header;
+            return this.header;
         }
 
         public Integer getDataStartRow() {
-            return dataStartRow;
+            return this.dataStartRow;
         }
 
         public List<Integer> getCellIndexes() {
-            return cellIndexes;
+            return this.cellIndexes;
         }
 
         public List<String> getBreakKey() {
-            return breakKey;
+            return this.breakKey;
         }
 
         public Builder setTableName(String tableName) {

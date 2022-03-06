@@ -1,9 +1,9 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.apache.poi.ooxml.util.SAXHelper;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.util.XMLHelper;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
@@ -35,7 +35,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     private final File[] src;
     private final TableNameFilter filter;
     private final XlsxSchema schema;
-    private ComparableDataSetParam param;
+    private final ComparableDataSetParam param;
     private final boolean loadData;
 
     public ComparableXlsxDataSetProducer(ComparableDataSetParam param) {
@@ -90,7 +90,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
         DataFormatter formatter = new DataFormatter();
         InputSource sheetSource = new InputSource(sheetInputStream);
         try {
-            XMLReader sheetParser = SAXHelper.newXMLReader();
+            XMLReader sheetParser = XMLHelper.newXMLReader();
             ContentHandler handler = new XSSFSheetXMLHandler(
                     styles, null, strings, sheetHandler, formatter, false);
             sheetParser.setContentHandler(handler);

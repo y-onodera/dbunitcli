@@ -115,6 +115,11 @@ public class CompareTest {
     }
 
     @Test
+    public void testExcelWithSchema() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramXlsxToXlsCompareWithSchema.txt"});
+    }
+
+    @Test
     public void testFailedResultDiffNotExpected() throws Exception {
         this.exit.expectSystemExitWithStatus(1);
         this.expectedException.expect(AssertionError.class);

@@ -16,7 +16,7 @@ public interface XlsxRowsToTableBuilder {
 
     void handle(CellReference reference, int currentCol, String formattedValue);
 
-    Object[] currentRow() throws DataSetException;
+    String[] currentRow() throws DataSetException;
 
     boolean isNowProcessing();
 

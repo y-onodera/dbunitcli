@@ -16,30 +16,22 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
-import yo.dbunitcli.resource.poi.XlsxCellsToTableBuilder;
-import yo.dbunitcli.resource.poi.XlsxRowsToTableBuilder;
-import yo.dbunitcli.resource.poi.XlsxSchema;
+import yo.dbunitcli.resource.poi.ExcelMappingDataSetConsumerWrapper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
-public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, HSSFListener {
+public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWrapper implements ComparableDataSetProducer, HSSFListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
-    private IDataSetConsumer consumer = new DefaultConsumer();
-    private final XlsxSchema schema;
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
-    private final boolean loadData;
 
     private final File[] src;
     private String tableName;
     private boolean isStartTable;
-    private XlsxRowsToTableBuilder rowsTableBuilder;
-    private XlsxCellsToTableBuilder randomCellRecordBuilder;
 
     private int lastRowNumber;
 
@@ -59,11 +51,10 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
     private boolean outputNextStringRecord;
 
     public ComparableXlsDataSetProducer(ComparableDataSetParam param) {
+        super(new DefaultConsumer(), param.getXlsxSchema(), param.isLoadData());
         this.param = param;
         this.src = this.param.getSrcFiles();
-        this.schema = this.param.getXlsxSchema();
         this.filter = this.param.getTableNameFilter();
-        this.loadData = this.param.isLoadData();
     }
 
     @Override
@@ -101,7 +92,7 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
                 factory.processWorkbookEvents(request, newFs);
                 if (this.isStartTable) {
                     this.consumer.endTable();
-                    this.loadRandomCellTable();
+                    this.createRandomCellTable();
                 }
             } catch (IOException e) {
                 throw new DataSetException(e);
@@ -123,19 +114,8 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
             case BOFRecord.sid:
                 BOFRecord br = (BOFRecord) record;
                 if (br.getType() == BOFRecord.TYPE_WORKSHEET) {
-                    try {
-                        if (this.rowsTableBuilder != null) {
-                            if (this.rowsTableBuilder.isNowProcessing()) {
-                                this.consumer.endTable();
-                                this.isStartTable = false;
-                            }
-                        }
-                        if (this.randomCellRecordBuilder != null) {
-                            this.loadRandomCellTable();
-                        }
-                    } catch (DataSetException e) {
-                        throw new RuntimeException(e);
-                    }
+                    this.handleSheetEnd();
+                    this.isStartTable = false;
                     // Output the worksheet name
                     // Works by ordering the BSRs by the location of
                     //  their BOFRecords, and then knowing that we
@@ -145,8 +125,7 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
                         this.orderedBSRs = BoundSheetRecord.orderByBofPosition(this.boundSheetRecords);
                     }
                     this.tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
-                    this.rowsTableBuilder = this.schema.getRowsTableBuilder(this.tableName);
-                    this.randomCellRecordBuilder = this.schema.getCellRecordBuilder(this.tableName);
+                    this.handleSheetStart(this.tableName);
                     logger.info("produceFromSheet - start {} [index={}]", this.tableName, this.sheetIndex);
                 }
                 break;
@@ -240,8 +219,7 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
         if (this.randomCellRecordBuilder != null && thisStr != null) {
             String cellReference = new CellAddress(thisRow, thisColumn).formatAsString();
             CellReference reference = new CellReference(cellReference);
-            this.randomCellRecordBuilder.handle(reference, thisStr);
-            this.rowsTableBuilder.handle(reference, thisColumn, thisStr);
+            this.handleCellValue(thisColumn, thisStr, reference);
         }
         // Update column and row count
         if (thisRow > -1) {
@@ -249,41 +227,10 @@ public class ComparableXlsDataSetProducer implements ComparableDataSetProducer, 
         }
         // Handle end of row
         if (record instanceof LastCellOfRowDummyRecord) {
-            try {
-                if (this.rowsTableBuilder.isTableStart(this.lastRowNumber)) {
-                    if (this.rowsTableBuilder.isNowProcessing()) {
-                        this.consumer.endTable();
-                    }
-                    this.consumer.startTable(this.rowsTableBuilder.startNewTable());
-                    this.isStartTable = true;
-                } else if (this.rowsTableBuilder.hasRow(this.lastRowNumber)) {
-                    if (this.rowsTableBuilder.hasRow(this.lastRowNumber)) {
-                        this.addRow(this.rowsTableBuilder.currentRow());
-                    }
-                }
-                this.rowsTableBuilder.clearRowValue();
-            } catch (DataSetException e) {
-                throw new RuntimeException(e);
+            if (!this.isStartTable) {
+                this.isStartTable = true;
             }
-        }
-
-    }
-
-    protected void addRow(Object[] row) throws DataSetException {
-        if (Stream.of(row).anyMatch(it -> it != null && !it.toString().equals(""))) {
-            this.consumer.row(row);
-        }
-    }
-
-    protected void loadRandomCellTable() throws DataSetException {
-        for (String tableName : this.randomCellRecordBuilder.getTableNames()) {
-            this.consumer.startTable(this.randomCellRecordBuilder.getTableMetaData(tableName));
-            if (this.loadData) {
-                for (Object[] row : this.randomCellRecordBuilder.getRows(tableName)) {
-                    this.addRow(row);
-                }
-            }
-            this.consumer.endTable();
+            this.addNewRowToRowsTable(this.lastRowNumber);
         }
     }
 

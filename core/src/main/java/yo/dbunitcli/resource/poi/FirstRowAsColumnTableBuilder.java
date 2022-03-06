@@ -57,7 +57,7 @@ public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
     }
 
     @Override
-    public Object[] currentRow() throws DataSetException {
+    public String[] currentRow() throws DataSetException {
         if (this.nowProcessing.getColumns().length < rowValues.size()) {
             throw new AssertionError(rowValues + " large items than header:" + Arrays.toString(this.nowProcessing.getColumns()));
         } else if (rowValues.size() < this.nowProcessing.getColumns().length) {
@@ -65,7 +65,7 @@ public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
                 rowValues.add("");
             }
         }
-        return this.rowValues.toArray(new Object[0]);
+        return this.rowValues.toArray(new String[0]);
     }
 
     @Override

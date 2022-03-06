@@ -21,7 +21,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
         }
     };
 
-    private String[] tableNames;
+    private final String[] tableNames;
 
     private final Map<String, Integer> tableStartRow = Maps.newHashMap();
 
@@ -31,7 +31,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
     private final Map<String, String[]> breakKey = Maps.newHashMap();
 
-    private List<Object> rowValues = Lists.newArrayList();
+    private final List<Object> rowValues = Lists.newArrayList();
     private int currentTableIndex = -1;
     private ITableMetaData nowProcessing = null;
 
@@ -88,13 +88,13 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
         int thisCol = reference.getCol();
         int missedCols = thisCol - lastCol - 1;
         for (int i = 0; i < missedCols; i++) {
-            this.addValue(i + lastCol + 1, null);
+            this.addValue(i + lastCol + 1, "");
         }
         this.addValue(thisCol, formattedValue);
     }
 
     @Override
-    public Object[] currentRow() throws DataSetException {
+    public String[] currentRow() throws DataSetException {
         if (this.nowProcessing.getColumns().length < rowValues.size()) {
             throw new AssertionError(rowValues + " large items than header:" + Arrays.toString(this.nowProcessing.getColumns()));
         } else if (rowValues.size() < this.nowProcessing.getColumns().length) {
@@ -102,7 +102,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
                 rowValues.add("");
             }
         }
-        return this.rowValues.toArray(new Object[0]);
+        return this.rowValues.toArray(new String[0]);
     }
 
     @Override
