@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 
 public class XlsxRowsTableDefine {
     private String tableName;
-    private final int columnCount;
     private final ITableMetaData tableMetaData;
     private Integer dataStartRow;
     private Integer[] cellIndexes;
@@ -20,7 +19,6 @@ public class XlsxRowsTableDefine {
     public XlsxRowsTableDefine(Builder builder) {
         this.tableName = builder.getTableName();
         String[] columnNames = builder.getHeader().toArray(new String[0]);
-        this.columnCount = columnNames.length;
         final Column[] columns = new Column[columnNames.length];
         for (int i = 0, j = columns.length; i < j; i++) {
             columns[i] = new Column(columnNames[i], DataType.UNKNOWN);
