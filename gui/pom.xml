@@ -60,7 +60,7 @@
         <dependency>
             <groupId>io.github.palexdev</groupId>
             <artifactId>materialfx</artifactId>
-            <version>11.13.0</version>
+            <version>11.13.5</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.openjfx</groupId>
