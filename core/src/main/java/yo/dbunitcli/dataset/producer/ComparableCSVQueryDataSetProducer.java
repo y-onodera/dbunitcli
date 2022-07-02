@@ -23,7 +23,7 @@ import java.util.Map;
 public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProducer {
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
-    private static final String URL = "jdbc:h2:mem:test";
+    private static final String URL = "jdbc:h2:mem:test;MODE=Oracle";
     private IDataSetConsumer consumer = new DefaultConsumer();
     private final File[] src;
     private final String encoding;
