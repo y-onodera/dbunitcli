@@ -3,7 +3,7 @@
     {
       "name": "joinQuery",
       "keys": [
-        "key"
+        "keycolumn"
       ]
     }
   ]

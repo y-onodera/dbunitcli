@@ -4,9 +4,9 @@ FROM
     CSVREAD('src/test/resources/yo/dbunitcli/dataset/producer/csvquery/csv/header.csv',null,'charset=UTF-8') table1
     inner join
     CSVREAD('src/test/resources/yo/dbunitcli/dataset/producer/csvquery/csv/detail.csv',null,'charset=UTF-8') table2
-    on table1.key = table2.key
+    on table1.keycolumn = table2.keycolumn
 WHERE
     table2.detailno=2
 ORDER BY
-    table1.key desc
+    table1.keycolumn desc
 ;
