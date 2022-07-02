@@ -21,7 +21,9 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -37,7 +39,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -149,16 +150,12 @@ public class MainPresenter {
     }
 
     private void resetInput(MFXComboBox<String> selected, Node form) {
-        ArgumentsParser.OptionParam option = parser.expandOption(this.inputToArg());
+        ArgumentsParser.OptionParam option = this.parser.expandOption(this.inputToArg());
         this.clearInputFields(form);
         int row = 1;
         MFXValidator validator = new MFXValidator();
         validator.validProperty().addListener((observable, oldVal, newVal) -> {
-            if (!newVal) {
-                exec.setDisable(true);
-            } else {
-                exec.setDisable(false);
-            }
+            this.exec.setDisable(!newVal);
         });
         for (String key : option.keySet()) {
             Map.Entry<String, ArgumentsParser.Attribute> entry = option.getColumn(key);
