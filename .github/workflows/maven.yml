@@ -24,7 +24,7 @@ jobs:
     - name: Postgresql startup
       run: docker-compose up -d
     - name: Build with Maven
-      run: mvn clean test allure:report -fcore/pom.xml -PIntegrationTest
+      run: mvn clean package allure:report -fcore/pom.xml -PIntegrationTest
     - name: Deploy TestReport
       uses: JamesIves/github-pages-deploy-action@v4.2.5
       with:
