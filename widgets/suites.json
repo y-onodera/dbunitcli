@@ -34,17 +34,6 @@
       "total" : 10
     }
   }, {
-    "uid" : "8e84c10bd9ee42c087cd6cfb1c7f6fa9",
-    "name" : "yo.dbunitcli.application.ConvertTest",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 8,
-      "unknown" : 0,
-      "total" : 8
-    }
-  }, {
     "uid" : "62773590e16625ae163e2e8362501b51",
     "name" : "yo.dbunitcli.dataset.ComparableTableTest",
     "statistic" : {
@@ -56,8 +45,19 @@
       "total" : 8
     }
   }, {
-    "uid" : "f9a1881c7acf28094ade338903dcc645",
-    "name" : "yo.dbunitcli.application.DBIntegrationTest",
+    "uid" : "8e84c10bd9ee42c087cd6cfb1c7f6fa9",
+    "name" : "yo.dbunitcli.application.ConvertTest",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 8,
+      "unknown" : 0,
+      "total" : 8
+    }
+  }, {
+    "uid" : "c01af63229e81e64b4cf059897a2ced7",
+    "name" : "yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducerTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
@@ -67,8 +67,8 @@
       "total" : 6
     }
   }, {
-    "uid" : "c01af63229e81e64b4cf059897a2ced7",
-    "name" : "yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducerTest",
+    "uid" : "f9a1881c7acf28094ade338903dcc645",
+    "name" : "yo.dbunitcli.application.DBIntegrationTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
@@ -100,8 +100,8 @@
       "total" : 3
     }
   }, {
-    "uid" : "51aa6ee97642c57710cb91bf37a1c9c3",
-    "name" : "yo.dbunitcli.application.argument.DataSetLoadOptionTest",
+    "uid" : "05ae8e61d36f7066caa3a1b3f8d2b6d4",
+    "name" : "yo.dbunitcli.application.ParameterizeExecuteTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
