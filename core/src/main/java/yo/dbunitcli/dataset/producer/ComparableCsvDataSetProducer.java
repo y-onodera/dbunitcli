@@ -60,7 +60,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         logger.info("produce() - start");
         this.consumer.startDataSet();
         for (File file : this.src) {
-            if (this.filter.predicate(file.getAbsolutePath())) {
+            if (this.filter.predicate(file.getAbsolutePath()) && file.length() > 0) {
                 try {
                     this.produceFromFile(file);
                 } catch (CsvParserException | DataSetException e) {

@@ -56,7 +56,7 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
     }
 
     @Override
-    public void setConsumer(IDataSetConsumer iDataSetConsumer)  {
+    public void setConsumer(IDataSetConsumer iDataSetConsumer) {
         this.consumer = iDataSetConsumer;
     }
 
@@ -66,7 +66,7 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
 
         this.consumer.startDataSet();
         for (File file : this.src) {
-            if (this.filter.predicate(file.getAbsolutePath())) {
+            if (this.filter.predicate(file.getAbsolutePath()) && file.length() > 0) {
                 try {
                     this.executeQuery(file);
                 } catch (IOException e) {

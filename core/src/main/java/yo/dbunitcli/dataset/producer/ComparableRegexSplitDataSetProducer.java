@@ -58,7 +58,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     }
 
     @Override
-    public void setConsumer(IDataSetConsumer iDataSetConsumer)  {
+    public void setConsumer(IDataSetConsumer iDataSetConsumer) {
         this.consumer = iDataSetConsumer;
     }
 
@@ -68,7 +68,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
 
         this.consumer.startDataSet();
         for (File file : this.src) {
-            if (this.filter.predicate(file.getAbsolutePath())) {
+            if (this.filter.predicate(file.getAbsolutePath()) && file.length() > 0) {
                 try {
                     this.executeQuery(file);
                 } catch (IOException e) {
@@ -82,7 +82,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
 
     protected void executeQuery(File aFile) throws DataSetException, IOException {
         logger.info("produceFromFile(theDataFile={}) - start", aFile);
-        if(this.headerNames != null){
+        if (this.headerNames != null) {
             ITableMetaData tableMetaData = this.createMetaData(aFile, this.headerNames);
             this.consumer.startTable(tableMetaData);
             if (!this.loadData) {

@@ -68,7 +68,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
         logger.info("produce() - start");
         this.consumer.startDataSet();
         for (File file : this.src) {
-            if (this.filter.predicate(file.getAbsolutePath())) {
+            if (this.filter.predicate(file.getAbsolutePath()) && file.length() > 0) {
                 try {
                     this.executeQuery(file);
                 } catch (SQLException | IOException e) {
