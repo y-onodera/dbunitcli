@@ -34,4 +34,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: executableJar
-        path: ./java/target/**jar-with-dependencies.jar
+        path: ./core/target/**jar-with-dependencies.jar
