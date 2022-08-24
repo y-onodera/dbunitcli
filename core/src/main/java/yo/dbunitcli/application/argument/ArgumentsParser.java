@@ -1,29 +1,30 @@
 package yo.dbunitcli.application.argument;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.*;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.NamedOptionDef;
-import org.kohsuke.args4j.spi.OptionHandler;
 
 import java.io.File;
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public interface ArgumentsParser {
 
     /**
-     * @param args
+     * @param args option
      * @return args exclude this option is parsed
-     * @throws CmdLineException
      */
     default CmdLineParser parseArgument(String[] args) throws CmdLineException {
         CmdLineParser parser = new CmdLineParser(this);
         try {
-            parser.parseArgument(this.filterArguments(parser, args));
+            String[] targetArgs = this.getArgumentMapper().map(args,this.getPrefix(),parser);
+            parser.parseArgument(this.filterArguments(parser, targetArgs));
+            setUpComponent(parser, targetArgs);
         } catch (CmdLineException cx) {
             System.out.println("usage:");
             parser.printSingleLineUsage(System.out);
@@ -31,55 +32,36 @@ public interface ArgumentsParser {
             parser.printUsage(System.out);
             throw cx;
         }
-        setUpComponent(parser, args);
         return parser;
     }
 
     default Collection<String> filterArguments(CmdLineParser parser, String[] expandArgs) {
-        Map<String, String> defaultArgs = Arrays.stream(expandArgs)
-                .filter(this.parserTarget(parser))
-                .filter(this.parserTarget(parser))
-                .collect(Collectors.toMap(this.argsToMapEntry(), it -> it));
-        if (!Strings.isNullOrEmpty(this.getPrefix())) {
-            String myArgs = "-" + getPrefix() + ".";
-            Map<String, String> overrideArgs = Arrays.stream(expandArgs)
-                    .filter(it -> it.startsWith(myArgs))
-                    .map(it -> it.replace(myArgs, "-"))
-                    .filter(this.parserTarget(parser))
-                    .collect(Collectors.toMap(this.argsToMapEntry(), it -> it));
-            defaultArgs.putAll(overrideArgs);
-        }
-        return defaultArgs.values();
+        return this.getArgumentMapper().mapFilterArgument(this.getArgumentFilter()
+                        .filterArguments(this.getPrefix(), parser, expandArgs)
+                , this.getPrefix(), parser, expandArgs);
     }
 
-    default Function<String, String> argsToMapEntry() {
-        return it -> it.replaceAll("(-[^=]+=).+", "$1");
+    default ArgumentFilter getArgumentFilter() {
+        return new DefaultArgumentFilter();
     }
 
-    default Predicate<String> parserTarget(CmdLineParser parser) {
-        return it -> {
-            for (OptionHandler handler : parser.getOptions()) {
-                if (it.startsWith(((NamedOptionDef) handler.option).name() + "=")) {
-                    return true;
-                }
-            }
-            return false;
-        };
+    default ArgumentMapper getArgumentMapper() {
+        return new DefaultArgumentMapper();
     }
-
-    void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException;
-
-    OptionParam expandOption(Map<String, String> args);
 
     default String getPrefix() {
         return "";
     }
 
+    OptionParam createOptionParam(Map<String, String> args);
+
+    void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException;
+
     class OptionParam {
 
-        private HashBasedTable<String, String, Attribute> options = HashBasedTable.create();
+        private final HashBasedTable<String, String, Attribute> options = HashBasedTable.create();
 
-        private ArrayList<String> keys = Lists.newArrayList();
+        private final ArrayList<String> keys = Lists.newArrayList();
 
         private final String prefix;
 
@@ -195,9 +177,9 @@ public interface ArgumentsParser {
 
     class Attribute {
 
-        private ParamType type;
+        private final ParamType type;
 
-        private ArrayList<String> selectOption;
+        private final ArrayList<String> selectOption;
 
         private final boolean required;
 

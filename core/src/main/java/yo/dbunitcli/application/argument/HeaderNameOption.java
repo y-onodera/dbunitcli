@@ -5,7 +5,7 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Map;
 
-public class HeaderNameOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
+public class HeaderNameOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
 
     @Option(name = "-headerName", usage = "comma separate header name. if set,all rows treat data rows")
     private String headerName;
@@ -20,7 +20,7 @@ public class HeaderNameOption extends PrefixArgumentsParser implements Comparabl
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-headerName", this.headerName);
         return result;

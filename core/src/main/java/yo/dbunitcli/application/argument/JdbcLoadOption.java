@@ -21,8 +21,8 @@ public class JdbcLoadOption extends JdbcOption implements ComparableDataSetParam
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
-        OptionParam result= super.expandOption(args);
+    public OptionParam createOptionParam(Map<String, String> args) {
+        OptionParam result= super.createOptionParam(args);
         result.put("-useJdbcMetaData",this.useJdbcMetaData);
         return result;
     }

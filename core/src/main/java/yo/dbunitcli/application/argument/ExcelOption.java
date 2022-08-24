@@ -10,7 +10,7 @@ import yo.dbunitcli.resource.poi.XlsxSchema;
 import java.io.File;
 import java.util.Map;
 
-public class ExcelOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
+public class ExcelOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
 
     @Option(name = "-xlsxSchema", usage = "schema use read xlsx")
     private File xlsxSchemaSource;
@@ -31,7 +31,7 @@ public class ExcelOption extends PrefixArgumentsParser implements ComparableData
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putFile("-xlsxSchema", this.xlsxSchemaSource);
         return result;

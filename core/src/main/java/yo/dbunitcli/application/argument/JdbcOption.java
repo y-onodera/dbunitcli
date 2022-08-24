@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class JdbcOption extends PrefixArgumentsParser {
+public class JdbcOption extends DefaultArgumentsParser {
 
     @Option(name = "-jdbcProperties", usage = "use connect database. [url=,user=,pass=]")
     private File jdbcProperties;
@@ -52,7 +52,7 @@ public class JdbcOption extends PrefixArgumentsParser {
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putFile("-jdbcProperties", this.jdbcProperties);
         if (Strings.isNullOrEmpty(result.get("-jdbcProperties"))) {

@@ -29,10 +29,10 @@ public class ConvertOption extends CommandLineOption {
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
-        result.putAll(this.src.expandOption(args));
-        result.putAll(this.getWriteOption().expandOption(args));
+        result.putAll(this.src.createOptionParam(args));
+        result.putAll(this.getWriteOption().createOptionParam(args));
         return result;
     }
 

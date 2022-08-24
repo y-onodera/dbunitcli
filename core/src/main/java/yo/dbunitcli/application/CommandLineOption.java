@@ -8,7 +8,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
 import yo.dbunitcli.application.argument.DataSetWriteOption;
-import yo.dbunitcli.application.argument.PrefixArgumentsParser;
+import yo.dbunitcli.application.argument.DefaultArgumentsParser;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.IDataSetWriter;
 import yo.dbunitcli.dataset.Parameter;
@@ -18,10 +18,9 @@ import yo.dbunitcli.dataset.writer.DataSetWriterLoader;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
-abstract public class CommandLineOption extends PrefixArgumentsParser {
+abstract public class CommandLineOption extends DefaultArgumentsParser {
 
     @Option(name = "-P", handler = MapOptionHandler.class)
     private Map<String, String> inputParam = Maps.newHashMap();

@@ -42,13 +42,13 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
-        result.putAll(this.param.expandOption(args));
+        result.putAll(this.param.createOptionParam(args));
         result.put("-cmd", this.cmd);
         result.put("-cmdParam", this.cmdParam);
         result.putFile("-template", this.template, true);
-        result.putAll(this.templateOption.expandOption(args));
+        result.putAll(this.templateOption.createOptionParam(args));
         return result;
     }
 

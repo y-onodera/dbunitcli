@@ -10,7 +10,7 @@ import yo.dbunitcli.dataset.writer.DBDataSetWriter;
 import java.io.File;
 import java.util.Map;
 
-public class DataSetWriteOption extends PrefixArgumentsParser {
+public class DataSetWriteOption extends DefaultArgumentsParser {
 
     @Option(name = "-result", usage = "directory result files at")
     private File resultDir = new File(".");
@@ -61,7 +61,7 @@ public class DataSetWriteOption extends PrefixArgumentsParser {
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-resultType", ResultType.valueOf(this.resultType.toString()), ResultType.class);
         if (!result.hasValue("-resultType")) {
@@ -72,7 +72,7 @@ public class DataSetWriteOption extends PrefixArgumentsParser {
             if (type == DataSourceType.table) {
                 result.put("-op", this.operation == null ? DBDataSetWriter.Operation.CLEAN_INSERT : this.operation
                         , DBDataSetWriter.Operation.class);
-                result.putAll(this.jdbcOption.expandOption(args));
+                result.putAll(this.jdbcOption.createOptionParam(args));
             } else {
                 result.putDir("-result", this.resultDir);
                 result.put("-resultPath", this.resultPath);

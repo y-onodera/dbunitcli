@@ -101,9 +101,9 @@ public class GenerateOption extends CommandLineOption {
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
-        result.putAll(this.src.expandOption(args));
+        result.putAll(this.src.createOptionParam(args));
         result.put("-generateType", this.generateType, GenerateType.class);
         if (result.hasValue("-generateType")
                 && GenerateType.valueOf(result.get("-generateType")) == GenerateType.txt
@@ -117,7 +117,7 @@ public class GenerateOption extends CommandLineOption {
             result.put("-sqlFilePrefix", this.sqlFilePrefix);
             result.put("-sqlFileSuffix", this.sqlFileSuffix);
         }
-        result.putAll(this.templateOption.expandOption(args));
+        result.putAll(this.templateOption.createOptionParam(args));
         if (result.hasValue("-generateType")
                 && !(GenerateType.valueOf(result.get("-generateType")) == GenerateType.sql
                 || GenerateType.valueOf(result.get("-generateType")) == GenerateType.settings)) {

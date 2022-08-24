@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-public class DataSetLoadOption extends PrefixArgumentsParser {
+public class DataSetLoadOption extends DefaultArgumentsParser {
 
     @Option(name = "-src", usage = "export target", required = true)
     private File src;
@@ -63,7 +63,7 @@ public class DataSetLoadOption extends PrefixArgumentsParser {
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-srcType", this.srcType, DataSourceType.class, true);
         result.putFileOrDir("-src", this.src, true);
@@ -78,7 +78,7 @@ public class DataSetLoadOption extends PrefixArgumentsParser {
         try {
             DataSourceType type = DataSourceType.valueOf(result.get("-srcType"));
             ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), type);
-            result.putAll(option.expandOption(args));
+            result.putAll(option.createOptionParam(args));
         } catch (Throwable th) {
         }
         return result;

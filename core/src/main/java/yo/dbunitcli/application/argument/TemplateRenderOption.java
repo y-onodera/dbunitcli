@@ -9,7 +9,7 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 import java.io.File;
 import java.util.Map;
 
-public class TemplateRenderOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
+public class TemplateRenderOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
 
     @Option(name = "-encoding", usage = "template file encoding")
     private String encoding = System.getProperty("file.encoding");
@@ -55,7 +55,7 @@ public class TemplateRenderOption extends PrefixArgumentsParser implements Compa
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-encoding", this.encoding);
         result.putFile("-templateGroup", this.templateGroup);

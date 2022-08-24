@@ -5,7 +5,7 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Map;
 
-public class RegexOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
+public class RegexOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
 
     @Option(name = "-regDataSplit", usage = "regex to use split data row")
     private String regDataSplit;
@@ -24,7 +24,7 @@ public class RegexOption extends PrefixArgumentsParser implements ComparableData
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-regDataSplit", this.regDataSplit);
         result.put("-regHeaderSplit", this.regHeaderSplit);

@@ -29,31 +29,7 @@ public class Compare implements Command<CompareOption> {
 
     @Override
     public void exec(CompareOption options) throws DatabaseUnitException {
-        ComparableDataSet oldData = options.oldDataSet();
-        ComparableDataSet newData = options.newDataSet();
-        IDataSetWriter writer = options.writer();
-        CompareResult result = new DataSetCompareBuilder()
-                .newDataSet(newData)
-                .oldDataSet(oldData)
-                .comparisonKeys(options.getComparisonKeys())
-                .dataSetWriter(writer)
-                .build()
-                .result();
-        if (options.getExpectData().getParam().getSrc() != null) {
-            if (new DataSetCompareBuilder()
-                    .newDataSet(options.resultDataSet())
-                    .oldDataSet(options.expectDataSet())
-                    .comparisonKeys(options.getExpectData().getParam().getColumnSettings().getComparisonKeys())
-                    .dataSetWriter(options.expectedDiffWriter())
-                    .build()
-                    .result().existDiff()) {
-                throw new AssertionError("unexpected diff found.");
-            }
-        } else {
-            if (result.existDiff()) {
-                throw new AssertionError("unexpected diff found.");
-            }
-        }
+        options.compare();
         logger.info("compare success.");
     }
 }

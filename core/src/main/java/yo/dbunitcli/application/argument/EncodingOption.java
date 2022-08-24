@@ -5,7 +5,7 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Map;
 
-public class EncodingOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
+public class EncodingOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
 
     @Option(name = "-encoding", usage = "csv file encoding")
     private String encoding = System.getProperty("file.encoding");
@@ -20,7 +20,7 @@ public class EncodingOption extends PrefixArgumentsParser implements ComparableD
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-encoding", this.encoding);
         return result;

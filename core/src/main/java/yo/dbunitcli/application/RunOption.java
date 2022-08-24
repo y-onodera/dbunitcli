@@ -76,13 +76,13 @@ public class RunOption extends CommandLineOption {
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-scriptType", this.scriptType, ScriptType.class);
         result.putFile("-src", this.src);
-        result.putAll(this.templateOption.expandOption(args));
+        result.putAll(this.templateOption.createOptionParam(args));
         if (result.get("-scriptType").equals(ScriptType.sql.name())) {
-            result.putAll(this.jdbcOption.expandOption(args));
+            result.putAll(this.jdbcOption.createOptionParam(args));
         }
         return result;
     }

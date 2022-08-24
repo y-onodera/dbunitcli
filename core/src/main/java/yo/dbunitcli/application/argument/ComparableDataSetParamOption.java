@@ -24,7 +24,7 @@ public interface ComparableDataSetParamOption extends ArgumentsParser {
     ;
 
     @Override
-    default OptionParam expandOption(Map<String, String> args) {
+    default OptionParam createOptionParam(Map<String, String> args) {
         return new OptionParam(this.getPrefix(), args);
     }
 
@@ -54,13 +54,13 @@ public interface ComparableDataSetParamOption extends ArgumentsParser {
         }
 
         @Override
-        public OptionParam expandOption(Map<String, String> args) {
+        public OptionParam createOptionParam(Map<String, String> args) {
             OptionParam result = null;
             for (ComparableDataSetParamOption delegate : this.leaf) {
                 if (result == null) {
-                    result = delegate.expandOption(args);
+                    result = delegate.createOptionParam(args);
                 } else {
-                    result.putAll(delegate.expandOption(args));
+                    result.putAll(delegate.createOptionParam(args));
                 }
             }
             return result;

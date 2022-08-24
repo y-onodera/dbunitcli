@@ -32,19 +32,23 @@ public class DataSetCompareBuilder {
     }
 
     public ComparableDataSet getOldDataSet() {
-        return oldDataSet;
+        return this.oldDataSet;
     }
 
     public ComparableDataSet getNewDataSet() {
-        return newDataSet;
+        return this.newDataSet;
     }
 
     public AddSettingColumns getComparisonKeys() {
-        return comparisonKeys;
+        return this.comparisonKeys;
     }
 
     public IDataSetWriter getDataSetWriter() {
-        return dataSetWriter;
+        return this.dataSetWriter;
+    }
+
+    public TableDataSetCompare getTableDataSetCompare() {
+        return new TableDataSetCompare();
     }
 
     public Compare build() throws DataSetException {

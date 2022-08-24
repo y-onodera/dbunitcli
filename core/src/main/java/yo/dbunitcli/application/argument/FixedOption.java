@@ -5,7 +5,7 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Map;
 
-public class FixedOption extends PrefixArgumentsParser implements ComparableDataSetParamOption {
+public class FixedOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
     public FixedOption(String prefix) {
         super(prefix);
     }
@@ -19,7 +19,7 @@ public class FixedOption extends PrefixArgumentsParser implements ComparableData
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-fixedLength", this.fixedLength);
         return result;

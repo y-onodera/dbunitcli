@@ -7,23 +7,44 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.application.argument.DataSetWriteOption;
+import yo.dbunitcli.application.argument.DefaultArgumentMapper;
+import yo.dbunitcli.application.argument.ImageCompareOption;
 import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.dataset.compare.CompareResult;
+import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CompareOption extends CommandLineOption {
 
+    public static final DefaultArgumentMapper SRC_TYPE_IMAGE_MAPPER = new DefaultArgumentMapper() {
+        @Override
+        public String[] map(String[] arguments, String prefix, CmdLineParser parser) {
+            List<String> newArg = Arrays.stream(arguments)
+                    .filter(it -> !it.contains("srcType=") && !it.contains("extension="))
+                    .collect(Collectors.toList());
+            newArg.add("-srcType=file");
+            newArg.add("-extension=png");
+            return newArg.toArray(new String[]{});
+        }
+    };
+
     @Option(name = "-setting", usage = "file comparison settings")
     private File setting;
+
+    @Option(name = "-targetType")
+    private Type targetType = Type.data;
 
     private final DataSetLoadOption expectData = new DataSetLoadOption("expect");
 
     private final DataSetLoadOption oldData = new DataSetLoadOption("old");
 
     private final DataSetLoadOption newData = new DataSetLoadOption("new");
+
+    private final ImageCompareOption imageOption = new ImageCompareOption("image");
 
     private ColumnSettings columnSettings;
 
@@ -50,6 +71,10 @@ public class CompareOption extends CommandLineOption {
     @Override
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
+        if (this.targetType == Type.image) {
+            this.newData.setArgumentMapper(SRC_TYPE_IMAGE_MAPPER);
+            this.oldData.setArgumentMapper(SRC_TYPE_IMAGE_MAPPER);
+        }
         this.newData.parseArgument(expandArgs);
         this.oldData.parseArgument(expandArgs);
         if (Arrays.stream(expandArgs).anyMatch(it -> it.startsWith("-expect.src"))) {
@@ -62,16 +87,49 @@ public class CompareOption extends CommandLineOption {
         }
         this.populateSettings(parser);
         this.getWriteOption().parseArgument(expandArgs);
+        if (this.targetType == Type.image) {
+            this.imageOption.parseArgument(expandArgs);
+        }
     }
 
     @Override
-    public OptionParam expandOption(Map<String, String> args) {
+    public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putFile("-setting", this.setting);
-        result.putAll(this.newData.expandOption(args));
-        result.putAll(this.oldData.expandOption(args));
-        result.putAll(this.getWriteOption().expandOption(args));
-        result.putAll(this.expectData.expandOption(args));
+        result.putAll(this.newData.createOptionParam(args));
+        result.putAll(this.oldData.createOptionParam(args));
+        result.putAll(this.getWriteOption().createOptionParam(args));
+        result.putAll(this.expectData.createOptionParam(args));
+        result.putAll(this.imageOption.createOptionParam(args));
+        return result;
+    }
+
+    public CompareResult compare() throws DataSetException {
+        ComparableDataSet oldData = this.oldDataSet();
+        ComparableDataSet newData = this.newDataSet();
+        IDataSetWriter writer = this.writer();
+        CompareResult result = this.getDataSetCompareBuilder()
+                .newDataSet(newData)
+                .oldDataSet(oldData)
+                .comparisonKeys(this.getComparisonKeys())
+                .dataSetWriter(writer)
+                .build()
+                .result();
+        if (this.getExpectData().getParam().getSrc() != null) {
+            if (new DataSetCompareBuilder()
+                    .newDataSet(this.resultDataSet())
+                    .oldDataSet(this.expectDataSet())
+                    .comparisonKeys(this.getExpectData().getParam().getColumnSettings().getComparisonKeys())
+                    .dataSetWriter(this.expectedDiffWriter())
+                    .build()
+                    .result().existDiff()) {
+                throw new AssertionError("unexpected diff found.");
+            }
+        } else {
+            if (result.existDiff()) {
+                throw new AssertionError("unexpected diff found.");
+            }
+        }
         return result;
     }
 
@@ -107,6 +165,13 @@ public class CompareOption extends CommandLineOption {
         return this.getComparableDataSetLoader().loadDataSet(this.expectData.getParam().build());
     }
 
+    public DataSetCompareBuilder getDataSetCompareBuilder() {
+        if (this.targetType == Type.data) {
+            return new DataSetCompareBuilder();
+        }
+        return this.imageOption.getDataSetCompareBuilder();
+    }
+
     public IDataSetWriter expectedDiffWriter() throws DataSetException {
         return this.writer(new File(this.getWriteOption().getResultDir(), "expectedDiff"));
     }
@@ -117,5 +182,13 @@ public class CompareOption extends CommandLineOption {
         } catch (IOException e) {
             throw new CmdLineException(parser, e);
         }
+        if (this.targetType != Type.data) {
+            this.columnSettings = this.columnSettings.apply(it -> it.setKeyEdit(edit ->
+                    edit.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList("NAME"))));
+        }
+    }
+
+    public enum Type {
+        data, image, pdf
     }
 }
