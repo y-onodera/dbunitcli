@@ -3,11 +3,7 @@ package yo.dbunitcli.application;
 import org.dbunit.DatabaseUnitException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.IDataSetWriter;
 import yo.dbunitcli.dataset.Parameter;
-import yo.dbunitcli.dataset.compare.CompareResult;
-import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
 
 public class Compare implements Command<CompareOption> {
 

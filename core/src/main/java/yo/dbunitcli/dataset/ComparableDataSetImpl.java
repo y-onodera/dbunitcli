@@ -3,7 +3,6 @@ package yo.dbunitcli.dataset;
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.CachedDataSet;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.ITable;
 
 import java.util.List;
 import java.util.Map;
