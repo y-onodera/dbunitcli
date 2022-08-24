@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class CsvOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
 
-    @Option(name = "-delimiter", usage = "default is comma")
+    @Option(name = "-delimiter", usage = "default is comma", handler = EscapeSequenceEnableCharOptionHandler.class)
     private char delimiter = ',';
 
     public CsvOption(String prefix) {
