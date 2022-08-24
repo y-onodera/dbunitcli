@@ -30,6 +30,7 @@ public class ComparableDataSetParam {
     private final String extension;
     private final TemplateRender templateRender;
     private final DatabaseConnectionLoader databaseConnectionLoader;
+    private final char delimiter;
 
     public ComparableDataSetParam(Builder builder) {
         this.src = builder.getSrc();
@@ -48,6 +49,7 @@ public class ComparableDataSetParam {
         this.fixedLength = builder.getFixedLength();
         this.templateRender = builder.getStTemplateLoader();
         this.extension = builder.getExtension();
+        this.delimiter = builder.getDelimiter();
         this.databaseConnectionLoader = builder.getDatabaseConnectionLoader();
     }
 
@@ -111,6 +113,10 @@ public class ComparableDataSetParam {
         return extension;
     }
 
+    public char getDelimiter() {
+        return delimiter;
+    }
+
     public TemplateRender getStTemplateLoader() {
         return templateRender;
     }
@@ -151,6 +157,7 @@ public class ComparableDataSetParam {
                 ", extension='" + extension + '\'' +
                 ", templateRender=" + templateRender +
                 ", databaseConnectionLoader=" + databaseConnectionLoader +
+                ", delimiter=" + delimiter +
                 '}';
     }
 
@@ -159,12 +166,12 @@ public class ComparableDataSetParam {
         if (this == o) return true;
         if (!(o instanceof ComparableDataSetParam)) return false;
         ComparableDataSetParam that = (ComparableDataSetParam) o;
-        return mapIncludeMetaData == that.mapIncludeMetaData && useJdbcMetaData == that.useJdbcMetaData && loadData == that.loadData && Objects.equal(src, that.src) && Objects.equal(encoding, that.encoding) && source == that.source && Objects.equal(columnSettings, that.columnSettings) && Objects.equal(headerSplitPattern, that.headerSplitPattern) && Objects.equal(dataSplitPattern, that.dataSplitPattern) && Objects.equal(regInclude, that.regInclude) && Objects.equal(regExclude, that.regExclude) && Objects.equal(xlsxSchema, that.xlsxSchema) && Objects.equal(headerName, that.headerName) && Objects.equal(fixedLength, that.fixedLength) && Objects.equal(extension, that.extension) && Objects.equal(templateRender, that.templateRender) && Objects.equal(databaseConnectionLoader, that.databaseConnectionLoader);
+        return mapIncludeMetaData == that.mapIncludeMetaData && useJdbcMetaData == that.useJdbcMetaData && loadData == that.loadData && delimiter == that.delimiter && Objects.equal(src, that.src) && Objects.equal(encoding, that.encoding) && source == that.source && Objects.equal(columnSettings, that.columnSettings) && Objects.equal(headerSplitPattern, that.headerSplitPattern) && Objects.equal(dataSplitPattern, that.dataSplitPattern) && Objects.equal(regInclude, that.regInclude) && Objects.equal(regExclude, that.regExclude) && Objects.equal(xlsxSchema, that.xlsxSchema) && Objects.equal(headerName, that.headerName) && Objects.equal(fixedLength, that.fixedLength) && Objects.equal(extension, that.extension) && Objects.equal(templateRender, that.templateRender) && Objects.equal(databaseConnectionLoader, that.databaseConnectionLoader);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(src, encoding, source, columnSettings, headerSplitPattern, dataSplitPattern, regInclude, regExclude, mapIncludeMetaData, xlsxSchema, useJdbcMetaData, loadData, headerName, fixedLength, extension, templateRender, databaseConnectionLoader);
+        return Objects.hashCode(src, encoding, source, columnSettings, headerSplitPattern, dataSplitPattern, regInclude, regExclude, mapIncludeMetaData, xlsxSchema, useJdbcMetaData, loadData, headerName, fixedLength, extension, templateRender, databaseConnectionLoader, delimiter);
     }
 
     public static class Builder {
@@ -185,6 +192,7 @@ public class ComparableDataSetParam {
         private String extension;
         private TemplateRender templateRender;
         private DatabaseConnectionLoader databaseConnectionLoader;
+        private char delimiter = ',';
 
         public Builder setSrc(File src) {
             this.src = src;
@@ -259,6 +267,10 @@ public class ComparableDataSetParam {
 
         public String getExtension() {
             return this.extension;
+        }
+
+        public char getDelimiter() {
+            return delimiter;
         }
 
         public DatabaseConnectionLoader getDatabaseConnectionLoader() {
@@ -353,6 +365,11 @@ public class ComparableDataSetParam {
 
         public Builder setDatabaseConnectionLoader(DatabaseConnectionLoader databaseConnectionLoader) {
             this.databaseConnectionLoader = databaseConnectionLoader;
+            return this;
+        }
+
+        public Builder setDelimiter(char delimiter) {
+            this.delimiter = delimiter;
             return this;
         }
 

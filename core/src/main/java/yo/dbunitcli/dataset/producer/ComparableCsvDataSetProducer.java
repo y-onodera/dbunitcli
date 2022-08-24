@@ -7,6 +7,8 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.common.handlers.IllegalInputCharacterException;
+import org.dbunit.dataset.common.handlers.Pipeline;
+import org.dbunit.dataset.common.handlers.PipelineConfig;
 import org.dbunit.dataset.common.handlers.PipelineException;
 import org.dbunit.dataset.csv.CsvDataSetWriter;
 import org.dbunit.dataset.csv.CsvParserException;
@@ -21,6 +23,7 @@ import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.util.List;
 
 public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
@@ -32,6 +35,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private final ComparableDataSetParam param;
     private final boolean loadData;
     private String[] headerNames;
+    private final char delimiter;
 
     public ComparableCsvDataSetProducer(ComparableDataSetParam param) {
         this.param = param;
@@ -43,6 +47,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         if (!Strings.isNullOrEmpty(headerName)) {
             this.headerNames = headerName.split(",");
         }
+        this.delimiter = param.getDelimiter();
     }
 
     @Override
@@ -74,7 +79,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private void produceFromFile(File theDataFile) throws DataSetException, CsvParserException {
         logger.info("produceFromFile(theDataFile={}) - start", theDataFile);
         try {
-            List<List<Object>> readData = new CsvParserImpl().parse(
+            List<List<Object>> readData = new CsvParser().setDelimiter(this.delimiter).parse(
                     new BufferedReader(new InputStreamReader(new FileInputStream(theDataFile), this.encoding))
                     , theDataFile.toString());
             ITableMetaData metaData;
@@ -92,7 +97,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
                 }
             }
             this.consumer.endTable();
-        } catch (PipelineException | IOException | IllegalInputCharacterException e) {
+        } catch (PipelineException | IOException | IllegalInputCharacterException | NoSuchFieldException | IllegalAccessException e) {
             throw new DataSetException(e);
         }
     }
@@ -120,5 +125,15 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             columns[i] = new Column(columnName, DataType.UNKNOWN);
         }
         return columns;
+    }
+
+    class CsvParser extends CsvParserImpl {
+        CsvParser setDelimiter(char delimiter) throws NoSuchFieldException, IllegalAccessException {
+            Field f = CsvParserImpl.class.getDeclaredField("pipeline");
+            f.setAccessible(true);
+            Pipeline pipeline = (Pipeline) f.get(this);
+            pipeline.getPipelineConfig().setSeparatorChar(delimiter);
+            return this;
+        }
     }
 }

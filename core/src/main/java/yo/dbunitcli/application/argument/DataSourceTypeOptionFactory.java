@@ -20,7 +20,7 @@ public class DataSourceTypeOptionFactory {
             case fixed:
                 return ComparableDataSetParamOption.join(new EncodingOption(prefix), new FixedOption(prefix), new HeaderNameOption(prefix));
             case csv:
-                return ComparableDataSetParamOption.join(new EncodingOption(prefix), new HeaderNameOption(prefix));
+                return ComparableDataSetParamOption.join(new EncodingOption(prefix), new HeaderNameOption(prefix),new CsvOption(prefix));
             case csvq:
                 return ComparableDataSetParamOption.join(new EncodingOption(prefix), new TemplateRenderOption(prefix));
         }
