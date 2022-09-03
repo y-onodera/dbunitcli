@@ -1,0 +1,55 @@
+{
+  "uid" : "13e9669fd3cc71fb",
+  "name" : "testGenerateDeleteNoCommit",
+  "fullName" : "yo.dbunitcli.application.GenerateTest.testGenerateDeleteNoCommit",
+  "historyId" : "db66763dbbc1b252d2021eabdcd41ba7",
+  "time" : {
+    "start" : 1662168063691,
+    "stop" : 1662168063707,
+    "duration" : 16
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.GenerateTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testGenerateDeleteNoCommit"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.GenerateTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az278-787"
+  }, {
+    "name" : "thread",
+    "value" : "2093@fv-az278-787.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "13e9669fd3cc71fb.json",
+  "parameterValues" : [ ]
+}
