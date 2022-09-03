@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.DataSourceType;
 
 import java.io.File;
 
@@ -18,6 +19,7 @@ public class ComparableFileDataSetProducerTest {
                 new ComparableFileDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
+                                .setSource(DataSourceType.file)
                                 .setRegInclude("DataSetProducer")
                                 .setRegExclude("Csv")
                                 .build()));

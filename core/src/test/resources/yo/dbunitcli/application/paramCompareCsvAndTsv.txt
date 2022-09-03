@@ -1,0 +1,6 @@
+-srcType=csv
+-old.src=src/test/resources/yo/dbunitcli/application/csv/header
+-new.src=src/test/resources/yo/dbunitcli/application/tsv
+-new.delimiter=\t
+-new.extension=tsv
+-result=target/test-classes/yo/dbunitcli/application/compare/csvAndTsv/result

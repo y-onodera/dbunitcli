@@ -1,4 +1,4 @@
--old.src=src/test/resources/yo/dbunitcli/application/csv2xlsx/csv
+-old.src=src/test/resources/yo/dbunitcli/application/csv/multi
 -encoding=UTF-8
 -new.src=src/test/resources/yo/dbunitcli/application/csv2xlsx/multifile.xlsx
 -new.srcType=xlsx

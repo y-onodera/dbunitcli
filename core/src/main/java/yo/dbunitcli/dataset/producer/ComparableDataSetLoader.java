@@ -24,10 +24,10 @@ public class ComparableDataSetLoader {
 
     public ComparableDataSet loadDataSet(ComparableDataSetParam param) throws DataSetException {
         logger.info("create DataSetLoader from {}", param);
-        return new ComparableDataSetImpl(getComparableDataSetProducer(param));
+        return new ComparableDataSetImpl(this.getComparableDataSetProducer(param));
     }
 
-    private ComparableDataSetProducer getComparableDataSetProducer(ComparableDataSetParam param) throws DataSetException {
+    protected ComparableDataSetProducer getComparableDataSetProducer(ComparableDataSetParam param) throws DataSetException {
         switch (param.getSource()) {
             case table:
                 return new ComparableDBDataSetProducer(param);

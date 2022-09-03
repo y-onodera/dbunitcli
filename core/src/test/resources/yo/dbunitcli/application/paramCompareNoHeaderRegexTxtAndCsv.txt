@@ -3,5 +3,5 @@
 -old.headerName=Contents,Option
 -regDataSplit=,\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}
 -new.srcType=csv
--new.src=src/test/resources/yo/dbunitcli/application/compare/csv/header
+-new.src=src/test/resources/yo/dbunitcli/application/csv/header
 -result=target/test-classes/yo/dbunitcli/application/compare/regex/noheader/result

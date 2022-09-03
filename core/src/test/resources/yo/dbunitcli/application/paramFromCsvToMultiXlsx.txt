@@ -1,4 +1,4 @@
--src=src/test/resources/yo/dbunitcli/application/csv2xlsx/csv
+-src=src/test/resources/yo/dbunitcli/application/csv/multi
 -srcType=csv
 -setting=src/test/resources/yo/dbunitcli/application/csv2xlsx/setting.json
 -result=target/test-classes/yo/dbunitcli/application/csv2xlsx/resultmultixlsx

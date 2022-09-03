@@ -204,6 +204,7 @@ public class ComparableCsvDataSetProducerTest {
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
+                                .setSource(DataSourceType.csv)
                                 .setEncoding("UTF8")
                                 .build()));
         Assert.assertEquals(src.getPath(), actual.getSrc());

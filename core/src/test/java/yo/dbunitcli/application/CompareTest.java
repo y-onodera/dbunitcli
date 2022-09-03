@@ -26,32 +26,32 @@ public class CompareTest {
 
     @Test
     public void testSuccessResultDiffExpected() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramResultDiffValidExpected.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffValidExpected.txt"});
     }
 
     @Test
     public void testResultXlsx() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramResultDiffXlsx.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffXlsx.txt"});
     }
 
     @Test
     public void testSuccessNoDiffExpected() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramNoDiff.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiff.txt"});
     }
 
     @Test
     public void testSuccessNoDiffWithCommonSetting() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramNoDiffWithCommonSetting.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiffWithCommonSetting.txt"});
     }
 
     @Test
     public void testComparePatternMatch() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramPatternMatch.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareOnlyPatternMatch.txt"});
     }
 
     @Test
     public void testCompareIgnoreNoSettingTables() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramTableNoMatch.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareTableNoMatch.txt"});
     }
 
     @Test
@@ -65,79 +65,84 @@ public class CompareTest {
     }
 
     @Test
-    public void testCompareCsvToXlsx() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCsvToXlsxCompare.txt"});
+    public void testCompareCsvAndXlsx() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareCsvAndXlsx.txt"});
     }
 
     @Test
-    public void testCompareXlsxToCsv() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramXlsxToCsvCompare.txt"});
+    public void testCompareCsvAndTsv() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareCsvAndTsv.txt"});
     }
 
     @Test
-    public void testCompareXlsxToXls() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramXlsxToXlsCompare.txt"});
+    public void testCompareXlsxAndCsv() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareXlsxAndCsv.txt"});
     }
 
     @Test
-    public void testCompareXlsToXlsx() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramXlsToXlsxCompare.txt"});
+    public void testCompareXlsxAndXls() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareXlsxAndXls.txt"});
+    }
+
+    @Test
+    public void testCompareXlsAndXlsx() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareXlsAndXlsx.txt"});
     }
 
     @Test
     public void testCompareCsvqToCsvq() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCsvqToCsvqCompare.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareCsvqAndCsvq.txt"});
     }
 
     @Test
     public void testCompareNoHeaderRegexTxtToCsv() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramNoHeaderRegexTxtToCsvCompare.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareNoHeaderRegexTxtAndCsv.txt"});
     }
 
     @Test
     public void testCompareNoHeaderRegexTxtToNoHeaderCsv() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramNoHeaderRegexTxtToNoHeaderCsvCompare.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareNoHeaderRegexTxtAndNoHeaderCsv.txt"});
     }
 
     @Test
     public void testCompareFilter() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramColumnFilter.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareColumnFilter.txt"});
     }
 
     @Test
     public void testCompareSort() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramColumnSort.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareColumnSort.txt"});
     }
 
     @Test
     public void testSettingMerge() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramSettingMerge.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareSettingMerge.txt"});
     }
 
     @Test
     public void testExcelWithSchema() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramXlsxToXlsCompareWithSchema.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareXlsxAndXlsWithSchema.txt"});
     }
 
     @Test
     public void testFailedResultDiffNotExpected() throws Exception {
         this.exit.expectSystemExitWithStatus(1);
         this.expectedException.expect(AssertionError.class);
-        Compare.main(new String[]{"@" + this.baseDir + "/paramDiffNotExpected.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffNotExpected.txt"});
     }
 
     @Test
     public void testFailedResultDiffDifferExpected() throws Exception {
         this.exit.expectSystemExitWithStatus(1);
         this.expectedException.expect(AssertionError.class);
-        Compare.main(new String[]{"@" + this.baseDir + "/paramResultDiffInValidExpected.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffInValidExpected.txt"});
     }
 
     @Test
     public void testFailedUnExpectedNoDiff() throws Exception {
         this.exit.expectSystemExitWithStatus(1);
         this.expectedException.expect(AssertionError.class);
-        Compare.main(new String[]{"@" + this.baseDir + "/paramNoDiffUnExpected.txt"});
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"});
     }
 
 }

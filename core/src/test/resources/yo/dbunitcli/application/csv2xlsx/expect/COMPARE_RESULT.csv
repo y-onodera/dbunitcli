@@ -1,3 +1,3 @@
 OLD_PATH, NEW_PATH, TARGET_NAME, DIFF, OLD_VALUE, NEW_VALUE, COLUMN_INDEX, DIFF_ROWS
-"src\\test\\resources\\yo\\dbunitcli\\application\\csv2xlsx\\csv","src\\test\\resources\\yo\\dbunitcli\\application\\csv2xlsx\\multifile.xlsx","multi1","MODIFY_VALUE","column1","column1","1","1"
-"src\\test\\resources\\yo\\dbunitcli\\application\\csv2xlsx\\csv","src\\test\\resources\\yo\\dbunitcli\\application\\csv2xlsx\\multifile.xlsx","multi2","MODIFY_VALUE","columna","columna","1","1"
+"src\\test\\resources\\yo\\dbunitcli\\application\\csv\\multi","src\\test\\resources\\yo\\dbunitcli\\application\\csv2xlsx\\multifile.xlsx","multi1","MODIFY_VALUE","column1","column1","1","1"
+"src\\test\\resources\\yo\\dbunitcli\\application\\csv\\multi","src\\test\\resources\\yo\\dbunitcli\\application\\csv2xlsx\\multifile.xlsx","multi2","MODIFY_VALUE","columna","columna","1","1"

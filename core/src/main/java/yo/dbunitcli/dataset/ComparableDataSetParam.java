@@ -110,7 +110,8 @@ public class ComparableDataSetParam {
     }
 
     public String getExtension() {
-        return extension;
+        return Strings.nullToEmpty(Optional.ofNullable(this.extension)
+                .orElse(this.source.getExtension()));
     }
 
     public char getDelimiter() {
@@ -127,9 +128,7 @@ public class ComparableDataSetParam {
 
     public File[] getSrcFiles() {
         if (this.getSrc().isDirectory()) {
-            String end = "." + Strings.nullToEmpty(Optional.ofNullable(this.extension)
-                            .orElse(this.source.getExtension()))
-                    .toUpperCase();
+            String end = "." + this.getExtension().toUpperCase();
             File[] result = this.getSrc().listFiles((file) -> file.isFile() && file.getName().toUpperCase().endsWith(end));
             Arrays.sort(result);
             return result;

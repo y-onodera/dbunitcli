@@ -1,0 +1,6 @@
+-targetType=image
+-old.src=src/test/resources/yo/dbunitcli/application/compare/image/old
+-old.srcType=file
+-new.src=src/test/resources/yo/dbunitcli/application/compare/image/new
+-new.srcType=file
+-result=target/test-classes/yo/dbunitcli/application/compare/image/result

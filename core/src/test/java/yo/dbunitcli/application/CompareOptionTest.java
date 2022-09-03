@@ -76,7 +76,7 @@ public class CompareOptionTest {
 
     @Test
     public void parseArgumentsLoadableFromParameterFile() throws Exception {
-        this.target.parse(new String[]{"@" + this.baseDir + "/paramResultDiffValidExpected.txt"});
+        this.target.parse(new String[]{"@" + this.baseDir + "/paramCompareResultDiffValidExpected.txt"});
         assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewData().getParam().getSrc().getAbsoluteFile());
         assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldData().getParam().getSrc().getAbsoluteFile());
         assertEquals(1, this.target.getComparisonKeys().getColumns("columnadd").size());

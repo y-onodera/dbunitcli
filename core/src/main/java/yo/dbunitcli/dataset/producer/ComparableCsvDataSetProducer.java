@@ -6,10 +6,7 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
-import org.dbunit.dataset.common.handlers.IllegalInputCharacterException;
-import org.dbunit.dataset.common.handlers.Pipeline;
-import org.dbunit.dataset.common.handlers.PipelineConfig;
-import org.dbunit.dataset.common.handlers.PipelineException;
+import org.dbunit.dataset.common.handlers.*;
 import org.dbunit.dataset.csv.CsvDataSetWriter;
 import org.dbunit.dataset.csv.CsvParserException;
 import org.dbunit.dataset.csv.CsvParserImpl;
@@ -28,6 +25,7 @@ import java.util.List;
 
 public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private static final Logger logger = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
+    private final String extension;
     private IDataSetConsumer consumer = new DefaultConsumer();
     private final File[] src;
     private final String encoding;
@@ -48,6 +46,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             this.headerNames = headerName.split(",");
         }
         this.delimiter = param.getDelimiter();
+        this.extension = param.getExtension();
     }
 
     @Override
@@ -113,7 +112,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
 
     protected ITableMetaData createTableMetaData(File theDataFile, List<Object> readData) {
         Column[] columns = this.loadColumns(readData);
-        String tableName = theDataFile.getName().substring(0, theDataFile.getName().indexOf(".csv"));
+        String tableName = theDataFile.getName().substring(0, theDataFile.getName().indexOf("." + this.extension));
         return new DefaultTableMetaData(tableName, columns);
     }
 
@@ -127,13 +126,90 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         return columns;
     }
 
-    class CsvParser extends CsvParserImpl {
+    static class CsvParser extends CsvParserImpl {
+
         CsvParser setDelimiter(char delimiter) throws NoSuchFieldException, IllegalAccessException {
             Field f = CsvParserImpl.class.getDeclaredField("pipeline");
             f.setAccessible(true);
-            Pipeline pipeline = (Pipeline) f.get(this);
+            Pipeline pipeline = new Pipeline() {
+                @Override
+                public void putFront(PipelineComponent component) {
+                    if (component instanceof WhitespacesHandler) {
+                        super.putFront(IgnoreDelimiterWhitespacesHandler.GET(delimiter, component));
+                    } else {
+                        super.putFront(component);
+                    }
+                }
+            };
             pipeline.getPipelineConfig().setSeparatorChar(delimiter);
+            pipeline.putFront(SeparatorHandler.ENDPIECE());
+            pipeline.putFront(EscapeHandler.ACCEPT());
+            pipeline.putFront(IsAlnumHandler.QUOTE());
+            pipeline.putFront(QuoteHandler.QUOTE());
+            pipeline.putFront(EscapeHandler.ESCAPE());
+            pipeline.putFront(WhitespacesHandler.IGNORE());
+            pipeline.putFront(TransparentHandler.IGNORE());
+            f.set(this, pipeline);
             return this;
         }
     }
+
+    private static class IgnoreDelimiterWhitespacesHandler extends AbstractPipelineComponent {
+        private static final Logger logger = LoggerFactory.getLogger(IgnoreDelimiterWhitespacesHandler.class);
+        static Field HANDLE;
+
+        static {
+            try {
+                HANDLE = AbstractPipelineComponent.class.getDeclaredField("helper");
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+            HANDLE.setAccessible(true);
+        }
+
+        private final char delimiter;
+
+        IgnoreDelimiterWhitespacesHandler(char delimiter) {
+            this.delimiter = delimiter;
+        }
+
+        public static final PipelineComponent IGNORE(char delimiter) {
+            logger.debug("IGNORE() - start");
+            return createPipelineComponent(new IgnoreDelimiterWhitespacesHandler(delimiter), new Ignore());
+        }
+
+        public static final PipelineComponent ACCEPT(char delimiter) {
+            logger.debug("ACCEPT() - start");
+            return createPipelineComponent(new IgnoreDelimiterWhitespacesHandler(delimiter), new Accept());
+        }
+
+        public static PipelineComponent GET(char delimiter, PipelineComponent component) {
+            try {
+
+                Helper helper = (Helper) HANDLE.get(component);
+                if (helper instanceof AbstractPipelineComponent.ACCEPT) {
+                    return IgnoreDelimiterWhitespacesHandler.ACCEPT(delimiter);
+                }
+                return IgnoreDelimiterWhitespacesHandler.IGNORE(delimiter);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public boolean canHandle(char c) throws IllegalInputCharacterException {
+            if (logger.isDebugEnabled()) {
+                logger.debug("canHandle(c={}) - start", c);
+            }
+            return c != delimiter && Character.isWhitespace(c);
+        }
+
+        static class Ignore extends IGNORE {
+
+        }
+
+        static class Accept extends ACCEPT {
+
+        }
+    }
+
 }
