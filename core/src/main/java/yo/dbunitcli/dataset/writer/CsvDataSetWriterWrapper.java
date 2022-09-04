@@ -89,12 +89,16 @@ public class CsvDataSetWriterWrapper implements IDataSetWriter {
 
             for (int i = 0; i < columns.length; ++i) {
                 String columnName = columns[i].getColumnName();
-                this.getWriter().write(columnName);
+                this.getWriter().write(this.quoted(columnName));
                 if (i < columns.length - 1) {
                     this.getWriter().write(",");
                 }
             }
 
+        }
+
+        private String quoted(String stringValue) {
+            return "\"" + escape(stringValue) + "\"";
         }
     }
 }
