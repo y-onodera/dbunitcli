@@ -13,16 +13,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ColumnSettings {
 
-    public static ColumnSettings NONE = new ColumnSettings(AddSettingColumns.NONE
+    public static ColumnSettings NONE = new ColumnSettings(it -> it, AddSettingColumns.NONE
             , AddSettingColumns.NONE
             , AddSettingColumns.NONE
             , AddSettingColumns.NONE
             , RowFilter.NONE);
+
+    private final Function<String, String> tableNameMap;
 
     private final AddSettingColumns comparisonKeys;
 
@@ -35,7 +38,7 @@ public class ColumnSettings {
     private final RowFilter filterExpressions;
 
     public ColumnSettings(Builder builder) {
-        this(builder.getComparisonKeys()
+        this(builder.getTableNameMap(), builder.getComparisonKeys()
                 , builder.getExcludeColumns()
                 , builder.getOrderColumns()
                 , builder.getExpressionColumns()
@@ -43,11 +46,12 @@ public class ColumnSettings {
         );
     }
 
-    private ColumnSettings(AddSettingColumns comparisonKeys
+    private ColumnSettings(Function<String, String> tableNameMap, AddSettingColumns comparisonKeys
             , AddSettingColumns excludeColumns
             , AddSettingColumns orderColumns
             , AddSettingColumns expressionColumns
             , RowFilter filterExpressions) {
+        this.tableNameMap = tableNameMap;
         this.comparisonKeys = comparisonKeys;
         this.excludeColumns = excludeColumns;
         this.orderColumns = orderColumns;
@@ -74,7 +78,8 @@ public class ColumnSettings {
     public ColumnSettings apply(Consumer<ColumnSettings.Editor> function) {
         Editor editor = new Editor();
         function.accept(editor);
-        return new ColumnSettings(this.comparisonKeys.apply(editor.keyEdit)
+        return new ColumnSettings(editor.tableNameMapEdit.apply(this.tableNameMap)
+                , this.comparisonKeys.apply(editor.keyEdit)
                 , this.excludeColumns.apply(editor.excludeEdit)
                 , this.orderColumns.apply(editor.orderEdit)
                 , this.expressionColumns.apply(editor.expressionEdit)
@@ -133,10 +138,15 @@ public class ColumnSettings {
     }
 
     protected AddSettingTableMetaData getAddSettingTableMetaData(ITableMetaData originMetaData) throws DataSetException {
-        return this.getExpressionColumns(originMetaData.getTableName())
-                .apply(originMetaData
-                        , this.getExcludeColumnFilter(originMetaData.getTableName())
-                        , this.getComparisonKeys(originMetaData.getTableName()));
+        return this.getExpressionColumns(this.getTableName(originMetaData))
+                .apply(this.getTableName(originMetaData)
+                        , originMetaData
+                        , this.getExcludeColumnFilter(getTableName(originMetaData))
+                        , this.getComparisonKeys(getTableName(originMetaData)));
+    }
+
+    protected String getTableName(ITableMetaData originMetaData) {
+        return tableNameMap.apply(originMetaData.getTableName());
     }
 
     protected List<Object[]> getOriginRows(ITable delegate) throws NoSuchFieldException, IllegalAccessException {
@@ -146,7 +156,7 @@ public class ColumnSettings {
     }
 
     protected Comparator<Object> getComparator(ITable delegate) {
-        Column[] orderColumns = this.getOrderColumns(delegate.getTableMetaData().getTableName());
+        Column[] orderColumns = this.getOrderColumns(getTableName(delegate.getTableMetaData()));
         if (orderColumns.length > 0) {
             return new SortedTable.AbstractRowComparator(delegate, orderColumns) {
                 @Override
@@ -159,7 +169,7 @@ public class ColumnSettings {
     }
 
     protected Predicate<Map<String, Object>> getRowFilter(AddSettingTableMetaData tableMetaData) {
-        return this.filterExpressions.getRowFilter(tableMetaData.getTableName());
+        return this.filterExpressions.getRowFilter(getTableName(tableMetaData));
     }
 
     public interface Builder {
@@ -169,6 +179,8 @@ public class ColumnSettings {
         default ColumnSettings build() {
             return new ColumnSettings(this);
         }
+
+        Function<String, String> getTableNameMap();
 
         AddSettingColumns getComparisonKeys();
 
@@ -182,6 +194,7 @@ public class ColumnSettings {
     }
 
     public static class Editor {
+        private Function<Function<String, String>, Function<String, String>> tableNameMapEdit = it -> it;
         private Consumer<AddSettingColumns.Builder> keyEdit = (it) -> {
         };
         private Consumer<AddSettingColumns.Builder> excludeEdit = (it) -> {
@@ -192,6 +205,11 @@ public class ColumnSettings {
         };
         private Consumer<RowFilter.Builder> filterEdit = (it) -> {
         };
+
+        public Editor setTableNameMapEdit(Function<Function<String, String>, Function<String, String>> function) {
+            this.tableNameMapEdit = function;
+            return this;
+        }
 
         public Editor setKeyEdit(Consumer<AddSettingColumns.Builder> key) {
             this.keyEdit = key;

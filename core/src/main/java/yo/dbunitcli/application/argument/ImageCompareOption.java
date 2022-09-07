@@ -108,19 +108,19 @@ public class ImageCompareOption extends DefaultArgumentsParser {
     public DataSetCompareBuilder getDataSetCompareBuilder() {
         return new ImageCompareBuilder()
                 .setThreshold(Integer.parseInt(Optional.ofNullable(this.threshold).orElse("5")))
-                .setPixelToleranceLevel(Double.parseDouble(Optional.ofNullable(this.pixelToleranceLevel).orElse("0.1D")))
-                .setAllowingPercentOfDifferentPixels(Double.parseDouble(Optional.ofNullable(this.allowingPercentOfDifferentPixels).orElse("0.1D")))
+                .setPixelToleranceLevel(Double.parseDouble(Optional.ofNullable(this.pixelToleranceLevel).orElse("0.01D")))
+                .setAllowingPercentOfDifferentPixels(Double.parseDouble(Optional.ofNullable(this.allowingPercentOfDifferentPixels).orElse("0.01D")))
                 .setRectangleLineWidth(Integer.parseInt(Optional.ofNullable(this.rectangleLineWidth).orElse("1")))
                 .setMinimalRectangleSize(Integer.valueOf(Optional.ofNullable(this.minimalRectangleSize).orElse("1")))
                 .setMaximalRectangleCount(Integer.valueOf(Optional.ofNullable(this.maximalRectangleCount).orElse("-1")))
                 .setFillDifferenceRectangles(this.fillDifferenceRectangles)
                 .setPercentOpacityDifferenceRectangles(Double.parseDouble(Optional.ofNullable(this.percentOpacityDifferenceRectangles).orElse("20.0")))
-                .setDifferenceRectangleColor(Color.getColor(Optional.ofNullable(this.differenceRectangleColor).orElse("RED")))
+                .setDifferenceRectangleColor(Optional.ofNullable(Color.getColor(this.differenceRectangleColor)).orElse(Color.red))
                 .setExcludeAreaList(this.excludeAreaList)
                 .setDrawExcludedRectangles(this.drawExcludedRectangles)
                 .setFillExcludedRectangles(this.fillExcludedRectangles)
                 .setPercentOpacityExcludedRectangles(Double.parseDouble(Optional.ofNullable(this.percentOpacityExcludedRectangles).orElse("20.0")))
-                .setExcludedRectangleColor(Color.getColor(Optional.ofNullable(this.excludedRectangleColor).orElse("GREEN")))
+                .setExcludedRectangleColor(Optional.ofNullable(Color.getColor(this.excludedRectangleColor)).orElse(Color.green))
                 ;
     }
 }

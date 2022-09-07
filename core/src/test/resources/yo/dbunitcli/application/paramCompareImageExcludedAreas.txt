@@ -1,5 +1,5 @@
 -targetType=image
 -old.src=src/test/resources/yo/dbunitcli/application/compare/image/old
 -new.src=src/test/resources/yo/dbunitcli/application/compare/image/new
--result=target/test-classes/yo/dbunitcli/application/compare/image/result
--expect.src=src/test/resources/yo/dbunitcli/application/compare/image/expected_diff
+-excludedAreas=[150.0,116.0,173.0,131.0]
+-result=target/test-classes/yo/dbunitcli/application/compare/image/result_excluded

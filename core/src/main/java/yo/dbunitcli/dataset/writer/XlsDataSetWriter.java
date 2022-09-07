@@ -19,11 +19,12 @@ import java.util.Date;
 
 public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter implements IDataSetWriter {
 
-    public enum TableExportType {
+    public static enum TableExportType {
         SHEET, BOOK
     }
 
     private static final Logger logger = LoggerFactory.getLogger(XlsDataSetWriter.class);
+
     private final File resultDir;
 
     private String filename;
@@ -137,6 +138,11 @@ public class XlsDataSetWriter extends org.dbunit.dataset.excel.XlsDataSetWriter 
             workbook.write(out);
             out.flush();
         }
+    }
+
+    @Override
+    public File getDir() {
+        return this.resultDir;
     }
 
     protected String getFilename() {

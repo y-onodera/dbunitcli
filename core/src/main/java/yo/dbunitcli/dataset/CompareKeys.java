@@ -37,6 +37,10 @@ public class CompareKeys {
         this.keys.addAll(aKeys);
     }
 
+    public String getKeysToString() {
+        return keys.toString();
+    }
+
     public int getRowNum() {
         return this.rowNum;
     }

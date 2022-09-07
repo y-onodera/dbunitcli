@@ -7,6 +7,8 @@ import com.github.romankh3.image.comparison.model.Rectangle;
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.CompareKeys;
 
 import javax.imageio.ImageIO;
@@ -18,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ImageCompare extends TableDataSetCompare {
+
+    private static final Logger logger = LoggerFactory.getLogger(ImageCompare.class);
 
     private final int threshold;
 
@@ -47,6 +51,8 @@ public class ImageCompare extends TableDataSetCompare {
 
     private final double percentOpacityExcludedRectangles;
 
+    private final File resultDir;
+
     public ImageCompare(ImageCompareBuilder builder) {
         this.threshold = builder.getThreshold();
         this.allowingPercentOfDifferentPixels = builder.getAllowingPercentOfDifferentPixels();
@@ -62,6 +68,7 @@ public class ImageCompare extends TableDataSetCompare {
         this.excludedRectangleColor = builder.getExcludedRectangleColor();
         this.fillExcludedRectangles = builder.isFillExcludedRectangles();
         this.percentOpacityExcludedRectangles = builder.getPercentOpacityExcludedRectangles();
+        this.resultDir = builder.getResultDir();
     }
 
     @Override
@@ -72,18 +79,17 @@ public class ImageCompare extends TableDataSetCompare {
     @Override
     protected void compareKey(Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists, Map<Integer, List<CompareKeys>> modifyValues, Object[] oldRow, CompareKeys key) throws DataSetException {
         Map.Entry<Integer, Object[]> rowEntry = newRowLists.get(key);
-        key = key.newRowNum(rowEntry.getKey());
         Object[] newRow = rowEntry.getValue();
-        if (!this.compareFile(oldRow[0].toString(), newRow[0].toString())) {
+        if (!this.compareFile(new File(oldRow[0].toString()), new File(newRow[0].toString()), new File(this.resultDir, key.getKeysToString() + ".png"))) {
             modifyValues.put(0, Lists.newArrayList(key));
         }
     }
 
-    protected boolean compareFile(String oldPath, String newPath) throws DataSetException {
+    protected boolean compareFile(File oldPath, File newPath, File destination) throws DataSetException {
         try {
-            BufferedImage newImage = ImageIO.read(new File(newPath));
-            BufferedImage oldImage = ImageIO.read(new File(oldPath));
-            ImageComparisonResult result = new ImageComparison(oldImage, newImage, new File("diff.png"))
+            BufferedImage newImage = ImageIO.read(newPath);
+            BufferedImage oldImage = ImageIO.read(oldPath);
+            ImageComparisonResult result = new ImageComparison(oldImage, newImage, destination)
                     .setThreshold(this.threshold)
                     .setAllowingPercentOfDifferentPixels(this.allowingPercentOfDifferentPixels)
                     .setPixelToleranceLevel(this.pixelToleranceLevel)
@@ -99,6 +105,14 @@ public class ImageCompare extends TableDataSetCompare {
                     .setExcludedRectangleFilling(this.fillExcludedRectangles
                             , this.percentOpacityExcludedRectangles)
                     .compareImages();
+            if (result.getRectangles() != null) {
+                StringBuilder sb = new StringBuilder();
+                result.getRectangles()
+                        .forEach(it -> sb.append(String.format("[%s,%s,%s,%s]"
+                                , it.getMinPoint().getX(), it.getMinPoint().getY()
+                                , it.getMaxPoint().getX(), it.getMaxPoint().getY())));
+                logger.info("diff areas = " + sb);
+            }
             return result.getImageComparisonState() == ImageComparisonState.MATCH;
         } catch (IOException e) {
             throw new DataSetException(e);

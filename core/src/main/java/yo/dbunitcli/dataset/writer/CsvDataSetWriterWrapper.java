@@ -19,8 +19,11 @@ public class CsvDataSetWriterWrapper implements IDataSetWriter {
 
     private final boolean exportEmptyTable;
 
+    private final File resultDir;
+
     public CsvDataSetWriterWrapper(DataSetWriterParam param) {
-        this.writer = new ExCsvDataSetWriter(param.getResultDir(), param.getOutputEncoding());
+        this.resultDir = param.getResultDir();
+        this.writer = new ExCsvDataSetWriter(this.resultDir, param.getOutputEncoding());
         this.exportEmptyTable = param.isExportEmptyTable();
     }
 
@@ -38,6 +41,11 @@ public class CsvDataSetWriterWrapper implements IDataSetWriter {
             return;
         }
         this.writer.write(new DefaultDataSet(aTable));
+    }
+
+    @Override
+    public File getDir() {
+        return this.resultDir;
     }
 
     private static class ExCsvDataSetWriter extends CsvDataSetWriter {

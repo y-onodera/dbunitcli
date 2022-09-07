@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.function.Function;
 
 public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
@@ -36,6 +37,11 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         return this.configureSetting(settingJson)
                 .configureCommonSetting(settingJson)
                 .importSetting(settingJson, setting);
+    }
+
+    @Override
+    public Function<String, String> getTableNameMap() {
+        return it -> it;
     }
 
     @Override
@@ -116,7 +122,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         return this;
     }
 
-    private void appendTo(FromJsonColumnSettingsBuilder other) {
+    protected void appendTo(FromJsonColumnSettingsBuilder other) {
         other.comparisonKeys.add(this.comparisonKeys.build());
         other.excludeColumns.add(this.excludeColumns.build());
         other.orderColumns.add(this.orderColumns.build());

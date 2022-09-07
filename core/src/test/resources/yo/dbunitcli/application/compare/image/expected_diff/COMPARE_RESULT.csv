@@ -1,0 +1,2 @@
+"OLD_PATH","NEW_PATH","TARGET_NAME","DIFF","OLD_VALUE","NEW_VALUE","COLUMN_INDEX","DIFF_ROWS"
+"src\\test\\resources\\yo\\dbunitcli\\application\\compare\\image\\old","src\\test\\resources\\yo\\dbunitcli\\application\\compare\\image\\new","TARGET","MODIFY_VALUE","PATH","PATH","0","1"

@@ -78,7 +78,7 @@ public class DataSetCompare implements Compare {
         Set<String> newTables = Sets.newHashSet(this.newDataSet.getTableNames());
         results.addAll(this.searchDeleteTables(oldTables, newTables));
         results.addAll(this.searchAddTables(oldTables, newTables));
-        results.addAll(this.searchModifyTables(oldTables, newTables, writer));
+        results.addAll(this.searchModifyTables(oldTables, newTables));
         return results;
     }
 
@@ -106,12 +106,12 @@ public class DataSetCompare implements Compare {
         return results;
     }
 
-    protected List<CompareDiff> searchModifyTables(Set<String> oldTables, Set<String> newTables, IDataSetWriter writer) throws DataSetException {
+    protected List<CompareDiff> searchModifyTables(Set<String> oldTables, Set<String> newTables) throws DataSetException {
         List<CompareDiff> results = Lists.newArrayList();
         for (String tableName : Sets.intersection(oldTables, newTables)) {
             ComparableTable oldTable = this.oldDataSet.getTable(tableName);
             ComparableTable newTable = this.newDataSet.getTable(tableName);
-            results.addAll(this.tableCompare.getResults(oldTable, newTable, this.comparisonKeys, writer));
+            results.addAll(this.tableCompare.getResults(oldTable, newTable, this.comparisonKeys, this.writer));
         }
         return results;
     }

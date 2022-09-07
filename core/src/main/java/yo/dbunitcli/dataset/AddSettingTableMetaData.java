@@ -18,8 +18,8 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final ColumnExpression additionalExpression;
     private final List<Integer> filterColumnIndex = Lists.newArrayList();
 
-    public AddSettingTableMetaData(ITableMetaData delegate, Column[] primaryKeys, IColumnFilter iColumnFilter, ColumnExpression additionalExpression) throws DataSetException {
-        this.tableName = delegate.getTableName();
+    public AddSettingTableMetaData(String tableName, ITableMetaData delegate, Column[] primaryKeys, IColumnFilter iColumnFilter, ColumnExpression additionalExpression) throws DataSetException {
+        this.tableName = tableName;
         this.primaryKeys = primaryKeys;
         if (iColumnFilter != null) {
             this.columns = additionalExpression.merge(new FilteredTableMetaData(delegate, iColumnFilter).getColumns());
@@ -30,7 +30,7 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         Set<Column> noFilter = Sets.newHashSet(delegate.getColumns());
         Set<Column> filtered = Sets.newHashSet(this.getColumns());
         for (Column column : Sets.difference(noFilter, filtered)) {
-            if(!this.additionalExpression.contains(column.getColumnName())) {
+            if (!this.additionalExpression.contains(column.getColumnName())) {
                 this.filterColumnIndex.add(delegate.getColumnIndex(column.getColumnName()));
             }
         }

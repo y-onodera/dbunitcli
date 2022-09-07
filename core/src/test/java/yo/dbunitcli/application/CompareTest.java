@@ -115,6 +115,16 @@ public class CompareTest {
     }
 
     @Test
+    public void testCompareImage() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareImage.txt"});
+    }
+
+    @Test
+    public void testCompareImageExcludedAreas() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareImageExcludedAreas.txt"});
+    }
+
+    @Test
     public void testSettingMerge() throws Exception {
         Compare.main(new String[]{"@" + this.baseDir + "/paramCompareSettingMerge.txt"});
     }

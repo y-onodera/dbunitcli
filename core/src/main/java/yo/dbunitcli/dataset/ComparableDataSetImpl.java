@@ -3,6 +3,8 @@ package yo.dbunitcli.dataset;
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.CachedDataSet;
 import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.DefaultTable;
+import org.dbunit.dataset.OrderedTableNameMap;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,12 @@ public class ComparableDataSetImpl extends CachedDataSet implements ComparableDa
         this.producer = producer;
         this.param = this.producer.getParam();
         this.compareSettings = this.param.getColumnSettings();
+        OrderedTableNameMap applySetting = this.createTableNameMap();
+        for (String tableName : this._orderedTableNameMap.getTableNames()) {
+            ComparableTable table = this.compareSettings.apply((DefaultTable) this._orderedTableNameMap.get(tableName));
+            applySetting.add(table.getTableMetaData().getTableName(), table);
+        }
+        this._orderedTableNameMap = applySetting;
     }
 
     @Override
@@ -39,7 +47,7 @@ public class ComparableDataSetImpl extends CachedDataSet implements ComparableDa
 
     @Override
     public ComparableTable getTable(String tableName) throws DataSetException {
-        return this.getCompareSettings().apply(super.getTable(tableName));
+        return (ComparableTable) super.getTable(tableName);
     }
 
     @Override

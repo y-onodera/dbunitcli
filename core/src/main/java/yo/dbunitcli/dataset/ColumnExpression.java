@@ -44,15 +44,15 @@ public class ColumnExpression {
     }
 
     public AddSettingTableMetaData apply(ITableMetaData delegateMetaData) throws DataSetException {
-        return this.apply(delegateMetaData, null, delegateMetaData.getPrimaryKeys());
+        return this.apply(delegateMetaData.getTableName(), delegateMetaData, null, delegateMetaData.getPrimaryKeys());
     }
 
-    public AddSettingTableMetaData apply(ITableMetaData originMetaData, IColumnFilter iColumnFilter, Column[] comparisonKeys) throws DataSetException {
+    public AddSettingTableMetaData apply(String tableName, ITableMetaData originMetaData, IColumnFilter iColumnFilter, Column[] comparisonKeys) throws DataSetException {
         Column[] primaryKey = originMetaData.getPrimaryKeys();
         if (comparisonKeys.length > 0) {
             primaryKey = comparisonKeys;
         }
-        return new AddSettingTableMetaData(originMetaData, primaryKey, iColumnFilter, this);
+        return new AddSettingTableMetaData(tableName, originMetaData, primaryKey, iColumnFilter, this);
     }
 
     public Collection<? extends Column> getColumns() {

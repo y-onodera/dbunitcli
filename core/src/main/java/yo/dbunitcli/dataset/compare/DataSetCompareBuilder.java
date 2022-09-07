@@ -5,6 +5,8 @@ import yo.dbunitcli.dataset.AddSettingColumns;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.IDataSetWriter;
 
+import java.io.File;
+
 public class DataSetCompareBuilder {
     private ComparableDataSet oldDataSet;
     private ComparableDataSet newDataSet;
@@ -49,6 +51,10 @@ public class DataSetCompareBuilder {
 
     public TableDataSetCompare getTableDataSetCompare() {
         return new TableDataSetCompare();
+    }
+
+    public File getResultDir() {
+        return this.getDataSetWriter().getDir();
     }
 
     public Compare build() throws DataSetException {

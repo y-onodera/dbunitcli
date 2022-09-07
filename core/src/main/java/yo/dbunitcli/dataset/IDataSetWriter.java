@@ -3,6 +3,8 @@ package yo.dbunitcli.dataset;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 
+import java.io.File;
+
 public interface IDataSetWriter {
 
     void cleanupDirectory();
@@ -15,5 +17,9 @@ public interface IDataSetWriter {
 
     default void close() throws DataSetException {
         // default no implementation
+    }
+
+    default File getDir() {
+        return null;
     }
 }

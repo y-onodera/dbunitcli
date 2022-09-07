@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class CompareOption extends CommandLineOption {
 
-    public static final DefaultArgumentMapper SRC_TYPE_IMAGE_MAPPER = new DefaultArgumentMapper() {
+    public static final DefaultArgumentMapper IMAGE_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
         public String[] map(String[] arguments, String prefix, CmdLineParser parser) {
             List<String> newArg = Arrays.stream(arguments)
@@ -74,8 +74,8 @@ public class CompareOption extends CommandLineOption {
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         if (this.targetType == Type.image) {
-            this.newData.setArgumentMapper(SRC_TYPE_IMAGE_MAPPER);
-            this.oldData.setArgumentMapper(SRC_TYPE_IMAGE_MAPPER);
+            this.newData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
+            this.oldData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
         }
         this.newData.parseArgument(expandArgs);
         this.oldData.parseArgument(expandArgs);
@@ -144,11 +144,23 @@ public class CompareOption extends CommandLineOption {
     }
 
     public ComparableDataSet newDataSet() throws DataSetException {
-        return this.getComparableDataSetLoader().loadDataSet(this.newData.getParam().build());
+        ComparableDataSetParam.Builder loadParam = newData.getParam()
+                .ifMatch(this.targetType != Type.data
+                        , it -> it.setColumnSettings(it
+                                .getColumnSettings()
+                                .apply(builder -> builder.setTableNameMapEdit(origin -> (String name) -> "TARGET")))
+                );
+        return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
     }
 
     public ComparableDataSet oldDataSet() throws DataSetException {
-        return this.getComparableDataSetLoader().loadDataSet(this.oldData.getParam().build());
+        ComparableDataSetParam.Builder loadParam = oldData.getParam()
+                .ifMatch(this.targetType != Type.data
+                        , it -> it.setColumnSettings(it
+                                .getColumnSettings()
+                                .apply(builder -> builder.setTableNameMapEdit(origin -> (String name) -> "TARGET")))
+                );
+        return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
     }
 
     public ComparableDataSet resultDataSet() throws DataSetException {
@@ -185,8 +197,9 @@ public class CompareOption extends CommandLineOption {
             throw new CmdLineException(parser, e);
         }
         if (this.targetType != Type.data) {
-            this.columnSettings = this.columnSettings.apply(it -> it.setKeyEdit(edit ->
-                    edit.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList("NAME"))));
+            this.columnSettings = this.columnSettings.apply(it -> it
+                    .setKeyEdit(setting -> setting.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList("NAME")))
+            );
         }
     }
 
