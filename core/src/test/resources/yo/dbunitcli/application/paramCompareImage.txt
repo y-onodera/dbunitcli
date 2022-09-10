@@ -3,3 +3,4 @@
 -new.src=src/test/resources/yo/dbunitcli/application/compare/image/new
 -result=target/test-classes/yo/dbunitcli/application/compare/image/result
 -expect.src=src/test/resources/yo/dbunitcli/application/compare/image/expected_diff
+-expect.setting=src/test/resources/yo/dbunitcli/application/compare/image/expectsetting.json
