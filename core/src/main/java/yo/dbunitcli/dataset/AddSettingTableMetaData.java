@@ -15,16 +15,18 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final String tableName;
     private final Column[] primaryKeys;
     private final Column[] columns;
+    private final Column[] allColumns;
     private final ColumnExpression additionalExpression;
     private final List<Integer> filterColumnIndex = Lists.newArrayList();
 
     public AddSettingTableMetaData(String tableName, ITableMetaData delegate, Column[] primaryKeys, IColumnFilter iColumnFilter, ColumnExpression additionalExpression) throws DataSetException {
         this.tableName = tableName;
         this.primaryKeys = primaryKeys;
+        this.allColumns = additionalExpression.merge(delegate.getColumns());
         if (iColumnFilter != null) {
             this.columns = additionalExpression.merge(new FilteredTableMetaData(delegate, iColumnFilter).getColumns());
         } else {
-            this.columns = additionalExpression.merge(delegate.getColumns());
+            this.columns = allColumns;
         }
         this.additionalExpression = additionalExpression;
         Set<Column> noFilter = Sets.newHashSet(delegate.getColumns());
@@ -61,11 +63,11 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         }
         Map<String, Object> param = Maps.newHashMap();
         for (int i = 0, j = objects.length; i < j; i++) {
-            param.put(this.columns[i].getColumnName(), objects[i]);
+            param.put(this.allColumns[i].getColumnName(), objects[i]);
         }
-        Object[] result = Arrays.copyOf(objects, this.columns.length);
+        Object[] result = Arrays.copyOf(objects, this.allColumns.length);
         for (int i = 0, j = result.length; i < j; i++) {
-            String columnName = this.columns[i].getColumnName();
+            String columnName = this.allColumns[i].getColumnName();
             if (this.additionalExpression.contains(columnName)) {
                 result[i] = this.additionalExpression.evaluate(columnName, param);
                 param.put(columnName, result[i]);

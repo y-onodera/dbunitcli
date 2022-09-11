@@ -128,48 +128,50 @@ public class ColumnSettings {
         try {
             ITableMetaData originMetaData = table.getTableMetaData();
             AddSettingTableMetaData tableMetaData = this.getAddSettingTableMetaData(originMetaData);
-            return new ComparableTable(tableMetaData
+            ComparableTable result = new ComparableTable(tableMetaData
                     , this.getOriginRows(table)
                     , this.getComparator(table)
-                    , this.getRowFilter(tableMetaData));
+                    , this.getRowFilter(originMetaData.getTableName()));
+            String beforeTableName = originMetaData.getTableName();
+            String afterTableName = tableMetaData.getTableName();
+            while (!beforeTableName.equals(afterTableName)) {
+                beforeTableName = afterTableName;
+                result = this.apply(result);
+                afterTableName = result.getTableMetaData().getTableName();
+            }
+            return result;
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new DataSetException(e);
         }
     }
 
     protected AddSettingTableMetaData getAddSettingTableMetaData(ITableMetaData originMetaData) throws DataSetException {
-        return this.getExpressionColumns(this.getTableName(originMetaData))
+        return this.getExpressionColumns(originMetaData.getTableName())
                 .apply(this.getTableName(originMetaData)
                         , originMetaData
-                        , this.getExcludeColumnFilter(getTableName(originMetaData))
-                        , this.getComparisonKeys(getTableName(originMetaData)));
+                        , this.getExcludeColumnFilter(originMetaData.getTableName())
+                        , this.getComparisonKeys(originMetaData.getTableName()));
     }
 
     protected String getTableName(ITableMetaData originMetaData) {
         return tableNameMap.apply(originMetaData.getTableName());
     }
 
-    protected List<Object[]> getOriginRows(ITable delegate) throws NoSuchFieldException, IllegalAccessException {
+    protected List<Object[]> getOriginRows(ITable delegate) throws NoSuchFieldException, IllegalAccessException, RowOutOfBoundsException {
+        if (delegate instanceof ComparableTable) {
+            return ((ComparableTable) delegate).getRows();
+        }
         Field f = delegate.getClass().getDeclaredField("_rowList");
         f.setAccessible(true);
         return (List<Object[]>) f.get(delegate);
     }
 
-    protected Comparator<Object> getComparator(ITable delegate) {
-        Column[] orderColumns = this.getOrderColumns(getTableName(delegate.getTableMetaData()));
-        if (orderColumns.length > 0) {
-            return new SortedTable.AbstractRowComparator(delegate, orderColumns) {
-                @Override
-                protected int compare(Column column, Object o, Object o1) throws TypeCastException {
-                    return column.getDataType().compare(o, o1);
-                }
-            };
-        }
-        return null;
+    protected Column[] getComparator(ITable delegate) {
+        return this.getOrderColumns(delegate.getTableMetaData().getTableName());
     }
 
-    protected Predicate<Map<String, Object>> getRowFilter(AddSettingTableMetaData tableMetaData) {
-        return this.filterExpressions.getRowFilter(getTableName(tableMetaData));
+    protected Predicate<Map<String, Object>> getRowFilter(String tableName) {
+        return this.filterExpressions.getRowFilter(tableName);
     }
 
     public interface Builder {

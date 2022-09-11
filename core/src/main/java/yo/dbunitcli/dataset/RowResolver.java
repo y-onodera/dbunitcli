@@ -1,12 +1,15 @@
 package yo.dbunitcli.dataset;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.dbunit.DatabaseUnitRuntimeException;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.RowOutOfBoundsException;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class RowResolver {
 
@@ -16,25 +19,30 @@ public class RowResolver {
 
     private Integer[] _indexes;
 
-    private final Comparator<Object> rowComparator;
+    private final Predicate<Map<String, Object>> rowFilter;
+
+    private final Column[] orderColumns;
 
     private final List<Integer> filteredRowIndexes;
 
-    public RowResolver(List<Object[]> values, Comparator<Object> rowComparator, Predicate<Map<String, Object>> rowFilter, AddSettingTableMetaData addSettingTableMetaData) throws RowOutOfBoundsException {
+    public RowResolver(List<Object[]> values, Column[] orderColumns, Predicate<Map<String, Object>> rowFilter, AddSettingTableMetaData addSettingTableMetaData) throws RowOutOfBoundsException {
         this.addSettingTableMetaData = addSettingTableMetaData;
         this.values = values;
-        this.rowComparator = rowComparator;
-        this.filteredRowIndexes = this.filteredRows(rowFilter);
+        this.rowFilter = rowFilter;
+        this.orderColumns = orderColumns;
+        this.filteredRowIndexes = this.filteredRows();
+    }
+
+    public List<Object[]> getRows() throws RowOutOfBoundsException {
+        List<Object[]> result = Lists.newArrayList();
+        for (int i = 0, j = this.getRowCount(); i < j; i++) {
+            result.add(getRow(i));
+        }
+        return result;
     }
 
     public Map<String, Object> getRowToMap(int rowNum) throws RowOutOfBoundsException {
-        Object[] row = this.getRow(rowNum);
-        Map<String, Object> map = Maps.newHashMap();
-        Column[] columns = this.addSettingTableMetaData.getColumns();
-        for (int i = 0, j = row.length; i < j; i++) {
-            map.put(columns[i].getColumnName(), row[i]);
-        }
-        return map;
+        return this.rowToMap(this.getRow(rowNum));
     }
 
     public Object[] getRow(int rowNum) throws RowOutOfBoundsException {
@@ -51,8 +59,25 @@ public class RowResolver {
         return this.values.size();
     }
 
+    public void add(ComparableTable table) throws DataSetException {
+        for (int rowNum = 0, total = table.getRowCount(); rowNum < total; rowNum++) {
+            Column[] columns = this.addSettingTableMetaData.getColumns();
+            Object[] row = new Object[columns.length];
+            for (int i = 0, j = columns.length; i < j; i++) {
+                row[i] = table.getValue(rowNum, columns[i].getColumnName());
+            }
+            this.add(row);
+        }
+    }
+
     public void add(Object[] row) {
-        this.values.add(row);
+        if (this.filteredRowIndexes == null || this.rowFilter.test(this.rowToMap(row))) {
+            this.values.add(row);
+            if (this.filteredRowIndexes != null) {
+                this.filteredRowIndexes.add(this.values.size() - 1);
+            }
+            this._indexes = null;
+        }
     }
 
     public void replaceValue(int row, int column, Object newValue) throws RowOutOfBoundsException {
@@ -81,28 +106,73 @@ public class RowResolver {
             for (int i = 0; i < indexes.length; ++i) {
                 indexes[i] = i;
             }
-            Arrays.sort(indexes, this.rowComparator);
+            List<Object[]> rows = Lists.newArrayList();
+            for (int i = 0, j = values.size(); i < j; i++) {
+                if (filteredRowIndexes == null || filteredRowIndexes.contains(i)) {
+                    rows.add(addSettingTableMetaData.applySetting(values.get(i)));
+                }
+            }
+            Integer[] columnIndex = Arrays.stream(orderColumns).map(it -> {
+                        try {
+                            return addSettingTableMetaData.getColumnIndex(it.getColumnName());
+                        } catch (DataSetException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .toArray(Integer[]::new);
+            Arrays.sort(indexes, (Integer i1, Integer i2) -> {
+                try {
+                    for (int i = 0, j = columnIndex.length; i < j; i++) {
+                        Object value1 = rows.get(i1)[columnIndex[i]];
+                        Object value2 = rows.get(i2)[columnIndex[i]];
+                        if (value1 != null || value2 != null) {
+                            if (value1 == null) {
+                                return -1;
+                            }
+                            if (value2 == null) {
+                                return 1;
+                            }
+                            int result = addSettingTableMetaData.getColumns()[i].getDataType().compare(value1, value2);
+                            if (result != 0) {
+                                return result;
+                            }
+                        }
+                    }
+                    return 0;
+                } catch (DataSetException var10) {
+                    throw new DatabaseUnitRuntimeException(var10);
+                }
+            });
             this._indexes = indexes;
         }
         return this._indexes[row];
     }
 
-    protected List<Integer> filteredRows(Predicate<Map<String, Object>> rowFilter) throws RowOutOfBoundsException {
-        if (rowFilter == null) {
+    protected List<Integer> filteredRows() throws RowOutOfBoundsException {
+        if (this.rowFilter == null) {
             return null;
         }
         int fullSize = this.values.size();
         List<Integer> filteredRowIndexes = new ArrayList<>();
         for (int row = 0; row < fullSize; ++row) {
-            if (rowFilter.test(this.getRowToMap(row))) {
+            if (this.rowFilter.test(this.getRowToMap(row))) {
                 filteredRowIndexes.add(row);
             }
         }
         return filteredRowIndexes;
     }
 
+    protected Map<String, Object> rowToMap(Object[] row) {
+        Map<String, Object> map = Maps.newHashMap();
+        Column[] columns = this.addSettingTableMetaData.getColumns();
+        for (int i = 0, j = row.length; i < j; i++) {
+            map.put(columns[i].getColumnName(), row[i]);
+        }
+        return map;
+    }
+
     protected boolean isSorted() {
-        return this.rowComparator != null;
+        return this.orderColumns.length > 0;
     }
 
 }

@@ -21,18 +21,18 @@ public class ComparableTable implements ITable {
     protected ComparableTable(ITableMetaData metaData) throws DataSetException {
         this(ColumnExpression.builder().build().apply(metaData)
                 , Lists.newArrayList()
-                , null
+                , new Column[]{}
                 , null);
     }
 
     protected ComparableTable(AddSettingTableMetaData tableMetaData
             , List<Object[]> values
-            , Comparator<Object> comparator
+            , Column[] orderColumns
             , Predicate<Map<String, Object>> rowFilter) throws RowOutOfBoundsException {
         this.addSettingTableMetaData = tableMetaData;
         this.primaryKeys = this.addSettingTableMetaData.getPrimaryKeys();
         this.columns = this.addSettingTableMetaData.getColumns();
-        this.rowResolver = new RowResolver(values, comparator, rowFilter, this.addSettingTableMetaData);
+        this.rowResolver = new RowResolver(values, orderColumns, rowFilter, this.addSettingTableMetaData);
     }
 
     public List<Map<String, Object>> toMap() throws RowOutOfBoundsException {
@@ -78,8 +78,13 @@ public class ComparableTable implements ITable {
                 list.add(it);
             }
         }
-        return  list.toArray(new Column[0]);
+        return list.toArray(new Column[0]);
     }
+
+    public List<Object[]> getRows() throws RowOutOfBoundsException {
+        return this.rowResolver.getRows();
+    }
+
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(List<String> keys) throws DataSetException {
         Map<CompareKeys, Map.Entry<Integer, Object[]>> result = Maps.newHashMap();
         for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
@@ -130,6 +135,10 @@ public class ComparableTable implements ITable {
 
     public Object getValue(int i, int j) throws RowOutOfBoundsException {
         return this.rowResolver.getValue(i, j);
+    }
+
+    public void addTableRows(ComparableTable table) throws DataSetException {
+        this.rowResolver.add(table);
     }
 
     protected void replaceValue(int row, int column, Object newValue) throws RowOutOfBoundsException {

@@ -1,0 +1,33 @@
+{
+  "settings": [
+    {
+      "name": "multi1",
+      "tableName": "merge",
+      "numberExpression": [
+        {
+          "key": "key * 10"
+        }
+      ],
+      "exclude": [
+        "column1",
+        "column2",
+        "column3"
+      ],
+      "stringExpression": [
+        {
+          "columna": "'column1:' + column1",
+          "columnb": "'column2:' + column2",
+          "columnc": "'column3:' + column3"
+        }
+      ]
+    },
+    {
+      "pattern": "multi2",
+      "tableName": "merge"
+    },
+    {
+      "name": "merge",
+      "order": ["key"]
+    }
+  ]
+}

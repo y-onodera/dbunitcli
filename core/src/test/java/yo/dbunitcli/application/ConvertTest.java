@@ -1,5 +1,6 @@
 package yo.dbunitcli.application;
 
+import org.dbunit.dataset.ITable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -164,5 +165,30 @@ public class ConvertTest {
         Assert.assertEquals("ユーザマスタ", actual.getTableNames()[1]);
         Assert.assertEquals("ユーザマスタ概要", actual.getTableNames()[2]);
         Assert.assertEquals("業務ドメイン", actual.getTableNames()[3]);
+    }
+
+    @Test
+    public void testTableNameMap() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMap.txt"});
+        File src = new File(this.baseDir + "/tablenamemap/result/paramFromMultiCsvTableNameMap.xlsx");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .build()));
+        Assert.assertEquals(1, actual.getTableNames().length);
+        ITable merged = actual.getTables()[0];
+        Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
+        Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
+        Assert.assertEquals(6, merged.getRowCount());
+        Assert.assertEquals("1", merged.getValue(0, "key"));
+        Assert.assertEquals("2", merged.getValue(0, "columna"));
+        Assert.assertEquals("2", merged.getValue(1, "key"));
+        Assert.assertEquals("test", merged.getValue(1, "columnb"));
+        Assert.assertEquals("3", merged.getValue(2, "key"));
+        Assert.assertEquals("10", merged.getValue(3, "key"));
+        Assert.assertEquals("column3:4", merged.getValue(3, "columnc"));
+        Assert.assertEquals("20", merged.getValue(4, "key"));
+        Assert.assertEquals("30", merged.getValue(5, "key"));
     }
 }

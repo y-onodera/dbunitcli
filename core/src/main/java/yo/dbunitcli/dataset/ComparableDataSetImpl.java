@@ -1,10 +1,7 @@
 package yo.dbunitcli.dataset;
 
 import com.google.common.collect.Lists;
-import org.dbunit.dataset.CachedDataSet;
-import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTable;
-import org.dbunit.dataset.OrderedTableNameMap;
+import org.dbunit.dataset.*;
 
 import java.util.List;
 import java.util.Map;
@@ -24,8 +21,21 @@ public class ComparableDataSetImpl extends CachedDataSet implements ComparableDa
         this.compareSettings = this.param.getColumnSettings();
         OrderedTableNameMap applySetting = this.createTableNameMap();
         for (String tableName : this._orderedTableNameMap.getTableNames()) {
-            ComparableTable table = this.compareSettings.apply((DefaultTable) this._orderedTableNameMap.get(tableName));
-            applySetting.add(table.getTableMetaData().getTableName(), table);
+            ComparableTable table = this.compareSettings.apply((ITable) this._orderedTableNameMap.get(tableName));
+            String beforeTableName = tableName;
+            String afterTableName = table.getTableMetaData().getTableName();
+            while (!beforeTableName.equals(afterTableName)) {
+                beforeTableName = afterTableName;
+                table = this.compareSettings.apply(table);
+                afterTableName = table.getTableMetaData().getTableName();
+            }
+            String resultTableName = table.getTableMetaData().getTableName();
+            if (applySetting.containsTable(resultTableName)) {
+                ComparableTable existingTable = (ComparableTable) applySetting.get(resultTableName);
+                existingTable.addTableRows(table);
+            } else {
+                applySetting.add(resultTableName, table);
+            }
         }
         this._orderedTableNameMap = applySetting;
     }

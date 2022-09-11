@@ -1,5 +1,6 @@
 package yo.dbunitcli.dataset;
 
+import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 
 import javax.json.*;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
@@ -21,6 +23,8 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     private final AddSettingColumns.Builder expressionColumns = AddSettingColumns.builder();
 
     private final RowFilter.Builder filterExpressions = RowFilter.builder();
+
+    private Function<String, String> tableNameMapFunction = Function.identity();
 
     @Override
     public ColumnSettings build(File setting) throws IOException {
@@ -41,7 +45,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
     @Override
     public Function<String, String> getTableNameMap() {
-        return it -> it;
+        return this.tableNameMapFunction;
     }
 
     @Override
@@ -92,6 +96,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         this.addSortColumns(strategy, json, key);
         this.addExpression(this.expressionColumns.getExpressionBuilder(strategy, key), json);
         this.addFilterExpression(strategy, json, key);
+        this.tableNameMapFunction = this.tableNameMapFunction.compose(this.toTableNameMapFunction(strategy, json));
     }
 
     protected FromJsonColumnSettingsBuilder configureCommonSetting(JsonObject setting) {
@@ -108,6 +113,19 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
                     this.addFilterExpression(json);
                 });
         return this;
+    }
+
+    protected Function<String, String> toTableNameMapFunction(AddSettingColumns.Strategy strategy, JsonObject json) {
+        if (!json.containsKey("tableName")) {
+            return Function.identity();
+        }
+        String result = json.getString("tableName");
+        if (strategy == AddSettingColumns.Strategy.BY_NAME) {
+            return it -> it.equals(json.getString("name")) ? result : it;
+        } else if (strategy == AddSettingColumns.Strategy.PATTERN) {
+            return it -> AddSettingColumns.ALL_MATCH_PATTERN.equals(json.getString("pattern")) || it.contains(json.getString("pattern")) ? result : it;
+        }
+        return Function.identity();
     }
 
     protected FromJsonColumnSettingsBuilder importSetting(JsonObject setting, File file) throws IOException {
