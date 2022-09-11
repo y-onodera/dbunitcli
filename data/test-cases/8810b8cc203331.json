@@ -1,0 +1,55 @@
+{
+  "uid" : "8810b8cc203331",
+  "name" : "testCompareXlsxAndXls",
+  "fullName" : "yo.dbunitcli.application.CompareTest.testCompareXlsxAndXls",
+  "historyId" : "a6259e615eb9aa9a54d9199fd7a24584",
+  "time" : {
+    "start" : 1662939933395,
+    "stop" : 1662939933440,
+    "duration" : 45
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.CompareTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testCompareXlsxAndXls"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.CompareTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az204-24"
+  }, {
+    "name" : "thread",
+    "value" : "2078@fv-az204-24.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "8810b8cc203331.json",
+  "parameterValues" : [ ]
+}

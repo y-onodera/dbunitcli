@@ -34,19 +34,19 @@
       "total" : 10
     }
   }, {
-    "uid" : "62773590e16625ae163e2e8362501b51",
-    "name" : "yo.dbunitcli.dataset.ComparableTableTest",
+    "uid" : "8e84c10bd9ee42c087cd6cfb1c7f6fa9",
+    "name" : "yo.dbunitcli.application.ConvertTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 8,
+      "passed" : 9,
       "unknown" : 0,
-      "total" : 8
+      "total" : 9
     }
   }, {
-    "uid" : "8e84c10bd9ee42c087cd6cfb1c7f6fa9",
-    "name" : "yo.dbunitcli.application.ConvertTest",
+    "uid" : "62773590e16625ae163e2e8362501b51",
+    "name" : "yo.dbunitcli.dataset.ComparableTableTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
