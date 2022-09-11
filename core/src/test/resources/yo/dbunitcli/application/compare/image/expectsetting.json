@@ -13,7 +13,7 @@
     },
     {
       "pattern": "TARGET",
-      "exclude": ["PATH","DIR"]
+      "exclude": ["PATH","DIR","LAST_MODIFIED"]
     }
   ]
 }
