@@ -7,9 +7,11 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.RowOutOfBoundsException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class RowResolver {
 
@@ -146,14 +148,14 @@ public class RowResolver {
         return this._indexes[row];
     }
 
-    protected List<Integer> filteredRows() throws RowOutOfBoundsException {
+    protected List<Integer> filteredRows() {
         if (this.rowFilter == null) {
             return null;
         }
         int fullSize = this.values.size();
         List<Integer> filteredRowIndexes = new ArrayList<>();
         for (int row = 0; row < fullSize; ++row) {
-            if (this.rowFilter.test(this.getRowToMap(row))) {
+            if (this.rowFilter.test(this.rowToMap(this.values.get(row)))) {
                 filteredRowIndexes.add(row);
             }
         }
