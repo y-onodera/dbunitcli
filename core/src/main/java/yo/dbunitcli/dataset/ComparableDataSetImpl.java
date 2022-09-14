@@ -2,11 +2,17 @@ package yo.dbunitcli.dataset;
 
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
-public class ComparableDataSetImpl extends CachedDataSet implements ComparableDataSet {
+public class ComparableDataSetImpl extends AbstractDataSet implements ComparableDataSet {
+
+    private static final Logger logger = LoggerFactory.getLogger(ComparableDataSetImpl.class);
+
+    private DefaultTable _activeTable;
 
     private final ColumnSettings compareSettings;
 
@@ -15,29 +21,50 @@ public class ComparableDataSetImpl extends CachedDataSet implements ComparableDa
     private final ComparableDataSetProducer producer;
 
     public ComparableDataSetImpl(ComparableDataSetProducer producer) throws DataSetException {
-        super(producer);
+        super(false);
         this.producer = producer;
         this.param = this.producer.getParam();
         this.compareSettings = this.param.getColumnSettings();
-        OrderedTableNameMap applySetting = this.createTableNameMap();
-        for (String tableName : this._orderedTableNameMap.getTableNames()) {
-            ComparableTable table = this.compareSettings.apply((ITable) this._orderedTableNameMap.get(tableName));
-            String beforeTableName = tableName;
-            String afterTableName = table.getTableMetaData().getTableName();
-            while (!beforeTableName.equals(afterTableName)) {
-                beforeTableName = afterTableName;
-                table = this.compareSettings.apply(table);
-                afterTableName = table.getTableMetaData().getTableName();
-            }
-            String resultTableName = table.getTableMetaData().getTableName();
-            if (applySetting.containsTable(resultTableName)) {
-                ComparableTable existingTable = (ComparableTable) applySetting.get(resultTableName);
-                existingTable.addTableRows(table);
-            } else {
-                applySetting.add(resultTableName, table);
-            }
+        this.producer.setConsumer(this);
+        this.producer.produce();
+    }
+
+    @Override
+    public void startDataSet() throws DataSetException {
+        logger.debug("startDataSet() - start");
+        this._orderedTableNameMap = super.createTableNameMap();
+    }
+
+    @Override
+    public void endDataSet() throws DataSetException {
+        logger.debug("endDataSet() - start");
+        logger.debug("endDataSet() - the final tableMap is: " + this._orderedTableNameMap);
+    }
+
+    @Override
+    public void startTable(ITableMetaData metaData) throws DataSetException {
+        logger.debug("startTable(metaData={}) - start", metaData);
+        this._activeTable = new DefaultTable(metaData);
+    }
+
+    @Override
+    public void endTable() throws DataSetException {
+        logger.debug("endTable() - start");
+        ComparableTable table = this.compareSettings.apply(this._activeTable);
+        String resultTableName = table.getTableMetaData().getTableName();
+        if (this._orderedTableNameMap.containsTable(resultTableName)) {
+            ComparableTable existingTable = (ComparableTable) this._orderedTableNameMap.get(resultTableName);
+            existingTable.addTableRows(table);
+        } else {
+            this._orderedTableNameMap.add(resultTableName, table);
         }
-        this._orderedTableNameMap = applySetting;
+        this._activeTable = null;
+    }
+
+    @Override
+    public void row(Object[] values) throws DataSetException {
+        logger.debug("row(values={}) - start", values);
+        this._activeTable.addRow(values);
     }
 
     @Override
@@ -83,5 +110,15 @@ public class ComparableDataSetImpl extends CachedDataSet implements ComparableDa
     @Override
     public ComparableDataSetProducer getProducer() {
         return this.producer;
+    }
+
+    @Override
+    protected ITableIterator createIterator(boolean reversed) throws DataSetException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("createIterator(reversed={}) - start", String.valueOf(reversed));
+        }
+
+        ITable[] tables = (ITable[])(this._orderedTableNameMap.orderedValues().toArray(new ITable[0]));
+        return new DefaultTableIterator(tables, reversed);
     }
 }

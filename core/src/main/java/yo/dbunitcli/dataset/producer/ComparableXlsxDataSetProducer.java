@@ -58,6 +58,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
 
     @Override
     public void produce() throws DataSetException {
+        this.consumer.startDataSet();
         for (File sourceFile : this.src) {
             logger.info("produceFromFile(theDataFile={}) - start", sourceFile);
 
@@ -80,6 +81,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
                 throw new DataSetException(e);
             }
         }
+        this.consumer.endDataSet();
     }
 
     public void processSheet(
