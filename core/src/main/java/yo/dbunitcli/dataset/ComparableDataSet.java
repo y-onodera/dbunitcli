@@ -17,13 +17,5 @@ public interface ComparableDataSet extends IDataSet, IDataSetConsumer {
 
     boolean contains(String tableName);
 
-    ComparableDataSetParam getParam();
-
-    ComparableDataSetProducer getProducer();
-
-    ColumnSettings getCompareSettings();
-
-    default String getSrc() {
-        return this.getProducer().getSrc();
-    }
+    String getSrc();
 }

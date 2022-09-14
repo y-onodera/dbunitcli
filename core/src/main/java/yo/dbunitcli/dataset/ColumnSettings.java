@@ -1,15 +1,14 @@
 package yo.dbunitcli.dataset;
 
+import com.google.common.collect.Lists;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
-import org.dbunit.dataset.datatype.TypeCastException;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -126,23 +125,21 @@ public class ColumnSettings {
 
     public ComparableTable apply(ITable table) throws DataSetException {
         try {
-            ITableMetaData originMetaData = table.getTableMetaData();
-            AddSettingTableMetaData tableMetaData = this.getAddSettingTableMetaData(originMetaData);
-            ComparableTable result = new ComparableTable(tableMetaData
-                    , this.getOriginRows(table)
-                    , this.getComparator(table)
-                    , this.getRowFilter(originMetaData.getTableName()));
-            String beforeTableName = originMetaData.getTableName();
-            String afterTableName = tableMetaData.getTableName();
-            while (!beforeTableName.equals(afterTableName)) {
-                beforeTableName = afterTableName;
-                result = this.apply(result);
-                afterTableName = result.getTableMetaData().getTableName();
+            ComparableTable result = this.toComparableTable(table);
+            if (!table.getTableMetaData().getTableName().equals(result.getTableMetaData().getTableName())) {
+                return this.apply(result);
             }
             return result;
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new DataSetException(e);
         }
+    }
+
+    protected ComparableTable toComparableTable(ITable table) throws DataSetException, NoSuchFieldException, IllegalAccessException {
+        return new ComparableTable(this.getAddSettingTableMetaData(table.getTableMetaData())
+                , this.getOriginRows(table)
+                , this.getComparator(table.getTableMetaData().getTableName())
+                , this.getRowFilter(table.getTableMetaData().getTableName()));
     }
 
     protected AddSettingTableMetaData getAddSettingTableMetaData(ITableMetaData originMetaData) throws DataSetException {
@@ -166,8 +163,8 @@ public class ColumnSettings {
         return (List<Object[]>) f.get(delegate);
     }
 
-    protected Column[] getComparator(ITable delegate) {
-        return this.getOrderColumns(delegate.getTableMetaData().getTableName());
+    protected Column[] getComparator(String tableName) {
+        return this.getOrderColumns(tableName);
     }
 
     protected Predicate<Map<String, Object>> getRowFilter(String tableName) {

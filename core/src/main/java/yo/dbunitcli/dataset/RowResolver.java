@@ -71,13 +71,11 @@ public class RowResolver {
     }
 
     public void add(Object[] row) {
-        if (this.filteredRowIndexes == null || this.rowFilter.test(this.rowToMap(row))) {
-            this.values.add(row);
-            if (this.filteredRowIndexes != null) {
-                this.filteredRowIndexes.add(this.values.size() - 1);
-            }
-            this._indexes = null;
+        this.values.add(row);
+        if (this.filteredRowIndexes != null && this.rowFilter.test(this.rowToMap(row))) {
+            this.filteredRowIndexes.add(this.values.size() - 1);
         }
+        this._indexes = null;
     }
 
     public void replaceValue(int row, int column, Object newValue) throws RowOutOfBoundsException {

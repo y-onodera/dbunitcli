@@ -69,7 +69,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     @Override
     public List<Map<String, Object>> toMap() throws DataSetException {
-        return this.toMap(this.getParam().isMapIncludeMetaData());
+        return this.toMap(this.param.isMapIncludeMetaData());
     }
 
     @Override
@@ -89,27 +89,12 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     @Override
     public boolean contains(String tableName) {
-        try {
-            this.getTable(tableName);
-            return true;
-        } catch (DataSetException e) {
-            return false;
-        }
+        return this._orderedTableNameMap.containsTable(tableName);
     }
 
     @Override
-    public ColumnSettings getCompareSettings() {
-        return this.compareSettings;
-    }
-
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    @Override
-    public ComparableDataSetProducer getProducer() {
-        return this.producer;
+    public String getSrc() {
+        return this.producer.getSrc();
     }
 
     @Override
@@ -118,7 +103,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
             logger.debug("createIterator(reversed={}) - start", String.valueOf(reversed));
         }
 
-        ITable[] tables = (ITable[])(this._orderedTableNameMap.orderedValues().toArray(new ITable[0]));
+        ITable[] tables = (ITable[]) (this._orderedTableNameMap.orderedValues().toArray(new ITable[0]));
         return new DefaultTableIterator(tables, reversed);
     }
 }
