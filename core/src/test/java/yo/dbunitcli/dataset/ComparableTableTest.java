@@ -1,10 +1,7 @@
 package yo.dbunitcli.dataset;
 
 import com.google.common.collect.Lists;
-import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTable;
-import org.dbunit.dataset.RowOutOfBoundsException;
+import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,7 +21,7 @@ public class ComparableTableTest {
 
     private ComparableTable target;
 
-    private DefaultTable table = new DefaultTable("TABLE1", new Column[]{
+    private DefaultTableMetaData table = new DefaultTableMetaData("TABLE1", new Column[]{
             new Column("COLUMN1", DataType.UNKNOWN)
             , new Column("COLUMN2", DataType.UNKNOWN)
             , new Column("COLUMN3", DataType.UNKNOWN)
@@ -33,10 +30,11 @@ public class ComparableTableTest {
 
     @Before
     public void setUp() throws DataSetException {
-        this.target = ColumnSettings.NONE.apply(this.table);
-        this.table.addRow(new Object[]{"1", "a", "あ", 1});
-        this.table.addRow(new Object[]{"1", "b", "あ", 1});
-        this.table.addRow(new Object[]{"2", "a", "い", 2});
+        ComparableTableMapper builder = ColumnSettings.NONE.createMapper(this.table);
+        builder.addRow(new Object[]{"1", "a", "あ", 1});
+        builder.addRow(new Object[]{"1", "b", "あ", 1});
+        builder.addRow(new Object[]{"2", "a", "い", 2});
+        this.target = builder.result();
     }
 
     @Test

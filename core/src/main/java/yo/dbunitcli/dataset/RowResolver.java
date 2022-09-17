@@ -1,7 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.dbunit.DatabaseUnitRuntimeException;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
@@ -11,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 public class RowResolver {
 
@@ -21,22 +18,19 @@ public class RowResolver {
 
     private Integer[] _indexes;
 
-    private final Predicate<Map<String, Object>> rowFilter;
-
     private final Column[] orderColumns;
 
     private final List<Integer> filteredRowIndexes;
 
-    public RowResolver(List<Object[]> values, Column[] orderColumns, Predicate<Map<String, Object>> rowFilter, AddSettingTableMetaData addSettingTableMetaData) throws RowOutOfBoundsException {
+    public RowResolver(Column[] orderColumns, AddSettingTableMetaData addSettingTableMetaData) {
         this.addSettingTableMetaData = addSettingTableMetaData;
-        this.values = values;
-        this.rowFilter = rowFilter;
+        this.values = new ArrayList<>();
         this.orderColumns = orderColumns;
-        this.filteredRowIndexes = this.filteredRows();
+        this.filteredRowIndexes = new ArrayList<>();
     }
 
     public List<Object[]> getRows() throws RowOutOfBoundsException {
-        List<Object[]> result = Lists.newArrayList();
+        List<Object[]> result = new ArrayList<>();
         for (int i = 0, j = this.getRowCount(); i < j; i++) {
             result.add(getRow(i));
         }
@@ -55,7 +49,7 @@ public class RowResolver {
     }
 
     public int getRowCount() {
-        if (this.filteredRowIndexes != null) {
+        if (this.addSettingTableMetaData.hasRowFilter()) {
             return this.filteredRowIndexes.size();
         }
         return this.values.size();
@@ -74,7 +68,7 @@ public class RowResolver {
 
     public void add(Object[] row) {
         this.values.add(row);
-        if (this.filteredRowIndexes != null && this.rowFilter.test(this.rowToMap(row))) {
+        if (this.addSettingTableMetaData.hasRowFilter() && this.addSettingTableMetaData.applySetting(row) != null) {
             this.filteredRowIndexes.add(this.values.size() - 1);
         }
         this._indexes = null;
@@ -95,7 +89,7 @@ public class RowResolver {
 
     public int getRowIndex(int noFilter) {
         int row = noFilter;
-        if (this.filteredRowIndexes != null) {
+        if (this.addSettingTableMetaData.hasRowFilter()) {
             row = this.filteredRowIndexes.get(noFilter);
         }
         if (!this.isSorted()) {
@@ -106,13 +100,13 @@ public class RowResolver {
             for (int i = 0; i < indexes.length; ++i) {
                 indexes[i] = i;
             }
-            List<Object[]> rows = Lists.newArrayList();
-            for (int i = 0, j = values.size(); i < j; i++) {
-                if (filteredRowIndexes == null || filteredRowIndexes.contains(i)) {
-                    rows.add(addSettingTableMetaData.applySetting(values.get(i)));
+            List<Object[]> rows = new ArrayList<>();
+            for (int i = 0, j = this.values.size(); i < j; i++) {
+                if (!this.addSettingTableMetaData.hasRowFilter() || this.filteredRowIndexes.contains(i)) {
+                    rows.add(this.addSettingTableMetaData.applySetting(this.values.get(i)));
                 }
             }
-            Integer[] columnIndex = Arrays.stream(orderColumns).map(it -> {
+            Integer[] columnIndex = Arrays.stream(this.orderColumns).map(it -> {
                         try {
                             return addSettingTableMetaData.getColumnIndex(it.getColumnName());
                         } catch (DataSetException e) {
@@ -148,27 +142,8 @@ public class RowResolver {
         return this._indexes[row];
     }
 
-    protected List<Integer> filteredRows() {
-        if (this.rowFilter == null) {
-            return null;
-        }
-        int fullSize = this.values.size();
-        List<Integer> filteredRowIndexes = new ArrayList<>();
-        for (int row = 0; row < fullSize; ++row) {
-            if (this.rowFilter.test(this.rowToMap(this.values.get(row)))) {
-                filteredRowIndexes.add(row);
-            }
-        }
-        return filteredRowIndexes;
-    }
-
     protected Map<String, Object> rowToMap(Object[] row) {
-        Map<String, Object> map = Maps.newHashMap();
-        Column[] columns = this.addSettingTableMetaData.getColumns();
-        for (int i = 0, j = row.length; i < j; i++) {
-            map.put(columns[i].getColumnName(), row[i]);
-        }
-        return map;
+        return this.addSettingTableMetaData.rowToMap(row);
     }
 
     protected boolean isSorted() {

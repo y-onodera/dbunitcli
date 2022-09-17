@@ -16,17 +16,18 @@ import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ColumnExpression {
 
-    private Map<String, String> stringExpression = Maps.newLinkedHashMap();
+    private final Map<String, String> stringExpression = Maps.newLinkedHashMap();
 
-    private Map<String, String> booleanExpression = Maps.newLinkedHashMap();
+    private final Map<String, String> booleanExpression = Maps.newLinkedHashMap();
 
-    private Map<String, String> numberExpression = Maps.newLinkedHashMap();
+    private final Map<String, String> numberExpression = Maps.newLinkedHashMap();
 
-    private Map<String, String> sqlFunction = Maps.newLinkedHashMap();
+    private final Map<String, String> sqlFunction = Maps.newLinkedHashMap();
 
     public ColumnExpression(Builder builder) {
         this.stringExpression.putAll(builder.stringExpression);
@@ -44,15 +45,15 @@ public class ColumnExpression {
     }
 
     public AddSettingTableMetaData apply(ITableMetaData delegateMetaData) throws DataSetException {
-        return this.apply(delegateMetaData.getTableName(), delegateMetaData, null, delegateMetaData.getPrimaryKeys());
+        return this.apply(delegateMetaData.getTableName(), delegateMetaData, null, delegateMetaData.getPrimaryKeys(), null);
     }
 
-    public AddSettingTableMetaData apply(String tableName, ITableMetaData originMetaData, IColumnFilter iColumnFilter, Column[] comparisonKeys) throws DataSetException {
+    public AddSettingTableMetaData apply(String tableName, ITableMetaData originMetaData, IColumnFilter iColumnFilter, Column[] comparisonKeys, Predicate<Map<String, Object>> rowFilter) throws DataSetException {
         Column[] primaryKey = originMetaData.getPrimaryKeys();
         if (comparisonKeys.length > 0) {
             primaryKey = comparisonKeys;
         }
-        return new AddSettingTableMetaData(tableName, originMetaData, primaryKey, iColumnFilter, this);
+        return new AddSettingTableMetaData(tableName, originMetaData, primaryKey, iColumnFilter, rowFilter, this);
     }
 
     public Collection<? extends Column> getColumns() {
@@ -134,13 +135,13 @@ public class ColumnExpression {
     }
 
     public static class Builder {
-        private Map<String, String> stringExpression = Maps.newLinkedHashMap();
+        private final Map<String, String> stringExpression = Maps.newLinkedHashMap();
 
-        private Map<String, String> booleanExpression = Maps.newLinkedHashMap();
+        private final Map<String, String> booleanExpression = Maps.newLinkedHashMap();
 
-        private Map<String, String> numberExpression = Maps.newLinkedHashMap();
+        private final Map<String, String> numberExpression = Maps.newLinkedHashMap();
 
-        private Map<String, String> sqlFunction = Maps.newLinkedHashMap();
+        private final Map<String, String> sqlFunction = Maps.newLinkedHashMap();
 
         public Builder add(ColumnExpression columnExpression) {
             return this.addStringExpression(columnExpression.stringExpression)

@@ -12,7 +12,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableDataSetImpl.class);
 
-    private DefaultTable _activeTable;
+    private ComparableTableMapper mapper;
 
     private final ColumnSettings compareSettings;
 
@@ -44,27 +44,27 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     @Override
     public void startTable(ITableMetaData metaData) throws DataSetException {
         logger.debug("startTable(metaData={}) - start", metaData);
-        this._activeTable = new DefaultTable(metaData);
+        this.mapper = this.compareSettings.createMapper(metaData);
     }
 
     @Override
     public void endTable() throws DataSetException {
         logger.debug("endTable() - start");
-        ComparableTable table = this.compareSettings.apply(this._activeTable);
-        String resultTableName = table.getTableMetaData().getTableName();
+        ComparableTable result = this.mapper.result();
+        String resultTableName = result.getTableMetaData().getTableName();
         if (this._orderedTableNameMap.containsTable(resultTableName)) {
             ComparableTable existingTable = (ComparableTable) this._orderedTableNameMap.get(resultTableName);
-            existingTable.addTableRows(table);
+            existingTable.addTableRows(result);
         } else {
-            this._orderedTableNameMap.add(resultTableName, table);
+            this._orderedTableNameMap.add(resultTableName, result);
         }
-        this._activeTable = null;
+        this.mapper = null;
     }
 
     @Override
     public void row(Object[] values) throws DataSetException {
         logger.debug("row(values={}) - start", values);
-        this._activeTable.addRow(values);
+        this.mapper.addRow(values);
     }
 
     @Override
@@ -98,12 +98,10 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     }
 
     @Override
-    protected ITableIterator createIterator(boolean reversed) throws DataSetException {
+    protected ITableIterator createIterator(boolean reversed) {
         if (logger.isDebugEnabled()) {
-            logger.debug("createIterator(reversed={}) - start", String.valueOf(reversed));
+            logger.debug("createIterator(reversed={}) - start", reversed);
         }
-
-        ITable[] tables = (ITable[]) (this._orderedTableNameMap.orderedValues().toArray(new ITable[0]));
-        return new DefaultTableIterator(tables, reversed);
+        return new DefaultTableIterator((ITable[]) (this._orderedTableNameMap.orderedValues().toArray(new ITable[0])), reversed);
     }
 }

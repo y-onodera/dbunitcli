@@ -293,7 +293,7 @@ public class ComparableDataSetParam {
             return this;
         }
 
-        public Builder editColumnSettings(Consumer<ColumnSettings.Editor> function) {
+        public Builder editColumnSettings(Consumer<ColumnSettingEditor> function) {
             return this.setColumnSettings(this.getColumnSettings().apply(function));
         }
 

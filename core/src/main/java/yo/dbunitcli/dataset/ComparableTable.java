@@ -1,11 +1,8 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.dbunit.dataset.*;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 
 public class ComparableTable implements ITable {
@@ -19,20 +16,14 @@ public class ComparableTable implements ITable {
     private final RowResolver rowResolver;
 
     protected ComparableTable(ITableMetaData metaData) throws DataSetException {
-        this(ColumnExpression.builder().build().apply(metaData)
-                , Lists.newArrayList()
-                , new Column[]{}
-                , null);
+        this(ColumnExpression.builder().build().apply(metaData), new Column[]{});
     }
 
-    protected ComparableTable(AddSettingTableMetaData tableMetaData
-            , List<Object[]> values
-            , Column[] orderColumns
-            , Predicate<Map<String, Object>> rowFilter) throws RowOutOfBoundsException {
+    protected ComparableTable(AddSettingTableMetaData tableMetaData, Column[] orderColumns) throws RowOutOfBoundsException {
         this.addSettingTableMetaData = tableMetaData;
         this.primaryKeys = this.addSettingTableMetaData.getPrimaryKeys();
         this.columns = this.addSettingTableMetaData.getColumns();
-        this.rowResolver = new RowResolver(values, orderColumns, rowFilter, this.addSettingTableMetaData);
+        this.rowResolver = new RowResolver(orderColumns, this.addSettingTableMetaData);
     }
 
     public List<Map<String, Object>> toMap() throws RowOutOfBoundsException {
@@ -40,16 +31,16 @@ public class ComparableTable implements ITable {
     }
 
     public List<Map<String, Object>> toMap(boolean includeMetaData) throws RowOutOfBoundsException {
-        List<Map<String, Object>> result = Lists.newArrayList();
+        List<Map<String, Object>> result = new ArrayList<>();
         String tableName = this.getTableMetaData().getTableName();
-        Map<String, Object> withMetaDataMap = Maps.newHashMap();
+        Map<String, Object> withMetaDataMap = new HashMap<>();
         if (includeMetaData) {
             withMetaDataMap.put("tableName", tableName);
             withMetaDataMap.put("columns", this.columns);
             withMetaDataMap.put("primaryKeys", this.primaryKeys);
             result.add(withMetaDataMap);
         }
-        List<Map<String, Object>> rowMap = Lists.newArrayList();
+        List<Map<String, Object>> rowMap = new ArrayList<>();
         for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
             Map<String, Object> map = this.rowResolver.getRowToMap(rowNum);
             if (includeMetaData) {
@@ -86,7 +77,7 @@ public class ComparableTable implements ITable {
     }
 
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(List<String> keys) throws DataSetException {
-        Map<CompareKeys, Map.Entry<Integer, Object[]>> result = Maps.newHashMap();
+        Map<CompareKeys, Map.Entry<Integer, Object[]>> result = new HashMap<>();
         for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
             result.put(this.getKey(rowNum, keys), new AbstractMap.SimpleEntry<>(this.getOriginalRowIndex(rowNum), this.getRow(rowNum)));
         }
@@ -115,7 +106,7 @@ public class ComparableTable implements ITable {
     }
 
     public Object[] getRow(int rowNum, int columnLength) throws RowOutOfBoundsException {
-        Object[] row = getRow(rowNum);
+        Object[] row = this.getRow(rowNum);
         if (row.length < columnLength) {
             throw new AssertionError(columnLength + " is larger than columnLength:" + row.length);
         }

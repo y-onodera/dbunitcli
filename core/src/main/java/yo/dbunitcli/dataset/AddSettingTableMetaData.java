@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final String tableName;
@@ -18,8 +19,9 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final Column[] allColumns;
     private final ColumnExpression additionalExpression;
     private final List<Integer> filterColumnIndex = Lists.newArrayList();
+    private final Predicate<Map<String, Object>> rowFilter;
 
-    public AddSettingTableMetaData(String tableName, ITableMetaData delegate, Column[] primaryKeys, IColumnFilter iColumnFilter, ColumnExpression additionalExpression) throws DataSetException {
+    public AddSettingTableMetaData(String tableName, ITableMetaData delegate, Column[] primaryKeys, IColumnFilter iColumnFilter, Predicate<Map<String, Object>> rowFilter, ColumnExpression additionalExpression) throws DataSetException {
         this.tableName = tableName;
         this.primaryKeys = primaryKeys;
         this.allColumns = additionalExpression.merge(delegate.getColumns());
@@ -36,6 +38,7 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
                 this.filterColumnIndex.add(delegate.getColumnIndex(column.getColumnName()));
             }
         }
+        this.rowFilter = rowFilter;
     }
 
     @Override
@@ -54,7 +57,19 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     }
 
     public Object[] applySetting(Object[] objects) {
-        return this.filterColumn(this.applyExpression(objects));
+        Object[] result = this.filterColumn(this.applyExpression(objects));
+        if (this.hasRowFilter() && !this.rowFilter.test(this.rowToMap(result))) {
+            return null;
+        }
+        return result;
+    }
+
+    protected Map<String, Object> rowToMap(Object[] row) {
+        Map<String, Object> map = Maps.newHashMap();
+        for (int i = 0, j = row.length; i < j; i++) {
+            map.put(this.columns[i].getColumnName(), row[i]);
+        }
+        return map;
     }
 
     protected Object[] applyExpression(Object[] objects) {
@@ -89,5 +104,9 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
             }
         }
         return result;
+    }
+
+    public boolean hasRowFilter() {
+        return this.rowFilter != null;
     }
 }
