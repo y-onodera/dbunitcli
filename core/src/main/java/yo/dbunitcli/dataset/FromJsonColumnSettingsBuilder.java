@@ -1,16 +1,13 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.Lists;
-
 import javax.json.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
@@ -151,7 +148,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     protected void addCommonSettings(JsonObject json, String key, AddSettingColumns.Builder targetSetting) {
         if (json.containsKey(key)) {
             JsonArray array = json.getJsonArray(key);
-            List<String> columns = Lists.newArrayList();
+            List<String> columns = new ArrayList<>();
             for (int i = 0, j = array.size(); i < j; i++) {
                 columns.add(array.getString(i));
             }
@@ -160,7 +157,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     }
 
     protected void addComparisonKeys(AddSettingColumns.Strategy strategy, JsonObject json, String file) {
-        this.comparisonKeys.add(strategy, file, Lists.newArrayList());
+        this.comparisonKeys.add(strategy, file, new ArrayList<>());
         this.addSettings(strategy, json, file, "keys", this.comparisonKeys);
     }
 
@@ -175,7 +172,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     protected void addSettings(AddSettingColumns.Strategy strategy, JsonObject json, String file, String key, AddSettingColumns.Builder comparisonKeys) {
         if (json.containsKey(key)) {
             JsonArray keyArray = json.getJsonArray(key);
-            List<String> keys = Lists.newArrayList();
+            List<String> keys = new ArrayList<>();
             for (int i = 0, j = keyArray.size(); i < j; i++) {
                 keys.add(keyArray.getString(i));
             }
