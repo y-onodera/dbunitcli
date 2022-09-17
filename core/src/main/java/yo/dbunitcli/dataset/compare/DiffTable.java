@@ -9,21 +9,22 @@ import java.util.List;
 
 public class DiffTable extends DefaultTable {
 
-    protected static final String C_ROW_AFTER_SORT = "$ROW_AFTER_SORT";
-    protected static final String C_DIFF_COLUMN_INDEXES = "$DIFF_COLUMN_INDEXES";
-    protected static final String C_ROW_ORIGINAL = "$ROW_ORIGINAL";
+    public static final String C_MODIFY = "$MODIFY";
+    public static final String C_ROW_AFTER_SORT = "$ROW_AFTER_SORT";
+    public static final String C_DIFF_COLUMN_INDEXES = "$DIFF_COLUMN_INDEXES";
+    public static final String C_ROW_ORIGINAL = "$ROW_ORIGINAL";
+    public static final Column[] COLUMNS = {new Column(C_MODIFY, DataType.UNKNOWN)
+            , new Column(C_ROW_AFTER_SORT, DataType.NUMERIC)
+            , new Column(C_ROW_ORIGINAL, DataType.NUMERIC)
+            , new Column(C_DIFF_COLUMN_INDEXES, DataType.UNKNOWN)};
 
     public static DiffTable from(ITableMetaData metaData, int columnLength) throws DataSetException {
         Column[] columns = toList(
                 metaData.getColumns()
-                , new Column("$MODIFY", DataType.UNKNOWN)
-                , new Column(C_ROW_AFTER_SORT, DataType.NUMERIC)
-                , new Column(C_ROW_ORIGINAL, DataType.NUMERIC)
-                , new Column(C_DIFF_COLUMN_INDEXES, DataType.UNKNOWN)
+                , COLUMNS
         ).toArray(new Column[columnLength + 4]);
         Column[] primaryKeys = Lists.newArrayList(columns[1], columns[0]).toArray(new Column[2]);
-        DefaultTableMetaData newMetaData = new DefaultTableMetaData(metaData.getTableName() + "$MODIFY", columns, primaryKeys);
-        return new DiffTable(newMetaData);
+        return new DiffTable(new DefaultTableMetaData(metaData.getTableName() + C_MODIFY, columns, primaryKeys));
     }
 
     private DiffTable(ITableMetaData metaData) {
@@ -64,7 +65,7 @@ public class DiffTable extends DefaultTable {
         return targetKey.equals(this.getKey(rowNum, Lists.newArrayList(C_ROW_AFTER_SORT)));
     }
 
-    public CompareKeys getKey(int rowNum, List<String> keys) throws DataSetException {
+    protected CompareKeys getKey(int rowNum, List<String> keys) throws DataSetException {
         return new CompareKeys(this, rowNum, keys).oldRowNum(Integer.parseInt(this.getValue(rowNum, C_ROW_ORIGINAL).toString()));
     }
 
