@@ -1,5 +1,6 @@
 package yo.dbunitcli.dataset;
 
+import org.dbunit.DatabaseUnitRuntimeException;
 import org.dbunit.dataset.*;
 
 import java.util.*;
@@ -9,21 +10,41 @@ public class ComparableTable implements ITable {
 
     private final AddSettingTableMetaData addSettingTableMetaData;
 
-    private final Column[] primaryKeys;
+    private final Column[] orderColumns;
 
-    private final Column[] columns;
+    private final List<Object[]> values = new ArrayList<>();
 
-    private final RowResolver rowResolver;
+    private final List<Integer> filteredRowIndexes = new ArrayList<>();
+
+    private Integer[] _indexes;
 
     protected ComparableTable(ITableMetaData metaData) throws DataSetException {
-        this(ColumnExpression.builder().build().apply(metaData), new Column[]{});
+        this(ColumnExpression.builder().build().apply(metaData), new Column[]{}, new ArrayList<>(), new ArrayList<>());
     }
 
-    protected ComparableTable(AddSettingTableMetaData tableMetaData, Column[] orderColumns) throws RowOutOfBoundsException {
-        this.addSettingTableMetaData = tableMetaData;
-        this.primaryKeys = this.addSettingTableMetaData.getPrimaryKeys();
-        this.columns = this.addSettingTableMetaData.getColumns();
-        this.rowResolver = new RowResolver(orderColumns, this.addSettingTableMetaData);
+    protected ComparableTable(AddSettingTableMetaData addSettingTableMetaData, Column[] orderColumns, List<Object[]> values, List<Integer> filteredRowIndexes) {
+        this.addSettingTableMetaData = addSettingTableMetaData;
+        this.orderColumns = orderColumns;
+        this.values.addAll(values);
+        this.filteredRowIndexes.addAll(filteredRowIndexes);
+    }
+
+    @Override
+    public ITableMetaData getTableMetaData() {
+        return this.addSettingTableMetaData;
+    }
+
+    @Override
+    public int getRowCount() {
+        if (this.addSettingTableMetaData.hasRowFilter()) {
+            return this.filteredRowIndexes.size();
+        }
+        return this.values.size();
+    }
+
+    @Override
+    public Object getValue(int i, String s) throws DataSetException {
+        return this.getValue(i, this.addSettingTableMetaData.getColumnIndex(s));
     }
 
     public List<Map<String, Object>> toMap() throws RowOutOfBoundsException {
@@ -36,13 +57,13 @@ public class ComparableTable implements ITable {
         Map<String, Object> withMetaDataMap = new HashMap<>();
         if (includeMetaData) {
             withMetaDataMap.put("tableName", tableName);
-            withMetaDataMap.put("columns", this.columns);
-            withMetaDataMap.put("primaryKeys", this.primaryKeys);
+            withMetaDataMap.put("columns", this.addSettingTableMetaData.getColumns());
+            withMetaDataMap.put("primaryKeys", this.addSettingTableMetaData.getPrimaryKeys());
             result.add(withMetaDataMap);
         }
         List<Map<String, Object>> rowMap = new ArrayList<>();
         for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
-            Map<String, Object> map = this.rowResolver.getRowToMap(rowNum);
+            Map<String, Object> map = this.getRowToMap(rowNum);
             if (includeMetaData) {
                 rowMap.add(map);
             } else {
@@ -53,11 +74,6 @@ public class ComparableTable implements ITable {
             withMetaDataMap.put("row", rowMap);
         }
         return result;
-    }
-
-    @Override
-    public ITableMetaData getTableMetaData() {
-        return this.addSettingTableMetaData;
     }
 
     public Column[] getColumnsExcludeKey() throws DataSetException {
@@ -72,10 +88,6 @@ public class ComparableTable implements ITable {
         return list.toArray(new Column[0]);
     }
 
-    public List<Object[]> getRows() throws RowOutOfBoundsException {
-        return this.rowResolver.getRows();
-    }
-
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(List<String> keys) throws DataSetException {
         Map<CompareKeys, Map.Entry<Integer, Object[]>> result = new HashMap<>();
         for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
@@ -85,11 +97,6 @@ public class ComparableTable implements ITable {
             throw new AssertionError("comparison keys not unique:" + keys.toString());
         }
         return result;
-    }
-
-    @Override
-    public int getRowCount() {
-        return this.rowResolver.getRowCount();
     }
 
     public Object[] get(CompareKeys targetKey, List<String> keys, int columnLength) throws DataSetException {
@@ -105,6 +112,17 @@ public class ComparableTable implements ITable {
         return new CompareKeys(this, rowNum, keys).oldRowNum(this.getOriginalRowIndex(rowNum));
     }
 
+    public Map<String, Object> getRowToMap(int rowNum) throws RowOutOfBoundsException {
+        return this.addSettingTableMetaData.rowToMap(this.getRow(rowNum));
+    }
+
+    public Object[] getRow(int rowNum) throws RowOutOfBoundsException {
+        if (rowNum < 0 || rowNum >= this.getRowCount()) {
+            throw new RowOutOfBoundsException("rowNum " + rowNum + " is out of range;current row size is " + this.getRowCount());
+        }
+        return this.addSettingTableMetaData.applySetting(this.values.get(this.getOriginalRowIndex(rowNum)));
+    }
+
     public Object[] getRow(int rowNum, int columnLength) throws RowOutOfBoundsException {
         Object[] row = this.getRow(rowNum);
         if (row.length < columnLength) {
@@ -115,33 +133,68 @@ public class ComparableTable implements ITable {
         return resultRow;
     }
 
-    public Object[] getRow(int rowNum) throws RowOutOfBoundsException {
-        return this.rowResolver.getRow(rowNum);
-    }
-
-    @Override
-    public Object getValue(int i, String s) throws DataSetException {
-        return this.rowResolver.getValue(i, s);
-    }
-
     public Object getValue(int i, int j) throws RowOutOfBoundsException {
-        return this.rowResolver.getValue(i, j);
-    }
-
-    public void addTableRows(ComparableTable table) throws DataSetException {
-        this.rowResolver.add(table);
-    }
-
-    protected void replaceValue(int row, int column, Object newValue) throws RowOutOfBoundsException {
-        this.rowResolver.replaceValue(row, column, newValue);
-    }
-
-    protected void addRow(Object[] row) {
-        this.rowResolver.add(row);
+        Object[] row = this.getRow(i);
+        return row[j] == null ? "" : row[j];
     }
 
     protected int getOriginalRowIndex(int noFilter) {
-        return this.rowResolver.getRowIndex(noFilter);
+        int row = noFilter;
+        if (this.addSettingTableMetaData.hasRowFilter()) {
+            row = this.filteredRowIndexes.get(noFilter);
+        }
+        if (!this.isSorted()) {
+            return row;
+        }
+        if (this._indexes == null) {
+            Integer[] indexes = new Integer[this.values.size()];
+            for (int i = 0; i < indexes.length; ++i) {
+                indexes[i] = i;
+            }
+            List<Object[]> rows = new ArrayList<>();
+            for (int i = 0, j = this.values.size(); i < j; i++) {
+                if (!this.addSettingTableMetaData.hasRowFilter() || this.filteredRowIndexes.contains(i)) {
+                    rows.add(this.addSettingTableMetaData.applySetting(this.values.get(i)));
+                }
+            }
+            Integer[] columnIndex = Arrays.stream(this.orderColumns).map(it -> {
+                        try {
+                            return addSettingTableMetaData.getColumnIndex(it.getColumnName());
+                        } catch (DataSetException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .toArray(Integer[]::new);
+            Arrays.sort(indexes, (Integer i1, Integer i2) -> {
+                try {
+                    for (int i = 0, j = columnIndex.length; i < j; i++) {
+                        Object value1 = rows.get(i1)[columnIndex[i]];
+                        Object value2 = rows.get(i2)[columnIndex[i]];
+                        if (value1 != null || value2 != null) {
+                            if (value1 == null) {
+                                return -1;
+                            }
+                            if (value2 == null) {
+                                return 1;
+                            }
+                            int result = addSettingTableMetaData.getColumns()[i].getDataType().compare(value1, value2);
+                            if (result != 0) {
+                                return result;
+                            }
+                        }
+                    }
+                    return 0;
+                } catch (DataSetException var10) {
+                    throw new DatabaseUnitRuntimeException(var10);
+                }
+            });
+            this._indexes = indexes;
+        }
+        return this._indexes[row];
+    }
+
+    protected boolean isSorted() {
+        return this.orderColumns.length > 0;
     }
 
 }

@@ -1,34 +1,32 @@
 package yo.dbunitcli.dataset.compare;
 
 import com.google.common.collect.Lists;
-import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTableMetaData;
-import org.dbunit.dataset.ITableMetaData;
+import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
-import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.CompareKeys;
 
 import java.util.List;
 
-public class DiffTable extends ComparableTable {
+public class DiffTable extends DefaultTable {
 
-    protected static final String COLUMN_ROW_AFTER_SORT = "$ROW_AFTER_SORT";
+    protected static final String C_ROW_AFTER_SORT = "$ROW_AFTER_SORT";
+    protected static final String C_DIFF_COLUMN_INDEXES = "$DIFF_COLUMN_INDEXES";
+    protected static final String C_ROW_ORIGINAL = "$ROW_ORIGINAL";
 
     public static DiffTable from(ITableMetaData metaData, int columnLength) throws DataSetException {
         Column[] columns = toList(
                 metaData.getColumns()
                 , new Column("$MODIFY", DataType.UNKNOWN)
-                , new Column(COLUMN_ROW_AFTER_SORT, DataType.NUMERIC)
-                , new Column("$ROW_ORIGINAL", DataType.NUMERIC)
-                , new Column("$DIFF_COLUMN_INDEXES", DataType.UNKNOWN)
+                , new Column(C_ROW_AFTER_SORT, DataType.NUMERIC)
+                , new Column(C_ROW_ORIGINAL, DataType.NUMERIC)
+                , new Column(C_DIFF_COLUMN_INDEXES, DataType.UNKNOWN)
         ).toArray(new Column[columnLength + 4]);
         Column[] primaryKeys = Lists.newArrayList(columns[1], columns[0]).toArray(new Column[2]);
         DefaultTableMetaData newMetaData = new DefaultTableMetaData(metaData.getTableName() + "$MODIFY", columns, primaryKeys);
         return new DiffTable(newMetaData);
     }
 
-    private DiffTable(ITableMetaData metaData) throws DataSetException {
+    private DiffTable(ITableMetaData metaData) {
         super(metaData);
     }
 
@@ -51,7 +49,7 @@ public class DiffTable extends ComparableTable {
         int replaceCount = 0;
         for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
             if (this.keyEquals(targetKey, keys, rowNum)) {
-                this.replaceValue(rowNum, 3, getValue(rowNum, 3) + "," + getIndexColumn(columnIndex));
+                this.setValue(rowNum, C_DIFF_COLUMN_INDEXES, getValue(rowNum, C_DIFF_COLUMN_INDEXES) + "," + getIndexColumn(columnIndex));
                 if (++replaceCount > 2) {
                     break;
                 }
@@ -63,7 +61,11 @@ public class DiffTable extends ComparableTable {
         if (keys.size() > 0) {
             return targetKey.equals(this.getKey(rowNum, keys));
         }
-        return targetKey.equals(this.getKey(rowNum, Lists.newArrayList(COLUMN_ROW_AFTER_SORT)));
+        return targetKey.equals(this.getKey(rowNum, Lists.newArrayList(C_ROW_AFTER_SORT)));
+    }
+
+    public CompareKeys getKey(int rowNum, List<String> keys) throws DataSetException {
+        return new CompareKeys(this, rowNum, keys).oldRowNum(Integer.parseInt(this.getValue(rowNum, C_ROW_ORIGINAL).toString()));
     }
 
     protected String getIndexColumn(Integer key) throws DataSetException {

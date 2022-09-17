@@ -5,6 +5,7 @@ import org.dbunit.dataset.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,8 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     private final ComparableDataSetParam param;
 
     private final ComparableDataSetProducer producer;
+
+    private final Map<String, ComparableTableMapper> mappers = new LinkedHashMap<>();
 
     public ComparableDataSetImpl(ComparableDataSetProducer producer) throws DataSetException {
         super(false);
@@ -38,6 +41,10 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     @Override
     public void endDataSet() throws DataSetException {
         logger.debug("endDataSet() - start");
+        this._orderedTableNameMap = createTableNameMap();
+        for (Map.Entry<String, ComparableTableMapper> it : mappers.entrySet()) {
+            this._orderedTableNameMap.add(it.getKey(), it.getValue().result());
+        }
         logger.debug("endDataSet() - the final tableMap is: " + this._orderedTableNameMap);
     }
 
@@ -50,13 +57,12 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     @Override
     public void endTable() throws DataSetException {
         logger.debug("endTable() - start");
-        ComparableTable result = this.mapper.result();
-        String resultTableName = result.getTableMetaData().getTableName();
-        if (this._orderedTableNameMap.containsTable(resultTableName)) {
-            ComparableTable existingTable = (ComparableTable) this._orderedTableNameMap.get(resultTableName);
-            existingTable.addTableRows(result);
+        String resultTableName = this.mapper.getTargetTableName();
+        if (mappers.containsKey(resultTableName)) {
+            ComparableTableMapper existingMapper = this.mappers.get(resultTableName);
+            existingMapper.add(this.mapper.result());
         } else {
-            this._orderedTableNameMap.add(resultTableName, result);
+            this.mappers.put(resultTableName, mapper);
         }
         this.mapper = null;
     }
