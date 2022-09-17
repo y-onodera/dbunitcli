@@ -27,7 +27,18 @@
     },
     {
       "name": "merge",
-      "order": ["key"]
+      "order": [
+        "key"
+      ]
+    }
+  ],
+  "commonSettings": [
+    {
+      "numberExpression": [
+        {
+          "key": "key"
+        }
+      ]
     }
   ]
 }

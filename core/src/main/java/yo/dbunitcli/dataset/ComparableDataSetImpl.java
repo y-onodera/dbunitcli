@@ -21,8 +21,6 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     private final ComparableDataSetProducer producer;
 
-    private final Map<String, ComparableTableMapper> mappers = new LinkedHashMap<>();
-
     public ComparableDataSetImpl(ComparableDataSetProducer producer) throws DataSetException {
         super(false);
         this.producer = producer;
@@ -41,10 +39,6 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     @Override
     public void endDataSet() throws DataSetException {
         logger.debug("endDataSet() - start");
-        this._orderedTableNameMap = createTableNameMap();
-        for (Map.Entry<String, ComparableTableMapper> it : mappers.entrySet()) {
-            this._orderedTableNameMap.add(it.getKey(), it.getValue().result());
-        }
         logger.debug("endDataSet() - the final tableMap is: " + this._orderedTableNameMap);
     }
 
@@ -58,11 +52,12 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     public void endTable() throws DataSetException {
         logger.debug("endTable() - start");
         String resultTableName = this.mapper.getTargetTableName();
-        if (mappers.containsKey(resultTableName)) {
-            ComparableTableMapper existingMapper = this.mappers.get(resultTableName);
-            existingMapper.add(this.mapper.result());
+        if (this._orderedTableNameMap.containsTable(resultTableName)) {
+            ComparableTable existingTable = (ComparableTable) this._orderedTableNameMap.get(resultTableName);
+            this.mapper.add(existingTable);
+            this._orderedTableNameMap.update(resultTableName, this.mapper.result());
         } else {
-            this.mappers.put(resultTableName, mapper);
+            this._orderedTableNameMap.add(resultTableName, this.mapper.result());
         }
         this.mapper = null;
     }
