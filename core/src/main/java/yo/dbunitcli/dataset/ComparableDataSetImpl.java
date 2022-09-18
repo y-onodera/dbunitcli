@@ -20,11 +20,14 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     private final ComparableDataSetProducer producer;
 
+    private final IDataSetWriter consumer;
+
     public ComparableDataSetImpl(ComparableDataSetProducer producer) throws DataSetException {
         super(false);
         this.producer = producer;
         this.param = this.producer.getParam();
         this.compareSettings = this.param.getColumnSettings();
+        this.consumer = this.param.getConsumer();
         this.producer.setConsumer(this);
         this.producer.produce();
     }
@@ -38,6 +41,12 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     @Override
     public void endDataSet() throws DataSetException {
         logger.debug("endDataSet() - start");
+        if (this.consumer != null) {
+            ITableIterator itr = this.createIterator(false);
+            while (itr.next()) {
+                this.consumer.write(itr.getTable());
+            }
+        }
         logger.debug("endDataSet() - the final tableMap is: " + this._orderedTableNameMap);
     }
 
@@ -56,7 +65,12 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
             this.mapper.add(existingTable);
             this._orderedTableNameMap.update(resultTableName, this.mapper.result());
         } else {
-            this._orderedTableNameMap.add(resultTableName, this.mapper.result());
+            ComparableTable result = this.mapper.result();
+            if (this.consumer != null && !result.isSorted()) {
+                this.consumer.write(result);
+            } else {
+                this._orderedTableNameMap.add(resultTableName, result);
+            }
         }
         this.mapper = null;
     }

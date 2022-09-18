@@ -30,6 +30,7 @@ public class ComparableDataSetParam {
     private final String extension;
     private final TemplateRender templateRender;
     private final DatabaseConnectionLoader databaseConnectionLoader;
+    private final IDataSetWriter consumer;
     private final char delimiter;
 
     public ComparableDataSetParam(Builder builder) {
@@ -51,6 +52,7 @@ public class ComparableDataSetParam {
         this.extension = builder.getExtension();
         this.delimiter = builder.getDelimiter();
         this.databaseConnectionLoader = builder.getDatabaseConnectionLoader();
+        this.consumer = builder.getConsumer();
     }
 
     public static Builder builder() {
@@ -126,6 +128,10 @@ public class ComparableDataSetParam {
         return this.databaseConnectionLoader;
     }
 
+    public IDataSetWriter getConsumer() {
+        return this.consumer;
+    }
+
     public File[] getSrcFiles() {
         if (this.getSrc().isDirectory()) {
             String end = "." + this.getExtension().toUpperCase();
@@ -191,6 +197,7 @@ public class ComparableDataSetParam {
         private String extension;
         private TemplateRender templateRender;
         private DatabaseConnectionLoader databaseConnectionLoader;
+        private IDataSetWriter consumer;
         private char delimiter = ',';
 
         public Builder setSrc(File src) {
@@ -274,6 +281,10 @@ public class ComparableDataSetParam {
 
         public DatabaseConnectionLoader getDatabaseConnectionLoader() {
             return this.databaseConnectionLoader;
+        }
+
+        public IDataSetWriter getConsumer() {
+            return consumer;
         }
 
         public Builder ifMatch(boolean condition, Function<Builder, Builder> function) {
@@ -372,9 +383,13 @@ public class ComparableDataSetParam {
             return this;
         }
 
+        public Builder setConsumer(IDataSetWriter writer) {
+            this.consumer = writer;
+            return this;
+        }
+
         public ComparableDataSetParam build() {
             return new ComparableDataSetParam(this);
         }
-
     }
 }

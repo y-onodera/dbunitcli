@@ -14,6 +14,8 @@ public class ComparableTableMapper {
     private final Column[] orderColumns;
     private final List<AddSettingTableMetaData> settingChain = Lists.newArrayList();
     private final List<Integer> filteredRowIndexes;
+    private int addRowCount = 0;
+    private IDataSetWriter consumer;
 
     public ComparableTableMapper(AddSettingTableMetaData metaData, Column[] orderColumns, List<AddSettingTableMetaData> settings) {
         this.values = new ArrayList<>();
@@ -21,6 +23,10 @@ public class ComparableTableMapper {
         this.addSettingTableMetaData = metaData;
         this.orderColumns = orderColumns;
         this.settingChain.addAll(settings);
+    }
+
+    public void setConsumer(IDataSetWriter consumer) {
+        this.consumer = consumer;
     }
 
     public ComparableTable result() {
@@ -51,15 +57,22 @@ public class ComparableTableMapper {
             for (int i = 0, j = columns.length; i < j; i++) {
                 row[i] = other.getValue(rowNum, columns[i].getColumnName());
             }
-            this.add(row);
+            this.addValue(row);
         }
     }
 
     public void add(Object[] row) {
-        this.values.add(row);
-        if (this.addSettingTableMetaData.hasRowFilter() && this.addSettingTableMetaData.applySetting(row) != null) {
-            this.filteredRowIndexes.add(this.values.size() - 1);
+        this.addValue(this.addSettingTableMetaData.applySetting(row));
+    }
+
+    protected void addValue(Object[] applySetting) {
+        if (applySetting != null) {
+            this.values.add(applySetting);
+            if (this.addSettingTableMetaData.hasRowFilter()) {
+                this.filteredRowIndexes.add(this.addRowCount);
+            }
         }
+        this.addRowCount++;
     }
 
 }

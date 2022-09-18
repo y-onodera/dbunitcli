@@ -120,7 +120,7 @@ public class ComparableTable implements ITable {
         if (rowNum < 0 || rowNum >= this.getRowCount()) {
             throw new RowOutOfBoundsException("rowNum " + rowNum + " is out of range;current row size is " + this.getRowCount());
         }
-        return this.addSettingTableMetaData.applySetting(this.values.get(this.getOriginalRowIndex(rowNum)));
+        return this.values.get(this.getSortedRowIndex(rowNum));
     }
 
     public Object[] getRow(int rowNum, int columnLength) throws RowOutOfBoundsException {
@@ -138,24 +138,22 @@ public class ComparableTable implements ITable {
         return row[j] == null ? "" : row[j];
     }
 
-    protected int getOriginalRowIndex(int noFilter) {
-        int row = noFilter;
+    protected int getOriginalRowIndex(int noSort) {
+        int row = this.getSortedRowIndex(noSort);
         if (this.addSettingTableMetaData.hasRowFilter()) {
-            row = this.filteredRowIndexes.get(noFilter);
+            return this.filteredRowIndexes.get(row);
         }
+        return row;
+    }
+
+    protected int getSortedRowIndex(int noSort) {
         if (!this.isSorted()) {
-            return row;
+            return noSort;
         }
         if (this._indexes == null) {
             Integer[] indexes = new Integer[this.values.size()];
             for (int i = 0; i < indexes.length; ++i) {
                 indexes[i] = i;
-            }
-            List<Object[]> rows = new ArrayList<>();
-            for (int i = 0, j = this.values.size(); i < j; i++) {
-                if (!this.addSettingTableMetaData.hasRowFilter() || this.filteredRowIndexes.contains(i)) {
-                    rows.add(this.addSettingTableMetaData.applySetting(this.values.get(i)));
-                }
             }
             Integer[] columnIndex = Arrays.stream(this.orderColumns).map(it -> {
                         try {
@@ -168,8 +166,8 @@ public class ComparableTable implements ITable {
             Arrays.sort(indexes, (Integer i1, Integer i2) -> {
                 try {
                     for (int i = 0, j = columnIndex.length; i < j; i++) {
-                        Object value1 = rows.get(i1)[columnIndex[i]];
-                        Object value2 = rows.get(i2)[columnIndex[i]];
+                        Object value1 = values.get(i1)[columnIndex[i]];
+                        Object value2 = values.get(i2)[columnIndex[i]];
                         if (value1 != null || value2 != null) {
                             if (value1 == null) {
                                 return -1;
@@ -190,7 +188,7 @@ public class ComparableTable implements ITable {
             });
             this._indexes = indexes;
         }
-        return this._indexes[row];
+        return this._indexes[noSort];
     }
 
     protected boolean isSorted() {

@@ -1,7 +1,5 @@
 package yo.dbunitcli.application;
 
-import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.IDataSetWriter;
 import yo.dbunitcli.dataset.Parameter;
 
 public class Convert implements Command<ConvertOption>{
@@ -22,13 +20,7 @@ public class Convert implements Command<ConvertOption>{
 
     @Override
     public void exec(ConvertOption options) throws Exception {
-        ComparableDataSet dataSet = options.targetDataSet();
-        IDataSetWriter writer = options.writer();
-        writer.open(options.getResultPath());
-        for (String tableName : dataSet.getTableNames()) {
-            writer.write(dataSet.getTable(tableName));
-        }
-        writer.close();
+        options.convertDataset();
     }
 
 }

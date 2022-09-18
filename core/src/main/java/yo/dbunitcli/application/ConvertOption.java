@@ -5,6 +5,7 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.IDataSetWriter;
 import yo.dbunitcli.dataset.Parameter;
 
 import java.util.Map;
@@ -19,6 +20,13 @@ public class ConvertOption extends CommandLineOption {
 
     public ConvertOption(Parameter param) {
         super(param);
+    }
+
+    public void convertDataset() throws DataSetException {
+        IDataSetWriter writer = this.writer();
+        writer.open(this.getResultPath());
+        this.getComparableDataSetLoader().loadDataSet(this.src.getParam().setConsumer(writer).build());
+        writer.close();
     }
 
     @Override
