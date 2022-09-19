@@ -14,6 +14,7 @@ public class ComparableTableMapper {
     private final Column[] orderColumns;
     private final List<AddSettingTableMetaData> settingChain = Lists.newArrayList();
     private final List<Integer> filteredRowIndexes;
+    private boolean startTable;
     private int addRowCount = 0;
     private IDataSetConsumer consumer;
 
@@ -27,13 +28,14 @@ public class ComparableTableMapper {
 
     public void setConsumer(IDataSetConsumer consumer) throws DataSetException {
         this.consumer = consumer;
-        if (this.isEnableRowProcessing()) {
+        if (this.isEnableRowProcessing() && this.consumer.isExportEmptyTable()) {
             this.consumer.startTable(this.addSettingTableMetaData);
+            this.startTable = true;
         }
     }
 
     public ComparableTable endTable() throws DataSetException {
-        if (this.isEnableRowProcessing()) {
+        if (this.isEnableRowProcessing() && this.startTable) {
             this.consumer.endTable();
             return null;
         }
@@ -75,6 +77,10 @@ public class ComparableTableMapper {
     protected void addValue(Object[] applySetting) throws DataSetException {
         if (applySetting != null) {
             if (this.isEnableRowProcessing()) {
+                if (!this.consumer.isExportEmptyTable() && !this.startTable) {
+                    this.consumer.startTable(this.addSettingTableMetaData);
+                    this.startTable = true;
+                }
                 this.consumer.row(applySetting);
             } else {
                 this.values.add(applySetting);
@@ -87,7 +93,7 @@ public class ComparableTableMapper {
     }
 
     private boolean isEnableRowProcessing() {
-        return this.consumer != null && this.orderColumns.length == 0 && this.consumer.isExportEmptyTable();
+        return this.consumer != null && this.orderColumns.length == 0;
     }
 
 }
