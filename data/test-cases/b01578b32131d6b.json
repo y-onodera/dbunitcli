@@ -1,0 +1,55 @@
+{
+  "uid" : "b01578b32131d6b",
+  "name" : "testFromCsvToMultiXls",
+  "fullName" : "yo.dbunitcli.application.ConvertTest.testFromCsvToMultiXls",
+  "historyId" : "7631b0766b310a5f959d69241254d6cd",
+  "time" : {
+    "start" : 1663586342140,
+    "stop" : 1663586342206,
+    "duration" : 66
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testFromCsvToMultiXls"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az210-608"
+  }, {
+    "name" : "thread",
+    "value" : "2079@fv-az210-608.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "b01578b32131d6b.json",
+  "parameterValues" : [ ]
+}
