@@ -135,7 +135,7 @@ public class ComparableTable implements ITable {
 
     public Object getValue(int i, int j) throws RowOutOfBoundsException {
         Object[] row = this.getRow(i);
-        return row[j] == null ? "" : row[j];
+        return row[j] == null ? NO_VALUE : row[j];
     }
 
     protected int getOriginalRowIndex(int noSort) {
