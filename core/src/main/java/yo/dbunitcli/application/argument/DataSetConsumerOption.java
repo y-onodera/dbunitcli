@@ -3,14 +3,14 @@ package yo.dbunitcli.application.argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import yo.dbunitcli.dataset.DataSetWriterParam;
+import yo.dbunitcli.dataset.DataSetConsumerParam;
 import yo.dbunitcli.dataset.DataSourceType;
-import yo.dbunitcli.dataset.writer.DBDataSetWriter;
+import yo.dbunitcli.dataset.consumer.DBConsumer;
 
 import java.io.File;
 import java.util.Map;
 
-public class DataSetWriteOption extends DefaultArgumentsParser {
+public class DataSetConsumerOption extends DefaultArgumentsParser {
 
     @Option(name = "-result", usage = "directory result files at")
     private File resultDir = new File(".");
@@ -28,35 +28,25 @@ public class DataSetWriteOption extends DefaultArgumentsParser {
     private String outputEncoding = "UTF-8";
 
     @Option(name = "-op", usage = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
-    private DBDataSetWriter.Operation operation;
+    private DBConsumer.Operation operation;
 
     @Option(name = "-excelTable", usage = "SHEET or BOOK")
     private String excelTable = "SHEET";
 
     private final JdbcOption jdbcOption;
 
-    private final DataSetWriterParam.Builder builder;
+    private final DataSetConsumerParam.Builder builder;
 
-    public DataSetWriteOption(String prefix) {
+    public DataSetConsumerOption(String prefix) {
         super(prefix);
         this.jdbcOption = new JdbcOption(prefix);
-        this.builder = DataSetWriterParam.builder();
+        this.builder = DataSetConsumerParam.builder();
     }
 
     @Override
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
-        this.builder.setResultType(this.resultType);
         if (this.resultType == DataSourceType.table) {
             this.jdbcOption.parseArgument(expandArgs);
-            this.builder.setOperation(this.operation)
-                    .setDatabaseConnectionLoader(this.jdbcOption.getDatabaseConnectionLoader());
-        } else {
-            this.builder.setExportEmptyTable(Boolean.parseBoolean(this.exportEmptyTable));
-            if (this.resultType == DataSourceType.csv) {
-                this.builder.setOutputEncoding(this.outputEncoding);
-            } else {
-                this.builder.setExcelTable(this.excelTable);
-            }
         }
     }
 
@@ -70,8 +60,8 @@ public class DataSetWriteOption extends DefaultArgumentsParser {
         try {
             DataSourceType type = DataSourceType.valueOf(result.get("-resultType"));
             if (type == DataSourceType.table) {
-                result.put("-op", this.operation == null ? DBDataSetWriter.Operation.CLEAN_INSERT : this.operation
-                        , DBDataSetWriter.Operation.class);
+                result.put("-op", this.operation == null ? DBConsumer.Operation.CLEAN_INSERT : this.operation
+                        , DBConsumer.Operation.class);
                 result.putAll(this.jdbcOption.createOptionParam(args));
             } else {
                 result.putDir("-result", this.resultDir);
@@ -88,8 +78,17 @@ public class DataSetWriteOption extends DefaultArgumentsParser {
         return result;
     }
 
-    public DataSetWriterParam.Builder getParam() {
-        return builder;
+    public DataSetConsumerParam.Builder getParam() {
+        return this.builder
+                .setResultType(this.resultType)
+                .setExportEmptyTable(Boolean.parseBoolean(this.exportEmptyTable))
+                .setResultDir(this.resultDir)
+                .setResultPath(this.resultPath)
+                .setOperation(this.operation)
+                .setDatabaseConnectionLoader(this.jdbcOption.getDatabaseConnectionLoader())
+                .setOutputEncoding(this.outputEncoding)
+                .setExcelTable(this.excelTable)
+                ;
     }
 
     public DataSourceType getResultType() {
@@ -110,6 +109,14 @@ public class DataSetWriteOption extends DefaultArgumentsParser {
 
     public String getOutputEncoding() {
         return this.outputEncoding;
+    }
+
+    public void setResultDir(File resultDir) {
+        this.resultDir = resultDir;
+    }
+
+    public void setResultPath(String resultPath) {
+        this.resultPath = resultPath;
     }
 
     public enum ResultType {

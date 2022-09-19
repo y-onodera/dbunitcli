@@ -5,7 +5,7 @@ import org.dbunit.dataset.ITable;
 
 import java.io.File;
 
-public interface IDataSetWriter {
+public interface IDataSetConsumer extends org.dbunit.dataset.stream.IDataSetConsumer {
 
     void cleanupDirectory();
 

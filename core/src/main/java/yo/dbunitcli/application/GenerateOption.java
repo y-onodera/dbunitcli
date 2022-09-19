@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
@@ -13,7 +12,7 @@ import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.Parameter;
-import yo.dbunitcli.dataset.writer.DBDataSetWriter;
+import yo.dbunitcli.dataset.consumer.DBConsumer;
 import yo.dbunitcli.resource.Files;
 import yo.dbunitcli.resource.poi.JxlsTemplateRender;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -44,7 +43,7 @@ public class GenerateOption extends CommandLineOption {
     private String sqlFilePrefix = "";
 
     @Option(name = "-op")
-    private DBDataSetWriter.Operation operation;
+    private DBConsumer.Operation operation;
 
     @Option(name = "-outputEncoding", usage = "output file encoding")
     private String outputEncoding = "UTF-8";
@@ -52,9 +51,9 @@ public class GenerateOption extends CommandLineOption {
     @Option(name = "-template", usage = "template file")
     private File template;
 
-    private DataSetLoadOption src = new DataSetLoadOption("src");
+    private final DataSetLoadOption src = new DataSetLoadOption("src");
 
-    private TemplateRenderOption templateOption = new TemplateRenderOption("template");
+    private final TemplateRenderOption templateOption = new TemplateRenderOption("template");
 
     private String templateString;
 
@@ -94,7 +93,7 @@ public class GenerateOption extends CommandLineOption {
     @Override
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
-        this.getWriteOption().parseArgument(expandArgs);
+        this.getConsumerOption().parseArgument(expandArgs);
         this.src.parseArgument(expandArgs);
         this.templateOption.parseArgument(expandArgs);
         this.getGenerateType().populateSettings(this, parser);
@@ -113,7 +112,7 @@ public class GenerateOption extends CommandLineOption {
         }
         if (result.hasValue("-generateType") && GenerateType.valueOf(result.get("-generateType")) == GenerateType.sql) {
             result.put("-commit", this.commit);
-            result.put("-op", this.operation, DBDataSetWriter.Operation.class);
+            result.put("-op", this.operation, DBConsumer.Operation.class);
             result.put("-sqlFilePrefix", this.sqlFilePrefix);
             result.put("-sqlFileSuffix", this.sqlFileSuffix);
         }
@@ -161,7 +160,7 @@ public class GenerateOption extends CommandLineOption {
     }
 
     public File getResultDir() {
-        return this.getWriteOption().getResultDir();
+        return this.getConsumerOption().getResultDir();
     }
 
     public enum GenerateUnit {
@@ -208,7 +207,6 @@ public class GenerateOption extends CommandLineOption {
         public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws DataSetException {
             Map<String, Object> param = new HashMap<>();
             param.put("_paramMap", map);
-            List<String> tableNames = Lists.newArrayList();
             param.put("dataSet", dataSet.toMap(true));
             return Stream.of(param);
         }

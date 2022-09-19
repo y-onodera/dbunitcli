@@ -20,7 +20,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     private final ComparableDataSetProducer producer;
 
-    private final IDataSetWriter consumer;
+    private final IDataSetConsumer consumer;
 
     public ComparableDataSetImpl(ComparableDataSetProducer producer) throws DataSetException {
         super(false);
@@ -36,6 +36,9 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     public void startDataSet() throws DataSetException {
         logger.debug("startDataSet() - start");
         this._orderedTableNameMap = super.createTableNameMap();
+        if (this.consumer != null) {
+            this.consumer.startDataSet();
+        }
     }
 
     @Override
@@ -44,8 +47,14 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
         if (this.consumer != null) {
             ITableIterator itr = this.createIterator(false);
             while (itr.next()) {
-                this.consumer.write(itr.getTable());
+                ComparableTable table = (ComparableTable) itr.getTable();
+                this.consumer.startTable(table.getTableMetaData());
+                for (int i = 0, j = table.getRowCount(); i < j; i++) {
+                    this.consumer.row(table.getRow(i));
+                }
+                this.consumer.endTable();
             }
+            this.consumer.endDataSet();
         }
         logger.debug("endDataSet() - the final tableMap is: " + this._orderedTableNameMap);
     }
@@ -54,6 +63,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     public void startTable(ITableMetaData metaData) throws DataSetException {
         logger.debug("startTable(metaData={}) - start", metaData);
         this.mapper = this.compareSettings.createMapper(metaData);
+        this.mapper.setConsumer(this.consumer);
     }
 
     @Override
@@ -63,12 +73,10 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
         if (this._orderedTableNameMap.containsTable(resultTableName)) {
             ComparableTable existingTable = (ComparableTable) this._orderedTableNameMap.get(resultTableName);
             this.mapper.add(existingTable);
-            this._orderedTableNameMap.update(resultTableName, this.mapper.result());
+            this._orderedTableNameMap.update(resultTableName, this.mapper.endTable());
         } else {
-            ComparableTable result = this.mapper.result();
-            if (this.consumer != null && !result.isSorted()) {
-                this.consumer.write(result);
-            } else {
+            ComparableTable result = this.mapper.endTable();
+            if (result != null) {
                 this._orderedTableNameMap.add(resultTableName, result);
             }
         }

@@ -5,7 +5,6 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.IDataSetWriter;
 import yo.dbunitcli.dataset.Parameter;
 
 import java.util.Map;
@@ -23,24 +22,22 @@ public class ConvertOption extends CommandLineOption {
     }
 
     public void convertDataset() throws DataSetException {
-        IDataSetWriter writer = this.writer();
-        writer.open(this.getResultPath());
-        this.getComparableDataSetLoader().loadDataSet(this.src.getParam().setConsumer(writer).build());
-        writer.close();
+        this.getConsumerOption().setResultPath(this.getResultPath());
+        this.getComparableDataSetLoader().loadDataSet(this.src.getParam().setConsumer(this.consumer()).build());
     }
 
     @Override
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         this.src.parseArgument(expandArgs);
-        this.getWriteOption().parseArgument(expandArgs);
+        this.getConsumerOption().parseArgument(expandArgs);
     }
 
     @Override
     public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putAll(this.src.createOptionParam(args));
-        result.putAll(this.getWriteOption().createOptionParam(args));
+        result.putAll(this.getConsumerOption().createOptionParam(args));
         return result;
     }
 

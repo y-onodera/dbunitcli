@@ -1,21 +1,23 @@
 package yo.dbunitcli.dataset;
 
-import yo.dbunitcli.dataset.writer.DBDataSetWriter;
+import yo.dbunitcli.dataset.consumer.DBConsumer;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.File;
 
-public class DataSetWriterParam {
+public class DataSetConsumerParam {
     private final DatabaseConnectionLoader databaseConnectionLoader;
     private final DataSourceType resultType;
-    private final DBDataSetWriter.Operation operation;
+    private final DBConsumer.Operation operation;
     private final File resultDir;
+    private final String fileName;
     private final String outputEncoding;
     private final String excelTable;
     private final boolean exportEmptyTable;
 
-    public DataSetWriterParam(Builder builder) {
+    public DataSetConsumerParam(Builder builder) {
         this.resultDir = builder.getResultDir();
+        this.fileName = builder.getResultPath();
         this.databaseConnectionLoader = builder.getDatabaseConnectionLoader();
         this.resultType = builder.getResultType();
         this.operation = builder.getOperation();
@@ -32,12 +34,16 @@ public class DataSetWriterParam {
         return this.resultType;
     }
 
-    public DBDataSetWriter.Operation getOperation() {
+    public DBConsumer.Operation getOperation() {
         return this.operation;
     }
 
     public File getResultDir() {
         return this.resultDir;
+    }
+
+    public String getFileName() {
+        return this.fileName;
     }
 
     public String getOutputEncoding() {
@@ -54,7 +60,7 @@ public class DataSetWriterParam {
 
     @Override
     public String toString() {
-        return "DataSetWriterParam{" +
+        return "DataSetConsumerParam{" +
                 "databaseConnectionLoader=" + databaseConnectionLoader +
                 ", resultType='" + resultType + '\'' +
                 ", operation='" + operation + '\'' +
@@ -72,14 +78,15 @@ public class DataSetWriterParam {
     public static class Builder {
         private DatabaseConnectionLoader databaseConnectionLoader;
         private DataSourceType resultType;
-        private DBDataSetWriter.Operation operation;
+        private DBConsumer.Operation operation;
         private File resultDir;
         private String outputEncoding;
         private String excelTable;
         private boolean exportEmptyTable;
+        private String resultPath;
 
-        public DataSetWriterParam build() {
-            return new DataSetWriterParam(this);
+        public DataSetConsumerParam build() {
+            return new DataSetConsumerParam(this);
         }
 
         public DatabaseConnectionLoader getDatabaseConnectionLoader() {
@@ -100,11 +107,11 @@ public class DataSetWriterParam {
             return this;
         }
 
-        public DBDataSetWriter.Operation getOperation() {
+        public DBConsumer.Operation getOperation() {
             return operation;
         }
 
-        public Builder setOperation(DBDataSetWriter.Operation operation) {
+        public Builder setOperation(DBConsumer.Operation operation) {
             this.operation = operation;
             return this;
         }
@@ -143,6 +150,15 @@ public class DataSetWriterParam {
         public Builder setExportEmptyTable(boolean exportEmptyTable) {
             this.exportEmptyTable = exportEmptyTable;
             return this;
+        }
+
+        public Builder setResultPath(String resultPath) {
+            this.resultPath = resultPath;
+            return this;
+        }
+
+        public String getResultPath() {
+            return this.resultPath;
         }
     }
 }

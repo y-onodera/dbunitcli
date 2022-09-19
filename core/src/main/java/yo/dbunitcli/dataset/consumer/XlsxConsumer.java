@@ -1,15 +1,20 @@
-package yo.dbunitcli.dataset.writer;
+package yo.dbunitcli.dataset.consumer;
 
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import yo.dbunitcli.dataset.DataSetWriterParam;
-import yo.dbunitcli.dataset.IDataSetWriter;
+import org.dbunit.dataset.DataSetException;
+import yo.dbunitcli.dataset.DataSetConsumerParam;
 
-public class XlsxDataSetWriter extends XlsDataSetWriter implements IDataSetWriter {
+public class XlsxConsumer extends XlsConsumer {
 
-    public XlsxDataSetWriter(DataSetWriterParam param) {
+    public XlsxConsumer(DataSetConsumerParam param) {
         super(param);
+    }
+
+    @Override
+    public void endDataSet() throws DataSetException {
+        super.endDataSet();
     }
 
     @Override
@@ -19,7 +24,7 @@ public class XlsxDataSetWriter extends XlsDataSetWriter implements IDataSetWrite
 
     @Override
     protected Workbook createWorkbook() {
-        Workbook result = new SXSSFWorkbook();
+        Workbook result = new SXSSFWorkbook(1000);
         Font font = result.getFontAt(0);
         font.setFontName("МＳ ゴシック");
         font.setFontHeightInPoints((short) 8);

@@ -31,32 +31,52 @@ public class DBIntegrationTest {
     }
 
     @Test
-    public void test1_runSql() throws Exception {
+    public void test01_runSql() throws Exception {
         Run.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationRunDdl.txt"});
     }
 
     @Test
-    public void test2_importToDB() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationImport.txt"});
+    public void test02_cleanInsertToDB() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationCleanInsert.txt"});
     }
 
     @Test
-    public void test3_exportFromDB() throws Exception {
+    public void test03_deleteToDB() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationDelete.txt"});
+    }
+
+    @Test
+    public void test04_insertToDB() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationInsert.txt"});
+    }
+
+    @Test
+    public void test05_updateToDB() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationUpdate.txt"});
+    }
+
+    @Test
+    public void test06_refreshToDB() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationRefresh.txt"});
+    }
+
+    @Test
+    public void test07_exportFromDB() throws Exception {
         Convert.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationExport.txt"});
     }
 
     @Test
-    public void test4_runSql() throws Exception {
+    public void test08_runSql() throws Exception {
         Run.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationRunDml.txt"});
     }
 
     @Test
-    public void test5_generateSetting() throws Exception {
+    public void test09_generateSetting() throws Exception {
         Generate.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationGenerateSetting.txt"});
     }
 
     @Test
-    public void test6_generateSql() throws Exception {
+    public void test10_generateSql() throws Exception {
         Generate.main(new String[]{"@" + this.testResourcesDir + "/paramDBIntegrationGenerateSql.txt"});
     }
 

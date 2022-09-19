@@ -3,7 +3,7 @@ package yo.dbunitcli.dataset.compare;
 import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.dataset.AddSettingColumns;
 import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.IDataSetWriter;
+import yo.dbunitcli.dataset.IDataSetConsumer;
 
 import java.io.File;
 
@@ -11,7 +11,7 @@ public class DataSetCompareBuilder {
     private ComparableDataSet oldDataSet;
     private ComparableDataSet newDataSet;
     private AddSettingColumns comparisonKeys;
-    private IDataSetWriter dataSetWriter;
+    private IDataSetConsumer dataSetWriter;
 
     public DataSetCompareBuilder oldDataSet(ComparableDataSet dataSet) {
         this.oldDataSet = dataSet;
@@ -28,7 +28,7 @@ public class DataSetCompareBuilder {
         return this;
     }
 
-    public DataSetCompareBuilder dataSetWriter(IDataSetWriter iDataSetWriter) {
+    public DataSetCompareBuilder dataSetWriter(IDataSetConsumer iDataSetWriter) {
         this.dataSetWriter = iDataSetWriter;
         return this;
     }
@@ -45,7 +45,7 @@ public class DataSetCompareBuilder {
         return this.comparisonKeys;
     }
 
-    public IDataSetWriter getDataSetWriter() {
+    public IDataSetConsumer getDataSetWriter() {
         return this.dataSetWriter;
     }
 

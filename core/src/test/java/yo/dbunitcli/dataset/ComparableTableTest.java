@@ -34,7 +34,7 @@ public class ComparableTableTest {
         builder.addRow(new Object[]{"1", "a", "あ", 1});
         builder.addRow(new Object[]{"1", "b", "あ", 1});
         builder.addRow(new Object[]{"2", "a", "い", 2});
-        this.target = builder.result();
+        this.target = builder.endTable();
     }
 
     @Test

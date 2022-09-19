@@ -3,8 +3,9 @@ package yo.dbunitcli.application;
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.CompositeDataSet;
 import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.stream.DataSetProducerAdapter;
+import org.dbunit.dataset.stream.IDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.IDataSetWriter;
 import yo.dbunitcli.dataset.Parameter;
 
 import java.util.List;
@@ -29,11 +30,9 @@ public class Aggregate {
             row++;
         }
         CompositeDataSet composite = new CompositeDataSet(dataSets.toArray(new IDataSet[0]));
-        IDataSetWriter writer = options.writer();
-        writer.open("result");
-        for (String tableName : composite.getTableNames()) {
-            writer.write(composite.getTable(tableName));
-        }
-        writer.close();
+        IDataSetProducer producer = new DataSetProducerAdapter(composite);
+        options.getConsumerOption().setResultPath("result");
+        producer.setConsumer(options.consumer());
+        producer.produce();
     }
 }

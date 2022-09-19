@@ -15,7 +15,7 @@ public class ComparableTableMapper {
     private final List<AddSettingTableMetaData> settingChain = Lists.newArrayList();
     private final List<Integer> filteredRowIndexes;
     private int addRowCount = 0;
-    private IDataSetWriter consumer;
+    private IDataSetConsumer consumer;
 
     public ComparableTableMapper(AddSettingTableMetaData metaData, Column[] orderColumns, List<AddSettingTableMetaData> settings) {
         this.values = new ArrayList<>();
@@ -25,11 +25,18 @@ public class ComparableTableMapper {
         this.settingChain.addAll(settings);
     }
 
-    public void setConsumer(IDataSetWriter consumer) {
+    public void setConsumer(IDataSetConsumer consumer) throws DataSetException {
         this.consumer = consumer;
+        if (this.consumer != null && this.orderColumns.length == 0) {
+            this.consumer.startTable(this.addSettingTableMetaData);
+        }
     }
 
-    public ComparableTable result() {
+    public ComparableTable endTable() throws DataSetException {
+        if (this.consumer != null && this.orderColumns.length == 0) {
+            this.consumer.endTable();
+            return null;
+        }
         return new ComparableTable(this.addSettingTableMetaData, this.orderColumns, this.values, this.filteredRowIndexes);
     }
 
@@ -37,7 +44,7 @@ public class ComparableTableMapper {
         return this.addSettingTableMetaData.getTableName();
     }
 
-    public void addRow(Object[] values) {
+    public void addRow(Object[] values) throws DataSetException {
         Object[] applySettings = values;
         for (AddSettingTableMetaData metaData : this.settingChain) {
             applySettings = metaData.applySetting(applySettings);
@@ -61,15 +68,19 @@ public class ComparableTableMapper {
         }
     }
 
-    public void add(Object[] row) {
+    public void add(Object[] row) throws DataSetException {
         this.addValue(this.addSettingTableMetaData.applySetting(row));
     }
 
-    protected void addValue(Object[] applySetting) {
+    protected void addValue(Object[] applySetting) throws DataSetException {
         if (applySetting != null) {
-            this.values.add(applySetting);
-            if (this.addSettingTableMetaData.hasRowFilter()) {
-                this.filteredRowIndexes.add(this.addRowCount);
+            if (this.consumer != null && this.orderColumns.length == 0) {
+                this.consumer.row(applySetting);
+            } else {
+                this.values.add(applySetting);
+                if (this.addSettingTableMetaData.hasRowFilter()) {
+                    this.filteredRowIndexes.add(this.addRowCount);
+                }
             }
         }
         this.addRowCount++;

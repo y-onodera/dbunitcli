@@ -8,7 +8,7 @@ import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.dataset.AddSettingColumns;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.CompareKeys;
-import yo.dbunitcli.dataset.IDataSetWriter;
+import yo.dbunitcli.dataset.IDataSetConsumer;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class TableDataSetCompare {
     private static final String COLUMN_NAME_ROW_INDEX = "$ROW_INDEX";
     private static final Column COLUMN_ROW_INDEX = new Column(COLUMN_NAME_ROW_INDEX, DataType.NUMERIC);
 
-    public List<CompareDiff> getResults(ComparableTable oldTable, ComparableTable newTable, AddSettingColumns comparisonKeys, IDataSetWriter writer) throws DataSetException {
+    public List<CompareDiff> getResults(ComparableTable oldTable, ComparableTable newTable, AddSettingColumns comparisonKeys, IDataSetConsumer writer) throws DataSetException {
         List<CompareDiff> results = Lists.newArrayList();
         ITableMetaData oldMetaData = oldTable.getTableMetaData();
         ITableMetaData newMetaData = newTable.getTableMetaData();
@@ -105,7 +105,7 @@ public class TableDataSetCompare {
         return results;
     }
 
-    protected List<CompareDiff> compareRow(ComparableTable oldTable, ComparableTable newTable, List<String> keyNames, IDataSetWriter writer) throws DataSetException {
+    protected List<CompareDiff> compareRow(ComparableTable oldTable, ComparableTable newTable, List<String> keyNames, IDataSetConsumer writer) throws DataSetException {
         List<CompareDiff> results = Lists.newArrayList();
         final int oldRows = oldTable.getRowCount();
         final int columnLength = Math.min(newTable.getTableMetaData().getColumns().length, oldTable.getTableMetaData().getColumns().length);
@@ -153,7 +153,7 @@ public class TableDataSetCompare {
         return Objects.equals(oldVal, newVal);
     }
 
-    protected List<CompareDiff> writeModifyValues(ComparableTable oldTable, ComparableTable newTable, List<String> keyNames, IDataSetWriter writer, int columnLength, Map<Integer, List<CompareKeys>> modifyValues) throws DataSetException {
+    protected List<CompareDiff> writeModifyValues(ComparableTable oldTable, ComparableTable newTable, List<String> keyNames, IDataSetConsumer writer, int columnLength, Map<Integer, List<CompareKeys>> modifyValues) throws DataSetException {
         List<CompareDiff> results = Lists.newArrayList();
         if (modifyValues.size() > 0) {
             final ITableMetaData origin = oldTable.getTableMetaData();
@@ -184,7 +184,7 @@ public class TableDataSetCompare {
         return results;
     }
 
-    protected List<CompareDiff> writeDeleteRows(ComparableTable oldTable, IDataSetWriter writer, List<Integer> deleteRows) throws DataSetException {
+    protected List<CompareDiff> writeDeleteRows(ComparableTable oldTable, IDataSetConsumer writer, List<Integer> deleteRows) throws DataSetException {
         List<CompareDiff> results = Lists.newArrayList();
         if (deleteRows.size() > 0) {
             DefaultTable diffDetailTable = toITable(oldTable, "$DELETE");
@@ -207,7 +207,7 @@ public class TableDataSetCompare {
         return results;
     }
 
-    protected List<CompareDiff> writeAddRows(ComparableTable newTable, IDataSetWriter writer, Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists, Set<CompareKeys> addRows) throws DataSetException {
+    protected List<CompareDiff> writeAddRows(ComparableTable newTable, IDataSetConsumer writer, Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists, Set<CompareKeys> addRows) throws DataSetException {
         List<CompareDiff> results = Lists.newArrayList();
         if (addRows.size() > 0) {
             DefaultTable diffDetailTable = toITable(newTable, "$ADD");

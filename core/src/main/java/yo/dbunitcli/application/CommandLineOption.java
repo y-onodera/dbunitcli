@@ -7,13 +7,13 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
-import yo.dbunitcli.application.argument.DataSetWriteOption;
+import yo.dbunitcli.application.argument.DataSetConsumerOption;
 import yo.dbunitcli.application.argument.DefaultArgumentsParser;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.IDataSetWriter;
+import yo.dbunitcli.dataset.IDataSetConsumer;
 import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.dataset.consumer.DataSetConsumerLoader;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
-import yo.dbunitcli.dataset.writer.DataSetWriterLoader;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -27,7 +27,7 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
 
     private final Parameter parameter;
 
-    private DataSetWriteOption writeOption = new DataSetWriteOption("result");
+    private final DataSetConsumerOption consumerOption = new DataSetConsumerOption("result");
 
     private String resultFile = "result";
 
@@ -50,16 +50,16 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
         return this.parameter;
     }
 
-    public DataSetWriteOption getWriteOption() {
-        return this.writeOption;
+    public DataSetConsumerOption getConsumerOption() {
+        return this.consumerOption;
     }
 
-    public IDataSetWriter writer() throws DataSetException {
-        return this.writer(this.writeOption.getResultDir());
+    public IDataSetConsumer consumer() throws DataSetException {
+        return new DataSetConsumerLoader().get(this.consumerOption.getParam().build());
     }
 
-    public IDataSetWriter writer(File outputTo) throws DataSetException {
-        return new DataSetWriterLoader().get(this.writeOption.getParam().setResultDir(outputTo).build());
+    public IDataSetConsumer consumer(File outputTo) throws DataSetException {
+        return new DataSetConsumerLoader().get(this.consumerOption.getParam().setResultDir(outputTo).build());
     }
 
     @Override
@@ -82,6 +82,6 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
     }
 
     protected String getResultPath() {
-        return Strings.isNullOrEmpty(this.writeOption.getResultPath()) ? this.resultFile : this.writeOption.getResultPath();
+        return Strings.isNullOrEmpty(this.consumerOption.getResultPath()) ? this.resultFile : this.consumerOption.getResultPath();
     }
 }

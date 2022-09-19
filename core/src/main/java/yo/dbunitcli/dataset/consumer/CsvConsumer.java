@@ -1,11 +1,13 @@
-package yo.dbunitcli.dataset.writer;
+package yo.dbunitcli.dataset.consumer;
 
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.csv.CsvDataSetWriter;
+import org.dbunit.dataset.stream.DataSetProducerAdapter;
+import org.dbunit.dataset.stream.IDataSetProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.DataSetWriterParam;
-import yo.dbunitcli.dataset.IDataSetWriter;
+import yo.dbunitcli.dataset.DataSetConsumerParam;
+import yo.dbunitcli.dataset.IDataSetConsumer;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,7 +15,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 
-public class CsvDataSetWriterWrapper implements IDataSetWriter {
+public class CsvConsumer implements IDataSetConsumer {
 
     private final CsvDataSetWriter writer;
 
@@ -21,10 +23,35 @@ public class CsvDataSetWriterWrapper implements IDataSetWriter {
 
     private final File resultDir;
 
-    public CsvDataSetWriterWrapper(DataSetWriterParam param) {
+    public CsvConsumer(DataSetConsumerParam param) {
         this.resultDir = param.getResultDir();
         this.writer = new ExCsvDataSetWriter(this.resultDir, param.getOutputEncoding());
         this.exportEmptyTable = param.isExportEmptyTable();
+    }
+
+    @Override
+    public void startDataSet() throws DataSetException {
+        this.writer.startDataSet();
+    }
+
+    @Override
+    public void startTable(ITableMetaData iTableMetaData) throws DataSetException {
+        this.writer.startTable(iTableMetaData);
+    }
+
+    @Override
+    public void row(Object[] objects) throws DataSetException {
+        this.writer.row(objects);
+    }
+
+    @Override
+    public void endTable() throws DataSetException {
+        this.writer.endTable();
+    }
+
+    @Override
+    public void endDataSet() throws DataSetException {
+        this.writer.endDataSet();
     }
 
     @Override
@@ -40,7 +67,9 @@ public class CsvDataSetWriterWrapper implements IDataSetWriter {
         if (!this.exportEmptyTable && aTable.getRowCount() == 0) {
             return;
         }
-        this.writer.write(new DefaultDataSet(aTable));
+        IDataSetProducer producer = new DataSetProducerAdapter(new DefaultDataSet(aTable));
+        producer.setConsumer(this);
+        producer.produce();
     }
 
     @Override
@@ -51,8 +80,6 @@ public class CsvDataSetWriterWrapper implements IDataSetWriter {
     private static class ExCsvDataSetWriter extends CsvDataSetWriter {
 
         private static final Logger logger = LoggerFactory.getLogger(CsvDataSetWriter.class);
-
-        private String activeTableName;
 
         private final String encoding;
 
@@ -65,7 +92,7 @@ public class CsvDataSetWriterWrapper implements IDataSetWriter {
 
         @Override
         public void startTable(ITableMetaData metaData) throws DataSetException {
-            this.activeTableName = metaData.getTableName();
+            String activeTableName = metaData.getTableName();
 
             try {
                 this.activeMetaData = metaData;
@@ -73,7 +100,7 @@ public class CsvDataSetWriterWrapper implements IDataSetWriter {
                 f.setAccessible(true);
                 f.set(this, metaData);
                 final File directory = new File(this.getTheDirectory());
-                File file = new File(directory, this.activeTableName + ".csv");
+                File file = new File(directory, activeTableName + ".csv");
                 logger.info("writeToFile(fileName={}) - start", file);
                 if (!directory.exists()) {
                     directory.mkdirs();
