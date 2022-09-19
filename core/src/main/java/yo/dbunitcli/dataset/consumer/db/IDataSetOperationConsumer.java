@@ -82,8 +82,12 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
                     try {
                         DataType dataType = column.getDataType();
                         Object value = row[this.metaData.getColumnIndex(columnName)];
-                        if ("".equals(value) && !this.allowEmptyFields) {
-                            this.handleColumnHasNoValue(this.metaData.getTableName(), columnName);
+                        if ("".equals(value)) {
+                            if (!this.allowEmptyFields) {
+                                this.handleColumnHasNoValue(this.metaData.getTableName(), columnName);
+                            } else {
+                                value = null;
+                            }
                         }
 
                         this.statement.addValue(value, dataType);
