@@ -34,6 +34,17 @@
       "total" : 10
     }
   }, {
+    "uid" : "f9a1881c7acf28094ade338903dcc645",
+    "name" : "yo.dbunitcli.application.DBIntegrationTest",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 10,
+      "unknown" : 0,
+      "total" : 10
+    }
+  }, {
     "uid" : "8e84c10bd9ee42c087cd6cfb1c7f6fa9",
     "name" : "yo.dbunitcli.application.ConvertTest",
     "statistic" : {
@@ -58,17 +69,6 @@
   }, {
     "uid" : "c01af63229e81e64b4cf059897a2ced7",
     "name" : "yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducerTest",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 6,
-      "unknown" : 0,
-      "total" : 6
-    }
-  }, {
-    "uid" : "f9a1881c7acf28094ade338903dcc645",
-    "name" : "yo.dbunitcli.application.DBIntegrationTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
