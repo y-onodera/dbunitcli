@@ -47,12 +47,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
         if (this.consumer != null) {
             ITableIterator itr = this.createIterator(false);
             while (itr.next()) {
-                ComparableTable table = (ComparableTable) itr.getTable();
-                this.consumer.startTable(table.getTableMetaData());
-                for (int i = 0, j = table.getRowCount(); i < j; i++) {
-                    this.consumer.row(table.getRow(i));
-                }
-                this.consumer.endTable();
+                this.consumer.write(itr.getTable());
             }
             this.consumer.endDataSet();
         }

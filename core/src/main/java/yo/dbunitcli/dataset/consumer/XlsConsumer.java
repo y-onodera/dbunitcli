@@ -2,10 +2,10 @@ package yo.dbunitcli.dataset.consumer;
 
 import com.google.common.base.Strings;
 import org.apache.poi.ss.usermodel.*;
-import org.dbunit.dataset.*;
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
-import org.dbunit.dataset.stream.DataSetProducerAdapter;
-import org.dbunit.dataset.stream.IDataSetProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
@@ -14,7 +14,6 @@ import yo.dbunitcli.dataset.IDataSetConsumer;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,8 +25,6 @@ public class XlsConsumer extends org.dbunit.dataset.excel.XlsDataSetWriter imple
     private final File resultDir;
 
     private String filename;
-
-    private DefaultDataSet dataSet;
 
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -56,7 +53,6 @@ public class XlsConsumer extends org.dbunit.dataset.excel.XlsDataSetWriter imple
     public void startDataSet() throws DataSetException {
         if (this.tableExport == TableExportType.SHEET) {
             this.workbook = this.createWorkbook();
-            this.dataSet = new DefaultDataSet();
             this.sheetIndex = 0;
         }
     }
@@ -146,51 +142,16 @@ public class XlsConsumer extends org.dbunit.dataset.excel.XlsDataSetWriter imple
     @Override
     public void open(String aFileName) {
         this.filename = aFileName;
-        if (this.tableExport == TableExportType.SHEET) {
-            this.dataSet = new DefaultDataSet();
-        }
-    }
-
-    @Override
-    public void write(ITable aTable) throws DataSetException {
-        if (!this.exportEmptyTable && aTable.getRowCount() == 0) {
-            return;
-        }
-        if (this.tableExport == TableExportType.SHEET) {
-            logger.info("addTable {}", aTable.getTableMetaData().getTableName());
-            this.dataSet.addTable(aTable);
-        } else {
-            this.dataSet = new DefaultDataSet();
-            this.dataSet.addTable(aTable);
-            try {
-                this.write(this.dataSet, null);
-            } catch (IOException e) {
-                throw new DataSetException(e);
-            }
-        }
-    }
-
-    @Override
-    public void close() throws DataSetException {
-        if (this.tableExport == TableExportType.SHEET) {
-            try {
-                this.write(this.dataSet, null);
-            } catch (IOException e) {
-                throw new DataSetException(e);
-            }
-        }
-    }
-
-    @Override
-    public void write(IDataSet dataSet, OutputStream out) throws IOException, DataSetException {
-        IDataSetProducer producer = new DataSetProducerAdapter(dataSet);
-        producer.setConsumer(this);
-        producer.produce();
     }
 
     @Override
     public File getDir() {
         return this.resultDir;
+    }
+
+    @Override
+    public boolean isExportEmptyTable() {
+        return this.exportEmptyTable;
     }
 
     protected String getFilename() {

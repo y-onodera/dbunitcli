@@ -4,7 +4,10 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.DefaultDataSet;
 import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.stream.DataSetProducerAdapter;
+import org.dbunit.dataset.stream.IDataSetProducer;
 import yo.dbunitcli.dataset.AddSettingColumns;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableTable;
@@ -54,8 +57,9 @@ public class DataSetCompare implements Compare {
         CompareResult compareResult = new CompareResult(this.oldDataSet.getSrc(), this.newDataSet.getSrc(), results);
         final ITable table = compareResult.toITable(RESULT_TABLE_NAME);
         this.writer.open(table.getTableMetaData().getTableName());
-        this.writer.write(table);
-        this.writer.close();
+        IDataSetProducer producer = new DataSetProducerAdapter(new DefaultDataSet(table));
+        producer.setConsumer(this.writer);
+        producer.produce();
         return compareResult;
     }
 

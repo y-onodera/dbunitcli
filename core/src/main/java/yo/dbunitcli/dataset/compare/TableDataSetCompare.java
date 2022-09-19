@@ -10,10 +10,7 @@ import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.CompareKeys;
 import yo.dbunitcli.dataset.IDataSetConsumer;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static yo.dbunitcli.dataset.compare.CompareDiff.getBuilder;
 
@@ -106,12 +103,12 @@ public class TableDataSetCompare {
     }
 
     protected List<CompareDiff> compareRow(ComparableTable oldTable, ComparableTable newTable, List<String> keyNames, IDataSetConsumer writer) throws DataSetException {
-        List<CompareDiff> results = Lists.newArrayList();
+        List<CompareDiff> results = new ArrayList<>();
         final int oldRows = oldTable.getRowCount();
         final int columnLength = Math.min(newTable.getTableMetaData().getColumns().length, oldTable.getTableMetaData().getColumns().length);
         Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists = newTable.getRows(keyNames);
         Map<Integer, List<CompareKeys>> modifyValues = Maps.newHashMap();
-        List<Integer> deleteRows = Lists.newArrayList();
+        List<Integer> deleteRows = new ArrayList<>();
         Set<CompareKeys> addRows = Sets.newHashSet(newRowLists.keySet());
         for (int rowNum = 0; rowNum < oldRows; rowNum++) {
             Object[] oldRow = oldTable.getRow(rowNum, columnLength);
@@ -127,10 +124,11 @@ public class TableDataSetCompare {
             return results;
         }
         writer.open(oldTable.getTableMetaData().getTableName());
+        writer.startDataSet();
         results.addAll(this.writeModifyValues(oldTable, newTable, keyNames, writer, columnLength, modifyValues));
         results.addAll(this.writeDeleteRows(oldTable, writer, deleteRows));
         results.addAll(this.writeAddRows(newTable, writer, newRowLists, addRows));
-        writer.close();
+        writer.endDataSet();
         return results;
     }
 

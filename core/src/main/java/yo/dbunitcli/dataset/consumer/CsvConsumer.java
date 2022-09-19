@@ -63,18 +63,13 @@ public class CsvConsumer implements IDataSetConsumer {
     }
 
     @Override
-    public void write(ITable aTable) throws DataSetException {
-        if (!this.exportEmptyTable && aTable.getRowCount() == 0) {
-            return;
-        }
-        IDataSetProducer producer = new DataSetProducerAdapter(new DefaultDataSet(aTable));
-        producer.setConsumer(this);
-        producer.produce();
+    public File getDir() {
+        return this.resultDir;
     }
 
     @Override
-    public File getDir() {
-        return this.resultDir;
+    public boolean isExportEmptyTable() {
+        return this.exportEmptyTable;
     }
 
     private static class ExCsvDataSetWriter extends CsvDataSetWriter {

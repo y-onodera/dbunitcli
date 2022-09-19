@@ -27,13 +27,13 @@ public class ComparableTableMapper {
 
     public void setConsumer(IDataSetConsumer consumer) throws DataSetException {
         this.consumer = consumer;
-        if (this.consumer != null && this.orderColumns.length == 0) {
+        if (this.isEnableRowProcessing()) {
             this.consumer.startTable(this.addSettingTableMetaData);
         }
     }
 
     public ComparableTable endTable() throws DataSetException {
-        if (this.consumer != null && this.orderColumns.length == 0) {
+        if (this.isEnableRowProcessing()) {
             this.consumer.endTable();
             return null;
         }
@@ -74,7 +74,7 @@ public class ComparableTableMapper {
 
     protected void addValue(Object[] applySetting) throws DataSetException {
         if (applySetting != null) {
-            if (this.consumer != null && this.orderColumns.length == 0) {
+            if (this.isEnableRowProcessing()) {
                 this.consumer.row(applySetting);
             } else {
                 this.values.add(applySetting);
@@ -84,6 +84,10 @@ public class ComparableTableMapper {
             }
         }
         this.addRowCount++;
+    }
+
+    private boolean isEnableRowProcessing() {
+        return this.consumer != null && this.orderColumns.length == 0 && this.consumer.isExportEmptyTable();
     }
 
 }
