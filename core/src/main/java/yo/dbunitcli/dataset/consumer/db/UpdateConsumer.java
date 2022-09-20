@@ -41,7 +41,7 @@ public class UpdateConsumer extends IDataSetOperationConsumer {
                     }
 
                     firstSet = false;
-                    columnName = this.getQualifiedName((String) null, column.getColumnName(), this.connection);
+                    columnName = this.getQualifiedName(null, column.getColumnName(), this.connection);
                     sqlBuffer.append(columnName);
                     sqlBuffer.append(" = ?");
                     columnList.add(column);

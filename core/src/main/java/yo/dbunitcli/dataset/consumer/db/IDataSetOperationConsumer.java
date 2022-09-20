@@ -115,6 +115,8 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
 
     @Override
     public void endTable() throws DataSetException {
+        this.ignoreMapping = null;
+        this.operationData = null;
         if (this.statement != null) {
             try {
                 this.statement.executeBatch();
@@ -125,7 +127,6 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
                 throw new DataSetException(e);
             }
         }
-
     }
 
     @Override

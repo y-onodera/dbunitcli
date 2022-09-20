@@ -18,12 +18,12 @@ public class DeleteConsumer extends IDataSetOperationConsumer {
         if (primaryKeys.length == 0) {
             throw new NoPrimaryKeyException(this.metaData.getTableName());
         } else {
-            StringBuffer sqlBuffer = new StringBuffer(128);
+            StringBuilder sqlBuffer = new StringBuilder(128);
             sqlBuffer.append("delete from ");
             sqlBuffer.append(this.getQualifiedName(this.connection.getSchema(), this.metaData.getTableName(), this.connection));
             sqlBuffer.append(" where ");
             for(int i = 0; i < primaryKeys.length; ++i) {
-                String columnName = this.getQualifiedName((String)null, primaryKeys[i].getColumnName(), this.connection);
+                String columnName = this.getQualifiedName(null, primaryKeys[i].getColumnName(), this.connection);
                 sqlBuffer.append(columnName);
                 sqlBuffer.append(" = ?");
                 if (i + 1 < primaryKeys.length) {
