@@ -76,9 +76,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                         } else {
                             originTable = this.connection.createTable(tableName);
                         }
-                        final SortedTable table = new SortedTable(originTable);
-                        table.setUseComparable(true);
-                        this.executeTable(table);
+                        this.executeTable(originTable);
                     } catch (SQLException | DataSetException e) {
                         throw new AssertionError(e);
                     }
@@ -101,13 +99,17 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         this.consumer.startTable(table.getTableMetaData());
         if (this.loadData) {
             Column[] columns = table.getTableMetaData().getColumns();
-            for (int row = 0, j = table.getRowCount(); row < j; row++) {
-                Object[] rows = new Object[columns.length];
-                int columnIndex = 0;
-                for (Column column : columns) {
-                    rows[columnIndex++] = table.getValue(row, column.getColumnName());
+            for (int row = 0; true; row++) {
+                try {
+                    Object[] rows = new Object[columns.length];
+                    int columnIndex = 0;
+                    for (Column column : columns) {
+                        rows[columnIndex++] = table.getValue(row, column.getColumnName());
+                    }
+                    this.consumer.row(rows);
+                } catch (RowOutOfBoundsException e) {
+                    break;
                 }
-                this.consumer.row(rows);
             }
         }
         this.consumer.endTable();

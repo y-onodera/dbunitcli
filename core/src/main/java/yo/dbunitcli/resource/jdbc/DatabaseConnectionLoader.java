@@ -3,6 +3,7 @@ package yo.dbunitcli.resource.jdbc;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseConnection;
+import org.dbunit.database.ForwardOnlyResultSetTableFactory;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.ext.mssql.MsSqlDataTypeFactory;
@@ -36,6 +37,7 @@ public class DatabaseConnectionLoader {
                 config.setProperty(DatabaseConfig.FEATURE_ALLOW_EMPTY_FIELDS, Boolean.TRUE);
                 config.setProperty(DatabaseConfig.FEATURE_SKIP_ORACLE_RECYCLEBIN_TABLES, Boolean.TRUE);
                 config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, Boolean.TRUE);
+                config.setProperty(DatabaseConfig.PROPERTY_RESULTSET_TABLE_FACTORY, new ForwardOnlyResultSetTableFactory());
             } else if (url.contains("jdbc:sqlserver")) {
                 Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
                 Connection conn = DriverManager.getConnection(url, user, pass);
@@ -44,6 +46,7 @@ public class DatabaseConnectionLoader {
                 config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new MsSqlDataTypeFactory());
                 config.setProperty(DatabaseConfig.FEATURE_ALLOW_EMPTY_FIELDS, Boolean.TRUE);
                 config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, Boolean.TRUE);
+                config.setProperty(DatabaseConfig.PROPERTY_RESULTSET_TABLE_FACTORY, new ForwardOnlyResultSetTableFactory());
             } else if (url.contains("jdbc:postgresql")) {
                 Class.forName("org.postgresql.Driver");
                 Connection conn = DriverManager.getConnection(url, user, pass);
@@ -53,6 +56,7 @@ public class DatabaseConnectionLoader {
                 config.setProperty(DatabaseConfig.FEATURE_ALLOW_EMPTY_FIELDS, Boolean.TRUE);
                 config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, Boolean.TRUE);
                 config.setProperty(DatabaseConfig.FEATURE_QUALIFIED_TABLE_NAMES, Boolean.FALSE);
+                config.setProperty(DatabaseConfig.PROPERTY_RESULTSET_TABLE_FACTORY, new ForwardOnlyResultSetTableFactory());
             } else {
                 throw new UnsupportedOperationException("unknown url :" + url);
             }

@@ -32,7 +32,7 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
     protected ITableMetaData metaData;
     protected BitSet ignoreMapping;
 
-    public IDataSetOperationConsumer(IDatabaseConnection connection) throws DataSetException {
+    public IDataSetOperationConsumer(IDatabaseConnection connection)  {
         this.connection = connection;
     }
 
