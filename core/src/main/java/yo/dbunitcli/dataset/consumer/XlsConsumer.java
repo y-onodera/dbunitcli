@@ -2,6 +2,7 @@ package yo.dbunitcli.dataset.consumer;
 
 import com.google.common.base.Strings;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
@@ -127,6 +128,9 @@ public class XlsConsumer extends org.dbunit.dataset.excel.XlsDataSetWriter imple
         try (FileOutputStream out = new FileOutputStream(writeTo)) {
             this.workbook.write(out);
             out.flush();
+            if(this.workbook instanceof SXSSFWorkbook){
+                ((SXSSFWorkbook)this.workbook).dispose();
+            }
         } catch (IOException e) {
             throw new DataSetException(e);
         }

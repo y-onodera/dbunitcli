@@ -13,18 +13,14 @@ public class XlsxConsumer extends XlsConsumer {
     }
 
     @Override
-    public void endDataSet() throws DataSetException {
-        super.endDataSet();
-    }
-
-    @Override
     protected String getFilename() {
         return super.getFilename() + "x";
     }
 
     @Override
     protected Workbook createWorkbook() {
-        Workbook result = new SXSSFWorkbook(1000);
+        SXSSFWorkbook result = new SXSSFWorkbook(1000);
+        result.setCompressTempFiles(true);
         Font font = result.getFontAt(0);
         font.setFontName("МＳ ゴシック");
         font.setFontHeightInPoints((short) 8);
