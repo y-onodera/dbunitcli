@@ -47,7 +47,7 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
     public void startDataSet() throws DataSetException {
         DatabaseConfig databaseConfig = this.connection.getConfig();
         this.factory = (IStatementFactory) databaseConfig.getProperty("http://www.dbunit.org/properties/statementFactory");
-        this.allowEmptyFields = connection.getConfig().getFeature("http://www.dbunit.org/features/allowEmptyFields");
+        this.allowEmptyFields = (Boolean) databaseConfig.getProperty("http://www.dbunit.org/features/allowEmptyFields");
     }
 
     @Override
