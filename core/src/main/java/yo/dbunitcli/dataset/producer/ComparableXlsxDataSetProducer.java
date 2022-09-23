@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger logger = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
     private IDataSetConsumer consumer = new DefaultConsumer();
     private final File[] src;
     private final TableNameFilter filter;
@@ -58,9 +58,10 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
 
     @Override
     public void produce() throws DataSetException {
+        LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         for (File sourceFile : this.src) {
-            logger.info("produceFromFile(theDataFile={}) - start", sourceFile);
+            LOGGER.info("produce - start fileName={}", sourceFile);
 
             try (OPCPackage pkg = OPCPackage.open(sourceFile)) {
                 ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);
@@ -72,16 +73,19 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
                     try (InputStream stream = iterator.next()) {
                         String sheetName = iterator.getSheetName();
                         if (this.filter.predicate(sheetName) && this.schema.contains(sheetName)) {
-                            logger.info("produceFromSheet - start {} [index={}]", sheetName, index++);
+                            LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
                             processSheet(styles, strings, this.schema.createHandler(this.consumer, sheetName, this.loadData), stream);
+                            LOGGER.info("produce - end   sheetName={},index={}", sheetName, index-1);
                         }
                     }
                 }
             } catch (IOException | SAXException | OpenXML4JException e) {
                 throw new DataSetException(e);
             }
+            LOGGER.info("produce - end   fileName={}", sourceFile);
         }
         this.consumer.endDataSet();
+        LOGGER.info("produce() - end");
     }
 
     public void processSheet(

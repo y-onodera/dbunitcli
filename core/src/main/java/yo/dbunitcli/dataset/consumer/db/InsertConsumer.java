@@ -10,7 +10,7 @@ import java.util.BitSet;
 
 public class InsertConsumer extends IDataSetOperationConsumer {
 
-    public InsertConsumer(IDatabaseConnection connection) throws DataSetException {
+    public InsertConsumer(IDatabaseConnection connection) {
         super(connection);
     }
 

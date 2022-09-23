@@ -59,6 +59,14 @@ public interface XlsxSchema {
             }
             return XlsxCellsToTableBuilder.NO_TARGET;
         }
+
+        @Override
+        public String toString() {
+            return "SimpleImpl{" +
+                    "rowsTableDefMap=" + rowsTableDefMap +
+                    ", cellsTableDefMap=" + cellsTableDefMap +
+                    '}';
+        }
     }
 
     interface Builder {

@@ -68,6 +68,15 @@ public class RowFilter {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "RowFilter{" +
+                "commonExpressions=" + commonExpressions +
+                ", byName=" + byName +
+                ", pattern=" + pattern +
+                '}';
+    }
+
     public static class Builder {
         private Set<String> commonExpressions = Sets.newHashSet();
 

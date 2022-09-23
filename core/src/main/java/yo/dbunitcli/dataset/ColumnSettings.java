@@ -152,6 +152,18 @@ public class ColumnSettings {
         return this.filterExpressions.getRowFilter(tableName);
     }
 
+    @Override
+    public String toString() {
+        return "ColumnSettings{" +
+                "tableNameMap=" + tableNameMap +
+                ", comparisonKeys=" + comparisonKeys +
+                ", excludeColumns=" + excludeColumns +
+                ", orderColumns=" + orderColumns +
+                ", expressionColumns=" + expressionColumns +
+                ", filterExpressions=" + filterExpressions +
+                '}';
+    }
+
     public interface Builder {
 
         ColumnSettings build(File setting) throws IOException;

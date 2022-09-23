@@ -2,12 +2,7 @@ package yo.dbunitcli.dataset.producer;
 
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
-import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTableMetaData;
-import org.dbunit.dataset.ITableMetaData;
-import org.dbunit.dataset.datatype.DataType;
-import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +16,8 @@ import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
 public class ComparableRegexSplitDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger logger = LoggerFactory.getLogger(ComparableRegexSplitDataSetProducer.class);
-    private IDataSetConsumer consumer = new DefaultConsumer();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableRegexSplitDataSetProducer.class);
+    private IDataSetConsumer consumer;
     private final File[] src;
     private final String encoding;
     private final Pattern dataSplitPattern;
@@ -64,8 +59,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
 
     @Override
     public void produce() throws DataSetException {
-        logger.info("produce() - start");
-
+        LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         for (File file : this.src) {
             if (this.filter.predicate(file.getAbsolutePath()) && file.length() > 0) {
@@ -77,14 +71,13 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
             }
         }
         this.consumer.endDataSet();
-
+        LOGGER.info("produce() - end");
     }
 
     protected void executeQuery(File aFile) throws DataSetException, IOException {
-        logger.info("produceFromFile(theDataFile={}) - start", aFile);
+        LOGGER.info("produce - start fileName={}", aFile);
         if (this.headerNames != null) {
-            ITableMetaData tableMetaData = this.createMetaData(aFile, this.headerNames);
-            this.consumer.startTable(tableMetaData);
+            this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
             if (!this.loadData) {
                 this.consumer.endTable();
                 return;
@@ -93,31 +86,18 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
         int lineNum = 0;
         for (String s : Files.readLines(aFile, Charset.forName(this.getEncoding()))) {
             if (lineNum == 0 && this.headerNames == null) {
-                String[] header = headerSplitPattern.split(s);
-                ITableMetaData tableMetaData = this.createMetaData(aFile, header);
-                this.consumer.startTable(tableMetaData);
+                this.consumer.startTable(this.createMetaData(aFile, this.headerSplitPattern.split(s)));
                 if (!this.loadData) {
                     break;
                 }
             } else {
-                Object[] row = this.dataSplitPattern.split(s);
-                this.consumer.row(row);
+                this.consumer.row(this.dataSplitPattern.split(s));
             }
             lineNum++;
         }
+        LOGGER.info("produce - rows={}", lineNum);
         this.consumer.endTable();
-    }
-
-    protected ITableMetaData createMetaData(File aFile, String[] header) {
-        Column[] columns = new Column[header.length];
-
-        for (int i = 0; i < header.length; i++) {
-            String columnName = header[i];
-            columnName = columnName.trim();
-            columns[i] = new Column(columnName, DataType.UNKNOWN);
-        }
-        String tableName = aFile.getName().substring(0, aFile.getName().indexOf("."));
-        return new DefaultTableMetaData(tableName, columns);
+        LOGGER.info("produce - end   fileName={}", aFile);
     }
 
     public String getEncoding() {

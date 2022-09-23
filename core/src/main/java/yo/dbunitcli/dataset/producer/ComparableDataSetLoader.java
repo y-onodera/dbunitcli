@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class ComparableDataSetLoader {
 
-    private static final Logger logger = LoggerFactory.getLogger(ComparableDataSetLoader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDataSetLoader.class);
 
     private final Parameter parameter;
 
@@ -23,7 +23,7 @@ public class ComparableDataSetLoader {
     }
 
     public ComparableDataSet loadDataSet(ComparableDataSetParam param) throws DataSetException {
-        logger.info("create DataSetLoader from {}", param);
+        LOGGER.info("create DataSetLoader from {}", param);
         return new ComparableDataSetImpl(this.getComparableDataSetProducer(param));
     }
 

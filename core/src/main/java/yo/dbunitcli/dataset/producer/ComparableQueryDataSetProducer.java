@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer {
 
-    private static final Logger logger = LoggerFactory.getLogger(ComparableQueryDataSetProducer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableQueryDataSetProducer.class);
     private final Parameter parameter;
 
     public ComparableQueryDataSetProducer(ComparableDataSetParam param, Parameter parameter) throws DataSetException {
@@ -25,7 +25,7 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
 
     @Override
     public void produce() throws DataSetException {
-        logger.info("produce() - start");
+        LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         for (File file : this.src) {
             if (this.filter.predicate(file.getAbsolutePath()) && file.length() > 0) {
@@ -37,6 +37,7 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
             }
         }
         this.consumer.endDataSet();
+        LOGGER.info("produce() - end");
     }
 
     public Map<String, Object> getParameter() {
@@ -49,10 +50,9 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
 
     protected void executeQuery(File aFile) throws SQLException, DataSetException, IOException {
         String query = this.loadQuery(aFile);
-        logger.info("produceFromQuery(query={}) - start", query);
-        String tableName = aFile.getName().substring(0, aFile.getName().indexOf("."));
-        ITable table = this.connection.createQueryTable(tableName, query);
-        this.executeTable(table);
+        LOGGER.info("produce - start fileName={},query={}", aFile.getName(), query);
+        this.executeTable(this.connection.createQueryTable(this.getTableName(aFile), query));
+        LOGGER.info("produce - end   fileName={}", aFile.getName());
     }
 
     protected String loadQuery(File aFile) throws IOException {

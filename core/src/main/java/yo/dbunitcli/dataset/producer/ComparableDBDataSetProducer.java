@@ -3,7 +3,6 @@ package yo.dbunitcli.dataset.producer;
 import com.google.common.io.Files;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.*;
-import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +18,9 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger logger = LoggerFactory.getLogger(ComparableDBDataSetProducer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDBDataSetProducer.class);
     protected final IDatabaseConnection connection;
-    protected IDataSetConsumer consumer = new DefaultConsumer();
+    protected IDataSetConsumer consumer;
     protected final File[] src;
     protected final String encoding;
     protected final TableNameFilter filter;
@@ -54,7 +53,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
 
     @Override
     public void produce() throws DataSetException {
-        logger.info("produce() - start");
+        LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         this.loadJdbcMetadata();
         Stream.of(this.src)
@@ -82,6 +81,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                     }
                 });
         this.consumer.endDataSet();
+        LOGGER.info("produce() - end");
     }
 
     protected void loadJdbcMetadata() {
@@ -95,11 +95,12 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     protected void executeTable(ITable table) throws DataSetException {
-        logger.info("produceFromDB(table={}) - start", table.getTableMetaData().getTableName());
+        LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
         this.consumer.startTable(table.getTableMetaData());
         if (this.loadData) {
             Column[] columns = table.getTableMetaData().getColumns();
-            for (int row = 0; true; row++) {
+            int row = 0;
+            for (; true; row++) {
                 try {
                     Object[] rows = new Object[columns.length];
                     int columnIndex = 0;
@@ -111,7 +112,9 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                     break;
                 }
             }
+            LOGGER.info("produce - rows={}", row);
         }
         this.consumer.endTable();
+        LOGGER.info("produce - end   databaseTable={}", table.getTableMetaData().getTableName());
     }
 }

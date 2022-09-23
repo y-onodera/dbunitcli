@@ -6,6 +6,7 @@ import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -53,6 +54,16 @@ public class XlsxRowsTableDefine {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return "XlsxRowsTableDefine{" +
+                "tableName='" + tableName + '\'' +
+                ", tableMetaData=" + tableMetaData +
+                ", dataStartRow=" + dataStartRow +
+                ", cellIndexes=" + Arrays.toString(cellIndexes) +
+                ", breakKey=" + Arrays.toString(breakKey) +
+                '}';
+    }
 
     public static class Builder {
         private String tableName;

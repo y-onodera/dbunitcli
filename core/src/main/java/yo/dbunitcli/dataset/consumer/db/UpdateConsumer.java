@@ -12,7 +12,7 @@ import java.util.List;
 
 public class UpdateConsumer extends IDataSetOperationConsumer {
 
-    public UpdateConsumer(IDatabaseConnection connection) throws DataSetException {
+    public UpdateConsumer(IDatabaseConnection connection) {
         super(connection);
     }
 

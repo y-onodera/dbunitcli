@@ -19,7 +19,7 @@ public class RefreshConsumer extends IDataSetOperationConsumer {
     private PreparedStatement countStatement;
     private boolean exists;
 
-    public RefreshConsumer(IDatabaseConnection connection) throws DataSetException {
+    public RefreshConsumer(IDatabaseConnection connection) {
         super(connection);
         this.insertConsumer = new InsertConsumer(connection);
         this.updateConsumer = new UpdateConsumer(connection);

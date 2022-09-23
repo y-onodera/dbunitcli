@@ -25,12 +25,11 @@ import java.util.List;
 
 public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWrapper implements ComparableDataSetProducer, HSSFListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableXlsDataSetProducer.class);
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
 
     private final File[] src;
-    private String tableName;
     private boolean isStartTable;
 
     private int lastRowNumber;
@@ -69,12 +68,13 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
 
     @Override
     public void produce() throws DataSetException {
+        LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         for (File sourceFile : this.src) {
             if (!filter.predicate(sourceFile.getName())) {
                 continue;
             }
-            logger.info("produceFromFile(theDataFile={}) - start", sourceFile);
+            LOGGER.info("produce - start fileName={}", sourceFile);
 
             try (POIFSFileSystem newFs = new POIFSFileSystem(sourceFile)) {
                 this.isStartTable = false;
@@ -94,11 +94,14 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                     this.consumer.endTable();
                     this.createRandomCellTable();
                 }
+                LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex].getSheetname(), this.sheetIndex);
             } catch (IOException e) {
                 throw new DataSetException(e);
             }
+            LOGGER.info("produce - end   fileName={}", sourceFile);
         }
         this.consumer.endDataSet();
+        LOGGER.info("produce() - end");
     }
 
     @Override
@@ -123,10 +126,12 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                     this.sheetIndex++;
                     if (this.orderedBSRs == null) {
                         this.orderedBSRs = BoundSheetRecord.orderByBofPosition(this.boundSheetRecords);
+                    } else {
+                        LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex - 1].getSheetname(), this.sheetIndex - 1);
                     }
-                    this.tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
-                    this.handleSheetStart(this.tableName);
-                    logger.info("produceFromSheet - start {} [index={}]", this.tableName, this.sheetIndex);
+                    String tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
+                    this.handleSheetStart(tableName);
+                    LOGGER.info("produce - start sheetName={},index={}", tableName, this.sheetIndex);
                 }
                 break;
 

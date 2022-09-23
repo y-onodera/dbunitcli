@@ -5,7 +5,6 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
-import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +21,10 @@ import java.util.Map;
 
 public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProducer {
 
-    private static final Logger logger = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
     private static final String URL = "jdbc:h2:mem:test;MODE=Oracle";
-    private IDataSetConsumer consumer = new DefaultConsumer();
+    private IDataSetConsumer consumer;
     private final File[] src;
-    private final String encoding;
     private final Parameter parameter;
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
@@ -39,7 +37,6 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
         } else {
             this.src = new File[]{this.param.getSrc()};
         }
-        this.encoding = param.getEncoding();
         this.filter = param.getTableNameFilter();
         this.parameter = parameter;
         this.loadData = this.param.isLoadData();
@@ -65,7 +62,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
 
     @Override
     public void produce() throws DataSetException {
-        logger.info("produce() - start");
+        LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         for (File file : this.src) {
             if (this.filter.predicate(file.getAbsolutePath()) && file.length() > 0) {
@@ -77,11 +74,12 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
             }
         }
         this.consumer.endDataSet();
+        LOGGER.info("produce() - end");
     }
 
     protected void executeQuery(File aFile) throws SQLException, DataSetException, IOException {
         String query = this.getTemplateLoader().render(aFile, this.getParameter());
-        logger.info("produceFromQuery(query={}) - start", query);
+        LOGGER.info("produce - start fileName={},query={}", aFile, query);
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt = conn.createStatement();
              ResultSet rst = stmt.executeQuery(query)
@@ -89,14 +87,11 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
             ResultSetMetaData metaData = rst.getMetaData();
             Column[] columns = new Column[metaData.getColumnCount()];
             for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                String columnName = metaData.getColumnName(i);
-                columnName = columnName.trim();
-                columns[i - 1] = new Column(columnName, DataType.UNKNOWN);
+                columns[i - 1] = new Column(metaData.getColumnName(i).trim(), DataType.UNKNOWN);
             }
-            String tableName = aFile.getName().substring(0, aFile.getName().indexOf("."));
-            ITableMetaData tableMetaData = new DefaultTableMetaData(tableName, columns);
-            this.consumer.startTable(tableMetaData);
+            this.consumer.startTable(this.createMetaData(aFile, columns));
             if (this.loadData) {
+                int readRows = 0;
                 while (rst.next()) {
                     Object[] row = new Object[metaData.getColumnCount()];
                     for (int i = 1; i <= metaData.getColumnCount(); i++) {
@@ -107,9 +102,12 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
                         }
                     }
                     this.consumer.row(row);
+                    readRows++;
                 }
+                LOGGER.info("produce - rows={}", readRows);
             }
             this.consumer.endTable();
+            LOGGER.info("produce - end   fileName={}", aFile);
         }
     }
 }

@@ -71,6 +71,17 @@ public class XlsxCellsTableDefine {
         return this.tableIndexMap.keySet();
     }
 
+    @Override
+    public String toString() {
+        return "XlsxCellsTableDefine{" +
+                "tableName='" + tableName + '\'' +
+                ", rowCount=" + rowCount +
+                ", columnCount=" + columnCount +
+                ", tableMetaData=" + tableMetaData +
+                ", tableIndexMap=" + tableIndexMap +
+                '}';
+    }
+
     public static class Builder {
         private String tableName;
         private List<String> header = Lists.newArrayList();

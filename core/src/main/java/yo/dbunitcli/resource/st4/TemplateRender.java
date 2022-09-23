@@ -13,15 +13,15 @@ import java.util.Map;
 
 public class TemplateRender {
 
-    private File templateGroup;
+    private final File templateGroup;
 
-    private String templateParameterAttribute;
+    private final String templateParameterAttribute;
 
-    private char templateVarStart;
+    private final char templateVarStart;
 
-    private char templateVarStop;
+    private final char templateVarStop;
 
-    private String encoding;
+    private final String encoding;
 
     public TemplateRender() {
         this(new Builder());
@@ -128,6 +128,17 @@ public class TemplateRender {
         }
         token = this.getTemplateVarStart() + token + this.getTemplateVarStop();
         return token;
+    }
+
+    @Override
+    public String toString() {
+        return "TemplateRender{" +
+                "templateGroup=" + templateGroup +
+                ", templateParameterAttribute='" + templateParameterAttribute + '\'' +
+                ", templateVarStart=" + templateVarStart +
+                ", templateVarStop=" + templateVarStop +
+                ", encoding='" + encoding + '\'' +
+                '}';
     }
 
     public static class Builder {

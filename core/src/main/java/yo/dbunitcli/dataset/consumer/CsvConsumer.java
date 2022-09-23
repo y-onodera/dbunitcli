@@ -2,8 +2,6 @@ package yo.dbunitcli.dataset.consumer;
 
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.csv.CsvDataSetWriter;
-import org.dbunit.dataset.stream.DataSetProducerAdapter;
-import org.dbunit.dataset.stream.IDataSetProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
@@ -74,11 +72,15 @@ public class CsvConsumer implements IDataSetConsumer {
 
     private static class ExCsvDataSetWriter extends CsvDataSetWriter {
 
-        private static final Logger logger = LoggerFactory.getLogger(CsvDataSetWriter.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(ExCsvDataSetWriter.class);
 
         private final String encoding;
 
         private ITableMetaData activeMetaData;
+
+        private int writeRows;
+
+        private File file;
 
         public ExCsvDataSetWriter(File theDirectory, String encoding) {
             super(theDirectory);
@@ -91,20 +93,21 @@ public class CsvConsumer implements IDataSetConsumer {
 
             try {
                 this.activeMetaData = metaData;
+                this.writeRows = 0;
                 Field f = CsvDataSetWriter.class.getDeclaredField("_activeMetaData");
                 f.setAccessible(true);
                 f.set(this, metaData);
                 final File directory = new File(this.getTheDirectory());
-                File file = new File(directory, activeTableName + ".csv");
-                logger.info("writeToFile(fileName={}) - start", file);
+                this.file = new File(directory, activeTableName + ".csv");
+                LOGGER.info("consume - start fileName={}", this.file);
                 if (!directory.exists()) {
                     directory.mkdirs();
                 }
-                if (file.exists()) {
-                    file.delete();
+                if (this.file.exists()) {
+                    this.file.delete();
                 }
-                file.createNewFile();
-                FileOutputStream fos = new FileOutputStream(file);
+                this.file.createNewFile();
+                FileOutputStream fos = new FileOutputStream(this.file);
                 this.setWriter(new OutputStreamWriter(fos, this.encoding));
                 this.writeColumnNames();
                 this.getWriter().write(System.getProperty("line.separator"));
@@ -113,18 +116,28 @@ public class CsvConsumer implements IDataSetConsumer {
             }
         }
 
-        private void writeColumnNames() throws DataSetException, IOException {
-            logger.debug("writeColumnNames() - start");
-            Column[] columns = this.activeMetaData.getColumns();
+        @Override
+        public void row(Object[] values) throws DataSetException {
+            super.row(values);
+            this.writeRows++;
+        }
 
+        @Override
+        public void endTable() throws DataSetException {
+            LOGGER.info("consume - rows={}", this.writeRows);
+            LOGGER.info("consume - end   fileName={}", this.file);
+            super.endTable();
+        }
+
+        private void writeColumnNames() throws DataSetException, IOException {
+            LOGGER.debug("writeColumnNames() - start");
+            Column[] columns = this.activeMetaData.getColumns();
             for (int i = 0; i < columns.length; ++i) {
-                String columnName = columns[i].getColumnName();
-                this.getWriter().write(this.quoted(columnName));
+                this.getWriter().write(this.quoted(columns[i].getColumnName()));
                 if (i < columns.length - 1) {
                     this.getWriter().write(",");
                 }
             }
-
         }
 
         private String quoted(String stringValue) {

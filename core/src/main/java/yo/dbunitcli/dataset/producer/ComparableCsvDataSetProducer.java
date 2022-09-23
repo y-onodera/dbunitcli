@@ -1,17 +1,12 @@
 package yo.dbunitcli.dataset.producer;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.common.handlers.*;
 import org.dbunit.dataset.csv.CsvDataSetWriter;
 import org.dbunit.dataset.csv.CsvParserException;
 import org.dbunit.dataset.csv.CsvParserImpl;
-import org.dbunit.dataset.datatype.DataType;
-import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +19,9 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger logger = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
     private final String extension;
-    private IDataSetConsumer consumer = new DefaultConsumer();
+    private IDataSetConsumer consumer;
     private final File[] src;
     private final String encoding;
     private final TableNameFilter filter;
@@ -61,7 +56,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
 
     @Override
     public void produce() throws DataSetException {
-        logger.info("produce() - start");
+        LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         for (File file : this.src) {
             if (this.filter.predicate(file.getAbsolutePath()) && file.length() > 0) {
@@ -73,10 +68,11 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             }
         }
         this.consumer.endDataSet();
+        LOGGER.info("produce() - end");
     }
 
     private void produceFromFile(File theDataFile) throws DataSetException, CsvParserException {
-        logger.info("produceFromFile(theDataFile={}) - start", theDataFile);
+        LOGGER.info("produce - start fileName={}", theDataFile);
         try {
             List<List<Object>> readData = new CsvParser().setDelimiter(this.delimiter).parse(
                     new BufferedReader(new InputStreamReader(new FileInputStream(theDataFile), this.encoding))
@@ -84,9 +80,9 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             ITableMetaData metaData;
             int startRow = 1;
             if (this.headerNames == null) {
-                metaData = this.createTableMetaData(theDataFile, readData.get(0));
+                metaData = this.createMetaData(theDataFile, readData.get(0).toArray(new String[]{}));
             } else {
-                metaData = this.createTableMetaData(theDataFile, Lists.newArrayList(this.headerNames));
+                metaData = this.createMetaData(theDataFile, this.headerNames);
                 startRow = 0;
             }
             this.consumer.startTable(metaData);
@@ -94,36 +90,21 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
                 for (int i = startRow; i < readData.size(); i++) {
                     this.consumer.row(this.loadData(readData, i));
                 }
+                LOGGER.info("produce - rows={}", readData.size() - startRow);
             }
             this.consumer.endTable();
         } catch (PipelineException | IOException | IllegalInputCharacterException | NoSuchFieldException | IllegalAccessException e) {
             throw new DataSetException(e);
         }
+        LOGGER.info("produce - end   fileName={}", theDataFile);
     }
 
     protected Object[] loadData(List<List<Object>> readData, int i) {
-        List<Object> rowList = readData.get(i);
-        Object[] row = rowList.toArray();
+        Object[] row = readData.get(i).toArray();
         for (int col = 0; col < row.length; col++) {
             row[col] = row[col].equals(CsvDataSetWriter.NULL) ? null : row[col];
         }
         return row;
-    }
-
-    protected ITableMetaData createTableMetaData(File theDataFile, List<Object> readData) {
-        Column[] columns = this.loadColumns(readData);
-        String tableName = theDataFile.getName().substring(0, theDataFile.getName().indexOf("." + this.extension));
-        return new DefaultTableMetaData(tableName, columns);
-    }
-
-    protected Column[] loadColumns(List<Object> readColumns) {
-        Column[] columns = new Column[readColumns.size()];
-        for (int i = 0; i < readColumns.size(); i++) {
-            String columnName = (String) readColumns.get(i);
-            columnName = columnName.trim();
-            columns[i] = new Column(columnName, DataType.UNKNOWN);
-        }
-        return columns;
     }
 
     static class CsvParser extends CsvParserImpl {
@@ -152,10 +133,11 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             f.set(this, pipeline);
             return this;
         }
+
     }
 
     private static class IgnoreDelimiterWhitespacesHandler extends AbstractPipelineComponent {
-        private static final Logger logger = LoggerFactory.getLogger(IgnoreDelimiterWhitespacesHandler.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(IgnoreDelimiterWhitespacesHandler.class);
         static Field HANDLE;
 
         static {
@@ -173,13 +155,13 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             this.delimiter = delimiter;
         }
 
-        public static final PipelineComponent IGNORE(char delimiter) {
-            logger.debug("IGNORE() - start");
+        public static PipelineComponent IGNORE(char delimiter) {
+            LOGGER.debug("IGNORE() - start");
             return createPipelineComponent(new IgnoreDelimiterWhitespacesHandler(delimiter), new Ignore());
         }
 
-        public static final PipelineComponent ACCEPT(char delimiter) {
-            logger.debug("ACCEPT() - start");
+        public static PipelineComponent ACCEPT(char delimiter) {
+            LOGGER.debug("ACCEPT() - start");
             return createPipelineComponent(new IgnoreDelimiterWhitespacesHandler(delimiter), new Accept());
         }
 
@@ -197,8 +179,8 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         }
 
         public boolean canHandle(char c) throws IllegalInputCharacterException {
-            if (logger.isDebugEnabled()) {
-                logger.debug("canHandle(c={}) - start", c);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("canHandle(c={}) - start", c);
             }
             return c != delimiter && Character.isWhitespace(c);
         }

@@ -31,8 +31,9 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
     protected IPreparedBatchStatement statement;
     protected ITableMetaData metaData;
     protected BitSet ignoreMapping;
+    protected int writeRows;
 
-    public IDataSetOperationConsumer(IDatabaseConnection connection)  {
+    public IDataSetOperationConsumer(IDatabaseConnection connection) {
         this.connection = connection;
     }
 
@@ -53,7 +54,9 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
     @Override
     public void startTable(ITableMetaData iTableMetaData) throws DataSetException {
         try {
-            metaData = this.getOperationMetaData(iTableMetaData);
+            this.metaData = this.getOperationMetaData(iTableMetaData);
+            this.writeRows = 0;
+            LOGGER.info("consume - start databaseTable={},className={}", this.metaData.getTableName(), this.getClass().getSimpleName());
         } catch (DatabaseUnitException | SQLException e) {
             throw new DataSetException(e);
         }
@@ -99,6 +102,7 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
                 }
             }
             this.statement.addBatch();
+            this.writeRows++;
         } catch (SQLException var30) {
             String msg = "Exception processing table name='" + this.metaData.getTableName() + "'";
             if (this.statement != null) {
@@ -127,6 +131,8 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
                 throw new DataSetException(e);
             }
         }
+        LOGGER.info("consume - rows={},className={}", this.writeRows, this.getClass().getSimpleName());
+        LOGGER.info("consume - end   databaseTable={},className={}", this.metaData.getTableName(), this.getClass().getSimpleName());
     }
 
     @Override

@@ -3,6 +3,8 @@ package yo.dbunitcli.dataset;
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +17,7 @@ public class ComparableTableMapper {
     private final List<AddSettingTableMetaData> settingChain = Lists.newArrayList();
     private final List<Integer> filteredRowIndexes;
     private boolean startTable;
-    private int addRowCount = 0;
+    private int addCount = 0;
     private IDataSetConsumer consumer;
 
     public ComparableTableMapper(AddSettingTableMetaData metaData, Column[] orderColumns, List<AddSettingTableMetaData> settings) {
@@ -85,11 +87,11 @@ public class ComparableTableMapper {
             } else {
                 this.values.add(applySetting);
                 if (this.addSettingTableMetaData.hasRowFilter()) {
-                    this.filteredRowIndexes.add(this.addRowCount);
+                    this.filteredRowIndexes.add(this.addCount);
                 }
             }
         }
-        this.addRowCount++;
+        this.addCount++;
     }
 
     private boolean isEnableRowProcessing() {

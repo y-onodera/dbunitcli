@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class ComparableDataSetImpl extends AbstractDataSet implements ComparableDataSet {
 
-    private static final Logger logger = LoggerFactory.getLogger(ComparableDataSetImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDataSetImpl.class);
 
     private ComparableTableMapper mapper;
 
@@ -34,7 +34,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     @Override
     public void startDataSet() throws DataSetException {
-        logger.debug("startDataSet() - start");
+        LOGGER.debug("startDataSet() - start");
         this._orderedTableNameMap = super.createTableNameMap();
         if (this.consumer != null) {
             this.consumer.startDataSet();
@@ -43,7 +43,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     @Override
     public void endDataSet() throws DataSetException {
-        logger.debug("endDataSet() - start");
+        LOGGER.debug("endDataSet() - start");
         if (this.consumer != null) {
             ITableIterator itr = this.createIterator(false);
             while (itr.next()) {
@@ -51,19 +51,19 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
             }
             this.consumer.endDataSet();
         }
-        logger.debug("endDataSet() - the final tableMap is: " + this._orderedTableNameMap);
+        LOGGER.debug("endDataSet() - the final tableMap is: " + this._orderedTableNameMap);
     }
 
     @Override
     public void startTable(ITableMetaData metaData) throws DataSetException {
-        logger.debug("startTable(metaData={}) - start", metaData);
+        LOGGER.debug("startTable(metaData={}) - start", metaData);
         this.mapper = this.compareSettings.createMapper(metaData);
         this.mapper.setConsumer(this.consumer);
     }
 
     @Override
     public void endTable() throws DataSetException {
-        logger.debug("endTable() - start");
+        LOGGER.debug("endTable() - start");
         String resultTableName = this.mapper.getTargetTableName();
         if (this._orderedTableNameMap.containsTable(resultTableName)) {
             ComparableTable existingTable = (ComparableTable) this._orderedTableNameMap.get(resultTableName);
@@ -80,7 +80,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     @Override
     public void row(Object[] values) throws DataSetException {
-        logger.debug("row(values={}) - start", values);
+        LOGGER.debug("row(values={}) - start", values);
         this.mapper.addRow(values);
     }
 
@@ -116,8 +116,8 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     @Override
     protected ITableIterator createIterator(boolean reversed) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("createIterator(reversed={}) - start", reversed);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("createIterator(reversed={}) - start", reversed);
         }
         return new DefaultTableIterator((ITable[]) (this._orderedTableNameMap.orderedValues().toArray(new ITable[0])), reversed);
     }

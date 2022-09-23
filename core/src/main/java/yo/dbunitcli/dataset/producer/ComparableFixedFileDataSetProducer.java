@@ -6,7 +6,6 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
-import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +23,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ComparableFixedFileDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger logger = LoggerFactory.getLogger(ComparableFixedFileDataSetProducer.class);
-    private IDataSetConsumer consumer = new DefaultConsumer();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableFixedFileDataSetProducer.class);
+    private IDataSetConsumer consumer;
     private final File[] src;
     private final String encoding;
-    private String[] headerNames;
-    private List<Integer> columnLengths;
+    private final String[] headerNames;
+    private final List<Integer> columnLengths;
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final boolean loadData;
@@ -62,8 +61,7 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
 
     @Override
     public void produce() throws DataSetException {
-        logger.info("produce() - start");
-
+        LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         for (File file : this.src) {
             if (this.filter.predicate(file.getAbsolutePath()) && file.length() > 0) {
@@ -75,22 +73,22 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
             }
         }
         this.consumer.endDataSet();
-
+        LOGGER.info("produce() - end");
     }
 
     protected void executeQuery(File aFile) throws DataSetException, IOException {
-        logger.info("produceFromFile(theDataFile={}) - start", aFile);
-        ITableMetaData tableMetaData = this.createMetaData(aFile, this.headerNames);
-        this.consumer.startTable(tableMetaData);
-        if (!this.loadData) {
-            this.consumer.endTable();
-            return;
-        }
-        for (String s : Files.readLines(aFile, Charset.forName(this.getEncoding()))) {
-            Object[] row = this.split(s);
-            this.consumer.row(row);
+        LOGGER.info("produce - start fileName={}", aFile);
+        this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
+        if (this.loadData) {
+            int rows = 0;
+            for (String s : Files.readLines(aFile, Charset.forName(this.getEncoding()))) {
+                this.consumer.row(this.split(s));
+                rows++;
+            }
+            LOGGER.info("produce - rows={}", rows);
         }
         this.consumer.endTable();
+        LOGGER.info("produce - end   fileName={}", aFile);
     }
 
     protected Object[] split(String s) throws UnsupportedEncodingException {
@@ -104,18 +102,6 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
             from = from + columnLengths.get(index);
         }
         return result;
-    }
-
-    protected ITableMetaData createMetaData(File aFile, String[] header) {
-        Column[] columns = new Column[header.length];
-
-        for (int i = 0; i < header.length; i++) {
-            String columnName = header[i];
-            columnName = columnName.trim();
-            columns[i] = new Column(columnName, DataType.UNKNOWN);
-        }
-        String tableName = aFile.getName().substring(0, aFile.getName().indexOf("."));
-        return new DefaultTableMetaData(tableName, columns);
     }
 
     public String getEncoding() {

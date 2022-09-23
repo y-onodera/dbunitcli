@@ -8,7 +8,7 @@ import org.dbunit.operation.OperationData;
 
 public class DeleteConsumer extends IDataSetOperationConsumer {
 
-    public DeleteConsumer(IDatabaseConnection connection) throws DataSetException {
+    public DeleteConsumer(IDatabaseConnection connection) {
         super(connection);
     }
 
@@ -22,7 +22,7 @@ public class DeleteConsumer extends IDataSetOperationConsumer {
             sqlBuffer.append("delete from ");
             sqlBuffer.append(this.getQualifiedName(this.connection.getSchema(), this.metaData.getTableName(), this.connection));
             sqlBuffer.append(" where ");
-            for(int i = 0; i < primaryKeys.length; ++i) {
+            for (int i = 0; i < primaryKeys.length; ++i) {
                 String columnName = this.getQualifiedName(null, primaryKeys[i].getColumnName(), this.connection);
                 sqlBuffer.append(columnName);
                 sqlBuffer.append(" = ?");

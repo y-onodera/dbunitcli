@@ -8,7 +8,7 @@ import org.dbunit.dataset.ITableMetaData;
 import java.sql.SQLException;
 
 public class CleanInsertConsumer extends InsertConsumer {
-    public CleanInsertConsumer(IDatabaseConnection connection) throws DataSetException {
+    public CleanInsertConsumer(IDatabaseConnection connection) {
         super(connection);
     }
 

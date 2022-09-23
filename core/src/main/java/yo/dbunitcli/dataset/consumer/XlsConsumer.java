@@ -21,7 +21,7 @@ import java.util.Date;
 
 public class XlsConsumer extends org.dbunit.dataset.excel.XlsDataSetWriter implements IDataSetConsumer {
 
-    private static final Logger logger = LoggerFactory.getLogger(XlsConsumer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(XlsConsumer.class);
 
     private final File resultDir;
 
@@ -60,7 +60,7 @@ public class XlsConsumer extends org.dbunit.dataset.excel.XlsDataSetWriter imple
 
     @Override
     public void startTable(ITableMetaData metaData) throws DataSetException {
-        logger.info("writeToSheet(sheetName={}) - start", metaData.getTableName());
+        LOGGER.info("consume - start sheetName={}", metaData.getTableName());
         this.metaData = metaData;
         if (this.tableExport == TableExportType.BOOK) {
             this.filename = this.metaData.getTableName();
@@ -72,9 +72,7 @@ public class XlsConsumer extends org.dbunit.dataset.excel.XlsDataSetWriter imple
         Row headerRow = this.sheet.createRow(0);
         Column[] columns = this.metaData.getColumns();
         for (int i = 0, j = columns.length; i < j; i++) {
-            Column column = columns[i];
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(column.getColumnName());
+            headerRow.createCell(i).setCellValue(columns[i].getColumnName());
         }
     }
 
@@ -104,6 +102,8 @@ public class XlsConsumer extends org.dbunit.dataset.excel.XlsDataSetWriter imple
 
     @Override
     public void endTable() throws DataSetException {
+        LOGGER.info("consume - rows={} ", this.rowIndex - 1);
+        LOGGER.info("consume - end   sheetName={}", this.metaData.getTableName());
         if (this.tableExport == TableExportType.SHEET) {
             this.sheetIndex++;
         } else {
@@ -121,19 +121,20 @@ public class XlsConsumer extends org.dbunit.dataset.excel.XlsDataSetWriter imple
 
     protected void flush() throws DataSetException {
         File writeTo = new File(this.resultDir, getFilename());
-        logger.info("writeToFile(fileName={}) - start", writeTo);
+        LOGGER.info("flush - start fileName={}", writeTo);
         if (!this.resultDir.exists()) {
             this.resultDir.mkdirs();
         }
         try (FileOutputStream out = new FileOutputStream(writeTo)) {
             this.workbook.write(out);
             out.flush();
-            if(this.workbook instanceof SXSSFWorkbook){
-                ((SXSSFWorkbook)this.workbook).dispose();
+            if (this.workbook instanceof SXSSFWorkbook) {
+                ((SXSSFWorkbook) this.workbook).dispose();
             }
         } catch (IOException e) {
             throw new DataSetException(e);
         }
+        LOGGER.info("flush - end   fileName={}", writeTo);
     }
 
     @Override

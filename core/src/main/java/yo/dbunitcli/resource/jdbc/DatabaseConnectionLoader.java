@@ -65,4 +65,11 @@ public class DatabaseConnectionLoader {
             throw new DataSetException(ex);
         }
     }
+
+    @Override
+    public String toString() {
+        return "DatabaseConnectionLoader{" +
+                "jdbcProp=" + jdbcProp +
+                '}';
+    }
 }

@@ -103,6 +103,18 @@ public class AddSettingColumns {
         return Objects.hashCode(byName, pattern, byNameExpression, patternExpression, common, commonExpression);
     }
 
+    @Override
+    public String toString() {
+        return "AddSettingColumns{" +
+                "byName=" + byName +
+                ", pattern=" + pattern +
+                ", byNameExpression=" + byNameExpression +
+                ", patternExpression=" + patternExpression +
+                ", common=" + common +
+                ", commonExpression=" + commonExpression +
+                '}';
+    }
+
     public static class Builder {
         private final Map<String, List<String>> byName = Maps.newHashMap();
 
