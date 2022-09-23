@@ -1,13 +1,13 @@
 package yo.dbunitcli.dataset.producer;
 
 import com.google.common.base.Strings;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.common.handlers.IllegalInputCharacterException;
 import org.dbunit.dataset.common.handlers.PipelineException;
 import org.dbunit.dataset.csv.CsvParserException;
 import org.dbunit.dataset.stream.IDataSetConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
@@ -16,7 +16,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
+    private static final Logger LOGGER = LogManager.getLogger();
     private IDataSetConsumer consumer;
     private final File[] src;
     private final TableNameFilter filter;

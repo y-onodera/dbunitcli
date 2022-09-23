@@ -1,8 +1,8 @@
 package yo.dbunitcli.dataset.producer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.*;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class ComparableDataSetLoader {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDataSetLoader.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final Parameter parameter;
 

@@ -1,18 +1,18 @@
 package yo.dbunitcli.dataset.consumer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.IDataSetConsumer;
 
 public class DataSetConsumerLoader {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataSetConsumerLoader.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public IDataSetConsumer get(DataSetConsumerParam param) throws DataSetException {
-        logger.info("create DataSetWriter param:{}", param);
+        LOGGER.info("create DataSetWriter param:{}", param);
         if (DataSourceType.table == param.getResultType()) {
             return new DBConsumer(param);
         } else if (DataSourceType.xlsx == param.getResultType()) {

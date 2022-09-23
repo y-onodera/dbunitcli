@@ -1,18 +1,16 @@
 package yo.dbunitcli.resource.poi;
 
 import com.google.common.base.Strings;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.stream.IDataSetConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 
 import java.util.stream.Stream;
 
 public class ExcelMappingDataSetConsumerWrapper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExcelMappingDataSetConsumerWrapper.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     protected final boolean loadData;
     private final XlsxSchema schema;

@@ -1,7 +1,7 @@
 package yo.dbunitcli.application;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import yo.dbunitcli.dataset.Parameter;
 
 import java.io.File;
@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class Generate implements Command<GenerateOption> {
 
-    private static final Logger logger = LoggerFactory.getLogger(Generate.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public static void main(String[] strings) throws Exception {
         new Generate().exec(strings);
@@ -36,7 +36,7 @@ public class Generate implements Command<GenerateOption> {
                             try {
                                 options.write(resultFile, param);
                             } catch (IOException e) {
-                                logger.error("failed write cause:", e);
+                                LOGGER.error("failed write cause:", e);
                                 System.exit(1);
                             }
                         }

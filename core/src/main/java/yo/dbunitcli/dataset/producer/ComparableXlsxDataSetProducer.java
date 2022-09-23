@@ -1,5 +1,7 @@
 package yo.dbunitcli.dataset.producer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -13,8 +15,6 @@ import org.apache.poi.xssf.model.StylesTable;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
+    private static final Logger LOGGER = LogManager.getLogger();
     private IDataSetConsumer consumer = new DefaultConsumer();
     private final File[] src;
     private final TableNameFilter filter;

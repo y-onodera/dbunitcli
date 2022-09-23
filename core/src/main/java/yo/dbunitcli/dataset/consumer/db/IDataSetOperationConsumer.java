@@ -1,5 +1,7 @@
 package yo.dbunitcli.dataset.consumer.db;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.IDatabaseConnection;
@@ -13,8 +15,6 @@ import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.dbunit.dataset.stream.IDataSetProducer;
 import org.dbunit.operation.AbstractOperation;
 import org.dbunit.operation.OperationData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import java.util.BitSet;
 import java.util.List;
 
 public abstract class IDataSetOperationConsumer extends AbstractOperation implements IDataSetConsumer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IDataSetOperationConsumer.class);
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final BitSet EMPTY_BITSET = new BitSet();
     protected final IDatabaseConnection connection;
     protected IStatementFactory factory;

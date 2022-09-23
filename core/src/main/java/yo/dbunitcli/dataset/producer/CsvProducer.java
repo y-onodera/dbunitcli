@@ -1,10 +1,10 @@
 package yo.dbunitcli.dataset.producer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.common.handlers.*;
 import org.dbunit.dataset.csv.CsvParserException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -124,7 +124,7 @@ class CsvProducer {
     }
 
     private static class IgnoreDelimiterWhitespacesHandler extends AbstractPipelineComponent {
-        private static final Logger LOGGER = LoggerFactory.getLogger(IgnoreDelimiterWhitespacesHandler.class);
+        private static final Logger LOGGER = LogManager.getLogger();
         static Field HANDLE;
 
         static {

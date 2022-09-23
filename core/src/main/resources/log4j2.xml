@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="off">
+    <!-- Propertiesは、nameの値を変数として使える -->
+    <Properties>
+        <Property name="format1">%d{yyyy/MM/dd HH:mm:ss.SSS} [%t] %-5level %class{15}:%L - %msg%n</Property>
+        <Property name="logfile">./logs/dbunitcli.log</Property>
+        <Property name="logfile-archive">./logs/dbunitcli_%d{yyyy-MM-dd_HH-mm}-%i.log</Property>
+    </Properties>
+    <Appenders>
+        <!-- コンソールに出力する設定 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout>
+                <pattern>${format1}</pattern>
+            </PatternLayout>
+        </Console>
+        <!-- ファイルに出力する設定 -->
+        <RollingFile name="logfile001" append="true" fileName="${logfile}" filePattern="${logfile-archive}">
+            <PatternLayout>
+                <pattern>${format1}</pattern>
+            </PatternLayout>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        // trace以上のログを出力する
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="logfile001"/>
+        </Root>
+    </Loggers>
+</Configuration>

@@ -1,14 +1,14 @@
 package yo.dbunitcli.dataset.consumer;
 
 import com.google.common.base.Strings;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
 import yo.dbunitcli.dataset.IDataSetConsumer;
 
@@ -21,7 +21,7 @@ import java.util.Date;
 
 public class XlsConsumer extends org.dbunit.dataset.excel.XlsDataSetWriter implements IDataSetConsumer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(XlsConsumer.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final File resultDir;
 

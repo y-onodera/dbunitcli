@@ -1,14 +1,10 @@
 package yo.dbunitcli.dataset.producer;
 
 import com.google.common.io.Files;
-import org.dbunit.dataset.Column;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTableMetaData;
-import org.dbunit.dataset.ITableMetaData;
-import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.IDataSetConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
@@ -23,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ComparableFixedFileDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableFixedFileDataSetProducer.class);
+    private static final Logger LOGGER = LogManager.getLogger();
     private IDataSetConsumer consumer;
     private final File[] src;
     private final String encoding;

@@ -1,13 +1,11 @@
 package yo.dbunitcli.dataset.producer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTableMetaData;
-import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.IDataSetConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.Parameter;
@@ -21,7 +19,7 @@ import java.util.Map;
 
 public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProducer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final String URL = "jdbc:h2:mem:test;MODE=Oracle";
     private IDataSetConsumer consumer;
     private final File[] src;

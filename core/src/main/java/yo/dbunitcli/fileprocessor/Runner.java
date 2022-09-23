@@ -1,8 +1,8 @@
 package yo.dbunitcli.fileprocessor;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -10,14 +10,14 @@ import java.util.Collection;
 
 public interface Runner {
 
-    Logger logger = LoggerFactory.getLogger(Runner.class);
+    Logger LOGGER = LogManager.getLogger();
 
     default void run(Collection<File> targetFiles) throws DataSetException {
         PrintStream sysErr = System.err;
         System.setErr(new PrintStream(sysErr) {
             @Override
             public void print(String s) {
-                logger.info(s);
+                LOGGER.info(s);
                 super.print(s);
             }
         });

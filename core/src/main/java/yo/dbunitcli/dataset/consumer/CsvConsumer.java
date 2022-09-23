@@ -1,9 +1,11 @@
 package yo.dbunitcli.dataset.consumer;
 
-import org.dbunit.dataset.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.csv.CsvDataSetWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
 import yo.dbunitcli.dataset.IDataSetConsumer;
 
@@ -72,7 +74,7 @@ public class CsvConsumer implements IDataSetConsumer {
 
     private static class ExCsvDataSetWriter extends CsvDataSetWriter {
 
-        private static final Logger LOGGER = LoggerFactory.getLogger(ExCsvDataSetWriter.class);
+        private static final Logger LOGGER = LogManager.getLogger();
 
         private final String encoding;
 
