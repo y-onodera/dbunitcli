@@ -168,6 +168,24 @@ public class ConvertTest {
     }
 
     @Test
+    public void testXlsWithSchemaToCsv() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromXlsWithSchemaToCsv.txt"});
+        File src = new File(this.baseDir + "/xlsxwithschema/result");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableCsvDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSource(DataSourceType.csv)
+                                .setSrc(src)
+                                .setEncoding("Shift-Jis")
+                                .build()));
+        Assert.assertEquals(4, actual.getTableNames().length);
+        Assert.assertEquals("テーブル一覧", actual.getTableNames()[0]);
+        Assert.assertEquals("ユーザマスタ", actual.getTableNames()[1]);
+        Assert.assertEquals("ユーザマスタ概要", actual.getTableNames()[2]);
+        Assert.assertEquals("業務ドメイン", actual.getTableNames()[3]);
+    }
+
+    @Test
     public void testTableNameMap() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMap.txt"});
         File src = new File(this.baseDir + "/tablenamemap/result/paramFromMultiCsvTableNameMap.xlsx");

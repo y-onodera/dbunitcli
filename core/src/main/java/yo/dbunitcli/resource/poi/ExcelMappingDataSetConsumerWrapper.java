@@ -3,17 +3,23 @@ package yo.dbunitcli.resource.poi;
 import com.google.common.base.Strings;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 
 import java.util.stream.Stream;
 
 public class ExcelMappingDataSetConsumerWrapper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExcelMappingDataSetConsumerWrapper.class);
 
     protected final boolean loadData;
     private final XlsxSchema schema;
     protected IDataSetConsumer consumer;
     protected XlsxCellsToTableBuilder randomCellRecordBuilder;
     protected XlsxRowsToTableBuilder rowsTableBuilder;
+    private int rowTableRows = 0;
 
     public ExcelMappingDataSetConsumerWrapper(IDataSetConsumer consumer, XlsxSchema schema, boolean loadData) {
         this.consumer = consumer;
@@ -31,6 +37,7 @@ public class ExcelMappingDataSetConsumerWrapper {
             if (this.rowsTableBuilder != null) {
                 if (this.rowsTableBuilder.isNowProcessing()) {
                     this.consumer.endTable();
+                    LOGGER.info("produce - rows={}", this.rowTableRows);
                 }
             }
             if (this.randomCellRecordBuilder != null) {
@@ -51,11 +58,14 @@ public class ExcelMappingDataSetConsumerWrapper {
             if (this.rowsTableBuilder.isTableStart(rowNumber)) {
                 if (this.rowsTableBuilder.isNowProcessing()) {
                     this.consumer.endTable();
+                    LOGGER.info("produce - rows={}", this.rowTableRows);
                 }
                 this.consumer.startTable(this.rowsTableBuilder.startNewTable());
+                this.rowTableRows = 0;
             } else if (this.rowsTableBuilder.hasRow(rowNumber)) {
                 if (this.rowsTableBuilder.hasRow(rowNumber)) {
                     this.addRowToTable(this.rowsTableBuilder.currentRow());
+                    this.rowTableRows++;
                 }
             }
             this.rowsTableBuilder.clearRowValue();
@@ -67,12 +77,17 @@ public class ExcelMappingDataSetConsumerWrapper {
     protected void createRandomCellTable() throws DataSetException {
         for (String tableName : this.randomCellRecordBuilder.getTableNames()) {
             this.consumer.startTable(this.randomCellRecordBuilder.getTableMetaData(tableName));
+            LOGGER.info("produce - start tableName={}", tableName);
             if (this.loadData) {
+                int i = 0;
                 for (String[] row : this.randomCellRecordBuilder.getRows(tableName)) {
                     this.addRowToTable(row);
+                    i++;
                 }
+                LOGGER.info("produce - rows={},tableName={}", i, tableName);
             }
             this.consumer.endTable();
+            LOGGER.info("produce - end   tableName={}", tableName);
         }
     }
 

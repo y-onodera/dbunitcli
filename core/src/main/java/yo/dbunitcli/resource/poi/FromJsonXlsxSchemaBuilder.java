@@ -1,13 +1,13 @@
 package yo.dbunitcli.resource.poi;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -15,9 +15,9 @@ import java.util.stream.Stream;
 
 public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
 
-    private final Map<String, List<XlsxRowsTableDefine>> rowsTableDefMap = Maps.newHashMap();
+    private final Map<String, List<XlsxRowsTableDefine>> rowsTableDefMap = new HashMap<>();
 
-    private final Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap = Maps.newHashMap();
+    private final Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap = new HashMap<>();
 
     public XlsxSchema build(File schema) throws FileNotFoundException, UnsupportedEncodingException {
         if (schema == null) {
@@ -83,7 +83,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
                 .setTableName(jsonObject.getString("tableName"))
                 .setHeader(this.jsonArrayToStream(jsonObject.getJsonArray("header")))
                 .setRows(this.jsonArrayToStream(jsonObject.getJsonArray("rows")
-                        , it -> (Integer i) -> it.getJsonObject(i).getJsonArray("cellAddress"))
+                                , it -> (Integer i) -> it.getJsonObject(i).getJsonArray("cellAddress"))
                         .map(this::jsonArrayToStream))
                 .build()
         );

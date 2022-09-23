@@ -30,7 +30,6 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
     private final ComparableDataSetParam param;
 
     private final File[] src;
-    private boolean isStartTable;
 
     private int lastRowNumber;
 
@@ -77,7 +76,6 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
             LOGGER.info("produce - start fileName={}", sourceFile);
 
             try (POIFSFileSystem newFs = new POIFSFileSystem(sourceFile)) {
-                this.isStartTable = false;
                 this.rowsTableBuilder = null;
                 this.randomCellRecordBuilder = null;
                 this.sheetIndex = -1;
@@ -90,10 +88,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                 HSSFRequest request = new HSSFRequest();
                 request.addListenerForAllRecords(this.formatListener);
                 factory.processWorkbookEvents(request, newFs);
-                if (this.isStartTable) {
-                    this.consumer.endTable();
-                    this.createRandomCellTable();
-                }
+                this.handleSheetEnd();
                 LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex].getSheetname(), this.sheetIndex);
             } catch (IOException e) {
                 throw new DataSetException(e);
@@ -118,7 +113,6 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                 BOFRecord br = (BOFRecord) record;
                 if (br.getType() == BOFRecord.TYPE_WORKSHEET) {
                     this.handleSheetEnd();
-                    this.isStartTable = false;
                     // Output the worksheet name
                     // Works by ordering the BSRs by the location of
                     //  their BOFRecords, and then knowing that we
@@ -232,9 +226,6 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
         }
         // Handle end of row
         if (record instanceof LastCellOfRowDummyRecord) {
-            if (!this.isStartTable) {
-                this.isStartTable = true;
-            }
             this.addNewRowToRowsTable(this.lastRowNumber);
         }
     }

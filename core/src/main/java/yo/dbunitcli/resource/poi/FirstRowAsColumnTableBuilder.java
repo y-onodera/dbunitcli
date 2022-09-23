@@ -1,6 +1,5 @@
 package yo.dbunitcli.resource.poi;
 
-import com.google.common.collect.Lists;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
@@ -8,13 +7,14 @@ import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
 
     private final String tableName;
-    private List<Object> rowValues = Lists.newArrayList();
+    private final List<String> rowValues = new ArrayList<>();
     private ITableMetaData nowProcessing = null;
 
     public FirstRowAsColumnTableBuilder(String tableName) {
@@ -35,7 +35,7 @@ public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
     public ITableMetaData startNewTable() {
         final Column[] columns = new Column[rowValues.size()];
         for (int i = 0, j = rowValues.size(); i < j; i++) {
-            columns[i] = new Column(rowValues.get(i).toString(), DataType.UNKNOWN);
+            columns[i] = new Column(rowValues.get(i), DataType.UNKNOWN);
         }
         this.nowProcessing = new DefaultTableMetaData(this.tableName, columns);
         return this.nowProcessing;
