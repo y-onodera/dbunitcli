@@ -4,6 +4,7 @@ import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.application.argument.JdbcOption;
 import yo.dbunitcli.application.argument.TemplateRenderOption;
 import yo.dbunitcli.dataset.DataSourceType;
@@ -21,15 +22,14 @@ import java.util.stream.Collectors;
 
 public class RunOption extends CommandLineOption {
 
-    @Option(name = "-src", usage = "directory script exists or file should be run", required = true)
-    private File src;
-
     @Option(name = "-scriptType")
     private ScriptType scriptType = ScriptType.sql;
 
-    private TemplateRenderOption templateOption = new TemplateRenderOption("");
+    private final DataSetLoadOption src = new DataSetLoadOption("");
 
-    private JdbcOption jdbcOption = new JdbcOption("");
+    private final TemplateRenderOption templateOption = new TemplateRenderOption("");
+
+    private final JdbcOption jdbcOption = new JdbcOption("");
 
     public RunOption() {
         super(Parameter.none());
@@ -39,21 +39,17 @@ public class RunOption extends CommandLineOption {
         super(param);
     }
 
-    public File getSrc() {
-        return this.src;
-    }
-
     public ScriptType getScriptType() {
         return this.scriptType;
     }
 
     public List<File> targetFiles() throws DataSetException {
         return this.getComparableDataSetLoader().loadDataSet(
-                        this.getDataSetParamBuilder()
-                                .setSrc(this.src)
+                        this.src.getParam()
                                 .setSource(DataSourceType.file)
                                 .setExtension(this.scriptType.getExtension())
                                 .setMapIncludeMetaData(false)
+                                .setLoadData(true)
                                 .build())
                 .toMap()
                 .stream()
@@ -70,16 +66,14 @@ public class RunOption extends CommandLineOption {
         super.setUpComponent(parser, expandArgs);
         this.templateOption.parseArgument(expandArgs);
         this.jdbcOption.parseArgument(expandArgs);
-        if (!this.src.exists()) {
-            throw new CmdLineException(parser, src + " is not exist", new IllegalArgumentException(src.toString()));
-        }
+        this.src.parseArgument(expandArgs);
     }
 
     @Override
     public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
+        result.putAll(this.src.createOptionParam(args));
         result.put("-scriptType", this.scriptType, ScriptType.class);
-        result.putFile("-src", this.src);
         result.putAll(this.templateOption.createOptionParam(args));
         if (result.get("-scriptType").equals(ScriptType.sql.name())) {
             result.putAll(this.jdbcOption.createOptionParam(args));
