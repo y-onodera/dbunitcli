@@ -25,6 +25,10 @@
                     <groupId>postgresql</groupId>
                     <artifactId>postgresql</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.oracle.database.jdbc</groupId>
+                    <artifactId>ojdbc8</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -50,6 +54,10 @@
                 <exclusion>
                     <groupId>commons-logging</groupId>
                     <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-core</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

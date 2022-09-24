@@ -5,10 +5,10 @@ import com.github.romankh3.image.comparison.model.ImageComparisonResult;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
 import com.google.common.collect.Lists;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.CompareKeys;
 
 import javax.imageio.ImageIO;
@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class ImageCompare extends TableDataSetCompare {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImageCompare.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final int threshold;
 
@@ -111,7 +111,7 @@ public class ImageCompare extends TableDataSetCompare {
                         .forEach(it -> sb.append(String.format("[%s,%s,%s,%s]"
                                 , it.getMinPoint().getX(), it.getMinPoint().getY()
                                 , it.getMaxPoint().getX(), it.getMaxPoint().getY())));
-                logger.info("diff areas = " + sb);
+                LOGGER.info("diff areas = " + sb);
             }
             return result.getImageComparisonState() == ImageComparisonState.MATCH;
         } catch (IOException e) {

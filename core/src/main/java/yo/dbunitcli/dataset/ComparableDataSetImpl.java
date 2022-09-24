@@ -1,16 +1,16 @@
 package yo.dbunitcli.dataset;
 
 import com.google.common.collect.Lists;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class ComparableDataSetImpl extends AbstractDataSet implements ComparableDataSet {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDataSetImpl.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private ComparableTableMapper mapper;
 
@@ -119,6 +119,6 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("createIterator(reversed={}) - start", reversed);
         }
-        return new DefaultTableIterator((ITable[]) (this._orderedTableNameMap.orderedValues().toArray(new ITable[0])), reversed);
+        return new DefaultTableIterator((ITable[]) (this._orderedTableNameMap.orderedValues().toArray(new ITable[0])));
     }
 }
