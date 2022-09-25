@@ -11,9 +11,7 @@ public interface IDataSetConverter extends org.dbunit.dataset.stream.IDataSetCon
 
     void cleanupDirectory();
 
-    default void open(String tableName) {
-        // default no implementation
-    }
+    boolean isExportEmptyTable();
 
     void reStartTable(ITableMetaData tableMetaData, Integer writeRows) throws DataSetException;
 
@@ -37,5 +35,4 @@ public interface IDataSetConverter extends org.dbunit.dataset.stream.IDataSetCon
         return null;
     }
 
-    boolean isExportEmptyTable();
 }

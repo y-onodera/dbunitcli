@@ -3,6 +3,7 @@
 -setting=src/test/resources/yo/dbunitcli/application/multidiff/setting.json
 -result=target/test-classes/yo/dbunitcli/application/multidiff/result
 -resultType=xlsx
+-result.excelTable=BOOK
 -expect.src=src/test/resources/yo/dbunitcli/application/multidiff/expect
 -expect.srcType=xlsx
 -expect.setting=src/test/resources/yo/dbunitcli/application/expectsetting.json

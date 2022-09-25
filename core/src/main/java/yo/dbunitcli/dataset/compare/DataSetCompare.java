@@ -53,10 +53,9 @@ public class DataSetCompare implements Compare {
         this.writer.cleanupDirectory();
         List<CompareDiff> results = Lists.newArrayList();
         results.addAll(this.compareTableCount());
-        results.addAll(this.compareTables(this.writer));
+        results.addAll(this.compareTables());
         CompareResult compareResult = new CompareResult(this.oldDataSet.getSrc(), this.newDataSet.getSrc(), results);
         final ITable table = compareResult.toITable(RESULT_TABLE_NAME);
-        this.writer.open(table.getTableMetaData().getTableName());
         IDataSetProducer producer = new DataSetProducerAdapter(new DefaultDataSet(table));
         producer.setConsumer(this.writer);
         producer.produce();
@@ -76,7 +75,7 @@ public class DataSetCompare implements Compare {
         return results;
     }
 
-    protected List<CompareDiff> compareTables(IDataSetConverter writer) throws DataSetException {
+    protected List<CompareDiff> compareTables() throws DataSetException {
         List<CompareDiff> results = Lists.newArrayList();
         Set<String> oldTables = Sets.newHashSet(this.oldDataSet.getTableNames());
         Set<String> newTables = Sets.newHashSet(this.newDataSet.getTableNames());

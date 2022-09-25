@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class XlsConverter implements IDataSetConverter {
 
@@ -53,7 +54,7 @@ public class XlsConverter implements IDataSetConverter {
         this.resultDir = param.getResultDir();
         this.tableExport = TableExportType.valueOf(param.getExcelTable());
         this.exportEmptyTable = param.isExportEmptyTable();
-        this.filename = param.getFileName();
+        this.filename = Optional.ofNullable(param.getFileName()).orElse(this.resultDir.getName());
     }
 
     @Override
@@ -141,11 +142,6 @@ public class XlsConverter implements IDataSetConverter {
         if (this.resultDir.exists()) {
             this.resultDir.delete();
         }
-    }
-
-    @Override
-    public void open(String aFileName) {
-        this.filename = aFileName;
     }
 
     @Override

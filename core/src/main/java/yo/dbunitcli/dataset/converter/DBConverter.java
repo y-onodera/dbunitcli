@@ -53,10 +53,6 @@ public class DBConverter implements IDataSetConverter {
     }
 
     @Override
-    public void open(String tableName) {
-    }
-
-    @Override
     public boolean isExportEmptyTable() {
         return this.exportEmptyTable;
     }

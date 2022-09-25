@@ -123,7 +123,6 @@ public class TableDataSetCompare {
         if (modifyValues.size() == 0 && deleteRows.size() == 0 && addRows.size() == 0) {
             return results;
         }
-        writer.open(oldTable.getTableMetaData().getTableName());
         writer.startDataSet();
         results.addAll(this.writeModifyValues(oldTable, newTable, keyNames, writer, columnLength, modifyValues));
         results.addAll(this.writeDeleteRows(oldTable, writer, deleteRows));
