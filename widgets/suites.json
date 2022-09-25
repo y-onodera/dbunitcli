@@ -12,6 +12,17 @@
       "total" : 25
     }
   }, {
+    "uid" : "8e84c10bd9ee42c087cd6cfb1c7f6fa9",
+    "name" : "yo.dbunitcli.application.ConvertTest",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 15,
+      "unknown" : 0,
+      "total" : 15
+    }
+  }, {
     "uid" : "f0f6e4f70398015bf62da72652fad8d0",
     "name" : "yo.dbunitcli.application.GenerateTest",
     "statistic" : {
@@ -21,17 +32,6 @@
       "passed" : 12,
       "unknown" : 0,
       "total" : 12
-    }
-  }, {
-    "uid" : "8e84c10bd9ee42c087cd6cfb1c7f6fa9",
-    "name" : "yo.dbunitcli.application.ConvertTest",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 10,
-      "unknown" : 0,
-      "total" : 10
     }
   }, {
     "uid" : "7b794a26452492f4e12d2283eba59d73",
