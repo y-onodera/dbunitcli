@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset.consumer.db;
+package yo.dbunitcli.dataset.converter.db;
 
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.database.statement.IBatchStatement;

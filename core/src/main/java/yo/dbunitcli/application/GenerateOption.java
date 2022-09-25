@@ -12,7 +12,7 @@ import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.Parameter;
-import yo.dbunitcli.dataset.consumer.DBConsumer;
+import yo.dbunitcli.dataset.converter.DBConverter;
 import yo.dbunitcli.resource.Files;
 import yo.dbunitcli.resource.poi.JxlsTemplateRender;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -43,7 +43,7 @@ public class GenerateOption extends CommandLineOption {
     private String sqlFilePrefix = "";
 
     @Option(name = "-op")
-    private DBConsumer.Operation operation;
+    private DBConverter.Operation operation;
 
     @Option(name = "-outputEncoding", usage = "output file encoding")
     private String outputEncoding = "UTF-8";
@@ -93,7 +93,7 @@ public class GenerateOption extends CommandLineOption {
     @Override
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
-        this.getConsumerOption().parseArgument(expandArgs);
+        this.getConverterOption().parseArgument(expandArgs);
         this.src.parseArgument(expandArgs);
         this.templateOption.parseArgument(expandArgs);
         this.getGenerateType().populateSettings(this, parser);
@@ -112,7 +112,7 @@ public class GenerateOption extends CommandLineOption {
         }
         if (result.hasValue("-generateType") && GenerateType.valueOf(result.get("-generateType")) == GenerateType.sql) {
             result.put("-commit", this.commit);
-            result.put("-op", this.operation, DBConsumer.Operation.class);
+            result.put("-op", this.operation, DBConverter.Operation.class);
             result.put("-sqlFilePrefix", this.sqlFilePrefix);
             result.put("-sqlFileSuffix", this.sqlFileSuffix);
         }
@@ -160,7 +160,7 @@ public class GenerateOption extends CommandLineOption {
     }
 
     public File getResultDir() {
-        return this.getConsumerOption().getResultDir();
+        return this.getConverterOption().getResultDir();
     }
 
     public enum GenerateUnit {

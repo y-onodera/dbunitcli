@@ -22,22 +22,22 @@ public class ConvertOption extends CommandLineOption {
     }
 
     public void convertDataset() throws DataSetException {
-        this.getConsumerOption().setResultPath(this.getResultPath());
-        this.getComparableDataSetLoader().loadDataSet(this.src.getParam().setConsumer(this.consumer()).build());
+        this.getConverterOption().setResultPath(this.getResultPath());
+        this.getComparableDataSetLoader().loadDataSet(this.src.getParam().setConsumer(this.converter()).build());
     }
 
     @Override
     public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         this.src.parseArgument(expandArgs);
-        this.getConsumerOption().parseArgument(expandArgs);
+        this.getConverterOption().parseArgument(expandArgs);
     }
 
     @Override
     public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putAll(this.src.createOptionParam(args));
-        result.putAll(this.getConsumerOption().createOptionParam(args));
+        result.putAll(this.getConverterOption().createOptionParam(args));
         return result;
     }
 

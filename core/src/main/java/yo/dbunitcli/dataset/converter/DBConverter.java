@@ -1,18 +1,18 @@
-package yo.dbunitcli.dataset.consumer;
+package yo.dbunitcli.dataset.converter;
 
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
-import yo.dbunitcli.dataset.IDataSetConsumer;
-import yo.dbunitcli.dataset.consumer.db.*;
+import yo.dbunitcli.dataset.IDataSetConverter;
+import yo.dbunitcli.dataset.converter.db.*;
 
-public class DBConsumer implements IDataSetConsumer {
+public class DBConverter implements IDataSetConverter {
     private final org.dbunit.dataset.stream.IDataSetConsumer operation;
 
     private final boolean exportEmptyTable;
 
-    public DBConsumer(DataSetConsumerParam param) throws DataSetException {
+    public DBConverter(DataSetConsumerParam param) throws DataSetException {
         IDatabaseConnection connection = param.getDatabaseConnectionLoader().loadConnection();
         this.operation = param.getOperation().createConsumer(connection);
         this.exportEmptyTable = param.isExportEmptyTable();
@@ -26,6 +26,11 @@ public class DBConsumer implements IDataSetConsumer {
     @Override
     public void startTable(ITableMetaData iTableMetaData) throws DataSetException {
         this.operation.startTable(iTableMetaData);
+    }
+
+    @Override
+    public void reStartTable(ITableMetaData tableMetaData, Integer writeRows) throws DataSetException {
+        this.operation.startTable(tableMetaData);
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.dbunit.dataset.DataSetException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ComparableTableMapper {
 
@@ -16,7 +17,9 @@ public class ComparableTableMapper {
     private final List<Object[]> values;
     private boolean startTable;
     private int addCount = 0;
-    private IDataSetConsumer consumer;
+    private int addRowCount = 0;
+    private IDataSetConverter converter;
+    private Map<String, Integer> alreadyWrite;
 
     public ComparableTableMapper(AddSettingTableMetaData metaData, Column[] orderColumns, List<AddSettingTableMetaData> settings) {
         this.values = new ArrayList<>();
@@ -26,17 +29,23 @@ public class ComparableTableMapper {
         this.settingChain.addAll(settings);
     }
 
-    public void setConsumer(IDataSetConsumer consumer) throws DataSetException {
-        this.consumer = consumer;
-        if (this.isEnableRowProcessing() && this.consumer.isExportEmptyTable()) {
-            this.consumer.startTable(this.addSettingTableMetaData);
+    public void setConsumer(IDataSetConverter converter, Map<String, Integer> alreadyWrite) throws DataSetException {
+        this.converter = converter;
+        this.alreadyWrite = alreadyWrite;
+        if (this.isEnableRowProcessing() && this.converter.isExportEmptyTable()) {
+            if (this.alreadyWrite.containsKey(this.addSettingTableMetaData.getTableName())) {
+                this.converter.reStartTable(this.addSettingTableMetaData, this.alreadyWrite.get(this.addSettingTableMetaData.getTableName()));
+            } else {
+                this.converter.startTable(this.addSettingTableMetaData);
+            }
             this.startTable = true;
         }
     }
 
     public ComparableTable endTable() throws DataSetException {
+        this.alreadyWrite.put(this.addSettingTableMetaData.getTableName(), this.addRowCount);
         if (this.isEnableRowProcessing() && this.startTable) {
-            this.consumer.endTable();
+            this.converter.endTable();
             return null;
         }
         return new ComparableTable(this.addSettingTableMetaData, this.orderColumns, this.values, this.filteredRowIndexes);
@@ -76,12 +85,13 @@ public class ComparableTableMapper {
 
     protected void addValue(Object[] applySetting) throws DataSetException {
         if (applySetting != null) {
+            this.addRowCount++;
             if (this.isEnableRowProcessing()) {
-                if (!this.consumer.isExportEmptyTable() && !this.startTable) {
-                    this.consumer.startTable(this.addSettingTableMetaData);
+                if (!this.converter.isExportEmptyTable() && !this.startTable) {
+                    this.converter.startTable(this.addSettingTableMetaData);
                     this.startTable = true;
                 }
-                this.consumer.row(applySetting);
+                this.converter.row(applySetting);
             } else {
                 this.values.add(applySetting);
                 if (this.addSettingTableMetaData.hasRowFilter()) {
@@ -93,7 +103,7 @@ public class ComparableTableMapper {
     }
 
     private boolean isEnableRowProcessing() {
-        return this.consumer != null && this.orderColumns.length == 0;
+        return this.converter != null && this.orderColumns.length == 0;
     }
 
 }

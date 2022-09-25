@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,14 +21,17 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     private final ComparableDataSetProducer producer;
 
-    private final IDataSetConsumer consumer;
+    private final IDataSetConverter converter;
+
+    private final Map<String, Integer> alreadyWrite;
 
     public ComparableDataSetImpl(ComparableDataSetProducer producer) throws DataSetException {
         super(false);
         this.producer = producer;
         this.param = this.producer.getParam();
         this.compareSettings = this.param.getColumnSettings();
-        this.consumer = this.param.getConsumer();
+        this.converter = this.param.getConsumer();
+        this.alreadyWrite = new HashMap<>();
         this.producer.setConsumer(this);
         this.producer.produce();
     }
@@ -36,20 +40,20 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     public void startDataSet() throws DataSetException {
         LOGGER.debug("startDataSet() - start");
         this._orderedTableNameMap = super.createTableNameMap();
-        if (this.consumer != null) {
-            this.consumer.startDataSet();
+        if (this.converter != null) {
+            this.converter.startDataSet();
         }
     }
 
     @Override
     public void endDataSet() throws DataSetException {
         LOGGER.debug("endDataSet() - start");
-        if (this.consumer != null) {
+        if (this.converter != null) {
             ITableIterator itr = this.createIterator(false);
             while (itr.next()) {
-                this.consumer.write(itr.getTable());
+                this.converter.write(itr.getTable());
             }
-            this.consumer.endDataSet();
+            this.converter.endDataSet();
         }
         LOGGER.debug("endDataSet() - the final tableMap is: " + this._orderedTableNameMap);
     }
@@ -58,7 +62,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     public void startTable(ITableMetaData metaData) throws DataSetException {
         LOGGER.debug("startTable(metaData={}) - start", metaData);
         this.mapper = this.compareSettings.createMapper(metaData);
-        this.mapper.setConsumer(this.consumer);
+        this.mapper.setConsumer(this.converter, this.alreadyWrite);
     }
 
     @Override

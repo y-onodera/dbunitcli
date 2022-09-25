@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset.consumer.db;
+package yo.dbunitcli.dataset.converter.db;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,7 +56,7 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
         try {
             this.metaData = this.getOperationMetaData(iTableMetaData);
             this.writeRows = 0;
-            LOGGER.info("consume - start databaseTable={},className={}", this.metaData.getTableName(), this.getClass().getSimpleName());
+            LOGGER.info("convert - start databaseTable={},className={}", this.metaData.getTableName(), this.getClass().getSimpleName());
         } catch (DatabaseUnitException | SQLException e) {
             throw new DataSetException(e);
         }
@@ -131,8 +131,8 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
                 throw new DataSetException(e);
             }
         }
-        LOGGER.info("consume - rows={},className={}", this.writeRows, this.getClass().getSimpleName());
-        LOGGER.info("consume - end   databaseTable={},className={}", this.metaData.getTableName(), this.getClass().getSimpleName());
+        LOGGER.info("convert - rows={},className={}", this.writeRows, this.getClass().getSimpleName());
+        LOGGER.info("convert - end   databaseTable={},className={}", this.metaData.getTableName(), this.getClass().getSimpleName());
     }
 
     @Override

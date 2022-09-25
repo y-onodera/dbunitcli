@@ -1,6 +1,6 @@
 package yo.dbunitcli.dataset;
 
-import yo.dbunitcli.dataset.consumer.DBConsumer;
+import yo.dbunitcli.dataset.converter.DBConverter;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.File;
@@ -8,7 +8,7 @@ import java.io.File;
 public class DataSetConsumerParam {
     private final DatabaseConnectionLoader databaseConnectionLoader;
     private final DataSourceType resultType;
-    private final DBConsumer.Operation operation;
+    private final DBConverter.Operation operation;
     private final File resultDir;
     private final String fileName;
     private final String outputEncoding;
@@ -34,7 +34,7 @@ public class DataSetConsumerParam {
         return this.resultType;
     }
 
-    public DBConsumer.Operation getOperation() {
+    public DBConverter.Operation getOperation() {
         return this.operation;
     }
 
@@ -78,7 +78,7 @@ public class DataSetConsumerParam {
     public static class Builder {
         private DatabaseConnectionLoader databaseConnectionLoader;
         private DataSourceType resultType;
-        private DBConsumer.Operation operation;
+        private DBConverter.Operation operation;
         private File resultDir;
         private String outputEncoding;
         private String excelTable;
@@ -107,11 +107,11 @@ public class DataSetConsumerParam {
             return this;
         }
 
-        public DBConsumer.Operation getOperation() {
+        public DBConverter.Operation getOperation() {
             return operation;
         }
 
-        public Builder setOperation(DBConsumer.Operation operation) {
+        public Builder setOperation(DBConverter.Operation operation) {
             this.operation = operation;
             return this;
         }

@@ -7,12 +7,12 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
-import yo.dbunitcli.application.argument.DataSetConsumerOption;
+import yo.dbunitcli.application.argument.DataSetConverterOption;
 import yo.dbunitcli.application.argument.DefaultArgumentsParser;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.IDataSetConsumer;
+import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.Parameter;
-import yo.dbunitcli.dataset.consumer.DataSetConsumerLoader;
+import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 
 import java.io.File;
@@ -27,7 +27,7 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
 
     private final Parameter parameter;
 
-    private final DataSetConsumerOption consumerOption = new DataSetConsumerOption("result");
+    private final DataSetConverterOption converterOption = new DataSetConverterOption("result");
 
     private String resultFile = "result";
 
@@ -50,16 +50,12 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
         return this.parameter;
     }
 
-    public DataSetConsumerOption getConsumerOption() {
-        return this.consumerOption;
+    public DataSetConverterOption getConverterOption() {
+        return this.converterOption;
     }
 
-    public IDataSetConsumer consumer() throws DataSetException {
-        return new DataSetConsumerLoader().get(this.consumerOption.getParam().build());
-    }
-
-    public IDataSetConsumer consumer(File outputTo) throws DataSetException {
-        return new DataSetConsumerLoader().get(this.consumerOption.getParam().setResultDir(outputTo).build());
+    public IDataSetConverter converter() throws DataSetException {
+        return new DataSetConverterLoader().get(this.converterOption.getParam().build());
     }
 
     @Override
@@ -82,6 +78,6 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
     }
 
     protected String getResultPath() {
-        return Strings.isNullOrEmpty(this.consumerOption.getResultPath()) ? this.resultFile : this.consumerOption.getResultPath();
+        return Strings.isNullOrEmpty(this.converterOption.getResultPath()) ? this.resultFile : this.converterOption.getResultPath();
     }
 }

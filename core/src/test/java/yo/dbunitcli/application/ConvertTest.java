@@ -209,4 +209,135 @@ public class ConvertTest {
         Assert.assertEquals("20", merged.getValue(4, "key"));
         Assert.assertEquals("30", merged.getValue(5, "key"));
     }
+
+    @Test
+    public void testTableNameMapNoSortToCsv() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMapNoSortToCsv.txt"});
+        File src = new File(this.baseDir + "/tablenamemap/NoSortCsv/result");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableCsvDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.csv)
+                                .setEncoding("UTF-8")
+                                .build()));
+        Assert.assertEquals(1, actual.getTableNames().length);
+        ITable merged = actual.getTables()[0];
+        Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
+        Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
+        Assert.assertEquals(6, merged.getRowCount());
+        Assert.assertEquals("10", merged.getValue(0, "key"));
+        Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
+        Assert.assertEquals("20", merged.getValue(1, "key"));
+        Assert.assertEquals("30", merged.getValue(2, "key"));
+        Assert.assertEquals("1", merged.getValue(3, "key"));
+        Assert.assertEquals("2", merged.getValue(3, "columna"));
+        Assert.assertEquals("2", merged.getValue(4, "key"));
+        Assert.assertEquals("test", merged.getValue(4, "columnb"));
+        Assert.assertEquals("3", merged.getValue(5, "key"));
+    }
+
+    @Test
+    public void testTableNameMapNoSortToXls() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMapNoSortToXls.txt"});
+        File src = new File(this.baseDir + "/tablenamemap/NoSortXls/result");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xls)
+                                .build()));
+        Assert.assertEquals(1, actual.getTableNames().length);
+        ITable merged = actual.getTables()[0];
+        Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
+        Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
+        Assert.assertEquals(6, merged.getRowCount());
+        Assert.assertEquals("10", merged.getValue(0, "key"));
+        Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
+        Assert.assertEquals("20", merged.getValue(1, "key"));
+        Assert.assertEquals("30", merged.getValue(2, "key"));
+        Assert.assertEquals("1", merged.getValue(3, "key"));
+        Assert.assertEquals("2", merged.getValue(3, "columna"));
+        Assert.assertEquals("2", merged.getValue(4, "key"));
+        Assert.assertEquals("test", merged.getValue(4, "columnb"));
+        Assert.assertEquals("3", merged.getValue(5, "key"));
+    }
+
+    @Test
+    public void testTableNameMapNoSortToXlsx() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMapNoSortToXlsx.txt"});
+        File src = new File(this.baseDir + "/tablenamemap/NoSortXlsx/result");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        Assert.assertEquals(1, actual.getTableNames().length);
+        ITable merged = actual.getTables()[0];
+        Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
+        Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
+        Assert.assertEquals(6, merged.getRowCount());
+        Assert.assertEquals("10", merged.getValue(0, "key"));
+        Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
+        Assert.assertEquals("20", merged.getValue(1, "key"));
+        Assert.assertEquals("30", merged.getValue(2, "key"));
+        Assert.assertEquals("1", merged.getValue(3, "key"));
+        Assert.assertEquals("2", merged.getValue(3, "columna"));
+        Assert.assertEquals("2", merged.getValue(4, "key"));
+        Assert.assertEquals("test", merged.getValue(4, "columnb"));
+        Assert.assertEquals("3", merged.getValue(5, "key"));
+    }
+
+    @Test
+    public void testTableNameMapNoSortToXlsPerTable() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMapNoSortToXlsPerTable.txt"});
+        File src = new File(this.baseDir + "/tablenamemap/NoSortXlsBook/result");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xls)
+                                .build()));
+        Assert.assertEquals(1, actual.getTableNames().length);
+        ITable merged = actual.getTables()[0];
+        Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
+        Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
+        Assert.assertEquals(6, merged.getRowCount());
+        Assert.assertEquals("10", merged.getValue(0, "key"));
+        Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
+        Assert.assertEquals("20", merged.getValue(1, "key"));
+        Assert.assertEquals("30", merged.getValue(2, "key"));
+        Assert.assertEquals("1", merged.getValue(3, "key"));
+        Assert.assertEquals("2", merged.getValue(3, "columna"));
+        Assert.assertEquals("2", merged.getValue(4, "key"));
+        Assert.assertEquals("test", merged.getValue(4, "columnb"));
+        Assert.assertEquals("3", merged.getValue(5, "key"));
+    }
+
+    @Test
+    public void testTableNameMapNoSortToXlsxPerTable() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMapNoSortToXlsxPerTable.txt"});
+        File src = new File(this.baseDir + "/tablenamemap/NoSortXlsxBook/result");
+        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        Assert.assertEquals(1, actual.getTableNames().length);
+        ITable merged = actual.getTables()[0];
+        Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
+        Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
+        Assert.assertEquals(6, merged.getRowCount());
+        Assert.assertEquals("10", merged.getValue(0, "key"));
+        Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
+        Assert.assertEquals("20", merged.getValue(1, "key"));
+        Assert.assertEquals("30", merged.getValue(2, "key"));
+        Assert.assertEquals("1", merged.getValue(3, "key"));
+        Assert.assertEquals("2", merged.getValue(3, "columna"));
+        Assert.assertEquals("2", merged.getValue(4, "key"));
+        Assert.assertEquals("test", merged.getValue(4, "columnb"));
+        Assert.assertEquals("3", merged.getValue(5, "key"));
+    }
 }

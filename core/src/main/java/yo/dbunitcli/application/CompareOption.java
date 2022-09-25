@@ -5,7 +5,7 @@ import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import yo.dbunitcli.application.argument.DataSetConsumerOption;
+import yo.dbunitcli.application.argument.DataSetConverterOption;
 import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.application.argument.DefaultArgumentMapper;
 import yo.dbunitcli.application.argument.ImageCompareOption;
@@ -88,7 +88,7 @@ public class CompareOption extends CommandLineOption {
             }
         }
         this.populateSettings(parser);
-        this.getConsumerOption().parseArgument(expandArgs);
+        this.getConverterOption().parseArgument(expandArgs);
         if (this.targetType == Type.image) {
             this.imageOption.parseArgument(expandArgs);
         }
@@ -100,21 +100,18 @@ public class CompareOption extends CommandLineOption {
         result.putFile("-setting", this.setting);
         result.putAll(this.newData.createOptionParam(args));
         result.putAll(this.oldData.createOptionParam(args));
-        result.putAll(this.getConsumerOption().createOptionParam(args));
+        result.putAll(this.getConverterOption().createOptionParam(args));
         result.putAll(this.expectData.createOptionParam(args));
         result.putAll(this.imageOption.createOptionParam(args));
         return result;
     }
 
     public CompareResult compare() throws DataSetException {
-        ComparableDataSet oldData = this.oldDataSet();
-        ComparableDataSet newData = this.newDataSet();
-        IDataSetConsumer writer = this.consumer();
         CompareResult result = this.getDataSetCompareBuilder()
-                .newDataSet(newData)
-                .oldDataSet(oldData)
+                .newDataSet(this.newDataSet())
+                .oldDataSet(this.oldDataSet())
                 .comparisonKeys(this.getComparisonKeys())
-                .dataSetWriter(writer)
+                .dataSetWriter(this.converter())
                 .build()
                 .result();
         if (this.getExpectData().getParam().getSrc() != null) {
@@ -164,7 +161,7 @@ public class CompareOption extends CommandLineOption {
     }
 
     public ComparableDataSet resultDataSet() throws DataSetException {
-        DataSetConsumerOption writeOption = this.getConsumerOption();
+        DataSetConverterOption writeOption = this.getConverterOption();
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
                         .setColumnSettings(this.expectData.getParam().getColumnSettings())
@@ -186,9 +183,9 @@ public class CompareOption extends CommandLineOption {
         return this.imageOption.getDataSetCompareBuilder();
     }
 
-    public IDataSetConsumer expectedDiffWriter() throws DataSetException {
-        this.getConsumerOption().setResultDir(new File(this.getConsumerOption().getResultDir(), "expectedDiff"));
-        return this.consumer();
+    public IDataSetConverter expectedDiffWriter() throws DataSetException {
+        this.getConverterOption().setResultDir(new File(this.getConverterOption().getResultDir(), "expectedDiff"));
+        return this.converter();
     }
 
     protected void populateSettings(CmdLineParser parser) throws CmdLineException {

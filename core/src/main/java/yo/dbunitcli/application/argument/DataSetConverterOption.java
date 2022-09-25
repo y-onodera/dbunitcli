@@ -5,12 +5,12 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
 import yo.dbunitcli.dataset.DataSourceType;
-import yo.dbunitcli.dataset.consumer.DBConsumer;
+import yo.dbunitcli.dataset.converter.DBConverter;
 
 import java.io.File;
 import java.util.Map;
 
-public class DataSetConsumerOption extends DefaultArgumentsParser {
+public class DataSetConverterOption extends DefaultArgumentsParser {
 
     @Option(name = "-result", usage = "directory result files at")
     private File resultDir = new File(".");
@@ -28,7 +28,7 @@ public class DataSetConsumerOption extends DefaultArgumentsParser {
     private String outputEncoding = "UTF-8";
 
     @Option(name = "-op", usage = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
-    private DBConsumer.Operation operation;
+    private DBConverter.Operation operation;
 
     @Option(name = "-excelTable", usage = "SHEET or BOOK")
     private String excelTable = "SHEET";
@@ -37,7 +37,7 @@ public class DataSetConsumerOption extends DefaultArgumentsParser {
 
     private final DataSetConsumerParam.Builder builder;
 
-    public DataSetConsumerOption(String prefix) {
+    public DataSetConverterOption(String prefix) {
         super(prefix);
         this.jdbcOption = new JdbcOption(prefix);
         this.builder = DataSetConsumerParam.builder();
@@ -60,8 +60,8 @@ public class DataSetConsumerOption extends DefaultArgumentsParser {
         try {
             DataSourceType type = DataSourceType.valueOf(result.get("-resultType"));
             if (type == DataSourceType.table) {
-                result.put("-op", this.operation == null ? DBConsumer.Operation.CLEAN_INSERT : this.operation
-                        , DBConsumer.Operation.class);
+                result.put("-op", this.operation == null ? DBConverter.Operation.CLEAN_INSERT : this.operation
+                        , DBConverter.Operation.class);
                 result.putAll(this.jdbcOption.createOptionParam(args));
             } else {
                 result.putDir("-result", this.resultDir);

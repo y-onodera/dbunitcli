@@ -1,0 +1,6 @@
+-src=src/test/resources/yo/dbunitcli/application/csv/multi
+-srcType=csv
+-setting=src/test/resources/yo/dbunitcli/application/tablenamemap/setting_nosort.json
+-result=target/test-classes/yo/dbunitcli/application/tablenamemap/NoSortXls/result
+-result.excelTable=SHEET
+-resultType=xls

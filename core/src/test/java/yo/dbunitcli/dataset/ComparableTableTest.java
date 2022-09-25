@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ public class ComparableTableTest {
     @Before
     public void setUp() throws DataSetException {
         ComparableTableMapper builder = ColumnSettings.NONE.createMapper(this.table);
+        builder.setConsumer(null, new HashMap<>());
         builder.addRow(new Object[]{"1", "a", "あ", 1});
         builder.addRow(new Object[]{"1", "b", "あ", 1});
         builder.addRow(new Object[]{"2", "a", "い", 2});

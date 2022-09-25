@@ -11,7 +11,7 @@ import org.dbunit.dataset.stream.IDataSetProducer;
 import yo.dbunitcli.dataset.AddSettingColumns;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableTable;
-import yo.dbunitcli.dataset.IDataSetConsumer;
+import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.util.List;
 import java.util.Set;
@@ -29,7 +29,7 @@ public class DataSetCompare implements Compare {
 
     private final AddSettingColumns comparisonKeys;
 
-    private final IDataSetConsumer writer;
+    private final IDataSetConverter writer;
 
     private final TableDataSetCompare tableCompare;
 
@@ -76,7 +76,7 @@ public class DataSetCompare implements Compare {
         return results;
     }
 
-    protected List<CompareDiff> compareTables(IDataSetConsumer writer) throws DataSetException {
+    protected List<CompareDiff> compareTables(IDataSetConverter writer) throws DataSetException {
         List<CompareDiff> results = Lists.newArrayList();
         Set<String> oldTables = Sets.newHashSet(this.oldDataSet.getTableNames());
         Set<String> newTables = Sets.newHashSet(this.newDataSet.getTableNames());

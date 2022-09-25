@@ -31,8 +31,8 @@ public class Aggregate {
         }
         CompositeDataSet composite = new CompositeDataSet(dataSets.toArray(new IDataSet[0]));
         IDataSetProducer producer = new DataSetProducerAdapter(composite);
-        options.getConsumerOption().setResultPath("result");
-        producer.setConsumer(options.consumer());
+        options.getConverterOption().setResultPath("result");
+        producer.setConsumer(options.converter());
         producer.produce();
     }
 }

@@ -1,26 +1,26 @@
-package yo.dbunitcli.dataset.consumer;
+package yo.dbunitcli.dataset.converter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
 import yo.dbunitcli.dataset.DataSourceType;
-import yo.dbunitcli.dataset.IDataSetConsumer;
+import yo.dbunitcli.dataset.IDataSetConverter;
 
-public class DataSetConsumerLoader {
+public class DataSetConverterLoader {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public IDataSetConsumer get(DataSetConsumerParam param) throws DataSetException {
+    public IDataSetConverter get(DataSetConsumerParam param) throws DataSetException {
         LOGGER.info("create DataSetWriter param:{}", param);
         if (DataSourceType.table == param.getResultType()) {
-            return new DBConsumer(param);
+            return new DBConverter(param);
         } else if (DataSourceType.xlsx == param.getResultType()) {
-            return new XlsxConsumer(param);
+            return new XlsxConverter(param);
         } else if (DataSourceType.xls == param.getResultType()) {
-            return new XlsConsumer(param);
+            return new XlsConverter(param);
         } else if (DataSourceType.csv == param.getResultType()) {
-            return new CsvConsumer(param);
+            return new CsvConverter(param);
         }
         throw new UnsupportedOperationException(param.getResultType().toString());
     }

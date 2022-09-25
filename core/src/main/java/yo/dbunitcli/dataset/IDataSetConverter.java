@@ -3,16 +3,19 @@ package yo.dbunitcli.dataset;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.ITableMetaData;
 
 import java.io.File;
 
-public interface IDataSetConsumer extends org.dbunit.dataset.stream.IDataSetConsumer {
+public interface IDataSetConverter extends org.dbunit.dataset.stream.IDataSetConsumer {
 
     void cleanupDirectory();
 
     default void open(String tableName) {
         // default no implementation
     }
+
+    void reStartTable(ITableMetaData tableMetaData, Integer writeRows) throws DataSetException;
 
     default void write(ITable aTable) throws DataSetException {
         if (!this.isExportEmptyTable() && aTable.getRowCount() == 0) {

@@ -30,7 +30,7 @@ public class ComparableDataSetParam {
     private final String extension;
     private final TemplateRender templateRender;
     private final DatabaseConnectionLoader databaseConnectionLoader;
-    private final IDataSetConsumer consumer;
+    private final IDataSetConverter consumer;
     private final char delimiter;
 
     public ComparableDataSetParam(Builder builder) {
@@ -128,7 +128,7 @@ public class ComparableDataSetParam {
         return this.databaseConnectionLoader;
     }
 
-    public IDataSetConsumer getConsumer() {
+    public IDataSetConverter getConsumer() {
         return this.consumer;
     }
 
@@ -197,7 +197,7 @@ public class ComparableDataSetParam {
         private String extension;
         private TemplateRender templateRender;
         private DatabaseConnectionLoader databaseConnectionLoader;
-        private IDataSetConsumer consumer;
+        private IDataSetConverter consumer;
         private char delimiter = ',';
 
         public Builder setSrc(File src) {
@@ -283,7 +283,7 @@ public class ComparableDataSetParam {
             return this.databaseConnectionLoader;
         }
 
-        public IDataSetConsumer getConsumer() {
+        public IDataSetConverter getConsumer() {
             return consumer;
         }
 
@@ -383,7 +383,7 @@ public class ComparableDataSetParam {
             return this;
         }
 
-        public Builder setConsumer(IDataSetConsumer writer) {
+        public Builder setConsumer(IDataSetConverter writer) {
             this.consumer = writer;
             return this;
         }
