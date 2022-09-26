@@ -150,7 +150,7 @@ public class MainPresenter {
     }
 
     private void resetInput(MFXComboBox<String> selected, Node form) {
-        ArgumentsParser.OptionParam option = this.parser.expandOption(this.inputToArg());
+        ArgumentsParser.OptionParam option = this.parser.createOptionParam(this.inputToArg());
         this.clearInputFields(form);
         int row = 1;
         MFXValidator validator = new MFXValidator();
