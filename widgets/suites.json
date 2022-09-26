@@ -100,8 +100,8 @@
       "total" : 3
     }
   }, {
-    "uid" : "05ae8e61d36f7066caa3a1b3f8d2b6d4",
-    "name" : "yo.dbunitcli.application.ParameterizeExecuteTest",
+    "uid" : "51aa6ee97642c57710cb91bf37a1c9c3",
+    "name" : "yo.dbunitcli.application.argument.DataSetLoadOptionTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
