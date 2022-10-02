@@ -2,18 +2,18 @@
   "settings": [
     {
       "name": "COMPARE_RESULT",
-      "stringExpression": [
-        {
-          "OLD_PATH": "get('OLD_PATH').replace('\\\\','/')"
-        },
-        {
-          "NEW_PATH": "get('NEW_PATH').replace('\\\\','/')"
-        }
-      ]
+      "string": {
+        "OLD_PATH": "get('OLD_PATH').replace('\\\\','/')",
+        "NEW_PATH": "get('NEW_PATH').replace('\\\\','/')"
+      }
     },
     {
       "pattern": "TARGET",
-      "exclude": ["PATH","DIR","LAST_MODIFIED"]
+      "exclude": [
+        "PATH",
+        "DIR",
+        "LAST_MODIFIED"
+      ]
     }
   ]
 }
