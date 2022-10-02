@@ -1,5 +1,25 @@
 {
   "uid" : "4b4757e66a1912dae1a509f688f20b0f",
-  "name" : "categories",
-  "children" : [ ]
+  "children" : [ {
+    "name" : "Product defects",
+    "children" : [ {
+      "name" : "option parse failed.",
+      "children" : [ {
+        "name" : "testGenerateXls",
+        "uid" : "92c82b7a034e3ac5",
+        "parentUid" : "83f7fe350225317fae8d205f14375389",
+        "status" : "failed",
+        "time" : {
+          "start" : 1664690701630,
+          "stop" : 1664690701643,
+          "duration" : 13
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      } ],
+      "uid" : "83f7fe350225317fae8d205f14375389"
+    } ],
+    "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
+  } ],
+  "name" : "categories"
 }
