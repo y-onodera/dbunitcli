@@ -1,5 +1,25 @@
 {
   "uid" : "4b4757e66a1912dae1a509f688f20b0f",
-  "children" : [ ],
+  "children" : [ {
+    "name" : "Product defects",
+    "children" : [ {
+      "name" : "unexpected diff found.",
+      "children" : [ {
+        "name" : "testCompareImage",
+        "uid" : "fa76d19e0c2da2fc",
+        "parentUid" : "bfe193d604e79085282c7791ef81bae6",
+        "status" : "failed",
+        "time" : {
+          "start" : 1664692985563,
+          "stop" : 1664692986007,
+          "duration" : 444
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      } ],
+      "uid" : "bfe193d604e79085282c7791ef81bae6"
+    } ],
+    "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
+  } ],
   "name" : "categories"
 }
