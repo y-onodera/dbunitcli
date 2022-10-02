@@ -6,13 +6,13 @@
       "name" : "unexpected diff found.",
       "children" : [ {
         "name" : "testCompareImage",
-        "uid" : "fa76d19e0c2da2fc",
+        "uid" : "6b0685f077be0bb7",
         "parentUid" : "bfe193d604e79085282c7791ef81bae6",
         "status" : "failed",
         "time" : {
-          "start" : 1664692985563,
-          "stop" : 1664692986007,
-          "duration" : 444
+          "start" : 1664705535547,
+          "stop" : 1664705536011,
+          "duration" : 464
         },
         "flaky" : false,
         "parameters" : [ ]
