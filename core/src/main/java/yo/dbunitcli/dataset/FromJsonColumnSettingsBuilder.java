@@ -189,14 +189,8 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
     protected void addExpression(ColumnExpression.Builder builder, JsonObject settingJson, ColumnExpression.ParameterType type) {
         if (settingJson.containsKey(type.keyName())) {
-            this.addExpression(builder, settingJson.getJsonArray(type.keyName()), type);
-        }
-    }
-
-    protected void addExpression(ColumnExpression.Builder builder, JsonArray expressions, ColumnExpression.ParameterType aType) {
-        for (int i = 0, j = expressions.size(); i < j; i++) {
-            expressions.getJsonObject(i)
-                    .forEach((key, value) -> builder.addExpression(aType, key, ((JsonString) value).getString()));
+            settingJson.getJsonObject(type.keyName()).forEach((key, value)
+                    -> builder.addExpression(type, key, ((JsonString) value).getString()));
         }
     }
 

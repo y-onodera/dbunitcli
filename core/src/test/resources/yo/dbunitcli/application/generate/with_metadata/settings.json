@@ -1,13 +1,29 @@
 {
   "settings": [
     {
-      "name":"Test1","keys": ["Key"],"numberExpression":[{"Column2": "Column2"}],"sqlFunction":[{"now": "'sysdate()'"}]
+      "name": "Test1",
+      "keys": [
+        "Key"
+      ],
+      "number": {
+        "Column2": "Column2"
+      },
+      "sqlFunction": {
+        "now": "'sysdate()'"
+      }
     },
     {
-      "name":"Test2","keys": ["PrimaryKey"]
+      "name": "Test2",
+      "keys": [
+        "PrimaryKey"
+      ]
     },
     {
-      "name":"Test3","keys": ["PrimaryKey","PrimaryKey2"]
+      "name": "Test3",
+      "keys": [
+        "PrimaryKey",
+        "PrimaryKey2"
+      ]
     }
   ]
 }

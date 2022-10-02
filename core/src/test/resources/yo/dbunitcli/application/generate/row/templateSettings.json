@@ -1,34 +1,18 @@
 {
   "commonSettings": [
     {
-      "stringExpression": [
-        {
-          "expression": "'int actual = ' + value2 + ' * ' + value1"
-        },
-        {
-          "assert": "'assertEquals(actual ,' + value1 * value2 + ')'"
-        }
-      ]
-    },
-    {
-      "booleanExpression": [
-        {
-          "method1": "method1"
-        },
-        {
-          "method2": "method2"
-        }
-      ]
-    },
-    {
-      "numberExpression": [
-        {
-          "value3": "value1 * value2"
-        },
-        {
-          "value4": "value3 * 2"
-        }
-      ]
+      "string": {
+        "expression": "'int actual = ' + value2 + ' * ' + value1",
+        "assert": "'assertEquals(actual ,' + value1 * value2 + ')'"
+      },
+      "boolean": {
+        "method1": "method1",
+        "method2": "method2"
+      },
+      "number": {
+        "value3": "value1 * value2",
+        "value4": "value3 * 2"
+      }
     }
   ]
 }

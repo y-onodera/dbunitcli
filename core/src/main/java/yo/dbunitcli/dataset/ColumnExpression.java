@@ -231,7 +231,7 @@ public class ColumnExpression {
         };
 
         public String keyName() {
-            return this.name().toLowerCase() + "Expression";
+            return this.name().toLowerCase();
         }
     }
 }
