@@ -1,5 +1,6 @@
 package yo.dbunitcli.dataset;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
@@ -10,6 +11,7 @@ import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -86,42 +88,13 @@ public class ColumnSettings {
                 , this.filterExpressions.apply(editor.getFilterEdit()));
     }
 
-    public Column[] getComparisonKeys(String tableName) {
-        return this.getComparisonKeys()
-                .getColumns(tableName)
-                .stream()
-                .map(it -> new Column(it, DataType.UNKNOWN))
-                .toArray(Column[]::new);
-    }
-
-    public List<Column> getExcludeColumns(String tableName) {
-        return this.getExcludeColumns()
-                .getColumns(tableName)
-                .stream()
-                .map(it -> new Column(it, DataType.UNKNOWN))
-                .collect(Collectors.toList());
-    }
-
-    public Column[] getOrderColumns(String tableName) {
-        return this.getOrderColumns()
-                .getColumns(tableName)
-                .stream()
-                .map(it -> new Column(it, DataType.UNKNOWN))
-                .toArray(Column[]::new);
-    }
-
-    public ColumnExpression getExpressionColumns(String tableName) {
-        return this.getExpressionColumns().getExpression(tableName);
-    }
-
-    public IColumnFilter getExcludeColumnFilter(String tableName) {
-        List<Column> columns = this.getExcludeColumns(tableName);
-        if (columns.size() == 0) {
-            return null;
-        }
-        DefaultColumnFilter result = new DefaultColumnFilter();
-        result.excludeColumns(columns.toArray(new Column[0]));
-        return result;
+    public ColumnSettings add(ColumnSettings other) {
+        return this.apply(editor -> editor.setTableNameMapEdit(other.tableNameMap::andThen)
+                .setKeyEdit(it -> it.add(other.comparisonKeys))
+                .setExcludeEdit(it -> it.add(other.excludeColumns))
+                .setOrderEdit(it -> it.add(other.orderColumns))
+                .setExpressionEdit(it -> it.add(other.expressionColumns))
+                .setFilterEdit(it -> it.add(other.filterExpressions)));
     }
 
     public ComparableTableMapper createMapper(ITableMetaData metaData) throws DataSetException {
@@ -133,6 +106,44 @@ public class ColumnSettings {
             resultMetaData = this.addSetting(resultMetaData);
         }
         return new ComparableTableMapper(resultMetaData, this.getOrderColumns(resultMetaData.getTableName()), settings);
+    }
+
+    protected Column[] getComparisonKeys(String tableName) {
+        return this.getComparisonKeys()
+                .getColumns(tableName)
+                .stream()
+                .map(it -> new Column(it, DataType.UNKNOWN))
+                .toArray(Column[]::new);
+    }
+
+    protected List<Column> getExcludeColumns(String tableName) {
+        return this.getExcludeColumns()
+                .getColumns(tableName)
+                .stream()
+                .map(it -> new Column(it, DataType.UNKNOWN))
+                .collect(Collectors.toList());
+    }
+
+    protected Column[] getOrderColumns(String tableName) {
+        return this.getOrderColumns()
+                .getColumns(tableName)
+                .stream()
+                .map(it -> new Column(it, DataType.UNKNOWN))
+                .toArray(Column[]::new);
+    }
+
+    protected ColumnExpression getExpressionColumns(String tableName) {
+        return this.getExpressionColumns().getExpression(tableName);
+    }
+
+    protected IColumnFilter getExcludeColumnFilter(String tableName) {
+        List<Column> columns = this.getExcludeColumns(tableName);
+        if (columns.size() == 0) {
+            return null;
+        }
+        DefaultColumnFilter result = new DefaultColumnFilter();
+        result.excludeColumns(columns.toArray(new Column[0]));
+        return result;
     }
 
     protected AddSettingTableMetaData addSetting(ITableMetaData originMetaData) throws DataSetException {
@@ -165,6 +176,24 @@ public class ColumnSettings {
     }
 
     public interface Builder {
+
+        default ColumnSettings build(String settings) throws IOException {
+            if (Strings.isNullOrEmpty(settings)) {
+                return this.build((File) null);
+            } else {
+                return this.build(Arrays.stream(settings.split(","))
+                        .map(File::new)
+                        .toArray(File[]::new));
+            }
+        }
+
+        default ColumnSettings build(File... settings) throws IOException {
+            ColumnSettings result = ColumnSettings.NONE;
+            for (File setting : settings) {
+                result = result.add(this.build(setting));
+            }
+            return result;
+        }
 
         ColumnSettings build(File setting) throws IOException;
 

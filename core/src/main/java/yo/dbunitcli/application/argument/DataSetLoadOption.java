@@ -22,7 +22,7 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
     private DataSourceType srcType = DataSourceType.csv;
 
     @Option(name = "-setting", usage = "file comparison settings")
-    private File setting;
+    private String setting;
 
     @Option(name = "-loadData", usage = "if false data row didn't load")
     private String loadData = "true";
@@ -38,7 +38,7 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
 
     private ColumnSettings columnSettings;
 
-    private ComparableDataSetParam.Builder builder;
+    private final ComparableDataSetParam.Builder builder;
 
     public DataSetLoadOption(String prefix) {
         super(prefix);
@@ -67,7 +67,7 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
         OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-srcType", this.srcType, DataSourceType.class, true);
         result.putFileOrDir("-src", this.src, true);
-        result.putFile("-setting", this.setting);
+        result.putFile("-setting", new File(this.setting));
         result.put("-loadData", this.loadData);
         result.put("-includeMetaData", this.includeMetaData);
         result.put("-regInclude", this.regInclude);
@@ -79,7 +79,7 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
             DataSourceType type = DataSourceType.valueOf(result.get("-srcType"));
             ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), type);
             result.putAll(option.createOptionParam(args));
-        } catch (Throwable th) {
+        } catch (Throwable ignored) {
         }
         return result;
     }

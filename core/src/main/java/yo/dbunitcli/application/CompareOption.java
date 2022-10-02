@@ -35,7 +35,7 @@ public class CompareOption extends CommandLineOption {
     };
 
     @Option(name = "-setting", usage = "file comparison settings")
-    private File setting;
+    private String setting;
 
     @Option(name = "-targetType")
     private Type targetType = Type.data;
@@ -97,7 +97,7 @@ public class CompareOption extends CommandLineOption {
     @Override
     public OptionParam createOptionParam(Map<String, String> args) {
         OptionParam result = new OptionParam(this.getPrefix(), args);
-        result.putFile("-setting", this.setting);
+        result.putFile("-setting", new File(this.setting));
         result.putAll(this.newData.createOptionParam(args));
         result.putAll(this.oldData.createOptionParam(args));
         result.putAll(this.getConverterOption().createOptionParam(args));

@@ -130,6 +130,11 @@ public class CompareTest {
     }
 
     @Test
+    public void testSettingImport() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareSettingImport.txt"});
+    }
+
+    @Test
     public void testExcelWithSchema() throws Exception {
         Compare.main(new String[]{"@" + this.baseDir + "/paramCompareXlsxAndXlsWithSchema.txt"});
     }
