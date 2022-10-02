@@ -1,4 +1,4 @@
 -encoding=UTF-8
--new.srcType=xlsx
+-new.srcType=xls
 -xlsxSchema=src/test/resources/yo/dbunitcli/application/generate/table/expect/ResultSchema.json
 -setting=src/test/resources/yo/dbunitcli/application/generate/table/expect/setting.json

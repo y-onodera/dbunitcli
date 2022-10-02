@@ -219,6 +219,16 @@ public class GenerateOption extends CommandLineOption {
             protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
                 JxlsTemplateRender.builder()
                         .setTemplateParameterAttribute(option.templateOption.getTemplateParameterAttribute())
+                        .setFormulaProcess(option.templateOption.isFormulaProcess())
+                        .build()
+                        .render(option.template, resultFile, param);
+            }
+        },
+        xls {
+            @Override
+            protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
+                JxlsTemplateRender.builder()
+                        .setTemplateParameterAttribute(option.templateOption.getTemplateParameterAttribute())
                         .build()
                         .render(option.template, resultFile, param);
             }

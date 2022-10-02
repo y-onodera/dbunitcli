@@ -36,9 +36,29 @@ public class GenerateTest {
     public void testGenerateXlsx() throws Exception {
         Generate.main(new String[]{"@" + this.testResourcesDir + "/paramGenerateXlsx.txt"});
         Compare.main(new String[]{"@" + this.testResourcesDir + "/generate/table/expect/xlsx/compareResult.txt"
-                , "-old.src=" + this.testResourcesDir + "/generate/table/expect/xlsx/Test1"
+                , "-old.src=" + this.testResourcesDir + "/generate/table/expect/Test1"
                 , "-new.src=" + this.baseDir + "/generate/table/result/xlsx/Test1.xlsx"
                 , "-result=" + this.baseDir + "/generate/table/result/xlsx/Test1"
+        });
+    }
+
+    @Test
+    public void testGenerateXlsxStreaming() throws Exception {
+        Generate.main(new String[]{"@" + this.testResourcesDir + "/paramGenerateXlsxStreaming.txt"});
+        Compare.main(new String[]{"@" + this.testResourcesDir + "/generate/table/expect/streamxlsx/compareResult.txt"
+                , "-old.src=" + this.testResourcesDir + "/generate/table/expect/Test1"
+                , "-new.src=" + this.baseDir + "/generate/table/result/xlsx/Test1_Stream.xlsx"
+                , "-result=" + this.baseDir + "/generate/table/result/xlsx/Test1Stream"
+        });
+    }
+
+    @Test
+    public void testGenerateXls() throws Exception {
+        Generate.main(new String[]{"@" + this.testResourcesDir + "/paramGenerateXls.txt"});
+        Compare.main(new String[]{"@" + this.testResourcesDir + "/generate/table/expect/xls/compareResult.txt"
+                , "-old.src=" + this.testResourcesDir + "/generate/table/expect/Test1"
+                , "-new.src=" + this.baseDir + "/generate/table/result/xls/Test1.xls"
+                , "-result=" + this.baseDir + "/generate/table/result/xls/Test1"
         });
     }
 

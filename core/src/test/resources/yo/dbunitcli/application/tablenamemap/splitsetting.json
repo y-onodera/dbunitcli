@@ -1,0 +1,21 @@
+{
+  "settings": [
+    {
+      "name": "multi1",
+      "split": [
+        {
+          "tableName": "split1",
+          "filter": [
+            "key < 3"
+          ]
+        },
+        {
+          "tableName": "split2",
+          "filter": [
+            "key > 1"
+          ]
+        }
+      ]
+    }
+  ]
+}

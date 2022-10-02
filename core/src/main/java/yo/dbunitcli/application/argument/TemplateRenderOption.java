@@ -26,10 +26,12 @@ public class TemplateRenderOption extends DefaultArgumentsParser implements Comp
     @Option(name = "-templateVarStop", usage = "StringTemplate expression stop char.default '$'\"")
     private char templateVarStop = '$';
 
+    @Option(name = "-formulaProcess", usage = "default true.if false xlsx output use LowerMemory but cellRef in formula isn't along with row increase")
+    private String formulaProcess = "true";
+
     public TemplateRenderOption(String prefix) {
         super(prefix);
     }
-
 
     @Override
     public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
@@ -42,6 +44,10 @@ public class TemplateRenderOption extends DefaultArgumentsParser implements Comp
 
     public String getTemplateEncoding() {
         return this.encoding;
+    }
+
+    public boolean isFormulaProcess() {
+        return Boolean.parseBoolean(this.formulaProcess);
     }
 
     public TemplateRender getTemplateRender() {

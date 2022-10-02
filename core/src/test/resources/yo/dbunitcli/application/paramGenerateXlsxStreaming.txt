@@ -1,0 +1,8 @@
+-srcType=csv
+-src=src/test/resources/yo/dbunitcli/application/generate/table/source/csv
+-encoding=MS932
+-template=src/test/resources/yo/dbunitcli/application/generate/table/template.xlsx
+-template.formulaProcess=false
+-unit=table
+-generateType=xlsx
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/table/result/xlsx/$param.tableName$_Stream.xlsx
