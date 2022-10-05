@@ -7,6 +7,7 @@ import org.dbunit.dataset.DataSetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class ComparableTableMapper {
 
@@ -43,7 +44,8 @@ public class ComparableTableMapper {
     }
 
     public ComparableTable endTable() throws DataSetException {
-        this.alreadyWrite.put(this.addSettingTableMetaData.getTableName(), this.addRowCount);
+        this.alreadyWrite.compute(this.addSettingTableMetaData.getTableName()
+                , (key, old) -> Optional.ofNullable(old).orElse(0) + this.addRowCount);
         if (this.isEnableRowProcessing() && this.startTable) {
             this.converter.endTable();
             return null;
