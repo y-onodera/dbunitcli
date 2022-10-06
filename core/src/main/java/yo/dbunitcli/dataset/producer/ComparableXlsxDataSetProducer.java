@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.util.XMLHelper;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
@@ -63,7 +64,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
         for (File sourceFile : this.src) {
             LOGGER.info("produce - start fileName={}", sourceFile);
 
-            try (OPCPackage pkg = OPCPackage.open(sourceFile)) {
+            try (OPCPackage pkg = OPCPackage.open(sourceFile, PackageAccess.READ)) {
                 ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);
                 XSSFReader xssfReader = new XSSFReader(pkg);
                 StylesTable styles = xssfReader.getStylesTable();
@@ -75,7 +76,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
                         if (this.filter.predicate(sheetName) && this.schema.contains(sheetName)) {
                             LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
                             processSheet(styles, strings, this.schema.createHandler(this.consumer, sheetName, this.loadData), stream);
-                            LOGGER.info("produce - end   sheetName={},index={}", sheetName, index-1);
+                            LOGGER.info("produce - end   sheetName={},index={}", sheetName, index - 1);
                         }
                     }
                 }

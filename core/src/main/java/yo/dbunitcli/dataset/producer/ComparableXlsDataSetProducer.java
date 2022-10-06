@@ -75,7 +75,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
             }
             LOGGER.info("produce - start fileName={}", sourceFile);
 
-            try (POIFSFileSystem newFs = new POIFSFileSystem(sourceFile)) {
+            try (POIFSFileSystem newFs = new POIFSFileSystem(sourceFile, true)) {
                 this.rowsTableBuilder = null;
                 this.randomCellRecordBuilder = null;
                 this.sheetIndex = -1;
