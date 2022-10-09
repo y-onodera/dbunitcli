@@ -115,6 +115,11 @@ public class CompareTest {
     }
 
     @Test
+    public void testComparePdf() throws Exception {
+        Compare.main(new String[]{"@" + this.baseDir + "/paramComparePdf.txt"});
+    }
+
+    @Test
     public void testCompareImage() throws Exception {
         Compare.main(new String[]{"@" + this.baseDir + "/paramCompareImage.txt"});
     }

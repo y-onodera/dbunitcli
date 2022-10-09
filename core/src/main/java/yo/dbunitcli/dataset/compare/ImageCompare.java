@@ -87,35 +87,43 @@ public class ImageCompare extends TableDataSetCompare {
 
     protected boolean compareFile(File oldPath, File newPath, File destination) throws DataSetException {
         try {
-            BufferedImage newImage = ImageIO.read(newPath);
-            BufferedImage oldImage = ImageIO.read(oldPath);
-            ImageComparisonResult result = new ImageComparison(oldImage, newImage, destination)
-                    .setThreshold(this.threshold)
-                    .setAllowingPercentOfDifferentPixels(this.allowingPercentOfDifferentPixels)
-                    .setPixelToleranceLevel(this.pixelToleranceLevel)
-                    .setRectangleLineWidth(this.rectangleLineWidth)
-                    .setMinimalRectangleSize(this.minimalRectangleSize)
-                    .setMaximalRectangleCount(this.maximalRectangleCount)
-                    .setDifferenceRectangleFilling(this.fillDifferenceRectangles
-                            , this.percentOpacityDifferenceRectangles)
-                    .setDifferenceRectangleColor(this.differenceRectangleColor)
-                    .setExcludedAreas(this.excludeAreaList)
-                    .setDrawExcludedRectangles(this.drawExcludedRectangles && this.excludeAreaList.size() > 0)
-                    .setExcludedRectangleColor(this.excludedRectangleColor)
-                    .setExcludedRectangleFilling(this.fillExcludedRectangles
-                            , this.percentOpacityExcludedRectangles)
-                    .compareImages();
-            if (result.getRectangles() != null) {
-                StringBuilder sb = new StringBuilder();
-                result.getRectangles()
-                        .forEach(it -> sb.append(String.format("[%s,%s,%s,%s]"
-                                , it.getMinPoint().getX(), it.getMinPoint().getY()
-                                , it.getMaxPoint().getX(), it.getMaxPoint().getY())));
-                LOGGER.info("diff areas = " + sb);
-            }
-            return result.getImageComparisonState() == ImageComparisonState.MATCH;
+            BufferedImage newImage = this.toImage(newPath);
+            BufferedImage oldImage = this.toImage(oldPath);
+            return this.compareImage(destination, newImage, oldImage);
         } catch (IOException e) {
             throw new DataSetException(e);
         }
+    }
+
+    protected BufferedImage toImage(File newPath) throws IOException {
+        return ImageIO.read(newPath);
+    }
+
+    protected boolean compareImage(File destination, BufferedImage newImage, BufferedImage oldImage) {
+        ImageComparisonResult result = new ImageComparison(oldImage, newImage, destination)
+                .setThreshold(this.threshold)
+                .setAllowingPercentOfDifferentPixels(this.allowingPercentOfDifferentPixels)
+                .setPixelToleranceLevel(this.pixelToleranceLevel)
+                .setRectangleLineWidth(this.rectangleLineWidth)
+                .setMinimalRectangleSize(this.minimalRectangleSize)
+                .setMaximalRectangleCount(this.maximalRectangleCount)
+                .setDifferenceRectangleFilling(this.fillDifferenceRectangles
+                        , this.percentOpacityDifferenceRectangles)
+                .setDifferenceRectangleColor(this.differenceRectangleColor)
+                .setExcludedAreas(this.excludeAreaList)
+                .setDrawExcludedRectangles(this.drawExcludedRectangles && this.excludeAreaList.size() > 0)
+                .setExcludedRectangleColor(this.excludedRectangleColor)
+                .setExcludedRectangleFilling(this.fillExcludedRectangles
+                        , this.percentOpacityExcludedRectangles)
+                .compareImages();
+        if (result.getRectangles() != null) {
+            StringBuilder sb = new StringBuilder();
+            result.getRectangles()
+                    .forEach(it -> sb.append(String.format("[%s,%s,%s,%s]"
+                            , it.getMinPoint().getX(), it.getMinPoint().getY()
+                            , it.getMaxPoint().getX(), it.getMaxPoint().getY())));
+            LOGGER.info("diff areas = " + sb);
+        }
+        return result.getImageComparisonState() == ImageComparisonState.MATCH;
     }
 }

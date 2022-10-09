@@ -34,6 +34,18 @@ public class CompareOption extends CommandLineOption {
         }
     };
 
+    public static final DefaultArgumentMapper PDF_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
+        @Override
+        public String[] map(String[] arguments, String prefix, CmdLineParser parser) {
+            List<String> newArg = Arrays.stream(arguments)
+                    .filter(it -> !it.contains("srcType=") && !it.contains("extension="))
+                    .collect(Collectors.toList());
+            newArg.add("-srcType=file");
+            newArg.add("-extension=pdf");
+            return newArg.toArray(new String[]{});
+        }
+    };
+
     @Option(name = "-setting", usage = "file comparison settings")
     private String setting;
 
@@ -76,7 +88,11 @@ public class CompareOption extends CommandLineOption {
         if (this.targetType == Type.image) {
             this.newData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
             this.oldData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
+        } else if (this.targetType == Type.pdf) {
+            this.newData.setArgumentMapper(PDF_TYPE_PARAM_MAPPER);
+            this.oldData.setArgumentMapper(PDF_TYPE_PARAM_MAPPER);
         }
+
         this.newData.parseArgument(expandArgs);
         this.oldData.parseArgument(expandArgs);
         if (Arrays.stream(expandArgs).anyMatch(it -> it.startsWith("-expect.src"))) {
@@ -89,7 +105,7 @@ public class CompareOption extends CommandLineOption {
         }
         this.populateSettings(parser);
         this.getConverterOption().parseArgument(expandArgs);
-        if (this.targetType == Type.image) {
+        if (this.targetType == Type.image || this.targetType == Type.pdf) {
             this.imageOption.parseArgument(expandArgs);
         }
     }
@@ -180,7 +196,7 @@ public class CompareOption extends CommandLineOption {
         if (this.targetType == Type.data) {
             return new DataSetCompareBuilder();
         }
-        return this.imageOption.getDataSetCompareBuilder();
+        return this.imageOption.getDataSetCompareBuilder(this.targetType);
     }
 
     public IDataSetConverter expectedDiffWriter() throws DataSetException {
