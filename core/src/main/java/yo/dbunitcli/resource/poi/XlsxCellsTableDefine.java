@@ -1,13 +1,13 @@
 package yo.dbunitcli.resource.poi;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -18,7 +18,7 @@ public class XlsxCellsTableDefine {
     private final int rowCount;
     private final int columnCount;
     private final ITableMetaData tableMetaData;
-    private Map<String, int[]> tableIndexMap = Maps.newHashMap();
+    private final Map<String, int[]> tableIndexMap = new HashMap<>();
 
     public XlsxCellsTableDefine(Builder builder) {
         this.tableName = builder.getTableName();
@@ -44,7 +44,7 @@ public class XlsxCellsTableDefine {
     }
 
     public String getTableName() {
-        return tableName;
+        return this.tableName;
     }
 
     public ITableMetaData getTableMetaData() {
@@ -84,19 +84,19 @@ public class XlsxCellsTableDefine {
 
     public static class Builder {
         private String tableName;
-        private List<String> header = Lists.newArrayList();
-        private List<String[]> rows = Lists.newArrayList();
+        private final List<String> header = new ArrayList<>();
+        private final List<String[]> rows = new ArrayList<>();
 
         public String getTableName() {
-            return tableName;
+            return this.tableName;
         }
 
         public List<String> getHeader() {
-            return header;
+            return new ArrayList<>(this.header);
         }
 
         public List<String[]> getRows() {
-            return rows;
+            return new ArrayList<>(this.rows);
         }
 
         public Builder setTableName(String tableName) {

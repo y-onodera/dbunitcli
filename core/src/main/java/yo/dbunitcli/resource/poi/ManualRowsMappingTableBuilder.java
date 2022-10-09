@@ -1,20 +1,15 @@
 package yo.dbunitcli.resource.poi;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
-    public static ManualRowsMappingTableBuilder NO_TARGET = new ManualRowsMappingTableBuilder(Lists.newArrayList()) {
+    public static ManualRowsMappingTableBuilder NO_TARGET = new ManualRowsMappingTableBuilder(new ArrayList<>()) {
         @Override
         public void handle(CellReference reference, int currentCol, String formattedValue) {
             // no handle
@@ -23,15 +18,15 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
     private final String[] tableNames;
 
-    private final Map<String, Integer> tableStartRow = Maps.newHashMap();
+    private final Map<String, Integer> tableStartRow = new HashMap<>();
 
-    private final Map<String, ITableMetaData> tableMetaDataMap = Maps.newHashMap();
+    private final Map<String, ITableMetaData> tableMetaDataMap = new HashMap<>();
 
-    private final Map<String, List<Integer>> targetIndex = Maps.newHashMap();
+    private final Map<String, List<Integer>> targetIndex = new HashMap<>();
 
-    private final Map<String, String[]> breakKey = Maps.newHashMap();
+    private final Map<String, String[]> breakKey = new HashMap<>();
 
-    private final List<Object> rowValues = Lists.newArrayList();
+    private final List<String> rowValues = new ArrayList<>();
     private int currentTableIndex = -1;
     private ITableMetaData nowProcessing = null;
 
@@ -42,7 +37,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
             this.tableNames[i] = def.getTableName();
             this.tableStartRow.put(def.getTableName(), def.getDataStartRow());
             this.tableMetaDataMap.put(def.getTableName(), def.getTableMetaData());
-            this.targetIndex.put(def.getTableName(), Lists.newArrayList(def.getCellIndexes()));
+            this.targetIndex.put(def.getTableName(), Arrays.asList(def.getCellIndexes()));
             this.breakKey.put(def.getTableName(), def.getBreakKey());
         }
     }
@@ -62,7 +57,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
         for (String conditionColumn : this.breakKey.get(this.tableNames[this.currentTableIndex])) {
             if (this.rowValues.size() <= metaData.getColumnIndex(conditionColumn)
                     || Strings.isNullOrEmpty(Optional.ofNullable(this.rowValues.get(metaData.getColumnIndex(conditionColumn)))
-                    .orElse("").toString())) {
+                    .orElse(""))) {
                 return false;
             }
         }

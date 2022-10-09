@@ -1,12 +1,11 @@
 package yo.dbunitcli.resource.poi;
 
-import com.google.common.collect.Lists;
-
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +52,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
     protected void loadRowsSetting(JsonObject jsonObject) {
         String sheetName = jsonObject.getString("sheetName");
         if (!this.rowsTableDefMap.containsKey(sheetName)) {
-            this.rowsTableDefMap.put(sheetName, Lists.newArrayList());
+            this.rowsTableDefMap.put(sheetName, new ArrayList<>());
         }
         this.rowsTableDefMap.get(sheetName).add(XlsxRowsTableDefine.builder()
                 .setTableName(jsonObject.getString("tableName"))
@@ -77,7 +76,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
     protected void loadCellsSetting(JsonObject jsonObject) {
         String sheetName = jsonObject.getString("sheetName");
         if (!this.cellsTableDefMap.containsKey(sheetName)) {
-            this.cellsTableDefMap.put(sheetName, Lists.newArrayList());
+            this.cellsTableDefMap.put(sheetName, new ArrayList<>());
         }
         this.cellsTableDefMap.get(sheetName).add(XlsxCellsTableDefine.builder()
                 .setTableName(jsonObject.getString("tableName"))

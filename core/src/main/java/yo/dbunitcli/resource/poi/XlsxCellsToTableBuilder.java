@@ -1,18 +1,17 @@
 package yo.dbunitcli.resource.poi;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class XlsxCellsToTableBuilder {
 
-    public static XlsxCellsToTableBuilder NO_TARGET = new XlsxCellsToTableBuilder(Lists.newArrayList()) {
+    public static XlsxCellsToTableBuilder NO_TARGET = new XlsxCellsToTableBuilder(new ArrayList<>()) {
         @Override
         public void handle(CellReference reference, String formattedValue) {
             // no handle
@@ -20,11 +19,11 @@ public class XlsxCellsToTableBuilder {
     };
     private final String[] tableNames;
 
-    private final Map<String, ITableMetaData> tableMetaDataMap = Maps.newHashMap();
+    private final Map<String, ITableMetaData> tableMetaDataMap = new HashMap<>();
 
-    private final Map<String, List<XlsxCellsTableDefine>> columnDefine = Maps.newHashMap();
+    private final Map<String, List<XlsxCellsTableDefine>> columnDefine = new HashMap<>();
 
-    private final Map<String, List<String[]>> row = Maps.newHashMap();
+    private final Map<String, List<String[]>> row = new HashMap<>();
 
     public XlsxCellsToTableBuilder(List<XlsxCellsTableDefine> tableDefines) {
         this.tableNames = new String[tableDefines.size()];
@@ -34,7 +33,7 @@ public class XlsxCellsToTableBuilder {
             this.tableMetaDataMap.put(def.getTableName(), def.getTableMetaData());
             for (String cellAddress : def.getTargetAddresses()) {
                 if (!this.columnDefine.containsKey(cellAddress)) {
-                    this.columnDefine.put(cellAddress, Lists.newArrayList());
+                    this.columnDefine.put(cellAddress, new ArrayList<>());
                 }
                 this.columnDefine.get(cellAddress).add(def);
             }
@@ -53,7 +52,7 @@ public class XlsxCellsToTableBuilder {
         try {
             if (this.columnDefine.containsKey(ref)) {
                 for (XlsxCellsTableDefine it : this.columnDefine.get(ref)) {
-                    ITableMetaData metaData = tableMetaDataMap.get(it.getTableName());
+                    ITableMetaData metaData = this.tableMetaDataMap.get(it.getTableName());
                     this.row.get(it.getTableName())
                             .get(it.getRowIndex(ref))[metaData.getColumnIndex(it.getColumnName(ref))] = formattedValue;
                 }
@@ -72,6 +71,6 @@ public class XlsxCellsToTableBuilder {
     }
 
     public List<String[]> getRows(String tableName) {
-        return row.get(tableName);
+        return this.row.get(tableName);
     }
 }

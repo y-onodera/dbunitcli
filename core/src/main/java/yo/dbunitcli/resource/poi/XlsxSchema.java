@@ -1,15 +1,19 @@
 package yo.dbunitcli.resource.poi;
 
-import com.google.common.collect.Maps;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public interface XlsxSchema {
 
     XlsxSchema DEFAULT = new XlsxSchema() {
+        @Override
+        public String toString() {
+            return "XlsxSchema{}";
+        }
     };
 
     default boolean contains(String sheetName) {
@@ -30,9 +34,9 @@ public interface XlsxSchema {
 
     class SimpleImpl implements XlsxSchema {
 
-        private Map<String, List<XlsxRowsTableDefine>> rowsTableDefMap = Maps.newHashMap();
+        private final Map<String, List<XlsxRowsTableDefine>> rowsTableDefMap = new HashMap<>();
 
-        private Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap = Maps.newHashMap();
+        private final Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap = new HashMap<>();
 
         protected SimpleImpl(Builder builder) {
             this.rowsTableDefMap.putAll(builder.getRowsTableDefMap());
