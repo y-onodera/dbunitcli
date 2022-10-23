@@ -1,6 +1,8 @@
 package yo.dbunitcli.dataset.converter;
 
 import com.google.common.base.Strings;
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -18,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -138,9 +141,13 @@ public class XlsConverter implements IDataSetConverter {
     }
 
     @Override
-    public void cleanupDirectory() {
+    public void cleanupDirectory() throws DataSetException {
         if (this.resultDir.exists()) {
-            this.resultDir.delete();
+            try {
+                MoreFiles.deleteRecursively(this.resultDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
+            } catch (IOException e) {
+                throw new DataSetException(e);
+            }
         }
     }
 
@@ -157,14 +164,16 @@ public class XlsConverter implements IDataSetConverter {
     protected void flush() throws DataSetException {
         File writeTo = this.writeTo();
         LOGGER.info("flush - start fileName={}", writeTo);
-        if (!this.resultDir.exists()) {
-            this.resultDir.mkdirs();
-        }
-        try (FileOutputStream out = new FileOutputStream(writeTo)) {
-            this.workbook.write(out);
-            out.flush();
-            if (this.workbook instanceof SXSSFWorkbook) {
-                ((SXSSFWorkbook) this.workbook).dispose();
+        try {
+            if (!this.resultDir.exists()) {
+                Files.createDirectories(this.resultDir.toPath());
+            }
+            try (FileOutputStream out = new FileOutputStream(writeTo)) {
+                this.workbook.write(out);
+                out.flush();
+                if (this.workbook instanceof SXSSFWorkbook) {
+                    ((SXSSFWorkbook) this.workbook).dispose();
+                }
             }
         } catch (IOException e) {
             throw new DataSetException(e);

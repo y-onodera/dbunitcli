@@ -1,5 +1,7 @@
 package yo.dbunitcli.dataset.converter;
 
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.Column;
@@ -14,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
 
 public class CsvConverter extends CsvDataSetWriter implements IDataSetConverter {
 
@@ -52,12 +55,10 @@ public class CsvConverter extends CsvDataSetWriter implements IDataSetConverter 
             this.file = new File(directory, activeTableName + ".csv");
             LOGGER.info("convert - start fileName={}", this.file);
             if (!directory.exists()) {
-                directory.mkdirs();
+                Files.createDirectories(directory.toPath());
             }
-            if (this.file.exists()) {
-                this.file.delete();
-            }
-            this.file.createNewFile();
+            Files.deleteIfExists(this.file.toPath());
+            Files.createFile(this.file.toPath());
             FileOutputStream fos = new FileOutputStream(this.file);
             this.setWriter(new OutputStreamWriter(fos, this.encoding));
             this.writeColumnNames();
@@ -101,9 +102,13 @@ public class CsvConverter extends CsvDataSetWriter implements IDataSetConverter 
     }
 
     @Override
-    public void cleanupDirectory() {
+    public void cleanupDirectory() throws DataSetException {
         if (this.resultDir.exists()) {
-            this.resultDir.delete();
+            try {
+                MoreFiles.deleteRecursively(this.resultDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
+            } catch (IOException e) {
+                throw new DataSetException(e);
+            }
         }
     }
 
