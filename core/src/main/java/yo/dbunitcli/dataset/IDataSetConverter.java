@@ -10,8 +10,6 @@ import java.io.IOException;
 
 public interface IDataSetConverter extends org.dbunit.dataset.stream.IDataSetConsumer {
 
-    void cleanupDirectory() throws DataSetException;
-
     boolean isExportEmptyTable();
 
     void reStartTable(ITableMetaData tableMetaData, Integer writeRows) throws DataSetException;

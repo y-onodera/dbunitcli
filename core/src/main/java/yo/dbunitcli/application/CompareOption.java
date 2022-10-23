@@ -11,7 +11,7 @@ import yo.dbunitcli.application.argument.DefaultArgumentMapper;
 import yo.dbunitcli.application.argument.ImageCompareOption;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.compare.CompareResult;
-import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
+import yo.dbunitcli.dataset.compare.CompareBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -131,7 +131,7 @@ public class CompareOption extends CommandLineOption {
                 .build()
                 .result();
         if (this.getExpectData().getParam().getSrc() != null) {
-            if (new DataSetCompareBuilder()
+            if (new CompareBuilder()
                     .newDataSet(this.resultDataSet())
                     .oldDataSet(this.expectDataSet())
                     .comparisonKeys(this.getExpectData().getParam().getColumnSettings().getComparisonKeys())
@@ -192,11 +192,11 @@ public class CompareOption extends CommandLineOption {
         return this.getComparableDataSetLoader().loadDataSet(this.expectData.getParam().build());
     }
 
-    public DataSetCompareBuilder getDataSetCompareBuilder() {
+    public CompareBuilder getDataSetCompareBuilder() {
         if (this.targetType == Type.data) {
-            return new DataSetCompareBuilder();
+            return new CompareBuilder();
         }
-        return this.imageOption.getDataSetCompareBuilder(this.targetType);
+        return new CompareBuilder().setCompareManagerFactory(this.imageOption.createFactoryOf(this.targetType));
     }
 
     public IDataSetConverter expectedDiffWriter() throws DataSetException {

@@ -5,8 +5,9 @@ import com.google.common.collect.Lists;
 
 import java.awt.*;
 import java.util.List;
+import java.util.function.Supplier;
 
-public class ImageCompareBuilder extends DataSetCompareBuilder {
+public class ImageCompareBuilder implements Supplier<Compare.Manager> {
 
     private int threshold;
 
@@ -37,8 +38,8 @@ public class ImageCompareBuilder extends DataSetCompareBuilder {
     private Color excludedRectangleColor;
 
     @Override
-    public TableDataSetCompare getTableDataSetCompare() {
-        return new ImageCompare(this);
+    public Compare.Manager get() {
+        return new ImageCompareManager(this);
     }
 
     public int getThreshold() {

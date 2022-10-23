@@ -8,9 +8,9 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler;
 import yo.dbunitcli.application.CompareOption;
-import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
+import yo.dbunitcli.dataset.compare.CompareBuilder;
 import yo.dbunitcli.dataset.compare.ImageCompareBuilder;
-import yo.dbunitcli.dataset.compare.PdfCompare;
+import yo.dbunitcli.dataset.compare.PdfCompareManager;
 
 import java.awt.*;
 import java.math.BigDecimal;
@@ -54,7 +54,7 @@ public class ImageCompareOption extends DefaultArgumentsParser {
     @Option(name = "-excludedAreas", usage = "ExcludedAreas contains a List of Rectangles to be ignored.")
     private String excludedAreas;
 
-    private List<Rectangle> excludeAreaList = Lists.newArrayList();
+    private final List<Rectangle> excludeAreaList = Lists.newArrayList();
 
     @Option(name = "-drawExcludedRectangles", handler = ExplicitBooleanOptionHandler.class, usage = "Flag which says draw excluded rectangles or not.")
     private boolean drawExcludedRectangles = true;
@@ -107,8 +107,8 @@ public class ImageCompareOption extends DefaultArgumentsParser {
         return result;
     }
 
-    public DataSetCompareBuilder getDataSetCompareBuilder(CompareOption.Type targetType) {
-        ImageCompareBuilder result = targetType == CompareOption.Type.image ? new ImageCompareBuilder() : PdfCompare.builder();
+    public ImageCompareBuilder createFactoryOf(CompareOption.Type targetType) {
+        ImageCompareBuilder result = targetType == CompareOption.Type.image ? new ImageCompareBuilder() : PdfCompareManager.builder();
         return result
                 .setThreshold(Integer.parseInt(Optional.ofNullable(this.threshold).orElse("5")))
                 .setPixelToleranceLevel(Double.parseDouble(Optional.ofNullable(this.pixelToleranceLevel).orElse("0.01D")))

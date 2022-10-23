@@ -6,30 +6,37 @@ import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.io.File;
+import java.util.function.Supplier;
 
-public class DataSetCompareBuilder {
+public class CompareBuilder {
     private ComparableDataSet oldDataSet;
     private ComparableDataSet newDataSet;
     private AddSettingColumns comparisonKeys;
     private IDataSetConverter dataSetWriter;
+    private Supplier<Compare.Manager> compareManagerFactory = DefaultCompareManager::new;
 
-    public DataSetCompareBuilder oldDataSet(ComparableDataSet dataSet) {
+    public CompareBuilder oldDataSet(ComparableDataSet dataSet) {
         this.oldDataSet = dataSet;
         return this;
     }
 
-    public DataSetCompareBuilder newDataSet(ComparableDataSet dataSet) {
+    public CompareBuilder newDataSet(ComparableDataSet dataSet) {
         this.newDataSet = dataSet;
         return this;
     }
 
-    public DataSetCompareBuilder comparisonKeys(AddSettingColumns comparisonKeys) {
+    public CompareBuilder comparisonKeys(AddSettingColumns comparisonKeys) {
         this.comparisonKeys = comparisonKeys;
         return this;
     }
 
-    public DataSetCompareBuilder dataSetWriter(IDataSetConverter iDataSetWriter) {
+    public CompareBuilder dataSetWriter(IDataSetConverter iDataSetWriter) {
         this.dataSetWriter = iDataSetWriter;
+        return this;
+    }
+
+    public CompareBuilder setCompareManagerFactory(Supplier<Compare.Manager> compareManagerFactory) {
+        this.compareManagerFactory = compareManagerFactory;
         return this;
     }
 
@@ -49,8 +56,8 @@ public class DataSetCompareBuilder {
         return this.dataSetWriter;
     }
 
-    public TableDataSetCompare getTableDataSetCompare() {
-        return new TableDataSetCompare();
+    public Compare.Manager getManager() {
+        return this.compareManagerFactory.get();
     }
 
     public File getResultDir() {
@@ -58,7 +65,7 @@ public class DataSetCompareBuilder {
     }
 
     public Compare build() throws DataSetException {
-        return new DataSetCompare(this);
+        return new Compare(this);
     }
 
 }

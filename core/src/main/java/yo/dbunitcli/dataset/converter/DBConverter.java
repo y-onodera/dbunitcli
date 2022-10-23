@@ -49,10 +49,6 @@ public class DBConverter implements IDataSetConverter {
     }
 
     @Override
-    public void cleanupDirectory() {
-    }
-
-    @Override
     public boolean isExportEmptyTable() {
         return this.exportEmptyTable;
     }

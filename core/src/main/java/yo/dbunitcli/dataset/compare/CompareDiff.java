@@ -1,88 +1,81 @@
 package yo.dbunitcli.dataset.compare;
 
-import org.dbunit.dataset.ITable;
+import java.util.function.UnaryOperator;
 
 public class CompareDiff {
 
     private final String targetName;
 
-    private final Type diff;
+    private final Diff diff;
 
-    private final String oldDef;
+    private final String oldDefine;
 
-    private final String newDef;
+    private final String newDefine;
 
     private final int columnIndex;
 
     private final int rows;
 
-    private final ITable detailRows;
-
     public CompareDiff(Builder builder) {
         this.targetName = builder.getTargetName();
         this.diff = builder.getDiff();
-        this.oldDef = builder.getOldDef();
-        this.newDef = builder.getNewDef();
+        this.oldDefine = builder.getOldDefine();
+        this.newDefine = builder.getNewDefine();
         this.columnIndex = builder.getColumnIndex();
         this.rows = builder.getRows();
-        this.detailRows = builder.getDetailRows();
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static Builder getBuilder(Type columnsCount) {
-        return builder().setDiff(columnsCount);
     }
 
     public String getTargetName() {
-        return targetName;
+        return this.targetName;
     }
 
     public String getDiff() {
-        return diff.name();
+        return this.diff.name();
     }
 
-    public String getOldDef() {
-        return oldDef;
+    public String getOldDefine() {
+        return this.oldDefine;
     }
 
-    public String getNewDef() {
-        return newDef;
+    public String getNewDefine() {
+        return this.newDefine;
     }
 
     public int getColumnIndex() {
-        return columnIndex;
+        return this.columnIndex;
     }
 
     public int getRows() {
-        return rows;
+        return this.rows;
     }
 
-    public ITable getDetailRows() {
-        return detailRows;
+    public CompareDiff edit(UnaryOperator<Builder> function) {
+        return function.apply(this.builder()).build();
     }
 
-    public enum Type {
-        TABLE_COUNT, TABLE_DELETE, TABLE_ADD, COLUMNS_COUNT, COLUMNS_MODIFY, COLUMNS_DELETE, COLUMNS_ADD, ROWS_COUNT, KEY_DELETE, KEY_ADD, MODIFY_VALUE
+    private Builder builder() {
+        return new Builder()
+                .setTargetName(this.targetName)
+                .setDiff(this.diff)
+                .setNewDefine(this.newDefine)
+                .setOldDefine(this.oldDefine)
+                .setColumnIndex(this.columnIndex)
+                .setRows(this.rows);
     }
 
     public static class Builder {
 
         private String targetName;
 
-        private Type diff;
+        private Diff diff;
 
-        private String oldDef;
+        private String oldDefine;
 
-        private String newDef;
+        private String newDefine;
 
         private int columnIndex;
 
         private int rows;
-
-        private ITable detailRows;
 
         public CompareDiff build() {
             return new CompareDiff(this);
@@ -97,30 +90,30 @@ public class CompareDiff {
             return this;
         }
 
-        public Type getDiff() {
+        public Diff getDiff() {
             return diff;
         }
 
-        public Builder setDiff(Type diff) {
+        public Builder setDiff(Diff diff) {
             this.diff = diff;
             return this;
         }
 
-        public String getOldDef() {
-            return oldDef;
+        public String getOldDefine() {
+            return this.oldDefine;
         }
 
-        public Builder setOldDef(String oldDef) {
-            this.oldDef = oldDef;
+        public Builder setOldDefine(String oldDef) {
+            this.oldDefine = oldDef;
             return this;
         }
 
-        public String getNewDef() {
-            return newDef;
+        public String getNewDefine() {
+            return this.newDefine;
         }
 
-        public Builder setNewDef(String newDef) {
-            this.newDef = newDef;
+        public Builder setNewDefine(String newDef) {
+            this.newDefine = newDef;
             return this;
         }
 
@@ -142,13 +135,18 @@ public class CompareDiff {
             return this;
         }
 
-        public ITable getDetailRows() {
-            return detailRows;
-        }
+    }
 
-        public Builder setDetailRows(ITable detailRows) {
-            this.detailRows = detailRows;
-            return this;
+    public interface Diff {
+
+        String name();
+
+        default Builder of() {
+            return new Builder().setDiff(this);
         }
+    }
+
+    public enum Type implements Diff {
+        TABLE_COUNT, TABLE_DELETE, TABLE_ADD, COLUMNS_COUNT, COLUMNS_MODIFY, COLUMNS_DELETE, COLUMNS_ADD, ROWS_COUNT, KEY_DELETE, KEY_ADD, MODIFY_VALUE
     }
 }

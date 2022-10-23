@@ -102,17 +102,6 @@ public class CsvConverter extends CsvDataSetWriter implements IDataSetConverter 
     }
 
     @Override
-    public void cleanupDirectory() throws DataSetException {
-        if (this.resultDir.exists()) {
-            try {
-                MoreFiles.deleteRecursively(this.resultDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
-            } catch (IOException e) {
-                throw new DataSetException(e);
-            }
-        }
-    }
-
-    @Override
     public File getDir() {
         return this.resultDir;
     }
