@@ -7,9 +7,9 @@
       "failed" : 0,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 26,
+      "passed" : 27,
       "unknown" : 0,
-      "total" : 26
+      "total" : 27
     }
   }, {
     "uid" : "8e84c10bd9ee42c087cd6cfb1c7f6fa9",
@@ -100,8 +100,8 @@
       "total" : 3
     }
   }, {
-    "uid" : "51aa6ee97642c57710cb91bf37a1c9c3",
-    "name" : "yo.dbunitcli.application.argument.DataSetLoadOptionTest",
+    "uid" : "05ae8e61d36f7066caa3a1b3f8d2b6d4",
+    "name" : "yo.dbunitcli.application.ParameterizeExecuteTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
