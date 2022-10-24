@@ -6,10 +6,7 @@ import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.DataSetException;
-import yo.dbunitcli.dataset.AddSettingColumns;
-import yo.dbunitcli.dataset.ComparableTable;
-import yo.dbunitcli.dataset.CompareKeys;
-import yo.dbunitcli.dataset.IDataSetConverter;
+import yo.dbunitcli.dataset.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -69,6 +66,11 @@ public class ImageCompareManager extends DefaultCompareManager {
     }
 
     @Override
+    public CompareResult toCompareResult(ComparableDataSet oldDataSet, ComparableDataSet newDataSet, List<CompareDiff> results) {
+        return new ImageCompareResult(oldDataSet.getSrc(), newDataSet.getSrc(), results);
+    }
+
+    @Override
     public Stream<Function<Compare, List<CompareDiff>>> getStrategies() {
         return Stream.of(this.searchModifyTables());
     }
@@ -81,6 +83,8 @@ public class ImageCompareManager extends DefaultCompareManager {
     public class ImageMain extends Main {
 
         protected final File resultDir;
+
+        protected int diffCount;
 
         public ImageMain(ComparableTable oldTable, ComparableTable newTable, AddSettingColumns comparisonKeys, IDataSetConverter writer) throws DataSetException {
             super(oldTable, newTable, comparisonKeys, writer);
@@ -101,7 +105,15 @@ public class ImageCompareManager extends DefaultCompareManager {
             try {
                 BufferedImage newImage = this.toImage(newPath);
                 BufferedImage oldImage = this.toImage(oldPath);
-                this.compareImage(key, newImage, oldImage, it -> new File(resultDir, it.getKeysToString() + ".png"));
+                ImageComparisonResult result = this.compareImage(key, newImage, oldImage);
+                if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
+                    result.writeResultTo(new File(resultDir, key.getKeysToString() + ".png"));
+                    this.modifyValues.put(this.diffCount++, ((CompareDiff.Diff) () -> result.getRectangles()
+                            .stream().reduce("", (String sb, Rectangle it) -> sb + String.format("[%s,%s,%s,%s]"
+                                    , it.getMinPoint().getX(), it.getMinPoint().getY()
+                                    , it.getMaxPoint().getX(), it.getMaxPoint().getY()), (a, b) -> a + b)
+                    ).of().setTargetName(oldPath.getName()).build());
+                }
             } catch (IOException e) {
                 throw new DataSetException(e);
             }
@@ -111,8 +123,8 @@ public class ImageCompareManager extends DefaultCompareManager {
             return ImageIO.read(newPath);
         }
 
-        protected void compareImage(CompareKeys key, BufferedImage newImage, BufferedImage oldImage, Function<CompareKeys, File> toDestination) throws DataSetException {
-            ImageComparisonResult result = new ImageComparison(oldImage, newImage)
+        protected ImageComparisonResult compareImage(CompareKeys key, BufferedImage newImage, BufferedImage oldImage) throws DataSetException {
+            return new ImageComparison(oldImage, newImage)
                     .setThreshold(threshold)
                     .setAllowingPercentOfDifferentPixels(allowingPercentOfDifferentPixels)
                     .setPixelToleranceLevel(pixelToleranceLevel)
@@ -126,19 +138,6 @@ public class ImageCompareManager extends DefaultCompareManager {
                     .setExcludedRectangleColor(excludedRectangleColor)
                     .setExcludedRectangleFilling(fillExcludedRectangles, percentOpacityExcludedRectangles)
                     .compareImages();
-            if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
-                result.writeResultTo(toDestination.apply(key));
-                this.modifyValues.put(0, ((CompareDiff.Diff) () -> result.getRectangles()
-                        .stream().reduce("", (String sb, Rectangle it) -> sb + String.format("[%s,%s,%s,%s]"
-                                , it.getMinPoint().getX(), it.getMinPoint().getY()
-                                , it.getMaxPoint().getX(), it.getMaxPoint().getY()), (a, b) -> a + b)
-                ).of().setTargetName(this.oldTable.getTableMetaData().getTableName())
-                        .setOldDefine(this.oldTable.getTableMetaData().getColumns()[0].getColumnName())
-                        .setNewDefine(this.newTable.getTableMetaData().getColumns()[0].getColumnName())
-                        .setColumnIndex(0)
-                        .setRows(1)
-                        .build());
-            }
         }
     }
 }

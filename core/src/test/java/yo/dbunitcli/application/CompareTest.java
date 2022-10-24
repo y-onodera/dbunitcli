@@ -119,6 +119,7 @@ public class CompareTest {
         Compare.main(new String[]{"@" + this.baseDir + "/paramComparePdf.txt"});
     }
 
+    @Test
     public void testComparePdfDiffAllPage() throws Exception {
         Compare.main(new String[]{"@" + this.baseDir + "/paramComparePdfDiffAllPage.txt"});
     }

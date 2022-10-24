@@ -1,5 +1,8 @@
 package yo.dbunitcli.dataset.compare;
 
+import com.github.romankh3.image.comparison.model.ImageComparisonResult;
+import com.github.romankh3.image.comparison.model.ImageComparisonState;
+import com.github.romankh3.image.comparison.model.Rectangle;
 import com.google.common.base.Strings;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -42,10 +45,16 @@ public class PdfCompareManager extends ImageCompareManager {
                 try (PDDocument doc = PDDocument.load(newIn); PDDocument oldDoc = PDDocument.load(oldIn)) {
                     for (int i = 0, j = oldDoc.getNumberOfPages(); i < j; i++) {
                         String page = Strings.padStart(String.valueOf(i), String.valueOf(j).length(), '0');
-                        this.compareImage(key
-                                , new PDFRenderer(doc).renderImage(i)
-                                , new PDFRenderer(oldDoc).renderImage(i)
-                                , it -> new File(this.resultDir, it.getKeysToString() + page + ".png"));
+                        ImageComparisonResult result = this.compareImage(key, new PDFRenderer(doc).renderImage(i), new PDFRenderer(oldDoc).renderImage(i));
+                        if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
+                            result.writeResultTo(new File(this.resultDir, key.getKeysToString() + page + ".png"));
+                            this.modifyValues.put(this.diffCount++, ((CompareDiff.Diff) () -> result.getRectangles()
+                                    .stream().reduce("", (String sb, Rectangle it) -> sb + String.format("[%s,%s,%s,%s]"
+                                            , it.getMinPoint().getX(), it.getMinPoint().getY()
+                                            , it.getMaxPoint().getX(), it.getMaxPoint().getY()), (a, b) -> a + b)
+                            ).of().setTargetName(oldPath.getName() + "_" + page).build());
+                        }
+
                     }
                 }
             } catch (IOException e) {
