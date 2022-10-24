@@ -77,26 +77,30 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         LOGGER.info("produce - start fileName={}", theDataFile);
         try {
             this.parse(theDataFile);
-        } catch (PipelineException | IOException | IllegalInputCharacterException e) {
+        } catch (PipelineException | IllegalInputCharacterException e) {
             throw new DataSetException(e);
         }
         LOGGER.info("produce - rows={}", this.processRow);
         LOGGER.info("produce - end   fileName={}", theDataFile);
     }
 
-    protected void parse(File file) throws IOException, DataSetException {
-        Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), this.encoding));
-        LineNumberReader lineNumberReader = new LineNumberReader(reader);
-        String[] headerName = this.headerNames;
-        if (headerName == null) {
-            headerName = this.parseFirstLine(lineNumberReader, file.getAbsolutePath());
+    protected void parse(File file) throws DataSetException {
+        try (FileInputStream fi = new FileInputStream(file)) {
+            Reader reader = new BufferedReader(new InputStreamReader(fi, this.encoding));
+            LineNumberReader lineNumberReader = new LineNumberReader(reader);
+            String[] headerName = this.headerNames;
+            if (headerName == null) {
+                headerName = this.parseFirstLine(lineNumberReader, file.getAbsolutePath());
+            }
+            this.consumer.startTable(this.createMetaData(file, headerName));
+            this.processRow = 0;
+            if (this.loadData) {
+                parseTheData(headerName, lineNumberReader);
+            }
+            this.consumer.endTable();
+        } catch (IOException e) {
+            throw new DataSetException(e);
         }
-        this.consumer.startTable(this.createMetaData(file, headerName));
-        this.processRow = 0;
-        if (this.loadData) {
-            parseTheData(headerName, lineNumberReader);
-        }
-        this. consumer.endTable();
     }
 
     protected String[] parseFirstLine(LineNumberReader lineNumberReader, String source) throws IOException, CsvParserException {
@@ -185,7 +189,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         pipeline.putFront(TransparentHandler.IGNORE());
     }
 
-    protected  static class IgnoreDelimiterWhitespacesHandler extends AbstractPipelineComponent {
+    protected static class IgnoreDelimiterWhitespacesHandler extends AbstractPipelineComponent {
         private static final Logger LOGGER = LogManager.getLogger();
         static Field HANDLE;
 
