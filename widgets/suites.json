@@ -4,12 +4,12 @@
     "uid" : "27fc8157e23299733182df5bab2c2e02",
     "name" : "yo.dbunitcli.application.CompareTest",
     "statistic" : {
-      "failed" : 1,
+      "failed" : 0,
       "broken" : 0,
       "skipped" : 0,
       "passed" : 27,
       "unknown" : 0,
-      "total" : 28
+      "total" : 27
     }
   }, {
     "uid" : "8e84c10bd9ee42c087cd6cfb1c7f6fa9",

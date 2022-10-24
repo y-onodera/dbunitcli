@@ -1,0 +1,55 @@
+{
+  "uid" : "b95eff521713779d",
+  "name" : "testGenerateXlsx",
+  "fullName" : "yo.dbunitcli.application.GenerateTest.testGenerateXlsx",
+  "historyId" : "3bb1200fd433b5970410244b316fbdbc",
+  "time" : {
+    "start" : 1666648875137,
+    "stop" : 1666648875889,
+    "duration" : 752
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.GenerateTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testGenerateXlsx"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.GenerateTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az180-977"
+  }, {
+    "name" : "thread",
+    "value" : "2085@fv-az180-977.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "b95eff521713779d.json",
+  "parameterValues" : [ ]
+}

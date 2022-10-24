@@ -1,25 +1,5 @@
 {
   "uid" : "4b4757e66a1912dae1a509f688f20b0f",
-  "children" : [ {
-    "name" : "Product defects",
-    "children" : [ {
-      "name" : "unexpected diff found.",
-      "children" : [ {
-        "name" : "testComparePdfDiffAllPage",
-        "uid" : "38db00b3442fd806",
-        "parentUid" : "bfe193d604e79085282c7791ef81bae6",
-        "status" : "failed",
-        "time" : {
-          "start" : 1666648699875,
-          "stop" : 1666648701522,
-          "duration" : 1647
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      } ],
-      "uid" : "bfe193d604e79085282c7791ef81bae6"
-    } ],
-    "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
-  } ],
+  "children" : [ ],
   "name" : "categories"
 }
