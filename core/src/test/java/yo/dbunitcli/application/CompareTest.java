@@ -1,6 +1,7 @@
 package yo.dbunitcli.application;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
@@ -119,7 +120,7 @@ public class CompareTest {
         Compare.main(new String[]{"@" + this.baseDir + "/paramComparePdf.txt"});
     }
 
-    @Test
+    @Ignore
     public void testComparePdfDiffAllPage() throws Exception {
         Compare.main(new String[]{"@" + this.baseDir + "/paramComparePdfDiffAllPage.txt"});
     }
