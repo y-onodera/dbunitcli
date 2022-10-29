@@ -1,13 +1,14 @@
 package yo.dbunitcli.dataset.converter;
 
-import com.google.common.io.MoreFiles;
-import com.google.common.io.RecursiveDeleteOption;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.csv.CsvDataSetWriter;
+import org.dbunit.dataset.datatype.DataType;
+import org.dbunit.dataset.datatype.TypeCastException;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
@@ -90,7 +91,33 @@ public class CsvConverter extends CsvDataSetWriter implements IDataSetConverter 
 
     @Override
     public void row(Object[] objects) throws DataSetException {
-        super.row(objects);
+        try {
+
+            Column[] columns = this.activeMetaData.getColumns();
+            for (int i = 0; i < columns.length; i++) {
+                String columnName = columns[i].getColumnName();
+                Object value = objects[i];
+
+                if (value == null || value == ITable.NO_VALUE) {
+                    this.getWriter().write("");
+                } else {
+                    try {
+                        this.getWriter().write(this.quoted(DataType.asString(value)));
+                    } catch (TypeCastException e) {
+                        throw new DataSetException("table=" +
+                                this.activeMetaData.getTableName() + ", row=" + i +
+                                ", column=" + columnName +
+                                ", value=" + value, e);
+                    }
+                }
+                if (i < columns.length - 1) {
+                    this.getWriter().write(",");
+                }
+            }
+            getWriter().write(System.getProperty("line.separator"));
+        } catch (IOException e) {
+            throw new DataSetException(e);
+        }
         this.writeRows++;
     }
 
