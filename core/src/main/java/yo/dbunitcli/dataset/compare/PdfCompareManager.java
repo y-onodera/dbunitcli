@@ -2,21 +2,18 @@ package yo.dbunitcli.dataset.compare;
 
 import com.github.romankh3.image.comparison.model.ImageComparisonResult;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
-import com.github.romankh3.image.comparison.model.Rectangle;
 import com.google.common.base.Strings;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.dbunit.dataset.DataSetException;
-import yo.dbunitcli.dataset.AddSettingColumns;
-import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.CompareKeys;
-import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.function.Function;
 
 public class PdfCompareManager extends ImageCompareManager {
 
@@ -29,14 +26,20 @@ public class PdfCompareManager extends ImageCompareManager {
     }
 
     @Override
-    public List<CompareDiff> compareTable(ComparableTable oldTable, ComparableTable newTable, AddSettingColumns comparisonKeys, IDataSetConverter writer) throws DataSetException {
-        return new PdfMain(oldTable, newTable, comparisonKeys, writer).getResults();
+    protected Function<DataSetCompare.TableCompare, List<CompareDiff>> compareRow() {
+        return it -> {
+            try {
+                return new PdfFileCompare(it).exec();
+            } catch (DataSetException e) {
+                throw new AssertionError(e);
+            }
+        };
     }
 
-    public class PdfMain extends ImageMain {
+    public class PdfFileCompare extends ImageFileCompare {
 
-        public PdfMain(ComparableTable oldTable, ComparableTable newTable, AddSettingColumns comparisonKeys, IDataSetConverter writer) throws DataSetException {
-            super(oldTable, newTable, comparisonKeys, writer);
+        public PdfFileCompare(DataSetCompare.TableCompare it) throws DataSetException {
+            super(it);
         }
 
         @Override
@@ -45,14 +48,13 @@ public class PdfCompareManager extends ImageCompareManager {
                 try (PDDocument doc = PDDocument.load(newIn); PDDocument oldDoc = PDDocument.load(oldIn)) {
                     for (int i = 0, j = oldDoc.getNumberOfPages(); i < j; i++) {
                         String page = Strings.padStart(String.valueOf(i), String.valueOf(j).length(), '0');
-                        ImageComparisonResult result = this.compareImage(key, new PDFRenderer(doc).renderImage(i), new PDFRenderer(oldDoc).renderImage(i));
+                        ImageComparisonResult result = this.compareImage(new PDFRenderer(doc).renderImage(i), new PDFRenderer(oldDoc).renderImage(i));
                         if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
                             result.writeResultTo(new File(this.resultDir, key.getKeysToString() + page + ".png"));
-                            this.modifyValues.put(this.diffCount++, ((CompareDiff.Diff) () -> result.getRectangles()
-                                    .stream().reduce("", (String sb, Rectangle it) -> sb + String.format("[%s,%s,%s,%s]"
-                                            , it.getMinPoint().getX(), it.getMinPoint().getY()
-                                            , it.getMaxPoint().getX(), it.getMaxPoint().getY()), (a, b) -> a + b)
-                            ).of().setTargetName(oldPath.getName() + "_" + page).build());
+                            this.modifyValues.put(this.diffCount++, this.getDiff(result)
+                                    .of()
+                                    .setTargetName(oldPath.getName() + "_" + page)
+                                    .build());
                         }
 
                     }

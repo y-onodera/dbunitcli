@@ -8,7 +8,6 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler;
 import yo.dbunitcli.application.CompareOption;
-import yo.dbunitcli.dataset.compare.CompareBuilder;
 import yo.dbunitcli.dataset.compare.ImageCompareBuilder;
 import yo.dbunitcli.dataset.compare.PdfCompareManager;
 

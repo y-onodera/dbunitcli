@@ -31,18 +31,18 @@ public class DiffTable extends DefaultTable {
         super(metaData);
     }
 
-    public void addRow(CompareKeys compareKeys, Integer key, Object[] oldRow, Object[] newRow) throws DataSetException {
+    public void addRow(CompareKeys compareKeys, Integer columnIndex, Object[] oldRow, Object[] newRow) throws DataSetException {
         this.addRow(toList(newRow,
                 "NEW"
                 , compareKeys.getRowNum()
                 , compareKeys.getNewRowNum()
-                , getIndexColumn(key))
+                , getIndexColumn(columnIndex))
                 .toArray(new Object[oldRow.length + 4]));
         this.addRow(toList(oldRow
                 , "OLD"
                 , compareKeys.getRowNum()
                 , compareKeys.getOldRowNum()
-                , getIndexColumn(key))
+                , getIndexColumn(columnIndex))
                 .toArray(new Object[oldRow.length + 4]));
     }
 

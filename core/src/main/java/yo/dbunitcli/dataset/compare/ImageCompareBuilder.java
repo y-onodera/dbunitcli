@@ -7,7 +7,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ImageCompareBuilder implements Supplier<Compare.Manager> {
+public class ImageCompareBuilder implements Supplier<DataSetCompare.Manager> {
 
     private int threshold;
 
@@ -38,7 +38,7 @@ public class ImageCompareBuilder implements Supplier<Compare.Manager> {
     private Color excludedRectangleColor;
 
     @Override
-    public Compare.Manager get() {
+    public DataSetCompare.Manager get() {
         return new ImageCompareManager(this);
     }
 

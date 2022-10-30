@@ -6,8 +6,10 @@ import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.dataset.*;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-public class DefaultCompareManager implements Compare.Manager {
+public class DefaultCompareManager implements DataSetCompare.Manager {
 
     private static final String COLUMN_NAME_ROW_INDEX = "$ROW_INDEX";
     private static final Column COLUMN_ROW_INDEX = new Column(COLUMN_NAME_ROW_INDEX, DataType.NUMERIC);
@@ -18,239 +20,272 @@ public class DefaultCompareManager implements Compare.Manager {
     }
 
     @Override
-    public List<CompareDiff> compareTable(ComparableTable oldTable, ComparableTable newTable, AddSettingColumns comparisonKeys, IDataSetConverter writer) throws DataSetException {
-        return new Main(oldTable, newTable, comparisonKeys, writer).getResults();
+    public List<CompareDiff> compareTable(DataSetCompare.TableCompare tableCompare) {
+        List<CompareDiff> results = new ArrayList<>();
+        getTableCompareStrategies().forEach(it -> results.addAll(it.apply(tableCompare)));
+        return results;
     }
 
-    public static class Main {
-        protected final ComparableTable oldTable;
-        protected final ComparableTable newTable;
-        protected final AddSettingColumns comparisonKeys;
-        protected final IDataSetConverter writer;
-        protected List<String> keyColumns;
-        protected DiffTable diffDetailTable;
-        protected Map<Integer, CompareDiff> modifyValues;
-        protected final int columnLength;
+    protected Stream<Function<DataSetCompare.TableCompare, List<CompareDiff>>> getTableCompareStrategies() {
+        return Stream.of(this.compareColumnCount()
+                , this.searchModifyAndDeleteColumns()
+                , this.searchAddColumns()
+                , this.rowCount()
+                , this.compareRow()
+        );
+    }
 
-        public Main(ComparableTable oldTable, ComparableTable newTable, AddSettingColumns comparisonKeys, IDataSetConverter writer) throws DataSetException {
-            this.oldTable = oldTable;
-            this.newTable = newTable;
-            this.comparisonKeys = comparisonKeys;
-            this.writer = writer;
-            this.columnLength = Math.min(this.newTable.getTableMetaData().getColumns().length, this.oldTable.getTableMetaData().getColumns().length);
-            this.keyColumns = this.comparisonKeys.getColumns(this.oldTable.getTableMetaData().getTableName());
-        }
-
-        public List<CompareDiff> getResults() throws DataSetException {
-            List<CompareDiff> results = Lists.newArrayList();
-            if (this.comparisonKeys.hasAdditionalSetting(this.oldTable.getTableMetaData().getTableName())) {
-                results.addAll(this.compareColumn());
-                results.addAll(this.rowCount());
-                results.addAll(this.compareRow());
+    protected Function<DataSetCompare.TableCompare, List<CompareDiff>> compareColumnCount() {
+        return it -> {
+            try {
+                List<CompareDiff> results = new ArrayList<>();
+                ITableMetaData oldMetaData = it.getOldTable().getTableMetaData();
+                ITableMetaData newMetaData = it.getNewTable().getTableMetaData();
+                final String tableName = oldMetaData.getTableName();
+                final int newColumns = newMetaData.getColumns().length;
+                final int oldColumns = oldMetaData.getColumns().length;
+                if (oldColumns != newColumns) {
+                    results.add(CompareDiff.Type.COLUMNS_COUNT.of()
+                            .setTargetName(tableName)
+                            .setOldDefine(String.valueOf(oldColumns))
+                            .setNewDefine(String.valueOf(newColumns))
+                            .build());
+                }
+                return results;
+            } catch (DataSetException e) {
+                throw new AssertionError(e);
             }
-            return results;
-        }
+        };
+    }
 
-        protected List<CompareDiff> compareColumn() throws DataSetException {
-            List<CompareDiff> results = Lists.newArrayList();
-            results.addAll(this.compareColumnCount());
-            results.addAll(this.searchModifyAndDeleteColumns());
-            results.addAll(this.searchAddColumns());
-            return results;
-        }
-
-        protected List<CompareDiff> compareColumnCount() throws DataSetException {
-            List<CompareDiff> results = Lists.newArrayList();
-            ITableMetaData oldMetaData = this.oldTable.getTableMetaData();
-            ITableMetaData newMetaData = this.newTable.getTableMetaData();
-            final String tableName = oldMetaData.getTableName();
-            final int newColumns = newMetaData.getColumns().length;
-            final int oldColumns = oldMetaData.getColumns().length;
-            if (oldColumns != newColumns) {
-                results.add(CompareDiff.Type.COLUMNS_COUNT.of()
-                        .setTargetName(tableName)
-                        .setOldDefine(String.valueOf(oldColumns))
-                        .setNewDefine(String.valueOf(newColumns))
-                        .build());
-            }
-            return results;
-        }
-
-        protected List<CompareDiff> searchModifyAndDeleteColumns() throws DataSetException {
-            List<CompareDiff> results = Lists.newArrayList();
-            ITableMetaData oldMetaData = this.oldTable.getTableMetaData();
-            ITableMetaData newMetaData = this.newTable.getTableMetaData();
-            final String tableName = oldMetaData.getTableName();
-            final int newColumns = newMetaData.getColumns().length;
-            final int oldColumns = oldMetaData.getColumns().length;
-            for (int i = 0; i < oldColumns; i++) {
-                Column oldColumn = oldMetaData.getColumns()[i];
-                if (i < newColumns) {
-                    Column newColumn = newMetaData.getColumns()[i];
-                    if (!Objects.equals(oldColumn.getColumnName(), newColumn.getColumnName())) {
-                        results.add(CompareDiff.Type.COLUMNS_MODIFY.of()
+    protected Function<DataSetCompare.TableCompare, List<CompareDiff>> searchModifyAndDeleteColumns() {
+        return it -> {
+            try {
+                List<CompareDiff> results = new ArrayList<>();
+                ITableMetaData oldMetaData = it.getOldTable().getTableMetaData();
+                ITableMetaData newMetaData = it.getNewTable().getTableMetaData();
+                final String tableName = oldMetaData.getTableName();
+                final int newColumns = newMetaData.getColumns().length;
+                final int oldColumns = oldMetaData.getColumns().length;
+                for (int i = 0; i < oldColumns; i++) {
+                    Column oldColumn = oldMetaData.getColumns()[i];
+                    if (i < newColumns) {
+                        Column newColumn = newMetaData.getColumns()[i];
+                        if (!Objects.equals(oldColumn.getColumnName(), newColumn.getColumnName())) {
+                            results.add(CompareDiff.Type.COLUMNS_MODIFY.of()
+                                    .setTargetName(tableName)
+                                    .setOldDefine(oldColumn.getColumnName())
+                                    .setNewDefine(newColumn.getColumnName())
+                                    .setColumnIndex(i)
+                                    .build());
+                        }
+                    } else {
+                        results.add(CompareDiff.Type.COLUMNS_DELETE.of()
                                 .setTargetName(tableName)
                                 .setOldDefine(oldColumn.getColumnName())
+                                .setColumnIndex(i)
+                                .build());
+                    }
+                }
+                return results;
+            } catch (DataSetException e) {
+                throw new AssertionError(e);
+            }
+        };
+    }
+
+    protected Function<DataSetCompare.TableCompare, List<CompareDiff>> searchAddColumns() {
+        return it -> {
+            try {
+                List<CompareDiff> results = new ArrayList<>();
+                ITableMetaData oldMetaData = it.getOldTable().getTableMetaData();
+                ITableMetaData newMetaData = it.getNewTable().getTableMetaData();
+                final String tableName = oldMetaData.getTableName();
+                final int newColumns = newMetaData.getColumns().length;
+                final int oldColumns = oldMetaData.getColumns().length;
+                if (oldColumns < newColumns) {
+                    for (int i = 0; oldColumns + i < newColumns; i++) {
+                        Column newColumn = newMetaData.getColumns()[oldColumns + i];
+                        results.add(CompareDiff.Type.COLUMNS_ADD.of()
+                                .setTargetName(tableName)
                                 .setNewDefine(newColumn.getColumnName())
                                 .setColumnIndex(i)
                                 .build());
                     }
-                } else {
-                    results.add(CompareDiff.Type.COLUMNS_DELETE.of()
-                            .setTargetName(tableName)
-                            .setOldDefine(oldColumn.getColumnName())
-                            .setColumnIndex(i)
-                            .build());
                 }
-            }
-            return results;
-        }
-
-        protected List<CompareDiff> searchAddColumns() throws DataSetException {
-            List<CompareDiff> results = Lists.newArrayList();
-            ITableMetaData oldMetaData = this.oldTable.getTableMetaData();
-            ITableMetaData newMetaData = this.newTable.getTableMetaData();
-            final String tableName = oldMetaData.getTableName();
-            final int newColumns = newMetaData.getColumns().length;
-            final int oldColumns = oldMetaData.getColumns().length;
-            if (oldColumns < newColumns) {
-                for (int i = 0; oldColumns + i < newColumns; i++) {
-                    Column newColumn = newMetaData.getColumns()[oldColumns + i];
-                    results.add(CompareDiff.Type.COLUMNS_ADD.of()
-                            .setTargetName(tableName)
-                            .setNewDefine(newColumn.getColumnName())
-                            .setColumnIndex(i)
-                            .build());
-                }
-            }
-            return results;
-        }
-
-        protected List<CompareDiff> compareRow() throws DataSetException {
-            List<CompareDiff> results = new ArrayList<>();
-            final int oldRows = this.oldTable.getRowCount();
-            Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists = this.newTable.getRows(this.keyColumns);
-            List<Integer> deleteRows = new ArrayList<>();
-            Set<CompareKeys> addRows = new HashSet<>(newRowLists.keySet());
-            this.diffDetailTable = DiffTable.from(this.oldTable.getTableMetaData(), this.columnLength);
-            this.modifyValues = new HashMap<>();
-            for (int rowNum = 0; rowNum < oldRows; rowNum++) {
-                Object[] oldRow = this.oldTable.getRow(rowNum, this.columnLength);
-                CompareKeys key = this.oldTable.getKey(rowNum, this.keyColumns);
-                if (newRowLists.containsKey(key)) {
-                    addRows.remove(key);
-                    this.compareKey(newRowLists, oldRow, key);
-                } else {
-                    deleteRows.add(rowNum);
-                }
-            }
-            if (this.modifyValues.size() == 0 && deleteRows.size() == 0 && addRows.size() == 0) {
                 return results;
+            } catch (DataSetException e) {
+                throw new AssertionError(e);
             }
-            this.writer.startDataSet();
-            if (this.diffDetailTable.getRowCount() > 0) {
-                SortedTable sortedTable = new SortedTable(this.diffDetailTable, this.diffDetailTable.getTableMetaData().getPrimaryKeys());
-                sortedTable.setUseComparable(true);
-                this.writer.write(sortedTable);
-            }
-            results.addAll(this.modifyValues.values());
-            results.addAll(this.writeDeleteRows(deleteRows));
-            results.addAll(this.writeAddRows(newRowLists, addRows));
-            this.writer.endDataSet();
-            return results;
-        }
+        };
+    }
 
-        protected void compareKey(Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists, Object[] oldRow, CompareKeys key) throws DataSetException {
-            Map.Entry<Integer, Object[]> rowEntry = newRowLists.get(key);
-            key = key.newRowNum(rowEntry.getKey());
-            Object[] newRow = rowEntry.getValue();
-            boolean existsDiff = false;
-            for (int i = 0, j = oldRow.length; i < j; i++) {
-                if (!this.compareValue(oldRow[i], newRow[i])) {
-                    if (!existsDiff) {
-                        this.diffDetailTable.addRow(key, i
-                                , this.oldTable.get(key, this.keyColumns, this.columnLength)
-                                , this.newTable.get(key, this.keyColumns, this.columnLength));
-                        existsDiff = true;
-                    } else {
-                        this.diffDetailTable.addDiffColumn(key, this.keyColumns, i);
-                    }
-                    if (!this.modifyValues.containsKey(i)) {
-                        this.modifyValues.put(i, CompareDiff.Type.MODIFY_VALUE.of()
-                                .setTargetName(this.oldTable.getTableMetaData().getTableName())
-                                .setOldDefine(this.oldTable.getTableMetaData().getColumns()[i].getColumnName())
-                                .setNewDefine(this.newTable.getTableMetaData().getColumns()[i].getColumnName())
-                                .setColumnIndex(i)
-                                .setRows(1)
-                                .build());
-                    } else {
-                        this.modifyValues.computeIfPresent(i, (k, v) -> v.edit(builder -> builder.setRows(builder.getRows() + 1)));
-                    }
-                }
-            }
-        }
-
-        protected boolean compareValue(Object oldVal, Object newVal) {
-            return Objects.equals(oldVal, newVal);
-        }
-
-        protected List<CompareDiff> writeDeleteRows(List<Integer> deleteRows) throws DataSetException {
-            List<CompareDiff> results = Lists.newArrayList();
-            if (deleteRows.size() > 0) {
-                DefaultTable diffDetailTable = this.toITable(this.oldTable, "$DELETE");
-                for (int rowNum : deleteRows) {
-                    Object[] row = this.oldTable.getRow(rowNum);
-                    row = Lists.asList(rowNum, row).toArray(new Object[row.length + 1]);
-                    diffDetailTable.addRow(row);
-                }
-                SortedTable sortedTable = new SortedTable(diffDetailTable, new Column[]{COLUMN_ROW_INDEX});
-                sortedTable.setUseComparable(true);
-                this.writer.write(sortedTable);
-                results.add(CompareDiff.Type.KEY_DELETE.of()
-                        .setTargetName(this.oldTable.getTableMetaData().getTableName())
-                        .setRows(deleteRows.size())
-                        .setOldDefine(String.valueOf(deleteRows.size()))
-                        .setNewDefine("0")
-                        .build());
-            }
-            return results;
-        }
-
-        protected List<CompareDiff> writeAddRows(Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists, Set<CompareKeys> addRows) throws DataSetException {
-            List<CompareDiff> results = Lists.newArrayList();
-            if (addRows.size() > 0) {
-                DefaultTable diffDetailTable = this.toITable(this.newTable, "$ADD");
-                for (CompareKeys targetKey : addRows) {
-                    Map.Entry<Integer, Object[]> row = newRowLists.get(targetKey);
-                    Object[] convertRow = Lists.asList(row.getKey(), row.getValue()).toArray(new Object[row.getValue().length + 1]);
-                    diffDetailTable.addRow(convertRow);
-                }
-                SortedTable sortedTable = new SortedTable(diffDetailTable, new Column[]{COLUMN_ROW_INDEX});
-                sortedTable.setUseComparable(true);
-                this.writer.write(sortedTable);
-                results.add(CompareDiff.Type.KEY_ADD.of()
-                        .setTargetName(this.newTable.getTableMetaData().getTableName())
-                        .setRows(addRows.size())
-                        .setOldDefine("0")
-                        .setNewDefine(String.valueOf(addRows.size()))
-                        .build());
-            }
-            return results;
-        }
-
-        protected List<CompareDiff> rowCount() {
-            List<CompareDiff> results = Lists.newArrayList();
-            final int newRows = this.newTable.getRowCount();
-            final int oldRows = this.oldTable.getRowCount();
+    protected Function<DataSetCompare.TableCompare, List<CompareDiff>> rowCount() {
+        return it -> {
+            List<CompareDiff> results = new ArrayList<>();
+            final int newRows = it.getNewTable().getRowCount();
+            final int oldRows = it.getOldTable().getRowCount();
             if (oldRows != newRows) {
                 results.add(CompareDiff.Type.ROWS_COUNT.of()
-                        .setTargetName(oldTable.getTableMetaData().getTableName())
+                        .setTargetName(it.getOldTable().getTableMetaData().getTableName())
                         .setRows(Math.abs(oldRows - newRows))
                         .setOldDefine(String.valueOf(oldRows))
                         .setNewDefine(String.valueOf(newRows))
                         .build());
             }
             return results;
+        };
+    }
+
+    protected Function<DataSetCompare.TableCompare, List<CompareDiff>> compareRow() {
+        return it -> {
+            try {
+                return new RowCompare(it).exec();
+            } catch (DataSetException e) {
+                throw new AssertionError(e);
+            }
+        };
+    }
+
+    public static class RowCompare {
+        protected final ComparableTable oldTable;
+        protected final ComparableTable newTable;
+        protected final AddSettingColumns comparisonKeys;
+        protected final IDataSetConverter writer;
+        protected List<String> keyColumns;
+        protected final int columnLength;
+        protected Map<Integer, CompareDiff> modifyValues;
+        protected DiffTable modifyDiffTable;
+        protected DefaultTable deleteDiffTable;
+        protected DefaultTable addDiffTable;
+
+        public RowCompare(DataSetCompare.TableCompare it) throws DataSetException {
+            this.oldTable = it.getOldTable();
+            this.newTable = it.getNewTable();
+            this.comparisonKeys = it.getComparisonKeys();
+            this.writer = it.getConverter();
+            this.columnLength = Math.min(this.newTable.getTableMetaData().getColumns().length, this.oldTable.getTableMetaData().getColumns().length);
+            this.keyColumns = this.comparisonKeys.getColumns(this.oldTable.getTableMetaData().getTableName());
+            this.modifyValues = new HashMap<>();
+        }
+
+        protected List<CompareDiff> exec() throws DataSetException {
+            final int oldRows = this.oldTable.getRowCount();
+            Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists = this.newTable.getRows(this.keyColumns);
+            this.modifyDiffTable = DiffTable.from(this.oldTable.getTableMetaData(), this.columnLength);
+            this.deleteDiffTable = this.toITable(this.oldTable, "$DELETE");
+            this.addDiffTable = this.toITable(this.newTable, "$ADD");
+            int deleteRow = 0;
+            for (int rowNum = 0; rowNum < oldRows; rowNum++) {
+                Object[] oldRow = this.oldTable.getRow(rowNum, this.columnLength);
+                CompareKeys key = this.oldTable.getKey(rowNum, this.keyColumns);
+                if (newRowLists.containsKey(key)) {
+                    Map.Entry<Integer, Object[]> rowEntry = newRowLists.get(key);
+                    this.compareKey(oldRow, rowEntry.getValue(), key.newRowNum(rowEntry.getKey()));
+                    newRowLists.remove(key);
+                } else {
+                    Object[] row = this.oldTable.getRow(rowNum);
+                    this.deleteDiffTable.addRow(Lists.asList(rowNum, row).toArray(new Object[row.length + 1]));
+                    deleteRow++;
+                }
+            }
+            this.countAddDiff(newRowLists);
+            List<CompareDiff> results = new ArrayList<>(this.modifyValues.values());
+            if (deleteRow > 0) {
+                results.add(CompareDiff.Type.KEY_DELETE.of()
+                        .setTargetName(this.oldTable.getTableMetaData().getTableName())
+                        .setRows(deleteRow)
+                        .setOldDefine(String.valueOf(deleteRow))
+                        .setNewDefine("0")
+                        .build());
+            }
+            if (newRowLists.size() > 0) {
+                results.add(CompareDiff.Type.KEY_ADD.of()
+                        .setTargetName(this.newTable.getTableMetaData().getTableName())
+                        .setRows(newRowLists.size())
+                        .setOldDefine("0")
+                        .setNewDefine(String.valueOf(newRowLists.size()))
+                        .build());
+            }
+            if (!this.hasNoTableRows()) {
+                this.writer.startDataSet();
+                this.writeModifyTable();
+                this.writeAddRows();
+                this.writeDeleteRows();
+                this.writer.endDataSet();
+            }
+            return results;
+        }
+
+        protected boolean hasNoTableRows() {
+            return this.modifyDiffTable.getRowCount() == 0 && this.deleteDiffTable.getRowCount() == 0 && this.addDiffTable.getRowCount() == 0;
+        }
+
+        protected void countAddDiff(Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists) throws DataSetException {
+            for (CompareKeys targetKey : newRowLists.keySet()) {
+                Map.Entry<Integer, Object[]> row = newRowLists.get(targetKey);
+                this.addDiffTable.addRow(Lists.asList(row.getKey()
+                        , row.getValue()).toArray(new Object[row.getValue().length + 1]));
+            }
+        }
+
+        protected void writeModifyTable() throws DataSetException {
+            if (this.modifyDiffTable.getRowCount() > 0) {
+                SortedTable sortedTable = new SortedTable(this.modifyDiffTable, this.modifyDiffTable.getTableMetaData().getPrimaryKeys());
+                sortedTable.setUseComparable(true);
+                this.writer.write(sortedTable);
+            }
+        }
+
+        protected void compareKey(Object[] oldRow, Object[] newRow, CompareKeys key) throws DataSetException {
+            int diff = 0;
+            for (int columnIndex = 0, columnLength = oldRow.length; columnIndex < columnLength; columnIndex++) {
+                if (!Objects.equals(oldRow[columnIndex], newRow[columnIndex])) {
+                    this.addRowToModifyTable(key, columnIndex, diff++ == 0);
+                    this.countModify(columnIndex);
+                }
+            }
+        }
+
+        protected void addRowToModifyTable(CompareKeys key, int columnIndex, boolean firstDiff) throws DataSetException {
+            if (firstDiff) {
+                this.modifyDiffTable.addRow(key, columnIndex
+                        , this.oldTable.get(key, this.keyColumns, this.columnLength)
+                        , this.newTable.get(key, this.keyColumns, this.columnLength));
+            } else {
+                this.modifyDiffTable.addDiffColumn(key, this.keyColumns, columnIndex);
+            }
+        }
+
+        protected void countModify(int columnIndex) throws DataSetException {
+            if (!this.modifyValues.containsKey(columnIndex)) {
+                this.modifyValues.put(columnIndex, CompareDiff.Type.MODIFY_VALUE.of()
+                        .setTargetName(this.oldTable.getTableMetaData().getTableName())
+                        .setOldDefine(this.oldTable.getTableMetaData().getColumns()[columnIndex].getColumnName())
+                        .setNewDefine(this.newTable.getTableMetaData().getColumns()[columnIndex].getColumnName())
+                        .setColumnIndex(columnIndex)
+                        .setRows(1)
+                        .build());
+            } else {
+                this.modifyValues.computeIfPresent(columnIndex
+                        , (k, v) -> v.edit(builder -> builder.setRows(builder.getRows() + 1)));
+            }
+        }
+
+        protected void writeDeleteRows() throws DataSetException {
+            if (this.deleteDiffTable.getRowCount() > 0) {
+                SortedTable sortedTable = new SortedTable(this.deleteDiffTable, new Column[]{COLUMN_ROW_INDEX});
+                sortedTable.setUseComparable(true);
+                this.writer.write(sortedTable);
+            }
+        }
+
+        protected void writeAddRows() throws DataSetException {
+            if (this.addDiffTable.getRowCount() > 0) {
+                SortedTable sortedTable = new SortedTable(this.addDiffTable, new Column[]{COLUMN_ROW_INDEX});
+                sortedTable.setUseComparable(true);
+                this.writer.write(sortedTable);
+            }
         }
 
         protected DefaultTable toITable(ComparableTable oldTable, String aTableName) throws DataSetException {

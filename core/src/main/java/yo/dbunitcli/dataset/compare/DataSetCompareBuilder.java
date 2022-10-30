@@ -8,34 +8,34 @@ import yo.dbunitcli.dataset.IDataSetConverter;
 import java.io.File;
 import java.util.function.Supplier;
 
-public class CompareBuilder {
+public class DataSetCompareBuilder {
     private ComparableDataSet oldDataSet;
     private ComparableDataSet newDataSet;
     private AddSettingColumns comparisonKeys;
     private IDataSetConverter dataSetWriter;
-    private Supplier<Compare.Manager> compareManagerFactory = DefaultCompareManager::new;
+    private Supplier<DataSetCompare.Manager> compareManagerFactory = DefaultCompareManager::new;
 
-    public CompareBuilder oldDataSet(ComparableDataSet dataSet) {
+    public DataSetCompareBuilder oldDataSet(ComparableDataSet dataSet) {
         this.oldDataSet = dataSet;
         return this;
     }
 
-    public CompareBuilder newDataSet(ComparableDataSet dataSet) {
+    public DataSetCompareBuilder newDataSet(ComparableDataSet dataSet) {
         this.newDataSet = dataSet;
         return this;
     }
 
-    public CompareBuilder comparisonKeys(AddSettingColumns comparisonKeys) {
+    public DataSetCompareBuilder comparisonKeys(AddSettingColumns comparisonKeys) {
         this.comparisonKeys = comparisonKeys;
         return this;
     }
 
-    public CompareBuilder dataSetWriter(IDataSetConverter iDataSetWriter) {
+    public DataSetCompareBuilder dataSetWriter(IDataSetConverter iDataSetWriter) {
         this.dataSetWriter = iDataSetWriter;
         return this;
     }
 
-    public CompareBuilder setCompareManagerFactory(Supplier<Compare.Manager> compareManagerFactory) {
+    public DataSetCompareBuilder setCompareManagerFactory(Supplier<DataSetCompare.Manager> compareManagerFactory) {
         this.compareManagerFactory = compareManagerFactory;
         return this;
     }
@@ -56,7 +56,7 @@ public class CompareBuilder {
         return this.dataSetWriter;
     }
 
-    public Compare.Manager getManager() {
+    public DataSetCompare.Manager getManager() {
         return this.compareManagerFactory.get();
     }
 
@@ -64,8 +64,8 @@ public class CompareBuilder {
         return this.getDataSetWriter().getDir();
     }
 
-    public Compare build() throws DataSetException {
-        return new Compare(this);
+    public DataSetCompare build() throws DataSetException {
+        return new DataSetCompare(this);
     }
 
 }

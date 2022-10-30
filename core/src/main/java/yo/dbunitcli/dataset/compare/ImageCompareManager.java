@@ -4,9 +4,9 @@ import com.github.romankh3.image.comparison.ImageComparison;
 import com.github.romankh3.image.comparison.model.ImageComparisonResult;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
-import com.google.common.collect.Lists;
 import org.dbunit.dataset.DataSetException;
-import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.CompareKeys;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -14,7 +14,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -71,59 +70,70 @@ public class ImageCompareManager extends DefaultCompareManager {
     }
 
     @Override
-    public Stream<Function<Compare, List<CompareDiff>>> getStrategies() {
+    public Stream<Function<DataSetCompare, List<CompareDiff>>> getStrategies() {
         return Stream.of(this.searchModifyTables());
     }
 
     @Override
-    public List<CompareDiff> compareTable(ComparableTable oldTable, ComparableTable newTable, AddSettingColumns comparisonKeys, IDataSetConverter writer) throws DataSetException {
-        return new ImageMain(oldTable, newTable, comparisonKeys, writer).getResults();
+    protected Stream<Function<DataSetCompare.TableCompare, List<CompareDiff>>> getTableCompareStrategies() {
+        return Stream.of(this.rowCount()
+                , this.compareRow()
+        );
     }
 
-    public class ImageMain extends Main {
+    @Override
+    protected Function<DataSetCompare.TableCompare, List<CompareDiff>> compareRow() {
+        return it -> {
+            try {
+                return new ImageFileCompare(it).exec();
+            } catch (DataSetException e) {
+                throw new AssertionError(e);
+            }
+        };
+    }
+
+    public class ImageFileCompare extends RowCompare {
 
         protected final File resultDir;
 
         protected int diffCount;
 
-        public ImageMain(ComparableTable oldTable, ComparableTable newTable, AddSettingColumns comparisonKeys, IDataSetConverter writer) throws DataSetException {
-            super(oldTable, newTable, comparisonKeys, writer);
-            this.resultDir = writer.getDir();
+        public ImageFileCompare(DataSetCompare.TableCompare it) throws DataSetException {
+            super(it);
+            this.resultDir = this.writer.getDir();
         }
 
         @Override
-        protected List<CompareDiff> compareColumn() {
-            return Lists.newArrayList();
-        }
-
-        @Override
-        protected void compareKey(Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists, Object[] oldRow, CompareKeys key) throws DataSetException {
-            this.compareFile(new File(oldRow[0].toString()), new File(newRowLists.get(key).getValue()[0].toString()), key);
+        protected void compareKey(Object[] oldRow, Object[] newRow, CompareKeys key) throws DataSetException {
+            this.compareFile(new File(oldRow[0].toString()), new File(newRow[0].toString()), key);
         }
 
         protected void compareFile(File oldPath, File newPath, CompareKeys key) throws DataSetException {
             try {
                 BufferedImage newImage = this.toImage(newPath);
                 BufferedImage oldImage = this.toImage(oldPath);
-                ImageComparisonResult result = this.compareImage(key, newImage, oldImage);
+                ImageComparisonResult result = this.compareImage(newImage, oldImage);
                 if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
                     result.writeResultTo(new File(resultDir, key.getKeysToString() + ".png"));
-                    this.modifyValues.put(this.diffCount++, ((CompareDiff.Diff) () -> result.getRectangles()
-                            .stream().reduce("", (String sb, Rectangle it) -> sb + String.format("[%s,%s,%s,%s]"
-                                    , it.getMinPoint().getX(), it.getMinPoint().getY()
-                                    , it.getMaxPoint().getX(), it.getMaxPoint().getY()), (a, b) -> a + b)
-                    ).of().setTargetName(oldPath.getName()).build());
+                    this.modifyValues.put(this.diffCount++, this.getDiff(result).of().setTargetName(oldPath.getName()).build());
                 }
             } catch (IOException e) {
                 throw new DataSetException(e);
             }
         }
 
+        protected CompareDiff.Diff getDiff(ImageComparisonResult result) {
+            return () -> result.getRectangles()
+                    .stream().reduce("", (String sb, Rectangle it) -> sb + String.format("[%s,%s,%s,%s]"
+                            , it.getMinPoint().getX(), it.getMinPoint().getY()
+                            , it.getMaxPoint().getX(), it.getMaxPoint().getY()), (a, b) -> a + b);
+        }
+
         protected BufferedImage toImage(File newPath) throws IOException {
             return ImageIO.read(newPath);
         }
 
-        protected ImageComparisonResult compareImage(CompareKeys key, BufferedImage newImage, BufferedImage oldImage) throws DataSetException {
+        protected ImageComparisonResult compareImage(BufferedImage newImage, BufferedImage oldImage) {
             return new ImageComparison(oldImage, newImage)
                     .setThreshold(threshold)
                     .setAllowingPercentOfDifferentPixels(allowingPercentOfDifferentPixels)

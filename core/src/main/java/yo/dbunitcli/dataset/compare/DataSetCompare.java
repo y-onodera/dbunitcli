@@ -1,7 +1,6 @@
 package yo.dbunitcli.dataset.compare;
 
 import com.google.common.base.Predicates;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Delete;
@@ -15,13 +14,14 @@ import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Compare {
+public class DataSetCompare {
 
     private final ComparableDataSet oldDataSet;
 
@@ -33,7 +33,7 @@ public class Compare {
 
     private final Manager manager;
 
-    public Compare(CompareBuilder builder) {
+    public DataSetCompare(DataSetCompareBuilder builder) {
         this.oldDataSet = builder.getOldDataSet();
         this.newDataSet = builder.getNewDataSet();
         this.comparisonKeys = builder.getComparisonKeys();
@@ -43,7 +43,7 @@ public class Compare {
 
     public CompareResult result() throws DataSetException {
         this.cleanupDirectory(this.writer.getDir());
-        CompareResult compareResult = this.manager.getResult(this);
+        CompareResult compareResult = this.manager.exec(this);
         IDataSetProducer producer = new DataSetProducerAdapter(new DefaultDataSet(compareResult.toITable()));
         producer.setConsumer(this.writer);
         producer.produce();
@@ -81,22 +81,22 @@ public class Compare {
 
     public interface Manager {
 
-        default CompareResult getResult(Compare compare) {
-            List<CompareDiff> results = Lists.newArrayList();
-            getStrategies().forEach(it -> results.addAll(it.apply(compare)));
-            return this.toCompareResult(compare.getOldDataSet(), compare.getNewDataSet(), results);
+        default CompareResult exec(DataSetCompare dataSetCompare) {
+            List<CompareDiff> results = new ArrayList<>();
+            getStrategies().forEach(it -> results.addAll(it.apply(dataSetCompare)));
+            return this.toCompareResult(dataSetCompare.getOldDataSet(), dataSetCompare.getNewDataSet(), results);
         }
 
-        default Stream<Function<Compare, List<CompareDiff>>> getStrategies() {
+        default Stream<Function<DataSetCompare, List<CompareDiff>>> getStrategies() {
             return Stream.of(this.compareTableCount()
                     , this.searchDeleteTables()
                     , this.searchAddTables()
                     , this.searchModifyTables());
         }
 
-        default Function<Compare, List<CompareDiff>> compareTableCount() {
+        default Function<DataSetCompare, List<CompareDiff>> compareTableCount() {
             return (it) -> {
-                List<CompareDiff> results = Lists.newArrayList();
+                List<CompareDiff> results = new ArrayList<>();
                 try {
                     final int oldTableCounts = it.getOldDataSet().getTableNames().length;
                     final int newTableCounts = it.getNewDataSet().getTableNames().length;
@@ -113,9 +113,9 @@ public class Compare {
             };
         }
 
-        default Function<Compare, List<CompareDiff>> searchAddTables() {
+        default Function<DataSetCompare, List<CompareDiff>> searchAddTables() {
             return (it) -> {
-                List<CompareDiff> results = Lists.newArrayList();
+                List<CompareDiff> results = new ArrayList<>();
                 try {
                     Set<String> oldTables = Sets.newHashSet(it.getOldDataSet().getTableNames());
                     Set<String> newTables = Sets.newHashSet(it.getNewDataSet().getTableNames());
@@ -133,9 +133,9 @@ public class Compare {
             };
         }
 
-        default Function<Compare, List<CompareDiff>> searchDeleteTables() {
+        default Function<DataSetCompare, List<CompareDiff>> searchDeleteTables() {
             return (it) -> {
-                List<CompareDiff> results = Lists.newArrayList();
+                List<CompareDiff> results = new ArrayList<>();
                 try {
                     Set<String> oldTables = Sets.newHashSet(it.getOldDataSet().getTableNames());
                     Set<String> newTables = Sets.newHashSet(it.getNewDataSet().getTableNames());
@@ -153,16 +153,18 @@ public class Compare {
             };
         }
 
-        default Function<Compare, List<CompareDiff>> searchModifyTables() {
+        default Function<DataSetCompare, List<CompareDiff>> searchModifyTables() {
             return (it) -> {
-                List<CompareDiff> results = Lists.newArrayList();
+                List<CompareDiff> results = new ArrayList<>();
                 try {
                     Set<String> oldTables = Sets.newHashSet(it.getOldDataSet().getTableNames());
                     Set<String> newTables = Sets.newHashSet(it.getNewDataSet().getTableNames());
                     for (String tableName : Sets.intersection(oldTables, newTables)) {
                         ComparableTable oldTable = it.getOldDataSet().getTable(tableName);
                         ComparableTable newTable = it.getNewDataSet().getTable(tableName);
-                        results.addAll(this.compareTable(oldTable, newTable, it.getComparisonKeys(), it.getWriter()));
+                        if (it.getComparisonKeys().hasAdditionalSetting(oldTable.getTableMetaData().getTableName())) {
+                            results.addAll(this.compareTable(new TableCompare(oldTable, newTable, it.getComparisonKeys(), it.getWriter())));
+                        }
                     }
                 } catch (DataSetException e) {
                     throw new AssertionError(e);
@@ -171,9 +173,38 @@ public class Compare {
             };
         }
 
-        List<CompareDiff> compareTable(ComparableTable oldTable, ComparableTable newTable, AddSettingColumns comparisonKeys, IDataSetConverter writer) throws DataSetException;
+        List<CompareDiff> compareTable(TableCompare tableCompare) throws DataSetException;
 
         CompareResult toCompareResult(ComparableDataSet oldDataSet, ComparableDataSet newDataSet, List<CompareDiff> results);
     }
 
+    static class TableCompare {
+        private final ComparableTable oldTable;
+        private final ComparableTable newTable;
+        private final AddSettingColumns comparisonKeys;
+        private final IDataSetConverter converter;
+
+        public TableCompare(ComparableTable oldTable, ComparableTable newTable, AddSettingColumns comparisonKeys, IDataSetConverter converter) {
+            this.oldTable = oldTable;
+            this.newTable = newTable;
+            this.comparisonKeys = comparisonKeys;
+            this.converter = converter;
+        }
+
+        public ComparableTable getOldTable() {
+            return oldTable;
+        }
+
+        public ComparableTable getNewTable() {
+            return newTable;
+        }
+
+        public AddSettingColumns getComparisonKeys() {
+            return comparisonKeys;
+        }
+
+        public IDataSetConverter getConverter() {
+            return converter;
+        }
+    }
 }
