@@ -5,15 +5,12 @@ import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.google.common.base.Strings;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
-import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.dataset.CompareKeys;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.function.Function;
 
 public class PdfCompareManager extends ImageCompareManager {
 
@@ -26,24 +23,18 @@ public class PdfCompareManager extends ImageCompareManager {
     }
 
     @Override
-    protected Function<DataSetCompare.TableCompare, List<CompareDiff>> compareRow() {
-        return it -> {
-            try {
-                return new PdfFileCompare(it).exec();
-            } catch (DataSetException e) {
-                throw new AssertionError(e);
-            }
-        };
+    protected RowCompareResultHandler getRowResultHandler(DataSetCompare.TableCompare it) {
+        return new PdfFileCompareHandler(it);
     }
 
-    public class PdfFileCompare extends ImageFileCompare {
+    public class PdfFileCompareHandler extends ImageFileCompareHandler {
 
-        public PdfFileCompare(DataSetCompare.TableCompare it) throws DataSetException {
+        protected PdfFileCompareHandler(DataSetCompare.TableCompare it) {
             super(it);
         }
 
         @Override
-        protected void compareFile(File oldPath, File newPath, CompareKeys key) throws DataSetException {
+        protected void compareFile(File oldPath, File newPath, CompareKeys key) {
             try (InputStream newIn = new FileInputStream(newPath); InputStream oldIn = new FileInputStream(oldPath)) {
                 try (PDDocument doc = PDDocument.load(newIn); PDDocument oldDoc = PDDocument.load(oldIn)) {
                     for (int i = 0, j = oldDoc.getNumberOfPages(); i < j; i++) {
@@ -51,7 +42,7 @@ public class PdfCompareManager extends ImageCompareManager {
                         ImageComparisonResult result = this.compareImage(new PDFRenderer(doc).renderImage(i), new PDFRenderer(oldDoc).renderImage(i));
                         if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
                             result.writeResultTo(new File(this.resultDir, key.getKeysToString() + page + ".png"));
-                            this.modifyValues.put(this.diffCount++, this.getDiff(result)
+                            this.modifyValues.add(this.getDiff(result)
                                     .of()
                                     .setTargetName(oldPath.getName() + "_" + page)
                                     .build());
@@ -60,7 +51,7 @@ public class PdfCompareManager extends ImageCompareManager {
                     }
                 }
             } catch (IOException e) {
-                throw new DataSetException(e);
+                throw new AssertionError(e);
             }
         }
     }

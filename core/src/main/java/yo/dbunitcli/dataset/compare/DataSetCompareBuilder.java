@@ -12,7 +12,7 @@ public class DataSetCompareBuilder {
     private ComparableDataSet oldDataSet;
     private ComparableDataSet newDataSet;
     private AddSettingColumns comparisonKeys;
-    private IDataSetConverter dataSetWriter;
+    private IDataSetConverter dataSetConverter;
     private Supplier<DataSetCompare.Manager> compareManagerFactory = DefaultCompareManager::new;
 
     public DataSetCompareBuilder oldDataSet(ComparableDataSet dataSet) {
@@ -30,8 +30,8 @@ public class DataSetCompareBuilder {
         return this;
     }
 
-    public DataSetCompareBuilder dataSetWriter(IDataSetConverter iDataSetWriter) {
-        this.dataSetWriter = iDataSetWriter;
+    public DataSetCompareBuilder dataSetConverter(IDataSetConverter iDataSetConverter) {
+        this.dataSetConverter = iDataSetConverter;
         return this;
     }
 
@@ -52,8 +52,8 @@ public class DataSetCompareBuilder {
         return this.comparisonKeys;
     }
 
-    public IDataSetConverter getDataSetWriter() {
-        return this.dataSetWriter;
+    public IDataSetConverter getDataSetConverter() {
+        return this.dataSetConverter;
     }
 
     public DataSetCompare.Manager getManager() {
@@ -61,7 +61,7 @@ public class DataSetCompareBuilder {
     }
 
     public File getResultDir() {
-        return this.getDataSetWriter().getDir();
+        return this.getDataSetConverter().getDir();
     }
 
     public DataSetCompare build() throws DataSetException {

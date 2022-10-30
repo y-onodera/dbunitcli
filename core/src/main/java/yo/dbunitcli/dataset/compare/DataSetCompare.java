@@ -29,7 +29,7 @@ public class DataSetCompare {
 
     private final AddSettingColumns comparisonKeys;
 
-    private final IDataSetConverter writer;
+    private final IDataSetConverter converter;
 
     private final Manager manager;
 
@@ -37,15 +37,15 @@ public class DataSetCompare {
         this.oldDataSet = builder.getOldDataSet();
         this.newDataSet = builder.getNewDataSet();
         this.comparisonKeys = builder.getComparisonKeys();
-        this.writer = builder.getDataSetWriter();
+        this.converter = builder.getDataSetConverter();
         this.manager = builder.getManager();
     }
 
     public CompareResult result() throws DataSetException {
-        this.cleanupDirectory(this.writer.getDir());
+        this.cleanupDirectory(this.converter.getDir());
         CompareResult compareResult = this.manager.exec(this);
         IDataSetProducer producer = new DataSetProducerAdapter(new DefaultDataSet(compareResult.toITable()));
-        producer.setConsumer(this.writer);
+        producer.setConsumer(this.converter);
         producer.produce();
         return compareResult;
     }
@@ -75,8 +75,8 @@ public class DataSetCompare {
         return comparisonKeys;
     }
 
-    public IDataSetConverter getWriter() {
-        return writer;
+    public IDataSetConverter getConverter() {
+        return converter;
     }
 
     public interface Manager {
@@ -163,7 +163,7 @@ public class DataSetCompare {
                         ComparableTable oldTable = it.getOldDataSet().getTable(tableName);
                         ComparableTable newTable = it.getNewDataSet().getTable(tableName);
                         if (it.getComparisonKeys().hasAdditionalSetting(oldTable.getTableMetaData().getTableName())) {
-                            results.addAll(this.compareTable(new TableCompare(oldTable, newTable, it.getComparisonKeys(), it.getWriter())));
+                            results.addAll(this.compareTable(new TableCompare(oldTable, newTable, it.getComparisonKeys(), it.getConverter())));
                         }
                     }
                 } catch (DataSetException e) {
@@ -183,12 +183,24 @@ public class DataSetCompare {
         private final ComparableTable newTable;
         private final AddSettingColumns comparisonKeys;
         private final IDataSetConverter converter;
+        private final int columnLength;
+        private final List<String> keyColumns;
 
         public TableCompare(ComparableTable oldTable, ComparableTable newTable, AddSettingColumns comparisonKeys, IDataSetConverter converter) {
             this.oldTable = oldTable;
             this.newTable = newTable;
             this.comparisonKeys = comparisonKeys;
             this.converter = converter;
+            this.columnLength = Math.min(this.getOldColumnLength(), this.getNewColumnLength());
+            this.keyColumns = this.comparisonKeys.getColumns(this.oldTable.getTableMetaData().getTableName());
+        }
+
+        public int getNewColumnLength() {
+            return this.getColumnLength(this.newTable);
+        }
+
+        public int getOldColumnLength() {
+            return this.getColumnLength(this.oldTable);
         }
 
         public ComparableTable getOldTable() {
@@ -199,6 +211,14 @@ public class DataSetCompare {
             return newTable;
         }
 
+        public int getColumnLength() {
+            return columnLength;
+        }
+
+        public List<String> getKeyColumns() {
+            return keyColumns;
+        }
+
         public AddSettingColumns getComparisonKeys() {
             return comparisonKeys;
         }
@@ -206,5 +226,14 @@ public class DataSetCompare {
         public IDataSetConverter getConverter() {
             return converter;
         }
+
+        protected int getColumnLength(ComparableTable table) {
+            try {
+                return table.getTableMetaData().getColumns().length;
+            } catch (DataSetException e) {
+                throw new AssertionError(e);
+            }
+        }
+
     }
 }

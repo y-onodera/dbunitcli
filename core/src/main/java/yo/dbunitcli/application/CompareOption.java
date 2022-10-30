@@ -127,7 +127,7 @@ public class CompareOption extends CommandLineOption {
                 .newDataSet(this.newDataSet())
                 .oldDataSet(this.oldDataSet())
                 .comparisonKeys(this.getComparisonKeys())
-                .dataSetWriter(this.converter())
+                .dataSetConverter(this.converter())
                 .build()
                 .result();
         if (this.getExpectData().getParam().getSrc() != null) {
@@ -135,7 +135,7 @@ public class CompareOption extends CommandLineOption {
                     .newDataSet(this.resultDataSet())
                     .oldDataSet(this.expectDataSet())
                     .comparisonKeys(this.getExpectData().getParam().getColumnSettings().getComparisonKeys())
-                    .dataSetWriter(this.expectedDiffWriter())
+                    .dataSetConverter(this.expectedDiffConverter())
                     .build()
                     .result().existDiff()) {
                 throw new AssertionError("unexpected diff found.");
@@ -177,13 +177,13 @@ public class CompareOption extends CommandLineOption {
     }
 
     public ComparableDataSet resultDataSet() throws DataSetException {
-        DataSetConverterOption writeOption = this.getConverterOption();
+        DataSetConverterOption converterOption = this.getConverterOption();
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
                         .setColumnSettings(this.expectData.getParam().getColumnSettings())
-                        .setSrc(writeOption.getResultDir())
-                        .setSource(writeOption.getResultType())
-                        .setEncoding(writeOption.getOutputEncoding())
+                        .setSrc(converterOption.getResultDir())
+                        .setSource(converterOption.getResultType())
+                        .setEncoding(converterOption.getOutputEncoding())
                         .build()
         );
     }
@@ -199,7 +199,7 @@ public class CompareOption extends CommandLineOption {
         return new DataSetCompareBuilder().setCompareManagerFactory(this.imageOption.createFactoryOf(this.targetType));
     }
 
-    public IDataSetConverter expectedDiffWriter() throws DataSetException {
+    public IDataSetConverter expectedDiffConverter() throws DataSetException {
         this.getConverterOption().setResultDir(new File(this.getConverterOption().getResultDir(), "expectedDiff"));
         return this.converter();
     }

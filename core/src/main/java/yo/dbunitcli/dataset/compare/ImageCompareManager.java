@@ -4,7 +4,6 @@ import com.github.romankh3.image.comparison.ImageComparison;
 import com.github.romankh3.image.comparison.model.ImageComparisonResult;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
-import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.CompareKeys;
 
@@ -13,6 +12,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -76,49 +76,55 @@ public class ImageCompareManager extends DefaultCompareManager {
 
     @Override
     protected Stream<Function<DataSetCompare.TableCompare, List<CompareDiff>>> getTableCompareStrategies() {
-        return Stream.of(this.rowCount()
-                , this.compareRow()
+        return Stream.of(this.rowCount(), this.compareRow()
         );
     }
 
     @Override
-    protected Function<DataSetCompare.TableCompare, List<CompareDiff>> compareRow() {
-        return it -> {
-            try {
-                return new ImageFileCompare(it).exec();
-            } catch (DataSetException e) {
-                throw new AssertionError(e);
-            }
-        };
+    protected RowCompareResultHandler getRowResultHandler(DataSetCompare.TableCompare it) {
+        return new ImageFileCompareHandler(it);
     }
 
-    public class ImageFileCompare extends RowCompare {
+    public class ImageFileCompareHandler implements RowCompareResultHandler {
 
         protected final File resultDir;
 
-        protected int diffCount;
+        protected List<CompareDiff> modifyValues;
 
-        public ImageFileCompare(DataSetCompare.TableCompare it) throws DataSetException {
-            super(it);
-            this.resultDir = this.writer.getDir();
+        protected ImageFileCompareHandler(DataSetCompare.TableCompare it) {
+            this.resultDir = it.getConverter().getDir();
+            this.modifyValues = new ArrayList<>();
         }
 
         @Override
-        protected void compareKey(Object[] oldRow, Object[] newRow, CompareKeys key) throws DataSetException {
+        public void handleModify(Object[] oldRow, Object[] newRow, CompareKeys key) {
             this.compareFile(new File(oldRow[0].toString()), new File(newRow[0].toString()), key);
         }
 
-        protected void compareFile(File oldPath, File newPath, CompareKeys key) throws DataSetException {
+        @Override
+        public void handleDelete(int rowNum, Object[] row) {
+        }
+
+        @Override
+        public void handleAdd(int rowNum, Object[] row) {
+        }
+
+        @Override
+        public List<CompareDiff> result() {
+            return this.modifyValues;
+        }
+
+        protected void compareFile(File oldPath, File newPath, CompareKeys key) {
             try {
                 BufferedImage newImage = this.toImage(newPath);
                 BufferedImage oldImage = this.toImage(oldPath);
                 ImageComparisonResult result = this.compareImage(newImage, oldImage);
                 if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
                     result.writeResultTo(new File(resultDir, key.getKeysToString() + ".png"));
-                    this.modifyValues.put(this.diffCount++, this.getDiff(result).of().setTargetName(oldPath.getName()).build());
+                    this.modifyValues.add(this.getDiff(result).of().setTargetName(oldPath.getName()).build());
                 }
             } catch (IOException e) {
-                throw new DataSetException(e);
+                throw new AssertionError(e);
             }
         }
 

@@ -1,7 +1,10 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.DatabaseUnitRuntimeException;
-import org.dbunit.dataset.*;
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.ITableMetaData;
 
 import java.util.*;
 
@@ -47,11 +50,11 @@ public class ComparableTable implements ITable {
         return this.getValue(i, this.addSettingTableMetaData.getColumnIndex(s));
     }
 
-    public List<Map<String, Object>> toMap() throws RowOutOfBoundsException {
+    public List<Map<String, Object>> toMap() {
         return this.toMap(false);
     }
 
-    public List<Map<String, Object>> toMap(boolean includeMetaData) throws RowOutOfBoundsException {
+    public List<Map<String, Object>> toMap(boolean includeMetaData) {
         List<Map<String, Object>> result = new ArrayList<>();
         String tableName = this.getTableMetaData().getTableName();
         Map<String, Object> withMetaDataMap = new HashMap<>();
@@ -88,7 +91,7 @@ public class ComparableTable implements ITable {
         return list.toArray(new Column[0]);
     }
 
-    public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(List<String> keys) throws DataSetException {
+    public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(List<String> keys) {
         Map<CompareKeys, Map.Entry<Integer, Object[]>> result = new HashMap<>();
         for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
             result.put(this.getKey(rowNum, keys), new AbstractMap.SimpleEntry<>(this.getOriginalRowIndex(rowNum), this.getRow(rowNum)));
@@ -99,7 +102,7 @@ public class ComparableTable implements ITable {
         return result;
     }
 
-    public Object[] get(CompareKeys targetKey, List<String> keys, int columnLength) throws DataSetException {
+    public Object[] get(CompareKeys targetKey, List<String> keys, int columnLength) {
         for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
             if (targetKey.equals(this.getKey(rowNum, keys))) {
                 return getRow(rowNum, columnLength);
@@ -108,22 +111,22 @@ public class ComparableTable implements ITable {
         throw new AssertionError("keys not found:" + targetKey.toString());
     }
 
-    public CompareKeys getKey(int rowNum, List<String> keys) throws DataSetException {
+    public CompareKeys getKey(int rowNum, List<String> keys) {
         return new CompareKeys(this, rowNum, keys).oldRowNum(this.getOriginalRowIndex(rowNum));
     }
 
-    public Map<String, Object> getRowToMap(int rowNum) throws RowOutOfBoundsException {
+    public Map<String, Object> getRowToMap(int rowNum) {
         return this.addSettingTableMetaData.rowToMap(this.getRow(rowNum));
     }
 
-    public Object[] getRow(int rowNum) throws RowOutOfBoundsException {
+    public Object[] getRow(int rowNum) {
         if (rowNum < 0 || rowNum >= this.getRowCount()) {
-            throw new RowOutOfBoundsException("rowNum " + rowNum + " is out of range;current row size is " + this.getRowCount());
+            throw new AssertionError("rowNum " + rowNum + " is out of range;current row size is " + this.getRowCount());
         }
         return this.values.get(this.getSortedRowIndex(rowNum));
     }
 
-    public Object[] getRow(int rowNum, int columnLength) throws RowOutOfBoundsException {
+    public Object[] getRow(int rowNum, int columnLength) {
         Object[] row = this.getRow(rowNum);
         if (row.length < columnLength) {
             throw new AssertionError(columnLength + " is larger than columnLength:" + row.length);
@@ -133,7 +136,7 @@ public class ComparableTable implements ITable {
         return resultRow;
     }
 
-    public Object getValue(int i, int j) throws RowOutOfBoundsException {
+    public Object getValue(int i, int j) {
         Object[] row = this.getRow(i);
         return row[j] == null ? NO_VALUE : row[j];
     }

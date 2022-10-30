@@ -13,16 +13,20 @@ public class CompareKeys {
     private final int oldRowNum;
     private final int newRowNum;
 
-    public CompareKeys(ITable table, int aRowNum, List<String> compareColumns) throws DataSetException {
-        this.rowNum = aRowNum;
-        this.oldRowNum = this.rowNum;
-        this.newRowNum = this.rowNum;
-        if (compareColumns.size() > 0) {
-            for (String column : compareColumns) {
-                keys.add(table.getValue(aRowNum, column).toString());
+    public CompareKeys(ITable table, int aRowNum, List<String> compareColumns) {
+        try {
+            this.rowNum = aRowNum;
+            this.oldRowNum = this.rowNum;
+            this.newRowNum = this.rowNum;
+            if (compareColumns.size() > 0) {
+                for (String column : compareColumns) {
+                    keys.add(table.getValue(aRowNum, column).toString());
+                }
+            } else {
+                keys.add(String.valueOf(aRowNum));
             }
-        } else {
-            keys.add(String.valueOf(aRowNum));
+        } catch (DataSetException e) {
+            throw new AssertionError(e);
         }
     }
 

@@ -1,7 +1,9 @@
 package yo.dbunitcli.dataset;
 
 import com.google.common.collect.Lists;
-import org.dbunit.dataset.*;
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.junit.Before;
 import org.junit.Rule;
@@ -40,7 +42,7 @@ public class ComparableTableTest {
     }
 
     @Test
-    public void getRows_result_has_argument_column_length() throws DataSetException {
+    public void getRows_result_has_argument_column_length() {
         final Collection<Map.Entry<Integer, Object[]>> actual = this.target.getRows(Lists.newArrayList("COLUMN1", "COLUMN2")).values();
         Iterator<Map.Entry<Integer, Object[]>> it = actual.iterator();
         assertArrayEquals(new Object[]{"1", "a", "あ", 1}, it.next().getValue());
@@ -50,19 +52,19 @@ public class ComparableTableTest {
     }
 
     @Test
-    public void getRows_throw_error_if_keys_not_unique() throws DataSetException {
+    public void getRows_throw_error_if_keys_not_unique() {
         expectedException.expect(AssertionError.class);
         this.target.getRows(Lists.newArrayList("COLUMN1")).values();
     }
 
     @Test
-    public void getRows_throw_exception_if_argument_column_not_exists() throws DataSetException {
-        expectedException.expect(DataSetException.class);
+    public void getRows_throw_exception_if_argument_column_not_exists() {
+        expectedException.expect(AssertionError.class);
         this.target.getRows(Lists.newArrayList("COLUMN1", "COLUMNA")).values();
     }
 
     @Test
-    public void getKey_return_argument_column() throws DataSetException {
+    public void getKey_return_argument_column() {
         CompareKeys actual = this.target.getKey(0, Lists.newArrayList("COLUMN1", "COLUMN2"));
         assertEquals(new CompareKeys(0, Lists.newArrayList("1", "a")), actual);
         actual = this.target.getKey(1, Lists.newArrayList("COLUMN1", "COLUMN2"));
@@ -72,7 +74,7 @@ public class ComparableTableTest {
     }
 
     @Test
-    public void getRow_result_has_argument_column_length() throws RowOutOfBoundsException {
+    public void getRow_result_has_argument_column_length() {
         assertArrayEquals(new Object[]{"1", "a", "あ"}, this.target.getRow(0, 3));
         assertArrayEquals(new Object[]{"1", "b", "あ"}, this.target.getRow(1, 3));
         assertArrayEquals(new Object[]{"2", "a", "い"}, this.target.getRow(2, 3));
@@ -92,7 +94,7 @@ public class ComparableTableTest {
     }
 
     @Test
-    public void getValue_return_argument_row_and_column_length_value() throws RowOutOfBoundsException {
+    public void getValue_return_argument_row_and_column_length_value() {
         assertEquals("2", this.target.getValue(2, 0));
         assertEquals("a", this.target.getValue(0, 1));
         assertEquals("b", this.target.getValue(1, 1));
