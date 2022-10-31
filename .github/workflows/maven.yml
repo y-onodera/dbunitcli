@@ -30,7 +30,7 @@ jobs:
       run: mvn allure:report -fcore/pom.xml
     - name: Deploy TestReport
       if: always()
-      uses: JamesIves/github-pages-deploy-action@v4.2.5
+      uses: JamesIves/github-pages-deploy-action@v4.4.1
       with:
         branch: gh-pages
         folder: ./core/target/site/allure-maven-plugin
