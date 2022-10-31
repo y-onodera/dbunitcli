@@ -9,7 +9,7 @@ import java.util.*;
 public class DataRowCompareResultHandler implements RowCompareResultHandler {
     protected final ComparableTable oldTable;
     protected final ComparableTable newTable;
-    private Map<Integer, CompareDiff> modifyValues;
+    private final Map<Integer, CompareDiff> modifyValues;
     private int deleteRow = 0;
     private int addRow = 0;
 
@@ -23,7 +23,7 @@ public class DataRowCompareResultHandler implements RowCompareResultHandler {
     public void handleModify(Object[] oldRow, Object[] newRow, CompareKeys key) {
         for (int columnIndex = 0, columnLength = oldRow.length; columnIndex < columnLength; columnIndex++) {
             if (!Objects.equals(oldRow[columnIndex], newRow[columnIndex])) {
-                addModify(columnIndex);
+                this.addModify(columnIndex);
             }
         }
     }
@@ -40,7 +40,8 @@ public class DataRowCompareResultHandler implements RowCompareResultHandler {
 
     @Override
     public List<CompareDiff> result() {
-        List<CompareDiff> results = this.modifyDiff();
+        List<CompareDiff> results = new ArrayList<>();
+        results.addAll(this.modifyDiff());
         results.addAll(this.deleteDiff());
         results.addAll(this.addDiff());
         return results;
@@ -65,24 +66,24 @@ public class DataRowCompareResultHandler implements RowCompareResultHandler {
         }
     }
 
-    protected ArrayList<CompareDiff> modifyDiff() {
-        return new ArrayList<>(this.modifyValues.values());
+    protected Collection<CompareDiff> modifyDiff() {
+        return this.modifyValues.values();
     }
 
-    protected List<CompareDiff> deleteDiff() {
+    protected Collection<CompareDiff> deleteDiff() {
         List<CompareDiff> results = new ArrayList<>();
         if (this.deleteRow > 0) {
             results.add(CompareDiff.Type.KEY_DELETE.of()
                     .setTargetName(this.oldTable.getTableMetaData().getTableName())
-                    .setRows(deleteRow)
-                    .setOldDefine(String.valueOf(deleteRow))
+                    .setRows(this.deleteRow)
+                    .setOldDefine(String.valueOf(this.deleteRow))
                     .setNewDefine("0")
                     .build());
         }
         return results;
     }
 
-    protected List<CompareDiff> addDiff() {
+    protected Collection<CompareDiff> addDiff() {
         List<CompareDiff> results = new ArrayList<>();
         if (this.addRow > 0) {
             results.add(CompareDiff.Type.KEY_ADD.of()

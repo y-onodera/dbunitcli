@@ -91,9 +91,15 @@ public class ImageCompareManager extends DefaultCompareManager {
 
         protected List<CompareDiff> modifyValues;
 
+        protected List<CompareDiff> deleteRows;
+
+        protected List<CompareDiff> addRows;
+
         protected ImageFileCompareHandler(DataSetCompare.TableCompare it) {
             this.resultDir = it.getConverter().getDir();
             this.modifyValues = new ArrayList<>();
+            this.deleteRows = new ArrayList<>();
+            this.addRows = new ArrayList<>();
         }
 
         @Override
@@ -103,15 +109,25 @@ public class ImageCompareManager extends DefaultCompareManager {
 
         @Override
         public void handleDelete(int rowNum, Object[] row) {
+            this.deleteRows.add(((CompareDiff.Diff) () -> "File Delete").of()
+                    .setTargetName(row[1].toString())
+                    .build());
         }
 
         @Override
         public void handleAdd(int rowNum, Object[] row) {
+            this.addRows.add(((CompareDiff.Diff) () -> "File Add").of()
+                    .setTargetName(row[1].toString())
+                    .build());
         }
 
         @Override
         public List<CompareDiff> result() {
-            return this.modifyValues;
+            List<CompareDiff> results = new ArrayList<>();
+            results.addAll(this.modifyValues);
+            results.addAll(this.addRows);
+            results.addAll(this.deleteRows);
+            return results;
         }
 
         protected void compareFile(File oldPath, File newPath, CompareKeys key) {
@@ -120,7 +136,7 @@ public class ImageCompareManager extends DefaultCompareManager {
                 BufferedImage oldImage = this.toImage(oldPath);
                 ImageComparisonResult result = this.compareImage(newImage, oldImage);
                 if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
-                    result.writeResultTo(new File(resultDir, key.getKeysToString() + ".png"));
+                    result.writeResultTo(new File(this.resultDir, key.getKeysToString() + ".png"));
                     this.modifyValues.add(this.getDiff(result).of().setTargetName(oldPath.getName()).build());
                 }
             } catch (IOException e) {

@@ -30,7 +30,13 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
         int diff = 0;
         for (int columnIndex = 0, columnLength = oldRow.length; columnIndex < columnLength; columnIndex++) {
             if (!Objects.equals(oldRow[columnIndex], newRow[columnIndex])) {
-                this.addModify(key, columnIndex, diff++ == 0);
+                if (diff++ == 0) {
+                    this.modifyDiffTable.addRow(key, columnIndex
+                            , this.tableCompare.getOldTable().get(key, this.tableCompare.getKeyColumns(), this.tableCompare.getColumnLength())
+                            , this.tableCompare.getNewTable().get(key, this.tableCompare.getKeyColumns(), this.tableCompare.getColumnLength()));
+                } else {
+                    this.modifyDiffTable.addDiffColumn(key, this.tableCompare.getKeyColumns(), columnIndex);
+                }
             }
         }
     }
@@ -59,16 +65,6 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
             }
         }
         return new ArrayList<>();
-    }
-
-    public void addModify(CompareKeys key, int columnIndex, boolean firstDiff) {
-        if (firstDiff) {
-            this.modifyDiffTable.addRow(key, columnIndex
-                    , this.tableCompare.getOldTable().get(key, this.tableCompare.getKeyColumns(), this.tableCompare.getColumnLength())
-                    , this.tableCompare.getNewTable().get(key, this.tableCompare.getKeyColumns(), this.tableCompare.getColumnLength()));
-        } else {
-            this.modifyDiffTable.addDiffColumn(key, this.tableCompare.getKeyColumns(), columnIndex);
-        }
     }
 
     protected void addRow(int rowNum, DefaultTable addDiffTable, Object... row) {
