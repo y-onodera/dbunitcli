@@ -1,0 +1,55 @@
+{
+  "uid" : "57d00711bd075b2",
+  "name" : "testNoSetting",
+  "fullName" : "yo.dbunitcli.application.ConvertTest.testNoSetting",
+  "historyId" : "ff9f935f2e9c207886a522f3758a71c9",
+  "time" : {
+    "start" : 1667253845968,
+    "stop" : 1667253846014,
+    "duration" : 46
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testNoSetting"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az245-751"
+  }, {
+    "name" : "thread",
+    "value" : "2081@fv-az245-751.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "57d00711bd075b2.json",
+  "parameterValues" : [ ]
+}
