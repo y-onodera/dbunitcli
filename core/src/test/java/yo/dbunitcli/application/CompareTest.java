@@ -1,9 +1,7 @@
 package yo.dbunitcli.application;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.contrib.java.lang.system.Assertion;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.rules.ExpectedException;
 
@@ -120,8 +118,9 @@ public class CompareTest {
         Compare.main(new String[]{"@" + this.baseDir + "/paramComparePdf.txt"});
     }
 
-    @Ignore
+    @Test
     public void testComparePdfDiffAllPage() throws Exception {
+        Assume.assumeTrue(System.getProperty("os.name").toLowerCase().startsWith("win"));
         Compare.main(new String[]{"@" + this.baseDir + "/paramComparePdfDiffAllPage.txt"});
     }
 
