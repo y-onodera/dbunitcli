@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class DefaultCompareManager implements DataSetCompare.Manager {
@@ -104,14 +105,18 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
                 final int newColumns = newMetaData.getColumns().length;
                 final int oldColumns = oldMetaData.getColumns().length;
                 if (oldColumns < newColumns) {
-                    for (int i = 0; oldColumns + i < newColumns; i++) {
-                        Column newColumn = newMetaData.getColumns()[oldColumns + i];
-                        results.add(CompareDiff.Type.COLUMNS_ADD.of()
-                                .setTargetName(tableName)
-                                .setNewDefine(newColumn.getColumnName())
-                                .setColumnIndex(i)
-                                .build());
-                    }
+                    IntStream.range(oldColumns, newColumns).forEach(i -> {
+                        try {
+                            Column newColumn = newMetaData.getColumns()[i];
+                            results.add(CompareDiff.Type.COLUMNS_ADD.of()
+                                    .setTargetName(tableName)
+                                    .setNewDefine(newColumn.getColumnName())
+                                    .setColumnIndex(i)
+                                    .build());
+                        } catch (DataSetException e) {
+                            throw new AssertionError(e);
+                        }
+                    });
                 }
                 return results;
             } catch (DataSetException e) {
@@ -167,7 +172,7 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
         protected List<CompareDiff> exec() {
             final int oldRows = this.oldTable.getRowCount();
             Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists = this.newTable.getRows(this.keyColumns);
-            for (int rowNum = 0; rowNum < oldRows; rowNum++) {
+            IntStream.range(0, oldRows).forEach(rowNum -> {
                 Object[] oldRow = this.oldTable.getRow(rowNum, this.columnLength);
                 CompareKeys key = this.oldTable.getKey(rowNum, this.keyColumns);
                 if (newRowLists.containsKey(key)) {
@@ -177,11 +182,11 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
                 } else {
                     this.handler.handleDelete(rowNum, this.oldTable.getRow(rowNum));
                 }
-            }
-            for (CompareKeys targetKey : newRowLists.keySet()) {
+            });
+            newRowLists.keySet().forEach(targetKey -> {
                 Map.Entry<Integer, Object[]> row = newRowLists.get(targetKey);
                 this.handler.handleAdd(row.getKey(), row.getValue());
-            }
+            });
             return this.handler.result();
         }
     }

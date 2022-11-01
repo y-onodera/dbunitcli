@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset.compare;
 
-import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 
 import java.util.List;
@@ -15,6 +14,6 @@ public interface CompareResult {
 
     List<CompareDiff> getDiffs();
 
-    ITable toITable() throws DataSetException;
+    ITable toITable();
 
 }

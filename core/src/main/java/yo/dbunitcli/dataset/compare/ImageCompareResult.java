@@ -32,22 +32,30 @@ public class ImageCompareResult implements CompareResult {
         this.diffs = Lists.newArrayList(results);
     }
 
-
     @Override
     public List<CompareDiff> getDiffs() {
         return this.diffs;
     }
 
     @Override
-    public ITable toITable() throws DataSetException {
+    public ITable toITable() {
         DefaultTable result = new DefaultTable(RESULT_TABLE_NAME, COLUMNS);
-        for (CompareDiff diff : getDiffs()) {
-            result.addRow(new Object[]{this.oldDir
-                    , this.newDir
-                    , diff.getTargetName()
-                    , diff.getDiff()
-            });
+        getDiffs().forEach(diff -> {
+            try {
+                result.addRow(new Object[]{this.oldDir
+                        , this.newDir
+                        , diff.getTargetName()
+                        , diff.getDiff()
+                });
+            } catch (DataSetException e) {
+                throw new AssertionError(e);
+            }
+        });
+        try {
+            return new SortedTable(result, SORT_KEYS);
+        } catch (DataSetException e) {
+            throw new AssertionError(e);
         }
-        return new SortedTable(result, SORT_KEYS);
     }
+
 }

@@ -131,16 +131,12 @@ public class ImageCompareManager extends DefaultCompareManager {
         }
 
         protected void compareFile(File oldPath, File newPath, CompareKeys key) {
-            try {
-                BufferedImage newImage = this.toImage(newPath);
-                BufferedImage oldImage = this.toImage(oldPath);
-                ImageComparisonResult result = this.compareImage(newImage, oldImage);
-                if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
-                    result.writeResultTo(new File(this.resultDir, key.getKeysToString() + ".png"));
-                    this.modifyValues.add(this.getDiff(result).of().setTargetName(oldPath.getName()).build());
-                }
-            } catch (IOException e) {
-                throw new AssertionError(e);
+            BufferedImage newImage = this.toImage(newPath);
+            BufferedImage oldImage = this.toImage(oldPath);
+            ImageComparisonResult result = this.compareImage(newImage, oldImage);
+            if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
+                result.writeResultTo(new File(this.resultDir, key.getKeysToString() + ".png"));
+                this.modifyValues.add(this.getDiff(result).of().setTargetName(oldPath.getName()).build());
             }
         }
 
@@ -151,8 +147,12 @@ public class ImageCompareManager extends DefaultCompareManager {
                             , it.getMaxPoint().getX(), it.getMaxPoint().getY()), (a, b) -> a + b);
         }
 
-        protected BufferedImage toImage(File newPath) throws IOException {
-            return ImageIO.read(newPath);
+        protected BufferedImage toImage(File newPath) {
+            try {
+                return ImageIO.read(newPath);
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
         }
 
         protected ImageComparisonResult compareImage(BufferedImage newImage, BufferedImage oldImage) {
