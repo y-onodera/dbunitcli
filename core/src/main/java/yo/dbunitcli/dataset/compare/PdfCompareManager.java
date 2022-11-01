@@ -51,25 +51,28 @@ public class PdfCompareManager extends ImageCompareManager {
         protected void compareFile(File oldPath, File newPath, CompareKeys key) {
             try (InputStream newIn = new FileInputStream(newPath); InputStream oldIn = new FileInputStream(oldPath)) {
                 try (PDDocument doc = PDDocument.load(newIn); PDDocument oldDoc = PDDocument.load(oldIn)) {
-                    if (doc.getNumberOfPages() != oldDoc.getNumberOfPages()) {
+                    int newPages = doc.getNumberOfPages();
+                    int oldPages = oldDoc.getNumberOfPages();
+                    if (newPages != oldPages) {
                         pageDiffs.add(((CompareDiff.Diff) () -> String.format("Page Number Change[new:%d,old:%d]"
-                                , doc.getNumberOfPages()
-                                , oldDoc.getNumberOfPages())).of()
+                                , newPages
+                                , oldPages)).of()
                                 .setTargetName(oldPath.getName())
                                 .build());
-                    }
-                    IntStream.range(0, oldDoc.getNumberOfPages()).forEach(i -> {
-                        String page = Strings.padStart(String.valueOf(i + 1), String.valueOf(oldDoc.getNumberOfPages()).length(), '0');
-                        ImageComparisonResult result = this.compareImage(getImage(doc, i), getImage(oldDoc, i));
-                        if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
-                            result.writeResultTo(new File(this.resultDir, key.getKeysToString() + page + ".png"));
-                            this.modifyValues.add(this.getDiff(result)
-                                    .of()
-                                    .setTargetName(oldPath.getName() + " page" + page)
-                                    .build());
-                        }
+                    } else {
+                        IntStream.range(0, oldPages).forEach(i -> {
+                            String page = Strings.padStart(String.valueOf(i + 1), String.valueOf(oldPages).length(), '0');
+                            ImageComparisonResult result = this.compareImage(getImage(doc, i), getImage(oldDoc, i));
+                            if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
+                                result.writeResultTo(new File(this.resultDir, key.getKeysToString() + page + ".png"));
+                                this.modifyValues.add(this.getDiff(result)
+                                        .of()
+                                        .setTargetName(oldPath.getName() + " page" + page)
+                                        .build());
+                            }
 
-                    });
+                        });
+                    }
                 }
             } catch (IOException e) {
                 throw new AssertionError(e);
