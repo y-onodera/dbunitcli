@@ -1,0 +1,55 @@
+{
+  "uid" : "2038b17fe9e0e34",
+  "name" : "testTableNameMapNoSortToCsv",
+  "fullName" : "yo.dbunitcli.application.ConvertTest.testTableNameMapNoSortToCsv",
+  "historyId" : "7f8d1332db27e3a4f9ad4102720371f1",
+  "time" : {
+    "start" : 1667310769426,
+    "stop" : 1667310769576,
+    "duration" : 150
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testTableNameMapNoSortToCsv"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az489-532"
+  }, {
+    "name" : "thread",
+    "value" : "2061@fv-az489-532.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "2038b17fe9e0e34.json",
+  "parameterValues" : [ ]
+}
