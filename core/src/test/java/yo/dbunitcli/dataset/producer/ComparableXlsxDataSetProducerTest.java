@@ -19,13 +19,13 @@ public class ComparableXlsxDataSetProducerTest {
     @Before
     public void setUp() throws UnsupportedEncodingException {
         this.resource = URLDecoder.decode(this.getClass().getResource(".").getPath(), "UTF-8")
-                .replace("target/test-classes","src/test/resources");
+                .replace("target/test-classes", "src/test/resources");
     }
 
     @Test
     public void createDataSetFromFile() throws DataSetException {
-        File src = new File(this.resource, "multifile.xlsx");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final File src = new File(this.resource, "multifile.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
@@ -77,8 +77,8 @@ public class ComparableXlsxDataSetProducerTest {
 
     @Test
     public void createDataSetFromFileIncludeSheet() throws DataSetException {
-        File src = new File(this.resource, "multifile.xlsx");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final File src = new File(this.resource, "multifile.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
@@ -87,7 +87,7 @@ public class ComparableXlsxDataSetProducerTest {
 
         Assert.assertEquals(src.getPath(), actual.getSrc());
         Assert.assertEquals(1, actual.getTableNames().length);
-        ComparableTable actualTable = actual.getTable("multi1");
+        final ComparableTable actualTable = actual.getTable("multi1");
         Assert.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
         Assert.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
         Assert.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
@@ -111,8 +111,8 @@ public class ComparableXlsxDataSetProducerTest {
 
     @Test
     public void createDataSetFromFileExcludeSheet() throws DataSetException {
-        File src = new File(this.resource, "multifile.xlsx");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final File src = new File(this.resource, "multifile.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
@@ -121,7 +121,7 @@ public class ComparableXlsxDataSetProducerTest {
 
         Assert.assertEquals(src.getPath(), actual.getSrc());
         Assert.assertEquals(1, actual.getTableNames().length);
-        ComparableTable actualTable = actual.getTable("multi1");
+        final ComparableTable actualTable = actual.getTable("multi1");
         Assert.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
         Assert.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
         Assert.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));

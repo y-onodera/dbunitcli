@@ -8,7 +8,7 @@ public abstract class DefaultArgumentsParser implements ArgumentsParser {
 
     private ArgumentMapper argumentMapper = new DefaultArgumentMapper();
 
-    public DefaultArgumentsParser(String prefix) {
+    public DefaultArgumentsParser(final String prefix) {
         this.prefix = prefix;
     }
 
@@ -27,11 +27,11 @@ public abstract class DefaultArgumentsParser implements ArgumentsParser {
         return this.argumentMapper;
     }
 
-    public void setArgumentFilter(ArgumentFilter argumentFilter) {
+    public void setArgumentFilter(final ArgumentFilter argumentFilter) {
         this.argumentFilter = argumentFilter;
     }
 
-    public void setArgumentMapper(ArgumentMapper argumentMapper) {
+    public void setArgumentMapper(final ArgumentMapper argumentMapper) {
         this.argumentMapper = argumentMapper;
     }
 }

@@ -14,7 +14,7 @@ public class ComparableFileTableMetaData extends DefaultTableMetaData {
             , new Column("LAST_MODIFIED", DataType.NVARCHAR)
     };
 
-    public ComparableFileTableMetaData(String tableName) {
+    public ComparableFileTableMetaData(final String tableName) {
         super(tableName, COLUMNS, new Column[]{PK});
     }
 }

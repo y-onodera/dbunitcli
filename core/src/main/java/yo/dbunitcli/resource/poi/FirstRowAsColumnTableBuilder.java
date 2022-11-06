@@ -10,6 +10,7 @@ import org.dbunit.dataset.datatype.DataType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
 
@@ -17,27 +18,25 @@ public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
     private final List<String> rowValues = new ArrayList<>();
     private ITableMetaData nowProcessing = null;
 
-    public FirstRowAsColumnTableBuilder(String tableName) {
+    public FirstRowAsColumnTableBuilder(final String tableName) {
         this.tableName = tableName;
     }
 
     @Override
-    public boolean isTableStart(int rowNum) {
+    public boolean isTableStart(final int rowNum) {
         return rowNum == 0;
     }
 
     @Override
-    public boolean hasRow(int rowNum) {
+    public boolean hasRow(final int rowNum) {
         return rowNum > 0;
     }
 
     @Override
     public ITableMetaData startNewTable() {
-        final Column[] columns = new Column[rowValues.size()];
-        for (int i = 0, j = rowValues.size(); i < j; i++) {
-            columns[i] = new Column(rowValues.get(i), DataType.UNKNOWN);
-        }
-        this.nowProcessing = new DefaultTableMetaData(this.tableName, columns);
+        this.nowProcessing = new DefaultTableMetaData(this.tableName, this.rowValues.stream()
+                .map(rowValue -> new Column(rowValue, DataType.UNKNOWN))
+                .toArray(Column[]::new));
         return this.nowProcessing;
     }
 
@@ -47,23 +46,20 @@ public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
     }
 
     @Override
-    public void handle(CellReference reference, int currentCol, String formattedValue) {
-        int thisCol = reference.getCol();
-        int missedCols = thisCol - currentCol - 1;
-        for (int i = 0; i < missedCols; i++) {
-            this.rowValues.add("");
-        }
+    public void handle(final CellReference reference, final int currentCol, final String formattedValue) {
+        final int thisCol = reference.getCol();
+        final int missedCols = thisCol - currentCol - 1;
+        IntStream.range(0, missedCols).forEach(i -> this.rowValues.add(""));
         this.rowValues.add(formattedValue);
     }
 
     @Override
-    public String[] currentRow() throws DataSetException {
-        if (this.nowProcessing.getColumns().length < rowValues.size()) {
-            throw new AssertionError(rowValues + " large items than header:" + Arrays.toString(this.nowProcessing.getColumns()));
-        } else if (rowValues.size() < this.nowProcessing.getColumns().length) {
-            for (int i = rowValues.size(), j = this.nowProcessing.getColumns().length; i < j; i++) {
-                rowValues.add("");
-            }
+    public String[] currentRow() {
+        if (this.getNowProcessingColumns().length < this.rowValues.size()) {
+            throw new AssertionError(this.rowValues + " large items than header:" + Arrays.toString(this.getNowProcessingColumns()));
+        } else if (this.rowValues.size() < this.getNowProcessingColumns().length) {
+            IntStream.range(this.rowValues.size(), this.getNowProcessingColumns().length)
+                    .forEach(i -> this.rowValues.add(""));
         }
         return this.rowValues.toArray(new String[0]);
     }
@@ -72,4 +68,13 @@ public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
     public boolean isNowProcessing() {
         return this.nowProcessing != null;
     }
+
+    private Column[] getNowProcessingColumns() {
+        try {
+            return this.nowProcessing.getColumns();
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
 }

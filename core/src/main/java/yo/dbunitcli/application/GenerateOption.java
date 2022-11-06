@@ -19,7 +19,6 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +60,7 @@ public class GenerateOption extends CommandLineOption {
         this(Parameter.none());
     }
 
-    public GenerateOption(Parameter param) {
+    public GenerateOption(final Parameter param) {
         super(param);
     }
 
@@ -77,21 +76,21 @@ public class GenerateOption extends CommandLineOption {
         return this.generateType;
     }
 
-    public Stream<Map<String, Object>> parameterStream() throws DataSetException {
+    public Stream<Map<String, Object>> parameterStream() {
         this.getParameter().getMap().put("commit", Boolean.valueOf(this.commit));
         return this.getUnit().parameterStream(this.getParameter().getMap(), this.targetDataSet());
     }
 
-    public String resultPath(Map<String, Object> param) {
+    public String resultPath(final Map<String, Object> param) {
         return this.templateOption.getTemplateRender().render(this.getResultPath(), param);
     }
 
-    public void write(File resultFile, Map<String, Object> param) throws IOException {
+    public void write(final File resultFile, final Map<String, Object> param) throws IOException {
         this.getGenerateType().write(this, resultFile, param);
     }
 
     @Override
-    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         this.getConverterOption().parseArgument(expandArgs);
         this.src.parseArgument(expandArgs);
@@ -100,8 +99,8 @@ public class GenerateOption extends CommandLineOption {
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putAll(this.src.createOptionParam(args));
         result.put("-generateType", this.generateType, GenerateType.class);
         if (result.hasValue("-generateType")
@@ -125,8 +124,8 @@ public class GenerateOption extends CommandLineOption {
         return result;
     }
 
-    public ComparableDataSet targetDataSet() throws DataSetException {
-        ComparableDataSetParam.Builder builder = this.src.getParam();
+    public ComparableDataSet targetDataSet() {
+        final ComparableDataSetParam.Builder builder = this.src.getParam();
         if (this.getGenerateType() == GenerateType.settings) {
             builder.setUseJdbcMetaData(true);
             builder.setLoadData(false);
@@ -151,9 +150,10 @@ public class GenerateOption extends CommandLineOption {
         }
     }
 
+    @Override
     protected String getResultPath() {
-        if (getGenerateType() == GenerateType.sql) {
-            String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
+        if (this.getGenerateType() == GenerateType.sql) {
+            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
             return super.getResultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
         }
         return super.getResultPath();
@@ -166,11 +166,11 @@ public class GenerateOption extends CommandLineOption {
     public enum GenerateUnit {
         record {
             @Override
-            public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws DataSetException {
+            public Stream<Map<String, Object>> parameterStream(final Map<String, Object> map, final ComparableDataSet dataSet) {
                 return dataSet.toMap(true).stream()
                         .flatMap(it -> ((List<Map<String, Object>>) it.get("row")).stream()
                                 .map(row -> {
-                                    Map<String, Object> result = Maps.newHashMap();
+                                    final Map<String, Object> result = Maps.newHashMap();
                                     result.putAll(it);
                                     result.put("row", row);
                                     result.put("_paramMap", map);
@@ -182,30 +182,33 @@ public class GenerateOption extends CommandLineOption {
 
         table {
             @Override
-            public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws
-                    DataSetException {
-                return Stream.of(dataSet.getTableNames())
-                        .map(it -> {
-                            try {
-                                Map<String, Object> param = new HashMap<>();
-                                param.put("_paramMap", map);
-                                ComparableTable table = dataSet.getTable(it);
-                                param.put("tableName", it);
-                                param.put("primaryKeys", table.getTableMetaData().getPrimaryKeys());
-                                param.put("columns", table.getTableMetaData().getColumns());
-                                param.put("columnsExcludeKey", table.getColumnsExcludeKey());
-                                param.put("rows", table.toMap());
-                                return param;
-                            } catch (DataSetException e) {
-                                throw new AssertionError(e);
-                            }
-                        });
+            public Stream<Map<String, Object>> parameterStream(final Map<String, Object> map, final ComparableDataSet dataSet) {
+                try {
+                    return Stream.of(dataSet.getTableNames())
+                            .map(it -> {
+                                try {
+                                    final Map<String, Object> param = new HashMap<>();
+                                    param.put("_paramMap", map);
+                                    final ComparableTable table = dataSet.getTable(it);
+                                    param.put("tableName", it);
+                                    param.put("primaryKeys", table.getTableMetaData().getPrimaryKeys());
+                                    param.put("columns", table.getTableMetaData().getColumns());
+                                    param.put("columnsExcludeKey", table.getColumnsExcludeKey());
+                                    param.put("rows", table.toMap());
+                                    return param;
+                                } catch (final DataSetException e) {
+                                    throw new AssertionError(e);
+                                }
+                            });
+                } catch (final DataSetException e) {
+                    throw new AssertionError(e);
+                }
             }
         },
         dataset;
 
-        public Stream<Map<String, Object>> parameterStream(Map<String, Object> map, ComparableDataSet dataSet) throws DataSetException {
-            Map<String, Object> param = new HashMap<>();
+        public Stream<Map<String, Object>> parameterStream(final Map<String, Object> map, final ComparableDataSet dataSet) {
+            final Map<String, Object> param = new HashMap<>();
             param.put("_paramMap", map);
             param.put("dataSet", dataSet.toMap(true));
             return Stream.of(param);
@@ -216,7 +219,7 @@ public class GenerateOption extends CommandLineOption {
         txt,
         xlsx {
             @Override
-            protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
+            protected void write(final GenerateOption option, final File resultFile, final Map<String, Object> param) throws IOException {
                 JxlsTemplateRender.builder()
                         .setTemplateParameterAttribute(option.templateOption.getTemplateParameterAttribute())
                         .setFormulaProcess(option.templateOption.isFormulaProcess())
@@ -226,7 +229,7 @@ public class GenerateOption extends CommandLineOption {
         },
         xls {
             @Override
-            protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
+            protected void write(final GenerateOption option, final File resultFile, final Map<String, Object> param) throws IOException {
                 JxlsTemplateRender.builder()
                         .setTemplateParameterAttribute(option.templateOption.getTemplateParameterAttribute())
                         .build()
@@ -235,13 +238,9 @@ public class GenerateOption extends CommandLineOption {
         },
         settings {
             @Override
-            protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
+            protected void populateSettings(final GenerateOption option, final CmdLineParser parser) {
                 option.unit = GenerateUnit.dataset;
-                try {
-                    option.templateString = Files.readClasspathResource("settings/settingTemplate.txt");
-                } catch (IOException | URISyntaxException e) {
-                    throw new CmdLineException(parser, e);
-                }
+                option.templateString = Files.readClasspathResource("settings/settingTemplate.txt");
             }
 
             @Override
@@ -254,13 +253,9 @@ public class GenerateOption extends CommandLineOption {
         },
         sql {
             @Override
-            protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
+            protected void populateSettings(final GenerateOption option, final CmdLineParser parser) {
                 option.unit = GenerateUnit.table;
-                try {
-                    option.templateString = Files.readClasspathResource(option.getSqlTemplate());
-                } catch (IOException | URISyntaxException e) {
-                    throw new CmdLineException(parser, e);
-                }
+                option.templateString = Files.readClasspathResource(option.getSqlTemplate());
             }
 
             @Override
@@ -272,18 +267,14 @@ public class GenerateOption extends CommandLineOption {
             }
         };
 
-        protected void populateSettings(GenerateOption option, CmdLineParser parser) throws CmdLineException {
-            File template = option.template;
+        protected void populateSettings(final GenerateOption option, final CmdLineParser parser) throws CmdLineException {
+            final File template = option.template;
             if (!template.exists() || !template.isFile()) {
                 throw new CmdLineException(parser, template + " is not exist file"
                         , new IllegalArgumentException(template.toString()));
             }
             if (this == GenerateType.txt) {
-                try {
-                    option.templateString = Files.read(template, option.templateOption.getTemplateEncoding());
-                } catch (IOException e) {
-                    throw new CmdLineException(parser, e);
-                }
+                option.templateString = Files.read(template, option.templateOption.getTemplateEncoding());
             }
         }
 
@@ -291,8 +282,8 @@ public class GenerateOption extends CommandLineOption {
             return null;
         }
 
-        protected void write(GenerateOption option, File resultFile, Map<String, Object> param) throws IOException {
-            option.templateOption.getTemplateRender().write(getStGroup()
+        protected void write(final GenerateOption option, final File resultFile, final Map<String, Object> param) throws IOException {
+            option.templateOption.getTemplateRender().write(this.getStGroup()
                     , option.templateString()
                     , param
                     , resultFile

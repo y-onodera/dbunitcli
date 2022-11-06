@@ -11,15 +11,14 @@ import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.resource.Files;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 public class ParameterizeOption extends CommandLineOption {
 
-    private DataSetLoadOption param = new DataSetLoadOption("param");
+    private final DataSetLoadOption param = new DataSetLoadOption("param");
 
-    private TemplateRenderOption templateOption = new TemplateRenderOption("template");
+    private final TemplateRenderOption templateOption = new TemplateRenderOption("template");
 
     @Option(name = "-cmd", usage = "data driven target cmd")
     private String cmd;
@@ -35,15 +34,15 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         this.param.parseArgument(expandArgs);
         this.templateOption.parseArgument(expandArgs);
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putAll(this.param.createOptionParam(args));
         result.put("-cmd", this.cmd);
         result.put("-cmdParam", this.cmdParam);
@@ -56,17 +55,17 @@ public class ParameterizeOption extends CommandLineOption {
         return this.getComparableDataSetLoader().loadParam(this.param.getParam().build());
     }
 
-    public String[] createArgs(Parameter aParam) throws IOException {
+    public String[] createArgs(final Parameter aParam) {
         return this.templateOption.getTemplateRender()
-                .render(getTemplateArgs(aParam.getMap()), aParam.getMap())
+                .render(this.getTemplateArgs(aParam.getMap()), aParam.getMap())
                 .split("\\r?\\n");
     }
 
-    public Command<?> createCommand(Map<String, Object> param) {
+    public Command<?> createCommand(final Map<String, Object> param) {
         return this.createCommand(this.templateOption.getTemplateRender().render(this.cmd, param));
     }
 
-    protected Command<? extends CommandLineOption> createCommand(String cmdType) {
+    protected Command<? extends CommandLineOption> createCommand(final String cmdType) {
         switch (cmdType) {
             case "compare":
                 return new Compare();
@@ -81,7 +80,7 @@ public class ParameterizeOption extends CommandLineOption {
         }
     }
 
-    protected String getTemplateArgs(Map<String, Object> param) throws IOException {
+    protected String getTemplateArgs(final Map<String, Object> param) {
         File template = this.template;
         if (!Strings.isNullOrEmpty(this.cmdParam)) {
             template = new File(this.templateOption.getTemplateRender().render(this.cmdParam, param));

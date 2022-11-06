@@ -12,8 +12,8 @@ public class DBConverter implements IDataSetConverter {
 
     private final boolean exportEmptyTable;
 
-    public DBConverter(DataSetConsumerParam param) throws DataSetException {
-        IDatabaseConnection connection = param.getDatabaseConnectionLoader().loadConnection();
+    public DBConverter(final DataSetConsumerParam param) {
+        final IDatabaseConnection connection = param.getDatabaseConnectionLoader().loadConnection();
         this.operation = param.getOperation().createConsumer(connection);
         this.exportEmptyTable = param.isExportEmptyTable();
     }
@@ -24,17 +24,17 @@ public class DBConverter implements IDataSetConverter {
     }
 
     @Override
-    public void startTable(ITableMetaData iTableMetaData) throws DataSetException {
+    public void startTable(final ITableMetaData iTableMetaData) throws DataSetException {
         this.operation.startTable(iTableMetaData);
     }
 
     @Override
-    public void reStartTable(ITableMetaData tableMetaData, Integer writeRows) throws DataSetException {
+    public void reStartTable(final ITableMetaData tableMetaData, final Integer writeRows) throws DataSetException {
         this.operation.startTable(tableMetaData);
     }
 
     @Override
-    public void row(Object[] objects) throws DataSetException {
+    public void row(final Object[] objects) throws DataSetException {
         this.operation.row(objects);
     }
 
@@ -60,7 +60,7 @@ public class DBConverter implements IDataSetConverter {
         REFRESH,
         CLEAN_INSERT;
 
-        org.dbunit.dataset.stream.IDataSetConsumer createConsumer(IDatabaseConnection connection) throws DataSetException {
+        org.dbunit.dataset.stream.IDataSetConsumer createConsumer(final IDatabaseConnection connection) {
             switch (this) {
                 case INSERT:
                     return new InsertConsumer(connection);

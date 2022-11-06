@@ -1,7 +1,5 @@
 package yo.dbunitcli.fileprocessor;
 
-import com.google.common.base.Strings;
-import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.BufferedReader;
@@ -16,39 +14,31 @@ public class CmdRunner implements Runner {
     private final Map<String, Object> parameter;
     private final TemplateRender templateRender;
 
-    public CmdRunner(Map<String, Object> parameter
-            , TemplateRender templateRender) {
+    public CmdRunner(final Map<String, Object> parameter
+            , final TemplateRender templateRender) {
         this.parameter = parameter;
         this.templateRender = templateRender;
     }
 
     @Override
-    public void runScript(Collection<File> targetFiles) throws DataSetException {
-        try {
-            for (File target : targetFiles) {
-                ProcessBuilder pb = new ProcessBuilder(this.getTemplateRender()
+    public void runScript(final Collection<File> targetFiles) {
+        targetFiles.forEach(target -> {
+            try {
+                final ProcessBuilder pb = new ProcessBuilder(this.getTemplateRender()
                         .render(target, this.getParameter()));
                 // 標準エラー出力を標準出力にマージする
                 pb.redirectErrorStream(true);
-                Process process = pb.start();
-                InputStream in = process.getInputStream();
-                BufferedReader br = new BufferedReader(new InputStreamReader(in, "MS932"));
-                String stdout;
-                while ((stdout = br.readLine()) != null) {
-                    // 不要なメッセージを表示しない
-                    if (Strings.isNullOrEmpty(stdout))
-                        continue;
-                    if (stdout.contains("echo off "))
-                        continue;
-                    if (stdout.contains("続行するには何かキーを押してください ")) {
-                        continue;
-                    }
+                final Process process = pb.start();
+                final InputStream in = process.getInputStream();
+                final BufferedReader br = new BufferedReader(new InputStreamReader(in, "MS932"));
+                while (br.readLine() != null) {
+                    // skip input
                 }
                 process.waitFor();
+            } catch (final Throwable var30) {
+                throw new AssertionError(var30);
             }
-        } catch (Throwable var30) {
-            throw new DataSetException(var30);
-        }
+        });
     }
 
     public Map<String, Object> getParameter() {

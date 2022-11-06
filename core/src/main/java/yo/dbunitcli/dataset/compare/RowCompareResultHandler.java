@@ -16,28 +16,28 @@ public interface RowCompareResultHandler {
 
     List<CompareDiff> result();
 
-    default RowCompareResultHandler compose(RowCompareResultHandler handlers) {
-        RowCompareResultHandler origin = this;
+    default RowCompareResultHandler compose(final RowCompareResultHandler handlers) {
+        final RowCompareResultHandler origin = this;
         return new RowCompareResultHandler() {
 
             @Override
-            public void handleModify(Object[] oldRow, Object[] newRow, CompareKeys key) {
+            public void handleModify(final Object[] oldRow, final Object[] newRow, final CompareKeys key) {
                 Stream.of(origin, handlers).forEach(it -> it.handleModify(oldRow, newRow, key));
             }
 
             @Override
-            public void handleDelete(int rowNum, Object[] row) {
+            public void handleDelete(final int rowNum, final Object[] row) {
                 Stream.of(origin, handlers).forEach(it -> it.handleDelete(rowNum, row));
             }
 
             @Override
-            public void handleAdd(int rowNum, Object[] row) {
+            public void handleAdd(final int rowNum, final Object[] row) {
                 Stream.of(origin, handlers).forEach(it -> it.handleAdd(rowNum, row));
             }
 
             @Override
             public List<CompareDiff> result() {
-                List<CompareDiff> results = new ArrayList<>();
+                final List<CompareDiff> results = new ArrayList<>();
                 Stream.of(origin, handlers).forEach(it -> results.addAll(it.result()));
                 return results;
             }

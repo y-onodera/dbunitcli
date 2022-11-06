@@ -29,12 +29,12 @@ public class JdbcOption extends DefaultArgumentsParser {
 
     private Properties jdbcProp;
 
-    public JdbcOption(String prefix) {
+    public JdbcOption(final String prefix) {
         super(prefix);
     }
 
     public Properties getJdbcProp() {
-        return jdbcProp;
+        return this.jdbcProp;
     }
 
     public DatabaseConnectionLoader getDatabaseConnectionLoader() {
@@ -42,18 +42,18 @@ public class JdbcOption extends DefaultArgumentsParser {
     }
 
     @Override
-    public void setUpComponent(CmdLineParser parser, String[] args) throws CmdLineException {
+    public void setUpComponent(final CmdLineParser parser, final String[] args) throws CmdLineException {
         try {
             this.loadJdbcTemplate();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new CmdLineException(parser, e.getMessage(), e);
         }
         this.validate(parser);
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putFile("-jdbcProperties", this.jdbcProperties);
         if (Strings.isNullOrEmpty(result.get("-jdbcProperties"))) {
             result.put("-jdbcUrl", this.jdbcUrl);
@@ -63,7 +63,7 @@ public class JdbcOption extends DefaultArgumentsParser {
         return result;
     }
 
-    protected void validate(CmdLineParser parser) throws CmdLineException {
+    protected void validate(final CmdLineParser parser) throws CmdLineException {
         if (Stream.of(this.jdbcUrl, this.jdbcUser, this.jdbcPass)
                 .anyMatch(Strings::isNullOrEmpty)) {
             if (this.jdbcProperties == null) {

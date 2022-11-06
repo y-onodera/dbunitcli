@@ -8,12 +8,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 public class XlsxCellsToTableBuilder {
 
     public static XlsxCellsToTableBuilder NO_TARGET = new XlsxCellsToTableBuilder(new ArrayList<>()) {
         @Override
-        public void handle(CellReference reference, String formattedValue) {
+        public void handle(final CellReference reference, final String formattedValue) {
             // no handle
         }
     };
@@ -25,40 +26,39 @@ public class XlsxCellsToTableBuilder {
 
     private final Map<String, List<String[]>> row = new HashMap<>();
 
-    public XlsxCellsToTableBuilder(List<XlsxCellsTableDefine> tableDefines) {
+    public XlsxCellsToTableBuilder(final List<XlsxCellsTableDefine> tableDefines) {
         this.tableNames = new String[tableDefines.size()];
-        for (int i = 0, j = tableNames.length; i < j; i++) {
-            XlsxCellsTableDefine def = tableDefines.get(i);
+        IntStream.range(0, this.tableNames.length).forEach(i -> {
+            final XlsxCellsTableDefine def = tableDefines.get(i);
             this.tableNames[i] = def.getTableName();
             this.tableMetaDataMap.put(def.getTableName(), def.getTableMetaData());
-            for (String cellAddress : def.getTargetAddresses()) {
+            def.getTargetAddresses().forEach(cellAddress -> {
                 if (!this.columnDefine.containsKey(cellAddress)) {
                     this.columnDefine.put(cellAddress, new ArrayList<>());
                 }
                 this.columnDefine.get(cellAddress).add(def);
-            }
+            });
             this.row.put(def.getTableName(), new ArrayList<>());
-            List<String[]> targetRows = this.row.get(def.getTableName());
-            for (int rowIndex = 0, rowCount = def.rowCount(); rowIndex < rowCount; rowIndex++) {
-                targetRows.add(rowIndex, new String[def.columnCount()]);
-            }
-        }
+            final List<String[]> targetRows = this.row.get(def.getTableName());
+            IntStream.range(0, def.rowCount())
+                    .forEach(rowIndex -> targetRows.add(rowIndex, new String[def.columnCount()]));
+        });
     }
 
-    public void handle(CellReference reference, String formattedValue) {
-        String ref = reference.formatAsString()
+    public void handle(final CellReference reference, final String formattedValue) {
+        final String ref = reference.formatAsString()
                 .replaceAll(".+!", "")
                 .replaceAll("\\$", "");
-        try {
-            if (this.columnDefine.containsKey(ref)) {
-                for (XlsxCellsTableDefine it : this.columnDefine.get(ref)) {
-                    ITableMetaData metaData = this.tableMetaDataMap.get(it.getTableName());
+        if (this.columnDefine.containsKey(ref)) {
+            this.columnDefine.get(ref).forEach(it -> {
+                final ITableMetaData metaData = this.tableMetaDataMap.get(it.getTableName());
+                try {
                     this.row.get(it.getTableName())
                             .get(it.getRowIndex(ref))[metaData.getColumnIndex(it.getColumnName(ref))] = formattedValue;
+                } catch (final DataSetException e) {
+                    throw new AssertionError(e);
                 }
-            }
-        } catch (DataSetException ex) {
-            throw new RuntimeException(ex);
+            });
         }
     }
 
@@ -66,11 +66,11 @@ public class XlsxCellsToTableBuilder {
         return this.tableNames;
     }
 
-    public ITableMetaData getTableMetaData(String tableName) {
+    public ITableMetaData getTableMetaData(final String tableName) {
         return this.tableMetaDataMap.get(tableName);
     }
 
-    public List<String[]> getRows(String tableName) {
+    public List<String[]> getRows(final String tableName) {
         return this.row.get(tableName);
     }
 }

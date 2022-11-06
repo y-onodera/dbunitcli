@@ -10,18 +10,18 @@ public class HeaderNameOption extends DefaultArgumentsParser implements Comparab
     @Option(name = "-headerName", usage = "comma separate header name. if set,all rows treat data rows")
     private String headerName;
 
-    public HeaderNameOption(String prefix) {
+    public HeaderNameOption(final String prefix) {
         super(prefix);
     }
 
     @Override
-    public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
+    public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         return builder.setHeaderName(this.headerName);
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-headerName", this.headerName);
         return result;
     }

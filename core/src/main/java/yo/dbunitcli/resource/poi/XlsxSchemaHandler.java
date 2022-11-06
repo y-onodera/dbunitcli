@@ -10,29 +10,29 @@ public class XlsxSchemaHandler extends ExcelMappingDataSetConsumerWrapper implem
     private int currentRow = -1;
     private int currentCol = -1;
 
-    public XlsxSchemaHandler(IDataSetConsumer delegate, String sheetName, XlsxSchema schema, boolean loadData) {
+    public XlsxSchemaHandler(final IDataSetConsumer delegate, final String sheetName, final XlsxSchema schema, final boolean loadData) {
         super(delegate, schema, loadData);
         this.handleSheetStart(sheetName);
     }
 
     @Override
-    public void startRow(int rowNum) {
+    public void startRow(final int rowNum) {
         this.currentRow = rowNum;
         this.currentCol = -1;
     }
 
     @Override
-    public void endRow(int rowNum) {
+    public void endRow(final int rowNum) {
         this.addNewRowToRowsTable(rowNum);
     }
 
     @Override
-    public void cell(String cellReference, String formattedValue, XSSFComment comment) {
+    public void cell(String cellReference, final String formattedValue, final XSSFComment comment) {
         // gracefully handle missing CellRef here in a similar way as XSSFCell does
         if (cellReference == null) {
             cellReference = new CellAddress(this.currentRow, this.currentCol).formatAsString();
         }
-        CellReference reference = new CellReference(cellReference);
+        final CellReference reference = new CellReference(cellReference);
         this.handleCellValue(this.currentCol, formattedValue, reference);
         this.currentCol = reference.getCol();
     }

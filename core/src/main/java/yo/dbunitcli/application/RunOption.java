@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -35,7 +34,7 @@ public class RunOption extends CommandLineOption {
         super(Parameter.none());
     }
 
-    public RunOption(Parameter param) {
+    public RunOption(final Parameter param) {
         super(param);
     }
 
@@ -43,7 +42,7 @@ public class RunOption extends CommandLineOption {
         return this.scriptType;
     }
 
-    public List<File> targetFiles() throws DataSetException {
+    public List<File> targetFiles() {
         return this.getComparableDataSetLoader().loadDataSet(
                         this.src.getParam()
                                 .setSource(DataSourceType.file)
@@ -62,7 +61,7 @@ public class RunOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         this.templateOption.parseArgument(expandArgs);
         this.jdbcOption.parseArgument(expandArgs);
@@ -70,8 +69,8 @@ public class RunOption extends CommandLineOption {
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putAll(this.src.createOptionParam(args));
         result.put("-scriptType", this.scriptType, ScriptType.class);
         result.putAll(this.templateOption.createOptionParam(args));
@@ -84,7 +83,7 @@ public class RunOption extends CommandLineOption {
     enum ScriptType {
         cmd, bat, sql {
             @Override
-            public Runner createRunner(RunOption aOption) {
+            public Runner createRunner(final RunOption aOption) {
                 return new SqlRunner(aOption.jdbcOption.getDatabaseConnectionLoader()
                         , aOption.getParameter().getMap()
                         , aOption.templateOption.getTemplateRender()
@@ -92,7 +91,7 @@ public class RunOption extends CommandLineOption {
             }
         }, ant {
             @Override
-            public Runner createRunner(RunOption aOption) {
+            public Runner createRunner(final RunOption aOption) {
                 return new AntRunner(aOption.getParameter().getMap());
             }
 
@@ -102,7 +101,7 @@ public class RunOption extends CommandLineOption {
             }
         };
 
-        public Runner createRunner(RunOption aOption) {
+        public Runner createRunner(final RunOption aOption) {
             return new CmdRunner(aOption.getParameter().getMap()
                     , aOption.templateOption.getTemplateRender()
             );

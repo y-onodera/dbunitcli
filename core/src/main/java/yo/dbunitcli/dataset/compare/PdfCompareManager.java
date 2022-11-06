@@ -22,12 +22,12 @@ public class PdfCompareManager extends ImageCompareManager {
         return new Builder();
     }
 
-    public PdfCompareManager(ImageCompareBuilder builder) {
+    public PdfCompareManager(final ImageCompareBuilder builder) {
         super(builder);
     }
 
     @Override
-    protected RowCompareResultHandler getRowResultHandler(DataSetCompare.TableCompare it) {
+    protected RowCompareResultHandler getRowResultHandler(final DataSetCompare.TableCompare it) {
         return new PdfFileCompareHandler(it);
     }
 
@@ -35,34 +35,34 @@ public class PdfCompareManager extends ImageCompareManager {
 
         protected List<CompareDiff> pageDiffs;
 
-        protected PdfFileCompareHandler(DataSetCompare.TableCompare it) {
+        protected PdfFileCompareHandler(final DataSetCompare.TableCompare it) {
             super(it);
             this.pageDiffs = new ArrayList<>();
         }
 
         @Override
         public List<CompareDiff> result() {
-            List<CompareDiff> results = super.result();
-            results.addAll(pageDiffs);
+            final List<CompareDiff> results = super.result();
+            results.addAll(this.pageDiffs);
             return results;
         }
 
         @Override
-        protected void compareFile(File oldPath, File newPath, CompareKeys key) {
-            try (InputStream newIn = new FileInputStream(newPath); InputStream oldIn = new FileInputStream(oldPath)) {
-                try (PDDocument doc = PDDocument.load(newIn); PDDocument oldDoc = PDDocument.load(oldIn)) {
-                    int newPages = doc.getNumberOfPages();
-                    int oldPages = oldDoc.getNumberOfPages();
+        protected void compareFile(final File oldPath, final File newPath, final CompareKeys key) {
+            try (final InputStream newIn = new FileInputStream(newPath); final InputStream oldIn = new FileInputStream(oldPath)) {
+                try (final PDDocument doc = PDDocument.load(newIn); final PDDocument oldDoc = PDDocument.load(oldIn)) {
+                    final int newPages = doc.getNumberOfPages();
+                    final int oldPages = oldDoc.getNumberOfPages();
                     if (newPages != oldPages) {
-                        pageDiffs.add(((CompareDiff.Diff) () -> String.format("Page Number Change[new:%d,old:%d]"
+                        this.pageDiffs.add(((CompareDiff.Diff) () -> String.format("Page Number Change[new:%d,old:%d]"
                                 , newPages
                                 , oldPages)).of()
                                 .setTargetName(oldPath.getName())
                                 .build());
                     } else {
                         IntStream.range(0, oldPages).forEach(i -> {
-                            String page = Strings.padStart(String.valueOf(i + 1), String.valueOf(oldPages).length(), '0');
-                            ImageComparisonResult result = this.compareImage(getImage(doc, i), getImage(oldDoc, i));
+                            final String page = Strings.padStart(String.valueOf(i + 1), String.valueOf(oldPages).length(), '0');
+                            final ImageComparisonResult result = this.compareImage(this.getImage(doc, i), this.getImage(oldDoc, i));
                             if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
                                 result.writeResultTo(new File(this.resultDir, key.getKeysToString() + page + ".png"));
                                 this.modifyValues.add(this.getDiff(result)
@@ -74,15 +74,15 @@ public class PdfCompareManager extends ImageCompareManager {
                         });
                     }
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new AssertionError(e);
             }
         }
 
-        private BufferedImage getImage(PDDocument doc, int i) {
+        private BufferedImage getImage(final PDDocument doc, final int i) {
             try {
                 return new PDFRenderer(doc).renderImage(i);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new AssertionError(e);
             }
         }

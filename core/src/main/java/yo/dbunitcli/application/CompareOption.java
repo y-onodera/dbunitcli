@@ -1,7 +1,6 @@
 package yo.dbunitcli.application;
 
 import com.google.common.collect.Lists;
-import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -24,8 +23,8 @@ public class CompareOption extends CommandLineOption {
 
     public static final DefaultArgumentMapper IMAGE_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
-        public String[] map(String[] arguments, String prefix, CmdLineParser parser) {
-            List<String> newArg = Arrays.stream(arguments)
+        public String[] map(final String[] arguments, final String prefix, final CmdLineParser parser) {
+            final List<String> newArg = Arrays.stream(arguments)
                     .filter(it -> !it.contains("srcType=") && !it.contains("extension="))
                     .collect(Collectors.toList());
             newArg.add("-srcType=file");
@@ -36,8 +35,8 @@ public class CompareOption extends CommandLineOption {
 
     public static final DefaultArgumentMapper PDF_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
-        public String[] map(String[] arguments, String prefix, CmdLineParser parser) {
-            List<String> newArg = Arrays.stream(arguments)
+        public String[] map(final String[] arguments, final String prefix, final CmdLineParser parser) {
+            final List<String> newArg = Arrays.stream(arguments)
                     .filter(it -> !it.contains("srcType=") && !it.contains("extension="))
                     .collect(Collectors.toList());
             newArg.add("-srcType=file");
@@ -66,7 +65,7 @@ public class CompareOption extends CommandLineOption {
         super(Parameter.none());
     }
 
-    public CompareOption(Parameter param) {
+    public CompareOption(final Parameter param) {
         super(param);
     }
 
@@ -83,7 +82,7 @@ public class CompareOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
         if (this.targetType == Type.image) {
             this.newData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
@@ -111,8 +110,8 @@ public class CompareOption extends CommandLineOption {
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putFile("-setting", new File(this.setting));
         result.putAll(this.newData.createOptionParam(args));
         result.putAll(this.oldData.createOptionParam(args));
@@ -122,8 +121,8 @@ public class CompareOption extends CommandLineOption {
         return result;
     }
 
-    public CompareResult compare() throws DataSetException {
-        CompareResult result = this.getDataSetCompareBuilder()
+    public CompareResult compare() {
+        final CompareResult result = this.getDataSetCompareBuilder()
                 .newDataSet(this.newDataSet())
                 .oldDataSet(this.oldDataSet())
                 .comparisonKeys(this.getComparisonKeys())
@@ -156,8 +155,8 @@ public class CompareOption extends CommandLineOption {
         return this.columnSettings;
     }
 
-    public ComparableDataSet newDataSet() throws DataSetException {
-        ComparableDataSetParam.Builder loadParam = newData.getParam()
+    public ComparableDataSet newDataSet() {
+        final ComparableDataSetParam.Builder loadParam = this.newData.getParam()
                 .ifMatch(this.targetType != Type.data
                         , it -> it.setColumnSettings(it
                                 .getColumnSettings()
@@ -166,8 +165,8 @@ public class CompareOption extends CommandLineOption {
         return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
     }
 
-    public ComparableDataSet oldDataSet() throws DataSetException {
-        ComparableDataSetParam.Builder loadParam = oldData.getParam()
+    public ComparableDataSet oldDataSet() {
+        final ComparableDataSetParam.Builder loadParam = this.oldData.getParam()
                 .ifMatch(this.targetType != Type.data
                         , it -> it.setColumnSettings(it
                                 .getColumnSettings()
@@ -176,8 +175,8 @@ public class CompareOption extends CommandLineOption {
         return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
     }
 
-    public ComparableDataSet resultDataSet() throws DataSetException {
-        DataSetConverterOption converterOption = this.getConverterOption();
+    public ComparableDataSet resultDataSet() {
+        final DataSetConverterOption converterOption = this.getConverterOption();
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
                         .setColumnSettings(this.expectData.getParam().getColumnSettings())
@@ -188,7 +187,7 @@ public class CompareOption extends CommandLineOption {
         );
     }
 
-    public ComparableDataSet expectDataSet() throws DataSetException {
+    public ComparableDataSet expectDataSet() {
         return this.getComparableDataSetLoader().loadDataSet(this.expectData.getParam().build());
     }
 
@@ -199,15 +198,15 @@ public class CompareOption extends CommandLineOption {
         return new DataSetCompareBuilder().setCompareManagerFactory(this.imageOption.createFactoryOf(this.targetType));
     }
 
-    public IDataSetConverter expectedDiffConverter() throws DataSetException {
+    public IDataSetConverter expectedDiffConverter() {
         this.getConverterOption().setResultDir(new File(this.getConverterOption().getResultDir(), "expectedDiff"));
         return this.converter();
     }
 
-    protected void populateSettings(CmdLineParser parser) throws CmdLineException {
+    protected void populateSettings(final CmdLineParser parser) throws CmdLineException {
         try {
             this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new CmdLineException(parser, e);
         }
         if (this.targetType != Type.data) {

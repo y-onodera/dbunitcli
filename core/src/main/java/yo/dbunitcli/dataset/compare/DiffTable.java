@@ -5,7 +5,11 @@ import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.dataset.CompareKeys;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class DiffTable extends DefaultTable {
 
@@ -18,84 +22,90 @@ public class DiffTable extends DefaultTable {
             , new Column(C_ROW_ORIGINAL, DataType.NUMERIC)
             , new Column(C_DIFF_COLUMN_INDEXES, DataType.UNKNOWN)};
 
-    public static DiffTable from(ITableMetaData metaData, int columnLength) {
+    public static DiffTable from(final ITableMetaData metaData, final int columnLength) {
         try {
-            Column[] columns = toList(
+            final Column[] columns = toList(
                     metaData.getColumns()
                     , COLUMNS
             ).toArray(new Column[columnLength + 4]);
-            Column[] primaryKeys = Lists.newArrayList(columns[1], columns[0]).toArray(new Column[2]);
+            final Column[] primaryKeys = Lists.newArrayList(columns[1], columns[0]).toArray(new Column[2]);
             return new DiffTable(new DefaultTableMetaData(metaData.getTableName() + C_MODIFY, columns, primaryKeys));
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
 
-    private DiffTable(ITableMetaData metaData) {
+    private DiffTable(final ITableMetaData metaData) {
         super(metaData);
     }
 
-    public void addRow(CompareKeys compareKeys, Integer columnIndex, Object[] oldRow, Object[] newRow) {
+    public Collection<Integer> addRow(final CompareKeys compareKeys, final Integer columnIndex, final Object[] oldRow, final Object[] newRow) {
         try {
             this.addRow(toList(newRow,
                     "NEW"
                     , compareKeys.getRowNum()
                     , compareKeys.getNewRowNum()
-                    , getIndexColumn(columnIndex))
+                    , this.getIndexColumn(columnIndex))
                     .toArray(new Object[oldRow.length + 4]));
             this.addRow(toList(oldRow
                     , "OLD"
                     , compareKeys.getRowNum()
                     , compareKeys.getOldRowNum()
-                    , getIndexColumn(columnIndex))
+                    , this.getIndexColumn(columnIndex))
                     .toArray(new Object[oldRow.length + 4]));
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
+        final int rowCount = this.getRowCount();
+        return Arrays.asList(rowCount - 1, rowCount - 2);
     }
 
-    public void addDiffColumn(CompareKeys targetKey, List<String> keys, Integer columnIndex) {
-        try {
-            int replaceCount = 0;
-            for (int rowNum = 0, total = this.getRowCount(); rowNum < total; rowNum++) {
-                if (this.keyEquals(targetKey, keys, rowNum)) {
-                    this.setValue(rowNum, C_DIFF_COLUMN_INDEXES, this.getValue(rowNum, C_DIFF_COLUMN_INDEXES) + "," + this.getIndexColumn(columnIndex));
-                    if (++replaceCount > 2) {
-                        break;
-                    }
-                }
+    public Collection<Integer> rows(final CompareKeys targetKey, final List<String> keys) {
+        final List<Integer> result = new ArrayList<>();
+        IntStream.range(0, this.getRowCount()).forEach(rowNum -> {
+            if (this.keyEquals(targetKey, keys, rowNum)) {
+                result.add(rowNum);
             }
-        } catch (DataSetException e) {
-            throw new AssertionError(e);
-        }
+        });
+        return result;
     }
 
-    protected boolean keyEquals(CompareKeys targetKey, List<String> keys, int rowNum) {
+    public void addDiffColumn(final Collection<Integer> rowNumbers, final Integer columnIndex) {
+        rowNumbers.forEach(rowNum -> {
+            try {
+                this.setValue(rowNum, C_DIFF_COLUMN_INDEXES, this.getValue(rowNum, C_DIFF_COLUMN_INDEXES) + "," + this.getIndexColumn(columnIndex));
+            } catch (final DataSetException e) {
+                throw new AssertionError(e);
+            }
+        });
+    }
+
+    protected boolean keyEquals(final CompareKeys targetKey, final List<String> keys, final int rowNum) {
         if (keys.size() > 0) {
             return targetKey.equals(this.getKey(rowNum, keys));
         }
         return targetKey.equals(this.getKey(rowNum, Lists.newArrayList(C_ROW_AFTER_SORT)));
     }
 
-    protected CompareKeys getKey(int rowNum, List<String> keys) {
+    protected CompareKeys getKey(final int rowNum, final List<String> keys) {
         try {
             return new CompareKeys(this, rowNum, keys).oldRowNum(Integer.parseInt(this.getValue(rowNum, C_ROW_ORIGINAL).toString()));
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
 
-    protected String getIndexColumn(Integer key) {
+    protected String getIndexColumn(final Integer key) {
         try {
             return String.format("%s[%d]", this.getTableMetaData().getColumns()[key + 4].getColumnName(), key);
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
 
     @SafeVarargs
-    protected static <T> List<T> toList(T[] otherValues, T... newValues) {
-        List<T> result = Lists.newArrayList(newValues);
+    protected static <T> List<T> toList(final T[] otherValues, final T... newValues) {
+        final List<T> result = Lists.newArrayList(newValues);
         result.addAll(Lists.newArrayList(otherValues));
         return result;
     }

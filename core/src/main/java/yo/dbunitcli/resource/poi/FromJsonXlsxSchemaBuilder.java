@@ -18,12 +18,12 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
 
     private final Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap = new HashMap<>();
 
-    public XlsxSchema build(File schema) throws FileNotFoundException, UnsupportedEncodingException {
+    public XlsxSchema build(final File schema) throws FileNotFoundException, UnsupportedEncodingException {
         if (schema == null) {
             return XlsxSchema.DEFAULT;
         }
-        JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(schema), "MS932"));
-        JsonObject settingJson = jsonReader.read()
+        final JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(schema), "MS932"));
+        final JsonObject settingJson = jsonReader.read()
                 .asJsonObject();
         return this.loadRowsSettings(settingJson)
                 .loadCellsSettings(settingJson)
@@ -40,7 +40,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
         return this.cellsTableDefMap;
     }
 
-    protected FromJsonXlsxSchemaBuilder loadRowsSettings(JsonObject setting) {
+    protected FromJsonXlsxSchemaBuilder loadRowsSettings(final JsonObject setting) {
         if (!setting.containsKey("rows")) {
             return this;
         }
@@ -49,8 +49,8 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
         return this;
     }
 
-    protected void loadRowsSetting(JsonObject jsonObject) {
-        String sheetName = jsonObject.getString("sheetName");
+    protected void loadRowsSetting(final JsonObject jsonObject) {
+        final String sheetName = jsonObject.getString("sheetName");
         if (!this.rowsTableDefMap.containsKey(sheetName)) {
             this.rowsTableDefMap.put(sheetName, new ArrayList<>());
         }
@@ -64,7 +64,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
         );
     }
 
-    protected FromJsonXlsxSchemaBuilder loadCellsSettings(JsonObject setting) {
+    protected FromJsonXlsxSchemaBuilder loadCellsSettings(final JsonObject setting) {
         if (!setting.containsKey("cells")) {
             return this;
         }
@@ -73,8 +73,8 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
         return this;
     }
 
-    protected void loadCellsSetting(JsonObject jsonObject) {
-        String sheetName = jsonObject.getString("sheetName");
+    protected void loadCellsSetting(final JsonObject jsonObject) {
+        final String sheetName = jsonObject.getString("sheetName");
         if (!this.cellsTableDefMap.containsKey(sheetName)) {
             this.cellsTableDefMap.put(sheetName, new ArrayList<>());
         }
@@ -88,15 +88,15 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
         );
     }
 
-    protected Stream<Integer> jsonArrayToIntStream(JsonArray array) {
+    protected Stream<Integer> jsonArrayToIntStream(final JsonArray array) {
         return this.jsonArrayToStream(array, it -> it::getInt);
     }
 
-    protected Stream<String> jsonArrayToStream(JsonArray array) {
+    protected Stream<String> jsonArrayToStream(final JsonArray array) {
         return this.jsonArrayToStream(array, it -> it::getString);
     }
 
-    protected <T> Stream<T> jsonArrayToStream(JsonArray array, Function<JsonArray, Function<Integer, T>> function) {
+    protected <T> Stream<T> jsonArrayToStream(final JsonArray array, final Function<JsonArray, Function<Integer, T>> function) {
         return Stream.iterate(0, i -> i + 1)
                 .limit(array.size())
                 .map(function.apply(array));

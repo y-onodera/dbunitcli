@@ -37,43 +37,40 @@ public class DataSetConverterOption extends DefaultArgumentsParser {
 
     private final DataSetConsumerParam.Builder builder;
 
-    public DataSetConverterOption(String prefix) {
+    public DataSetConverterOption(final String prefix) {
         super(prefix);
         this.jdbcOption = new JdbcOption(prefix);
         this.builder = DataSetConsumerParam.builder();
     }
 
     @Override
-    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
         if (this.resultType == DataSourceType.table) {
             this.jdbcOption.parseArgument(expandArgs);
         }
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-resultType", ResultType.valueOf(this.resultType.toString()), ResultType.class);
         if (!result.hasValue("-resultType")) {
             return result;
         }
-        try {
-            DataSourceType type = DataSourceType.valueOf(result.get("-resultType"));
-            if (type == DataSourceType.table) {
-                result.put("-op", this.operation == null ? DBConverter.Operation.CLEAN_INSERT : this.operation
-                        , DBConverter.Operation.class);
-                result.putAll(this.jdbcOption.createOptionParam(args));
+        final DataSourceType type = DataSourceType.valueOf(result.get("-resultType"));
+        if (type == DataSourceType.table) {
+            result.put("-op", this.operation == null ? DBConverter.Operation.CLEAN_INSERT : this.operation
+                    , DBConverter.Operation.class);
+            result.putAll(this.jdbcOption.createOptionParam(args));
+        } else {
+            result.putDir("-result", this.resultDir);
+            result.put("-resultPath", this.resultPath);
+            result.put("-exportEmptyTable", this.exportEmptyTable);
+            if (type == DataSourceType.csv) {
+                result.put("-outputEncoding", this.outputEncoding);
             } else {
-                result.putDir("-result", this.resultDir);
-                result.put("-resultPath", this.resultPath);
-                result.put("-exportEmptyTable", this.exportEmptyTable);
-                if (type == DataSourceType.csv) {
-                    result.put("-outputEncoding", this.outputEncoding);
-                } else {
-                    result.put("-excelTable", this.excelTable);
-                }
+                result.put("-excelTable", this.excelTable);
             }
-        } catch (Throwable th) {
         }
         return result;
     }
@@ -92,7 +89,7 @@ public class DataSetConverterOption extends DefaultArgumentsParser {
     }
 
     public DataSourceType getResultType() {
-        return resultType;
+        return this.resultType;
     }
 
     public JdbcOption getJdbcOption() {
@@ -111,16 +108,16 @@ public class DataSetConverterOption extends DefaultArgumentsParser {
         return this.outputEncoding;
     }
 
-    public void setResultDir(File resultDir) {
+    public void setResultDir(final File resultDir) {
         this.resultDir = resultDir;
     }
 
-    public void setResultPath(String resultPath) {
+    public void setResultPath(final String resultPath) {
         this.resultPath = resultPath;
     }
 
     public enum ResultType {
-        csv, xls, xlsx, table;
+        csv, xls, xlsx, table
     }
 
 }

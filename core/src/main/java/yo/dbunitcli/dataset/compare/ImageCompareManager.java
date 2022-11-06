@@ -47,7 +47,7 @@ public class ImageCompareManager extends DefaultCompareManager {
 
     protected final double percentOpacityExcludedRectangles;
 
-    public ImageCompareManager(ImageCompareBuilder builder) {
+    public ImageCompareManager(final ImageCompareBuilder builder) {
         this.threshold = builder.getThreshold();
         this.allowingPercentOfDifferentPixels = builder.getAllowingPercentOfDifferentPixels();
         this.pixelToleranceLevel = builder.getPixelToleranceLevel();
@@ -65,7 +65,7 @@ public class ImageCompareManager extends DefaultCompareManager {
     }
 
     @Override
-    public CompareResult toCompareResult(ComparableDataSet oldDataSet, ComparableDataSet newDataSet, List<CompareDiff> results) {
+    public CompareResult toCompareResult(final ComparableDataSet oldDataSet, final ComparableDataSet newDataSet, final List<CompareDiff> results) {
         return new ImageCompareResult(oldDataSet.getSrc(), newDataSet.getSrc(), results);
     }
 
@@ -81,7 +81,7 @@ public class ImageCompareManager extends DefaultCompareManager {
     }
 
     @Override
-    protected RowCompareResultHandler getRowResultHandler(DataSetCompare.TableCompare it) {
+    protected RowCompareResultHandler getRowResultHandler(final DataSetCompare.TableCompare it) {
         return new ImageFileCompareHandler(it);
     }
 
@@ -95,7 +95,7 @@ public class ImageCompareManager extends DefaultCompareManager {
 
         protected List<CompareDiff> addRows;
 
-        protected ImageFileCompareHandler(DataSetCompare.TableCompare it) {
+        protected ImageFileCompareHandler(final DataSetCompare.TableCompare it) {
             this.resultDir = it.getConverter().getDir();
             this.modifyValues = new ArrayList<>();
             this.deleteRows = new ArrayList<>();
@@ -103,19 +103,19 @@ public class ImageCompareManager extends DefaultCompareManager {
         }
 
         @Override
-        public void handleModify(Object[] oldRow, Object[] newRow, CompareKeys key) {
+        public void handleModify(final Object[] oldRow, final Object[] newRow, final CompareKeys key) {
             this.compareFile(new File(oldRow[0].toString()), new File(newRow[0].toString()), key);
         }
 
         @Override
-        public void handleDelete(int rowNum, Object[] row) {
+        public void handleDelete(final int rowNum, final Object[] row) {
             this.deleteRows.add(((CompareDiff.Diff) () -> "File Delete").of()
                     .setTargetName(row[1].toString())
                     .build());
         }
 
         @Override
-        public void handleAdd(int rowNum, Object[] row) {
+        public void handleAdd(final int rowNum, final Object[] row) {
             this.addRows.add(((CompareDiff.Diff) () -> "File Add").of()
                     .setTargetName(row[1].toString())
                     .build());
@@ -123,52 +123,52 @@ public class ImageCompareManager extends DefaultCompareManager {
 
         @Override
         public List<CompareDiff> result() {
-            List<CompareDiff> results = new ArrayList<>();
+            final List<CompareDiff> results = new ArrayList<>();
             results.addAll(this.modifyValues);
             results.addAll(this.addRows);
             results.addAll(this.deleteRows);
             return results;
         }
 
-        protected void compareFile(File oldPath, File newPath, CompareKeys key) {
-            BufferedImage newImage = this.toImage(newPath);
-            BufferedImage oldImage = this.toImage(oldPath);
-            ImageComparisonResult result = this.compareImage(newImage, oldImage);
+        protected void compareFile(final File oldPath, final File newPath, final CompareKeys key) {
+            final BufferedImage newImage = this.toImage(newPath);
+            final BufferedImage oldImage = this.toImage(oldPath);
+            final ImageComparisonResult result = this.compareImage(newImage, oldImage);
             if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
                 result.writeResultTo(new File(this.resultDir, key.getKeysToString() + ".png"));
                 this.modifyValues.add(this.getDiff(result).of().setTargetName(oldPath.getName()).build());
             }
         }
 
-        protected CompareDiff.Diff getDiff(ImageComparisonResult result) {
+        protected CompareDiff.Diff getDiff(final ImageComparisonResult result) {
             return () -> result.getRectangles()
                     .stream().reduce("", (String sb, Rectangle it) -> sb + String.format("[%s,%s,%s,%s]"
                             , it.getMinPoint().getX(), it.getMinPoint().getY()
                             , it.getMaxPoint().getX(), it.getMaxPoint().getY()), (a, b) -> a + b);
         }
 
-        protected BufferedImage toImage(File newPath) {
+        protected BufferedImage toImage(final File newPath) {
             try {
                 return ImageIO.read(newPath);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new AssertionError(e);
             }
         }
 
-        protected ImageComparisonResult compareImage(BufferedImage newImage, BufferedImage oldImage) {
+        protected ImageComparisonResult compareImage(final BufferedImage newImage, final BufferedImage oldImage) {
             return new ImageComparison(oldImage, newImage)
-                    .setThreshold(threshold)
-                    .setAllowingPercentOfDifferentPixels(allowingPercentOfDifferentPixels)
-                    .setPixelToleranceLevel(pixelToleranceLevel)
-                    .setRectangleLineWidth(rectangleLineWidth)
-                    .setMinimalRectangleSize(minimalRectangleSize)
-                    .setMaximalRectangleCount(maximalRectangleCount)
-                    .setDifferenceRectangleFilling(fillDifferenceRectangles, percentOpacityDifferenceRectangles)
-                    .setDifferenceRectangleColor(differenceRectangleColor)
-                    .setExcludedAreas(excludeAreaList)
-                    .setDrawExcludedRectangles(drawExcludedRectangles && excludeAreaList.size() > 0)
-                    .setExcludedRectangleColor(excludedRectangleColor)
-                    .setExcludedRectangleFilling(fillExcludedRectangles, percentOpacityExcludedRectangles)
+                    .setThreshold(ImageCompareManager.this.threshold)
+                    .setAllowingPercentOfDifferentPixels(ImageCompareManager.this.allowingPercentOfDifferentPixels)
+                    .setPixelToleranceLevel(ImageCompareManager.this.pixelToleranceLevel)
+                    .setRectangleLineWidth(ImageCompareManager.this.rectangleLineWidth)
+                    .setMinimalRectangleSize(ImageCompareManager.this.minimalRectangleSize)
+                    .setMaximalRectangleCount(ImageCompareManager.this.maximalRectangleCount)
+                    .setDifferenceRectangleFilling(ImageCompareManager.this.fillDifferenceRectangles, ImageCompareManager.this.percentOpacityDifferenceRectangles)
+                    .setDifferenceRectangleColor(ImageCompareManager.this.differenceRectangleColor)
+                    .setExcludedAreas(ImageCompareManager.this.excludeAreaList)
+                    .setDrawExcludedRectangles(ImageCompareManager.this.drawExcludedRectangles && ImageCompareManager.this.excludeAreaList.size() > 0)
+                    .setExcludedRectangleColor(ImageCompareManager.this.excludedRectangleColor)
+                    .setExcludedRectangleFilling(ImageCompareManager.this.fillExcludedRectangles, ImageCompareManager.this.percentOpacityExcludedRectangles)
                     .compareImages();
         }
     }

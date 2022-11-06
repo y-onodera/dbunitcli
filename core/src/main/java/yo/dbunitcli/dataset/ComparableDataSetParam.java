@@ -33,7 +33,7 @@ public class ComparableDataSetParam {
     private final IDataSetConverter consumer;
     private final char delimiter;
 
-    public ComparableDataSetParam(Builder builder) {
+    public ComparableDataSetParam(final Builder builder) {
         this.src = builder.getSrc();
         this.encoding = builder.getEncoding();
         this.source = builder.getSource();
@@ -117,11 +117,11 @@ public class ComparableDataSetParam {
     }
 
     public char getDelimiter() {
-        return delimiter;
+        return this.delimiter;
     }
 
     public TemplateRender getStTemplateLoader() {
-        return templateRender;
+        return this.templateRender;
     }
 
     public DatabaseConnectionLoader getDatabaseConnectionLoader() {
@@ -134,8 +134,8 @@ public class ComparableDataSetParam {
 
     public File[] getSrcFiles() {
         if (this.getSrc().isDirectory()) {
-            String end = "." + this.getExtension().toUpperCase();
-            File[] result = this.getSrc().listFiles((file) -> file.isFile() && file.getName().toUpperCase().endsWith(end));
+            final String end = "." + this.getExtension().toUpperCase();
+            final File[] result = this.getSrc().listFiles((file) -> file.isFile() && file.getName().toUpperCase().endsWith(end));
             Arrays.sort(result);
             return result;
         }
@@ -145,38 +145,42 @@ public class ComparableDataSetParam {
     @Override
     public String toString() {
         return "ComparableDataSetParam{" +
-                "src=" + src +
-                ", encoding='" + encoding + '\'' +
-                ", source=" + source +
-                ", columnSettings=" + columnSettings +
-                ", headerSplitPattern='" + headerSplitPattern + '\'' +
-                ", dataSplitPattern='" + dataSplitPattern + '\'' +
-                ", regInclude='" + regInclude + '\'' +
-                ", regExclude='" + regExclude + '\'' +
-                ", mapIncludeMetaData=" + mapIncludeMetaData +
-                ", xlsxSchema=" + xlsxSchema +
-                ", useJdbcMetaData=" + useJdbcMetaData +
-                ", loadData=" + loadData +
-                ", headerName='" + headerName + '\'' +
-                ", fixedLength='" + fixedLength + '\'' +
-                ", extension='" + extension + '\'' +
-                ", templateRender=" + templateRender +
-                ", databaseConnectionLoader=" + databaseConnectionLoader +
-                ", delimiter=" + delimiter +
+                "src=" + this.src +
+                ", encoding='" + this.encoding + '\'' +
+                ", source=" + this.source +
+                ", columnSettings=" + this.columnSettings +
+                ", headerSplitPattern='" + this.headerSplitPattern + '\'' +
+                ", dataSplitPattern='" + this.dataSplitPattern + '\'' +
+                ", regInclude='" + this.regInclude + '\'' +
+                ", regExclude='" + this.regExclude + '\'' +
+                ", mapIncludeMetaData=" + this.mapIncludeMetaData +
+                ", xlsxSchema=" + this.xlsxSchema +
+                ", useJdbcMetaData=" + this.useJdbcMetaData +
+                ", loadData=" + this.loadData +
+                ", headerName='" + this.headerName + '\'' +
+                ", fixedLength='" + this.fixedLength + '\'' +
+                ", extension='" + this.extension + '\'' +
+                ", templateRender=" + this.templateRender +
+                ", databaseConnectionLoader=" + this.databaseConnectionLoader +
+                ", delimiter=" + this.delimiter +
                 '}';
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ComparableDataSetParam)) return false;
-        ComparableDataSetParam that = (ComparableDataSetParam) o;
-        return mapIncludeMetaData == that.mapIncludeMetaData && useJdbcMetaData == that.useJdbcMetaData && loadData == that.loadData && delimiter == that.delimiter && Objects.equal(src, that.src) && Objects.equal(encoding, that.encoding) && source == that.source && Objects.equal(columnSettings, that.columnSettings) && Objects.equal(headerSplitPattern, that.headerSplitPattern) && Objects.equal(dataSplitPattern, that.dataSplitPattern) && Objects.equal(regInclude, that.regInclude) && Objects.equal(regExclude, that.regExclude) && Objects.equal(xlsxSchema, that.xlsxSchema) && Objects.equal(headerName, that.headerName) && Objects.equal(fixedLength, that.fixedLength) && Objects.equal(extension, that.extension) && Objects.equal(templateRender, that.templateRender) && Objects.equal(databaseConnectionLoader, that.databaseConnectionLoader);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ComparableDataSetParam)) {
+            return false;
+        }
+        final ComparableDataSetParam that = (ComparableDataSetParam) o;
+        return this.mapIncludeMetaData == that.mapIncludeMetaData && this.useJdbcMetaData == that.useJdbcMetaData && this.loadData == that.loadData && this.delimiter == that.delimiter && Objects.equal(this.src, that.src) && Objects.equal(this.encoding, that.encoding) && this.source == that.source && Objects.equal(this.columnSettings, that.columnSettings) && Objects.equal(this.headerSplitPattern, that.headerSplitPattern) && Objects.equal(this.dataSplitPattern, that.dataSplitPattern) && Objects.equal(this.regInclude, that.regInclude) && Objects.equal(this.regExclude, that.regExclude) && Objects.equal(this.xlsxSchema, that.xlsxSchema) && Objects.equal(this.headerName, that.headerName) && Objects.equal(this.fixedLength, that.fixedLength) && Objects.equal(this.extension, that.extension) && Objects.equal(this.templateRender, that.templateRender) && Objects.equal(this.databaseConnectionLoader, that.databaseConnectionLoader);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(src, encoding, source, columnSettings, headerSplitPattern, dataSplitPattern, regInclude, regExclude, mapIncludeMetaData, xlsxSchema, useJdbcMetaData, loadData, headerName, fixedLength, extension, templateRender, databaseConnectionLoader, delimiter);
+        return Objects.hashCode(this.src, this.encoding, this.source, this.columnSettings, this.headerSplitPattern, this.dataSplitPattern, this.regInclude, this.regExclude, this.mapIncludeMetaData, this.xlsxSchema, this.useJdbcMetaData, this.loadData, this.headerName, this.fixedLength, this.extension, this.templateRender, this.databaseConnectionLoader, this.delimiter);
     }
 
     public static class Builder {
@@ -200,7 +204,7 @@ public class ComparableDataSetParam {
         private IDataSetConverter consumer;
         private char delimiter = ',';
 
-        public Builder setSrc(File src) {
+        public Builder setSrc(final File src) {
             this.src = src;
             return this;
         }
@@ -249,7 +253,7 @@ public class ComparableDataSetParam {
         }
 
         public boolean isUseJdbcMetaData() {
-            return useJdbcMetaData;
+            return this.useJdbcMetaData;
         }
 
         public boolean isLoadData() {
@@ -268,7 +272,7 @@ public class ComparableDataSetParam {
             if (this.templateRender == null) {
                 return new TemplateRender();
             }
-            return templateRender;
+            return this.templateRender;
         }
 
         public String getExtension() {
@@ -276,7 +280,7 @@ public class ComparableDataSetParam {
         }
 
         public char getDelimiter() {
-            return delimiter;
+            return this.delimiter;
         }
 
         public DatabaseConnectionLoader getDatabaseConnectionLoader() {
@@ -284,106 +288,106 @@ public class ComparableDataSetParam {
         }
 
         public IDataSetConverter getConsumer() {
-            return consumer;
+            return this.consumer;
         }
 
-        public Builder ifMatch(boolean condition, Function<Builder, Builder> function) {
+        public Builder ifMatch(final boolean condition, final Function<Builder, Builder> function) {
             if (!condition) {
                 return this;
             }
             return function.apply(this);
         }
 
-        public Builder setEncoding(String encoding) {
+        public Builder setEncoding(final String encoding) {
             this.encoding = encoding;
             return this;
         }
 
-        public Builder setSource(DataSourceType source) {
+        public Builder setSource(final DataSourceType source) {
             this.source = source;
             return this;
         }
 
-        public Builder editColumnSettings(Consumer<ColumnSettingEditor> function) {
+        public Builder editColumnSettings(final Consumer<ColumnSettingEditor> function) {
             return this.setColumnSettings(this.getColumnSettings().apply(function));
         }
 
-        public Builder setColumnSettings(ColumnSettings columnSettings) {
+        public Builder setColumnSettings(final ColumnSettings columnSettings) {
             this.columnSettings = columnSettings;
             return this;
         }
 
-        public Builder setHeaderSplitPattern(String headerSplitPattern) {
+        public Builder setHeaderSplitPattern(final String headerSplitPattern) {
             this.headerSplitPattern = headerSplitPattern;
             return this;
         }
 
-        public Builder setDataSplitPattern(String dataSplitPattern) {
+        public Builder setDataSplitPattern(final String dataSplitPattern) {
             this.dataSplitPattern = dataSplitPattern;
             return this;
         }
 
-        public Builder setRegInclude(String regInclude) {
+        public Builder setRegInclude(final String regInclude) {
             this.regInclude = regInclude;
             return this;
         }
 
-        public Builder setRegExclude(String regExclude) {
+        public Builder setRegExclude(final String regExclude) {
             this.regExclude = regExclude;
             return this;
         }
 
-        public Builder setMapIncludeMetaData(boolean includeMetaData) {
+        public Builder setMapIncludeMetaData(final boolean includeMetaData) {
             this.mapIncludeMetaData = includeMetaData;
             return this;
         }
 
-        public Builder setXlsxSchema(XlsxSchema xlsxSchema) {
+        public Builder setXlsxSchema(final XlsxSchema xlsxSchema) {
             this.xlsxSchema = xlsxSchema;
             return this;
         }
 
-        public Builder setUseJdbcMetaData(boolean useJdbcMetaData) {
+        public Builder setUseJdbcMetaData(final boolean useJdbcMetaData) {
             this.useJdbcMetaData = useJdbcMetaData;
             return this;
         }
 
-        public Builder setLoadData(boolean loadData) {
+        public Builder setLoadData(final boolean loadData) {
             this.loadData = loadData;
             return this;
         }
 
-        public Builder setHeaderName(String headerName) {
+        public Builder setHeaderName(final String headerName) {
             this.headerName = headerName;
             return this;
         }
 
-        public Builder setFixedLength(String fixedLength) {
+        public Builder setFixedLength(final String fixedLength) {
             this.fixedLength = fixedLength;
             return this;
         }
 
-        public Builder setSTTemplateLoader(TemplateRender templateRender) {
+        public Builder setSTTemplateLoader(final TemplateRender templateRender) {
             this.templateRender = templateRender;
             return this;
         }
 
-        public Builder setExtension(String extension) {
+        public Builder setExtension(final String extension) {
             this.extension = extension;
             return this;
         }
 
-        public Builder setDatabaseConnectionLoader(DatabaseConnectionLoader databaseConnectionLoader) {
+        public Builder setDatabaseConnectionLoader(final DatabaseConnectionLoader databaseConnectionLoader) {
             this.databaseConnectionLoader = databaseConnectionLoader;
             return this;
         }
 
-        public Builder setDelimiter(char delimiter) {
+        public Builder setDelimiter(final char delimiter) {
             this.delimiter = delimiter;
             return this;
         }
 
-        public Builder setConsumer(IDataSetConverter writer) {
+        public Builder setConsumer(final IDataSetConverter writer) {
             this.consumer = writer;
             return this;
         }

@@ -10,18 +10,18 @@ public class EncodingOption extends DefaultArgumentsParser implements Comparable
     @Option(name = "-encoding", usage = "csv file encoding")
     private String encoding = System.getProperty("file.encoding");
 
-    public EncodingOption(String prefix) {
+    public EncodingOption(final String prefix) {
         super(prefix);
     }
 
     @Override
-    public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
+    public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         return builder.setEncoding(this.encoding);
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-encoding", this.encoding);
         return result;
     }

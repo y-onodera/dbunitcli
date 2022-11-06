@@ -29,6 +29,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -39,7 +40,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     private final ComparableDataSetParam param;
     private final boolean loadData;
 
-    public ComparableXlsxDataSetProducer(ComparableDataSetParam param) {
+    public ComparableXlsxDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrcFiles();
         this.filter = this.param.getTableNameFilter();
@@ -53,7 +54,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public void setConsumer(IDataSetConsumer aConsumer) {
+    public void setConsumer(final IDataSetConsumer aConsumer) {
         this.consumer = aConsumer;
     }
 
@@ -61,50 +62,52 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     public void produce() throws DataSetException {
         LOGGER.info("produce() - start");
         this.consumer.startDataSet();
-        for (File sourceFile : this.src) {
-            LOGGER.info("produce - start fileName={}", sourceFile);
-
-            try (OPCPackage pkg = OPCPackage.open(sourceFile, PackageAccess.READ)) {
-                ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);
-                XSSFReader xssfReader = new XSSFReader(pkg);
-                StylesTable styles = xssfReader.getStylesTable();
-                XSSFReader.SheetIterator iterator = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
-                int index = 0;
-                while (iterator.hasNext()) {
-                    try (InputStream stream = iterator.next()) {
-                        String sheetName = iterator.getSheetName();
-                        if (this.filter.predicate(sheetName) && this.schema.contains(sheetName)) {
-                            LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
-                            processSheet(styles, strings, this.schema.createHandler(this.consumer, sheetName, this.loadData), stream);
-                            LOGGER.info("produce - end   sheetName={},index={}", sheetName, index - 1);
-                        }
-                    }
-                }
-            } catch (IOException | SAXException | OpenXML4JException e) {
-                throw new DataSetException(e);
-            }
-            LOGGER.info("produce - end   fileName={}", sourceFile);
-        }
+        Arrays.stream(this.src)
+                .forEach(this::execute);
         this.consumer.endDataSet();
         LOGGER.info("produce() - end");
     }
 
     public void processSheet(
-            Styles styles,
-            SharedStrings strings,
-            XSSFSheetXMLHandler.SheetContentsHandler sheetHandler,
-            InputStream sheetInputStream) throws IOException, SAXException {
-        DataFormatter formatter = new DataFormatter();
-        InputSource sheetSource = new InputSource(sheetInputStream);
+            final Styles styles,
+            final SharedStrings strings,
+            final XSSFSheetXMLHandler.SheetContentsHandler sheetHandler,
+            final InputStream sheetInputStream) throws IOException, SAXException {
+        final DataFormatter formatter = new DataFormatter();
+        final InputSource sheetSource = new InputSource(sheetInputStream);
         try {
-            XMLReader sheetParser = XMLHelper.newXMLReader();
-            ContentHandler handler = new XSSFSheetXMLHandler(
+            final XMLReader sheetParser = XMLHelper.newXMLReader();
+            final ContentHandler handler = new XSSFSheetXMLHandler(
                     styles, null, strings, sheetHandler, formatter, false);
             sheetParser.setContentHandler(handler);
             sheetParser.parse(sheetSource);
-        } catch (ParserConfigurationException e) {
+        } catch (final ParserConfigurationException e) {
             throw new RuntimeException("SAX parser appears to be broken - " + e.getMessage());
         }
+    }
+
+    protected void execute(final File sourceFile) {
+        LOGGER.info("produce - start fileName={}", sourceFile);
+        try (final OPCPackage pkg = OPCPackage.open(sourceFile, PackageAccess.READ)) {
+            final ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);
+            final XSSFReader xssfReader = new XSSFReader(pkg);
+            final StylesTable styles = xssfReader.getStylesTable();
+            final XSSFReader.SheetIterator iterator = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
+            int index = 0;
+            while (iterator.hasNext()) {
+                try (final InputStream stream = iterator.next()) {
+                    final String sheetName = iterator.getSheetName();
+                    if (this.filter.predicate(sheetName) && this.schema.contains(sheetName)) {
+                        LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
+                        this.processSheet(styles, strings, this.schema.createHandler(this.consumer, sheetName, this.loadData), stream);
+                        LOGGER.info("produce - end   sheetName={},index={}", sheetName, index - 1);
+                    }
+                }
+            }
+        } catch (final IOException | SAXException | OpenXML4JException e) {
+            throw new AssertionError(e);
+        }
+        LOGGER.info("produce - end   fileName={}", sourceFile);
     }
 }
 

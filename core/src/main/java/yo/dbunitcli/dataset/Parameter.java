@@ -12,7 +12,7 @@ public class Parameter {
 
     private final Map<String, Object> map = Maps.newHashMap();
 
-    public Parameter(int rowNumber, Map<String, Object> map) {
+    public Parameter(final int rowNumber, final Map<String, Object> map) {
         this.rowNumber = rowNumber;
         this.map.putAll(map);
         this.map.put("rowNumber", this.rowNumber);

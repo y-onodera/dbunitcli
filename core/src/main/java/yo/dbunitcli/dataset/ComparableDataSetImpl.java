@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,15 +26,19 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     private final Map<String, Integer> alreadyWrite;
 
-    public ComparableDataSetImpl(ComparableDataSetProducer producer) throws DataSetException {
+    public ComparableDataSetImpl(final ComparableDataSetProducer producer) {
         super(false);
         this.producer = producer;
         this.param = this.producer.getParam();
         this.compareSettings = this.param.getColumnSettings();
         this.converter = this.param.getConsumer();
         this.alreadyWrite = new HashMap<>();
-        this.producer.setConsumer(this);
-        this.producer.produce();
+        try {
+            this.producer.setConsumer(this);
+            this.producer.produce();
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
@@ -49,9 +54,9 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     public void endDataSet() throws DataSetException {
         LOGGER.debug("endDataSet() - start");
         if (this.converter != null) {
-            ITableIterator itr = this.createIterator(false);
+            final ITableIterator itr = this.createIterator(false);
             while (itr.next()) {
-                this.converter.write(itr.getTable());
+                this.converter.convert(itr.getTable());
             }
             this.converter.endDataSet();
         }
@@ -59,7 +64,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     }
 
     @Override
-    public void startTable(ITableMetaData metaData) throws DataSetException {
+    public void startTable(final ITableMetaData metaData) throws DataSetException {
         LOGGER.debug("startTable(metaData={}) - start", metaData);
         this.mapper = this.compareSettings.createMapper(metaData);
         this.mapper.setConsumer(this.converter, this.alreadyWrite);
@@ -68,13 +73,13 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     @Override
     public void endTable() throws DataSetException {
         LOGGER.debug("endTable() - start");
-        String resultTableName = this.mapper.getTargetTableName();
+        final String resultTableName = this.mapper.getTargetTableName();
         if (this._orderedTableNameMap.containsTable(resultTableName)) {
-            ComparableTable existingTable = (ComparableTable) this._orderedTableNameMap.get(resultTableName);
+            final ComparableTable existingTable = (ComparableTable) this._orderedTableNameMap.get(resultTableName);
             this.mapper.add(existingTable);
             this._orderedTableNameMap.update(resultTableName, this.mapper.endTable());
         } else {
-            ComparableTable result = this.mapper.endTable();
+            final ComparableTable result = this.mapper.endTable();
             if (result != null) {
                 this._orderedTableNameMap.add(resultTableName, result);
             }
@@ -83,33 +88,41 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     }
 
     @Override
-    public void row(Object[] values) throws DataSetException {
+    public void row(final Object[] values) throws DataSetException {
         LOGGER.debug("row(values={}) - start", values);
         this.mapper.addRow(values);
     }
 
     @Override
-    public List<Map<String, Object>> toMap() throws DataSetException {
+    public List<Map<String, Object>> toMap() {
         return this.toMap(this.param.isMapIncludeMetaData());
     }
 
     @Override
-    public List<Map<String, Object>> toMap(boolean includeMetaData) throws DataSetException {
-        List<Map<String, Object>> result = Lists.newArrayList();
-        for (String tableName : this.getTableNames()) {
-            ComparableTable table = this.getTable(tableName);
-            result.addAll(table.toMap(includeMetaData));
+    public List<Map<String, Object>> toMap(final boolean includeMetaData) {
+        final List<Map<String, Object>> result = Lists.newArrayList();
+        try {
+            Arrays.stream(this.getTableNames()).forEach(tableName -> {
+                final ComparableTable table = this.getTable(tableName);
+                result.addAll(table.toMap(includeMetaData));
+            });
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
         }
         return result;
     }
 
     @Override
-    public ComparableTable getTable(String tableName) throws DataSetException {
-        return (ComparableTable) super.getTable(tableName);
+    public ComparableTable getTable(final String tableName) {
+        try {
+            return (ComparableTable) super.getTable(tableName);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
-    public boolean contains(String tableName) {
+    public boolean contains(final String tableName) {
         return this._orderedTableNameMap.containsTable(tableName);
     }
 
@@ -119,7 +132,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     }
 
     @Override
-    protected ITableIterator createIterator(boolean reversed) {
+    protected ITableIterator createIterator(final boolean reversed) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("createIterator(reversed={}) - start", reversed);
         }

@@ -67,17 +67,17 @@ public class ImageCompareOption extends DefaultArgumentsParser {
     @Option(name = "-excludedRectangleColor", usage = "Rectangle color of excluded part..")
     private String excludedRectangleColor;
 
-    public ImageCompareOption(String prefix) {
+    public ImageCompareOption(final String prefix) {
         super(prefix);
     }
 
     @Override
-    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
         if (!Strings.isNullOrEmpty(this.excludedAreas)) {
-            Matcher m = AREA_REGEX.matcher(this.excludedAreas);
+            final Matcher m = AREA_REGEX.matcher(this.excludedAreas);
             while (m.find()) {
-                String[] points = m.group(1).split(",");
-                excludeAreaList.add(new Rectangle(new BigDecimal(points[0]).intValue()
+                final String[] points = m.group(1).split(",");
+                this.excludeAreaList.add(new Rectangle(new BigDecimal(points[0]).intValue()
                         , new BigDecimal(points[1]).intValue()
                         , new BigDecimal(points[2]).intValue()
                         , new BigDecimal(points[3]).intValue()
@@ -87,8 +87,8 @@ public class ImageCompareOption extends DefaultArgumentsParser {
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-threshold", this.threshold);
         result.put("-pixelToleranceLevel", this.pixelToleranceLevel);
         result.put("-allowingPercentOfDifferentPixels", this.allowingPercentOfDifferentPixels);
@@ -106,8 +106,8 @@ public class ImageCompareOption extends DefaultArgumentsParser {
         return result;
     }
 
-    public ImageCompareBuilder createFactoryOf(CompareOption.Type targetType) {
-        ImageCompareBuilder result = targetType == CompareOption.Type.image ? new ImageCompareBuilder() : PdfCompareManager.builder();
+    public ImageCompareBuilder createFactoryOf(final CompareOption.Type targetType) {
+        final ImageCompareBuilder result = targetType == CompareOption.Type.image ? new ImageCompareBuilder() : PdfCompareManager.builder();
         return result
                 .setThreshold(Integer.parseInt(Optional.ofNullable(this.threshold).orElse("5")))
                 .setPixelToleranceLevel(Double.parseDouble(Optional.ofNullable(this.pixelToleranceLevel).orElse("0.01D")))

@@ -29,7 +29,7 @@ public class ColumnExpression {
 
     private final Map<String, String> sqlFunction = Maps.newLinkedHashMap();
 
-    public ColumnExpression(Builder builder) {
+    public ColumnExpression(final Builder builder) {
         this.stringExpression.putAll(builder.stringExpression);
         this.booleanExpression.putAll(builder.booleanExpression);
         this.numberExpression.putAll(builder.numberExpression);
@@ -40,15 +40,15 @@ public class ColumnExpression {
         return new Builder();
     }
 
-    public ColumnExpression add(ColumnExpression other) {
+    public ColumnExpression add(final ColumnExpression other) {
         return builder().add(this).add(other).build();
     }
 
-    public AddSettingTableMetaData apply(ITableMetaData delegateMetaData) throws DataSetException {
+    public AddSettingTableMetaData apply(final ITableMetaData delegateMetaData) throws DataSetException {
         return this.apply(delegateMetaData.getTableName(), delegateMetaData, null, delegateMetaData.getPrimaryKeys(), null);
     }
 
-    public AddSettingTableMetaData apply(String tableName, ITableMetaData originMetaData, IColumnFilter iColumnFilter, Column[] comparisonKeys, Predicate<Map<String, Object>> rowFilter) throws DataSetException {
+    public AddSettingTableMetaData apply(final String tableName, final ITableMetaData originMetaData, final IColumnFilter iColumnFilter, final Column[] comparisonKeys, final Predicate<Map<String, Object>> rowFilter) throws DataSetException {
         Column[] primaryKey = originMetaData.getPrimaryKeys();
         if (comparisonKeys.length > 0) {
             primaryKey = comparisonKeys;
@@ -57,7 +57,7 @@ public class ColumnExpression {
     }
 
     public Collection<? extends Column> getColumns() {
-        Set<Column> result = Sets.newLinkedHashSet();
+        final Set<Column> result = Sets.newLinkedHashSet();
         this.stringExpression.keySet().forEach(key -> result.add(new Column(key, DataType.NVARCHAR)));
         this.booleanExpression.keySet().forEach(key -> result.add(new Column(key, DataType.BOOLEAN)));
         this.numberExpression.keySet().forEach(key -> result.add(new Column(key, DataType.NUMERIC)));
@@ -65,17 +65,17 @@ public class ColumnExpression {
         return result;
     }
 
-    public Column[] merge(Column[] columns) {
+    public Column[] merge(final Column[] columns) {
         if (this.size() > 0) {
-            ArrayList<Column> columnList = Lists.newArrayList(columns);
-            List<String> columnNames = columnList.stream().map(Column::getColumnName).collect(Collectors.toList());
-            for (Column column : this.getColumns()) {
+            final ArrayList<Column> columnList = Lists.newArrayList(columns);
+            final List<String> columnNames = columnList.stream().map(Column::getColumnName).collect(Collectors.toList());
+            this.getColumns().forEach(column -> {
                 if (!columnNames.contains(column.getColumnName())) {
                     columnList.add(column);
                 } else {
                     columnList.replaceAll(it -> it.getColumnName().equals(column.getColumnName()) ? column : it);
                 }
-            }
+            });
             return columnList.toArray(new Column[0]);
         }
         return columns;
@@ -89,7 +89,7 @@ public class ColumnExpression {
                 ;
     }
 
-    public boolean contains(String columnName) {
+    public boolean contains(final String columnName) {
         return this.stringExpression.containsKey(columnName)
                 || this.booleanExpression.containsKey(columnName)
                 || this.numberExpression.containsKey(columnName)
@@ -97,9 +97,9 @@ public class ColumnExpression {
                 ;
     }
 
-    public Object evaluate(String columnName, Map<String, Object> param) {
-        JexlEngine jexl = new JexlBuilder().create();
-        JexlContext jc = new MapContext(param);
+    public Object evaluate(final String columnName, final Map<String, Object> param) {
+        final JexlEngine jexl = new JexlBuilder().create();
+        final JexlContext jc = new MapContext(param);
         if (this.stringExpression.containsKey(columnName)) {
             return jexl.createExpression(this.stringExpression.get(columnName)).evaluate(jc);
         } else if (this.booleanExpression.containsKey(columnName)) {
@@ -111,26 +111,30 @@ public class ColumnExpression {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ColumnExpression that = (ColumnExpression) o;
-        return Objects.equal(stringExpression, that.stringExpression) &&
-                Objects.equal(booleanExpression, that.booleanExpression) &&
-                Objects.equal(numberExpression, that.numberExpression);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final ColumnExpression that = (ColumnExpression) o;
+        return Objects.equal(this.stringExpression, that.stringExpression) &&
+                Objects.equal(this.booleanExpression, that.booleanExpression) &&
+                Objects.equal(this.numberExpression, that.numberExpression);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(stringExpression, booleanExpression, numberExpression);
+        return Objects.hashCode(this.stringExpression, this.booleanExpression, this.numberExpression);
     }
 
     @Override
     public String toString() {
         return "ColumnExpression{" +
-                "stringExpression=" + stringExpression +
-                ", booleanExpression=" + booleanExpression +
-                ", numberExpression=" + numberExpression +
+                "stringExpression=" + this.stringExpression +
+                ", booleanExpression=" + this.booleanExpression +
+                ", numberExpression=" + this.numberExpression +
                 '}';
     }
 
@@ -143,7 +147,7 @@ public class ColumnExpression {
 
         private final Map<String, String> sqlFunction = Maps.newLinkedHashMap();
 
-        public Builder add(ColumnExpression columnExpression) {
+        public Builder add(final ColumnExpression columnExpression) {
             return this.addStringExpression(columnExpression.stringExpression)
                     .addBooleanExpression(columnExpression.booleanExpression)
                     .addNumberExpression(columnExpression.numberExpression)
@@ -154,7 +158,7 @@ public class ColumnExpression {
             return new ColumnExpression(this);
         }
 
-        public void addExpression(ParameterType type, String key, String value) {
+        public void addExpression(final ParameterType type, final String key, final String value) {
             switch (type) {
                 case STRING:
                     this.addStringExpression(key, value);
@@ -169,39 +173,39 @@ public class ColumnExpression {
             }
         }
 
-        public Builder addStringExpression(Map<String, String> stringExpression) {
+        public Builder addStringExpression(final Map<String, String> stringExpression) {
             stringExpression.forEach(this::addStringExpression);
             return this;
         }
 
-        public Builder addBooleanExpression(Map<String, String> booleanExpression) {
+        public Builder addBooleanExpression(final Map<String, String> booleanExpression) {
             booleanExpression.forEach(this::addBooleanExpression);
             return this;
         }
 
-        public Builder addNumberExpression(Map<String, String> numberExpression) {
+        public Builder addNumberExpression(final Map<String, String> numberExpression) {
             numberExpression.forEach(this::addNumberExpression);
             return this;
         }
 
-        public Builder addSqlFunction(Map<String, String> sqlFunction) {
+        public Builder addSqlFunction(final Map<String, String> sqlFunction) {
             sqlFunction.forEach(this::addSqlFunction);
             return this;
         }
 
-        protected void addStringExpression(String key, String value) {
+        protected void addStringExpression(final String key, final String value) {
             this.stringExpression.put(key, value);
         }
 
-        protected void addBooleanExpression(String key, String value) {
+        protected void addBooleanExpression(final String key, final String value) {
             this.booleanExpression.put(key, value);
         }
 
-        protected void addNumberExpression(String key, String value) {
+        protected void addNumberExpression(final String key, final String value) {
             this.numberExpression.put(key, value);
         }
 
-        protected void addSqlFunction(String key, String value) {
+        protected void addSqlFunction(final String key, final String value) {
             this.sqlFunction.put(key, value);
         }
 

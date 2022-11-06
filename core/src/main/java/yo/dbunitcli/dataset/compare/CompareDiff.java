@@ -16,7 +16,7 @@ public class CompareDiff {
 
     private final int rows;
 
-    public CompareDiff(Builder builder) {
+    public CompareDiff(final Builder builder) {
         this.targetName = builder.getTargetName();
         this.diff = builder.getDiff();
         this.oldDefine = builder.getOldDefine();
@@ -49,7 +49,7 @@ public class CompareDiff {
         return this.rows;
     }
 
-    public CompareDiff edit(UnaryOperator<Builder> function) {
+    public CompareDiff edit(final UnaryOperator<Builder> function) {
         return function.apply(this.builder()).build();
     }
 
@@ -82,19 +82,19 @@ public class CompareDiff {
         }
 
         public String getTargetName() {
-            return targetName;
+            return this.targetName;
         }
 
-        public Builder setTargetName(String targetName) {
+        public Builder setTargetName(final String targetName) {
             this.targetName = targetName;
             return this;
         }
 
         public Diff getDiff() {
-            return diff;
+            return this.diff;
         }
 
-        public Builder setDiff(Diff diff) {
+        public Builder setDiff(final Diff diff) {
             this.diff = diff;
             return this;
         }
@@ -103,7 +103,7 @@ public class CompareDiff {
             return this.oldDefine;
         }
 
-        public Builder setOldDefine(String oldDef) {
+        public Builder setOldDefine(final String oldDef) {
             this.oldDefine = oldDef;
             return this;
         }
@@ -112,25 +112,25 @@ public class CompareDiff {
             return this.newDefine;
         }
 
-        public Builder setNewDefine(String newDef) {
+        public Builder setNewDefine(final String newDef) {
             this.newDefine = newDef;
             return this;
         }
 
         public int getColumnIndex() {
-            return columnIndex;
+            return this.columnIndex;
         }
 
-        public Builder setColumnIndex(int columnIndex) {
+        public Builder setColumnIndex(final int columnIndex) {
             this.columnIndex = columnIndex;
             return this;
         }
 
         public int getRows() {
-            return rows;
+            return this.rows;
         }
 
-        public Builder setRows(int rows) {
+        public Builder setRows(final int rows) {
             this.rows = rows;
             return this;
         }

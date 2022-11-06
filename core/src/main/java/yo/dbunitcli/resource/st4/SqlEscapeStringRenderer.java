@@ -8,7 +8,7 @@ import java.util.Locale;
 public class SqlEscapeStringRenderer extends StringRenderer {
 
     @Override
-    public String toString(Object o, String formatString, Locale locale) {
+    public String toString(final Object o, final String formatString, final Locale locale) {
         if (formatString == null) {
             return o.toString();
         } else if (formatString.equals("escapeSql")) {

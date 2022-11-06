@@ -13,19 +13,19 @@ public class RegexOption extends DefaultArgumentsParser implements ComparableDat
     @Option(name = "-regHeaderSplit", usage = "regex to use split header row")
     private String regHeaderSplit;
 
-    public RegexOption(String prefix) {
+    public RegexOption(final String prefix) {
         super(prefix);
     }
 
     @Override
-    public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
+    public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         return builder.setDataSplitPattern(this.regDataSplit)
                 .setHeaderSplitPattern(this.regHeaderSplit);
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-regDataSplit", this.regDataSplit);
         result.put("-regHeaderSplit", this.regHeaderSplit);
         return result;

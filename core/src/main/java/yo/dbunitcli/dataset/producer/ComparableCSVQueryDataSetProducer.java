@@ -13,8 +13,8 @@ import yo.dbunitcli.dataset.TableNameFilter;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.*;
+import java.util.Arrays;
 import java.util.Map;
 
 public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProducer {
@@ -28,7 +28,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     private final ComparableDataSetParam param;
     private final boolean loadData;
 
-    public ComparableCSVQueryDataSetProducer(ComparableDataSetParam param, Parameter parameter) {
+    public ComparableCSVQueryDataSetProducer(final ComparableDataSetParam param, final Parameter parameter) {
         this.param = param;
         if (this.param.getSrc().isDirectory()) {
             this.src = this.param.getSrc().listFiles(File::isFile);
@@ -54,7 +54,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     }
 
     @Override
-    public void setConsumer(IDataSetConsumer iDataSetConsumer) {
+    public void setConsumer(final IDataSetConsumer iDataSetConsumer) {
         this.consumer = iDataSetConsumer;
     }
 
@@ -62,50 +62,48 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     public void produce() throws DataSetException {
         LOGGER.info("produce() - start");
         this.consumer.startDataSet();
-        for (File file : this.src) {
-            if (this.filter.predicate(file.getAbsolutePath()) && file.length() > 0) {
-                try {
-                    this.executeQuery(file);
-                } catch (SQLException | IOException e) {
-                    throw new DataSetException(e);
-                }
-            }
-        }
+        Arrays.stream(this.src)
+                .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
+                .forEach(this::executeQuery);
         this.consumer.endDataSet();
         LOGGER.info("produce() - end");
     }
 
-    protected void executeQuery(File aFile) throws SQLException, DataSetException, IOException {
-        String query = this.getTemplateLoader().render(aFile, this.getParameter());
-        LOGGER.info("produce - start fileName={},query={}", aFile, query);
-        try (Connection conn = DriverManager.getConnection(URL);
-             Statement stmt = conn.createStatement();
-             ResultSet rst = stmt.executeQuery(query)
-        ) {
-            ResultSetMetaData metaData = rst.getMetaData();
-            Column[] columns = new Column[metaData.getColumnCount()];
-            for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                columns[i - 1] = new Column(metaData.getColumnName(i).trim(), DataType.UNKNOWN);
-            }
-            this.consumer.startTable(this.createMetaData(aFile, columns));
-            if (this.loadData) {
-                int readRows = 0;
-                while (rst.next()) {
-                    Object[] row = new Object[metaData.getColumnCount()];
-                    for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                        if (rst.getString(i) != null) {
-                            row[i - 1] = rst.getString(i);
-                        } else {
-                            row[i - 1] = "";
-                        }
-                    }
-                    this.consumer.row(row);
-                    readRows++;
+    protected void executeQuery(final File aFile) {
+        try {
+            final String query = this.getTemplateLoader().render(aFile, this.getParameter());
+            LOGGER.info("produce - start fileName={},query={}", aFile, query);
+            try (final Connection conn = DriverManager.getConnection(URL);
+                 final Statement stmt = conn.createStatement();
+                 final ResultSet rst = stmt.executeQuery(query)
+            ) {
+                final ResultSetMetaData metaData = rst.getMetaData();
+                final Column[] columns = new Column[metaData.getColumnCount()];
+                for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                    columns[i - 1] = new Column(metaData.getColumnName(i).trim(), DataType.UNKNOWN);
                 }
-                LOGGER.info("produce - rows={}", readRows);
+                this.consumer.startTable(this.createMetaData(aFile, columns));
+                if (this.loadData) {
+                    int readRows = 0;
+                    while (rst.next()) {
+                        final Object[] row = new Object[metaData.getColumnCount()];
+                        for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                            if (rst.getString(i) != null) {
+                                row[i - 1] = rst.getString(i);
+                            } else {
+                                row[i - 1] = "";
+                            }
+                        }
+                        this.consumer.row(row);
+                        readRows++;
+                    }
+                    LOGGER.info("produce - rows={}", readRows);
+                }
+                this.consumer.endTable();
+                LOGGER.info("produce - end   fileName={}", aFile);
             }
-            this.consumer.endTable();
-            LOGGER.info("produce - end   fileName={}", aFile);
+        } catch (final SQLException | DataSetException e) {
+            throw new AssertionError(e);
         }
     }
 }

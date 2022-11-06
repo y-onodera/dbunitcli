@@ -2,7 +2,6 @@ package yo.dbunitcli.application;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -31,14 +30,14 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
 
     private String resultFile = "result";
 
-    public CommandLineOption(Parameter param) {
+    public CommandLineOption(final Parameter param) {
         super("");
         this.parameter = param;
     }
 
-    public void parse(String[] args) throws Exception {
-        CmdLineParser parser = new CmdLineParser(this);
-        String[] expandArgs = getExpandArgs(args, parser);
+    public void parse(final String[] args) {
+        final CmdLineParser parser = new CmdLineParser(this);
+        final String[] expandArgs = this.getExpandArgs(args, parser);
         if (args[0].startsWith("@")) {
             this.resultFile = new File(args[0].replace("@", "")).getName();
             this.resultFile = this.resultFile.substring(0, this.resultFile.lastIndexOf("."));
@@ -54,12 +53,12 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
         return this.converterOption;
     }
 
-    public IDataSetConverter converter() throws DataSetException {
+    public IDataSetConverter converter() {
         return new DataSetConverterLoader().get(this.converterOption.getParam().build());
     }
 
     @Override
-    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
         this.parameter.getMap().putAll(this.inputParam);
     }
 
@@ -71,10 +70,14 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
         return ComparableDataSetParam.builder();
     }
 
-    protected String[] getExpandArgs(String[] args, CmdLineParser parser) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Method expand = CmdLineParser.class.getDeclaredMethod("expandAtFiles", String[].class);
-        expand.setAccessible(true);
-        return (String[]) expand.invoke(parser, (Object) args);
+    protected String[] getExpandArgs(final String[] args, final CmdLineParser parser) {
+        try {
+            final Method expand = CmdLineParser.class.getDeclaredMethod("expandAtFiles", String[].class);
+            expand.setAccessible(true);
+            return (String[]) expand.invoke(parser, (Object) args);
+        } catch (final NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
     }
 
     protected String getResultPath() {

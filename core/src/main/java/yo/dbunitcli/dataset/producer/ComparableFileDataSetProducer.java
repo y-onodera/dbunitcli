@@ -28,7 +28,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     private final boolean loadData;
     private int rows = 0;
 
-    public ComparableFileDataSetProducer(ComparableDataSetParam param) {
+    public ComparableFileDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrc().getAbsoluteFile();
         this.filter = this.param.getTableNameFilter();
@@ -41,7 +41,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public void setConsumer(IDataSetConsumer aConsumer) {
+    public void setConsumer(final IDataSetConsumer aConsumer) {
         this.consumer = aConsumer;
     }
 
@@ -49,16 +49,16 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     public void produce() throws DataSetException {
         LOGGER.info("produce() - start");
         this.consumer.startDataSet();
-        ITableMetaData metaData = new ComparableFileTableMetaData(this.src.getName());
+        final ITableMetaData metaData = new ComparableFileTableMetaData(this.src.getName());
         this.consumer.startTable(metaData);
         LOGGER.info("produce - start fileName={}", this.src);
         if (this.loadData) {
             try {
                 Files.walk(this.src.toPath())
-                        .filter(fileTypeFilter())
+                        .filter(this.fileTypeFilter())
                         .filter(path -> this.filter.predicate(path.toString()))
                         .forEach(path -> this.produceFromFile(path.toFile()));
-            } catch (IOException | AssertionError e) {
+            } catch (final IOException | AssertionError e) {
                 throw new DataSetException("error producing dataSet for '" + this.src + "'", e);
             }
         }
@@ -77,8 +77,8 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
                 && path.toString().toUpperCase().endsWith(this.param.getExtension().toUpperCase());
     }
 
-    protected void produceFromFile(File file) {
-        Object[] row = new Object[6];
+    protected void produceFromFile(final File file) {
+        final Object[] row = new Object[6];
         row[0] = file.getAbsolutePath();
         row[1] = file.getName();
         row[2] = file.getParent();
@@ -88,7 +88,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
         try {
             this.consumer.row(row);
             this.rows++;
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }

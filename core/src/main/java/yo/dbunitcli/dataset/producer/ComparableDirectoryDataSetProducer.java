@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 
 public class ComparableDirectoryDataSetProducer extends ComparableFileDataSetProducer {
 
-    public ComparableDirectoryDataSetProducer(ComparableDataSetParam param) {
+    public ComparableDirectoryDataSetProducer(final ComparableDataSetParam param) {
         super(param);
     }
 

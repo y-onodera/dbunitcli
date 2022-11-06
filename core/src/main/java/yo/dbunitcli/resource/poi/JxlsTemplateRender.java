@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 public class JxlsTemplateRender {
 
@@ -24,7 +25,7 @@ public class JxlsTemplateRender {
 
     private final boolean formulaProcess;
 
-    public JxlsTemplateRender(Builder builder) {
+    public JxlsTemplateRender(final Builder builder) {
         this.templateParameterAttribute = builder.getTemplateParameterAttribute();
         this.formulaProcess = builder.isFormulaProcess();
     }
@@ -34,18 +35,18 @@ public class JxlsTemplateRender {
     }
 
     public String getTemplateParameterAttribute() {
-        return templateParameterAttribute;
+        return this.templateParameterAttribute;
     }
 
-    public void render(File aTemplate, File aResultFile, Map<String, Object> param) throws IOException {
-        try (InputStream is = new FileInputStream(aTemplate)) {
-            Context context = new Context();
+    public void render(final File aTemplate, final File aResultFile, final Map<String, Object> param) throws IOException {
+        try (final InputStream is = new FileInputStream(aTemplate)) {
+            final Context context = new Context();
             if (Strings.isNullOrEmpty(this.getTemplateParameterAttribute())) {
                 param.forEach(context::putVar);
             } else {
                 context.putVar(this.getTemplateParameterAttribute(), param);
             }
-            try (OutputStream os = new FileOutputStream(aResultFile)) {
+            try (final OutputStream os = new FileOutputStream(aResultFile)) {
                 if (!aResultFile.getName().endsWith(".xls") && !this.formulaProcess) {
                     this.streamingRender(is, context, os);
                 } else {
@@ -57,19 +58,16 @@ public class JxlsTemplateRender {
         }
     }
 
-    protected void streamingRender(InputStream is, Context context, OutputStream os) throws IOException {
-        Workbook workbook = WorkbookFactory.create(is);
-        SelectSheetsForStreamingPoiTransformer transformer = new SelectSheetsForStreamingPoiTransformer(workbook);
-        Set<String> streamingSheets = new HashSet<>();
-        for (int i = 0, j = workbook.getNumberOfSheets(); i < j; i++) {
-            streamingSheets.add(workbook.getSheetAt(i).getSheetName());
-        }
+    protected void streamingRender(final InputStream is, final Context context, final OutputStream os) throws IOException {
+        final Workbook workbook = WorkbookFactory.create(is);
+        final SelectSheetsForStreamingPoiTransformer transformer = new SelectSheetsForStreamingPoiTransformer(workbook);
+        final Set<String> streamingSheets = new HashSet<>();
+        IntStream.range(0, workbook.getNumberOfSheets()).forEach(i ->
+                streamingSheets.add(workbook.getSheetAt(i).getSheetName()));
         transformer.setDataSheetsToUseStreaming(streamingSheets);
-        AreaBuilder areaBuilder = new XlsCommentAreaBuilder(transformer);
-        List<Area> xlsAreaList = areaBuilder.build();
-        for (Area xlsArea : xlsAreaList) {
-            xlsArea.applyAt(new CellRef(xlsArea.getStartCellRef().getCellName()), context);
-        }
+        final AreaBuilder areaBuilder = new XlsCommentAreaBuilder(transformer);
+        final List<Area> xlsAreaList = areaBuilder.build();
+        xlsAreaList.forEach(xlsArea -> xlsArea.applyAt(new CellRef(xlsArea.getStartCellRef().getCellName()), context));
         transformer.getWorkbook().write(os);
         if (transformer.getWorkbook() instanceof SXSSFWorkbook) {
             ((SXSSFWorkbook) transformer.getWorkbook()).dispose();
@@ -83,19 +81,19 @@ public class JxlsTemplateRender {
         private boolean formulaProcess;
 
         public String getTemplateParameterAttribute() {
-            return templateParameterAttribute;
+            return this.templateParameterAttribute;
         }
 
         public boolean isFormulaProcess() {
             return this.formulaProcess;
         }
 
-        public Builder setTemplateParameterAttribute(String templateParameterAttribute) {
+        public Builder setTemplateParameterAttribute(final String templateParameterAttribute) {
             this.templateParameterAttribute = templateParameterAttribute;
             return this;
         }
 
-        public Builder setFormulaProcess(boolean formulaProcess) {
+        public Builder setFormulaProcess(final boolean formulaProcess) {
             this.formulaProcess = formulaProcess;
             return this;
         }

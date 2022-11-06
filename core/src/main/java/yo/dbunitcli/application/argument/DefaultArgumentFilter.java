@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 public class DefaultArgumentFilter implements ArgumentFilter {
 
     @Override
-    public Map<String, String> filterArguments(String prefix, CmdLineParser parser, String[] expandArgs) {
-        Map<String, String> defaultArgs = Arrays.stream(expandArgs)
+    public Map<String, String> filterArguments(final String prefix, final CmdLineParser parser, final String[] expandArgs) {
+        final Map<String, String> defaultArgs = Arrays.stream(expandArgs)
                 .filter(this.parserTarget(parser))
                 .collect(Collectors.toMap(this.argsToMapEntry(), it -> it));
         if (!Strings.isNullOrEmpty(prefix)) {
-            String myArgs = "-" + prefix + ".";
-            Map<String, String> overrideArgs = Arrays.stream(expandArgs)
+            final String myArgs = "-" + prefix + ".";
+            final Map<String, String> overrideArgs = Arrays.stream(expandArgs)
                     .filter(it -> it.startsWith(myArgs))
                     .map(it -> it.replace(myArgs, "-"))
                     .filter(this.parserTarget(parser))
@@ -33,7 +33,7 @@ public class DefaultArgumentFilter implements ArgumentFilter {
         return it -> it.replaceAll("(-[^=]+=).+", "$1");
     }
 
-    protected Predicate<String> parserTarget(CmdLineParser parser) {
+    protected Predicate<String> parserTarget(final CmdLineParser parser) {
         return it -> parser.getOptions()
                 .stream()
                 .anyMatch(handler -> it.startsWith(((NamedOptionDef) handler.option).name() + "="));

@@ -1,13 +1,11 @@
 package yo.dbunitcli.dataset;
 
 import javax.json.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
@@ -24,20 +22,24 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     private Function<String, String> tableNameMapFunction = Function.identity();
 
     @Override
-    public ColumnSettings build(File setting) throws IOException {
+    public ColumnSettings build(final File setting) throws IOException {
         if (setting == null) {
             return ColumnSettings.NONE;
         }
         return this.load(setting).build();
     }
 
-    public FromJsonColumnSettingsBuilder load(File setting) throws IOException {
-        JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(setting), "MS932"));
-        JsonObject settingJson = jsonReader.read()
-                .asJsonObject();
-        return this.configureSetting(settingJson)
-                .configureCommonSetting(settingJson)
-                .importSetting(settingJson, setting);
+    public FromJsonColumnSettingsBuilder load(final File setting) {
+        try {
+            final JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(setting), "MS932"));
+            final JsonObject settingJson = jsonReader.read()
+                    .asJsonObject();
+            return this.configureSetting(settingJson)
+                    .configureCommonSetting(settingJson)
+                    .importSetting(settingJson, setting);
+        } catch (final UnsupportedEncodingException | FileNotFoundException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
@@ -70,13 +72,13 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         return this.filterExpressions.build();
     }
 
-    protected FromJsonColumnSettingsBuilder configureSetting(JsonObject setting) {
+    protected FromJsonColumnSettingsBuilder configureSetting(final JsonObject setting) {
         if (!setting.containsKey("settings")) {
             return this;
         }
         setting.getJsonArray("settings")
                 .forEach(v -> {
-                    JsonObject json = v.asJsonObject();
+                    final JsonObject json = v.asJsonObject();
                     if (json.containsKey("name")) {
                         this.addSettings(json, "name", AddSettingColumns.Strategy.BY_NAME);
                     } else if (json.containsKey("pattern")) {
@@ -86,8 +88,8 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         return this;
     }
 
-    protected void addSettings(JsonObject json, String name, AddSettingColumns.Strategy strategy) {
-        String key = json.getString(name);
+    protected void addSettings(final JsonObject json, final String name, final AddSettingColumns.Strategy strategy) {
+        final String key = json.getString(name);
         this.addComparisonKeys(strategy, json, key);
         this.addExcludeColumns(strategy, json, key);
         this.addSortColumns(strategy, json, key);
@@ -96,13 +98,13 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         this.tableNameMapFunction = this.tableNameMapFunction.compose(this.toTableNameMapFunction(strategy, json));
     }
 
-    protected FromJsonColumnSettingsBuilder configureCommonSetting(JsonObject setting) {
+    protected FromJsonColumnSettingsBuilder configureCommonSetting(final JsonObject setting) {
         if (!setting.containsKey("commonSettings")) {
             return this;
         }
         setting.getJsonArray("commonSettings")
                 .forEach(v -> {
-                    JsonObject json = v.asJsonObject();
+                    final JsonObject json = v.asJsonObject();
                     this.addCommonSettings(json, "keys", this.comparisonKeys);
                     this.addCommonSettings(json, "exclude", this.excludeColumns);
                     this.addCommonSettings(json, "order", this.orderColumns);
@@ -112,11 +114,11 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         return this;
     }
 
-    protected Function<String, String> toTableNameMapFunction(AddSettingColumns.Strategy strategy, JsonObject json) {
+    protected Function<String, String> toTableNameMapFunction(final AddSettingColumns.Strategy strategy, final JsonObject json) {
         if (!json.containsKey("tableName")) {
             return Function.identity();
         }
-        String result = json.getString("tableName");
+        final String result = json.getString("tableName");
         if (strategy == AddSettingColumns.Strategy.BY_NAME) {
             return it -> it.equals(json.getString("name")) ? result : it;
         } else if (strategy == AddSettingColumns.Strategy.PATTERN) {
@@ -125,19 +127,18 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         return Function.identity();
     }
 
-    protected FromJsonColumnSettingsBuilder importSetting(JsonObject setting, File file) throws IOException {
+    protected FromJsonColumnSettingsBuilder importSetting(final JsonObject setting, final File file) {
         if (!setting.containsKey("import")) {
             return this;
         }
-        for (JsonValue v : setting.getJsonArray("import")) {
-            JsonObject json = v.asJsonObject();
-            new FromJsonColumnSettingsBuilder().load(new File(file.getParent(), json.getString("path")))
-                    .appendTo(this);
-        }
+        setting.getJsonArray("import").forEach(v ->
+                new FromJsonColumnSettingsBuilder().load(new File(file.getParent(), v.asJsonObject().getString("path")))
+                        .appendTo(this)
+        );
         return this;
     }
 
-    protected void appendTo(FromJsonColumnSettingsBuilder other) {
+    protected void appendTo(final FromJsonColumnSettingsBuilder other) {
         other.comparisonKeys.add(this.comparisonKeys.build());
         other.excludeColumns.add(this.excludeColumns.build());
         other.orderColumns.add(this.orderColumns.build());
@@ -145,70 +146,64 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         other.filterExpressions.add(this.filterExpressions.build());
     }
 
-    protected void addCommonSettings(JsonObject json, String key, AddSettingColumns.Builder targetSetting) {
+    protected void addCommonSettings(final JsonObject json, final String key, final AddSettingColumns.Builder targetSetting) {
         if (json.containsKey(key)) {
-            JsonArray array = json.getJsonArray(key);
-            List<String> columns = new ArrayList<>();
-            for (int i = 0, j = array.size(); i < j; i++) {
-                columns.add(array.getString(i));
-            }
-            targetSetting.addCommon(columns);
+            final JsonArray array = json.getJsonArray(key);
+            targetSetting.addCommon(IntStream.range(0, array.size())
+                    .mapToObj(array::getString)
+                    .collect(Collectors.toList()));
         }
     }
 
-    protected void addComparisonKeys(AddSettingColumns.Strategy strategy, JsonObject json, String file) {
+    protected void addComparisonKeys(final AddSettingColumns.Strategy strategy, final JsonObject json, final String file) {
         this.comparisonKeys.add(strategy, file, new ArrayList<>());
         this.addSettings(strategy, json, file, "keys", this.comparisonKeys);
     }
 
-    protected void addExcludeColumns(AddSettingColumns.Strategy strategy, JsonObject json, String file) {
+    protected void addExcludeColumns(final AddSettingColumns.Strategy strategy, final JsonObject json, final String file) {
         this.addSettings(strategy, json, file, "exclude", this.excludeColumns);
     }
 
-    protected void addSortColumns(AddSettingColumns.Strategy strategy, JsonObject json, String file) {
+    protected void addSortColumns(final AddSettingColumns.Strategy strategy, final JsonObject json, final String file) {
         this.addSettings(strategy, json, file, "order", this.orderColumns);
     }
 
-    protected void addSettings(AddSettingColumns.Strategy strategy, JsonObject json, String file, String key, AddSettingColumns.Builder comparisonKeys) {
+    protected void addSettings(final AddSettingColumns.Strategy strategy, final JsonObject json, final String file, final String key, final AddSettingColumns.Builder comparisonKeys) {
         if (json.containsKey(key)) {
-            JsonArray keyArray = json.getJsonArray(key);
-            List<String> keys = new ArrayList<>();
-            for (int i = 0, j = keyArray.size(); i < j; i++) {
-                keys.add(keyArray.getString(i));
-            }
-            comparisonKeys.add(strategy, file, keys);
+            final JsonArray keyArray = json.getJsonArray(key);
+            comparisonKeys.add(strategy, file, IntStream.range(0, keyArray.size())
+                    .mapToObj(keyArray::getString)
+                    .collect(Collectors.toList()));
         }
     }
 
-    protected void addExpression(ColumnExpression.Builder builder, JsonObject json) {
+    protected void addExpression(final ColumnExpression.Builder builder, final JsonObject json) {
         this.addExpression(builder, json, ColumnExpression.ParameterType.STRING);
         this.addExpression(builder, json, ColumnExpression.ParameterType.BOOLEAN);
         this.addExpression(builder, json, ColumnExpression.ParameterType.NUMBER);
         this.addExpression(builder, json, ColumnExpression.ParameterType.SQL_FUNCTION);
     }
 
-    protected void addExpression(ColumnExpression.Builder builder, JsonObject settingJson, ColumnExpression.ParameterType type) {
+    protected void addExpression(final ColumnExpression.Builder builder, final JsonObject settingJson, final ColumnExpression.ParameterType type) {
         if (settingJson.containsKey(type.keyName())) {
             settingJson.getJsonObject(type.keyName()).forEach((key, value)
                     -> builder.addExpression(type, key, ((JsonString) value).getString()));
         }
     }
 
-    protected void addFilterExpression(AddSettingColumns.Strategy strategy, JsonObject settingJson, String key) {
+    protected void addFilterExpression(final AddSettingColumns.Strategy strategy, final JsonObject settingJson, final String key) {
         if (settingJson.containsKey("filter")) {
-            JsonArray expressions = settingJson.getJsonArray("filter");
-            for (int i = 0, j = expressions.size(); i < j; i++) {
-                this.filterExpressions.add(strategy, key, expressions.getString(i));
-            }
+            final JsonArray expressions = settingJson.getJsonArray("filter");
+            IntStream.range(0, expressions.size())
+                    .forEach(i -> this.filterExpressions.add(strategy, key, expressions.getString(i)));
         }
     }
 
-    protected void addFilterExpression(JsonObject settingJson) {
+    protected void addFilterExpression(final JsonObject settingJson) {
         if (settingJson.containsKey("filter")) {
-            JsonArray expressions = settingJson.getJsonArray("filter");
-            for (int i = 0, j = expressions.size(); i < j; i++) {
-                this.filterExpressions.addCommon(expressions.getString(i));
-            }
+            final JsonArray expressions = settingJson.getJsonArray("filter");
+            IntStream.range(0, expressions.size())
+                    .forEach(i -> this.filterExpressions.addCommon(expressions.getString(i)));
         }
     }
 

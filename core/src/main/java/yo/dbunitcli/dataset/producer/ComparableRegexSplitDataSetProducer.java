@@ -1,7 +1,6 @@
 package yo.dbunitcli.dataset.producer;
 
 import com.google.common.base.Strings;
-import com.google.common.io.Files;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
@@ -13,6 +12,8 @@ import yo.dbunitcli.dataset.TableNameFilter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class ComparableRegexSplitDataSetProducer implements ComparableDataSetProducer {
@@ -27,7 +28,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     private final ComparableDataSetParam param;
     private final boolean loadData;
 
-    public ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) {
+    public ComparableRegexSplitDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         if (this.param.getSrc().isDirectory()) {
             this.src = this.param.getSrc().listFiles(File::isFile);
@@ -35,7 +36,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
             this.src = new File[]{this.param.getSrc()};
         }
         this.encoding = this.param.getEncoding();
-        String headerName = this.param.getHeaderName();
+        final String headerName = this.param.getHeaderName();
         if (!Strings.isNullOrEmpty(headerName)) {
             this.headerNames = headerName.split(",");
         }
@@ -53,7 +54,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     }
 
     @Override
-    public void setConsumer(IDataSetConsumer iDataSetConsumer) {
+    public void setConsumer(final IDataSetConsumer iDataSetConsumer) {
         this.consumer = iDataSetConsumer;
     }
 
@@ -61,43 +62,41 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     public void produce() throws DataSetException {
         LOGGER.info("produce() - start");
         this.consumer.startDataSet();
-        for (File file : this.src) {
-            if (this.filter.predicate(file.getAbsolutePath()) && file.length() > 0) {
-                try {
-                    this.executeQuery(file);
-                } catch (IOException e) {
-                    throw new DataSetException(e);
-                }
-            }
-        }
+        Arrays.stream(this.src)
+                .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
+                .forEach(this::execute);
         this.consumer.endDataSet();
         LOGGER.info("produce() - end");
     }
 
-    protected void executeQuery(File aFile) throws DataSetException, IOException {
-        LOGGER.info("produce - start fileName={}", aFile);
-        if (this.headerNames != null) {
-            this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
-            if (!this.loadData) {
-                this.consumer.endTable();
-                return;
-            }
-        }
-        int lineNum = 0;
-        for (String s : Files.readLines(aFile, Charset.forName(this.getEncoding()))) {
-            if (lineNum == 0 && this.headerNames == null) {
-                this.consumer.startTable(this.createMetaData(aFile, this.headerSplitPattern.split(s)));
+    protected void execute(final File aFile) {
+        try {
+            LOGGER.info("produce - start fileName={}", aFile);
+            if (this.headerNames != null) {
+                this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
                 if (!this.loadData) {
-                    break;
+                    this.consumer.endTable();
+                    return;
                 }
-            } else {
-                this.consumer.row(this.dataSplitPattern.split(s));
             }
-            lineNum++;
+            int lineNum = 0;
+            for (final String s : Files.readAllLines(aFile.toPath(), Charset.forName(this.getEncoding()))) {
+                if (lineNum == 0 && this.headerNames == null) {
+                    this.consumer.startTable(this.createMetaData(aFile, this.headerSplitPattern.split(s)));
+                    if (!this.loadData) {
+                        break;
+                    }
+                } else {
+                    this.consumer.row(this.dataSplitPattern.split(s));
+                }
+                lineNum++;
+            }
+            LOGGER.info("produce - rows={}", lineNum);
+            this.consumer.endTable();
+            LOGGER.info("produce - end   fileName={}", aFile);
+        } catch (final IOException | DataSetException e) {
+            throw new AssertionError(e);
         }
-        LOGGER.info("produce - rows={}", lineNum);
-        this.consumer.endTable();
-        LOGGER.info("produce - end   fileName={}", aFile);
     }
 
     public String getEncoding() {

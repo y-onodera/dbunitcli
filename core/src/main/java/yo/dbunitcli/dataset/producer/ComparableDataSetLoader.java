@@ -14,20 +14,20 @@ public class ComparableDataSetLoader {
 
     private final Parameter parameter;
 
-    public ComparableDataSetLoader(Parameter parameter) {
+    public ComparableDataSetLoader(final Parameter parameter) {
         this.parameter = parameter;
     }
 
-    public List<Map<String, Object>> loadParam(ComparableDataSetParam param) throws DataSetException {
+    public List<Map<String, Object>> loadParam(final ComparableDataSetParam param) throws DataSetException {
         return this.loadDataSet(param).toMap();
     }
 
-    public ComparableDataSet loadDataSet(ComparableDataSetParam param) throws DataSetException {
+    public ComparableDataSet loadDataSet(final ComparableDataSetParam param) {
         LOGGER.info("create DataSetLoader from {}", param);
         return new ComparableDataSetImpl(this.getComparableDataSetProducer(param));
     }
 
-    protected ComparableDataSetProducer getComparableDataSetProducer(ComparableDataSetParam param) throws DataSetException {
+    protected ComparableDataSetProducer getComparableDataSetProducer(final ComparableDataSetParam param) {
         switch (param.getSource()) {
             case table:
                 return new ComparableDBDataSetProducer(param);

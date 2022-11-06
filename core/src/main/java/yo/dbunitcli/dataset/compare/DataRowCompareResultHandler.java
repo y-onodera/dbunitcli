@@ -5,6 +5,7 @@ import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.CompareKeys;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class DataRowCompareResultHandler implements RowCompareResultHandler {
     protected final ComparableTable oldTable;
@@ -13,41 +14,41 @@ public class DataRowCompareResultHandler implements RowCompareResultHandler {
     private int deleteRow = 0;
     private int addRow = 0;
 
-    public DataRowCompareResultHandler(DataSetCompare.TableCompare tableCompare) {
+    public DataRowCompareResultHandler(final DataSetCompare.TableCompare tableCompare) {
         this.oldTable = tableCompare.getOldTable();
         this.newTable = tableCompare.getNewTable();
         this.modifyValues = new HashMap<>();
     }
 
     @Override
-    public void handleModify(Object[] oldRow, Object[] newRow, CompareKeys key) {
-        for (int columnIndex = 0, columnLength = oldRow.length; columnIndex < columnLength; columnIndex++) {
+    public void handleModify(final Object[] oldRow, final Object[] newRow, final CompareKeys key) {
+        IntStream.range(0, oldRow.length).forEach(columnIndex -> {
             if (!Objects.equals(oldRow[columnIndex], newRow[columnIndex])) {
                 this.addModify(columnIndex);
             }
-        }
+        });
     }
 
     @Override
-    public void handleDelete(int rowNum, Object[] row) {
+    public void handleDelete(final int rowNum, final Object[] row) {
         this.deleteRow++;
     }
 
     @Override
-    public void handleAdd(int rowNum, Object[] row) {
+    public void handleAdd(final int rowNum, final Object[] row) {
         this.addRow++;
     }
 
     @Override
     public List<CompareDiff> result() {
-        List<CompareDiff> results = new ArrayList<>();
+        final List<CompareDiff> results = new ArrayList<>();
         results.addAll(this.modifyDiff());
         results.addAll(this.deleteDiff());
         results.addAll(this.addDiff());
         return results;
     }
 
-    protected void addModify(int columnIndex) {
+    protected void addModify(final int columnIndex) {
         try {
             if (!this.modifyValues.containsKey(columnIndex)) {
                 this.modifyValues.put(columnIndex, CompareDiff.Type.MODIFY_VALUE.of()
@@ -61,7 +62,7 @@ public class DataRowCompareResultHandler implements RowCompareResultHandler {
                 this.modifyValues.computeIfPresent(columnIndex
                         , (k, v) -> v.edit(builder -> builder.setRows(builder.getRows() + 1)));
             }
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
@@ -71,7 +72,7 @@ public class DataRowCompareResultHandler implements RowCompareResultHandler {
     }
 
     protected Collection<CompareDiff> deleteDiff() {
-        List<CompareDiff> results = new ArrayList<>();
+        final List<CompareDiff> results = new ArrayList<>();
         if (this.deleteRow > 0) {
             results.add(CompareDiff.Type.KEY_DELETE.of()
                     .setTargetName(this.oldTable.getTableMetaData().getTableName())
@@ -84,7 +85,7 @@ public class DataRowCompareResultHandler implements RowCompareResultHandler {
     }
 
     protected Collection<CompareDiff> addDiff() {
-        List<CompareDiff> results = new ArrayList<>();
+        final List<CompareDiff> results = new ArrayList<>();
         if (this.addRow > 0) {
             results.add(CompareDiff.Type.KEY_ADD.of()
                     .setTargetName(this.newTable.getTableMetaData().getTableName())

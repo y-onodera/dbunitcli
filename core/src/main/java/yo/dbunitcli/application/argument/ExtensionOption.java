@@ -10,19 +10,19 @@ public class ExtensionOption extends DefaultArgumentsParser implements Comparabl
     @Option(name = "-extension", usage = "target extension")
     private String extension;
 
-    public ExtensionOption(String prefix) {
+    public ExtensionOption(final String prefix) {
         super(prefix);
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-extension", this.extension);
         return result;
     }
 
     @Override
-    public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
+    public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         return builder.setExtension(this.extension);
     }
 

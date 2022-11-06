@@ -32,7 +32,7 @@ public class TableCompareResult implements CompareResult {
 
     private final String newDir;
 
-    public TableCompareResult(String aOldDir, String aNewDir, List<CompareDiff> results) {
+    public TableCompareResult(final String aOldDir, final String aNewDir, final List<CompareDiff> results) {
         this.oldDir = aOldDir;
         this.newDir = aNewDir;
         this.diffs = Lists.newArrayList(results);
@@ -45,8 +45,8 @@ public class TableCompareResult implements CompareResult {
 
     @Override
     public ITable toITable() {
-        DefaultTable result = new DefaultTable(RESULT_TABLE_NAME, COLUMNS);
-        getDiffs().forEach(diff -> {
+        final DefaultTable result = new DefaultTable(RESULT_TABLE_NAME, COLUMNS);
+        this.getDiffs().forEach(diff -> {
             try {
                 result.addRow(new Object[]{this.oldDir
                         , this.newDir
@@ -57,13 +57,13 @@ public class TableCompareResult implements CompareResult {
                         , diff.getColumnIndex()
                         , diff.getRows()
                 });
-            } catch (DataSetException e) {
+            } catch (final DataSetException e) {
                 throw new AssertionError(e);
             }
         });
         try {
             return new SortedTable(result, SORT_KEYS);
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }

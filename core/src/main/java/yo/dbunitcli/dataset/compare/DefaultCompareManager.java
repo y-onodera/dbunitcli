@@ -16,14 +16,14 @@ import java.util.stream.Stream;
 public class DefaultCompareManager implements DataSetCompare.Manager {
 
     @Override
-    public CompareResult toCompareResult(ComparableDataSet oldDataSet, ComparableDataSet newDataSet, List<CompareDiff> results) {
+    public CompareResult toCompareResult(final ComparableDataSet oldDataSet, final ComparableDataSet newDataSet, final List<CompareDiff> results) {
         return new TableCompareResult(oldDataSet.getSrc(), newDataSet.getSrc(), results);
     }
 
     @Override
-    public List<CompareDiff> compareTable(DataSetCompare.TableCompare tableCompare) {
-        List<CompareDiff> results = new ArrayList<>();
-        getTableCompareStrategies().forEach(it -> results.addAll(it.apply(tableCompare)));
+    public List<CompareDiff> compareTable(final DataSetCompare.TableCompare tableCompare) {
+        final List<CompareDiff> results = new ArrayList<>();
+        this.getTableCompareStrategies().forEach(it -> results.addAll(it.apply(tableCompare)));
         return results;
     }
 
@@ -39,9 +39,9 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
     protected Function<DataSetCompare.TableCompare, List<CompareDiff>> compareColumnCount() {
         return it -> {
             try {
-                List<CompareDiff> results = new ArrayList<>();
-                ITableMetaData oldMetaData = it.getOldTable().getTableMetaData();
-                ITableMetaData newMetaData = it.getNewTable().getTableMetaData();
+                final List<CompareDiff> results = new ArrayList<>();
+                final ITableMetaData oldMetaData = it.getOldTable().getTableMetaData();
+                final ITableMetaData newMetaData = it.getNewTable().getTableMetaData();
                 final String tableName = oldMetaData.getTableName();
                 final int newColumns = newMetaData.getColumns().length;
                 final int oldColumns = oldMetaData.getColumns().length;
@@ -53,7 +53,7 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
                             .build());
                 }
                 return results;
-            } catch (DataSetException e) {
+            } catch (final DataSetException e) {
                 throw new AssertionError(e);
             }
         };
@@ -62,16 +62,16 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
     protected Function<DataSetCompare.TableCompare, List<CompareDiff>> searchModifyAndDeleteColumns() {
         return it -> {
             try {
-                List<CompareDiff> results = new ArrayList<>();
-                ITableMetaData oldMetaData = it.getOldTable().getTableMetaData();
-                ITableMetaData newMetaData = it.getNewTable().getTableMetaData();
+                final List<CompareDiff> results = new ArrayList<>();
+                final ITableMetaData oldMetaData = it.getOldTable().getTableMetaData();
+                final ITableMetaData newMetaData = it.getNewTable().getTableMetaData();
                 final String tableName = oldMetaData.getTableName();
                 final int newColumns = newMetaData.getColumns().length;
                 final int oldColumns = oldMetaData.getColumns().length;
-                for (int i = 0; i < oldColumns; i++) {
-                    Column oldColumn = oldMetaData.getColumns()[i];
+                IntStream.range(0, oldColumns).forEach(i -> {
+                    final Column oldColumn = this.getColumn(oldMetaData, i);
                     if (i < newColumns) {
-                        Column newColumn = newMetaData.getColumns()[i];
+                        final Column newColumn = this.getColumn(newMetaData, i);
                         if (!Objects.equals(oldColumn.getColumnName(), newColumn.getColumnName())) {
                             results.add(CompareDiff.Type.COLUMNS_MODIFY.of()
                                     .setTargetName(tableName)
@@ -87,9 +87,9 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
                                 .setColumnIndex(i)
                                 .build());
                     }
-                }
+                });
                 return results;
-            } catch (DataSetException e) {
+            } catch (final DataSetException e) {
                 throw new AssertionError(e);
             }
         };
@@ -98,28 +98,24 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
     protected Function<DataSetCompare.TableCompare, List<CompareDiff>> searchAddColumns() {
         return it -> {
             try {
-                List<CompareDiff> results = new ArrayList<>();
-                ITableMetaData oldMetaData = it.getOldTable().getTableMetaData();
-                ITableMetaData newMetaData = it.getNewTable().getTableMetaData();
+                final List<CompareDiff> results = new ArrayList<>();
+                final ITableMetaData oldMetaData = it.getOldTable().getTableMetaData();
+                final ITableMetaData newMetaData = it.getNewTable().getTableMetaData();
                 final String tableName = oldMetaData.getTableName();
                 final int newColumns = newMetaData.getColumns().length;
                 final int oldColumns = oldMetaData.getColumns().length;
                 if (oldColumns < newColumns) {
                     IntStream.range(oldColumns, newColumns).forEach(i -> {
-                        try {
-                            Column newColumn = newMetaData.getColumns()[i];
-                            results.add(CompareDiff.Type.COLUMNS_ADD.of()
-                                    .setTargetName(tableName)
-                                    .setNewDefine(newColumn.getColumnName())
-                                    .setColumnIndex(i)
-                                    .build());
-                        } catch (DataSetException e) {
-                            throw new AssertionError(e);
-                        }
+                        final Column newColumn = this.getColumn(newMetaData, i);
+                        results.add(CompareDiff.Type.COLUMNS_ADD.of()
+                                .setTargetName(tableName)
+                                .setNewDefine(newColumn.getColumnName())
+                                .setColumnIndex(i)
+                                .build());
                     });
                 }
                 return results;
-            } catch (DataSetException e) {
+            } catch (final DataSetException e) {
                 throw new AssertionError(e);
             }
         };
@@ -127,7 +123,7 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
 
     protected Function<DataSetCompare.TableCompare, List<CompareDiff>> rowCount() {
         return it -> {
-            List<CompareDiff> results = new ArrayList<>();
+            final List<CompareDiff> results = new ArrayList<>();
             final int newRows = it.getNewTable().getRowCount();
             final int oldRows = it.getOldTable().getRowCount();
             if (oldRows != newRows) {
@@ -143,11 +139,19 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
     }
 
     protected Function<DataSetCompare.TableCompare, List<CompareDiff>> compareRow() {
-        return it -> new RowCompare(it, getRowResultHandler(it)).exec();
+        return it -> new RowCompare(it, this.getRowResultHandler(it)).exec();
     }
 
-    protected RowCompareResultHandler getRowResultHandler(DataSetCompare.TableCompare it) {
+    protected RowCompareResultHandler getRowResultHandler(final DataSetCompare.TableCompare it) {
         return new DiffWriteRowCompareResultHandler(it).compose(new DataRowCompareResultHandler(it));
+    }
+
+    private Column getColumn(final ITableMetaData oldMetaData, final int columnIndex) {
+        try {
+            return oldMetaData.getColumns()[columnIndex];
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public static class RowCompare {
@@ -159,7 +163,7 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
         protected List<String> keyColumns;
         protected RowCompareResultHandler handler;
 
-        protected RowCompare(DataSetCompare.TableCompare it, RowCompareResultHandler handler) {
+        protected RowCompare(final DataSetCompare.TableCompare it, final RowCompareResultHandler handler) {
             this.oldTable = it.getOldTable();
             this.newTable = it.getNewTable();
             this.comparisonKeys = it.getComparisonKeys();
@@ -171,12 +175,12 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
 
         protected List<CompareDiff> exec() {
             final int oldRows = this.oldTable.getRowCount();
-            Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists = this.newTable.getRows(this.keyColumns);
+            final Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists = this.newTable.getRows(this.keyColumns);
             IntStream.range(0, oldRows).forEach(rowNum -> {
-                Object[] oldRow = this.oldTable.getRow(rowNum, this.columnLength);
-                CompareKeys key = this.oldTable.getKey(rowNum, this.keyColumns);
+                final Object[] oldRow = this.oldTable.getRow(rowNum, this.columnLength);
+                final CompareKeys key = this.oldTable.getKey(rowNum, this.keyColumns);
                 if (newRowLists.containsKey(key)) {
-                    Map.Entry<Integer, Object[]> rowEntry = newRowLists.get(key);
+                    final Map.Entry<Integer, Object[]> rowEntry = newRowLists.get(key);
                     this.handler.handleModify(oldRow, rowEntry.getValue(), key.newRowNum(rowEntry.getKey()));
                     newRowLists.remove(key);
                 } else {
@@ -184,7 +188,7 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
                 }
             });
             newRowLists.keySet().forEach(targetKey -> {
-                Map.Entry<Integer, Object[]> row = newRowLists.get(targetKey);
+                final Map.Entry<Integer, Object[]> row = newRowLists.get(targetKey);
                 this.handler.handleAdd(row.getKey(), row.getValue());
             });
             return this.handler.result();

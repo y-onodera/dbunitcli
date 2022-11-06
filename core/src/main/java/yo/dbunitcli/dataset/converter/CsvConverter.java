@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
+import java.util.stream.IntStream;
 
 public class CsvConverter extends CsvDataSetWriter implements IDataSetConverter {
 
@@ -35,7 +36,7 @@ public class CsvConverter extends CsvDataSetWriter implements IDataSetConverter 
 
     private File file;
 
-    public CsvConverter(DataSetConsumerParam param) {
+    public CsvConverter(final DataSetConsumerParam param) {
         super(param.getResultDir());
         this.resultDir = param.getResultDir();
         this.encoding = param.getOutputEncoding();
@@ -43,13 +44,13 @@ public class CsvConverter extends CsvDataSetWriter implements IDataSetConverter 
     }
 
     @Override
-    public void startTable(ITableMetaData metaData) throws DataSetException {
-        String activeTableName = metaData.getTableName();
+    public void startTable(final ITableMetaData metaData) throws DataSetException {
+        final String activeTableName = metaData.getTableName();
 
         try {
             this.activeMetaData = metaData;
             this.writeRows = 0;
-            Field f = CsvDataSetWriter.class.getDeclaredField("_activeMetaData");
+            final Field f = CsvDataSetWriter.class.getDeclaredField("_activeMetaData");
             f.setAccessible(true);
             f.set(this, metaData);
             final File directory = new File(this.getTheDirectory());
@@ -60,64 +61,59 @@ public class CsvConverter extends CsvDataSetWriter implements IDataSetConverter 
             }
             Files.deleteIfExists(this.file.toPath());
             Files.createFile(this.file.toPath());
-            FileOutputStream fos = new FileOutputStream(this.file);
+            final FileOutputStream fos = new FileOutputStream(this.file);
             this.setWriter(new OutputStreamWriter(fos, this.encoding));
             this.writeColumnNames();
-            this.getWriter().write(System.getProperty("line.separator"));
-        } catch (IOException | NoSuchFieldException | IllegalAccessException var3) {
+            this.write(System.getProperty("line.separator"));
+        } catch (final IOException | NoSuchFieldException | IllegalAccessException var3) {
             throw new DataSetException(var3);
         }
     }
 
     @Override
-    public void reStartTable(ITableMetaData metaData, Integer writeRows) throws DataSetException {
-        String activeTableName = metaData.getTableName();
+    public void reStartTable(final ITableMetaData metaData, final Integer writeRows) throws DataSetException {
+        final String activeTableName = metaData.getTableName();
 
         try {
             this.activeMetaData = metaData;
             this.writeRows = writeRows;
-            Field f = CsvDataSetWriter.class.getDeclaredField("_activeMetaData");
+            final Field f = CsvDataSetWriter.class.getDeclaredField("_activeMetaData");
             f.setAccessible(true);
             f.set(this, metaData);
             final File directory = new File(this.getTheDirectory());
             this.file = new File(directory, activeTableName + ".csv");
             LOGGER.info("convert - restart fileName={},rows={}", this.file, this.writeRows);
-            FileOutputStream fos = new FileOutputStream(this.file, true);
+            final FileOutputStream fos = new FileOutputStream(this.file, true);
             this.setWriter(new OutputStreamWriter(fos, this.encoding));
-        } catch (IOException | NoSuchFieldException | IllegalAccessException var3) {
+        } catch (final IOException | NoSuchFieldException | IllegalAccessException var3) {
             throw new DataSetException(var3);
         }
     }
 
     @Override
-    public void row(Object[] objects) throws DataSetException {
-        try {
+    public void row(final Object[] objects) throws DataSetException {
+        final Column[] columns = this.activeMetaData.getColumns();
+        IntStream.range(0, columns.length).forEach(i -> {
+            final String columnName = columns[i].getColumnName();
+            final Object value = objects[i];
 
-            Column[] columns = this.activeMetaData.getColumns();
-            for (int i = 0; i < columns.length; i++) {
-                String columnName = columns[i].getColumnName();
-                Object value = objects[i];
-
-                if (value == null || value == ITable.NO_VALUE) {
-                    this.getWriter().write("");
-                } else {
-                    try {
-                        this.getWriter().write(this.quoted(DataType.asString(value)));
-                    } catch (TypeCastException e) {
-                        throw new DataSetException("table=" +
-                                this.activeMetaData.getTableName() + ", row=" + i +
-                                ", column=" + columnName +
-                                ", value=" + value, e);
-                    }
-                }
-                if (i < columns.length - 1) {
-                    this.getWriter().write(",");
+            if (value == null || value == ITable.NO_VALUE) {
+                this.write("");
+            } else {
+                try {
+                    this.write(this.quoted(DataType.asString(value)));
+                } catch (final TypeCastException e) {
+                    throw new AssertionError("table=" +
+                            this.activeMetaData.getTableName() + ", row=" + i +
+                            ", column=" + columnName +
+                            ", value=" + value, e);
                 }
             }
-            getWriter().write(System.getProperty("line.separator"));
-        } catch (IOException e) {
-            throw new DataSetException(e);
-        }
+            if (i < columns.length - 1) {
+                this.write(",");
+            }
+        });
+        this.write(System.getProperty("line.separator"));
         this.writeRows++;
     }
 
@@ -140,17 +136,24 @@ public class CsvConverter extends CsvDataSetWriter implements IDataSetConverter 
 
     private void writeColumnNames() throws DataSetException, IOException {
         LOGGER.debug("writeColumnNames() - start");
-        Column[] columns = this.activeMetaData.getColumns();
-        for (int i = 0; i < columns.length; ++i) {
-            this.getWriter().write(this.quoted(columns[i].getColumnName()));
+        final Column[] columns = this.activeMetaData.getColumns();
+        IntStream.range(0, columns.length).forEach(i -> {
+            this.write(this.quoted(columns[i].getColumnName()));
             if (i < columns.length - 1) {
-                this.getWriter().write(",");
+                this.write(",");
             }
-        }
+        });
     }
 
-    private String quoted(String stringValue) {
+    private String quoted(final String stringValue) {
         return "\"" + escape(stringValue) + "\"";
     }
 
+    private void write(final String s) {
+        try {
+            this.getWriter().write(s);
+        } catch (final IOException e) {
+            throw new AssertionError(e);
+        }
+    }
 }

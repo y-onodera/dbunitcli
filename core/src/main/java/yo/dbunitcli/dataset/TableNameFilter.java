@@ -10,7 +10,7 @@ public class TableNameFilter {
     private Pattern includePattern;
     private Pattern excludePattern;
 
-    public TableNameFilter(String regInclude, String regExclude) {
+    public TableNameFilter(final String regInclude, final String regExclude) {
         this.regInclude = regInclude;
         this.regExclude = regExclude;
         if (!Strings.isNullOrEmpty(this.regInclude)) {
@@ -21,8 +21,8 @@ public class TableNameFilter {
         }
     }
 
-    public boolean predicate(String tableName) {
-        return (includePattern == null || includePattern.matcher(tableName).find())
-                && (excludePattern == null || !excludePattern.matcher(tableName).find());
+    public boolean predicate(final String tableName) {
+        return (this.includePattern == null || this.includePattern.matcher(tableName).find())
+                && (this.excludePattern == null || !this.excludePattern.matcher(tableName).find());
     }
 }

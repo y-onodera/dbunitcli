@@ -17,13 +17,12 @@ public class XlsxRowsTableDefine {
     private final Integer[] cellIndexes;
     private final String[] breakKey;
 
-    public XlsxRowsTableDefine(Builder builder) {
+    public XlsxRowsTableDefine(final Builder builder) {
         this.tableName = builder.getTableName();
-        String[] columnNames = builder.getHeader().toArray(new String[0]);
-        final Column[] columns = new Column[columnNames.length];
-        for (int i = 0, j = columns.length; i < j; i++) {
-            columns[i] = new Column(columnNames[i], DataType.UNKNOWN);
-        }
+        final Column[] columns = builder.getHeader()
+                .stream()
+                .map(columnNames -> new Column(columnNames, DataType.UNKNOWN))
+                .toArray(Column[]::new);
         this.tableMetaData = new DefaultTableMetaData(this.tableName, columns);
         this.dataStartRow = builder.getDataStartRow();
         this.cellIndexes = builder.getCellIndexes().toArray(new Integer[0]);
@@ -57,11 +56,11 @@ public class XlsxRowsTableDefine {
     @Override
     public String toString() {
         return "XlsxRowsTableDefine{" +
-                "tableName='" + tableName + '\'' +
-                ", tableMetaData=" + tableMetaData +
-                ", dataStartRow=" + dataStartRow +
-                ", cellIndexes=" + Arrays.toString(cellIndexes) +
-                ", breakKey=" + Arrays.toString(breakKey) +
+                "tableName='" + this.tableName + '\'' +
+                ", tableMetaData=" + this.tableMetaData +
+                ", dataStartRow=" + this.dataStartRow +
+                ", cellIndexes=" + Arrays.toString(this.cellIndexes) +
+                ", breakKey=" + Arrays.toString(this.breakKey) +
                 '}';
     }
 
@@ -92,27 +91,27 @@ public class XlsxRowsTableDefine {
             return this.breakKey;
         }
 
-        public Builder setTableName(String tableName) {
+        public Builder setTableName(final String tableName) {
             this.tableName = tableName;
             return this;
         }
 
-        public Builder setHeader(Stream<String> header) {
+        public Builder setHeader(final Stream<String> header) {
             header.forEach(this.header::add);
             return this;
         }
 
-        public Builder setDataStartRow(Integer dataStartRow) {
+        public Builder setDataStartRow(final Integer dataStartRow) {
             this.dataStartRow = dataStartRow;
             return this;
         }
 
-        public Builder addCellIndexes(Stream<Integer> cellIndexes) {
+        public Builder addCellIndexes(final Stream<Integer> cellIndexes) {
             cellIndexes.forEach(this.cellIndexes::add);
             return this;
         }
 
-        public Builder addBreakKey(Stream<String> breakKey) {
+        public Builder addBreakKey(final Stream<String> breakKey) {
             breakKey.forEach(this.breakKey::add);
             return this;
         }

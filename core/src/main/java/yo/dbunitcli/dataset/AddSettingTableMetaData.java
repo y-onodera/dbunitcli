@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final String tableName;
@@ -21,19 +22,19 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final List<Integer> filterColumnIndex = Lists.newArrayList();
     private final Predicate<Map<String, Object>> rowFilter;
 
-    public AddSettingTableMetaData(String tableName, ITableMetaData delegate, Column[] primaryKeys, IColumnFilter iColumnFilter, Predicate<Map<String, Object>> rowFilter, ColumnExpression additionalExpression) throws DataSetException {
+    public AddSettingTableMetaData(final String tableName, final ITableMetaData delegate, final Column[] primaryKeys, final IColumnFilter iColumnFilter, final Predicate<Map<String, Object>> rowFilter, final ColumnExpression additionalExpression) throws DataSetException {
         this.tableName = tableName;
         this.primaryKeys = primaryKeys;
         this.allColumns = additionalExpression.merge(delegate.getColumns());
         if (iColumnFilter != null) {
             this.columns = additionalExpression.merge(new FilteredTableMetaData(delegate, iColumnFilter).getColumns());
         } else {
-            this.columns = allColumns;
+            this.columns = this.allColumns;
         }
         this.additionalExpression = additionalExpression;
-        Set<Column> noFilter = Sets.newHashSet(delegate.getColumns());
-        Set<Column> filtered = Sets.newHashSet(this.getColumns());
-        for (Column column : Sets.difference(noFilter, filtered)) {
+        final Set<Column> noFilter = Sets.newHashSet(delegate.getColumns());
+        final Set<Column> filtered = Sets.newHashSet(this.getColumns());
+        for (final Column column : Sets.difference(noFilter, filtered)) {
             if (!this.additionalExpression.contains(column.getColumnName())) {
                 this.filterColumnIndex.add(delegate.getColumnIndex(column.getColumnName()));
             }
@@ -56,46 +57,42 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         return this.primaryKeys;
     }
 
-    public Object[] applySetting(Object[] objects) {
-        Object[] result = this.filterColumn(this.applyExpression(objects));
+    public Object[] applySetting(final Object[] objects) {
+        final Object[] result = this.filterColumn(this.applyExpression(objects));
         if (this.hasRowFilter() && !this.rowFilter.test(this.rowToMap(result))) {
             return null;
         }
         return result;
     }
 
-    protected Map<String, Object> rowToMap(Object[] row) {
-        Map<String, Object> map = Maps.newHashMap();
-        for (int i = 0, j = row.length; i < j; i++) {
-            map.put(this.columns[i].getColumnName(), row[i]);
-        }
+    protected Map<String, Object> rowToMap(final Object[] row) {
+        final Map<String, Object> map = Maps.newHashMap();
+        IntStream.range(0, row.length).forEach(i -> map.put(this.columns[i].getColumnName(), row[i]));
         return map;
     }
 
-    protected Object[] applyExpression(Object[] objects) {
+    protected Object[] applyExpression(final Object[] objects) {
         if (this.additionalExpression.size() == 0) {
             return objects;
         }
-        Map<String, Object> param = Maps.newHashMap();
-        for (int i = 0, j = objects.length; i < j; i++) {
-            param.put(this.allColumns[i].getColumnName(), objects[i]);
-        }
-        Object[] result = Arrays.copyOf(objects, this.allColumns.length);
-        for (int i = 0, j = result.length; i < j; i++) {
-            String columnName = this.allColumns[i].getColumnName();
+        final Map<String, Object> param = Maps.newHashMap();
+        IntStream.range(0, objects.length).forEach(i -> param.put(this.allColumns[i].getColumnName(), objects[i]));
+        final Object[] result = Arrays.copyOf(objects, this.allColumns.length);
+        IntStream.range(0, result.length).forEach(i -> {
+            final String columnName = this.allColumns[i].getColumnName();
             if (this.additionalExpression.contains(columnName)) {
                 result[i] = this.additionalExpression.evaluate(columnName, param);
                 param.put(columnName, result[i]);
             }
-        }
+        });
         return result;
     }
 
-    protected Object[] filterColumn(Object[] noFilter) {
+    protected Object[] filterColumn(final Object[] noFilter) {
         if (this.filterColumnIndex.size() == 0) {
             return noFilter;
         }
-        Object[] result = new Object[noFilter.length - this.filterColumnIndex.size()];
+        final Object[] result = new Object[noFilter.length - this.filterColumnIndex.size()];
         int index = 0;
         for (int i = 0, j = noFilter.length; i < j; i++) {
             if (!this.filterColumnIndex.contains(i)) {

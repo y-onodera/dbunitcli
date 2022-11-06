@@ -19,13 +19,13 @@ public class ExcelMappingDataSetConsumerWrapper {
     protected XlsxRowsToTableBuilder rowsTableBuilder;
     private int rowTableRows = 0;
 
-    public ExcelMappingDataSetConsumerWrapper(IDataSetConsumer consumer, XlsxSchema schema, boolean loadData) {
+    public ExcelMappingDataSetConsumerWrapper(final IDataSetConsumer consumer, final XlsxSchema schema, final boolean loadData) {
         this.consumer = consumer;
         this.schema = schema;
         this.loadData = loadData;
     }
 
-    protected void handleSheetStart(String tableName) {
+    protected void handleSheetStart(final String tableName) {
         this.rowsTableBuilder = this.schema.getRowsTableBuilder(tableName);
         this.randomCellRecordBuilder = this.schema.getCellRecordBuilder(tableName);
     }
@@ -37,48 +37,56 @@ public class ExcelMappingDataSetConsumerWrapper {
                     this.consumer.endTable();
                     LOGGER.info("produce - rows={}", this.rowTableRows);
                 }
+                this.rowsTableBuilder = null;
             }
             if (this.randomCellRecordBuilder != null) {
                 this.createRandomCellTable();
+                this.randomCellRecordBuilder = null;
             }
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new RuntimeException(e);
         }
     }
 
-    protected void handleCellValue(int thisColumn, String thisStr, CellReference reference) {
-        this.randomCellRecordBuilder.handle(reference, thisStr);
-        this.rowsTableBuilder.handle(reference, thisColumn, thisStr);
+    protected void handleCellValue(final int thisColumn, final String thisStr, final CellReference reference) {
+        if (this.randomCellRecordBuilder != null) {
+            this.randomCellRecordBuilder.handle(reference, thisStr);
+        }
+        if (this.rowsTableBuilder != null) {
+            this.rowsTableBuilder.handle(reference, thisColumn, thisStr);
+        }
     }
 
-    protected void addNewRowToRowsTable(int rowNumber) {
+    protected void addNewRowToRowsTable(final int rowNumber) {
         try {
-            if (this.rowsTableBuilder.isTableStart(rowNumber)) {
-                if (this.rowsTableBuilder.isNowProcessing()) {
-                    this.consumer.endTable();
-                    LOGGER.info("produce - rows={}", this.rowTableRows);
+            if (this.rowsTableBuilder != null) {
+                if (this.rowsTableBuilder.isTableStart(rowNumber)) {
+                    if (this.rowsTableBuilder.isNowProcessing()) {
+                        this.consumer.endTable();
+                        LOGGER.info("produce - rows={}", this.rowTableRows);
+                    }
+                    this.consumer.startTable(this.rowsTableBuilder.startNewTable());
+                    this.rowTableRows = 0;
+                } else if (this.rowsTableBuilder.hasRow(rowNumber)) {
+                    if (this.rowsTableBuilder.hasRow(rowNumber)) {
+                        this.addRowToTable(this.rowsTableBuilder.currentRow());
+                        this.rowTableRows++;
+                    }
                 }
-                this.consumer.startTable(this.rowsTableBuilder.startNewTable());
-                this.rowTableRows = 0;
-            } else if (this.rowsTableBuilder.hasRow(rowNumber)) {
-                if (this.rowsTableBuilder.hasRow(rowNumber)) {
-                    this.addRowToTable(this.rowsTableBuilder.currentRow());
-                    this.rowTableRows++;
-                }
+                this.rowsTableBuilder.clearRowValue();
             }
-            this.rowsTableBuilder.clearRowValue();
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new RuntimeException(e);
         }
     }
 
     protected void createRandomCellTable() throws DataSetException {
-        for (String tableName : this.randomCellRecordBuilder.getTableNames()) {
+        for (final String tableName : this.randomCellRecordBuilder.getTableNames()) {
             this.consumer.startTable(this.randomCellRecordBuilder.getTableMetaData(tableName));
             LOGGER.info("produce - start tableName={}", tableName);
             if (this.loadData) {
                 int i = 0;
-                for (String[] row : this.randomCellRecordBuilder.getRows(tableName)) {
+                for (final String[] row : this.randomCellRecordBuilder.getRows(tableName)) {
                     this.addRowToTable(row);
                     i++;
                 }
@@ -89,7 +97,7 @@ public class ExcelMappingDataSetConsumerWrapper {
         }
     }
 
-    protected void addRowToTable(String[] row) throws DataSetException {
+    protected void addRowToTable(final String[] row) throws DataSetException {
         if (Stream.of(row).anyMatch(it -> !Strings.isNullOrEmpty(it))) {
             this.consumer.row(Stream.of(row).map(it -> it == null ? "" : it).toArray());
         }

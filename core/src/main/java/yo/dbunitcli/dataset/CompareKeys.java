@@ -13,28 +13,28 @@ public class CompareKeys {
     private final int oldRowNum;
     private final int newRowNum;
 
-    public CompareKeys(ITable table, int aRowNum, List<String> compareColumns) {
+    public CompareKeys(final ITable table, final int aRowNum, final List<String> compareColumns) {
         try {
             this.rowNum = aRowNum;
             this.oldRowNum = this.rowNum;
             this.newRowNum = this.rowNum;
             if (compareColumns.size() > 0) {
-                for (String column : compareColumns) {
-                    keys.add(table.getValue(aRowNum, column).toString());
+                for (final String column : compareColumns) {
+                    this.keys.add(table.getValue(aRowNum, column).toString());
                 }
             } else {
-                keys.add(String.valueOf(aRowNum));
+                this.keys.add(String.valueOf(aRowNum));
             }
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
 
-    public CompareKeys(int aRowNum, List<String> aKeys) {
+    public CompareKeys(final int aRowNum, final List<String> aKeys) {
         this(aRowNum, aRowNum, aRowNum, aKeys);
     }
 
-    public CompareKeys(int rowNum, int originalOldRowNum, int originalNewRowNum, List<String> aKeys) {
+    public CompareKeys(final int rowNum, final int originalOldRowNum, final int originalNewRowNum, final List<String> aKeys) {
         this.rowNum = rowNum;
         this.oldRowNum = originalOldRowNum;
         this.newRowNum = originalNewRowNum;
@@ -42,7 +42,7 @@ public class CompareKeys {
     }
 
     public String getKeysToString() {
-        return keys.toString();
+        return this.keys.toString();
     }
 
     public int getRowNum() {
@@ -50,41 +50,45 @@ public class CompareKeys {
     }
 
     public int getOldRowNum() {
-        return oldRowNum;
+        return this.oldRowNum;
     }
 
     public int getNewRowNum() {
-        return newRowNum;
+        return this.newRowNum;
     }
 
-    public CompareKeys oldRowNum(int aOriginalRowNum) {
+    public CompareKeys oldRowNum(final int aOriginalRowNum) {
         return new CompareKeys(this.rowNum, aOriginalRowNum, this.newRowNum, this.keys);
     }
 
-    public CompareKeys newRowNum(int aNewRowNum) {
+    public CompareKeys newRowNum(final int aNewRowNum) {
         return new CompareKeys(this.rowNum, this.oldRowNum, aNewRowNum, this.keys);
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CompareKeys that = (CompareKeys) o;
-        return Objects.equals(keys, that.keys);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final CompareKeys that = (CompareKeys) o;
+        return Objects.equals(this.keys, that.keys);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(keys);
+        return Objects.hash(this.keys);
     }
 
     @Override
     public String toString() {
         return "CompareKeys{" +
-                "keys=" + keys +
-                ", rowNum=" + rowNum +
-                ", oldRowNum=" + oldRowNum +
-                ", newRowNum=" + newRowNum +
+                "keys=" + this.keys +
+                ", rowNum=" + this.rowNum +
+                ", oldRowNum=" + this.oldRowNum +
+                ", newRowNum=" + this.newRowNum +
                 '}';
     }
 }

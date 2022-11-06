@@ -6,7 +6,8 @@ import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.ITableMetaData;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 
 public interface IDataSetConverter extends org.dbunit.dataset.stream.IDataSetConsumer {
 
@@ -14,20 +15,43 @@ public interface IDataSetConverter extends org.dbunit.dataset.stream.IDataSetCon
 
     void reStartTable(ITableMetaData tableMetaData, Integer writeRows) throws DataSetException;
 
-    default void write(ITable aTable) throws DataSetException {
+    default void convert(final ITable aTable) {
         if (!this.isExportEmptyTable() && aTable.getRowCount() == 0) {
             return;
         }
-        this.startTable(aTable.getTableMetaData());
-        Column[] columns = aTable.getTableMetaData().getColumns();
-        for (int i = 0, j = aTable.getRowCount(); i < j; i++) {
-            Object[] row = new Object[columns.length];
-            for (int index = 0, last = columns.length; index < last; index++) {
-                row[index] = aTable.getValue(i, columns[index].getColumnName());
-            }
-            this.row(row);
+        try {
+            this.startTable(aTable.getTableMetaData());
+            IntStream.range(0, aTable.getRowCount()).forEach(i -> this.convertRow(aTable, i));
+            this.endTable();
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
         }
-        this.endTable();
+    }
+
+    default void convertRow(final ITable aTable, final int rowNum) {
+        try {
+            this.convertRow(Arrays.stream(aTable.getTableMetaData().getColumns())
+                    .map(column -> this.getValue(aTable, rowNum, column))
+                    .toArray(Object[]::new));
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    default void convertRow(final Object[] row) {
+        try {
+            this.row(row);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    default Object getValue(final ITable aTable, final int i, final Column column) {
+        try {
+            return aTable.getValue(i, column.getColumnName());
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     default File getDir() {

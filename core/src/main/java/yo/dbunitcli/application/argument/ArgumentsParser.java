@@ -19,23 +19,23 @@ public interface ArgumentsParser {
      * @param args option
      * @return args exclude this option is parsed
      */
-    default CmdLineParser parseArgument(String[] args) throws CmdLineException {
-        CmdLineParser parser = new CmdLineParser(this);
+    default CmdLineParser parseArgument(final String[] args) {
+        final CmdLineParser parser = new CmdLineParser(this);
         try {
-            String[] targetArgs = this.getArgumentMapper().map(args,this.getPrefix(),parser);
+            final String[] targetArgs = this.getArgumentMapper().map(args, this.getPrefix(), parser);
             parser.parseArgument(this.filterArguments(parser, targetArgs));
-            setUpComponent(parser, targetArgs);
-        } catch (CmdLineException cx) {
+            this.setUpComponent(parser, targetArgs);
+        } catch (final CmdLineException cx) {
             System.out.println("usage:");
             parser.printSingleLineUsage(System.out);
             System.out.println();
             parser.printUsage(System.out);
-            throw cx;
+            throw new AssertionError(cx);
         }
         return parser;
     }
 
-    default Collection<String> filterArguments(CmdLineParser parser, String[] expandArgs) {
+    default Collection<String> filterArguments(final CmdLineParser parser, final String[] expandArgs) {
         return this.getArgumentMapper().mapFilterArgument(this.getArgumentFilter()
                         .filterArguments(this.getPrefix(), parser, expandArgs)
                 , this.getPrefix(), parser, expandArgs);
@@ -67,62 +67,62 @@ public interface ArgumentsParser {
 
         private final Map<String, String> args;
 
-        public OptionParam(String prefix, Map<String, String> args) {
+        public OptionParam(final String prefix, final Map<String, String> args) {
             this.prefix = prefix;
             this.args = args;
         }
 
-        public void putAll(OptionParam other) {
+        public void putAll(final OptionParam other) {
             other.options
                     .rowKeySet()
                     .forEach(it -> {
-                        Map.Entry<String, Attribute> entry = other.options.row(it).entrySet().iterator().next();
-                        put(it, entry.getKey(), entry.getValue());
+                        final Map.Entry<String, Attribute> entry = other.options.row(it).entrySet().iterator().next();
+                        this.put(it, entry.getKey(), entry.getValue());
                     });
 
         }
 
-        public void put(String key, char value) {
+        public void put(final String key, final char value) {
             this.put(key, value, false);
         }
 
-        public void put(String key, char value, boolean required) {
+        public void put(final String key, final char value, final boolean required) {
             this.put(key, String.valueOf(value), new Attribute(ParamType.TEXT, required));
         }
 
-        public void put(String key, String value) {
+        public void put(final String key, final String value) {
             this.put(key, value, false);
         }
 
-        public void put(String key, String value, boolean required) {
+        public void put(final String key, final String value, final boolean required) {
             this.put(key, value, new Attribute(ParamType.TEXT, required));
         }
 
-        public void putFile(String key, File value) {
+        public void putFile(final String key, final File value) {
             this.putFile(key, value, false);
         }
 
-        public void putFile(String key, File value, boolean required) {
+        public void putFile(final String key, final File value, final boolean required) {
             this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.FILE, required));
         }
 
-        public void putDir(String key, File value) {
+        public void putDir(final String key, final File value) {
             this.putDir(key, value, false);
         }
 
-        public void putDir(String key, File value, boolean required) {
+        public void putDir(final String key, final File value, final boolean required) {
             this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.DIR, required));
         }
 
-        public void putFileOrDir(String key, File value, boolean required) {
+        public void putFileOrDir(final String key, final File value, final boolean required) {
             this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.FILE_OR_DIR, required));
         }
 
-        public <T extends Enum<?>> void put(String key, T value, Class<T> type) {
+        public <T extends Enum<?>> void put(final String key, final T value, final Class<T> type) {
             this.put(key, value, type, false);
         }
 
-        public <T extends Enum<?>> void put(String key, T value, Class<T> type, boolean required) {
+        public <T extends Enum<?>> void put(final String key, final T value, final Class<T> type, final boolean required) {
             this.put(key, value == null ? "" : value.toString(), new Attribute(ParamType.ENUM,
                     Arrays.stream(type.getEnumConstants())
                             .map(Object::toString)
@@ -131,42 +131,42 @@ public interface ArgumentsParser {
             );
         }
 
-        public void put(String key, String value, Attribute type) {
-            if (Strings.isNullOrEmpty(this.args.get(withPrefix(key)))) {
-                this.options.put(withPrefix(key), this.args.getOrDefault(key, Strings.nullToEmpty(value)), type);
+        public void put(final String key, final String value, final Attribute type) {
+            if (Strings.isNullOrEmpty(this.args.get(this.withPrefix(key)))) {
+                this.options.put(this.withPrefix(key), this.args.getOrDefault(key, Strings.nullToEmpty(value)), type);
             } else {
-                this.options.put(withPrefix(key), this.args.getOrDefault(withPrefix(key), value), type);
+                this.options.put(this.withPrefix(key), this.args.getOrDefault(this.withPrefix(key), value), type);
             }
-            this.keys.add(withPrefix(key));
+            this.keys.add(this.withPrefix(key));
         }
 
         public Iterable<String> keySet() {
             return this.keys;
         }
 
-        public Map.Entry<String, Attribute> getColumn(String key) {
-            if (this.options.containsRow(withPrefix(key))) {
-                return this.options.row(withPrefix(key)).entrySet().iterator().next();
+        public Map.Entry<String, Attribute> getColumn(final String key) {
+            if (this.options.containsRow(this.withPrefix(key))) {
+                return this.options.row(this.withPrefix(key)).entrySet().iterator().next();
             } else if (this.options.containsRow(key)) {
                 return this.options.row(key).entrySet().iterator().next();
             }
             return null;
         }
 
-        public String get(String key) {
-            if (this.options.containsRow(withPrefix(key))) {
-                return this.options.row(withPrefix(key)).keySet().iterator().next();
+        public String get(final String key) {
+            if (this.options.containsRow(this.withPrefix(key))) {
+                return this.options.row(this.withPrefix(key)).keySet().iterator().next();
             } else if (this.options.containsRow(key)) {
                 return this.options.row(key).keySet().iterator().next();
             }
             return "";
         }
 
-        public boolean hasValue(String key) {
+        public boolean hasValue(final String key) {
             return !Strings.isNullOrEmpty(this.get(key));
         }
 
-        protected String withPrefix(String key) {
+        protected String withPrefix(final String key) {
             if (Strings.isNullOrEmpty(this.prefix) || key.startsWith("-" + this.prefix + ".")) {
                 return key;
             }
@@ -183,26 +183,26 @@ public interface ArgumentsParser {
 
         private final boolean required;
 
-        public Attribute(ParamType type, boolean required) {
+        public Attribute(final ParamType type, final boolean required) {
             this(type, Lists.newArrayList(), required);
         }
 
-        public Attribute(ParamType type, ArrayList<String> selectOption, boolean required) {
+        public Attribute(final ParamType type, final ArrayList<String> selectOption, final boolean required) {
             this.type = type;
             this.selectOption = selectOption;
             this.required = required;
         }
 
         public ParamType getType() {
-            return type;
+            return this.type;
         }
 
         public ArrayList<String> getSelectOption() {
-            return selectOption;
+            return this.selectOption;
         }
 
         public boolean isRequired() {
-            return required;
+            return this.required;
         }
     }
 

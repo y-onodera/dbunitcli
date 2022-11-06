@@ -11,7 +11,7 @@ public class Generate implements Command<GenerateOption> {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static void main(String[] strings) throws Exception {
+    public static void main(final String[] strings) throws Exception {
         new Generate().exec(strings);
     }
 
@@ -21,23 +21,22 @@ public class Generate implements Command<GenerateOption> {
     }
 
     @Override
-    public GenerateOption getOptions(Parameter param) {
+    public GenerateOption getOptions(final Parameter param) {
         return new GenerateOption(param);
     }
 
     @Override
-    public void exec(GenerateOption options) throws Exception {
+    public void exec(final GenerateOption options) {
         options.parameterStream()
                 .forEach(param -> {
-                            File resultFile = new File(options.getResultDir(), options.resultPath(param));
+                            final File resultFile = new File(options.getResultDir(), options.resultPath(param));
                             if (!resultFile.getParentFile().exists()) {
                                 resultFile.getParentFile().mkdirs();
                             }
                             try {
                                 options.write(resultFile, param);
-                            } catch (IOException e) {
-                                LOGGER.error("failed write cause:", e);
-                                System.exit(1);
+                            } catch (final IOException e) {
+                                throw new AssertionError(e);
                             }
                         }
                 );

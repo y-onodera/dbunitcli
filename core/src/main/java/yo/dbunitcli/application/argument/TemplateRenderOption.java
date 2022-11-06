@@ -29,17 +29,17 @@ public class TemplateRenderOption extends DefaultArgumentsParser implements Comp
     @Option(name = "-formulaProcess", usage = "default true.if false xlsx output use LowerMemory but cellRef in formula isn't along with row increase")
     private String formulaProcess = "true";
 
-    public TemplateRenderOption(String prefix) {
+    public TemplateRenderOption(final String prefix) {
         super(prefix);
     }
 
     @Override
-    public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
+    public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         return builder.setSTTemplateLoader(this.getTemplateRender());
     }
 
     public String getTemplateParameterAttribute() {
-        return templateParameterAttribute;
+        return this.templateParameterAttribute;
     }
 
     public String getTemplateEncoding() {
@@ -61,8 +61,8 @@ public class TemplateRenderOption extends DefaultArgumentsParser implements Comp
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-encoding", this.encoding);
         result.putFile("-templateGroup", this.templateGroup);
         result.put("-templateParameterAttribute", this.templateParameterAttribute);
@@ -72,7 +72,7 @@ public class TemplateRenderOption extends DefaultArgumentsParser implements Comp
     }
 
     @Override
-    public void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
         if (this.templateGroup != null) {
             if (!this.templateGroup.exists() || !this.templateGroup.isFile()) {
                 throw new CmdLineException(parser, this.templateGroup + " is not exist file"

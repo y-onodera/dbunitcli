@@ -8,20 +8,20 @@ import org.dbunit.dataset.ITableMetaData;
 import java.sql.SQLException;
 
 public class CleanInsertConsumer extends InsertConsumer {
-    public CleanInsertConsumer(IDatabaseConnection connection) {
+    public CleanInsertConsumer(final IDatabaseConnection connection) {
         super(connection);
     }
 
     @Override
-    public void startTable(ITableMetaData iTableMetaData) throws DataSetException {
+    public void startTable(final ITableMetaData iTableMetaData) throws DataSetException {
         super.startTable(iTableMetaData);
         try {
-            IBatchStatement statement = this.factory.createBatchStatement(this.connection);
+            final IBatchStatement statement = this.factory.createBatchStatement(this.connection);
             statement.addBatch("truncate table " +
                     this.getQualifiedName(this.connection.getSchema(), this.metaData.getTableName(), this.connection));
             statement.executeBatch();
             statement.clearBatch();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new DataSetException(e);
         }
     }

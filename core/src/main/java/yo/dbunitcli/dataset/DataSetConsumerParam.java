@@ -15,7 +15,7 @@ public class DataSetConsumerParam {
     private final String excelTable;
     private final boolean exportEmptyTable;
 
-    public DataSetConsumerParam(Builder builder) {
+    public DataSetConsumerParam(final Builder builder) {
         this.resultDir = builder.getResultDir();
         this.fileName = builder.getResultPath();
         this.databaseConnectionLoader = builder.getDatabaseConnectionLoader();
@@ -61,13 +61,13 @@ public class DataSetConsumerParam {
     @Override
     public String toString() {
         return "DataSetConsumerParam{" +
-                "databaseConnectionLoader=" + databaseConnectionLoader +
-                ", resultType='" + resultType + '\'' +
-                ", operation='" + operation + '\'' +
-                ", resultDir=" + resultDir +
-                ", outputEncoding='" + outputEncoding + '\'' +
-                ", excelTable='" + excelTable + '\'' +
-                ", exportEmptyTable=" + exportEmptyTable +
+                "databaseConnectionLoader=" + this.databaseConnectionLoader +
+                ", resultType='" + this.resultType + '\'' +
+                ", operation='" + this.operation + '\'' +
+                ", resultDir=" + this.resultDir +
+                ", outputEncoding='" + this.outputEncoding + '\'' +
+                ", excelTable='" + this.excelTable + '\'' +
+                ", exportEmptyTable=" + this.exportEmptyTable +
                 '}';
     }
 
@@ -93,66 +93,66 @@ public class DataSetConsumerParam {
             return this.databaseConnectionLoader;
         }
 
-        public Builder setDatabaseConnectionLoader(DatabaseConnectionLoader databaseConnectionLoader) {
+        public Builder setDatabaseConnectionLoader(final DatabaseConnectionLoader databaseConnectionLoader) {
             this.databaseConnectionLoader = databaseConnectionLoader;
             return this;
         }
 
         public DataSourceType getResultType() {
-            return resultType;
+            return this.resultType;
         }
 
-        public Builder setResultType(DataSourceType resultType) {
+        public Builder setResultType(final DataSourceType resultType) {
             this.resultType = resultType;
             return this;
         }
 
         public DBConverter.Operation getOperation() {
-            return operation;
+            return this.operation;
         }
 
-        public Builder setOperation(DBConverter.Operation operation) {
+        public Builder setOperation(final DBConverter.Operation operation) {
             this.operation = operation;
             return this;
         }
 
         public File getResultDir() {
-            return resultDir;
+            return this.resultDir;
         }
 
-        public Builder setResultDir(File resultDir) {
+        public Builder setResultDir(final File resultDir) {
             this.resultDir = resultDir;
             return this;
         }
 
         public String getOutputEncoding() {
-            return outputEncoding;
+            return this.outputEncoding;
         }
 
-        public Builder setOutputEncoding(String outputEncoding) {
+        public Builder setOutputEncoding(final String outputEncoding) {
             this.outputEncoding = outputEncoding;
             return this;
         }
 
         public String getExcelTable() {
-            return excelTable;
+            return this.excelTable;
         }
 
-        public Builder setExcelTable(String excelTable) {
+        public Builder setExcelTable(final String excelTable) {
             this.excelTable = excelTable;
             return this;
         }
 
         public boolean isExportEmptyTable() {
-            return exportEmptyTable;
+            return this.exportEmptyTable;
         }
 
-        public Builder setExportEmptyTable(boolean exportEmptyTable) {
+        public Builder setExportEmptyTable(final boolean exportEmptyTable) {
             this.exportEmptyTable = exportEmptyTable;
             return this;
         }
 
-        public Builder setResultPath(String resultPath) {
+        public Builder setResultPath(final String resultPath) {
             this.resultPath = resultPath;
             return this;
         }

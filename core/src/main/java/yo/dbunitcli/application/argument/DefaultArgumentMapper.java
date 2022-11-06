@@ -8,12 +8,12 @@ import java.util.Map;
 public class DefaultArgumentMapper implements ArgumentMapper {
 
     @Override
-    public Collection<String> mapFilterArgument(Map<String, String> filterArguments, String prefix, CmdLineParser parser, String[] expandArgs) {
+    public Collection<String> mapFilterArgument(final Map<String, String> filterArguments, final String prefix, final CmdLineParser parser, final String[] expandArgs) {
         return filterArguments.values();
     }
 
     @Override
-    public String[] map(String[] args, String prefix, CmdLineParser parser) {
+    public String[] map(final String[] args, final String prefix, final CmdLineParser parser) {
         return args;
     }
 }

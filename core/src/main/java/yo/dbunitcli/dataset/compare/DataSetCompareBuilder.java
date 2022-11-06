@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset.compare;
 
-import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.dataset.AddSettingColumns;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.IDataSetConverter;
@@ -15,27 +14,27 @@ public class DataSetCompareBuilder {
     private IDataSetConverter dataSetConverter;
     private Supplier<DataSetCompare.Manager> compareManagerFactory = DefaultCompareManager::new;
 
-    public DataSetCompareBuilder oldDataSet(ComparableDataSet dataSet) {
+    public DataSetCompareBuilder oldDataSet(final ComparableDataSet dataSet) {
         this.oldDataSet = dataSet;
         return this;
     }
 
-    public DataSetCompareBuilder newDataSet(ComparableDataSet dataSet) {
+    public DataSetCompareBuilder newDataSet(final ComparableDataSet dataSet) {
         this.newDataSet = dataSet;
         return this;
     }
 
-    public DataSetCompareBuilder comparisonKeys(AddSettingColumns comparisonKeys) {
+    public DataSetCompareBuilder comparisonKeys(final AddSettingColumns comparisonKeys) {
         this.comparisonKeys = comparisonKeys;
         return this;
     }
 
-    public DataSetCompareBuilder dataSetConverter(IDataSetConverter iDataSetConverter) {
+    public DataSetCompareBuilder dataSetConverter(final IDataSetConverter iDataSetConverter) {
         this.dataSetConverter = iDataSetConverter;
         return this;
     }
 
-    public DataSetCompareBuilder setCompareManagerFactory(Supplier<DataSetCompare.Manager> compareManagerFactory) {
+    public DataSetCompareBuilder setCompareManagerFactory(final Supplier<DataSetCompare.Manager> compareManagerFactory) {
         this.compareManagerFactory = compareManagerFactory;
         return this;
     }
@@ -64,7 +63,7 @@ public class DataSetCompareBuilder {
         return this.getDataSetConverter().getDir();
     }
 
-    public DataSetCompare build() throws DataSetException {
+    public DataSetCompare build() {
         return new DataSetCompare(this);
     }
 

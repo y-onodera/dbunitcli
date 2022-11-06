@@ -7,6 +7,7 @@ import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.IDataSetProducer;
 
 import java.io.File;
+import java.util.Arrays;
 
 public interface ComparableDataSetProducer extends IDataSetProducer {
 
@@ -16,20 +17,16 @@ public interface ComparableDataSetProducer extends IDataSetProducer {
 
     ComparableDataSetParam getParam();
 
-    default ITableMetaData createMetaData(File aFile, String[] header) {
-        Column[] columns = new Column[header.length];
-        for (int i = 0; i < header.length; i++) {
-            columns[i] = new Column(header[i].trim(), DataType.UNKNOWN);
-        }
-        return this.createMetaData(aFile, columns);
+    default ITableMetaData createMetaData(final File aFile, final String[] header) {
+        return this.createMetaData(aFile, Arrays.stream(header).map(s -> new Column(s.trim(), DataType.UNKNOWN))
+                .toArray(Column[]::new));
     }
 
-    default  ITableMetaData createMetaData(File aFile, Column[] columns) {
+    default ITableMetaData createMetaData(final File aFile, final Column[] columns) {
         return new DefaultTableMetaData(this.getTableName(aFile), columns);
     }
 
-
-    default String getTableName(File aFile) {
+    default String getTableName(final File aFile) {
         return aFile.getName().substring(0, aFile.getName().lastIndexOf("."));
     }
 

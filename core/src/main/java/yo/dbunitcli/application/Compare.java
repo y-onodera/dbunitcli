@@ -2,14 +2,13 @@ package yo.dbunitcli.application;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.dbunit.DatabaseUnitException;
 import yo.dbunitcli.dataset.Parameter;
 
 public class Compare implements Command<CompareOption> {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
         new Compare().exec(args);
     }
 
@@ -19,12 +18,12 @@ public class Compare implements Command<CompareOption> {
     }
 
     @Override
-    public CompareOption getOptions(Parameter param) {
+    public CompareOption getOptions(final Parameter param) {
         return new CompareOption(param);
     }
 
     @Override
-    public void exec(CompareOption options) throws DatabaseUnitException {
+    public void exec(final CompareOption options) {
         options.compare();
         LOGGER.info("compare success.");
     }

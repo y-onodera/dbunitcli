@@ -9,58 +9,49 @@ import org.dbunit.operation.OperationData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class UpdateConsumer extends IDataSetOperationConsumer {
 
-    public UpdateConsumer(IDatabaseConnection connection) {
+    public UpdateConsumer(final IDatabaseConnection connection) {
         super(connection);
     }
 
     @Override
     protected OperationData getOperationData() throws DataSetException {
-        Column[] columns = this.metaData.getColumns();
-        Column[] primaryKeys = this.metaData.getPrimaryKeys();
+        final Column[] columns = this.metaData.getColumns();
+        final Column[] primaryKeys = this.metaData.getPrimaryKeys();
         if (primaryKeys.length == 0) {
             throw new NoPrimaryKeyException(this.metaData.getTableName());
         } else {
-            StringBuilder sqlBuffer = new StringBuilder(128);
+            final StringBuilder sqlBuffer = new StringBuilder(128);
             sqlBuffer.append("update ");
             sqlBuffer.append(this.getQualifiedName(this.connection.getSchema(), this.metaData.getTableName(), this.connection));
-            boolean firstSet = true;
-            List<Column> columnList = new ArrayList<>(columns.length);
+            final List<Column> columnList = new ArrayList<>(columns.length);
             sqlBuffer.append(" set ");
-
-            int i;
-            Column column;
-            String columnName;
-            for (i = 0; i < columns.length; ++i) {
-                column = columns[i];
+            IntStream.range(0, columns.length).forEach(i -> {
+                final Column column = columns[i];
                 if (Columns.getColumn(column.getColumnName(), primaryKeys) == null) {
-                    if (!firstSet) {
+                    if (columnList.size() > 0) {
                         sqlBuffer.append(", ");
                     }
-
-                    firstSet = false;
-                    columnName = this.getQualifiedName(null, column.getColumnName(), this.connection);
+                    final String columnName = this.getQualifiedName(null, column.getColumnName(), this.connection);
                     sqlBuffer.append(columnName);
                     sqlBuffer.append(" = ?");
                     columnList.add(column);
                 }
-            }
-
+            });
             sqlBuffer.append(" where ");
-
-            for (i = 0; i < primaryKeys.length; ++i) {
-                column = primaryKeys[i];
+            IntStream.range(0, primaryKeys.length).forEach(i -> {
+                final Column column = primaryKeys[i];
                 if (i > 0) {
                     sqlBuffer.append(" and ");
                 }
-
-                columnName = this.getQualifiedName(null, column.getColumnName(), this.connection);
+                final String columnName = this.getQualifiedName(null, column.getColumnName(), this.connection);
                 sqlBuffer.append(columnName);
                 sqlBuffer.append(" = ?");
                 columnList.add(column);
-            }
+            });
             return new OperationData(sqlBuffer.toString(), columnList.toArray(new Column[0]));
         }
     }

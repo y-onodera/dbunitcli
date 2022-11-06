@@ -43,127 +43,127 @@ public class ImageCompareBuilder implements Supplier<DataSetCompare.Manager> {
     }
 
     public int getThreshold() {
-        return threshold;
+        return this.threshold;
     }
 
-    public ImageCompareBuilder setThreshold(int threshold) {
+    public ImageCompareBuilder setThreshold(final int threshold) {
         this.threshold = threshold;
         return this;
     }
 
     public int getRectangleLineWidth() {
-        return rectangleLineWidth;
+        return this.rectangleLineWidth;
     }
 
-    public ImageCompareBuilder setRectangleLineWidth(int rectangleLineWidth) {
+    public ImageCompareBuilder setRectangleLineWidth(final int rectangleLineWidth) {
         this.rectangleLineWidth = rectangleLineWidth;
         return this;
     }
 
     public Integer getMinimalRectangleSize() {
-        return minimalRectangleSize;
+        return this.minimalRectangleSize;
     }
 
-    public ImageCompareBuilder setMinimalRectangleSize(Integer minimalRectangleSize) {
+    public ImageCompareBuilder setMinimalRectangleSize(final Integer minimalRectangleSize) {
         this.minimalRectangleSize = minimalRectangleSize;
         return this;
     }
 
     public Integer getMaximalRectangleCount() {
-        return maximalRectangleCount;
+        return this.maximalRectangleCount;
     }
 
-    public ImageCompareBuilder setMaximalRectangleCount(Integer maximalRectangleCount) {
+    public ImageCompareBuilder setMaximalRectangleCount(final Integer maximalRectangleCount) {
         this.maximalRectangleCount = maximalRectangleCount;
         return this;
     }
 
     public double getPixelToleranceLevel() {
-        return pixelToleranceLevel;
+        return this.pixelToleranceLevel;
     }
 
-    public ImageCompareBuilder setPixelToleranceLevel(double pixelToleranceLevel) {
+    public ImageCompareBuilder setPixelToleranceLevel(final double pixelToleranceLevel) {
         this.pixelToleranceLevel = pixelToleranceLevel;
         return this;
     }
 
     public List<Rectangle> getExcludeAreaList() {
-        return excludeAreaList;
+        return this.excludeAreaList;
     }
 
-    public ImageCompareBuilder setExcludeAreaList(List<Rectangle> excludeAreaList) {
+    public ImageCompareBuilder setExcludeAreaList(final List<Rectangle> excludeAreaList) {
         this.excludeAreaList = excludeAreaList;
         return this;
     }
 
     public boolean isDrawExcludedRectangles() {
-        return drawExcludedRectangles;
+        return this.drawExcludedRectangles;
     }
 
-    public ImageCompareBuilder setDrawExcludedRectangles(boolean drawExcludedRectangles) {
+    public ImageCompareBuilder setDrawExcludedRectangles(final boolean drawExcludedRectangles) {
         this.drawExcludedRectangles = drawExcludedRectangles;
         return this;
     }
 
     public boolean isFillExcludedRectangles() {
-        return fillExcludedRectangles;
+        return this.fillExcludedRectangles;
     }
 
-    public ImageCompareBuilder setFillExcludedRectangles(boolean fillExcludedRectangles) {
+    public ImageCompareBuilder setFillExcludedRectangles(final boolean fillExcludedRectangles) {
         this.fillExcludedRectangles = fillExcludedRectangles;
         return this;
     }
 
     public double getPercentOpacityExcludedRectangles() {
-        return percentOpacityExcludedRectangles;
+        return this.percentOpacityExcludedRectangles;
     }
 
-    public ImageCompareBuilder setPercentOpacityExcludedRectangles(double percentOpacityExcludedRectangles) {
+    public ImageCompareBuilder setPercentOpacityExcludedRectangles(final double percentOpacityExcludedRectangles) {
         this.percentOpacityExcludedRectangles = percentOpacityExcludedRectangles;
         return this;
     }
 
     public boolean isFillDifferenceRectangles() {
-        return fillDifferenceRectangles;
+        return this.fillDifferenceRectangles;
     }
 
-    public ImageCompareBuilder setFillDifferenceRectangles(boolean fillDifferenceRectangles) {
+    public ImageCompareBuilder setFillDifferenceRectangles(final boolean fillDifferenceRectangles) {
         this.fillDifferenceRectangles = fillDifferenceRectangles;
         return this;
     }
 
     public double getPercentOpacityDifferenceRectangles() {
-        return percentOpacityDifferenceRectangles;
+        return this.percentOpacityDifferenceRectangles;
     }
 
-    public ImageCompareBuilder setPercentOpacityDifferenceRectangles(double percentOpacityDifferenceRectangles) {
+    public ImageCompareBuilder setPercentOpacityDifferenceRectangles(final double percentOpacityDifferenceRectangles) {
         this.percentOpacityDifferenceRectangles = percentOpacityDifferenceRectangles;
         return this;
     }
 
     public double getAllowingPercentOfDifferentPixels() {
-        return allowingPercentOfDifferentPixels;
+        return this.allowingPercentOfDifferentPixels;
     }
 
-    public ImageCompareBuilder setAllowingPercentOfDifferentPixels(double allowingPercentOfDifferentPixels) {
+    public ImageCompareBuilder setAllowingPercentOfDifferentPixels(final double allowingPercentOfDifferentPixels) {
         this.allowingPercentOfDifferentPixels = allowingPercentOfDifferentPixels;
         return this;
     }
 
     public Color getDifferenceRectangleColor() {
-        return differenceRectangleColor;
+        return this.differenceRectangleColor;
     }
 
-    public ImageCompareBuilder setDifferenceRectangleColor(Color differenceRectangleColor) {
+    public ImageCompareBuilder setDifferenceRectangleColor(final Color differenceRectangleColor) {
         this.differenceRectangleColor = differenceRectangleColor;
         return this;
     }
 
     public Color getExcludedRectangleColor() {
-        return excludedRectangleColor;
+        return this.excludedRectangleColor;
     }
 
-    public ImageCompareBuilder setExcludedRectangleColor(Color excludedRectangleColor) {
+    public ImageCompareBuilder setExcludedRectangleColor(final Color excludedRectangleColor) {
         this.excludedRectangleColor = excludedRectangleColor;
         return this;
     }

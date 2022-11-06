@@ -4,10 +4,8 @@ import com.google.common.collect.Lists;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.IntStream;
 
 public class ComparableTableMapper {
 
@@ -22,7 +20,7 @@ public class ComparableTableMapper {
     private IDataSetConverter converter;
     private Map<String, Integer> alreadyWrite;
 
-    public ComparableTableMapper(AddSettingTableMetaData metaData, Column[] orderColumns, List<AddSettingTableMetaData> settings) {
+    public ComparableTableMapper(final AddSettingTableMetaData metaData, final Column[] orderColumns, final List<AddSettingTableMetaData> settings) {
         this.values = new ArrayList<>();
         this.filteredRowIndexes = new ArrayList<>();
         this.addSettingTableMetaData = metaData;
@@ -30,7 +28,7 @@ public class ComparableTableMapper {
         this.settingChain.addAll(settings);
     }
 
-    public void setConsumer(IDataSetConverter converter, Map<String, Integer> alreadyWrite) throws DataSetException {
+    public void setConsumer(final IDataSetConverter converter, final Map<String, Integer> alreadyWrite) throws DataSetException {
         this.converter = converter;
         this.alreadyWrite = alreadyWrite;
         if (this.isEnableRowProcessing() && this.converter.isExportEmptyTable()) {
@@ -57,9 +55,9 @@ public class ComparableTableMapper {
         return this.addSettingTableMetaData.getTableName();
     }
 
-    public void addRow(Object[] values) throws DataSetException {
+    public void addRow(final Object[] values) {
         Object[] applySettings = values;
-        for (AddSettingTableMetaData metaData : this.settingChain) {
+        for (final AddSettingTableMetaData metaData : this.settingChain) {
             applySettings = metaData.applySetting(applySettings);
             if (applySettings == null) {
                 break;
@@ -70,38 +68,38 @@ public class ComparableTableMapper {
         }
     }
 
-    public void add(ComparableTable other) throws DataSetException {
-        for (int rowNum = 0, total = other.getRowCount(); rowNum < total; rowNum++) {
-            Column[] columns = this.addSettingTableMetaData.getColumns();
-            Object[] row = new Object[columns.length];
-            for (int i = 0, j = columns.length; i < j; i++) {
-                row[i] = other.getValue(rowNum, columns[i].getColumnName());
-            }
-            this.addValue(row);
-        }
+    public void add(final ComparableTable other) {
+        IntStream.range(0, other.getRowCount()).forEach(rowNum ->
+                this.addValue(Arrays.stream(this.addSettingTableMetaData.getColumns())
+                        .map(column -> other.getValue(rowNum, column.getColumnName()))
+                        .toArray(Object[]::new)));
     }
 
-    public void add(Object[] row) throws DataSetException {
+    public void add(final Object[] row) {
         this.addValue(this.addSettingTableMetaData.applySetting(row));
     }
 
-    protected void addValue(Object[] applySetting) throws DataSetException {
-        if (applySetting != null) {
-            this.addRowCount++;
-            if (this.isEnableRowProcessing()) {
-                if (!this.converter.isExportEmptyTable() && !this.startTable) {
-                    this.converter.startTable(this.addSettingTableMetaData);
-                    this.startTable = true;
-                }
-                this.converter.row(applySetting);
-            } else {
-                this.values.add(applySetting);
-                if (this.addSettingTableMetaData.hasRowFilter()) {
-                    this.filteredRowIndexes.add(this.addCount);
+    protected void addValue(final Object[] applySetting) {
+        try {
+            if (applySetting != null) {
+                this.addRowCount++;
+                if (this.isEnableRowProcessing()) {
+                    if (!this.converter.isExportEmptyTable() && !this.startTable) {
+                        this.converter.startTable(this.addSettingTableMetaData);
+                        this.startTable = true;
+                    }
+                    this.converter.row(applySetting);
+                } else {
+                    this.values.add(applySetting);
+                    if (this.addSettingTableMetaData.hasRowFilter()) {
+                        this.filteredRowIndexes.add(this.addCount);
+                    }
                 }
             }
+            this.addCount++;
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
         }
-        this.addCount++;
     }
 
     private boolean isEnableRowProcessing() {

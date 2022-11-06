@@ -2,7 +2,6 @@ package yo.dbunitcli.fileprocessor;
 
 import com.google.common.io.CharStreams;
 import org.apache.tools.ant.taskdefs.SQLExec;
-import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
@@ -23,9 +22,9 @@ public class SqlRunner implements Runner {
     private final Map<String, Object> parameter;
     private final TemplateRender templateRender;
 
-    public SqlRunner(DatabaseConnectionLoader connectionLoader
-            , Map<String, Object> parameter
-            , TemplateRender templateRender) {
+    public SqlRunner(final DatabaseConnectionLoader connectionLoader
+            , final Map<String, Object> parameter
+            , final TemplateRender templateRender) {
         this.connectionLoader = connectionLoader;
         this.parameter = parameter;
         this.templateRender = templateRender;
@@ -40,46 +39,46 @@ public class SqlRunner implements Runner {
     }
 
     @Override
-    public void runScript(Collection<File> targetFiles) throws DataSetException {
-        for (File target : targetFiles) {
+    public void runScript(final Collection<File> targetFiles) {
+        targetFiles.forEach(target -> {
             try {
-                Connection conn = this.getConnection();
-                SQLExec exec = this.createExecInstance(conn);
+                final Connection conn = this.getConnection();
+                final SQLExec exec = this.createExecInstance(conn);
                 exec.setSrc(target);
                 if (target.getName().endsWith("plsql")) {
-                    SQLExec.DelimiterType delimiterType = new SQLExec.DelimiterType();
+                    final SQLExec.DelimiterType delimiterType = new SQLExec.DelimiterType();
                     delimiterType.setValue("row");
                     exec.setDelimiterType(delimiterType);
                     exec.setDelimiter("/");
                     exec.setKeepformat(true);
                 }
                 exec.execute();
-            } catch (Throwable var30) {
+            } catch (final Throwable var30) {
                 LOGGER.error("error " + target.getName(), var30);
-                throw new DataSetException(var30);
+                throw new AssertionError(var30);
             }
-        }
+        });
     }
 
-    private SQLExec createExecInstance(Connection conn) {
-        SQLExec exec = new SQLExec() {
+    private SQLExec createExecInstance(final Connection conn) {
+        final SQLExec exec = new SQLExec() {
             @Override
             protected Connection getConnection() {
                 return conn;
             }
 
             @Override
-            protected void runStatements(Reader reader, PrintStream out) throws SQLException, IOException {
-                String statement = getTemplateRender().render(CharStreams.toString(reader), getParameter());
+            protected void runStatements(final Reader reader, final PrintStream out) throws SQLException, IOException {
+                String statement = SqlRunner.this.getTemplateRender().render(CharStreams.toString(reader), SqlRunner.this.getParameter());
                 statement = SQLPLUS_SET.matcher(statement).replaceAll("");
                 statement = SQLPLUS_SPOOL_OR_PROMPT.matcher(statement).replaceAll("");
                 statement = SQLPLUS_EXIT_OR_COMMIT.matcher(statement).replaceAll("");
-                boolean dbmsOutput = statement.contains("dbms_output");
+                final boolean dbmsOutput = statement.contains("dbms_output");
                 try {
                     super.runStatements(new StringReader(statement), out);
                 } finally {
                     if (dbmsOutput) {
-                        printDbmsOutputResults(conn);
+                        SqlRunner.this.printDbmsOutputResults(conn);
                     }
                 }
             }
@@ -89,19 +88,19 @@ public class SqlRunner implements Runner {
         return exec;
     }
 
-    private Connection getConnection() throws SQLException, DataSetException {
-        Connection conn = this.connectionLoader.loadConnection().getConnection();
+    private Connection getConnection() throws SQLException {
+        final Connection conn = this.connectionLoader.loadConnection().getConnection();
         conn.setAutoCommit(false);
         return conn;
     }
 
-    private void printDbmsOutputResults(Connection conn) throws java.sql.SQLException {
-        String getLineSql = "begin dbms_output.get_line(?,?); end;";
-        CallableStatement stmt = conn.prepareCall(getLineSql);
+    private void printDbmsOutputResults(final Connection conn) throws java.sql.SQLException {
+        final String getLineSql = "begin dbms_output.get_line(?,?); end;";
+        final CallableStatement stmt = conn.prepareCall(getLineSql);
         boolean hasMore = true;
         stmt.registerOutParameter(1, Types.VARCHAR);
         stmt.registerOutParameter(2, Types.INTEGER);
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         while (hasMore) {
             stmt.execute();
             hasMore = (stmt.getInt(2) == 0);

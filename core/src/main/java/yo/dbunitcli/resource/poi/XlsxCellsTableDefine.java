@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class XlsxCellsTableDefine {
@@ -20,23 +21,20 @@ public class XlsxCellsTableDefine {
     private final ITableMetaData tableMetaData;
     private final Map<String, int[]> tableIndexMap = new HashMap<>();
 
-    public XlsxCellsTableDefine(Builder builder) {
+    public XlsxCellsTableDefine(final Builder builder) {
         this.tableName = builder.getTableName();
-        List<String[]> rows = builder.getRows();
+        final List<String[]> rows = builder.getRows();
         this.rowCount = rows.size();
-        String[] columnNames = builder.getHeader().toArray(new String[0]);
-        this.columnCount = columnNames.length;
-        final Column[] columns = new Column[columnNames.length];
-        for (int i = 0, j = columns.length; i < j; i++) {
-            columns[i] = new Column(columnNames[i], DataType.UNKNOWN);
-        }
+        final Column[] columns = builder.getHeader()
+                .stream()
+                .map(columnNames -> new Column(columnNames, DataType.UNKNOWN))
+                .toArray(Column[]::new);
+        this.columnCount = columns.length;
         this.tableMetaData = new DefaultTableMetaData(this.tableName, columns);
-        for (int rowNum = 0, maxRow = rows.size(); rowNum < maxRow; rowNum++) {
-            String[] row = rows.get(rowNum);
-            for (int col = 0, maxCol = row.length; col < maxCol; col++) {
-                this.tableIndexMap.put(row[col], new int[]{rowNum, col});
-            }
-        }
+        IntStream.range(0, rows.size()).forEach(rowNum -> {
+            final String[] row = rows.get(rowNum);
+            IntStream.range(0, row.length).forEach(col -> this.tableIndexMap.put(row[col], new int[]{rowNum, col}));
+        });
     }
 
     public static XlsxCellsTableDefine.Builder builder() {
@@ -59,11 +57,11 @@ public class XlsxCellsTableDefine {
         return this.rowCount;
     }
 
-    public String getColumnName(String ref) throws DataSetException {
+    public String getColumnName(final String ref) throws DataSetException {
         return this.tableMetaData.getColumns()[this.tableIndexMap.get(ref)[1]].getColumnName();
     }
 
-    public int getRowIndex(String ref) {
+    public int getRowIndex(final String ref) {
         return this.tableIndexMap.get(ref)[0];
     }
 
@@ -74,11 +72,11 @@ public class XlsxCellsTableDefine {
     @Override
     public String toString() {
         return "XlsxCellsTableDefine{" +
-                "tableName='" + tableName + '\'' +
-                ", rowCount=" + rowCount +
-                ", columnCount=" + columnCount +
-                ", tableMetaData=" + tableMetaData +
-                ", tableIndexMap=" + tableIndexMap +
+                "tableName='" + this.tableName + '\'' +
+                ", rowCount=" + this.rowCount +
+                ", columnCount=" + this.columnCount +
+                ", tableMetaData=" + this.tableMetaData +
+                ", tableIndexMap=" + this.tableIndexMap +
                 '}';
     }
 
@@ -99,17 +97,17 @@ public class XlsxCellsTableDefine {
             return new ArrayList<>(this.rows);
         }
 
-        public Builder setTableName(String tableName) {
+        public Builder setTableName(final String tableName) {
             this.tableName = tableName;
             return this;
         }
 
-        public Builder setHeader(Stream<String> header) {
+        public Builder setHeader(final Stream<String> header) {
             header.forEach(this.header::add);
             return this;
         }
 
-        public Builder setRows(Stream<Stream<String>> rows) {
+        public Builder setRows(final Stream<Stream<String>> rows) {
             rows.forEach(it -> this.rows.add(it.toArray(String[]::new)));
             return this;
         }

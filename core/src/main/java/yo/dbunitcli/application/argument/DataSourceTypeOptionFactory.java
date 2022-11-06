@@ -4,7 +4,7 @@ import yo.dbunitcli.dataset.DataSourceType;
 
 public class DataSourceTypeOptionFactory {
 
-    public ComparableDataSetParamOption create(String prefix, DataSourceType type) {
+    public ComparableDataSetParamOption create(final String prefix, final DataSourceType type) {
         switch (type) {
             case file:
                 return ComparableDataSetParamOption.join(new ExtensionOption(prefix));

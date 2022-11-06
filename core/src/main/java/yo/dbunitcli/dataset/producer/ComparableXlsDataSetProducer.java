@@ -21,6 +21,7 @@ import yo.dbunitcli.resource.poi.ExcelMappingDataSetConsumerWrapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWrapper implements ComparableDataSetProducer, HSSFListener {
@@ -48,7 +49,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
     private int nextColumn;
     private boolean outputNextStringRecord;
 
-    public ComparableXlsDataSetProducer(ComparableDataSetParam param) {
+    public ComparableXlsDataSetProducer(final ComparableDataSetParam param) {
         super(new DefaultConsumer(), param.getXlsxSchema(), param.isLoadData());
         this.param = param;
         this.src = this.param.getSrcFiles();
@@ -61,7 +62,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
     }
 
     @Override
-    public void setConsumer(IDataSetConsumer aConsumer) {
+    public void setConsumer(final IDataSetConsumer aConsumer) {
         this.consumer = aConsumer;
     }
 
@@ -69,38 +70,14 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
     public void produce() throws DataSetException {
         LOGGER.info("produce() - start");
         this.consumer.startDataSet();
-        for (File sourceFile : this.src) {
-            if (!filter.predicate(sourceFile.getName())) {
-                continue;
-            }
-            LOGGER.info("produce - start fileName={}", sourceFile);
-
-            try (POIFSFileSystem newFs = new POIFSFileSystem(sourceFile, true)) {
-                this.rowsTableBuilder = null;
-                this.randomCellRecordBuilder = null;
-                this.sheetIndex = -1;
-                this.boundSheetRecords = new ArrayList<>();
-                this.orderedBSRs = null;
-                MissingRecordAwareHSSFListener listener = new MissingRecordAwareHSSFListener(this);
-                this.formatListener = new FormatTrackingHSSFListener(listener);
-
-                HSSFEventFactory factory = new HSSFEventFactory();
-                HSSFRequest request = new HSSFRequest();
-                request.addListenerForAllRecords(this.formatListener);
-                factory.processWorkbookEvents(request, newFs);
-                this.handleSheetEnd();
-                LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex].getSheetname(), this.sheetIndex);
-            } catch (IOException e) {
-                throw new DataSetException(e);
-            }
-            LOGGER.info("produce - end   fileName={}", sourceFile);
-        }
+        Arrays.stream(this.src)
+                .forEach(this::execute);
         this.consumer.endDataSet();
         LOGGER.info("produce() - end");
     }
 
     @Override
-    public void processRecord(Record record) {
+    public void processRecord(final Record record) {
         int thisRow = -1;
         int thisColumn = -1;
         String thisStr = null;
@@ -110,7 +87,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                 this.boundSheetRecords.add((BoundSheetRecord) record);
                 break;
             case BOFRecord.sid:
-                BOFRecord br = (BOFRecord) record;
+                final BOFRecord br = (BOFRecord) record;
                 if (br.getType() == BOFRecord.TYPE_WORKSHEET) {
                     this.handleSheetEnd();
                     // Output the worksheet name
@@ -123,9 +100,11 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                     } else {
                         LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex - 1].getSheetname(), this.sheetIndex - 1);
                     }
-                    String tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
-                    this.handleSheetStart(tableName);
-                    LOGGER.info("produce - start sheetName={},index={}", tableName, this.sheetIndex);
+                    final String tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
+                    if (this.filter.predicate(tableName)) {
+                        this.handleSheetStart(tableName);
+                        LOGGER.info("produce - start sheetName={},index={}", tableName, this.sheetIndex);
+                    }
                 }
                 break;
 
@@ -134,14 +113,14 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                 break;
 
             case BlankRecord.sid:
-                BlankRecord blankRec = (BlankRecord) record;
+                final BlankRecord blankRec = (BlankRecord) record;
 
                 thisRow = blankRec.getRow();
                 thisColumn = blankRec.getColumn();
                 thisStr = "";
                 break;
             case BoolErrRecord.sid:
-                BoolErrRecord boolErrorRec = (BoolErrRecord) record;
+                final BoolErrRecord boolErrorRec = (BoolErrRecord) record;
 
                 thisRow = boolErrorRec.getRow();
                 thisColumn = boolErrorRec.getColumn();
@@ -149,7 +128,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                 break;
 
             case FormulaRecord.sid:
-                FormulaRecord formulaRec = (FormulaRecord) record;
+                final FormulaRecord formulaRec = (FormulaRecord) record;
                 thisRow = formulaRec.getRow();
                 thisColumn = formulaRec.getColumn();
                 if (formulaRec.hasCachedResultString()) {
@@ -165,7 +144,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
             case StringRecord.sid:
                 if (this.outputNextStringRecord) {
                     // String for formula
-                    StringRecord srec = (StringRecord) record;
+                    final StringRecord srec = (StringRecord) record;
                     thisStr = srec.getString();
                     thisRow = this.nextRow;
                     thisColumn = this.nextColumn;
@@ -173,13 +152,13 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                 }
                 break;
             case LabelRecord.sid:
-                LabelRecord labelRec = (LabelRecord) record;
+                final LabelRecord labelRec = (LabelRecord) record;
                 thisRow = labelRec.getRow();
                 thisColumn = labelRec.getColumn();
                 thisStr = labelRec.getValue();
                 break;
             case LabelSSTRecord.sid:
-                LabelSSTRecord labelSSTRec = (LabelSSTRecord) record;
+                final LabelSSTRecord labelSSTRec = (LabelSSTRecord) record;
 
                 thisRow = labelSSTRec.getRow();
                 thisColumn = labelSSTRec.getColumn();
@@ -193,7 +172,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                 // note ignore
                 break;
             case NumberRecord.sid:
-                NumberRecord numRec = (NumberRecord) record;
+                final NumberRecord numRec = (NumberRecord) record;
 
                 thisRow = numRec.getRow();
                 thisColumn = numRec.getColumn();
@@ -210,14 +189,14 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
 
         // Handle missing column
         if (record instanceof MissingCellDummyRecord) {
-            MissingCellDummyRecord mc = (MissingCellDummyRecord) record;
+            final MissingCellDummyRecord mc = (MissingCellDummyRecord) record;
             thisRow = mc.getRow();
             thisColumn = mc.getColumn();
             thisStr = "";
         }
         if (this.randomCellRecordBuilder != null && thisStr != null) {
-            String cellReference = new CellAddress(thisRow, thisColumn).formatAsString();
-            CellReference reference = new CellReference(cellReference);
+            final String cellReference = new CellAddress(thisRow, thisColumn).formatAsString();
+            final CellReference reference = new CellReference(cellReference);
             this.handleCellValue(thisColumn, thisStr, reference);
         }
         // Update column and row count
@@ -228,6 +207,29 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
         if (record instanceof LastCellOfRowDummyRecord) {
             this.addNewRowToRowsTable(this.lastRowNumber);
         }
+    }
+
+    protected void execute(final File sourceFile) {
+        LOGGER.info("produce - start fileName={}", sourceFile);
+        try (final POIFSFileSystem newFs = new POIFSFileSystem(sourceFile, true)) {
+            this.rowsTableBuilder = null;
+            this.randomCellRecordBuilder = null;
+            this.sheetIndex = -1;
+            this.boundSheetRecords = new ArrayList<>();
+            this.orderedBSRs = null;
+            final MissingRecordAwareHSSFListener listener = new MissingRecordAwareHSSFListener(this);
+            this.formatListener = new FormatTrackingHSSFListener(listener);
+
+            final HSSFEventFactory factory = new HSSFEventFactory();
+            final HSSFRequest request = new HSSFRequest();
+            request.addListenerForAllRecords(this.formatListener);
+            factory.processWorkbookEvents(request, newFs);
+            this.handleSheetEnd();
+            LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex].getSheetname(), this.sheetIndex);
+        } catch (final IOException e) {
+            throw new AssertionError(e);
+        }
+        LOGGER.info("produce - end   fileName={}", sourceFile);
     }
 
 }

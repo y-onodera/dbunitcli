@@ -10,18 +10,18 @@ public class CsvOption extends DefaultArgumentsParser implements ComparableDataS
     @Option(name = "-delimiter", usage = "default is comma", handler = EscapeSequenceEnableCharOptionHandler.class)
     private char delimiter = ',';
 
-    public CsvOption(String prefix) {
+    public CsvOption(final String prefix) {
         super(prefix);
     }
 
     @Override
-    public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
+    public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         return builder.setDelimiter(this.delimiter);
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-delimiter", this.delimiter);
         return result;
     }

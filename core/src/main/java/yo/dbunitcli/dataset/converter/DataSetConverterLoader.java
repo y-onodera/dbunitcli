@@ -2,7 +2,6 @@ package yo.dbunitcli.dataset.converter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.IDataSetConverter;
@@ -11,7 +10,7 @@ public class DataSetConverterLoader {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public IDataSetConverter get(DataSetConsumerParam param) throws DataSetException {
+    public IDataSetConverter get(final DataSetConsumerParam param) {
         LOGGER.info("create DataSetWriter param:{}", param);
         if (DataSourceType.table == param.getResultType()) {
             return new DBConverter(param);

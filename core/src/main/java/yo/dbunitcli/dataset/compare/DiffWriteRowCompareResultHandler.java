@@ -9,6 +9,7 @@ import yo.dbunitcli.dataset.CompareKeys;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler {
     private static final String COLUMN_NAME_ROW_INDEX = "$ROW_INDEX";
@@ -18,7 +19,7 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
     private final DefaultTable deleteDiffTable;
     private final DefaultTable addDiffTable;
 
-    protected DiffWriteRowCompareResultHandler(DataSetCompare.TableCompare it) {
+    protected DiffWriteRowCompareResultHandler(final DataSetCompare.TableCompare it) {
         this.tableCompare = it;
         this.modifyDiffTable = DiffTable.from(this.tableCompare.getOldTable().getTableMetaData(), this.tableCompare.getColumnLength());
         this.deleteDiffTable = this.toITable(this.tableCompare.getOldTable(), "$DELETE");
@@ -26,28 +27,28 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
     }
 
     @Override
-    public void handleModify(Object[] oldRow, Object[] newRow, CompareKeys key) {
-        int diff = 0;
-        for (int columnIndex = 0, columnLength = oldRow.length; columnIndex < columnLength; columnIndex++) {
+    public void handleModify(final Object[] oldRow, final Object[] newRow, final CompareKeys key) {
+        final List<Integer> targetRows = new ArrayList<>();
+        IntStream.range(0, oldRow.length).forEach(columnIndex -> {
             if (!Objects.equals(oldRow[columnIndex], newRow[columnIndex])) {
-                if (diff++ == 0) {
-                    this.modifyDiffTable.addRow(key, columnIndex
+                if (targetRows.size() == 0) {
+                    targetRows.addAll(this.modifyDiffTable.addRow(key, columnIndex
                             , this.tableCompare.getOldTable().get(key, this.tableCompare.getKeyColumns(), this.tableCompare.getColumnLength())
-                            , this.tableCompare.getNewTable().get(key, this.tableCompare.getKeyColumns(), this.tableCompare.getColumnLength()));
+                            , this.tableCompare.getNewTable().get(key, this.tableCompare.getKeyColumns(), this.tableCompare.getColumnLength())));
                 } else {
-                    this.modifyDiffTable.addDiffColumn(key, this.tableCompare.getKeyColumns(), columnIndex);
+                    this.modifyDiffTable.addDiffColumn(targetRows, columnIndex);
                 }
             }
-        }
+        });
     }
 
     @Override
-    public void handleDelete(int rowNum, Object[] row) {
+    public void handleDelete(final int rowNum, final Object[] row) {
         this.addRow(rowNum, this.deleteDiffTable, row);
     }
 
     @Override
-    public void handleAdd(int rowNum, Object[] row) {
+    public void handleAdd(final int rowNum, final Object[] row) {
         this.addRow(rowNum, this.addDiffTable, row);
     }
 
@@ -60,17 +61,17 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
                 this.writeAddRowsTable();
                 this.writeDeleteRowsTable();
                 this.tableCompare.getConverter().endDataSet();
-            } catch (DataSetException e) {
+            } catch (final DataSetException e) {
                 throw new AssertionError(e);
             }
         }
         return new ArrayList<>();
     }
 
-    protected void addRow(int rowNum, DefaultTable addDiffTable, Object... row) {
+    protected void addRow(final int rowNum, final DefaultTable addDiffTable, final Object... row) {
         try {
             addDiffTable.addRow(Lists.asList(rowNum, row).toArray(new Object[row.length + 1]));
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
@@ -81,8 +82,8 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
 
     protected void writeModifyRowsTable() {
         try {
-            writeTable(this.modifyDiffTable, this.modifyDiffTable.getTableMetaData().getPrimaryKeys());
-        } catch (DataSetException e) {
+            this.writeTable(this.modifyDiffTable, this.modifyDiffTable.getTableMetaData().getPrimaryKeys());
+        } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
@@ -95,25 +96,25 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
         this.writeTable(this.addDiffTable, new Column[]{COLUMN_ROW_INDEX});
     }
 
-    protected void writeTable(DefaultTable diffTable, Column[] columns) {
+    protected void writeTable(final DefaultTable diffTable, final Column[] columns) {
         try {
             if (diffTable.getRowCount() > 0) {
-                SortedTable sortedTable = new SortedTable(diffTable, columns);
+                final SortedTable sortedTable = new SortedTable(diffTable, columns);
                 sortedTable.setUseComparable(true);
-                this.tableCompare.getConverter().write(sortedTable);
+                this.tableCompare.getConverter().convert(sortedTable);
             }
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
 
-    protected DefaultTable toITable(ComparableTable oldTable, String aTableName) {
+    protected DefaultTable toITable(final ComparableTable oldTable, final String aTableName) {
         try {
-            ITableMetaData origin = oldTable.getTableMetaData();
-            Column[] columns = Lists.asList(COLUMN_ROW_INDEX, origin.getColumns()).toArray(new Column[origin.getColumns().length + 1]);
-            DefaultTableMetaData metaData = new DefaultTableMetaData(origin.getTableName() + aTableName, columns, new String[]{COLUMN_NAME_ROW_INDEX});
+            final ITableMetaData origin = oldTable.getTableMetaData();
+            final Column[] columns = Lists.asList(COLUMN_ROW_INDEX, origin.getColumns()).toArray(new Column[origin.getColumns().length + 1]);
+            final DefaultTableMetaData metaData = new DefaultTableMetaData(origin.getTableName() + aTableName, columns, new String[]{COLUMN_NAME_ROW_INDEX});
             return new DefaultTable(metaData);
-        } catch (DataSetException e) {
+        } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }

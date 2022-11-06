@@ -40,13 +40,13 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
 
     private final ComparableDataSetParam.Builder builder;
 
-    public DataSetLoadOption(String prefix) {
+    public DataSetLoadOption(final String prefix) {
         super(prefix);
         this.builder = ComparableDataSetParam.builder();
     }
 
     @Override
-    public void setUpComponent(CmdLineParser parser, String[] args) throws CmdLineException {
+    public void setUpComponent(final CmdLineParser parser, final String[] args) throws CmdLineException {
         this.assertFileExists(parser, this.src);
         this.populateSettings(parser);
         this.builder.setSource(this.srcType)
@@ -57,14 +57,14 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
                 .setRegInclude(this.regInclude)
                 .setRegExclude(this.regExclude)
         ;
-        ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), this.srcType);
+        final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), this.srcType);
         option.parseArgument(args);
         option.populate(this.builder);
     }
 
     @Override
-    public OptionParam createOptionParam(Map<String, String> args) {
-        OptionParam result = new OptionParam(this.getPrefix(), args);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-srcType", this.srcType, DataSourceType.class, true);
         result.putFileOrDir("-src", this.src, true);
         result.putFile("-setting", new File(this.setting));
@@ -76,10 +76,10 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
             return result;
         }
         try {
-            DataSourceType type = DataSourceType.valueOf(result.get("-srcType"));
-            ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), type);
+            final DataSourceType type = DataSourceType.valueOf(result.get("-srcType"));
+            final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), type);
             result.putAll(option.createOptionParam(args));
-        } catch (Throwable ignored) {
+        } catch (final Throwable ignored) {
         }
         return result;
     }
@@ -88,16 +88,16 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
         return this.builder;
     }
 
-    protected void assertFileExists(CmdLineParser parser, File file) throws CmdLineException {
+    protected void assertFileExists(final CmdLineParser parser, final File file) throws CmdLineException {
         if (!file.exists()) {
             throw new CmdLineException(parser, file + " is not exist", new IllegalArgumentException(file.toString()));
         }
     }
 
-    protected void populateSettings(CmdLineParser parser) throws CmdLineException {
+    protected void populateSettings(final CmdLineParser parser) throws CmdLineException {
         try {
             this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new CmdLineException(parser, e);
         }
     }

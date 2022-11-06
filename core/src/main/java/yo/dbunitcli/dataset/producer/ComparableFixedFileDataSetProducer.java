@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset.producer;
 
-import com.google.common.io.Files;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
@@ -13,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +29,7 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
     private final ComparableDataSetParam param;
     private final boolean loadData;
 
-    public ComparableFixedFileDataSetProducer(ComparableDataSetParam param) {
+    public ComparableFixedFileDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         if (this.param.getSrc().isDirectory()) {
             this.src = this.param.getSrc().listFiles(File::isFile);
@@ -51,7 +51,7 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
     }
 
     @Override
-    public void setConsumer(IDataSetConsumer iDataSetConsumer) {
+    public void setConsumer(final IDataSetConsumer iDataSetConsumer) {
         this.consumer = iDataSetConsumer;
     }
 
@@ -59,43 +59,41 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
     public void produce() throws DataSetException {
         LOGGER.info("produce() - start");
         this.consumer.startDataSet();
-        for (File file : this.src) {
-            if (this.filter.predicate(file.getAbsolutePath()) && file.length() > 0) {
-                try {
-                    this.executeQuery(file);
-                } catch (IOException e) {
-                    throw new DataSetException(e);
-                }
-            }
-        }
+        Arrays.stream(this.src)
+                .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
+                .forEach(this::execute);
         this.consumer.endDataSet();
         LOGGER.info("produce() - end");
     }
 
-    protected void executeQuery(File aFile) throws DataSetException, IOException {
-        LOGGER.info("produce - start fileName={}", aFile);
-        this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
-        if (this.loadData) {
-            int rows = 0;
-            for (String s : Files.readLines(aFile, Charset.forName(this.getEncoding()))) {
-                this.consumer.row(this.split(s));
-                rows++;
+    protected void execute(final File aFile) {
+        try {
+            LOGGER.info("produce - start fileName={}", aFile);
+            this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
+            if (this.loadData) {
+                int rows = 0;
+                for (final String s : Files.readAllLines(aFile.toPath(), Charset.forName(this.getEncoding()))) {
+                    this.consumer.row(this.split(s));
+                    rows++;
+                }
+                LOGGER.info("produce - rows={}", rows);
             }
-            LOGGER.info("produce - rows={}", rows);
+            this.consumer.endTable();
+            LOGGER.info("produce - end   fileName={}", aFile);
+        } catch (final IOException | DataSetException e) {
+            throw new AssertionError(e);
         }
-        this.consumer.endTable();
-        LOGGER.info("produce - end   fileName={}", aFile);
     }
 
-    protected Object[] split(String s) throws UnsupportedEncodingException {
-        Object[] result = new Object[this.columnLengths.size()];
-        byte[] bytes = s.getBytes(this.encoding);
+    protected Object[] split(final String s) throws UnsupportedEncodingException {
+        final Object[] result = new Object[this.columnLengths.size()];
+        final byte[] bytes = s.getBytes(this.encoding);
         int from = 0;
         int to = 0;
         for (int index = 0, max = this.columnLengths.size(); index < max; index++) {
-            to = to + columnLengths.get(index);
+            to = to + this.columnLengths.get(index);
             result[index] = new String(Arrays.copyOfRange(bytes, from, to), this.encoding);
-            from = from + columnLengths.get(index);
+            from = from + this.columnLengths.get(index);
         }
         return result;
     }
