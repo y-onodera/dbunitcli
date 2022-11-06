@@ -1,0 +1,55 @@
+{
+  "uid" : "2f4e85be99e49ea6",
+  "name" : "test",
+  "fullName" : "yo.dbunitcli.dataset.producer.ComparableDirectoryDataSetProducerTest.test",
+  "historyId" : "ca5c411de7f32aafd3719b64591a73b2",
+  "time" : {
+    "start" : 1667734740558,
+    "stop" : 1667734740562,
+    "duration" : 4
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.dataset.producer"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.dataset.producer.ComparableDirectoryDataSetProducerTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "test"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.dataset.producer.ComparableDirectoryDataSetProducerTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az365-424"
+  }, {
+    "name" : "thread",
+    "value" : "2112@fv-az365-424.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "2f4e85be99e49ea6.json",
+  "parameterValues" : [ ]
+}
