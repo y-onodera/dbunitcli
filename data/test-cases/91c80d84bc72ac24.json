@@ -1,0 +1,55 @@
+{
+  "uid" : "91c80d84bc72ac24",
+  "name" : "testXlsxWithSchemaToCsv",
+  "fullName" : "yo.dbunitcli.application.ConvertTest.testXlsxWithSchemaToCsv",
+  "historyId" : "fc66d2c61f89c0d1893fed6d8103c099",
+  "time" : {
+    "start" : 1667731820483,
+    "stop" : 1667731820557,
+    "duration" : 74
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testXlsxWithSchemaToCsv"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az183-630"
+  }, {
+    "name" : "thread",
+    "value" : "2104@fv-az183-630.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "91c80d84bc72ac24.json",
+  "parameterValues" : [ ]
+}
