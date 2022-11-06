@@ -44,8 +44,12 @@ public class ColumnExpression {
         return builder().add(this).add(other).build();
     }
 
-    public AddSettingTableMetaData apply(final ITableMetaData delegateMetaData) throws DataSetException {
-        return this.apply(delegateMetaData.getTableName(), delegateMetaData, null, delegateMetaData.getPrimaryKeys(), null);
+    public AddSettingTableMetaData apply(final ITableMetaData delegateMetaData) {
+        try {
+            return this.apply(delegateMetaData.getTableName(), delegateMetaData, null, delegateMetaData.getPrimaryKeys(), null);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public AddSettingTableMetaData apply(final String tableName, final ITableMetaData originMetaData, final IColumnFilter iColumnFilter, final Column[] comparisonKeys, final Predicate<Map<String, Object>> rowFilter) {

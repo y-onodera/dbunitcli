@@ -186,7 +186,7 @@ public class ColumnSettings {
             }
         }
 
-        default ColumnSettings build(final File... settings) throws IOException {
+        default ColumnSettings build(final File... settings) {
             ColumnSettings result = ColumnSettings.NONE;
             for (final File setting : settings) {
                 result = result.add(this.build(setting));
@@ -194,7 +194,7 @@ public class ColumnSettings {
             return result;
         }
 
-        ColumnSettings build(File setting) throws IOException;
+        ColumnSettings build(File setting);
 
         default ColumnSettings build() {
             return new ColumnSettings(this);

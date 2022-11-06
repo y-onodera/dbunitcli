@@ -14,19 +14,19 @@ public class CompareKeys {
     private final int newRowNum;
 
     public CompareKeys(final ITable table, final int aRowNum, final List<String> compareColumns) {
-        try {
-            this.rowNum = aRowNum;
-            this.oldRowNum = this.rowNum;
-            this.newRowNum = this.rowNum;
-            if (compareColumns.size() > 0) {
-                for (final String column : compareColumns) {
+        this.rowNum = aRowNum;
+        this.oldRowNum = this.rowNum;
+        this.newRowNum = this.rowNum;
+        if (compareColumns.size() > 0) {
+            compareColumns.forEach(column -> {
+                try {
                     this.keys.add(table.getValue(aRowNum, column).toString());
+                } catch (final DataSetException e) {
+                    throw new AssertionError(e);
                 }
-            } else {
-                this.keys.add(String.valueOf(aRowNum));
-            }
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
+            });
+        } else {
+            this.keys.add(String.valueOf(aRowNum));
         }
     }
 

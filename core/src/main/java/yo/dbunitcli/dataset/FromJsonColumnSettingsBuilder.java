@@ -22,7 +22,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     private Function<String, String> tableNameMapFunction = Function.identity();
 
     @Override
-    public ColumnSettings build(final File setting) throws IOException {
+    public ColumnSettings build(final File setting) {
         if (setting == null) {
             return ColumnSettings.NONE;
         }

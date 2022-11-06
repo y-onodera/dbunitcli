@@ -22,7 +22,7 @@ public class ComparableTable implements ITable {
 
     private Integer[] _indexes;
 
-    protected ComparableTable(final ITableMetaData metaData) throws DataSetException {
+    protected ComparableTable(final ITableMetaData metaData) {
         this(ColumnExpression.builder().build().apply(metaData), new Column[]{}, new ArrayList<>(), new ArrayList<>());
     }
 
@@ -81,11 +81,15 @@ public class ComparableTable implements ITable {
         return result;
     }
 
-    public Column[] getColumnsExcludeKey() throws DataSetException {
-        final List<Column> primaryKey = Arrays.asList(this.getTableMetaData().getPrimaryKeys());
-        return Arrays.stream(this.getTableMetaData().getColumns())
-                .filter(it -> !primaryKey.contains(it))
-                .toArray(Column[]::new);
+    public Column[] getColumnsExcludeKey() {
+        try {
+            final List<Column> primaryKey = Arrays.asList(this.getTableMetaData().getPrimaryKeys());
+            return Arrays.stream(this.getTableMetaData().getColumns())
+                    .filter(it -> !primaryKey.contains(it))
+                    .toArray(Column[]::new);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(final List<String> keys) {

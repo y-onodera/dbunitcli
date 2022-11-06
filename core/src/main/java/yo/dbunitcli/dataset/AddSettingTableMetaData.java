@@ -34,11 +34,11 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         this.additionalExpression = additionalExpression;
         final Set<Column> noFilter = Sets.newHashSet(delegate.getColumns());
         final Set<Column> filtered = Sets.newHashSet(this.getColumns());
-        for (final Column column : Sets.difference(noFilter, filtered)) {
+        Sets.difference(noFilter, filtered).forEach(column -> {
             if (!this.additionalExpression.contains(column.getColumnName())) {
-                this.filterColumnIndex.add(delegate.getColumnIndex(column.getColumnName()));
+                this.filterColumnIndex.add(this.getColumnIndex(delegate, column));
             }
-        }
+        });
         this.rowFilter = rowFilter;
     }
 
@@ -63,6 +63,10 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
             return null;
         }
         return result;
+    }
+
+    public boolean hasRowFilter() {
+        return this.rowFilter != null;
     }
 
     protected Map<String, Object> rowToMap(final Object[] row) {
@@ -92,18 +96,18 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         if (this.filterColumnIndex.size() == 0) {
             return noFilter;
         }
-        final Object[] result = new Object[noFilter.length - this.filterColumnIndex.size()];
-        int index = 0;
-        for (int i = 0, j = noFilter.length; i < j; i++) {
-            if (!this.filterColumnIndex.contains(i)) {
-                result[index] = noFilter[i];
-                index++;
-            }
-        }
-        return result;
+        return IntStream.range(0, noFilter.length)
+                .filter(i -> !this.filterColumnIndex.contains(i))
+                .mapToObj(i -> noFilter[i])
+                .toArray(Object[]::new);
     }
 
-    public boolean hasRowFilter() {
-        return this.rowFilter != null;
+    private int getColumnIndex(final ITableMetaData delegate, final Column column) {
+        try {
+            return delegate.getColumnIndex(column.getColumnName());
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
+
 }
