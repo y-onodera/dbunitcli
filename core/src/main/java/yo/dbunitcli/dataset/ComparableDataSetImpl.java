@@ -31,7 +31,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
         this.producer = producer;
         this.param = this.producer.getParam();
         this.compareSettings = this.param.getColumnSettings();
-        this.converter = this.param.getConsumer();
+        this.converter = this.param.getConverter();
         this.alreadyWrite = new HashMap<>();
         try {
             this.producer.setConsumer(this);

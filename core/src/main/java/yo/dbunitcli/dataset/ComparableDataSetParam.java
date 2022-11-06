@@ -30,7 +30,7 @@ public class ComparableDataSetParam {
     private final String extension;
     private final TemplateRender templateRender;
     private final DatabaseConnectionLoader databaseConnectionLoader;
-    private final IDataSetConverter consumer;
+    private final IDataSetConverter converter;
     private final char delimiter;
 
     public ComparableDataSetParam(final Builder builder) {
@@ -52,7 +52,7 @@ public class ComparableDataSetParam {
         this.extension = builder.getExtension();
         this.delimiter = builder.getDelimiter();
         this.databaseConnectionLoader = builder.getDatabaseConnectionLoader();
-        this.consumer = builder.getConsumer();
+        this.converter = builder.getConverter();
     }
 
     public static Builder builder() {
@@ -128,8 +128,8 @@ public class ComparableDataSetParam {
         return this.databaseConnectionLoader;
     }
 
-    public IDataSetConverter getConsumer() {
-        return this.consumer;
+    public IDataSetConverter getConverter() {
+        return this.converter;
     }
 
     public File[] getSrcFiles() {
@@ -201,7 +201,7 @@ public class ComparableDataSetParam {
         private String extension;
         private TemplateRender templateRender;
         private DatabaseConnectionLoader databaseConnectionLoader;
-        private IDataSetConverter consumer;
+        private IDataSetConverter converter;
         private char delimiter = ',';
 
         public Builder setSrc(final File src) {
@@ -287,8 +287,8 @@ public class ComparableDataSetParam {
             return this.databaseConnectionLoader;
         }
 
-        public IDataSetConverter getConsumer() {
-            return this.consumer;
+        public IDataSetConverter getConverter() {
+            return this.converter;
         }
 
         public Builder ifMatch(final boolean condition, final Function<Builder, Builder> function) {
@@ -387,8 +387,8 @@ public class ComparableDataSetParam {
             return this;
         }
 
-        public Builder setConsumer(final IDataSetConverter writer) {
-            this.consumer = writer;
+        public Builder setConverter(final IDataSetConverter writer) {
+            this.converter = writer;
             return this;
         }
 

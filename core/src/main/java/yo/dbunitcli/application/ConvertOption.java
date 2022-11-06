@@ -22,7 +22,7 @@ public class ConvertOption extends CommandLineOption {
 
     public void convertDataset() {
         this.getConverterOption().setResultPath(this.getResultPath());
-        this.getComparableDataSetLoader().loadDataSet(this.src.getParam().setConsumer(this.converter()).build());
+        this.getComparableDataSetLoader().loadDataSet(this.src.getParam().setConverter(this.converter()).build());
     }
 
     @Override
