@@ -71,9 +71,7 @@ public class CsvConverter extends CsvDataSetWriter implements IDataSetConverter 
     }
 
     @Override
-    public void reStartTable(final ITableMetaData metaData, final Integer writeRows) throws DataSetException {
-        final String activeTableName = metaData.getTableName();
-
+    public void reStartTable(final ITableMetaData metaData, final Integer writeRows) {
         try {
             this.activeMetaData = metaData;
             this.writeRows = writeRows;
@@ -81,12 +79,12 @@ public class CsvConverter extends CsvDataSetWriter implements IDataSetConverter 
             f.setAccessible(true);
             f.set(this, metaData);
             final File directory = new File(this.getTheDirectory());
-            this.file = new File(directory, activeTableName + ".csv");
+            this.file = new File(directory, metaData.getTableName() + ".csv");
             LOGGER.info("convert - restart fileName={},rows={}", this.file, this.writeRows);
             final FileOutputStream fos = new FileOutputStream(this.file, true);
             this.setWriter(new OutputStreamWriter(fos, this.encoding));
         } catch (final IOException | NoSuchFieldException | IllegalAccessException var3) {
-            throw new DataSetException(var3);
+            throw new AssertionError(var3);
         }
     }
 

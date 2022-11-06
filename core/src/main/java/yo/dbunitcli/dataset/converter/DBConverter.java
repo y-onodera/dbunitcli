@@ -29,8 +29,12 @@ public class DBConverter implements IDataSetConverter {
     }
 
     @Override
-    public void reStartTable(final ITableMetaData tableMetaData, final Integer writeRows) throws DataSetException {
-        this.operation.startTable(tableMetaData);
+    public void reStartTable(final ITableMetaData tableMetaData, final Integer writeRows) {
+        try {
+            this.operation.startTable(tableMetaData);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override

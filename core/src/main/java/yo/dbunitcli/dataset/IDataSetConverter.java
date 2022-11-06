@@ -13,7 +13,7 @@ public interface IDataSetConverter extends org.dbunit.dataset.stream.IDataSetCon
 
     boolean isExportEmptyTable();
 
-    void reStartTable(ITableMetaData tableMetaData, Integer writeRows) throws DataSetException;
+    void reStartTable(ITableMetaData tableMetaData, Integer writeRows);
 
     default void convert(final ITable aTable) {
         if (!this.isExportEmptyTable() && aTable.getRowCount() == 0) {

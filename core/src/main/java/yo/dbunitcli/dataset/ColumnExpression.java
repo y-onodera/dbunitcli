@@ -48,12 +48,16 @@ public class ColumnExpression {
         return this.apply(delegateMetaData.getTableName(), delegateMetaData, null, delegateMetaData.getPrimaryKeys(), null);
     }
 
-    public AddSettingTableMetaData apply(final String tableName, final ITableMetaData originMetaData, final IColumnFilter iColumnFilter, final Column[] comparisonKeys, final Predicate<Map<String, Object>> rowFilter) throws DataSetException {
-        Column[] primaryKey = originMetaData.getPrimaryKeys();
-        if (comparisonKeys.length > 0) {
-            primaryKey = comparisonKeys;
+    public AddSettingTableMetaData apply(final String tableName, final ITableMetaData originMetaData, final IColumnFilter iColumnFilter, final Column[] comparisonKeys, final Predicate<Map<String, Object>> rowFilter) {
+        try {
+            Column[] primaryKey = originMetaData.getPrimaryKeys();
+            if (comparisonKeys.length > 0) {
+                primaryKey = comparisonKeys;
+            }
+            return new AddSettingTableMetaData(tableName, originMetaData, primaryKey, iColumnFilter, rowFilter, this);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
         }
-        return new AddSettingTableMetaData(tableName, originMetaData, primaryKey, iColumnFilter, rowFilter, this);
     }
 
     public Collection<? extends Column> getColumns() {

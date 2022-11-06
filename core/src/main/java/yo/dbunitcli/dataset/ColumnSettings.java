@@ -3,7 +3,6 @@ package yo.dbunitcli.dataset;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
@@ -97,7 +96,7 @@ public class ColumnSettings {
                 .setFilterEdit(it -> it.add(other.filterExpressions)));
     }
 
-    public ComparableTableMapper createMapper(ITableMetaData metaData) throws DataSetException {
+    public ComparableTableMapper createMapper(ITableMetaData metaData) {
         final List<AddSettingTableMetaData> settings = Lists.newArrayList();
         AddSettingTableMetaData resultMetaData = this.addSetting(metaData);
         while (!metaData.getTableName().equals(resultMetaData.getTableName())) {
@@ -146,7 +145,7 @@ public class ColumnSettings {
         return result;
     }
 
-    protected AddSettingTableMetaData addSetting(final ITableMetaData originMetaData) throws DataSetException {
+    protected AddSettingTableMetaData addSetting(final ITableMetaData originMetaData) {
         return this.getExpressionColumns(originMetaData.getTableName())
                 .apply(this.getTableName(originMetaData)
                         , originMetaData

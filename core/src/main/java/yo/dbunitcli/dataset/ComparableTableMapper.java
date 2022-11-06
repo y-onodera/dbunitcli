@@ -28,24 +28,33 @@ public class ComparableTableMapper {
         this.settingChain.addAll(settings);
     }
 
-    public void setConsumer(final IDataSetConverter converter, final Map<String, Integer> alreadyWrite) throws DataSetException {
+    public void setConsumer(final IDataSetConverter converter, final Map<String, Integer> alreadyWrite) {
         this.converter = converter;
         this.alreadyWrite = alreadyWrite;
         if (this.isEnableRowProcessing() && this.converter.isExportEmptyTable()) {
-            if (this.alreadyWrite.containsKey(this.addSettingTableMetaData.getTableName())) {
-                this.converter.reStartTable(this.addSettingTableMetaData, this.alreadyWrite.get(this.addSettingTableMetaData.getTableName()));
-            } else {
-                this.converter.startTable(this.addSettingTableMetaData);
+            try {
+
+                if (this.alreadyWrite.containsKey(this.addSettingTableMetaData.getTableName())) {
+                    this.converter.reStartTable(this.addSettingTableMetaData, this.alreadyWrite.get(this.addSettingTableMetaData.getTableName()));
+                } else {
+                    this.converter.startTable(this.addSettingTableMetaData);
+                }
+                this.startTable = true;
+            } catch (final DataSetException e) {
+                throw new AssertionError(e);
             }
-            this.startTable = true;
         }
     }
 
-    public ComparableTable endTable() throws DataSetException {
+    public ComparableTable endTable() {
         this.alreadyWrite.compute(this.addSettingTableMetaData.getTableName()
                 , (key, old) -> Optional.ofNullable(old).orElse(0) + this.addRowCount);
         if (this.isEnableRowProcessing() && this.startTable) {
-            this.converter.endTable();
+            try {
+                this.converter.endTable();
+            } catch (final DataSetException e) {
+                throw new AssertionError(e);
+            }
             return null;
         }
         return new ComparableTable(this.addSettingTableMetaData, this.orderColumns, this.values, this.filteredRowIndexes);
