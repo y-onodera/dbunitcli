@@ -100,15 +100,15 @@
       "total" : 3
     }
   }, {
-    "uid" : "05ae8e61d36f7066caa3a1b3f8d2b6d4",
-    "name" : "yo.dbunitcli.application.ParameterizeExecuteTest",
+    "uid" : "7a66142a22dd1f500946aab14d1bc4c3",
+    "name" : "yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducerTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 2,
+      "passed" : 3,
       "unknown" : 0,
-      "total" : 2
+      "total" : 3
     }
   } ]
 }
