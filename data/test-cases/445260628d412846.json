@@ -1,0 +1,55 @@
+{
+  "uid" : "445260628d412846",
+  "name" : "testCompareCsvAndTsv",
+  "fullName" : "yo.dbunitcli.application.CompareTest.testCompareCsvAndTsv",
+  "historyId" : "f564d04ab86460a1d3246b2b132e2efa",
+  "time" : {
+    "start" : 1667734044212,
+    "stop" : 1667734044217,
+    "duration" : 5
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.CompareTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testCompareCsvAndTsv"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.CompareTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az424-534"
+  }, {
+    "name" : "thread",
+    "value" : "2114@fv-az424-534.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "445260628d412846.json",
+  "parameterValues" : [ ]
+}
