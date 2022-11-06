@@ -15,9 +15,8 @@ import yo.dbunitcli.fileprocessor.Runner;
 import yo.dbunitcli.fileprocessor.SqlRunner;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RunOption extends CommandLineOption {
 
@@ -42,7 +41,7 @@ public class RunOption extends CommandLineOption {
         return this.scriptType;
     }
 
-    public List<File> targetFiles() {
+    public Stream<File> targetFiles() {
         return this.getComparableDataSetLoader().loadDataSet(
                         this.src.getParam()
                                 .setSource(DataSourceType.file)
@@ -52,8 +51,7 @@ public class RunOption extends CommandLineOption {
                                 .build())
                 .toMap()
                 .stream()
-                .map(it -> new File(it.get(ComparableFileTableMetaData.PK.getColumnName()).toString()))
-                .collect(Collectors.toList());
+                .map(it -> new File(it.get(ComparableFileTableMetaData.PK.getColumnName()).toString()));
     }
 
     public Runner runner() {

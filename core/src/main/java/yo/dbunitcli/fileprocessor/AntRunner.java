@@ -4,8 +4,8 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class AntRunner implements Runner {
 
@@ -16,7 +16,7 @@ public class AntRunner implements Runner {
     }
 
     @Override
-    public void runScript(final Collection<File> targetFiles) {
+    public void runScript(final Stream<File> targetFiles) {
         targetFiles.forEach(target -> {
             final Project p = new Project();
             p.setUserProperty("ant.file", target.getAbsolutePath());

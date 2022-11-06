@@ -5,13 +5,13 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 public interface Runner {
 
     Logger LOGGER = LogManager.getLogger();
 
-    default void run(final Collection<File> targetFiles) {
+    default void run(final Stream<File> targetFiles) {
         final PrintStream sysErr = System.err;
         System.setErr(new PrintStream(sysErr) {
             @Override
@@ -27,5 +27,5 @@ public interface Runner {
         }
     }
 
-    void runScript(Collection<File> targetFiles);
+    void runScript(Stream<File> targetFiles);
 }

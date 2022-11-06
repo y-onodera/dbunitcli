@@ -10,9 +10,9 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class SqlRunner implements Runner {
     private static final Pattern SQLPLUS_SET = Pattern.compile("SET\\s+(DEFINE|ECHO|PAUSE|TIMING|SERVEROUTPUT)\\s+(ON|OFF).*\\n", Pattern.CASE_INSENSITIVE);
@@ -39,7 +39,7 @@ public class SqlRunner implements Runner {
     }
 
     @Override
-    public void runScript(final Collection<File> targetFiles) {
+    public void runScript(final Stream<File> targetFiles) {
         targetFiles.forEach(target -> {
             try {
                 final Connection conn = this.getConnection();
