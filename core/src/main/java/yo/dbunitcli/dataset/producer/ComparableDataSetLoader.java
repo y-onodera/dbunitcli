@@ -5,8 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.dataset.*;
 
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class ComparableDataSetLoader {
 
@@ -18,7 +18,7 @@ public class ComparableDataSetLoader {
         this.parameter = parameter;
     }
 
-    public List<Map<String, Object>> loadParam(final ComparableDataSetParam param) throws DataSetException {
+    public Stream<Map<String, Object>> loadParam(final ComparableDataSetParam param) throws DataSetException {
         return this.loadDataSet(param).toMap();
     }
 

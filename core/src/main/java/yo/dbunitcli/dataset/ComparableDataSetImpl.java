@@ -1,14 +1,14 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Lists;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.*;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class ComparableDataSetImpl extends AbstractDataSet implements ComparableDataSet {
 
@@ -94,22 +94,18 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     }
 
     @Override
-    public List<Map<String, Object>> toMap() {
+    public Stream<Map<String, Object>> toMap() {
         return this.toMap(this.param.isMapIncludeMetaData());
     }
 
     @Override
-    public List<Map<String, Object>> toMap(final boolean includeMetaData) {
-        final List<Map<String, Object>> result = Lists.newArrayList();
+    public Stream<Map<String, Object>> toMap(final boolean includeMetaData) {
         try {
-            Arrays.stream(this.getTableNames()).forEach(tableName -> {
-                final ComparableTable table = this.getTable(tableName);
-                result.addAll(table.toMap(includeMetaData));
-            });
+            return Arrays.stream(this.getTableNames()).map(tableName -> this.getTable(tableName).toMap(includeMetaData))
+                    .flatMap(Collection::stream);
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
-        return result;
     }
 
     @Override

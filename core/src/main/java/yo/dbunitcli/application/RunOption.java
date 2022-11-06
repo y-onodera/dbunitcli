@@ -50,7 +50,6 @@ public class RunOption extends CommandLineOption {
                                 .setLoadData(true)
                                 .build())
                 .toMap()
-                .stream()
                 .map(it -> new File(it.get(ComparableFileTableMetaData.PK.getColumnName()).toString()));
     }
 

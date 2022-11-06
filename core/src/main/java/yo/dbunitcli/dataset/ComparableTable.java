@@ -61,15 +61,15 @@ public class ComparableTable implements ITable {
 
     public List<Map<String, Object>> toMap(final boolean includeMetaData) {
         final List<Map<String, Object>> result = new ArrayList<>();
-        final String tableName = this.getTableMetaData().getTableName();
         final Map<String, Object> withMetaDataMap = new HashMap<>();
+        final List<Map<String, Object>> rowMap = new ArrayList<>();
         if (includeMetaData) {
-            withMetaDataMap.put("tableName", tableName);
+            withMetaDataMap.put("tableName", this.getTableMetaData().getTableName());
             withMetaDataMap.put("columns", this.addSettingTableMetaData.getColumns());
             withMetaDataMap.put("primaryKeys", this.addSettingTableMetaData.getPrimaryKeys());
+            withMetaDataMap.put("row", rowMap);
             result.add(withMetaDataMap);
         }
-        final List<Map<String, Object>> rowMap = new ArrayList<>();
         IntStream.range(0, this.getRowCount()).forEach(rowNum -> {
             final Map<String, Object> map = this.getRowToMap(rowNum);
             if (includeMetaData) {
@@ -78,9 +78,6 @@ public class ComparableTable implements ITable {
                 result.add(map);
             }
         });
-        if (includeMetaData) {
-            withMetaDataMap.put("row", rowMap);
-        }
         return result;
     }
 
@@ -93,9 +90,9 @@ public class ComparableTable implements ITable {
 
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(final List<String> keys) {
         final Map<CompareKeys, Map.Entry<Integer, Object[]>> result = new HashMap<>();
-        IntStream.range(0, this.getRowCount()).forEach(rowNum -> {
-            result.put(this.getKey(rowNum, keys), new AbstractMap.SimpleEntry<>(this.getOriginalRowIndex(rowNum), this.getRow(rowNum)));
-        });
+        IntStream.range(0, this.getRowCount())
+                .forEach(rowNum -> result.put(this.getKey(rowNum, keys)
+                        , new AbstractMap.SimpleEntry<>(this.getOriginalRowIndex(rowNum), this.getRow(rowNum))));
         if (result.size() < this.getRowCount()) {
             throw new AssertionError("comparison keys not unique:" + keys.toString());
         }

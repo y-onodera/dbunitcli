@@ -1,15 +1,11 @@
 package yo.dbunitcli.application;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import yo.dbunitcli.dataset.Parameter;
 
 import java.io.File;
 import java.io.IOException;
 
 public class Generate implements Command<GenerateOption> {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     public static void main(final String[] strings) throws Exception {
         new Generate().exec(strings);

@@ -8,8 +8,6 @@ import org.dbunit.dataset.stream.IDataSetProducer;
 import yo.dbunitcli.dataset.Parameter;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
 
 public class Aggregate {
     public static void main(final String[] args) throws Exception {
@@ -20,9 +18,8 @@ public class Aggregate {
             throw new AssertionError("option parse failed.", exp);
         }
         final List<IDataSet> dataSets = Lists.newArrayList();
-        final List<Map<String, Object>> params = options.loadParams();
-        IntStream.range(0, params.size()).forEach(i -> {
-            final Parameter param = new Parameter(i + 1, params.get(i));
+        options.loadParams().forEach(it -> {
+            final Parameter param = new Parameter(dataSets.size() + 1, it);
             final ConvertOption exp = new ConvertOption(param);
             exp.parse(options.createArgs(param));
             dataSets.add(exp.targetDataSet());

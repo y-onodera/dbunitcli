@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GenerateOption extends CommandLineOption {
@@ -167,7 +168,7 @@ public class GenerateOption extends CommandLineOption {
         record {
             @Override
             public Stream<Map<String, Object>> parameterStream(final Map<String, Object> map, final ComparableDataSet dataSet) {
-                return dataSet.toMap(true).stream()
+                return dataSet.toMap(true)
                         .flatMap(it -> ((List<Map<String, Object>>) it.get("row")).stream()
                                 .map(row -> {
                                     final Map<String, Object> result = Maps.newHashMap();
@@ -210,7 +211,7 @@ public class GenerateOption extends CommandLineOption {
         public Stream<Map<String, Object>> parameterStream(final Map<String, Object> map, final ComparableDataSet dataSet) {
             final Map<String, Object> param = new HashMap<>();
             param.put("_paramMap", map);
-            param.put("dataSet", dataSet.toMap(true));
+            param.put("dataSet", dataSet.toMap(true).collect(Collectors.toList()));
             return Stream.of(param);
         }
     }

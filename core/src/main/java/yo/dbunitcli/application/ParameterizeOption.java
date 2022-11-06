@@ -11,8 +11,8 @@ import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.resource.Files;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class ParameterizeOption extends CommandLineOption {
 
@@ -51,7 +51,7 @@ public class ParameterizeOption extends CommandLineOption {
         return result;
     }
 
-    public List<Map<String, Object>> loadParams() throws DataSetException {
+    public Stream<Map<String, Object>> loadParams() throws DataSetException {
         return this.getComparableDataSetLoader().loadParam(this.param.getParam().build());
     }
 
