@@ -2,8 +2,9 @@ package yo.dbunitcli.dataset.compare;
 
 import yo.dbunitcli.dataset.CompareKeys;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface RowCompareResultHandler {
@@ -37,9 +38,9 @@ public interface RowCompareResultHandler {
 
             @Override
             public List<CompareDiff> result() {
-                final List<CompareDiff> results = new ArrayList<>();
-                Stream.of(origin, handlers).forEach(it -> results.addAll(it.result()));
-                return results;
+                return Stream.of(origin, handlers).map(RowCompareResultHandler::result)
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList());
             }
         };
     }

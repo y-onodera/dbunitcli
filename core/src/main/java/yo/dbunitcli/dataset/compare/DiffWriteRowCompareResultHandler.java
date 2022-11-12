@@ -14,12 +14,12 @@ import java.util.stream.IntStream;
 public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler {
     private static final String COLUMN_NAME_ROW_INDEX = "$ROW_INDEX";
     private static final Column COLUMN_ROW_INDEX = new Column(COLUMN_NAME_ROW_INDEX, DataType.NUMERIC);
-    private final DataSetCompare.TableCompare tableCompare;
+    private final TableCompare tableCompare;
     private final DiffTable modifyDiffTable;
     private final DefaultTable deleteDiffTable;
     private final DefaultTable addDiffTable;
 
-    protected DiffWriteRowCompareResultHandler(final DataSetCompare.TableCompare it) {
+    protected DiffWriteRowCompareResultHandler(final TableCompare it) {
         this.tableCompare = it;
         this.modifyDiffTable = DiffTable.from(this.tableCompare.getOldTable().getTableMetaData(), this.tableCompare.getColumnLength());
         this.deleteDiffTable = this.toITable(this.tableCompare.getOldTable(), "$DELETE");
@@ -32,9 +32,7 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
         IntStream.range(0, oldRow.length).forEach(columnIndex -> {
             if (!Objects.equals(oldRow[columnIndex], newRow[columnIndex])) {
                 if (targetRows.size() == 0) {
-                    targetRows.addAll(this.modifyDiffTable.addRow(key, columnIndex
-                            , this.tableCompare.getOldTable().get(key, this.tableCompare.getKeyColumns(), this.tableCompare.getColumnLength())
-                            , this.tableCompare.getNewTable().get(key, this.tableCompare.getKeyColumns(), this.tableCompare.getColumnLength())));
+                    targetRows.addAll(this.modifyDiffTable.addRow(key, columnIndex, oldRow, newRow));
                 } else {
                     this.modifyDiffTable.addDiffColumn(targetRows, columnIndex);
                 }

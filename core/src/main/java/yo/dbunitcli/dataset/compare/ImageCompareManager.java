@@ -75,13 +75,13 @@ public class ImageCompareManager extends DefaultCompareManager {
     }
 
     @Override
-    protected Stream<Function<DataSetCompare.TableCompare, List<CompareDiff>>> getTableCompareStrategies() {
+    protected Stream<Function<TableCompare, List<CompareDiff>>> getTableCompareStrategies() {
         return Stream.of(this.rowCount(), this.compareRow()
         );
     }
 
     @Override
-    protected RowCompareResultHandler getRowResultHandler(final DataSetCompare.TableCompare it) {
+    protected RowCompareResultHandler getRowResultHandler(final TableCompare it) {
         return new ImageFileCompareHandler(it);
     }
 
@@ -95,7 +95,7 @@ public class ImageCompareManager extends DefaultCompareManager {
 
         protected List<CompareDiff> addRows;
 
-        protected ImageFileCompareHandler(final DataSetCompare.TableCompare it) {
+        protected ImageFileCompareHandler(final TableCompare it) {
             this.resultDir = it.getConverter().getDir();
             this.modifyValues = new ArrayList<>();
             this.deleteRows = new ArrayList<>();

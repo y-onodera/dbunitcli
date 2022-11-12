@@ -27,7 +27,7 @@ public class PdfCompareManager extends ImageCompareManager {
     }
 
     @Override
-    protected RowCompareResultHandler getRowResultHandler(final DataSetCompare.TableCompare it) {
+    protected RowCompareResultHandler getRowResultHandler(final TableCompare it) {
         return new PdfFileCompareHandler(it);
     }
 
@@ -35,7 +35,7 @@ public class PdfCompareManager extends ImageCompareManager {
 
         protected List<CompareDiff> pageDiffs;
 
-        protected PdfFileCompareHandler(final DataSetCompare.TableCompare it) {
+        protected PdfFileCompareHandler(final TableCompare it) {
             super(it);
             this.pageDiffs = new ArrayList<>();
         }

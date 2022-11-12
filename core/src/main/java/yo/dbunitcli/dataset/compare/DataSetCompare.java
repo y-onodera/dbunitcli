@@ -15,6 +15,7 @@ import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -87,9 +88,10 @@ public class DataSetCompare {
     public interface Manager {
 
         default CompareResult exec(final DataSetCompare dataSetCompare) {
-            final List<CompareDiff> results = new ArrayList<>();
-            this.getStrategies().forEach(it -> results.addAll(it.apply(dataSetCompare)));
-            return this.toCompareResult(dataSetCompare.getOldDataSet(), dataSetCompare.getNewDataSet(), results);
+            return this.toCompareResult(dataSetCompare.getOldDataSet(), dataSetCompare.getNewDataSet(), this.getStrategies()
+                    .map(it -> it.apply(dataSetCompare))
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList()));
         }
 
         default Stream<Function<DataSetCompare, List<CompareDiff>>> getStrategies() {
@@ -102,17 +104,13 @@ public class DataSetCompare {
         default Function<DataSetCompare, List<CompareDiff>> compareTableCount() {
             return (it) -> {
                 final List<CompareDiff> results = new ArrayList<>();
-                try {
-                    final int oldTableCounts = it.getOldDataSet().getTableNames().length;
-                    final int newTableCounts = it.getNewDataSet().getTableNames().length;
-                    if (oldTableCounts != newTableCounts) {
-                        results.add(CompareDiff.Type.TABLE_COUNT.of()
-                                .setOldDefine(String.valueOf(oldTableCounts))
-                                .setNewDefine(String.valueOf(newTableCounts))
-                                .build());
-                    }
-                } catch (final DataSetException e) {
-                    throw new AssertionError(e);
+                final int oldTableCounts = it.getOldTableNames().length;
+                final int newTableCounts = it.getNewTableNames().length;
+                if (oldTableCounts != newTableCounts) {
+                    results.add(CompareDiff.Type.TABLE_COUNT.of()
+                            .setOldDefine(String.valueOf(oldTableCounts))
+                            .setNewDefine(String.valueOf(newTableCounts))
+                            .build());
                 }
                 return results;
             };
@@ -120,40 +118,30 @@ public class DataSetCompare {
 
         default Function<DataSetCompare, List<CompareDiff>> searchAddTables() {
             return (it) -> {
-                final List<CompareDiff> results = new ArrayList<>();
-                try {
-                    final Set<String> oldTables = Sets.newHashSet(it.getOldDataSet().getTableNames());
-                    final Set<String> newTables = Sets.newHashSet(it.getNewDataSet().getTableNames());
-                    newTables.stream()
-                            .filter(table -> !Predicates.in(oldTables).apply(table))
-                            .collect(Collectors.toSet())
-                            .forEach(name -> results.add(CompareDiff.Type.TABLE_ADD.of()
-                                    .setTargetName(name)
-                                    .setNewDefine(name)
-                                    .build()));
-                } catch (final DataSetException e) {
-                    throw new AssertionError(e);
-                }
-                return results;
+                final Set<String> oldTables = Sets.newHashSet(it.getOldTableNames());
+                final Set<String> newTables = Sets.newHashSet(it.getNewTableNames());
+                return newTables.stream()
+                        .filter(table -> !Predicates.in(oldTables).apply(table))
+                        .map(name -> CompareDiff.Type.TABLE_ADD.of()
+                                .setTargetName(name)
+                                .setNewDefine(name)
+                                .build())
+                        .collect(Collectors.toList());
             };
         }
 
         default Function<DataSetCompare, List<CompareDiff>> searchDeleteTables() {
             return (it) -> {
                 final List<CompareDiff> results = new ArrayList<>();
-                try {
-                    final Set<String> oldTables = Sets.newHashSet(it.getOldDataSet().getTableNames());
-                    final Set<String> newTables = Sets.newHashSet(it.getNewDataSet().getTableNames());
-                    oldTables.stream()
-                            .filter(table -> !Predicates.in(newTables).apply(table))
-                            .collect(Collectors.toSet())
-                            .forEach(name -> results.add(CompareDiff.Type.TABLE_DELETE.of()
-                                    .setTargetName(name)
-                                    .setOldDefine(name)
-                                    .build()));
-                } catch (final DataSetException e) {
-                    throw new AssertionError(e);
-                }
+                final Set<String> oldTables = Sets.newHashSet(it.getOldTableNames());
+                final Set<String> newTables = Sets.newHashSet(it.getNewTableNames());
+                oldTables.stream()
+                        .filter(table -> !Predicates.in(newTables).apply(table))
+                        .collect(Collectors.toSet())
+                        .forEach(name -> results.add(CompareDiff.Type.TABLE_DELETE.of()
+                                .setTargetName(name)
+                                .setOldDefine(name)
+                                .build()));
                 return results;
             };
         }
@@ -161,19 +149,15 @@ public class DataSetCompare {
         default Function<DataSetCompare, List<CompareDiff>> searchModifyTables() {
             return (it) -> {
                 final List<CompareDiff> results = new ArrayList<>();
-                try {
-                    final Set<String> oldTables = Sets.newHashSet(it.getOldDataSet().getTableNames());
-                    final Set<String> newTables = Sets.newHashSet(it.getNewDataSet().getTableNames());
-                    Sets.intersection(oldTables, newTables).forEach(tableName -> {
-                        final ComparableTable oldTable = it.getOldDataSet().getTable(tableName);
-                        final ComparableTable newTable = it.getNewDataSet().getTable(tableName);
-                        if (it.getComparisonKeys().hasAdditionalSetting(oldTable.getTableMetaData().getTableName())) {
-                            results.addAll(this.compareTable(new TableCompare(oldTable, newTable, it.getComparisonKeys(), it.getConverter())));
-                        }
-                    });
-                } catch (final DataSetException e) {
-                    throw new AssertionError(e);
-                }
+                final Set<String> oldTables = Sets.newHashSet(it.getOldTableNames());
+                final Set<String> newTables = Sets.newHashSet(it.getNewTableNames());
+                Sets.intersection(oldTables, newTables).forEach(tableName -> {
+                    final ComparableTable oldTable = it.getOldDataSet().getTable(tableName);
+                    final ComparableTable newTable = it.getNewDataSet().getTable(tableName);
+                    if (it.getComparisonKeys().hasAdditionalSetting(oldTable.getTableMetaData().getTableName())) {
+                        results.addAll(this.compareTable(new TableCompare(oldTable, newTable, it.getComparisonKeys(), it.getConverter())));
+                    }
+                });
                 return results;
             };
         }
@@ -183,62 +167,20 @@ public class DataSetCompare {
         CompareResult toCompareResult(ComparableDataSet oldDataSet, ComparableDataSet newDataSet, List<CompareDiff> results);
     }
 
-    static class TableCompare {
-        private final ComparableTable oldTable;
-        private final ComparableTable newTable;
-        private final AddSettingColumns comparisonKeys;
-        private final IDataSetConverter converter;
-        private final int columnLength;
-        private final List<String> keyColumns;
-
-        public TableCompare(final ComparableTable oldTable, final ComparableTable newTable, final AddSettingColumns comparisonKeys, final IDataSetConverter converter) {
-            this.oldTable = oldTable;
-            this.newTable = newTable;
-            this.comparisonKeys = comparisonKeys;
-            this.converter = converter;
-            this.columnLength = Math.min(this.getOldColumnLength(), this.getNewColumnLength());
-            this.keyColumns = this.comparisonKeys.getColumns(this.oldTable.getTableMetaData().getTableName());
-        }
-
-        public int getNewColumnLength() {
-            return this.getColumnLength(this.newTable);
-        }
-
-        public int getOldColumnLength() {
-            return this.getColumnLength(this.oldTable);
-        }
-
-        public ComparableTable getOldTable() {
-            return this.oldTable;
-        }
-
-        public ComparableTable getNewTable() {
-            return this.newTable;
-        }
-
-        public int getColumnLength() {
-            return this.columnLength;
-        }
-
-        public List<String> getKeyColumns() {
-            return this.keyColumns;
-        }
-
-        public AddSettingColumns getComparisonKeys() {
-            return this.comparisonKeys;
-        }
-
-        public IDataSetConverter getConverter() {
-            return this.converter;
-        }
-
-        protected int getColumnLength(final ComparableTable table) {
-            try {
-                return table.getTableMetaData().getColumns().length;
-            } catch (final DataSetException e) {
-                throw new AssertionError(e);
-            }
-        }
-
+    public String[] getOldTableNames() {
+        return this.getTableNames(this.oldDataSet);
     }
+
+    public String[] getNewTableNames() {
+        return this.getTableNames(this.newDataSet);
+    }
+
+    protected String[] getTableNames(final ComparableDataSet dataSet) {
+        try {
+            return dataSet.getTableNames();
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
 }
