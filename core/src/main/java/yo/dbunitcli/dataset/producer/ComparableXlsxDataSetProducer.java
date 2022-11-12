@@ -63,7 +63,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
         LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
-                .forEach(this::execute);
+                .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         LOGGER.info("produce() - end");
     }
@@ -86,7 +86,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
         }
     }
 
-    protected void execute(final File sourceFile) {
+    protected void produceFromFile(final File sourceFile) {
         LOGGER.info("produce - start fileName={}", sourceFile);
         try (final OPCPackage pkg = OPCPackage.open(sourceFile, PackageAccess.READ)) {
             final ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);

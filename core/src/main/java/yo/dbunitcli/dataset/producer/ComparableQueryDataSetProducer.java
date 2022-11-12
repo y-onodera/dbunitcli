@@ -28,7 +28,7 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
         this.consumer.startDataSet();
         Arrays.stream(this.src)
                 .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
-                .forEach(this::execute);
+                .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         LOGGER.info("produce() - end");
     }
@@ -41,7 +41,7 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
         return this.getParam().getStTemplateLoader();
     }
 
-    protected void execute(final File aFile) {
+    protected void produceFromFile(final File aFile) {
         try {
             final String query = this.loadQuery(aFile);
             LOGGER.info("produce - start fileName={},query={}", aFile.getName(), query);

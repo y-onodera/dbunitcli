@@ -64,12 +64,12 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
         this.consumer.startDataSet();
         Arrays.stream(this.src)
                 .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
-                .forEach(this::execute);
+                .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         LOGGER.info("produce() - end");
     }
 
-    protected void execute(final File aFile) {
+    protected void produceFromFile(final File aFile) {
         try {
             LOGGER.info("produce - start fileName={}", aFile);
             if (this.headerNames != null) {

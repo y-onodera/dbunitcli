@@ -71,7 +71,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
         LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
-                .forEach(this::execute);
+                .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         LOGGER.info("produce() - end");
     }
@@ -209,7 +209,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
         }
     }
 
-    protected void execute(final File sourceFile) {
+    protected void produceFromFile(final File sourceFile) {
         LOGGER.info("produce - start fileName={}", sourceFile);
         try (final POIFSFileSystem newFs = new POIFSFileSystem(sourceFile, true)) {
             this.rowsTableBuilder = null;

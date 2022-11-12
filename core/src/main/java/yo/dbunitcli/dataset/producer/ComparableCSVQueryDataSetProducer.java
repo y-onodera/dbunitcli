@@ -64,12 +64,12 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
         this.consumer.startDataSet();
         Arrays.stream(this.src)
                 .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
-                .forEach(this::executeQuery);
+                .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         LOGGER.info("produce() - end");
     }
 
-    protected void executeQuery(final File aFile) {
+    protected void produceFromFile(final File aFile) {
         try {
             final String query = this.getTemplateLoader().render(aFile, this.getParameter());
             LOGGER.info("produce - start fileName={},query={}", aFile, query);

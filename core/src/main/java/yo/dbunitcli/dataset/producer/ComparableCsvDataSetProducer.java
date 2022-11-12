@@ -23,9 +23,9 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private final File[] src;
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
-    final String encoding;
-    final String[] headerNames;
-    final boolean loadData;
+    private final String encoding;
+    private final String[] headerNames;
+    private final boolean loadData;
     private final char delimiter;
     private int processRow;
     private Pipeline pipeline;
@@ -69,11 +69,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
 
     protected void produceFromFile(final File theDataFile) {
         LOGGER.info("produce - start fileName={}", theDataFile);
-        try {
-            this.parse(theDataFile);
-        } catch (final PipelineException | IllegalInputCharacterException e) {
-            throw new AssertionError(e);
-        }
+        this.parse(theDataFile);
         LOGGER.info("produce - rows={}", this.processRow);
         LOGGER.info("produce - end   fileName={}", theDataFile);
     }
