@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class AddSettingColumns {
 
-    public static final AddSettingColumns NONE = AddSettingColumns.builder().build();
+    public static final AddSettingColumns NONE = new Builder().build();
 
     public static final String ALL_MATCH_PATTERN = "*";
 
@@ -36,12 +36,12 @@ public class AddSettingColumns {
         this.commonExpression = builder.commonExpression.build();
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Builder builder() {
+        return new Builder().add(this);
     }
 
     public AddSettingColumns apply(final Consumer<Builder> editor) {
-        final Builder builder = builder().add(this);
+        final Builder builder = this.builder().add(this);
         editor.accept(builder);
         return builder.build();
     }
@@ -162,12 +162,12 @@ public class AddSettingColumns {
         }
 
         public Builder addPatternExpressionFrom(final AddSettingColumns from) {
-            from.patternExpression.forEach((key, value) -> this.addExpression(Strategy.PATTERN, key, it -> it.add(value)));
+            from.patternExpression.forEach((key, value) -> this.getExpressionBuilder(Strategy.PATTERN, key).add(value));
             return this;
         }
 
         public Builder addByNameExpressionFrom(final AddSettingColumns from) {
-            from.byNameExpression.forEach((key, value) -> this.addExpression(Strategy.BY_NAME, key, it -> it.add(value)));
+            from.byNameExpression.forEach((key, value) -> this.getExpressionBuilder(Strategy.BY_NAME, key).add(value));
             return this;
         }
 
@@ -177,11 +177,6 @@ public class AddSettingColumns {
             } else if (strategy == Strategy.PATTERN) {
                 return this.addPattern(name, keys);
             }
-            return this;
-        }
-
-        public Builder addExpression(final Strategy strategy, final String name, final Consumer<ColumnExpression.Builder> builder) {
-            builder.accept(this.getExpressionBuilder(strategy, name));
             return this;
         }
 

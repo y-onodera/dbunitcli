@@ -1,51 +1,63 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class RowFilter {
 
-    public static final RowFilter NONE = builder().build();
+    public static final RowFilter NONE = new RowFilter((it) -> Boolean.TRUE);
 
-    private final Set<String> commonExpressions = Sets.newHashSet();
+    private final Predicate<Map<String, Object>> filter;
 
-    private final Map<String, Set<String>> byName = Maps.newHashMap();
+    private final Function<String, String> tableRenameFunction;
 
-    private final Map<String, Set<String>> pattern = Maps.newHashMap();
-
-    protected RowFilter(final Builder builder) {
-        this.byName.putAll(builder.byName);
-        this.pattern.putAll(builder.pattern);
-        this.commonExpressions.addAll(builder.commonExpressions);
+    public RowFilter(final String expression) {
+        this(createFilter(expression));
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public RowFilter(final List<String> expressions) {
+        this(createFilter(expressions));
     }
 
-    public RowFilter apply(final Consumer<RowFilter.Builder> editor) {
-        final RowFilter.Builder builder = builder().add(this);
-        editor.accept(builder);
-        return builder.build();
+    public RowFilter(final Predicate<Map<String, Object>> filter) {
+        this(filter, Function.identity());
     }
 
-    public Predicate<Map<String, Object>> getRowFilter(final String tableName) {
-        final Set<String> expressions = this.expressions(tableName);
-        if (expressions.size() == 0) {
-            return null;
-        }
+    public RowFilter(final Predicate<Map<String, Object>> filter, final Function<String, String> tableRenameFunction) {
+        this.filter = filter;
+        this.tableRenameFunction = tableRenameFunction;
+    }
+
+    public boolean test(final Map<String, Object> rowToMap) {
+        return this.filter.test(rowToMap);
+    }
+
+    public RowFilter addFilter(final String expression) {
+        return new RowFilter(this.filter.and(createFilter(expression)), this.tableRenameFunction);
+    }
+
+    public RowFilter add(final RowFilter other
+            , final BiFunction<Function<String, String>, Function<String, String>, Function<String, String>> tableNameFunctionCompose) {
+        return new RowFilter(this.filter.and(other.filter), tableNameFunctionCompose.apply(this.tableRenameFunction, other.tableRenameFunction));
+    }
+
+    static Predicate<Map<String, Object>> createFilter(final String expression) {
+        final List<String> expressions = new ArrayList<>();
+        expressions.add(expression);
+        return createFilter(expressions);
+    }
+
+    static Predicate<Map<String, Object>> createFilter(final List<String> expressions) {
         final JexlEngine jexl = new JexlBuilder().create();
         final List<JexlExpression> expr = expressions
                 .stream()
@@ -54,64 +66,15 @@ public class RowFilter {
         return (map) -> expr.stream().allMatch(it -> Boolean.parseBoolean(it.evaluate(new MapContext(map)).toString()));
     }
 
-    public Set<String> expressions(final String tableName) {
-        final Set<String> result = Sets.newLinkedHashSet(this.commonExpressions);
-        if (this.byName.containsKey(tableName)) {
-            result.addAll(this.byName.get(tableName));
-            return result;
-        }
-        result.addAll(this.pattern.entrySet().stream()
-                .filter(it -> tableName.contains(it.getKey()))
-                .map(Map.Entry::getValue)
-                .flatMap(Set::stream)
-                .collect(Collectors.toSet()));
-        return result;
+    public String rename(final String tableName) {
+        return this.tableRenameFunction.apply(tableName);
     }
 
-    @Override
-    public String toString() {
-        return "RowFilter{" +
-                "commonExpressions=" + this.commonExpressions +
-                ", byName=" + this.byName +
-                ", pattern=" + this.pattern +
-                '}';
+    public RowFilter withRenameFunction(final Function<String, String> renameFunction) {
+        return new RowFilter(this.filter, renameFunction);
     }
 
-    public static class Builder {
-        private final Set<String> commonExpressions = Sets.newHashSet();
-
-        private final Map<String, Set<String>> byName = Maps.newHashMap();
-
-        private final Map<String, Set<String>> pattern = Maps.newHashMap();
-
-        public Builder add(final RowFilter rowFilter) {
-            this.byName.putAll(rowFilter.byName);
-            this.pattern.putAll(rowFilter.pattern);
-            this.commonExpressions.addAll(rowFilter.commonExpressions);
-            return this;
-        }
-
-        public RowFilter build() {
-            return new RowFilter(this);
-        }
-
-        public void addCommon(final String aExpression) {
-            this.commonExpressions.add(aExpression);
-        }
-
-        public void add(final AddSettingColumns.Strategy strategy, final String key, final String expression) {
-            if (strategy == AddSettingColumns.Strategy.BY_NAME) {
-                this.addSetting(key, expression, this.byName);
-            } else if (strategy == AddSettingColumns.Strategy.PATTERN) {
-                this.addSetting(key, expression, this.pattern);
-            }
-        }
-
-        protected void addSetting(final String key, final String expression, final Map<String, Set<String>> filters) {
-            if (!filters.containsKey(key)) {
-                filters.put(key, new HashSet<>());
-            }
-            filters.get(key).add(expression);
-        }
+    public RowFilter editRenameFunction(final Function<Function<String, String>, Function<String, String>> renameFunction) {
+        return new RowFilter(this.filter, renameFunction.apply(this.tableRenameFunction));
     }
 }

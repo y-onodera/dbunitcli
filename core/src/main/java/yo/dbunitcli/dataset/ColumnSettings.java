@@ -12,21 +12,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ColumnSettings {
 
-    public static ColumnSettings NONE = new ColumnSettings(it -> it, AddSettingColumns.NONE
+    public static ColumnSettings NONE = new ColumnSettings(AddSettingColumns.NONE
             , AddSettingColumns.NONE
             , AddSettingColumns.NONE
             , AddSettingColumns.NONE
-            , RowFilter.NONE);
-
-    private final Function<String, String> tableNameMap;
+            , RowFilters.NONE
+            , TableSplitter.NONE);
 
     private final AddSettingColumns comparisonKeys;
 
@@ -36,28 +32,32 @@ public class ColumnSettings {
 
     private final AddSettingColumns expressionColumns;
 
-    private final RowFilter filterExpressions;
+    private final RowFilters rowFilters;
+
+    private final TableSplitter tableSplitters;
 
     public ColumnSettings(final Builder builder) {
-        this(builder.getTableNameMap(), builder.getComparisonKeys()
+        this(builder.getComparisonKeys()
                 , builder.getExcludeColumns()
                 , builder.getOrderColumns()
                 , builder.getExpressionColumns()
-                , builder.getFilterExpressions()
+                , builder.getRowFilters()
+                , builder.getTableSplitters()
         );
     }
 
-    private ColumnSettings(final Function<String, String> tableNameMap, final AddSettingColumns comparisonKeys
+    private ColumnSettings(final AddSettingColumns comparisonKeys
             , final AddSettingColumns excludeColumns
             , final AddSettingColumns orderColumns
             , final AddSettingColumns expressionColumns
-            , final RowFilter filterExpressions) {
-        this.tableNameMap = tableNameMap;
+            , final RowFilters rowFilters
+            , final TableSplitter tableSplitters) {
         this.comparisonKeys = comparisonKeys;
         this.excludeColumns = excludeColumns;
         this.orderColumns = orderColumns;
         this.expressionColumns = expressionColumns;
-        this.filterExpressions = filterExpressions;
+        this.rowFilters = rowFilters;
+        this.tableSplitters = tableSplitters;
     }
 
     public AddSettingColumns getComparisonKeys() {
@@ -79,21 +79,22 @@ public class ColumnSettings {
     public ColumnSettings apply(final Consumer<ColumnSettingEditor> function) {
         final ColumnSettingEditor editor = new ColumnSettingEditor();
         function.accept(editor);
-        return new ColumnSettings(editor.getTableNameMapEdit().apply(this.tableNameMap)
-                , this.comparisonKeys.apply(editor.getKeyEdit())
+        return new ColumnSettings(this.comparisonKeys.apply(editor.getKeyEdit())
                 , this.excludeColumns.apply(editor.getExcludeEdit())
                 , this.orderColumns.apply(editor.getOrderEdit())
                 , this.expressionColumns.apply(editor.getExpressionEdit())
-                , this.filterExpressions.apply(editor.getFilterEdit()));
+                , this.rowFilters.apply(editor.getFilterEdit()).editCommonRenameFunction(editor.getTableRenameFunctionEdit())
+                , this.tableSplitters.apply(editor.getTableSplitterEdit()));
     }
 
     public ColumnSettings add(final ColumnSettings other) {
-        return this.apply(editor -> editor.setTableNameMapEdit(other.tableNameMap::andThen)
-                .setKeyEdit(it -> it.add(other.comparisonKeys))
+        return this.apply(editor -> editor.setKeyEdit(it -> it.add(other.comparisonKeys))
                 .setExcludeEdit(it -> it.add(other.excludeColumns))
                 .setOrderEdit(it -> it.add(other.orderColumns))
                 .setExpressionEdit(it -> it.add(other.expressionColumns))
-                .setFilterEdit(it -> it.add(other.filterExpressions)));
+                .setFilterEdit(it -> it.add(other.rowFilters))
+                .setGetTableSplitterEdit(it -> it.add(other.tableSplitters))
+        );
     }
 
     public ComparableTableMapper createMapper(ITableMetaData metaData) {
@@ -147,30 +148,24 @@ public class ColumnSettings {
 
     protected AddSettingTableMetaData addSetting(final ITableMetaData originMetaData) {
         return this.getExpressionColumns(originMetaData.getTableName())
-                .apply(this.getTableName(originMetaData)
-                        , originMetaData
+                .apply(originMetaData
                         , this.getExcludeColumnFilter(originMetaData.getTableName())
                         , this.getComparisonKeys(originMetaData.getTableName())
                         , this.getRowFilter(originMetaData.getTableName()));
     }
 
-    protected String getTableName(final ITableMetaData originMetaData) {
-        return this.tableNameMap.apply(originMetaData.getTableName());
-    }
-
-    protected Predicate<Map<String, Object>> getRowFilter(final String tableName) {
-        return this.filterExpressions.getRowFilter(tableName);
+    protected RowFilter getRowFilter(final String tableName) {
+        return this.rowFilters.getRowFilter(tableName);
     }
 
     @Override
     public String toString() {
         return "ColumnSettings{" +
-                "tableNameMap=" + this.tableNameMap +
-                ", comparisonKeys=" + this.comparisonKeys +
+                " comparisonKeys=" + this.comparisonKeys +
                 ", excludeColumns=" + this.excludeColumns +
                 ", orderColumns=" + this.orderColumns +
                 ", expressionColumns=" + this.expressionColumns +
-                ", filterExpressions=" + this.filterExpressions +
+                ", filterExpressions=" + this.rowFilters +
                 '}';
     }
 
@@ -200,8 +195,6 @@ public class ColumnSettings {
             return new ColumnSettings(this);
         }
 
-        Function<String, String> getTableNameMap();
-
         AddSettingColumns getComparisonKeys();
 
         AddSettingColumns getExcludeColumns();
@@ -210,7 +203,9 @@ public class ColumnSettings {
 
         AddSettingColumns getExpressionColumns();
 
-        RowFilter getFilterExpressions();
+        RowFilters getRowFilters();
+
+        TableSplitter getTableSplitters();
     }
 
 }

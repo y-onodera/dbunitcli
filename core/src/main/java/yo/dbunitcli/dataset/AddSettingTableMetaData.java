@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 public class AddSettingTableMetaData extends AbstractTableMetaData {
@@ -20,10 +19,13 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final Column[] allColumns;
     private final ColumnExpression additionalExpression;
     private final List<Integer> filterColumnIndex = Lists.newArrayList();
-    private final Predicate<Map<String, Object>> rowFilter;
+    private final RowFilter rowFilter;
 
-    public AddSettingTableMetaData(final String tableName, final ITableMetaData delegate, final Column[] primaryKeys, final IColumnFilter iColumnFilter, final Predicate<Map<String, Object>> rowFilter, final ColumnExpression additionalExpression) throws DataSetException {
-        this.tableName = tableName;
+    public AddSettingTableMetaData(final ITableMetaData delegate
+            , final Column[] primaryKeys
+            , final IColumnFilter iColumnFilter
+            , final RowFilter rowFilter
+            , final ColumnExpression additionalExpression) throws DataSetException {
         this.primaryKeys = primaryKeys;
         this.allColumns = additionalExpression.merge(delegate.getColumns());
         if (iColumnFilter != null) {
@@ -40,6 +42,7 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
             }
         });
         this.rowFilter = rowFilter;
+        this.tableName = this.rowFilter.rename(delegate.getTableName());
     }
 
     @Override

@@ -16,7 +16,6 @@ import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ColumnExpression {
@@ -46,19 +45,19 @@ public class ColumnExpression {
 
     public AddSettingTableMetaData apply(final ITableMetaData delegateMetaData) {
         try {
-            return this.apply(delegateMetaData.getTableName(), delegateMetaData, null, delegateMetaData.getPrimaryKeys(), null);
+            return this.apply(delegateMetaData, null, delegateMetaData.getPrimaryKeys(), RowFilter.NONE);
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
 
-    public AddSettingTableMetaData apply(final String tableName, final ITableMetaData originMetaData, final IColumnFilter iColumnFilter, final Column[] comparisonKeys, final Predicate<Map<String, Object>> rowFilter) {
+    public AddSettingTableMetaData apply(final ITableMetaData originMetaData, final IColumnFilter iColumnFilter, final Column[] comparisonKeys, final RowFilter rowFilter) {
         try {
             Column[] primaryKey = originMetaData.getPrimaryKeys();
             if (comparisonKeys.length > 0) {
                 primaryKey = comparisonKeys;
             }
-            return new AddSettingTableMetaData(tableName, originMetaData, primaryKey, iColumnFilter, rowFilter, this);
+            return new AddSettingTableMetaData(originMetaData, primaryKey, iColumnFilter, rowFilter, this);
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }

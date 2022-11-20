@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ColumnSettingEditor {
-    private Function<Function<String, String>, Function<String, String>> tableNameMapEdit = it -> it;
+    private Function<Function<String, String>, Function<String, String>> tableRenameFunctionEdit = Function.identity();
 
     private Consumer<AddSettingColumns.Builder> keyEdit = (it) -> {
     };
@@ -18,11 +18,14 @@ public class ColumnSettingEditor {
     private Consumer<AddSettingColumns.Builder> expressionEdit = (it) -> {
     };
 
-    private Consumer<RowFilter.Builder> filterEdit = (it) -> {
+    private Consumer<RowFilters.Builder> filterEdit = (it) -> {
     };
 
-    public Function<Function<String, String>, Function<String, String>> getTableNameMapEdit() {
-        return this.tableNameMapEdit;
+    private Consumer<TableSplitter.Builder> getTableSplitterEdit = (it) -> {
+    };
+
+    public Function<Function<String, String>, Function<String, String>> getTableRenameFunctionEdit() {
+        return this.tableRenameFunctionEdit;
     }
 
     public Consumer<AddSettingColumns.Builder> getKeyEdit() {
@@ -41,12 +44,16 @@ public class ColumnSettingEditor {
         return this.expressionEdit;
     }
 
-    public Consumer<RowFilter.Builder> getFilterEdit() {
+    public Consumer<RowFilters.Builder> getFilterEdit() {
         return this.filterEdit;
     }
 
-    public ColumnSettingEditor setTableNameMapEdit(final Function<Function<String, String>, Function<String, String>> function) {
-        this.tableNameMapEdit = function;
+    public Consumer<TableSplitter.Builder> getTableSplitterEdit() {
+        return this.getTableSplitterEdit;
+    }
+
+    public ColumnSettingEditor setTableRenameFunctionEdit(final Function<Function<String, String>, Function<String, String>> function) {
+        this.tableRenameFunctionEdit = function;
         return this;
     }
 
@@ -70,8 +77,13 @@ public class ColumnSettingEditor {
         return this;
     }
 
-    public ColumnSettingEditor setFilterEdit(final Consumer<RowFilter.Builder> filter) {
+    public ColumnSettingEditor setFilterEdit(final Consumer<RowFilters.Builder> filter) {
         this.filterEdit = filter;
+        return this;
+    }
+
+    public ColumnSettingEditor setGetTableSplitterEdit(final Consumer<TableSplitter.Builder> getTableSplitterEdit) {
+        this.getTableSplitterEdit = getTableSplitterEdit;
         return this;
     }
 }

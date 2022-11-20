@@ -85,7 +85,7 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
 
                     try {
                         final DataType dataType = column.getDataType();
-                        Object value = row[this.metaData.getColumnIndex(columnName)];
+                        Object value = row[this.getColumnIndex(columnName)];
                         if ("".equals(value)) {
                             if (!this.allowEmptyFields) {
                                 this.handleColumnHasNoValue(this.metaData.getTableName(), columnName);
@@ -166,6 +166,14 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
             }
         });
         return new DefaultTableMetaData(tableMetaData.getTableName(), columnList.toArray(new Column[0]), tableMetaData.getPrimaryKeys());
+    }
+
+    protected int getColumnIndex(final String columnName) {
+        try {
+            return this.metaData.getColumnIndex(columnName);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     protected void handleColumnHasNoValue(final String tableName, final String columnName) {

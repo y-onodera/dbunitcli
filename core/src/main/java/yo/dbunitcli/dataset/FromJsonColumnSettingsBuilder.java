@@ -3,23 +3,24 @@ package yo.dbunitcli.dataset;
 import javax.json.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
-    private final AddSettingColumns.Builder comparisonKeys = AddSettingColumns.builder();
+    private final AddSettingColumns.Builder comparisonKeys = AddSettingColumns.NONE.builder();
 
-    private final AddSettingColumns.Builder excludeColumns = AddSettingColumns.builder();
+    private final AddSettingColumns.Builder excludeColumns = AddSettingColumns.NONE.builder();
 
-    private final AddSettingColumns.Builder orderColumns = AddSettingColumns.builder();
+    private final AddSettingColumns.Builder orderColumns = AddSettingColumns.NONE.builder();
 
-    private final AddSettingColumns.Builder expressionColumns = AddSettingColumns.builder();
+    private final AddSettingColumns.Builder expressionColumns = AddSettingColumns.NONE.builder();
 
-    private final RowFilter.Builder filterExpressions = RowFilter.builder();
+    private final RowFilters.Builder filterExpressions = RowFilters.NONE.builder();
 
-    private Function<String, String> tableNameMapFunction = Function.identity();
+    private final TableSplitter.Builder tableSplitters = TableSplitter.NONE.builder();
 
     @Override
     public ColumnSettings build(final File setting) {
@@ -43,11 +44,6 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     }
 
     @Override
-    public Function<String, String> getTableNameMap() {
-        return this.tableNameMapFunction;
-    }
-
-    @Override
     public AddSettingColumns getComparisonKeys() {
         return this.comparisonKeys.build();
     }
@@ -68,8 +64,13 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     }
 
     @Override
-    public RowFilter getFilterExpressions() {
+    public RowFilters getRowFilters() {
         return this.filterExpressions.build();
+    }
+
+    @Override
+    public TableSplitter getTableSplitters() {
+        return this.tableSplitters.build();
     }
 
     protected FromJsonColumnSettingsBuilder configureSetting(final JsonObject setting) {
@@ -94,8 +95,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         this.addExcludeColumns(strategy, json, key);
         this.addSortColumns(strategy, json, key);
         this.addExpression(this.expressionColumns.getExpressionBuilder(strategy, key), json);
-        this.addFilterExpression(strategy, json, key);
-        this.tableNameMapFunction = this.tableNameMapFunction.compose(this.toTableNameMapFunction(strategy, json));
+        this.addTableSplitter(strategy, json, key);
     }
 
     protected FromJsonColumnSettingsBuilder configureCommonSetting(final JsonObject setting) {
@@ -112,19 +112,6 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
                     this.addFilterExpression(json);
                 });
         return this;
-    }
-
-    protected Function<String, String> toTableNameMapFunction(final AddSettingColumns.Strategy strategy, final JsonObject json) {
-        if (!json.containsKey("tableName")) {
-            return Function.identity();
-        }
-        final String result = json.getString("tableName");
-        if (strategy == AddSettingColumns.Strategy.BY_NAME) {
-            return it -> it.equals(json.getString("name")) ? result : it;
-        } else if (strategy == AddSettingColumns.Strategy.PATTERN) {
-            return it -> AddSettingColumns.ALL_MATCH_PATTERN.equals(json.getString("pattern")) || it.contains(json.getString("pattern")) ? result : it;
-        }
-        return Function.identity();
     }
 
     protected FromJsonColumnSettingsBuilder importSetting(final JsonObject setting, final File file) {
@@ -191,12 +178,35 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         }
     }
 
+    protected void addTableSplitter(final AddSettingColumns.Strategy strategy, final JsonObject json, final String key) {
+        if (json.containsKey("split")) {
+            final JsonArray expressions = json.getJsonArray("split");
+            IntStream.range(0, expressions.size())
+                    .mapToObj(expressions::getJsonObject)
+                    .forEach(splitDefine -> {
+                        final JsonArray filters = splitDefine.getJsonArray("filter");
+                        final String resultName = splitDefine.getString("resultName");
+                        final List<String> filterExpressions = IntStream.range(0, filters.size())
+                                .mapToObj(filters::getString)
+                                .collect(Collectors.toList());
+                        if (strategy == AddSettingColumns.Strategy.BY_NAME) {
+                            this.tableSplitters.addByNames(key, filterExpressions, resultName);
+                        } else {
+                            this.tableSplitters.addPattern(key, filterExpressions, resultName);
+                        }
+                    });
+        } else {
+            this.addFilterExpression(strategy, json, key);
+        }
+    }
+
     protected void addFilterExpression(final AddSettingColumns.Strategy strategy, final JsonObject settingJson, final String key) {
         if (settingJson.containsKey("filter")) {
             final JsonArray expressions = settingJson.getJsonArray("filter");
             IntStream.range(0, expressions.size())
                     .forEach(i -> this.filterExpressions.add(strategy, key, expressions.getString(i)));
         }
+        this.filterExpressions.addRenameFunction(strategy, key, this.toTableNameMapFunction(strategy, settingJson));
     }
 
     protected void addFilterExpression(final JsonObject settingJson) {
@@ -205,6 +215,21 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
             IntStream.range(0, expressions.size())
                     .forEach(i -> this.filterExpressions.addCommon(expressions.getString(i)));
         }
+    }
+
+    protected Function<String, String> toTableNameMapFunction(final AddSettingColumns.Strategy strategy, final JsonObject json) {
+        if (!json.containsKey("tableName")) {
+            return Function.identity();
+        }
+        final String result = json.getString("tableName");
+        if (strategy == AddSettingColumns.Strategy.BY_NAME) {
+            final String name = json.getString("name");
+            return it -> it.equals(name) ? result : it;
+        } else if (strategy == AddSettingColumns.Strategy.PATTERN) {
+            final String pattern = json.getString("pattern");
+            return it -> AddSettingColumns.ALL_MATCH_PATTERN.equals(pattern) || it.contains(pattern) ? result : it;
+        }
+        return Function.identity();
     }
 
 }
