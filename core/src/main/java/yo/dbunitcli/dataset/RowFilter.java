@@ -26,7 +26,11 @@ public class RowFilter {
     }
 
     public RowFilter(final List<String> expressions) {
-        this(createFilter(expressions));
+        this(createFilter(expressions), Function.identity());
+    }
+
+    public RowFilter(final List<String> expressions, final Function<String, String> tableRenameFunction) {
+        this(createFilter(expressions), tableRenameFunction);
     }
 
     public RowFilter(final Predicate<Map<String, Object>> filter) {

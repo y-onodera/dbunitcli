@@ -21,9 +21,6 @@ public class ColumnSettingEditor {
     private Consumer<RowFilters.Builder> filterEdit = (it) -> {
     };
 
-    private Consumer<TableSplitter.Builder> getTableSplitterEdit = (it) -> {
-    };
-
     public Function<Function<String, String>, Function<String, String>> getTableRenameFunctionEdit() {
         return this.tableRenameFunctionEdit;
     }
@@ -46,10 +43,6 @@ public class ColumnSettingEditor {
 
     public Consumer<RowFilters.Builder> getFilterEdit() {
         return this.filterEdit;
-    }
-
-    public Consumer<TableSplitter.Builder> getTableSplitterEdit() {
-        return this.getTableSplitterEdit;
     }
 
     public ColumnSettingEditor setTableRenameFunctionEdit(final Function<Function<String, String>, Function<String, String>> function) {
@@ -82,8 +75,4 @@ public class ColumnSettingEditor {
         return this;
     }
 
-    public ColumnSettingEditor setGetTableSplitterEdit(final Consumer<TableSplitter.Builder> getTableSplitterEdit) {
-        this.getTableSplitterEdit = getTableSplitterEdit;
-        return this;
-    }
 }

@@ -7,8 +7,8 @@ import org.dbunit.dataset.ITableMetaData;
 
 import java.sql.SQLException;
 
-public class CleanInsertConsumer extends InsertConsumer {
-    public CleanInsertConsumer(final IDatabaseConnection connection) {
+public class CleanInsertOperator extends InsertOperator {
+    public CleanInsertOperator(final IDatabaseConnection connection) {
         super(connection);
     }
 
@@ -23,6 +23,15 @@ public class CleanInsertConsumer extends InsertConsumer {
             statement.clearBatch();
         } catch (final SQLException e) {
             throw new DataSetException(e);
+        }
+    }
+
+    @Override
+    public void reStartTable(final ITableMetaData iTableMetaData) {
+        try {
+            super.startTable(iTableMetaData);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
         }
     }
 }

@@ -9,9 +9,9 @@ import org.dbunit.operation.OperationData;
 import java.util.BitSet;
 import java.util.stream.IntStream;
 
-public class InsertConsumer extends IDataSetOperationConsumer {
+public class InsertOperator extends DBOperator {
 
-    public InsertConsumer(final IDatabaseConnection connection) {
+    public InsertOperator(final IDatabaseConnection connection) {
         super(connection);
     }
 

@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class UpdateConsumer extends IDataSetOperationConsumer {
+public class UpdateOperator extends DBOperator {
 
-    public UpdateConsumer(final IDatabaseConnection connection) {
+    public UpdateOperator(final IDatabaseConnection connection) {
         super(connection);
     }
 

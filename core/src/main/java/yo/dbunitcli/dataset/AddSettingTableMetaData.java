@@ -1,15 +1,11 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.filter.IColumnFilter;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class AddSettingTableMetaData extends AbstractTableMetaData {
@@ -18,31 +14,27 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final Column[] columns;
     private final Column[] allColumns;
     private final ColumnExpression additionalExpression;
-    private final List<Integer> filterColumnIndex = Lists.newArrayList();
+    private final List<Integer> filterColumnIndex;
     private final RowFilter rowFilter;
+    private final AddSettingTableMetaData preset;
 
     public AddSettingTableMetaData(final ITableMetaData delegate
             , final Column[] primaryKeys
             , final IColumnFilter iColumnFilter
             , final RowFilter rowFilter
-            , final ColumnExpression additionalExpression) throws DataSetException {
+            , final ColumnExpression additionalExpression) {
+        this.tableName = rowFilter.rename(delegate.getTableName());
         this.primaryKeys = primaryKeys;
-        this.allColumns = additionalExpression.merge(delegate.getColumns());
-        if (iColumnFilter != null) {
-            this.columns = additionalExpression.merge(new FilteredTableMetaData(delegate, iColumnFilter).getColumns());
-        } else {
-            this.columns = this.allColumns;
-        }
         this.additionalExpression = additionalExpression;
-        final Set<Column> noFilter = Sets.newHashSet(delegate.getColumns());
-        final Set<Column> filtered = Sets.newHashSet(this.getColumns());
-        Sets.difference(noFilter, filtered).forEach(column -> {
-            if (!this.additionalExpression.contains(column.getColumnName())) {
-                this.filterColumnIndex.add(this.getColumnIndex(delegate, column));
-            }
-        });
+        this.allColumns = this.getAllColumns(delegate);
+        this.columns = this.getColumns(delegate, iColumnFilter);
+        this.filterColumnIndex = this.getFilterColumnIndex(delegate);
         this.rowFilter = rowFilter;
-        this.tableName = this.rowFilter.rename(delegate.getTableName());
+        if (delegate instanceof AddSettingTableMetaData) {
+            this.preset = (AddSettingTableMetaData) delegate;
+        } else {
+            this.preset = null;
+        }
     }
 
     @Override
@@ -60,8 +52,15 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         return this.primaryKeys;
     }
 
-    public Object[] applySetting(final Object[] objects) {
-        final Object[] result = this.filterColumn(this.applyExpression(objects));
+    public Object[] applySetting(final Object[] values) {
+        Object[] applySettings = values;
+        if (this.preset != null) {
+            applySettings = this.preset.applySetting(applySettings);
+            if (applySettings == null) {
+                return null;
+            }
+        }
+        final Object[] result = this.filterColumn(this.applyExpression(applySettings));
         if (this.hasRowFilter() && !this.rowFilter.test(this.rowToMap(result))) {
             return null;
         }
@@ -105,12 +104,46 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
                 .toArray(Object[]::new);
     }
 
-    private int getColumnIndex(final ITableMetaData delegate, final Column column) {
+    protected Column[] getAllColumns(final ITableMetaData delegate) {
+        try {
+            return this.additionalExpression.merge(delegate.getColumns());
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    protected Column[] getColumns(final ITableMetaData delegate, final IColumnFilter iColumnFilter) {
+        try {
+            if (iColumnFilter != null) {
+                return this.additionalExpression.merge(new FilteredTableMetaData(delegate, iColumnFilter).getColumns());
+            }
+            return this.allColumns;
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    protected List<Integer> getFilterColumnIndex(final ITableMetaData delegate) {
+        try {
+            final List<Integer> result = new ArrayList<>();
+            final Set<Column> noFilter = Sets.newHashSet(delegate.getColumns());
+            final Set<Column> filtered = Sets.newHashSet(this.columns);
+            Sets.difference(noFilter, filtered).forEach(column -> {
+                if (!this.additionalExpression.contains(column.getColumnName())) {
+                    result.add(this.getColumnIndex(delegate, column));
+                }
+            });
+            return result;
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    protected int getColumnIndex(final ITableMetaData delegate, final Column column) {
         try {
             return delegate.getColumnIndex(column.getColumnName());
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
-
 }

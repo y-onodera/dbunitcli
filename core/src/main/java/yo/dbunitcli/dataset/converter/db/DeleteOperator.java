@@ -8,9 +8,9 @@ import org.dbunit.operation.OperationData;
 
 import java.util.stream.IntStream;
 
-public class DeleteConsumer extends IDataSetOperationConsumer {
+public class DeleteOperator extends DBOperator {
 
-    public DeleteConsumer(final IDatabaseConnection connection) {
+    public DeleteOperator(final IDatabaseConnection connection) {
         super(connection);
     }
 

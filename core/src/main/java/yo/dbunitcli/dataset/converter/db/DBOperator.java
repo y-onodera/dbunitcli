@@ -22,7 +22,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public abstract class IDataSetOperationConsumer extends AbstractOperation implements IDataSetConsumer {
+public abstract class DBOperator extends AbstractOperation implements IDataSetConsumer {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final BitSet EMPTY_BITSET = new BitSet();
     protected final IDatabaseConnection connection;
@@ -34,7 +34,7 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
     protected BitSet ignoreMapping;
     protected int writeRows;
 
-    public IDataSetOperationConsumer(final IDatabaseConnection connection) {
+    public DBOperator(final IDatabaseConnection connection) {
         this.connection = connection;
     }
 
@@ -60,6 +60,14 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
             LOGGER.info("convert - start databaseTable={},className={}", this.metaData.getTableName(), this.getClass().getSimpleName());
         } catch (final DatabaseUnitException | SQLException e) {
             throw new DataSetException(e);
+        }
+    }
+
+    public void reStartTable(final ITableMetaData iTableMetaData) {
+        try {
+            this.startTable(iTableMetaData);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
         }
     }
 

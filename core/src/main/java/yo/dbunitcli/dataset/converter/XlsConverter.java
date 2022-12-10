@@ -33,15 +33,15 @@ public class XlsConverter implements IDataSetConverter {
     private static final String ZEROS = "0000000000000000000000000000000000000000000000000000";
     private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    protected final File resultDir;
+
+    protected String filename;
+
+    protected final TableExportType tableExport;
+
+    protected final boolean exportEmptyTable;
+
     private final Map<Workbook, Map<Short, CellStyle>> cellStyleMap = new HashMap<>();
-
-    private final File resultDir;
-
-    private String filename;
-
-    private final TableExportType tableExport;
-
-    private final boolean exportEmptyTable;
 
     private Workbook workbook;
 
@@ -54,10 +54,27 @@ public class XlsConverter implements IDataSetConverter {
     private int rowIndex = 1;
 
     public XlsConverter(final DataSetConsumerParam param) {
-        this.resultDir = param.getResultDir();
-        this.tableExport = TableExportType.valueOf(param.getExcelTable());
-        this.exportEmptyTable = param.isExportEmptyTable();
-        this.filename = Optional.ofNullable(param.getFileName()).orElse(this.resultDir.getName());
+        this(param.getResultDir()
+                , param.getFileName()
+                , TableExportType.valueOf(param.getExcelTable())
+                , param.isExportEmptyTable());
+    }
+
+    public XlsConverter(final File resultDir, final String filename, final TableExportType tableExport, final boolean exportEmptyTable) {
+        this.resultDir = resultDir;
+        this.filename = Optional.ofNullable(filename).orElse(this.resultDir.getName());
+        this.tableExport = tableExport;
+        this.exportEmptyTable = exportEmptyTable;
+    }
+
+    @Override
+    public boolean isSplittable() {
+        return this.tableExport != TableExportType.SHEET;
+    }
+
+    @Override
+    public IDataSetConverter split() {
+        return new XlsConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable);
     }
 
     @Override

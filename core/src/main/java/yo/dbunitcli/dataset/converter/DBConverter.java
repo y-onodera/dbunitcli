@@ -8,48 +8,64 @@ import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.converter.db.*;
 
 public class DBConverter implements IDataSetConverter {
-    private final org.dbunit.dataset.stream.IDataSetConsumer operation;
 
+    private final IDatabaseConnection connection;
+    private final Operation operation;
     private final boolean exportEmptyTable;
+    private final DBOperator operator;
 
     public DBConverter(final DataSetConsumerParam param) {
-        final IDatabaseConnection connection = param.getDatabaseConnectionLoader().loadConnection();
-        this.operation = param.getOperation().createConsumer(connection);
-        this.exportEmptyTable = param.isExportEmptyTable();
+        this(param.getDatabaseConnectionLoader().loadConnection()
+                , param.getOperation()
+                , param.isExportEmptyTable());
+    }
+
+    public DBConverter(final IDatabaseConnection connection, final Operation operation, final boolean exportEmptyTable) {
+        this.connection = connection;
+        this.operation = operation;
+        this.exportEmptyTable = exportEmptyTable;
+        this.operator = operation.operator(connection);
     }
 
     @Override
-    public void startDataSet() throws DataSetException {
-        this.operation.startDataSet();
-    }
-
-    @Override
-    public void startTable(final ITableMetaData iTableMetaData) throws DataSetException {
-        this.operation.startTable(iTableMetaData);
-    }
-
-    @Override
-    public void reStartTable(final ITableMetaData tableMetaData, final Integer writeRows) {
+    public IDataSetConverter split() {
         try {
-            this.operation.startTable(tableMetaData);
+            final IDataSetConverter result = new DBConverter(this.connection, this.operation, this.exportEmptyTable);
+            result.startDataSet();
+            return result;
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
 
     @Override
+    public void startDataSet() throws DataSetException {
+        this.operator.startDataSet();
+    }
+
+    @Override
+    public void startTable(final ITableMetaData iTableMetaData) throws DataSetException {
+        this.operator.startTable(iTableMetaData);
+    }
+
+    @Override
+    public void reStartTable(final ITableMetaData tableMetaData, final Integer writeRows) {
+        this.operator.reStartTable(tableMetaData);
+    }
+
+    @Override
     public void row(final Object[] objects) throws DataSetException {
-        this.operation.row(objects);
+        this.operator.row(objects);
     }
 
     @Override
     public void endTable() throws DataSetException {
-        this.operation.endTable();
+        this.operator.endTable();
     }
 
     @Override
     public void endDataSet() throws DataSetException {
-        this.operation.endDataSet();
+        this.operator.endDataSet();
     }
 
     @Override
@@ -64,18 +80,18 @@ public class DBConverter implements IDataSetConverter {
         REFRESH,
         CLEAN_INSERT;
 
-        org.dbunit.dataset.stream.IDataSetConsumer createConsumer(final IDatabaseConnection connection) {
+        DBOperator operator(final IDatabaseConnection connection) {
             switch (this) {
                 case INSERT:
-                    return new InsertConsumer(connection);
+                    return new InsertOperator(connection);
                 case UPDATE:
-                    return new UpdateConsumer(connection);
+                    return new UpdateOperator(connection);
                 case DELETE:
-                    return new DeleteConsumer(connection);
+                    return new DeleteOperator(connection);
                 case REFRESH:
-                    return new RefreshConsumer(connection);
+                    return new RefreshOperator(connection);
             }
-            return new CleanInsertConsumer(connection);
+            return new CleanInsertOperator(connection);
         }
     }
 }

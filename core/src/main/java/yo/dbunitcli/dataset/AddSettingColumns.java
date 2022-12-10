@@ -4,10 +4,10 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class AddSettingColumns {
 
@@ -57,11 +57,12 @@ public class AddSettingColumns {
             result.addAll(this.byName.get(tableName));
             return result;
         }
-        final List<String> patternResult = this.pattern.entrySet().stream()
+        final List<String> patternResult = this.pattern.entrySet()
+                .stream()
                 .filter(it -> tableName.contains(it.getKey()))
                 .map(Map.Entry::getValue)
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+                .findFirst()
+                .orElse(new ArrayList<>());
         if (this.pattern.containsKey(ALL_MATCH_PATTERN) && patternResult.size() == 0) {
             result.addAll(this.pattern.get(ALL_MATCH_PATTERN));
         } else {

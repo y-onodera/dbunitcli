@@ -37,9 +37,9 @@ public class ConvertTest {
 
     @Test
     public void testFromRegexToXlsx() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromRegexToXlsx.txt"});
-        File src = new File(this.baseDir + "/regex2xlsx/result/paramFromRegexToXlsx.xlsx");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertRegexToXlsx.txt"});
+        final File src = new File(this.baseDir + "/regex2xlsx/result/paramConvertRegexToXlsx.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
@@ -50,9 +50,9 @@ public class ConvertTest {
 
     @Test
     public void testNoSetting() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromRegexToXlsxNoSetting.txt"});
-        File src = new File(this.baseDir + "/regex2xlsx/result/paramFromRegexToXlsxNoSetting.xlsx");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertRegexToXlsxNoSetting.txt"});
+        final File src = new File(this.baseDir + "/regex2xlsx/result/paramConvertRegexToXlsxNoSetting.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
@@ -63,9 +63,9 @@ public class ConvertTest {
 
     @Test
     public void testFromCsvToXlsx() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromCsvToXlsx.txt"});
-        File src = new File(this.baseDir + "/csv2xlsx/result/paramFromCsvToXlsx.xlsx");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvToXlsx.txt"});
+        final File src = new File(this.baseDir + "/csv2xlsx/result/paramConvertCsvToXlsx.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
@@ -77,9 +77,9 @@ public class ConvertTest {
 
     @Test
     public void testFromCsvToMultiXlsx() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromCsvToMultiXlsx.txt"});
-        File src = new File(this.baseDir + "/csv2xlsx/resultmultixlsx");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvToMultiXlsx.txt"});
+        final File src = new File(this.baseDir + "/csv2xlsx/resultmultixlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.xlsx)
@@ -92,9 +92,9 @@ public class ConvertTest {
 
     @Test
     public void testFromCsvToMultiXls() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromCsvToMultiXls.txt"});
-        File src = new File(this.baseDir + "/csv2xlsx/resultmultixls");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvToMultiXls.txt"});
+        final File src = new File(this.baseDir + "/csv2xlsx/resultmultixls");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.xls)
@@ -106,10 +106,10 @@ public class ConvertTest {
     }
 
     @Test
-    public void testParamFromFixedFileToCsv() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromFixedFileToCsv.txt"});
-        File src = new File(this.baseDir + "/fixed2csv/result");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+    public void testparamConvertFixedFileToCsv() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFixedFileToCsv.txt"});
+        final File src = new File(this.baseDir + "/fixed2csv/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
@@ -118,7 +118,7 @@ public class ConvertTest {
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
         Assert.assertEquals("固定長ファイル", actual.getTableNames()[0]);
-        ComparableTable table = actual.getTable("固定長ファイル");
+        final ComparableTable table = actual.getTable("固定長ファイル");
         Assert.assertEquals(4, table.getRowCount());
         Assert.assertEquals("a1a", table.getValue(0, "半角"));
         Assert.assertEquals("a  ", table.getValue(1, "半角"));
@@ -136,9 +136,9 @@ public class ConvertTest {
 
     @Test
     public void testFromCsvqToCsv() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromCsvqToCsv.txt"});
-        File src = new File(this.baseDir + "/csvq/result");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvqToCsv.txt"});
+        final File src = new File(this.baseDir + "/csvq/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
@@ -151,9 +151,9 @@ public class ConvertTest {
 
     @Test
     public void testXlsxWithSchemaToCsv() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromXlsxWithSchemaToCsv.txt"});
-        File src = new File(this.baseDir + "/xlsxwithschema/result");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertXlsxWithSchemaToCsv.txt"});
+        final File src = new File(this.baseDir + "/xlsxwithschema/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
@@ -169,9 +169,9 @@ public class ConvertTest {
 
     @Test
     public void testXlsWithSchemaToCsv() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromXlsWithSchemaToCsv.txt"});
-        File src = new File(this.baseDir + "/xlsxwithschema/result");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertXlsWithSchemaToCsv.txt"});
+        final File src = new File(this.baseDir + "/xlsxwithschema/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
@@ -187,15 +187,15 @@ public class ConvertTest {
 
     @Test
     public void testTableNameMap() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMap.txt"});
-        File src = new File(this.baseDir + "/tablenamemap/result/paramFromMultiCsvTableNameMap.xlsx");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertMultiCsvTableNameMap.txt"});
+        final File src = new File(this.baseDir + "/tablenamemap/result/paramConvertMultiCsvTableNameMap.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
-        ITable merged = actual.getTables()[0];
+        final ITable merged = actual.getTables()[0];
         Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
         Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
         Assert.assertEquals(6, merged.getRowCount());
@@ -212,9 +212,9 @@ public class ConvertTest {
 
     @Test
     public void testTableNameMapNoSortToCsv() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMapNoSortToCsv.txt"});
-        File src = new File(this.baseDir + "/tablenamemap/NoSortCsv/result");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertMultiCsvTableNameMapNoSortToCsv.txt"});
+        final File src = new File(this.baseDir + "/tablenamemap/NoSortCsv/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
@@ -222,7 +222,7 @@ public class ConvertTest {
                                 .setEncoding("UTF-8")
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
-        ITable merged = actual.getTables()[0];
+        final ITable merged = actual.getTables()[0];
         Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
         Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
         Assert.assertEquals(6, merged.getRowCount());
@@ -239,16 +239,16 @@ public class ConvertTest {
 
     @Test
     public void testTableNameMapNoSortToXls() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMapNoSortToXls.txt"});
-        File src = new File(this.baseDir + "/tablenamemap/NoSortXls/result");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertMultiCsvTableNameMapNoSortToXls.txt"});
+        final File src = new File(this.baseDir + "/tablenamemap/NoSortXls/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setSource(DataSourceType.xls)
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
-        ITable merged = actual.getTables()[0];
+        final ITable merged = actual.getTables()[0];
         Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
         Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
         Assert.assertEquals(6, merged.getRowCount());
@@ -265,16 +265,16 @@ public class ConvertTest {
 
     @Test
     public void testTableNameMapNoSortToXlsx() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMapNoSortToXlsx.txt"});
-        File src = new File(this.baseDir + "/tablenamemap/NoSortXlsx/result");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertMultiCsvTableNameMapNoSortToXlsx.txt"});
+        final File src = new File(this.baseDir + "/tablenamemap/NoSortXlsx/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
-        ITable merged = actual.getTables()[0];
+        final ITable merged = actual.getTables()[0];
         Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
         Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
         Assert.assertEquals(6, merged.getRowCount());
@@ -291,16 +291,16 @@ public class ConvertTest {
 
     @Test
     public void testTableNameMapNoSortToXlsPerTable() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMapNoSortToXlsPerTable.txt"});
-        File src = new File(this.baseDir + "/tablenamemap/NoSortXlsBook/result");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertMultiCsvTableNameMapNoSortToXlsPerTable.txt"});
+        final File src = new File(this.baseDir + "/tablenamemap/NoSortXlsBook/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setSource(DataSourceType.xls)
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
-        ITable merged = actual.getTables()[0];
+        final ITable merged = actual.getTables()[0];
         Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
         Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
         Assert.assertEquals(6, merged.getRowCount());
@@ -317,16 +317,16 @@ public class ConvertTest {
 
     @Test
     public void testTableNameMapNoSortToXlsxPerTable() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramFromMultiCsvTableNameMapNoSortToXlsxPerTable.txt"});
-        File src = new File(this.baseDir + "/tablenamemap/NoSortXlsxBook/result");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertMultiCsvTableNameMapNoSortToXlsxPerTable.txt"});
+        final File src = new File(this.baseDir + "/tablenamemap/NoSortXlsxBook/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
-        ITable merged = actual.getTables()[0];
+        final ITable merged = actual.getTables()[0];
         Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
         Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
         Assert.assertEquals(6, merged.getRowCount());
@@ -340,4 +340,29 @@ public class ConvertTest {
         Assert.assertEquals("test", merged.getValue(4, "columnb"));
         Assert.assertEquals("3", merged.getValue(5, "key"));
     }
+
+    @Test
+    public void testConvertCsvSplitMultiXlsx() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvSplitMultiXlsx.txt"});
+        final File src = new File(this.baseDir + "/split/resulfilteringsplit");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        Assert.assertEquals(3, actual.getTableNames().length);
+        Assert.assertEquals("multi2", actual.getTableNames()[0]);
+        final ITable split1 = actual.getTables()[1];
+        Assert.assertEquals("split1", split1.getTableMetaData().getTableName());
+        Assert.assertEquals(2, split1.getRowCount());
+        Assert.assertEquals("1", split1.getValue(0, "key"));
+        Assert.assertEquals("2", split1.getValue(1, "key"));
+        final ITable split2 = actual.getTables()[2];
+        Assert.assertEquals("split2", split2.getTableMetaData().getTableName());
+        Assert.assertEquals(2, split2.getRowCount());
+        Assert.assertEquals("2", split2.getValue(0, "key"));
+        Assert.assertEquals("3", split2.getValue(1, "key"));
+    }
+
 }
