@@ -1,0 +1,55 @@
+{
+  "uid" : "bace891417a4dcaf",
+  "name" : "testGenerateInsert",
+  "fullName" : "yo.dbunitcli.application.GenerateTest.testGenerateInsert",
+  "historyId" : "64244f1fe9e3f37aaa5805091fb3077d",
+  "time" : {
+    "start" : 1683167456730,
+    "stop" : 1683167456740,
+    "duration" : 10
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.GenerateTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testGenerateInsert"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.GenerateTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az341-539"
+  }, {
+    "name" : "thread",
+    "value" : "2137@fv-az341-539.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "bace891417a4dcaf.json",
+  "parameterValues" : [ ]
+}

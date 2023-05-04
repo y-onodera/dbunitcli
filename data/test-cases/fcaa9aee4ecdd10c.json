@@ -1,0 +1,55 @@
+{
+  "uid" : "fcaa9aee4ecdd10c",
+  "name" : "createDataSetFromFileIncludeSheet",
+  "fullName" : "yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducerTest.createDataSetFromFileIncludeSheet",
+  "historyId" : "d8290e7a753d818166dc5025ba171292",
+  "time" : {
+    "start" : 1683167450194,
+    "stop" : 1683167450211,
+    "duration" : 17
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.dataset.producer"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducerTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "createDataSetFromFileIncludeSheet"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducerTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az341-539"
+  }, {
+    "name" : "thread",
+    "value" : "2137@fv-az341-539.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "fcaa9aee4ecdd10c.json",
+  "parameterValues" : [ ]
+}
