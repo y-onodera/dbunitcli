@@ -32,7 +32,8 @@ jobs:
         run: mvn clean package -PIntegrationTest
       - name: Create TestReport
         if: always()
-        run: mvn allure:report -fcore/pom`.xml
+        run: mvn allure:report -fcore/pom.xml
+        shell: cmd
       - name: Deploy TestReport
         if: always()
         uses: JamesIves/github-pages-deploy-action@v4.4.1
