@@ -1,0 +1,55 @@
+{
+  "uid" : "784cc924a650d64",
+  "name" : "test05_updateToDB",
+  "fullName" : "yo.dbunitcli.application.DBIntegrationTest.test05_updateToDB",
+  "historyId" : "f0b2b2dc9363246661407e42c2d806db",
+  "time" : {
+    "start" : 1683260027309,
+    "stop" : 1683260027398,
+    "duration" : 89
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.DBIntegrationTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "test05_updateToDB"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.DBIntegrationTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az811-888"
+  }, {
+    "name" : "thread",
+    "value" : "1512@fv-az811-888.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "784cc924a650d64.json",
+  "parameterValues" : [ ]
+}
