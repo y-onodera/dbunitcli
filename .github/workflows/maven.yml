@@ -34,12 +34,12 @@ jobs:
         if: always()
         run: mvn allure:report -fcore/pom.xml
         shell: cmd
-      - name: Deploy TestReport
+      - name: Upload TestReport
+        uses: actions/upload-artifact@v3
         if: always()
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
         with:
-          branch: gh-pages
-          folder: ./core/target/site/allure-maven-plugin
+          name: unitTestReport
+          path: ./core/target/site
       - name: Upload jar
         uses: actions/upload-artifact@v3
         with:
@@ -50,3 +50,19 @@ jobs:
         with:
           name: gui executableJar
           path: ./gui/target/**jar-with-dependencies.jar
+
+  report-deploy:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ️
+        uses: actions/checkout@v3
+      - name: Download unitTestReport
+        uses: actions/download-artifact@v3
+        with:
+          name: unitTestReport
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        with:
+          branch: gh-pages
+          folder: 'allure-maven-plugin'
