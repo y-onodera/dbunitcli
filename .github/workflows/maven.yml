@@ -23,7 +23,7 @@ jobs:
       - name: Postgresql startup
         run: docker-compose up -d
       - name: Build with Maven
-        run: mvn clean package -fcore/pom.xml -PIntegrationTest
+        run: mvn clean install -fcore/pom.xml -PIntegrationTest
       - name: Create TestReport
         if: always()
         run: mvn allure:report -fcore/pom.xml
