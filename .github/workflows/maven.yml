@@ -23,7 +23,7 @@ jobs:
       - name: Postgresql startup
         run: docker-compose up -d
       - name: Build with Maven
-        run: mvn clean install -fcore/pom.xml -PIntegrationTest
+        run: mvn clean package -PIntegrationTest
       - name: Create TestReport
         if: always()
         run: mvn allure:report -fcore/pom.xml
@@ -38,9 +38,7 @@ jobs:
         with:
           name: executableJar
           path: ./core/target/**jar-with-dependencies.jar
-      - name: Build GUI with Maven
-        run: mvn clean package -fgui/pom.xml
-      - name: Upload jar
+      - name: Upload GUI jar
         uses: actions/upload-artifact@v3
         with:
           name: gui executableJar
