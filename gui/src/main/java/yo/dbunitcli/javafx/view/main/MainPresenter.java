@@ -8,10 +8,10 @@ import io.github.palexdev.materialfx.controls.MFXComboBox;
 import io.github.palexdev.materialfx.controls.MFXTextField;
 import io.github.palexdev.materialfx.enums.ButtonType;
 import io.github.palexdev.materialfx.enums.FloatMode;
-import io.github.palexdev.materialfx.font.MFXFontIcon;
 import io.github.palexdev.materialfx.validation.Constraint;
 import io.github.palexdev.materialfx.validation.MFXValidator;
 import io.github.palexdev.materialfx.validation.Severity;
+import io.github.palexdev.mfxresources.fonts.MFXFontIcon;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 import javafx.collections.FXCollections;
@@ -75,19 +75,19 @@ public class MainPresenter {
     void initialize() {
         this.commandTypeSelect.getItems().add("");
         this.commandTypeSelect.setEditable(true);
-        for (String cmdType : this.commandTypes()) {
+        for (final String cmdType : this.commandTypes()) {
             this.commandTypeSelect.getItems().add(cmdType);
         }
         this.reset(new ActionEvent());
     }
 
     @FXML
-    public void close(ActionEvent actionEvent) {
+    public void close(final ActionEvent actionEvent) {
         Platform.exit();
     }
 
     @FXML
-    public void reset(ActionEvent actionEvent) {
+    public void reset(final ActionEvent actionEvent) {
         this.commandTypeSelect.selectFirst();
         this.exec.setDisable(true);
     }
@@ -95,28 +95,28 @@ public class MainPresenter {
     @FXML
     public void execCmd() {
         try {
-            Class<?> clazz = Class.forName("yo.dbunitcli.application." + this.selectedCommand);
-            String[] args = this.inputToArg().entrySet()
+            final Class<?> clazz = Class.forName("yo.dbunitcli.application." + this.selectedCommand);
+            final String[] args = this.inputToArg().entrySet()
                     .stream()
                     .map(it -> it.getKey() + "=" + it.getValue())
                     .toArray(String[]::new);
             ((Command) clazz.getDeclaredConstructor().newInstance()).exec(args);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
 
     @FXML
-    public void saveFile(ActionEvent actionEvent) throws IOException {
-        String content = this.inputToArg().entrySet()
+    public void saveFile(final ActionEvent actionEvent) throws IOException {
+        final String content = this.inputToArg().entrySet()
                 .stream()
                 .map(it -> it.getKey() + "=" + it.getValue())
                 .collect(Collectors.joining("\r\n"));
-        FileChooser fileSave = new FileChooser();
+        final FileChooser fileSave = new FileChooser();
         fileSave.setTitle("Save Parameter File");
         fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("(*.txt)", "*.txt"));
         fileSave.setInitialDirectory(new File("."));
-        File file = fileSave.showSaveDialog(commandTypeSelect.getScene().getWindow());
+        final File file = fileSave.showSaveDialog(this.commandTypeSelect.getScene().getWindow());
         if (file == null) {
             return;
         }
@@ -131,7 +131,7 @@ public class MainPresenter {
 
     @FXML
     public void selectCommandType() throws NoSuchMethodException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        String currentSelect = this.selectedCommand;
+        final String currentSelect = this.selectedCommand;
         this.selectedCommand = this.commandTypeSelect.getSelectionModel().getSelectedItem();
         if (Objects.equals(this.commandTypeSelect, currentSelect)) {
             return;
@@ -140,30 +140,30 @@ public class MainPresenter {
             this.exec.setDisable(true);
             return;
         }
-        Class<?> clazz = Class.forName("yo.dbunitcli.application." + this.selectedCommand + "Option");
+        final Class<?> clazz = Class.forName("yo.dbunitcli.application." + this.selectedCommand + "Option");
         this.parser = (ArgumentsParser) clazz.getDeclaredConstructor().newInstance();
         this.resetInput(this.commandTypeSelect);
     }
 
-    private void resetInput(MFXComboBox<String> selected) {
+    private void resetInput(final MFXComboBox<String> selected) {
         this.resetInput(selected, selected);
     }
 
-    private void resetInput(MFXComboBox<String> selected, Node form) {
-        ArgumentsParser.OptionParam option = this.parser.createOptionParam(this.inputToArg());
+    private void resetInput(final MFXComboBox<String> selected, final Node form) {
+        final ArgumentsParser.OptionParam option = this.parser.createOptionParam(this.inputToArg());
         this.clearInputFields(form);
         int row = 1;
-        MFXValidator validator = new MFXValidator();
+        final MFXValidator validator = new MFXValidator();
         validator.validProperty().addListener((observable, oldVal, newVal) -> {
             this.exec.setDisable(!newVal);
         });
-        for (String key : option.keySet()) {
-            Map.Entry<String, ArgumentsParser.Attribute> entry = option.getColumn(key);
+        for (final String key : option.keySet()) {
+            final Map.Entry<String, ArgumentsParser.Attribute> entry = option.getColumn(key);
             if (entry.getValue().getType() == ArgumentsParser.ParamType.ENUM) {
                 if (selected.getFloatingText().equals(key)) {
                     this.argument.put(key, selected);
                 } else {
-                    MFXComboBox<String> select = new MFXComboBox<>(FXCollections.observableArrayList(
+                    final MFXComboBox<String> select = new MFXComboBox<>(FXCollections.observableArrayList(
                             entry.getValue().getSelectOption()
                     ));
                     select.setFloatingText(key);
@@ -171,25 +171,25 @@ public class MainPresenter {
                     select.setEditable(true);
                     select.getSelectionModel().selectItem(entry.getKey());
                     if (entry.getValue().isRequired()) {
-                        VBox vbox = addRequiredValidation(validator, select);
+                        final VBox vbox = this.addRequiredValidation(validator, select);
                         this.commandPane.add(vbox, "cell 0 " + row);
                         select.getSelectionModel().selectedItemProperty()
-                                .addListener((observable, newVal, oldVal) -> resetInput(select, vbox));
+                                .addListener((observable, newVal, oldVal) -> this.resetInput(select, vbox));
                     } else {
                         this.commandPane.add(select, "width 80,cell 0 " + row);
                         select.getSelectionModel().selectedItemProperty()
-                                .addListener((observable, newVal, oldVal) -> resetInput(select));
+                                .addListener((observable, newVal, oldVal) -> this.resetInput(select));
                     }
                     this.argument.put(key, select);
                 }
             } else {
-                MFXTextField text = new MFXTextField();
+                final MFXTextField text = new MFXTextField();
                 text.setPrefWidth(400);
                 text.setText(option.get(key));
                 text.setFloatingText(key);
                 text.setFloatMode(FloatMode.INLINE);
                 if (entry.getValue().isRequired()) {
-                    VBox vbox = addRequiredValidation(validator, text);
+                    final VBox vbox = this.addRequiredValidation(validator, text);
                     this.commandPane.add(vbox, "cell 0 " + row);
                 } else {
                     this.commandPane.add(text, "cell 0 " + row);
@@ -200,21 +200,21 @@ public class MainPresenter {
                 } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE) {
                     text.setTrailingIcon(this.createFileChoiceButton(text));
                 } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE_OR_DIR) {
-                    HBox hBox = new HBox();
+                    final HBox hBox = new HBox();
                     hBox.getChildren().addAll(this.createDirectoryChoiceButton(text), this.createFileChoiceButton(text));
                     text.setTrailingIcon(hBox);
                 }
             }
             row++;
         }
-        MFXButton more = new MFXButton("more");
+        final MFXButton more = new MFXButton("more");
         more.setButtonType(ButtonType.RAISED);
         more.getStyleClass().add("text-button");
         this.commandPane.add(more, "align right,cell 1 " + row);
     }
 
-    private VBox addRequiredValidation(MFXValidator validator, MFXTextField text) {
-        Label validationLabel = new Label();
+    private VBox addRequiredValidation(final MFXValidator validator, final MFXTextField text) {
+        final Label validationLabel = new Label();
         validationLabel.setText("required input");
         validationLabel.getStyleClass().add("validationLabel");
         text.getValidator().validProperty().addListener((observable, oldVal, newVal) -> {
@@ -224,7 +224,7 @@ public class MainPresenter {
         });
         text.delegateFocusedProperty().addListener((observable, oldVal, newVal) -> {
             if (oldVal && !newVal) {
-                List<Constraint> constraints = text.validate();
+                final List<Constraint> constraints = text.validate();
                 if (!constraints.isEmpty()) {
                     text.pseudoClassStateChanged(INVALID_PSEUDO_CLASS, true);
                 }
@@ -233,67 +233,67 @@ public class MainPresenter {
         text.getValidator().constraint(Constraint.of(Severity.ERROR, validationLabel.getText()
                 , BooleanExpression.booleanExpression(text.textProperty().isEmpty().not())));
         validator.dependsOn(text.getValidator());
-        VBox vbox = new VBox();
+        final VBox vbox = new VBox();
         vbox.setPrefWidth(400);
         vbox.getChildren().addAll(text, validationLabel);
         return vbox;
     }
 
-    private StackPane createDirectoryChoiceButton(MFXTextField text) {
-        return this.createChoiceButton(new MFXFontIcon("mfx-folder", 32), event -> {
-            File choice = openDirChooser();
+    private StackPane createDirectoryChoiceButton(final MFXTextField text) {
+        return this.createChoiceButton(new MFXFontIcon("fas-folder", 32), event -> {
+            final File choice = this.openDirChooser();
             if (choice != null) {
-                text.setText(relativize(choice));
+                text.setText(this.relativize(choice));
             }
         });
     }
 
-    private StackPane createFileChoiceButton(MFXTextField text) {
-        return createChoiceButton(new MFXFontIcon("mfx-file", 32), event -> {
-            File choice = openFileChooser();
+    private StackPane createFileChoiceButton(final MFXTextField text) {
+        return this.createChoiceButton(new MFXFontIcon("fas-file", 32), event -> {
+            final File choice = this.openFileChooser();
             if (choice != null) {
-                text.setText(relativize(choice));
+                text.setText(this.relativize(choice));
             }
         });
     }
 
-    private String relativize(File choice) {
+    private String relativize(final File choice) {
         return Path.of(new File(".").getAbsolutePath())
                 .relativize(Path.of(choice.getAbsolutePath()))
                 .toString()
                 .replace("\\", "/");
     }
 
-    private StackPane createChoiceButton(MFXFontIcon folderIcon, EventHandler<ActionEvent> actionEventEventHandler) {
-        MFXButton fileChoice = new MFXButton();
+    private StackPane createChoiceButton(final MFXFontIcon folderIcon, final EventHandler<ActionEvent> actionEventEventHandler) {
+        final MFXButton fileChoice = new MFXButton();
         fileChoice.setGraphic(folderIcon);
         fileChoice.setText("");
         fileChoice.setOnAction(actionEventEventHandler);
         fileChoice.setAlignment(Pos.TOP_CENTER);
         fileChoice.setPrefHeight(50);
-        TextField textField = new TextField("open");
+        final TextField textField = new TextField("open");
         textField.setMaxWidth(45);
         textField.setPrefHeight(10);
         textField.setAlignment(Pos.BOTTOM_CENTER);
-        StackPane stack = new StackPane();
+        final StackPane stack = new StackPane();
         stack.setAlignment(Pos.BOTTOM_CENTER);
         stack.getChildren().addAll(fileChoice, textField);
         return stack;
     }
 
     private File openFileChooser() {
-        FileChooser fileChooser = new FileChooser();
+        final FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File("."));
-        Stage stage = new Stage();
-        stage.initOwner(commandTypeSelect.getScene().getWindow());
+        final Stage stage = new Stage();
+        stage.initOwner(this.commandTypeSelect.getScene().getWindow());
         return fileChooser.showOpenDialog(stage);
     }
 
     private File openDirChooser() {
-        DirectoryChooser fileChooser = new DirectoryChooser();
+        final DirectoryChooser fileChooser = new DirectoryChooser();
         fileChooser.setInitialDirectory(new File("."));
-        Stage stage = new Stage();
-        stage.initOwner(commandTypeSelect.getScene().getWindow());
+        final Stage stage = new Stage();
+        stage.initOwner(this.commandTypeSelect.getScene().getWindow());
         return fileChooser.showDialog(stage);
     }
 
@@ -319,7 +319,7 @@ public class MainPresenter {
         return COMMAND_TYPES;
     }
 
-    private void clearInputFields(Node selected) {
+    private void clearInputFields(final Node selected) {
         this.commandPane.getChildren().removeIf(node -> !this.commandTypeSelect.equals(node) && !selected.equals(node));
         this.argument = Maps.newHashMap();
     }

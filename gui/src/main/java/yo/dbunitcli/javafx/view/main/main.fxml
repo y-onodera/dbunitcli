@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import io.github.palexdev.materialfx.controls.MFXComboBox?>
-<?import javafx.scene.layout.*?>
-<?import org.tbee.javafx.scene.layout.fxml.MigPane?>
-<?import io.github.palexdev.materialfx.controls.MFXButton?>
-<?import io.github.palexdev.materialfx.controls.MFXScrollPane?>
+<?import io.github.palexdev.materialfx.controls.*?>
+<?import io.github.palexdev.mfxresources.fonts.MFXFontIcon?>
 <?import javafx.scene.control.Label?>
-<?import io.github.palexdev.materialfx.font.MFXFontIcon?>
+<?import javafx.scene.layout.*?>
+<?import org.tbee.javafx.scene.layout.fxml.*?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity"
             minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="500.0" prefWidth="600.0"
@@ -21,7 +19,7 @@
                     <Label styleClass="menu-label" text="DBUnit CLI Param Editor"/>
                     <MFXButton text="" onAction="#close" MigPane.cc="align right">
                         <graphic>
-                            <MFXFontIcon description="mfx-x-light" color="white" size="16"/>
+                            <MFXFontIcon description="fas-x" color="white" size="16"/>
                         </graphic>
                     </MFXButton>
                 </MigPane>
@@ -41,7 +39,7 @@
                            MigPane.cc="right"/>
                 <MFXButton fx:id="exec" rippleColor="white" buttonType="RAISED" styleClass="outline-button" mnemonicParsing="false" text="exec" onAction="#execCmd"
                            MigPane.cc="right"/>
-                <MFXButton fx:id="save" rippleColor="white" buttonType="RAISED" styleClass="contain-button" mnemonicParsing="false" text="save" onAction="#saveFile"
+                <MFXButton id="save" rippleColor="white" buttonType="RAISED" styleClass="contain-button" mnemonicParsing="false" text="save" onAction="#saveFile"
                            MigPane.cc="right" rippleAnimateShadow=""/>
             </MigPane>
         </bottom>
