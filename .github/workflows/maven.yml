@@ -20,8 +20,14 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
           cache: maven
-      - name: Postgresql startup
-        run: docker-compose up -d
+      - name: postgresql setup
+        uses: ikalnytskyi/action-setup-postgres@v4
+        with:
+          username: admin
+          password: admin
+          database: test
+          port: 5433
+        id: postgres
       - name: Build with Maven
         run: mvn clean package -PIntegrationTest
       - name: Create TestReport
