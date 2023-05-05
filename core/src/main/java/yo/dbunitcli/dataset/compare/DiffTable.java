@@ -1,14 +1,11 @@
 package yo.dbunitcli.dataset.compare;
 
-import com.google.common.collect.Lists;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.dataset.CompareKeys;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class DiffTable extends DefaultTable {
@@ -28,7 +25,7 @@ public class DiffTable extends DefaultTable {
                     metaData.getColumns()
                     , COLUMNS
             ).toArray(new Column[columnLength + 4]);
-            final Column[] primaryKeys = Lists.newArrayList(columns[1], columns[0]).toArray(new Column[2]);
+            final Column[] primaryKeys = new Column[]{columns[1], columns[0]};
             return new DiffTable(new DefaultTableMetaData(metaData.getTableName() + C_MODIFY, columns, primaryKeys));
         } catch (final DataSetException e) {
             throw new AssertionError(e);
@@ -84,7 +81,7 @@ public class DiffTable extends DefaultTable {
         if (keys.size() > 0) {
             return targetKey.equals(this.getKey(rowNum, keys));
         }
-        return targetKey.equals(this.getKey(rowNum, Lists.newArrayList(C_ROW_AFTER_SORT)));
+        return targetKey.equals(this.getKey(rowNum, Collections.singletonList(C_ROW_AFTER_SORT)));
     }
 
     protected CompareKeys getKey(final int rowNum, final List<String> keys) {
@@ -105,8 +102,8 @@ public class DiffTable extends DefaultTable {
 
     @SafeVarargs
     protected static <T> List<T> toList(final T[] otherValues, final T... newValues) {
-        final List<T> result = Lists.newArrayList(newValues);
-        result.addAll(Lists.newArrayList(otherValues));
+        final List<T> result = Arrays.stream(newValues).collect(Collectors.toList());
+        result.addAll(Arrays.asList(otherValues));
         return result;
     }
 }
