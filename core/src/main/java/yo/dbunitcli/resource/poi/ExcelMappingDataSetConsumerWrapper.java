@@ -1,12 +1,12 @@
 package yo.dbunitcli.resource.poi;
 
-import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ExcelMappingDataSetConsumerWrapper {
@@ -98,7 +98,7 @@ public class ExcelMappingDataSetConsumerWrapper {
     }
 
     protected void addRowToTable(final String[] row) throws DataSetException {
-        if (Stream.of(row).anyMatch(it -> !Strings.isNullOrEmpty(it))) {
+        if (Stream.of(row).anyMatch(it -> !Optional.ofNullable(it).orElse("").isEmpty())) {
             this.consumer.row(Stream.of(row).map(it -> it == null ? "" : it).toArray());
         }
     }

@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset.converter;
 
-import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -130,7 +129,7 @@ public class XlsConverter implements IDataSetConverter {
                     this.setDateCell(cell, new Date((Long) value));
                 } else {
                     final String stringValue = this.getString(value);
-                    if (!Strings.isNullOrEmpty(stringValue)) {
+                    if (!Optional.ofNullable(stringValue).orElse("").isEmpty()) {
                         cell.setCellValue(stringValue);
                     }
                 }

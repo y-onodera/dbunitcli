@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset.producer;
 
-import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
@@ -16,6 +15,7 @@ import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -37,7 +37,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         this.filter = this.param.getTableNameFilter();
         this.loadData = this.param.isLoadData();
         final String headerName = this.param.getHeaderName();
-        if (!Strings.isNullOrEmpty(headerName)) {
+        if (!Optional.ofNullable(headerName).orElse("").isEmpty()) {
             this.headerNames = headerName.split(",");
         } else {
             this.headerNames = null;

@@ -2,7 +2,6 @@ package yo.dbunitcli.dataset.compare;
 
 import com.github.romankh3.image.comparison.model.ImageComparisonResult;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
-import com.google.common.base.Strings;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import yo.dbunitcli.dataset.CompareKeys;
@@ -61,7 +60,7 @@ public class PdfCompareManager extends ImageCompareManager {
                                 .build());
                     } else {
                         IntStream.range(0, oldPages).forEach(i -> {
-                            final String page = Strings.padStart(String.valueOf(i + 1), String.valueOf(oldPages).length(), '0');
+                            final String page = String.format("%0" + String.valueOf(oldPages).length() + "d", i + 1);
                             final ImageComparisonResult result = this.compareImage(this.getImage(doc, i), this.getImage(oldDoc, i));
                             if (result.getImageComparisonState() != ImageComparisonState.MATCH) {
                                 result.writeResultTo(new File(this.resultDir, key.getKeysToString() + page + ".png"));

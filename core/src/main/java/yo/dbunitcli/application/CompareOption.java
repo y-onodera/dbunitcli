@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import com.google.common.collect.Lists;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -14,6 +13,7 @@ import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +98,7 @@ public class CompareOption extends CommandLineOption {
             this.expectData.parseArgument(expandArgs);
             if (Arrays.stream(expandArgs).noneMatch(it -> it.startsWith("-expect.setting"))) {
                 this.expectData.getParam().editColumnSettings(editor -> editor.setKeyEdit(it ->
-                        it.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList())
+                        it.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, new ArrayList<>())
                 ));
             }
         }
@@ -211,7 +211,7 @@ public class CompareOption extends CommandLineOption {
         }
         if (this.targetType != Type.data) {
             this.columnSettings = this.columnSettings.apply(it -> it
-                    .setKeyEdit(setting -> setting.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList("NAME")))
+                    .setKeyEdit(setting -> setting.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, List.of("NAME")))
             );
         }
     }

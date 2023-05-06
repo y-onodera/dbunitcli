@@ -1,9 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
@@ -20,13 +16,13 @@ import java.util.stream.Collectors;
 
 public class ColumnExpression {
 
-    private final Map<String, String> stringExpression = Maps.newLinkedHashMap();
+    private final Map<String, String> stringExpression = new LinkedHashMap<>();
 
-    private final Map<String, String> booleanExpression = Maps.newLinkedHashMap();
+    private final Map<String, String> booleanExpression = new LinkedHashMap<>();
 
-    private final Map<String, String> numberExpression = Maps.newLinkedHashMap();
+    private final Map<String, String> numberExpression = new LinkedHashMap<>();
 
-    private final Map<String, String> sqlFunction = Maps.newLinkedHashMap();
+    private final Map<String, String> sqlFunction = new LinkedHashMap<>();
 
     public ColumnExpression(final Builder builder) {
         this.stringExpression.putAll(builder.stringExpression);
@@ -64,7 +60,7 @@ public class ColumnExpression {
     }
 
     public Collection<? extends Column> getColumns() {
-        final Set<Column> result = Sets.newLinkedHashSet();
+        final Set<Column> result = new LinkedHashSet<>();
         this.stringExpression.keySet().forEach(key -> result.add(new Column(key, DataType.NVARCHAR)));
         this.booleanExpression.keySet().forEach(key -> result.add(new Column(key, DataType.BOOLEAN)));
         this.numberExpression.keySet().forEach(key -> result.add(new Column(key, DataType.NUMERIC)));
@@ -74,7 +70,7 @@ public class ColumnExpression {
 
     public Column[] merge(final Column[] columns) {
         if (this.size() > 0) {
-            final ArrayList<Column> columnList = Lists.newArrayList(columns);
+            final ArrayList<Column> columnList = Arrays.stream(columns).collect(Collectors.toCollection(ArrayList::new));
             final List<String> columnNames = columnList.stream().map(Column::getColumnName).collect(Collectors.toList());
             this.getColumns().forEach(column -> {
                 if (!columnNames.contains(column.getColumnName())) {
@@ -122,18 +118,19 @@ public class ColumnExpression {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (!(o instanceof ColumnExpression)) {
             return false;
         }
         final ColumnExpression that = (ColumnExpression) o;
-        return Objects.equal(this.stringExpression, that.stringExpression) &&
-                Objects.equal(this.booleanExpression, that.booleanExpression) &&
-                Objects.equal(this.numberExpression, that.numberExpression);
+        return Objects.equals(this.stringExpression, that.stringExpression)
+                && Objects.equals(this.booleanExpression, that.booleanExpression)
+                && Objects.equals(this.numberExpression, that.numberExpression)
+                && Objects.equals(this.sqlFunction, that.sqlFunction);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.stringExpression, this.booleanExpression, this.numberExpression);
+        return Objects.hash(this.stringExpression, this.booleanExpression, this.numberExpression, this.sqlFunction);
     }
 
     @Override
@@ -146,13 +143,13 @@ public class ColumnExpression {
     }
 
     public static class Builder {
-        private final Map<String, String> stringExpression = Maps.newLinkedHashMap();
+        private final Map<String, String> stringExpression = new LinkedHashMap<>();
 
-        private final Map<String, String> booleanExpression = Maps.newLinkedHashMap();
+        private final Map<String, String> booleanExpression = new LinkedHashMap<>();
 
-        private final Map<String, String> numberExpression = Maps.newLinkedHashMap();
+        private final Map<String, String> numberExpression = new LinkedHashMap<>();
 
-        private final Map<String, String> sqlFunction = Maps.newLinkedHashMap();
+        private final Map<String, String> sqlFunction = new LinkedHashMap<>();
 
         public Builder add(final ColumnExpression columnExpression) {
             return this.addStringExpression(columnExpression.stringExpression)

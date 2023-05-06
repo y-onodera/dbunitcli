@@ -1,6 +1,5 @@
 package yo.dbunitcli.resource.poi;
 
-import com.google.common.base.Strings;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
@@ -58,8 +57,8 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
         final ITableMetaData metaData = this.tableMetaDataMap.get(this.tableNames[this.currentTableIndex]);
         for (final String conditionColumn : this.breakKey.get(this.tableNames[this.currentTableIndex])) {
             if (this.rowValues.size() <= this.getColumnIndex(metaData, conditionColumn)
-                    || Strings.isNullOrEmpty(Optional.ofNullable(this.rowValues.get(this.getColumnIndex(metaData, conditionColumn)))
-                    .orElse(""))) {
+                    || Optional.ofNullable(this.rowValues.get(this.getColumnIndex(metaData, conditionColumn)))
+                    .orElse("").isEmpty()) {
                 return false;
             }
         }

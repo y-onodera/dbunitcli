@@ -1,7 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.filter.IColumnFilter;
 
@@ -72,7 +70,7 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     }
 
     protected Map<String, Object> rowToMap(final Object[] row) {
-        final Map<String, Object> map = Maps.newHashMap();
+        final Map<String, Object> map = new HashMap<>();
         IntStream.range(0, row.length).forEach(i -> map.put(this.columns[i].getColumnName(), row[i]));
         return map;
     }
@@ -81,7 +79,7 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         if (this.additionalExpression.size() == 0) {
             return objects;
         }
-        final Map<String, Object> param = Maps.newHashMap();
+        final Map<String, Object> param = new HashMap<>();
         IntStream.range(0, objects.length).forEach(i -> param.put(this.allColumns[i].getColumnName(), objects[i]));
         final Object[] result = Arrays.copyOf(objects, this.allColumns.length);
         IntStream.range(0, result.length).forEach(i -> {
@@ -126,9 +124,9 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     protected List<Integer> getFilterColumnIndex(final ITableMetaData delegate) {
         try {
             final List<Integer> result = new ArrayList<>();
-            final Set<Column> noFilter = Sets.newHashSet(delegate.getColumns());
-            final Set<Column> filtered = Sets.newHashSet(this.columns);
-            Sets.difference(noFilter, filtered).forEach(column -> {
+            final Set<Column> noFilter = new HashSet<>(Arrays.asList(delegate.getColumns()));
+            final Set<Column> filtered = new HashSet<>(Arrays.asList(this.columns));
+            noFilter.stream().filter(it -> !filtered.contains(it)).forEach(column -> {
                 if (!this.additionalExpression.contains(column.getColumnName())) {
                     result.add(this.getColumnIndex(delegate, column));
                 }

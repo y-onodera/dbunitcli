@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.base.Strings;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
@@ -9,10 +8,7 @@ import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -193,7 +189,7 @@ public class ColumnSettings {
     public interface Builder {
 
         default ColumnSettings build(final String settings) throws IOException {
-            if (Strings.isNullOrEmpty(settings)) {
+            if (Optional.ofNullable(settings).orElse("").isEmpty()) {
                 return this.build((File) null);
             } else {
                 return this.build(Arrays.stream(settings.split(","))

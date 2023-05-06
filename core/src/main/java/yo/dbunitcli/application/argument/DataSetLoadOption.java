@@ -1,6 +1,5 @@
 package yo.dbunitcli.application.argument;
 
-import com.google.common.base.Strings;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -12,6 +11,7 @@ import yo.dbunitcli.dataset.FromJsonColumnSettingsBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 public class DataSetLoadOption extends DefaultArgumentsParser {
 
@@ -72,7 +72,7 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
         result.put("-includeMetaData", this.includeMetaData);
         result.put("-regInclude", this.regInclude);
         result.put("-regExclude", this.regExclude);
-        if (Strings.isNullOrEmpty(result.get("-srcType"))) {
+        if (Optional.ofNullable(result.get("-srcType")).orElse("").isEmpty()) {
             return result;
         }
         try {

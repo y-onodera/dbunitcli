@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -171,7 +170,7 @@ public class GenerateOption extends CommandLineOption {
                 return dataSet.toMap(true)
                         .flatMap(it -> ((List<Map<String, Object>>) it.get("row")).stream()
                                 .map(row -> {
-                                    final Map<String, Object> result = Maps.newHashMap();
+                                    final Map<String, Object> result = new HashMap<>();
                                     result.putAll(it);
                                     result.put("row", row);
                                     result.put("_paramMap", map);

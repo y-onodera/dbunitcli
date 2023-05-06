@@ -1,16 +1,11 @@
 package yo.dbunitcli.application.argument;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public interface ArgumentsParser {
@@ -61,7 +56,7 @@ public interface ArgumentsParser {
 
         private final HashBasedTable<String, String, Attribute> options = HashBasedTable.create();
 
-        private final ArrayList<String> keys = Lists.newArrayList();
+        private final ArrayList<String> keys = new ArrayList<>();
 
         private final String prefix;
 
@@ -132,8 +127,8 @@ public interface ArgumentsParser {
         }
 
         public void put(final String key, final String value, final Attribute type) {
-            if (Strings.isNullOrEmpty(this.args.get(this.withPrefix(key)))) {
-                this.options.put(this.withPrefix(key), this.args.getOrDefault(key, Strings.nullToEmpty(value)), type);
+            if (Optional.ofNullable(this.args.get(this.withPrefix(key))).orElse("").isEmpty()) {
+                this.options.put(this.withPrefix(key), this.args.getOrDefault(key, Optional.ofNullable(value).orElse("")), type);
             } else {
                 this.options.put(this.withPrefix(key), this.args.getOrDefault(this.withPrefix(key), value), type);
             }
@@ -163,11 +158,11 @@ public interface ArgumentsParser {
         }
 
         public boolean hasValue(final String key) {
-            return !Strings.isNullOrEmpty(this.get(key));
+            return !Optional.ofNullable(this.get(key)).orElse("").isEmpty();
         }
 
         protected String withPrefix(final String key) {
-            if (Strings.isNullOrEmpty(this.prefix) || key.startsWith("-" + this.prefix + ".")) {
+            if (Optional.ofNullable(this.prefix).orElse("").isEmpty() || key.startsWith("-" + this.prefix + ".")) {
                 return key;
             }
             return key.replace("-", "-" + this.prefix + ".");
@@ -184,7 +179,7 @@ public interface ArgumentsParser {
         private final boolean required;
 
         public Attribute(final ParamType type, final boolean required) {
-            this(type, Lists.newArrayList(), required);
+            this(type, new ArrayList<>(), required);
         }
 
         public Attribute(final ParamType type, final ArrayList<String> selectOption, final boolean required) {

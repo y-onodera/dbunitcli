@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset.producer;
 
-import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
@@ -14,6 +13,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class ComparableRegexSplitDataSetProducer implements ComparableDataSetProducer {
@@ -37,7 +37,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
         }
         this.encoding = this.param.getEncoding();
         final String headerName = this.param.getHeaderName();
-        if (!Strings.isNullOrEmpty(headerName)) {
+        if (!Optional.ofNullable(headerName).orElse("").isEmpty()) {
             this.headerNames = headerName.split(",");
         }
         if (this.headerNames == null) {

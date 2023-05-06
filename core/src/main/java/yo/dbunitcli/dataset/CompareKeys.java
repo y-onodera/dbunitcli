@@ -1,14 +1,14 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Lists;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class CompareKeys {
-    private final List<String> keys = Lists.newArrayList();
+    private final List<String> keys = new ArrayList<>();
     private final int rowNum;
     private final int oldRowNum;
     private final int newRowNum;
