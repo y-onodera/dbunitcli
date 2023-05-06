@@ -1,6 +1,5 @@
 package yo.dbunitcli.application.argument;
 
-import com.google.common.collect.HashBasedTable;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -54,7 +53,7 @@ public interface ArgumentsParser {
 
     class OptionParam {
 
-        private final HashBasedTable<String, String, Attribute> options = HashBasedTable.create();
+        private final Map<String, Map<String, Attribute>> options = new HashMap<>();
 
         private final ArrayList<String> keys = new ArrayList<>();
 
@@ -69,9 +68,11 @@ public interface ArgumentsParser {
 
         public void putAll(final OptionParam other) {
             other.options
-                    .rowKeySet()
+                    .values()
+                    .stream()
+                    .flatMap(it -> it.keySet().stream())
                     .forEach(it -> {
-                        final Map.Entry<String, Attribute> entry = other.options.row(it).entrySet().iterator().next();
+                        final Map.Entry<String, Attribute> entry = other.options.get(it).entrySet().iterator().next();
                         this.put(it, entry.getKey(), entry.getValue());
                     });
 
@@ -128,9 +129,13 @@ public interface ArgumentsParser {
 
         public void put(final String key, final String value, final Attribute type) {
             if (Optional.ofNullable(this.args.get(this.withPrefix(key))).orElse("").isEmpty()) {
-                this.options.put(this.withPrefix(key), this.args.getOrDefault(key, Optional.ofNullable(value).orElse("")), type);
+                this.options.put(this.withPrefix(key), new HashMap<>() {{
+                    this.put(OptionParam.this.args.getOrDefault(key, Optional.ofNullable(value).orElse("")), type);
+                }});
             } else {
-                this.options.put(this.withPrefix(key), this.args.getOrDefault(this.withPrefix(key), value), type);
+                this.options.put(this.withPrefix(key), new HashMap<>() {{
+                    this.put(OptionParam.this.args.getOrDefault(OptionParam.this.withPrefix(key), value), type);
+                }});
             }
             this.keys.add(this.withPrefix(key));
         }
@@ -140,19 +145,19 @@ public interface ArgumentsParser {
         }
 
         public Map.Entry<String, Attribute> getColumn(final String key) {
-            if (this.options.containsRow(this.withPrefix(key))) {
-                return this.options.row(this.withPrefix(key)).entrySet().iterator().next();
-            } else if (this.options.containsRow(key)) {
-                return this.options.row(key).entrySet().iterator().next();
+            if (this.options.containsKey(this.withPrefix(key))) {
+                return this.options.get(this.withPrefix(key)).entrySet().iterator().next();
+            } else if (this.options.containsKey(key)) {
+                return this.options.get(key).entrySet().iterator().next();
             }
             return null;
         }
 
         public String get(final String key) {
-            if (this.options.containsRow(this.withPrefix(key))) {
-                return this.options.row(this.withPrefix(key)).keySet().iterator().next();
-            } else if (this.options.containsRow(key)) {
-                return this.options.row(key).keySet().iterator().next();
+            if (this.options.containsKey(this.withPrefix(key))) {
+                return this.options.get(this.withPrefix(key)).keySet().iterator().next();
+            } else if (this.options.containsKey(key)) {
+                return this.options.get(key).keySet().iterator().next();
             }
             return "";
         }
