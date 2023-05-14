@@ -2,7 +2,7 @@
   "settings": [
     {
       "name": "multi1",
-      "split": [
+      "separate": [
         {
           "tableName": "split1",
           "filter": [

@@ -1,5 +1,7 @@
 package yo.dbunitcli.application;
 
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,6 +20,7 @@ import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Arrays;
 
 public class ConvertTest {
     @Rule
@@ -344,7 +347,63 @@ public class ConvertTest {
     @Test
     public void testConvertCsvSplitMultiXlsx() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvSplitMultiXlsx.txt"});
-        final File src = new File(this.baseDir + "/split/resulfilteringsplit");
+        final File src = new File(this.baseDir + "/split/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        Assert.assertEquals(8, actual.getTableNames().length);
+        final ITable split1 = actual.getTables()[0];
+        Assert.assertEquals("0000_multi1", split1.getTableMetaData().getTableName());
+        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, getColumnNames(split1));
+        Assert.assertEquals(2, split1.getRowCount());
+        Assert.assertEquals("1", split1.getValue(0, "key"));
+        Assert.assertEquals("2", split1.getValue(1, "key"));
+        final ITable split2 = actual.getTables()[1];
+        Assert.assertEquals("0000_multi2", split2.getTableMetaData().getTableName());
+        Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, getColumnNames(split2));
+        Assert.assertEquals(2, split2.getRowCount());
+        Assert.assertEquals("1", split2.getValue(0, "key"));
+        Assert.assertEquals("2", split2.getValue(1, "key"));
+        final ITable split3 = actual.getTables()[2];
+        Assert.assertEquals("0000_rename", split3.getTableMetaData().getTableName());
+        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, getColumnNames(split3));
+        Assert.assertEquals(2, split3.getRowCount());
+        Assert.assertEquals("1", split3.getValue(0, "key"));
+        Assert.assertEquals("2", split3.getValue(1, "key"));
+        final ITable split4 = actual.getTables()[3];
+        Assert.assertEquals("0001_rename", split4.getTableMetaData().getTableName());
+        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, getColumnNames(split4));
+        Assert.assertEquals(1, split4.getRowCount());
+        Assert.assertEquals("3", split4.getValue(0, "key"));
+        final ITable split5 = actual.getTables()[4];
+        Assert.assertEquals("multi1_00", split5.getTableMetaData().getTableName());
+        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, getColumnNames(split5));
+        Assert.assertEquals(1, split5.getRowCount());
+        Assert.assertEquals("2", split5.getValue(0, "key"));
+        final ITable split6 = actual.getTables()[5];
+        Assert.assertEquals("multi1_01", split6.getTableMetaData().getTableName());
+        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, getColumnNames(split6));
+        Assert.assertEquals(1, split6.getRowCount());
+        Assert.assertEquals("3", split6.getValue(0, "key"));
+        final ITable split7 = actual.getTables()[6];
+        Assert.assertEquals("multi2_00", split7.getTableMetaData().getTableName());
+        Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, getColumnNames(split7));
+        Assert.assertEquals(1, split7.getRowCount());
+        Assert.assertEquals("2", split7.getValue(0, "key"));
+        final ITable split8 = actual.getTables()[7];
+        Assert.assertEquals("multi2_01", split8.getTableMetaData().getTableName());
+        Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, getColumnNames(split8));
+        Assert.assertEquals(1, split8.getRowCount());
+        Assert.assertEquals("3", split8.getValue(0, "key"));
+    }
+
+    @Test
+    public void testConvertCsvSeparateMultiXlsx() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvSeparateMultiXlsx.txt"});
+        final File src = new File(this.baseDir + "/separate/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
@@ -363,6 +422,12 @@ public class ConvertTest {
         Assert.assertEquals(2, split2.getRowCount());
         Assert.assertEquals("2", split2.getValue(0, "key"));
         Assert.assertEquals("3", split2.getValue(1, "key"));
+    }
+
+    private static String[] getColumnNames(final ITable split1) throws DataSetException {
+        return Arrays.stream(split1.getTableMetaData().getColumns())
+                .map(Column::getColumnName)
+                .toArray(String[]::new);
     }
 
 }

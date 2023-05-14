@@ -28,7 +28,7 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
         this.converter = converter;
         this.alreadyWrite = alreadyWrite;
         this.head.startTable(converter, alreadyWrite);
-        if (converter.isSplittable()) {
+        if (this.converter != null && this.converter.isSplittable()) {
             this.rests.forEach(it -> it.startTable(converter.split(), alreadyWrite));
         }
     }
@@ -36,7 +36,7 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     @Override
     public void addRow(final Object[] values) {
         this.head.addRow(values);
-        if (this.converter.isSplittable()) {
+        if (this.converter != null && this.converter.isSplittable()) {
             this.rests.forEach(it -> it.addRow(values));
         } else {
             this.rows.add(values);
@@ -46,7 +46,7 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     @Override
     public void endTable(final OrderedTableNameMap orderedTableNameMap) {
         this.head.endTable(orderedTableNameMap);
-        if (this.converter.isSplittable()) {
+        if (this.converter != null && this.converter.isSplittable()) {
             this.rests.forEach(it -> it.endTable(orderedTableNameMap));
         } else {
             this.rests.forEach(it -> {

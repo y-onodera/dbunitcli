@@ -34,7 +34,7 @@ public class ComparableTable implements ITable {
     }
 
     @Override
-    public ITableMetaData getTableMetaData() {
+    public AddSettingTableMetaData getTableMetaData() {
         return this.addSettingTableMetaData;
     }
 
@@ -82,14 +82,10 @@ public class ComparableTable implements ITable {
     }
 
     public Column[] getColumnsExcludeKey() {
-        try {
-            final List<Column> primaryKey = Arrays.asList(this.getTableMetaData().getPrimaryKeys());
-            return Arrays.stream(this.getTableMetaData().getColumns())
-                    .filter(it -> !primaryKey.contains(it))
-                    .toArray(Column[]::new);
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
+        final List<Column> primaryKey = Arrays.asList(this.getTableMetaData().getPrimaryKeys());
+        return Arrays.stream(this.getTableMetaData().getColumns())
+                .filter(it -> !primaryKey.contains(it))
+                .toArray(Column[]::new);
     }
 
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(final List<String> keys) {
@@ -167,7 +163,7 @@ public class ComparableTable implements ITable {
                         }
                     })
                     .toArray(Integer[]::new);
-            Arrays.sort(indexes, (Integer i1, Integer i2) -> {
+            Arrays.sort(indexes, (final Integer i1, final Integer i2) -> {
                 try {
                     for (int i = 0, j = columnIndex.length; i < j; i++) {
                         final Object value1 = this.values.get(i1)[columnIndex[i]];

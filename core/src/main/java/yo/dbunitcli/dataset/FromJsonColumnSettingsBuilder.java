@@ -3,7 +3,6 @@ package yo.dbunitcli.dataset;
 import javax.json.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -17,7 +16,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
     private final AddSettingColumns.Builder expressionColumns = AddSettingColumns.NONE.builder();
 
-    private final RowFilters.Builder filterExpressions = RowFilters.NONE.builder();
+    private final TableSeparators.Builder separateExpressions = TableSeparators.NONE.builder();
 
     @Override
     public ColumnSettings build(final File setting) {
@@ -61,8 +60,8 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     }
 
     @Override
-    public RowFilters getRowFilters() {
-        return this.filterExpressions.build();
+    public TableSeparators getTableSeparators() {
+        return this.separateExpressions.build();
     }
 
     protected FromJsonColumnSettingsBuilder configureSetting(final JsonObject setting) {
@@ -87,7 +86,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         this.addExcludeColumns(strategy, json, key);
         this.addSortColumns(strategy, json, key);
         this.addExpression(this.expressionColumns.getExpressionBuilder(strategy, key), json);
-        this.addTableSplitter(strategy, json, key);
+        this.addTableSeparate(strategy, json, key);
     }
 
     protected FromJsonColumnSettingsBuilder configureCommonSetting(final JsonObject setting) {
@@ -122,7 +121,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         other.excludeColumns.add(this.excludeColumns.build());
         other.orderColumns.add(this.orderColumns.build());
         other.expressionColumns.add(this.expressionColumns.build());
-        other.filterExpressions.add(this.filterExpressions.build());
+        other.separateExpressions.add(this.separateExpressions.build());
     }
 
     protected void addCommonSettings(final JsonObject json, final String key, final AddSettingColumns.Builder targetSetting) {
@@ -170,16 +169,18 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         }
     }
 
-    protected void addTableSplitter(final AddSettingColumns.Strategy strategy, final JsonObject json, final String key) {
-        if (json.containsKey("split")) {
-            final JsonArray expressions = json.getJsonArray("split");
+    protected void addTableSeparate(final AddSettingColumns.Strategy strategy, final JsonObject json, final String key) {
+        if (json.containsKey("separate")) {
+            final JsonArray expressions = json.getJsonArray("separate");
             IntStream.range(0, expressions.size())
                     .mapToObj(expressions::getJsonObject)
-                    .forEach(split -> {
-                        final JsonArray expression = split.getJsonArray("filter");
-                        this.filterExpressions.addSplit(key, strategy
-                                , new RowFilter(IntStream.range(0, expression.size()).mapToObj(expression::getString).collect(Collectors.toList())
-                                        , this.toTableNameMapFunction(json, strategy, split)));
+                    .forEach(separate -> {
+                        final JsonArray expression = separate.getJsonArray("filter");
+                        this.separateExpressions.add(strategy, key,
+                                new TableSeparator(this.getSplitter(separate)
+                                        , IntStream.range(0, expression.size())
+                                        .mapToObj(expression::getString)
+                                        .collect(Collectors.toList())));
                     });
         } else {
             this.addFilterExpression(strategy, json, key);
@@ -189,33 +190,41 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     protected void addFilterExpression(final AddSettingColumns.Strategy strategy, final JsonObject settingJson, final String key) {
         if (settingJson.containsKey("filter")) {
             final JsonArray expressions = settingJson.getJsonArray("filter");
-            IntStream.range(0, expressions.size())
-                    .forEach(i -> this.filterExpressions.add(strategy, key, expressions.getString(i)));
+            this.separateExpressions.add(strategy, key
+                    , new TableSeparator(this.getSplitter(settingJson)
+                            , IntStream.range(0, expressions.size())
+                            .mapToObj(expressions::getString)
+                            .toList())
+            );
+        } else {
+            this.separateExpressions.add(strategy, key, TableSeparator.NONE.with(this.getSplitter(settingJson)));
         }
-        this.filterExpressions.addRenameFunction(strategy, key, this.toTableNameMapFunction(settingJson, strategy, settingJson));
     }
 
     protected void addFilterExpression(final JsonObject settingJson) {
         if (settingJson.containsKey("filter")) {
             final JsonArray expressions = settingJson.getJsonArray("filter");
-            IntStream.range(0, expressions.size())
-                    .forEach(i -> this.filterExpressions.addCommon(expressions.getString(i)));
+            this.separateExpressions.addCommon(IntStream.range(0, expressions.size())
+                    .mapToObj(expressions::getString)
+                    .toList());
         }
     }
 
-    protected Function<String, String> toTableNameMapFunction(final JsonObject settingJson, final AddSettingColumns.Strategy strategy, final JsonObject json) {
-        if (!json.containsKey("tableName")) {
-            return Function.identity();
+    protected TableSplitter getSplitter(final JsonObject json) {
+        if (json.containsKey("split")) {
+            final JsonObject split = json.getJsonObject("split");
+            final int limit = split.getInt("limit");
+            final String newName = split.containsKey("tableName") ? split.getString("tableName") : "";
+            final String prefix = split.containsKey("prefix") ? split.getString("prefix") : "";
+            final String suffix = split.containsKey("suffix") ? split.getString("suffix") : "";
+            return new TableSplitter(newName, prefix, suffix, limit);
+        } else if (json.containsKey("tableName") || json.containsKey("prefix") || json.containsKey("suffix")) {
+            final String newName = json.containsKey("tableName") ? json.getString("tableName") : "";
+            final String prefix = json.containsKey("prefix") ? json.getString("prefix") : "";
+            final String suffix = json.containsKey("suffix") ? json.getString("suffix") : "";
+            return new TableSplitter(newName, prefix, suffix, 0);
         }
-        final String result = json.getString("tableName");
-        if (strategy == AddSettingColumns.Strategy.BY_NAME) {
-            final String name = settingJson.getString("name");
-            return it -> it.equals(name) ? result : it;
-        } else if (strategy == AddSettingColumns.Strategy.PATTERN) {
-            final String pattern = settingJson.getString("pattern");
-            return it -> AddSettingColumns.ALL_MATCH_PATTERN.equals(pattern) || it.contains(pattern) ? result : it;
-        }
-        return Function.identity();
+        return TableSplitter.NONE;
     }
 
 }

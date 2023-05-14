@@ -1,0 +1,32 @@
+{
+  "settings": [
+    {
+      "name": "multi1",
+      "split": {
+        "prefix": "%04d_",
+        "tableName": "rename",
+        "limit": 2
+      }
+    },
+    {
+      "pattern": "mul",
+      "split": {
+        "prefix": "%04d_",
+        "limit": 2
+      },
+      "filter": [
+        "key < 3"
+      ]
+    },
+    {
+      "pattern": "multi",
+      "split": {
+        "suffix": "_%02d",
+        "limit": 1
+      },
+      "filter": [
+        "key > 1"
+      ]
+    }
+  ]
+}

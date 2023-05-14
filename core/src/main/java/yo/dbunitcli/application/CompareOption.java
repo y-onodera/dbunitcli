@@ -160,7 +160,9 @@ public class CompareOption extends CommandLineOption {
                 .ifMatch(this.targetType != Type.data
                         , it -> it.setColumnSettings(it
                                 .getColumnSettings()
-                                .apply(builder -> builder.setTableRenameFunctionEdit(origin -> (String name) -> "TARGET")))
+                                .apply(builder -> builder.setSeparatorEdit(separator ->
+                                        separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
+                                                .setNewName("TARGET").build()))))
                 );
         return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
     }
@@ -170,7 +172,9 @@ public class CompareOption extends CommandLineOption {
                 .ifMatch(this.targetType != Type.data
                         , it -> it.setColumnSettings(it
                                 .getColumnSettings()
-                                .apply(builder -> builder.setTableRenameFunctionEdit(origin -> (String name) -> "TARGET")))
+                                .apply(builder -> builder.setSeparatorEdit(separator ->
+                                        separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
+                                                .setNewName("TARGET").build()))))
                 );
         return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
     }

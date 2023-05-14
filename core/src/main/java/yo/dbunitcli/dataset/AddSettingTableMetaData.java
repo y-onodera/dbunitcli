@@ -13,26 +13,48 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final Column[] allColumns;
     private final ColumnExpression additionalExpression;
     private final List<Integer> filterColumnIndex;
-    private final RowFilter rowFilter;
+    private final TableSeparator tableSeparator;
     private final AddSettingTableMetaData preset;
 
     public AddSettingTableMetaData(final ITableMetaData delegate
             , final Column[] primaryKeys
             , final IColumnFilter iColumnFilter
-            , final RowFilter rowFilter
+            , final TableSeparator tableSeparator
             , final ColumnExpression additionalExpression) {
-        this.tableName = rowFilter.rename(delegate.getTableName());
+        this.tableName = tableSeparator.rename(delegate.getTableName());
         this.primaryKeys = primaryKeys;
         this.additionalExpression = additionalExpression;
         this.allColumns = this.getAllColumns(delegate);
         this.columns = this.getColumns(delegate, iColumnFilter);
         this.filterColumnIndex = this.getFilterColumnIndex(delegate);
-        this.rowFilter = rowFilter;
+        this.tableSeparator = tableSeparator;
         if (delegate instanceof AddSettingTableMetaData) {
             this.preset = (AddSettingTableMetaData) delegate;
         } else {
             this.preset = null;
         }
+    }
+
+    private AddSettingTableMetaData(final String tableName, final Column[] primaryKeys, final Column[] columns, final Column[] allColumns, final ColumnExpression additionalExpression, final List<Integer> filterColumnIndex, final TableSeparator tableSeparator, final AddSettingTableMetaData preset) {
+        this.tableName = tableName;
+        this.primaryKeys = primaryKeys;
+        this.columns = columns;
+        this.allColumns = allColumns;
+        this.additionalExpression = additionalExpression;
+        this.filterColumnIndex = filterColumnIndex;
+        this.tableSeparator = tableSeparator;
+        this.preset = preset;
+    }
+
+    public AddSettingTableMetaData rename(final String newTableName) {
+        return new AddSettingTableMetaData(newTableName
+                , this.primaryKeys
+                , this.columns
+                , this.allColumns
+                , this.additionalExpression
+                , this.filterColumnIndex
+                , this.tableSeparator
+                , this.preset);
     }
 
     @Override
@@ -59,14 +81,18 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
             }
         }
         final Object[] result = this.filterColumn(this.applyExpression(applySettings));
-        if (this.hasRowFilter() && !this.rowFilter.test(this.rowToMap(result))) {
+        if (this.hasRowFilter() && !this.tableSeparator.test(this.rowToMap(result))) {
             return null;
         }
         return result;
     }
 
     public boolean hasRowFilter() {
-        return this.rowFilter != null;
+        return this.tableSeparator != null;
+    }
+
+    public TableSplitter getTableSplitter() {
+        return this.tableSeparator.getSplitter();
     }
 
     protected Map<String, Object> rowToMap(final Object[] row) {
@@ -144,4 +170,5 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
             throw new AssertionError(e);
         }
     }
+
 }

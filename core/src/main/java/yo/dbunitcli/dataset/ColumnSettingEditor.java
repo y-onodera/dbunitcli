@@ -1,11 +1,8 @@
 package yo.dbunitcli.dataset;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class ColumnSettingEditor {
-    private Function<Function<String, String>, Function<String, String>> tableRenameFunctionEdit = Function.identity();
-
     private Consumer<AddSettingColumns.Builder> keyEdit = (it) -> {
     };
 
@@ -18,12 +15,8 @@ public class ColumnSettingEditor {
     private Consumer<AddSettingColumns.Builder> expressionEdit = (it) -> {
     };
 
-    private Consumer<RowFilters.Builder> filterEdit = (it) -> {
+    private Consumer<TableSeparators.Builder> separatorEdit = (it) -> {
     };
-
-    public Function<Function<String, String>, Function<String, String>> getTableRenameFunctionEdit() {
-        return this.tableRenameFunctionEdit;
-    }
 
     public Consumer<AddSettingColumns.Builder> getKeyEdit() {
         return this.keyEdit;
@@ -41,14 +34,10 @@ public class ColumnSettingEditor {
         return this.expressionEdit;
     }
 
-    public Consumer<RowFilters.Builder> getFilterEdit() {
-        return this.filterEdit;
+    public Consumer<TableSeparators.Builder> getSeparatorEdit() {
+        return this.separatorEdit;
     }
 
-    public ColumnSettingEditor setTableRenameFunctionEdit(final Function<Function<String, String>, Function<String, String>> function) {
-        this.tableRenameFunctionEdit = function;
-        return this;
-    }
 
     public ColumnSettingEditor setKeyEdit(final Consumer<AddSettingColumns.Builder> key) {
         this.keyEdit = key;
@@ -70,8 +59,8 @@ public class ColumnSettingEditor {
         return this;
     }
 
-    public ColumnSettingEditor setFilterEdit(final Consumer<RowFilters.Builder> filter) {
-        this.filterEdit = filter;
+    public ColumnSettingEditor setSeparatorEdit(final Consumer<TableSeparators.Builder> filter) {
+        this.separatorEdit = filter;
         return this;
     }
 

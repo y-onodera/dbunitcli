@@ -14,21 +14,19 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ColumnExpression {
-
-    private final Map<String, String> stringExpression = new LinkedHashMap<>();
-
-    private final Map<String, String> booleanExpression = new LinkedHashMap<>();
-
-    private final Map<String, String> numberExpression = new LinkedHashMap<>();
-
-    private final Map<String, String> sqlFunction = new LinkedHashMap<>();
+public record ColumnExpression(
+        Map<String, String> stringExpression
+        , Map<String, String> booleanExpression
+        , Map<String, String> numberExpression
+        , Map<String, String> sqlFunction
+) {
 
     public ColumnExpression(final Builder builder) {
-        this.stringExpression.putAll(builder.stringExpression);
-        this.booleanExpression.putAll(builder.booleanExpression);
-        this.numberExpression.putAll(builder.numberExpression);
-        this.sqlFunction.putAll(builder.sqlFunction);
+        this(new LinkedHashMap<>(builder.stringExpression)
+                , new LinkedHashMap<>(builder.booleanExpression)
+                , new LinkedHashMap<>(builder.numberExpression)
+                , new LinkedHashMap<>(builder.sqlFunction)
+        );
     }
 
     public static Builder builder() {
@@ -41,19 +39,19 @@ public class ColumnExpression {
 
     public AddSettingTableMetaData apply(final ITableMetaData delegateMetaData) {
         try {
-            return this.apply(delegateMetaData, null, delegateMetaData.getPrimaryKeys(), RowFilter.NONE);
+            return this.apply(delegateMetaData, null, delegateMetaData.getPrimaryKeys(), TableSeparator.NONE);
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
 
-    public AddSettingTableMetaData apply(final ITableMetaData originMetaData, final IColumnFilter iColumnFilter, final Column[] comparisonKeys, final RowFilter rowFilter) {
+    public AddSettingTableMetaData apply(final ITableMetaData originMetaData, final IColumnFilter iColumnFilter, final Column[] comparisonKeys, final TableSeparator tableSeparator) {
         try {
             Column[] primaryKey = originMetaData.getPrimaryKeys();
             if (comparisonKeys.length > 0) {
                 primaryKey = comparisonKeys;
             }
-            return new AddSettingTableMetaData(originMetaData, primaryKey, iColumnFilter, rowFilter, this);
+            return new AddSettingTableMetaData(originMetaData, primaryKey, iColumnFilter, tableSeparator, this);
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
@@ -71,7 +69,7 @@ public class ColumnExpression {
     public Column[] merge(final Column[] columns) {
         if (this.size() > 0) {
             final ArrayList<Column> columnList = Arrays.stream(columns).collect(Collectors.toCollection(ArrayList::new));
-            final List<String> columnNames = columnList.stream().map(Column::getColumnName).collect(Collectors.toList());
+            final List<String> columnNames = columnList.stream().map(Column::getColumnName).toList();
             this.getColumns().forEach(column -> {
                 if (!columnNames.contains(column.getColumnName())) {
                     columnList.add(column);
@@ -111,35 +109,6 @@ public class ColumnExpression {
             return jexl.createExpression(this.sqlFunction.get(columnName)).evaluate(jc).toString();
         }
         return new BigDecimal(jexl.createExpression(this.numberExpression.get(columnName)).evaluate(jc).toString());
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof ColumnExpression)) {
-            return false;
-        }
-        final ColumnExpression that = (ColumnExpression) o;
-        return Objects.equals(this.stringExpression, that.stringExpression)
-                && Objects.equals(this.booleanExpression, that.booleanExpression)
-                && Objects.equals(this.numberExpression, that.numberExpression)
-                && Objects.equals(this.sqlFunction, that.sqlFunction);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.stringExpression, this.booleanExpression, this.numberExpression, this.sqlFunction);
-    }
-
-    @Override
-    public String toString() {
-        return "ColumnExpression{" +
-                "stringExpression=" + this.stringExpression +
-                ", booleanExpression=" + this.booleanExpression +
-                ", numberExpression=" + this.numberExpression +
-                '}';
     }
 
     public static class Builder {
