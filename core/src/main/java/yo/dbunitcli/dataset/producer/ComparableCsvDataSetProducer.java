@@ -141,7 +141,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
                 boolean shouldProceed = false;
                 while (columnsCollectedSoFar < expectedNumberOfColumns) {
                     try {
-                        columns = this.parse(buffer.append(anotherLine).toString());
+                        columns = this.parse(buffer.append(anotherLine.replaceAll("(?!<\\\\)\\\\(?![\\\\\"])", "\\\\\\\\")).toString());
                         columnsCollectedSoFar = columns.size();
                     } catch (final IllegalStateException var9) {
                         this.resetThePipeline();
@@ -174,6 +174,8 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             public void putFront(final PipelineComponent component) {
                 if (component instanceof WhitespacesHandler) {
                     super.putFront(IgnoreDelimiterWhitespacesHandler.GET(ComparableCsvDataSetProducer.this.delimiter, component));
+                } else if (component instanceof EnforceHandler) {
+                    super.putFront(LightEnforceHandler.ENFORCE((EnforceHandler) component));
                 } else {
                     super.putFront(component);
                 }
@@ -190,6 +192,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     }
 
     protected static class IgnoreDelimiterWhitespacesHandler extends AbstractPipelineComponent {
+
         private static final Logger LOGGER = LogManager.getLogger();
         static Field HANDLE;
 
@@ -245,6 +248,91 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
 
         static class Accept extends ACCEPT {
 
+        }
+    }
+
+    static class LightEnforceHandler extends AbstractPipelineComponent {
+        static Field HANDLE;
+
+        static {
+            try {
+                HANDLE = EnforceHandler.class.getDeclaredField("enforcedComponents");
+            } catch (final NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+            HANDLE.setAccessible(true);
+        }
+
+        private PipelineComponent[] enforcedComponents;
+        private PipelineComponent theHandlerComponent;
+
+        private LightEnforceHandler(final EnforceHandler components) {
+            try {
+                this.setEnforcedComponents((PipelineComponent[]) HANDLE.get(components));
+            } catch (final IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public static PipelineComponent ENFORCE(final EnforceHandler components) {
+            final LightEnforceHandler handler = new LightEnforceHandler(components);
+            return createPipelineComponent(handler, new ENFORCE(handler));
+        }
+
+        @Override
+        public boolean canHandle(final char c) {
+            for (int i = 0; i < this.getEnforcedComponents().length; i++) {
+                if (this.getEnforcedComponents()[i].canHandle(c)) {
+                    this.setTheHandlerComponent(this.getEnforcedComponents()[i]);
+                    return true;
+                }
+            }
+            this.getPipeline().removeFront();
+            return false;
+        }
+
+        @Override
+        public void setPipeline(final Pipeline pipeline) {
+            for (int i = 0; i < this.getEnforcedComponents().length; i++) {
+                this.getEnforcedComponents()[i].setPipeline(pipeline);
+            }
+            super.setPipeline(pipeline);
+        }
+
+        protected PipelineComponent[] getEnforcedComponents() {
+            return this.enforcedComponents;
+        }
+
+        protected void setEnforcedComponents(final PipelineComponent[] enforcedComponents) {
+            this.enforcedComponents = enforcedComponents;
+        }
+
+        PipelineComponent getTheHandlerComponent() {
+            return this.theHandlerComponent;
+        }
+
+        void setTheHandlerComponent(final PipelineComponent theHandlerComponent) {
+            this.theHandlerComponent = theHandlerComponent;
+        }
+
+        static private class ENFORCE extends ACCEPT {
+            LightEnforceHandler handler;
+
+            public ENFORCE(final LightEnforceHandler handler) {
+                this.handler = handler;
+            }
+
+            @Override
+            public void helpWith(final char c) {
+
+                try {
+                    this.handler.getTheHandlerComponent().handle(c);
+                    this.handler.getPipeline().removeFront();
+                } catch (final PipelineException e) {
+                    throw new RuntimeException(e.getMessage());
+                }
+                // ignore the char
+            }
         }
     }
 }
