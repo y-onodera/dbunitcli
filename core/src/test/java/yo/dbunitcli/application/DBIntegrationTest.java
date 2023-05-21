@@ -1,30 +1,25 @@
 package yo.dbunitcli.application;
 
-import org.junit.*;
-import org.junit.contrib.java.lang.system.ExpectedSystemExit;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.OrderWith;
 import org.junit.runner.manipulation.Alphanumeric;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 @Category(IntegrationTest.class)
 @OrderWith(Alphanumeric.class)
 public class DBIntegrationTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-    @Rule
-    public ExpectedSystemExit exit = ExpectedSystemExit.none();
 
     private static String testResourcesDir;
 
-    private static String baseDir;
-
     @BeforeClass
     public static void setUp() throws Exception {
-        baseDir = URLDecoder.decode(DBIntegrationTest.class.getResource(".").getPath(), "UTF-8");
+        final String baseDir = URLDecoder.decode(Objects.requireNonNull(DBIntegrationTest.class.getResource(".")).getPath(), StandardCharsets.UTF_8);
         testResourcesDir = baseDir.replace("target/test-classes", "src/test/resources");
         Run.main(new String[]{"@" + testResourcesDir + "/paramDBIntegrationRunCreateTable.txt"});
     }

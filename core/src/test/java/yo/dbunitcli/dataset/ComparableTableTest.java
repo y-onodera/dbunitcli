@@ -1,27 +1,19 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.collect.Lists;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.OrderedTableNameMap;
 import org.dbunit.dataset.datatype.DataType;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
 public class ComparableTableTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private ComparableTable target;
 
@@ -46,7 +38,7 @@ public class ComparableTableTest {
 
     @Test
     public void getRows_result_has_argument_column_length() {
-        final Collection<Map.Entry<Integer, Object[]>> actual = this.target.getRows(Lists.newArrayList("COLUMN1", "COLUMN2")).values();
+        final Collection<Map.Entry<Integer, Object[]>> actual = this.target.getRows(List.of("COLUMN1", "COLUMN2")).values();
         final Iterator<Map.Entry<Integer, Object[]>> it = actual.iterator();
         assertArrayEquals(new Object[]{"1", "a", "あ", 1}, it.next().getValue());
         assertArrayEquals(new Object[]{"1", "b", "あ", 1}, it.next().getValue());
@@ -56,24 +48,26 @@ public class ComparableTableTest {
 
     @Test
     public void getRows_throw_error_if_keys_not_unique() {
-        this.expectedException.expect(AssertionError.class);
-        this.target.getRows(Lists.newArrayList("COLUMN1")).values();
+        Assert.assertThrows(AssertionError.class,
+                () -> this.target.getRows(List.of("COLUMN1")).values()
+        );
     }
 
     @Test
     public void getRows_throw_exception_if_argument_column_not_exists() {
-        this.expectedException.expect(AssertionError.class);
-        this.target.getRows(Lists.newArrayList("COLUMN1", "COLUMNA")).values();
+        Assert.assertThrows(AssertionError.class,
+                () -> this.target.getRows(List.of("COLUMN1", "COLUMNA")).values()
+        );
     }
 
     @Test
     public void getKey_return_argument_column() {
-        CompareKeys actual = this.target.getKey(0, Lists.newArrayList("COLUMN1", "COLUMN2"));
-        assertEquals(new CompareKeys(0, Lists.newArrayList("1", "a")), actual);
-        actual = this.target.getKey(1, Lists.newArrayList("COLUMN1", "COLUMN2"));
-        assertEquals(new CompareKeys(1, Lists.newArrayList("1", "b")), actual);
-        actual = this.target.getKey(2, Lists.newArrayList("COLUMN1", "COLUMN2"));
-        assertEquals(new CompareKeys(2, Lists.newArrayList("2", "a")), actual);
+        CompareKeys actual = this.target.getKey(0, List.of("COLUMN1", "COLUMN2"));
+        assertEquals(new CompareKeys(0, List.of("1", "a")), actual);
+        actual = this.target.getKey(1, List.of("COLUMN1", "COLUMN2"));
+        assertEquals(new CompareKeys(1, List.of("1", "b")), actual);
+        actual = this.target.getKey(2, List.of("COLUMN1", "COLUMN2"));
+        assertEquals(new CompareKeys(2, List.of("2", "a")), actual);
     }
 
     @Test

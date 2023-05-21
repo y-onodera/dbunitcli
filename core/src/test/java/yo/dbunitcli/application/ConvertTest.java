@@ -5,9 +5,7 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
@@ -24,8 +22,6 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class ConvertTest {
-    @Rule
-    public ExpectedSystemExit exit = ExpectedSystemExit.none();
 
     private String testResourceDir;
 

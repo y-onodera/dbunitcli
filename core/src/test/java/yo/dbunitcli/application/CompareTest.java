@@ -1,11 +1,9 @@
 package yo.dbunitcli.application;
 
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.ExpectedSystemExit;
-import org.junit.rules.ExpectedException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -13,11 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class CompareTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-    @Rule
-    public ExpectedSystemExit exit = ExpectedSystemExit.none();
 
     private String baseDir;
 
@@ -154,24 +147,24 @@ public class CompareTest {
     }
 
     @Test
-    public void testFailedResultDiffNotExpected() throws Exception {
-        this.exit.expectSystemExitWithStatus(1);
-        this.expectedException.expect(AssertionError.class);
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffNotExpected.txt"});
+    public void testFailedResultDiffNotExpected() {
+        Assert.assertThrows(AssertionError.class,
+                () -> Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffNotExpected.txt"})
+        );
     }
 
     @Test
-    public void testFailedResultDiffDifferExpected() throws Exception {
-        this.exit.expectSystemExitWithStatus(1);
-        this.expectedException.expect(AssertionError.class);
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffInValidExpected.txt"});
+    public void testFailedResultDiffDifferExpected() {
+        Assert.assertThrows(AssertionError.class,
+                () -> Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffInValidExpected.txt"})
+        );
     }
 
     @Test
-    public void testFailedUnExpectedNoDiff() throws Exception {
-        this.exit.expectSystemExitWithStatus(1);
-        this.expectedException.expect(AssertionError.class);
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"});
+    public void testFailedUnExpectedNoDiff() {
+        Assert.assertThrows(AssertionError.class,
+                () -> Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"})
+        );
     }
 
 }
