@@ -1,29 +1,23 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class AddSettingColumns {
 
-    public static final AddSettingColumns NONE = AddSettingColumns.builder().build();
+    public static final AddSettingColumns NONE = new Builder().build();
 
     public static final String ALL_MATCH_PATTERN = "*";
 
-    private final Map<String, List<String>> byName = Maps.newHashMap();
+    private final Map<String, List<String>> byName = new HashMap<>();
 
-    private final Map<String, List<String>> pattern = Maps.newHashMap();
+    private final Map<String, List<String>> pattern = new HashMap<>();
 
-    private final Map<String, ColumnExpression> byNameExpression = Maps.newHashMap();
+    private final Map<String, ColumnExpression> byNameExpression = new HashMap<>();
 
-    private final Map<String, ColumnExpression> patternExpression = Maps.newHashMap();
+    private final Map<String, ColumnExpression> patternExpression = new HashMap<>();
 
-    private final List<String> common = Lists.newArrayList();
+    private final List<String> common = new ArrayList<>();
 
     private final ColumnExpression commonExpression;
 
@@ -36,12 +30,12 @@ public class AddSettingColumns {
         this.commonExpression = builder.commonExpression.build();
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Builder builder() {
+        return new Builder().add(this);
     }
 
     public AddSettingColumns apply(final Consumer<Builder> editor) {
-        final Builder builder = builder().add(this);
+        final Builder builder = this.builder().add(this);
         editor.accept(builder);
         return builder.build();
     }
@@ -52,16 +46,17 @@ public class AddSettingColumns {
     }
 
     public List<String> getColumns(final String tableName) {
-        final List<String> result = Lists.newArrayList(this.common);
+        final List<String> result = new ArrayList<>(this.common);
         if (this.byName.containsKey(tableName)) {
             result.addAll(this.byName.get(tableName));
             return result;
         }
-        final List<String> patternResult = this.pattern.entrySet().stream()
+        final List<String> patternResult = this.pattern.entrySet()
+                .stream()
                 .filter(it -> tableName.contains(it.getKey()))
                 .map(Map.Entry::getValue)
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+                .findFirst()
+                .orElse(new ArrayList<>());
         if (this.pattern.containsKey(ALL_MATCH_PATTERN) && patternResult.size() == 0) {
             result.addAll(this.pattern.get(ALL_MATCH_PATTERN));
         } else {
@@ -90,21 +85,21 @@ public class AddSettingColumns {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (!(o instanceof AddSettingColumns)) {
             return false;
         }
         final AddSettingColumns that = (AddSettingColumns) o;
-        return Objects.equal(this.byName, that.byName) &&
-                Objects.equal(this.pattern, that.pattern) &&
-                Objects.equal(this.byNameExpression, that.byNameExpression) &&
-                Objects.equal(this.patternExpression, that.patternExpression) &&
-                Objects.equal(this.common, that.common) &&
-                Objects.equal(this.commonExpression, that.commonExpression);
+        return Objects.equals(this.byName, that.byName)
+                && Objects.equals(this.pattern, that.pattern)
+                && Objects.equals(this.byNameExpression, that.byNameExpression)
+                && Objects.equals(this.patternExpression, that.patternExpression)
+                && Objects.equals(this.common, that.common)
+                && Objects.equals(this.commonExpression, that.commonExpression);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.byName, this.pattern, this.byNameExpression, this.patternExpression, this.common, this.commonExpression);
+        return Objects.hash(this.byName, this.pattern, this.byNameExpression, this.patternExpression, this.common, this.commonExpression);
     }
 
     @Override
@@ -120,15 +115,15 @@ public class AddSettingColumns {
     }
 
     public static class Builder {
-        private final Map<String, List<String>> byName = Maps.newHashMap();
+        private final Map<String, List<String>> byName = new HashMap<>();
 
-        private final Map<String, ColumnExpression.Builder> byNameExpression = Maps.newHashMap();
+        private final Map<String, ColumnExpression.Builder> byNameExpression = new HashMap<>();
 
-        private final Map<String, List<String>> pattern = Maps.newHashMap();
+        private final Map<String, List<String>> pattern = new HashMap<>();
 
-        private final Map<String, ColumnExpression.Builder> patternExpression = Maps.newHashMap();
+        private final Map<String, ColumnExpression.Builder> patternExpression = new HashMap<>();
 
-        private final List<String> common = Lists.newArrayList();
+        private final List<String> common = new ArrayList<>();
 
         private final ColumnExpression.Builder commonExpression = ColumnExpression.builder();
 
@@ -162,12 +157,12 @@ public class AddSettingColumns {
         }
 
         public Builder addPatternExpressionFrom(final AddSettingColumns from) {
-            from.patternExpression.forEach((key, value) -> this.addExpression(Strategy.PATTERN, key, it -> it.add(value)));
+            from.patternExpression.forEach((key, value) -> this.getExpressionBuilder(Strategy.PATTERN, key).add(value));
             return this;
         }
 
         public Builder addByNameExpressionFrom(final AddSettingColumns from) {
-            from.byNameExpression.forEach((key, value) -> this.addExpression(Strategy.BY_NAME, key, it -> it.add(value)));
+            from.byNameExpression.forEach((key, value) -> this.getExpressionBuilder(Strategy.BY_NAME, key).add(value));
             return this;
         }
 
@@ -177,11 +172,6 @@ public class AddSettingColumns {
             } else if (strategy == Strategy.PATTERN) {
                 return this.addPattern(name, keys);
             }
-            return this;
-        }
-
-        public Builder addExpression(final Strategy strategy, final String name, final Consumer<ColumnExpression.Builder> builder) {
-            builder.accept(this.getExpressionBuilder(strategy, name));
             return this;
         }
 

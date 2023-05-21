@@ -1,7 +1,7 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.base.Strings;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class TableNameFilter {
@@ -9,10 +9,10 @@ public class TableNameFilter {
     private Pattern excludePattern;
 
     public TableNameFilter(final String regInclude, final String regExclude) {
-        if (!Strings.isNullOrEmpty(regInclude)) {
+        if (!Optional.ofNullable(regInclude).orElse("").isEmpty()) {
             this.includePattern = Pattern.compile(regInclude);
         }
-        if (!Strings.isNullOrEmpty(regExclude)) {
+        if (!Optional.ofNullable(regExclude).orElse("").isEmpty()) {
             this.excludePattern = Pattern.compile(regExclude);
         }
     }

@@ -1,7 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
@@ -10,54 +8,30 @@ import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class ColumnSettings {
+public record ColumnSettings(AddSettingColumns comparisonKeys
+        , AddSettingColumns excludeColumns
+        , AddSettingColumns orderColumns
+        , AddSettingColumns expressionColumns
+        , TableSeparators tableSeparators
+) {
 
-    public static ColumnSettings NONE = new ColumnSettings(it -> it, AddSettingColumns.NONE
+    public static ColumnSettings NONE = new ColumnSettings(AddSettingColumns.NONE
             , AddSettingColumns.NONE
             , AddSettingColumns.NONE
             , AddSettingColumns.NONE
-            , RowFilter.NONE);
-
-    private final Function<String, String> tableNameMap;
-
-    private final AddSettingColumns comparisonKeys;
-
-    private final AddSettingColumns excludeColumns;
-
-    private final AddSettingColumns orderColumns;
-
-    private final AddSettingColumns expressionColumns;
-
-    private final RowFilter filterExpressions;
+            , TableSeparators.NONE);
 
     public ColumnSettings(final Builder builder) {
-        this(builder.getTableNameMap(), builder.getComparisonKeys()
+        this(builder.getComparisonKeys()
                 , builder.getExcludeColumns()
                 , builder.getOrderColumns()
                 , builder.getExpressionColumns()
-                , builder.getFilterExpressions()
+                , builder.getTableSeparators()
         );
-    }
-
-    private ColumnSettings(final Function<String, String> tableNameMap, final AddSettingColumns comparisonKeys
-            , final AddSettingColumns excludeColumns
-            , final AddSettingColumns orderColumns
-            , final AddSettingColumns expressionColumns
-            , final RowFilter filterExpressions) {
-        this.tableNameMap = tableNameMap;
-        this.comparisonKeys = comparisonKeys;
-        this.excludeColumns = excludeColumns;
-        this.orderColumns = orderColumns;
-        this.expressionColumns = expressionColumns;
-        this.filterExpressions = filterExpressions;
     }
 
     public AddSettingColumns getComparisonKeys() {
@@ -79,35 +53,61 @@ public class ColumnSettings {
     public ColumnSettings apply(final Consumer<ColumnSettingEditor> function) {
         final ColumnSettingEditor editor = new ColumnSettingEditor();
         function.accept(editor);
-        return new ColumnSettings(editor.getTableNameMapEdit().apply(this.tableNameMap)
-                , this.comparisonKeys.apply(editor.getKeyEdit())
+        return new ColumnSettings(this.comparisonKeys.apply(editor.getKeyEdit())
                 , this.excludeColumns.apply(editor.getExcludeEdit())
                 , this.orderColumns.apply(editor.getOrderEdit())
                 , this.expressionColumns.apply(editor.getExpressionEdit())
-                , this.filterExpressions.apply(editor.getFilterEdit()));
+                , this.tableSeparators.apply(editor.getSeparatorEdit())
+        );
     }
 
     public ColumnSettings add(final ColumnSettings other) {
-        return this.apply(editor -> editor.setTableNameMapEdit(other.tableNameMap::andThen)
-                .setKeyEdit(it -> it.add(other.comparisonKeys))
+        return this.apply(editor -> editor.setKeyEdit(it -> it.add(other.comparisonKeys))
                 .setExcludeEdit(it -> it.add(other.excludeColumns))
                 .setOrderEdit(it -> it.add(other.orderColumns))
                 .setExpressionEdit(it -> it.add(other.expressionColumns))
-                .setFilterEdit(it -> it.add(other.filterExpressions)));
+                .setSeparatorEdit(it -> it.add(other.tableSeparators))
+        );
     }
 
-    public ComparableTableMapper createMapper(ITableMetaData metaData) {
-        final List<AddSettingTableMetaData> settings = Lists.newArrayList();
-        AddSettingTableMetaData resultMetaData = this.addSetting(metaData);
-        while (!metaData.getTableName().equals(resultMetaData.getTableName())) {
-            settings.add(resultMetaData);
-            metaData = resultMetaData;
-            resultMetaData = this.addSetting(resultMetaData);
+    public ComparableTableMapper createMapper(final ITableMetaData metaData) {
+        final List<AddSettingTableMetaData> results = this.getAddSettingTableMetaData(metaData);
+        if (results.size() == 1) {
+            return this.createMapperFrom(results.get(0));
         }
-        return new ComparableTableMapper(resultMetaData, this.getOrderColumns(resultMetaData.getTableName()), settings);
+        return new ComparableTableMapperMulti(results.stream()
+                .map(this::createMapperFrom)
+                .collect(Collectors.toList()));
     }
 
-    protected Column[] getComparisonKeys(final String tableName) {
+    private ComparableTableMapper createMapperFrom(final AddSettingTableMetaData results) {
+        return new ComparableTableMapperSingle(results, this.getOrderColumns(results.getTableName()));
+    }
+
+    private List<AddSettingTableMetaData> getAddSettingTableMetaData(final ITableMetaData metaData) {
+        return this.addSetting(metaData).stream()
+                .map(it -> {
+                    ITableMetaData origin = metaData;
+                    AddSettingTableMetaData resultMetaData = it;
+                    while (!origin.getTableName().equals(resultMetaData.getTableName())) {
+                        origin = resultMetaData;
+                        final List<AddSettingTableMetaData> addSetting = this.addSetting(resultMetaData);
+                        if (addSetting.size() == 1) {
+                            resultMetaData = addSetting.get(0);
+                        } else {
+                            return addSetting.stream()
+                                    .map(this::getAddSettingTableMetaData)
+                                    .flatMap(Collection::stream)
+                                    .collect(Collectors.toList());
+                        }
+                    }
+                    return Collections.singletonList(resultMetaData);
+                })
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    private Column[] getComparisonKeys(final String tableName) {
         return this.getComparisonKeys()
                 .getColumns(tableName)
                 .stream()
@@ -115,7 +115,7 @@ public class ColumnSettings {
                 .toArray(Column[]::new);
     }
 
-    protected List<Column> getExcludeColumns(final String tableName) {
+    private List<Column> getExcludeColumns(final String tableName) {
         return this.getExcludeColumns()
                 .getColumns(tableName)
                 .stream()
@@ -123,7 +123,7 @@ public class ColumnSettings {
                 .collect(Collectors.toList());
     }
 
-    protected Column[] getOrderColumns(final String tableName) {
+    private Column[] getOrderColumns(final String tableName) {
         return this.getOrderColumns()
                 .getColumns(tableName)
                 .stream()
@@ -131,11 +131,11 @@ public class ColumnSettings {
                 .toArray(Column[]::new);
     }
 
-    protected ColumnExpression getExpressionColumns(final String tableName) {
+    private ColumnExpression getExpressionColumns(final String tableName) {
         return this.getExpressionColumns().getExpression(tableName);
     }
 
-    protected IColumnFilter getExcludeColumnFilter(final String tableName) {
+    private IColumnFilter getExcludeColumnFilter(final String tableName) {
         final List<Column> columns = this.getExcludeColumns(tableName);
         if (columns.size() == 0) {
             return null;
@@ -145,39 +145,28 @@ public class ColumnSettings {
         return result;
     }
 
-    protected AddSettingTableMetaData addSetting(final ITableMetaData originMetaData) {
+    private List<AddSettingTableMetaData> addSetting(final ITableMetaData originMetaData) {
+        return this.getRowFilter(originMetaData.getTableName()).stream()
+                .map(it -> this.addSetting(originMetaData, it))
+                .collect(Collectors.toList());
+    }
+
+    private AddSettingTableMetaData addSetting(final ITableMetaData originMetaData, final TableSeparator tableSeparator) {
         return this.getExpressionColumns(originMetaData.getTableName())
-                .apply(this.getTableName(originMetaData)
-                        , originMetaData
+                .apply(originMetaData
                         , this.getExcludeColumnFilter(originMetaData.getTableName())
                         , this.getComparisonKeys(originMetaData.getTableName())
-                        , this.getRowFilter(originMetaData.getTableName()));
+                        , tableSeparator);
     }
 
-    protected String getTableName(final ITableMetaData originMetaData) {
-        return this.tableNameMap.apply(originMetaData.getTableName());
-    }
-
-    protected Predicate<Map<String, Object>> getRowFilter(final String tableName) {
-        return this.filterExpressions.getRowFilter(tableName);
-    }
-
-    @Override
-    public String toString() {
-        return "ColumnSettings{" +
-                "tableNameMap=" + this.tableNameMap +
-                ", comparisonKeys=" + this.comparisonKeys +
-                ", excludeColumns=" + this.excludeColumns +
-                ", orderColumns=" + this.orderColumns +
-                ", expressionColumns=" + this.expressionColumns +
-                ", filterExpressions=" + this.filterExpressions +
-                '}';
+    private Collection<TableSeparator> getRowFilter(final String tableName) {
+        return this.tableSeparators.getSeparators(tableName);
     }
 
     public interface Builder {
 
         default ColumnSettings build(final String settings) throws IOException {
-            if (Strings.isNullOrEmpty(settings)) {
+            if (Optional.ofNullable(settings).orElse("").isEmpty()) {
                 return this.build((File) null);
             } else {
                 return this.build(Arrays.stream(settings.split(","))
@@ -200,8 +189,6 @@ public class ColumnSettings {
             return new ColumnSettings(this);
         }
 
-        Function<String, String> getTableNameMap();
-
         AddSettingColumns getComparisonKeys();
 
         AddSettingColumns getExcludeColumns();
@@ -210,7 +197,8 @@ public class ColumnSettings {
 
         AddSettingColumns getExpressionColumns();
 
-        RowFilter getFilterExpressions();
+        TableSeparators getTableSeparators();
+
     }
 
 }

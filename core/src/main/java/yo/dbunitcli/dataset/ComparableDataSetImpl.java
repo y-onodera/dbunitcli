@@ -67,30 +67,20 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     public void startTable(final ITableMetaData metaData) throws DataSetException {
         LOGGER.debug("startTable(metaData={}) - start", metaData);
         this.mapper = this.compareSettings.createMapper(metaData);
-        this.mapper.setConsumer(this.converter, this.alreadyWrite);
-    }
-
-    @Override
-    public void endTable() throws DataSetException {
-        LOGGER.debug("endTable() - start");
-        final String resultTableName = this.mapper.getTargetTableName();
-        if (this._orderedTableNameMap.containsTable(resultTableName)) {
-            final ComparableTable existingTable = (ComparableTable) this._orderedTableNameMap.get(resultTableName);
-            this.mapper.add(existingTable);
-            this._orderedTableNameMap.update(resultTableName, this.mapper.endTable());
-        } else {
-            final ComparableTable result = this.mapper.endTable();
-            if (result != null) {
-                this._orderedTableNameMap.add(resultTableName, result);
-            }
-        }
-        this.mapper = null;
+        this.mapper.startTable(this.converter, this.alreadyWrite);
     }
 
     @Override
     public void row(final Object[] values) throws DataSetException {
         LOGGER.debug("row(values={}) - start", values);
         this.mapper.addRow(values);
+    }
+
+    @Override
+    public void endTable() throws DataSetException {
+        LOGGER.debug("endTable() - start");
+        this.mapper.endTable(this._orderedTableNameMap);
+        this.mapper = null;
     }
 
     @Override

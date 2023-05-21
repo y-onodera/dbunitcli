@@ -1,13 +1,12 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Strings;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -112,8 +111,8 @@ public class ComparableDataSetParam {
     }
 
     public String getExtension() {
-        return Strings.nullToEmpty(Optional.ofNullable(this.extension)
-                .orElse(this.source.getExtension()));
+        return Optional.ofNullable(this.extension)
+                .orElse(Optional.ofNullable(this.source.getExtension()).orElse(""));
     }
 
     public char getDelimiter() {
@@ -175,12 +174,12 @@ public class ComparableDataSetParam {
             return false;
         }
         final ComparableDataSetParam that = (ComparableDataSetParam) o;
-        return this.mapIncludeMetaData == that.mapIncludeMetaData && this.useJdbcMetaData == that.useJdbcMetaData && this.loadData == that.loadData && this.delimiter == that.delimiter && Objects.equal(this.src, that.src) && Objects.equal(this.encoding, that.encoding) && this.source == that.source && Objects.equal(this.columnSettings, that.columnSettings) && Objects.equal(this.headerSplitPattern, that.headerSplitPattern) && Objects.equal(this.dataSplitPattern, that.dataSplitPattern) && Objects.equal(this.regInclude, that.regInclude) && Objects.equal(this.regExclude, that.regExclude) && Objects.equal(this.xlsxSchema, that.xlsxSchema) && Objects.equal(this.headerName, that.headerName) && Objects.equal(this.fixedLength, that.fixedLength) && Objects.equal(this.extension, that.extension) && Objects.equal(this.templateRender, that.templateRender) && Objects.equal(this.databaseConnectionLoader, that.databaseConnectionLoader);
+        return this.mapIncludeMetaData == that.mapIncludeMetaData && this.useJdbcMetaData == that.useJdbcMetaData && this.loadData == that.loadData && this.delimiter == that.delimiter && Objects.equals(this.src, that.src) && Objects.equals(this.encoding, that.encoding) && this.source == that.source && Objects.equals(this.columnSettings, that.columnSettings) && Objects.equals(this.headerSplitPattern, that.headerSplitPattern) && Objects.equals(this.dataSplitPattern, that.dataSplitPattern) && Objects.equals(this.regInclude, that.regInclude) && Objects.equals(this.regExclude, that.regExclude) && Objects.equals(this.xlsxSchema, that.xlsxSchema) && Objects.equals(this.headerName, that.headerName) && Objects.equals(this.fixedLength, that.fixedLength) && Objects.equals(this.extension, that.extension) && Objects.equals(this.templateRender, that.templateRender) && Objects.equals(this.databaseConnectionLoader, that.databaseConnectionLoader) && Objects.equals(this.converter, that.converter);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.src, this.encoding, this.source, this.columnSettings, this.headerSplitPattern, this.dataSplitPattern, this.regInclude, this.regExclude, this.mapIncludeMetaData, this.xlsxSchema, this.useJdbcMetaData, this.loadData, this.headerName, this.fixedLength, this.extension, this.templateRender, this.databaseConnectionLoader, this.delimiter);
+        return Objects.hash(this.src, this.encoding, this.source, this.columnSettings, this.headerSplitPattern, this.dataSplitPattern, this.regInclude, this.regExclude, this.mapIncludeMetaData, this.xlsxSchema, this.useJdbcMetaData, this.loadData, this.headerName, this.fixedLength, this.extension, this.templateRender, this.databaseConnectionLoader, this.converter, this.delimiter);
     }
 
     public static class Builder {

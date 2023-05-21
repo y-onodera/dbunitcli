@@ -1,7 +1,5 @@
 package yo.dbunitcli.dataset.compare;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.Sets;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Delete;
 import org.dbunit.dataset.DataSetException;
@@ -14,10 +12,7 @@ import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -118,10 +113,11 @@ public class DataSetCompare {
 
         default Function<DataSetCompare, List<CompareDiff>> searchAddTables() {
             return (it) -> {
-                final Set<String> oldTables = Sets.newHashSet(it.getOldTableNames());
-                final Set<String> newTables = Sets.newHashSet(it.getNewTableNames());
+                final Set<String> oldTables = Arrays.stream(it.getOldTableNames()).collect(Collectors.toSet());
+                final Set<String> newTables = Arrays.stream(it.getNewTableNames()).collect(Collectors.toSet());
+                ;
                 return newTables.stream()
-                        .filter(table -> !Predicates.in(oldTables).apply(table))
+                        .filter(table -> !oldTables.contains(table))
                         .map(name -> CompareDiff.Type.TABLE_ADD.of()
                                 .setTargetName(name)
                                 .setNewDefine(name)
@@ -133,10 +129,10 @@ public class DataSetCompare {
         default Function<DataSetCompare, List<CompareDiff>> searchDeleteTables() {
             return (it) -> {
                 final List<CompareDiff> results = new ArrayList<>();
-                final Set<String> oldTables = Sets.newHashSet(it.getOldTableNames());
-                final Set<String> newTables = Sets.newHashSet(it.getNewTableNames());
+                final Set<String> oldTables = Arrays.stream(it.getOldTableNames()).collect(Collectors.toSet());
+                final Set<String> newTables = Arrays.stream(it.getNewTableNames()).collect(Collectors.toSet());
                 oldTables.stream()
-                        .filter(table -> !Predicates.in(newTables).apply(table))
+                        .filter(table -> !newTables.contains(table))
                         .collect(Collectors.toSet())
                         .forEach(name -> results.add(CompareDiff.Type.TABLE_DELETE.of()
                                 .setTargetName(name)
@@ -149,15 +145,17 @@ public class DataSetCompare {
         default Function<DataSetCompare, List<CompareDiff>> searchModifyTables() {
             return (it) -> {
                 final List<CompareDiff> results = new ArrayList<>();
-                final Set<String> oldTables = Sets.newHashSet(it.getOldTableNames());
-                final Set<String> newTables = Sets.newHashSet(it.getNewTableNames());
-                Sets.intersection(oldTables, newTables).forEach(tableName -> {
-                    final ComparableTable oldTable = it.getOldDataSet().getTable(tableName);
-                    final ComparableTable newTable = it.getNewDataSet().getTable(tableName);
-                    if (it.getComparisonKeys().hasAdditionalSetting(oldTable.getTableMetaData().getTableName())) {
-                        results.addAll(this.compareTable(new TableCompare(oldTable, newTable, it.getComparisonKeys(), it.getConverter())));
-                    }
-                });
+                final Set<String> oldTables = Arrays.stream(it.getOldTableNames()).collect(Collectors.toSet());
+                final Set<String> newTables = Arrays.stream(it.getNewTableNames()).collect(Collectors.toSet());
+                oldTables.stream()
+                        .filter(newTables::contains)
+                        .forEach(tableName -> {
+                            final ComparableTable oldTable = it.getOldDataSet().getTable(tableName);
+                            final ComparableTable newTable = it.getNewDataSet().getTable(tableName);
+                            if (it.getComparisonKeys().hasAdditionalSetting(oldTable.getTableMetaData().getTableName())) {
+                                results.addAll(this.compareTable(new TableCompare(oldTable, newTable, it.getComparisonKeys(), it.getConverter())));
+                            }
+                        });
                 return results;
             };
         }

@@ -1,9 +1,9 @@
 package yo.dbunitcli.dataset.compare;
 
-import com.google.common.collect.Lists;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -35,7 +35,7 @@ public class TableCompareResult implements CompareResult {
     public TableCompareResult(final String aOldDir, final String aNewDir, final List<CompareDiff> results) {
         this.oldDir = aOldDir;
         this.newDir = aNewDir;
-        this.diffs = Lists.newArrayList(results);
+        this.diffs = new ArrayList<>(results);
     }
 
     @Override

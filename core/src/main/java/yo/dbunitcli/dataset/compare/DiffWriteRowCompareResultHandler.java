@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset.compare;
 
-import com.google.common.collect.Lists;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.dataset.ComparableTable;
@@ -10,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler {
     private static final String COLUMN_NAME_ROW_INDEX = "$ROW_INDEX";
@@ -68,7 +68,7 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
 
     protected void addRow(final int rowNum, final DefaultTable addDiffTable, final Object... row) {
         try {
-            addDiffTable.addRow(Lists.asList(rowNum, row).toArray(new Object[row.length + 1]));
+            addDiffTable.addRow(Stream.concat(Stream.of(rowNum), Stream.of(row)).toArray(Object[]::new));
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
@@ -109,7 +109,8 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
     protected DefaultTable toITable(final ComparableTable oldTable, final String aTableName) {
         try {
             final ITableMetaData origin = oldTable.getTableMetaData();
-            final Column[] columns = Lists.asList(COLUMN_ROW_INDEX, origin.getColumns()).toArray(new Column[origin.getColumns().length + 1]);
+            final Column[] columns = Stream.concat(Stream.of(COLUMN_ROW_INDEX), Stream.of(origin.getColumns()))
+                    .toArray(Column[]::new);
             final DefaultTableMetaData metaData = new DefaultTableMetaData(origin.getTableName() + aTableName, columns, new String[]{COLUMN_NAME_ROW_INDEX});
             return new DefaultTable(metaData);
         } catch (final DataSetException e) {

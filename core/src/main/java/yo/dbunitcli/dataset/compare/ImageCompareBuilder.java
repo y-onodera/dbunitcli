@@ -1,9 +1,9 @@
 package yo.dbunitcli.dataset.compare;
 
 import com.github.romankh3.image.comparison.model.Rectangle;
-import com.google.common.collect.Lists;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -19,7 +19,7 @@ public class ImageCompareBuilder implements Supplier<DataSetCompare.Manager> {
 
     private double pixelToleranceLevel;
 
-    private List<Rectangle> excludeAreaList = Lists.newArrayList();
+    private List<Rectangle> excludeAreaList = new ArrayList<>();
 
     private boolean drawExcludedRectangles;
 

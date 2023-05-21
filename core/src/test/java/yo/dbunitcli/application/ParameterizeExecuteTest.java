@@ -1,26 +1,21 @@
 package yo.dbunitcli.application;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.ExpectedSystemExit;
-import org.junit.rules.ExpectedException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public class ParameterizeExecuteTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-    @Rule
-    public ExpectedSystemExit exit = ExpectedSystemExit.none();
 
     private String baseDir;
 
     @Before
     public void setUp() throws UnsupportedEncodingException {
-        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(),"UTF-8")
-                .replace("target/test-classes","src/test/resources");
+        this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
+                .replace("target/test-classes", "src/test/resources");
     }
 
     @Test

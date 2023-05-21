@@ -1,7 +1,8 @@
 version: '3'
 services:
   db:
-    build: .
+    image: postgres:latest
+    restart: always
     ports:
      - '5433:5432'
     environment:

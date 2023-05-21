@@ -11,31 +11,58 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
-
+    runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 8
-      uses: actions/setup-java@v3
-      with:
-        java-version: '8'
-        distribution: 'temurin'
-        cache: maven
-    - name: Postgresql startup
-      run: docker-compose up -d
-    - name: Build with Maven
-      run: mvn clean package -fcore/pom.xml -PIntegrationTest
-    - name: Create TestReport
-      if: always()
-      run: mvn allure:report -fcore/pom.xml
-    - name: Deploy TestReport
-      if: always()
-      uses: JamesIves/github-pages-deploy-action@v4.4.1
-      with:
-        branch: gh-pages
-        folder: ./core/target/site/allure-maven-plugin
-    - name: Upload jar
-      uses: actions/upload-artifact@v3
-      with:
-        name: executableJar
-        path: ./core/target/**jar-with-dependencies.jar
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+          cache: maven
+      - name: postgresql setup
+        uses: ikalnytskyi/action-setup-postgres@v4
+        with:
+          username: admin
+          password: admin
+          database: test
+          port: 5433
+        id: postgres
+      - name: Build with Maven
+        run: mvn clean package -PIntegrationTest
+      - name: Create TestReport
+        if: always()
+        run: mvn allure:report -fcore/pom.xml
+        shell: cmd
+      - name: Upload TestReport
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: unitTestReport
+          path: ./core/target/site
+      - name: Upload jar
+        uses: actions/upload-artifact@v3
+        with:
+          name: executableJar
+          path: ./core/target/**jar-with-dependencies.jar
+      - name: Upload GUI jar
+        uses: actions/upload-artifact@v3
+        with:
+          name: gui executableJar
+          path: ./gui/target/**jar-with-dependencies.jar
+
+  report-deploy:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ️
+        uses: actions/checkout@v3
+      - name: Download unitTestReport
+        uses: actions/download-artifact@v3
+        with:
+          name: unitTestReport
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        with:
+          branch: gh-pages
+          folder: 'allure-maven-plugin'

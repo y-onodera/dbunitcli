@@ -1,6 +1,5 @@
 package yo.dbunitcli.resource.st4;
 
-import com.google.common.base.Strings;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -10,6 +9,7 @@ import yo.dbunitcli.resource.Files;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 public class TemplateRender {
 
@@ -81,7 +81,7 @@ public class TemplateRender {
     public ST createST(final String target, final Map<String, Object> parameter) {
         final String template = this.replaceParameter(target, parameter);
         final ST st = this.createST(template);
-        if (Strings.isNullOrEmpty(this.getTemplateParameterAttribute())) {
+        if (Optional.ofNullable(this.getTemplateParameterAttribute()).orElse("").isEmpty()) {
             parameter.forEach(st::add);
         } else {
             st.add(this.getTemplateParameterAttribute(), parameter);
@@ -102,7 +102,7 @@ public class TemplateRender {
 
     public STGroup createSTGroup(final String fileName) {
         final STGroup stGroup;
-        if (Strings.isNullOrEmpty(fileName)) {
+        if (Optional.ofNullable(fileName).orElse("").isEmpty()) {
             stGroup = new STGroup(this.templateVarStart, this.templateVarStop);
         } else {
             stGroup = new STGroupFile(fileName, this.templateVarStart, this.templateVarStop);
@@ -123,7 +123,7 @@ public class TemplateRender {
 
     public String getAttributeName(final String name) {
         String token = name;
-        if (!Strings.isNullOrEmpty(this.getTemplateParameterAttribute())) {
+        if (!Optional.ofNullable(this.getTemplateParameterAttribute()).orElse("").isEmpty()) {
             token = this.getTemplateParameterAttribute() + name;
         }
         token = this.getTemplateVarStart() + token + this.getTemplateVarStop();

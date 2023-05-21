@@ -1,9 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
@@ -16,24 +12,21 @@ import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class ColumnExpression {
-
-    private final Map<String, String> stringExpression = Maps.newLinkedHashMap();
-
-    private final Map<String, String> booleanExpression = Maps.newLinkedHashMap();
-
-    private final Map<String, String> numberExpression = Maps.newLinkedHashMap();
-
-    private final Map<String, String> sqlFunction = Maps.newLinkedHashMap();
+public record ColumnExpression(
+        Map<String, String> stringExpression
+        , Map<String, String> booleanExpression
+        , Map<String, String> numberExpression
+        , Map<String, String> sqlFunction
+) {
 
     public ColumnExpression(final Builder builder) {
-        this.stringExpression.putAll(builder.stringExpression);
-        this.booleanExpression.putAll(builder.booleanExpression);
-        this.numberExpression.putAll(builder.numberExpression);
-        this.sqlFunction.putAll(builder.sqlFunction);
+        this(new LinkedHashMap<>(builder.stringExpression)
+                , new LinkedHashMap<>(builder.booleanExpression)
+                , new LinkedHashMap<>(builder.numberExpression)
+                , new LinkedHashMap<>(builder.sqlFunction)
+        );
     }
 
     public static Builder builder() {
@@ -46,26 +39,26 @@ public class ColumnExpression {
 
     public AddSettingTableMetaData apply(final ITableMetaData delegateMetaData) {
         try {
-            return this.apply(delegateMetaData.getTableName(), delegateMetaData, null, delegateMetaData.getPrimaryKeys(), null);
+            return this.apply(delegateMetaData, null, delegateMetaData.getPrimaryKeys(), TableSeparator.NONE);
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
 
-    public AddSettingTableMetaData apply(final String tableName, final ITableMetaData originMetaData, final IColumnFilter iColumnFilter, final Column[] comparisonKeys, final Predicate<Map<String, Object>> rowFilter) {
+    public AddSettingTableMetaData apply(final ITableMetaData originMetaData, final IColumnFilter iColumnFilter, final Column[] comparisonKeys, final TableSeparator tableSeparator) {
         try {
             Column[] primaryKey = originMetaData.getPrimaryKeys();
             if (comparisonKeys.length > 0) {
                 primaryKey = comparisonKeys;
             }
-            return new AddSettingTableMetaData(tableName, originMetaData, primaryKey, iColumnFilter, rowFilter, this);
+            return new AddSettingTableMetaData(originMetaData, primaryKey, iColumnFilter, tableSeparator, this);
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
 
     public Collection<? extends Column> getColumns() {
-        final Set<Column> result = Sets.newLinkedHashSet();
+        final Set<Column> result = new LinkedHashSet<>();
         this.stringExpression.keySet().forEach(key -> result.add(new Column(key, DataType.NVARCHAR)));
         this.booleanExpression.keySet().forEach(key -> result.add(new Column(key, DataType.BOOLEAN)));
         this.numberExpression.keySet().forEach(key -> result.add(new Column(key, DataType.NUMERIC)));
@@ -75,8 +68,8 @@ public class ColumnExpression {
 
     public Column[] merge(final Column[] columns) {
         if (this.size() > 0) {
-            final ArrayList<Column> columnList = Lists.newArrayList(columns);
-            final List<String> columnNames = columnList.stream().map(Column::getColumnName).collect(Collectors.toList());
+            final ArrayList<Column> columnList = Arrays.stream(columns).collect(Collectors.toCollection(ArrayList::new));
+            final List<String> columnNames = columnList.stream().map(Column::getColumnName).toList();
             this.getColumns().forEach(column -> {
                 if (!columnNames.contains(column.getColumnName())) {
                     columnList.add(column);
@@ -118,42 +111,14 @@ public class ColumnExpression {
         return new BigDecimal(jexl.createExpression(this.numberExpression.get(columnName)).evaluate(jc).toString());
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
-        final ColumnExpression that = (ColumnExpression) o;
-        return Objects.equal(this.stringExpression, that.stringExpression) &&
-                Objects.equal(this.booleanExpression, that.booleanExpression) &&
-                Objects.equal(this.numberExpression, that.numberExpression);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.stringExpression, this.booleanExpression, this.numberExpression);
-    }
-
-    @Override
-    public String toString() {
-        return "ColumnExpression{" +
-                "stringExpression=" + this.stringExpression +
-                ", booleanExpression=" + this.booleanExpression +
-                ", numberExpression=" + this.numberExpression +
-                '}';
-    }
-
     public static class Builder {
-        private final Map<String, String> stringExpression = Maps.newLinkedHashMap();
+        private final Map<String, String> stringExpression = new LinkedHashMap<>();
 
-        private final Map<String, String> booleanExpression = Maps.newLinkedHashMap();
+        private final Map<String, String> booleanExpression = new LinkedHashMap<>();
 
-        private final Map<String, String> numberExpression = Maps.newLinkedHashMap();
+        private final Map<String, String> numberExpression = new LinkedHashMap<>();
 
-        private final Map<String, String> sqlFunction = Maps.newLinkedHashMap();
+        private final Map<String, String> sqlFunction = new LinkedHashMap<>();
 
         public Builder add(final ColumnExpression columnExpression) {
             return this.addStringExpression(columnExpression.stringExpression)

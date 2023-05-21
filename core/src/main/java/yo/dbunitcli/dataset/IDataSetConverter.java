@@ -58,4 +58,9 @@ public interface IDataSetConverter extends org.dbunit.dataset.stream.IDataSetCon
         return null;
     }
 
+    default boolean isSplittable() {
+        return true;
+    }
+
+    IDataSetConverter split();
 }

@@ -1,21 +1,19 @@
 package yo.dbunitcli.application;
 
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import yo.dbunitcli.dataset.AddSettingColumns;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 
 public class CompareOptionTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private String baseDir;
 
@@ -24,40 +22,42 @@ public class CompareOptionTest {
     @Before
     public void setUp() throws UnsupportedEncodingException {
         this.target = new CompareOption();
-        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(), "UTF-8")
+        this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
                 .replace("target/test-classes", "src/test/resources");
     }
 
     @Test
     public void parseRequiredOldFileDir() {
-        this.expectedException.expect(AssertionError.class);
-        this.expectedException.expectMessage("Option \"-src\" is required");
-        this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-setting=" + this.baseDir + "/multidiff/setting.json"});
+        Assert.assertThrows("Option \"-src\" is required", AssertionError.class,
+                () -> this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-setting=" + this.baseDir + "/multidiff/setting.json"}));
     }
 
     @Test
     public void parseRequiredNewFileDir() {
-        this.expectedException.expect(AssertionError.class);
-        this.expectedException.expectMessage("Option \"-src\" is required");
-        this.target.parse(new String[]{"-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"});
+        Assert.assertThrows("Option \"-src\" is required", AssertionError.class,
+                () -> this.target.parse(new String[]{"-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"})
+        );
     }
 
     @Test
     public void parseRequiredOldFileDirExists() {
-        this.expectedException.expect(AssertionError.class);
-        this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/notExists", "-setting=" + this.baseDir + "/multidiff/setting.json"});
+        Assert.assertThrows(AssertionError.class,
+                () -> this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/notExists", "-setting=" + this.baseDir + "/multidiff/setting.json"})
+        );
     }
 
     @Test
     public void parseRequiredNewFileDirExists() {
-        this.expectedException.expect(AssertionError.class);
-        this.target.parse(new String[]{"-new.src=" + this.baseDir + "/notExists", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"});
+        Assert.assertThrows(AssertionError.class,
+                () -> this.target.parse(new String[]{"-new.src=" + this.baseDir + "/notExists", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"})
+        );
     }
 
     @Test
     public void parseRequiredSettingFileExists() {
-        this.expectedException.expect(AssertionError.class);
-        this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/NotExists.json"});
+        Assert.assertThrows(AssertionError.class,
+                () -> this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/NotExists.json"})
+        );
     }
 
     @Test

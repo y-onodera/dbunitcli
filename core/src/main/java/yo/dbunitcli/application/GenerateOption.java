@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import com.google.common.collect.Maps;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -137,18 +136,13 @@ public class GenerateOption extends CommandLineOption {
     }
 
     protected String getSqlTemplate() {
-        switch (this.operation) {
-            case INSERT:
-                return "sql/insertTemplate.txt";
-            case DELETE:
-                return "sql/deleteTemplate.txt";
-            case UPDATE:
-                return "sql/updateTemplate.txt";
-            case CLEAN_INSERT:
-                return "sql/cleanInsertTemplate.txt";
-            default:
-                return "sql/deleteInsertTemplate.txt";
-        }
+        return switch (this.operation) {
+            case INSERT -> "sql/insertTemplate.txt";
+            case DELETE -> "sql/deleteTemplate.txt";
+            case UPDATE -> "sql/updateTemplate.txt";
+            case CLEAN_INSERT -> "sql/cleanInsertTemplate.txt";
+            default -> "sql/deleteInsertTemplate.txt";
+        };
     }
 
     @Override
@@ -171,8 +165,7 @@ public class GenerateOption extends CommandLineOption {
                 return dataSet.toMap(true)
                         .flatMap(it -> ((List<Map<String, Object>>) it.get("row")).stream()
                                 .map(row -> {
-                                    final Map<String, Object> result = Maps.newHashMap();
-                                    result.putAll(it);
+                                    final Map<String, Object> result = new HashMap<>(it);
                                     result.put("row", row);
                                     result.put("_paramMap", map);
                                     return result;
@@ -187,19 +180,15 @@ public class GenerateOption extends CommandLineOption {
                 try {
                     return Stream.of(dataSet.getTableNames())
                             .map(it -> {
-                                try {
-                                    final Map<String, Object> param = new HashMap<>();
-                                    param.put("_paramMap", map);
-                                    final ComparableTable table = dataSet.getTable(it);
-                                    param.put("tableName", it);
-                                    param.put("primaryKeys", table.getTableMetaData().getPrimaryKeys());
-                                    param.put("columns", table.getTableMetaData().getColumns());
-                                    param.put("columnsExcludeKey", table.getColumnsExcludeKey());
-                                    param.put("rows", table.toMap());
-                                    return param;
-                                } catch (final DataSetException e) {
-                                    throw new AssertionError(e);
-                                }
+                                final Map<String, Object> param = new HashMap<>();
+                                param.put("_paramMap", map);
+                                final ComparableTable table = dataSet.getTable(it);
+                                param.put("tableName", it);
+                                param.put("primaryKeys", table.getTableMetaData().getPrimaryKeys());
+                                param.put("columns", table.getTableMetaData().getColumns());
+                                param.put("columnsExcludeKey", table.getColumnsExcludeKey());
+                                param.put("rows", table.toMap());
+                                return param;
                             });
                 } catch (final DataSetException e) {
                     throw new AssertionError(e);

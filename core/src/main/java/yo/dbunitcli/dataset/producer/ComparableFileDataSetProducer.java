@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset.producer;
 
-import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
@@ -15,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class ComparableFileDataSetProducer implements ComparableDataSetProducer {
@@ -70,7 +70,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     }
 
     protected Predicate<Path> fileTypeFilter() {
-        if (Strings.isNullOrEmpty(this.param.getExtension())) {
+        if (Optional.ofNullable(this.param.getExtension()).orElse("").isEmpty()) {
             return path -> path.toFile().isFile();
         }
         return path -> path.toFile().isFile()

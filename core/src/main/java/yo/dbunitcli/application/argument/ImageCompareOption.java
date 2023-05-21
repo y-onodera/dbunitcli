@@ -1,8 +1,6 @@
 package yo.dbunitcli.application.argument;
 
 import com.github.romankh3.image.comparison.model.Rectangle;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -13,6 +11,7 @@ import yo.dbunitcli.dataset.compare.PdfCompareManager;
 
 import java.awt.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -53,7 +52,7 @@ public class ImageCompareOption extends DefaultArgumentsParser {
     @Option(name = "-excludedAreas", usage = "ExcludedAreas contains a List of Rectangles to be ignored.")
     private String excludedAreas;
 
-    private final List<Rectangle> excludeAreaList = Lists.newArrayList();
+    private final List<Rectangle> excludeAreaList = new ArrayList<>();
 
     @Option(name = "-drawExcludedRectangles", handler = ExplicitBooleanOptionHandler.class, usage = "Flag which says draw excluded rectangles or not.")
     private boolean drawExcludedRectangles = true;
@@ -73,7 +72,7 @@ public class ImageCompareOption extends DefaultArgumentsParser {
 
     @Override
     public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
-        if (!Strings.isNullOrEmpty(this.excludedAreas)) {
+        if (!Optional.ofNullable(this.excludedAreas).orElse("").isEmpty()) {
             final Matcher m = AREA_REGEX.matcher(this.excludedAreas);
             while (m.find()) {
                 final String[] points = m.group(1).split(",");

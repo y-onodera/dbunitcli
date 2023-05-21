@@ -1,43 +1,43 @@
 package yo.dbunitcli.application.argument;
 
-import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.kohsuke.args4j.CmdLineParser;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 public class DataSetLoadOptionTest {
-    private String[] expect = new String[]{"-src=test"
+    private final String[] expect = new String[]{"-src=test"
             , "-srcType=csv"
             , "-setting=setting.js"
             , "-loadData=true"
             , "-regInclude=*.\\.csv"
             , "-regExclude=*.\\.csv"};
 
-    private List<String> expectList = Lists.newArrayList(expect);
+    private final List<String> expectList = Arrays.stream(this.expect).collect(Collectors.toList());
+    ;
 
     @Test
     public void testFilterArguments() {
-        DataSetLoadOption target = new DataSetLoadOption("");
-        CmdLineParser parser = new CmdLineParser(target);
-        expectList.add("-other=other");
-        Collection<String> result = target.filterArguments(parser, expectList.toArray(new String[expectList.size()]));
-        assertArrayEquals(Arrays.stream(expect).sorted().toArray(), result.stream().sorted().toArray());
+        final DataSetLoadOption target = new DataSetLoadOption("");
+        final CmdLineParser parser = new CmdLineParser(target);
+        this.expectList.add("-other=other");
+        final Collection<String> result = target.filterArguments(parser, this.expectList.toArray(new String[this.expectList.size()]));
+        assertArrayEquals(Arrays.stream(this.expect).sorted().toArray(), result.stream().sorted().toArray());
     }
 
     @Test
     public void testFilterArgumentsOverride() {
-        DataSetLoadOption target = new DataSetLoadOption("new");
-        CmdLineParser parser = new CmdLineParser(target);
-        List<String> argsList = Lists.newArrayList("-new.src=replace", "-other=other");
-        argsList.addAll(expectList);
-        Collection<String> result = target.filterArguments(parser, argsList.toArray(new String[argsList.size()]));
-        assertArrayEquals(Arrays.stream(expect).map(it -> it.equals("-src=test") ? "-src=replace" : it).sorted().toArray()
+        final DataSetLoadOption target = new DataSetLoadOption("new");
+        final CmdLineParser parser = new CmdLineParser(target);
+        final List<String> argsList = Arrays.stream(new String[]{"-new.src=replace", "-other=other"}).collect(Collectors.toList());
+        argsList.addAll(this.expectList);
+        final Collection<String> result = target.filterArguments(parser, argsList.toArray(new String[argsList.size()]));
+        assertArrayEquals(Arrays.stream(this.expect).map(it -> it.equals("-src=test") ? "-src=replace" : it).sorted().toArray()
                 , result.stream().sorted().toArray());
     }
 }

@@ -1,12 +1,12 @@
 package yo.dbunitcli.application;
 
-import com.google.common.collect.Lists;
 import org.dbunit.dataset.CompositeDataSet;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.stream.DataSetProducerAdapter;
 import org.dbunit.dataset.stream.IDataSetProducer;
 import yo.dbunitcli.dataset.Parameter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Aggregate {
@@ -17,7 +17,7 @@ public class Aggregate {
         } catch (final Exception exp) {
             throw new AssertionError("option parse failed.", exp);
         }
-        final List<IDataSet> dataSets = Lists.newArrayList();
+        final List<IDataSet> dataSets = new ArrayList<>();
         options.loadParams().forEach(it -> {
             final Parameter param = new Parameter(dataSets.size() + 1, it);
             final ConvertOption exp = new ConvertOption(param);

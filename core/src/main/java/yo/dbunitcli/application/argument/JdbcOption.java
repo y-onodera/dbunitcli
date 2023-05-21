@@ -1,6 +1,5 @@
 package yo.dbunitcli.application.argument;
 
-import com.google.common.base.Strings;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -10,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -55,7 +55,7 @@ public class JdbcOption extends DefaultArgumentsParser {
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putFile("-jdbcProperties", this.jdbcProperties);
-        if (Strings.isNullOrEmpty(result.get("-jdbcProperties"))) {
+        if (Optional.ofNullable(result.get("-jdbcProperties")).orElse("").isEmpty()) {
             result.put("-jdbcUrl", this.jdbcUrl);
             result.put("-jdbcUser", this.jdbcUser);
             result.put("-jdbcPass", this.jdbcPass);
@@ -65,7 +65,7 @@ public class JdbcOption extends DefaultArgumentsParser {
 
     protected void validate(final CmdLineParser parser) throws CmdLineException {
         if (Stream.of(this.jdbcUrl, this.jdbcUser, this.jdbcPass)
-                .anyMatch(Strings::isNullOrEmpty)) {
+                .anyMatch(it -> Optional.ofNullable(it).orElse("").isEmpty())) {
             if (this.jdbcProperties == null) {
                 throw new CmdLineException(parser, "need jdbcProperties option", new IllegalArgumentException());
             }
@@ -80,13 +80,13 @@ public class JdbcOption extends DefaultArgumentsParser {
         if (this.jdbcProperties != null) {
             this.jdbcProp.load(new FileInputStream(this.jdbcProperties));
         }
-        if (!Strings.isNullOrEmpty(this.jdbcUrl)) {
+        if (!Optional.ofNullable(this.jdbcUrl).orElse("").isEmpty()) {
             this.jdbcProp.put("url", this.jdbcUrl);
         }
-        if (!Strings.isNullOrEmpty(this.jdbcUser)) {
+        if (!Optional.ofNullable(this.jdbcUser).orElse("").isEmpty()) {
             this.jdbcProp.put("user", this.jdbcUser);
         }
-        if (!Strings.isNullOrEmpty(this.jdbcPass)) {
+        if (!Optional.ofNullable(this.jdbcPass).orElse("").isEmpty()) {
             this.jdbcProp.put("pass", this.jdbcPass);
         }
     }

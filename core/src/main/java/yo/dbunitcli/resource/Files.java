@@ -1,11 +1,12 @@
 package yo.dbunitcli.resource;
 
-import com.google.common.io.Resources;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Objects;
 
 public enum Files {
@@ -18,21 +19,16 @@ public enum Files {
 
     public static String readClasspathResource(final String aURL, final Charset aCharset) {
         try {
-            return Resources.asCharSource(Objects.requireNonNull(Files.class
-                                    .getClassLoader()
-                                    .getResource(aURL))
-                            , aCharset)
-                    .read();
-        } catch (final IOException e) {
+            return java.nio.file.Files.readString(Path.of(Objects.requireNonNull(Files.class.getClassLoader()
+                    .getResource(aURL)).toURI()), aCharset);
+        } catch (final IOException | URISyntaxException e) {
             throw new AssertionError(e);
         }
     }
 
     public static String read(final File aFile, final String aEncoding) {
         try {
-            return com.google.common.io.Files
-                    .asCharSource(aFile, Charset.forName(aEncoding))
-                    .read();
+            return java.nio.file.Files.readString(aFile.toPath(), Charset.forName(aEncoding));
         } catch (final IOException e) {
             throw new AssertionError(e);
         }

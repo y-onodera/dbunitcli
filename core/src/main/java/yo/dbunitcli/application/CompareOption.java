@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import com.google.common.collect.Lists;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -14,6 +13,7 @@ import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +98,7 @@ public class CompareOption extends CommandLineOption {
             this.expectData.parseArgument(expandArgs);
             if (Arrays.stream(expandArgs).noneMatch(it -> it.startsWith("-expect.setting"))) {
                 this.expectData.getParam().editColumnSettings(editor -> editor.setKeyEdit(it ->
-                        it.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList())
+                        it.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, new ArrayList<>())
                 ));
             }
         }
@@ -112,7 +112,7 @@ public class CompareOption extends CommandLineOption {
     @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(this.getPrefix(), args);
-        result.putFile("-setting", new File(this.setting));
+        result.putFile("-setting", this.setting == null ? null : new File(this.setting));
         result.putAll(this.newData.createOptionParam(args));
         result.putAll(this.oldData.createOptionParam(args));
         result.putAll(this.getConverterOption().createOptionParam(args));
@@ -160,7 +160,9 @@ public class CompareOption extends CommandLineOption {
                 .ifMatch(this.targetType != Type.data
                         , it -> it.setColumnSettings(it
                                 .getColumnSettings()
-                                .apply(builder -> builder.setTableNameMapEdit(origin -> (String name) -> "TARGET")))
+                                .apply(builder -> builder.setSeparatorEdit(separator ->
+                                        separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
+                                                .setNewName("TARGET").build()))))
                 );
         return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
     }
@@ -170,7 +172,9 @@ public class CompareOption extends CommandLineOption {
                 .ifMatch(this.targetType != Type.data
                         , it -> it.setColumnSettings(it
                                 .getColumnSettings()
-                                .apply(builder -> builder.setTableNameMapEdit(origin -> (String name) -> "TARGET")))
+                                .apply(builder -> builder.setSeparatorEdit(separator ->
+                                        separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
+                                                .setNewName("TARGET").build()))))
                 );
         return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
     }
@@ -211,7 +215,7 @@ public class CompareOption extends CommandLineOption {
         }
         if (this.targetType != Type.data) {
             this.columnSettings = this.columnSettings.apply(it -> it
-                    .setKeyEdit(setting -> setting.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, Lists.newArrayList("NAME")))
+                    .setKeyEdit(setting -> setting.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, List.of("NAME")))
             );
         }
     }

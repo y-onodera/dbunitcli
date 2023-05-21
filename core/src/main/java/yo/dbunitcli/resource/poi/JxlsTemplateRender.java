@@ -1,6 +1,5 @@
 package yo.dbunitcli.resource.poi;
 
-import com.google.common.base.Strings;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -13,10 +12,7 @@ import org.jxls.transform.poi.SelectSheetsForStreamingPoiTransformer;
 import org.jxls.util.JxlsHelper;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class JxlsTemplateRender {
@@ -41,7 +37,7 @@ public class JxlsTemplateRender {
     public void render(final File aTemplate, final File aResultFile, final Map<String, Object> param) throws IOException {
         try (final InputStream is = new FileInputStream(aTemplate)) {
             final Context context = new Context();
-            if (Strings.isNullOrEmpty(this.getTemplateParameterAttribute())) {
+            if (Optional.ofNullable(this.getTemplateParameterAttribute()).orElse("").isEmpty()) {
                 param.forEach(context::putVar);
             } else {
                 context.putVar(this.getTemplateParameterAttribute(), param);

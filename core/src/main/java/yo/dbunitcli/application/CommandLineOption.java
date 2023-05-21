@@ -1,7 +1,5 @@
 package yo.dbunitcli.application;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -17,12 +15,14 @@ import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 abstract public class CommandLineOption extends DefaultArgumentsParser {
 
     @Option(name = "-P", handler = MapOptionHandler.class)
-    private Map<String, String> inputParam = Maps.newHashMap();
+    private Map<String, String> inputParam = new HashMap<>();
 
     private final Parameter parameter;
 
@@ -81,6 +81,8 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
     }
 
     protected String getResultPath() {
-        return Strings.isNullOrEmpty(this.converterOption.getResultPath()) ? this.resultFile : this.converterOption.getResultPath();
+        return Optional.ofNullable(this.converterOption.getResultPath())
+                .filter(it -> !it.isEmpty())
+                .orElse(this.resultFile);
     }
 }

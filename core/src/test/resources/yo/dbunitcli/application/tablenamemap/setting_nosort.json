@@ -20,9 +20,6 @@
     {
       "pattern": "multi2",
       "tableName": "merge"
-    },
-    {
-      "name": "merge"
     }
   ],
   "commonSettings": [

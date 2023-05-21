@@ -1,6 +1,6 @@
 package yo.dbunitcli.fileprocessor;
 
-import com.google.common.io.CharStreams;
+import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.taskdefs.SQLExec;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -69,7 +69,7 @@ public class SqlRunner implements Runner {
 
             @Override
             protected void runStatements(final Reader reader, final PrintStream out) throws SQLException, IOException {
-                String statement = SqlRunner.this.getTemplateRender().render(CharStreams.toString(reader), SqlRunner.this.getParameter());
+                String statement = SqlRunner.this.getTemplateRender().render(IOUtils.toString(reader), SqlRunner.this.getParameter());
                 statement = SQLPLUS_SET.matcher(statement).replaceAll("");
                 statement = SQLPLUS_SPOOL_OR_PROMPT.matcher(statement).replaceAll("");
                 statement = SQLPLUS_EXIT_OR_COMMIT.matcher(statement).replaceAll("");

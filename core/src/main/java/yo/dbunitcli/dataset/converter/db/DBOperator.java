@@ -22,7 +22,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public abstract class IDataSetOperationConsumer extends AbstractOperation implements IDataSetConsumer {
+public abstract class DBOperator extends AbstractOperation implements IDataSetConsumer {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final BitSet EMPTY_BITSET = new BitSet();
     protected final IDatabaseConnection connection;
@@ -34,7 +34,7 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
     protected BitSet ignoreMapping;
     protected int writeRows;
 
-    public IDataSetOperationConsumer(final IDatabaseConnection connection) {
+    public DBOperator(final IDatabaseConnection connection) {
         this.connection = connection;
     }
 
@@ -63,6 +63,14 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
         }
     }
 
+    public void reStartTable(final ITableMetaData iTableMetaData) {
+        try {
+            this.startTable(iTableMetaData);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     @Override
     public void row(final Object[] row) throws DataSetException {
         try {
@@ -85,7 +93,7 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
 
                     try {
                         final DataType dataType = column.getDataType();
-                        Object value = row[this.metaData.getColumnIndex(columnName)];
+                        Object value = row[this.getColumnIndex(columnName)];
                         if ("".equals(value)) {
                             if (!this.allowEmptyFields) {
                                 this.handleColumnHasNoValue(this.metaData.getTableName(), columnName);
@@ -166,6 +174,14 @@ public abstract class IDataSetOperationConsumer extends AbstractOperation implem
             }
         });
         return new DefaultTableMetaData(tableMetaData.getTableName(), columnList.toArray(new Column[0]), tableMetaData.getPrimaryKeys());
+    }
+
+    protected int getColumnIndex(final String columnName) {
+        try {
+            return this.metaData.getColumnIndex(columnName);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     protected void handleColumnHasNoValue(final String tableName, final String columnName) {

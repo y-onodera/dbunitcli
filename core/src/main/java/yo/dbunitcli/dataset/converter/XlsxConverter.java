@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
+import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,6 +15,15 @@ public class XlsxConverter extends XlsConverter {
 
     public XlsxConverter(final DataSetConsumerParam param) {
         super(param);
+    }
+
+    public XlsxConverter(final File resultDir, final String filename, final TableExportType tableExport, final boolean exportEmptyTable) {
+        super(resultDir, filename, tableExport, exportEmptyTable);
+    }
+
+    @Override
+    public IDataSetConverter split() {
+        return new XlsxConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable);
     }
 
     @Override

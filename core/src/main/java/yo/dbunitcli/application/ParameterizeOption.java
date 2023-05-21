@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import com.google.common.base.Strings;
 import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -12,6 +11,7 @@ import yo.dbunitcli.resource.Files;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ParameterizeOption extends CommandLineOption {
@@ -82,7 +82,7 @@ public class ParameterizeOption extends CommandLineOption {
 
     protected String getTemplateArgs(final Map<String, Object> param) {
         File template = this.template;
-        if (!Strings.isNullOrEmpty(this.cmdParam)) {
+        if (!Optional.ofNullable(this.cmdParam).orElse("").isEmpty()) {
             template = new File(this.templateOption.getTemplateRender().render(this.cmdParam, param));
         }
         return Files.read(template, this.templateOption.getTemplateEncoding());
