@@ -1,0 +1,6 @@
+-src=src/test/resources/yo/dbunitcli/application/csv/combikey
+-srcType=csv
+-setting=src/test/resources/yo/dbunitcli/application/split/keysplit_setting.json
+-result=target/test-classes/yo/dbunitcli/application/split/keysplit_result
+-resultType=xlsx
+-excelTable=BOOK

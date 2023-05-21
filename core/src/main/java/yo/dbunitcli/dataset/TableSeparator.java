@@ -12,7 +12,8 @@ import java.util.function.Predicate;
 
 public record TableSeparator(TableSplitter splitter, Predicate<Map<String, Object>> filter) {
 
-    public static final TableSeparator NONE = new TableSeparator(TableSplitter.NONE, it -> Boolean.TRUE);
+    public static final Predicate<Map<String, Object>> NO_FILTER = it -> Boolean.TRUE;
+    public static final TableSeparator NONE = new TableSeparator(TableSplitter.NONE, NO_FILTER);
 
     public TableSeparator(final TableSplitter splitter, final String expression) {
         this(splitter, createFilter(expression));
@@ -20,6 +21,10 @@ public record TableSeparator(TableSplitter splitter, Predicate<Map<String, Objec
 
     public TableSeparator(final TableSplitter splitter, final List<String> expressions) {
         this(splitter, createFilter(expressions));
+    }
+
+    public boolean hasRowFilter() {
+        return this.filter() != NO_FILTER;
     }
 
     public boolean test(final Map<String, Object> rowToMap) {
@@ -79,7 +84,7 @@ public record TableSeparator(TableSplitter splitter, Predicate<Map<String, Objec
         final JexlEngine jexl = new JexlBuilder().create();
         final List<JexlExpression> expr = expressions
                 .stream()
-                .filter(it -> !it.isEmpty())
+                .filter(it -> !it.trim().isEmpty())
                 .map(jexl::createExpression)
                 .toList();
         if (expr.size() == 0) {

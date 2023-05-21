@@ -81,18 +81,31 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
             }
         }
         final Object[] result = this.filterColumn(this.applyExpression(applySettings));
-        if (this.hasRowFilter() && !this.tableSeparator.test(this.rowToMap(result))) {
+        if (!this.tableSeparator.test(this.rowToMap(result))) {
             return null;
         }
         return result;
     }
 
     public boolean hasRowFilter() {
-        return this.tableSeparator != null;
+        return this.tableSeparator.hasRowFilter();
     }
 
     public TableSplitter getTableSplitter() {
         return this.tableSeparator.getSplitter();
+    }
+
+    public List<String> getBreakKeys(final Object[] applySetting) {
+        return this.tableSeparator.splitter().breakKeys().stream()
+                .map(name -> {
+                    try {
+                        return this.getColumnIndex(name);
+                    } catch (final DataSetException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .map(index -> applySetting[index].toString())
+                .toList();
     }
 
     protected Map<String, Object> rowToMap(final Object[] row) {

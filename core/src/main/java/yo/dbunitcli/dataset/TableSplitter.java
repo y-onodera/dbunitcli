@@ -1,15 +1,23 @@
 package yo.dbunitcli.dataset;
 
-public record TableSplitter(TableRenameStrategy renameFunction, int limit) {
+import java.util.ArrayList;
+import java.util.List;
 
-    public static TableSplitter NONE = new TableSplitter(new TableRenameStrategy.ReplaceFunction.Builder().build(), 0);
+public record TableSplitter(TableRenameStrategy renameFunction, List<String> breakKeys, int limit) {
+
+    public static TableSplitter NONE = new TableSplitter(new TableRenameStrategy.ReplaceFunction.Builder().build(), new ArrayList<>(), 0);
 
     public TableSplitter(final String newName, final String prefix, final String suffix, final int limit) {
-        this(new TableRenameStrategy.ReplaceFunction(newName, prefix, suffix, limit > 0), limit);
+        this(new TableRenameStrategy.ReplaceFunction(newName, prefix, suffix, limit > 0), new ArrayList<>(), limit);
+    }
+
+    public TableSplitter(final String newName, final String prefix, final String suffix, final List<String> breakKeys, final int limit) {
+        this(new TableRenameStrategy.ReplaceFunction(newName, prefix, suffix, limit > 0), breakKeys, limit);
+
     }
 
     public TableSplitter(final Builder builder) {
-        this(builder.getRenameFunction(), builder.getLimit());
+        this(builder.getRenameFunction(), builder.getBreakKeys(), builder.getLimit());
     }
 
     public AddSettingTableMetaData getMetaData(final AddSettingTableMetaData metaData, final int no) {
@@ -31,6 +39,9 @@ public record TableSplitter(TableRenameStrategy renameFunction, int limit) {
 
     public static class Builder {
         private TableRenameStrategy renameFunction = NONE.renameFunction;
+
+        private List<String> breakKeys = new ArrayList<>();
+
         private int limit;
 
         public TableSplitter build() {
@@ -44,6 +55,14 @@ public record TableSplitter(TableRenameStrategy renameFunction, int limit) {
         public Builder setRenameFunction(final TableRenameStrategy renameFunction) {
             this.renameFunction = renameFunction;
             return this;
+        }
+
+        public List<String> getBreakKeys() {
+            return this.breakKeys;
+        }
+
+        public void setBreakKeys(final List<String> breakKeys) {
+            this.breakKeys = breakKeys;
         }
 
         public int getLimit() {

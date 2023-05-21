@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
-import org.junit.rules.ExpectedException;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
@@ -20,11 +19,11 @@ import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class ConvertTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
     @Rule
     public ExpectedSystemExit exit = ExpectedSystemExit.none();
 
@@ -34,7 +33,7 @@ public class ConvertTest {
 
     @Before
     public void setUp() throws UnsupportedEncodingException {
-        this.baseDir = URLDecoder.decode(this.getClass().getResource(".").getPath(), "UTF-8");
+        this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8);
         this.testResourceDir = this.baseDir.replace("target/test-classes", "src/test/resources");
     }
 
@@ -398,6 +397,54 @@ public class ConvertTest {
         Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, getColumnNames(split8));
         Assert.assertEquals(1, split8.getRowCount());
         Assert.assertEquals("3", split8.getValue(0, "key"));
+    }
+
+    @Test
+    public void testConvertCsvSplitByColumnMultiXlsx() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvSplitByColumnMultiXlsx.txt"});
+        final File src = new File(this.baseDir + "/split/keysplit_result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        Assert.assertEquals(3, actual.getTableNames().length);
+        final ITable split1 = actual.getTables()[0];
+        Assert.assertEquals("0000_break_key1", split1.getTableMetaData().getTableName());
+        Assert.assertEquals(4, split1.getRowCount());
+        Assert.assertEquals("1", split1.getValue(0, "key1"));
+        Assert.assertEquals("4", split1.getValue(0, "key2"));
+        Assert.assertEquals("number", split1.getValue(0, "col1"));
+        Assert.assertEquals("2", split1.getValue(1, "key1"));
+        Assert.assertEquals("3", split1.getValue(1, "key2"));
+        Assert.assertEquals("number", split1.getValue(1, "col1"));
+        Assert.assertEquals("A", split1.getValue(2, "key1"));
+        Assert.assertEquals("1", split1.getValue(2, "key2"));
+        Assert.assertEquals("test", split1.getValue(2, "col1"));
+        Assert.assertEquals("A", split1.getValue(3, "key1"));
+        Assert.assertEquals("2", split1.getValue(3, "key2"));
+        Assert.assertEquals("test", split1.getValue(3, "col1"));
+        final ITable split2 = actual.getTables()[1];
+        Assert.assertEquals("0001_break_key1", split2.getTableMetaData().getTableName());
+        Assert.assertEquals("A", split2.getValue(0, "key1"));
+        Assert.assertEquals("3", split2.getValue(0, "key2"));
+        Assert.assertEquals("test3", split2.getValue(0, "col1"));
+        Assert.assertEquals("B", split2.getValue(1, "key1"));
+        Assert.assertEquals("3", split2.getValue(1, "key2"));
+        Assert.assertEquals("", split2.getValue(1, "col1"));
+        Assert.assertEquals("B", split2.getValue(2, "key1"));
+        Assert.assertEquals("4", split2.getValue(2, "key2"));
+        Assert.assertEquals("", split2.getValue(2, "col1"));
+        Assert.assertEquals("C", split2.getValue(3, "key1"));
+        Assert.assertEquals("10", split2.getValue(3, "key2"));
+        Assert.assertEquals("", split2.getValue(3, "col1"));
+        final ITable split3 = actual.getTables()[2];
+        Assert.assertEquals("0002_break_key1", split3.getTableMetaData().getTableName());
+        Assert.assertEquals(1, split3.getRowCount());
+        Assert.assertEquals("あ", split3.getValue(0, "key1"));
+        Assert.assertEquals("3", split3.getValue(0, "key2"));
+        Assert.assertEquals("", split3.getValue(0, "col1"));
     }
 
     @Test

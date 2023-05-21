@@ -3,6 +3,7 @@ package yo.dbunitcli.dataset;
 import javax.json.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -217,7 +218,14 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
             final String newName = split.containsKey("tableName") ? split.getString("tableName") : "";
             final String prefix = split.containsKey("prefix") ? split.getString("prefix") : "";
             final String suffix = split.containsKey("suffix") ? split.getString("suffix") : "";
-            return new TableSplitter(newName, prefix, suffix, limit);
+            final List<String> breakKeys = new ArrayList<>();
+            if (split.containsKey("breakKey")) {
+                final JsonArray breakKey = split.getJsonArray("breakKey");
+                breakKeys.addAll(IntStream.range(0, breakKey.size())
+                        .mapToObj(breakKey::getString)
+                        .toList());
+            }
+            return new TableSplitter(newName, prefix, suffix, breakKeys, limit);
         } else if (json.containsKey("tableName") || json.containsKey("prefix") || json.containsKey("suffix")) {
             final String newName = json.containsKey("tableName") ? json.getString("tableName") : "";
             final String prefix = json.containsKey("prefix") ? json.getString("prefix") : "";

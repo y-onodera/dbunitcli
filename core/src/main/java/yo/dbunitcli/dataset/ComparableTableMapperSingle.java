@@ -20,6 +20,8 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private boolean startTable;
     private int addCount = 0;
     private int addRowCount = 0;
+    private final List<String> currentKeys = new ArrayList<>();
+    private int breakKeyCount = 0;
     private IDataSetConverter converter;
     private Map<String, Integer> alreadyWrite;
 
@@ -63,7 +65,46 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                 orderedTableNameMap.update(resultTableName, this.getResult());
             } else {
                 try {
-                    orderedTableNameMap.add(resultTableName, this.getResult());
+                    if (this.splitter.isSplit()) {
+                        final ComparableTable sorted = new ComparableTable(this.baseMetaData, this.orderColumns, this.values, this.filteredRowIndexes);
+                        AddSettingTableMetaData splitMetaData = this.metaData;
+                        ArrayList<Integer> targetRowIndexes = new ArrayList<>();
+                        ArrayList<Object[]> targetValues = new ArrayList<>();
+                        final List<String> keys = new ArrayList<>();
+                        int keyCount = 0;
+                        int splitCount = 0;
+                        for (int i = 0, j = this.values.size(); i < j; i++) {
+                            final Object[] row = sorted.getRow(i);
+                            if (this.splitter.breakKeys().size() > 0) {
+                                final List<String> breakKey = this.metaData.getBreakKeys(row);
+                                if (i == 0) {
+                                    keys.addAll(breakKey);
+                                } else {
+                                    if (!keys.equals(breakKey)) {
+                                        keyCount++;
+                                        keys.clear();
+                                        keys.addAll(breakKey);
+                                    }
+                                }
+                            } else {
+                                keyCount++;
+                            }
+                            if (this.splitter.isLimit(keyCount)) {
+                                orderedTableNameMap.add(splitMetaData.getTableName(), new ComparableTable(splitMetaData, this.orderColumns, targetValues, targetRowIndexes));
+                                targetRowIndexes = new ArrayList<>();
+                                targetValues = new ArrayList<>();
+                                keyCount = 0;
+                                splitMetaData = this.splitter.getMetaData(this.baseMetaData, ++splitCount);
+                            }
+                            targetValues.add(row);
+                            if (this.metaData.hasRowFilter()) {
+                                targetRowIndexes.add(this.filteredRowIndexes.get(i));
+                            }
+                        }
+                        orderedTableNameMap.add(splitMetaData.getTableName(), new ComparableTable(splitMetaData, this.orderColumns, targetValues, targetRowIndexes));
+                    } else {
+                        orderedTableNameMap.add(resultTableName, this.getResult());
+                    }
                 } catch (final AmbiguousTableNameException e) {
                     throw new AssertionError(e);
                 }
@@ -92,13 +133,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                         this.converter.startTable(this.metaData);
                         this.startTable = true;
                     }
-                    if (this.splitter.isLimit(this.getAddRowCount())) {
-                        this.endTable(null);
-                        this.no++;
-                        this.metaData = this.splitter.getMetaData(this.baseMetaData, this.no);
-                        this.converter.startTable(this.metaData);
-                        this.addRowCount = 0;
-                    }
+                    this.splitTable(applySetting);
                     this.converter.row(applySetting);
                 } else {
                     this.values.add(applySetting);
@@ -111,6 +146,25 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             this.addCount++;
         } catch (final DataSetException e) {
             throw new AssertionError(e);
+        }
+    }
+
+    protected void splitTable(final Object[] applySetting) throws DataSetException {
+        if (this.splitter.breakKeys().size() > 0) {
+            final List<String> keys = this.metaData.getBreakKeys(applySetting);
+            if (!this.currentKeys.equals(keys)) {
+                this.breakKeyCount++;
+                this.currentKeys.clear();
+                this.currentKeys.addAll(keys);
+            }
+        }
+        if (this.splitter.isLimit(this.getBreakKeyCount())) {
+            this.endTable(null);
+            this.no++;
+            this.metaData = this.splitter.getMetaData(this.baseMetaData, this.no);
+            this.converter.startTable(this.metaData);
+            this.addRowCount = 0;
+            this.breakKeyCount = 0;
         }
     }
 
@@ -133,4 +187,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         return this.addRowCount + Optional.ofNullable(this.alreadyWrite.get(this.metaData.getTableName())).orElse(0);
     }
 
+    protected int getBreakKeyCount() {
+        return this.splitter.breakKeys().size() == 0 ? this.getAddRowCount() : this.breakKeyCount;
+    }
 }
