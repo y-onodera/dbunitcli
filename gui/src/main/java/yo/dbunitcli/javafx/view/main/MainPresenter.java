@@ -1,8 +1,5 @@
 package yo.dbunitcli.javafx.view.main;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXComboBox;
 import io.github.palexdev.materialfx.controls.MFXTextField;
@@ -37,11 +34,10 @@ import yo.dbunitcli.application.argument.ArgumentsParser;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MainPresenter {
@@ -68,7 +64,7 @@ public class MainPresenter {
 
     private ArgumentsParser parser;
 
-    private Map<String, Node> argument = Maps.newHashMap();
+    private Map<String, Node> argument = new HashMap<>();
 
 
     @FXML
@@ -126,7 +122,7 @@ public class MainPresenter {
         if (!file.exists()) {
             Files.createFile(file.toPath());
         }
-        Files.writeString(file.toPath(), content, Charsets.UTF_8);
+        Files.writeString(file.toPath(), content, StandardCharsets.UTF_8);
     }
 
     @FXML
@@ -135,7 +131,7 @@ public class MainPresenter {
         this.selectedCommand = this.commandTypeSelect.getSelectionModel().getSelectedItem();
         if (Objects.equals(this.commandTypeSelect, currentSelect)) {
             return;
-        } else if (Strings.isNullOrEmpty(this.selectedCommand)) {
+        } else if (Optional.ofNullable(this.selectedCommand).orElse("").isEmpty()) {
             this.clearInputFields(this.commandTypeSelect);
             this.exec.setDisable(true);
             return;
@@ -302,10 +298,11 @@ public class MainPresenter {
                 .stream()
                 .filter(it -> {
                     if (it.getValue() instanceof TextField) {
-                        return !Strings.isNullOrEmpty(it.getKey()) && !Strings.isNullOrEmpty(((TextField) it.getValue()).getText());
+                        return !Optional.ofNullable(it.getKey()).orElse("").isEmpty()
+                                && !Optional.ofNullable(((TextField) it.getValue()).getText()).orElse("").isEmpty();
                     }
-                    return !Strings.isNullOrEmpty(it.getKey())
-                            && !Strings.isNullOrEmpty(((ChoiceBox) it.getValue()).getSelectionModel().getSelectedItem().toString());
+                    return !Optional.ofNullable(it.getKey()).orElse("").isEmpty()
+                            && !Optional.ofNullable(((ChoiceBox) it.getValue()).getSelectionModel().getSelectedItem().toString()).orElse("").isEmpty();
                 })
                 .collect(Collectors.toMap(it -> it.getKey(), it -> {
                     if (it.getValue() instanceof TextField) {
@@ -321,7 +318,7 @@ public class MainPresenter {
 
     private void clearInputFields(final Node selected) {
         this.commandPane.getChildren().removeIf(node -> !this.commandTypeSelect.equals(node) && !selected.equals(node));
-        this.argument = Maps.newHashMap();
+        this.argument = new HashMap<>();
     }
 
 }

@@ -8,18 +8,16 @@ import yo.dbunitcli.javafx.view.main.MainView;
 
 public class DbUnitGuiApplication extends Application {
 
-    private MainView mainView;
-
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         launch(args);
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(final Stage stage) {
         Injector.setModelOrService(DbUnitGuiApplication.class, this);
         stage.initStyle(StageStyle.TRANSPARENT);
-        this.mainView = new MainView();
-        this.mainView.open(stage);
+        final MainView mainView = new MainView();
+        mainView.open(stage);
     }
 
     @Override
