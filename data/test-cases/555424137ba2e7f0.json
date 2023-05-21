@@ -1,0 +1,55 @@
+{
+  "uid" : "555424137ba2e7f0",
+  "name" : "testTableNameMapNoSortToXlsx",
+  "fullName" : "yo.dbunitcli.application.ConvertTest.testTableNameMapNoSortToXlsx",
+  "historyId" : "c9fec009648831e1795709989936b933",
+  "time" : {
+    "start" : 1684668600708,
+    "stop" : 1684668601005,
+    "duration" : 297
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testTableNameMapNoSortToXlsx"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az456-882"
+  }, {
+    "name" : "thread",
+    "value" : "3108@fv-az456-882.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "555424137ba2e7f0.json",
+  "parameterValues" : [ ]
+}
