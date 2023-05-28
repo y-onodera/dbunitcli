@@ -64,7 +64,7 @@ public class MainPresenter {
 
     private ArgumentsParser parser;
 
-    private Map<String, Node> argument = new HashMap<>();
+    private final Map<String, Node> argument = new LinkedHashMap<>();
 
 
     @FXML
@@ -309,7 +309,7 @@ public class MainPresenter {
                         return ((TextField) it.getValue()).getText();
                     }
                     return ((ChoiceBox) it.getValue()).getSelectionModel().getSelectedItem().toString();
-                }));
+                }, (s, a) -> s, LinkedHashMap::new));
     }
 
     private String[] commandTypes() {
@@ -318,7 +318,7 @@ public class MainPresenter {
 
     private void clearInputFields(final Node selected) {
         this.commandPane.getChildren().removeIf(node -> !this.commandTypeSelect.equals(node) && !selected.equals(node));
-        this.argument = new HashMap<>();
+        this.argument.clear();
     }
 
 }

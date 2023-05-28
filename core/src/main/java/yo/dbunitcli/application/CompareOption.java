@@ -13,7 +13,10 @@ import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -109,11 +112,8 @@ public class CompareOption extends CommandLineOption {
     @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(this.getPrefix(), args);
-        if (!Optional.ofNullable(args.get("-targetType")).orElse("").isEmpty()) {
-            this.targetType = Type.valueOf(args.get("-targetType"));
-        }
         result.put("-targetType", this.targetType, Type.class);
-        if (this.targetType.isAny(Type.pdf, Type.image)) {
+        if (Type.valueOf(result.get("-targetType")).isAny(Type.pdf, Type.image)) {
             result.putAll(this.imageOption.createOptionParam(args));
         }
         result.putFile("-setting", this.setting == null ? null : new File(this.setting));
