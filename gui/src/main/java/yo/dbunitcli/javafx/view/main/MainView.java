@@ -9,6 +9,8 @@ import javafx.stage.Window;
 
 public class MainView extends FXMLView {
     private Window window;
+    private double xOffset = 0;
+    private double yOffset = 0;
 
     public void open(final Stage stage) {
         final Scene scene = new Scene(this.getView());
@@ -17,6 +19,16 @@ public class MainView extends FXMLView {
         stage.setResizable(true);
         stage.show();
         this.window = scene.getWindow();
+        //マウス・ボタンが押されたとき
+        scene.setOnMousePressed(event -> {
+            this.xOffset = event.getSceneX();
+            this.yOffset = event.getSceneY();
+        });
+        //マウス・ボタンがドラッグされるとき
+        scene.setOnMouseDragged(event -> {
+            stage.setX(event.getScreenX() - this.xOffset);
+            stage.setY(event.getScreenY() - this.yOffset);
+        });
     }
 
     public Window getMainWindow() {
