@@ -74,16 +74,16 @@ public class MainPresenter {
         for (final String cmdType : this.commandTypes()) {
             this.commandTypeSelect.getItems().add(cmdType);
         }
-        this.reset(new ActionEvent());
+        this.reset();
     }
 
     @FXML
-    public void close(final ActionEvent actionEvent) {
+    public void close() {
         Platform.exit();
     }
 
     @FXML
-    public void reset(final ActionEvent actionEvent) {
+    public void reset() {
         this.commandTypeSelect.selectFirst();
         this.exec.setDisable(true);
     }
@@ -103,7 +103,7 @@ public class MainPresenter {
     }
 
     @FXML
-    public void saveFile(final ActionEvent actionEvent) throws IOException {
+    public void saveFile() throws IOException {
         final String content = this.inputToArg().entrySet()
                 .stream()
                 .map(it -> it.getKey() + "=" + it.getValue())
@@ -129,7 +129,7 @@ public class MainPresenter {
     public void selectCommandType() throws NoSuchMethodException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException {
         final String currentSelect = this.selectedCommand;
         this.selectedCommand = this.commandTypeSelect.getSelectionModel().getSelectedItem();
-        if (Objects.equals(this.commandTypeSelect, currentSelect)) {
+        if (Objects.equals(this.selectedCommand, currentSelect)) {
             return;
         } else if (Optional.ofNullable(this.selectedCommand).orElse("").isEmpty()) {
             this.clearInputFields(this.commandTypeSelect);
@@ -239,7 +239,7 @@ public class MainPresenter {
         return this.createChoiceButton(new MFXFontIcon("fas-folder", 32), event -> {
             final File choice = this.openDirChooser();
             if (choice != null) {
-                text.setText(this.relativize(choice));
+                text.setText(this.relative(choice));
             }
         });
     }
@@ -248,12 +248,12 @@ public class MainPresenter {
         return this.createChoiceButton(new MFXFontIcon("fas-file", 32), event -> {
             final File choice = this.openFileChooser();
             if (choice != null) {
-                text.setText(this.relativize(choice));
+                text.setText(this.relative(choice));
             }
         });
     }
 
-    private String relativize(final File choice) {
+    private String relative(final File choice) {
         return Path.of(new File(".").getAbsolutePath())
                 .relativize(Path.of(choice.getAbsolutePath()))
                 .toString()
@@ -304,7 +304,7 @@ public class MainPresenter {
                     return !Optional.ofNullable(it.getKey()).orElse("").isEmpty()
                             && !Optional.ofNullable(((ChoiceBox) it.getValue()).getSelectionModel().getSelectedItem().toString()).orElse("").isEmpty();
                 })
-                .collect(Collectors.toMap(it -> it.getKey(), it -> {
+                .collect(Collectors.toMap(Map.Entry::getKey, it -> {
                     if (it.getValue() instanceof TextField) {
                         return ((TextField) it.getValue()).getText();
                     }

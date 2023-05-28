@@ -13,11 +13,9 @@ import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CompareOption extends CommandLineOption {
 
@@ -84,14 +82,16 @@ public class CompareOption extends CommandLineOption {
     @Override
     public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
         super.setUpComponent(parser, expandArgs);
-        if (this.targetType == Type.image) {
-            this.newData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
-            this.oldData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
-        } else if (this.targetType == Type.pdf) {
-            this.newData.setArgumentMapper(PDF_TYPE_PARAM_MAPPER);
-            this.oldData.setArgumentMapper(PDF_TYPE_PARAM_MAPPER);
+        if (this.targetType.isAny(Type.image, Type.pdf)) {
+            this.imageOption.parseArgument(expandArgs);
+            if (this.targetType == Type.image) {
+                this.newData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
+                this.oldData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
+            } else if (this.targetType == Type.pdf) {
+                this.newData.setArgumentMapper(PDF_TYPE_PARAM_MAPPER);
+                this.oldData.setArgumentMapper(PDF_TYPE_PARAM_MAPPER);
+            }
         }
-
         this.newData.parseArgument(expandArgs);
         this.oldData.parseArgument(expandArgs);
         if (Arrays.stream(expandArgs).anyMatch(it -> it.startsWith("-expect.src"))) {
@@ -104,20 +104,23 @@ public class CompareOption extends CommandLineOption {
         }
         this.populateSettings(parser);
         this.getConverterOption().parseArgument(expandArgs);
-        if (this.targetType == Type.image || this.targetType == Type.pdf) {
-            this.imageOption.parseArgument(expandArgs);
-        }
     }
 
     @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(this.getPrefix(), args);
+        if (!Optional.ofNullable(args.get("-targetType")).orElse("").isEmpty()) {
+            this.targetType = Type.valueOf(args.get("-targetType"));
+        }
+        result.put("-targetType", this.targetType, Type.class);
+        if (this.targetType.isAny(Type.pdf, Type.image)) {
+            result.putAll(this.imageOption.createOptionParam(args));
+        }
         result.putFile("-setting", this.setting == null ? null : new File(this.setting));
         result.putAll(this.newData.createOptionParam(args));
         result.putAll(this.oldData.createOptionParam(args));
         result.putAll(this.getConverterOption().createOptionParam(args));
         result.putAll(this.expectData.createOptionParam(args));
-        result.putAll(this.imageOption.createOptionParam(args));
         return result;
     }
 
@@ -221,6 +224,10 @@ public class CompareOption extends CommandLineOption {
     }
 
     public enum Type {
-        data, image, pdf
+        data, image, pdf;
+
+        public boolean isAny(final Type... expects) {
+            return Stream.of(expects).anyMatch(it -> it == this);
+        }
     }
 }

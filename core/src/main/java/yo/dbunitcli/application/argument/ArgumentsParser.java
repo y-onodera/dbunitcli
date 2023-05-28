@@ -67,12 +67,9 @@ public interface ArgumentsParser {
         }
 
         public void putAll(final OptionParam other) {
-            other.options
-                    .values()
-                    .stream()
-                    .flatMap(it -> it.keySet().stream())
+            other.keySet()
                     .forEach(it -> {
-                        final Map.Entry<String, Attribute> entry = other.options.get(it).entrySet().iterator().next();
+                        final Map.Entry<String, Attribute> entry = other.getColumn(it);
                         this.put(it, entry.getKey(), entry.getValue());
                     });
 
