@@ -31,7 +31,4 @@ public class MainView extends FXMLView {
         });
     }
 
-    public Window getMainWindow() {
-        return this.window;
-    }
 }

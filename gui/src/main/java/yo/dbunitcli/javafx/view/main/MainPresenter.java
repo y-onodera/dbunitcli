@@ -3,7 +3,6 @@ package yo.dbunitcli.javafx.view.main;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXComboBox;
 import io.github.palexdev.materialfx.controls.MFXTextField;
-import io.github.palexdev.materialfx.enums.ButtonType;
 import io.github.palexdev.materialfx.enums.FloatMode;
 import io.github.palexdev.materialfx.validation.Constraint;
 import io.github.palexdev.materialfx.validation.MFXValidator;
@@ -203,10 +202,6 @@ public class MainPresenter {
             }
             row++;
         }
-        final MFXButton more = new MFXButton("more");
-        more.setButtonType(ButtonType.RAISED);
-        more.getStyleClass().add("text-button");
-        this.commandPane.add(more, "align right,cell 1 " + row);
     }
 
     private VBox addRequiredValidation(final MFXValidator validator, final MFXTextField text) {
