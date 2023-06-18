@@ -14,7 +14,7 @@ public class DataSourceTypeOptionFactory {
                 return ComparableDataSetParamOption.join(new EncodingOption(prefix), new JdbcLoadOption(prefix), new TemplateRenderOption(prefix));
             case xls:
             case xlsx:
-                return new ExcelOption(prefix);
+                return ComparableDataSetParamOption.join(new ExcelOption(prefix), new ExtensionOption(prefix));
             case reg:
                 return ComparableDataSetParamOption.join(new EncodingOption(prefix), new RegexOption(prefix), new HeaderNameOption(prefix));
             case fixed:
