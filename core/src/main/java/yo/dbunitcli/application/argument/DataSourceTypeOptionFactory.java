@@ -7,7 +7,7 @@ public class DataSourceTypeOptionFactory {
     public ComparableDataSetParamOption create(final String prefix, final DataSourceType type) {
         switch (type) {
             case file:
-                return ComparableDataSetParamOption.join(new ExtensionOption(prefix));
+                return ComparableDataSetParamOption.join(new ExtensionOption(prefix), new RecursiveOption(prefix));
             case table:
                 return ComparableDataSetParamOption.join(new EncodingOption(prefix), new JdbcLoadOption(prefix));
             case sql:

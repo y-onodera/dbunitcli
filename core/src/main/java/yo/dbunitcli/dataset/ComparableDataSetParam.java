@@ -32,6 +32,8 @@ public class ComparableDataSetParam {
     private final IDataSetConverter converter;
     private final char delimiter;
 
+    private final boolean recursive;
+
     public ComparableDataSetParam(final Builder builder) {
         this.src = builder.getSrc();
         this.encoding = builder.getEncoding();
@@ -52,6 +54,7 @@ public class ComparableDataSetParam {
         this.delimiter = builder.getDelimiter();
         this.databaseConnectionLoader = builder.getDatabaseConnectionLoader();
         this.converter = builder.getConverter();
+        this.recursive = builder.isRecursive();
     }
 
     public static Builder builder() {
@@ -117,6 +120,10 @@ public class ComparableDataSetParam {
 
     public char getDelimiter() {
         return this.delimiter;
+    }
+
+    public boolean isRecursive() {
+        return this.recursive;
     }
 
     public TemplateRender getStTemplateLoader() {
@@ -202,6 +209,7 @@ public class ComparableDataSetParam {
         private DatabaseConnectionLoader databaseConnectionLoader;
         private IDataSetConverter converter;
         private char delimiter = ',';
+        private boolean recursive = true;
 
         public Builder setSrc(final File src) {
             this.src = src;
@@ -280,6 +288,10 @@ public class ComparableDataSetParam {
 
         public char getDelimiter() {
             return this.delimiter;
+        }
+
+        public boolean isRecursive() {
+            return this.recursive;
         }
 
         public DatabaseConnectionLoader getDatabaseConnectionLoader() {
@@ -391,8 +403,14 @@ public class ComparableDataSetParam {
             return this;
         }
 
+        public Builder setRecursive(final boolean recursive) {
+            this.recursive = recursive;
+            return this;
+        }
+
         public ComparableDataSetParam build() {
             return new ComparableDataSetParam(this);
         }
+
     }
 }

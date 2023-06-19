@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class ComparableFileDataSetProducer implements ComparableDataSetProducer {
 
@@ -26,6 +27,9 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final boolean loadData;
+
+    private final boolean recursive;
+
     private int rows = 0;
 
     public ComparableFileDataSetProducer(final ComparableDataSetParam param) {
@@ -33,6 +37,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
         this.src = this.param.getSrc().getAbsoluteFile();
         this.filter = this.param.getTableNameFilter();
         this.loadData = this.param.isLoadData();
+        this.recursive = this.param.isRecursive();
     }
 
     @Override
@@ -54,7 +59,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
         LOGGER.info("produce - start fileName={}", this.src);
         if (this.loadData) {
             try {
-                Files.walk(this.src.toPath())
+                this.getWalk()
                         .filter(this.fileTypeFilter())
                         .filter(path -> this.filter.predicate(path.toString()))
                         .forEach(path -> this.produceFromFile(path.toFile()));
@@ -67,6 +72,13 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
         LOGGER.info("produce - end   fileName={}", this.src);
         this.consumer.endDataSet();
         LOGGER.info("produce() - end");
+    }
+
+    protected Stream<Path> getWalk() throws IOException {
+        if (this.recursive) {
+            return Files.walk(this.src.toPath());
+        }
+        return Files.walk(this.src.toPath(), 1);
     }
 
     protected Predicate<Path> fileTypeFilter() {
