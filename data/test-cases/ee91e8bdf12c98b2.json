@@ -1,0 +1,55 @@
+{
+  "uid" : "ee91e8bdf12c98b2",
+  "name" : "test08_runSql",
+  "fullName" : "yo.dbunitcli.application.DBIntegrationTest.test08_runSql",
+  "historyId" : "be4df72d7cefe6459b04c99099c3d7d3",
+  "time" : {
+    "start" : 1687195155342,
+    "stop" : 1687195155421,
+    "duration" : 79
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.DBIntegrationTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "test08_runSql"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.DBIntegrationTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az319-931"
+  }, {
+    "name" : "thread",
+    "value" : "1208@fv-az319-931.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "ee91e8bdf12c98b2.json",
+  "parameterValues" : [ ]
+}
