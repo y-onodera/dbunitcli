@@ -200,7 +200,9 @@ public class GenerateOption extends CommandLineOption {
         public Stream<Map<String, Object>> parameterStream(final Map<String, Object> map, final ComparableDataSet dataSet) {
             final Map<String, Object> param = new HashMap<>();
             param.put("_paramMap", map);
-            param.put("dataSet", dataSet.toMap(true).collect(Collectors.toList()));
+            param.put("dataSet", dataSet.toMap(true)
+                    .flatMap(it -> it.entrySet().stream())
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             return Stream.of(param);
         }
     }
