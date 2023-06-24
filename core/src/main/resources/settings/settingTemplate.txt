@@ -1,6 +1,6 @@
 {
   "settings": [
-$dataSet:{table |$setting(table)$}; separator="
+$dataSet.keys:{tableName |$setting(dataSet.(tableName))$}; separator="
   , "$
   ]
 }

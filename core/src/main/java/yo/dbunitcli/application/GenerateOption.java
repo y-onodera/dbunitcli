@@ -19,6 +19,7 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -201,8 +202,7 @@ public class GenerateOption extends CommandLineOption {
             final Map<String, Object> param = new HashMap<>();
             param.put("_paramMap", map);
             param.put("dataSet", dataSet.toMap(true)
-                    .flatMap(it -> it.entrySet().stream())
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    .collect(Collectors.toMap(it -> it.get("tableName").toString(), it -> it, (old, other) -> other, LinkedHashMap::new)));
             return Stream.of(param);
         }
     }
