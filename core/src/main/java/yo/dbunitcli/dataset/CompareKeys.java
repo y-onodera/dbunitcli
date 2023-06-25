@@ -7,16 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CompareKeys {
-    private final List<String> keys = new ArrayList<>();
-    private final int rowNum;
-    private final int oldRowNum;
-    private final int newRowNum;
+public record CompareKeys(List<String> keys, int rowNum, int oldRowNum, int newRowNum) {
 
     public CompareKeys(final ITable table, final int aRowNum, final List<String> compareColumns) {
-        this.rowNum = aRowNum;
-        this.oldRowNum = this.rowNum;
-        this.newRowNum = this.rowNum;
+        this(new ArrayList<>(), aRowNum, aRowNum, aRowNum);
         if (compareColumns.size() > 0) {
             compareColumns.forEach(column -> {
                 try {
@@ -35,26 +29,12 @@ public class CompareKeys {
     }
 
     public CompareKeys(final int rowNum, final int originalOldRowNum, final int originalNewRowNum, final List<String> aKeys) {
-        this.rowNum = rowNum;
-        this.oldRowNum = originalOldRowNum;
-        this.newRowNum = originalNewRowNum;
+        this(new ArrayList<>(), rowNum, originalOldRowNum, originalNewRowNum);
         this.keys.addAll(aKeys);
     }
 
     public String getKeysToString() {
         return this.keys.toString();
-    }
-
-    public int getRowNum() {
-        return this.rowNum;
-    }
-
-    public int getOldRowNum() {
-        return this.oldRowNum;
-    }
-
-    public int getNewRowNum() {
-        return this.newRowNum;
     }
 
     public CompareKeys oldRowNum(final int aOriginalRowNum) {
@@ -82,13 +62,4 @@ public class CompareKeys {
         return Objects.hash(this.keys);
     }
 
-    @Override
-    public String toString() {
-        return "CompareKeys{" +
-                "keys=" + this.keys +
-                ", rowNum=" + this.rowNum +
-                ", oldRowNum=" + this.oldRowNum +
-                ", newRowNum=" + this.newRowNum +
-                '}';
-    }
 }

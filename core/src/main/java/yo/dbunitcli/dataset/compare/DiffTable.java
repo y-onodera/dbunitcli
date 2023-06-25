@@ -40,14 +40,14 @@ public class DiffTable extends DefaultTable {
         try {
             this.addRow(toList(newRow,
                     "NEW"
-                    , compareKeys.getRowNum()
-                    , compareKeys.getNewRowNum()
+                    , compareKeys.rowNum()
+                    , compareKeys.newRowNum()
                     , this.getIndexColumn(columnIndex))
                     .toArray(new Object[oldRow.length + 4]));
             this.addRow(toList(oldRow
                     , "OLD"
-                    , compareKeys.getRowNum()
-                    , compareKeys.getOldRowNum()
+                    , compareKeys.rowNum()
+                    , compareKeys.oldRowNum()
                     , this.getIndexColumn(columnIndex))
                     .toArray(new Object[oldRow.length + 4]));
         } catch (final DataSetException e) {
