@@ -12,15 +12,15 @@ public class DataSetConverterLoader {
 
     public IDataSetConverter get(final DataSetConsumerParam param) {
         LOGGER.info("create DataSetWriter param:{}", param);
-        if (DataSourceType.table == param.getResultType()) {
+        if (DataSourceType.table == param.resultType()) {
             return new DBConverter(param);
-        } else if (DataSourceType.xlsx == param.getResultType()) {
+        } else if (DataSourceType.xlsx == param.resultType()) {
             return new XlsxConverter(param);
-        } else if (DataSourceType.xls == param.getResultType()) {
+        } else if (DataSourceType.xls == param.resultType()) {
             return new XlsConverter(param);
-        } else if (DataSourceType.csv == param.getResultType()) {
+        } else if (DataSourceType.csv == param.resultType()) {
             return new CsvConverter(param);
         }
-        throw new UnsupportedOperationException(param.getResultType().toString());
+        throw new UnsupportedOperationException(param.resultType().toString());
     }
 }

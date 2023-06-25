@@ -38,10 +38,10 @@ public class CsvConverter implements IDataSetConverter {
     private Writer writer;
 
     public CsvConverter(final DataSetConsumerParam param) {
-        this(param.getResultDir().getAbsolutePath()
-                , param.getResultDir()
-                , param.getOutputEncoding()
-                , param.isExportEmptyTable());
+        this(param.resultDir().getAbsolutePath()
+                , param.resultDir()
+                , param.outputEncoding()
+                , param.exportEmptyTable());
     }
 
     public CsvConverter(final String theDirectory, final File resultDir, final String encoding, final boolean exportEmptyTable) {

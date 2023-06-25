@@ -15,9 +15,9 @@ public class DBConverter implements IDataSetConverter {
     private final DBOperator operator;
 
     public DBConverter(final DataSetConsumerParam param) {
-        this(param.getDatabaseConnectionLoader().loadConnection()
-                , param.getOperation()
-                , param.isExportEmptyTable());
+        this(param.databaseConnectionLoader().loadConnection()
+                , param.operation()
+                , param.exportEmptyTable());
     }
 
     public DBConverter(final IDatabaseConnection connection, final Operation operation, final boolean exportEmptyTable) {

@@ -5,70 +5,26 @@ import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.File;
 
-public class DataSetConsumerParam {
-    private final DatabaseConnectionLoader databaseConnectionLoader;
-    private final DataSourceType resultType;
-    private final DBConverter.Operation operation;
-    private final File resultDir;
-    private final String fileName;
-    private final String outputEncoding;
-    private final String excelTable;
-    private final boolean exportEmptyTable;
+public record DataSetConsumerParam(
+        DatabaseConnectionLoader databaseConnectionLoader
+        , DataSourceType resultType
+        , DBConverter.Operation operation
+        , File resultDir
+        , String fileName
+        , String outputEncoding
+        , String excelTable
+        , boolean exportEmptyTable) {
 
     public DataSetConsumerParam(final Builder builder) {
-        this.resultDir = builder.getResultDir();
-        this.fileName = builder.getResultPath();
-        this.databaseConnectionLoader = builder.getDatabaseConnectionLoader();
-        this.resultType = builder.getResultType();
-        this.operation = builder.getOperation();
-        this.outputEncoding = builder.getOutputEncoding();
-        this.excelTable = builder.getExcelTable();
-        this.exportEmptyTable = builder.isExportEmptyTable();
-    }
-
-    public DatabaseConnectionLoader getDatabaseConnectionLoader() {
-        return this.databaseConnectionLoader;
-    }
-
-    public DataSourceType getResultType() {
-        return this.resultType;
-    }
-
-    public DBConverter.Operation getOperation() {
-        return this.operation;
-    }
-
-    public File getResultDir() {
-        return this.resultDir;
-    }
-
-    public String getFileName() {
-        return this.fileName;
-    }
-
-    public String getOutputEncoding() {
-        return this.outputEncoding;
-    }
-
-    public String getExcelTable() {
-        return this.excelTable;
-    }
-
-    public boolean isExportEmptyTable() {
-        return this.exportEmptyTable;
-    }
-
-    @Override
-    public String toString() {
-        return "DataSetConsumerParam{" +
-                "databaseConnectionLoader=" + this.databaseConnectionLoader +
-                ", resultType='" + this.resultType + '\'' +
-                ", operation='" + this.operation + '\'' +
-                ", resultDir=" + this.resultDir +
-                ", outputEncoding='" + this.outputEncoding + '\'' +
-                ", excelTable='" + this.excelTable + '\'' +
-                ", exportEmptyTable=" + this.exportEmptyTable +
-                '}';
+        this(builder.getDatabaseConnectionLoader()
+                , builder.getResultType()
+                , builder.getOperation()
+                , builder.getResultDir()
+                , builder.getResultPath()
+                , builder.getOutputEncoding()
+                , builder.getExcelTable()
+                , builder.isExportEmptyTable()
+        );
     }
 
     public static Builder builder() {

@@ -16,47 +16,47 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public record ComparableDataSetParam(
-        File src,
-        String encoding,
-        DataSourceType source,
-        ColumnSettings columnSettings,
-        String headerSplitPattern,
-        String dataSplitPattern,
-        TableNameFilter tableNameFilter,
-        boolean mapIncludeMetaData,
-        XlsxSchema xlsxSchema,
-        boolean useJdbcMetaData,
-        boolean loadData,
-        String headerName,
-        String fixedLength,
-        char delimiter,
-        String extension,
-        boolean recursive,
-        TemplateRender templateRender,
-        DatabaseConnectionLoader databaseConnectionLoader,
-        IDataSetConverter converter
+        File src
+        , String encoding
+        , DataSourceType source
+        , ColumnSettings columnSettings
+        , String headerSplitPattern
+        , String dataSplitPattern
+        , TableNameFilter tableNameFilter
+        , boolean mapIncludeMetaData
+        , XlsxSchema xlsxSchema
+        , boolean useJdbcMetaData
+        , boolean loadData
+        , String headerName
+        , String fixedLength
+        , char delimiter
+        , String extension
+        , boolean recursive
+        , TemplateRender templateRender
+        , DatabaseConnectionLoader databaseConnectionLoader
+        , IDataSetConverter converter
 ) {
 
     public ComparableDataSetParam(final Builder builder) {
-        this(builder.getSrc(),
-                builder.getEncoding(),
-                builder.getSource(),
-                builder.getColumnSettings(),
-                builder.getHeaderSplitPattern(),
-                builder.getDataSplitPattern(),
-                builder.getTableNameFilter(),
-                builder.isMapIncludeMetaData(),
-                builder.getXlsxSchema(),
-                builder.isUseJdbcMetaData(),
-                builder.isLoadData(),
-                builder.getHeaderName(),
-                builder.getFixedLength(),
-                builder.getDelimiter(),
-                builder.getExtension(),
-                builder.isRecursive(),
-                builder.getStTemplateLoader(),
-                builder.getDatabaseConnectionLoader(),
-                builder.getConverter()
+        this(builder.getSrc()
+                , builder.getEncoding()
+                , builder.getSource()
+                , builder.getColumnSettings()
+                , builder.getHeaderSplitPattern()
+                , builder.getDataSplitPattern()
+                , builder.getTableNameFilter()
+                , builder.isMapIncludeMetaData()
+                , builder.getXlsxSchema()
+                , builder.isUseJdbcMetaData()
+                , builder.isLoadData()
+                , builder.getHeaderName()
+                , builder.getFixedLength()
+                , builder.getDelimiter()
+                , builder.getExtension()
+                , builder.isRecursive()
+                , builder.getStTemplateLoader()
+                , builder.getDatabaseConnectionLoader()
+                , builder.getConverter()
         );
     }
 

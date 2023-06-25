@@ -53,10 +53,10 @@ public class XlsConverter implements IDataSetConverter {
     private int rowIndex = 1;
 
     public XlsConverter(final DataSetConsumerParam param) {
-        this(param.getResultDir()
-                , param.getFileName()
-                , TableExportType.valueOf(param.getExcelTable())
-                , param.isExportEmptyTable());
+        this(param.resultDir()
+                , param.fileName()
+                , TableExportType.valueOf(param.excelTable())
+                , param.exportEmptyTable());
     }
 
     public XlsConverter(final File resultDir, final String filename, final TableExportType tableExport, final boolean exportEmptyTable) {
