@@ -31,18 +31,18 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
 
     public ComparableFixedFileDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
-        if (this.param.getSrc().isDirectory()) {
-            this.src = this.param.getSrc().listFiles(File::isFile);
+        if (this.param.src().isDirectory()) {
+            this.src = this.param.src().listFiles(File::isFile);
         } else {
-            this.src = new File[]{this.param.getSrc()};
+            this.src = new File[]{this.param.src()};
         }
-        this.encoding = this.param.getEncoding();
-        this.headerNames = this.param.getHeaderName().split(",");
-        this.columnLengths = Arrays.stream(this.param.getFixedLength().split(","))
+        this.encoding = this.param.encoding();
+        this.headerNames = this.param.headerName().split(",");
+        this.columnLengths = Arrays.stream(this.param.fixedLength().split(","))
                 .map(Integer::valueOf)
                 .collect(Collectors.toCollection(ArrayList::new));
-        this.filter = this.param.getTableNameFilter();
-        this.loadData = this.param.isLoadData();
+        this.filter = this.param.tableNameFilter();
+        this.loadData = this.param.loadData();
     }
 
     @Override

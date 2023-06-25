@@ -50,10 +50,10 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
     private boolean outputNextStringRecord;
 
     public ComparableXlsDataSetProducer(final ComparableDataSetParam param) {
-        super(new DefaultConsumer(), param.getXlsxSchema(), param.isLoadData());
+        super(new DefaultConsumer(), param.xlsxSchema(), param.loadData());
         this.param = param;
         this.src = this.param.getSrcFiles();
-        this.filter = this.param.getTableNameFilter();
+        this.filter = this.param.tableNameFilter();
     }
 
     @Override

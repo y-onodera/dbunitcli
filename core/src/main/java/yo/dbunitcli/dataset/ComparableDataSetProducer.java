@@ -12,7 +12,7 @@ import java.util.Arrays;
 public interface ComparableDataSetProducer extends IDataSetProducer {
 
     default String getSrc() {
-        return this.getParam().getSrc().getPath();
+        return this.getParam().src().getPath();
     }
 
     ComparableDataSetParam getParam();

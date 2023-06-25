@@ -38,7 +38,7 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     }
 
     public TemplateRender getTemplateLoader() {
-        return this.getParam().getStTemplateLoader();
+        return this.getParam().templateRender();
     }
 
     protected void produceFromFile(final File aFile) {

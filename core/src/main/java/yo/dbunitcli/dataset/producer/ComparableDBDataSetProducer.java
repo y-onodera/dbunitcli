@@ -29,16 +29,16 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     private final boolean loadData;
 
     public ComparableDBDataSetProducer(final ComparableDataSetParam param) {
-        this.connection = param.getDatabaseConnectionLoader().loadConnection();
+        this.connection = param.databaseConnectionLoader().loadConnection();
         this.param = param;
-        if (this.getParam().getSrc().isDirectory()) {
-            this.src = this.getParam().getSrc().listFiles(File::isFile);
+        if (this.getParam().src().isDirectory()) {
+            this.src = this.getParam().src().listFiles(File::isFile);
         } else {
-            this.src = new File[]{this.getParam().getSrc()};
+            this.src = new File[]{this.getParam().src()};
         }
-        this.encoding = this.param.getEncoding();
-        this.filter = this.param.getTableNameFilter();
-        this.loadData = this.param.isLoadData();
+        this.encoding = this.param.encoding();
+        this.filter = this.param.tableNameFilter();
+        this.loadData = this.param.loadData();
     }
 
     @Override
@@ -73,7 +73,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     protected void loadJdbcMetadata() {
-        if (this.getParam().isUseJdbcMetaData()) {
+        if (this.getParam().useJdbcMetaData()) {
             try {
                 this.databaseDataSet = this.connection.createDataSet();
             } catch (final SQLException e) {

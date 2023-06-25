@@ -15,136 +15,58 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class ComparableDataSetParam {
-    private final File src;
-    private final String encoding;
-    private final DataSourceType source;
-    private final ColumnSettings columnSettings;
-    private final String headerSplitPattern;
-    private final String dataSplitPattern;
-    private final String regInclude;
-    private final String regExclude;
-    private final boolean mapIncludeMetaData;
-    private final XlsxSchema xlsxSchema;
-    private final boolean useJdbcMetaData;
-    private final boolean loadData;
-    private final String headerName;
-    private final String fixedLength;
-    private final String extension;
-    private final TemplateRender templateRender;
-    private final DatabaseConnectionLoader databaseConnectionLoader;
-    private final IDataSetConverter converter;
-    private final char delimiter;
-
-    private final boolean recursive;
+public record ComparableDataSetParam(
+        File src,
+        String encoding,
+        DataSourceType source,
+        ColumnSettings columnSettings,
+        String headerSplitPattern,
+        String dataSplitPattern,
+        TableNameFilter tableNameFilter,
+        boolean mapIncludeMetaData,
+        XlsxSchema xlsxSchema,
+        boolean useJdbcMetaData,
+        boolean loadData,
+        String headerName,
+        String fixedLength,
+        char delimiter,
+        String extension,
+        boolean recursive,
+        TemplateRender templateRender,
+        DatabaseConnectionLoader databaseConnectionLoader,
+        IDataSetConverter converter
+) {
 
     public ComparableDataSetParam(final Builder builder) {
-        this.src = builder.getSrc();
-        this.encoding = builder.getEncoding();
-        this.source = builder.getSource();
-        this.columnSettings = builder.getColumnSettings();
-        this.headerSplitPattern = builder.getHeaderSplitPattern();
-        this.dataSplitPattern = builder.getDataSplitPattern();
-        this.regInclude = builder.getRegInclude();
-        this.regExclude = builder.getRegExclude();
-        this.mapIncludeMetaData = builder.isMapIncludeMetaData();
-        this.xlsxSchema = builder.getXlsxSchema();
-        this.useJdbcMetaData = builder.isUseJdbcMetaData();
-        this.loadData = builder.isLoadData();
-        this.headerName = builder.getHeaderName();
-        this.fixedLength = builder.getFixedLength();
-        this.templateRender = builder.getStTemplateLoader();
-        this.extension = builder.getExtension();
-        this.delimiter = builder.getDelimiter();
-        this.databaseConnectionLoader = builder.getDatabaseConnectionLoader();
-        this.converter = builder.getConverter();
-        this.recursive = builder.isRecursive();
+        this(builder.getSrc(),
+                builder.getEncoding(),
+                builder.getSource(),
+                builder.getColumnSettings(),
+                builder.getHeaderSplitPattern(),
+                builder.getDataSplitPattern(),
+                builder.getTableNameFilter(),
+                builder.isMapIncludeMetaData(),
+                builder.getXlsxSchema(),
+                builder.isUseJdbcMetaData(),
+                builder.isLoadData(),
+                builder.getHeaderName(),
+                builder.getFixedLength(),
+                builder.getDelimiter(),
+                builder.getExtension(),
+                builder.isRecursive(),
+                builder.getStTemplateLoader(),
+                builder.getDatabaseConnectionLoader(),
+                builder.getConverter()
+        );
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public File getSrc() {
-        return this.src;
-    }
-
-    public String getEncoding() {
-        return this.encoding;
-    }
-
-    public DataSourceType getSource() {
-        return this.source;
-    }
-
-    public ColumnSettings getColumnSettings() {
-        return this.columnSettings;
-    }
-
-    public String getHeaderSplitPattern() {
-        return this.headerSplitPattern;
-    }
-
-    public String getDataSplitPattern() {
-        return this.dataSplitPattern;
-    }
-
-    public TableNameFilter getTableNameFilter() {
-        return new TableNameFilter(this.regInclude, this.regExclude);
-    }
-
-    public boolean isMapIncludeMetaData() {
-        return this.mapIncludeMetaData;
-    }
-
-    public XlsxSchema getXlsxSchema() {
-        return this.xlsxSchema;
-    }
-
-    public boolean isUseJdbcMetaData() {
-        return this.useJdbcMetaData;
-    }
-
-    public boolean isLoadData() {
-        return this.loadData;
-    }
-
-    public String getHeaderName() {
-        return this.headerName;
-    }
-
-    public String getFixedLength() {
-        return this.fixedLength;
-    }
-
-    public String getExtension() {
-        return Optional.ofNullable(this.extension)
-                .orElse(Optional.ofNullable(this.source.getExtension()).orElse(""));
-    }
-
-    public char getDelimiter() {
-        return this.delimiter;
-    }
-
-    public boolean isRecursive() {
-        return this.recursive;
-    }
-
-    public TemplateRender getStTemplateLoader() {
-        return this.templateRender;
-    }
-
-    public DatabaseConnectionLoader getDatabaseConnectionLoader() {
-        return this.databaseConnectionLoader;
-    }
-
-    public IDataSetConverter getConverter() {
-        return this.converter;
-    }
-
     public File[] getSrcFiles() {
-        if (this.getSrc().isDirectory()) {
-            final String end = "." + this.getExtension().toUpperCase();
+        if (this.src().isDirectory()) {
+            final String end = "." + this.extension().toUpperCase();
             final File[] result = this.getWalk()
                     .map(Path::toFile)
                     .filter(it -> it.isFile() && it.getName().toUpperCase().endsWith(end))
@@ -152,58 +74,18 @@ public class ComparableDataSetParam {
             Arrays.sort(result);
             return result;
         }
-        return new File[]{this.getSrc()};
+        return new File[]{this.src()};
     }
 
-    @Override
-    public String toString() {
-        return "ComparableDataSetParam{" +
-                "src=" + this.src +
-                ", encoding='" + this.encoding + '\'' +
-                ", source=" + this.source +
-                ", columnSettings=" + this.columnSettings +
-                ", headerSplitPattern='" + this.headerSplitPattern + '\'' +
-                ", dataSplitPattern='" + this.dataSplitPattern + '\'' +
-                ", regInclude='" + this.regInclude + '\'' +
-                ", regExclude='" + this.regExclude + '\'' +
-                ", mapIncludeMetaData=" + this.mapIncludeMetaData +
-                ", xlsxSchema=" + this.xlsxSchema +
-                ", useJdbcMetaData=" + this.useJdbcMetaData +
-                ", loadData=" + this.loadData +
-                ", headerName='" + this.headerName + '\'' +
-                ", fixedLength='" + this.fixedLength + '\'' +
-                ", extension='" + this.extension + '\'' +
-                ", templateRender=" + this.templateRender +
-                ", databaseConnectionLoader=" + this.databaseConnectionLoader +
-                ", delimiter=" + this.delimiter +
-                '}';
-    }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof ComparableDataSetParam)) {
-            return false;
-        }
-        final ComparableDataSetParam that = (ComparableDataSetParam) o;
-        return this.mapIncludeMetaData == that.mapIncludeMetaData && this.useJdbcMetaData == that.useJdbcMetaData && this.loadData == that.loadData && this.delimiter == that.delimiter && Objects.equals(this.src, that.src) && Objects.equals(this.encoding, that.encoding) && this.source == that.source && Objects.equals(this.columnSettings, that.columnSettings) && Objects.equals(this.headerSplitPattern, that.headerSplitPattern) && Objects.equals(this.dataSplitPattern, that.dataSplitPattern) && Objects.equals(this.regInclude, that.regInclude) && Objects.equals(this.regExclude, that.regExclude) && Objects.equals(this.xlsxSchema, that.xlsxSchema) && Objects.equals(this.headerName, that.headerName) && Objects.equals(this.fixedLength, that.fixedLength) && Objects.equals(this.extension, that.extension) && Objects.equals(this.templateRender, that.templateRender) && Objects.equals(this.databaseConnectionLoader, that.databaseConnectionLoader) && Objects.equals(this.converter, that.converter);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.src, this.encoding, this.source, this.columnSettings, this.headerSplitPattern, this.dataSplitPattern, this.regInclude, this.regExclude, this.mapIncludeMetaData, this.xlsxSchema, this.useJdbcMetaData, this.loadData, this.headerName, this.fixedLength, this.extension, this.templateRender, this.databaseConnectionLoader, this.converter, this.delimiter);
-    }
-
-    protected Stream<Path> getWalk() {
+    public Stream<Path> getWalk() {
         try {
             if (this.recursive) {
                 return Files.walk(this.src.toPath());
             }
             return Files.walk(this.src.toPath(), 1);
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new AssertionError(e);
         }
     }
 
@@ -265,12 +147,8 @@ public class ComparableDataSetParam {
             return this.mapIncludeMetaData;
         }
 
-        public String getRegInclude() {
-            return this.regInclude;
-        }
-
-        public String getRegExclude() {
-            return this.regExclude;
+        public TableNameFilter getTableNameFilter() {
+            return new TableNameFilter(this.regInclude, this.regExclude);
         }
 
         public XlsxSchema getXlsxSchema() {
@@ -294,14 +172,12 @@ public class ComparableDataSetParam {
         }
 
         public TemplateRender getStTemplateLoader() {
-            if (this.templateRender == null) {
-                return new TemplateRender();
-            }
-            return this.templateRender;
+            return Objects.requireNonNullElseGet(this.templateRender, TemplateRender::new);
         }
 
         public String getExtension() {
-            return this.extension;
+            return Optional.ofNullable(this.extension)
+                    .orElse(this.source == null ? "" : this.source.getExtension());
         }
 
         public char getDelimiter() {

@@ -27,7 +27,7 @@ public class ComparableDataSetLoader {
     }
 
     protected ComparableDataSetProducer getComparableDataSetProducer(final ComparableDataSetParam param) {
-        switch (param.getSource()) {
+        switch (param.source()) {
             case table:
                 return new ComparableDBDataSetProducer(param);
             case sql:
@@ -49,6 +49,6 @@ public class ComparableDataSetLoader {
             case dir:
                 return new ComparableDirectoryDataSetProducer(param);
         }
-        throw new UnsupportedOperationException(param.getSource().name());
+        throw new UnsupportedOperationException(param.source().name());
     }
 }

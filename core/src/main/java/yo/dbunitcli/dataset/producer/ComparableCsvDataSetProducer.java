@@ -33,16 +33,16 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     public ComparableCsvDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrcFiles();
-        this.encoding = this.param.getEncoding();
-        this.filter = this.param.getTableNameFilter();
-        this.loadData = this.param.isLoadData();
-        final String headerName = this.param.getHeaderName();
+        this.encoding = this.param.encoding();
+        this.filter = this.param.tableNameFilter();
+        this.loadData = this.param.loadData();
+        final String headerName = this.param.headerName();
         if (!Optional.ofNullable(headerName).orElse("").isEmpty()) {
             this.headerNames = headerName.split(",");
         } else {
             this.headerNames = null;
         }
-        this.delimiter = param.getDelimiter();
+        this.delimiter = param.delimiter();
         this.resetThePipeline();
     }
 

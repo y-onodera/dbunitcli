@@ -30,8 +30,8 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
         super(false);
         this.producer = producer;
         this.param = this.producer.getParam();
-        this.compareSettings = this.param.getColumnSettings();
-        this.converter = this.param.getConverter();
+        this.compareSettings = this.param.columnSettings();
+        this.converter = this.param.converter();
         this.alreadyWrite = new HashMap<>();
         try {
             this.producer.setConsumer(this);
@@ -85,7 +85,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     @Override
     public Stream<Map<String, Object>> toMap() {
-        return this.toMap(this.param.isMapIncludeMetaData());
+        return this.toMap(this.param.mapIncludeMetaData());
     }
 
     @Override

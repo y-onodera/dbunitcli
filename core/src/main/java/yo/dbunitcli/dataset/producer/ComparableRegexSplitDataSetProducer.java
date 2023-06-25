@@ -30,22 +30,22 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
 
     public ComparableRegexSplitDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
-        if (this.param.getSrc().isDirectory()) {
-            this.src = this.param.getSrc().listFiles(File::isFile);
+        if (this.param.src().isDirectory()) {
+            this.src = this.param.src().listFiles(File::isFile);
         } else {
-            this.src = new File[]{this.param.getSrc()};
+            this.src = new File[]{this.param.src()};
         }
-        this.encoding = this.param.getEncoding();
-        final String headerName = this.param.getHeaderName();
+        this.encoding = this.param.encoding();
+        final String headerName = this.param.headerName();
         if (!Optional.ofNullable(headerName).orElse("").isEmpty()) {
             this.headerNames = headerName.split(",");
         }
         if (this.headerNames == null) {
-            this.headerSplitPattern = Pattern.compile(this.param.getHeaderSplitPattern());
+            this.headerSplitPattern = Pattern.compile(this.param.headerSplitPattern());
         }
-        this.dataSplitPattern = Pattern.compile(this.param.getDataSplitPattern());
-        this.filter = this.param.getTableNameFilter();
-        this.loadData = this.param.isLoadData();
+        this.dataSplitPattern = Pattern.compile(this.param.dataSplitPattern());
+        this.filter = this.param.tableNameFilter();
+        this.loadData = this.param.loadData();
     }
 
     @Override

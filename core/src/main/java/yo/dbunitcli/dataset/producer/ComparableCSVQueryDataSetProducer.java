@@ -30,14 +30,14 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
 
     public ComparableCSVQueryDataSetProducer(final ComparableDataSetParam param, final Parameter parameter) {
         this.param = param;
-        if (this.param.getSrc().isDirectory()) {
-            this.src = this.param.getSrc().listFiles(File::isFile);
+        if (this.param.src().isDirectory()) {
+            this.src = this.param.src().listFiles(File::isFile);
         } else {
-            this.src = new File[]{this.param.getSrc()};
+            this.src = new File[]{this.param.src()};
         }
-        this.filter = param.getTableNameFilter();
+        this.filter = param.tableNameFilter();
         this.parameter = parameter;
-        this.loadData = this.param.isLoadData();
+        this.loadData = this.param.loadData();
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     }
 
     public TemplateRender getTemplateLoader() {
-        return this.getParam().getStTemplateLoader();
+        return this.getParam().templateRender();
     }
 
     @Override

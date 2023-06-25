@@ -10,13 +10,10 @@ import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class ComparableFileDataSetProducer implements ComparableDataSetProducer {
 
@@ -34,10 +31,10 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
 
     public ComparableFileDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
-        this.src = this.param.getSrc().getAbsoluteFile();
-        this.filter = this.param.getTableNameFilter();
-        this.loadData = this.param.isLoadData();
-        this.recursive = this.param.isRecursive();
+        this.src = this.param.src().getAbsoluteFile();
+        this.filter = this.param.tableNameFilter();
+        this.loadData = this.param.loadData();
+        this.recursive = this.param.recursive();
     }
 
     @Override
@@ -59,11 +56,11 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
         LOGGER.info("produce - start fileName={}", this.src);
         if (this.loadData) {
             try {
-                this.getWalk()
+                this.param.getWalk()
                         .filter(this.fileTypeFilter())
                         .filter(path -> this.filter.predicate(path.toString()))
                         .forEach(path -> this.produceFromFile(path.toFile()));
-            } catch (final IOException | AssertionError e) {
+            } catch (final AssertionError e) {
                 throw new DataSetException("error producing dataSet for '" + this.src + "'", e);
             }
         }
@@ -74,19 +71,12 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
         LOGGER.info("produce() - end");
     }
 
-    protected Stream<Path> getWalk() throws IOException {
-        if (this.recursive) {
-            return Files.walk(this.src.toPath());
-        }
-        return Files.walk(this.src.toPath(), 1);
-    }
-
     protected Predicate<Path> fileTypeFilter() {
-        if (Optional.ofNullable(this.param.getExtension()).orElse("").isEmpty()) {
+        if (Optional.ofNullable(this.param.extension()).orElse("").isEmpty()) {
             return path -> path.toFile().isFile();
         }
         return path -> path.toFile().isFile()
-                && path.toString().toUpperCase().endsWith(this.param.getExtension().toUpperCase());
+                && path.toString().toUpperCase().endsWith(this.param.extension().toUpperCase());
     }
 
     protected void produceFromFile(final File file) {
