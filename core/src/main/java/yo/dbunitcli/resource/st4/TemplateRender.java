@@ -11,52 +11,32 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
-public class TemplateRender {
-
-    private final File templateGroup;
-
-    private final String templateParameterAttribute;
-
-    private final char templateVarStart;
-
-    private final char templateVarStop;
-
-    private final String encoding;
+public record TemplateRender(
+        File templateGroup
+        , String templateParameterAttribute
+        , char templateVarStart
+        , char templateVarStop
+        , String encoding) {
 
     public TemplateRender() {
         this(new Builder());
     }
 
     public TemplateRender(final Builder builder) {
-        this.encoding = builder.getEncoding();
-        this.templateGroup = builder.getTemplateGroup();
-        this.templateParameterAttribute = builder.getTemplateParameterAttribute();
-        this.templateVarStart = builder.getTemplateVarStart();
-        this.templateVarStop = builder.getTemplateVarStop();
+        this(builder.getTemplateGroup()
+                , builder.getTemplateParameterAttribute()
+                , builder.getTemplateVarStart()
+                , builder.getTemplateVarStop()
+                , builder.getEncoding()
+        );
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public String getEncoding() {
-        return this.encoding;
-    }
-
-    public String getTemplateParameterAttribute() {
-        return this.templateParameterAttribute;
-    }
-
-    public char getTemplateVarStart() {
-        return this.templateVarStart;
-    }
-
-    public char getTemplateVarStop() {
-        return this.templateVarStop;
-    }
-
     public String render(final File aFile, final Map<String, Object> parameter) {
-        return this.render(Files.read(aFile, this.getEncoding()), parameter);
+        return this.render(Files.read(aFile, this.encoding()), parameter);
     }
 
     public String render(final String target, final Map<String, Object> parameter) {
@@ -81,16 +61,16 @@ public class TemplateRender {
     public ST createST(final String target, final Map<String, Object> parameter) {
         final String template = this.replaceParameter(target, parameter);
         final ST st = this.createST(template);
-        if (Optional.ofNullable(this.getTemplateParameterAttribute()).orElse("").isEmpty()) {
+        if (Optional.ofNullable(this.templateParameterAttribute()).orElse("").isEmpty()) {
             parameter.forEach(st::add);
         } else {
-            st.add(this.getTemplateParameterAttribute(), parameter);
+            st.add(this.templateParameterAttribute(), parameter);
         }
         return st;
     }
 
     public STGroup createSTGroup() {
-        return this.createSTGroup(this.templateGroup);
+        return this.createSTGroup(this.templateGroup());
     }
 
     public STGroup createSTGroup(final File groupFile) {
@@ -103,9 +83,9 @@ public class TemplateRender {
     public STGroup createSTGroup(final String fileName) {
         final STGroup stGroup;
         if (Optional.ofNullable(fileName).orElse("").isEmpty()) {
-            stGroup = new STGroup(this.templateVarStart, this.templateVarStop);
+            stGroup = new STGroup(this.templateVarStart(), this.templateVarStop());
         } else {
-            stGroup = new STGroupFile(fileName, this.templateVarStart, this.templateVarStop);
+            stGroup = new STGroupFile(fileName, this.templateVarStart(), this.templateVarStop());
         }
         stGroup.registerRenderer(String.class, new SqlEscapeStringRenderer());
         return stGroup;
@@ -123,22 +103,11 @@ public class TemplateRender {
 
     public String getAttributeName(final String name) {
         String token = name;
-        if (!Optional.ofNullable(this.getTemplateParameterAttribute()).orElse("").isEmpty()) {
-            token = this.getTemplateParameterAttribute() + name;
+        if (!Optional.ofNullable(this.templateParameterAttribute()).orElse("").isEmpty()) {
+            token = this.templateParameterAttribute() + name;
         }
-        token = this.getTemplateVarStart() + token + this.getTemplateVarStop();
+        token = this.templateVarStart() + token + this.templateVarStop();
         return token;
-    }
-
-    @Override
-    public String toString() {
-        return "TemplateRender{" +
-                "templateGroup=" + this.templateGroup +
-                ", templateParameterAttribute='" + this.templateParameterAttribute + '\'' +
-                ", templateVarStart=" + this.templateVarStart +
-                ", templateVarStop=" + this.templateVarStop +
-                ", encoding='" + this.encoding + '\'' +
-                '}';
     }
 
     public static class Builder {

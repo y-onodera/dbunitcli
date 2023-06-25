@@ -84,7 +84,7 @@ public class SqlRunner implements Runner {
             }
         };
         exec.setExpandProperties(false);
-        exec.setEncoding(this.getTemplateRender().getEncoding());
+        exec.setEncoding(this.getTemplateRender().encoding());
         return exec;
     }
 

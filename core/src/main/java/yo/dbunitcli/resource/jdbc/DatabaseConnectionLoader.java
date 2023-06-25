@@ -14,12 +14,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class DatabaseConnectionLoader {
-    private final Properties jdbcProp;
-
-    public DatabaseConnectionLoader(final Properties jdbcProp) {
-        this.jdbcProp = jdbcProp;
-    }
+public record DatabaseConnectionLoader(Properties jdbcProp) {
 
     public IDatabaseConnection loadConnection() {
         final String url = this.jdbcProp.get("url").toString();
@@ -63,12 +58,5 @@ public class DatabaseConnectionLoader {
         } catch (final ClassNotFoundException | SQLException | DatabaseUnitException ex) {
             throw new AssertionError(ex);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "DatabaseConnectionLoader{" +
-                "jdbcProp=" + this.jdbcProp +
-                '}';
     }
 }
