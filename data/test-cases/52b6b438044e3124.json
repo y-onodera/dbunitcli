@@ -1,0 +1,55 @@
+{
+  "uid" : "52b6b438044e3124",
+  "name" : "testCompareIgnoreNoSettingTables",
+  "fullName" : "yo.dbunitcli.application.CompareTest.testCompareIgnoreNoSettingTables",
+  "historyId" : "1d078adfce34a92a012c3686130c9948",
+  "time" : {
+    "start" : 1687690159204,
+    "stop" : 1687690159235,
+    "duration" : 31
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.CompareTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testCompareIgnoreNoSettingTables"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.CompareTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az449-14"
+  }, {
+    "name" : "thread",
+    "value" : "1432@fv-az449-14.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "52b6b438044e3124.json",
+  "parameterValues" : [ ]
+}
