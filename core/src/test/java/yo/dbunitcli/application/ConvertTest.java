@@ -18,8 +18,10 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 
 public class ConvertTest {
 
@@ -465,6 +467,92 @@ public class ConvertTest {
         Assert.assertEquals(2, split2.getRowCount());
         Assert.assertEquals("2", split2.getValue(0, "key"));
         Assert.assertEquals("3", split2.getValue(1, "key"));
+    }
+
+    @Test
+    public void testConvertFilePathToCsv() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFilePathToCsv.txt"});
+        final File src = new File(this.baseDir + "/file/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableCsvDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.csv)
+                                .setEncoding("UTF-8")
+                                .build()));
+        final ITable result = actual.getTables()[0];
+        Assert.assertEquals(4, result.getRowCount());
+        Assert.assertEquals(Set.of("csv.csv", "test.txt", "sub.csv", "sub.txt"),
+                Set.of(result.getValue(0, "NAME")
+                        , result.getValue(1, "NAME")
+                        , result.getValue(2, "NAME")
+                        , result.getValue(3, "NAME")
+                ));
+    }
+
+    @Test
+    public void testConvertFilePathToCsvNotRecursive() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFilePathToCsv.txt", "-recursive=false"});
+        final File src = new File(this.baseDir + "/file/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableCsvDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.csv)
+                                .setEncoding("UTF-8")
+                                .build()));
+        final ITable result = actual.getTables()[0];
+        Assert.assertEquals(2, result.getRowCount());
+        Assert.assertEquals(Set.of("csv.csv", "test.txt"),
+                Set.of(result.getValue(0, "NAME")
+                        , result.getValue(1, "NAME")
+                ));
+    }
+
+    @Test
+    public void testConvertFilePathToCsvFilterExtension() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFilePathToCsv.txt", "-extension=txt"});
+        final File src = new File(this.baseDir + "/file/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableCsvDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.csv)
+                                .setEncoding("UTF-8")
+                                .build()));
+        final ITable result = actual.getTables()[0];
+        Assert.assertEquals(2, result.getRowCount());
+        Assert.assertEquals(Set.of("test.txt", "sub.txt"),
+                Set.of(result.getValue(0, "NAME")
+                        , result.getValue(1, "NAME")
+                ));
+    }
+
+    @Test
+    public void testConvertFilePathToCsvWithSetting() throws Exception {
+        Files.writeString(new File(this.baseDir, "testConvertFilePathToCsvWithSetting.json").toPath(), """
+                {
+                  "commonSettings":[
+                  {
+                  "string":{"NO_EXTENSION":"get('NAME').substring(0,get('NAME').lastIndexOf('.'))","RELATIVE_PATH":"get('RELATIVE_PATH').replace('\\\\\\\\','/')"},
+                  "filter":["NAME =$ '.txt'","RELATIVE_PATH !~ '.*/.*'"]
+                  }
+                  ]
+                }
+                """);
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFilePathToCsv.txt"
+                , "-setting=" + this.baseDir + "/testConvertFilePathToCsvWithSetting.json"});
+        final File src = new File(this.baseDir + "/file/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableCsvDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.csv)
+                                .setEncoding("UTF-8")
+                                .build()));
+        final ITable result = actual.getTables()[0];
+        Assert.assertEquals(1, result.getRowCount());
+        Assert.assertEquals("test", result.getValue(0, "NO_EXTENSION"));
     }
 
     private static String[] getColumnNames(final ITable split1) throws DataSetException {

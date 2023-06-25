@@ -1,0 +1,5 @@
+-src=src/test/resources/yo/dbunitcli/application/file
+-srcType=file
+-result=target/test-classes/yo/dbunitcli/application/file/result
+-resultType=csv
+-outputEncoding=UTF-8
