@@ -5,11 +5,15 @@ import yo.dbunitcli.resource.poi.XlsxSchema;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class ComparableDataSetParam {
     private final File src;
@@ -141,7 +145,10 @@ public class ComparableDataSetParam {
     public File[] getSrcFiles() {
         if (this.getSrc().isDirectory()) {
             final String end = "." + this.getExtension().toUpperCase();
-            final File[] result = this.getSrc().listFiles((file) -> file.isFile() && file.getName().toUpperCase().endsWith(end));
+            final File[] result = this.getWalk()
+                    .map(Path::toFile)
+                    .filter(it -> it.isFile() && it.getName().toUpperCase().endsWith(end))
+                    .toArray(File[]::new);
             Arrays.sort(result);
             return result;
         }
@@ -187,6 +194,17 @@ public class ComparableDataSetParam {
     @Override
     public int hashCode() {
         return Objects.hash(this.src, this.encoding, this.source, this.columnSettings, this.headerSplitPattern, this.dataSplitPattern, this.regInclude, this.regExclude, this.mapIncludeMetaData, this.xlsxSchema, this.useJdbcMetaData, this.loadData, this.headerName, this.fixedLength, this.extension, this.templateRender, this.databaseConnectionLoader, this.converter, this.delimiter);
+    }
+
+    protected Stream<Path> getWalk() {
+        try {
+            if (this.recursive) {
+                return Files.walk(this.src.toPath());
+            }
+            return Files.walk(this.src.toPath(), 1);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static class Builder {

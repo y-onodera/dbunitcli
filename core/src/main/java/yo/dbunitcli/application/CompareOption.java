@@ -190,12 +190,13 @@ public class CompareOption extends CommandLineOption {
                         .setSrc(converterOption.getResultDir())
                         .setSource(converterOption.getResultType())
                         .setEncoding(converterOption.getOutputEncoding())
+                        .setRecursive(false)
                         .build()
         );
     }
 
     public ComparableDataSet expectDataSet() {
-        return this.getComparableDataSetLoader().loadDataSet(this.expectData.getParam().build());
+        return this.getComparableDataSetLoader().loadDataSet(this.expectData.getParam().setRecursive(false).build());
     }
 
     public DataSetCompareBuilder getDataSetCompareBuilder() {
