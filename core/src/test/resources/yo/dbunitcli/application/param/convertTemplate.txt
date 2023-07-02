@@ -1,0 +1,3 @@
+-src=$param.PATH$
+-srcType=csv
+-result=target/test-classes/yo/dbunitcli/application/param/convert/result

@@ -15,6 +15,7 @@ public interface ArgumentsParser {
      */
     default CmdLineParser parseArgument(final String[] args) {
         final CmdLineParser parser = new CmdLineParser(this);
+        parser.getProperties().withOptionValueDelimiter("=");
         try {
             final String[] targetArgs = this.getArgumentMapper().map(args, this.getPrefix(), parser);
             parser.parseArgument(this.filterArguments(parser, targetArgs));
