@@ -6,6 +6,9 @@ public class ColumnSettingEditor {
     private Consumer<AddSettingColumns.Builder> keyEdit = (it) -> {
     };
 
+    private Consumer<AddSettingColumns.Builder> includeEdit = (it) -> {
+    };
+
     private Consumer<AddSettingColumns.Builder> excludeEdit = (it) -> {
     };
 
@@ -20,6 +23,10 @@ public class ColumnSettingEditor {
 
     public Consumer<AddSettingColumns.Builder> getKeyEdit() {
         return this.keyEdit;
+    }
+
+    public Consumer<AddSettingColumns.Builder> getIncludeEdit() {
+        return this.includeEdit;
     }
 
     public Consumer<AddSettingColumns.Builder> getExcludeEdit() {
@@ -41,6 +48,12 @@ public class ColumnSettingEditor {
 
     public ColumnSettingEditor setKeyEdit(final Consumer<AddSettingColumns.Builder> key) {
         this.keyEdit = key;
+        return this;
+    }
+
+
+    public ColumnSettingEditor setIncludeEdit(final Consumer<AddSettingColumns.Builder> include) {
+        this.includeEdit = include;
         return this;
     }
 

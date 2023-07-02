@@ -13,7 +13,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private final AddSettingTableMetaData baseMetaData;
     private final Column[] orderColumns;
     private final List<Integer> filteredRowIndexes;
-    private final List<Object[]> values;
+    private final Collection<Object[]> values;
     private final TableSplitter splitter;
     private AddSettingTableMetaData metaData;
     private int no;

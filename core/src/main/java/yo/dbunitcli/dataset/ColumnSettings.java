@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public record ColumnSettings(AddSettingColumns comparisonKeys
+        , AddSettingColumns includeColumns
         , AddSettingColumns excludeColumns
         , AddSettingColumns orderColumns
         , AddSettingColumns expressionColumns
@@ -23,10 +24,12 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
             , AddSettingColumns.NONE
             , AddSettingColumns.NONE
             , AddSettingColumns.NONE
+            , AddSettingColumns.NONE
             , TableSeparators.NONE);
 
     public ColumnSettings(final Builder builder) {
         this(builder.getComparisonKeys()
+                , builder.getIncludeColumns()
                 , builder.getExcludeColumns()
                 , builder.getOrderColumns()
                 , builder.getExpressionColumns()
@@ -36,6 +39,10 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
 
     public AddSettingColumns getComparisonKeys() {
         return this.comparisonKeys;
+    }
+
+    public AddSettingColumns getIncludeColumns() {
+        return this.includeColumns;
     }
 
     public AddSettingColumns getExcludeColumns() {
@@ -54,6 +61,7 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
         final ColumnSettingEditor editor = new ColumnSettingEditor();
         function.accept(editor);
         return new ColumnSettings(this.comparisonKeys.apply(editor.getKeyEdit())
+                , this.includeColumns.apply(editor.getIncludeEdit())
                 , this.excludeColumns.apply(editor.getExcludeEdit())
                 , this.orderColumns.apply(editor.getOrderEdit())
                 , this.expressionColumns.apply(editor.getExpressionEdit())
@@ -63,6 +71,7 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
 
     public ColumnSettings add(final ColumnSettings other) {
         return this.apply(editor -> editor.setKeyEdit(it -> it.add(other.comparisonKeys))
+                .setIncludeEdit(it -> it.add(other.includeColumns))
                 .setExcludeEdit(it -> it.add(other.excludeColumns))
                 .setOrderEdit(it -> it.add(other.orderColumns))
                 .setExpressionEdit(it -> it.add(other.expressionColumns))
@@ -115,6 +124,14 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
                 .toArray(Column[]::new);
     }
 
+    private List<Column> getIncludeColumns(final String tableName) {
+        return this.getIncludeColumns()
+                .getColumns(tableName)
+                .stream()
+                .map(it -> new Column(it, DataType.UNKNOWN))
+                .collect(Collectors.toList());
+    }
+
     private List<Column> getExcludeColumns(final String tableName) {
         return this.getExcludeColumns()
                 .getColumns(tableName)
@@ -135,13 +152,19 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
         return this.getExpressionColumns().getExpression(tableName);
     }
 
-    private IColumnFilter getExcludeColumnFilter(final String tableName) {
-        final List<Column> columns = this.getExcludeColumns(tableName);
-        if (columns.size() == 0) {
+    private IColumnFilter getColumnFilter(final String tableName) {
+        final List<Column> includeColumns = this.getIncludeColumns(tableName);
+        final List<Column> excludeColumns = this.getExcludeColumns(tableName);
+        if (excludeColumns.size() == 0 && includeColumns.size() == 0) {
             return null;
         }
         final DefaultColumnFilter result = new DefaultColumnFilter();
-        result.excludeColumns(columns.toArray(new Column[0]));
+        if (includeColumns.size() > 0) {
+            result.includeColumns(includeColumns.toArray(new Column[0]));
+        }
+        if (excludeColumns.size() > 0) {
+            result.excludeColumns(excludeColumns.toArray(new Column[0]));
+        }
         return result;
     }
 
@@ -154,7 +177,7 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
     private AddSettingTableMetaData addSetting(final ITableMetaData originMetaData, final TableSeparator tableSeparator) {
         return this.getExpressionColumns(originMetaData.getTableName())
                 .apply(originMetaData
-                        , this.getExcludeColumnFilter(originMetaData.getTableName())
+                        , this.getColumnFilter(originMetaData.getTableName())
                         , this.getComparisonKeys(originMetaData.getTableName())
                         , tableSeparator);
     }
@@ -190,6 +213,8 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
         }
 
         AddSettingColumns getComparisonKeys();
+
+        AddSettingColumns getIncludeColumns();
 
         AddSettingColumns getExcludeColumns();
 

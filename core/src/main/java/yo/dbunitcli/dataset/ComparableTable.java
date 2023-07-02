@@ -26,7 +26,7 @@ public class ComparableTable implements ITable {
         this(ColumnExpression.builder().build().apply(metaData), new Column[]{}, new ArrayList<>(), new ArrayList<>());
     }
 
-    protected ComparableTable(final AddSettingTableMetaData addSettingTableMetaData, final Column[] orderColumns, final List<Object[]> values, final List<Integer> filteredRowIndexes) {
+    protected ComparableTable(final AddSettingTableMetaData addSettingTableMetaData, final Column[] orderColumns, final Collection<Object[]> values, final List<Integer> filteredRowIndexes) {
         this.addSettingTableMetaData = addSettingTableMetaData;
         this.orderColumns = orderColumns;
         this.values.addAll(values);

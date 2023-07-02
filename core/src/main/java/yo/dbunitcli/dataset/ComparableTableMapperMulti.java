@@ -3,6 +3,7 @@ package yo.dbunitcli.dataset;
 import org.dbunit.dataset.OrderedTableNameMap;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     private final ComparableTableMapper head;
     private final List<ComparableTableMapper> rests;
 
-    private final List<Object[]> rows;
+    private final Collection<Object[]> rows;
 
     private IDataSetConverter converter;
 

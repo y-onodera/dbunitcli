@@ -13,6 +13,8 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
     private final AddSettingColumns.Builder excludeColumns = AddSettingColumns.NONE.builder();
 
+    private final AddSettingColumns.Builder includeColumns = AddSettingColumns.NONE.builder();
+
     private final AddSettingColumns.Builder orderColumns = AddSettingColumns.NONE.builder();
 
     private final AddSettingColumns.Builder expressionColumns = AddSettingColumns.NONE.builder();
@@ -43,6 +45,11 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     @Override
     public AddSettingColumns getComparisonKeys() {
         return this.comparisonKeys.build();
+    }
+
+    @Override
+    public AddSettingColumns getIncludeColumns() {
+        return this.includeColumns.build();
     }
 
     @Override
@@ -84,6 +91,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     protected void addSettings(final JsonObject json, final String name, final AddSettingColumns.Strategy strategy) {
         final String key = json.getString(name);
         this.addComparisonKeys(strategy, json, key);
+        this.addIncludeColumns(strategy, json, key);
         this.addExcludeColumns(strategy, json, key);
         this.addSortColumns(strategy, json, key);
         this.addExpression(this.expressionColumns.getExpressionBuilder(strategy, key), json);
@@ -99,6 +107,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
                     final JsonObject json = v.asJsonObject();
                     this.addCommonSettings(json, "keys", this.comparisonKeys);
                     this.addCommonSettings(json, "exclude", this.excludeColumns);
+                    this.addCommonSettings(json, "include", this.includeColumns);
                     this.addCommonSettings(json, "order", this.orderColumns);
                     this.addExpression(this.expressionColumns.getCommonExpressionBuilder(), json);
                     this.addFilterExpression(json);
@@ -120,6 +129,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     protected void appendTo(final FromJsonColumnSettingsBuilder other) {
         other.comparisonKeys.add(this.comparisonKeys.build());
         other.excludeColumns.add(this.excludeColumns.build());
+        other.includeColumns.add(this.includeColumns.build());
         other.orderColumns.add(this.orderColumns.build());
         other.expressionColumns.add(this.expressionColumns.build());
         other.separateExpressions.add(this.separateExpressions.build());
@@ -137,6 +147,10 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
     protected void addComparisonKeys(final AddSettingColumns.Strategy strategy, final JsonObject json, final String file) {
         this.comparisonKeys.add(strategy, file, new ArrayList<>());
         this.addSettings(strategy, json, file, "keys", this.comparisonKeys);
+    }
+
+    protected void addIncludeColumns(final AddSettingColumns.Strategy strategy, final JsonObject json, final String file) {
+        this.addSettings(strategy, json, file, "include", this.includeColumns);
     }
 
     protected void addExcludeColumns(final AddSettingColumns.Strategy strategy, final JsonObject json, final String file) {
