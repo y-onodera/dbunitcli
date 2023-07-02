@@ -18,9 +18,9 @@
       "failed" : 0,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 22,
+      "passed" : 23,
       "unknown" : 0,
-      "total" : 22
+      "total" : 23
     }
   }, {
     "uid" : "f0f6e4f70398015bf62da72652fad8d0",
@@ -100,8 +100,8 @@
       "total" : 3
     }
   }, {
-    "uid" : "9172ce6c01190df7eb693ee5a6dc5315",
-    "name" : "yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducerTest",
+    "uid" : "7a66142a22dd1f500946aab14d1bc4c3",
+    "name" : "yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducerTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
