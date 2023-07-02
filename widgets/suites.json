@@ -89,8 +89,8 @@
       "total" : 5
     }
   }, {
-    "uid" : "7a66142a22dd1f500946aab14d1bc4c3",
-    "name" : "yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducerTest",
+    "uid" : "05ae8e61d36f7066caa3a1b3f8d2b6d4",
+    "name" : "yo.dbunitcli.application.ParameterizeExecuteTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
