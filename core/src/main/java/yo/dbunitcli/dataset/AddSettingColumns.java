@@ -1,33 +1,45 @@
 package yo.dbunitcli.dataset;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
-public class AddSettingColumns {
+public record AddSettingColumns(
+        Map<String, List<String>> byName
+        , Map<String, List<String>> pattern
+        , Map<String, ColumnExpression> byNameExpression
+        , Map<String, ColumnExpression> patternExpression
+        , Map<String, Boolean> byNameFlg
+        , Map<String, Boolean> patternFlg
+        , List<String> common
+        , ColumnExpression commonExpression
+        , boolean commonFlg
+) {
 
     public static final AddSettingColumns NONE = new Builder().build();
 
     public static final String ALL_MATCH_PATTERN = "*";
 
-    private final Map<String, List<String>> byName = new HashMap<>();
-
-    private final Map<String, List<String>> pattern = new HashMap<>();
-
-    private final Map<String, ColumnExpression> byNameExpression = new HashMap<>();
-
-    private final Map<String, ColumnExpression> patternExpression = new HashMap<>();
-
-    private final List<String> common = new ArrayList<>();
-
-    private final ColumnExpression commonExpression;
 
     public AddSettingColumns(final Builder builder) {
+        this(new HashMap<>()
+                , new HashMap<>()
+                , new HashMap<>()
+                , new HashMap<>()
+                , new HashMap<>()
+                , new HashMap<>()
+                , new ArrayList<>()
+                , builder.commonExpression.build()
+                , builder.commonFlg);
         this.byName.putAll(builder.byName);
         builder.byNameExpression.forEach((key, value) -> this.byNameExpression.put(key, value.build()));
+        this.byNameFlg.putAll(builder.byNameFlg);
         this.pattern.putAll(builder.pattern);
         builder.patternExpression.forEach((key, value) -> this.patternExpression.put(key, value.build()));
+        this.patternFlg.putAll(builder.patternFlg);
         this.common.addAll(builder.common);
-        this.commonExpression = builder.commonExpression.build();
     }
 
     public Builder builder() {
@@ -51,16 +63,14 @@ public class AddSettingColumns {
             result.addAll(this.byName.get(tableName));
             return result;
         }
-        final List<String> patternResult = this.pattern.entrySet()
+        result.addAll(this.pattern.entrySet()
                 .stream()
                 .filter(it -> tableName.contains(it.getKey()))
                 .map(Map.Entry::getValue)
                 .findFirst()
-                .orElse(new ArrayList<>());
-        if (this.pattern.containsKey(ALL_MATCH_PATTERN) && patternResult.size() == 0) {
+                .orElse(new ArrayList<>()));
+        if (this.pattern.containsKey(ALL_MATCH_PATTERN)) {
             result.addAll(this.pattern.get(ALL_MATCH_PATTERN));
-        } else {
-            result.addAll(patternResult);
         }
         return result;
     }
@@ -70,48 +80,33 @@ public class AddSettingColumns {
         if (this.byNameExpression.containsKey(tableName)) {
             return result.add(this.byNameExpression.get(tableName));
         }
-        return this.patternExpression.entrySet().stream()
+        final ColumnExpression patternResult = this.patternExpression.entrySet().stream()
                 .filter(it -> tableName.contains(it.getKey()))
                 .map(Map.Entry::getValue)
                 .reduce(result, ColumnExpression::add);
+        if (this.patternExpression.containsKey(ALL_MATCH_PATTERN)) {
+            return this.patternExpression.get(ALL_MATCH_PATTERN).add(patternResult);
+        }
+        return patternResult;
+    }
+
+    public Boolean getFlg(final String tableName) {
+        final Boolean result = this.commonFlg;
+        if (this.byNameFlg.containsKey(tableName)) {
+            return this.byNameFlg.get(tableName) || result;
+        }
+        final Boolean patternResult = this.patternFlg.entrySet().stream()
+                .filter(it -> tableName.contains(it.getKey()))
+                .map(Map.Entry::getValue)
+                .reduce(result, (ret, newVal) -> ret || newVal);
+        if (this.patternFlg.containsKey(ALL_MATCH_PATTERN)) {
+            return this.patternFlg.get(ALL_MATCH_PATTERN) || result;
+        }
+        return patternResult;
     }
 
     public int byNameSize() {
         return this.byName.size();
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof AddSettingColumns)) {
-            return false;
-        }
-        final AddSettingColumns that = (AddSettingColumns) o;
-        return Objects.equals(this.byName, that.byName)
-                && Objects.equals(this.pattern, that.pattern)
-                && Objects.equals(this.byNameExpression, that.byNameExpression)
-                && Objects.equals(this.patternExpression, that.patternExpression)
-                && Objects.equals(this.common, that.common)
-                && Objects.equals(this.commonExpression, that.commonExpression);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.byName, this.pattern, this.byNameExpression, this.patternExpression, this.common, this.commonExpression);
-    }
-
-    @Override
-    public String toString() {
-        return "AddSettingColumns{" +
-                "byName=" + this.byName +
-                ", pattern=" + this.pattern +
-                ", byNameExpression=" + this.byNameExpression +
-                ", patternExpression=" + this.patternExpression +
-                ", common=" + this.common +
-                ", commonExpression=" + this.commonExpression +
-                '}';
     }
 
     public static class Builder {
@@ -119,13 +114,19 @@ public class AddSettingColumns {
 
         private final Map<String, ColumnExpression.Builder> byNameExpression = new HashMap<>();
 
+        private final Map<String, Boolean> byNameFlg = new HashMap<>();
+
         private final Map<String, List<String>> pattern = new HashMap<>();
 
         private final Map<String, ColumnExpression.Builder> patternExpression = new HashMap<>();
 
+        private final Map<String, Boolean> patternFlg = new HashMap<>();
+
         private final List<String> common = new ArrayList<>();
 
         private final ColumnExpression.Builder commonExpression = ColumnExpression.builder();
+
+        public boolean commonFlg;
 
         public AddSettingColumns build() {
             return new AddSettingColumns(this);
@@ -138,6 +139,9 @@ public class AddSettingColumns {
                     .addByNameFrom(from)
                     .addPatternFrom(from)
                     .addCommon(from.common)
+                    .addByNameFlgFrom(from)
+                    .addPatternFlgFrom(from)
+                    .setCommonFlg(from.commonFlg)
                     ;
         }
 
@@ -163,6 +167,25 @@ public class AddSettingColumns {
 
         public Builder addByNameExpressionFrom(final AddSettingColumns from) {
             from.byNameExpression.forEach((key, value) -> this.getExpressionBuilder(Strategy.BY_NAME, key).add(value));
+            return this;
+        }
+
+        private Builder addPatternFlgFrom(final AddSettingColumns from) {
+            this.patternFlg.putAll(from.patternFlg);
+            return this;
+        }
+
+        private Builder addByNameFlgFrom(final AddSettingColumns from) {
+            this.byNameFlg.putAll(from.byNameFlg);
+            return this;
+        }
+
+        public Builder add(final Strategy strategy, final String name, final Boolean distinct) {
+            if (strategy == Strategy.BY_NAME) {
+                return this.addByNameFlg(name, distinct);
+            } else if (strategy == Strategy.PATTERN) {
+                return this.addPatternFlg(name, distinct);
+            }
             return this;
         }
 
@@ -200,8 +223,23 @@ public class AddSettingColumns {
             return this;
         }
 
+        public Builder addByNameFlg(final String name, final Boolean flg) {
+            this.byNameFlg.put(name, flg);
+            return this;
+        }
+
+        public Builder addPatternFlg(final String name, final Boolean flg) {
+            this.patternFlg.put(name, flg);
+            return this;
+        }
+
         public Builder addCommon(final List<String> columns) {
             this.common.addAll(columns);
+            return this;
+        }
+
+        public Builder setCommonFlg(final boolean flg) {
+            this.commonFlg = flg;
             return this;
         }
 

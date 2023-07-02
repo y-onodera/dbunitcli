@@ -21,6 +21,8 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
     private final TableSeparators.Builder separateExpressions = TableSeparators.NONE.builder();
 
+    private final AddSettingColumns.Builder distinct = AddSettingColumns.NONE.builder();
+
     @Override
     public ColumnSettings build(final File setting) {
         if (setting == null) {
@@ -72,6 +74,11 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         return this.separateExpressions.build();
     }
 
+    @Override
+    public AddSettingColumns getDistinct() {
+        return this.distinct.build();
+    }
+
     protected FromJsonColumnSettingsBuilder configureSetting(final JsonObject setting) {
         if (!setting.containsKey("settings")) {
             return this;
@@ -96,6 +103,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         this.addSortColumns(strategy, json, key);
         this.addExpression(this.expressionColumns.getExpressionBuilder(strategy, key), json);
         this.addTableSeparate(strategy, json, key);
+        this.addDistinct(strategy, json, key);
     }
 
     protected FromJsonColumnSettingsBuilder configureCommonSetting(final JsonObject setting) {
@@ -111,6 +119,7 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
                     this.addCommonSettings(json, "order", this.orderColumns);
                     this.addExpression(this.expressionColumns.getCommonExpressionBuilder(), json);
                     this.addFilterExpression(json);
+                    this.addCommonFlg(json, "distinct", this.distinct);
                 });
         return this;
     }
@@ -133,6 +142,13 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
         other.orderColumns.add(this.orderColumns.build());
         other.expressionColumns.add(this.expressionColumns.build());
         other.separateExpressions.add(this.separateExpressions.build());
+        other.distinct.add(this.distinct.build());
+    }
+
+    protected void addCommonFlg(final JsonObject json, final String key, final AddSettingColumns.Builder targetSetting) {
+        if (json.containsKey(key)) {
+            targetSetting.setCommonFlg(json.getBoolean(key));
+        }
     }
 
     protected void addCommonSettings(final JsonObject json, final String key, final AddSettingColumns.Builder targetSetting) {
@@ -159,6 +175,12 @@ public class FromJsonColumnSettingsBuilder implements ColumnSettings.Builder {
 
     protected void addSortColumns(final AddSettingColumns.Strategy strategy, final JsonObject json, final String file) {
         this.addSettings(strategy, json, file, "order", this.orderColumns);
+    }
+
+    protected void addDistinct(final AddSettingColumns.Strategy strategy, final JsonObject json, final String file) {
+        if (json.containsKey("distinct")) {
+            this.distinct.add(strategy, file, json.getBoolean("distinct"));
+        }
     }
 
     protected void addSettings(final AddSettingColumns.Strategy strategy, final JsonObject json, final String file, final String key, final AddSettingColumns.Builder comparisonKeys) {

@@ -18,6 +18,7 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
         , AddSettingColumns orderColumns
         , AddSettingColumns expressionColumns
         , TableSeparators tableSeparators
+        , AddSettingColumns distinct
 ) {
 
     public static ColumnSettings NONE = new ColumnSettings(AddSettingColumns.NONE
@@ -25,7 +26,9 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
             , AddSettingColumns.NONE
             , AddSettingColumns.NONE
             , AddSettingColumns.NONE
-            , TableSeparators.NONE);
+            , TableSeparators.NONE
+            , AddSettingColumns.NONE
+    );
 
     public ColumnSettings(final Builder builder) {
         this(builder.getComparisonKeys()
@@ -34,27 +37,8 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
                 , builder.getOrderColumns()
                 , builder.getExpressionColumns()
                 , builder.getTableSeparators()
+                , builder.getDistinct()
         );
-    }
-
-    public AddSettingColumns getComparisonKeys() {
-        return this.comparisonKeys;
-    }
-
-    public AddSettingColumns getIncludeColumns() {
-        return this.includeColumns;
-    }
-
-    public AddSettingColumns getExcludeColumns() {
-        return this.excludeColumns;
-    }
-
-    public AddSettingColumns getOrderColumns() {
-        return this.orderColumns;
-    }
-
-    public AddSettingColumns getExpressionColumns() {
-        return this.expressionColumns;
     }
 
     public ColumnSettings apply(final Consumer<ColumnSettingEditor> function) {
@@ -66,6 +50,7 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
                 , this.orderColumns.apply(editor.getOrderEdit())
                 , this.expressionColumns.apply(editor.getExpressionEdit())
                 , this.tableSeparators.apply(editor.getSeparatorEdit())
+                , this.distinct.apply(editor.getDistinctEdit())
         );
     }
 
@@ -76,6 +61,7 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
                 .setOrderEdit(it -> it.add(other.orderColumns))
                 .setExpressionEdit(it -> it.add(other.expressionColumns))
                 .setSeparatorEdit(it -> it.add(other.tableSeparators))
+                .setDistinctEdit(it -> it.add(other.distinct))
         );
     }
 
@@ -116,8 +102,23 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
                 .collect(Collectors.toList());
     }
 
+    private List<AddSettingTableMetaData> addSetting(final ITableMetaData originMetaData) {
+        return this.getRowFilter(originMetaData.getTableName()).stream()
+                .map(it -> this.addSetting(originMetaData, it))
+                .collect(Collectors.toList());
+    }
+
+    private AddSettingTableMetaData addSetting(final ITableMetaData originMetaData, final TableSeparator tableSeparator) {
+        return this.getExpressionColumns(originMetaData.getTableName())
+                .apply(originMetaData
+                        , this.getColumnFilter(originMetaData.getTableName())
+                        , this.getComparisonKeys(originMetaData.getTableName())
+                        , tableSeparator
+                        , this.isDistinct(originMetaData.getTableName()));
+    }
+
     private Column[] getComparisonKeys(final String tableName) {
-        return this.getComparisonKeys()
+        return this.comparisonKeys()
                 .getColumns(tableName)
                 .stream()
                 .map(it -> new Column(it, DataType.UNKNOWN))
@@ -125,7 +126,7 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
     }
 
     private List<Column> getIncludeColumns(final String tableName) {
-        return this.getIncludeColumns()
+        return this.includeColumns()
                 .getColumns(tableName)
                 .stream()
                 .map(it -> new Column(it, DataType.UNKNOWN))
@@ -133,7 +134,7 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
     }
 
     private List<Column> getExcludeColumns(final String tableName) {
-        return this.getExcludeColumns()
+        return this.excludeColumns()
                 .getColumns(tableName)
                 .stream()
                 .map(it -> new Column(it, DataType.UNKNOWN))
@@ -141,7 +142,7 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
     }
 
     private Column[] getOrderColumns(final String tableName) {
-        return this.getOrderColumns()
+        return this.orderColumns()
                 .getColumns(tableName)
                 .stream()
                 .map(it -> new Column(it, DataType.UNKNOWN))
@@ -149,7 +150,7 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
     }
 
     private ColumnExpression getExpressionColumns(final String tableName) {
-        return this.getExpressionColumns().getExpression(tableName);
+        return this.expressionColumns().getExpression(tableName);
     }
 
     private IColumnFilter getColumnFilter(final String tableName) {
@@ -168,18 +169,8 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
         return result;
     }
 
-    private List<AddSettingTableMetaData> addSetting(final ITableMetaData originMetaData) {
-        return this.getRowFilter(originMetaData.getTableName()).stream()
-                .map(it -> this.addSetting(originMetaData, it))
-                .collect(Collectors.toList());
-    }
-
-    private AddSettingTableMetaData addSetting(final ITableMetaData originMetaData, final TableSeparator tableSeparator) {
-        return this.getExpressionColumns(originMetaData.getTableName())
-                .apply(originMetaData
-                        , this.getColumnFilter(originMetaData.getTableName())
-                        , this.getComparisonKeys(originMetaData.getTableName())
-                        , tableSeparator);
+    private Boolean isDistinct(final String tableName) {
+        return this.distinct().getFlg(tableName);
     }
 
     private Collection<TableSeparator> getRowFilter(final String tableName) {
@@ -224,6 +215,7 @@ public record ColumnSettings(AddSettingColumns comparisonKeys
 
         TableSeparators getTableSeparators();
 
+        AddSettingColumns getDistinct();
     }
 
 }

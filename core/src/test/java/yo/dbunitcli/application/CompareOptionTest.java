@@ -68,10 +68,10 @@ public class CompareOptionTest {
         assertEquals(2, this.target.getComparisonKeys().byNameSize());
         assertEquals(1, this.target.getComparisonKeys().getColumns("columnadd").size());
         assertEquals("key", this.target.getComparisonKeys().getColumns("columnadd").get(0));
-        assertEquals(2, this.target.getColumnSettings().getExcludeColumns().byNameSize());
-        assertEquals(2, this.target.getColumnSettings().getExcludeColumns().getColumns("columnadd").size());
-        assertEquals("AddColumn", this.target.getColumnSettings().getExcludeColumns().getColumns("columnadd").get(0));
-        assertEquals("ChangeColumn", this.target.getColumnSettings().getExcludeColumns().getColumns("columnadd").get(1));
+        assertEquals(2, this.target.getColumnSettings().excludeColumns().byNameSize());
+        assertEquals(2, this.target.getColumnSettings().excludeColumns().getColumns("columnadd").size());
+        assertEquals("AddColumn", this.target.getColumnSettings().excludeColumns().getColumns("columnadd").get(0));
+        assertEquals("ChangeColumn", this.target.getColumnSettings().excludeColumns().getColumns("columnadd").get(1));
     }
 
     @Test
@@ -102,8 +102,8 @@ public class CompareOptionTest {
     public void parseNoSettingFile() {
         this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old"});
         assertEquals(AddSettingColumns.NONE, this.target.getComparisonKeys());
-        assertEquals(AddSettingColumns.NONE, this.target.getColumnSettings().getExcludeColumns());
-        assertEquals(AddSettingColumns.NONE, this.target.getColumnSettings().getOrderColumns());
+        assertEquals(AddSettingColumns.NONE, this.target.getColumnSettings().excludeColumns());
+        assertEquals(AddSettingColumns.NONE, this.target.getColumnSettings().orderColumns());
     }
 
 

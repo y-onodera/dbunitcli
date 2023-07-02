@@ -136,7 +136,7 @@ public class CompareOption extends CommandLineOption {
             if (new DataSetCompareBuilder()
                     .newDataSet(this.resultDataSet())
                     .oldDataSet(this.expectDataSet())
-                    .comparisonKeys(this.getExpectData().getParam().getColumnSettings().getComparisonKeys())
+                    .comparisonKeys(this.getExpectData().getParam().getColumnSettings().comparisonKeys())
                     .dataSetConverter(this.expectedDiffConverter())
                     .build()
                     .result().existDiff()) {
@@ -151,7 +151,7 @@ public class CompareOption extends CommandLineOption {
     }
 
     public AddSettingColumns getComparisonKeys() {
-        return this.columnSettings.getComparisonKeys();
+        return this.columnSettings.comparisonKeys();
     }
 
     public ColumnSettings getColumnSettings() {

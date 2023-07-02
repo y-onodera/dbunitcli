@@ -136,9 +136,11 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                     this.splitTable(applySetting);
                     this.converter.row(applySetting);
                 } else {
-                    this.values.add(applySetting);
-                    if (this.metaData.hasRowFilter()) {
-                        this.filteredRowIndexes.add(this.addCount);
+                    if (!(this.metaData.isDistinct() && this.values.stream().anyMatch(it -> Arrays.equals(it, applySetting)))) {
+                        this.values.add(applySetting);
+                        if (this.metaData.hasRowFilter()) {
+                            this.filteredRowIndexes.add(this.addCount);
+                        }
                     }
                 }
                 this.addRowCount++;
@@ -180,7 +182,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     }
 
     protected boolean isEnableRowProcessing() {
-        return this.converter != null && this.orderColumns.length == 0;
+        return this.converter != null && this.orderColumns.length == 0 && !this.metaData.isDistinct();
     }
 
     protected int getAddRowCount() {

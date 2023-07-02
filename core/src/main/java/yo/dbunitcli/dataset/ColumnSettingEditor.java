@@ -20,6 +20,8 @@ public class ColumnSettingEditor {
 
     private Consumer<TableSeparators.Builder> separatorEdit = (it) -> {
     };
+    private Consumer<AddSettingColumns.Builder> distinctEdit = (it) -> {
+    };
 
     public Consumer<AddSettingColumns.Builder> getKeyEdit() {
         return this.keyEdit;
@@ -45,6 +47,9 @@ public class ColumnSettingEditor {
         return this.separatorEdit;
     }
 
+    public Consumer<AddSettingColumns.Builder> getDistinctEdit() {
+        return this.distinctEdit;
+    }
 
     public ColumnSettingEditor setKeyEdit(final Consumer<AddSettingColumns.Builder> key) {
         this.keyEdit = key;
@@ -77,4 +82,8 @@ public class ColumnSettingEditor {
         return this;
     }
 
+    public ColumnSettingEditor setDistinctEdit(final Consumer<AddSettingColumns.Builder> distinctEdit) {
+        this.distinctEdit = distinctEdit;
+        return this;
+    }
 }

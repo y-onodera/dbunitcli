@@ -37,21 +37,22 @@ public record ColumnExpression(
         return builder().add(this).add(other).build();
     }
 
+
     public AddSettingTableMetaData apply(final ITableMetaData delegateMetaData) {
         try {
-            return this.apply(delegateMetaData, null, delegateMetaData.getPrimaryKeys(), TableSeparator.NONE);
+            return this.apply(delegateMetaData, null, delegateMetaData.getPrimaryKeys(), TableSeparator.NONE, Boolean.FALSE);
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
 
-    public AddSettingTableMetaData apply(final ITableMetaData originMetaData, final IColumnFilter iColumnFilter, final Column[] comparisonKeys, final TableSeparator tableSeparator) {
+    public AddSettingTableMetaData apply(final ITableMetaData originMetaData, final IColumnFilter iColumnFilter, final Column[] comparisonKeys, final TableSeparator tableSeparator, final Boolean distinct) {
         try {
             Column[] primaryKey = originMetaData.getPrimaryKeys();
             if (comparisonKeys.length > 0) {
                 primaryKey = comparisonKeys;
             }
-            return new AddSettingTableMetaData(originMetaData, primaryKey, iColumnFilter, tableSeparator, this);
+            return new AddSettingTableMetaData(originMetaData, primaryKey, iColumnFilter, tableSeparator, distinct, this);
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }

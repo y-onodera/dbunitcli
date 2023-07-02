@@ -1,0 +1,5 @@
+-src=src/test/resources/yo/dbunitcli/application/csv/combikey
+-srcType=csv
+-setting=src/test/resources/yo/dbunitcli/application/setting/distinctsetting.json
+-result=target/test-classes/yo/dbunitcli/application/setting/distinct/result
+-resultType=xlsx

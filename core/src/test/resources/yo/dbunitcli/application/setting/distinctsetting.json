@@ -1,0 +1,12 @@
+{
+  "settings": [
+    {
+      "name": "combikey",
+      "include": [
+        "key1",
+        "col1"
+      ],
+      "distinct": true
+    }
+  ]
+}

@@ -14,12 +14,14 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final ColumnExpression additionalExpression;
     private final List<Integer> filterColumnIndex;
     private final TableSeparator tableSeparator;
+    private final Boolean distinct;
     private final AddSettingTableMetaData preset;
 
     public AddSettingTableMetaData(final ITableMetaData delegate
             , final Column[] primaryKeys
             , final IColumnFilter iColumnFilter
             , final TableSeparator tableSeparator
+            , final Boolean distinct
             , final ColumnExpression additionalExpression) {
         this.tableName = tableSeparator.rename(delegate.getTableName());
         this.primaryKeys = primaryKeys;
@@ -33,9 +35,10 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         } else {
             this.preset = null;
         }
+        this.distinct = distinct;
     }
 
-    private AddSettingTableMetaData(final String tableName, final Column[] primaryKeys, final Column[] columns, final Column[] allColumns, final ColumnExpression additionalExpression, final List<Integer> filterColumnIndex, final TableSeparator tableSeparator, final AddSettingTableMetaData preset) {
+    private AddSettingTableMetaData(final String tableName, final Column[] primaryKeys, final Column[] columns, final Column[] allColumns, final ColumnExpression additionalExpression, final List<Integer> filterColumnIndex, final TableSeparator tableSeparator, final AddSettingTableMetaData preset, final Boolean distinct) {
         this.tableName = tableName;
         this.primaryKeys = primaryKeys;
         this.columns = columns;
@@ -44,6 +47,7 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         this.filterColumnIndex = filterColumnIndex;
         this.tableSeparator = tableSeparator;
         this.preset = preset;
+        this.distinct = distinct;
     }
 
     public AddSettingTableMetaData rename(final String newTableName) {
@@ -54,7 +58,8 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
                 , this.additionalExpression
                 , this.filterColumnIndex
                 , this.tableSeparator
-                , this.preset);
+                , this.preset
+                , this.distinct);
     }
 
     @Override
@@ -70,6 +75,10 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     @Override
     public Column[] getPrimaryKeys() {
         return this.primaryKeys;
+    }
+
+    public Boolean isDistinct() {
+        return this.distinct;
     }
 
     public Object[] applySetting(final Object[] values) {

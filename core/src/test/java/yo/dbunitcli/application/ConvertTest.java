@@ -555,6 +555,11 @@ public class ConvertTest {
         Assert.assertEquals("test", result.getValue(0, "NO_EXTENSION"));
     }
 
+    @Test
+    public void testConvertDistinctColumn() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertDistinctColumn.txt"});
+    }
+
     private static String[] getColumnNames(final ITable split1) throws DataSetException {
         return Arrays.stream(split1.getTableMetaData().getColumns())
                 .map(Column::getColumnName)
