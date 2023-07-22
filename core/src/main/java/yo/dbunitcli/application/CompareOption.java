@@ -124,7 +124,7 @@ public class CompareOption extends CommandLineOption {
         return result;
     }
 
-    public CompareResult compare() {
+    public boolean compare() {
         final CompareResult result = this.getDataSetCompareBuilder()
                 .newDataSet(this.newDataSet())
                 .oldDataSet(this.oldDataSet())
@@ -133,21 +133,15 @@ public class CompareOption extends CommandLineOption {
                 .build()
                 .result();
         if (this.getExpectData().getParam().getSrc() != null) {
-            if (new DataSetCompareBuilder()
+            return !new DataSetCompareBuilder()
                     .newDataSet(this.resultDataSet())
                     .oldDataSet(this.expectDataSet())
                     .comparisonKeys(this.getExpectData().getParam().getColumnSettings().comparisonKeys())
                     .dataSetConverter(this.expectedDiffConverter())
                     .build()
-                    .result().existDiff()) {
-                throw new AssertionError("unexpected diff found.");
-            }
-        } else {
-            if (result.existDiff()) {
-                throw new AssertionError("unexpected diff found.");
-            }
+                    .result().existDiff();
         }
-        return result;
+        return !result.existDiff();
     }
 
     public AddSettingColumns getComparisonKeys() {

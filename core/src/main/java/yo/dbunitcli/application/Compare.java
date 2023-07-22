@@ -24,7 +24,11 @@ public class Compare implements Command<CompareOption> {
 
     @Override
     public void exec(final CompareOption options) {
-        options.compare();
+        final boolean success = options.compare();
+        LOGGER.info("compare finish.");
+        if (!success) {
+            throw new AssertionError("unexpected diff found.");
+        }
         LOGGER.info("compare success.");
     }
 }
