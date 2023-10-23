@@ -1,0 +1,55 @@
+{
+  "uid" : "5e9120d4f1cc1a4",
+  "name" : "getRow_result_has_argument_column_length",
+  "fullName" : "yo.dbunitcli.dataset.ComparableTableTest.getRow_result_has_argument_column_length",
+  "historyId" : "b2cb53f3a4966dcb221059f73ee4ba59",
+  "time" : {
+    "start" : 1698094216350,
+    "stop" : 1698094216350,
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.dataset"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.dataset.ComparableTableTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "getRow_result_has_argument_column_length"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.dataset.ComparableTableTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az1238-867"
+  }, {
+    "name" : "thread",
+    "value" : "1104@fv-az1238-867.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "5e9120d4f1cc1a4.json",
+  "parameterValues" : [ ]
+}
