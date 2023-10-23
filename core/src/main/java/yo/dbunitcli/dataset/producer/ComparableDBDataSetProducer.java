@@ -3,6 +3,7 @@ package yo.dbunitcli.dataset.producer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.database.IResultSetTable;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
@@ -109,6 +110,9 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
             }
             this.consumer.endTable();
             LOGGER.info("produce - end   databaseTable={}", table.getTableMetaData().getTableName());
+            if (table instanceof IResultSetTable resultSetTable) {
+                resultSetTable.close();
+            }
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
