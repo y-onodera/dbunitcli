@@ -1,0 +1,43 @@
+{
+  "settings": [
+    {
+      "name": "multi1",
+      "tableName": "merge",
+      "exclude": [
+        "column1",
+        "column2",
+        "column3"
+      ],
+      "number": {
+        "key": "key == 2 ? key : key * 10"
+      },
+      "string": {
+        "columna": "key == 2 ? column1 :'column1:' + column1",
+        "columnb": "key == 2 ? column2 :'column2:' + column2",
+        "columnc": "'column3:' + column3"
+      }
+    },
+    {
+      "pattern": "multi2",
+      "tableName": "merge"
+    },
+    {
+      "name": "merge",
+      "distinct": true,
+      "include": [
+        "key",
+        "columna"
+      ],
+      "order": [
+        "key"
+      ]
+    }
+  ],
+  "commonSettings": [
+    {
+      "number": {
+        "key": "key"
+      }
+    }
+  ]
+}

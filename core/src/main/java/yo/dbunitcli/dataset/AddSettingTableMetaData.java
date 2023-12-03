@@ -4,6 +4,8 @@ import org.dbunit.dataset.*;
 import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 
 public class AddSettingTableMetaData extends AbstractTableMetaData {
@@ -77,8 +79,8 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         return this.primaryKeys;
     }
 
-    public Boolean isDistinct() {
-        return this.distinct;
+    public Boolean needDistinct() {
+        return this.distinct || (this.preset != null && this.preset.needDistinct());
     }
 
     public Object[] applySetting(final Object[] values) {
@@ -94,6 +96,17 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
             return null;
         }
         return result;
+    }
+
+    public Rows distinct(final Collection<Object[]> values, final Collection<Integer> filteredRowIndexes) {
+        Rows target = new Rows(values, filteredRowIndexes);
+        if (this.preset != null && this.preset.needDistinct()) {
+            target = this.preset.distinct(values, filteredRowIndexes);
+        }
+        if (!this.distinct) {
+            return target;
+        }
+        return target.distinct(this::applySetting);
     }
 
     public boolean hasRowFilter() {
@@ -191,6 +204,55 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
+    }
+
+    public record Rows(List<Object[]> rows, List<Integer> filteredRowIndexes) {
+
+        private static final BiPredicate<List<Object[]>, Object[]> DISTINCT_PREDICATE = (newRows, row) -> newRows.stream().noneMatch(it -> Arrays.equals(it, row));
+
+        public Rows(final Collection<Object[]> rows, final Collection<Integer> filteredRowIndexes) {
+            this(new ArrayList<>(rows), new ArrayList<>(filteredRowIndexes));
+        }
+
+        public int size() {
+            return this.rows().size();
+        }
+
+        public boolean filtered() {
+            return this.filteredRowIndexes().size() > 0;
+        }
+
+        public Rows add(final Rows other) {
+            final List<Object[]> mergeRows = new ArrayList<>(this.rows());
+            final List<Integer> mergeFilteredRowIndexes = new ArrayList<>(this.filteredRowIndexes());
+            mergeRows.addAll(other.rows());
+            mergeFilteredRowIndexes.addAll(other.filteredRowIndexes());
+            return new Rows(mergeRows, mergeFilteredRowIndexes);
+        }
+
+        public Rows map(final UnaryOperator<Object[]> rowFunction, final BiPredicate<List<Object[]>, Object[]> reduceCondition) {
+            final List<Object[]> newRows = new ArrayList<>();
+            final List<Integer> newFilteredRowIndexes = new ArrayList<>();
+            for (int i = 0, j = this.rows.size(); i < j; i++) {
+                final Object[] row = rowFunction.apply(this.rows.get(i));
+                if (row != null && reduceCondition.test(newRows, row)) {
+                    newRows.add(row);
+                    if (this.filtered()) {
+                        newFilteredRowIndexes.add(this.filteredRowIndexes.get(i));
+                    }
+                }
+            }
+            return new Rows(newRows, newFilteredRowIndexes);
+        }
+
+        public Rows distinct() {
+            return this.map(it -> it, DISTINCT_PREDICATE);
+        }
+
+        public Rows distinct(final UnaryOperator<Object[]> rowFunction) {
+            return this.map(rowFunction, DISTINCT_PREDICATE);
+        }
+
     }
 
 }

@@ -558,6 +558,81 @@ public class ConvertTest {
     @Test
     public void testConvertDistinctColumn() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertDistinctColumn.txt"});
+        final File src = new File(this.baseDir + "/setting/distinct/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        final ITable result = actual.getTable("combikey");
+        Assert.assertEquals(7, result.getRowCount());
+        Assert.assertEquals("A", result.getValue(0, "key1"));
+        Assert.assertEquals("test", result.getValue(0, "col1"));
+        Assert.assertEquals("C", result.getValue(1, "key1"));
+        Assert.assertEquals("", result.getValue(1, "col1"));
+        Assert.assertEquals("A", result.getValue(2, "key1"));
+        Assert.assertEquals("test3", result.getValue(2, "col1"));
+        Assert.assertEquals("B", result.getValue(3, "key1"));
+        Assert.assertEquals("", result.getValue(3, "col1"));
+        Assert.assertEquals("あ", result.getValue(4, "key1"));
+        Assert.assertEquals("", result.getValue(4, "col1"));
+        Assert.assertEquals("1", result.getValue(5, "key1"));
+        Assert.assertEquals("number", result.getValue(5, "col1"));
+        Assert.assertEquals("2", result.getValue(6, "key1"));
+        Assert.assertEquals("number", result.getValue(6, "col1"));
+    }
+
+    @Test
+    public void testConvertDistinctWithTableNameMap() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertDistinctWithTableNameMap.txt"});
+        final File src = new File(this.baseDir + "/tablenamemap/distinct/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        final ITable result = actual.getTable("distinct");
+        Assert.assertEquals(7, result.getRowCount());
+        Assert.assertEquals("A", result.getValue(0, "key1"));
+        Assert.assertEquals("test", result.getValue(0, "col1"));
+        Assert.assertEquals("C", result.getValue(1, "key1"));
+        Assert.assertEquals("", result.getValue(1, "col1"));
+        Assert.assertEquals("A", result.getValue(2, "key1"));
+        Assert.assertEquals("test3", result.getValue(2, "col1"));
+        Assert.assertEquals("B", result.getValue(3, "key1"));
+        Assert.assertEquals("", result.getValue(3, "col1"));
+        Assert.assertEquals("あ", result.getValue(4, "key1"));
+        Assert.assertEquals("", result.getValue(4, "col1"));
+        Assert.assertEquals("1", result.getValue(5, "key1"));
+        Assert.assertEquals("number", result.getValue(5, "col1"));
+        Assert.assertEquals("2", result.getValue(6, "key1"));
+        Assert.assertEquals("number", result.getValue(6, "col1"));
+    }
+
+    @Test
+    public void testConvertDistinctWithMerge() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertDistinctWithMerge.txt"});
+        final File src = new File(this.baseDir + "/tablenamemap/merge/distinct/result");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        final ITable result = actual.getTable("merge");
+        Assert.assertEquals(5, result.getRowCount());
+        Assert.assertEquals("1", result.getValue(0, "key"));
+        Assert.assertEquals("2", result.getValue(0, "columna"));
+        Assert.assertEquals("2", result.getValue(1, "key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(1, "columna"));
+        Assert.assertEquals("3", result.getValue(2, "key"));
+        Assert.assertEquals("", result.getValue(2, "columna"));
+        Assert.assertEquals("10", result.getValue(3, "key"));
+        Assert.assertEquals("column1:2", result.getValue(3, "columna"));
+        Assert.assertEquals("30", result.getValue(4, "key"));
+        Assert.assertEquals("column1:", result.getValue(4, "columna"));
     }
 
     private static String[] getColumnNames(final ITable split1) throws DataSetException {
