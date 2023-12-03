@@ -20,7 +20,15 @@
     },
     {
       "pattern": "multi2",
-      "tableName": "merge"
+      "tableName": "merge",
+      "number": {
+        "key": "key == 1 ?  key * 10 : key"
+      },
+      "string": {
+        "columna": "key != 10 ? columna :'column1:' + columna",
+        "columnb": "key != 10 ? columnb :'column2:' + columnb",
+        "columnc": "'column3:' + columnc"
+      }
     },
     {
       "name": "merge",

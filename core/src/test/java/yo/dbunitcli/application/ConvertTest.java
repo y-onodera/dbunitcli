@@ -622,17 +622,15 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         final ITable result = actual.getTable("merge");
-        Assert.assertEquals(5, result.getRowCount());
-        Assert.assertEquals("1", result.getValue(0, "key"));
-        Assert.assertEquals("2", result.getValue(0, "columna"));
-        Assert.assertEquals("2", result.getValue(1, "key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(1, "columna"));
-        Assert.assertEquals("3", result.getValue(2, "key"));
-        Assert.assertEquals("", result.getValue(2, "columna"));
-        Assert.assertEquals("10", result.getValue(3, "key"));
-        Assert.assertEquals("column1:2", result.getValue(3, "columna"));
-        Assert.assertEquals("30", result.getValue(4, "key"));
-        Assert.assertEquals("column1:", result.getValue(4, "columna"));
+        Assert.assertEquals(4, result.getRowCount());
+        Assert.assertEquals("2", result.getValue(0, "key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(0, "columna"));
+        Assert.assertEquals("3", result.getValue(1, "key"));
+        Assert.assertEquals("", result.getValue(1, "columna"));
+        Assert.assertEquals("10", result.getValue(2, "key"));
+        Assert.assertEquals("column1:2", result.getValue(2, "columna"));
+        Assert.assertEquals("30", result.getValue(3, "key"));
+        Assert.assertEquals("column1:", result.getValue(3, "columna"));
     }
 
     private static String[] getColumnNames(final ITable split1) throws DataSetException {
