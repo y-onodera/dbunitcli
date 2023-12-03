@@ -46,7 +46,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
 
     @Override
     public void addRow(final Object[] values) {
-        if (this.metaData.needDistinct()) {
+        if (this.metaData.isNeedDistinct()) {
             this.rows.add(values);
             this.addCount++;
         } else {
@@ -67,7 +67,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             if (orderedTableNameMap.containsTable(resultTableName)) {
                 final ComparableTable other = (ComparableTable) orderedTableNameMap.get(resultTableName);
                 final AddSettingTableMetaData.Rows add = other.getRows().add(this.metaData.distinct(this.rows, this.filteredRowIndexes));
-                if (this.metaData.needDistinct()) {
+                if (this.metaData.isNeedDistinct()) {
                     orderedTableNameMap.update(resultTableName, new ComparableTable(this.metaData, this.orderColumns, add.distinct()));
                 } else {
                     orderedTableNameMap.update(resultTableName, new ComparableTable(this.metaData, this.orderColumns, add));
@@ -194,7 +194,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     }
 
     protected boolean isEnableRowProcessing() {
-        return this.converter != null && this.orderColumns.length == 0 && !this.metaData.needDistinct();
+        return this.converter != null && this.orderColumns.length == 0 && !this.metaData.isNeedDistinct();
     }
 
     protected int getAddRowCount() {

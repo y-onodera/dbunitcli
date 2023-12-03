@@ -3,6 +3,7 @@
     {
       "name": "multi1",
       "tableName": "merge",
+      "distinct": true,
       "exclude": [
         "column1",
         "column2",

@@ -79,34 +79,27 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         return this.primaryKeys;
     }
 
-    public Boolean needDistinct() {
-        return this.distinct || (this.preset != null && this.preset.needDistinct());
+    public Boolean isNeedDistinct() {
+        return this.distinct || this.isPresetNeedDistinct();
+    }
+
+    protected boolean isPresetNeedDistinct() {
+        return this.preset != null && this.preset.isNeedDistinct();
     }
 
     public Object[] applySetting(final Object[] values) {
-        Object[] applySettings = values;
-        if (this.preset != null) {
-            applySettings = this.preset.applySetting(applySettings);
-            if (applySettings == null) {
-                return null;
-            }
-        }
-        final Object[] result = this.filterColumn(this.applyExpression(applySettings));
-        if (!this.tableSeparator.test(this.rowToMap(result))) {
-            return null;
-        }
-        return result;
+        return this.applySetting(values, this.preset != null);
     }
 
     public Rows distinct(final Collection<Object[]> values, final Collection<Integer> filteredRowIndexes) {
         Rows target = new Rows(values, filteredRowIndexes);
-        if (this.preset != null && this.preset.needDistinct()) {
+        if (this.isPresetNeedDistinct()) {
             target = this.preset.distinct(values, filteredRowIndexes);
         }
         if (!this.distinct) {
             return target;
         }
-        return target.distinct(this::applySetting);
+        return target.distinct(row -> this.applySetting(row, this.preset != null && !this.preset.isNeedDistinct()));
     }
 
     public boolean hasRowFilter() {
@@ -128,6 +121,21 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
                 })
                 .map(index -> applySetting[index].toString())
                 .toList();
+    }
+
+    protected Object[] applySetting(final Object[] values, final boolean applyPreset) {
+        Object[] applySettings = values;
+        if (applyPreset) {
+            applySettings = this.preset.applySetting(applySettings);
+            if (applySettings == null) {
+                return null;
+            }
+        }
+        final Object[] result = this.filterColumn(this.applyExpression(applySettings));
+        if (!this.tableSeparator.test(this.rowToMap(result))) {
+            return null;
+        }
+        return result;
     }
 
     protected Map<String, Object> rowToMap(final Object[] row) {
