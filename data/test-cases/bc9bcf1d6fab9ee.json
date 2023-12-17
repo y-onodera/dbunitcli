@@ -1,0 +1,55 @@
+{
+  "uid" : "bc9bcf1d6fab9ee",
+  "name" : "testConvertDistinctWithTableNameMap",
+  "fullName" : "yo.dbunitcli.application.ConvertTest.testConvertDistinctWithTableNameMap",
+  "historyId" : "a6298e928af38c6529eea32f3af64c52",
+  "time" : {
+    "start" : 1702807062892,
+    "stop" : 1702807062923,
+    "duration" : 31
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testConvertDistinctWithTableNameMap"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az1489-652"
+  }, {
+    "name" : "thread",
+    "value" : "3192@fv-az1489-652.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "bc9bcf1d6fab9ee.json",
+  "parameterValues" : [ ]
+}
