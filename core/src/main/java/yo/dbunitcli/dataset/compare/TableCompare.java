@@ -3,27 +3,29 @@ package yo.dbunitcli.dataset.compare;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
-import yo.dbunitcli.dataset.AddSettingColumns;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class TableCompare {
     private final ComparableTable oldTable;
     private final ComparableTable newTable;
-    private final AddSettingColumns comparisonKeys;
     private final IDataSetConverter converter;
     private final int columnLength;
     private final List<String> keyColumns;
 
-    public TableCompare(final ComparableTable oldTable, final ComparableTable newTable, final AddSettingColumns comparisonKeys, final IDataSetConverter converter) {
+    public TableCompare(final ComparableTable oldTable, final ComparableTable newTable, final IDataSetConverter converter) {
         this.oldTable = oldTable;
         this.newTable = newTable;
-        this.comparisonKeys = comparisonKeys;
         this.converter = converter;
         this.columnLength = Math.min(this.getOldColumnLength(), this.getNewColumnLength());
-        this.keyColumns = this.comparisonKeys.getColumns(this.getOldTableMetaData().getTableName());
+        this.keyColumns = this.getKeyColumns(oldTable);
+    }
+
+    private List<String> getKeyColumns(final ComparableTable oldTable) {
+        return Arrays.stream(oldTable.getTableMetaData().getPrimaryKeys()).map(Column::getColumnName).toList();
     }
 
     public int getNewColumnLength() {
@@ -48,10 +50,6 @@ public class TableCompare {
 
     public List<String> getKeyColumns() {
         return this.keyColumns;
-    }
-
-    public AddSettingColumns getComparisonKeys() {
-        return this.comparisonKeys;
     }
 
     public IDataSetConverter getConverter() {

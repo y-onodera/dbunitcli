@@ -6,10 +6,10 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultDataSet;
 import org.dbunit.dataset.stream.DataSetProducerAdapter;
 import org.dbunit.dataset.stream.IDataSetProducer;
-import yo.dbunitcli.dataset.AddSettingColumns;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.IDataSetConverter;
+import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.File;
 import java.util.*;
@@ -23,7 +23,7 @@ public class DataSetCompare {
 
     private final ComparableDataSet newDataSet;
 
-    private final AddSettingColumns comparisonKeys;
+    private final TableSeparators tableSeparators;
 
     private final IDataSetConverter converter;
 
@@ -32,7 +32,7 @@ public class DataSetCompare {
     public DataSetCompare(final DataSetCompareBuilder builder) {
         this.oldDataSet = builder.getOldDataSet();
         this.newDataSet = builder.getNewDataSet();
-        this.comparisonKeys = builder.getComparisonKeys();
+        this.tableSeparators = builder.getTableSeparators();
         this.converter = builder.getDataSetConverter();
         this.manager = builder.getManager();
     }
@@ -70,10 +70,6 @@ public class DataSetCompare {
 
     public ComparableDataSet getNewDataSet() {
         return this.newDataSet;
-    }
-
-    public AddSettingColumns getComparisonKeys() {
-        return this.comparisonKeys;
     }
 
     public IDataSetConverter getConverter() {
@@ -115,7 +111,6 @@ public class DataSetCompare {
             return (it) -> {
                 final Set<String> oldTables = Arrays.stream(it.getOldTableNames()).collect(Collectors.toSet());
                 final Set<String> newTables = Arrays.stream(it.getNewTableNames()).collect(Collectors.toSet());
-                ;
                 return newTables.stream()
                         .filter(table -> !oldTables.contains(table))
                         .map(name -> CompareDiff.Type.TABLE_ADD.of()
@@ -152,8 +147,8 @@ public class DataSetCompare {
                         .forEach(tableName -> {
                             final ComparableTable oldTable = it.getOldDataSet().getTable(tableName);
                             final ComparableTable newTable = it.getNewDataSet().getTable(tableName);
-                            if (it.getComparisonKeys().hasAdditionalSetting(oldTable.getTableMetaData().getTableName())) {
-                                results.addAll(this.compareTable(new TableCompare(oldTable, newTable, it.getComparisonKeys(), it.getConverter())));
+                            if (it.tableSeparators.hasAdditionalSetting(oldTable.getTableMetaData().getTableName())) {
+                                results.addAll(this.compareTable(new TableCompare(oldTable, newTable, it.getConverter())));
                             }
                         });
                 return results;

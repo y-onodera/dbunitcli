@@ -3,10 +3,10 @@ package yo.dbunitcli.application.argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import yo.dbunitcli.dataset.ColumnSettings;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSourceType;
-import yo.dbunitcli.dataset.FromJsonColumnSettingsBuilder;
+import yo.dbunitcli.dataset.FromJsonTableSeparatorsBuilder;
+import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
     @Option(name = "-regExclude", usage = "regex to exclude table")
     private String regExclude;
 
-    private ColumnSettings columnSettings;
+    private TableSeparators tableSeparators;
 
     private final ComparableDataSetParam.Builder builder;
 
@@ -51,7 +51,7 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
         this.populateSettings(parser);
         this.builder.setSource(this.srcType)
                 .setSrc(this.src)
-                .setColumnSettings(this.columnSettings)
+                .setTableSeparators(this.tableSeparators)
                 .setLoadData(Boolean.parseBoolean(this.loadData))
                 .setMapIncludeMetaData(Boolean.parseBoolean(this.includeMetaData))
                 .setRegInclude(this.regInclude)
@@ -96,7 +96,7 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
 
     protected void populateSettings(final CmdLineParser parser) throws CmdLineException {
         try {
-            this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
+            this.tableSeparators = new FromJsonTableSeparatorsBuilder().build(this.setting);
         } catch (final IOException e) {
             throw new CmdLineException(parser, e);
         }

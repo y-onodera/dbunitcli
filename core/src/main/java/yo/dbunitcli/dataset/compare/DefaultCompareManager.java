@@ -1,7 +1,10 @@
 package yo.dbunitcli.dataset.compare;
 
 import org.dbunit.dataset.Column;
-import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.dataset.CompareKeys;
+import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.util.*;
 import java.util.function.Function;
@@ -124,7 +127,6 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
     public static class RowCompare {
         protected final ComparableTable oldTable;
         protected final ComparableTable newTable;
-        protected final AddSettingColumns comparisonKeys;
         protected final IDataSetConverter converter;
         protected final int columnLength;
         protected List<String> keyColumns;
@@ -133,7 +135,6 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
         protected RowCompare(final TableCompare it, final RowCompareResultHandler handler) {
             this.oldTable = it.getOldTable();
             this.newTable = it.getNewTable();
-            this.comparisonKeys = it.getComparisonKeys();
             this.converter = it.getConverter();
             this.columnLength = it.getColumnLength();
             this.keyColumns = it.getKeyColumns();

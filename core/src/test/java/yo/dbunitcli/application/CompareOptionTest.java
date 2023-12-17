@@ -3,7 +3,8 @@ package yo.dbunitcli.application;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import yo.dbunitcli.dataset.AddSettingColumns;
+import yo.dbunitcli.dataset.TableSeparator;
+import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -65,13 +66,10 @@ public class CompareOptionTest {
         this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/filter/setting.json"});
         assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewData().getParam().getSrc());
         assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldData().getParam().getSrc());
-        assertEquals(2, this.target.getComparisonKeys().byNameSize());
-        assertEquals(1, this.target.getComparisonKeys().getColumns("columnadd").size());
-        assertEquals("key", this.target.getComparisonKeys().getColumns("columnadd").get(0));
-        assertEquals(2, this.target.getColumnSettings().excludeColumns().byNameSize());
-        assertEquals(2, this.target.getColumnSettings().excludeColumns().getColumns("columnadd").size());
-        assertEquals("AddColumn", this.target.getColumnSettings().excludeColumns().getColumns("columnadd").get(0));
-        assertEquals("ChangeColumn", this.target.getColumnSettings().excludeColumns().getColumns("columnadd").get(1));
+        assertEquals(2, this.target.getTableSeparators().byNames().size());
+        final TableSeparator columnadd = this.target.getTableSeparators().getSeparators("columnadd").iterator().next();
+        assertEquals(1, columnadd.comparisonKeys().size());
+        assertEquals("key", columnadd.comparisonKeys().get(0));
     }
 
     @Test
@@ -79,8 +77,9 @@ public class CompareOptionTest {
         this.target.parse(new String[]{"@" + this.baseDir + "/paramCompareResultDiffValidExpected.txt"});
         assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewData().getParam().getSrc().getAbsoluteFile());
         assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldData().getParam().getSrc().getAbsoluteFile());
-        assertEquals(1, this.target.getComparisonKeys().getColumns("columnadd").size());
-        assertEquals("key", this.target.getComparisonKeys().getColumns("columnadd").get(0));
+        final TableSeparator columnadd = this.target.getTableSeparators().getSeparators("columnadd").iterator().next();
+        assertEquals(1, columnadd.comparisonKeys().size());
+        assertEquals("key", columnadd.comparisonKeys().get(0));
     }
 
     @Test
@@ -101,9 +100,7 @@ public class CompareOptionTest {
     @Test
     public void parseNoSettingFile() {
         this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old"});
-        assertEquals(AddSettingColumns.NONE, this.target.getComparisonKeys());
-        assertEquals(AddSettingColumns.NONE, this.target.getColumnSettings().excludeColumns());
-        assertEquals(AddSettingColumns.NONE, this.target.getColumnSettings().orderColumns());
+        assertEquals(TableSeparators.NONE, this.target.getTableSeparators());
     }
 
 

@@ -13,23 +13,28 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final Column[] primaryKeys;
     private final Column[] columns;
     private final Column[] allColumns;
-    private final ColumnExpression additionalExpression;
+    private final ExpressionColumns additionalExpression;
     private final List<Integer> filterColumnIndex;
     private final TableSeparator tableSeparator;
     private final Boolean distinct;
     private final AddSettingTableMetaData preset;
 
+    public static AddSettingTableMetaData from(final ITableMetaData metaData, final TableSeparator tableSeparator) {
+        try {
+            return new AddSettingTableMetaData(metaData, metaData.getPrimaryKeys(), tableSeparator);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     public AddSettingTableMetaData(final ITableMetaData delegate
             , final Column[] primaryKeys
-            , final IColumnFilter iColumnFilter
-            , final TableSeparator tableSeparator
-            , final Boolean distinct
-            , final ColumnExpression additionalExpression) {
+            , final TableSeparator tableSeparator) {
         this.tableName = tableSeparator.rename(delegate.getTableName());
         this.primaryKeys = primaryKeys;
-        this.additionalExpression = additionalExpression;
+        this.additionalExpression = tableSeparator.expressionColumns();
         this.allColumns = this.getAllColumns(delegate);
-        this.columns = this.getColumns(delegate, iColumnFilter);
+        this.columns = this.getColumns(delegate, tableSeparator.getColumnFilter());
         this.filterColumnIndex = this.getFilterColumnIndex(delegate);
         this.tableSeparator = tableSeparator;
         if (delegate instanceof AddSettingTableMetaData) {
@@ -37,10 +42,10 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         } else {
             this.preset = null;
         }
-        this.distinct = distinct;
+        this.distinct = tableSeparator.distinct();
     }
 
-    private AddSettingTableMetaData(final String tableName, final Column[] primaryKeys, final Column[] columns, final Column[] allColumns, final ColumnExpression additionalExpression, final List<Integer> filterColumnIndex, final TableSeparator tableSeparator, final AddSettingTableMetaData preset, final Boolean distinct) {
+    private AddSettingTableMetaData(final String tableName, final Column[] primaryKeys, final Column[] columns, final Column[] allColumns, final ExpressionColumns additionalExpression, final List<Integer> filterColumnIndex, final TableSeparator tableSeparator, final AddSettingTableMetaData preset, final Boolean distinct) {
         this.tableName = tableName;
         this.primaryKeys = primaryKeys;
         this.columns = columns;
@@ -79,6 +84,10 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         return this.primaryKeys;
     }
 
+    public TableSeparator getTableSeparator() {
+        return this.tableSeparator;
+    }
+
     public Boolean isNeedDistinct() {
         return this.distinct || this.isPresetNeedDistinct();
     }
@@ -107,7 +116,7 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     }
 
     public TableSplitter getTableSplitter() {
-        return this.tableSeparator.getSplitter();
+        return this.tableSeparator.splitter();
     }
 
     public List<String> getBreakKeys(final Object[] applySetting) {
@@ -212,6 +221,25 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
+    }
+
+    public Column[] getOrderColumns() {
+        return this.tableSeparator.getOrderColumns();
+    }
+
+    @Override
+    public String toString() {
+        return "AddSettingTableMetaData{" +
+                "tableName='" + this.tableName + '\'' +
+                ", primaryKeys=" + Arrays.toString(this.primaryKeys) +
+                ", columns=" + Arrays.toString(this.columns) +
+                ", allColumns=" + Arrays.toString(this.allColumns) +
+                ", additionalExpression=" + this.additionalExpression +
+                ", filterColumnIndex=" + this.filterColumnIndex +
+                ", tableSeparator=" + this.tableSeparator +
+                ", distinct=" + this.distinct +
+                ", preset=" + this.preset +
+                '}';
     }
 
     public record Rows(List<Object[]> rows, List<Integer> filteredRowIndexes) {

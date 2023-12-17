@@ -19,7 +19,7 @@ public record ComparableDataSetParam(
         File src
         , String encoding
         , DataSourceType source
-        , ColumnSettings columnSettings
+        , TableSeparators tableSeparators
         , String headerSplitPattern
         , String dataSplitPattern
         , TableNameFilter tableNameFilter
@@ -41,7 +41,7 @@ public record ComparableDataSetParam(
         this(builder.getSrc()
                 , builder.getEncoding()
                 , builder.getSource()
-                , builder.getColumnSettings()
+                , builder.getTableSeparators()
                 , builder.getHeaderSplitPattern()
                 , builder.getDataSplitPattern()
                 , builder.getTableNameFilter()
@@ -93,7 +93,7 @@ public record ComparableDataSetParam(
         private File src;
         private String encoding;
         private DataSourceType source;
-        private ColumnSettings columnSettings;
+        private TableSeparators tableSeparators;
         private String headerSplitPattern;
         private String dataSplitPattern;
         private boolean mapIncludeMetaData;
@@ -128,11 +128,11 @@ public record ComparableDataSetParam(
             return this.source;
         }
 
-        public ColumnSettings getColumnSettings() {
-            if (this.columnSettings == null) {
-                return ColumnSettings.NONE;
+        public TableSeparators getTableSeparators() {
+            if (this.tableSeparators == null) {
+                return TableSeparators.NONE;
             }
-            return this.columnSettings;
+            return this.tableSeparators;
         }
 
         public String getHeaderSplitPattern() {
@@ -213,12 +213,13 @@ public record ComparableDataSetParam(
             return this;
         }
 
-        public Builder editColumnSettings(final Consumer<ColumnSettingEditor> function) {
-            return this.setColumnSettings(this.getColumnSettings().apply(function));
+        public Builder editColumnSettings(final Consumer<TableSeparators.Builder> function) {
+            this.tableSeparators = this.getTableSeparators().map(function);
+            return this;
         }
 
-        public Builder setColumnSettings(final ColumnSettings columnSettings) {
-            this.columnSettings = columnSettings;
+        public Builder setTableSeparators(final TableSeparators tableSeparators) {
+            this.tableSeparators = tableSeparators;
             return this;
         }
 

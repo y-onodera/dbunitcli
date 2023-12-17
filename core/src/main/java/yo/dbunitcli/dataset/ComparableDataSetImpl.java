@@ -16,7 +16,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     private ComparableTableMapper mapper;
 
-    private final ColumnSettings compareSettings;
+    private final TableSeparators tableSeparators;
 
     private final ComparableDataSetParam param;
 
@@ -30,7 +30,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
         super(false);
         this.producer = producer;
         this.param = this.producer.getParam();
-        this.compareSettings = this.param.columnSettings();
+        this.tableSeparators = this.param.tableSeparators();
         this.converter = this.param.converter();
         this.alreadyWrite = new HashMap<>();
         try {
@@ -66,7 +66,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     @Override
     public void startTable(final ITableMetaData metaData) throws DataSetException {
         LOGGER.debug("startTable(metaData={}) - start", metaData);
-        this.mapper = this.compareSettings.createMapper(metaData);
+        this.mapper = this.tableSeparators.createMapper(metaData);
         this.mapper.startTable(this.converter, this.alreadyWrite);
     }
 

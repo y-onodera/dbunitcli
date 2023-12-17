@@ -4,23 +4,83 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.datatype.DataType;
+import org.dbunit.dataset.filter.DefaultColumnFilter;
+import org.dbunit.dataset.filter.IColumnFilter;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
-public record TableSeparator(TableSplitter splitter, Predicate<Map<String, Object>> filter) {
+public record TableSeparator(TableSplitter splitter
+        , List<String> comparisonKeys
+        , ExpressionColumns expressionColumns
+        , List<String> includeColumns
+        , List<String> excludeColumns
+        , List<String> orderColumns
+        , Predicate<Map<String, Object>> filter
+        , boolean distinct
+) {
 
     public static final Predicate<Map<String, Object>> NO_FILTER = it -> Boolean.TRUE;
-    public static final TableSeparator NONE = new TableSeparator(TableSplitter.NONE, NO_FILTER);
 
-    public TableSeparator(final TableSplitter splitter, final String expression) {
-        this(splitter, createFilter(expression));
+    public static final TableSeparator NONE = builder().build();
+
+    public TableSeparator(final Builder builder) {
+        this(builder.getSplitter()
+                , new ArrayList<>(builder.getComparisonKeys())
+                , builder.getExpressionColumns().copy()
+                , new ArrayList<>(builder.getIncludeColumns())
+                , new ArrayList<>(builder.getExcludeColumns())
+                , new ArrayList<>(builder.getOrderColumns())
+                , builder.getFilter()
+                , builder.isDistinct()
+        );
     }
 
-    public TableSeparator(final TableSplitter splitter, final List<String> expressions) {
-        this(splitter, createFilter(expressions));
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public TableSeparator map(final Consumer<Builder> mapper) {
+        final Builder builder = new Builder(this);
+        mapper.accept(builder);
+        return builder.build();
+    }
+
+    public Column[] getComparisonKeys() {
+        return this.comparisonKeys()
+                .stream()
+                .map(it -> new Column(it, DataType.UNKNOWN))
+                .toArray(Column[]::new);
+    }
+
+    public IColumnFilter getColumnFilter() {
+        if (this.excludeColumns.size() == 0 && this.includeColumns.size() == 0) {
+            return null;
+        }
+        final DefaultColumnFilter result = new DefaultColumnFilter();
+        if (this.includeColumns.size() > 0) {
+            result.includeColumns(this.includeColumns.stream()
+                    .map(it -> new Column(it, DataType.UNKNOWN))
+                    .toList().toArray(new Column[0]));
+        }
+        if (this.excludeColumns.size() > 0) {
+            result.excludeColumns(this.excludeColumns.stream()
+                    .map(it -> new Column(it, DataType.UNKNOWN))
+                    .toList().toArray(new Column[0]));
+        }
+        return result;
+    }
+
+    public Column[] getOrderColumns() {
+        return this.orderColumns.stream()
+                .map(it -> new Column(it, DataType.UNKNOWN))
+                .toList().toArray(new Column[0]);
     }
 
     public boolean hasRowFilter() {
@@ -31,10 +91,6 @@ public record TableSeparator(TableSplitter splitter, Predicate<Map<String, Objec
         return this.filter.test(rowToMap);
     }
 
-    public TableSplitter getSplitter() {
-        return this.splitter;
-    }
-
     public String rename(final String tableName) {
         if (this.splitter.limit() > 0) {
             return tableName;
@@ -42,55 +98,186 @@ public record TableSeparator(TableSplitter splitter, Predicate<Map<String, Objec
         return this.splitter.renameFunction().apply(tableName, 0);
     }
 
-    public TableSeparator addFilter(final List<String> expressions) {
-        return this.with(createFilter(expressions));
-    }
-
     public TableSeparator add(final TableSeparator other) {
-        return this.with(other.filter()).with(other.splitter());
+        return this.map(builder -> builder.with(other));
     }
 
-    public TableSeparator with(final Predicate<Map<String, Object>> add) {
-        if (add == NONE.filter()) {
+    public boolean hasSettings() {
+        return !this.splitter.equals(TableSplitter.NONE)
+                || this.comparisonKeys.size() > 0
+                || this.expressionColumns.size() > 0
+                || this.includeColumns.size() > 0
+                || this.excludeColumns.size() > 0
+                || this.orderColumns.size() > 0
+                || this.filter != NO_FILTER
+                || this.distinct
+                ;
+    }
+
+    public static class Builder {
+        private TableSplitter splitter = TableSplitter.NONE;
+        private List<String> comparisonKeys = new ArrayList<>();
+        private ExpressionColumns expressionColumns = ExpressionColumns.NONE;
+        private List<String> includeColumns = new ArrayList<>();
+        private List<String> excludeColumns = new ArrayList<>();
+        private List<String> orderColumns = new ArrayList<>();
+        private Predicate<Map<String, Object>> filter = NO_FILTER;
+
+        private boolean distinct = false;
+
+        public Builder() {
+        }
+
+        public Builder(final TableSeparator tableSeparator) {
+            this.splitter = tableSeparator.splitter();
+            this.comparisonKeys.addAll(tableSeparator.comparisonKeys());
+            this.expressionColumns = tableSeparator.expressionColumns().copy();
+            this.includeColumns.addAll(tableSeparator.includeColumns());
+            this.excludeColumns.addAll(tableSeparator.excludeColumns());
+            this.orderColumns.addAll(tableSeparator.orderColumns());
+            this.filter = tableSeparator.filter();
+            this.distinct = tableSeparator.distinct();
+        }
+
+        public Builder setSplitter(final TableSplitter splitter) {
+            this.splitter = splitter;
             return this;
-        } else if (this.filter == NONE.filter()) {
-            return new TableSeparator(this.splitter, add);
         }
-        return new TableSeparator(this.splitter, this.filter.and(add));
-    }
 
-    public TableSeparator with(final TableSplitter other) {
-        if (this.splitter == TableSplitter.NONE) {
-            return new TableSeparator(other, this.filter);
-        } else if (other == TableSplitter.NONE || this.splitter.equals(other)) {
+        public Builder setComparisonKeys(final List<String> comparisonKeys) {
+            this.comparisonKeys = comparisonKeys;
             return this;
-        } else if (!other.isSplit() && !this.splitter.renameFunction().equals(other.renameFunction())) {
-            return new TableSeparator(this.splitter.builder()
-                    .setRenameFunction(this.splitter().renameFunction().compose(other.renameFunction()))
-                    .build(), this.filter);
-        } else if (!this.splitter.isSplit() && other.isSplit() && !this.splitter.renameFunction().equals(other.renameFunction())) {
-            return new TableSeparator(other.builder()
-                    .setRenameFunction(this.splitter().renameFunction().andThen(other.renameFunction()))
-                    .build(), this.filter);
         }
-        throw new UnsupportedOperationException("splitter define is conflict:" + this);
-    }
 
-    static Predicate<Map<String, Object>> createFilter(final String expression) {
-        return createFilter(Collections.singletonList(expression));
-    }
-
-    static Predicate<Map<String, Object>> createFilter(final List<String> expressions) {
-        final JexlEngine jexl = new JexlBuilder().create();
-        final List<JexlExpression> expr = expressions
-                .stream()
-                .filter(it -> !it.trim().isEmpty())
-                .map(jexl::createExpression)
-                .toList();
-        if (expr.size() == 0) {
-            return NONE.filter();
+        public Builder setIncludeColumns(final List<String> includeColumns) {
+            this.includeColumns = includeColumns;
+            return this;
         }
-        return (map) -> expr.stream().allMatch(it -> Boolean.parseBoolean(it.evaluate(new MapContext(map)).toString()));
-    }
 
+        public Builder setExcludeColumns(final List<String> excludeColumns) {
+            this.excludeColumns = excludeColumns;
+            return this;
+        }
+
+        public Builder setOrderColumns(final List<String> orderColumns) {
+            this.orderColumns = orderColumns;
+            return this;
+        }
+
+        public Builder setFilter(final Predicate<Map<String, Object>> filter) {
+            this.filter = filter;
+            return this;
+        }
+
+        public Builder setFilter(final List<String> filterExpressions) {
+            this.filter = this.createFilter(filterExpressions);
+            return this;
+        }
+
+        public Builder setDistinct(final boolean distinct) {
+            this.distinct = distinct;
+            return this;
+        }
+
+        public Builder setExpressionColumns(final ExpressionColumns expressionColumns) {
+            this.expressionColumns = expressionColumns;
+            return this;
+        }
+
+        public Builder with(final TableSeparator other) {
+            return this.with(other.splitter())
+                    .with(other.filter())
+                    .setComparisonKeys(Stream.concat(this.comparisonKeys.stream(), other.comparisonKeys().stream())
+                            .distinct()
+                            .toList())
+                    .setExpressionColumns(this.expressionColumns.add(other.expressionColumns()))
+                    .setIncludeColumns(Stream.concat(this.includeColumns.stream(), other.includeColumns().stream())
+                            .distinct()
+                            .toList())
+                    .setExcludeColumns(Stream.concat(this.excludeColumns.stream(), other.excludeColumns().stream())
+                            .distinct()
+                            .toList())
+                    .setOrderColumns(Stream.concat(this.orderColumns.stream(), other.orderColumns().stream())
+                            .distinct()
+                            .toList())
+                    .setDistinct(this.isDistinct() || other.distinct())
+                    ;
+        }
+
+        public Builder with(final TableSplitter other) {
+            if (this.splitter == TableSplitter.NONE) {
+                return this.setSplitter(other);
+            } else if (other == TableSplitter.NONE || this.splitter.equals(other)) {
+                return this;
+            } else if (!other.isSplit() && !this.splitter.renameFunction().equals(other.renameFunction())) {
+                return this.setSplitter(this.splitter.builder()
+                        .setRenameFunction(this.splitter.renameFunction().compose(other.renameFunction()))
+                        .build());
+            } else if (!this.splitter.isSplit() && other.isSplit() && !this.splitter.renameFunction().equals(other.renameFunction())) {
+                return this.setSplitter(other.builder()
+                        .setRenameFunction(this.splitter.renameFunction().andThen(other.renameFunction()))
+                        .build());
+            }
+            throw new UnsupportedOperationException("splitter define is conflict:" + this);
+        }
+
+        public Builder with(final Predicate<Map<String, Object>> otherFilter) {
+            if (otherFilter == NONE.filter()) {
+                return this;
+            } else if (this.filter == NONE.filter()) {
+                return this.setFilter(otherFilter);
+            }
+            return this.setFilter(this.filter.and(otherFilter));
+        }
+
+        public TableSplitter getSplitter() {
+            return this.splitter;
+        }
+
+        public List<String> getComparisonKeys() {
+            return this.comparisonKeys;
+        }
+
+        public List<String> getIncludeColumns() {
+            return this.includeColumns;
+        }
+
+        public List<String> getExcludeColumns() {
+            return this.excludeColumns;
+        }
+
+        public List<String> getOrderColumns() {
+            return this.orderColumns;
+        }
+
+        public Predicate<Map<String, Object>> getFilter() {
+            return this.filter;
+        }
+
+        public boolean isDistinct() {
+            return this.distinct;
+        }
+
+        public ExpressionColumns getExpressionColumns() {
+            return this.expressionColumns;
+        }
+
+        public TableSeparator build() {
+            return new TableSeparator(this);
+        }
+
+        private Predicate<Map<String, Object>> createFilter(final List<String> expressions) {
+            final JexlEngine jexl = new JexlBuilder().create();
+            final List<JexlExpression> expr = expressions
+                    .stream()
+                    .filter(it -> !it.trim().isEmpty())
+                    .map(jexl::createExpression)
+                    .toList();
+            if (expr.size() == 0) {
+                return NONE.filter();
+            }
+            return (map) -> expr.stream().allMatch(it -> Boolean.parseBoolean(it.evaluate(new MapContext(map)).toString()));
+        }
+
+    }
 }

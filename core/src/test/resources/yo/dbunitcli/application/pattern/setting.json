@@ -1,12 +1,6 @@
 {
   "settings": [
     {
-      "pattern": "test",
-      "keys": [
-        "testkey"
-      ]
-    },
-    {
       "name": "test_differentPattern",
       "keys": [
         "key"
@@ -19,7 +13,16 @@
       ]
     },
     {
+      "pattern": "test_s",
+      "keys": [
+        "testkey"
+      ]
+    },
+    {
       "name": "test",
+      "keys": [
+        "testkey"
+      ],
       "exclude": [
         "column2"
       ]

@@ -13,7 +13,6 @@ import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +59,7 @@ public class CompareOption extends CommandLineOption {
 
     private final ImageCompareOption imageOption = new ImageCompareOption("image");
 
-    private ColumnSettings columnSettings;
+    private TableSeparators tableSeparators;
 
     public CompareOption() {
         super(Parameter.none());
@@ -100,9 +99,11 @@ public class CompareOption extends CommandLineOption {
         if (Arrays.stream(expandArgs).anyMatch(it -> it.startsWith("-expect.src"))) {
             this.expectData.parseArgument(expandArgs);
             if (Arrays.stream(expandArgs).noneMatch(it -> it.startsWith("-expect.setting"))) {
-                this.expectData.getParam().editColumnSettings(editor -> editor.setKeyEdit(it ->
-                        it.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, new ArrayList<>())
-                ));
+                this.expectData.getParam().editColumnSettings(separator ->
+                        separator.add(TableSeparators.Strategy.PATTERN
+                                , "*"
+                                , TableSeparator.builder().build())
+                );
             }
         }
         this.populateSettings(parser);
@@ -128,7 +129,7 @@ public class CompareOption extends CommandLineOption {
         final CompareResult result = this.getDataSetCompareBuilder()
                 .newDataSet(this.newDataSet())
                 .oldDataSet(this.oldDataSet())
-                .comparisonKeys(this.getComparisonKeys())
+                .tableSeparators(this.getTableSeparators())
                 .dataSetConverter(this.converter())
                 .build()
                 .result();
@@ -136,7 +137,7 @@ public class CompareOption extends CommandLineOption {
             return !new DataSetCompareBuilder()
                     .newDataSet(this.resultDataSet())
                     .oldDataSet(this.expectDataSet())
-                    .comparisonKeys(this.getExpectData().getParam().getColumnSettings().comparisonKeys())
+                    .tableSeparators(this.getExpectData().getParam().getTableSeparators())
                     .dataSetConverter(this.expectedDiffConverter())
                     .build()
                     .result().existDiff();
@@ -144,22 +145,21 @@ public class CompareOption extends CommandLineOption {
         return !result.existDiff();
     }
 
-    public AddSettingColumns getComparisonKeys() {
-        return this.columnSettings.comparisonKeys();
-    }
-
-    public ColumnSettings getColumnSettings() {
-        return this.columnSettings;
+    public TableSeparators getTableSeparators() {
+        return this.tableSeparators;
     }
 
     public ComparableDataSet newDataSet() {
         final ComparableDataSetParam.Builder loadParam = this.newData.getParam()
                 .ifMatch(this.targetType != Type.data
-                        , it -> it.setColumnSettings(it
-                                .getColumnSettings()
-                                .apply(builder -> builder.setSeparatorEdit(separator ->
-                                        separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
-                                                .setNewName("TARGET").build()))))
+                        , it -> it.editColumnSettings(separator ->
+                                separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
+                                                .setNewName("TARGET").build())
+                                        .add(TableSeparators.Strategy.PATTERN
+                                                , "*"
+                                                , TableSeparator.builder().setComparisonKeys(List.of("NAME"))
+                                                        .build())
+                        )
                 );
         return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
     }
@@ -167,11 +167,14 @@ public class CompareOption extends CommandLineOption {
     public ComparableDataSet oldDataSet() {
         final ComparableDataSetParam.Builder loadParam = this.oldData.getParam()
                 .ifMatch(this.targetType != Type.data
-                        , it -> it.setColumnSettings(it
-                                .getColumnSettings()
-                                .apply(builder -> builder.setSeparatorEdit(separator ->
-                                        separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
-                                                .setNewName("TARGET").build()))))
+                        , it -> it.editColumnSettings(separator ->
+                                separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
+                                                .setNewName("TARGET").build())
+                                        .add(TableSeparators.Strategy.PATTERN
+                                                , "*"
+                                                , TableSeparator.builder().setComparisonKeys(List.of("NAME"))
+                                                        .build())
+                        )
                 );
         return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
     }
@@ -180,7 +183,7 @@ public class CompareOption extends CommandLineOption {
         final DataSetConverterOption converterOption = this.getConverterOption();
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
-                        .setColumnSettings(this.expectData.getParam().getColumnSettings())
+                        .setTableSeparators(this.expectData.getParam().getTableSeparators())
                         .setSrc(converterOption.getResultDir())
                         .setSource(converterOption.getResultType())
                         .setEncoding(converterOption.getOutputEncoding())
@@ -207,13 +210,14 @@ public class CompareOption extends CommandLineOption {
 
     protected void populateSettings(final CmdLineParser parser) throws CmdLineException {
         try {
-            this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
+            this.tableSeparators = new FromJsonTableSeparatorsBuilder().build(this.setting);
         } catch (final IOException e) {
             throw new CmdLineException(parser, e);
         }
         if (this.targetType != Type.data) {
-            this.columnSettings = this.columnSettings.apply(it -> it
-                    .setKeyEdit(setting -> setting.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, List.of("NAME")))
+            this.tableSeparators = this.tableSeparators.map(separator -> separator.add(TableSeparators.Strategy.PATTERN
+                    , "*"
+                    , TableSeparator.builder().setComparisonKeys(List.of("NAME")).build())
             );
         }
     }

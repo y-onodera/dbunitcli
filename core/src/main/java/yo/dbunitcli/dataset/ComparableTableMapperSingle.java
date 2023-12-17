@@ -25,11 +25,11 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private IDataSetConverter converter;
     private Map<String, Integer> alreadyWrite;
 
-    public ComparableTableMapperSingle(final AddSettingTableMetaData metaData, final Column[] orderColumns) {
-        this.splitter = metaData.getTableSplitter();
+    public ComparableTableMapperSingle(final AddSettingTableMetaData metaData) {
         this.baseMetaData = metaData;
+        this.splitter = metaData.getTableSplitter();
+        this.orderColumns = metaData.getOrderColumns();
         this.metaData = this.splitter.getMetaData(this.baseMetaData, this.no);
-        this.orderColumns = orderColumns;
         this.rows = new ArrayList<>();
         this.filteredRowIndexes = new ArrayList<>();
     }

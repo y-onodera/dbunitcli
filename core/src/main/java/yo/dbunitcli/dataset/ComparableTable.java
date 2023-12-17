@@ -21,7 +21,7 @@ public class ComparableTable implements ITable {
     private Integer[] _sortedIndexes;
 
     protected ComparableTable(final ITableMetaData metaData) {
-        this(ColumnExpression.builder().build().apply(metaData), new Column[]{}, new ArrayList<>(), new ArrayList<>());
+        this(AddSettingTableMetaData.from(metaData, TableSeparator.NONE), new Column[]{}, new ArrayList<>(), new ArrayList<>());
     }
 
     protected ComparableTable(final AddSettingTableMetaData addSettingTableMetaData, final Column[] orderColumns, final Collection<Object[]> rows, final List<Integer> filteredRowIndexes) {
@@ -98,7 +98,7 @@ public class ComparableTable implements ITable {
                 .forEach(rowNum -> result.put(this.getKey(rowNum, keys)
                         , new AbstractMap.SimpleEntry<>(this.getOriginalRowIndex(rowNum), this.getRow(rowNum))));
         if (result.size() < this.getRowCount()) {
-            throw new AssertionError("comparison keys not unique:" + keys.toString());
+            throw new AssertionError("comparison keys not unique:" + keys.toString() + " metaData:" + this.addSettingTableMetaData);
         }
         return result;
     }
@@ -109,7 +109,7 @@ public class ComparableTable implements ITable {
                 return this.getRow(rowNum, columnLength);
             }
         }
-        throw new AssertionError("keys not found:" + targetKey.toString());
+        throw new AssertionError("keys not found:" + targetKey.toString() + ". metaData:" + this.addSettingTableMetaData);
     }
 
     public CompareKeys getKey(final int rowNum, final List<String> keys) {
@@ -122,7 +122,7 @@ public class ComparableTable implements ITable {
 
     public Object[] getRow(final int rowNum) {
         if (rowNum < 0 || rowNum >= this.getRowCount()) {
-            throw new AssertionError("rowNum " + rowNum + " is out of range;current row size is " + this.getRowCount());
+            throw new AssertionError("rowNum " + rowNum + " is out of range;current row size is " + this.getRowCount() + ". metaData:" + this.addSettingTableMetaData);
         }
         return this.rows.rows().get(this.getIndexBeforeSort(rowNum));
     }
@@ -130,7 +130,7 @@ public class ComparableTable implements ITable {
     public Object[] getRow(final int rowNum, final int columnLength) {
         final Object[] row = this.getRow(rowNum);
         if (row.length < columnLength) {
-            throw new AssertionError(columnLength + " is larger than columnLength:" + row.length);
+            throw new AssertionError(columnLength + " is larger than columnLength:" + row.length + " row:" + Arrays.toString(row) + " metaData:" + this.addSettingTableMetaData);
         }
         final Object[] resultRow = new Object[columnLength];
         System.arraycopy(row, 0, resultRow, 0, columnLength);

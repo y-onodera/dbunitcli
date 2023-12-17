@@ -1,5 +1,9 @@
 package yo.dbunitcli.dataset;
 
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.ITableMetaData;
+
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -18,30 +22,130 @@ public record TableSeparators(Map<String, List<TableSeparator>> byNames,
         return new Builder().add(this);
     }
 
-    public TableSeparators apply(final Consumer<TableSeparators.Builder> editor) {
+    public TableSeparators map(final Consumer<TableSeparators.Builder> editor) {
         final TableSeparators.Builder builder = this.builder().add(this);
         editor.accept(builder);
         return builder.build();
     }
 
+    public boolean hasAdditionalSetting(final String tableName) {
+        return this.getSeparators(tableName)
+                .stream()
+                .filter(it -> !it.equals(TableSeparator.NONE))
+                .toList()
+                .size() > 0;
+    }
+
     public Collection<TableSeparator> getSeparators(final String tableName) {
         final Set<TableSeparator> result = new HashSet<>();
-        if (this.byNames.containsKey(tableName)) {
-            result.addAll(this.byNames.get(tableName).stream()
-                    .map(this.commonExpressions::add)
-                    .toList());
+        TableSeparator noReName = Optional.ofNullable(this.byNames.get(tableName))
+                .orElse(new ArrayList<>())
+                .stream()
+                .filter(TableSeparator::hasSettings)
+                .filter(it -> it.splitter() == TableSplitter.NONE)
+                .reduce(TableSeparator.NONE, TableSeparator::add)
+                .add(this.pattern.entrySet().stream()
+                        .filter(it -> tableName.contains(it.getKey()) || it.getKey().equals("*"))
+                        .map(Map.Entry::getValue)
+                        .flatMap(List::stream)
+                        .filter(TableSeparator::hasSettings)
+                        .filter(it -> it.splitter() == TableSplitter.NONE)
+                        .reduce(TableSeparator.NONE, TableSeparator::add)
+                );
+        if (noReName == TableSeparator.NONE) {
+            noReName = this.pattern.entrySet().stream()
+                    .filter(it -> tableName.contains(it.getKey()) || it.getKey().equals("*"))
+                    .map(Map.Entry::getValue)
+                    .flatMap(List::stream)
+                    .filter(TableSeparator::hasSettings)
+                    .filter(it -> it.splitter() == TableSplitter.NONE)
+                    .reduce(TableSeparator.NONE, TableSeparator::add);
         }
+        result.addAll(Optional.ofNullable(this.byNames.get(tableName))
+                .orElse(new ArrayList<>())
+                .stream()
+                .filter(TableSeparator::hasSettings)
+                .filter(it -> it.splitter() != TableSplitter.NONE)
+                .map(noReName::add)
+                .map(this.commonExpressions::add)
+                .toList());
         result.addAll(this.pattern.entrySet().stream()
-                .filter(it -> tableName.contains(it.getKey()))
+                .filter(it -> tableName.contains(it.getKey()) || it.getKey().equals("*"))
                 .map(Map.Entry::getValue)
                 .flatMap(List::stream)
+                .filter(TableSeparator::hasSettings)
+                .filter(it -> it.splitter() != TableSplitter.NONE)
+                .map(noReName::add)
                 .map(this.commonExpressions::add)
                 .toList());
         if (result.size() > 0) {
             return result;
         }
-        result.add(this.commonExpressions);
+        result.add(noReName.add(this.commonExpressions));
         return result;
+    }
+
+    public ComparableTableMapper createMapper(final ITableMetaData metaData) {
+        final List<AddSettingTableMetaData> results = this.getAddSettingTableMetaData(metaData);
+        if (results.size() == 1) {
+            return this.createMapperFrom(results.get(0));
+        }
+        return new ComparableTableMapperMulti(results.stream()
+                .map(this::createMapperFrom)
+                .collect(Collectors.toList()));
+    }
+
+    private ComparableTableMapper createMapperFrom(final AddSettingTableMetaData results) {
+        return new ComparableTableMapperSingle(results);
+    }
+
+    private List<AddSettingTableMetaData> getAddSettingTableMetaData(final ITableMetaData metaData) {
+        return this.addSetting(metaData).stream()
+                .map(it -> {
+                    ITableMetaData origin = metaData;
+                    AddSettingTableMetaData resultMetaData = it;
+                    if (origin.getTableName().equals(resultMetaData.getTableName()) && origin instanceof AddSettingTableMetaData base) {
+                        resultMetaData = this.addSetting(origin, base.getTableSeparator().add(resultMetaData.getTableSeparator()));
+                    }
+                    while (!origin.getTableName().equals(resultMetaData.getTableName())) {
+                        origin = resultMetaData;
+                        final List<AddSettingTableMetaData> addSetting = this.addSetting(resultMetaData);
+                        if (addSetting.size() == 1) {
+                            resultMetaData = addSetting.get(0);
+                        } else {
+                            return addSetting.stream()
+                                    .map(this::getAddSettingTableMetaData)
+                                    .flatMap(Collection::stream)
+                                    .collect(Collectors.toList());
+                        }
+                    }
+                    return Collections.singletonList(resultMetaData);
+                })
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    private List<AddSettingTableMetaData> addSetting(final ITableMetaData originMetaData) {
+        return this.getSeparators(originMetaData.getTableName()).stream()
+                .map(it -> this.addSetting(originMetaData, it))
+                .collect(Collectors.toList());
+    }
+
+    private AddSettingTableMetaData addSetting(final ITableMetaData originMetaData, final TableSeparator tableSeparator) {
+        final Column[] comparisonKeys = tableSeparator.getComparisonKeys();
+        try {
+            Column[] primaryKey = originMetaData.getPrimaryKeys();
+            if (comparisonKeys.length > 0) {
+                primaryKey = comparisonKeys;
+            }
+            return new AddSettingTableMetaData(originMetaData, primaryKey, tableSeparator);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public enum Strategy {
+        BY_NAME, PATTERN
     }
 
     public static class Builder {
@@ -70,32 +174,24 @@ public record TableSeparators(Map<String, List<TableSeparator>> byNames,
             return this.pattern;
         }
 
-        public void addCommon(final List<String> aExpressions) {
-            this.commonExpressions = this.commonExpressions.addFilter(aExpressions);
+        public void addCommon(final TableSeparator aExpressions) {
+            this.commonExpressions = this.commonExpressions.add(aExpressions);
         }
 
-        public void add(final AddSettingColumns.Strategy strategy, final String targetName, final TableSeparator filter) {
-            if (strategy == AddSettingColumns.Strategy.BY_NAME) {
+        public void add(final Strategy strategy, final String targetName, final TableSeparator filter) {
+            if (strategy == Strategy.BY_NAME) {
                 this.add(this.byNames, targetName, filter);
             } else {
                 this.add(this.pattern, targetName, filter);
             }
         }
 
-        public void add(final AddSettingColumns.Strategy strategy, final String targetName, final List<String> expressions, final TableSplitter splitter) {
-            if (strategy == AddSettingColumns.Strategy.BY_NAME) {
-                this.addSetting(this.byNames, targetName, expressions, splitter);
-            } else if (strategy == AddSettingColumns.Strategy.PATTERN) {
-                this.addSetting(this.pattern, targetName, expressions, splitter);
-            }
-        }
-
         public Builder setCommonRenameFunction(final TableRenameStrategy newFunction) {
-            this.commonExpressions = this.commonExpressions.with(this.commonExpressions
-                    .splitter()
-                    .builder()
-                    .setRenameFunction(newFunction)
-                    .build());
+            this.commonExpressions = this.commonExpressions.map(builder -> builder.setSplitter(
+                    builder.getSplitter()
+                            .builder()
+                            .setRenameFunction(newFunction)
+                            .build()));
             return this;
         }
 
@@ -105,19 +201,5 @@ public record TableSeparators(Map<String, List<TableSeparator>> byNames,
                 current.add(separator);
             }
         }
-
-        protected void addSetting(final Map<String, List<TableSeparator>> filters, final String targetName, final List<String> expressions, final TableSplitter splitter) {
-            if (filters.containsKey(targetName)) {
-                filters.put(targetName, filters.get(targetName)
-                        .stream()
-                        .map(it -> it.addFilter(expressions).with(splitter))
-                        .collect(Collectors.toList()));
-            } else {
-                final List<TableSeparator> newVal = new ArrayList<>();
-                newVal.add(new TableSeparator(splitter, expressions));
-                filters.put(targetName, newVal);
-            }
-        }
-
     }
 }
