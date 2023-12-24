@@ -8,14 +8,13 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public record TableSeparators(Map<String, List<TableSeparator>> byNames,
-                              Map<String, List<TableSeparator>> pattern,
-                              TableSeparator commonExpressions) {
+public record TableSeparators(List<TableSeparator> settings,
+                              List<TableSeparator> commonSettings) {
 
     public static final TableSeparators NONE = new Builder().build();
 
     TableSeparators(final Builder builder) {
-        this(new HashMap<>(builder.getByNames()), new HashMap<>(builder.getPattern()), builder.commonExpressions);
+        this(new ArrayList<>(builder.getSettings()), builder.commonExpressions);
     }
 
     public Builder builder() {
@@ -37,52 +36,22 @@ public record TableSeparators(Map<String, List<TableSeparator>> byNames,
     }
 
     public Collection<TableSeparator> getSeparators(final String tableName) {
-        final Set<TableSeparator> result = new HashSet<>();
-        TableSeparator noReName = Optional.ofNullable(this.byNames.get(tableName))
-                .orElse(new ArrayList<>())
-                .stream()
+        final Set<TableSeparator> result = new HashSet<>(this.settings.stream()
                 .filter(TableSeparator::hasSettings)
-                .filter(it -> it.splitter() == TableSplitter.NONE)
-                .reduce(TableSeparator.NONE, TableSeparator::add)
-                .add(this.pattern.entrySet().stream()
-                        .filter(it -> tableName.contains(it.getKey()) || it.getKey().equals("*"))
-                        .map(Map.Entry::getValue)
-                        .flatMap(List::stream)
-                        .filter(TableSeparator::hasSettings)
-                        .filter(it -> it.splitter() == TableSplitter.NONE)
-                        .reduce(TableSeparator.NONE, TableSeparator::add)
-                );
-        if (noReName == TableSeparator.NONE) {
-            noReName = this.pattern.entrySet().stream()
-                    .filter(it -> tableName.contains(it.getKey()) || it.getKey().equals("*"))
-                    .map(Map.Entry::getValue)
-                    .flatMap(List::stream)
-                    .filter(TableSeparator::hasSettings)
-                    .filter(it -> it.splitter() == TableSplitter.NONE)
-                    .reduce(TableSeparator.NONE, TableSeparator::add);
-        }
-        result.addAll(Optional.ofNullable(this.byNames.get(tableName))
-                .orElse(new ArrayList<>())
-                .stream()
-                .filter(TableSeparator::hasSettings)
-                .filter(it -> it.splitter() != TableSplitter.NONE)
-                .map(noReName::add)
-                .map(this.commonExpressions::add)
-                .toList());
-        result.addAll(this.pattern.entrySet().stream()
-                .filter(it -> tableName.contains(it.getKey()) || it.getKey().equals("*"))
-                .map(Map.Entry::getValue)
-                .flatMap(List::stream)
-                .filter(TableSeparator::hasSettings)
-                .filter(it -> it.splitter() != TableSplitter.NONE)
-                .map(noReName::add)
-                .map(this.commonExpressions::add)
+                .filter(it -> it.targetFilter().test(tableName))
+                .map(this.getCommonExpressions(tableName)::add)
                 .toList());
         if (result.size() > 0) {
             return result;
         }
-        result.add(noReName.add(this.commonExpressions));
+        result.add(this.getCommonExpressions(tableName));
         return result;
+    }
+
+    private TableSeparator getCommonExpressions(final String tableName) {
+        return this.commonSettings.stream()
+                .filter(it -> it.targetFilter().test(tableName))
+                .reduce(TableSeparator.NONE, TableSeparator::add);
     }
 
     public ComparableTableMapper createMapper(final ITableMetaData metaData) {
@@ -144,21 +113,18 @@ public record TableSeparators(Map<String, List<TableSeparator>> byNames,
         }
     }
 
-    public enum Strategy {
-        BY_NAME, PATTERN
-    }
-
     public static class Builder {
-        private TableSeparator commonExpressions = TableSeparator.NONE;
+        private List<TableSeparator> commonExpressions = new ArrayList<>();
 
-        private final Map<String, List<TableSeparator>> byNames = new HashMap<>();
+        private final List<TableSeparator> settings = new ArrayList<>();
 
-        private final Map<String, List<TableSeparator>> pattern = new HashMap<>();
+        public Builder() {
+            this.commonExpressions.add(TableSeparator.NONE);
+        }
 
         public Builder add(final TableSeparators tableSeparators) {
-            this.byNames.putAll(tableSeparators.byNames);
-            this.pattern.putAll(tableSeparators.pattern);
-            this.commonExpressions = this.commonExpressions.add(tableSeparators.commonExpressions);
+            this.settings.addAll(tableSeparators.settings);
+            this.commonExpressions.addAll(tableSeparators.commonSettings);
             return this;
         }
 
@@ -166,40 +132,27 @@ public record TableSeparators(Map<String, List<TableSeparator>> byNames,
             return new TableSeparators(this);
         }
 
-        public Map<String, List<TableSeparator>> getByNames() {
-            return this.byNames;
-        }
-
-        public Map<String, List<TableSeparator>> getPattern() {
-            return this.pattern;
+        public List<TableSeparator> getSettings() {
+            return this.settings;
         }
 
         public void addCommon(final TableSeparator aExpressions) {
-            this.commonExpressions = this.commonExpressions.add(aExpressions);
+            this.commonExpressions.add(aExpressions);
         }
 
-        public void add(final Strategy strategy, final String targetName, final TableSeparator filter) {
-            if (strategy == Strategy.BY_NAME) {
-                this.add(this.byNames, targetName, filter);
-            } else {
-                this.add(this.pattern, targetName, filter);
-            }
+        public void add(final TableSeparator setting) {
+            this.settings.add(setting);
         }
 
         public Builder setCommonRenameFunction(final TableRenameStrategy newFunction) {
-            this.commonExpressions = this.commonExpressions.map(builder -> builder.setSplitter(
-                    builder.getSplitter()
-                            .builder()
-                            .setRenameFunction(newFunction)
-                            .build()));
+            this.commonExpressions = this.commonExpressions.stream()
+                    .map(it -> it.map(builder -> builder.setSplitter(
+                            builder.getSplitter()
+                                    .builder()
+                                    .setRenameFunction(newFunction)
+                                    .build())))
+                    .toList();
             return this;
-        }
-
-        protected void add(final Map<String, List<TableSeparator>> byNames, final String targetName, final TableSeparator separator) {
-            final List<TableSeparator> current = byNames.computeIfAbsent(targetName, key -> new ArrayList<>());
-            if (!current.contains(separator)) {
-                current.add(separator);
-            }
         }
     }
 }

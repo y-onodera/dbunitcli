@@ -1,21 +1,9 @@
 {
   "settings": [
     {
-      "name": "test_differentPattern",
-      "keys": [
-        "key"
-      ]
-    },
-    {
       "pattern": "test_",
       "exclude": [
         "columnB"
-      ]
-    },
-    {
-      "pattern": "test_s",
-      "keys": [
-        "testkey"
       ]
     },
     {
@@ -25,6 +13,20 @@
       ],
       "exclude": [
         "column2"
+      ]
+    }
+  ],
+  "commonSettings": [
+    {
+      "name": "test_differentPattern",
+      "keys": [
+        "key"
+      ]
+    },
+    {
+      "pattern": "test_s",
+      "keys": [
+        "testkey"
       ]
     }
   ]

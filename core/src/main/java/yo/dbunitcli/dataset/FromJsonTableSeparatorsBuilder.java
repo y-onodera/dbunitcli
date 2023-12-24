@@ -3,6 +3,7 @@ package yo.dbunitcli.dataset;
 import javax.json.*;
 import java.io.*;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -36,8 +37,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
     public FromJsonTableSeparatorsBuilder load(final File setting) {
         try {
             final JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(setting), "MS932"));
-            final JsonObject settingJson = jsonReader.read()
-                    .asJsonObject();
+            final JsonObject settingJson = jsonReader.read().asJsonObject();
             return this.configureSetting(settingJson)
                     .configureCommonSetting(settingJson)
                     .importSetting(settingJson, setting);
@@ -51,19 +51,12 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
             return this;
         }
         setting.getJsonArray("settings")
-                .forEach(v -> {
-                    final JsonObject json = v.asJsonObject();
-                    if (json.containsKey("name")) {
-                        this.addSettings(json, "name", TableSeparators.Strategy.BY_NAME);
-                    } else if (json.containsKey("pattern")) {
-                        this.addSettings(json, "pattern", TableSeparators.Strategy.PATTERN);
-                    }
-                });
+                .forEach(v -> this.addSettings(v.asJsonObject()));
         return this;
     }
 
-    protected void addSettings(final JsonObject json, final String name, final TableSeparators.Strategy strategy) {
-        this.addTableSeparate(strategy, json, json.getString(name));
+    protected void addSettings(final JsonObject json) {
+        this.addTableSeparate(json, this.getTargetFilter(json));
     }
 
     protected FromJsonTableSeparatorsBuilder configureCommonSetting(final JsonObject setting) {
@@ -125,19 +118,24 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         other.add(this.build());
     }
 
-    protected void addTableSeparate(final TableSeparators.Strategy strategy, final JsonObject json, final String key) {
+    protected void addTableSeparate(final JsonObject json, final Predicate<String> targetFilter) {
         if (json.containsKey("separate")) {
             final JsonArray expressions = json.getJsonArray("separate");
             IntStream.range(0, expressions.size())
                     .mapToObj(expressions::getJsonObject)
-                    .forEach(separate -> this.add(strategy, key, this.getTableSeparator(separate)));
+                    .forEach(separate -> this.add(this.getTableSeparator(separate, targetFilter)));
         } else {
-            this.add(strategy, key, this.getTableSeparator(json));
+            this.add(this.getTableSeparator(json, targetFilter));
         }
     }
 
     protected TableSeparator getTableSeparator(final JsonObject settingJson) {
+        return this.getTableSeparator(settingJson, this.getTargetFilter(settingJson));
+    }
+
+    protected TableSeparator getTableSeparator(final JsonObject settingJson, final Predicate<String> targetFilter) {
         return TableSeparator.builder()
+                .setTargetFilter(targetFilter)
                 .setSplitter(this.getSplitter(settingJson))
                 .setComparisonKeys(this.collectSettings(settingJson, "keys"))
                 .setExpressionColumns(this.collectExpressionColumns(settingJson))
@@ -147,6 +145,24 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
                 .setFilter(this.collectFilters(settingJson))
                 .setDistinct(this.isDistinct(settingJson))
                 .build();
+    }
+
+    protected Predicate<String> getTargetFilter(final JsonObject settingJson) {
+        if (settingJson.containsKey("name")) {
+            if (settingJson.get("name") instanceof JsonString targetName) {
+                return (it) -> it.equals(targetName.getString());
+            } else {
+                final JsonArray names = settingJson.getJsonArray("name");
+                final List<String> nameList = IntStream.range(0, names.size())
+                        .mapToObj(names::getString)
+                        .toList();
+                return nameList::contains;
+            }
+        } else if (settingJson.containsKey("pattern")) {
+            final String targetPattern = settingJson.getString("pattern");
+            return (it) -> it.contains(targetPattern) || targetPattern.equals("*");
+        }
+        return TableSeparator.EVERY;
     }
 
     protected boolean isDistinct(final JsonObject settingJson) {

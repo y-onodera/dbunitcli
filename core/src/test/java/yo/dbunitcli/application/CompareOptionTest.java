@@ -66,7 +66,7 @@ public class CompareOptionTest {
         this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/filter/setting.json"});
         assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewData().getParam().getSrc());
         assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldData().getParam().getSrc());
-        assertEquals(2, this.target.getTableSeparators().byNames().size());
+        assertEquals(2, this.target.getTableSeparators().settings().size());
         final TableSeparator columnadd = this.target.getTableSeparators().getSeparators("columnadd").iterator().next();
         assertEquals(1, columnadd.comparisonKeys().size());
         assertEquals("key", columnadd.comparisonKeys().get(0));

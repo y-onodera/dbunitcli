@@ -7,15 +7,17 @@
       "name": "test_differentPattern"
     },
     {
-      "pattern": "test_",
-      "exclude": [
-        "columnB"
-      ]
-    },
-    {
       "name": "test",
       "exclude": [
         "column2"
+      ]
+    }
+  ],
+  "commonSettings": [
+    {
+      "pattern": "test_",
+      "exclude": [
+        "columnB"
       ]
     }
   ]

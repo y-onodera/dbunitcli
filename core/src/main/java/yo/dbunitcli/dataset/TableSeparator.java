@@ -16,7 +16,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public record TableSeparator(TableSplitter splitter
+public record TableSeparator(Predicate<String> targetFilter
+        , TableSplitter splitter
         , List<String> comparisonKeys
         , ExpressionColumns expressionColumns
         , List<String> includeColumns
@@ -26,12 +27,14 @@ public record TableSeparator(TableSplitter splitter
         , boolean distinct
 ) {
 
+    public static final Predicate<String> EVERY = (it) -> true;
     public static final Predicate<Map<String, Object>> NO_FILTER = it -> Boolean.TRUE;
 
     public static final TableSeparator NONE = builder().build();
 
     public TableSeparator(final Builder builder) {
-        this(builder.getSplitter()
+        this(builder.getTargetFilter()
+                , builder.getSplitter()
                 , new ArrayList<>(builder.getComparisonKeys())
                 , builder.getExpressionColumns().copy()
                 , new ArrayList<>(builder.getIncludeColumns())
@@ -115,6 +118,7 @@ public record TableSeparator(TableSplitter splitter
     }
 
     public static class Builder {
+        private Predicate<String> targetFilter = TableSeparator.EVERY;
         private TableSplitter splitter = TableSplitter.NONE;
         private List<String> comparisonKeys = new ArrayList<>();
         private ExpressionColumns expressionColumns = ExpressionColumns.NONE;
@@ -129,6 +133,7 @@ public record TableSeparator(TableSplitter splitter
         }
 
         public Builder(final TableSeparator tableSeparator) {
+            this.targetFilter = tableSeparator.targetFilter();
             this.splitter = tableSeparator.splitter();
             this.comparisonKeys.addAll(tableSeparator.comparisonKeys());
             this.expressionColumns = tableSeparator.expressionColumns().copy();
@@ -137,6 +142,11 @@ public record TableSeparator(TableSplitter splitter
             this.orderColumns.addAll(tableSeparator.orderColumns());
             this.filter = tableSeparator.filter();
             this.distinct = tableSeparator.distinct();
+        }
+
+        public Builder setTargetFilter(final Predicate<String> targetFilter) {
+            this.targetFilter = targetFilter;
+            return this;
         }
 
         public Builder setSplitter(final TableSplitter splitter) {
@@ -228,6 +238,10 @@ public record TableSeparator(TableSplitter splitter
                 return this.setFilter(otherFilter);
             }
             return this.setFilter(this.filter.and(otherFilter));
+        }
+
+        public Predicate<String> getTargetFilter() {
+            return this.targetFilter;
         }
 
         public TableSplitter getSplitter() {

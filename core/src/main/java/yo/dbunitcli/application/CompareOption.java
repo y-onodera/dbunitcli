@@ -100,9 +100,7 @@ public class CompareOption extends CommandLineOption {
             this.expectData.parseArgument(expandArgs);
             if (Arrays.stream(expandArgs).noneMatch(it -> it.startsWith("-expect.setting"))) {
                 this.expectData.getParam().editColumnSettings(separator ->
-                        separator.add(TableSeparators.Strategy.PATTERN
-                                , "*"
-                                , TableSeparator.builder().build())
+                        separator.add(TableSeparator.builder().build())
                 );
             }
         }
@@ -155,10 +153,8 @@ public class CompareOption extends CommandLineOption {
                         , it -> it.editColumnSettings(separator ->
                                 separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
                                                 .setNewName("TARGET").build())
-                                        .add(TableSeparators.Strategy.PATTERN
-                                                , "*"
-                                                , TableSeparator.builder().setComparisonKeys(List.of("NAME"))
-                                                        .build())
+                                        .add(TableSeparator.builder().setComparisonKeys(List.of("NAME"))
+                                                .build())
                         )
                 );
         return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
@@ -170,10 +166,8 @@ public class CompareOption extends CommandLineOption {
                         , it -> it.editColumnSettings(separator ->
                                 separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
                                                 .setNewName("TARGET").build())
-                                        .add(TableSeparators.Strategy.PATTERN
-                                                , "*"
-                                                , TableSeparator.builder().setComparisonKeys(List.of("NAME"))
-                                                        .build())
+                                        .add(TableSeparator.builder().setComparisonKeys(List.of("NAME"))
+                                                .build())
                         )
                 );
         return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
@@ -215,9 +209,8 @@ public class CompareOption extends CommandLineOption {
             throw new CmdLineException(parser, e);
         }
         if (this.targetType != Type.data) {
-            this.tableSeparators = this.tableSeparators.map(separator -> separator.add(TableSeparators.Strategy.PATTERN
-                    , "*"
-                    , TableSeparator.builder().setComparisonKeys(List.of("NAME")).build())
+            this.tableSeparators = this.tableSeparators.map(separator -> separator.add(TableSeparator.builder()
+                    .setComparisonKeys(List.of("NAME")).build())
             );
         }
     }
