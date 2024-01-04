@@ -1,20 +1,21 @@
 package yo.dbunitcli.dataset;
 
-import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public record TableSeparators(List<TableSeparator> settings,
-                              List<TableSeparator> commonSettings) {
+public record TableSeparators(List<TableSeparator> settings
+        , List<TableSeparator> commonSettings
+        , List<JoinCondition> joins) {
 
     public static final TableSeparators NONE = new Builder().build();
 
     TableSeparators(final Builder builder) {
-        this(new ArrayList<>(builder.getSettings()), builder.commonExpressions);
+        this(new ArrayList<>(builder.getSettings())
+                , new ArrayList<>(builder.getCommonSettings())
+                , new ArrayList<>(builder.getJoins()));
     }
 
     public Builder builder() {
@@ -39,19 +40,13 @@ public record TableSeparators(List<TableSeparator> settings,
         final Set<TableSeparator> result = new HashSet<>(this.settings.stream()
                 .filter(TableSeparator::hasSettings)
                 .filter(it -> it.targetFilter().test(tableName))
-                .map(this.getCommonExpressions(tableName)::add)
+                .map(this.getCommonSettings(tableName)::add)
                 .toList());
         if (result.size() > 0) {
             return result;
         }
-        result.add(this.getCommonExpressions(tableName));
+        result.add(this.getCommonSettings(tableName));
         return result;
-    }
-
-    private TableSeparator getCommonExpressions(final String tableName) {
-        return this.commonSettings.stream()
-                .filter(it -> it.targetFilter().test(tableName))
-                .reduce(TableSeparator.NONE, TableSeparator::add);
     }
 
     public ComparableTableMapper createMapper(final ITableMetaData metaData) {
@@ -69,16 +64,13 @@ public record TableSeparators(List<TableSeparator> settings,
     }
 
     private List<AddSettingTableMetaData> getAddSettingTableMetaData(final ITableMetaData metaData) {
-        return this.addSetting(metaData).stream()
+        return this.addSettings(metaData).stream()
                 .map(it -> {
                     ITableMetaData origin = metaData;
                     AddSettingTableMetaData resultMetaData = it;
-                    if (origin.getTableName().equals(resultMetaData.getTableName()) && origin instanceof AddSettingTableMetaData base) {
-                        resultMetaData = this.addSetting(origin, base.getTableSeparator().add(resultMetaData.getTableSeparator()));
-                    }
                     while (!origin.getTableName().equals(resultMetaData.getTableName())) {
                         origin = resultMetaData;
-                        final List<AddSettingTableMetaData> addSetting = this.addSetting(resultMetaData);
+                        final List<AddSettingTableMetaData> addSetting = this.addSettings(resultMetaData);
                         if (addSetting.size() == 1) {
                             resultMetaData = addSetting.get(0);
                         } else {
@@ -94,37 +86,33 @@ public record TableSeparators(List<TableSeparator> settings,
                 .collect(Collectors.toList());
     }
 
-    private List<AddSettingTableMetaData> addSetting(final ITableMetaData originMetaData) {
+    private List<AddSettingTableMetaData> addSettings(final ITableMetaData originMetaData) {
         return this.getSeparators(originMetaData.getTableName()).stream()
-                .map(it -> this.addSetting(originMetaData, it))
+                .map(it -> it.addSetting(originMetaData))
                 .collect(Collectors.toList());
     }
 
-    private AddSettingTableMetaData addSetting(final ITableMetaData originMetaData, final TableSeparator tableSeparator) {
-        final Column[] comparisonKeys = tableSeparator.getComparisonKeys();
-        try {
-            Column[] primaryKey = originMetaData.getPrimaryKeys();
-            if (comparisonKeys.length > 0) {
-                primaryKey = comparisonKeys;
-            }
-            return new AddSettingTableMetaData(originMetaData, primaryKey, tableSeparator);
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
+    private TableSeparator getCommonSettings(final String tableName) {
+        return this.commonSettings.stream()
+                .filter(it -> it.targetFilter().test(tableName))
+                .reduce(TableSeparator.NONE, TableSeparator::add);
     }
 
     public static class Builder {
-        private List<TableSeparator> commonExpressions = new ArrayList<>();
+        private List<TableSeparator> commonSettings = new ArrayList<>();
 
         private final List<TableSeparator> settings = new ArrayList<>();
 
+        private final List<JoinCondition> joins = new ArrayList<>();
+
         public Builder() {
-            this.commonExpressions.add(TableSeparator.NONE);
+            this.commonSettings.add(TableSeparator.NONE);
         }
 
         public Builder add(final TableSeparators tableSeparators) {
-            this.settings.addAll(tableSeparators.settings);
-            this.commonExpressions.addAll(tableSeparators.commonSettings);
+            this.settings.addAll(tableSeparators.settings());
+            this.commonSettings.addAll(tableSeparators.commonSettings());
+            this.joins.addAll(tableSeparators.joins());
             return this;
         }
 
@@ -136,16 +124,28 @@ public record TableSeparators(List<TableSeparator> settings,
             return this.settings;
         }
 
-        public void addCommon(final TableSeparator aExpressions) {
-            this.commonExpressions.add(aExpressions);
+        public List<TableSeparator> getCommonSettings() {
+            return this.commonSettings;
         }
 
-        public void add(final TableSeparator setting) {
+        public List<JoinCondition> getJoins() {
+            return this.joins;
+        }
+
+        public void addSetting(final TableSeparator setting) {
             this.settings.add(setting);
         }
 
+        public void addCommon(final TableSeparator aExpressions) {
+            this.commonSettings.add(aExpressions);
+        }
+
+        public void addJoin(final JoinCondition join) {
+            this.joins.add(join);
+        }
+
         public Builder setCommonRenameFunction(final TableRenameStrategy newFunction) {
-            this.commonExpressions = this.commonExpressions.stream()
+            this.commonSettings = this.commonSettings.stream()
                     .map(it -> it.map(builder -> builder.setSplitter(
                             builder.getSplitter()
                                     .builder()
@@ -154,5 +154,6 @@ public record TableSeparators(List<TableSeparator> settings,
                     .toList();
             return this;
         }
+
     }
 }

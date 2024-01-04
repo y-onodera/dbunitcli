@@ -100,7 +100,7 @@ public class CompareOption extends CommandLineOption {
             this.expectData.parseArgument(expandArgs);
             if (Arrays.stream(expandArgs).noneMatch(it -> it.startsWith("-expect.setting"))) {
                 this.expectData.getParam().editColumnSettings(separator ->
-                        separator.add(TableSeparator.builder().build())
+                        separator.addSetting(TableSeparator.builder().build())
                 );
             }
         }
@@ -153,7 +153,7 @@ public class CompareOption extends CommandLineOption {
                         , it -> it.editColumnSettings(separator ->
                                 separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
                                                 .setNewName("TARGET").build())
-                                        .add(TableSeparator.builder().setComparisonKeys(List.of("NAME"))
+                                        .addSetting(TableSeparator.builder().setComparisonKeys(List.of("NAME"))
                                                 .build())
                         )
                 );
@@ -166,7 +166,7 @@ public class CompareOption extends CommandLineOption {
                         , it -> it.editColumnSettings(separator ->
                                 separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
                                                 .setNewName("TARGET").build())
-                                        .add(TableSeparator.builder().setComparisonKeys(List.of("NAME"))
+                                        .addSetting(TableSeparator.builder().setComparisonKeys(List.of("NAME"))
                                                 .build())
                         )
                 );
@@ -209,7 +209,7 @@ public class CompareOption extends CommandLineOption {
             throw new CmdLineException(parser, e);
         }
         if (this.targetType != Type.data) {
-            this.tableSeparators = this.tableSeparators.map(separator -> separator.add(TableSeparator.builder()
+            this.tableSeparators = this.tableSeparators.map(separator -> separator.addSetting(TableSeparator.builder()
                     .setComparisonKeys(List.of("NAME")).build())
             );
         }

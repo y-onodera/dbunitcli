@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final String tableName;
@@ -92,10 +93,6 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         return this.distinct || this.isPresetNeedDistinct();
     }
 
-    protected boolean isPresetNeedDistinct() {
-        return this.preset != null && this.preset.isNeedDistinct();
-    }
-
     public Object[] applySetting(final Object[] values) {
         return this.applySetting(values, this.preset != null);
     }
@@ -132,6 +129,18 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
                 .toList();
     }
 
+    public Column[] getOrderColumns() {
+        return this.tableSeparator.getOrderColumns();
+    }
+
+    public boolean isSorted() {
+        return this.getOrderColumns().length > 0;
+    }
+
+    protected boolean isPresetNeedDistinct() {
+        return this.preset != null && this.preset.isNeedDistinct();
+    }
+
     protected Object[] applySetting(final Object[] values, final boolean applyPreset) {
         Object[] applySettings = values;
         if (applyPreset) {
@@ -148,7 +157,7 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     }
 
     protected Map<String, Object> rowToMap(final Object[] row) {
-        final Map<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = new LinkedHashMap<>();
         IntStream.range(0, row.length).forEach(i -> map.put(this.columns[i].getColumnName(), row[i]));
         return map;
     }
@@ -223,10 +232,6 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         }
     }
 
-    public Column[] getOrderColumns() {
-        return this.tableSeparator.getOrderColumns();
-    }
-
     @Override
     public String toString() {
         return "AddSettingTableMetaData{" +
@@ -246,15 +251,27 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
 
         private static final BiPredicate<List<Object[]>, Object[]> DISTINCT_PREDICATE = (newRows, row) -> newRows.stream().noneMatch(it -> Arrays.equals(it, row));
 
+        public Rows() {
+            this(new ArrayList<>(), new ArrayList<>());
+        }
+
         public Rows(final Collection<Object[]> rows, final Collection<Integer> filteredRowIndexes) {
             this(new ArrayList<>(rows), new ArrayList<>(filteredRowIndexes));
+        }
+
+        public Object[] get(final int index) {
+            return this.rows().get(index);
+        }
+
+        public Stream<Object[]> stream() {
+            return this.rows.stream();
         }
 
         public int size() {
             return this.rows().size();
         }
 
-        public boolean filtered() {
+        public boolean isFiltered() {
             return this.filteredRowIndexes().size() > 0;
         }
 
@@ -273,7 +290,7 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
                 final Object[] row = rowFunction.apply(this.rows.get(i));
                 if (row != null && reduceCondition.test(newRows, row)) {
                     newRows.add(row);
-                    if (this.filtered()) {
+                    if (this.isFiltered()) {
                         newFilteredRowIndexes.add(this.filteredRowIndexes.get(i));
                     }
                 }

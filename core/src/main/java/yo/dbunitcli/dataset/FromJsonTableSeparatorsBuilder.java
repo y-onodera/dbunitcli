@@ -123,9 +123,11 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
             final JsonArray expressions = json.getJsonArray("separate");
             IntStream.range(0, expressions.size())
                     .mapToObj(expressions::getJsonObject)
-                    .forEach(separate -> this.add(this.getTableSeparator(separate, targetFilter)));
+                    .forEach(separate -> this.addSetting(this.getTableSeparator(separate, targetFilter)));
+        } else if (json.containsKey("join")) {
+            this.addJoin(this.getJoin(json.getJsonObject("join"), this.getTableSeparator(json, targetFilter)));
         } else {
-            this.add(this.getTableSeparator(json, targetFilter));
+            this.addSetting(this.getTableSeparator(json, targetFilter));
         }
     }
 
@@ -161,8 +163,10 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         } else if (settingJson.containsKey("pattern")) {
             final String targetPattern = settingJson.getString("pattern");
             return (it) -> it.contains(targetPattern) || targetPattern.equals("*");
+        } else if (settingJson.containsKey("join")) {
+            return TableSeparator.REJECT_ALL;
         }
-        return TableSeparator.EVERY;
+        return TableSeparator.ACCEPT_ALL;
     }
 
     protected boolean isDistinct(final JsonObject settingJson) {
@@ -194,6 +198,19 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
             return new TableSplitter(newName, prefix, suffix, 0);
         }
         return TableSplitter.NONE;
+    }
+
+    protected JoinCondition getJoin(final JsonObject json, final TableSeparator tableSeparator) {
+        final JsonArray columns = json.getJsonArray("column");
+        final List<String> joinColumns = IntStream.range(0, columns.size())
+                .mapToObj(columns::getString)
+                .toList();
+        return JoinCondition.builder()
+                .setOuter(json.getString("outer"))
+                .setInner(json.getString("inner"))
+                .setOn((outer, inner) -> joinColumns.stream().allMatch(it -> outer.get(it).equals(inner.get(it))))
+                .setTableSeparator(tableSeparator)
+                .build();
     }
 
 }

@@ -5,6 +5,8 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.filter.IColumnFilter;
@@ -27,7 +29,8 @@ public record TableSeparator(Predicate<String> targetFilter
         , boolean distinct
 ) {
 
-    public static final Predicate<String> EVERY = (it) -> true;
+    public static final Predicate<String> ACCEPT_ALL = (it) -> true;
+    public static final Predicate<String> REJECT_ALL = (it) -> false;
     public static final Predicate<Map<String, Object>> NO_FILTER = it -> Boolean.TRUE;
 
     public static final TableSeparator NONE = builder().build();
@@ -43,6 +46,19 @@ public record TableSeparator(Predicate<String> targetFilter
                 , builder.getFilter()
                 , builder.isDistinct()
         );
+    }
+
+    public AddSettingTableMetaData addSetting(final ITableMetaData originMetaData) {
+        final Column[] comparisonKeys = this.getComparisonKeys();
+        try {
+            Column[] primaryKey = originMetaData.getPrimaryKeys();
+            if (comparisonKeys.length > 0) {
+                primaryKey = comparisonKeys;
+            }
+            return new AddSettingTableMetaData(originMetaData, primaryKey, this);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public static Builder builder() {
@@ -118,7 +134,7 @@ public record TableSeparator(Predicate<String> targetFilter
     }
 
     public static class Builder {
-        private Predicate<String> targetFilter = TableSeparator.EVERY;
+        private Predicate<String> targetFilter = TableSeparator.ACCEPT_ALL;
         private TableSplitter splitter = TableSplitter.NONE;
         private List<String> comparisonKeys = new ArrayList<>();
         private ExpressionColumns expressionColumns = ExpressionColumns.NONE;
@@ -292,6 +308,5 @@ public record TableSeparator(Predicate<String> targetFilter
             }
             return (map) -> expr.stream().allMatch(it -> Boolean.parseBoolean(it.evaluate(new MapContext(map)).toString()));
         }
-
     }
 }

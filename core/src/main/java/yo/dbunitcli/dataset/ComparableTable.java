@@ -8,32 +8,15 @@ import org.dbunit.dataset.ITableMetaData;
 
 import java.util.*;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
-public class ComparableTable implements ITable {
+public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
+        , AddSettingTableMetaData.Rows rows
+        , Integer[] _sortedIndexes) implements ITable {
 
-    private final AddSettingTableMetaData addSettingTableMetaData;
-
-    private final Column[] orderColumns;
-
-    private final AddSettingTableMetaData.Rows rows;
-
-    private Integer[] _sortedIndexes;
-
-    protected ComparableTable(final ITableMetaData metaData) {
-        this(AddSettingTableMetaData.from(metaData, TableSeparator.NONE), new Column[]{}, new ArrayList<>(), new ArrayList<>());
-    }
-
-    protected ComparableTable(final AddSettingTableMetaData addSettingTableMetaData, final Column[] orderColumns, final Collection<Object[]> rows, final List<Integer> filteredRowIndexes) {
-        this.addSettingTableMetaData = addSettingTableMetaData;
-        this.orderColumns = orderColumns;
-        this.rows = new AddSettingTableMetaData.Rows(rows, filteredRowIndexes);
-    }
-
-    protected ComparableTable(final AddSettingTableMetaData addSettingTableMetaData, final Column[] orderColumns, final AddSettingTableMetaData.Rows rows) {
-        this.addSettingTableMetaData = addSettingTableMetaData;
-        this.orderColumns = orderColumns;
-        this.rows = rows;
+    public ComparableTable(final Builder builder) {
+        this(builder.getAddSettingTableMetaData(), builder.getRows(), builder.getSortedIndexes());
     }
 
     @Override
@@ -43,7 +26,7 @@ public class ComparableTable implements ITable {
 
     @Override
     public int getRowCount() {
-        return this.rows.rows().size();
+        return this.rows.size();
     }
 
     @Override
@@ -53,6 +36,10 @@ public class ComparableTable implements ITable {
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
+    }
+
+    public Stream<Map<String, Object>> stream() {
+        return IntStream.range(0, this.getRowCount()).mapToObj(this::getRowToMap);
     }
 
     public AddSettingTableMetaData.Rows getRows() {
@@ -124,7 +111,7 @@ public class ComparableTable implements ITable {
         if (rowNum < 0 || rowNum >= this.getRowCount()) {
             throw new AssertionError("rowNum " + rowNum + " is out of range;current row size is " + this.getRowCount() + ". metaData:" + this.addSettingTableMetaData);
         }
-        return this.rows.rows().get(this.getIndexBeforeSort(rowNum));
+        return this.rows.get(this.getIndexBeforeSort(rowNum));
     }
 
     public Object[] getRow(final int rowNum, final int columnLength) {
@@ -142,7 +129,7 @@ public class ComparableTable implements ITable {
         return row[j] == null ? NO_VALUE : row[j];
     }
 
-    protected int getOriginalRowIndex(final int sortedIndex) {
+    private int getOriginalRowIndex(final int sortedIndex) {
         final int row = this.getIndexBeforeSort(sortedIndex);
         if (this.addSettingTableMetaData.hasRowFilter()) {
             return this.rows.filteredRowIndexes().get(row);
@@ -150,53 +137,82 @@ public class ComparableTable implements ITable {
         return row;
     }
 
-    protected int getIndexBeforeSort(final int sortedIndex) {
-        if (!this.isSorted()) {
+    private int getIndexBeforeSort(final int sortedIndex) {
+        if (!this.addSettingTableMetaData.isSorted()) {
             return sortedIndex;
-        }
-        if (this._sortedIndexes == null) {
-            final Integer[] sortedIndexes = new Integer[this.rows.rows().size()];
-            for (int i = 0; i < sortedIndexes.length; ++i) {
-                sortedIndexes[i] = i;
-            }
-            final Integer[] columnIndex = Arrays.stream(this.orderColumns).map(it -> {
-                        try {
-                            return this.addSettingTableMetaData.getColumnIndex(it.getColumnName());
-                        } catch (final DataSetException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .toArray(Integer[]::new);
-            Arrays.sort(sortedIndexes, (final Integer i1, final Integer i2) -> {
-                try {
-                    for (int i = 0, j = columnIndex.length; i < j; i++) {
-                        final Object value1 = this.rows.rows().get(i1)[columnIndex[i]];
-                        final Object value2 = this.rows.rows().get(i2)[columnIndex[i]];
-                        if (value1 != null || value2 != null) {
-                            if (value1 == null) {
-                                return -1;
-                            }
-                            if (value2 == null) {
-                                return 1;
-                            }
-                            final int result = this.addSettingTableMetaData.getColumns()[i].getDataType().compare(value1, value2);
-                            if (result != 0) {
-                                return result;
-                            }
-                        }
-                    }
-                    return 0;
-                } catch (final DataSetException var10) {
-                    throw new DatabaseUnitRuntimeException(var10);
-                }
-            });
-            this._sortedIndexes = sortedIndexes;
         }
         return this._sortedIndexes[sortedIndex];
     }
 
-    protected boolean isSorted() {
-        return this.orderColumns.length > 0;
-    }
+    public static class Builder {
+        private final AddSettingTableMetaData addSettingTableMetaData;
+        private AddSettingTableMetaData.Rows rows = new AddSettingTableMetaData.Rows();
 
+        public Builder(final ITableMetaData metaData) {
+            this(AddSettingTableMetaData.from(metaData, TableSeparator.NONE));
+        }
+
+        public Builder(final AddSettingTableMetaData addSettingTableMetaData) {
+            this.addSettingTableMetaData = addSettingTableMetaData;
+        }
+
+        public ComparableTable build() {
+            return new ComparableTable(this);
+        }
+
+        public Builder setRows(final AddSettingTableMetaData.Rows rows) {
+            this.rows = rows;
+            return this;
+        }
+
+        public AddSettingTableMetaData getAddSettingTableMetaData() {
+            return this.addSettingTableMetaData;
+        }
+
+        public AddSettingTableMetaData.Rows getRows() {
+            return this.rows;
+        }
+
+        public Integer[] getSortedIndexes() {
+            if (this.addSettingTableMetaData.isSorted()) {
+                final Integer[] sortedIndexes = new Integer[this.rows.rows().size()];
+                for (int i = 0; i < sortedIndexes.length; ++i) {
+                    sortedIndexes[i] = i;
+                }
+                final Integer[] columnIndex = Arrays.stream(this.addSettingTableMetaData.getOrderColumns()).map(it -> {
+                            try {
+                                return this.addSettingTableMetaData.getColumnIndex(it.getColumnName());
+                            } catch (final DataSetException e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                        .toArray(Integer[]::new);
+                Arrays.sort(sortedIndexes, (final Integer i1, final Integer i2) -> {
+                    try {
+                        for (int i = 0, j = columnIndex.length; i < j; i++) {
+                            final Object value1 = this.rows.rows().get(i1)[columnIndex[i]];
+                            final Object value2 = this.rows.rows().get(i2)[columnIndex[i]];
+                            if (value1 != null || value2 != null) {
+                                if (value1 == null) {
+                                    return -1;
+                                }
+                                if (value2 == null) {
+                                    return 1;
+                                }
+                                final int result = this.addSettingTableMetaData.getColumns()[i].getDataType().compare(value1, value2);
+                                if (result != 0) {
+                                    return result;
+                                }
+                            }
+                        }
+                        return 0;
+                    } catch (final DataSetException var10) {
+                        throw new DatabaseUnitRuntimeException(var10);
+                    }
+                });
+                return sortedIndexes;
+            }
+            return null;
+        }
+    }
 }

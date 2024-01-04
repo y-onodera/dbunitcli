@@ -633,6 +633,11 @@ public class ConvertTest {
         Assert.assertEquals("column1:", result.getValue(3, "columna"));
     }
 
+    @Test
+    public void testConvertWithJoin() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertWithJoin.txt"});
+    }
+
     private static String[] getColumnNames(final ITable split1) throws DataSetException {
         return Arrays.stream(split1.getTableMetaData().getColumns())
                 .map(Column::getColumnName)

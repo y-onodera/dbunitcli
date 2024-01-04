@@ -4,10 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.*;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ComparableDataSetImpl extends AbstractDataSet implements ComparableDataSet {
@@ -26,6 +24,8 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     private final Map<String, Integer> alreadyWrite;
 
+    private final List<ComparableTableJoin> joins;
+
     public ComparableDataSetImpl(final ComparableDataSetProducer producer) {
         super(false);
         this.producer = producer;
@@ -33,6 +33,10 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
         this.tableSeparators = this.param.tableSeparators();
         this.converter = this.param.converter();
         this.alreadyWrite = new HashMap<>();
+        this.joins = this.tableSeparators.joins()
+                .stream()
+                .map(ComparableTableJoin::new)
+                .collect(Collectors.toList());
         try {
             this.producer.setConsumer(this);
             this.producer.produce();
@@ -53,6 +57,24 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     @Override
     public void endDataSet() throws DataSetException {
         LOGGER.debug("endDataSet() - start");
+        if (this.joins.size() > 0) {
+            final List<String> joinSource = this.joins.stream()
+                    .flatMap(it -> Stream.of(it.getCondition().outer(), it.getCondition().inner()))
+                    .toList();
+            final OrderedTableNameMap excludeJoinSource = super.createTableNameMap();
+            for (final String tableName : this._orderedTableNameMap.getTableNames()) {
+                if (!joinSource.contains(tableName)) {
+                    excludeJoinSource.add(tableName, this._orderedTableNameMap.get(tableName));
+                }
+            }
+            this._orderedTableNameMap = excludeJoinSource;
+            new ArrayList<>(this.joins).forEach(it -> {
+                this.joins.remove(it);
+                this.startTable(it.createMetaData());
+                it.joinRows().forEach(this::row);
+                this.endTable();
+            });
+        }
         if (this.converter != null) {
             final ITableIterator itr = this.createIterator(false);
             while (itr.next()) {
@@ -64,20 +86,20 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     }
 
     @Override
-    public void startTable(final ITableMetaData metaData) throws DataSetException {
+    public void startTable(final ITableMetaData metaData) {
         LOGGER.debug("startTable(metaData={}) - start", metaData);
         this.mapper = this.tableSeparators.createMapper(metaData);
-        this.mapper.startTable(this.converter, this.alreadyWrite);
+        this.mapper.startTable(this.converter, this.alreadyWrite, this.joins);
     }
 
     @Override
-    public void row(final Object[] values) throws DataSetException {
+    public void row(final Object[] values) {
         LOGGER.debug("row(values={}) - start", values);
         this.mapper.addRow(values);
     }
 
     @Override
-    public void endTable() throws DataSetException {
+    public void endTable() {
         LOGGER.debug("endTable() - start");
         this.mapper.endTable(this._orderedTableNameMap);
         this.mapper = null;

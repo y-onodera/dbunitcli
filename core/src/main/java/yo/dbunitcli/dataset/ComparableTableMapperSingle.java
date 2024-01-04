@@ -1,17 +1,16 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.database.AmbiguousTableNameException;
-import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.OrderedTableNameMap;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ComparableTableMapperSingle implements ComparableTableMapper {
 
     private final AddSettingTableMetaData baseMetaData;
-    private final Column[] orderColumns;
     private final List<Integer> filteredRowIndexes;
     private final Collection<Object[]> rows;
     private final TableSplitter splitter;
@@ -24,20 +23,23 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private int breakKeyCount = 0;
     private IDataSetConverter converter;
     private Map<String, Integer> alreadyWrite;
+    private List<ComparableTableJoin> joins;
 
     public ComparableTableMapperSingle(final AddSettingTableMetaData metaData) {
         this.baseMetaData = metaData;
         this.splitter = metaData.getTableSplitter();
-        this.orderColumns = metaData.getOrderColumns();
         this.metaData = this.splitter.getMetaData(this.baseMetaData, this.no);
         this.rows = new ArrayList<>();
         this.filteredRowIndexes = new ArrayList<>();
     }
 
     @Override
-    public void startTable(final IDataSetConverter converter, final Map<String, Integer> alreadyWrite) {
+    public void startTable(final IDataSetConverter converter, final Map<String, Integer> alreadyWrite, final List<ComparableTableJoin> joins) {
         this.converter = converter;
         this.alreadyWrite = alreadyWrite;
+        this.joins = joins.stream()
+                .filter(it -> it.hasRelation(this.metaData.getTableName()))
+                .collect(Collectors.toList());
         if (this.isEnableRowProcessing() && this.converter.isExportEmptyTable()) {
             this.processingStart();
             this.startTable = true;
@@ -67,29 +69,33 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             if (orderedTableNameMap.containsTable(resultTableName)) {
                 final ComparableTable other = (ComparableTable) orderedTableNameMap.get(resultTableName);
                 final AddSettingTableMetaData.Rows add = other.getRows().add(this.metaData.distinct(this.rows, this.filteredRowIndexes));
-                if (this.metaData.isNeedDistinct()) {
-                    orderedTableNameMap.update(resultTableName, new ComparableTable(this.metaData, this.orderColumns, add.distinct()));
-                } else {
-                    orderedTableNameMap.update(resultTableName, new ComparableTable(this.metaData, this.orderColumns, add));
-                }
+                orderedTableNameMap.update(resultTableName, this.metaData.isNeedDistinct()
+                        ? new ComparableTable.Builder(this.metaData).setRows(add.distinct()).build()
+                        : new ComparableTable.Builder(this.metaData).setRows(add).build());
             } else {
                 try {
                     if (this.splitter.isSplit()) {
                         this.addSplitResultTo(orderedTableNameMap);
                     } else {
-                        orderedTableNameMap.add(resultTableName, this.getResult());
+                        orderedTableNameMap.add(resultTableName, this.lazyProcess());
                     }
                 } catch (final AmbiguousTableNameException e) {
                     throw new AssertionError(e);
                 }
             }
+            this.joins.stream()
+                    .filter(it -> it.getCondition().inner().equals(resultTableName))
+                    .forEach(it -> it.setInner((ComparableTable) orderedTableNameMap.get(resultTableName)));
+            this.joins.stream()
+                    .filter(it -> it.getCondition().outer().equals(resultTableName))
+                    .forEach(it -> it.setOuter((ComparableTable) orderedTableNameMap.get(resultTableName)));
         }
         this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
     }
 
     protected void addSplitResultTo(final OrderedTableNameMap orderedTableNameMap) throws AmbiguousTableNameException {
         final AddSettingTableMetaData.Rows distinctRows = this.baseMetaData.distinct(this.rows, this.filteredRowIndexes);
-        final ComparableTable sorted = new ComparableTable(this.baseMetaData, this.orderColumns, distinctRows);
+        final ComparableTable sorted = new ComparableTable.Builder(this.baseMetaData).setRows(distinctRows).build();
         AddSettingTableMetaData splitMetaData = this.metaData;
         ArrayList<Integer> targetRowIndexes = new ArrayList<>();
         ArrayList<Object[]> targetValues = new ArrayList<>();
@@ -113,7 +119,10 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                 keyCount++;
             }
             if (this.splitter.isLimit(keyCount)) {
-                orderedTableNameMap.add(splitMetaData.getTableName(), new ComparableTable(splitMetaData, this.orderColumns, targetValues, targetRowIndexes));
+                orderedTableNameMap.add(splitMetaData.getTableName()
+                        , new ComparableTable.Builder(splitMetaData)
+                                .setRows(new AddSettingTableMetaData.Rows(targetValues, targetRowIndexes))
+                                .build());
                 targetRowIndexes = new ArrayList<>();
                 targetValues = new ArrayList<>();
                 keyCount = 0;
@@ -121,10 +130,13 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             }
             targetValues.add(row);
             if (this.metaData.hasRowFilter()) {
-                targetRowIndexes.add(this.filteredRowIndexes.get(i));
+                targetRowIndexes.add(distinctRows.filteredRowIndexes().get(i));
             }
         }
-        orderedTableNameMap.add(splitMetaData.getTableName(), new ComparableTable(splitMetaData, this.orderColumns, targetValues, targetRowIndexes));
+        orderedTableNameMap.add(splitMetaData.getTableName()
+                , new ComparableTable.Builder(splitMetaData)
+                        .setRows(new AddSettingTableMetaData.Rows(targetValues, targetRowIndexes))
+                        .build());
     }
 
     protected void processingStart() {
@@ -189,12 +201,17 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                         .toArray(Object[]::new)));
     }
 
-    protected ComparableTable getResult() {
-        return new ComparableTable(this.metaData, this.orderColumns, this.metaData.distinct(this.rows, this.filteredRowIndexes));
+    protected ComparableTable lazyProcess() {
+        return new ComparableTable.Builder(this.metaData)
+                .setRows(this.metaData.distinct(this.rows, this.filteredRowIndexes))
+                .build();
     }
 
     protected boolean isEnableRowProcessing() {
-        return this.converter != null && this.orderColumns.length == 0 && !this.metaData.isNeedDistinct();
+        return this.converter != null
+                && this.metaData.getOrderColumns().length == 0
+                && !this.metaData.isNeedDistinct()
+                && this.joins.size() == 0;
     }
 
     protected int getAddRowCount() {
