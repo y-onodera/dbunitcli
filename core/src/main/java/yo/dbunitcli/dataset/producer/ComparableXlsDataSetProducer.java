@@ -188,8 +188,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
         }
 
         // Handle missing column
-        if (record instanceof MissingCellDummyRecord) {
-            final MissingCellDummyRecord mc = (MissingCellDummyRecord) record;
+        if (record instanceof final MissingCellDummyRecord mc) {
             thisRow = mc.getRow();
             thisColumn = mc.getColumn();
             thisStr = "";
