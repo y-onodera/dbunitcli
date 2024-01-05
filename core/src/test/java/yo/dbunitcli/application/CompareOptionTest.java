@@ -3,7 +3,7 @@ package yo.dbunitcli.application;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import yo.dbunitcli.dataset.TableSeparator;
+import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.File;
@@ -67,9 +67,9 @@ public class CompareOptionTest {
         assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewData().getParam().getSrc());
         assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldData().getParam().getSrc());
         assertEquals(2, this.target.getTableSeparators().settings().size());
-        final TableSeparator columnadd = this.target.getTableSeparators().getSeparators("columnadd").iterator().next();
-        assertEquals(1, columnadd.comparisonKeys().size());
-        assertEquals("key", columnadd.comparisonKeys().get(0));
+        final ComparableTable columnadd = this.target.oldDataSet().getTable("columnadd");
+        assertEquals(1, columnadd.getTableMetaData().getPrimaryKeys().length);
+        assertEquals("key", columnadd.getTableMetaData().getPrimaryKeys()[0].getColumnName());
     }
 
     @Test
@@ -77,9 +77,12 @@ public class CompareOptionTest {
         this.target.parse(new String[]{"@" + this.baseDir + "/paramCompareResultDiffValidExpected.txt"});
         assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewData().getParam().getSrc().getAbsoluteFile());
         assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldData().getParam().getSrc().getAbsoluteFile());
-        final TableSeparator columnadd = this.target.getTableSeparators().getSeparators("columnadd").iterator().next();
-        assertEquals(1, columnadd.comparisonKeys().size());
-        assertEquals("key", columnadd.comparisonKeys().get(0));
+        final ComparableTable columnadd = this.target.oldDataSet().getTable("columnadd");
+        assertEquals(1, columnadd.getTableMetaData().getPrimaryKeys().length);
+        assertEquals("key", columnadd.getTableMetaData().getPrimaryKeys()[0].getColumnName());
+        final ComparableTable columndrop = this.target.oldDataSet().getTable("columndrop");
+        assertEquals(1, columndrop.getTableMetaData().getPrimaryKeys().length);
+        assertEquals("key", columndrop.getTableMetaData().getPrimaryKeys()[0].getColumnName());
     }
 
     @Test
