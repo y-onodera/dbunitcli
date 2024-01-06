@@ -29,11 +29,15 @@ public record TableSeparator(Predicate<String> targetFilter
         , boolean distinct
 ) {
 
-    public static final Predicate<String> ACCEPT_ALL = (it) -> true;
-    public static final Predicate<String> REJECT_ALL = (it) -> false;
+    public static final Predicate<String> ACCEPT_ALL = it -> Boolean.TRUE;
+    public static final Predicate<String> REJECT_ALL = it -> Boolean.FALSE;
     public static final Predicate<Map<String, Object>> NO_FILTER = it -> Boolean.TRUE;
 
     public static final TableSeparator NONE = builder().build();
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public TableSeparator(final Builder builder) {
         this(builder.getTargetFilter()
@@ -59,10 +63,6 @@ public record TableSeparator(Predicate<String> targetFilter
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public TableSeparator map(final Consumer<Builder> mapper) {
@@ -145,7 +145,7 @@ public record TableSeparator(Predicate<String> targetFilter
 
         private boolean distinct = false;
 
-        public Builder() {
+        private Builder() {
         }
 
         public Builder(final TableSeparator tableSeparator) {
@@ -306,7 +306,7 @@ public record TableSeparator(Predicate<String> targetFilter
             if (expr.size() == 0) {
                 return NONE.filter();
             }
-            return (map) -> expr.stream().allMatch(it -> Boolean.parseBoolean(it.evaluate(new MapContext(map)).toString()));
+            return map -> expr.stream().allMatch(it -> Boolean.parseBoolean(it.evaluate(new MapContext(map)).toString()));
         }
     }
 }

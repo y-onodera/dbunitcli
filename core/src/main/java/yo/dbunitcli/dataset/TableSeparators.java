@@ -5,6 +5,7 @@ import org.dbunit.dataset.ITableMetaData;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public record TableSeparators(List<TableSeparator> settings
         , List<TableSeparator> commonSettings
@@ -36,7 +37,49 @@ public record TableSeparators(List<TableSeparator> settings
                 .size() > 0;
     }
 
-    public Collection<TableSeparator> getSeparators(final String tableName) {
+    public ComparableTableMapper createMapper(final ComparableTableJoin join) {
+        final ITableMetaData joinMetadata = join.joinMetaData();
+        return this.createMapper(this.addNewNameSetting(Stream.of(this.getCommonSettings(joinMetadata.getTableName())
+                        .add(join.getCondition().tableSeparator())
+                        .addSetting(joinMetadata))
+                , joinMetadata.getTableName()));
+    }
+
+    public ComparableTableMapper createMapper(final ITableMetaData metaData) {
+        return this.createMapper(this.getAddSettingTableMetaData(metaData));
+    }
+
+    private ComparableTableMapper createMapper(final Stream<AddSettingTableMetaData> metaData) {
+        final List<ComparableTableMapper> results = metaData.map(this::createMapperFrom).collect(Collectors.toList());
+        if (results.size() == 1) {
+            return results.get(0);
+        }
+        return new ComparableTableMapperMulti(results);
+    }
+
+    private ComparableTableMapper createMapperFrom(final AddSettingTableMetaData results) {
+        return new ComparableTableMapperSingle(results);
+    }
+
+    private Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ITableMetaData metaData) {
+        return this.addNewNameSetting(this.addSettings(metaData), metaData.getTableName());
+    }
+
+    private Stream<AddSettingTableMetaData> addNewNameSetting(final Stream<AddSettingTableMetaData> target, final String beforeTableName) {
+        return target.flatMap(it -> {
+            if (!beforeTableName.equals(it.getTableName())) {
+                return this.addNewNameSetting(this.addSettings(it), it.getTableName());
+            }
+            return Stream.of(it);
+        });
+    }
+
+    private Stream<AddSettingTableMetaData> addSettings(final ITableMetaData originMetaData) {
+        return this.getSeparators(originMetaData.getTableName()).stream()
+                .map(it -> it.addSetting(originMetaData));
+    }
+
+    private Collection<TableSeparator> getSeparators(final String tableName) {
         final Set<TableSeparator> result = new HashSet<>(this.settings.stream()
                 .filter(TableSeparator::hasSettings)
                 .filter(it -> it.targetFilter().test(tableName))
@@ -47,49 +90,6 @@ public record TableSeparators(List<TableSeparator> settings
         }
         result.add(this.getCommonSettings(tableName));
         return result;
-    }
-
-    public ComparableTableMapper createMapper(final ITableMetaData metaData) {
-        final List<AddSettingTableMetaData> results = this.getAddSettingTableMetaData(metaData);
-        if (results.size() == 1) {
-            return this.createMapperFrom(results.get(0));
-        }
-        return new ComparableTableMapperMulti(results.stream()
-                .map(this::createMapperFrom)
-                .collect(Collectors.toList()));
-    }
-
-    private ComparableTableMapper createMapperFrom(final AddSettingTableMetaData results) {
-        return new ComparableTableMapperSingle(results);
-    }
-
-    private List<AddSettingTableMetaData> getAddSettingTableMetaData(final ITableMetaData metaData) {
-        return this.addSettings(metaData).stream()
-                .map(it -> {
-                    ITableMetaData origin = metaData;
-                    AddSettingTableMetaData resultMetaData = it;
-                    while (!origin.getTableName().equals(resultMetaData.getTableName())) {
-                        origin = resultMetaData;
-                        final List<AddSettingTableMetaData> addSetting = this.addSettings(resultMetaData);
-                        if (addSetting.size() == 1) {
-                            resultMetaData = addSetting.get(0);
-                        } else {
-                            return addSetting.stream()
-                                    .map(this::getAddSettingTableMetaData)
-                                    .flatMap(Collection::stream)
-                                    .collect(Collectors.toList());
-                        }
-                    }
-                    return Collections.singletonList(resultMetaData);
-                })
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-    }
-
-    private List<AddSettingTableMetaData> addSettings(final ITableMetaData originMetaData) {
-        return this.getSeparators(originMetaData.getTableName()).stream()
-                .map(it -> it.addSetting(originMetaData))
-                .collect(Collectors.toList());
     }
 
     private TableSeparator getCommonSettings(final String tableName) {

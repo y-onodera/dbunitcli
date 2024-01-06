@@ -20,14 +20,6 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
     private final Boolean distinct;
     private final AddSettingTableMetaData preset;
 
-    public static AddSettingTableMetaData from(final ITableMetaData metaData, final TableSeparator tableSeparator) {
-        try {
-            return new AddSettingTableMetaData(metaData, metaData.getPrimaryKeys(), tableSeparator);
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
-    }
-
     public AddSettingTableMetaData(final ITableMetaData delegate
             , final Column[] primaryKeys
             , final TableSeparator tableSeparator) {
@@ -305,7 +297,5 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         public Rows distinct(final UnaryOperator<Object[]> rowFunction) {
             return this.map(rowFunction, DISTINCT_PREDICATE);
         }
-
     }
-
 }

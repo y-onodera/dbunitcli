@@ -2,6 +2,7 @@ package yo.dbunitcli.dataset;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.dbunit.database.AmbiguousTableNameException;
 import org.dbunit.dataset.*;
 
 import java.util.*;
@@ -58,20 +59,12 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     public void endDataSet() throws DataSetException {
         LOGGER.debug("endDataSet() - start");
         if (this.joins.size() > 0) {
-            final List<String> joinSource = this.joins.stream()
-                    .flatMap(it -> Stream.of(it.getCondition().outer(), it.getCondition().inner()))
-                    .toList();
-            final OrderedTableNameMap excludeJoinSource = super.createTableNameMap();
-            for (final String tableName : this._orderedTableNameMap.getTableNames()) {
-                if (!joinSource.contains(tableName)) {
-                    excludeJoinSource.add(tableName, this._orderedTableNameMap.get(tableName));
-                }
-            }
-            this._orderedTableNameMap = excludeJoinSource;
-            new ArrayList<>(this.joins).forEach(it -> {
-                this.joins.remove(it);
-                this.startTable(it.createMetaData());
-                it.joinRows().forEach(this::row);
+            this._orderedTableNameMap = this.orderedTableNameMapExcludeJoins();
+            new ArrayList<>(this.joins).forEach(join -> {
+                this.joins.remove(join);
+                this.mapper = this.tableSeparators.createMapper(join);
+                this.mapper.startTable(this.converter, this.alreadyWrite, this.joins);
+                join.execute().forEach(this::row);
                 this.endTable();
             });
         }
@@ -146,4 +139,18 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
         }
         return new DefaultTableIterator((ITable[]) (this._orderedTableNameMap.orderedValues().toArray(new ITable[0])));
     }
+
+    private OrderedTableNameMap orderedTableNameMapExcludeJoins() throws AmbiguousTableNameException {
+        final List<String> joinSource = this.joins.stream()
+                .flatMap(it -> Stream.of(it.getCondition().outer(), it.getCondition().inner()))
+                .toList();
+        final OrderedTableNameMap excludeJoinSource = super.createTableNameMap();
+        for (final String tableName : this._orderedTableNameMap.getTableNames()) {
+            if (!joinSource.contains(tableName)) {
+                excludeJoinSource.add(tableName, this._orderedTableNameMap.get(tableName));
+            }
+        }
+        return excludeJoinSource;
+    }
+
 }

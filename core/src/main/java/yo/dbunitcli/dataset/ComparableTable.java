@@ -149,7 +149,7 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
         private AddSettingTableMetaData.Rows rows = new AddSettingTableMetaData.Rows();
 
         public Builder(final ITableMetaData metaData) {
-            this(AddSettingTableMetaData.from(metaData, TableSeparator.NONE));
+            this(TableSeparator.NONE.addSetting(metaData));
         }
 
         public Builder(final AddSettingTableMetaData addSettingTableMetaData) {

@@ -30,7 +30,6 @@
       }
     },
     {
-      "tableName": "join",
       "join": {
         "outer": "multi1",
         "inner": "merge",
@@ -38,6 +37,7 @@
           "key"
         ]
       },
+      "tableName": "join",
       "include": [
         "key",
         "columna",
@@ -45,13 +45,30 @@
         "columnc"
       ],
       "number": {
-        "key": "merge_key"
+        "key": "multi1_key"
       },
       "string": {
         "columnab": "merge_columna + multi1_columnb",
         "columnbc": "merge_columnb + multi1_columnc",
         "columnca": "merge_columnc + multi1_columna"
       }
+    },
+    {
+      "name": "join",
+      "separate": [
+        {
+          "tableName": "split1",
+          "filter": [
+            "key < 3"
+          ]
+        },
+        {
+          "tableName": "split2",
+          "filter": [
+            "key > 1"
+          ]
+        }
+      ]
     }
   ],
   "commonSettings": []
