@@ -1,0 +1,55 @@
+{
+  "uid" : "8b22b9fcd0cb3ba9",
+  "name" : "testComparePdfDiffAllPage",
+  "fullName" : "yo.dbunitcli.application.CompareTest.testComparePdfDiffAllPage",
+  "historyId" : "fa9670d38d47b59252e5e4f01bc2d1eb",
+  "time" : {
+    "start" : 1704595309758,
+    "stop" : 1704595310758,
+    "duration" : 1000
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.CompareTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testComparePdfDiffAllPage"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.CompareTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az980-86"
+  }, {
+    "name" : "thread",
+    "value" : "2876@fv-az980-86.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "8b22b9fcd0cb3ba9.json",
+  "parameterValues" : [ ]
+}
