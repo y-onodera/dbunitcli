@@ -19,6 +19,10 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
         this(builder.getAddSettingTableMetaData(), builder.getRows(), builder.getSortedIndexes());
     }
 
+    public String getTableName() {
+        return this.getTableMetaData().getTableName();
+    }
+
     @Override
     public AddSettingTableMetaData getTableMetaData() {
         return this.addSettingTableMetaData;
@@ -193,9 +197,9 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
                         .toArray(Integer[]::new);
                 Arrays.sort(sortedIndexes, (final Integer i1, final Integer i2) -> {
                     try {
-                        for (int i = 0, j = columnIndex.length; i < j; i++) {
-                            final Object value1 = this.rows.rows().get(i1)[columnIndex[i]];
-                            final Object value2 = this.rows.rows().get(i2)[columnIndex[i]];
+                        for (final Integer index : columnIndex) {
+                            final Object value1 = this.rows.rows().get(i1)[index];
+                            final Object value2 = this.rows.rows().get(i2)[index];
                             if (value1 != null || value2 != null) {
                                 if (value1 == null) {
                                     return 1;
@@ -203,7 +207,7 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
                                 if (value2 == null) {
                                     return -1;
                                 }
-                                final int result = this.addSettingTableMetaData.getColumns()[i].getDataType().compare(value1, value2);
+                                final int result = this.addSettingTableMetaData.getColumns()[index].getDataType().compare(value1, value2);
                                 if (result != 0) {
                                     return result;
                                 }
