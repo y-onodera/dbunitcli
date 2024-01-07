@@ -198,10 +198,10 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
                             final Object value2 = this.rows.rows().get(i2)[columnIndex[i]];
                             if (value1 != null || value2 != null) {
                                 if (value1 == null) {
-                                    return -1;
+                                    return 1;
                                 }
                                 if (value2 == null) {
-                                    return 1;
+                                    return -1;
                                 }
                                 final int result = this.addSettingTableMetaData.getColumns()[i].getDataType().compare(value1, value2);
                                 if (result != 0) {

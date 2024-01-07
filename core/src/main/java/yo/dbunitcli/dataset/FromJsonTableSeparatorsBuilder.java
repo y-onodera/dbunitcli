@@ -133,6 +133,10 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
             this.addJoin(this.getJoin(json.getJsonObject("outerJoin")
                     , ComparableTableJoin.Strategy.outerJoin(this.getJoinOn(json.getJsonObject("outerJoin")))
                     , this.getTableSeparator(json, targetFilter)));
+        } else if (json.containsKey("fullJoin")) {
+            this.addJoin(this.getJoin(json.getJsonObject("fullJoin")
+                    , ComparableTableJoin.Strategy.fullJoin(this.getJoinOn(json.getJsonObject("fullJoin")))
+                    , this.getTableSeparator(json, targetFilter)));
         } else {
             this.addSetting(this.getTableSeparator(json, targetFilter));
         }
@@ -170,7 +174,9 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         } else if (settingJson.containsKey("pattern")) {
             final String targetPattern = settingJson.getString("pattern");
             return (it) -> it.contains(targetPattern) || targetPattern.equals("*");
-        } else if (settingJson.containsKey("innerJoin") || settingJson.containsKey("outerJoin")) {
+        } else if (settingJson.containsKey("innerJoin")
+                || settingJson.containsKey("outerJoin")
+                || settingJson.containsKey("fullJoin")) {
             return TableSeparator.REJECT_ALL;
         }
         return TableSeparator.ACCEPT_ALL;

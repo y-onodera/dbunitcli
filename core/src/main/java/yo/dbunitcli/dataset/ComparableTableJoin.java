@@ -3,10 +3,9 @@ package yo.dbunitcli.dataset;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DefaultTableMetaData;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class ComparableTableJoin {
@@ -67,6 +66,10 @@ public class ComparableTableJoin {
             return new InnerJoin(on);
         }
 
+        static Strategy fullJoin(final BiFunction<Map<String, Object>, Map<String, Object>, Boolean> on) {
+            return new FullJoin(on);
+        }
+
         Stream<Object[]> execute(ComparableTable left, ComparableTable right);
     }
 
@@ -98,6 +101,35 @@ public class ComparableTableJoin {
                                 , Optional.of(notJoined).stream()
                         ).filter(it -> !(firstReturn[0] != null && it == notJoined));
                     });
+        }
+    }
+
+    private record FullJoin(BiFunction<Map<String, Object>, Map<String, Object>, Boolean> on) implements Strategy {
+        @Override
+        public Stream<Object[]> execute(final ComparableTable left, final ComparableTable right) {
+            final Set<Integer> joinRows = new HashSet<>();
+            return Stream.concat(left.stream()
+                            .flatMap(outerRow -> {
+                                final Object[] firstReturn = new Object[1];
+                                final Object[] notJoined = Stream.concat(outerRow.values().stream()
+                                        , Arrays.stream(new Object[right.getColumnNumbers()])).toArray();
+                                return Stream.concat(
+                                        IntStream.range(0, right.getRowCount())
+                                                .filter(rowNum -> this.on().apply(outerRow, right.getRowToMap(rowNum)))
+                                                .mapToObj(rowNum -> {
+                                                    firstReturn[0] = "";
+                                                    joinRows.add(rowNum);
+                                                    return Stream.concat(outerRow.values().stream()
+                                                            , right.getRowToMap(rowNum).values().stream()).toArray();
+                                                })
+                                        , Optional.of(notJoined).stream()
+                                ).filter(it -> !(firstReturn[0] != null && it == notJoined));
+                            })
+                    , IntStream.range(0, right.getRowCount())
+                            .filter(rowNum -> !joinRows.contains(rowNum))
+                            .mapToObj(rest -> Stream.concat(Arrays.stream(new Object[left.getColumnNumbers()])
+                                    , right.getRowToMap(rest).values().stream()).toArray())
+            );
         }
     }
 }
