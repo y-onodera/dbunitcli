@@ -1,19 +1,19 @@
 {
   "total" : 14,
   "items" : [ {
-    "uid" : "27fc8157e23299733182df5bab2c2e02",
-    "name" : "yo.dbunitcli.application.CompareTest",
+    "uid" : "8e84c10bd9ee42c087cd6cfb1c7f6fa9",
+    "name" : "yo.dbunitcli.application.ConvertTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 28,
+      "passed" : 29,
       "unknown" : 0,
-      "total" : 28
+      "total" : 29
     }
   }, {
-    "uid" : "8e84c10bd9ee42c087cd6cfb1c7f6fa9",
-    "name" : "yo.dbunitcli.application.ConvertTest",
+    "uid" : "27fc8157e23299733182df5bab2c2e02",
+    "name" : "yo.dbunitcli.application.CompareTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,

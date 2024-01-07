@@ -1,0 +1,55 @@
+{
+  "uid" : "d3244ec1a3502409",
+  "name" : "testTableNameMapNoSortToXls",
+  "fullName" : "yo.dbunitcli.application.ConvertTest.testTableNameMapNoSortToXls",
+  "historyId" : "b482d54a09451e628bff0e98ffce7a94",
+  "time" : {
+    "start" : 1704623487217,
+    "stop" : 1704623487326,
+    "duration" : 109
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testTableNameMapNoSortToXls"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az731-105"
+  }, {
+    "name" : "thread",
+    "value" : "6908@fv-az731-105.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "d3244ec1a3502409.json",
+  "parameterValues" : [ ]
+}
