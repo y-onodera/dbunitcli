@@ -39,7 +39,7 @@ public class ComparableTableJoin {
     }
 
     public DefaultTableMetaData joinMetaData() {
-        return new DefaultTableMetaData(this.outer.getTableMetaData().getTableName()
+        return new DefaultTableMetaData(this.outer.getTableMetaData().getTableName() + "_with_" + this.inner.getTableMetaData().getTableName()
                 , Stream.concat(this.convertColumnName(this.outer.getTableMetaData())
                         , this.convertColumnName(this.inner.getTableMetaData()))
                 .toArray(Column[]::new)
