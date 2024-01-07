@@ -46,7 +46,7 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
         return IntStream.range(0, this.getRowCount()).mapToObj(this::getRowToMap);
     }
 
-    public int getColumnNumbers() {
+    public int getNumberOfColumns() {
         return this.addSettingTableMetaData.columns().length;
     }
 

@@ -195,9 +195,8 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
-        final ITable merged = actual.getTables()[0];
-        Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
-        Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
+        final ComparableTable merged = actual.getTable("merge");
+        Assert.assertEquals(4, merged.getNumberOfColumns());
         Assert.assertEquals(6, merged.getRowCount());
         Assert.assertEquals("1", merged.getValue(0, "key"));
         Assert.assertEquals("2", merged.getValue(0, "columna"));
@@ -222,9 +221,8 @@ public class ConvertTest {
                                 .setEncoding("UTF-8")
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
-        final ITable merged = actual.getTables()[0];
-        Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
-        Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
+        final ComparableTable merged = actual.getTable("merge");
+        Assert.assertEquals(4, merged.getNumberOfColumns());
         Assert.assertEquals(6, merged.getRowCount());
         Assert.assertEquals("10", merged.getValue(0, "key"));
         Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
@@ -248,9 +246,8 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xls)
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
-        final ITable merged = actual.getTables()[0];
-        Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
-        Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
+        final ComparableTable merged = actual.getTable("merge");
+        Assert.assertEquals(4, merged.getNumberOfColumns());
         Assert.assertEquals(6, merged.getRowCount());
         Assert.assertEquals("10", merged.getValue(0, "key"));
         Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
@@ -274,9 +271,8 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
-        final ITable merged = actual.getTables()[0];
-        Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
-        Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
+        final ComparableTable merged = actual.getTable("merge");
+        Assert.assertEquals(4, merged.getNumberOfColumns());
         Assert.assertEquals(6, merged.getRowCount());
         Assert.assertEquals("10", merged.getValue(0, "key"));
         Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
@@ -300,9 +296,8 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xls)
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
-        final ITable merged = actual.getTables()[0];
-        Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
-        Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
+        final ComparableTable merged = actual.getTable("merge");
+        Assert.assertEquals(4, merged.getNumberOfColumns());
         Assert.assertEquals(6, merged.getRowCount());
         Assert.assertEquals("10", merged.getValue(0, "key"));
         Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
@@ -326,9 +321,8 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         Assert.assertEquals(1, actual.getTableNames().length);
-        final ITable merged = actual.getTables()[0];
-        Assert.assertEquals("merge", merged.getTableMetaData().getTableName());
-        Assert.assertEquals(4, merged.getTableMetaData().getColumns().length);
+        final ComparableTable merged = actual.getTable("merge");
+        Assert.assertEquals(4, merged.getNumberOfColumns());
         Assert.assertEquals(6, merged.getRowCount());
         Assert.assertEquals("10", merged.getValue(0, "key"));
         Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
@@ -643,9 +637,9 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
-        final ITable result = actual.getTable("multi1_with_merge");
+        final ComparableTable result = actual.getTable("multi1_with_merge");
         Assert.assertEquals(3, result.getRowCount());
-        Assert.assertEquals(8, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals(8, result.getNumberOfColumns());
         Assert.assertEquals("2", result.getValue(0, "multi1_key"));
         Assert.assertEquals("あ\nいうえお", result.getValue(0, "multi1_columna"));
         Assert.assertEquals("test", result.getValue(0, "multi1_columnb"));
@@ -682,9 +676,9 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
-        final ITable result = actual.getTable("multi1_with_merge");
+        final ComparableTable result = actual.getTable("multi1_with_merge");
         Assert.assertEquals(4, result.getRowCount());
-        Assert.assertEquals(8, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals(8, result.getNumberOfColumns());
         Assert.assertEquals("2", result.getValue(0, "multi1_key"));
         Assert.assertEquals("あ\nいうえお", result.getValue(0, "multi1_columna"));
         Assert.assertEquals("test", result.getValue(0, "multi1_columnb"));
@@ -729,9 +723,9 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
-        final ITable result = actual.getTable("multi1_with_merge");
+        final ComparableTable result = actual.getTable("multi1_with_merge");
         Assert.assertEquals(2, result.getRowCount());
-        Assert.assertEquals(8, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals(8, result.getNumberOfColumns());
         Assert.assertEquals("10", result.getValue(0, "multi1_key"));
         Assert.assertEquals("column1:2", result.getValue(0, "multi1_columna"));
         Assert.assertEquals("column2:3", result.getValue(0, "multi1_columnb"));
@@ -760,9 +754,9 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
-        final ITable result = actual.getTable("multi1_with_merge");
+        final ComparableTable result = actual.getTable("multi1_with_merge");
         Assert.assertEquals(5, result.getRowCount());
-        Assert.assertEquals(8, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals(8, result.getNumberOfColumns());
         Assert.assertEquals("10", result.getValue(0, "multi1_key"));
         Assert.assertEquals("column1:2", result.getValue(0, "multi1_columna"));
         Assert.assertEquals("column2:3", result.getValue(0, "multi1_columnb"));
@@ -815,16 +809,16 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
-        ITable result = actual.getTable("split_00");
+        ComparableTable result = actual.getTable("split_00");
         Assert.assertEquals(1, result.getRowCount());
-        Assert.assertEquals(4, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals(4, result.getNumberOfColumns());
         Assert.assertEquals("10", result.getValue(0, "key"));
         Assert.assertEquals("column1:2column2:3", result.getValue(0, "columnab"));
         Assert.assertEquals("column2:3column3:4", result.getValue(0, "columnbc"));
         Assert.assertEquals("column3:4column1:2", result.getValue(0, "columnca"));
         result = actual.getTable("split_01");
         Assert.assertEquals(1, result.getRowCount());
-        Assert.assertEquals(4, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals(4, result.getNumberOfColumns());
         Assert.assertEquals("2", result.getValue(0, "key"));
         Assert.assertEquals("あ\nいうえおtest", result.getValue(0, "columnab"));
         Assert.assertEquals("testcolumn3:5", result.getValue(0, "columnbc"));
@@ -841,16 +835,16 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
-        ITable result = actual.getTable("under3");
+        ComparableTable result = actual.getTable("under3");
         Assert.assertEquals(1, result.getRowCount());
-        Assert.assertEquals(4, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals(4, result.getNumberOfColumns());
         Assert.assertEquals("2", result.getValue(0, "key"));
         Assert.assertEquals("あ\nいうえおtest", result.getValue(0, "columnab"));
         Assert.assertEquals("testcolumn3:5", result.getValue(0, "columnbc"));
         Assert.assertEquals("column3:5あ\nいうえお", result.getValue(0, "columnca"));
         result = actual.getTable("over1");
         Assert.assertEquals(2, result.getRowCount());
-        Assert.assertEquals(4, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals(4, result.getNumberOfColumns());
         Assert.assertEquals("10", result.getValue(0, "key"));
         Assert.assertEquals("column1:2column2:3", result.getValue(0, "columnab"));
         Assert.assertEquals("column2:3column3:4", result.getValue(0, "columnbc"));

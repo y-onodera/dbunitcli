@@ -128,7 +128,7 @@ public class ComparableTableJoin {
                     .flatMap(outerRow -> {
                         final Object[] firstReturn = new Object[1];
                         final Object[] notJoined = Stream.concat(outerRow.values().stream()
-                                , Arrays.stream(new Object[right.getColumnNumbers()])).toArray();
+                                , Arrays.stream(new Object[right.getNumberOfColumns()])).toArray();
                         return Stream.concat(
                                 right.stream()
                                         .filter(innerRow -> on.apply(outerRow, innerRow))
@@ -151,7 +151,7 @@ public class ComparableTableJoin {
                             .flatMap(outerRow -> {
                                 final Object[] firstReturn = new Object[1];
                                 final Object[] notJoined = Stream.concat(outerRow.values().stream()
-                                        , Arrays.stream(new Object[right.getColumnNumbers()])).toArray();
+                                        , Arrays.stream(new Object[right.getNumberOfColumns()])).toArray();
                                 return Stream.concat(
                                         IntStream.range(0, right.getRowCount())
                                                 .filter(rowNum -> on.apply(outerRow, right.getRowToMap(rowNum)))
@@ -166,7 +166,7 @@ public class ComparableTableJoin {
                             })
                     , IntStream.range(0, right.getRowCount())
                             .filter(rowNum -> !joinRows.contains(rowNum))
-                            .mapToObj(rest -> Stream.concat(Arrays.stream(new Object[left.getColumnNumbers()])
+                            .mapToObj(rest -> Stream.concat(Arrays.stream(new Object[left.getNumberOfColumns()])
                                     , right.getRowToMap(rest).values().stream()).toArray())
             );
         }
