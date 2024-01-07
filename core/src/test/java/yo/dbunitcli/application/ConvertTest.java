@@ -751,6 +751,61 @@ public class ConvertTest {
     }
 
     @Test
+    public void testConvertInnerJoinByExpression() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertInnerJoinByExpression.txt"});
+        final File src = new File(this.baseDir + "/join/result/paramConvertInnerJoinByExpression.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        final ITable result = actual.getTable("multi1_with_merge");
+        Assert.assertEquals(5, result.getRowCount());
+        Assert.assertEquals(8, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals("10", result.getValue(0, "multi1_key"));
+        Assert.assertEquals("column1:2", result.getValue(0, "multi1_columna"));
+        Assert.assertEquals("column2:3", result.getValue(0, "multi1_columnb"));
+        Assert.assertEquals("column3:4", result.getValue(0, "multi1_columnc"));
+        Assert.assertEquals("2", result.getValue(0, "merge_key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(0, "merge_columna"));
+        Assert.assertEquals("test", result.getValue(0, "merge_columnb"));
+        Assert.assertEquals("column3:5", result.getValue(0, "merge_columnc"));
+        Assert.assertEquals("10", result.getValue(1, "multi1_key"));
+        Assert.assertEquals("column1:2", result.getValue(1, "multi1_columna"));
+        Assert.assertEquals("column2:3", result.getValue(1, "multi1_columnb"));
+        Assert.assertEquals("column3:4", result.getValue(1, "multi1_columnc"));
+        Assert.assertEquals("3", result.getValue(1, "merge_key"));
+        Assert.assertEquals("", result.getValue(1, "merge_columna"));
+        Assert.assertEquals("", result.getValue(1, "merge_columnb"));
+        Assert.assertEquals("column3:", result.getValue(1, "merge_columnc"));
+        Assert.assertEquals("30", result.getValue(2, "multi1_key"));
+        Assert.assertEquals("column1:", result.getValue(2, "multi1_columna"));
+        Assert.assertEquals("column2:", result.getValue(2, "multi1_columnb"));
+        Assert.assertEquals("column3:", result.getValue(2, "multi1_columnc"));
+        Assert.assertEquals("2", result.getValue(2, "merge_key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(2, "merge_columna"));
+        Assert.assertEquals("test", result.getValue(2, "merge_columnb"));
+        Assert.assertEquals("column3:5", result.getValue(2, "merge_columnc"));
+        Assert.assertEquals("30", result.getValue(3, "multi1_key"));
+        Assert.assertEquals("column1:", result.getValue(3, "multi1_columna"));
+        Assert.assertEquals("column2:", result.getValue(3, "multi1_columnb"));
+        Assert.assertEquals("column3:", result.getValue(3, "multi1_columnc"));
+        Assert.assertEquals("3", result.getValue(3, "merge_key"));
+        Assert.assertEquals("", result.getValue(3, "merge_columna"));
+        Assert.assertEquals("", result.getValue(3, "merge_columnb"));
+        Assert.assertEquals("column3:", result.getValue(3, "merge_columnc"));
+        Assert.assertEquals("30", result.getValue(4, "multi1_key"));
+        Assert.assertEquals("column1:", result.getValue(4, "multi1_columna"));
+        Assert.assertEquals("column2:", result.getValue(4, "multi1_columnb"));
+        Assert.assertEquals("column3:", result.getValue(4, "multi1_columnc"));
+        Assert.assertEquals("10", result.getValue(4, "merge_key"));
+        Assert.assertEquals("column1:2", result.getValue(4, "merge_columna"));
+        Assert.assertEquals("column2:3", result.getValue(4, "merge_columnb"));
+        Assert.assertEquals("column3:4", result.getValue(4, "merge_columnc"));
+    }
+
+    @Test
     public void testConvertInnerJoinWithSplit() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertInnerJoinWithSplit.txt"});
         final File src = new File(this.baseDir + "/join/result/paramConvertInnerJoinWithSplit.xlsx");

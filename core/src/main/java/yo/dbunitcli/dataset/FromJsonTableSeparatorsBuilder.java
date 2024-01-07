@@ -3,7 +3,6 @@ package yo.dbunitcli.dataset;
 import javax.json.*;
 import java.io.*;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -127,15 +126,15 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
                     .forEach(separate -> this.addSetting(this.getTableSeparator(separate, targetFilter)));
         } else if (json.containsKey("innerJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("innerJoin")
-                    , ComparableTableJoin.Strategy.innerJoin(this.getJoinOn(json.getJsonObject("innerJoin")))
+                    , ComparableTableJoin.innerJoin(this.getJoinOn(json.getJsonObject("innerJoin")))
                     , this.getTableSeparator(json, targetFilter)));
         } else if (json.containsKey("outerJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("outerJoin")
-                    , ComparableTableJoin.Strategy.outerJoin(this.getJoinOn(json.getJsonObject("outerJoin")))
+                    , ComparableTableJoin.outerJoin(this.getJoinOn(json.getJsonObject("outerJoin")))
                     , this.getTableSeparator(json, targetFilter)));
         } else if (json.containsKey("fullJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("fullJoin")
-                    , ComparableTableJoin.Strategy.fullJoin(this.getJoinOn(json.getJsonObject("fullJoin")))
+                    , ComparableTableJoin.fullJoin(this.getJoinOn(json.getJsonObject("fullJoin")))
                     , this.getTableSeparator(json, targetFilter)));
         } else {
             this.addSetting(this.getTableSeparator(json, targetFilter));
@@ -222,12 +221,14 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
                 .build();
     }
 
-    protected BiFunction<Map<String, Object>, Map<String, Object>, Boolean> getJoinOn(final JsonObject json) {
-        final JsonArray columns = json.getJsonArray("column");
-        final List<String> joinColumns = IntStream.range(0, columns.size())
-                .mapToObj(columns::getString)
-                .toList();
-        return (left, right) -> joinColumns.stream().allMatch(it -> left.get(it).equals(right.get(it)));
+    protected ComparableTableJoin.ConditionBuilder getJoinOn(final JsonObject json) {
+        if (json.containsKey("column")) {
+            final JsonArray columns = json.getJsonArray("column");
+            return ComparableTableJoin.equals(IntStream.range(0, columns.size())
+                    .mapToObj(columns::getString)
+                    .collect(Collectors.toSet()));
+        }
+        return ComparableTableJoin.eval(json.getString("on"));
     }
 
 }

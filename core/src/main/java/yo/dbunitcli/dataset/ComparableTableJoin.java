@@ -1,5 +1,8 @@
 package yo.dbunitcli.dataset;
 
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlExpression;
+import org.apache.commons.jexl3.MapContext;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DefaultTableMetaData;
 
@@ -12,6 +15,26 @@ public class ComparableTableJoin {
     private final JoinCondition condition;
     private ComparableTable left;
     private ComparableTable right;
+
+    public static Strategy outerJoin(final ConditionBuilder on) {
+        return new OuterJoin(on);
+    }
+
+    public static Strategy innerJoin(final ConditionBuilder on) {
+        return new InnerJoin(on);
+    }
+
+    public static Strategy fullJoin(final ConditionBuilder on) {
+        return new FullJoin(on);
+    }
+
+    public static ConditionBuilder equals(final Set<String> columns) {
+        return new Equals(columns);
+    }
+
+    public static ConditionBuilder eval(final String expression) {
+        return new Eval(expression);
+    }
 
     public ComparableTableJoin(final JoinCondition condition) {
         this.condition = condition;
@@ -55,37 +78,52 @@ public class ComparableTableJoin {
         return Arrays.stream(columns).map(it -> new Column(tableMetaData.getTableName() + "_" + it.getColumnName(), it.getDataType()));
     }
 
+    public interface ConditionBuilder {
+        BiFunction<Map<String, Object>, Map<String, Object>, Boolean> build(ComparableTable left, ComparableTable right);
+
+    }
+
+    private record Equals(Set<String> columns) implements ConditionBuilder {
+        @Override
+        public BiFunction<Map<String, Object>, Map<String, Object>, Boolean> build(final ComparableTable left, final ComparableTable right) {
+            return (leftRow, rightRow) -> this.columns.stream().allMatch(it -> leftRow.get(it).equals(rightRow.get(it)));
+        }
+    }
+
+    private record Eval(String expression) implements ConditionBuilder {
+        @Override
+        public BiFunction<Map<String, Object>, Map<String, Object>, Boolean> build(final ComparableTable left, final ComparableTable right) {
+            final JexlExpression jexl = new JexlBuilder().create().createExpression(this.expression());
+            return (leftRow, rightRow) -> {
+                final Map<String, Object> param = new HashMap<>();
+                leftRow.forEach((key, value) -> param.put(left.getTableName() + "_" + key, value));
+                rightRow.forEach((key, value) -> param.put(right.getTableName() + "_" + key, value));
+                return Boolean.parseBoolean(jexl.evaluate(new MapContext(param)).toString());
+            };
+        }
+    }
+
     public interface Strategy {
         Strategy NOT_JOIN = (left, right) -> Stream.empty();
-
-        static Strategy outerJoin(final BiFunction<Map<String, Object>, Map<String, Object>, Boolean> on) {
-            return new OuterJoin(on);
-        }
-
-        static Strategy innerJoin(final BiFunction<Map<String, Object>, Map<String, Object>, Boolean> on) {
-            return new InnerJoin(on);
-        }
-
-        static Strategy fullJoin(final BiFunction<Map<String, Object>, Map<String, Object>, Boolean> on) {
-            return new FullJoin(on);
-        }
 
         Stream<Object[]> execute(ComparableTable left, ComparableTable right);
     }
 
-    private record InnerJoin(BiFunction<Map<String, Object>, Map<String, Object>, Boolean> on) implements Strategy {
+    private record InnerJoin(ConditionBuilder condition) implements Strategy {
         @Override
         public Stream<Object[]> execute(final ComparableTable left, final ComparableTable right) {
+            final var on = this.condition().build(left, right);
             return left.stream()
                     .flatMap(outerRow -> right.stream()
-                            .filter(innerRow -> this.on().apply(outerRow, innerRow))
+                            .filter(innerRow -> on.apply(outerRow, innerRow))
                             .map(joined -> Stream.concat(outerRow.values().stream(), joined.values().stream()).toArray()));
         }
     }
 
-    private record OuterJoin(BiFunction<Map<String, Object>, Map<String, Object>, Boolean> on) implements Strategy {
+    private record OuterJoin(ConditionBuilder condition) implements Strategy {
         @Override
         public Stream<Object[]> execute(final ComparableTable left, final ComparableTable right) {
+            final var on = this.condition().build(left, right);
             return left.stream()
                     .flatMap(outerRow -> {
                         final Object[] firstReturn = new Object[1];
@@ -93,7 +131,7 @@ public class ComparableTableJoin {
                                 , Arrays.stream(new Object[right.getColumnNumbers()])).toArray();
                         return Stream.concat(
                                 right.stream()
-                                        .filter(innerRow -> this.on().apply(outerRow, innerRow))
+                                        .filter(innerRow -> on.apply(outerRow, innerRow))
                                         .map(innerRow -> {
                                             firstReturn[0] = "";
                                             return Stream.concat(outerRow.values().stream(), innerRow.values().stream()).toArray();
@@ -104,10 +142,11 @@ public class ComparableTableJoin {
         }
     }
 
-    private record FullJoin(BiFunction<Map<String, Object>, Map<String, Object>, Boolean> on) implements Strategy {
+    private record FullJoin(ConditionBuilder condition) implements Strategy {
         @Override
         public Stream<Object[]> execute(final ComparableTable left, final ComparableTable right) {
             final Set<Integer> joinRows = new HashSet<>();
+            final var on = this.condition().build(left, right);
             return Stream.concat(left.stream()
                             .flatMap(outerRow -> {
                                 final Object[] firstReturn = new Object[1];
@@ -115,7 +154,7 @@ public class ComparableTableJoin {
                                         , Arrays.stream(new Object[right.getColumnNumbers()])).toArray();
                                 return Stream.concat(
                                         IntStream.range(0, right.getRowCount())
-                                                .filter(rowNum -> this.on().apply(outerRow, right.getRowToMap(rowNum)))
+                                                .filter(rowNum -> on.apply(outerRow, right.getRowToMap(rowNum)))
                                                 .mapToObj(rowNum -> {
                                                     firstReturn[0] = "";
                                                     joinRows.add(rowNum);
