@@ -634,9 +634,48 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertWithJoin() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertWithJoin.txt"});
-        final File src = new File(this.baseDir + "/join/result/paramConvertWithJoin.xlsx");
+    public void testConvertOuterJoin() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertOuterJoin.txt"});
+        final File src = new File(this.baseDir + "/join/result/paramConvertOuterJoin.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        final ITable result = actual.getTable("multi1_with_merge");
+        Assert.assertEquals(3, result.getRowCount());
+        Assert.assertEquals(8, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals("2", result.getValue(0, "multi1_key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(0, "multi1_columna"));
+        Assert.assertEquals("test", result.getValue(0, "multi1_columnb"));
+        Assert.assertEquals("column3:5", result.getValue(0, "multi1_columnc"));
+        Assert.assertEquals("2", result.getValue(0, "merge_key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(0, "merge_columna"));
+        Assert.assertEquals("test", result.getValue(0, "merge_columnb"));
+        Assert.assertEquals("column3:5", result.getValue(0, "merge_columnc"));
+        Assert.assertEquals("10", result.getValue(1, "multi1_key"));
+        Assert.assertEquals("column1:2", result.getValue(1, "multi1_columna"));
+        Assert.assertEquals("column2:3", result.getValue(1, "multi1_columnb"));
+        Assert.assertEquals("column3:4", result.getValue(1, "multi1_columnc"));
+        Assert.assertEquals("10", result.getValue(1, "merge_key"));
+        Assert.assertEquals("column1:2", result.getValue(1, "merge_columna"));
+        Assert.assertEquals("column2:3", result.getValue(1, "merge_columnb"));
+        Assert.assertEquals("column3:4", result.getValue(1, "merge_columnc"));
+        Assert.assertEquals("30", result.getValue(2, "multi1_key"));
+        Assert.assertEquals("column1:", result.getValue(2, "multi1_columna"));
+        Assert.assertEquals("column2:", result.getValue(2, "multi1_columnb"));
+        Assert.assertEquals("column3:", result.getValue(2, "multi1_columnc"));
+        Assert.assertEquals("", result.getValue(2, "merge_key"));
+        Assert.assertEquals("", result.getValue(2, "merge_columna"));
+        Assert.assertEquals("", result.getValue(2, "merge_columnb"));
+        Assert.assertEquals("", result.getValue(2, "merge_columnc"));
+    }
+
+    @Test
+    public void testConvertInnerJoin() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertInnerJoin.txt"});
+        final File src = new File(this.baseDir + "/join/result/paramConvertInnerJoin.xlsx");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
@@ -665,9 +704,9 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertWithJoinAndSplit() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertWithJoinAndSplit.txt"});
-        final File src = new File(this.baseDir + "/join/result/paramConvertWithJoinAndSplit.xlsx");
+    public void testConvertInnerJoinWithSplit() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertInnerJoinWithSplit.txt"});
+        final File src = new File(this.baseDir + "/join/result/paramConvertInnerJoinWithSplit.xlsx");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()
@@ -691,9 +730,9 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertWithJoinAndSeparate() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertWithJoinAndSeparate.txt"});
-        final File src = new File(this.baseDir + "/join/result/paramConvertWithJoinAndSeparate.xlsx");
+    public void testConvertInnerJoinWithSeparate() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertInnerJoinWithSeparate.txt"});
+        final File src = new File(this.baseDir + "/join/result/paramConvertInnerJoinWithSeparate.xlsx");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableXlsxDataSetProducer(
                         ComparableDataSetParam.builder()

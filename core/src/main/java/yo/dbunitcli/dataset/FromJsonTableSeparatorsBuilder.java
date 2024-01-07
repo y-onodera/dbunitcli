@@ -3,6 +3,7 @@ package yo.dbunitcli.dataset;
 import javax.json.*;
 import java.io.*;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -124,8 +125,14 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
             IntStream.range(0, expressions.size())
                     .mapToObj(expressions::getJsonObject)
                     .forEach(separate -> this.addSetting(this.getTableSeparator(separate, targetFilter)));
-        } else if (json.containsKey("join")) {
-            this.addJoin(this.getJoin(json.getJsonObject("join"), this.getTableSeparator(json, targetFilter)));
+        } else if (json.containsKey("innerJoin")) {
+            this.addJoin(this.getJoin(json.getJsonObject("innerJoin")
+                    , ComparableTableJoin.Strategy.innerJoin(this.getJoinOn(json.getJsonObject("innerJoin")))
+                    , this.getTableSeparator(json, targetFilter)));
+        } else if (json.containsKey("outerJoin")) {
+            this.addJoin(this.getJoin(json.getJsonObject("outerJoin")
+                    , ComparableTableJoin.Strategy.outerJoin(this.getJoinOn(json.getJsonObject("outerJoin")))
+                    , this.getTableSeparator(json, targetFilter)));
         } else {
             this.addSetting(this.getTableSeparator(json, targetFilter));
         }
@@ -163,7 +170,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         } else if (settingJson.containsKey("pattern")) {
             final String targetPattern = settingJson.getString("pattern");
             return (it) -> it.contains(targetPattern) || targetPattern.equals("*");
-        } else if (settingJson.containsKey("join")) {
+        } else if (settingJson.containsKey("innerJoin") || settingJson.containsKey("outerJoin")) {
             return TableSeparator.REJECT_ALL;
         }
         return TableSeparator.ACCEPT_ALL;
@@ -200,17 +207,21 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         return TableSplitter.NONE;
     }
 
-    protected JoinCondition getJoin(final JsonObject json, final TableSeparator tableSeparator) {
+    protected JoinCondition getJoin(final JsonObject json, final ComparableTableJoin.Strategy strategy, final TableSeparator tableSeparator) {
+        return JoinCondition.builder()
+                .setLeft(json.getString("left"))
+                .setRight(json.getString("right"))
+                .setStrategy(strategy)
+                .setTableSeparator(tableSeparator)
+                .build();
+    }
+
+    protected BiFunction<Map<String, Object>, Map<String, Object>, Boolean> getJoinOn(final JsonObject json) {
         final JsonArray columns = json.getJsonArray("column");
         final List<String> joinColumns = IntStream.range(0, columns.size())
                 .mapToObj(columns::getString)
                 .toList();
-        return JoinCondition.builder()
-                .setOuter(json.getString("outer"))
-                .setInner(json.getString("inner"))
-                .setOn((outer, inner) -> joinColumns.stream().allMatch(it -> outer.get(it).equals(inner.get(it))))
-                .setTableSeparator(tableSeparator)
-                .build();
+        return (left, right) -> joinColumns.stream().allMatch(it -> left.get(it).equals(right.get(it)));
     }
 
 }

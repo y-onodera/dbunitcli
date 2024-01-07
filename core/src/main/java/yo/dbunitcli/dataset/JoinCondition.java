@@ -1,21 +1,17 @@
 package yo.dbunitcli.dataset;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiFunction;
 
-public record JoinCondition(String outer, String inner
-        , BiFunction<Map<String, Object>, Map<String, Object>, Boolean> on
+public record JoinCondition(String left, String right
+        , ComparableTableJoin.Strategy strategy
         , TableSeparator tableSeparator) {
 
-    public static final BiFunction<Map<String, Object>, Map<String, Object>, Boolean> UNABLE_JOIN = (outer, inner) -> false;
-
     public JoinCondition() {
-        this("", "", UNABLE_JOIN, TableSeparator.NONE);
+        this("", "", ComparableTableJoin.Strategy.NOT_JOIN, TableSeparator.NONE);
     }
 
     public JoinCondition(final Builder builder) {
-        this(builder.getOuter(), builder.getInner(), builder.getOn(), builder.getTableSeparator());
+        this(builder.getLeft(), builder.getRight(), builder.getStrategy(), builder.getTableSeparator());
     }
 
     public static Builder builder() {
@@ -23,31 +19,31 @@ public record JoinCondition(String outer, String inner
     }
 
     public boolean hasRelation(final String tableName) {
-        return Objects.equals(this.inner(), tableName) || Objects.equals(this.outer(), tableName);
+        return Objects.equals(this.right(), tableName) || Objects.equals(this.left(), tableName);
     }
 
     public static class Builder {
-        private String outer;
-        private String inner;
-        private BiFunction<Map<String, Object>, Map<String, Object>, Boolean> on = UNABLE_JOIN;
+        private String left;
+        private String right;
+        private ComparableTableJoin.Strategy strategy = ComparableTableJoin.Strategy.NOT_JOIN;
         private TableSeparator tableSeparator = TableSeparator.NONE;
 
         public JoinCondition build() {
             return new JoinCondition(this);
         }
 
-        public Builder setOuter(final String outer) {
-            this.outer = outer;
+        public Builder setLeft(final String left) {
+            this.left = left;
             return this;
         }
 
-        public Builder setInner(final String inner) {
-            this.inner = inner;
+        public Builder setRight(final String right) {
+            this.right = right;
             return this;
         }
 
-        public Builder setOn(final BiFunction<Map<String, Object>, Map<String, Object>, Boolean> on) {
-            this.on = on;
+        public Builder setStrategy(final ComparableTableJoin.Strategy strategy) {
+            this.strategy = strategy;
             return this;
         }
 
@@ -56,16 +52,16 @@ public record JoinCondition(String outer, String inner
             return this;
         }
 
-        public String getOuter() {
-            return this.outer;
+        public String getLeft() {
+            return this.left;
         }
 
-        public String getInner() {
-            return this.inner;
+        public String getRight() {
+            return this.right;
         }
 
-        public BiFunction<Map<String, Object>, Map<String, Object>, Boolean> getOn() {
-            return this.on;
+        public ComparableTableJoin.Strategy getStrategy() {
+            return this.strategy;
         }
 
         public TableSeparator getTableSeparator() {

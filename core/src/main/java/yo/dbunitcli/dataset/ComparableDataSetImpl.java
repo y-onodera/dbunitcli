@@ -142,7 +142,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     private OrderedTableNameMap orderedTableNameMapExcludeJoins() throws AmbiguousTableNameException {
         final List<String> joinSource = this.joins.stream()
-                .flatMap(it -> Stream.of(it.getCondition().outer(), it.getCondition().inner()))
+                .flatMap(it -> Stream.of(it.getCondition().left(), it.getCondition().right()))
                 .toList();
         final OrderedTableNameMap excludeJoinSource = super.createTableNameMap();
         for (final String tableName : this._orderedTableNameMap.getTableNames()) {

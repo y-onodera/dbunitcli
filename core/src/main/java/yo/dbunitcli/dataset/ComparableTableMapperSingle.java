@@ -84,11 +84,11 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                 }
             }
             this.joins.stream()
-                    .filter(it -> it.getCondition().inner().equals(resultTableName))
-                    .forEach(it -> it.setInner((ComparableTable) orderedTableNameMap.get(resultTableName)));
+                    .filter(it -> it.getCondition().right().equals(resultTableName))
+                    .forEach(it -> it.setRight((ComparableTable) orderedTableNameMap.get(resultTableName)));
             this.joins.stream()
-                    .filter(it -> it.getCondition().outer().equals(resultTableName))
-                    .forEach(it -> it.setOuter((ComparableTable) orderedTableNameMap.get(resultTableName)));
+                    .filter(it -> it.getCondition().left().equals(resultTableName))
+                    .forEach(it -> it.setLeft((ComparableTable) orderedTableNameMap.get(resultTableName)));
         }
         this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
     }
