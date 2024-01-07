@@ -636,6 +636,88 @@ public class ConvertTest {
     @Test
     public void testConvertWithJoin() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertWithJoin.txt"});
+        final File src = new File(this.baseDir + "/join/result/paramConvertWithJoin.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        final ITable result = actual.getTable("multi1_with_merge");
+        Assert.assertEquals(2, result.getRowCount());
+        Assert.assertEquals(8, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals("10", result.getValue(0, "multi1_key"));
+        Assert.assertEquals("column1:2", result.getValue(0, "multi1_columna"));
+        Assert.assertEquals("column2:3", result.getValue(0, "multi1_columnb"));
+        Assert.assertEquals("column3:4", result.getValue(0, "multi1_columnc"));
+        Assert.assertEquals("10", result.getValue(0, "merge_key"));
+        Assert.assertEquals("column1:2", result.getValue(0, "merge_columna"));
+        Assert.assertEquals("column2:3", result.getValue(0, "merge_columnb"));
+        Assert.assertEquals("column3:4", result.getValue(0, "merge_columnc"));
+        Assert.assertEquals("2", result.getValue(1, "multi1_key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(1, "multi1_columna"));
+        Assert.assertEquals("test", result.getValue(1, "multi1_columnb"));
+        Assert.assertEquals("column3:5", result.getValue(1, "multi1_columnc"));
+        Assert.assertEquals("2", result.getValue(1, "merge_key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(1, "merge_columna"));
+        Assert.assertEquals("test", result.getValue(1, "merge_columnb"));
+        Assert.assertEquals("column3:5", result.getValue(1, "merge_columnc"));
+    }
+
+    @Test
+    public void testConvertWithJoinAndSplit() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertWithJoinAndSplit.txt"});
+        final File src = new File(this.baseDir + "/join/result/paramConvertWithJoinAndSplit.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        ITable result = actual.getTable("split_00");
+        Assert.assertEquals(1, result.getRowCount());
+        Assert.assertEquals(4, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals("10", result.getValue(0, "key"));
+        Assert.assertEquals("column1:2column2:3", result.getValue(0, "columnab"));
+        Assert.assertEquals("column2:3column3:4", result.getValue(0, "columnbc"));
+        Assert.assertEquals("column3:4column1:2", result.getValue(0, "columnca"));
+        result = actual.getTable("split_01");
+        Assert.assertEquals(1, result.getRowCount());
+        Assert.assertEquals(4, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals("2", result.getValue(0, "key"));
+        Assert.assertEquals("あ\nいうえおtest", result.getValue(0, "columnab"));
+        Assert.assertEquals("testcolumn3:5", result.getValue(0, "columnbc"));
+        Assert.assertEquals("column3:5あ\nいうえお", result.getValue(0, "columnca"));
+    }
+
+    @Test
+    public void testConvertWithJoinAndSeparate() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertWithJoinAndSeparate.txt"});
+        final File src = new File(this.baseDir + "/join/result/paramConvertWithJoinAndSeparate.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        ITable result = actual.getTable("under3");
+        Assert.assertEquals(1, result.getRowCount());
+        Assert.assertEquals(4, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals("2", result.getValue(0, "key"));
+        Assert.assertEquals("あ\nいうえおtest", result.getValue(0, "columnab"));
+        Assert.assertEquals("testcolumn3:5", result.getValue(0, "columnbc"));
+        Assert.assertEquals("column3:5あ\nいうえお", result.getValue(0, "columnca"));
+        result = actual.getTable("over1");
+        Assert.assertEquals(2, result.getRowCount());
+        Assert.assertEquals(4, result.getTableMetaData().getColumns().length);
+        Assert.assertEquals("10", result.getValue(0, "key"));
+        Assert.assertEquals("column1:2column2:3", result.getValue(0, "columnab"));
+        Assert.assertEquals("column2:3column3:4", result.getValue(0, "columnbc"));
+        Assert.assertEquals("column3:4column1:2", result.getValue(0, "columnca"));
+        Assert.assertEquals("2", result.getValue(1, "key"));
+        Assert.assertEquals("あ\nいうえおtest", result.getValue(1, "columnab"));
+        Assert.assertEquals("testcolumn3:5", result.getValue(1, "columnbc"));
+        Assert.assertEquals("column3:5あ\nいうえお", result.getValue(1, "columnca"));
     }
 
     private static String[] getColumnNames(final ITable split1) throws DataSetException {

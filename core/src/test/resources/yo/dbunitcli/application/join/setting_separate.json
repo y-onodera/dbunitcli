@@ -36,7 +36,39 @@
         "column": [
           "key"
         ]
+      },
+      "tableName": "join",
+      "include": [
+        "key",
+        "columna",
+        "columnb",
+        "columnc"
+      ],
+      "number": {
+        "key": "multi1_key"
+      },
+      "string": {
+        "columnab": "merge_columna + multi1_columnb",
+        "columnbc": "merge_columnb + multi1_columnc",
+        "columnca": "merge_columnc + multi1_columna"
       }
+    },
+    {
+      "name": "join",
+      "separate": [
+        {
+          "tableName": "under3",
+          "filter": [
+            "key < 3"
+          ]
+        },
+        {
+          "tableName": "over1",
+          "filter": [
+            "key > 1"
+          ]
+        }
+      ]
     }
   ],
   "commonSettings": []

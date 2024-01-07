@@ -36,6 +36,25 @@
         "column": [
           "key"
         ]
+      },
+      "split": {
+        "tableName": "split",
+        "suffix": "_%02d",
+        "limit": 1
+      },
+      "include": [
+        "key",
+        "columna",
+        "columnb",
+        "columnc"
+      ],
+      "number": {
+        "key": "multi1_key"
+      },
+      "string": {
+        "columnab": "merge_columna + multi1_columnb",
+        "columnbc": "merge_columnb + multi1_columnc",
+        "columnca": "merge_columnc + multi1_columna"
       }
     }
   ],
