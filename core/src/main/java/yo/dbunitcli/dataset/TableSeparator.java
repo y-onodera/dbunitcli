@@ -59,7 +59,7 @@ public record TableSeparator(Predicate<String> targetFilter
             if (comparisonKeys.length > 0) {
                 primaryKey = comparisonKeys;
             }
-            return new AddSettingTableMetaData(originMetaData, primaryKey, this);
+            return AddSettingTableMetaData.builder(originMetaData, primaryKey, this).build();
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }

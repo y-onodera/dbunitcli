@@ -9,57 +9,48 @@ import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class AddSettingTableMetaData extends AbstractTableMetaData {
-    private final String tableName;
-    private final Column[] primaryKeys;
-    private final Column[] columns;
-    private final Column[] allColumns;
-    private final ExpressionColumns additionalExpression;
-    private final List<Integer> filterColumnIndex;
-    private final TableSeparator tableSeparator;
-    private final Boolean distinct;
-    private final AddSettingTableMetaData preset;
+public record AddSettingTableMetaData(
+        String tableName,
+        Column[] primaryKeys,
+        Column[] columns,
+        Map<String, Integer> columnIndexes,
+        Column[] allColumns,
+        ExpressionColumns additionalExpression,
+        List<Integer> filterColumnIndex,
+        TableSeparator tableSeparator,
+        Boolean distinct,
+        AddSettingTableMetaData preset) implements ITableMetaData {
 
-    public AddSettingTableMetaData(final ITableMetaData delegate
-            , final Column[] primaryKeys
-            , final TableSeparator tableSeparator) {
-        this.tableName = tableSeparator.rename(delegate.getTableName());
-        this.primaryKeys = primaryKeys;
-        this.additionalExpression = tableSeparator.expressionColumns();
-        this.allColumns = this.getAllColumns(delegate);
-        this.columns = this.getColumns(delegate, tableSeparator.getColumnFilter());
-        this.filterColumnIndex = this.getFilterColumnIndex(delegate);
-        this.tableSeparator = tableSeparator;
-        if (delegate instanceof AddSettingTableMetaData) {
-            this.preset = (AddSettingTableMetaData) delegate;
-        } else {
-            this.preset = null;
-        }
-        this.distinct = tableSeparator.distinct();
+    public static Builder builder(final ITableMetaData originMetaData, final Column[] primaryKey, final TableSeparator tableSeparator) {
+        return new Builder(originMetaData, primaryKey, tableSeparator);
     }
 
-    private AddSettingTableMetaData(final String tableName, final Column[] primaryKeys, final Column[] columns, final Column[] allColumns, final ExpressionColumns additionalExpression, final List<Integer> filterColumnIndex, final TableSeparator tableSeparator, final AddSettingTableMetaData preset, final Boolean distinct) {
-        this.tableName = tableName;
-        this.primaryKeys = primaryKeys;
-        this.columns = columns;
-        this.allColumns = allColumns;
-        this.additionalExpression = additionalExpression;
-        this.filterColumnIndex = filterColumnIndex;
-        this.tableSeparator = tableSeparator;
-        this.preset = preset;
-        this.distinct = distinct;
+    public AddSettingTableMetaData(final Builder builder) {
+        this(builder.getTableName()
+                , builder.getPrimaryKeys()
+                , builder.getColumns()
+                , builder.getColumnIndexes()
+                , builder.getAllColumns()
+                , builder.getAdditionalExpression()
+                , builder.getFilterColumnIndex()
+                , builder.getTableSeparator()
+                , builder.getDistinct()
+                , builder.getPreset()
+        );
     }
 
     public AddSettingTableMetaData rename(final String newTableName) {
         return new AddSettingTableMetaData(newTableName
                 , this.primaryKeys
                 , this.columns
+                , this.columnIndexes
                 , this.allColumns
                 , this.additionalExpression
                 , this.filterColumnIndex
                 , this.tableSeparator
+                , this.distinct
                 , this.preset
-                , this.distinct);
+        );
     }
 
     @Override
@@ -77,8 +68,16 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         return this.primaryKeys;
     }
 
-    public TableSeparator getTableSeparator() {
-        return this.tableSeparator;
+    @Override
+    public int getColumnIndex(final String columnName) throws DataSetException {
+        final Integer result = this.columnIndexes.get(columnName.toUpperCase());
+        if (result != null) {
+            return result;
+        } else {
+            throw new NoSuchColumnException(this.getTableName(), columnName.toUpperCase(),
+                    " (Non-uppercase input column: " + columnName + ") in ColumnNameToIndexes cache map. " +
+                            "Note that the map's column names are NOT case sensitive.");
+        }
     }
 
     public Boolean isNeedDistinct() {
@@ -87,6 +86,12 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
 
     public Object[] applySetting(final Object[] values) {
         return this.applySetting(values, this.preset != null);
+    }
+
+    public Map<String, Object> rowToMap(final Object[] row) {
+        final Map<String, Object> map = new LinkedHashMap<>();
+        IntStream.range(0, row.length).forEach(i -> map.put(this.columns[i].getColumnName(), row[i]));
+        return map;
     }
 
     public Rows distinct(final Collection<Object[]> values, final Collection<Integer> filteredRowIndexes) {
@@ -129,11 +134,11 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         return this.getOrderColumns().length > 0;
     }
 
-    protected boolean isPresetNeedDistinct() {
+    private boolean isPresetNeedDistinct() {
         return this.preset != null && this.preset.isNeedDistinct();
     }
 
-    protected Object[] applySetting(final Object[] values, final boolean applyPreset) {
+    private Object[] applySetting(final Object[] values, final boolean applyPreset) {
         Object[] applySettings = values;
         if (applyPreset) {
             applySettings = this.preset.applySetting(applySettings);
@@ -148,13 +153,7 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         return result;
     }
 
-    protected Map<String, Object> rowToMap(final Object[] row) {
-        final Map<String, Object> map = new LinkedHashMap<>();
-        IntStream.range(0, row.length).forEach(i -> map.put(this.columns[i].getColumnName(), row[i]));
-        return map;
-    }
-
-    protected Object[] applyExpression(final Object[] objects) {
+    private Object[] applyExpression(final Object[] objects) {
         if (this.additionalExpression.size() == 0) {
             return objects;
         }
@@ -171,7 +170,7 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
         return result;
     }
 
-    protected Object[] filterColumn(final Object[] noFilter) {
+    private Object[] filterColumn(final Object[] noFilter) {
         if (this.filterColumnIndex.size() == 0) {
             return noFilter;
         }
@@ -179,64 +178,6 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
                 .filter(i -> !this.filterColumnIndex.contains(i))
                 .mapToObj(i -> noFilter[i])
                 .toArray(Object[]::new);
-    }
-
-    protected Column[] getAllColumns(final ITableMetaData delegate) {
-        try {
-            return this.additionalExpression.merge(delegate.getColumns());
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    protected Column[] getColumns(final ITableMetaData delegate, final IColumnFilter iColumnFilter) {
-        try {
-            if (iColumnFilter != null) {
-                return this.additionalExpression.merge(new FilteredTableMetaData(delegate, iColumnFilter).getColumns());
-            }
-            return this.allColumns;
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    protected List<Integer> getFilterColumnIndex(final ITableMetaData delegate) {
-        try {
-            final List<Integer> result = new ArrayList<>();
-            final Set<Column> noFilter = new HashSet<>(Arrays.asList(delegate.getColumns()));
-            final Set<Column> filtered = new HashSet<>(Arrays.asList(this.columns));
-            noFilter.stream().filter(it -> !filtered.contains(it)).forEach(column -> {
-                if (!this.additionalExpression.contains(column.getColumnName())) {
-                    result.add(this.getColumnIndex(delegate, column));
-                }
-            });
-            return result;
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    protected int getColumnIndex(final ITableMetaData delegate, final Column column) {
-        try {
-            return delegate.getColumnIndex(column.getColumnName());
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "AddSettingTableMetaData{" +
-                "tableName='" + this.tableName + '\'' +
-                ", primaryKeys=" + Arrays.toString(this.primaryKeys) +
-                ", columns=" + Arrays.toString(this.columns) +
-                ", allColumns=" + Arrays.toString(this.allColumns) +
-                ", additionalExpression=" + this.additionalExpression +
-                ", filterColumnIndex=" + this.filterColumnIndex +
-                ", tableSeparator=" + this.tableSeparator +
-                ", distinct=" + this.distinct +
-                ", preset=" + this.preset +
-                '}';
     }
 
     public record Rows(List<Object[]> rows, List<Integer> filteredRowIndexes) {
@@ -296,6 +237,128 @@ public class AddSettingTableMetaData extends AbstractTableMetaData {
 
         public Rows distinct(final UnaryOperator<Object[]> rowFunction) {
             return this.map(rowFunction, DISTINCT_PREDICATE);
+        }
+    }
+
+    public static class Builder {
+        private final String tableName;
+        private final Column[] primaryKeys;
+        private final Column[] columns;
+        private final Map<String, Integer> columnIndexes;
+        private final Column[] allColumns;
+        private final ExpressionColumns additionalExpression;
+        private final List<Integer> filterColumnIndex;
+        private final TableSeparator tableSeparator;
+        private final Boolean distinct;
+        private AddSettingTableMetaData preset;
+
+        public Builder(final ITableMetaData originMetaData, final Column[] primaryKeys, final TableSeparator tableSeparator) {
+            this.tableName = tableSeparator.rename(originMetaData.getTableName());
+            this.primaryKeys = primaryKeys;
+            this.additionalExpression = tableSeparator.expressionColumns();
+            this.allColumns = this.getAllColumns(originMetaData);
+            this.columns = this.getColumns(originMetaData, tableSeparator.getColumnFilter());
+            this.filterColumnIndex = this.getFilterColumnIndex(originMetaData);
+            this.tableSeparator = tableSeparator;
+            if (originMetaData instanceof AddSettingTableMetaData delegate) {
+                this.preset = delegate;
+            }
+            this.distinct = tableSeparator.distinct();
+            this.columnIndexes = this.createColumnIndexes();
+        }
+
+        public AddSettingTableMetaData build() {
+            return new AddSettingTableMetaData(this);
+        }
+
+        public String getTableName() {
+            return this.tableName;
+        }
+
+        public Column[] getPrimaryKeys() {
+            return this.primaryKeys;
+        }
+
+        public Column[] getColumns() {
+            return this.columns;
+        }
+
+        public Map<String, Integer> getColumnIndexes() {
+            return this.columnIndexes;
+        }
+
+        public Column[] getAllColumns() {
+            return this.allColumns;
+        }
+
+        public ExpressionColumns getAdditionalExpression() {
+            return this.additionalExpression;
+        }
+
+        public List<Integer> getFilterColumnIndex() {
+            return this.filterColumnIndex;
+        }
+
+        public TableSeparator getTableSeparator() {
+            return this.tableSeparator;
+        }
+
+        public Boolean getDistinct() {
+            return this.distinct;
+        }
+
+        public AddSettingTableMetaData getPreset() {
+            return this.preset;
+        }
+
+        private Column[] getAllColumns(final ITableMetaData delegate) {
+            try {
+                return this.additionalExpression.merge(delegate.getColumns());
+            } catch (final DataSetException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        private Column[] getColumns(final ITableMetaData delegate, final IColumnFilter iColumnFilter) {
+            try {
+                if (iColumnFilter != null) {
+                    return this.additionalExpression.merge(new FilteredTableMetaData(delegate, iColumnFilter).getColumns());
+                }
+                return this.allColumns;
+            } catch (final DataSetException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        private List<Integer> getFilterColumnIndex(final ITableMetaData delegate) {
+            try {
+                final List<Integer> result = new ArrayList<>();
+                final Set<Column> noFilter = new HashSet<>(Arrays.asList(delegate.getColumns()));
+                final Set<Column> filtered = new HashSet<>(Arrays.asList(this.columns));
+                noFilter.stream().filter(it -> !filtered.contains(it)).forEach(column -> {
+                    if (!this.additionalExpression.contains(column.getColumnName())) {
+                        result.add(this.getColumnIndex(delegate, column));
+                    }
+                });
+                return result;
+            } catch (final DataSetException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        private int getColumnIndex(final ITableMetaData delegate, final Column column) {
+            try {
+                return delegate.getColumnIndex(column.getColumnName());
+            } catch (final DataSetException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        private HashMap<String, Integer> createColumnIndexes() {
+            final HashMap<String, Integer> result = new HashMap<>();
+            IntStream.range(0, this.columns.length)
+                    .forEach(i -> result.put(this.columns[i].getColumnName().toUpperCase(), i));
+            return result;
         }
     }
 }
