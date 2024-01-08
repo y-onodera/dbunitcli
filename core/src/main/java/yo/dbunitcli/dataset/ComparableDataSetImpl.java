@@ -58,16 +58,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     @Override
     public void endDataSet() throws DataSetException {
         LOGGER.debug("endDataSet() - start");
-        if (this.joins.size() > 0) {
-            this._orderedTableNameMap = this.orderedTableNameMapExcludeJoins();
-            new ArrayList<>(this.joins).forEach(join -> {
-                this.joins.remove(join);
-                this.mapper = this.tableSeparators.createMapper(join);
-                this.mapper.startTable(this.converter, this.alreadyWrite, this.joins);
-                join.execute().forEach(this::row);
-                this.endTable();
-            });
-        }
+        this.executeJoin();
         if (this.converter != null) {
             final ITableIterator itr = this.createIterator(false);
             while (itr.next()) {
@@ -140,8 +131,28 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
         return new DefaultTableIterator((ITable[]) (this._orderedTableNameMap.orderedValues().toArray(new ITable[0])));
     }
 
+    private void executeJoin() throws AmbiguousTableNameException {
+        boolean isJoinContinue = this.joins.size() > 0;
+        while (isJoinContinue) {
+            final int joinCount = this.joins.size();
+            this._orderedTableNameMap = this.orderedTableNameMapExcludeJoins();
+            this.joins.stream()
+                    .filter(ComparableTableJoin::isExecutable)
+                    .toList()
+                    .forEach(join -> {
+                        this.joins.remove(join);
+                        this.mapper = this.tableSeparators.createMapper(join);
+                        this.mapper.startTable(this.converter, this.alreadyWrite, this.joins);
+                        join.execute().forEach(this::row);
+                        this.endTable();
+                    });
+            isJoinContinue = joinCount != this.joins.size();
+        }
+    }
+
     private OrderedTableNameMap orderedTableNameMapExcludeJoins() throws AmbiguousTableNameException {
         final List<String> joinSource = this.joins.stream()
+                .filter(ComparableTableJoin::isExecutable)
                 .flatMap(it -> Stream.of(it.getCondition().left(), it.getCondition().right()))
                 .toList();
         final OrderedTableNameMap excludeJoinSource = super.createTableNameMap();

@@ -40,6 +40,14 @@ public class ComparableTableJoin {
         this.condition = condition;
     }
 
+    public boolean isExecutable() {
+        return this.left != null && this.right != null;
+    }
+
+    public Stream<Object[]> execute() {
+        return this.condition.strategy().execute(this.left, this.right);
+    }
+
     public JoinCondition getCondition() {
         return this.condition;
     }
@@ -54,10 +62,6 @@ public class ComparableTableJoin {
 
     public boolean hasRelation(final String tableName) {
         return this.getCondition().hasRelation(tableName);
-    }
-
-    public Stream<Object[]> execute() {
-        return this.condition.strategy().execute(this.left, this.right);
     }
 
     public DefaultTableMetaData joinMetaData() {
@@ -86,7 +90,7 @@ public class ComparableTableJoin {
     private record Equals(Set<String> columns) implements ConditionBuilder {
         @Override
         public BiFunction<Map<String, Object>, Map<String, Object>, Boolean> build(final ComparableTable left, final ComparableTable right) {
-            return (leftRow, rightRow) -> this.columns.stream().allMatch(it -> leftRow.get(it).equals(rightRow.get(it)));
+            return (leftRow, rightRow) -> this.columns.stream().allMatch(it -> Objects.equals(leftRow.get(it), rightRow.get(it)));
         }
     }
 

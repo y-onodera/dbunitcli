@@ -855,6 +855,69 @@ public class ConvertTest {
         Assert.assertEquals("column3:5あ\nいうえお", result.getValue(1, "columnca"));
     }
 
+    @Test
+    public void testConvertJoinMultiple() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertJoinMultiple.txt"});
+        final File src = new File(this.baseDir + "/join/result/paramConvertJoinMultiple.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        final ComparableTable result = actual.getTable("firstJoin_with_keyChange");
+        Assert.assertEquals(4, result.getRowCount());
+        Assert.assertEquals(12, result.getNumberOfColumns());
+        Assert.assertEquals("2", result.getValue(0, "firstJoin_multi1_key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(0, "firstJoin_multi1_column1"));
+        Assert.assertEquals("test", result.getValue(0, "firstJoin_multi1_column2"));
+        Assert.assertEquals("5", result.getValue(0, "firstJoin_multi1_column3"));
+        Assert.assertEquals("2", result.getValue(0, "firstJoin_multi2_key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(0, "firstJoin_multi2_columna"));
+        Assert.assertEquals("test", result.getValue(0, "firstJoin_multi2_columnb"));
+        Assert.assertEquals("5", result.getValue(0, "firstJoin_multi2_columnc"));
+        Assert.assertEquals("2", result.getValue(0, "keyChange_key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(0, "keyChange_column1"));
+        Assert.assertEquals("test", result.getValue(0, "keyChange_column2"));
+        Assert.assertEquals("5", result.getValue(0, "keyChange_column3"));
+        Assert.assertEquals("3", result.getValue(1, "firstJoin_multi1_key"));
+        Assert.assertEquals("", result.getValue(1, "firstJoin_multi1_column1"));
+        Assert.assertEquals("", result.getValue(1, "firstJoin_multi1_column2"));
+        Assert.assertEquals("", result.getValue(1, "firstJoin_multi1_column3"));
+        Assert.assertEquals("3", result.getValue(1, "firstJoin_multi2_key"));
+        Assert.assertEquals("", result.getValue(1, "firstJoin_multi2_columna"));
+        Assert.assertEquals("", result.getValue(1, "firstJoin_multi2_columnb"));
+        Assert.assertEquals("", result.getValue(1, "firstJoin_multi2_columnc"));
+        Assert.assertEquals("", result.getValue(1, "keyChange_key"));
+        Assert.assertEquals("", result.getValue(1, "keyChange_column1"));
+        Assert.assertEquals("", result.getValue(1, "keyChange_column2"));
+        Assert.assertEquals("", result.getValue(1, "keyChange_column3"));
+        Assert.assertEquals("", result.getValue(2, "firstJoin_multi1_key"));
+        Assert.assertEquals("", result.getValue(2, "firstJoin_multi1_column1"));
+        Assert.assertEquals("", result.getValue(2, "firstJoin_multi1_column2"));
+        Assert.assertEquals("", result.getValue(2, "firstJoin_multi1_column3"));
+        Assert.assertEquals("", result.getValue(2, "firstJoin_multi2_key"));
+        Assert.assertEquals("", result.getValue(2, "firstJoin_multi2_columna"));
+        Assert.assertEquals("", result.getValue(2, "firstJoin_multi2_columnb"));
+        Assert.assertEquals("", result.getValue(2, "firstJoin_multi2_columnc"));
+        Assert.assertEquals("10", result.getValue(2, "keyChange_key"));
+        Assert.assertEquals("2", result.getValue(2, "keyChange_column1"));
+        Assert.assertEquals("3", result.getValue(2, "keyChange_column2"));
+        Assert.assertEquals("4", result.getValue(2, "keyChange_column3"));
+        Assert.assertEquals("", result.getValue(3, "firstJoin_multi1_key"));
+        Assert.assertEquals("", result.getValue(3, "firstJoin_multi1_column1"));
+        Assert.assertEquals("", result.getValue(3, "firstJoin_multi1_column2"));
+        Assert.assertEquals("", result.getValue(3, "firstJoin_multi1_column3"));
+        Assert.assertEquals("", result.getValue(3, "firstJoin_multi2_key"));
+        Assert.assertEquals("", result.getValue(3, "firstJoin_multi2_columna"));
+        Assert.assertEquals("", result.getValue(3, "firstJoin_multi2_columnb"));
+        Assert.assertEquals("", result.getValue(3, "firstJoin_multi2_columnc"));
+        Assert.assertEquals("30", result.getValue(3, "keyChange_key"));
+        Assert.assertEquals("", result.getValue(3, "keyChange_column1"));
+        Assert.assertEquals("", result.getValue(3, "keyChange_column2"));
+        Assert.assertEquals("", result.getValue(3, "keyChange_column3"));
+    }
+
     private static String[] getColumnNames(final ITable split1) throws DataSetException {
         return Arrays.stream(split1.getTableMetaData().getColumns())
                 .map(Column::getColumnName)
