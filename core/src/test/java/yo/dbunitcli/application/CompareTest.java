@@ -1,5 +1,6 @@
 package yo.dbunitcli.application;
 
+import com.github.stefanbirkner.systemlambda.SystemLambda;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
@@ -147,24 +148,27 @@ public class CompareTest {
     }
 
     @Test
-    public void testFailedResultDiffNotExpected() {
-        Assert.assertThrows(AssertionError.class,
+    public void testFailedResultDiffNotExpected() throws Exception {
+        final int exitCode = SystemLambda.catchSystemExit(
                 () -> Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffNotExpected.txt"})
         );
+        Assert.assertEquals(1, exitCode);
     }
 
     @Test
-    public void testFailedResultDiffDifferExpected() {
-        Assert.assertThrows(AssertionError.class,
+    public void testFailedResultDiffDifferExpected() throws Exception {
+        final int exitCode = SystemLambda.catchSystemExit(
                 () -> Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffInValidExpected.txt"})
         );
+        Assert.assertEquals(1, exitCode);
     }
 
     @Test
-    public void testFailedUnExpectedNoDiff() {
-        Assert.assertThrows(AssertionError.class,
+    public void testFailedUnExpectedNoDiff() throws Exception {
+        final int exitCode = SystemLambda.catchSystemExit(
                 () -> Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"})
         );
+        Assert.assertEquals(1, exitCode);
     }
 
 }

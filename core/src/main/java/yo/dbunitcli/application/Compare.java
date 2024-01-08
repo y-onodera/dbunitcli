@@ -9,7 +9,11 @@ public class Compare implements Command<CompareOption> {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static void main(final String[] args) throws Exception {
-        new Compare().exec(args);
+        try {
+            new Compare().exec(args);
+        } catch (final DiffFoundException ex) {
+            System.exit(1);
+        }
     }
 
     @Override
@@ -27,8 +31,12 @@ public class Compare implements Command<CompareOption> {
         final boolean success = options.compare();
         LOGGER.info("compare finish.");
         if (!success) {
-            throw new AssertionError("unexpected diff found.");
+            LOGGER.info("unexpected diff found.");
+            throw new DiffFoundException();
         }
         LOGGER.info("compare success.");
+    }
+
+    private static class DiffFoundException extends RuntimeException {
     }
 }
