@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import org.dbunit.dataset.DataSetException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -23,14 +22,21 @@ public class ParameterizeOption extends CommandLineOption {
     @Option(name = "-cmd", usage = "data driven target cmd")
     private String cmd;
 
-    @Option(name = "-cmdParam", usage = "parameterFile for cmd")
+    @Option(name = "-cmdParam", usage = "columnName parameterFile for cmd. dynamically set fileName from param dataset")
     private String cmdParam;
 
-    @Option(name = "-template", usage = "template file")
+    @Option(name = "-template", usage = "default template file. case when cmdParam exists,this option is ignore.")
     private File template;
+
+    @Option(name = "-ignoreFail", usage = "data driven target cmd")
+    private String ignoreFail = "false";
 
     public ParameterizeOption() {
         super(Parameter.none());
+    }
+
+    public boolean isIgnoreFail() {
+        return Boolean.getBoolean(this.ignoreFail);
     }
 
     @Override
@@ -51,7 +57,7 @@ public class ParameterizeOption extends CommandLineOption {
         return result;
     }
 
-    public Stream<Map<String, Object>> loadParams() throws DataSetException {
+    public Stream<Map<String, Object>> loadParams() {
         return this.getComparableDataSetLoader().loadParam(this.param.getParam().build());
     }
 
@@ -66,18 +72,13 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     protected Command<? extends CommandLineOption> createCommand(final String cmdType) {
-        switch (cmdType) {
-            case "compare":
-                return new Compare();
-            case "convert":
-                return new Convert();
-            case "generate":
-                return new Generate();
-            case "run":
-                return new Run();
-            default:
-                throw new IllegalArgumentException("no executable command : " + cmdType);
-        }
+        return switch (cmdType) {
+            case "compare" -> new Compare();
+            case "convert" -> new Convert();
+            case "generate" -> new Generate();
+            case "run" -> new Run();
+            default -> throw new IllegalArgumentException("no executable command : " + cmdType);
+        };
     }
 
     protected String getTemplateArgs(final Map<String, Object> param) {

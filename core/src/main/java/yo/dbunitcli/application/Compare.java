@@ -11,7 +11,8 @@ public class Compare implements Command<CompareOption> {
     public static void main(final String[] args) throws Exception {
         try {
             new Compare().exec(args);
-        } catch (final DiffFoundException ex) {
+        } catch (final CommandFailException ex) {
+            LOGGER.info(ex.getMessage());
             System.exit(1);
         }
     }
@@ -31,12 +32,8 @@ public class Compare implements Command<CompareOption> {
         final boolean success = options.compare();
         LOGGER.info("compare finish.");
         if (!success) {
-            LOGGER.info("unexpected diff found.");
-            throw new DiffFoundException();
+            throw new CommandFailException("unexpected diff found.");
         }
         LOGGER.info("compare success.");
-    }
-
-    private static class DiffFoundException extends RuntimeException {
     }
 }

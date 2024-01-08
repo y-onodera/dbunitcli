@@ -27,4 +27,16 @@ public interface Command<T extends CommandLineOption> {
         return options;
     }
 
+    class CommandFailException extends RuntimeException {
+        private final String message;
+
+        public CommandFailException(final String message) {
+            this.message = message;
+        }
+
+        @Override
+        public String getMessage() {
+            return this.message;
+        }
+    }
 }
