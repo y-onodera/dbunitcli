@@ -1,0 +1,55 @@
+{
+  "uid" : "99cee107fd9d132e",
+  "name" : "testConvertFilePathToCsvWithSetting",
+  "fullName" : "yo.dbunitcli.application.ConvertTest.testConvertFilePathToCsvWithSetting",
+  "historyId" : "d2a3fb7afcecc08a60ef3b03b9e8f13b",
+  "time" : {
+    "start" : 1704750720452,
+    "stop" : 1704750720514,
+    "duration" : 62
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testConvertFilePathToCsvWithSetting"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az534-989"
+  }, {
+    "name" : "thread",
+    "value" : "6652@fv-az534-989.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "99cee107fd9d132e.json",
+  "parameterValues" : [ ]
+}
