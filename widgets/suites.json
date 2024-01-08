@@ -100,8 +100,8 @@
       "total" : 3
     }
   }, {
-    "uid" : "7a66142a22dd1f500946aab14d1bc4c3",
-    "name" : "yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducerTest",
+    "uid" : "9172ce6c01190df7eb693ee5a6dc5315",
+    "name" : "yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducerTest",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
