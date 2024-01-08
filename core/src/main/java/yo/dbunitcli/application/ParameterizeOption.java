@@ -28,7 +28,7 @@ public class ParameterizeOption extends CommandLineOption {
     @Option(name = "-template", usage = "default template file. case when cmdParam exists,this option is ignore.")
     private File template;
 
-    @Option(name = "-ignoreFail", usage = "data driven target cmd")
+    @Option(name = "-ignoreFail", usage = "case when cmd is compare and unexpected diff found, then continue other cmd")
     private String ignoreFail = "false";
 
     public ParameterizeOption() {
