@@ -1,0 +1,21 @@
+{
+  "settings": [
+    {
+      "innerJoin": {
+        "left": "ユーザマスタ概要",
+        "right": "ユーザマスタ",
+        "column": [
+          "$FILE_PATH"
+        ]
+      },
+      "exclude": [
+        "ユーザマスタ_$FILE_PATH",
+        "ユーザマスタ_$FILE_NAME",
+        "ユーザマスタ_$SHEET_NAME",
+        "ユーザマスタ概要_$FILE_PATH",
+        "ユーザマスタ概要_$FILE_NAME",
+        "ユーザマスタ概要_$SHEET_NAME"
+      ]
+    }
+  ]
+}

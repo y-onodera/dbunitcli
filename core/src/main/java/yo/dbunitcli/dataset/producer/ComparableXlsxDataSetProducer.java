@@ -99,7 +99,8 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
                     final String sheetName = iterator.getSheetName();
                     if (this.filter.predicate(sheetName) && this.schema.contains(sheetName)) {
                         LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
-                        this.processSheet(styles, strings, this.schema.createHandler(this.consumer, sheetName, this.loadData), stream);
+                        this.processSheet(styles, strings, this.schema.addFileInfo(sourceFile, sheetName)
+                                .createHandler(this.consumer, sheetName, this.loadData), stream);
                         LOGGER.info("produce - end   sheetName={},index={}", sheetName, index - 1);
                     }
                 }

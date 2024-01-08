@@ -60,6 +60,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
                 .setDataStartRow(jsonObject.getInt("dataStart"))
                 .addCellIndexes(this.jsonArrayToIntStream(jsonObject.getJsonArray("columnIndex")))
                 .addBreakKey(this.jsonArrayToStream(jsonObject.getJsonArray("breakKey")))
+                .setAddOptional(jsonObject.containsKey("addFileInfo") && jsonObject.getBoolean("addFileInfo"))
                 .build()
         );
     }
@@ -84,6 +85,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
                 .setRows(this.jsonArrayToStream(jsonObject.getJsonArray("rows")
                                 , it -> (Integer i) -> it.getJsonObject(i).getJsonArray("cellAddress"))
                         .map(this::jsonArrayToStream))
+                .setAddFileInfo(jsonObject.containsKey("addFileInfo") && jsonObject.getBoolean("addFileInfo"))
                 .build()
         );
     }

@@ -125,9 +125,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
 
     @Override
     protected ITableIterator createIterator(final boolean reversed) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("createIterator(reversed={}) - start", reversed);
-        }
+        LOGGER.debug("createIterator(reversed={}) - start", reversed);
         return new DefaultTableIterator((ITable[]) (this._orderedTableNameMap.orderedValues().toArray(new ITable[0])));
     }
 
@@ -140,6 +138,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
                     .filter(ComparableTableJoin::isExecutable)
                     .toList()
                     .forEach(join -> {
+                        LOGGER.debug("startTableJoin(join={}) - start", join);
                         this.joins.remove(join);
                         this.mapper = this.tableSeparators.createMapper(join);
                         this.mapper.startTable(this.converter, this.alreadyWrite, this.joins);

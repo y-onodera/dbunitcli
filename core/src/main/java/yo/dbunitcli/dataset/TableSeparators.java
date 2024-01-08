@@ -67,7 +67,7 @@ public record TableSeparators(List<TableSeparator> settings
 
     private Stream<AddSettingTableMetaData> addNewNameSetting(final Stream<AddSettingTableMetaData> target, final String beforeTableName) {
         return target.flatMap(it -> {
-            if (!beforeTableName.equals(it.getTableName())) {
+            if (!Objects.equals(beforeTableName, it.getTableName())) {
                 return this.addNewNameSetting(this.addSettings(it), it.getTableName());
             }
             return Stream.of(it);

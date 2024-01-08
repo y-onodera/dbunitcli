@@ -918,6 +918,32 @@ public class ConvertTest {
         Assert.assertEquals("", result.getValue(3, "keyChange_column3"));
     }
 
+    @Test
+    public void testConvertXlsxWithSchemaAddFileInfo() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertXlsxWithSchemaAndFileInfoJoin.txt"});
+        final File src = new File(this.baseDir + "/xlsxwithschema/result/paramConvertXlsxWithSchemaAndFileInfoJoin.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
+        final ComparableTable result = actual.getTable("ユーザマスタ概要_with_ユーザマスタ");
+        Assert.assertEquals(5, result.getRowCount());
+        Assert.assertEquals(17, result.getNumberOfColumns());
+        Assert.assertArrayEquals(new String[]{"ユーザマスタ概要_論理名称", "ユーザマスタ概要_物理名称", "ユーザマスタ概要_システムID", "ユーザマスタ概要_システム名称", "ユーザマスタ概要_改訂日", "ユーザマスタ概要_改訂者", "ユーザマスタ_No", "ユーザマスタ_論理名称", "ユーザマスタ_物理名称", "ユーザマスタ_データ型", "ユーザマスタ_桁数", "ユーザマスタ_初期値", "ユーザマスタ_PK", "ユーザマスタ_IDX1", "ユーザマスタ_IDX2", "ユーザマスタ_NN", "ユーザマスタ_備考"}, getColumnNames(result));
+        Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "1", "ユーザID", "ID", "NVARCHAR", "10", "", "1", "", "", "", ""}
+                , result.getRow(0));
+        Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "2", "パスワード", "PASSWORD", "NVARCHAR", "8", "", "", "", "", "", ""}
+                , result.getRow(1));
+        Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "3", "名称", "NAME", "NVARCHAR", "40", "", "", "", "", "○", ""}
+                , result.getRow(2));
+        Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "4", "電話番号", "TEL", "DECIMAL", "11,0", "", "", "", "", "", ""}
+                , result.getRow(3));
+        Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "5", "メールアドレス", "MAIL", "NVARCHAR", "40", "", "", "", "", "", ""}
+                , result.getRow(4));
+    }
+
     private static String[] getColumnNames(final ITable split1) throws DataSetException {
         return Arrays.stream(split1.getTableMetaData().getColumns())
                 .map(Column::getColumnName)
