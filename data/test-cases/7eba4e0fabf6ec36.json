@@ -1,0 +1,55 @@
+{
+  "uid" : "7eba4e0fabf6ec36",
+  "name" : "testConvertXlsxWithSchemaAddFileInfo",
+  "fullName" : "yo.dbunitcli.application.ConvertTest.testConvertXlsxWithSchemaAddFileInfo",
+  "historyId" : "5627c4a6ac09495bd10ac5c3518018a9",
+  "time" : {
+    "start" : 1704709649999,
+    "stop" : 1704709650077,
+    "duration" : 78
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testConvertXlsxWithSchemaAddFileInfo"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.ConvertTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az1111-852"
+  }, {
+    "name" : "thread",
+    "value" : "6328@fv-az1111-852.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "7eba4e0fabf6ec36.json",
+  "parameterValues" : [ ]
+}
