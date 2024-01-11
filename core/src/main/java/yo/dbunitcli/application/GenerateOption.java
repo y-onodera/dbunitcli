@@ -164,7 +164,7 @@ public class GenerateOption extends CommandLineOption {
             @Override
             public Stream<Map<String, Object>> parameterStream(final Map<String, Object> map, final ComparableDataSet dataSet) {
                 return dataSet.toMap(true)
-                        .flatMap(it -> ((List<Map<String, Object>>) it.get("row")).stream()
+                        .flatMap(it -> ((List<Map<String, Object>>) it.get("rows")).stream()
                                 .map(row -> {
                                     final Map<String, Object> result = new HashMap<>(it);
                                     result.put("row", row);

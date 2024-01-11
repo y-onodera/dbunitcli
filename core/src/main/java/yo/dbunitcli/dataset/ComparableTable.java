@@ -66,7 +66,7 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
             withMetaDataMap.put("tableName", this.getTableMetaData().getTableName());
             withMetaDataMap.put("columns", this.addSettingTableMetaData.getColumns());
             withMetaDataMap.put("primaryKeys", this.addSettingTableMetaData.getPrimaryKeys());
-            withMetaDataMap.put("row", rowMap);
+            withMetaDataMap.put("rows", rowMap);
             result.add(withMetaDataMap);
         }
         IntStream.range(0, this.getRowCount()).forEach(rowNum -> {
