@@ -9,6 +9,16 @@ import java.util.stream.IntStream;
 
 public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
 
+    private final String settingEncoding;
+
+    public FromJsonTableSeparatorsBuilder() {
+        this(System.getProperty("file.encoding"));
+    }
+
+    public FromJsonTableSeparatorsBuilder(final String settingEncoding) {
+        this.settingEncoding = settingEncoding;
+    }
+
     public TableSeparators build(final String settings) throws IOException {
         if (Optional.ofNullable(settings).orElse("").isEmpty()) {
             return this.build((File) null);
@@ -36,7 +46,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
 
     public FromJsonTableSeparatorsBuilder load(final File setting) {
         try {
-            final JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(setting), "MS932"));
+            final JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(setting), this.settingEncoding));
             final JsonObject settingJson = jsonReader.read().asJsonObject();
             return this.configureSetting(settingJson)
                     .configureCommonSetting(settingJson)
@@ -70,7 +80,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
     protected FromJsonTableSeparatorsBuilder importSetting(final JsonObject setting, final File file) {
         if (setting.containsKey("import")) {
             setting.getJsonArray("import").forEach(v ->
-                    new FromJsonTableSeparatorsBuilder().load(new File(file.getParent(), v.asJsonObject().getString("path")))
+                    new FromJsonTableSeparatorsBuilder(this.settingEncoding).load(new File(file.getParent(), v.asJsonObject().getString("path")))
                             .appendTo(this)
             );
         }

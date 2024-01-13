@@ -24,6 +24,9 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
     @Option(name = "-setting", usage = "file comparison settings")
     private String setting;
 
+    @Option(name = "-settingEncoding", usage = "settings encoding")
+    private String settingEncoding = System.getProperty("file.encoding");
+
     @Option(name = "-loadData", usage = "if false data row didn't load")
     private String loadData = "true";
 
@@ -96,7 +99,7 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
 
     protected void populateSettings(final CmdLineParser parser) throws CmdLineException {
         try {
-            this.tableSeparators = new FromJsonTableSeparatorsBuilder().build(this.setting);
+            this.tableSeparators = new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting);
         } catch (final IOException e) {
             throw new CmdLineException(parser, e);
         }
