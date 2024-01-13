@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public record TableSeparator(Predicate<String> targetFilter
+public record TableSeparator(TargetFilter targetFilter
         , TableSplitter splitter
         , List<String> comparisonKeys
         , ExpressionColumns expressionColumns
@@ -29,11 +29,11 @@ public record TableSeparator(Predicate<String> targetFilter
         , boolean distinct
 ) {
 
-    public static final Predicate<String> ACCEPT_ALL = it -> Boolean.TRUE;
-    public static final Predicate<String> REJECT_ALL = it -> Boolean.FALSE;
+    public static final TargetFilter ACCEPT_ALL = new TargetFilter.Always(true);
+    public static final TargetFilter REJECT_ALL = new TargetFilter.Always(false);
     public static final Predicate<Map<String, Object>> NO_FILTER = it -> Boolean.TRUE;
 
-    public static final TableSeparator NONE = builder().build();
+    public static final TableSeparator NONE = TableSeparator.builder().build();
 
     public static Builder builder() {
         return new Builder();
@@ -103,7 +103,7 @@ public record TableSeparator(Predicate<String> targetFilter
     }
 
     public boolean hasRowFilter() {
-        return this.filter() != NO_FILTER;
+        return this.filter() != TableSeparator.NO_FILTER;
     }
 
     public boolean test(final Map<String, Object> rowToMap) {
@@ -128,20 +128,66 @@ public record TableSeparator(Predicate<String> targetFilter
                 || this.includeColumns.size() > 0
                 || this.excludeColumns.size() > 0
                 || this.orderColumns.size() > 0
-                || this.filter != NO_FILTER
+                || this.filter != TableSeparator.NO_FILTER
                 || this.distinct
                 ;
     }
 
+    public interface TargetFilter {
+
+        static TargetFilter any(final String... names) {
+            return new Any(List.of(names));
+        }
+
+        static TargetFilter contain(final String pattern) {
+            return new Contain(pattern);
+        }
+
+        default TargetFilter exclude(final List<String> names) {
+            return new Exclude(this, names);
+        }
+
+        boolean test(String tableName);
+
+        record Exclude(TargetFilter base, List<String> names) implements TargetFilter {
+            @Override
+            public boolean test(final String tableName) {
+                return this.base.test(tableName) && !this.names().contains(tableName);
+            }
+        }
+
+        record Any(List<String> names) implements TargetFilter {
+            @Override
+            public boolean test(final String tableName) {
+                return this.names().contains(tableName);
+            }
+        }
+
+        record Contain(String patternString) implements TargetFilter {
+            @Override
+            public boolean test(final String tableName) {
+                return tableName.contains(this.patternString()) || this.patternString().equals("*");
+            }
+        }
+
+        record Always(boolean result) implements TargetFilter {
+            @Override
+            public boolean test(final String tableName) {
+                return this.result();
+            }
+        }
+
+    }
+
     public static class Builder {
-        private Predicate<String> targetFilter = TableSeparator.ACCEPT_ALL;
+        private TargetFilter targetFilter = TableSeparator.ACCEPT_ALL;
         private TableSplitter splitter = TableSplitter.NONE;
         private List<String> comparisonKeys = new ArrayList<>();
         private ExpressionColumns expressionColumns = ExpressionColumns.NONE;
         private List<String> includeColumns = new ArrayList<>();
         private List<String> excludeColumns = new ArrayList<>();
         private List<String> orderColumns = new ArrayList<>();
-        private Predicate<Map<String, Object>> filter = NO_FILTER;
+        private Predicate<Map<String, Object>> filter = TableSeparator.NO_FILTER;
 
         private boolean distinct = false;
 
@@ -160,7 +206,89 @@ public record TableSeparator(Predicate<String> targetFilter
             this.distinct = tableSeparator.distinct();
         }
 
-        public Builder setTargetFilter(final Predicate<String> targetFilter) {
+        public Builder with(final TableSeparator other) {
+            return this.with(other.splitter())
+                    .with(other.filter())
+                    .setComparisonKeys(Stream.concat(this.comparisonKeys.stream(), other.comparisonKeys().stream())
+                            .distinct()
+                            .toList())
+                    .setExpressionColumns(this.expressionColumns.add(other.expressionColumns()))
+                    .setIncludeColumns(Stream.concat(this.includeColumns.stream(), other.includeColumns().stream())
+                            .distinct()
+                            .toList())
+                    .setExcludeColumns(Stream.concat(this.excludeColumns.stream(), other.excludeColumns().stream())
+                            .distinct()
+                            .toList())
+                    .setOrderColumns(Stream.concat(this.orderColumns.stream(), other.orderColumns().stream())
+                            .distinct()
+                            .toList())
+                    .setDistinct(this.isDistinct() || other.distinct())
+                    ;
+        }
+
+        public Builder with(final TableSplitter other) {
+            if (this.splitter == TableSplitter.NONE) {
+                return this.setSplitter(other);
+            } else if (other == TableSplitter.NONE || this.splitter.equals(other)) {
+                return this;
+            } else if (!other.isSplit() && !this.splitter.renameFunction().equals(other.renameFunction())) {
+                return this.setSplitter(this.splitter.builder()
+                        .setRenameFunction(this.splitter.renameFunction().compose(other.renameFunction()))
+                        .build());
+            } else if (!this.splitter.isSplit() && other.isSplit() && !this.splitter.renameFunction().equals(other.renameFunction())) {
+                return this.setSplitter(other.builder()
+                        .setRenameFunction(this.splitter.renameFunction().andThen(other.renameFunction()))
+                        .build());
+            }
+            throw new UnsupportedOperationException("splitter define is conflict:" + this);
+        }
+
+        public Builder with(final Predicate<Map<String, Object>> otherFilter) {
+            if (otherFilter == TableSeparator.NONE.filter()) {
+                return this;
+            } else if (this.filter == TableSeparator.NONE.filter()) {
+                return this.setFilter(otherFilter);
+            }
+            return this.setFilter(this.filter.and(otherFilter));
+        }
+
+        public TargetFilter getTargetFilter() {
+            return this.targetFilter;
+        }
+
+        public TableSplitter getSplitter() {
+            return this.splitter;
+        }
+
+        public List<String> getComparisonKeys() {
+            return this.comparisonKeys;
+        }
+
+        public List<String> getIncludeColumns() {
+            return this.includeColumns;
+        }
+
+        public List<String> getExcludeColumns() {
+            return this.excludeColumns;
+        }
+
+        public List<String> getOrderColumns() {
+            return this.orderColumns;
+        }
+
+        public Predicate<Map<String, Object>> getFilter() {
+            return this.filter;
+        }
+
+        public boolean isDistinct() {
+            return this.distinct;
+        }
+
+        public ExpressionColumns getExpressionColumns() {
+            return this.expressionColumns;
+        }
+
+        public Builder setTargetFilter(final TargetFilter targetFilter) {
             this.targetFilter = targetFilter;
             return this;
         }
@@ -210,88 +338,6 @@ public record TableSeparator(Predicate<String> targetFilter
             return this;
         }
 
-        public Builder with(final TableSeparator other) {
-            return this.with(other.splitter())
-                    .with(other.filter())
-                    .setComparisonKeys(Stream.concat(this.comparisonKeys.stream(), other.comparisonKeys().stream())
-                            .distinct()
-                            .toList())
-                    .setExpressionColumns(this.expressionColumns.add(other.expressionColumns()))
-                    .setIncludeColumns(Stream.concat(this.includeColumns.stream(), other.includeColumns().stream())
-                            .distinct()
-                            .toList())
-                    .setExcludeColumns(Stream.concat(this.excludeColumns.stream(), other.excludeColumns().stream())
-                            .distinct()
-                            .toList())
-                    .setOrderColumns(Stream.concat(this.orderColumns.stream(), other.orderColumns().stream())
-                            .distinct()
-                            .toList())
-                    .setDistinct(this.isDistinct() || other.distinct())
-                    ;
-        }
-
-        public Builder with(final TableSplitter other) {
-            if (this.splitter == TableSplitter.NONE) {
-                return this.setSplitter(other);
-            } else if (other == TableSplitter.NONE || this.splitter.equals(other)) {
-                return this;
-            } else if (!other.isSplit() && !this.splitter.renameFunction().equals(other.renameFunction())) {
-                return this.setSplitter(this.splitter.builder()
-                        .setRenameFunction(this.splitter.renameFunction().compose(other.renameFunction()))
-                        .build());
-            } else if (!this.splitter.isSplit() && other.isSplit() && !this.splitter.renameFunction().equals(other.renameFunction())) {
-                return this.setSplitter(other.builder()
-                        .setRenameFunction(this.splitter.renameFunction().andThen(other.renameFunction()))
-                        .build());
-            }
-            throw new UnsupportedOperationException("splitter define is conflict:" + this);
-        }
-
-        public Builder with(final Predicate<Map<String, Object>> otherFilter) {
-            if (otherFilter == NONE.filter()) {
-                return this;
-            } else if (this.filter == NONE.filter()) {
-                return this.setFilter(otherFilter);
-            }
-            return this.setFilter(this.filter.and(otherFilter));
-        }
-
-        public Predicate<String> getTargetFilter() {
-            return this.targetFilter;
-        }
-
-        public TableSplitter getSplitter() {
-            return this.splitter;
-        }
-
-        public List<String> getComparisonKeys() {
-            return this.comparisonKeys;
-        }
-
-        public List<String> getIncludeColumns() {
-            return this.includeColumns;
-        }
-
-        public List<String> getExcludeColumns() {
-            return this.excludeColumns;
-        }
-
-        public List<String> getOrderColumns() {
-            return this.orderColumns;
-        }
-
-        public Predicate<Map<String, Object>> getFilter() {
-            return this.filter;
-        }
-
-        public boolean isDistinct() {
-            return this.distinct;
-        }
-
-        public ExpressionColumns getExpressionColumns() {
-            return this.expressionColumns;
-        }
-
         public TableSeparator build() {
             return new TableSeparator(this);
         }
@@ -304,7 +350,7 @@ public record TableSeparator(Predicate<String> targetFilter
                     .map(jexl::createExpression)
                     .toList();
             if (expr.size() == 0) {
-                return NONE.filter();
+                return TableSeparator.NONE.filter();
             }
             return map -> expr.stream().allMatch(it -> Boolean.parseBoolean(it.evaluate(new MapContext(map)).toString()));
         }

@@ -19,7 +19,12 @@
       }
     },
     {
-      "pattern": "multi2",
+      "pattern": {
+        "string": "multi",
+        "exclude": [
+          "multi1"
+        ]
+      },
       "tableName": "merge",
       "number": {
         "key": "key == 1 ?  key * 10 : key"

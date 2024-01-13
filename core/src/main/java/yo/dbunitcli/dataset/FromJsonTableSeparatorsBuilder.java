@@ -3,7 +3,6 @@ package yo.dbunitcli.dataset;
 import javax.json.*;
 import java.io.*;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -128,7 +127,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         other.add(this.build());
     }
 
-    protected void addTableSeparate(final JsonObject json, final Predicate<String> targetFilter) {
+    protected void addTableSeparate(final JsonObject json, final TableSeparator.TargetFilter targetFilter) {
         if (json.containsKey("separate")) {
             final JsonArray expressions = json.getJsonArray("separate");
             IntStream.range(0, expressions.size())
@@ -155,7 +154,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         return this.getTableSeparator(settingJson, this.getTargetFilter(settingJson));
     }
 
-    protected TableSeparator getTableSeparator(final JsonObject settingJson, final Predicate<String> targetFilter) {
+    protected TableSeparator getTableSeparator(final JsonObject settingJson, final TableSeparator.TargetFilter targetFilter) {
         return TableSeparator.builder()
                 .setTargetFilter(targetFilter)
                 .setSplitter(this.getSplitter(settingJson))
@@ -169,20 +168,33 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
                 .build();
     }
 
-    protected Predicate<String> getTargetFilter(final JsonObject settingJson) {
+    protected TableSeparator.TargetFilter getTargetFilter(final JsonObject settingJson) {
         if (settingJson.containsKey("name")) {
             if (settingJson.get("name") instanceof JsonString targetName) {
-                return (it) -> it.equals(targetName.getString());
+                return TableSeparator.TargetFilter.any(targetName.getString());
             } else {
                 final JsonArray names = settingJson.getJsonArray("name");
-                final List<String> nameList = IntStream.range(0, names.size())
+                return TableSeparator.TargetFilter.any(IntStream.range(0, names.size())
                         .mapToObj(names::getString)
-                        .toList();
-                return nameList::contains;
+                        .toArray(String[]::new));
             }
         } else if (settingJson.containsKey("pattern")) {
-            final String targetPattern = settingJson.getString("pattern");
-            return (it) -> it.contains(targetPattern) || targetPattern.equals("*");
+            if (settingJson.get("pattern") instanceof JsonString targetString) {
+                return TableSeparator.TargetFilter.contain(targetString.getString());
+            } else {
+                final JsonObject pattern = settingJson.getJsonObject("pattern");
+                TableSeparator.TargetFilter result = TableSeparator.ACCEPT_ALL;
+                if (pattern.containsKey("string")) {
+                    result = TableSeparator.TargetFilter.contain(pattern.getString("string"));
+                }
+                if (pattern.containsKey("exclude")) {
+                    final JsonArray names = pattern.getJsonArray("exclude");
+                    return result.exclude(IntStream.range(0, names.size())
+                            .mapToObj(names::getString)
+                            .toList());
+                }
+                return result;
+            }
         } else if (settingJson.containsKey("innerJoin")
                 || settingJson.containsKey("outerJoin")
                 || settingJson.containsKey("fullJoin")) {
