@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public record TableSeparator(TargetFilter targetFilter
@@ -25,13 +24,13 @@ public record TableSeparator(TargetFilter targetFilter
         , List<String> includeColumns
         , List<String> excludeColumns
         , List<String> orderColumns
-        , Predicate<Map<String, Object>> filter
+        , RowFilter filter
         , boolean distinct
 ) {
 
     public static final TargetFilter ACCEPT_ALL = new TargetFilter.Always(true);
     public static final TargetFilter REJECT_ALL = new TargetFilter.Always(false);
-    public static final Predicate<Map<String, Object>> NO_FILTER = it -> Boolean.TRUE;
+    public static final RowFilter NO_FILTER = new RowFilter(new ArrayList<>());
 
     public static final TableSeparator NONE = TableSeparator.builder().build();
 
@@ -103,7 +102,7 @@ public record TableSeparator(TargetFilter targetFilter
     }
 
     public boolean hasRowFilter() {
-        return this.filter() != TableSeparator.NO_FILTER;
+        return this.filter().isEmpty();
     }
 
     public boolean test(final Map<String, Object> rowToMap) {
@@ -176,6 +175,40 @@ public record TableSeparator(TargetFilter targetFilter
                 return this.result();
             }
         }
+    }
+
+    public record RowFilter(List<JexlExpression> expressions) {
+
+        static JexlEngine JEXL = new JexlBuilder().create();
+
+        static RowFilter of(final List<String> expression) {
+            if (expression.size() == 0) {
+                return TableSeparator.NO_FILTER;
+            }
+            return new RowFilter(expression
+                    .stream()
+                    .filter(it -> !it.trim().isEmpty())
+                    .map(RowFilter.JEXL::createExpression)
+                    .toList());
+        }
+
+        public boolean isEmpty() {
+            return this.expressions().size() == 0;
+        }
+
+        public boolean test(final Map<String, Object> row) {
+            if (this.expressions.size() == 0) {
+                return true;
+            }
+            return this.expressions.stream().allMatch(it -> Boolean.parseBoolean(it.evaluate(new MapContext(row)).toString()));
+        }
+
+        public RowFilter and(final RowFilter otherFilter) {
+            final List<JexlExpression> newFilters = new ArrayList<>();
+            newFilters.addAll(this.expressions());
+            newFilters.addAll(otherFilter.expressions());
+            return new RowFilter(newFilters);
+        }
 
     }
 
@@ -187,7 +220,7 @@ public record TableSeparator(TargetFilter targetFilter
         private List<String> includeColumns = new ArrayList<>();
         private List<String> excludeColumns = new ArrayList<>();
         private List<String> orderColumns = new ArrayList<>();
-        private Predicate<Map<String, Object>> filter = TableSeparator.NO_FILTER;
+        private RowFilter filter = TableSeparator.NO_FILTER;
 
         private boolean distinct = false;
 
@@ -243,7 +276,7 @@ public record TableSeparator(TargetFilter targetFilter
             throw new UnsupportedOperationException("splitter define is conflict:" + this);
         }
 
-        public Builder with(final Predicate<Map<String, Object>> otherFilter) {
+        public Builder with(final RowFilter otherFilter) {
             if (otherFilter == TableSeparator.NONE.filter()) {
                 return this;
             } else if (this.filter == TableSeparator.NONE.filter()) {
@@ -276,7 +309,7 @@ public record TableSeparator(TargetFilter targetFilter
             return this.orderColumns;
         }
 
-        public Predicate<Map<String, Object>> getFilter() {
+        public RowFilter getFilter() {
             return this.filter;
         }
 
@@ -318,13 +351,13 @@ public record TableSeparator(TargetFilter targetFilter
             return this;
         }
 
-        public Builder setFilter(final Predicate<Map<String, Object>> filter) {
+        public Builder setFilter(final RowFilter filter) {
             this.filter = filter;
             return this;
         }
 
         public Builder setFilter(final List<String> filterExpressions) {
-            this.filter = this.createFilter(filterExpressions);
+            this.filter = RowFilter.of(filterExpressions);
             return this;
         }
 
@@ -342,17 +375,5 @@ public record TableSeparator(TargetFilter targetFilter
             return new TableSeparator(this);
         }
 
-        private Predicate<Map<String, Object>> createFilter(final List<String> expressions) {
-            final JexlEngine jexl = new JexlBuilder().create();
-            final List<JexlExpression> expr = expressions
-                    .stream()
-                    .filter(it -> !it.trim().isEmpty())
-                    .map(jexl::createExpression)
-                    .toList();
-            if (expr.size() == 0) {
-                return TableSeparator.NONE.filter();
-            }
-            return map -> expr.stream().allMatch(it -> Boolean.parseBoolean(it.evaluate(new MapContext(map)).toString()));
-        }
     }
 }
