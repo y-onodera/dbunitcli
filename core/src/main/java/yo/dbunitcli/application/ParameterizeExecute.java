@@ -16,18 +16,28 @@ public class ParameterizeExecute {
             throw new AssertionError("option parse failed.", exp);
         }
         final Integer[] rowNum = new Integer[]{0};
-        options.loadParams().forEach(it -> {
-            final Parameter parameter = new Parameter(rowNum[0]++, it);
-            try {
-                options.createCommand(it).exec(options.createArgs(parameter), parameter);
-            } catch (final Command.CommandFailException fail) {
-                if (!options.isIgnoreFail()) {
-                    throw fail;
-                } else {
-                    LOGGER.info(fail.getMessage());
-                }
-            }
-        });
+        final int failCount = options.loadParams().map(it -> {
+                    final Parameter parameter = new Parameter(rowNum[0]++, it);
+                    try {
+                        options.createCommand(it).exec(options.createArgs(parameter), parameter);
+                    } catch (final Command.CommandFailException fail) {
+                        ParameterizeExecute.LOGGER.info(fail.getMessage());
+                        return 1;
+                    } catch (final AssertionError ae) {
+                        if (!options.isIgnoreFail()) {
+                            throw ae;
+                        } else {
+                            ParameterizeExecute.LOGGER.info(ae.getMessage());
+                            return 1;
+                        }
+                    }
+                    return 0;
+                })
+                .reduce(0, Integer::sum);
+        if (failCount > 0) {
+            ParameterizeExecute.LOGGER.info("total fail count:" + failCount);
+            System.exit(1);
+        }
     }
 
 }
