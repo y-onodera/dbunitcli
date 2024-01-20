@@ -30,37 +30,42 @@
       }
     },
     {
-      "fullJoin": {
+      "innerJoin": {
         "left": "multi1",
         "right": "merge",
         "column": [
           "key"
         ]
       },
+      "tableName": "join",
+      "include": [
+        "key",
+        "columna",
+        "columnb",
+        "columnc"
+      ],
+      "number": {
+        "key": "multi1_key"
+      },
+      "string": {
+        "columnab": "merge_columna + multi1_columnb",
+        "columnbc": "merge_columnb + multi1_columnc",
+        "columnca": "merge_columnc + multi1_columna"
+      }
+    },
+    {
+      "name": "join",
       "separate": [
         {
-          "tableName": "separate",
+          "tableName": "under3",
           "filter": [
-            "true"
-          ],
-          "number": {
-            "merge_key": "(merge_key ?: 0 ) == 3 ?  10 : (merge_key ?: 0 )"
-          },
-          "include": [
-            "merge_key"
-          ],
-          "order": [
-            "merge_key"
-          ],
-          "distinct": true
+            "key < 3"
+          ]
         },
         {
           "tableName": "over1",
           "filter": [
-            "(merge_key ? merge_key : 0) > 1"
-          ],
-          "order": [
-            "multi1_key"
+            "key > 1"
           ]
         }
       ]

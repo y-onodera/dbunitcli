@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 public record TableSeparators(List<TableSeparator> settings
         , List<TableSeparator> commonSettings
-        , List<JoinCondition> joins) {
+        , List<ComparableTableJoinCondition> joins) {
 
     public static final TableSeparators NONE = new Builder().build();
 
@@ -39,9 +39,11 @@ public record TableSeparators(List<TableSeparator> settings
 
     public ComparableTableMapper createMapper(final ComparableTableJoin join) {
         final ITableMetaData joinMetadata = join.joinMetaData();
-        return this.createMapper(this.addNewNameSetting(Stream.of(this.getCommonSettings(joinMetadata.getTableName())
-                        .add(join.getCondition().tableSeparator())
-                        .addSetting(joinMetadata))
+        return this.createMapper(this.addNewNameSetting(join.getCondition().tableSeparators()
+                        .stream()
+                        .map(it -> this.getCommonSettings(joinMetadata.getTableName())
+                                .add(it)
+                                .addSetting(joinMetadata))
                 , joinMetadata.getTableName()));
     }
 
@@ -68,7 +70,13 @@ public record TableSeparators(List<TableSeparator> settings
     private Stream<AddSettingTableMetaData> addNewNameSetting(final Stream<AddSettingTableMetaData> target, final String beforeTableName) {
         return target.flatMap(it -> {
             if (!Objects.equals(beforeTableName, it.getTableName())) {
-                return this.addNewNameSetting(this.addSettings(it), it.getTableName());
+                final Set<TableSeparator> separatorsFromSettings = this.getSeparatorsFromSettings(it.getTableName());
+                if (separatorsFromSettings.size() == 0) {
+                    return Stream.of(it);
+                }
+                return this.addNewNameSetting(separatorsFromSettings
+                                .stream().map(separator -> separator.addSetting(it))
+                        , it.getTableName());
             }
             return Stream.of(it);
         });
@@ -80,16 +88,20 @@ public record TableSeparators(List<TableSeparator> settings
     }
 
     private Collection<TableSeparator> getSeparators(final String tableName) {
-        final Set<TableSeparator> result = new HashSet<>(this.settings.stream()
-                .filter(TableSeparator::hasSettings)
-                .filter(it -> it.targetFilter().test(tableName))
-                .map(this.getCommonSettings(tableName)::add)
-                .toList());
+        final Set<TableSeparator> result = this.getSeparatorsFromSettings(tableName);
         if (result.size() > 0) {
             return result;
         }
         result.add(this.getCommonSettings(tableName));
         return result;
+    }
+
+    private Set<TableSeparator> getSeparatorsFromSettings(final String tableName) {
+        return new HashSet<>(this.settings.stream()
+                .filter(TableSeparator::hasSettings)
+                .filter(it -> it.targetFilter().test(tableName))
+                .map(this.getCommonSettings(tableName)::add)
+                .toList());
     }
 
     private TableSeparator getCommonSettings(final String tableName) {
@@ -99,11 +111,9 @@ public record TableSeparators(List<TableSeparator> settings
     }
 
     public static class Builder {
-        private List<TableSeparator> commonSettings = new ArrayList<>();
-
         private final List<TableSeparator> settings = new ArrayList<>();
-
-        private final List<JoinCondition> joins = new ArrayList<>();
+        private final List<ComparableTableJoinCondition> joins = new ArrayList<>();
+        private List<TableSeparator> commonSettings = new ArrayList<>();
 
         public Builder() {
             this.commonSettings.add(TableSeparator.NONE);
@@ -128,8 +138,12 @@ public record TableSeparators(List<TableSeparator> settings
             return this.commonSettings;
         }
 
-        public List<JoinCondition> getJoins() {
+        public List<ComparableTableJoinCondition> getJoins() {
             return this.joins;
+        }
+
+        public void addSettings(final List<TableSeparator> settings) {
+            settings.forEach(this::addSetting);
         }
 
         public void addSetting(final TableSeparator setting) {
@@ -140,7 +154,7 @@ public record TableSeparators(List<TableSeparator> settings
             this.commonSettings.add(aExpressions);
         }
 
-        public void addJoin(final JoinCondition join) {
+        public void addJoin(final ComparableTableJoinCondition join) {
             this.joins.add(join);
         }
 

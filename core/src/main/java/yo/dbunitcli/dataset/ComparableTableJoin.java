@@ -12,7 +12,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class ComparableTableJoin {
-    private final JoinCondition condition;
+    private final ComparableTableJoinCondition condition;
     private ComparableTable left;
     private ComparableTable right;
 
@@ -36,7 +36,7 @@ public class ComparableTableJoin {
         return new Eval(expression);
     }
 
-    public ComparableTableJoin(final JoinCondition condition) {
+    public ComparableTableJoin(final ComparableTableJoinCondition condition) {
         this.condition = condition;
     }
 
@@ -48,7 +48,7 @@ public class ComparableTableJoin {
         return this.condition.strategy().execute(this.left, this.right);
     }
 
-    public JoinCondition getCondition() {
+    public ComparableTableJoinCondition getCondition() {
         return this.condition;
     }
 
@@ -87,6 +87,12 @@ public class ComparableTableJoin {
 
     }
 
+    public interface Strategy {
+        Strategy NOT_JOIN = (left, right) -> Stream.empty();
+
+        Stream<Object[]> execute(ComparableTable left, ComparableTable right);
+    }
+
     private record Equals(Set<String> columns) implements ConditionBuilder {
         @Override
         public BiFunction<Map<String, Object>, Map<String, Object>, Boolean> build(final ComparableTable left, final ComparableTable right) {
@@ -105,12 +111,6 @@ public class ComparableTableJoin {
                 return Boolean.parseBoolean(jexl.evaluate(new MapContext(param)).toString());
             };
         }
-    }
-
-    public interface Strategy {
-        Strategy NOT_JOIN = (left, right) -> Stream.empty();
-
-        Stream<Object[]> execute(ComparableTable left, ComparableTable right);
     }
 
     private record InnerJoin(ConditionBuilder condition) implements Strategy {

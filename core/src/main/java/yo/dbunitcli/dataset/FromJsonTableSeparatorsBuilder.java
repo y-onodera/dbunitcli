@@ -128,26 +128,32 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
     }
 
     protected void addTableSeparate(final JsonObject json, final TableSeparator.TargetFilter targetFilter) {
-        if (json.containsKey("separate")) {
-            final JsonArray expressions = json.getJsonArray("separate");
-            IntStream.range(0, expressions.size())
-                    .mapToObj(expressions::getJsonObject)
-                    .forEach(separate -> this.addSetting(this.getTableSeparator(separate, targetFilter)));
-        } else if (json.containsKey("innerJoin")) {
+        if (json.containsKey("innerJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("innerJoin")
                     , ComparableTableJoin.innerJoin(this.getJoinOn(json.getJsonObject("innerJoin")))
-                    , this.getTableSeparator(json, targetFilter)));
+                    , this.getTableSeparators(json, targetFilter)));
         } else if (json.containsKey("outerJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("outerJoin")
                     , ComparableTableJoin.outerJoin(this.getJoinOn(json.getJsonObject("outerJoin")))
-                    , this.getTableSeparator(json, targetFilter)));
+                    , this.getTableSeparators(json, targetFilter)));
         } else if (json.containsKey("fullJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("fullJoin")
                     , ComparableTableJoin.fullJoin(this.getJoinOn(json.getJsonObject("fullJoin")))
-                    , this.getTableSeparator(json, targetFilter)));
+                    , this.getTableSeparators(json, targetFilter)));
         } else {
-            this.addSetting(this.getTableSeparator(json, targetFilter));
+            this.addSettings(this.getTableSeparators(json, targetFilter));
         }
+    }
+
+    protected List<TableSeparator> getTableSeparators(final JsonObject settingJson, final TableSeparator.TargetFilter targetFilter) {
+        if (settingJson.containsKey("separate")) {
+            final JsonArray expressions = settingJson.getJsonArray("separate");
+            return IntStream.range(0, expressions.size())
+                    .mapToObj(expressions::getJsonObject)
+                    .map(separate -> this.getTableSeparator(separate, targetFilter))
+                    .collect(Collectors.toList());
+        }
+        return List.of(this.getTableSeparator(settingJson, targetFilter));
     }
 
     protected TableSeparator getTableSeparator(final JsonObject settingJson) {
@@ -234,12 +240,12 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         return TableSplitter.NONE;
     }
 
-    protected JoinCondition getJoin(final JsonObject json, final ComparableTableJoin.Strategy strategy, final TableSeparator tableSeparator) {
-        return JoinCondition.builder()
+    protected ComparableTableJoinCondition getJoin(final JsonObject json, final ComparableTableJoin.Strategy strategy, final List<TableSeparator> tableSeparator) {
+        return ComparableTableJoinCondition.builder()
                 .setLeft(json.getString("left"))
                 .setRight(json.getString("right"))
                 .setStrategy(strategy)
-                .setTableSeparator(tableSeparator)
+                .addTableSeparators(tableSeparator)
                 .build();
     }
 

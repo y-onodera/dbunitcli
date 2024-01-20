@@ -1,21 +1,23 @@
 package yo.dbunitcli.dataset;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-public record JoinCondition(String left, String right
+public record ComparableTableJoinCondition(String left, String right
         , ComparableTableJoin.Strategy strategy
-        , TableSeparator tableSeparator) {
-
-    public JoinCondition() {
-        this("", "", ComparableTableJoin.Strategy.NOT_JOIN, TableSeparator.NONE);
-    }
-
-    public JoinCondition(final Builder builder) {
-        this(builder.getLeft(), builder.getRight(), builder.getStrategy(), builder.getTableSeparator());
-    }
+        , List<TableSeparator> tableSeparators) {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public ComparableTableJoinCondition() {
+        this("", "", ComparableTableJoin.Strategy.NOT_JOIN, List.of(TableSeparator.NONE));
+    }
+
+    public ComparableTableJoinCondition(final Builder builder) {
+        this(builder.getLeft(), builder.getRight(), builder.getStrategy(), builder.getTableSeparators());
     }
 
     public boolean hasRelation(final String tableName) {
@@ -23,13 +25,13 @@ public record JoinCondition(String left, String right
     }
 
     public static class Builder {
+        private final List<TableSeparator> tableSeparators = new ArrayList<>();
         private String left;
         private String right;
         private ComparableTableJoin.Strategy strategy = ComparableTableJoin.Strategy.NOT_JOIN;
-        private TableSeparator tableSeparator = TableSeparator.NONE;
 
-        public JoinCondition build() {
-            return new JoinCondition(this);
+        public ComparableTableJoinCondition build() {
+            return new ComparableTableJoinCondition(this);
         }
 
         public Builder setLeft(final String left) {
@@ -47,8 +49,8 @@ public record JoinCondition(String left, String right
             return this;
         }
 
-        public Builder setTableSeparator(final TableSeparator tableSeparator) {
-            this.tableSeparator = tableSeparator;
+        public Builder addTableSeparators(final List<TableSeparator> tableSeparators) {
+            this.tableSeparators.addAll(tableSeparators);
             return this;
         }
 
@@ -64,8 +66,11 @@ public record JoinCondition(String left, String right
             return this.strategy;
         }
 
-        public TableSeparator getTableSeparator() {
-            return this.tableSeparator;
+        public List<TableSeparator> getTableSeparators() {
+            if (this.tableSeparators.size() == 0) {
+                return List.of(TableSeparator.NONE);
+            }
+            return this.tableSeparators;
         }
     }
 }

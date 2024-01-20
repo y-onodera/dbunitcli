@@ -29,6 +29,12 @@ public class ConvertTest {
 
     private String baseDir;
 
+    private static String[] getColumnNames(final ITable split1) throws DataSetException {
+        return Arrays.stream(split1.getTableMetaData().getColumns())
+                .map(Column::getColumnName)
+                .toArray(String[]::new);
+    }
+
     @Before
     public void setUp() throws UnsupportedEncodingException {
         this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8);
@@ -348,45 +354,45 @@ public class ConvertTest {
         Assert.assertEquals(8, actual.getTableNames().length);
         final ITable split1 = actual.getTables()[0];
         Assert.assertEquals("0000_multi1", split1.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, getColumnNames(split1));
+        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split1));
         Assert.assertEquals(2, split1.getRowCount());
         Assert.assertEquals("1", split1.getValue(0, "key"));
         Assert.assertEquals("2", split1.getValue(1, "key"));
         final ITable split2 = actual.getTables()[1];
         Assert.assertEquals("0000_multi2", split2.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, getColumnNames(split2));
+        Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, ConvertTest.getColumnNames(split2));
         Assert.assertEquals(2, split2.getRowCount());
         Assert.assertEquals("1", split2.getValue(0, "key"));
         Assert.assertEquals("2", split2.getValue(1, "key"));
         final ITable split3 = actual.getTables()[2];
         Assert.assertEquals("0000_rename", split3.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, getColumnNames(split3));
+        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split3));
         Assert.assertEquals(2, split3.getRowCount());
         Assert.assertEquals("1", split3.getValue(0, "key"));
         Assert.assertEquals("2", split3.getValue(1, "key"));
         final ITable split4 = actual.getTables()[3];
         Assert.assertEquals("0001_rename", split4.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, getColumnNames(split4));
+        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split4));
         Assert.assertEquals(1, split4.getRowCount());
         Assert.assertEquals("3", split4.getValue(0, "key"));
         final ITable split5 = actual.getTables()[4];
         Assert.assertEquals("multi1_00", split5.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, getColumnNames(split5));
+        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split5));
         Assert.assertEquals(1, split5.getRowCount());
         Assert.assertEquals("2", split5.getValue(0, "key"));
         final ITable split6 = actual.getTables()[5];
         Assert.assertEquals("multi1_01", split6.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, getColumnNames(split6));
+        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split6));
         Assert.assertEquals(1, split6.getRowCount());
         Assert.assertEquals("3", split6.getValue(0, "key"));
         final ITable split7 = actual.getTables()[6];
         Assert.assertEquals("multi2_00", split7.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, getColumnNames(split7));
+        Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, ConvertTest.getColumnNames(split7));
         Assert.assertEquals(1, split7.getRowCount());
         Assert.assertEquals("2", split7.getValue(0, "key"));
         final ITable split8 = actual.getTables()[7];
         Assert.assertEquals("multi2_01", split8.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, getColumnNames(split8));
+        Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, ConvertTest.getColumnNames(split8));
         Assert.assertEquals(1, split8.getRowCount());
         Assert.assertEquals("3", split8.getValue(0, "key"));
     }
@@ -835,6 +841,51 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
+        ComparableTable result = actual.getTable("separate");
+        Assert.assertEquals(3, result.getRowCount());
+        Assert.assertEquals(1, result.getNumberOfColumns());
+        Assert.assertEquals("0", result.getValue(0, "merge_key"));
+        Assert.assertEquals("2", result.getValue(1, "merge_key"));
+        Assert.assertEquals("10", result.getValue(2, "merge_key"));
+        result = actual.getTable("over1");
+        Assert.assertEquals(3, result.getRowCount());
+        Assert.assertEquals(8, result.getNumberOfColumns());
+        Assert.assertEquals("2", result.getValue(0, "multi1_key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(0, "multi1_columna"));
+        Assert.assertEquals("test", result.getValue(0, "multi1_columnb"));
+        Assert.assertEquals("column3:5", result.getValue(0, "multi1_columnc"));
+        Assert.assertEquals("2", result.getValue(0, "merge_key"));
+        Assert.assertEquals("あ\nいうえお", result.getValue(0, "merge_columna"));
+        Assert.assertEquals("test", result.getValue(0, "merge_columnb"));
+        Assert.assertEquals("column3:5", result.getValue(0, "merge_columnc"));
+        Assert.assertEquals("10", result.getValue(1, "multi1_key"));
+        Assert.assertEquals("column1:2", result.getValue(1, "multi1_columna"));
+        Assert.assertEquals("column2:3", result.getValue(1, "multi1_columnb"));
+        Assert.assertEquals("column3:4", result.getValue(1, "multi1_columnc"));
+        Assert.assertEquals("10", result.getValue(1, "merge_key"));
+        Assert.assertEquals("column1:2", result.getValue(1, "merge_columna"));
+        Assert.assertEquals("column2:3", result.getValue(1, "merge_columnb"));
+        Assert.assertEquals("column3:4", result.getValue(1, "merge_columnc"));
+        Assert.assertEquals("", result.getValue(2, "multi1_key"));
+        Assert.assertEquals("", result.getValue(2, "multi1_columna"));
+        Assert.assertEquals("", result.getValue(2, "multi1_columnb"));
+        Assert.assertEquals("", result.getValue(2, "multi1_columnc"));
+        Assert.assertEquals("3", result.getValue(2, "merge_key"));
+        Assert.assertEquals("", result.getValue(2, "merge_columna"));
+        Assert.assertEquals("", result.getValue(2, "merge_columnb"));
+        Assert.assertEquals("column3:", result.getValue(2, "merge_columnc"));
+    }
+
+    @Test
+    public void testConvertInnerJoinWithRename() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertInnerJoinWithRename.txt"});
+        final File src = new File(this.baseDir + "/join/result/paramConvertInnerJoinWithRename.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .setSource(DataSourceType.xlsx)
+                                .build()));
         ComparableTable result = actual.getTable("under3");
         Assert.assertEquals(1, result.getRowCount());
         Assert.assertEquals(4, result.getNumberOfColumns());
@@ -931,7 +982,7 @@ public class ConvertTest {
         final ComparableTable result = actual.getTable("ユーザマスタ概要_with_ユーザマスタ");
         Assert.assertEquals(5, result.getRowCount());
         Assert.assertEquals(17, result.getNumberOfColumns());
-        Assert.assertArrayEquals(new String[]{"ユーザマスタ概要_論理名称", "ユーザマスタ概要_物理名称", "ユーザマスタ概要_システムID", "ユーザマスタ概要_システム名称", "ユーザマスタ概要_改訂日", "ユーザマスタ概要_改訂者", "ユーザマスタ_No", "ユーザマスタ_論理名称", "ユーザマスタ_物理名称", "ユーザマスタ_データ型", "ユーザマスタ_桁数", "ユーザマスタ_初期値", "ユーザマスタ_PK", "ユーザマスタ_IDX1", "ユーザマスタ_IDX2", "ユーザマスタ_NN", "ユーザマスタ_備考"}, getColumnNames(result));
+        Assert.assertArrayEquals(new String[]{"ユーザマスタ概要_論理名称", "ユーザマスタ概要_物理名称", "ユーザマスタ概要_システムID", "ユーザマスタ概要_システム名称", "ユーザマスタ概要_改訂日", "ユーザマスタ概要_改訂者", "ユーザマスタ_No", "ユーザマスタ_論理名称", "ユーザマスタ_物理名称", "ユーザマスタ_データ型", "ユーザマスタ_桁数", "ユーザマスタ_初期値", "ユーザマスタ_PK", "ユーザマスタ_IDX1", "ユーザマスタ_IDX2", "ユーザマスタ_NN", "ユーザマスタ_備考"}, ConvertTest.getColumnNames(result));
         Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "1", "ユーザID", "ID", "NVARCHAR", "10", "", "1", "", "", "", ""}
                 , result.getRow(0));
         Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "2", "パスワード", "PASSWORD", "NVARCHAR", "8", "", "", "", "", "", ""}
@@ -942,12 +993,6 @@ public class ConvertTest {
                 , result.getRow(3));
         Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "5", "メールアドレス", "MAIL", "NVARCHAR", "40", "", "", "", "", "", ""}
                 , result.getRow(4));
-    }
-
-    private static String[] getColumnNames(final ITable split1) throws DataSetException {
-        return Arrays.stream(split1.getTableMetaData().getColumns())
-                .map(Column::getColumnName)
-                .toArray(String[]::new);
     }
 
 }
