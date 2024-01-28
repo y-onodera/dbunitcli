@@ -1,13 +1,13 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Map;
 
 public class EncodingOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
 
-    @Option(name = "-encoding", usage = "csv file encoding")
+    @CommandLine.Option(names = "-encoding", description = "csv file encoding")
     private String encoding = System.getProperty("file.encoding");
 
     public EncodingOption(final String prefix) {

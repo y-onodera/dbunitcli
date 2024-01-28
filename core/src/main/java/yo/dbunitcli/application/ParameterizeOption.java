@@ -1,8 +1,6 @@
 package yo.dbunitcli.application;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.application.argument.TemplateRenderOption;
 import yo.dbunitcli.dataset.Parameter;
@@ -13,23 +11,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+@CommandLine.Command(name = "parameterizeExecute", mixinStandardHelpOptions = true)
 public class ParameterizeOption extends CommandLineOption {
 
     private final DataSetLoadOption param = new DataSetLoadOption("param");
 
     private final TemplateRenderOption templateOption = new TemplateRenderOption("template");
-
-    @Option(name = "-cmd", usage = "data driven target cmd")
-    private String cmd;
-
-    @Option(name = "-cmdParam", usage = "columnName parameterFile for cmd. dynamically set fileName from param dataset")
-    private String cmdParam;
-
-    @Option(name = "-template", usage = "default template file. case when cmdParam exists,this option is ignore.")
-    private File template;
-
-    @Option(name = "-ignoreFail", usage = "case when cmd is compare and unexpected diff found, then continue other cmd")
+    @CommandLine.Option(names = "-ignoreFail", description = "case when cmd is compare and unexpected diff found, then continue other cmd")
     private String ignoreFail = "false";
+    @CommandLine.Option(names = "-cmd", description = "data driven target cmd")
+    private String cmd;
+    @CommandLine.Option(names = "-cmdParam", description = "columnName parameterFile for cmd. dynamically set fileName from param dataset")
+    private String cmdParam;
+    @CommandLine.Option(names = "-template", description = "default template file. case when cmdParam exists,this option is ignore.")
+    private File template;
 
     public ParameterizeOption() {
         super(Parameter.none());
@@ -40,7 +35,7 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CommandLine.ParseResult parser, final String[] expandArgs) {
         super.setUpComponent(parser, expandArgs);
         this.param.parseArgument(expandArgs);
         this.templateOption.parseArgument(expandArgs);

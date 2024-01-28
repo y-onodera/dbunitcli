@@ -1,13 +1,13 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Map;
 
 public class RecursiveOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
 
-    @Option(name = "-recursive", usage = "default true. whether traversal recursively")
+    @CommandLine.Option(names = "-recursive", description = "default true. whether traversal recursively")
     private String recursive = "true";
 
     public RecursiveOption(final String prefix) {

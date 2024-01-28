@@ -1,8 +1,6 @@
 package yo.dbunitcli.application;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.application.argument.DataSetConverterOption;
 import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.application.argument.DefaultArgumentMapper;
@@ -23,45 +21,38 @@ public class CompareOption extends CommandLineOption {
 
     public static final DefaultArgumentMapper IMAGE_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
-        public String[] map(final String[] arguments, final String prefix, final CmdLineParser parser) {
+        public String[] map(final String[] arguments, final String prefix, final CommandLine cmdLine) {
             final List<String> newArg = Arrays.stream(arguments)
                     .filter(it -> !it.contains("srcType=") && !it.contains("extension="))
                     .collect(Collectors.toList());
             newArg.add("-srcType=file");
             newArg.add("-extension=png");
-            return newArg.toArray(new String[]{});
+            return newArg.toArray(new String[0]);
         }
     };
 
     public static final DefaultArgumentMapper PDF_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
-        public String[] map(final String[] arguments, final String prefix, final CmdLineParser parser) {
+        public String[] map(final String[] arguments, final String prefix, final CommandLine cmdLine) {
             final List<String> newArg = Arrays.stream(arguments)
                     .filter(it -> !it.contains("srcType=") && !it.contains("extension="))
                     .collect(Collectors.toList());
             newArg.add("-srcType=file");
             newArg.add("-extension=pdf");
-            return newArg.toArray(new String[]{});
+            return newArg.toArray(new String[0]);
         }
     };
 
-    @Option(name = "-setting", usage = "file comparison settings")
-    private String setting;
-
-    @Option(name = "-settingEncoding", usage = "settings encoding")
-    private String settingEncoding = System.getProperty("file.encoding");
-    
-    @Option(name = "-targetType")
-    private Type targetType = Type.data;
-
     private final DataSetLoadOption expectData = new DataSetLoadOption("expect");
-
     private final DataSetLoadOption oldData = new DataSetLoadOption("old");
-
     private final DataSetLoadOption newData = new DataSetLoadOption("new");
-
     private final ImageCompareOption imageOption = new ImageCompareOption("image");
-
+    @CommandLine.Option(names = "-setting", description = "file comparison settings")
+    private String setting;
+    @CommandLine.Option(names = "-settingEncoding", description = "settings encoding")
+    private String settingEncoding = System.getProperty("file.encoding");
+    @CommandLine.Option(names = "-targetType")
+    private Type targetType = Type.data;
     private TableSeparators tableSeparators;
 
     public CompareOption() {
@@ -85,16 +76,16 @@ public class CompareOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
-        super.setUpComponent(parser, expandArgs);
+    public void setUpComponent(final CommandLine.ParseResult parseResult, final String[] expandArgs) {
+        super.setUpComponent(parseResult, expandArgs);
         if (this.targetType.isAny(Type.image, Type.pdf)) {
             this.imageOption.parseArgument(expandArgs);
             if (this.targetType == Type.image) {
-                this.newData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
-                this.oldData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
+                this.newData.setArgumentMapper(CompareOption.IMAGE_TYPE_PARAM_MAPPER);
+                this.oldData.setArgumentMapper(CompareOption.IMAGE_TYPE_PARAM_MAPPER);
             } else if (this.targetType == Type.pdf) {
-                this.newData.setArgumentMapper(PDF_TYPE_PARAM_MAPPER);
-                this.oldData.setArgumentMapper(PDF_TYPE_PARAM_MAPPER);
+                this.newData.setArgumentMapper(CompareOption.PDF_TYPE_PARAM_MAPPER);
+                this.oldData.setArgumentMapper(CompareOption.PDF_TYPE_PARAM_MAPPER);
             }
         }
         this.newData.parseArgument(expandArgs);
@@ -107,7 +98,7 @@ public class CompareOption extends CommandLineOption {
                 );
             }
         }
-        this.populateSettings(parser);
+        this.populateSettings();
         this.getConverterOption().parseArgument(expandArgs);
     }
 
@@ -205,11 +196,11 @@ public class CompareOption extends CommandLineOption {
         return this.converter();
     }
 
-    protected void populateSettings(final CmdLineParser parser) throws CmdLineException {
+    protected void populateSettings() {
         try {
             this.tableSeparators = new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting);
         } catch (final IOException e) {
-            throw new CmdLineException(parser, e);
+            throw new AssertionError(e);
         }
         if (this.targetType != Type.data) {
             this.tableSeparators = this.tableSeparators.map(separator -> separator.addSetting(TableSeparator.builder()

@@ -8,4 +8,4 @@
 -unit=table
 -outputEncoding=UTF-8
 -resultPath=target/test-classes/yo/dbunitcli/application/generate/table/result/$tableName$.txt
--P=package=jp.co.somecompany
+-Ppackage=jp.co.somecompany

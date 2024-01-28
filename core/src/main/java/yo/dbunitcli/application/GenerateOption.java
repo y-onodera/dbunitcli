@@ -1,10 +1,8 @@
 package yo.dbunitcli.application;
 
 import org.dbunit.dataset.DataSetException;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
 import org.stringtemplate.v4.STGroup;
+import picocli.CommandLine;
 import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.application.argument.TemplateRenderOption;
 import yo.dbunitcli.dataset.ComparableDataSet;
@@ -27,34 +25,24 @@ import java.util.stream.Stream;
 
 public class GenerateOption extends CommandLineOption {
 
-    @Option(name = "-generateType")
-    private GenerateType generateType = GenerateType.txt;
-
-    @Option(name = "-unit")
-    private GenerateUnit unit = GenerateUnit.record;
-
-    @Option(name = "-commit", usage = "default commit;whether commit or not generate sql")
-    private String commit = "true";
-
-    @Option(name = "-sqlFileSuffix", usage = "generate sqlFile fileName suffix")
-    private String sqlFileSuffix = "";
-
-    @Option(name = "-sqlFilePrefix", usage = "generate sqlFile fileName prefix")
-    private String sqlFilePrefix = "";
-
-    @Option(name = "-op")
-    private DBConverter.Operation operation;
-
-    @Option(name = "-outputEncoding", usage = "output file encoding")
-    private String outputEncoding = "UTF-8";
-
-    @Option(name = "-template", usage = "template file")
-    private File template;
-
     private final DataSetLoadOption src = new DataSetLoadOption("src");
-
     private final TemplateRenderOption templateOption = new TemplateRenderOption("template");
-
+    @CommandLine.Option(names = "-generateType")
+    private GenerateType generateType = GenerateType.txt;
+    @CommandLine.Option(names = "-unit")
+    private GenerateUnit unit = GenerateUnit.record;
+    @CommandLine.Option(names = "-commit", description = "default commit;whether commit or not generate sql")
+    private String commit = "true";
+    @CommandLine.Option(names = "-sqlFileSuffix", description = "generate sqlFile fileName suffix")
+    private String sqlFileSuffix = "";
+    @CommandLine.Option(names = "-sqlFilePrefix", description = "generate sqlFile fileName prefix")
+    private String sqlFilePrefix = "";
+    @CommandLine.Option(names = "-op")
+    private DBConverter.Operation operation;
+    @CommandLine.Option(names = "-outputEncoding", description = "output file encoding")
+    private String outputEncoding = "UTF-8";
+    @CommandLine.Option(names = "-template", description = "template file")
+    private File template;
     private String templateString;
 
     public GenerateOption() {
@@ -91,12 +79,21 @@ public class GenerateOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CommandLine.ParseResult parser, final String[] expandArgs) {
         super.setUpComponent(parser, expandArgs);
         this.getConverterOption().parseArgument(expandArgs);
         this.src.parseArgument(expandArgs);
         this.templateOption.parseArgument(expandArgs);
-        this.getGenerateType().populateSettings(this, parser);
+        this.getGenerateType().populateSettings(this);
+    }
+
+    @Override
+    protected String getResultPath() {
+        if (this.getGenerateType() == GenerateType.sql) {
+            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
+            return super.getResultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
+        }
+        return super.getResultPath();
     }
 
     @Override
@@ -144,15 +141,6 @@ public class GenerateOption extends CommandLineOption {
             case CLEAN_INSERT -> "sql/cleanInsertTemplate.txt";
             default -> "sql/deleteInsertTemplate.txt";
         };
-    }
-
-    @Override
-    protected String getResultPath() {
-        if (this.getGenerateType() == GenerateType.sql) {
-            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
-            return super.getResultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
-        }
-        return super.getResultPath();
     }
 
     public File getResultDir() {
@@ -230,7 +218,7 @@ public class GenerateOption extends CommandLineOption {
         },
         settings {
             @Override
-            protected void populateSettings(final GenerateOption option, final CmdLineParser parser) {
+            protected void populateSettings(final GenerateOption option) {
                 option.unit = GenerateUnit.dataset;
                 option.templateString = Files.readClasspathResource("settings/settingTemplate.txt");
             }
@@ -245,7 +233,7 @@ public class GenerateOption extends CommandLineOption {
         },
         sql {
             @Override
-            protected void populateSettings(final GenerateOption option, final CmdLineParser parser) {
+            protected void populateSettings(final GenerateOption option) {
                 option.unit = GenerateUnit.table;
                 option.templateString = Files.readClasspathResource(option.getSqlTemplate());
             }
@@ -259,10 +247,10 @@ public class GenerateOption extends CommandLineOption {
             }
         };
 
-        protected void populateSettings(final GenerateOption option, final CmdLineParser parser) throws CmdLineException {
+        protected void populateSettings(final GenerateOption option) {
             final File template = option.template;
             if (!template.exists() || !template.isFile()) {
-                throw new CmdLineException(parser, template + " is not exist file"
+                throw new AssertionError(template + " is not exist file"
                         , new IllegalArgumentException(template.toString()));
             }
             if (this == GenerateType.txt) {

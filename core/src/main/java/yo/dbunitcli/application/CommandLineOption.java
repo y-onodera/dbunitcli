@@ -1,9 +1,6 @@
 package yo.dbunitcli.application;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.spi.MapOptionHandler;
+import picocli.CommandLine;
 import yo.dbunitcli.application.argument.DataSetConverterOption;
 import yo.dbunitcli.application.argument.DefaultArgumentsParser;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
@@ -13,21 +10,16 @@ import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.*;
 
 abstract public class CommandLineOption extends DefaultArgumentsParser {
 
-    @Option(name = "-P", handler = MapOptionHandler.class)
-    private Map<String, String> inputParam = new HashMap<>();
-
     private final Parameter parameter;
-
     private final DataSetConverterOption converterOption = new DataSetConverterOption("result");
-
+    @CommandLine.Option(names = "-P")
+    private final Map<String, String> inputParam = new HashMap<>();
     private String resultFile = "result";
 
     public CommandLineOption(final Parameter param) {
@@ -36,8 +28,7 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
     }
 
     public void parse(final String[] args) {
-        final CmdLineParser parser = new CmdLineParser(this);
-        final String[] expandArgs = this.getExpandArgs(args, parser);
+        final String[] expandArgs = this.getExpandArgs(args);
         if (args[0].startsWith("@")) {
             this.resultFile = new File(args[0].replace("@", "")).getName();
             this.resultFile = this.resultFile.substring(0, this.resultFile.lastIndexOf("."));
@@ -58,7 +49,7 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
     }
 
     @Override
-    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CommandLine.ParseResult parseResult, final String[] expandArgs) {
         this.parameter.getMap().putAll(this.inputParam);
     }
 
@@ -70,14 +61,24 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
         return ComparableDataSetParam.builder();
     }
 
-    protected String[] getExpandArgs(final String[] args, final CmdLineParser parser) {
-        try {
-            final Method expand = CmdLineParser.class.getDeclaredMethod("expandAtFiles", String[].class);
-            expand.setAccessible(true);
-            return (String[]) expand.invoke(parser, (Object) args);
-        } catch (final NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new AssertionError(e);
+    protected String[] getExpandArgs(final String[] args) {
+        final List<String> result = new ArrayList<>();
+        for (final String arg : args) {
+            if (arg.startsWith("@")) {
+                final File file = new File(arg.substring(1));
+                if (!file.exists()) {
+                    throw new AssertionError("file not exists :" + file.getPath());
+                }
+                try {
+                    result.addAll(Files.readAllLines(file.toPath()));
+                } catch (final IOException ex) {
+                    throw new AssertionError("Failed to parse " + file, ex);
+                }
+            } else {
+                result.add(arg);
+            }
         }
+        return result.toArray(new String[0]);
     }
 
     protected String getResultPath() {
@@ -85,4 +86,5 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
                 .filter(it -> !it.isEmpty())
                 .orElse(this.resultFile);
     }
+
 }

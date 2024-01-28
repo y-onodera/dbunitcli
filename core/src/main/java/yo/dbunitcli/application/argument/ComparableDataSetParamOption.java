@@ -1,7 +1,6 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
+import picocli.CommandLine;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Map;
@@ -17,13 +16,13 @@ public interface ComparableDataSetParamOption extends ArgumentsParser {
     ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder);
 
     @Override
-    default void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
-        // nothing
+    default OptionParam createOptionParam(final Map<String, String> args) {
+        return new OptionParam(this.getPrefix(), args);
     }
 
     @Override
-    default OptionParam createOptionParam(final Map<String, String> args) {
-        return new OptionParam(this.getPrefix(), args);
+    default void setUpComponent(final CommandLine.ParseResult parseResult, final String[] expandArgs) {
+        // nothing
     }
 
     class None implements ComparableDataSetParamOption {
@@ -43,12 +42,18 @@ public interface ComparableDataSetParamOption extends ArgumentsParser {
         }
 
         @Override
-        public CmdLineParser parseArgument(final String[] args) {
-            CmdLineParser result = null;
+        public void parseArgument(final String[] args) {
             for (final ComparableDataSetParamOption delegate : this.leaf) {
-                result = delegate.parseArgument(args);
+                delegate.parseArgument(args);
             }
-            return result;
+        }
+
+        @Override
+        public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
+            for (final ComparableDataSetParamOption delegate : this.leaf) {
+                builder = delegate.populate(builder);
+            }
+            return builder;
         }
 
         @Override
@@ -62,14 +67,6 @@ public interface ComparableDataSetParamOption extends ArgumentsParser {
                 }
             }
             return result;
-        }
-
-        @Override
-        public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {
-            for (final ComparableDataSetParamOption delegate : this.leaf) {
-                builder = delegate.populate(builder);
-            }
-            return builder;
         }
     }
 }

@@ -3,6 +3,7 @@ package yo.dbunitcli.application;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import picocli.CommandLine;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.TableSeparators;
 
@@ -29,13 +30,13 @@ public class CompareOptionTest {
 
     @Test
     public void parseRequiredOldFileDir() {
-        Assert.assertThrows("Option \"-src\" is required", AssertionError.class,
+        Assert.assertThrows("Option \"-src\" is required", CommandLine.MissingParameterException.class,
                 () -> this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-setting=" + this.baseDir + "/multidiff/setting.json"}));
     }
 
     @Test
     public void parseRequiredNewFileDir() {
-        Assert.assertThrows("Option \"-src\" is required", AssertionError.class,
+        Assert.assertThrows("Option \"-src\" is required", CommandLine.MissingParameterException.class,
                 () -> this.target.parse(new String[]{"-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"})
         );
     }

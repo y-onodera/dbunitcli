@@ -1,8 +1,6 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.converter.DBConverter;
@@ -12,42 +10,27 @@ import java.util.Map;
 
 public class DataSetConverterOption extends DefaultArgumentsParser {
 
-    @Option(name = "-result", usage = "directory result files at")
-    private File resultDir = new File(".");
-
-    @Option(name = "-resultType")
-    private DataSourceType resultType = DataSourceType.csv;
-
-    @Option(name = "-exportEmptyTable", usage = "if true then empty table is not export")
-    private String exportEmptyTable = "true";
-
-    @Option(name = "-resultPath", usage = "result file relative path from -result=dir.")
-    private String resultPath;
-
-    @Option(name = "-outputEncoding", usage = "output csv file encoding")
-    private String outputEncoding = "UTF-8";
-
-    @Option(name = "-op", usage = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
-    private DBConverter.Operation operation;
-
-    @Option(name = "-excelTable", usage = "SHEET or BOOK")
-    private String excelTable = "SHEET";
-
     private final JdbcOption jdbcOption;
-
     private final DataSetConsumerParam.Builder builder;
+    @CommandLine.Option(names = "-result", description = "directory result files at")
+    private File resultDir = new File(".");
+    @CommandLine.Option(names = "-resultType")
+    private DataSourceType resultType = DataSourceType.csv;
+    @CommandLine.Option(names = "-exportEmptyTable", description = "if true then empty table is not export")
+    private String exportEmptyTable = "true";
+    @CommandLine.Option(names = "-resultPath", description = "result file relative path from -result=dir.")
+    private String resultPath;
+    @CommandLine.Option(names = "-outputEncoding", description = "output csv file encoding")
+    private String outputEncoding = "UTF-8";
+    @CommandLine.Option(names = "-op", description = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
+    private DBConverter.Operation operation;
+    @CommandLine.Option(names = "-excelTable", description = "SHEET or BOOK")
+    private String excelTable = "SHEET";
 
     public DataSetConverterOption(final String prefix) {
         super(prefix);
         this.jdbcOption = new JdbcOption(prefix);
         this.builder = DataSetConsumerParam.builder();
-    }
-
-    @Override
-    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
-        if (this.resultType == DataSourceType.table) {
-            this.jdbcOption.parseArgument(expandArgs);
-        }
     }
 
     @Override
@@ -73,6 +56,13 @@ public class DataSetConverterOption extends DefaultArgumentsParser {
             }
         }
         return result;
+    }
+
+    @Override
+    public void setUpComponent(final CommandLine.ParseResult parser, final String[] expandArgs) {
+        if (this.resultType == DataSourceType.table) {
+            this.jdbcOption.parseArgument(expandArgs);
+        }
     }
 
     public DataSetConsumerParam.Builder getParam() {

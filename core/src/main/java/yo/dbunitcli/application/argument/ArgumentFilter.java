@@ -1,11 +1,9 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.CmdLineParser;
-
-import java.util.Map;
+import picocli.CommandLine;
 
 public interface ArgumentFilter {
 
-    Map<String, String> filterArguments(String prefix, CmdLineParser parser, String[] expandArgs);
+    String[] filterArguments(String prefix, CommandLine commandLine, String[] expandArgs);
 
 }

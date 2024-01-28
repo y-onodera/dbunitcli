@@ -1,13 +1,13 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Map;
 
 public class JdbcLoadOption extends JdbcOption implements ComparableDataSetParamOption {
 
-    @Option(name = "-useJdbcMetaData", usage = "default false. whether load metaData from jdbc or not")
+    @CommandLine.Option(names = "-useJdbcMetaData", description = "default false. whether load metaData from jdbc or not")
     private String useJdbcMetaData = "false";
 
     public JdbcLoadOption(final String prefix) {

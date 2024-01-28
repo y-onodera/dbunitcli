@@ -1,8 +1,6 @@
 package yo.dbunitcli.application;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.application.argument.JdbcOption;
 import yo.dbunitcli.application.argument.TemplateRenderOption;
@@ -20,14 +18,11 @@ import java.util.stream.Stream;
 
 public class RunOption extends CommandLineOption {
 
-    @Option(name = "-scriptType")
-    private ScriptType scriptType = ScriptType.sql;
-
     private final DataSetLoadOption src = new DataSetLoadOption("");
-
     private final TemplateRenderOption templateOption = new TemplateRenderOption("");
-
     private final JdbcOption jdbcOption = new JdbcOption("");
+    @CommandLine.Option(names = "-scriptType")
+    private ScriptType scriptType = ScriptType.sql;
 
     public RunOption() {
         super(Parameter.none());
@@ -58,7 +53,7 @@ public class RunOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CommandLine.ParseResult parser, final String[] expandArgs) {
         super.setUpComponent(parser, expandArgs);
         this.templateOption.parseArgument(expandArgs);
         this.jdbcOption.parseArgument(expandArgs);
