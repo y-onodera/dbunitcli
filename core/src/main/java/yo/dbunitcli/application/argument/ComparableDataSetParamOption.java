@@ -7,8 +7,6 @@ import java.util.Map;
 
 public interface ComparableDataSetParamOption extends ArgumentsParser {
 
-    ComparableDataSetParamOption NONE = new None();
-
     static ComparableDataSetParamOption join(final ComparableDataSetParamOption... leaf) {
         return new CompositeOption(leaf);
     }
@@ -23,15 +21,6 @@ public interface ComparableDataSetParamOption extends ArgumentsParser {
     @Override
     default void setUpComponent(final CommandLine.ParseResult parseResult, final String[] expandArgs) {
         // nothing
-    }
-
-    class None implements ComparableDataSetParamOption {
-
-        @Override
-        public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
-            return builder;
-        }
-
     }
 
     class CompositeOption implements ComparableDataSetParamOption {

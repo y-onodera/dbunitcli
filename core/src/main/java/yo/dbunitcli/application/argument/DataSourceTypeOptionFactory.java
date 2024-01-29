@@ -7,6 +7,7 @@ public class DataSourceTypeOptionFactory {
     public ComparableDataSetParamOption create(final String prefix, final DataSourceType type) {
         return switch (type) {
             case file -> ComparableDataSetParamOption.join(new ExtensionOption(prefix), new RecursiveOption(prefix));
+            case dir -> new RecursiveOption(prefix);
             case table -> ComparableDataSetParamOption.join(new EncodingOption(prefix), new JdbcLoadOption(prefix));
             case sql ->
                     ComparableDataSetParamOption.join(new EncodingOption(prefix), new JdbcLoadOption(prefix), new TemplateRenderOption(prefix));
@@ -20,7 +21,6 @@ public class DataSourceTypeOptionFactory {
                     ComparableDataSetParamOption.join(new EncodingOption(prefix), new HeaderNameOption(prefix), new CsvOption(prefix), new ExtensionOption(prefix), new RecursiveOption(prefix));
             case csvq ->
                     ComparableDataSetParamOption.join(new EncodingOption(prefix), new TemplateRenderOption(prefix));
-            default -> ComparableDataSetParamOption.NONE;
         };
     }
 
