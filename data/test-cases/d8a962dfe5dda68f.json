@@ -1,0 +1,55 @@
+{
+  "uid" : "d8a962dfe5dda68f",
+  "name" : "test02_cleanInsertToDB",
+  "fullName" : "yo.dbunitcli.application.DBIntegrationTest.test02_cleanInsertToDB",
+  "historyId" : "3ebaf86b29e4d8d2994a1fc235eb6886",
+  "time" : {
+    "start" : 1706540139847,
+    "stop" : 1706540140112,
+    "duration" : 265
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.DBIntegrationTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "test02_cleanInsertToDB"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.DBIntegrationTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az663-571"
+  }, {
+    "name" : "thread",
+    "value" : "1076@fv-az663-571.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "d8a962dfe5dda68f.json",
+  "parameterValues" : [ ]
+}
