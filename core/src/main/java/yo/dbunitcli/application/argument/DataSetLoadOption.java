@@ -43,6 +43,7 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
         result.put("-srcType", this.srcType, DataSourceType.class, true);
         result.putFileOrDir("-src", this.src, true);
         result.putFile("-setting", this.setting == null ? null : new File(this.setting));
+        result.put("-settingEncoding", this.settingEncoding);
         result.put("-loadData", this.loadData);
         result.put("-includeMetaData", this.includeMetaData);
         result.put("-regInclude", this.regInclude);

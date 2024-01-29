@@ -110,6 +110,7 @@ public class CompareOption extends CommandLineOption {
             result.putAll(this.imageOption.createOptionParam(args));
         }
         result.putFile("-setting", this.setting == null ? null : new File(this.setting));
+        result.put("-settingEncoding", this.settingEncoding);
         result.putAll(this.newData.createOptionParam(args));
         result.putAll(this.oldData.createOptionParam(args));
         result.putAll(this.getConverterOption().createOptionParam(args));
