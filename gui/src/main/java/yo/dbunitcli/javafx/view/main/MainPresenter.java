@@ -27,12 +27,11 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.tbee.javafx.scene.layout.MigPane;
-import yo.dbunitcli.application.Command;
+import yo.dbunitcli.application.*;
 import yo.dbunitcli.application.argument.ArgumentsParser;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,7 +48,7 @@ public class MainPresenter {
             , "Generate"
             , "Run"
     };
-
+    private final Map<String, Node> argument = new LinkedHashMap<>();
     @FXML
     public MFXButton exec;
     @FXML
@@ -58,13 +57,8 @@ public class MainPresenter {
     private MigPane commandPane;
     @FXML
     private MFXComboBox<String> commandTypeSelect;
-
     private String selectedCommand;
-
     private ArgumentsParser parser;
-
-    private final Map<String, Node> argument = new LinkedHashMap<>();
-
 
     @FXML
     void initialize() {
@@ -90,12 +84,11 @@ public class MainPresenter {
     @FXML
     public void execCmd() {
         try {
-            final Class<?> clazz = Class.forName("yo.dbunitcli.application." + this.selectedCommand);
             final String[] args = this.inputToArg().entrySet()
                     .stream()
                     .map(it -> it.getKey() + "=" + it.getValue())
                     .toArray(String[]::new);
-            ((Command) clazz.getDeclaredConstructor().newInstance()).exec(args);
+            this.createCommand(this.selectedCommand).exec(args);
         } catch (final Exception e) {
             e.printStackTrace();
         }
@@ -125,7 +118,7 @@ public class MainPresenter {
     }
 
     @FXML
-    public void selectCommandType() throws NoSuchMethodException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public void selectCommandType() {
         final String currentSelect = this.selectedCommand;
         this.selectedCommand = this.commandTypeSelect.getSelectionModel().getSelectedItem();
         if (Objects.equals(this.selectedCommand, currentSelect)) {
@@ -135,8 +128,7 @@ public class MainPresenter {
             this.exec.setDisable(true);
             return;
         }
-        final Class<?> clazz = Class.forName("yo.dbunitcli.application." + this.selectedCommand + "Option");
-        this.parser = (ArgumentsParser) clazz.getDeclaredConstructor().newInstance();
+        this.parser = this.createCommand(this.selectedCommand).getOptions();
         this.resetInput(this.commandTypeSelect);
     }
 
@@ -149,9 +141,7 @@ public class MainPresenter {
         this.clearInputFields(form);
         int row = 1;
         final MFXValidator validator = new MFXValidator();
-        validator.validProperty().addListener((observable, oldVal, newVal) -> {
-            this.exec.setDisable(!newVal);
-        });
+        validator.validProperty().addListener((observable, oldVal, newVal) -> this.exec.setDisable(!newVal));
         for (final String key : option.keySet()) {
             final Map.Entry<String, ArgumentsParser.Attribute> entry = option.getColumn(key);
             if (entry.getValue().getType() == ArgumentsParser.ParamType.ENUM) {
@@ -210,14 +200,14 @@ public class MainPresenter {
         validationLabel.getStyleClass().add("validationLabel");
         text.getValidator().validProperty().addListener((observable, oldVal, newVal) -> {
             if (newVal) {
-                text.pseudoClassStateChanged(INVALID_PSEUDO_CLASS, false);
+                text.pseudoClassStateChanged(MainPresenter.INVALID_PSEUDO_CLASS, false);
             }
         });
         text.delegateFocusedProperty().addListener((observable, oldVal, newVal) -> {
             if (oldVal && !newVal) {
                 final List<Constraint> constraints = text.validate();
                 if (!constraints.isEmpty()) {
-                    text.pseudoClassStateChanged(INVALID_PSEUDO_CLASS, true);
+                    text.pseudoClassStateChanged(MainPresenter.INVALID_PSEUDO_CLASS, true);
                 }
             }
         });
@@ -292,28 +282,40 @@ public class MainPresenter {
         return this.argument.entrySet()
                 .stream()
                 .filter(it -> {
-                    if (it.getValue() instanceof TextField) {
+                    if (it.getValue() instanceof TextField textField) {
                         return !Optional.ofNullable(it.getKey()).orElse("").isEmpty()
-                                && !Optional.ofNullable(((TextField) it.getValue()).getText()).orElse("").isEmpty();
+                                && !Optional.ofNullable(textField.getText()).orElse("").isEmpty();
                     }
                     return !Optional.ofNullable(it.getKey()).orElse("").isEmpty()
-                            && !Optional.ofNullable(((ChoiceBox) it.getValue()).getSelectionModel().getSelectedItem().toString()).orElse("").isEmpty();
+                            && it.getValue() instanceof ChoiceBox<?> choiceBox
+                            && !Optional.ofNullable(choiceBox.getSelectionModel().getSelectedItem().toString()).orElse("").isEmpty();
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, it -> {
                     if (it.getValue() instanceof TextField) {
                         return ((TextField) it.getValue()).getText();
                     }
-                    return ((ChoiceBox) it.getValue()).getSelectionModel().getSelectedItem().toString();
+                    return it.getValue() instanceof ChoiceBox<?> choiceBox
+                            ? choiceBox.getSelectionModel().getSelectedItem().toString() : "";
                 }, (s, a) -> s, LinkedHashMap::new));
     }
 
     private String[] commandTypes() {
-        return COMMAND_TYPES;
+        return MainPresenter.COMMAND_TYPES;
     }
 
     private void clearInputFields(final Node selected) {
         this.commandPane.getChildren().removeIf(node -> !this.commandTypeSelect.equals(node) && !selected.equals(node));
         this.argument.clear();
+    }
+
+    private Command<?> createCommand(final String command) {
+        return switch (command) {
+            case "Convert" -> new Convert();
+            case "Compare" -> new Compare();
+            case "Generate" -> new Generate();
+            case "Run" -> new Run();
+            default -> null;
+        };
     }
 
 }
