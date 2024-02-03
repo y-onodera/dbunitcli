@@ -4,1533 +4,1533 @@
   "children" : [ {
     "name" : "fv-az742-688",
     "children" : [ {
-      "name" : "3304@fv-az742-688.main(1)",
+      "name" : "4756@fv-az742-688.main(1)",
       "children" : [ {
-        "name" : "testConvertDistinctWithTableNameMap",
-        "uid" : "2709f81bc6a2e8f7",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942131679,
-          "stop" : 1706942131711,
-          "duration" : 32
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertDistinctColumn",
-        "uid" : "2f82b8f0272a9af7",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942131070,
-          "stop" : 1706942131117,
-          "duration" : 47
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "getValue_return_argument_row_and_column_length_value",
-        "uid" : "7ea358356a4e7749",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135416,
-          "stop" : 1706942135416,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertInnerJoinByExpression",
-        "uid" : "8fd1449af42d2ce1",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942131336,
-          "stop" : 1706942131382,
-          "duration" : 46
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createDataSetFromDirectoryContainsMultiFile",
-        "uid" : "5ea1e54b72641f91",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135447,
-          "stop" : 1706942135463,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testCompareXlsAndXlsx",
-        "uid" : "9097717507c1d5b3",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942131024,
-          "stop" : 1706942131054,
-          "duration" : 30
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testGenerateCleanInsert",
-        "uid" : "c680b39bda89c1d0",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135197,
-          "stop" : 1706942135228,
-          "duration" : 31
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createDataSetFromDirectoryExcludeFile",
-        "uid" : "9955b96cb159a8b0",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135432,
-          "stop" : 1706942135432,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "parseSettingTargetDirAndSettingFiles",
-        "uid" : "a6e10d259be57ea8",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942115362,
-          "stop" : 1706942115393,
-          "duration" : 31
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testGenerateTxtWithMetaData",
-        "uid" : "542f205adbdff307",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135182,
-          "stop" : 1706942135197,
-          "duration" : 15
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testFailedResultDiffDifferExpected",
-        "uid" : "6411092acab31f4",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942130132,
-          "stop" : 1706942130523,
-          "duration" : 391
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "parseDefaultResultDirEqualsCurrentDir",
-        "uid" : "8482bf16c7040c89",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942115424,
-          "stop" : 1706942115440,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "parseRequiredNewFileDir",
-        "uid" : "a7f732ff64c23be2",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942115393,
-          "stop" : 1706942115409,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "parseResultDirChangeableCommandLineParameter",
-        "uid" : "eb2002c6b3ffd581",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942115409,
-          "stop" : 1706942115424,
-          "duration" : 15
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testCompareNoHeaderRegexTxtToCsv",
-        "uid" : "a324a20f3bac225c",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942129647,
-          "stop" : 1706942129663,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "getRows_result_has_argument_column_length",
-        "uid" : "d40d6c15e36bdd88",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135416,
-          "stop" : 1706942135416,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "getValue_return_argument_row_and_column_value",
-        "uid" : "340f38736a847632",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135416,
-          "stop" : 1706942135416,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
         "name" : "testFailedResultDiffNotExpected",
-        "uid" : "89e6006c16a720fd",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "uid" : "2d2699f32e9c4150",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942118519,
-          "stop" : 1706942118581,
-          "duration" : 62
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testGenerateDeleteNoCommit",
-        "uid" : "ef99b2ea3b9deb02",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942134884,
-          "stop" : 1706942134900,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "test04_insertToDB",
-        "uid" : "681593cb4e606d93",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942133461,
-          "stop" : 1706942133523,
-          "duration" : 62
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testSuccessNoDiffWithCommonSetting",
-        "uid" : "81ab81aba307dc37",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942118253,
-          "stop" : 1706942118284,
-          "duration" : 31
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testExcelWithSchema",
-        "uid" : "596e946a1f496d81",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942129444,
-          "stop" : 1706942129616,
-          "duration" : 172
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createDataSetFromFileIncludeSheet",
-        "uid" : "1e740b3b3cd1202a",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135526,
-          "stop" : 1706942135541,
-          "duration" : 15
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createDataSetFromDirectoryContainsSingleFile",
-        "uid" : "73d56eda40a315d9",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135463,
-          "stop" : 1706942135479,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testCompareSort",
-        "uid" : "344e3b4e1ae7e9de",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942127225,
-          "stop" : 1706942127585,
-          "duration" : 360
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "getRows_throw_error_if_keys_not_unique",
-        "uid" : "21beca0dc6ed1caa",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135416,
-          "stop" : 1706942135416,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testSuccessNoDiffExpected",
-        "uid" : "d611ecd0bfe35d8d",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942127585,
-          "stop" : 1706942127600,
-          "duration" : 15
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testparamConvertFixedFileToCsv",
-        "uid" : "8075272796215d98",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942132773,
-          "stop" : 1706942132789,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testCompareNoHeaderRegexTxtToNoHeaderCsv",
-        "uid" : "655b6406730fb4ed",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942117143,
-          "stop" : 1706942117159,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testComparePdfDiffAllPage",
-        "uid" : "782cbb2fbfd28607",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942117175,
-          "stop" : 1706942118253,
-          "duration" : 1078
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "test",
-        "uid" : "12463f782f2a4eac",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135494,
-          "stop" : 1706942135494,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertJoinMultiple",
-        "uid" : "f06d350d4c38e41a",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942132148,
-          "stop" : 1706942132179,
-          "duration" : 31
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "test",
-        "uid" : "72758bd7bd766367",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135494,
-          "stop" : 1706942135494,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "test02_cleanInsertToDB",
-        "uid" : "f0bce17c24c28636",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942133226,
-          "stop" : 1706942133398,
-          "duration" : 172
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testComparePatternMatch",
-        "uid" : "92a9edc9edb2beeb",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942128819,
-          "stop" : 1706942129007,
-          "duration" : 188
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testComparePdf",
-        "uid" : "e2aeb71e5798863c",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942118284,
-          "stop" : 1706942118519,
-          "duration" : 235
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testTableNameMapNoSortToCsv",
-        "uid" : "85dec43be335648d",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942131179,
-          "stop" : 1706942131226,
+          "start" : 1707002323529,
+          "stop" : 1707002323576,
           "duration" : 47
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertCsvSplitMultiXlsx",
-        "uid" : "e376892b726af8fc",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942131789,
-          "stop" : 1706942131992,
-          "duration" : 203
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createDataSetFromDirectoryFilterExcludeFile",
-        "uid" : "69c29d49192b2b5d",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135479,
-          "stop" : 1706942135494,
-          "duration" : 15
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testCompareImage",
-        "uid" : "ff14fc39ee343e5d",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942129194,
-          "stop" : 1706942129444,
-          "duration" : 250
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testCompareCsvAndTsv",
-        "uid" : "4fd8269cba2f57c3",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942130132,
-          "stop" : 1706942130132,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "test07_exportFromDB",
-        "uid" : "c7d69d2a6b7ff5bb",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942133680,
-          "stop" : 1706942133742,
-          "duration" : 62
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertInnerJoinWithRename",
-        "uid" : "fe933b7e3166a95e",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942132601,
-          "stop" : 1706942132648,
-          "duration" : 47
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testGenerateXlsxStreaming",
-        "uid" : "d870824ff715e09c",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942134524,
-          "stop" : 1706942134884,
-          "duration" : 360
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "test05_updateToDB",
-        "uid" : "c17f502f48fa2314",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942133523,
-          "stop" : 1706942133601,
-          "duration" : 78
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createDataSetFromFile",
-        "uid" : "e5418ab0a58fd11",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135510,
-          "stop" : 1706942135510,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testTableNameMapNoSortToXls",
-        "uid" : "cb9ff56e2c9bf16b",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942131226,
-          "stop" : 1706942131289,
-          "duration" : 63
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createDataSetFromDirectoryContainsShiftJisFile",
-        "uid" : "3fbe80b0b0f4e007",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135447,
-          "stop" : 1706942135447,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createDataSetFromFileExcludeSheet",
-        "uid" : "738117694456a702",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135510,
-          "stop" : 1706942135510,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createEmptyDataSetFromNoFileDirectory",
-        "uid" : "c2b328df0cc4d0c3",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135447,
-          "stop" : 1706942135447,
-          "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
         "name" : "parseArgumentsLoadableFromParameterFile",
-        "uid" : "d4451bc5cef721e2",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "uid" : "a36240531b1ad818",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942114846,
-          "stop" : 1706942115315,
+          "start" : 1707002319794,
+          "stop" : 1707002320263,
           "duration" : 469
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testXlsxWithSchemaToCsv",
-        "uid" : "6f6caaec89ce9755",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testConvertCsvSplitMultiXlsx",
+        "uid" : "f637c83c79854323",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942132726,
-          "stop" : 1706942132773,
-          "duration" : 47
+          "start" : 1707002336488,
+          "stop" : 1707002336676,
+          "duration" : 188
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testGenerateInsert",
-        "uid" : "8522943ee559b1c8",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "test07_exportFromDB",
+        "uid" : "67268490fcc9d9c8",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942135135,
-          "stop" : 1706942135166,
-          "duration" : 31
+          "start" : 1707002338254,
+          "stop" : 1707002338316,
+          "duration" : 62
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testGenerateSettings",
-        "uid" : "abd863a15a8e0604",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "test",
+        "uid" : "302f6a2af66ad7ad",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942135244,
-          "stop" : 1706942135260,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertXlsxWithSchemaAddFileInfo",
-        "uid" : "99833dcf5da69800",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942132398,
-          "stop" : 1706942132476,
-          "duration" : 78
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testCompareWithRowFilter",
-        "uid" : "e175c018af53a186",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942115455,
-          "stop" : 1706942115877,
-          "duration" : 422
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "test10_generateSql",
-        "uid" : "f2ff4d0c5d71dd41",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942133851,
-          "stop" : 1706942133914,
-          "duration" : 63
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createDataSetFromDirectoryIncludeFile",
-        "uid" : "16e5b43292be1f15",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135432,
-          "stop" : 1706942135432,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "getRow_result_has_argument_column_length",
-        "uid" : "a0399cbe57aef6d3",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135416,
-          "stop" : 1706942135416,
+          "start" : 1707002340024,
+          "stop" : 1707002340024,
           "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
         "name" : "testFromCsvToMultiXlsx",
-        "uid" : "fa7cf89d86dbc5af",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "uid" : "629cd51d4d30f5e",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942131539,
-          "stop" : 1706942131586,
-          "duration" : 47
+          "start" : 1707002336254,
+          "stop" : 1707002336316,
+          "duration" : 62
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testFilterArguments",
-        "uid" : "e4d9ec7b40c0e5b3",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "createDataSetFromDirectoryContainsMultiFile",
+        "uid" : "d01be9e4e3f9eaf8",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942114830,
-          "stop" : 1706942114830,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testCompareFilter",
-        "uid" : "1902e5386586494",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942128132,
-          "stop" : 1706942128397,
-          "duration" : 265
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "parseNoSettingFile",
-        "uid" : "da077e07f69d73bb",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942115330,
-          "stop" : 1706942115346,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testGenerateTxtPerTable",
-        "uid" : "173e444930ab5261",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942134900,
-          "stop" : 1706942134931,
-          "duration" : 31
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testFromCsvToXlsx",
-        "uid" : "f45679a8639c1bf9",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942132101,
-          "stop" : 1706942132148,
-          "duration" : 47
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testCompareXlsxAndXls",
-        "uid" : "ca5df4c49787b6c",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942116706,
-          "stop" : 1706942117081,
-          "duration" : 375
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertOuterJoin",
-        "uid" : "885648dcea760e7e",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942131992,
-          "stop" : 1706942132039,
-          "duration" : 47
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testCompareImageExcludedAreas",
-        "uid" : "205b6c537e167e58",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942129007,
-          "stop" : 1706942129194,
-          "duration" : 187
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testGenerateTxt",
-        "uid" : "5a8a939726f10e49",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942134931,
-          "stop" : 1706942134947,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testFromRegexToXlsx",
-        "uid" : "ee702f5d1ab5bddb",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942132539,
-          "stop" : 1706942132554,
+          "start" : 1707002339958,
+          "stop" : 1707002339973,
           "duration" : 15
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testFromCsvqToCsv",
-        "uid" : "7447a857d8c499da",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testConvertDistinctColumn",
+        "uid" : "e6ad1a8017390ed2",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942132476,
-          "stop" : 1706942132492,
-          "duration" : 16
+          "start" : 1707002335769,
+          "stop" : 1707002335848,
+          "duration" : 79
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testSpaceContainsPathAsSrcParameter",
-        "uid" : "a5d2605cd350b4c0",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "createDataSetFromDirectoryIncludeFile",
+        "uid" : "6962b4349f04981a",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942135260,
-          "stop" : 1706942135276,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createDataSetFromDirectoryContainsUTF8File",
-        "uid" : "2a6ac661d49f4745",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135447,
-          "stop" : 1706942135447,
+          "start" : 1707002339942,
+          "stop" : 1707002339942,
           "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "test03_deleteToDB",
-        "uid" : "ce77c6ffa23e721",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "createDataSetFromFile",
+        "uid" : "74e5f295e6ece7c0",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942133398,
-          "stop" : 1706942133445,
-          "duration" : 47
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testGenerateXlsx",
-        "uid" : "5bc22fcbde8af3f4",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942134070,
-          "stop" : 1706942134493,
-          "duration" : 423
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertInnerJoinWithSplit",
-        "uid" : "9cd16c55bb35b535",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942132351,
-          "stop" : 1706942132398,
-          "duration" : 47
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertFilePathToCsvFilterExtension",
-        "uid" : "1ecb750bf652add9",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942131632,
-          "stop" : 1706942131648,
+          "start" : 1707002340052,
+          "stop" : 1707002340068,
           "duration" : 16
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testConvertInnerJoinWithSeparate",
-        "uid" : "11656079ad35a275",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testGenerateTxtWithMetaData",
+        "uid" : "a9c93d0c9359a71e",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942132554,
-          "stop" : 1706942132601,
-          "duration" : 47
+          "start" : 1707002339692,
+          "stop" : 1707002339708,
+          "duration" : 16
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testResultXlsx",
-        "uid" : "e603fb099359d31b",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testGenerateTxt",
+        "uid" : "a6048eff082a927c",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942118722,
-          "stop" : 1706942127225,
-          "duration" : 8503
+          "start" : 1707002339458,
+          "stop" : 1707002339489,
+          "duration" : 31
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testComparePdfDiffAllPage",
+        "uid" : "fa82293edaf12fd8",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002322108,
+          "stop" : 1707002323138,
+          "duration" : 1030
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "parseSettingTargetDirAndSettingFiles",
+        "uid" : "f6e2a6a142a3f3d6",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002320294,
+          "stop" : 1707002320326,
+          "duration" : 32
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "test10_generateSql",
+        "uid" : "70f5f317e25a2112",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002338441,
+          "stop" : 1707002338504,
+          "duration" : 63
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareNoHeaderRegexTxtToCsv",
+        "uid" : "5fe12e3253daf51",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002334284,
+          "stop" : 1707002334284,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareImageExcludedAreas",
+        "uid" : "752f4fafb0ccf605",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002333566,
+          "stop" : 1707002333691,
+          "duration" : 125
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
         "name" : "testCompareWithRowNum",
-        "uid" : "df6473d71f3574b1",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "uid" : "77214920afa79731",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942127991,
-          "stop" : 1706942128132,
+          "start" : 1707002332628,
+          "stop" : 1707002332768,
+          "duration" : 140
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "test06_refreshToDB",
+        "uid" : "7cf00eea7770a228",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002338191,
+          "stop" : 1707002338254,
+          "duration" : 63
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "createDataSetFromFile",
+        "uid" : "b72da8b543f05141",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339942,
+          "stop" : 1707002339942,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testFromCsvqToCsv",
+        "uid" : "74d5bb9c3bfd78f4",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002337098,
+          "stop" : 1707002337113,
+          "duration" : 15
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testFromRegexToXlsx",
+        "uid" : "496190ff05cf1848",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002337176,
+          "stop" : 1707002337191,
+          "duration" : 15
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testGenerateXls",
+        "uid" : "bebdb2e06d50585d",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339489,
+          "stop" : 1707002339630,
+          "duration" : 141
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testConvertCsvSplitByColumnMultiXlsx",
+        "uid" : "c15025d2949b2a25",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002336863,
+          "stop" : 1707002336926,
+          "duration" : 63
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testDataDrivenExecute",
+        "uid" : "54877db2acfebbc9",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339848,
+          "stop" : 1707002339927,
+          "duration" : 79
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "getRow_result_has_argument_column_length",
+        "uid" : "f54990381377f558",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339942,
+          "stop" : 1707002339942,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareWithRowFilter",
+        "uid" : "562705735a06fbe2",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002320404,
+          "stop" : 1707002320794,
+          "duration" : 390
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareCsvAndXlsx",
+        "uid" : "32de702038ebdb6f",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002323576,
+          "stop" : 1707002323701,
+          "duration" : 125
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "test05_updateToDB",
+        "uid" : "59ac324b7588f4c",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002338129,
+          "stop" : 1707002338191,
+          "duration" : 62
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testGenerateXlsx",
+        "uid" : "7498d3216c4c1ce6",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002338551,
+          "stop" : 1707002339009,
+          "duration" : 458
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareCsvqToCsvq",
+        "uid" : "a04494a78603432",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002335097,
+          "stop" : 1707002335676,
+          "duration" : 579
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "createEmptyDataSetFromNoFileDirectory",
+        "uid" : "9e8fbd7bbf16fd3e",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339958,
+          "stop" : 1707002339958,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testGenerateDelete",
+        "uid" : "9e4dcfe75a3c9850",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339630,
+          "stop" : 1707002339661,
+          "duration" : 31
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "createDataSetFromDirectoryOnlyIncludeFile",
+        "uid" : "bd1731f133974798",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339989,
+          "stop" : 1707002339989,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testConvertInnerJoinWithRename",
+        "uid" : "e61817cb69dce001",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002337238,
+          "stop" : 1707002337285,
+          "duration" : 47
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "createDataSetFromDirectoryExcludeFile",
+        "uid" : "28622c96a47b2b12",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339942,
+          "stop" : 1707002339942,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareImage",
+        "uid" : "107993428e50d155",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002333691,
+          "stop" : 1707002334050,
+          "duration" : 359
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testConvertInnerJoinWithSplit",
+        "uid" : "44c4ebbbb944c402",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002337005,
+          "stop" : 1707002337051,
+          "duration" : 46
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "createDataSetFromDirectoryContainsShiftJisFile",
+        "uid" : "b4b27c5ece18047f",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339958,
+          "stop" : 1707002339958,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testTableNameMapNoSortToXlsx",
+        "uid" : "9c5db217a4939535",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002337113,
+          "stop" : 1707002337176,
+          "duration" : 63
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "parseDefaultResultDirEqualsCurrentDir",
+        "uid" : "866fb48af8490b8c",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002320373,
+          "stop" : 1707002320388,
+          "duration" : 15
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "createDataSetFromDirectoryFilterExcludeFile",
+        "uid" : "3adc29079fbec467",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002340005,
+          "stop" : 1707002340020,
+          "duration" : 15
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testConvertJoinMultiple",
+        "uid" : "8f1720f3d47e56a6",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002336816,
+          "stop" : 1707002336848,
+          "duration" : 32
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareCsvAndTsv",
+        "uid" : "836dd30003e1cff1",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002334659,
+          "stop" : 1707002334659,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "getRowCount_return_delegateTableRowCount",
+        "uid" : "f32fc22334911f72",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339927,
+          "stop" : 1707002339927,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "test02_cleanInsertToDB",
+        "uid" : "c47675ec26236f9",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002337863,
+          "stop" : 1707002338004,
           "duration" : 141
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
         "name" : "createDataSetFromFile",
-        "uid" : "e9db16be2dcfe6af",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "uid" : "dee7c5795afaa791",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942135479,
-          "stop" : 1706942135479,
+          "start" : 1707002339989,
+          "stop" : 1707002340005,
+          "duration" : 16
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testTableNameMapNoSortToCsv",
+        "uid" : "5f36c5cd81c93a67",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002335910,
+          "stop" : 1707002335926,
+          "duration" : 16
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "getRows_result_has_argument_column_length",
+        "uid" : "647188f3a8cedc89",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339942,
+          "stop" : 1707002339942,
           "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "parseRequiredOldFileDir",
-        "uid" : "8a4ce67414760c18",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "createDataSetFromFile",
+        "uid" : "f7e97c7d2171aadb",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942115440,
-          "stop" : 1706942115455,
-          "duration" : 15
+          "start" : 1707002340037,
+          "stop" : 1707002340037,
+          "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "getKey_return_argument_column",
-        "uid" : "41d0f967ba15f74a",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testSuccessNoDiffExpected",
+        "uid" : "38e2f5efd507304e",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942135416,
-          "stop" : 1706942135416,
+          "start" : 1707002332315,
+          "stop" : 1707002332315,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "createDataSetFromDirectoryContainsSingleFile",
+        "uid" : "bf64f2cc1e17a30a",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339989,
+          "stop" : 1707002339989,
           "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
         "name" : "testXlsWithSchemaToCsv",
-        "uid" : "7816eb27c13e1e78",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "uid" : "5d7cdd7e72c3e33c",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942131117,
-          "stop" : 1706942131179,
-          "duration" : 62
+          "start" : 1707002335848,
+          "stop" : 1707002335894,
+          "duration" : 46
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testCompareCsvqToCsvq",
-        "uid" : "dd2a930c4642c0a4",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "parseRequiredOldFileDir",
+        "uid" : "33ce33f9ea94423",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942130523,
-          "stop" : 1706942131024,
-          "duration" : 501
+          "start" : 1707002320388,
+          "stop" : 1707002320404,
+          "duration" : 16
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testSettingImport",
-        "uid" : "abb97451232d56ca",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testResultXlsx",
+        "uid" : "e213997cde7ee897",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942127600,
-          "stop" : 1706942127991,
-          "duration" : 391
+          "start" : 1707002323701,
+          "stop" : 1707002331971,
+          "duration" : 8270
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testCompareXlsxAndCsv",
-        "uid" : "9ca01ee80489003",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "getValue_return_argument_row_and_column_length_value",
+        "uid" : "6ce2c1cf32302142",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942115877,
-          "stop" : 1706942116690,
-          "duration" : 813
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createDataSetFromDirectoryOnlyIncludeFile",
-        "uid" : "c30b755d800173ec",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135463,
-          "stop" : 1706942135463,
+          "start" : 1707002339942,
+          "stop" : 1707002339942,
           "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testNoSetting",
-        "uid" : "4e6cc2bb438b46e",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testFailedResultDiffDifferExpected",
+        "uid" : "4b09b27d7f77fd8b",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942131648,
-          "stop" : 1706942131679,
-          "duration" : 31
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testTableNameMapNoSortToXlsPerTable",
-        "uid" : "82d0b3b0ef15d02a",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942131304,
-          "stop" : 1706942131336,
-          "duration" : 32
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertCsvSeparateMultiXlsx",
-        "uid" : "44b743395f75d8f",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942132039,
-          "stop" : 1706942132101,
-          "duration" : 62
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testCompareCsvAndXlsx",
-        "uid" : "e5cbaad5566ed580",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942118581,
-          "stop" : 1706942118722,
-          "duration" : 141
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testGenerateXls",
-        "uid" : "a89edbe669fe7197",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942134947,
-          "stop" : 1706942135103,
-          "duration" : 156
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testSettingMerge",
-        "uid" : "c25d63766677978d",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942129663,
-          "stop" : 1706942130132,
-          "duration" : 469
+          "start" : 1707002334659,
+          "stop" : 1707002335081,
+          "duration" : 422
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
         "name" : "parseRequiredSettingFileExists",
-        "uid" : "6a1b346b02ca9a68",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "uid" : "9f01efde52cfff9f",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942115346,
-          "stop" : 1706942115346,
+          "start" : 1707002320279,
+          "stop" : 1707002320279,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testConvertDistinctWithMerge",
+        "uid" : "d63cb2fdd15d443",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002336926,
+          "stop" : 1707002336973,
+          "duration" : 47
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testGenerateRefresh",
+        "uid" : "450d994f5a55217",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339739,
+          "stop" : 1707002339755,
+          "duration" : 16
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testConvertFilePathToCsv",
+        "uid" : "5f356ff3a1d38477",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002337348,
+          "stop" : 1707002337363,
+          "duration" : 15
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testFailedUnExpectedNoDiff",
+        "uid" : "ec8f526c166d45ab",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002334253,
+          "stop" : 1707002334284,
+          "duration" : 31
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "createDataSetFromFileIncludeSheet",
+        "uid" : "77f89be4f135f32",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002340037,
+          "stop" : 1707002340037,
           "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
         "name" : "parseRequiredNewFileDirExists",
-        "uid" : "2a229f6b2d10e604",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "uid" : "7a6118940b7c504f",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942115424,
-          "stop" : 1706942115424,
+          "start" : 1707002320373,
+          "stop" : 1707002320373,
           "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testConvertFilePathToCsvNotRecursive",
-        "uid" : "f228b22af4ddc0a9",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testConvertXlsxWithSchemaAddFileInfo",
+        "uid" : "cc1cc539d1cc5ad0",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942132648,
-          "stop" : 1706942132664,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "createDataSetFromFile",
-        "uid" : "5c7689e168026262",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135541,
-          "stop" : 1706942135541,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertCsvSplitByColumnMultiXlsx",
-        "uid" : "c841227088cd40ea",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942132179,
-          "stop" : 1706942132257,
-          "duration" : 78
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testTableNameMapNoSortToXlsxPerTable",
-        "uid" : "86f1eb37c9647af1",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942131382,
-          "stop" : 1706942131539,
-          "duration" : 157
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertFullJoin",
-        "uid" : "cf111fae3790e1e8",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942131586,
-          "stop" : 1706942131632,
-          "duration" : 46
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertInnerJoin",
-        "uid" : "4218920f43f673c6",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942132679,
-          "stop" : 1706942132711,
-          "duration" : 32
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "parseRequiredOldFileDirExists",
-        "uid" : "23105d872952e647",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942115346,
-          "stop" : 1706942115362,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testGenerateDelete",
-        "uid" : "befec4026fc8c2af",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135103,
-          "stop" : 1706942135135,
-          "duration" : 32
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testGenerateUpdate",
-        "uid" : "908d984bf8f3bdbd",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135166,
-          "stop" : 1706942135182,
-          "duration" : 16
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testDataDrivenExecute",
-        "uid" : "4c1f26c7de90c41d",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942135354,
-          "stop" : 1706942135416,
-          "duration" : 62
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "test06_refreshToDB",
-        "uid" : "838d60f0c7f9d16c",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942133601,
-          "stop" : 1706942133680,
-          "duration" : 79
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testTableNameMapNoSortToXlsx",
-        "uid" : "5e8042e2d41b6de3",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942132492,
-          "stop" : 1706942132539,
+          "start" : 1707002337051,
+          "stop" : 1707002337098,
           "duration" : 47
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "getRowCount_return_delegateTableRowCount",
-        "uid" : "6631eb18c722604a",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testConvertCsvSeparateMultiXlsx",
+        "uid" : "d1923626bf8f7c24",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942135416,
-          "stop" : 1706942135416,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "test09_generateSetting",
-        "uid" : "a34bbaec101ff492",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942133789,
-          "stop" : 1706942133851,
+          "start" : 1707002336723,
+          "stop" : 1707002336785,
           "duration" : 62
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testConvertFilePathToCsv",
-        "uid" : "9c901e5280cc2673",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testConvertFilePathToCsvWithSetting",
+        "uid" : "ac705b19d82a9045",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942132726,
-          "stop" : 1706942132726,
+          "start" : 1707002336441,
+          "stop" : 1707002336488,
+          "duration" : 47
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testConvertFilePathToCsvFilterExtension",
+        "uid" : "8de01168ddca8256",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002336363,
+          "stop" : 1707002336363,
           "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testConvertFilePathToCsvWithSetting",
-        "uid" : "7b98b5acfe40fc24",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testDataDrivenExport",
+        "uid" : "9955294de3d57377",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942131711,
-          "stop" : 1706942131789,
-          "duration" : 78
+          "start" : 1707002339786,
+          "stop" : 1707002339833,
+          "duration" : 47
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "createDataSetFromFileExcludeSheet",
-        "uid" : "6337a8dee413dd42",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "parseRequiredOldFileDirExists",
+        "uid" : "11f5b42bd82daa47",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942135510,
-          "stop" : 1706942135526,
-          "duration" : 16
+          "start" : 1707002320294,
+          "stop" : 1707002320294,
+          "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testFailedUnExpectedNoDiff",
-        "uid" : "22e94632af3b8c74",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testConvertOuterJoin",
+        "uid" : "d6a82d0de7bc5022",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942129616,
-          "stop" : 1706942129647,
+          "start" : 1707002336676,
+          "stop" : 1707002336707,
           "duration" : 31
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testGenerateRefresh",
-        "uid" : "22b2b51bba114526",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testparamConvertFixedFileToCsv",
+        "uid" : "303b5209626ab14",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942135228,
-          "stop" : 1706942135244,
-          "duration" : 16
+          "start" : 1707002337395,
+          "stop" : 1707002337410,
+          "duration" : 15
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "createDataSetFromFileIncludeSheet",
-        "uid" : "c51a29de98930ed9",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "getRows_throw_error_if_keys_not_unique",
+        "uid" : "c82db580b537a74",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942135510,
-          "stop" : 1706942135510,
+          "start" : 1707002339942,
+          "stop" : 1707002339942,
           "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testGenerateInsertNoCommit",
-        "uid" : "cefb8dd74aab017c",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testXlsxWithSchemaToCsv",
+        "uid" : "678528a9fc7be39b",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942134493,
-          "stop" : 1706942134524,
+          "start" : 1707002337363,
+          "stop" : 1707002337395,
+          "duration" : 32
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testGenerateDeleteNoCommit",
+        "uid" : "e7a483a5434a64d1",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339395,
+          "stop" : 1707002339427,
+          "duration" : 32
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testSettingMerge",
+        "uid" : "625fd971cfee2bc5",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002334284,
+          "stop" : 1707002334659,
+          "duration" : 375
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testTableNameMapNoSortToXlsPerTable",
+        "uid" : "308a449cb7994b3c",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002336004,
+          "stop" : 1707002336035,
+          "duration" : 31
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "createDataSetFromDirectoryContainsUTF8File",
+        "uid" : "f49afb2701e019b6",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339942,
+          "stop" : 1707002339958,
+          "duration" : 16
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareXlsxAndXls",
+        "uid" : "835574694b9bddd3",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002321592,
+          "stop" : 1707002322014,
+          "duration" : 422
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testSettingImport",
+        "uid" : "6c752949f29ef2e4",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002332315,
+          "stop" : 1707002332628,
+          "duration" : 313
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testFilterArgumentsOverride",
+        "uid" : "34383a3d422e0ee1",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002319466,
+          "stop" : 1707002319669,
+          "duration" : 203
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testConvertFilePathToCsvNotRecursive",
+        "uid" : "3682fd6c1904fb4c",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002337285,
+          "stop" : 1707002337285,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "parseResultDirChangeableCommandLineParameter",
+        "uid" : "b3b20329d03b4803",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002320357,
+          "stop" : 1707002320373,
+          "duration" : 16
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareXlsAndXlsx",
+        "uid" : "31e297c7d4d1d8c8",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002335676,
+          "stop" : 1707002335723,
+          "duration" : 47
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testGenerateInsertNoCommit",
+        "uid" : "ef3c72cbaa23cde0",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339009,
+          "stop" : 1707002339036,
+          "duration" : 27
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testNoSetting",
+        "uid" : "1733276133beeaea",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002336363,
+          "stop" : 1707002336394,
           "duration" : 31
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
         "name" : "testTableNameMap",
-        "uid" : "724627f8665f3a23",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "uid" : "6768dcafbd2b9084",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942132304,
-          "stop" : 1706942132351,
-          "duration" : 47
+          "start" : 1707002336973,
+          "stop" : 1707002337005,
+          "duration" : 32
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "test08_runSql",
-        "uid" : "3dfa7c71a9d6b2ca",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testSuccessNoDiffWithCommonSetting",
+        "uid" : "1a39d15124d2d147",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942133742,
-          "stop" : 1706942133789,
-          "duration" : 47
-        },
-        "flaky" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "testConvertDistinctWithMerge",
-        "uid" : "f1b1ffed8b0f4e6f",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
-        "status" : "passed",
-        "time" : {
-          "start" : 1706942132257,
-          "stop" : 1706942132304,
-          "duration" : 47
+          "start" : 1707002323154,
+          "stop" : 1707002323169,
+          "duration" : 15
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
         "name" : "getRows_throw_exception_if_argument_column_not_exists",
-        "uid" : "f3475d8290f164ca",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "uid" : "913b93a490c4edd9",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942135416,
-          "stop" : 1706942135416,
+          "start" : 1707002339942,
+          "stop" : 1707002339942,
           "duration" : 0
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testCompareIgnoreNoSettingTables",
-        "uid" : "26f13ebbaa086e09",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "parseNoSettingFile",
+        "uid" : "cd1967089c26f00b",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942117081,
-          "stop" : 1706942117128,
+          "start" : 1707002320263,
+          "stop" : 1707002320279,
+          "duration" : 16
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareXlsxAndCsv",
+        "uid" : "e3372cdcf15f4571",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002320794,
+          "stop" : 1707002321592,
+          "duration" : 798
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareNoHeaderRegexTxtToNoHeaderCsv",
+        "uid" : "9c465357d49dd622",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002322077,
+          "stop" : 1707002322108,
+          "duration" : 31
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testFilterArguments",
+        "uid" : "9c43a873170e2928",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002319747,
+          "stop" : 1707002319763,
+          "duration" : 16
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "createDataSetFromFileIncludeSheet",
+        "uid" : "8e44e78f60cc533f",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002340052,
+          "stop" : 1707002340052,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "createDataSetFromFileExcludeSheet",
+        "uid" : "94a01d456610f5dd",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002340037,
+          "stop" : 1707002340052,
+          "duration" : 15
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testGenerateUpdate",
+        "uid" : "5dd49d14591a8bf4",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339677,
+          "stop" : 1707002339692,
+          "duration" : 15
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testSpaceContainsPathAsSrcParameter",
+        "uid" : "cbac86f61fad841b",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339770,
+          "stop" : 1707002339786,
+          "duration" : 16
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "test04_insertToDB",
+        "uid" : "cfe53190401d3497",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002338066,
+          "stop" : 1707002338129,
+          "duration" : 63
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testGenerateSettings",
+        "uid" : "5ad23c4e7b80fcbb",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339755,
+          "stop" : 1707002339770,
+          "duration" : 15
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testGenerateXlsxStreaming",
+        "uid" : "314dc426eef1cd6d",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339051,
+          "stop" : 1707002339395,
+          "duration" : 344
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testConvertInnerJoin",
+        "uid" : "74e63e2cd4e12938",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002337316,
+          "stop" : 1707002337348,
+          "duration" : 32
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testTableNameMapNoSortToXlsxPerTable",
+        "uid" : "92498060b318d90f",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002336098,
+          "stop" : 1707002336254,
+          "duration" : 156
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testConvertInnerJoinByExpression",
+        "uid" : "6b73c2aa8dc41d73",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002336035,
+          "stop" : 1707002336098,
+          "duration" : 63
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "getKey_return_argument_column",
+        "uid" : "b514b1be4cdba33b",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339927,
+          "stop" : 1707002339927,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testGenerateTxtPerTable",
+        "uid" : "6bd69602fb590e15",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339427,
+          "stop" : 1707002339458,
+          "duration" : 31
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "test09_generateSetting",
+        "uid" : "630d6524f327ea99",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002338379,
+          "stop" : 1707002338441,
+          "duration" : 62
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testGenerateCleanInsert",
+        "uid" : "7304f6f5d2199781",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339723,
+          "stop" : 1707002339739,
+          "duration" : 16
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "test03_deleteToDB",
+        "uid" : "c061c2cc6297f42",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002338004,
+          "stop" : 1707002338066,
+          "duration" : 62
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "test08_runSql",
+        "uid" : "579bbdc11fe88ec9",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002338316,
+          "stop" : 1707002338363,
           "duration" : 47
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testDataDrivenExport",
-        "uid" : "9dad6d2d183db50c",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testConvertFullJoin",
+        "uid" : "259f12e5025fe361",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942135276,
-          "stop" : 1706942135354,
+          "start" : 1707002336316,
+          "stop" : 1707002336363,
+          "duration" : 47
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "test",
+        "uid" : "8b7c00e434888128",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002340024,
+          "stop" : 1707002340024,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "getValue_return_argument_row_and_column_value",
+        "uid" : "aae3c738c250daba",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339927,
+          "stop" : 1707002339927,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testTableNameMapNoSortToXls",
+        "uid" : "4ec60cc6a09aaa8b",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002335926,
+          "stop" : 1707002336004,
           "duration" : 78
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testSuccessResultDiffExpected",
-        "uid" : "9743c10e1179f524",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testFromCsvToXlsx",
+        "uid" : "9e201dde6fedf8bd",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942128413,
-          "stop" : 1706942128803,
-          "duration" : 390
+          "start" : 1707002336785,
+          "stop" : 1707002336816,
+          "duration" : 31
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testConvertInnerJoinWithSeparate",
+        "uid" : "e35936a632347dc9",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002337191,
+          "stop" : 1707002337238,
+          "duration" : 47
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testGenerateInsert",
+        "uid" : "6691fd6f719e91de",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002339661,
+          "stop" : 1707002339677,
+          "duration" : 16
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareSort",
+        "uid" : "86eb59886d3b896c",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002331971,
+          "stop" : 1707002332299,
+          "duration" : 328
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareFilter",
+        "uid" : "6ac4ffbb57791963",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002332768,
+          "stop" : 1707002333050,
+          "duration" : 282
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "parseRequiredNewFileDir",
+        "uid" : "74feb5f235163edf",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002320341,
+          "stop" : 1707002320357,
+          "duration" : 16
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "createDataSetFromFileExcludeSheet",
+        "uid" : "9a196b462f90ca77",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002340024,
+          "stop" : 1707002340037,
+          "duration" : 13
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
         "name" : "testFromCsvToMultiXls",
-        "uid" : "ec97301f8b444622",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "uid" : "ff4808abdc388656",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942132664,
-          "stop" : 1706942132679,
-          "duration" : 15
+          "start" : 1707002337285,
+          "stop" : 1707002337301,
+          "duration" : 16
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "createDataSetFromFile",
-        "uid" : "a964dd90f0f2af33",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testConvertDistinctWithTableNameMap",
+        "uid" : "37dff5da37daafa8",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942135432,
-          "stop" : 1706942135447,
-          "duration" : 15
+          "start" : 1707002336394,
+          "stop" : 1707002336426,
+          "duration" : 32
         },
         "flaky" : false,
         "parameters" : [ ]
       }, {
-        "name" : "testFilterArgumentsOverride",
-        "uid" : "4b514adf52149857",
-        "parentUid" : "73fa82b5aa1a174e38682e17811a12b7",
+        "name" : "testSuccessResultDiffExpected",
+        "uid" : "c1778d357f99d010",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
         "status" : "passed",
         "time" : {
-          "start" : 1706942114533,
-          "stop" : 1706942114736,
-          "duration" : 203
+          "start" : 1707002333050,
+          "stop" : 1707002333409,
+          "duration" : 359
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testComparePatternMatch",
+        "uid" : "1fda29c15a4deb63",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002333409,
+          "stop" : 1707002333566,
+          "duration" : 157
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testComparePdf",
+        "uid" : "874a3bbd1d083237",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002323169,
+          "stop" : 1707002323529,
+          "duration" : 360
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testCompareIgnoreNoSettingTables",
+        "uid" : "40e805ee59f0a6c5",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002322014,
+          "stop" : 1707002322061,
+          "duration" : 47
+        },
+        "flaky" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "testExcelWithSchema",
+        "uid" : "31cdc85d02bf8666",
+        "parentUid" : "b7154eda5127f4985fa08b8cdec79d7b",
+        "status" : "passed",
+        "time" : {
+          "start" : 1707002334050,
+          "stop" : 1707002334238,
+          "duration" : 188
         },
         "flaky" : false,
         "parameters" : [ ]
       } ],
-      "uid" : "73fa82b5aa1a174e38682e17811a12b7"
+      "uid" : "b7154eda5127f4985fa08b8cdec79d7b"
     } ],
     "uid" : "b403138c510e7cb66099f96adb4eb8fe"
   } ]
