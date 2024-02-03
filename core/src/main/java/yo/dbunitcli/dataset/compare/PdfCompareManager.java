@@ -2,6 +2,8 @@ package yo.dbunitcli.dataset.compare;
 
 import com.github.romankh3.image.comparison.model.ImageComparisonResult;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import yo.dbunitcli.dataset.CompareKeys;
@@ -30,6 +32,13 @@ public class PdfCompareManager extends ImageCompareManager {
         return new PdfFileCompareHandler(it);
     }
 
+    public static class Builder extends ImageCompareBuilder {
+        @Override
+        public DefaultCompareManager get() {
+            return new PdfCompareManager(this);
+        }
+    }
+
     public class PdfFileCompareHandler extends ImageFileCompareHandler {
 
         protected List<CompareDiff> pageDiffs;
@@ -49,7 +58,8 @@ public class PdfCompareManager extends ImageCompareManager {
         @Override
         protected void compareFile(final File oldPath, final File newPath, final CompareKeys key) {
             try (final InputStream newIn = new FileInputStream(newPath); final InputStream oldIn = new FileInputStream(oldPath)) {
-                try (final PDDocument doc = PDDocument.load(newIn); final PDDocument oldDoc = PDDocument.load(oldIn)) {
+                try (final PDDocument doc = Loader.loadPDF(new RandomAccessReadBuffer(newIn));
+                     final PDDocument oldDoc = Loader.loadPDF(new RandomAccessReadBuffer(oldIn))) {
                     final int newPages = doc.getNumberOfPages();
                     final int oldPages = oldDoc.getNumberOfPages();
                     if (newPages != oldPages) {
@@ -84,13 +94,6 @@ public class PdfCompareManager extends ImageCompareManager {
             } catch (final IOException e) {
                 throw new AssertionError(e);
             }
-        }
-    }
-
-    public static class Builder extends ImageCompareBuilder {
-        @Override
-        public DefaultCompareManager get() {
-            return new PdfCompareManager(this);
         }
     }
 
