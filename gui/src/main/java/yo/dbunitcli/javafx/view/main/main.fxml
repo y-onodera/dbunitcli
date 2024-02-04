@@ -35,12 +35,12 @@
         </center>
         <bottom>
             <MigPane cols="push[35][35][35]" rows="[50]" maxHeight="50" prefWidth="550.0" styleClass="bottom-background">
-                <MFXButton fx:id="reset" rippleColor="white" buttonType="FLAT" styleClass="text-button" mnemonicParsing="false" text="reset" onAction="#reset"
+                <MFXButton fx:id="reset" buttonType="FLAT" minWidth="70.0" styleClass="text-button" text="reset" onAction="#reset"
                            MigPane.cc="right"/>
-                <MFXButton fx:id="exec" rippleColor="white" buttonType="FLAT" styleClass="text-button" mnemonicParsing="false" text="exec" onAction="#execCmd"
+                <MFXButton fx:id="exec" buttonType="FLAT" minWidth="70.0" styleClass="text-button" text="exec" onAction="#execCmd"
                            MigPane.cc="right"/>
-                <MFXButton id="save" rippleColor="white" buttonType="FLAT" styleClass="text-button" mnemonicParsing="false" text="save" onAction="#saveFile"
-                           MigPane.cc="right" rippleAnimateShadow=""/>
+                <MFXButton id="save" buttonType="FLAT" minWidth="70.0" styleClass="text-button" text="save" onAction="#saveFile"
+                           MigPane.cc="right"/>
             </MigPane>
         </bottom>
     </BorderPane>

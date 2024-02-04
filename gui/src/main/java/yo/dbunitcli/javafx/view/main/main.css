@@ -25,24 +25,8 @@
 .text-button:focused {
 	-fx-background-color: lightgray;
 }
-.outline-button {
-	-fx-background-color: transparent;
-	-fx-border-color: #7a0ed9;
-	-fx-border-radius: 3;
-	-fx-text-fill: #7a0ed9;
-}
-.outline-button:hover,
-.outline-button:focused {
-	-fx-background-color: lightgray;
-}
-.contain-button {
-	-fx-background-color: #7a0ed9;
-	-fx-text-fill: white;
-}
-.contain-button:hover,
-.contain-button:focused {
-	-fx-border-color: lightgray;
-	-fx-text-fill: lightgray;
+.text-button:disabled {
+	-fx-text-fill: rgba(0, 0, 0, 0.38); /* Disabled */
 }
 :invalid {
 	-fx-border-color: #EF6E6B;
