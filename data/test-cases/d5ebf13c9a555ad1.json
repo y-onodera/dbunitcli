@@ -1,0 +1,55 @@
+{
+  "uid" : "d5ebf13c9a555ad1",
+  "name" : "testExcelWithSchema",
+  "fullName" : "yo.dbunitcli.application.CompareTest.testExcelWithSchema",
+  "historyId" : "c0531e7128b71132a045e7c503d44e97",
+  "time" : {
+    "start" : 1707019235721,
+    "stop" : 1707019235956,
+    "duration" : 235
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "package",
+    "value" : "yo.dbunitcli.application"
+  }, {
+    "name" : "testClass",
+    "value" : "yo.dbunitcli.application.CompareTest"
+  }, {
+    "name" : "testMethod",
+    "value" : "testExcelWithSchema"
+  }, {
+    "name" : "suite",
+    "value" : "yo.dbunitcli.application.CompareTest"
+  }, {
+    "name" : "host",
+    "value" : "fv-az1390-392"
+  }, {
+    "name" : "thread",
+    "value" : "3440@fv-az1390-392.main(1)"
+  }, {
+    "name" : "framework",
+    "value" : "junit4"
+  }, {
+    "name" : "language",
+    "value" : "java"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "d5ebf13c9a555ad1.json",
+  "parameterValues" : [ ]
+}
