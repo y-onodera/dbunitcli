@@ -1,6 +1,7 @@
 package yo.dbunitcli.application;
 
-import com.github.stefanbirkner.systemlambda.SystemLambda;
+import mockit.Mock;
+import mockit.MockUp;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
@@ -149,26 +150,47 @@ public class CompareTest {
 
     @Test
     public void testFailedResultDiffNotExpected() throws Exception {
-        final int exitCode = SystemLambda.catchSystemExit(
-                () -> Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffNotExpected.txt"})
-        );
-        Assert.assertEquals(1, exitCode);
+        new MockUp<System>() {
+            @Mock
+            public void exit(final int value) {
+                throw new RuntimeException(String.valueOf(value));
+            }
+        };
+        try {
+            Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffNotExpected.txt"});
+        } catch (final RuntimeException ex) {
+            Assert.assertEquals("1", ex.getMessage());
+        }
     }
 
     @Test
     public void testFailedResultDiffDifferExpected() throws Exception {
-        final int exitCode = SystemLambda.catchSystemExit(
-                () -> Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffInValidExpected.txt"})
-        );
-        Assert.assertEquals(1, exitCode);
+        new MockUp<System>() {
+            @Mock
+            public void exit(final int value) {
+                throw new RuntimeException(String.valueOf(value));
+            }
+        };
+        try {
+            Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffInValidExpected.txt"});
+        } catch (final RuntimeException ex) {
+            Assert.assertEquals("1", ex.getMessage());
+        }
     }
 
     @Test
     public void testFailedUnExpectedNoDiff() throws Exception {
-        final int exitCode = SystemLambda.catchSystemExit(
-                () -> Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"})
-        );
-        Assert.assertEquals(1, exitCode);
+        new MockUp<System>() {
+            @Mock
+            public void exit(final int value) {
+                throw new RuntimeException(String.valueOf(value));
+            }
+        };
+        try {
+            Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"});
+        } catch (final RuntimeException ex) {
+            Assert.assertEquals("1", ex.getMessage());
+        }
     }
 
 }

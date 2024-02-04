@@ -14,7 +14,16 @@
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jdbc.dependencies.scope>test</jdbc.dependencies.scope>
     </properties>
+    <profiles>
+        <profile>
+            <id>native</id>
+            <properties>
+                <jdbc.dependencies.scope>compile</jdbc.dependencies.scope>
+            </properties>
+        </profile>
+    </profiles>
     <dependencies>
         <dependency>
             <groupId>org.dbunit</groupId>
@@ -198,13 +207,13 @@
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc11</artifactId>
             <version>23.3.0.23.09</version>
-            <scope>test</scope>
+            <scope>${jdbc.dependencies.scope}</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>2.2.224</version>
-            <scope>test</scope>
+            <scope>${jdbc.dependencies.scope}</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -213,10 +222,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-           <groupId>com.github.stefanbirkner</groupId>
-           <artifactId>system-lambda</artifactId>
-           <version>1.2.1</version>
-           <scope>test</scope>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <version>1.49</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
