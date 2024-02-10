@@ -60,6 +60,7 @@
                     <include>**/*.txt</include>
                     <include>**/*.stg</include>
                     <include>**/*.xml</include>
+                    <include>**/*.scmo</include>
                 </includes>
             </resource>
         </resources>
