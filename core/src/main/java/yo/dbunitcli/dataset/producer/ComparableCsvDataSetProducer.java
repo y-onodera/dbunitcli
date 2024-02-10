@@ -1,10 +1,10 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.common.handlers.*;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
@@ -18,8 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private IDataSetConsumer consumer;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
     private final File[] src;
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
@@ -27,6 +26,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private final String[] headerNames;
     private final boolean loadData;
     private final char delimiter;
+    private IDataSetConsumer consumer;
     private int processRow;
     private Pipeline pipeline;
 
@@ -58,20 +58,20 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
 
     @Override
     public void produce() throws DataSetException {
-        LOGGER.info("produce() - start");
+        ComparableCsvDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
                 .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
-        LOGGER.info("produce() - end");
+        ComparableCsvDataSetProducer.LOGGER.info("produce() - end");
     }
 
     protected void produceFromFile(final File theDataFile) {
-        LOGGER.info("produce - start fileName={}", theDataFile);
+        ComparableCsvDataSetProducer.LOGGER.info("produce - start fileName={}", theDataFile);
         this.parse(theDataFile);
-        LOGGER.info("produce - rows={}", this.processRow);
-        LOGGER.info("produce - end   fileName={}", theDataFile);
+        ComparableCsvDataSetProducer.LOGGER.info("produce - rows={}", this.processRow);
+        ComparableCsvDataSetProducer.LOGGER.info("produce - end   fileName={}", theDataFile);
     }
 
     protected void parse(final File file) {
@@ -193,38 +193,33 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
 
     protected static class IgnoreDelimiterWhitespacesHandler extends AbstractPipelineComponent {
 
-        private static final Logger LOGGER = LogManager.getLogger();
         static Field HANDLE;
 
         static {
             try {
-                HANDLE = AbstractPipelineComponent.class.getDeclaredField("helper");
+                IgnoreDelimiterWhitespacesHandler.HANDLE = AbstractPipelineComponent.class.getDeclaredField("helper");
             } catch (final NoSuchFieldException e) {
                 throw new RuntimeException(e);
             }
-            HANDLE.setAccessible(true);
+            IgnoreDelimiterWhitespacesHandler.HANDLE.setAccessible(true);
         }
 
         private final char delimiter;
 
-        IgnoreDelimiterWhitespacesHandler(final char delimiter) {
-            this.delimiter = delimiter;
-        }
-
         public static PipelineComponent IGNORE(final char delimiter) {
-            LOGGER.debug("IGNORE() - start");
-            return createPipelineComponent(new IgnoreDelimiterWhitespacesHandler(delimiter), new IgnoreDelimiterWhitespacesHandler.Ignore());
+            ComparableCsvDataSetProducer.LOGGER.debug("IGNORE() - start");
+            return AbstractPipelineComponent.createPipelineComponent(new IgnoreDelimiterWhitespacesHandler(delimiter), new IgnoreDelimiterWhitespacesHandler.Ignore());
         }
 
         public static PipelineComponent ACCEPT(final char delimiter) {
-            LOGGER.debug("ACCEPT() - start");
-            return createPipelineComponent(new IgnoreDelimiterWhitespacesHandler(delimiter), new IgnoreDelimiterWhitespacesHandler.Accept());
+            ComparableCsvDataSetProducer.LOGGER.debug("ACCEPT() - start");
+            return AbstractPipelineComponent.createPipelineComponent(new IgnoreDelimiterWhitespacesHandler(delimiter), new IgnoreDelimiterWhitespacesHandler.Accept());
         }
 
         public static PipelineComponent GET(final char delimiter, final PipelineComponent component) {
             try {
 
-                final Helper helper = (Helper) HANDLE.get(component);
+                final Helper helper = (Helper) IgnoreDelimiterWhitespacesHandler.HANDLE.get(component);
                 if (helper instanceof AbstractPipelineComponent.ACCEPT) {
                     return IgnoreDelimiterWhitespacesHandler.ACCEPT(delimiter);
                 }
@@ -234,10 +229,14 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             }
         }
 
+        IgnoreDelimiterWhitespacesHandler(final char delimiter) {
+            this.delimiter = delimiter;
+        }
+
         @Override
         public boolean canHandle(final char c) throws IllegalInputCharacterException {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("canHandle(c={}) - start", c);
+            if (ComparableCsvDataSetProducer.LOGGER.isDebugEnabled()) {
+                ComparableCsvDataSetProducer.LOGGER.debug("canHandle(c={}) - start", c);
             }
             return c != this.delimiter && Character.isWhitespace(c);
         }
@@ -256,27 +255,27 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
 
         static {
             try {
-                HANDLE = EnforceHandler.class.getDeclaredField("enforcedComponents");
+                LightEnforceHandler.HANDLE = EnforceHandler.class.getDeclaredField("enforcedComponents");
             } catch (final NoSuchFieldException e) {
                 throw new RuntimeException(e);
             }
-            HANDLE.setAccessible(true);
+            LightEnforceHandler.HANDLE.setAccessible(true);
         }
 
         private PipelineComponent[] enforcedComponents;
         private PipelineComponent theHandlerComponent;
 
+        public static PipelineComponent ENFORCE(final EnforceHandler components) {
+            final LightEnforceHandler handler = new LightEnforceHandler(components);
+            return AbstractPipelineComponent.createPipelineComponent(handler, new ENFORCE(handler));
+        }
+
         private LightEnforceHandler(final EnforceHandler components) {
             try {
-                this.setEnforcedComponents((PipelineComponent[]) HANDLE.get(components));
+                this.setEnforcedComponents((PipelineComponent[]) LightEnforceHandler.HANDLE.get(components));
             } catch (final IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
-        }
-
-        public static PipelineComponent ENFORCE(final EnforceHandler components) {
-            final LightEnforceHandler handler = new LightEnforceHandler(components);
-            return createPipelineComponent(handler, new ENFORCE(handler));
         }
 
         @Override

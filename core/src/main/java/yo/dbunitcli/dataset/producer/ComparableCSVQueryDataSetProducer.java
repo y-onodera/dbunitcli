@@ -1,11 +1,11 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.Parameter;
@@ -19,14 +19,14 @@ import java.util.Map;
 
 public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProducer {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
     private static final String URL = "jdbc:h2:mem:test;MODE=Oracle";
-    private IDataSetConsumer consumer;
     private final File[] src;
     private final Parameter parameter;
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final boolean loadData;
+    private IDataSetConsumer consumer;
 
     public ComparableCSVQueryDataSetProducer(final ComparableDataSetParam param, final Parameter parameter) {
         this.param = param;
@@ -60,20 +60,20 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
 
     @Override
     public void produce() throws DataSetException {
-        LOGGER.info("produce() - start");
+        ComparableCSVQueryDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
                 .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
-        LOGGER.info("produce() - end");
+        ComparableCSVQueryDataSetProducer.LOGGER.info("produce() - end");
     }
 
     protected void produceFromFile(final File aFile) {
         try {
             final String query = this.getTemplateLoader().render(aFile, this.getParameter());
-            LOGGER.info("produce - start fileName={},query={}", aFile, query);
-            try (final Connection conn = DriverManager.getConnection(URL);
+            ComparableCSVQueryDataSetProducer.LOGGER.info("produce - start fileName={},query={}", aFile, query);
+            try (final Connection conn = DriverManager.getConnection(ComparableCSVQueryDataSetProducer.URL);
                  final Statement stmt = conn.createStatement();
                  final ResultSet rst = stmt.executeQuery(query)
             ) {
@@ -97,10 +97,10 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
                         this.consumer.row(row);
                         readRows++;
                     }
-                    LOGGER.info("produce - rows={}", readRows);
+                    ComparableCSVQueryDataSetProducer.LOGGER.info("produce - rows={}", readRows);
                 }
                 this.consumer.endTable();
-                LOGGER.info("produce - end   fileName={}", aFile);
+                ComparableCSVQueryDataSetProducer.LOGGER.info("produce - end   fileName={}", aFile);
             }
         } catch (final SQLException | DataSetException e) {
             throw new AssertionError(e);

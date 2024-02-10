@@ -1,7 +1,7 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.*;
 
 import java.util.Map;
@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 public class ComparableDataSetLoader {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDataSetLoader.class);
 
     private final Parameter parameter;
 
@@ -22,7 +22,7 @@ public class ComparableDataSetLoader {
     }
 
     public ComparableDataSet loadDataSet(final ComparableDataSetParam param) {
-        LOGGER.info("create DataSetLoader from {}", param);
+        ComparableDataSetLoader.LOGGER.info("create DataSetLoader from {}", param);
         return new ComparableDataSetImpl(this.getComparableDataSetProducer(param));
     }
 

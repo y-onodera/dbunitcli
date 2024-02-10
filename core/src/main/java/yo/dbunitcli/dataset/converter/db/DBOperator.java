@@ -1,7 +1,5 @@
 package yo.dbunitcli.dataset.converter.db;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.IDatabaseConnection;
@@ -14,6 +12,8 @@ import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.dbunit.dataset.stream.IDataSetProducer;
 import org.dbunit.operation.AbstractOperation;
 import org.dbunit.operation.OperationData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 public abstract class DBOperator extends AbstractOperation implements IDataSetConsumer {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(DBOperator.class);
     private static final BitSet EMPTY_BITSET = new BitSet();
     protected final IDatabaseConnection connection;
     protected IStatementFactory factory;
@@ -53,22 +53,37 @@ public abstract class DBOperator extends AbstractOperation implements IDataSetCo
     }
 
     @Override
+    public void endDataSet() throws DataSetException {
+
+    }
+
+    @Override
     public void startTable(final ITableMetaData iTableMetaData) throws DataSetException {
         try {
             this.metaData = this.getOperationMetaData(iTableMetaData);
             this.writeRows = 0;
-            LOGGER.info("convert - start databaseTable={},className={}", this.metaData.getTableName(), this.getClass().getSimpleName());
+            DBOperator.LOGGER.info("convert - start databaseTable={},className={}", this.metaData.getTableName(), this.getClass().getSimpleName());
         } catch (final DatabaseUnitException | SQLException e) {
             throw new DataSetException(e);
         }
     }
 
-    public void reStartTable(final ITableMetaData iTableMetaData) {
-        try {
-            this.startTable(iTableMetaData);
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
+    @Override
+    public void endTable() throws DataSetException {
+        this.ignoreMapping = null;
+        this.operationData = null;
+        if (this.statement != null) {
+            try {
+                this.statement.executeBatch();
+                this.statement.clearBatch();
+                this.statement.close();
+                this.statement = null;
+            } catch (final SQLException e) {
+                throw new DataSetException(e);
+            }
         }
+        DBOperator.LOGGER.info("convert - rows={},className={}", this.writeRows, this.getClass().getSimpleName());
+        DBOperator.LOGGER.info("convert - end   databaseTable={},className={}", this.metaData.getTableName(), this.getClass().getSimpleName());
     }
 
     @Override
@@ -105,7 +120,7 @@ public abstract class DBOperator extends AbstractOperation implements IDataSetCo
                         this.statement.addValue(value, dataType);
                     } catch (final SQLException | DataSetException var28) {
                         final String msg = "Error casting value for table '" + this.metaData.getTableName() + "' and column '" + columnName + "'";
-                        LOGGER.error("execute: {}", msg);
+                        DBOperator.LOGGER.error("execute: {}", msg);
                         throw new AssertionError(msg, var28);
                     }
                 }
@@ -126,31 +141,16 @@ public abstract class DBOperator extends AbstractOperation implements IDataSetCo
         }
     }
 
-    @Override
-    public void endTable() throws DataSetException {
-        this.ignoreMapping = null;
-        this.operationData = null;
-        if (this.statement != null) {
-            try {
-                this.statement.executeBatch();
-                this.statement.clearBatch();
-                this.statement.close();
-                this.statement = null;
-            } catch (final SQLException e) {
-                throw new DataSetException(e);
-            }
+    public void reStartTable(final ITableMetaData iTableMetaData) {
+        try {
+            this.startTable(iTableMetaData);
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
         }
-        LOGGER.info("convert - rows={},className={}", this.writeRows, this.getClass().getSimpleName());
-        LOGGER.info("convert - end   databaseTable={},className={}", this.metaData.getTableName(), this.getClass().getSimpleName());
-    }
-
-    @Override
-    public void endDataSet() throws DataSetException {
-
     }
 
     protected BitSet getIgnoreMapping(final Object[] row) throws DataSetException {
-        return EMPTY_BITSET;
+        return DBOperator.EMPTY_BITSET;
     }
 
     protected boolean equalsIgnoreMapping(final BitSet ignoreMapping, final Object[] row) throws DataSetException {
@@ -160,7 +160,7 @@ public abstract class DBOperator extends AbstractOperation implements IDataSetCo
     protected abstract OperationData getOperationData() throws DataSetException;
 
     protected ITableMetaData getOperationMetaData(final ITableMetaData metaData) throws DatabaseUnitException, SQLException {
-        LOGGER.debug("getOperationMetaData(connection={}, metaData={}) - start", this.connection, metaData);
+        DBOperator.LOGGER.debug("getOperationMetaData(connection={}, metaData={}) - start", this.connection, metaData);
         final IDataSet databaseDataSet = this.connection.createDataSet();
         final String tableName = metaData.getTableName();
         final ITableMetaData tableMetaData = databaseDataSet.getTableMetaData(tableName);
@@ -187,7 +187,7 @@ public abstract class DBOperator extends AbstractOperation implements IDataSetCo
     protected void handleColumnHasNoValue(final String tableName, final String columnName) {
         final String tableColumnName = tableName + "." + columnName;
         final String msg = "table.column=" + tableColumnName + " value is empty but must contain a value (to disable this feature check, set DatabaseConfig.FEATURE_ALLOW_EMPTY_FIELDS to true)";
-        LOGGER.error("execute: {}", msg);
+        DBOperator.LOGGER.error("execute: {}", msg);
         throw new IllegalArgumentException(msg);
     }
 

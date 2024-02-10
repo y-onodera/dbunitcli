@@ -1,9 +1,9 @@
 package yo.dbunitcli.dataset;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.dbunit.database.AmbiguousTableNameException;
 import org.dbunit.dataset.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 public class ComparableDataSetImpl extends AbstractDataSet implements ComparableDataSet {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDataSetImpl.class);
     private final TableSeparators tableSeparators;
     private final ComparableDataSetParam param;
     private final IDataSetConverter converter;

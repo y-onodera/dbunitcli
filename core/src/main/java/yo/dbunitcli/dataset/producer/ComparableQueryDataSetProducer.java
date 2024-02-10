@@ -1,8 +1,8 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableQueryDataSetProducer.class);
     private final Parameter parameter;
 
     public ComparableQueryDataSetProducer(final ComparableDataSetParam param, final Parameter parameter) {
@@ -24,13 +24,13 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
 
     @Override
     public void produce() throws DataSetException {
-        LOGGER.info("produce() - start");
+        ComparableQueryDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
                 .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
-        LOGGER.info("produce() - end");
+        ComparableQueryDataSetProducer.LOGGER.info("produce() - end");
     }
 
     public Map<String, Object> getParameter() {
@@ -44,9 +44,9 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     protected void produceFromFile(final File aFile) {
         try {
             final String query = this.loadQuery(aFile);
-            LOGGER.info("produce - start fileName={},query={}", aFile.getName(), query);
+            ComparableQueryDataSetProducer.LOGGER.info("produce - start fileName={},query={}", aFile.getName(), query);
             this.executeTable(this.connection.createQueryTable(this.getTableName(aFile), query));
-            LOGGER.info("produce - end   fileName={}", aFile.getName());
+            ComparableQueryDataSetProducer.LOGGER.info("produce - end   fileName={}", aFile.getName());
         } catch (final SQLException | DataSetException e) {
             throw new AssertionError(e);
         }

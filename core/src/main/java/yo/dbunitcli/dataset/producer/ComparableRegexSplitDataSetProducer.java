@@ -1,9 +1,9 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
@@ -17,16 +17,16 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class ComparableRegexSplitDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private IDataSetConsumer consumer;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableRegexSplitDataSetProducer.class);
     private final File[] src;
     private final String encoding;
     private final Pattern dataSplitPattern;
-    private String[] headerNames;
-    private Pattern headerSplitPattern;
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final boolean loadData;
+    private IDataSetConsumer consumer;
+    private String[] headerNames;
+    private Pattern headerSplitPattern;
 
     public ComparableRegexSplitDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
@@ -60,18 +60,18 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
 
     @Override
     public void produce() throws DataSetException {
-        LOGGER.info("produce() - start");
+        ComparableRegexSplitDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
                 .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
-        LOGGER.info("produce() - end");
+        ComparableRegexSplitDataSetProducer.LOGGER.info("produce() - end");
     }
 
     protected void produceFromFile(final File aFile) {
         try {
-            LOGGER.info("produce - start fileName={}", aFile);
+            ComparableRegexSplitDataSetProducer.LOGGER.info("produce - start fileName={}", aFile);
             if (this.headerNames != null) {
                 this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
                 if (!this.loadData) {
@@ -91,9 +91,9 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
                 }
                 lineNum++;
             }
-            LOGGER.info("produce - rows={}", lineNum);
+            ComparableRegexSplitDataSetProducer.LOGGER.info("produce - rows={}", lineNum);
             this.consumer.endTable();
-            LOGGER.info("produce - end   fileName={}", aFile);
+            ComparableRegexSplitDataSetProducer.LOGGER.info("produce - end   fileName={}", aFile);
         } catch (final IOException | DataSetException e) {
             throw new AssertionError(e);
         }

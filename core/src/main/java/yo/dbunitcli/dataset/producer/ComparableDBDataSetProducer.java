@@ -1,11 +1,11 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.database.IResultSetTable;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
@@ -19,15 +19,15 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDBDataSetProducer.class);
     protected final IDatabaseConnection connection;
-    protected IDataSetConsumer consumer;
     protected final File[] src;
     protected final String encoding;
     protected final TableNameFilter filter;
     private final ComparableDataSetParam param;
-    private IDataSet databaseDataSet;
     private final boolean loadData;
+    protected IDataSetConsumer consumer;
+    private IDataSet databaseDataSet;
 
     public ComparableDBDataSetProducer(final ComparableDataSetParam param) {
         this.connection = param.databaseConnectionLoader().loadConnection();
@@ -54,7 +54,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
 
     @Override
     public void produce() throws DataSetException {
-        LOGGER.info("produce() - start");
+        ComparableDBDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         this.loadJdbcMetadata();
         Stream.of(this.src)
@@ -70,7 +70,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                 .distinct()
                 .forEach(this::executeTable);
         this.consumer.endDataSet();
-        LOGGER.info("produce() - end");
+        ComparableDBDataSetProducer.LOGGER.info("produce() - end");
     }
 
     protected void loadJdbcMetadata() {
@@ -89,7 +89,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
 
     protected void executeTable(final ITable table) {
         try {
-            LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
+            ComparableDBDataSetProducer.LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
             this.consumer.startTable(table.getTableMetaData());
             if (this.loadData) {
                 final Column[] columns = table.getTableMetaData().getColumns();
@@ -106,10 +106,10 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                         break;
                     }
                 }
-                LOGGER.info("produce - rows={}", row);
+                ComparableDBDataSetProducer.LOGGER.info("produce - rows={}", row);
             }
             this.consumer.endTable();
-            LOGGER.info("produce - end   databaseTable={}", table.getTableMetaData().getTableName());
+            ComparableDBDataSetProducer.LOGGER.info("produce - end   databaseTable={}", table.getTableMetaData().getTableName());
             if (table instanceof IResultSetTable resultSetTable) {
                 resultSetTable.close();
             }

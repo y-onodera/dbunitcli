@@ -1,9 +1,9 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
@@ -19,8 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ComparableFixedFileDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private IDataSetConsumer consumer;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableFixedFileDataSetProducer.class);
     private final File[] src;
     private final String encoding;
     private final String[] headerNames;
@@ -28,6 +27,7 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final boolean loadData;
+    private IDataSetConsumer consumer;
 
     public ComparableFixedFileDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
@@ -57,18 +57,18 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
 
     @Override
     public void produce() throws DataSetException {
-        LOGGER.info("produce() - start");
+        ComparableFixedFileDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
                 .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
-        LOGGER.info("produce() - end");
+        ComparableFixedFileDataSetProducer.LOGGER.info("produce() - end");
     }
 
     protected void produceFromFile(final File aFile) {
         try {
-            LOGGER.info("produce - start fileName={}", aFile);
+            ComparableFixedFileDataSetProducer.LOGGER.info("produce - start fileName={}", aFile);
             this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
             if (this.loadData) {
                 int rows = 0;
@@ -76,10 +76,10 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
                     this.consumer.row(this.split(s));
                     rows++;
                 }
-                LOGGER.info("produce - rows={}", rows);
+                ComparableFixedFileDataSetProducer.LOGGER.info("produce - rows={}", rows);
             }
             this.consumer.endTable();
-            LOGGER.info("produce - end   fileName={}", aFile);
+            ComparableFixedFileDataSetProducer.LOGGER.info("produce - end   fileName={}", aFile);
         } catch (final IOException | DataSetException e) {
             throw new AssertionError(e);
         }
