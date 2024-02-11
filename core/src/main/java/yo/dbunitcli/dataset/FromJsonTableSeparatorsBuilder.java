@@ -1,6 +1,7 @@
 package yo.dbunitcli.dataset;
 
-import javax.json.*;
+import jakarta.json.*;
+
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
