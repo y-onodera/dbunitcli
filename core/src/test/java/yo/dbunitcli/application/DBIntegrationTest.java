@@ -17,6 +17,7 @@ public class DBIntegrationTest {
         final String baseDir = URLDecoder.decode(Objects.requireNonNull(DBIntegrationTest.class.getResource(".")).getPath(), StandardCharsets.UTF_8);
         DBIntegrationTest.testResourcesDir = baseDir.replace("target/test-classes", "src/test/resources");
         Run.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationRunCreateTable.txt"});
+        Compare.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationCompare.txt", "-old.loadData=false"});
     }
 
     @AfterAll
@@ -28,18 +29,21 @@ public class DBIntegrationTest {
     @Order(1)
     public void cleanInsertToDB() throws Exception {
         Convert.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationCleanInsert.txt"});
+        Compare.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationCompare.txt"});
     }
 
     @Test
     @Order(2)
     public void deleteToDB() throws Exception {
         Convert.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationDelete.txt"});
+        Compare.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationCompare.txt", "-old.loadData=false"});
     }
 
     @Test
     @Order(3)
     public void insertToDB() throws Exception {
         Convert.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationInsert.txt"});
+        Compare.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationCompare.txt"});
     }
 
     @Test
