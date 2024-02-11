@@ -12,7 +12,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <exclude.testcase>yo.dbunitcli.application.IntegrationTest</exclude.testcase>
-        <aspectj.version>1.9.4</aspectj.version>
     </properties>
     <profiles>
         <profile>
@@ -43,6 +42,9 @@
                             <mainClass>yo.dbunitcli.application.ParameterizeExecute</mainClass>
                             <imageName>dbunit-cli</imageName>
                             <fallback>false</fallback>
+                            <buildArgs>
+                                -H:+AddAllCharsets
+                            </buildArgs>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -91,36 +93,6 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <useSystemClassLoader>false</useSystemClassLoader>
-                    <excludedGroups>${exclude.testcase}</excludedGroups>
-                    <argLine>
-                        -Dfile.encoding=UTF-8 -javaagent:"${settings.localRepository}/org/jmockit/jmockit/1.49/jmockit-1.49.jar" -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
-                    </argLine>
-                    <properties>
-                        <property>
-                            <name>listener</name>
-                            <value>io.qameta.allure.junit4.AllureJunit4</value>
-                        </property>
-                    </properties>
-                    <systemProperties>
-                        <property>
-                            <name>allure.results.directory</name>
-                            <value>${project.build.directory}/allure-results</value>
-                        </property>
-                    </systemProperties>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.aspectj</groupId>
-                        <artifactId>aspectjweaver</artifactId>
-                        <version>${aspectj.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>io.qameta.allure</groupId>

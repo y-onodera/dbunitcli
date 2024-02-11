@@ -2,21 +2,24 @@ package yo.dbunitcli.application;
 
 import mockit.Mock;
 import mockit.MockUp;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import mockit.integration.junit5.JMockitExtension;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+@ExtendWith(JMockitExtension.class)
 public class CompareTest {
 
     private String baseDir;
 
-    @Before
+    @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
         this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
                 .replace("target/test-classes", "src/test/resources");
@@ -119,7 +122,7 @@ public class CompareTest {
 
     @Test
     public void testComparePdfDiffAllPage() throws Exception {
-        Assume.assumeTrue(System.getProperty("os.name").toLowerCase().startsWith("win"));
+        Assumptions.assumeTrue(System.getProperty("os.name").toLowerCase().startsWith("win"));
         Compare.main(new String[]{"@" + this.baseDir + "/paramComparePdfDiffAllPage.txt"});
     }
 
@@ -159,7 +162,7 @@ public class CompareTest {
         try {
             Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffNotExpected.txt"});
         } catch (final RuntimeException ex) {
-            Assert.assertEquals("1", ex.getMessage());
+            Assertions.assertEquals("1", ex.getMessage());
         }
     }
 
@@ -174,7 +177,7 @@ public class CompareTest {
         try {
             Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffInValidExpected.txt"});
         } catch (final RuntimeException ex) {
-            Assert.assertEquals("1", ex.getMessage());
+            Assertions.assertEquals("1", ex.getMessage());
         }
     }
 
@@ -189,7 +192,7 @@ public class CompareTest {
         try {
             Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"});
         } catch (final RuntimeException ex) {
-            Assert.assertEquals("1", ex.getMessage());
+            Assertions.assertEquals("1", ex.getMessage());
         }
     }
 

@@ -1,7 +1,7 @@
 package yo.dbunitcli.application;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -12,7 +12,7 @@ public class ParameterizeExecuteTest {
 
     private String baseDir;
 
-    @Before
+    @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
         this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
                 .replace("target/test-classes", "src/test/resources")

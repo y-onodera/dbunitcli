@@ -1,8 +1,7 @@
 package yo.dbunitcli.application;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.TableSeparators;
@@ -13,7 +12,9 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 public class CompareOptionTest {
 
@@ -21,7 +22,7 @@ public class CompareOptionTest {
 
     private CompareOption target;
 
-    @Before
+    @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
         this.target = new CompareOption();
         this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
@@ -30,34 +31,36 @@ public class CompareOptionTest {
 
     @Test
     public void parseRequiredOldFileDir() {
-        Assert.assertThrows("Option \"-src\" is required", CommandLine.MissingParameterException.class,
-                () -> this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-setting=" + this.baseDir + "/multidiff/setting.json"}));
+        assertThrows(CommandLine.MissingParameterException.class
+                , () -> this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-setting=" + this.baseDir + "/multidiff/setting.json"})
+                , "Option \"-src\" is required");
     }
 
     @Test
     public void parseRequiredNewFileDir() {
-        Assert.assertThrows("Option \"-src\" is required", CommandLine.MissingParameterException.class,
-                () -> this.target.parse(new String[]{"-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"})
+        assertThrows(CommandLine.MissingParameterException.class
+                , () -> this.target.parse(new String[]{"-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"})
+                , "Option \"-src\" is required"
         );
     }
 
     @Test
     public void parseRequiredOldFileDirExists() {
-        Assert.assertThrows(AssertionError.class,
+        assertThrows(AssertionError.class,
                 () -> this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/notExists", "-setting=" + this.baseDir + "/multidiff/setting.json"})
         );
     }
 
     @Test
     public void parseRequiredNewFileDirExists() {
-        Assert.assertThrows(AssertionError.class,
+        assertThrows(AssertionError.class,
                 () -> this.target.parse(new String[]{"-new.src=" + this.baseDir + "/notExists", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"})
         );
     }
 
     @Test
     public void parseRequiredSettingFileExists() {
-        Assert.assertThrows(AssertionError.class,
+        assertThrows(AssertionError.class,
                 () -> this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/NotExists.json"})
         );
     }

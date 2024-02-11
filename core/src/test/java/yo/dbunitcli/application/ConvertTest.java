@@ -3,9 +3,9 @@ package yo.dbunitcli.application;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
@@ -35,7 +35,7 @@ public class ConvertTest {
                 .toArray(String[]::new);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
         this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8);
         this.testResourceDir = this.baseDir.replace("target/test-classes", "src/test/resources");
@@ -50,8 +50,8 @@ public class ConvertTest {
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .build()));
-        Assert.assertEquals(1, actual.getTableNames().length);
-        Assert.assertEquals("dirty", actual.getTableNames()[0]);
+        Assertions.assertEquals(1, actual.getTableNames().length);
+        Assertions.assertEquals("dirty", actual.getTableNames()[0]);
     }
 
     @Test
@@ -63,8 +63,8 @@ public class ConvertTest {
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .build()));
-        Assert.assertEquals(1, actual.getTableNames().length);
-        Assert.assertEquals("dirty", actual.getTableNames()[0]);
+        Assertions.assertEquals(1, actual.getTableNames().length);
+        Assertions.assertEquals("dirty", actual.getTableNames()[0]);
     }
 
     @Test
@@ -76,9 +76,9 @@ public class ConvertTest {
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .build()));
-        Assert.assertEquals(2, actual.getTableNames().length);
-        Assert.assertEquals("multi1", actual.getTableNames()[0]);
-        Assert.assertEquals("multi2", actual.getTableNames()[1]);
+        Assertions.assertEquals(2, actual.getTableNames().length);
+        Assertions.assertEquals("multi1", actual.getTableNames()[0]);
+        Assertions.assertEquals("multi2", actual.getTableNames()[1]);
     }
 
     @Test
@@ -91,9 +91,9 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .setSrc(src)
                                 .build()));
-        Assert.assertEquals(2, actual.getTableNames().length);
-        Assert.assertEquals("multi1", actual.getTableNames()[0]);
-        Assert.assertEquals("multi2", actual.getTableNames()[1]);
+        Assertions.assertEquals(2, actual.getTableNames().length);
+        Assertions.assertEquals("multi1", actual.getTableNames()[0]);
+        Assertions.assertEquals("multi2", actual.getTableNames()[1]);
     }
 
     @Test
@@ -106,9 +106,9 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xls)
                                 .setSrc(src)
                                 .build()));
-        Assert.assertEquals(2, actual.getTableNames().length);
-        Assert.assertEquals("multi1", actual.getTableNames()[0]);
-        Assert.assertEquals("multi2", actual.getTableNames()[1]);
+        Assertions.assertEquals(2, actual.getTableNames().length);
+        Assertions.assertEquals("multi1", actual.getTableNames()[0]);
+        Assertions.assertEquals("multi2", actual.getTableNames()[1]);
     }
 
     @Test
@@ -122,22 +122,22 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setEncoding("UTF-8")
                                 .build()));
-        Assert.assertEquals(1, actual.getTableNames().length);
-        Assert.assertEquals("固定長ファイル", actual.getTableNames()[0]);
+        Assertions.assertEquals(1, actual.getTableNames().length);
+        Assertions.assertEquals("固定長ファイル", actual.getTableNames()[0]);
         final ComparableTable table = actual.getTable("固定長ファイル");
-        Assert.assertEquals(4, table.getRowCount());
-        Assert.assertEquals("a1a", table.getValue(0, "半角"));
-        Assert.assertEquals("a  ", table.getValue(1, "半角"));
-        Assert.assertEquals("   ", table.getValue(2, "半角"));
-        Assert.assertEquals("   ", table.getValue(3, "半角"));
-        Assert.assertEquals("123                                               ", table.getValue(0, "数値"));
-        Assert.assertEquals("                                                  ", table.getValue(1, "数値"));
-        Assert.assertEquals("123                                               ", table.getValue(2, "数値"));
-        Assert.assertEquals("                                                  ", table.getValue(3, "数値"));
-        Assert.assertEquals("あさぼらけ", table.getValue(0, "全角"));
-        Assert.assertEquals("      有明の", table.getValue(1, "全角"));
-        Assert.assertEquals("              1", table.getValue(2, "全角"));
-        Assert.assertEquals("         月と", table.getValue(3, "全角"));
+        Assertions.assertEquals(4, table.getRowCount());
+        Assertions.assertEquals("a1a", table.getValue(0, "半角"));
+        Assertions.assertEquals("a  ", table.getValue(1, "半角"));
+        Assertions.assertEquals("   ", table.getValue(2, "半角"));
+        Assertions.assertEquals("   ", table.getValue(3, "半角"));
+        Assertions.assertEquals("123                                               ", table.getValue(0, "数値"));
+        Assertions.assertEquals("                                                  ", table.getValue(1, "数値"));
+        Assertions.assertEquals("123                                               ", table.getValue(2, "数値"));
+        Assertions.assertEquals("                                                  ", table.getValue(3, "数値"));
+        Assertions.assertEquals("あさぼらけ", table.getValue(0, "全角"));
+        Assertions.assertEquals("      有明の", table.getValue(1, "全角"));
+        Assertions.assertEquals("              1", table.getValue(2, "全角"));
+        Assertions.assertEquals("         月と", table.getValue(3, "全角"));
     }
 
     @Test
@@ -151,8 +151,8 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setEncoding("Shift-Jis")
                                 .build()));
-        Assert.assertEquals(1, actual.getTableNames().length);
-        Assert.assertEquals("joinQuery", actual.getTableNames()[0]);
+        Assertions.assertEquals(1, actual.getTableNames().length);
+        Assertions.assertEquals("joinQuery", actual.getTableNames()[0]);
     }
 
     @Test
@@ -166,11 +166,11 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setEncoding("Shift-Jis")
                                 .build()));
-        Assert.assertEquals(4, actual.getTableNames().length);
-        Assert.assertEquals("テーブル一覧", actual.getTableNames()[0]);
-        Assert.assertEquals("ユーザマスタ", actual.getTableNames()[1]);
-        Assert.assertEquals("ユーザマスタ概要", actual.getTableNames()[2]);
-        Assert.assertEquals("業務ドメイン", actual.getTableNames()[3]);
+        Assertions.assertEquals(4, actual.getTableNames().length);
+        Assertions.assertEquals("テーブル一覧", actual.getTableNames()[0]);
+        Assertions.assertEquals("ユーザマスタ", actual.getTableNames()[1]);
+        Assertions.assertEquals("ユーザマスタ概要", actual.getTableNames()[2]);
+        Assertions.assertEquals("業務ドメイン", actual.getTableNames()[3]);
     }
 
     @Test
@@ -184,11 +184,11 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setEncoding("Shift-Jis")
                                 .build()));
-        Assert.assertEquals(4, actual.getTableNames().length);
-        Assert.assertEquals("テーブル一覧", actual.getTableNames()[0]);
-        Assert.assertEquals("ユーザマスタ", actual.getTableNames()[1]);
-        Assert.assertEquals("ユーザマスタ概要", actual.getTableNames()[2]);
-        Assert.assertEquals("業務ドメイン", actual.getTableNames()[3]);
+        Assertions.assertEquals(4, actual.getTableNames().length);
+        Assertions.assertEquals("テーブル一覧", actual.getTableNames()[0]);
+        Assertions.assertEquals("ユーザマスタ", actual.getTableNames()[1]);
+        Assertions.assertEquals("ユーザマスタ概要", actual.getTableNames()[2]);
+        Assertions.assertEquals("業務ドメイン", actual.getTableNames()[3]);
     }
 
     @Test
@@ -200,19 +200,19 @@ public class ConvertTest {
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .build()));
-        Assert.assertEquals(1, actual.getTableNames().length);
+        Assertions.assertEquals(1, actual.getTableNames().length);
         final ComparableTable merged = actual.getTable("merge");
-        Assert.assertEquals(4, merged.getNumberOfColumns());
-        Assert.assertEquals(6, merged.getRowCount());
-        Assert.assertEquals("1", merged.getValue(0, "key"));
-        Assert.assertEquals("2", merged.getValue(0, "columna"));
-        Assert.assertEquals("2", merged.getValue(1, "key"));
-        Assert.assertEquals("test", merged.getValue(1, "columnb"));
-        Assert.assertEquals("3", merged.getValue(2, "key"));
-        Assert.assertEquals("10", merged.getValue(3, "key"));
-        Assert.assertEquals("column3:4", merged.getValue(3, "columnc"));
-        Assert.assertEquals("20", merged.getValue(4, "key"));
-        Assert.assertEquals("30", merged.getValue(5, "key"));
+        Assertions.assertEquals(4, merged.getNumberOfColumns());
+        Assertions.assertEquals(6, merged.getRowCount());
+        Assertions.assertEquals("1", merged.getValue(0, "key"));
+        Assertions.assertEquals("2", merged.getValue(0, "columna"));
+        Assertions.assertEquals("2", merged.getValue(1, "key"));
+        Assertions.assertEquals("test", merged.getValue(1, "columnb"));
+        Assertions.assertEquals("3", merged.getValue(2, "key"));
+        Assertions.assertEquals("10", merged.getValue(3, "key"));
+        Assertions.assertEquals("column3:4", merged.getValue(3, "columnc"));
+        Assertions.assertEquals("20", merged.getValue(4, "key"));
+        Assertions.assertEquals("30", merged.getValue(5, "key"));
     }
 
     @Test
@@ -226,19 +226,19 @@ public class ConvertTest {
                                 .setSource(DataSourceType.csv)
                                 .setEncoding("UTF-8")
                                 .build()));
-        Assert.assertEquals(1, actual.getTableNames().length);
+        Assertions.assertEquals(1, actual.getTableNames().length);
         final ComparableTable merged = actual.getTable("merge");
-        Assert.assertEquals(4, merged.getNumberOfColumns());
-        Assert.assertEquals(6, merged.getRowCount());
-        Assert.assertEquals("10", merged.getValue(0, "key"));
-        Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
-        Assert.assertEquals("20", merged.getValue(1, "key"));
-        Assert.assertEquals("30", merged.getValue(2, "key"));
-        Assert.assertEquals("1", merged.getValue(3, "key"));
-        Assert.assertEquals("2", merged.getValue(3, "columna"));
-        Assert.assertEquals("2", merged.getValue(4, "key"));
-        Assert.assertEquals("test", merged.getValue(4, "columnb"));
-        Assert.assertEquals("3", merged.getValue(5, "key"));
+        Assertions.assertEquals(4, merged.getNumberOfColumns());
+        Assertions.assertEquals(6, merged.getRowCount());
+        Assertions.assertEquals("10", merged.getValue(0, "key"));
+        Assertions.assertEquals("column3:4", merged.getValue(0, "columnc"));
+        Assertions.assertEquals("20", merged.getValue(1, "key"));
+        Assertions.assertEquals("30", merged.getValue(2, "key"));
+        Assertions.assertEquals("1", merged.getValue(3, "key"));
+        Assertions.assertEquals("2", merged.getValue(3, "columna"));
+        Assertions.assertEquals("2", merged.getValue(4, "key"));
+        Assertions.assertEquals("test", merged.getValue(4, "columnb"));
+        Assertions.assertEquals("3", merged.getValue(5, "key"));
     }
 
     @Test
@@ -251,19 +251,19 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xls)
                                 .build()));
-        Assert.assertEquals(1, actual.getTableNames().length);
+        Assertions.assertEquals(1, actual.getTableNames().length);
         final ComparableTable merged = actual.getTable("merge");
-        Assert.assertEquals(4, merged.getNumberOfColumns());
-        Assert.assertEquals(6, merged.getRowCount());
-        Assert.assertEquals("10", merged.getValue(0, "key"));
-        Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
-        Assert.assertEquals("20", merged.getValue(1, "key"));
-        Assert.assertEquals("30", merged.getValue(2, "key"));
-        Assert.assertEquals("1", merged.getValue(3, "key"));
-        Assert.assertEquals("2", merged.getValue(3, "columna"));
-        Assert.assertEquals("2", merged.getValue(4, "key"));
-        Assert.assertEquals("test", merged.getValue(4, "columnb"));
-        Assert.assertEquals("3", merged.getValue(5, "key"));
+        Assertions.assertEquals(4, merged.getNumberOfColumns());
+        Assertions.assertEquals(6, merged.getRowCount());
+        Assertions.assertEquals("10", merged.getValue(0, "key"));
+        Assertions.assertEquals("column3:4", merged.getValue(0, "columnc"));
+        Assertions.assertEquals("20", merged.getValue(1, "key"));
+        Assertions.assertEquals("30", merged.getValue(2, "key"));
+        Assertions.assertEquals("1", merged.getValue(3, "key"));
+        Assertions.assertEquals("2", merged.getValue(3, "columna"));
+        Assertions.assertEquals("2", merged.getValue(4, "key"));
+        Assertions.assertEquals("test", merged.getValue(4, "columnb"));
+        Assertions.assertEquals("3", merged.getValue(5, "key"));
     }
 
     @Test
@@ -276,19 +276,19 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
-        Assert.assertEquals(1, actual.getTableNames().length);
+        Assertions.assertEquals(1, actual.getTableNames().length);
         final ComparableTable merged = actual.getTable("merge");
-        Assert.assertEquals(4, merged.getNumberOfColumns());
-        Assert.assertEquals(6, merged.getRowCount());
-        Assert.assertEquals("10", merged.getValue(0, "key"));
-        Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
-        Assert.assertEquals("20", merged.getValue(1, "key"));
-        Assert.assertEquals("30", merged.getValue(2, "key"));
-        Assert.assertEquals("1", merged.getValue(3, "key"));
-        Assert.assertEquals("2", merged.getValue(3, "columna"));
-        Assert.assertEquals("2", merged.getValue(4, "key"));
-        Assert.assertEquals("test", merged.getValue(4, "columnb"));
-        Assert.assertEquals("3", merged.getValue(5, "key"));
+        Assertions.assertEquals(4, merged.getNumberOfColumns());
+        Assertions.assertEquals(6, merged.getRowCount());
+        Assertions.assertEquals("10", merged.getValue(0, "key"));
+        Assertions.assertEquals("column3:4", merged.getValue(0, "columnc"));
+        Assertions.assertEquals("20", merged.getValue(1, "key"));
+        Assertions.assertEquals("30", merged.getValue(2, "key"));
+        Assertions.assertEquals("1", merged.getValue(3, "key"));
+        Assertions.assertEquals("2", merged.getValue(3, "columna"));
+        Assertions.assertEquals("2", merged.getValue(4, "key"));
+        Assertions.assertEquals("test", merged.getValue(4, "columnb"));
+        Assertions.assertEquals("3", merged.getValue(5, "key"));
     }
 
     @Test
@@ -301,19 +301,19 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xls)
                                 .build()));
-        Assert.assertEquals(1, actual.getTableNames().length);
+        Assertions.assertEquals(1, actual.getTableNames().length);
         final ComparableTable merged = actual.getTable("merge");
-        Assert.assertEquals(4, merged.getNumberOfColumns());
-        Assert.assertEquals(6, merged.getRowCount());
-        Assert.assertEquals("10", merged.getValue(0, "key"));
-        Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
-        Assert.assertEquals("20", merged.getValue(1, "key"));
-        Assert.assertEquals("30", merged.getValue(2, "key"));
-        Assert.assertEquals("1", merged.getValue(3, "key"));
-        Assert.assertEquals("2", merged.getValue(3, "columna"));
-        Assert.assertEquals("2", merged.getValue(4, "key"));
-        Assert.assertEquals("test", merged.getValue(4, "columnb"));
-        Assert.assertEquals("3", merged.getValue(5, "key"));
+        Assertions.assertEquals(4, merged.getNumberOfColumns());
+        Assertions.assertEquals(6, merged.getRowCount());
+        Assertions.assertEquals("10", merged.getValue(0, "key"));
+        Assertions.assertEquals("column3:4", merged.getValue(0, "columnc"));
+        Assertions.assertEquals("20", merged.getValue(1, "key"));
+        Assertions.assertEquals("30", merged.getValue(2, "key"));
+        Assertions.assertEquals("1", merged.getValue(3, "key"));
+        Assertions.assertEquals("2", merged.getValue(3, "columna"));
+        Assertions.assertEquals("2", merged.getValue(4, "key"));
+        Assertions.assertEquals("test", merged.getValue(4, "columnb"));
+        Assertions.assertEquals("3", merged.getValue(5, "key"));
     }
 
     @Test
@@ -326,19 +326,19 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
-        Assert.assertEquals(1, actual.getTableNames().length);
+        Assertions.assertEquals(1, actual.getTableNames().length);
         final ComparableTable merged = actual.getTable("merge");
-        Assert.assertEquals(4, merged.getNumberOfColumns());
-        Assert.assertEquals(6, merged.getRowCount());
-        Assert.assertEquals("10", merged.getValue(0, "key"));
-        Assert.assertEquals("column3:4", merged.getValue(0, "columnc"));
-        Assert.assertEquals("20", merged.getValue(1, "key"));
-        Assert.assertEquals("30", merged.getValue(2, "key"));
-        Assert.assertEquals("1", merged.getValue(3, "key"));
-        Assert.assertEquals("2", merged.getValue(3, "columna"));
-        Assert.assertEquals("2", merged.getValue(4, "key"));
-        Assert.assertEquals("test", merged.getValue(4, "columnb"));
-        Assert.assertEquals("3", merged.getValue(5, "key"));
+        Assertions.assertEquals(4, merged.getNumberOfColumns());
+        Assertions.assertEquals(6, merged.getRowCount());
+        Assertions.assertEquals("10", merged.getValue(0, "key"));
+        Assertions.assertEquals("column3:4", merged.getValue(0, "columnc"));
+        Assertions.assertEquals("20", merged.getValue(1, "key"));
+        Assertions.assertEquals("30", merged.getValue(2, "key"));
+        Assertions.assertEquals("1", merged.getValue(3, "key"));
+        Assertions.assertEquals("2", merged.getValue(3, "columna"));
+        Assertions.assertEquals("2", merged.getValue(4, "key"));
+        Assertions.assertEquals("test", merged.getValue(4, "columnb"));
+        Assertions.assertEquals("3", merged.getValue(5, "key"));
     }
 
     @Test
@@ -351,50 +351,50 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
-        Assert.assertEquals(8, actual.getTableNames().length);
+        Assertions.assertEquals(8, actual.getTableNames().length);
         final ITable split1 = actual.getTables()[0];
-        Assert.assertEquals("0000_multi1", split1.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split1));
-        Assert.assertEquals(2, split1.getRowCount());
-        Assert.assertEquals("1", split1.getValue(0, "key"));
-        Assert.assertEquals("2", split1.getValue(1, "key"));
+        Assertions.assertEquals("0000_multi1", split1.getTableMetaData().getTableName());
+        Assertions.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split1));
+        Assertions.assertEquals(2, split1.getRowCount());
+        Assertions.assertEquals("1", split1.getValue(0, "key"));
+        Assertions.assertEquals("2", split1.getValue(1, "key"));
         final ITable split2 = actual.getTables()[1];
-        Assert.assertEquals("0000_multi2", split2.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, ConvertTest.getColumnNames(split2));
-        Assert.assertEquals(2, split2.getRowCount());
-        Assert.assertEquals("1", split2.getValue(0, "key"));
-        Assert.assertEquals("2", split2.getValue(1, "key"));
+        Assertions.assertEquals("0000_multi2", split2.getTableMetaData().getTableName());
+        Assertions.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, ConvertTest.getColumnNames(split2));
+        Assertions.assertEquals(2, split2.getRowCount());
+        Assertions.assertEquals("1", split2.getValue(0, "key"));
+        Assertions.assertEquals("2", split2.getValue(1, "key"));
         final ITable split3 = actual.getTables()[2];
-        Assert.assertEquals("0000_rename", split3.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split3));
-        Assert.assertEquals(2, split3.getRowCount());
-        Assert.assertEquals("1", split3.getValue(0, "key"));
-        Assert.assertEquals("2", split3.getValue(1, "key"));
+        Assertions.assertEquals("0000_rename", split3.getTableMetaData().getTableName());
+        Assertions.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split3));
+        Assertions.assertEquals(2, split3.getRowCount());
+        Assertions.assertEquals("1", split3.getValue(0, "key"));
+        Assertions.assertEquals("2", split3.getValue(1, "key"));
         final ITable split4 = actual.getTables()[3];
-        Assert.assertEquals("0001_rename", split4.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split4));
-        Assert.assertEquals(1, split4.getRowCount());
-        Assert.assertEquals("3", split4.getValue(0, "key"));
+        Assertions.assertEquals("0001_rename", split4.getTableMetaData().getTableName());
+        Assertions.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split4));
+        Assertions.assertEquals(1, split4.getRowCount());
+        Assertions.assertEquals("3", split4.getValue(0, "key"));
         final ITable split5 = actual.getTables()[4];
-        Assert.assertEquals("multi1_00", split5.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split5));
-        Assert.assertEquals(1, split5.getRowCount());
-        Assert.assertEquals("2", split5.getValue(0, "key"));
+        Assertions.assertEquals("multi1_00", split5.getTableMetaData().getTableName());
+        Assertions.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split5));
+        Assertions.assertEquals(1, split5.getRowCount());
+        Assertions.assertEquals("2", split5.getValue(0, "key"));
         final ITable split6 = actual.getTables()[5];
-        Assert.assertEquals("multi1_01", split6.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split6));
-        Assert.assertEquals(1, split6.getRowCount());
-        Assert.assertEquals("3", split6.getValue(0, "key"));
+        Assertions.assertEquals("multi1_01", split6.getTableMetaData().getTableName());
+        Assertions.assertArrayEquals(new String[]{"key", "column1", "column2", "column3"}, ConvertTest.getColumnNames(split6));
+        Assertions.assertEquals(1, split6.getRowCount());
+        Assertions.assertEquals("3", split6.getValue(0, "key"));
         final ITable split7 = actual.getTables()[6];
-        Assert.assertEquals("multi2_00", split7.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, ConvertTest.getColumnNames(split7));
-        Assert.assertEquals(1, split7.getRowCount());
-        Assert.assertEquals("2", split7.getValue(0, "key"));
+        Assertions.assertEquals("multi2_00", split7.getTableMetaData().getTableName());
+        Assertions.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, ConvertTest.getColumnNames(split7));
+        Assertions.assertEquals(1, split7.getRowCount());
+        Assertions.assertEquals("2", split7.getValue(0, "key"));
         final ITable split8 = actual.getTables()[7];
-        Assert.assertEquals("multi2_01", split8.getTableMetaData().getTableName());
-        Assert.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, ConvertTest.getColumnNames(split8));
-        Assert.assertEquals(1, split8.getRowCount());
-        Assert.assertEquals("3", split8.getValue(0, "key"));
+        Assertions.assertEquals("multi2_01", split8.getTableMetaData().getTableName());
+        Assertions.assertArrayEquals(new String[]{"key", "columna", "columnb", "columnc"}, ConvertTest.getColumnNames(split8));
+        Assertions.assertEquals(1, split8.getRowCount());
+        Assertions.assertEquals("3", split8.getValue(0, "key"));
     }
 
     @Test
@@ -407,42 +407,42 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
-        Assert.assertEquals(3, actual.getTableNames().length);
+        Assertions.assertEquals(3, actual.getTableNames().length);
         final ITable split1 = actual.getTables()[0];
-        Assert.assertEquals("0000_break_key1", split1.getTableMetaData().getTableName());
-        Assert.assertEquals(4, split1.getRowCount());
-        Assert.assertEquals("1", split1.getValue(0, "key1"));
-        Assert.assertEquals("4", split1.getValue(0, "key2"));
-        Assert.assertEquals("number", split1.getValue(0, "col1"));
-        Assert.assertEquals("2", split1.getValue(1, "key1"));
-        Assert.assertEquals("3", split1.getValue(1, "key2"));
-        Assert.assertEquals("number", split1.getValue(1, "col1"));
-        Assert.assertEquals("A", split1.getValue(2, "key1"));
-        Assert.assertEquals("1", split1.getValue(2, "key2"));
-        Assert.assertEquals("test", split1.getValue(2, "col1"));
-        Assert.assertEquals("A", split1.getValue(3, "key1"));
-        Assert.assertEquals("2", split1.getValue(3, "key2"));
-        Assert.assertEquals("test", split1.getValue(3, "col1"));
+        Assertions.assertEquals("0000_break_key1", split1.getTableMetaData().getTableName());
+        Assertions.assertEquals(4, split1.getRowCount());
+        Assertions.assertEquals("1", split1.getValue(0, "key1"));
+        Assertions.assertEquals("4", split1.getValue(0, "key2"));
+        Assertions.assertEquals("number", split1.getValue(0, "col1"));
+        Assertions.assertEquals("2", split1.getValue(1, "key1"));
+        Assertions.assertEquals("3", split1.getValue(1, "key2"));
+        Assertions.assertEquals("number", split1.getValue(1, "col1"));
+        Assertions.assertEquals("A", split1.getValue(2, "key1"));
+        Assertions.assertEquals("1", split1.getValue(2, "key2"));
+        Assertions.assertEquals("test", split1.getValue(2, "col1"));
+        Assertions.assertEquals("A", split1.getValue(3, "key1"));
+        Assertions.assertEquals("2", split1.getValue(3, "key2"));
+        Assertions.assertEquals("test", split1.getValue(3, "col1"));
         final ITable split2 = actual.getTables()[1];
-        Assert.assertEquals("0001_break_key1", split2.getTableMetaData().getTableName());
-        Assert.assertEquals("A", split2.getValue(0, "key1"));
-        Assert.assertEquals("3", split2.getValue(0, "key2"));
-        Assert.assertEquals("test3", split2.getValue(0, "col1"));
-        Assert.assertEquals("B", split2.getValue(1, "key1"));
-        Assert.assertEquals("3", split2.getValue(1, "key2"));
-        Assert.assertEquals("", split2.getValue(1, "col1"));
-        Assert.assertEquals("B", split2.getValue(2, "key1"));
-        Assert.assertEquals("4", split2.getValue(2, "key2"));
-        Assert.assertEquals("", split2.getValue(2, "col1"));
-        Assert.assertEquals("C", split2.getValue(3, "key1"));
-        Assert.assertEquals("10", split2.getValue(3, "key2"));
-        Assert.assertEquals("", split2.getValue(3, "col1"));
+        Assertions.assertEquals("0001_break_key1", split2.getTableMetaData().getTableName());
+        Assertions.assertEquals("A", split2.getValue(0, "key1"));
+        Assertions.assertEquals("3", split2.getValue(0, "key2"));
+        Assertions.assertEquals("test3", split2.getValue(0, "col1"));
+        Assertions.assertEquals("B", split2.getValue(1, "key1"));
+        Assertions.assertEquals("3", split2.getValue(1, "key2"));
+        Assertions.assertEquals("", split2.getValue(1, "col1"));
+        Assertions.assertEquals("B", split2.getValue(2, "key1"));
+        Assertions.assertEquals("4", split2.getValue(2, "key2"));
+        Assertions.assertEquals("", split2.getValue(2, "col1"));
+        Assertions.assertEquals("C", split2.getValue(3, "key1"));
+        Assertions.assertEquals("10", split2.getValue(3, "key2"));
+        Assertions.assertEquals("", split2.getValue(3, "col1"));
         final ITable split3 = actual.getTables()[2];
-        Assert.assertEquals("0002_break_key1", split3.getTableMetaData().getTableName());
-        Assert.assertEquals(1, split3.getRowCount());
-        Assert.assertEquals("あ", split3.getValue(0, "key1"));
-        Assert.assertEquals("3", split3.getValue(0, "key2"));
-        Assert.assertEquals("", split3.getValue(0, "col1"));
+        Assertions.assertEquals("0002_break_key1", split3.getTableMetaData().getTableName());
+        Assertions.assertEquals(1, split3.getRowCount());
+        Assertions.assertEquals("あ", split3.getValue(0, "key1"));
+        Assertions.assertEquals("3", split3.getValue(0, "key2"));
+        Assertions.assertEquals("", split3.getValue(0, "col1"));
     }
 
     @Test
@@ -455,18 +455,18 @@ public class ConvertTest {
                                 .setSrc(src)
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
-        Assert.assertEquals(3, actual.getTableNames().length);
-        Assert.assertEquals("multi2", actual.getTableNames()[0]);
+        Assertions.assertEquals(3, actual.getTableNames().length);
+        Assertions.assertEquals("multi2", actual.getTableNames()[0]);
         final ITable split1 = actual.getTables()[1];
-        Assert.assertEquals("split1", split1.getTableMetaData().getTableName());
-        Assert.assertEquals(2, split1.getRowCount());
-        Assert.assertEquals("1", split1.getValue(0, "key"));
-        Assert.assertEquals("2", split1.getValue(1, "key"));
+        Assertions.assertEquals("split1", split1.getTableMetaData().getTableName());
+        Assertions.assertEquals(2, split1.getRowCount());
+        Assertions.assertEquals("1", split1.getValue(0, "key"));
+        Assertions.assertEquals("2", split1.getValue(1, "key"));
         final ITable split2 = actual.getTables()[2];
-        Assert.assertEquals("split2", split2.getTableMetaData().getTableName());
-        Assert.assertEquals(2, split2.getRowCount());
-        Assert.assertEquals("2", split2.getValue(0, "key"));
-        Assert.assertEquals("3", split2.getValue(1, "key"));
+        Assertions.assertEquals("split2", split2.getTableMetaData().getTableName());
+        Assertions.assertEquals(2, split2.getRowCount());
+        Assertions.assertEquals("2", split2.getValue(0, "key"));
+        Assertions.assertEquals("3", split2.getValue(1, "key"));
     }
 
     @Test
@@ -481,8 +481,8 @@ public class ConvertTest {
                                 .setEncoding("UTF-8")
                                 .build()));
         final ITable result = actual.getTables()[0];
-        Assert.assertEquals(4, result.getRowCount());
-        Assert.assertEquals(Set.of("csv.csv", "test.txt", "sub.csv", "sub.txt"),
+        Assertions.assertEquals(4, result.getRowCount());
+        Assertions.assertEquals(Set.of("csv.csv", "test.txt", "sub.csv", "sub.txt"),
                 Set.of(result.getValue(0, "NAME")
                         , result.getValue(1, "NAME")
                         , result.getValue(2, "NAME")
@@ -502,8 +502,8 @@ public class ConvertTest {
                                 .setEncoding("UTF-8")
                                 .build()));
         final ITable result = actual.getTables()[0];
-        Assert.assertEquals(2, result.getRowCount());
-        Assert.assertEquals(Set.of("csv.csv", "test.txt"),
+        Assertions.assertEquals(2, result.getRowCount());
+        Assertions.assertEquals(Set.of("csv.csv", "test.txt"),
                 Set.of(result.getValue(0, "NAME")
                         , result.getValue(1, "NAME")
                 ));
@@ -521,8 +521,8 @@ public class ConvertTest {
                                 .setEncoding("UTF-8")
                                 .build()));
         final ITable result = actual.getTables()[0];
-        Assert.assertEquals(2, result.getRowCount());
-        Assert.assertEquals(Set.of("test.txt", "sub.txt"),
+        Assertions.assertEquals(2, result.getRowCount());
+        Assertions.assertEquals(Set.of("test.txt", "sub.txt"),
                 Set.of(result.getValue(0, "NAME")
                         , result.getValue(1, "NAME")
                 ));
@@ -551,8 +551,8 @@ public class ConvertTest {
                                 .setEncoding("UTF-8")
                                 .build()));
         final ITable result = actual.getTables()[0];
-        Assert.assertEquals(1, result.getRowCount());
-        Assert.assertEquals("test", result.getValue(0, "NO_EXTENSION"));
+        Assertions.assertEquals(1, result.getRowCount());
+        Assertions.assertEquals("test", result.getValue(0, "NO_EXTENSION"));
     }
 
     @Test
@@ -566,21 +566,21 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         final ITable result = actual.getTable("combikey");
-        Assert.assertEquals(7, result.getRowCount());
-        Assert.assertEquals("A", result.getValue(0, "key1"));
-        Assert.assertEquals("test", result.getValue(0, "col1"));
-        Assert.assertEquals("C", result.getValue(1, "key1"));
-        Assert.assertEquals("", result.getValue(1, "col1"));
-        Assert.assertEquals("A", result.getValue(2, "key1"));
-        Assert.assertEquals("test3", result.getValue(2, "col1"));
-        Assert.assertEquals("B", result.getValue(3, "key1"));
-        Assert.assertEquals("", result.getValue(3, "col1"));
-        Assert.assertEquals("あ", result.getValue(4, "key1"));
-        Assert.assertEquals("", result.getValue(4, "col1"));
-        Assert.assertEquals("1", result.getValue(5, "key1"));
-        Assert.assertEquals("number", result.getValue(5, "col1"));
-        Assert.assertEquals("2", result.getValue(6, "key1"));
-        Assert.assertEquals("number", result.getValue(6, "col1"));
+        Assertions.assertEquals(7, result.getRowCount());
+        Assertions.assertEquals("A", result.getValue(0, "key1"));
+        Assertions.assertEquals("test", result.getValue(0, "col1"));
+        Assertions.assertEquals("C", result.getValue(1, "key1"));
+        Assertions.assertEquals("", result.getValue(1, "col1"));
+        Assertions.assertEquals("A", result.getValue(2, "key1"));
+        Assertions.assertEquals("test3", result.getValue(2, "col1"));
+        Assertions.assertEquals("B", result.getValue(3, "key1"));
+        Assertions.assertEquals("", result.getValue(3, "col1"));
+        Assertions.assertEquals("あ", result.getValue(4, "key1"));
+        Assertions.assertEquals("", result.getValue(4, "col1"));
+        Assertions.assertEquals("1", result.getValue(5, "key1"));
+        Assertions.assertEquals("number", result.getValue(5, "col1"));
+        Assertions.assertEquals("2", result.getValue(6, "key1"));
+        Assertions.assertEquals("number", result.getValue(6, "col1"));
     }
 
     @Test
@@ -594,21 +594,21 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         final ITable result = actual.getTable("distinct");
-        Assert.assertEquals(7, result.getRowCount());
-        Assert.assertEquals("A", result.getValue(0, "key1"));
-        Assert.assertEquals("test", result.getValue(0, "col1"));
-        Assert.assertEquals("C", result.getValue(1, "key1"));
-        Assert.assertEquals("", result.getValue(1, "col1"));
-        Assert.assertEquals("A", result.getValue(2, "key1"));
-        Assert.assertEquals("test3", result.getValue(2, "col1"));
-        Assert.assertEquals("B", result.getValue(3, "key1"));
-        Assert.assertEquals("", result.getValue(3, "col1"));
-        Assert.assertEquals("あ", result.getValue(4, "key1"));
-        Assert.assertEquals("", result.getValue(4, "col1"));
-        Assert.assertEquals("1", result.getValue(5, "key1"));
-        Assert.assertEquals("number", result.getValue(5, "col1"));
-        Assert.assertEquals("2", result.getValue(6, "key1"));
-        Assert.assertEquals("number", result.getValue(6, "col1"));
+        Assertions.assertEquals(7, result.getRowCount());
+        Assertions.assertEquals("A", result.getValue(0, "key1"));
+        Assertions.assertEquals("test", result.getValue(0, "col1"));
+        Assertions.assertEquals("C", result.getValue(1, "key1"));
+        Assertions.assertEquals("", result.getValue(1, "col1"));
+        Assertions.assertEquals("A", result.getValue(2, "key1"));
+        Assertions.assertEquals("test3", result.getValue(2, "col1"));
+        Assertions.assertEquals("B", result.getValue(3, "key1"));
+        Assertions.assertEquals("", result.getValue(3, "col1"));
+        Assertions.assertEquals("あ", result.getValue(4, "key1"));
+        Assertions.assertEquals("", result.getValue(4, "col1"));
+        Assertions.assertEquals("1", result.getValue(5, "key1"));
+        Assertions.assertEquals("number", result.getValue(5, "col1"));
+        Assertions.assertEquals("2", result.getValue(6, "key1"));
+        Assertions.assertEquals("number", result.getValue(6, "col1"));
     }
 
     @Test
@@ -622,15 +622,15 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         final ITable result = actual.getTable("merge");
-        Assert.assertEquals(4, result.getRowCount());
-        Assert.assertEquals("2", result.getValue(0, "key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(0, "columna"));
-        Assert.assertEquals("3", result.getValue(1, "key"));
-        Assert.assertEquals("", result.getValue(1, "columna"));
-        Assert.assertEquals("10", result.getValue(2, "key"));
-        Assert.assertEquals("column1:2", result.getValue(2, "columna"));
-        Assert.assertEquals("30", result.getValue(3, "key"));
-        Assert.assertEquals("column1:", result.getValue(3, "columna"));
+        Assertions.assertEquals(4, result.getRowCount());
+        Assertions.assertEquals("2", result.getValue(0, "key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(0, "columna"));
+        Assertions.assertEquals("3", result.getValue(1, "key"));
+        Assertions.assertEquals("", result.getValue(1, "columna"));
+        Assertions.assertEquals("10", result.getValue(2, "key"));
+        Assertions.assertEquals("column1:2", result.getValue(2, "columna"));
+        Assertions.assertEquals("30", result.getValue(3, "key"));
+        Assertions.assertEquals("column1:", result.getValue(3, "columna"));
     }
 
     @Test
@@ -644,32 +644,32 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         final ComparableTable result = actual.getTable("multi1_with_merge");
-        Assert.assertEquals(3, result.getRowCount());
-        Assert.assertEquals(8, result.getNumberOfColumns());
-        Assert.assertEquals("2", result.getValue(0, "multi1_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(0, "multi1_columna"));
-        Assert.assertEquals("test", result.getValue(0, "multi1_columnb"));
-        Assert.assertEquals("column3:5", result.getValue(0, "multi1_columnc"));
-        Assert.assertEquals("2", result.getValue(0, "merge_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(0, "merge_columna"));
-        Assert.assertEquals("test", result.getValue(0, "merge_columnb"));
-        Assert.assertEquals("column3:5", result.getValue(0, "merge_columnc"));
-        Assert.assertEquals("10", result.getValue(1, "multi1_key"));
-        Assert.assertEquals("column1:2", result.getValue(1, "multi1_columna"));
-        Assert.assertEquals("column2:3", result.getValue(1, "multi1_columnb"));
-        Assert.assertEquals("column3:4", result.getValue(1, "multi1_columnc"));
-        Assert.assertEquals("10", result.getValue(1, "merge_key"));
-        Assert.assertEquals("column1:2", result.getValue(1, "merge_columna"));
-        Assert.assertEquals("column2:3", result.getValue(1, "merge_columnb"));
-        Assert.assertEquals("column3:4", result.getValue(1, "merge_columnc"));
-        Assert.assertEquals("30", result.getValue(2, "multi1_key"));
-        Assert.assertEquals("column1:", result.getValue(2, "multi1_columna"));
-        Assert.assertEquals("column2:", result.getValue(2, "multi1_columnb"));
-        Assert.assertEquals("column3:", result.getValue(2, "multi1_columnc"));
-        Assert.assertEquals("", result.getValue(2, "merge_key"));
-        Assert.assertEquals("", result.getValue(2, "merge_columna"));
-        Assert.assertEquals("", result.getValue(2, "merge_columnb"));
-        Assert.assertEquals("", result.getValue(2, "merge_columnc"));
+        Assertions.assertEquals(3, result.getRowCount());
+        Assertions.assertEquals(8, result.getNumberOfColumns());
+        Assertions.assertEquals("2", result.getValue(0, "multi1_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(0, "multi1_columna"));
+        Assertions.assertEquals("test", result.getValue(0, "multi1_columnb"));
+        Assertions.assertEquals("column3:5", result.getValue(0, "multi1_columnc"));
+        Assertions.assertEquals("2", result.getValue(0, "merge_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(0, "merge_columna"));
+        Assertions.assertEquals("test", result.getValue(0, "merge_columnb"));
+        Assertions.assertEquals("column3:5", result.getValue(0, "merge_columnc"));
+        Assertions.assertEquals("10", result.getValue(1, "multi1_key"));
+        Assertions.assertEquals("column1:2", result.getValue(1, "multi1_columna"));
+        Assertions.assertEquals("column2:3", result.getValue(1, "multi1_columnb"));
+        Assertions.assertEquals("column3:4", result.getValue(1, "multi1_columnc"));
+        Assertions.assertEquals("10", result.getValue(1, "merge_key"));
+        Assertions.assertEquals("column1:2", result.getValue(1, "merge_columna"));
+        Assertions.assertEquals("column2:3", result.getValue(1, "merge_columnb"));
+        Assertions.assertEquals("column3:4", result.getValue(1, "merge_columnc"));
+        Assertions.assertEquals("30", result.getValue(2, "multi1_key"));
+        Assertions.assertEquals("column1:", result.getValue(2, "multi1_columna"));
+        Assertions.assertEquals("column2:", result.getValue(2, "multi1_columnb"));
+        Assertions.assertEquals("column3:", result.getValue(2, "multi1_columnc"));
+        Assertions.assertEquals("", result.getValue(2, "merge_key"));
+        Assertions.assertEquals("", result.getValue(2, "merge_columna"));
+        Assertions.assertEquals("", result.getValue(2, "merge_columnb"));
+        Assertions.assertEquals("", result.getValue(2, "merge_columnc"));
     }
 
     @Test
@@ -683,40 +683,40 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         final ComparableTable result = actual.getTable("multi1_with_merge");
-        Assert.assertEquals(4, result.getRowCount());
-        Assert.assertEquals(8, result.getNumberOfColumns());
-        Assert.assertEquals("2", result.getValue(0, "multi1_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(0, "multi1_columna"));
-        Assert.assertEquals("test", result.getValue(0, "multi1_columnb"));
-        Assert.assertEquals("column3:5", result.getValue(0, "multi1_columnc"));
-        Assert.assertEquals("2", result.getValue(0, "merge_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(0, "merge_columna"));
-        Assert.assertEquals("test", result.getValue(0, "merge_columnb"));
-        Assert.assertEquals("column3:5", result.getValue(0, "merge_columnc"));
-        Assert.assertEquals("10", result.getValue(1, "multi1_key"));
-        Assert.assertEquals("column1:2", result.getValue(1, "multi1_columna"));
-        Assert.assertEquals("column2:3", result.getValue(1, "multi1_columnb"));
-        Assert.assertEquals("column3:4", result.getValue(1, "multi1_columnc"));
-        Assert.assertEquals("10", result.getValue(1, "merge_key"));
-        Assert.assertEquals("column1:2", result.getValue(1, "merge_columna"));
-        Assert.assertEquals("column2:3", result.getValue(1, "merge_columnb"));
-        Assert.assertEquals("column3:4", result.getValue(1, "merge_columnc"));
-        Assert.assertEquals("30", result.getValue(2, "multi1_key"));
-        Assert.assertEquals("column1:", result.getValue(2, "multi1_columna"));
-        Assert.assertEquals("column2:", result.getValue(2, "multi1_columnb"));
-        Assert.assertEquals("column3:", result.getValue(2, "multi1_columnc"));
-        Assert.assertEquals("", result.getValue(2, "merge_key"));
-        Assert.assertEquals("", result.getValue(2, "merge_columna"));
-        Assert.assertEquals("", result.getValue(2, "merge_columnb"));
-        Assert.assertEquals("", result.getValue(2, "merge_columnc"));
-        Assert.assertEquals("", result.getValue(3, "multi1_key"));
-        Assert.assertEquals("", result.getValue(3, "multi1_columna"));
-        Assert.assertEquals("", result.getValue(3, "multi1_columnb"));
-        Assert.assertEquals("", result.getValue(3, "multi1_columnc"));
-        Assert.assertEquals("3", result.getValue(3, "merge_key"));
-        Assert.assertEquals("", result.getValue(3, "merge_columna"));
-        Assert.assertEquals("", result.getValue(3, "merge_columnb"));
-        Assert.assertEquals("column3:", result.getValue(3, "merge_columnc"));
+        Assertions.assertEquals(4, result.getRowCount());
+        Assertions.assertEquals(8, result.getNumberOfColumns());
+        Assertions.assertEquals("2", result.getValue(0, "multi1_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(0, "multi1_columna"));
+        Assertions.assertEquals("test", result.getValue(0, "multi1_columnb"));
+        Assertions.assertEquals("column3:5", result.getValue(0, "multi1_columnc"));
+        Assertions.assertEquals("2", result.getValue(0, "merge_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(0, "merge_columna"));
+        Assertions.assertEquals("test", result.getValue(0, "merge_columnb"));
+        Assertions.assertEquals("column3:5", result.getValue(0, "merge_columnc"));
+        Assertions.assertEquals("10", result.getValue(1, "multi1_key"));
+        Assertions.assertEquals("column1:2", result.getValue(1, "multi1_columna"));
+        Assertions.assertEquals("column2:3", result.getValue(1, "multi1_columnb"));
+        Assertions.assertEquals("column3:4", result.getValue(1, "multi1_columnc"));
+        Assertions.assertEquals("10", result.getValue(1, "merge_key"));
+        Assertions.assertEquals("column1:2", result.getValue(1, "merge_columna"));
+        Assertions.assertEquals("column2:3", result.getValue(1, "merge_columnb"));
+        Assertions.assertEquals("column3:4", result.getValue(1, "merge_columnc"));
+        Assertions.assertEquals("30", result.getValue(2, "multi1_key"));
+        Assertions.assertEquals("column1:", result.getValue(2, "multi1_columna"));
+        Assertions.assertEquals("column2:", result.getValue(2, "multi1_columnb"));
+        Assertions.assertEquals("column3:", result.getValue(2, "multi1_columnc"));
+        Assertions.assertEquals("", result.getValue(2, "merge_key"));
+        Assertions.assertEquals("", result.getValue(2, "merge_columna"));
+        Assertions.assertEquals("", result.getValue(2, "merge_columnb"));
+        Assertions.assertEquals("", result.getValue(2, "merge_columnc"));
+        Assertions.assertEquals("", result.getValue(3, "multi1_key"));
+        Assertions.assertEquals("", result.getValue(3, "multi1_columna"));
+        Assertions.assertEquals("", result.getValue(3, "multi1_columnb"));
+        Assertions.assertEquals("", result.getValue(3, "multi1_columnc"));
+        Assertions.assertEquals("3", result.getValue(3, "merge_key"));
+        Assertions.assertEquals("", result.getValue(3, "merge_columna"));
+        Assertions.assertEquals("", result.getValue(3, "merge_columnb"));
+        Assertions.assertEquals("column3:", result.getValue(3, "merge_columnc"));
     }
 
     @Test
@@ -730,24 +730,24 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         final ComparableTable result = actual.getTable("multi1_with_merge");
-        Assert.assertEquals(2, result.getRowCount());
-        Assert.assertEquals(8, result.getNumberOfColumns());
-        Assert.assertEquals("10", result.getValue(0, "multi1_key"));
-        Assert.assertEquals("column1:2", result.getValue(0, "multi1_columna"));
-        Assert.assertEquals("column2:3", result.getValue(0, "multi1_columnb"));
-        Assert.assertEquals("column3:4", result.getValue(0, "multi1_columnc"));
-        Assert.assertEquals("10", result.getValue(0, "merge_key"));
-        Assert.assertEquals("column1:2", result.getValue(0, "merge_columna"));
-        Assert.assertEquals("column2:3", result.getValue(0, "merge_columnb"));
-        Assert.assertEquals("column3:4", result.getValue(0, "merge_columnc"));
-        Assert.assertEquals("2", result.getValue(1, "multi1_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(1, "multi1_columna"));
-        Assert.assertEquals("test", result.getValue(1, "multi1_columnb"));
-        Assert.assertEquals("column3:5", result.getValue(1, "multi1_columnc"));
-        Assert.assertEquals("2", result.getValue(1, "merge_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(1, "merge_columna"));
-        Assert.assertEquals("test", result.getValue(1, "merge_columnb"));
-        Assert.assertEquals("column3:5", result.getValue(1, "merge_columnc"));
+        Assertions.assertEquals(2, result.getRowCount());
+        Assertions.assertEquals(8, result.getNumberOfColumns());
+        Assertions.assertEquals("10", result.getValue(0, "multi1_key"));
+        Assertions.assertEquals("column1:2", result.getValue(0, "multi1_columna"));
+        Assertions.assertEquals("column2:3", result.getValue(0, "multi1_columnb"));
+        Assertions.assertEquals("column3:4", result.getValue(0, "multi1_columnc"));
+        Assertions.assertEquals("10", result.getValue(0, "merge_key"));
+        Assertions.assertEquals("column1:2", result.getValue(0, "merge_columna"));
+        Assertions.assertEquals("column2:3", result.getValue(0, "merge_columnb"));
+        Assertions.assertEquals("column3:4", result.getValue(0, "merge_columnc"));
+        Assertions.assertEquals("2", result.getValue(1, "multi1_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(1, "multi1_columna"));
+        Assertions.assertEquals("test", result.getValue(1, "multi1_columnb"));
+        Assertions.assertEquals("column3:5", result.getValue(1, "multi1_columnc"));
+        Assertions.assertEquals("2", result.getValue(1, "merge_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(1, "merge_columna"));
+        Assertions.assertEquals("test", result.getValue(1, "merge_columnb"));
+        Assertions.assertEquals("column3:5", result.getValue(1, "merge_columnc"));
     }
 
     @Test
@@ -761,48 +761,48 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         final ComparableTable result = actual.getTable("multi1_with_merge");
-        Assert.assertEquals(5, result.getRowCount());
-        Assert.assertEquals(8, result.getNumberOfColumns());
-        Assert.assertEquals("10", result.getValue(0, "multi1_key"));
-        Assert.assertEquals("column1:2", result.getValue(0, "multi1_columna"));
-        Assert.assertEquals("column2:3", result.getValue(0, "multi1_columnb"));
-        Assert.assertEquals("column3:4", result.getValue(0, "multi1_columnc"));
-        Assert.assertEquals("2", result.getValue(0, "merge_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(0, "merge_columna"));
-        Assert.assertEquals("test", result.getValue(0, "merge_columnb"));
-        Assert.assertEquals("column3:5", result.getValue(0, "merge_columnc"));
-        Assert.assertEquals("10", result.getValue(1, "multi1_key"));
-        Assert.assertEquals("column1:2", result.getValue(1, "multi1_columna"));
-        Assert.assertEquals("column2:3", result.getValue(1, "multi1_columnb"));
-        Assert.assertEquals("column3:4", result.getValue(1, "multi1_columnc"));
-        Assert.assertEquals("3", result.getValue(1, "merge_key"));
-        Assert.assertEquals("", result.getValue(1, "merge_columna"));
-        Assert.assertEquals("", result.getValue(1, "merge_columnb"));
-        Assert.assertEquals("column3:", result.getValue(1, "merge_columnc"));
-        Assert.assertEquals("30", result.getValue(2, "multi1_key"));
-        Assert.assertEquals("column1:", result.getValue(2, "multi1_columna"));
-        Assert.assertEquals("column2:", result.getValue(2, "multi1_columnb"));
-        Assert.assertEquals("column3:", result.getValue(2, "multi1_columnc"));
-        Assert.assertEquals("2", result.getValue(2, "merge_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(2, "merge_columna"));
-        Assert.assertEquals("test", result.getValue(2, "merge_columnb"));
-        Assert.assertEquals("column3:5", result.getValue(2, "merge_columnc"));
-        Assert.assertEquals("30", result.getValue(3, "multi1_key"));
-        Assert.assertEquals("column1:", result.getValue(3, "multi1_columna"));
-        Assert.assertEquals("column2:", result.getValue(3, "multi1_columnb"));
-        Assert.assertEquals("column3:", result.getValue(3, "multi1_columnc"));
-        Assert.assertEquals("3", result.getValue(3, "merge_key"));
-        Assert.assertEquals("", result.getValue(3, "merge_columna"));
-        Assert.assertEquals("", result.getValue(3, "merge_columnb"));
-        Assert.assertEquals("column3:", result.getValue(3, "merge_columnc"));
-        Assert.assertEquals("30", result.getValue(4, "multi1_key"));
-        Assert.assertEquals("column1:", result.getValue(4, "multi1_columna"));
-        Assert.assertEquals("column2:", result.getValue(4, "multi1_columnb"));
-        Assert.assertEquals("column3:", result.getValue(4, "multi1_columnc"));
-        Assert.assertEquals("10", result.getValue(4, "merge_key"));
-        Assert.assertEquals("column1:2", result.getValue(4, "merge_columna"));
-        Assert.assertEquals("column2:3", result.getValue(4, "merge_columnb"));
-        Assert.assertEquals("column3:4", result.getValue(4, "merge_columnc"));
+        Assertions.assertEquals(5, result.getRowCount());
+        Assertions.assertEquals(8, result.getNumberOfColumns());
+        Assertions.assertEquals("10", result.getValue(0, "multi1_key"));
+        Assertions.assertEquals("column1:2", result.getValue(0, "multi1_columna"));
+        Assertions.assertEquals("column2:3", result.getValue(0, "multi1_columnb"));
+        Assertions.assertEquals("column3:4", result.getValue(0, "multi1_columnc"));
+        Assertions.assertEquals("2", result.getValue(0, "merge_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(0, "merge_columna"));
+        Assertions.assertEquals("test", result.getValue(0, "merge_columnb"));
+        Assertions.assertEquals("column3:5", result.getValue(0, "merge_columnc"));
+        Assertions.assertEquals("10", result.getValue(1, "multi1_key"));
+        Assertions.assertEquals("column1:2", result.getValue(1, "multi1_columna"));
+        Assertions.assertEquals("column2:3", result.getValue(1, "multi1_columnb"));
+        Assertions.assertEquals("column3:4", result.getValue(1, "multi1_columnc"));
+        Assertions.assertEquals("3", result.getValue(1, "merge_key"));
+        Assertions.assertEquals("", result.getValue(1, "merge_columna"));
+        Assertions.assertEquals("", result.getValue(1, "merge_columnb"));
+        Assertions.assertEquals("column3:", result.getValue(1, "merge_columnc"));
+        Assertions.assertEquals("30", result.getValue(2, "multi1_key"));
+        Assertions.assertEquals("column1:", result.getValue(2, "multi1_columna"));
+        Assertions.assertEquals("column2:", result.getValue(2, "multi1_columnb"));
+        Assertions.assertEquals("column3:", result.getValue(2, "multi1_columnc"));
+        Assertions.assertEquals("2", result.getValue(2, "merge_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(2, "merge_columna"));
+        Assertions.assertEquals("test", result.getValue(2, "merge_columnb"));
+        Assertions.assertEquals("column3:5", result.getValue(2, "merge_columnc"));
+        Assertions.assertEquals("30", result.getValue(3, "multi1_key"));
+        Assertions.assertEquals("column1:", result.getValue(3, "multi1_columna"));
+        Assertions.assertEquals("column2:", result.getValue(3, "multi1_columnb"));
+        Assertions.assertEquals("column3:", result.getValue(3, "multi1_columnc"));
+        Assertions.assertEquals("3", result.getValue(3, "merge_key"));
+        Assertions.assertEquals("", result.getValue(3, "merge_columna"));
+        Assertions.assertEquals("", result.getValue(3, "merge_columnb"));
+        Assertions.assertEquals("column3:", result.getValue(3, "merge_columnc"));
+        Assertions.assertEquals("30", result.getValue(4, "multi1_key"));
+        Assertions.assertEquals("column1:", result.getValue(4, "multi1_columna"));
+        Assertions.assertEquals("column2:", result.getValue(4, "multi1_columnb"));
+        Assertions.assertEquals("column3:", result.getValue(4, "multi1_columnc"));
+        Assertions.assertEquals("10", result.getValue(4, "merge_key"));
+        Assertions.assertEquals("column1:2", result.getValue(4, "merge_columna"));
+        Assertions.assertEquals("column2:3", result.getValue(4, "merge_columnb"));
+        Assertions.assertEquals("column3:4", result.getValue(4, "merge_columnc"));
     }
 
     @Test
@@ -816,19 +816,19 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         ComparableTable result = actual.getTable("split_00");
-        Assert.assertEquals(1, result.getRowCount());
-        Assert.assertEquals(4, result.getNumberOfColumns());
-        Assert.assertEquals("10", result.getValue(0, "key"));
-        Assert.assertEquals("column1:2column2:3", result.getValue(0, "columnab"));
-        Assert.assertEquals("column2:3column3:4", result.getValue(0, "columnbc"));
-        Assert.assertEquals("column3:4column1:2", result.getValue(0, "columnca"));
+        Assertions.assertEquals(1, result.getRowCount());
+        Assertions.assertEquals(4, result.getNumberOfColumns());
+        Assertions.assertEquals("10", result.getValue(0, "key"));
+        Assertions.assertEquals("column1:2column2:3", result.getValue(0, "columnab"));
+        Assertions.assertEquals("column2:3column3:4", result.getValue(0, "columnbc"));
+        Assertions.assertEquals("column3:4column1:2", result.getValue(0, "columnca"));
         result = actual.getTable("split_01");
-        Assert.assertEquals(1, result.getRowCount());
-        Assert.assertEquals(4, result.getNumberOfColumns());
-        Assert.assertEquals("2", result.getValue(0, "key"));
-        Assert.assertEquals("あ\nいうえおtest", result.getValue(0, "columnab"));
-        Assert.assertEquals("testcolumn3:5", result.getValue(0, "columnbc"));
-        Assert.assertEquals("column3:5あ\nいうえお", result.getValue(0, "columnca"));
+        Assertions.assertEquals(1, result.getRowCount());
+        Assertions.assertEquals(4, result.getNumberOfColumns());
+        Assertions.assertEquals("2", result.getValue(0, "key"));
+        Assertions.assertEquals("あ\nいうえおtest", result.getValue(0, "columnab"));
+        Assertions.assertEquals("testcolumn3:5", result.getValue(0, "columnbc"));
+        Assertions.assertEquals("column3:5あ\nいうえお", result.getValue(0, "columnca"));
     }
 
     @Test
@@ -842,38 +842,38 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         ComparableTable result = actual.getTable("separate");
-        Assert.assertEquals(3, result.getRowCount());
-        Assert.assertEquals(1, result.getNumberOfColumns());
-        Assert.assertEquals("0", result.getValue(0, "merge_key"));
-        Assert.assertEquals("2", result.getValue(1, "merge_key"));
-        Assert.assertEquals("10", result.getValue(2, "merge_key"));
+        Assertions.assertEquals(3, result.getRowCount());
+        Assertions.assertEquals(1, result.getNumberOfColumns());
+        Assertions.assertEquals("0", result.getValue(0, "merge_key"));
+        Assertions.assertEquals("2", result.getValue(1, "merge_key"));
+        Assertions.assertEquals("10", result.getValue(2, "merge_key"));
         result = actual.getTable("over1");
-        Assert.assertEquals(3, result.getRowCount());
-        Assert.assertEquals(8, result.getNumberOfColumns());
-        Assert.assertEquals("2", result.getValue(0, "multi1_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(0, "multi1_columna"));
-        Assert.assertEquals("test", result.getValue(0, "multi1_columnb"));
-        Assert.assertEquals("column3:5", result.getValue(0, "multi1_columnc"));
-        Assert.assertEquals("2", result.getValue(0, "merge_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(0, "merge_columna"));
-        Assert.assertEquals("test", result.getValue(0, "merge_columnb"));
-        Assert.assertEquals("column3:5", result.getValue(0, "merge_columnc"));
-        Assert.assertEquals("10", result.getValue(1, "multi1_key"));
-        Assert.assertEquals("column1:2", result.getValue(1, "multi1_columna"));
-        Assert.assertEquals("column2:3", result.getValue(1, "multi1_columnb"));
-        Assert.assertEquals("column3:4", result.getValue(1, "multi1_columnc"));
-        Assert.assertEquals("10", result.getValue(1, "merge_key"));
-        Assert.assertEquals("column1:2", result.getValue(1, "merge_columna"));
-        Assert.assertEquals("column2:3", result.getValue(1, "merge_columnb"));
-        Assert.assertEquals("column3:4", result.getValue(1, "merge_columnc"));
-        Assert.assertEquals("", result.getValue(2, "multi1_key"));
-        Assert.assertEquals("", result.getValue(2, "multi1_columna"));
-        Assert.assertEquals("", result.getValue(2, "multi1_columnb"));
-        Assert.assertEquals("", result.getValue(2, "multi1_columnc"));
-        Assert.assertEquals("3", result.getValue(2, "merge_key"));
-        Assert.assertEquals("", result.getValue(2, "merge_columna"));
-        Assert.assertEquals("", result.getValue(2, "merge_columnb"));
-        Assert.assertEquals("column3:", result.getValue(2, "merge_columnc"));
+        Assertions.assertEquals(3, result.getRowCount());
+        Assertions.assertEquals(8, result.getNumberOfColumns());
+        Assertions.assertEquals("2", result.getValue(0, "multi1_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(0, "multi1_columna"));
+        Assertions.assertEquals("test", result.getValue(0, "multi1_columnb"));
+        Assertions.assertEquals("column3:5", result.getValue(0, "multi1_columnc"));
+        Assertions.assertEquals("2", result.getValue(0, "merge_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(0, "merge_columna"));
+        Assertions.assertEquals("test", result.getValue(0, "merge_columnb"));
+        Assertions.assertEquals("column3:5", result.getValue(0, "merge_columnc"));
+        Assertions.assertEquals("10", result.getValue(1, "multi1_key"));
+        Assertions.assertEquals("column1:2", result.getValue(1, "multi1_columna"));
+        Assertions.assertEquals("column2:3", result.getValue(1, "multi1_columnb"));
+        Assertions.assertEquals("column3:4", result.getValue(1, "multi1_columnc"));
+        Assertions.assertEquals("10", result.getValue(1, "merge_key"));
+        Assertions.assertEquals("column1:2", result.getValue(1, "merge_columna"));
+        Assertions.assertEquals("column2:3", result.getValue(1, "merge_columnb"));
+        Assertions.assertEquals("column3:4", result.getValue(1, "merge_columnc"));
+        Assertions.assertEquals("", result.getValue(2, "multi1_key"));
+        Assertions.assertEquals("", result.getValue(2, "multi1_columna"));
+        Assertions.assertEquals("", result.getValue(2, "multi1_columnb"));
+        Assertions.assertEquals("", result.getValue(2, "multi1_columnc"));
+        Assertions.assertEquals("3", result.getValue(2, "merge_key"));
+        Assertions.assertEquals("", result.getValue(2, "merge_columna"));
+        Assertions.assertEquals("", result.getValue(2, "merge_columnb"));
+        Assertions.assertEquals("column3:", result.getValue(2, "merge_columnc"));
     }
 
     @Test
@@ -887,23 +887,23 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         ComparableTable result = actual.getTable("under3");
-        Assert.assertEquals(1, result.getRowCount());
-        Assert.assertEquals(4, result.getNumberOfColumns());
-        Assert.assertEquals("2", result.getValue(0, "key"));
-        Assert.assertEquals("あ\nいうえおtest", result.getValue(0, "columnab"));
-        Assert.assertEquals("testcolumn3:5", result.getValue(0, "columnbc"));
-        Assert.assertEquals("column3:5あ\nいうえお", result.getValue(0, "columnca"));
+        Assertions.assertEquals(1, result.getRowCount());
+        Assertions.assertEquals(4, result.getNumberOfColumns());
+        Assertions.assertEquals("2", result.getValue(0, "key"));
+        Assertions.assertEquals("あ\nいうえおtest", result.getValue(0, "columnab"));
+        Assertions.assertEquals("testcolumn3:5", result.getValue(0, "columnbc"));
+        Assertions.assertEquals("column3:5あ\nいうえお", result.getValue(0, "columnca"));
         result = actual.getTable("over1");
-        Assert.assertEquals(2, result.getRowCount());
-        Assert.assertEquals(4, result.getNumberOfColumns());
-        Assert.assertEquals("10", result.getValue(0, "key"));
-        Assert.assertEquals("column1:2column2:3", result.getValue(0, "columnab"));
-        Assert.assertEquals("column2:3column3:4", result.getValue(0, "columnbc"));
-        Assert.assertEquals("column3:4column1:2", result.getValue(0, "columnca"));
-        Assert.assertEquals("2", result.getValue(1, "key"));
-        Assert.assertEquals("あ\nいうえおtest", result.getValue(1, "columnab"));
-        Assert.assertEquals("testcolumn3:5", result.getValue(1, "columnbc"));
-        Assert.assertEquals("column3:5あ\nいうえお", result.getValue(1, "columnca"));
+        Assertions.assertEquals(2, result.getRowCount());
+        Assertions.assertEquals(4, result.getNumberOfColumns());
+        Assertions.assertEquals("10", result.getValue(0, "key"));
+        Assertions.assertEquals("column1:2column2:3", result.getValue(0, "columnab"));
+        Assertions.assertEquals("column2:3column3:4", result.getValue(0, "columnbc"));
+        Assertions.assertEquals("column3:4column1:2", result.getValue(0, "columnca"));
+        Assertions.assertEquals("2", result.getValue(1, "key"));
+        Assertions.assertEquals("あ\nいうえおtest", result.getValue(1, "columnab"));
+        Assertions.assertEquals("testcolumn3:5", result.getValue(1, "columnbc"));
+        Assertions.assertEquals("column3:5あ\nいうえお", result.getValue(1, "columnca"));
     }
 
     @Test
@@ -917,56 +917,56 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         final ComparableTable result = actual.getTable("firstJoin_with_keyChange");
-        Assert.assertEquals(4, result.getRowCount());
-        Assert.assertEquals(12, result.getNumberOfColumns());
-        Assert.assertEquals("2", result.getValue(0, "firstJoin_multi1_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(0, "firstJoin_multi1_column1"));
-        Assert.assertEquals("test", result.getValue(0, "firstJoin_multi1_column2"));
-        Assert.assertEquals("5", result.getValue(0, "firstJoin_multi1_column3"));
-        Assert.assertEquals("2", result.getValue(0, "firstJoin_multi2_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(0, "firstJoin_multi2_columna"));
-        Assert.assertEquals("test", result.getValue(0, "firstJoin_multi2_columnb"));
-        Assert.assertEquals("5", result.getValue(0, "firstJoin_multi2_columnc"));
-        Assert.assertEquals("2", result.getValue(0, "keyChange_key"));
-        Assert.assertEquals("あ\nいうえお", result.getValue(0, "keyChange_column1"));
-        Assert.assertEquals("test", result.getValue(0, "keyChange_column2"));
-        Assert.assertEquals("5", result.getValue(0, "keyChange_column3"));
-        Assert.assertEquals("3", result.getValue(1, "firstJoin_multi1_key"));
-        Assert.assertEquals("", result.getValue(1, "firstJoin_multi1_column1"));
-        Assert.assertEquals("", result.getValue(1, "firstJoin_multi1_column2"));
-        Assert.assertEquals("", result.getValue(1, "firstJoin_multi1_column3"));
-        Assert.assertEquals("3", result.getValue(1, "firstJoin_multi2_key"));
-        Assert.assertEquals("", result.getValue(1, "firstJoin_multi2_columna"));
-        Assert.assertEquals("", result.getValue(1, "firstJoin_multi2_columnb"));
-        Assert.assertEquals("", result.getValue(1, "firstJoin_multi2_columnc"));
-        Assert.assertEquals("", result.getValue(1, "keyChange_key"));
-        Assert.assertEquals("", result.getValue(1, "keyChange_column1"));
-        Assert.assertEquals("", result.getValue(1, "keyChange_column2"));
-        Assert.assertEquals("", result.getValue(1, "keyChange_column3"));
-        Assert.assertEquals("", result.getValue(2, "firstJoin_multi1_key"));
-        Assert.assertEquals("", result.getValue(2, "firstJoin_multi1_column1"));
-        Assert.assertEquals("", result.getValue(2, "firstJoin_multi1_column2"));
-        Assert.assertEquals("", result.getValue(2, "firstJoin_multi1_column3"));
-        Assert.assertEquals("", result.getValue(2, "firstJoin_multi2_key"));
-        Assert.assertEquals("", result.getValue(2, "firstJoin_multi2_columna"));
-        Assert.assertEquals("", result.getValue(2, "firstJoin_multi2_columnb"));
-        Assert.assertEquals("", result.getValue(2, "firstJoin_multi2_columnc"));
-        Assert.assertEquals("10", result.getValue(2, "keyChange_key"));
-        Assert.assertEquals("2", result.getValue(2, "keyChange_column1"));
-        Assert.assertEquals("3", result.getValue(2, "keyChange_column2"));
-        Assert.assertEquals("4", result.getValue(2, "keyChange_column3"));
-        Assert.assertEquals("", result.getValue(3, "firstJoin_multi1_key"));
-        Assert.assertEquals("", result.getValue(3, "firstJoin_multi1_column1"));
-        Assert.assertEquals("", result.getValue(3, "firstJoin_multi1_column2"));
-        Assert.assertEquals("", result.getValue(3, "firstJoin_multi1_column3"));
-        Assert.assertEquals("", result.getValue(3, "firstJoin_multi2_key"));
-        Assert.assertEquals("", result.getValue(3, "firstJoin_multi2_columna"));
-        Assert.assertEquals("", result.getValue(3, "firstJoin_multi2_columnb"));
-        Assert.assertEquals("", result.getValue(3, "firstJoin_multi2_columnc"));
-        Assert.assertEquals("30", result.getValue(3, "keyChange_key"));
-        Assert.assertEquals("", result.getValue(3, "keyChange_column1"));
-        Assert.assertEquals("", result.getValue(3, "keyChange_column2"));
-        Assert.assertEquals("", result.getValue(3, "keyChange_column3"));
+        Assertions.assertEquals(4, result.getRowCount());
+        Assertions.assertEquals(12, result.getNumberOfColumns());
+        Assertions.assertEquals("2", result.getValue(0, "firstJoin_multi1_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(0, "firstJoin_multi1_column1"));
+        Assertions.assertEquals("test", result.getValue(0, "firstJoin_multi1_column2"));
+        Assertions.assertEquals("5", result.getValue(0, "firstJoin_multi1_column3"));
+        Assertions.assertEquals("2", result.getValue(0, "firstJoin_multi2_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(0, "firstJoin_multi2_columna"));
+        Assertions.assertEquals("test", result.getValue(0, "firstJoin_multi2_columnb"));
+        Assertions.assertEquals("5", result.getValue(0, "firstJoin_multi2_columnc"));
+        Assertions.assertEquals("2", result.getValue(0, "keyChange_key"));
+        Assertions.assertEquals("あ\nいうえお", result.getValue(0, "keyChange_column1"));
+        Assertions.assertEquals("test", result.getValue(0, "keyChange_column2"));
+        Assertions.assertEquals("5", result.getValue(0, "keyChange_column3"));
+        Assertions.assertEquals("3", result.getValue(1, "firstJoin_multi1_key"));
+        Assertions.assertEquals("", result.getValue(1, "firstJoin_multi1_column1"));
+        Assertions.assertEquals("", result.getValue(1, "firstJoin_multi1_column2"));
+        Assertions.assertEquals("", result.getValue(1, "firstJoin_multi1_column3"));
+        Assertions.assertEquals("3", result.getValue(1, "firstJoin_multi2_key"));
+        Assertions.assertEquals("", result.getValue(1, "firstJoin_multi2_columna"));
+        Assertions.assertEquals("", result.getValue(1, "firstJoin_multi2_columnb"));
+        Assertions.assertEquals("", result.getValue(1, "firstJoin_multi2_columnc"));
+        Assertions.assertEquals("", result.getValue(1, "keyChange_key"));
+        Assertions.assertEquals("", result.getValue(1, "keyChange_column1"));
+        Assertions.assertEquals("", result.getValue(1, "keyChange_column2"));
+        Assertions.assertEquals("", result.getValue(1, "keyChange_column3"));
+        Assertions.assertEquals("", result.getValue(2, "firstJoin_multi1_key"));
+        Assertions.assertEquals("", result.getValue(2, "firstJoin_multi1_column1"));
+        Assertions.assertEquals("", result.getValue(2, "firstJoin_multi1_column2"));
+        Assertions.assertEquals("", result.getValue(2, "firstJoin_multi1_column3"));
+        Assertions.assertEquals("", result.getValue(2, "firstJoin_multi2_key"));
+        Assertions.assertEquals("", result.getValue(2, "firstJoin_multi2_columna"));
+        Assertions.assertEquals("", result.getValue(2, "firstJoin_multi2_columnb"));
+        Assertions.assertEquals("", result.getValue(2, "firstJoin_multi2_columnc"));
+        Assertions.assertEquals("10", result.getValue(2, "keyChange_key"));
+        Assertions.assertEquals("2", result.getValue(2, "keyChange_column1"));
+        Assertions.assertEquals("3", result.getValue(2, "keyChange_column2"));
+        Assertions.assertEquals("4", result.getValue(2, "keyChange_column3"));
+        Assertions.assertEquals("", result.getValue(3, "firstJoin_multi1_key"));
+        Assertions.assertEquals("", result.getValue(3, "firstJoin_multi1_column1"));
+        Assertions.assertEquals("", result.getValue(3, "firstJoin_multi1_column2"));
+        Assertions.assertEquals("", result.getValue(3, "firstJoin_multi1_column3"));
+        Assertions.assertEquals("", result.getValue(3, "firstJoin_multi2_key"));
+        Assertions.assertEquals("", result.getValue(3, "firstJoin_multi2_columna"));
+        Assertions.assertEquals("", result.getValue(3, "firstJoin_multi2_columnb"));
+        Assertions.assertEquals("", result.getValue(3, "firstJoin_multi2_columnc"));
+        Assertions.assertEquals("30", result.getValue(3, "keyChange_key"));
+        Assertions.assertEquals("", result.getValue(3, "keyChange_column1"));
+        Assertions.assertEquals("", result.getValue(3, "keyChange_column2"));
+        Assertions.assertEquals("", result.getValue(3, "keyChange_column3"));
     }
 
     @Test
@@ -980,18 +980,18 @@ public class ConvertTest {
                                 .setSource(DataSourceType.xlsx)
                                 .build()));
         final ComparableTable result = actual.getTable("ユーザマスタ概要_with_ユーザマスタ");
-        Assert.assertEquals(5, result.getRowCount());
-        Assert.assertEquals(17, result.getNumberOfColumns());
-        Assert.assertArrayEquals(new String[]{"ユーザマスタ概要_論理名称", "ユーザマスタ概要_物理名称", "ユーザマスタ概要_システムID", "ユーザマスタ概要_システム名称", "ユーザマスタ概要_改訂日", "ユーザマスタ概要_改訂者", "ユーザマスタ_No", "ユーザマスタ_論理名称", "ユーザマスタ_物理名称", "ユーザマスタ_データ型", "ユーザマスタ_桁数", "ユーザマスタ_初期値", "ユーザマスタ_PK", "ユーザマスタ_IDX1", "ユーザマスタ_IDX2", "ユーザマスタ_NN", "ユーザマスタ_備考"}, ConvertTest.getColumnNames(result));
-        Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "1", "ユーザID", "ID", "NVARCHAR", "10", "", "1", "", "", "", ""}
+        Assertions.assertEquals(5, result.getRowCount());
+        Assertions.assertEquals(17, result.getNumberOfColumns());
+        Assertions.assertArrayEquals(new String[]{"ユーザマスタ概要_論理名称", "ユーザマスタ概要_物理名称", "ユーザマスタ概要_システムID", "ユーザマスタ概要_システム名称", "ユーザマスタ概要_改訂日", "ユーザマスタ概要_改訂者", "ユーザマスタ_No", "ユーザマスタ_論理名称", "ユーザマスタ_物理名称", "ユーザマスタ_データ型", "ユーザマスタ_桁数", "ユーザマスタ_初期値", "ユーザマスタ_PK", "ユーザマスタ_IDX1", "ユーザマスタ_IDX2", "ユーザマスタ_NN", "ユーザマスタ_備考"}, ConvertTest.getColumnNames(result));
+        Assertions.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "1", "ユーザID", "ID", "NVARCHAR", "10", "", "1", "", "", "", ""}
                 , result.getRow(0));
-        Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "2", "パスワード", "PASSWORD", "NVARCHAR", "8", "", "", "", "", "", ""}
+        Assertions.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "2", "パスワード", "PASSWORD", "NVARCHAR", "8", "", "", "", "", "", ""}
                 , result.getRow(1));
-        Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "3", "名称", "NAME", "NVARCHAR", "40", "", "", "", "", "○", ""}
+        Assertions.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "3", "名称", "NAME", "NVARCHAR", "40", "", "", "", "", "○", ""}
                 , result.getRow(2));
-        Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "4", "電話番号", "TEL", "DECIMAL", "11,0", "", "", "", "", "", ""}
+        Assertions.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "4", "電話番号", "TEL", "DECIMAL", "11,0", "", "", "", "", "", ""}
                 , result.getRow(3));
-        Assert.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "5", "メールアドレス", "MAIL", "NVARCHAR", "40", "", "", "", "", "", ""}
+        Assertions.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "5", "メールアドレス", "MAIL", "NVARCHAR", "40", "", "", "", "", "", ""}
                 , result.getRow(4));
     }
 

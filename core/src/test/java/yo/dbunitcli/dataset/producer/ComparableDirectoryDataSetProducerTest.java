@@ -2,8 +2,8 @@ package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
@@ -13,17 +13,17 @@ public class ComparableDirectoryDataSetProducerTest {
 
     @Test
     public void test() throws DataSetException {
-        File src = new File(".", "src/test/java");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final File src = new File(".", "src/test/java");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableDirectoryDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setRegInclude("yo[/\\\\]+dbunitcli[/\\\\]+")
                                 .setRegExclude("application")
                                 .build()));
-        Assert.assertEquals(src.getPath(), actual.getSrc());
-        Assert.assertEquals(1, actual.getTables().length);
-        ITable table = actual.getTable("java");
-        Assert.assertEquals(2, table.getRowCount());
+        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        Assertions.assertEquals(1, actual.getTables().length);
+        final ITable table = actual.getTable("java");
+        Assertions.assertEquals(2, table.getRowCount());
     }
 }

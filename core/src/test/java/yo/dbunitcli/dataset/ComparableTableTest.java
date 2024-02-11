@@ -5,17 +5,15 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.OrderedTableNameMap;
 import org.dbunit.dataset.datatype.DataType;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ComparableTableTest {
-
-    private ComparableTable target;
 
     private final DefaultTableMetaData table = new DefaultTableMetaData("TABLE1", new Column[]{
             new Column("COLUMN1", DataType.UNKNOWN)
@@ -23,8 +21,9 @@ public class ComparableTableTest {
             , new Column("COLUMN3", DataType.UNKNOWN)
             , new Column("", DataType.UNKNOWN)
     });
+    private ComparableTable target;
 
-    @Before
+    @BeforeEach
     public void setUp() throws DataSetException {
         final ComparableTableMapper builder = TableSeparators.NONE.createMapper(this.table);
         builder.startTable(null, new HashMap<>(), new ArrayList<>());
@@ -48,15 +47,15 @@ public class ComparableTableTest {
 
     @Test
     public void getRows_throw_error_if_keys_not_unique() {
-        Assert.assertThrows(AssertionError.class,
-                () -> this.target.getRows(List.of("COLUMN1")).values()
+        Assertions.assertThrows(AssertionError.class,
+                () -> this.target.getRows(List.of("COLUMN1"))
         );
     }
 
     @Test
     public void getRows_throw_exception_if_argument_column_not_exists() {
-        Assert.assertThrows(AssertionError.class,
-                () -> this.target.getRows(List.of("COLUMN1", "COLUMNA")).values()
+        Assertions.assertThrows(AssertionError.class,
+                () -> this.target.getRows(List.of("COLUMN1", "COLUMNA"))
         );
     }
 

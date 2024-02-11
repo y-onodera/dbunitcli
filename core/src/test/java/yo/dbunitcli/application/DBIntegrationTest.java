@@ -1,77 +1,81 @@
 package yo.dbunitcli.application;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.runner.OrderWith;
-import org.junit.runner.manipulation.Alphanumeric;
+import org.junit.jupiter.api.*;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-@Category(IntegrationTest.class)
-@OrderWith(Alphanumeric.class)
+@Tag("yo.dbunitcli.application.IntegrationTest")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DBIntegrationTest {
 
     private static String testResourcesDir;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws Exception {
         final String baseDir = URLDecoder.decode(Objects.requireNonNull(DBIntegrationTest.class.getResource(".")).getPath(), StandardCharsets.UTF_8);
-        testResourcesDir = baseDir.replace("target/test-classes", "src/test/resources");
-        Run.main(new String[]{"@" + testResourcesDir + "/paramDBIntegrationRunCreateTable.txt"});
+        DBIntegrationTest.testResourcesDir = baseDir.replace("target/test-classes", "src/test/resources");
+        Run.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationRunCreateTable.txt"});
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws Exception {
-        Run.main(new String[]{"@" + testResourcesDir + "/paramDBIntegrationRunDropTable.txt"});
+        Run.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationRunDropTable.txt"});
     }
 
     @Test
-    public void test02_cleanInsertToDB() throws Exception {
-        Convert.main(new String[]{"@" + testResourcesDir + "/paramDBIntegrationCleanInsert.txt"});
+    @Order(1)
+    public void cleanInsertToDB() throws Exception {
+        Convert.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationCleanInsert.txt"});
     }
 
     @Test
-    public void test03_deleteToDB() throws Exception {
-        Convert.main(new String[]{"@" + testResourcesDir + "/paramDBIntegrationDelete.txt"});
+    @Order(2)
+    public void deleteToDB() throws Exception {
+        Convert.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationDelete.txt"});
     }
 
     @Test
-    public void test04_insertToDB() throws Exception {
-        Convert.main(new String[]{"@" + testResourcesDir + "/paramDBIntegrationInsert.txt"});
+    @Order(3)
+    public void insertToDB() throws Exception {
+        Convert.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationInsert.txt"});
     }
 
     @Test
-    public void test05_updateToDB() throws Exception {
-        Convert.main(new String[]{"@" + testResourcesDir + "/paramDBIntegrationUpdate.txt"});
+    @Order(4)
+    public void updateToDB() throws Exception {
+        Convert.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationUpdate.txt"});
     }
 
     @Test
-    public void test06_refreshToDB() throws Exception {
-        Convert.main(new String[]{"@" + testResourcesDir + "/paramDBIntegrationRefresh.txt"});
+    @Order(5)
+    public void refreshToDB() throws Exception {
+        Convert.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationRefresh.txt"});
     }
 
     @Test
-    public void test07_exportFromDB() throws Exception {
-        Convert.main(new String[]{"@" + testResourcesDir + "/paramDBIntegrationExport.txt"});
+    @Order(6)
+    public void exportFromDB() throws Exception {
+        Convert.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationExport.txt"});
     }
 
     @Test
-    public void test08_runSql() throws Exception {
-        Run.main(new String[]{"@" + testResourcesDir + "/paramDBIntegrationRunDml.txt"});
+    @Order(7)
+    public void runSql() throws Exception {
+        Run.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationRunDml.txt"});
     }
 
     @Test
-    public void test09_generateSetting() throws Exception {
-        Generate.main(new String[]{"@" + testResourcesDir + "/paramDBIntegrationGenerateSetting.txt"});
+    @Order(8)
+    public void generateSetting() throws Exception {
+        Generate.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationGenerateSetting.txt"});
     }
 
     @Test
-    public void test10_generateSql() throws Exception {
-        Generate.main(new String[]{"@" + testResourcesDir + "/paramDBIntegrationGenerateSql.txt"});
+    @Order(9)
+    public void generateSql() throws Exception {
+        Generate.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationGenerateSql.txt"});
     }
 
 }
