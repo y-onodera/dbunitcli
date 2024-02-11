@@ -17,7 +17,7 @@
             <HBox alignment="CENTER" styleClass="toolbar" HBox.hgrow="ALWAYS">
                 <MigPane cols="[500,grow]push[]">
                     <Label styleClass="menu-label" text="DBUnit CLI Param Editor"/>
-                    <MFXButton onAction="#close" text="" MigPane.cc="align right">
+                    <MFXButton onAction="#close" contentDisplay="GRAPHIC_ONLY" MigPane.cc="align right">
                         <graphic>
                             <MFXFontIcon description="fas-x" color="white" size="16"/>
                         </graphic>
@@ -28,8 +28,10 @@
         <center>
             <MFXScrollPane>
                 <MigPane fx:id="commandPane" cols="[300,grow][100,right]" rows="[30,shrink]" prefWidth="550.0">
-                    <MFXComboBox floatingText="command" floatMode="INLINE" fx:id="commandTypeSelect"
-                                 onAction="#selectCommandType" MigPane.cc="wrap"/>
+                    <HBox fx:id="commandBox" spacing="10">
+                        <MFXComboBox floatingText="command" floatMode="INLINE" fx:id="commandTypeSelect"
+                                     onAction="#selectCommandType"/>
+                    </HBox>
                 </MigPane>
             </MFXScrollPane>
         </center>

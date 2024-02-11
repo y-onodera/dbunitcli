@@ -18,6 +18,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -53,6 +54,8 @@ public class MainPresenter {
     public MFXButton exec;
     @FXML
     public MFXButton reset;
+    @FXML
+    public HBox commandBox;
     @FXML
     private MigPane commandPane;
     @FXML
@@ -187,6 +190,7 @@ public class MainPresenter {
                 } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE_OR_DIR) {
                     final HBox hBox = new HBox();
                     hBox.getChildren().addAll(this.createDirectoryChoiceButton(text), this.createFileChoiceButton(text));
+                    hBox.setSpacing(5);
                     text.setTrailingIcon(hBox);
                 }
             }
@@ -221,7 +225,7 @@ public class MainPresenter {
     }
 
     private StackPane createDirectoryChoiceButton(final MFXTextField text) {
-        return this.createChoiceButton(new MFXFontIcon("fas-folder", 32), event -> {
+        return this.createChoiceButton(new MFXFontIcon("fas-folder-plus", 32), event -> {
             final File choice = this.openDirChooser();
             if (choice != null) {
                 text.setText(this.relative(choice));
@@ -230,7 +234,7 @@ public class MainPresenter {
     }
 
     private StackPane createFileChoiceButton(final MFXTextField text) {
-        return this.createChoiceButton(new MFXFontIcon("fas-file", 32), event -> {
+        return this.createChoiceButton(new MFXFontIcon("fas-file-circle-plus", 32), event -> {
             final File choice = this.openFileChooser();
             if (choice != null) {
                 text.setText(this.relative(choice));
@@ -248,17 +252,13 @@ public class MainPresenter {
     private StackPane createChoiceButton(final MFXFontIcon folderIcon, final EventHandler<ActionEvent> actionEventEventHandler) {
         final MFXButton fileChoice = new MFXButton();
         fileChoice.setGraphic(folderIcon);
-        fileChoice.setText("");
+        fileChoice.setText("open");
+        fileChoice.setContentDisplay(ContentDisplay.TOP);
         fileChoice.setOnAction(actionEventEventHandler);
-        fileChoice.setAlignment(Pos.TOP_CENTER);
-        fileChoice.setPrefHeight(50);
-        final TextField textField = new TextField("open");
-        textField.setMaxWidth(45);
-        textField.setPrefHeight(10);
-        textField.setAlignment(Pos.BOTTOM_CENTER);
+        fileChoice.setAlignment(Pos.CENTER);
+        fileChoice.setPrefHeight(60);
         final StackPane stack = new StackPane();
-        stack.setAlignment(Pos.BOTTOM_CENTER);
-        stack.getChildren().addAll(fileChoice, textField);
+        stack.getChildren().addAll(fileChoice);
         return stack;
     }
 
@@ -304,7 +304,7 @@ public class MainPresenter {
     }
 
     private void clearInputFields(final Node selected) {
-        this.commandPane.getChildren().removeIf(node -> !this.commandTypeSelect.equals(node) && !selected.equals(node));
+        this.commandPane.getChildren().removeIf(node -> !this.commandBox.equals(node) && !selected.equals(node));
         this.argument.clear();
     }
 
