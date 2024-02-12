@@ -1,0 +1,19 @@
+{
+  "rules": [
+    {
+      "excludeClasses": "org.apache.maven.surefire.**"
+    },
+    {
+      "excludeClasses": "net.bytebuddy.**"
+    },
+    {
+      "excludeClasses": "io.qameta.allure.**"
+    },
+    {
+      "excludeClasses": "org.junit.**"
+    },
+    {
+      "excludeClasses": "mockit.**"
+    }
+  ]
+}

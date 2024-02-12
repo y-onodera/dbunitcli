@@ -1,0 +1,508 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "\\QMETA-INF/log4j-provider.properties\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/jakarta.json.spi.JsonProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.net.spi.InetAddressResolverProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.net.spi.URLStreamHandlerProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.nio.charset.spi.CharsetProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.sql.Driver\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/java.util.spi.ResourceBundleControlProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.imageio.spi.ImageInputStreamSpi\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.imageio.spi.ImageOutputStreamSpi\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.imageio.spi.ImageReaderSpi\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.imageio.spi.ImageTranscoderSpi\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.imageio.spi.ImageWriterSpi\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.xml.parsers.DocumentBuilderFactory\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.xml.parsers.SAXParserFactory\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.xml.transform.TransformerFactory\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/javax.xml.xpath.XPathFactory\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/org.apache.logging.log4j.spi.Provider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/org.apache.poi.ss.usermodel.WorkbookProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/org.jxls.expression.ExpressionEvaluatorFactory\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/org.jxls.util.JxlsConfigProvider\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/org.jxls.util.ServiceFactory\\E"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
+      },
+      {
+        "pattern": "\\Qlogback-test.scmo\\E"
+      },
+      {
+        "pattern": "\\Qlogback.scmo\\E"
+      },
+      {
+        "pattern": "\\Qoracle/jdbc/defaultConnectionProperties.properties\\E"
+      },
+      {
+        "pattern": "\\Qoracle/jdbc/driver/errorMap.xml\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/fontbox/cmap/Identity-H\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/glyphlist/glyphlist.txt\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/glyphlist/zapfdingbats.txt\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/comments4c11doctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctauthorsb8a7type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctbookviewf677type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctbookviewsb864type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctborderf935type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctborderpre497type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctborders0d66type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctcell842btype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctcellformula3583type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctcellstylexfsa81ftype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctcellxfs1322type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctclientdata433btype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctcola95ftype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctcolord2c2type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctcolors6579type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctcols627ctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctcomment7bfetype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctcommentlist7a3ctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctcommentse3bdtype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctdxfsb26atype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctfill550ctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctfills2c6ftype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctfont14d8type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctfontfamily685ctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctfontname2dc3type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctfonts6623type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctfontschemebf5dtype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctfontsizeb3b9type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctindexedcolorsa0a0type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctlegacydrawing49f4type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctnumfmt3870type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctnumfmtsb58btype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctpagemargins5455type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctpatternfill7452type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctproperties2c18type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctproperties3f10type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctrelt6464type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctrgbcolor95dftype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctrowdd39type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctrsta472type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctshape5cb5type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctshapetype5c6ftype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctsheet4dbetype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctsheetdata8408type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctsheetdimensiond310type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctsheetformatprdef7type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctsheets49fdtype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctsheetview0f43type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctsheetviewsb918type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctsst44f3type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctstylesheet4257type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/cttablestyles872ftype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctworkbook83c3type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctworkbookpr03a5type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctworksheet530dtype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctxf97f7type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/ctxml2989type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/index.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/properties288cdoctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/propertiesee84doctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/shapeaee1doctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/shapeelement.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/shapetypeb89bdoctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/shapetypeelement.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/sstf81fdoctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stborderid1a80type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stcellformulatypee2cdtype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stcellrefe4e0type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stcellstylexfid70c7type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stcelltypebf95type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stfillida097type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stfontfamily9c6ctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stfontid9d63type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stfontschemef36dtype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stnumfmtid76fbtype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stobjecttype97a7type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stpatterntype7939type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stref90a2type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/strelationshipid1e94type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stunsignedinthex27datype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stxstringf179type.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/stylesheet5d8bdoctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/themefd26doctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/workbookec17doctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/worksheetf539doctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/schemas/ooxml/system/ooxml/xml2eb5doctype.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/ss/formula/function/functionMetadata.txt\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/xmlbeans/metadata/system/sXMLCONFIG/index.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/xmlbeans/metadata/system/sXMLLANG/index.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/xmlbeans/metadata/system/sXMLSCHEMA/index.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/xmlbeans/metadata/system/sXMLTOOLS/index.xsb\\E"
+      },
+      {
+        "pattern": "\\Qorg/h2/util/data.zip\\E"
+      },
+      {
+        "pattern": "\\Qorg/postgresql/driverconfig.properties\\E"
+      },
+      {
+        "pattern": "\\Qsettings/settingTemplate.stg\\E"
+      },
+      {
+        "pattern": "\\Qsettings/settingTemplate.txt\\E"
+      },
+      {
+        "pattern": "\\Qsql/cleanInsertTemplate.txt\\E"
+      },
+      {
+        "pattern": "\\Qsql/deleteInsertTemplate.txt\\E"
+      },
+      {
+        "pattern": "\\Qsql/deleteTemplate.txt\\E"
+      },
+      {
+        "pattern": "\\Qsql/insertTemplate.txt\\E"
+      },
+      {
+        "pattern": "\\Qsql/sqlTemplate.stg\\E"
+      },
+      {
+        "pattern": "\\Qsql/updateTemplate.txt\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/application/.\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/application/CompareOptionTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/application/CompareTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/application/ConvertTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/application/DBIntegrationTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/application/GenerateTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/application/ParameterizeExecuteTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/application/argument/DataSetLoadOptionTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/dataset/ComparableTableTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/dataset/producer/.\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/dataset/producer/ComparableCSVQueryDataSetProducerTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/dataset/producer/ComparableCsvDataSetProducerTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/dataset/producer/ComparableDirectoryDataSetProducerTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/dataset/producer/ComparableFileDataSetProducerTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/dataset/producer/ComparableXlsDataSetProducerTest.class\\E"
+      },
+      {
+        "pattern": "\\Qyo/dbunitcli/dataset/producer/ComparableXlsxDataSetProducerTest.class\\E"
+      },
+      {
+        "pattern": "java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfkc.nrm\\E"
+      },
+      {
+        "pattern": "java.base:\\Qjdk/internal/icu/impl/data/icudt72b/ubidi.icu\\E"
+      },
+      {
+        "pattern": "java.xml:\\Qcom/sun/org/apache/xml/internal/serializer/Encodings.properties\\E"
+      },
+      {
+        "pattern": "jdk.jfr:\\Qjdk/jfr/internal/query/view.ini\\E"
+      }
+    ]
+  },
+  "bundles": [
+    {
+      "name": "com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMessages",
+      "classNames": [
+        "com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMessages",
+        "com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMessages_ja"
+      ]
+    },
+    {
+      "name": "com.sun.org.apache.xml.internal.serializer.XMLEntities",
+      "locales": [
+        ""
+      ]
+    },
+    {
+      "name": "oracle.jdbc.driver.ErrorMessages",
+      "classNames": [
+        "oracle.jdbc.driver.ErrorMessages",
+        "oracle.jdbc.driver.ErrorMessages_ja"
+      ]
+    },
+    {
+      "name": "oracle.jdbc.driver.Messages",
+      "locales": [
+        "",
+        "ja"
+      ]
+    },
+    {
+      "name": "org.apache.xmlbeans.impl.regex.message",
+      "locales": [
+        "",
+        "ja"
+      ]
+    },
+    {
+      "name": "sun.awt.resources.awt",
+      "classNames": [
+        "sun.awt.resources.awt",
+        "sun.awt.resources.awt_ja"
+      ]
+    }
+  ]
+}

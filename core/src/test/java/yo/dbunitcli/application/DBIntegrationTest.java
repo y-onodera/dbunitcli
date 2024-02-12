@@ -6,7 +6,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-@Tag("yo.dbunitcli.application.IntegrationTest")
+@Tag("IntegrationTest")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DBIntegrationTest {
 

@@ -3,10 +3,7 @@ package yo.dbunitcli.application;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.integration.junit5.JMockitExtension;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.UnsupportedEncodingException;
@@ -14,7 +11,6 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-@ExtendWith(JMockitExtension.class)
 public class CompareTest {
 
     private String baseDir;
@@ -151,49 +147,53 @@ public class CompareTest {
         Compare.main(new String[]{"@" + this.baseDir + "/paramCompareXlsxAndXlsWithSchema.txt"});
     }
 
-    @Test
-    public void testFailedResultDiffNotExpected() throws Exception {
-        new MockUp<System>() {
-            @Mock
-            public void exit(final int value) {
-                throw new RuntimeException(String.valueOf(value));
+    @Tag("jvmTest")
+    @Nested
+    @ExtendWith(JMockitExtension.class)
+    class ExitCodeTest {
+        @Test
+        public void testFailedResultDiffNotExpected() throws Exception {
+            new MockUp<System>() {
+                @Mock
+                public void exit(final int value) {
+                    throw new RuntimeException(String.valueOf(value));
+                }
+            };
+            try {
+                Compare.main(new String[]{"@" + CompareTest.this.baseDir + "/paramCompareResultDiffNotExpected.txt"});
+            } catch (final RuntimeException ex) {
+                Assertions.assertEquals("1", ex.getMessage());
             }
-        };
-        try {
-            Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffNotExpected.txt"});
-        } catch (final RuntimeException ex) {
-            Assertions.assertEquals("1", ex.getMessage());
+        }
+
+        @Test
+        public void testFailedResultDiffDifferExpected() throws Exception {
+            new MockUp<System>() {
+                @Mock
+                public void exit(final int value) {
+                    throw new RuntimeException(String.valueOf(value));
+                }
+            };
+            try {
+                Compare.main(new String[]{"@" + CompareTest.this.baseDir + "/paramCompareResultDiffInValidExpected.txt"});
+            } catch (final RuntimeException ex) {
+                Assertions.assertEquals("1", ex.getMessage());
+            }
+        }
+
+        @Test
+        public void testFailedUnExpectedNoDiff() throws Exception {
+            new MockUp<System>() {
+                @Mock
+                public void exit(final int value) {
+                    throw new RuntimeException(String.valueOf(value));
+                }
+            };
+            try {
+                Compare.main(new String[]{"@" + CompareTest.this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"});
+            } catch (final RuntimeException ex) {
+                Assertions.assertEquals("1", ex.getMessage());
+            }
         }
     }
-
-    @Test
-    public void testFailedResultDiffDifferExpected() throws Exception {
-        new MockUp<System>() {
-            @Mock
-            public void exit(final int value) {
-                throw new RuntimeException(String.valueOf(value));
-            }
-        };
-        try {
-            Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffInValidExpected.txt"});
-        } catch (final RuntimeException ex) {
-            Assertions.assertEquals("1", ex.getMessage());
-        }
-    }
-
-    @Test
-    public void testFailedUnExpectedNoDiff() throws Exception {
-        new MockUp<System>() {
-            @Mock
-            public void exit(final int value) {
-                throw new RuntimeException(String.valueOf(value));
-            }
-        };
-        try {
-            Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"});
-        } catch (final RuntimeException ex) {
-            Assertions.assertEquals("1", ex.getMessage());
-        }
-    }
-
 }

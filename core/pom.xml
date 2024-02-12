@@ -11,7 +11,7 @@
     <artifactId>dbunit-cli</artifactId>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <exclude.testcase>yo.dbunitcli.application.IntegrationTest</exclude.testcase>
+        <exclude.testcase>IntegrationTest</exclude.testcase>
     </properties>
     <profiles>
         <profile>
@@ -44,7 +44,38 @@
                             <fallback>false</fallback>
                             <buildArgs>
                                 -H:+AddAllCharsets
+                                -H:+UnlockExperimentalVMOptions
+                                -H:ReflectionConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/reflect-config.json
+                                -H:ResourceConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/resource-config.json
+                                -H:JNIConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/jni-config.json
+                                -H:SerializationConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/serialization-config.json
                             </buildArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>native-trace</id>
+            <properties>
+                <exclude.testcase>jvmTest</exclude.testcase>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>0.10.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <agent>
+                                <enabled>true</enabled>
+                                <options>
+                                    <accessFilterFiles>
+                                        <filterFile>${project.basedir}/access-filter.json</filterFile>
+                                    </accessFilterFiles>
+                                </options>
+                            </agent>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -59,6 +90,7 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
+                    <include>**/*.properties</include>
                     <include>**/*.txt</include>
                     <include>**/*.stg</include>
                     <include>**/*.xml</include>
