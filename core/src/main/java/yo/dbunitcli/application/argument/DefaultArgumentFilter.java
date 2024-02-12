@@ -2,26 +2,34 @@ package yo.dbunitcli.application.argument;
 
 import picocli.CommandLine;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class DefaultArgumentFilter implements ArgumentFilter {
 
-    @Override
-    public String[] filterArguments(final String prefix, final CommandLine commandLine, final String[] expandArgs) {
-        final Map<String, String> options = Arrays.stream(expandArgs)
-                .filter(this.filterOptionNameMatch(commandLine))
-                .collect(Collectors.toMap(this.argsToMapEntry(), it -> it));
-        this.overrideByPrefixUsedOption(prefix, commandLine, expandArgs, options);
-        return options.values().toArray(new String[0]);
+    private final List<String> mapKeyNames;
+
+    public DefaultArgumentFilter(final String... keyNames) {
+        if (keyNames != null) {
+            this.mapKeyNames = Arrays.asList(keyNames);
+        } else {
+            this.mapKeyNames = new ArrayList<>();
+        }
     }
 
-    protected Function<String, String> argsToMapEntry() {
-        return it -> it.replaceAll("(-[^=]+=).+", "$1");
+    @Override
+    public String[] filterArguments(final String prefix, final CommandLine commandLine, final String[] expandArgs) {
+        final List<String> mapArgs = new ArrayList<>(Arrays.stream(expandArgs)
+                .filter(it -> this.mapKeyNames.stream().anyMatch(key -> it.startsWith(key + "=")))
+                .toList());
+        final Map<String, String> options = Arrays.stream(expandArgs)
+                .filter(it -> this.mapKeyNames.stream().noneMatch(key -> it.startsWith(key + "=")))
+                .filter(this.filterOptionNameMatch(commandLine))
+                .collect(Collectors.toMap(this.extractKey(), it -> it));
+        this.overrideByPrefixUsedOption(prefix, commandLine, expandArgs, options);
+        mapArgs.addAll(options.values());
+        return mapArgs.toArray(new String[0]);
     }
 
     protected Predicate<String> filterOptionNameMatch(final CommandLine commandLine) {
@@ -38,7 +46,7 @@ public class DefaultArgumentFilter implements ArgumentFilter {
                     .filter(it -> it.startsWith(myArgs))
                     .map(it -> it.replace(myArgs, "-"))
                     .filter(this.filterOptionNameMatch(commandLine))
-                    .collect(Collectors.toMap(this.argsToMapEntry(), it -> it));
+                    .collect(Collectors.toMap(this.extractKey(), it -> it));
             nonPrefixOption.putAll(prefixUsedOption);
         }
     }

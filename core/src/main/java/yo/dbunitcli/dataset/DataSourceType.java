@@ -1,6 +1,7 @@
 package yo.dbunitcli.dataset;
 
 public enum DataSourceType {
+    none,
     table,
     sql,
     file,

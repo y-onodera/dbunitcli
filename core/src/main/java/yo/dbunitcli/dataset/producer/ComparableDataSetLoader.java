@@ -36,18 +36,20 @@ public class ComparableDataSetLoader {
                 return new ComparableXlsxDataSetProducer(param);
             case xls:
                 return new ComparableXlsDataSetProducer(param);
-            case csvq:
-                return new ComparableCSVQueryDataSetProducer(param, this.parameter);
             case csv:
                 return new ComparableCsvDataSetProducer(param);
-            case reg:
-                return new ComparableRegexSplitDataSetProducer(param);
-            case fixed:
-                return new ComparableFixedFileDataSetProducer(param);
+            case csvq:
+                return new ComparableCSVQueryDataSetProducer(param, this.parameter);
             case file:
                 return new ComparableFileDataSetProducer(param);
             case dir:
                 return new ComparableDirectoryDataSetProducer(param);
+            case reg:
+                return new ComparableRegexSplitDataSetProducer(param);
+            case fixed:
+                return new ComparableFixedFileDataSetProducer(param);
+            case none:
+                return new ComparableNoneDataSetProducer(param);
         }
         throw new UnsupportedOperationException(param.source().name());
     }

@@ -14,7 +14,7 @@ import java.util.Optional;
 public class DataSetLoadOption extends DefaultArgumentsParser {
 
     private final ComparableDataSetParam.Builder builder;
-    @CommandLine.Option(names = "-src", description = "export target", required = true)
+    @CommandLine.Option(names = "-src", description = "resource to load", required = true)
     private File src;
     @CommandLine.Option(names = "-srcType")
     private DataSourceType srcType = DataSourceType.csv;

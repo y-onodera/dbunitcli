@@ -1,7 +1,9 @@
 package yo.dbunitcli.application;
 
 import picocli.CommandLine;
+import yo.dbunitcli.application.argument.ArgumentFilter;
 import yo.dbunitcli.application.argument.DataSetConverterOption;
+import yo.dbunitcli.application.argument.DefaultArgumentFilter;
 import yo.dbunitcli.application.argument.DefaultArgumentsParser;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
@@ -19,7 +21,7 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
     private final Parameter parameter;
     private final DataSetConverterOption converterOption = new DataSetConverterOption("result");
     @CommandLine.Option(names = "-P")
-    private final Map<String, String> inputParam = new HashMap<>();
+    private Map<String, String> inputParam = new HashMap<>();
     private String resultFile = "result";
 
     public CommandLineOption(final Parameter param) {
@@ -46,6 +48,11 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
 
     public IDataSetConverter converter() {
         return new DataSetConverterLoader().get(this.converterOption.getParam().build());
+    }
+
+    @Override
+    public ArgumentFilter getArgumentFilter() {
+        return new DefaultArgumentFilter("-P");
     }
 
     @Override
