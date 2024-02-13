@@ -17,15 +17,23 @@ public class ParameterizeOption extends CommandLineOption {
         @Override
         public String[] map(final String[] arguments, final String prefix, final CommandLine cmdLine) {
             final List<String> list = Arrays.asList(arguments);
-            if (list.contains("-srcType=none") || list.stream().noneMatch(it -> it.startsWith("-srcType="))) {
+            if (this.paramTypeIsNone(list)) {
                 final List<String> newArg = Arrays.stream(arguments)
                         .filter(it -> !it.contains("-src=") || !it.contains("-srcType="))
                         .collect(Collectors.toList());
                 newArg.add("-srcType=none");
                 newArg.add("-src=.");
+                if (list.stream().noneMatch(it -> it.startsWith("-parameterize="))) {
+                    newArg.add("-parameterize=false");
+                }
                 return newArg.toArray(new String[0]);
             }
             return arguments;
+        }
+
+        private boolean paramTypeIsNone(final List<String> list) {
+            return list.contains("-srcType=none") || list.contains("-param.srcType=none")
+                    || list.stream().noneMatch(it -> it.startsWith("-srcType=") || it.startsWith("-param.srcType="));
         }
     };
 
@@ -37,8 +45,10 @@ public class ParameterizeOption extends CommandLineOption {
     private String cmd;
     @CommandLine.Option(names = "-cmdParam", description = "columnName parameterFile for cmd. dynamically set fileName from param dataset")
     private String cmdParam;
-    @CommandLine.Option(names = "-cmdArg")
-    private Map<String, String> cmdArgs = new HashMap<>();
+    @CommandLine.Option(names = "-arg")
+    private Map<String, String> args = new HashMap<>();
+    @CommandLine.Option(names = "-parameterize", defaultValue = "true", description = "whether cmdParam is template or not. if true, then cmdParam populate by param")
+    private String parameterize = "true";
     @CommandLine.Option(names = "-template", description = "default template file. case when cmdParam exists,this option is ignore.")
     private File template;
 
@@ -51,12 +61,16 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     public boolean isIgnoreFail() {
-        return Boolean.getBoolean(this.ignoreFail);
+        return Boolean.parseBoolean(this.ignoreFail);
+    }
+
+    public boolean isParameterize() {
+        return Boolean.parseBoolean(this.parameterize);
     }
 
     @Override
     public ArgumentFilter getArgumentFilter() {
-        return new DefaultArgumentFilter("-P", "-cmdArg");
+        return new DefaultArgumentFilter("-P", "-arg");
     }
 
     @Override
@@ -71,6 +85,7 @@ public class ParameterizeOption extends CommandLineOption {
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putAll(this.param.createOptionParam(args));
+        result.put("-parameterize", this.parameterize);
         result.put("-ignoreFail", this.ignoreFail);
         result.put("-cmd", this.cmd);
         result.put("-cmdParam", this.cmdParam);
@@ -84,22 +99,24 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     public String[] createArgs(final Parameter aParam) {
-        final String[] result = this.templateOption.getTemplateRender()
+        final String parameterList = this.isParameterize()
+                ? this.templateOption.getTemplateRender()
                 .render(this.getTemplateArgs(aParam.getMap()), aParam.getMap())
-                .split("\\r?\\n");
-        if (this.cmdArgs.size() == 0) {
+                : this.getTemplateArgs(aParam.getMap());
+        final String[] result = parameterList.split("\\r?\\n");
+        if (this.args.size() == 0) {
             return result;
         }
         final Map<String, String> mergeResult = Arrays.stream(result)
                 .collect(Collectors.toMap(this.getArgumentFilter().extractKey(), it -> it));
-        mergeResult.putAll(this.cmdArgs.entrySet()
+        mergeResult.putAll(this.args.entrySet()
                 .stream()
                 .collect(Collectors.toMap(entry -> entry.getKey() + "=", entry -> entry.getKey() + "=" + entry.getValue())));
         return mergeResult.values().toArray(new String[0]);
     }
 
-    public Command<?> createCommand(final Map<String, Object> param) {
-        return this.createCommand(this.templateOption.getTemplateRender().render(this.cmd, param));
+    public Command<?> createCommand(final Parameter aParam) {
+        return this.createCommand(this.templateOption.getTemplateRender().render(this.cmd, aParam.getMap()));
     }
 
     protected Command<? extends CommandLineOption> createCommand(final String cmdType) {
@@ -113,10 +130,10 @@ public class ParameterizeOption extends CommandLineOption {
         };
     }
 
-    protected String getTemplateArgs(final Map<String, Object> param) {
+    protected String getTemplateArgs(final Map<String, Object> aParam) {
         File template = this.template;
         if (!Optional.ofNullable(this.cmdParam).orElse("").isEmpty()) {
-            template = new File(this.templateOption.getTemplateRender().render(this.cmdParam, param));
+            template = new File(this.templateOption.getTemplateRender().render(this.cmdParam, aParam));
         }
         return Files.read(template, this.templateOption.getTemplateEncoding());
     }

@@ -40,16 +40,18 @@ public class ParameterizeTest {
     @Test
     public void testExecCommandNoneParameter() throws Exception {
         Parameterize.main(new String[]{
-                "-cmd=convert"
-                , "-cmdParam=" + this.baseDir + "/paramConvertCsvToXlsx.txt"
-                , "-cmdArg=-result=target/test-classes/yo/dbunitcli/application/param/csv2xlsx/result"
+                "-cmd=$param.cmdName$"
+                , "-cmdParam=$param.templateName$"
+                , "-arg=-result=target/test-classes/yo/dbunitcli/application/param/csv2xlsx/result"
+                , "-P=cmdName=convert"
+                , "-P=templateName=" + this.baseDir + "/paramConvertCsvToXlsx.txt"
         });
         Parameterize.main(new String[]{
                 "-cmd=compare"
-                , "-cmdParam=" + this.baseDir + "/paramCompareXlsAndXlsx.txt"
-                , "-cmdArg=-setting=src/test/resources/yo/dbunitcli/application/csv2xlsx/setting_replacelineseparator.json"
-                , "-cmdArg=-new.src=target/test-classes/yo/dbunitcli/application/param/csv2xlsx/result"
-                , "-cmdArg=-result=target/test-classes/yo/dbunitcli/application/param/csv2xlsx/compare/result"
+                , "-template=" + this.baseDir + "/paramCompareXlsAndXlsx.txt"
+                , "-arg=-setting=src/test/resources/yo/dbunitcli/application/csv2xlsx/setting_replacelineseparator.json"
+                , "-arg=-new.src=target/test-classes/yo/dbunitcli/application/param/csv2xlsx/result"
+                , "-arg=-result=target/test-classes/yo/dbunitcli/application/param/csv2xlsx/compare/result"
         });
     }
 

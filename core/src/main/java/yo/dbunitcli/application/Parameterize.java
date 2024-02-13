@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.Parameter;
 
+import java.util.Map;
+
 public class Parameterize implements Command<ParameterizeOption> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Parameterize.class);
@@ -19,10 +21,12 @@ public class Parameterize implements Command<ParameterizeOption> {
     @Override
     public void exec(final ParameterizeOption options) {
         final Integer[] rowNum = new Integer[]{0};
+        final Map<String, Object> inputParam = options.getParameter().getMap();
         final int failCount = options.loadParams().map(it -> {
-                    final Parameter parameter = new Parameter(rowNum[0]++, it);
+                    final Parameter parameter = new Parameter(rowNum[0]++, inputParam);
+                    parameter.getMap().putAll(it);
                     try {
-                        options.createCommand(it).exec(options.createArgs(parameter), parameter);
+                        options.createCommand(parameter).exec(options.createArgs(parameter), parameter);
                     } catch (final Command.CommandFailException fail) {
                         Parameterize.LOGGER.info(fail.getMessage());
                         return 1;

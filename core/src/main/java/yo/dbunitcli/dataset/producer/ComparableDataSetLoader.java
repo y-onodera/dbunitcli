@@ -27,30 +27,18 @@ public class ComparableDataSetLoader {
     }
 
     protected ComparableDataSetProducer getComparableDataSetProducer(final ComparableDataSetParam param) {
-        switch (param.source()) {
-            case table:
-                return new ComparableDBDataSetProducer(param);
-            case sql:
-                return new ComparableQueryDataSetProducer(param, this.parameter);
-            case xlsx:
-                return new ComparableXlsxDataSetProducer(param);
-            case xls:
-                return new ComparableXlsDataSetProducer(param);
-            case csv:
-                return new ComparableCsvDataSetProducer(param);
-            case csvq:
-                return new ComparableCSVQueryDataSetProducer(param, this.parameter);
-            case file:
-                return new ComparableFileDataSetProducer(param);
-            case dir:
-                return new ComparableDirectoryDataSetProducer(param);
-            case reg:
-                return new ComparableRegexSplitDataSetProducer(param);
-            case fixed:
-                return new ComparableFixedFileDataSetProducer(param);
-            case none:
-                return new ComparableNoneDataSetProducer(param);
-        }
-        throw new UnsupportedOperationException(param.source().name());
+        return switch (param.source()) {
+            case table -> new ComparableDBDataSetProducer(param);
+            case sql -> new ComparableQueryDataSetProducer(param, this.parameter);
+            case xlsx -> new ComparableXlsxDataSetProducer(param);
+            case xls -> new ComparableXlsDataSetProducer(param);
+            case csv -> new ComparableCsvDataSetProducer(param);
+            case csvq -> new ComparableCSVQueryDataSetProducer(param, this.parameter);
+            case file -> new ComparableFileDataSetProducer(param);
+            case dir -> new ComparableDirectoryDataSetProducer(param);
+            case reg -> new ComparableRegexSplitDataSetProducer(param);
+            case fixed -> new ComparableFixedFileDataSetProducer(param);
+            case none -> new ComparableNoneDataSetProducer(param);
+        };
     }
 }
