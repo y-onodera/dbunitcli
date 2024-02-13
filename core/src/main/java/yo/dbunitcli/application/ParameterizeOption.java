@@ -46,6 +46,10 @@ public class ParameterizeOption extends CommandLineOption {
         super(Parameter.none());
     }
 
+    public ParameterizeOption(final Parameter param) {
+        super(param);
+    }
+
     public boolean isIgnoreFail() {
         return Boolean.getBoolean(this.ignoreFail);
     }
@@ -67,6 +71,7 @@ public class ParameterizeOption extends CommandLineOption {
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putAll(this.param.createOptionParam(args));
+        result.put("-ignoreFail", this.ignoreFail);
         result.put("-cmd", this.cmd);
         result.put("-cmdParam", this.cmdParam);
         result.putFile("-template", this.template, true);
@@ -103,6 +108,7 @@ public class ParameterizeOption extends CommandLineOption {
             case "convert" -> new Convert();
             case "generate" -> new Generate();
             case "run" -> new Run();
+            case "parameterize" -> new Parameterize();
             default -> throw new IllegalArgumentException("no executable command : " + cmdType);
         };
     }
