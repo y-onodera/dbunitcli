@@ -62,15 +62,18 @@ jobs:
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
-      - name: Build with Maven
-        run: mvn clean package -Pnative
+      - name: Build native-image
+        run: |
+          mvn clean package -Pnative -Dmaven.test.skip=true
+          mkdir core\target\lib
+          copy $GRAALVM_HOME/lib/*font ./core/target/lib
       - uses: actions/upload-artifact@v4
         with:
-          name: my-artifact
+          name: upload native-image
           path: |
-            ./core/target/java.dll
-            ./core/target/jvm.dll
+            ./core/target/*.dll
             ./core/target/dbunit-cli.exe
+            ./core/target/lib
 
   report-deploy:
     needs: [ build ]
