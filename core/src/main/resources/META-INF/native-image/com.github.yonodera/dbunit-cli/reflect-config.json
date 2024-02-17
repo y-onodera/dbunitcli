@@ -3118,6 +3118,13 @@
         ]
       },
       {
+        "name": "replaceAll",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.String"
+        ]
+      },
+      {
         "name": "substring",
         "parameterTypes": [
           "int",
@@ -7402,7 +7409,12 @@
     ]
   },
   {
-    "name": "yo.dbunitcli.application.ParameterizeExecuteTest",
+    "name": "yo.dbunitcli.application.ParameterizeOption",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "yo.dbunitcli.application.ParameterizeTest",
     "allDeclaredFields": true,
     "allDeclaredClasses": true,
     "queryAllDeclaredMethods": true,
@@ -7426,15 +7438,14 @@
         "parameterTypes": []
       },
       {
+        "name": "testExecCommandNoneParameter",
+        "parameterTypes": []
+      },
+      {
         "name": "testSpaceContainsPathAsSrcParameter",
         "parameterTypes": []
       }
     ]
-  },
-  {
-    "name": "yo.dbunitcli.application.ParameterizeOption",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
   },
   {
     "name": "yo.dbunitcli.application.RunOption",

@@ -404,51 +404,6 @@
         "pattern": "\\Qyo/dbunitcli/application/.\\E"
       },
       {
-        "pattern": "\\Qyo/dbunitcli/application/CompareOptionTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/application/CompareTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/application/ConvertTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/application/DBIntegrationTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/application/GenerateTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/application/ParameterizeExecuteTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/application/argument/DataSetLoadOptionTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/dataset/ComparableTableTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/dataset/producer/.\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/dataset/producer/ComparableCSVQueryDataSetProducerTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/dataset/producer/ComparableCsvDataSetProducerTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/dataset/producer/ComparableDirectoryDataSetProducerTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/dataset/producer/ComparableFileDataSetProducerTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/dataset/producer/ComparableXlsDataSetProducerTest.class\\E"
-      },
-      {
-        "pattern": "\\Qyo/dbunitcli/dataset/producer/ComparableXlsxDataSetProducerTest.class\\E"
-      },
-      {
         "pattern": "java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfkc.nrm\\E"
       },
       {
