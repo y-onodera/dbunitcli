@@ -43,6 +43,7 @@
                             <imageName>dbunit-cli</imageName>
                             <fallback>false</fallback>
                             <buildArgs>
+                                -J-Dfile.encoding=UTF-8
                                 -H:+AddAllCharsets
                                 -H:+UnlockExperimentalVMOptions
                                 -H:ReflectionConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/reflect-config.json
@@ -75,6 +76,13 @@
                                         <filterFile>${project.basedir}/access-filter.json</filterFile>
                                     </accessFilterFiles>
                                 </options>
+                                <metadataCopy>
+                                    <disabledStages>
+                                        <stage>main</stage>
+                                    </disabledStages>
+                                    <merge>true</merge>
+                                    <outputDirectory>${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}</outputDirectory>
+                                </metadataCopy>
                             </agent>
                         </configuration>
                     </plugin>
