@@ -1,11 +1,26 @@
 package yo.dbunitcli.application;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.Parameter;
+
+import java.util.Arrays;
 
 public interface Command<T extends CommandLineOption> {
 
+    Logger LOGGER = LoggerFactory.getLogger(Command.class);
+
     default void exec(final String[] args) {
-        this.exec(this.parseOption(args, this.getOptions()));
+        try {
+            this.exec(this.parseOption(args, this.getOptions()));
+        } catch (final CommandFailException ex) {
+            Command.LOGGER.info(ex.getMessage());
+            System.exit(1);
+        } catch (final Throwable th) {
+            Command.LOGGER.error("args:" + Arrays.toString(args));
+            Command.LOGGER.error("error:", th);
+            throw th;
+        }
     }
 
     default void exec(final String[] args, final Parameter param) {
