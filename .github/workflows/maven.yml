@@ -18,7 +18,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
-          cache: maven
+          cache: 'maven'
       - name: postgresql setup
         uses: ikalnytskyi/action-setup-postgres@v4
         with:
@@ -65,7 +65,7 @@ jobs:
           cache: 'maven'
       - name: Build native-image
         run: |
-          mvn clean package -Dmaven.test.skip=true -Pnative
+          mvn clean package -Pnative "-Dmaven.test.skip=true"
           mkdir core/target/lib
           copy $env:GRAALVM_HOME/lib/*font ./core/target/lib
       - name: ls
