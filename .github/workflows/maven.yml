@@ -65,10 +65,11 @@ jobs:
           cache: 'maven'
       - name: Build native-image
         run: |
-          mvn clean package -Pnative
+          mvn clean package -Dmaven.test.skip=true -Pnative
           mkdir core/target/lib
           copy $env:GRAALVM_HOME/lib/*font ./core/target/lib
-          ls core/target/lib
+      - name: ls
+        run: ls core/target/lib
       - uses: actions/upload-artifact@v4
         with:
           name: native-image
