@@ -67,9 +67,7 @@ jobs:
         run: |
           mvn clean package -Pnative "-Dmaven.test.skip=true"
           mkdir core/target/lib
-          copy $env:GRAALVM_HOME/lib/*font ./core/target/lib
-      - name: ls
-        run: ls core/target/lib
+          copy -path "$env:GRAALVM_HOME/lib/font*" ./core/target/lib
       - uses: actions/upload-artifact@v4
         with:
           name: native-image
