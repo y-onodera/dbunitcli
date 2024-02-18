@@ -19,7 +19,7 @@ public class ParameterizeOption extends CommandLineOption {
             final List<String> list = Arrays.asList(arguments);
             if (this.paramTypeIsNone(list)) {
                 final List<String> newArg = Arrays.stream(arguments)
-                        .filter(it -> !it.contains("-src=") || !it.contains("-srcType="))
+                        .filter(it -> this.isNotSrcArg(prefix, it))
                         .collect(Collectors.toList());
                 newArg.add("-srcType=none");
                 newArg.add("-src=.");
@@ -29,6 +29,11 @@ public class ParameterizeOption extends CommandLineOption {
                 return newArg.toArray(new String[0]);
             }
             return arguments;
+        }
+
+        private boolean isNotSrcArg(final String prefix, final String it) {
+            return !it.startsWith("-" + prefix + ".src=") || !it.startsWith("-" + prefix + ".srcType=")
+                    || !it.startsWith("-src=") || !it.startsWith("-srcType=");
         }
 
         private boolean paramTypeIsNone(final List<String> list) {
@@ -45,7 +50,7 @@ public class ParameterizeOption extends CommandLineOption {
     private String cmd;
     @CommandLine.Option(names = "-cmdParam", description = "columnName parameterFile for cmd. dynamically set fileName from param dataset")
     private String cmdParam;
-    @CommandLine.Option(names = "-arg")
+    @CommandLine.Option(names = {"-arg", "-A"})
     private Map<String, String> args = new HashMap<>();
     @CommandLine.Option(names = "-parameterize", defaultValue = "true", description = "whether cmdParam is template or not. if true, then cmdParam populate by param")
     private String parameterize = "true";
@@ -70,7 +75,7 @@ public class ParameterizeOption extends CommandLineOption {
 
     @Override
     public ArgumentFilter getArgumentFilter() {
-        return new DefaultArgumentFilter("-P", "-arg");
+        return new DefaultArgumentFilter("-P", "-A", "-arg");
     }
 
     @Override
@@ -134,6 +139,8 @@ public class ParameterizeOption extends CommandLineOption {
         File template = this.template;
         if (!Optional.ofNullable(this.cmdParam).orElse("").isEmpty()) {
             template = new File(this.templateOption.getTemplateRender().render(this.cmdParam, aParam));
+        } else if (template == null) {
+            return "";
         }
         return Files.read(template, this.templateOption.getTemplateEncoding());
     }

@@ -21,10 +21,10 @@ public class DefaultArgumentFilter implements ArgumentFilter {
     @Override
     public String[] filterArguments(final String prefix, final CommandLine commandLine, final String[] expandArgs) {
         final List<String> mapArgs = new ArrayList<>(Arrays.stream(expandArgs)
-                .filter(it -> this.mapKeyNames.stream().anyMatch(key -> it.startsWith(key + "=")))
+                .filter(it -> this.mapKeyNames.stream().anyMatch(it::startsWith))
                 .toList());
         final Map<String, String> options = Arrays.stream(expandArgs)
-                .filter(it -> this.mapKeyNames.stream().noneMatch(key -> it.startsWith(key + "=")))
+                .filter(it -> this.mapKeyNames.stream().noneMatch(it::startsWith))
                 .filter(this.filterOptionNameMatch(commandLine))
                 .collect(Collectors.toMap(this.extractKey(), it -> it));
         this.overrideByPrefixUsedOption(prefix, commandLine, expandArgs, options);
