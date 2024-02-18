@@ -65,12 +65,15 @@ jobs:
       - name: Build native-image
         run: |
           mvn clean package -Pnative
+          mkdir core/target/lib
+          copy $GRAALVM_HOME/lib/*font ./core/target/lib
       - uses: actions/upload-artifact@v4
         with:
-          name: upload native-image
+          name: native-image
           path: |
             ./core/target/*.dll
             ./core/target/dbunit-cli.exe
+            ./core/target/lib
 
   report-deploy:
     needs: [ build ]
