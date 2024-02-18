@@ -1,12 +1,10 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
-import yo.dbunitcli.dataset.ColumnSettings;
+import picocli.CommandLine;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSourceType;
-import yo.dbunitcli.dataset.FromJsonColumnSettingsBuilder;
+import yo.dbunitcli.dataset.FromJsonTableSeparatorsBuilder;
+import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,51 +13,28 @@ import java.util.Optional;
 
 public class DataSetLoadOption extends DefaultArgumentsParser {
 
-    @Option(name = "-src", usage = "export target", required = true)
-    private File src;
-
-    @Option(name = "-srcType")
-    private DataSourceType srcType = DataSourceType.csv;
-
-    @Option(name = "-setting", usage = "file comparison settings")
-    private String setting;
-
-    @Option(name = "-loadData", usage = "if false data row didn't load")
-    private String loadData = "true";
-
-    @Option(name = "-includeMetaData", usage = "whether param include tableName and columns or not ")
-    private String includeMetaData = "false";
-
-    @Option(name = "-regInclude", usage = "regex to include table")
-    private String regInclude;
-
-    @Option(name = "-regExclude", usage = "regex to exclude table")
-    private String regExclude;
-
-    private ColumnSettings columnSettings;
-
     private final ComparableDataSetParam.Builder builder;
+    @CommandLine.Option(names = "-src", description = "resource to load", required = true)
+    private File src;
+    @CommandLine.Option(names = "-srcType")
+    private DataSourceType srcType = DataSourceType.csv;
+    @CommandLine.Option(names = "-setting", description = "file comparison settings")
+    private String setting;
+    @CommandLine.Option(names = "-settingEncoding", description = "settings encoding")
+    private String settingEncoding = System.getProperty("file.encoding");
+    @CommandLine.Option(names = "-loadData", description = "if false data row didn't load")
+    private String loadData = "true";
+    @CommandLine.Option(names = "-includeMetaData", description = "whether param include tableName and columns or not ")
+    private String includeMetaData = "false";
+    @CommandLine.Option(names = "-regInclude", description = "regex to include table")
+    private String regInclude;
+    @CommandLine.Option(names = "-regExclude", description = "regex to exclude table")
+    private String regExclude;
+    private TableSeparators tableSeparators;
 
     public DataSetLoadOption(final String prefix) {
         super(prefix);
         this.builder = ComparableDataSetParam.builder();
-    }
-
-    @Override
-    public void setUpComponent(final CmdLineParser parser, final String[] args) throws CmdLineException {
-        this.assertFileExists(parser, this.src);
-        this.populateSettings(parser);
-        this.builder.setSource(this.srcType)
-                .setSrc(this.src)
-                .setColumnSettings(this.columnSettings)
-                .setLoadData(Boolean.parseBoolean(this.loadData))
-                .setMapIncludeMetaData(Boolean.parseBoolean(this.includeMetaData))
-                .setRegInclude(this.regInclude)
-                .setRegExclude(this.regExclude)
-        ;
-        final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), this.srcType);
-        option.parseArgument(args);
-        option.populate(this.builder);
     }
 
     @Override
@@ -68,6 +43,7 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
         result.put("-srcType", this.srcType, DataSourceType.class, true);
         result.putFileOrDir("-src", this.src, true);
         result.putFile("-setting", this.setting == null ? null : new File(this.setting));
+        result.put("-settingEncoding", this.settingEncoding);
         result.put("-loadData", this.loadData);
         result.put("-includeMetaData", this.includeMetaData);
         result.put("-regInclude", this.regInclude);
@@ -84,21 +60,38 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
         return result;
     }
 
+    @Override
+    public void setUpComponent(final CommandLine.ParseResult parser, final String[] args) {
+        this.assertFileExists(this.src);
+        this.populateSettings();
+        this.builder.setSource(this.srcType)
+                .setSrc(this.src)
+                .setTableSeparators(this.tableSeparators)
+                .setLoadData(Boolean.parseBoolean(this.loadData))
+                .setMapIncludeMetaData(Boolean.parseBoolean(this.includeMetaData))
+                .setRegInclude(this.regInclude)
+                .setRegExclude(this.regExclude)
+        ;
+        final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), this.srcType);
+        option.parseArgument(args);
+        option.populate(this.builder);
+    }
+
     public ComparableDataSetParam.Builder getParam() {
         return this.builder;
     }
 
-    protected void assertFileExists(final CmdLineParser parser, final File file) throws CmdLineException {
+    protected void assertFileExists(final File file) {
         if (!file.exists()) {
-            throw new CmdLineException(parser, file + " is not exist", new IllegalArgumentException(file.toString()));
+            throw new AssertionError(file + " is not exist", new IllegalArgumentException(file.toString()));
         }
     }
 
-    protected void populateSettings(final CmdLineParser parser) throws CmdLineException {
+    protected void populateSettings() {
         try {
-            this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
+            this.tableSeparators = new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting);
         } catch (final IOException e) {
-            throw new CmdLineException(parser, e);
+            throw new AssertionError(e);
         }
     }
 }

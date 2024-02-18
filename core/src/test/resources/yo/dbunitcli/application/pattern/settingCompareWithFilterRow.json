@@ -1,7 +1,11 @@
 {
   "settings": [
     {
-      "name": "test_differentPattern",
+      "pattern": {
+        "exclude": [
+          "test_samePattern"
+        ]
+      },
       "filter": [
         "not empty(columnB)"
       ]

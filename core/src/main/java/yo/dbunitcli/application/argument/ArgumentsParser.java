@@ -1,7 +1,6 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
+import picocli.CommandLine;
 
 import java.io.File;
 import java.util.*;
@@ -11,29 +10,17 @@ public interface ArgumentsParser {
 
     /**
      * @param args option
-     * @return args exclude this option is parsed
      */
-    default CmdLineParser parseArgument(final String[] args) {
-        final CmdLineParser parser = new CmdLineParser(this);
-        parser.getProperties().withOptionValueDelimiter("=");
-        try {
-            final String[] targetArgs = this.getArgumentMapper().map(args, this.getPrefix(), parser);
-            parser.parseArgument(this.filterArguments(parser, targetArgs));
-            this.setUpComponent(parser, targetArgs);
-        } catch (final CmdLineException cx) {
-            System.out.println("usage:");
-            parser.printSingleLineUsage(System.out);
-            System.out.println();
-            parser.printUsage(System.out);
-            throw new AssertionError(cx);
-        }
-        return parser;
+    default void parseArgument(final String[] args) {
+        final CommandLine cmdLine = new CommandLine(this);
+        final String[] targetArgs = this.getArgumentMapper().map(args, this.getPrefix(), cmdLine);
+        final CommandLine.ParseResult result = cmdLine.parseArgs(this.filterArguments(cmdLine, targetArgs));
+        this.setUpComponent(result, targetArgs);
     }
 
-    default Collection<String> filterArguments(final CmdLineParser parser, final String[] expandArgs) {
-        return this.getArgumentMapper().mapFilterArgument(this.getArgumentFilter()
-                        .filterArguments(this.getPrefix(), parser, expandArgs)
-                , this.getPrefix(), parser, expandArgs);
+    default String[] filterArguments(final CommandLine commandLine, final String[] expandArgs) {
+        return this.getArgumentFilter()
+                .filterArguments(this.getPrefix(), commandLine, expandArgs);
     }
 
     default ArgumentFilter getArgumentFilter() {
@@ -50,7 +37,11 @@ public interface ArgumentsParser {
 
     OptionParam createOptionParam(Map<String, String> args);
 
-    void setUpComponent(CmdLineParser parser, String[] expandArgs) throws CmdLineException;
+    void setUpComponent(CommandLine.ParseResult parseResult, String[] expandArgs);
+
+    enum ParamType {
+        TEXT, ENUM, FILE, DIR, FILE_OR_DIR,
+    }
 
     class OptionParam {
 
@@ -202,10 +193,6 @@ public interface ArgumentsParser {
         public boolean isRequired() {
             return this.required;
         }
-    }
-
-    enum ParamType {
-        TEXT, ENUM, FILE, DIR, FILE_OR_DIR,
     }
 
 }

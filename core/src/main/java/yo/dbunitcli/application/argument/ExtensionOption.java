@@ -1,13 +1,13 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Map;
 
 public class ExtensionOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
 
-    @Option(name = "-extension", usage = "target extension")
+    @CommandLine.Option(names = "-extension", description = "target extension")
     private String extension;
 
     public ExtensionOption(final String prefix) {

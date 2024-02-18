@@ -1,10 +1,7 @@
 package yo.dbunitcli.application.argument;
 
 import com.github.romankh3.image.comparison.model.Rectangle;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler;
+import picocli.CommandLine;
 import yo.dbunitcli.application.CompareOption;
 import yo.dbunitcli.dataset.compare.ImageCompareBuilder;
 import yo.dbunitcli.dataset.compare.PdfCompareManager;
@@ -21,68 +18,40 @@ import java.util.regex.Pattern;
 public class ImageCompareOption extends DefaultArgumentsParser {
 
     private static final Pattern AREA_REGEX = Pattern.compile("(?=\\[)\\[((\\d+\\.?\\d*,){3}(\\d+\\.?\\d*))\\]((?=\\[)|$)");
-
-    @Option(name = "-threshold", usage = "the max distance between non-equal pixels.")
-    private String threshold;
-
-    @Option(name = "-pixelToleranceLevel", usage = "Level of the pixel tolerance. By default it's 0.1 -> 10% difference.")
-    private String pixelToleranceLevel;
-
-    @Option(name = "-allowingPercentOfDifferentPixels", usage = "The percent of the allowing pixels to be different to stay MATCH for comparison.")
-    private String allowingPercentOfDifferentPixels;
-
-    @Option(name = "-rectangleLineWidth", usage = "Width of the line that is drawn the rectangle.")
-    private String rectangleLineWidth;
-
-    @Option(name = "-minimalRectangleSize", usage = "The number of the minimal rectangle size.")
-    private String minimalRectangleSize;
-
-    @Option(name = "-maximalRectangleCount", usage = "Maximal count of the Rectangles, which would be drawn.")
-    private String maximalRectangleCount;
-
-    @Option(name = "-fillDifferenceRectangles", handler = ExplicitBooleanOptionHandler.class, usage = "Flag which says fill difference rectangles or not.")
-    private boolean fillDifferenceRectangles;
-
-    @Option(name = "-percentOpacityDifferenceRectangles", usage = "The desired opacity of the difference rectangle fill.")
-    private String percentOpacityDifferenceRectangles;
-
-    @Option(name = "-differenceRectangleColor", usage = "Rectangle color of image difference.")
-    private String differenceRectangleColor;
-
-    @Option(name = "-excludedAreas", usage = "ExcludedAreas contains a List of Rectangles to be ignored.")
-    private String excludedAreas;
-
     private final List<Rectangle> excludeAreaList = new ArrayList<>();
-
-    @Option(name = "-drawExcludedRectangles", handler = ExplicitBooleanOptionHandler.class, usage = "Flag which says draw excluded rectangles or not.")
-    private boolean drawExcludedRectangles = true;
-
-    @Option(name = "-fillExcludedRectangles", handler = ExplicitBooleanOptionHandler.class, usage = "Flag which says fill excluded rectangles or not.")
+    @CommandLine.Option(names = "-drawExcludedRectangles", defaultValue = "true", description = "Flag which says draw excluded rectangles or not.")
+    private boolean drawExcludedRectangles;
+    @CommandLine.Option(names = "-threshold", description = "the max distance between non-equal pixels.")
+    private String threshold;
+    @CommandLine.Option(names = "-pixelToleranceLevel", description = "Level of the pixel tolerance. By default it's 0.1 -> 10% difference.")
+    private String pixelToleranceLevel;
+    @CommandLine.Option(names = "-allowingPercentOfDifferentPixels", description = "The percent of the allowing pixels to be different to stay MATCH for comparison.")
+    private String allowingPercentOfDifferentPixels;
+    @CommandLine.Option(names = "-rectangleLineWidth", description = "Width of the line that is drawn the rectangle.")
+    private String rectangleLineWidth;
+    @CommandLine.Option(names = "-minimalRectangleSize", description = "The number of the minimal rectangle size.")
+    private String minimalRectangleSize;
+    @CommandLine.Option(names = "-maximalRectangleCount", description = "Maximal count of the Rectangles, which would be drawn.")
+    private String maximalRectangleCount;
+    @CommandLine.Option(names = "-fillDifferenceRectangles", description = "Flag which says fill difference rectangles or not.")
+    private boolean fillDifferenceRectangles;
+    @CommandLine.Option(names = "-percentOpacityDifferenceRectangles", description = "The desired opacity of the difference rectangle fill.")
+    private String percentOpacityDifferenceRectangles;
+    @CommandLine.Option(names = "-differenceRectangleColor", description = "Rectangle color of image difference.")
+    private String differenceRectangleColor;
+    @CommandLine.Option(names = "-excludedAreas", description = "ExcludedAreas contains a List of Rectangles to be ignored.")
+    private String excludedAreas;
+    @CommandLine.Option(names = "-fillExcludedRectangles", description = "Flag which says fill excluded rectangles or not.")
     private boolean fillExcludedRectangles;
 
-    @Option(name = "-percentOpacityExcludedRectangles", usage = "The desired opacity of the excluded rectangle fill..")
+    @CommandLine.Option(names = "-percentOpacityExcludedRectangles", description = "The desired opacity of the excluded rectangle fill..")
     private String percentOpacityExcludedRectangles;
 
-    @Option(name = "-excludedRectangleColor", usage = "Rectangle color of excluded part..")
+    @CommandLine.Option(names = "-excludedRectangleColor", description = "Rectangle color of excluded part..")
     private String excludedRectangleColor;
 
     public ImageCompareOption(final String prefix) {
         super(prefix);
-    }
-
-    @Override
-    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
-        if (!Optional.ofNullable(this.excludedAreas).orElse("").isEmpty()) {
-            final Matcher m = AREA_REGEX.matcher(this.excludedAreas);
-            while (m.find()) {
-                final String[] points = m.group(1).split(",");
-                this.excludeAreaList.add(new Rectangle(new BigDecimal(points[0]).intValue()
-                        , new BigDecimal(points[1]).intValue()
-                        , new BigDecimal(points[2]).intValue()
-                        , new BigDecimal(points[3]).intValue()
-                ));
-            }
-        }
     }
 
     @Override
@@ -103,6 +72,21 @@ public class ImageCompareOption extends DefaultArgumentsParser {
         result.put("-percentOpacityDifferenceRectangles", this.percentOpacityDifferenceRectangles);
         result.put("-differenceRectangleColor", this.differenceRectangleColor);
         return result;
+    }
+
+    @Override
+    public void setUpComponent(final CommandLine.ParseResult parser, final String[] expandArgs) {
+        if (!Optional.ofNullable(this.excludedAreas).orElse("").isEmpty()) {
+            final Matcher m = ImageCompareOption.AREA_REGEX.matcher(this.excludedAreas);
+            while (m.find()) {
+                final String[] points = m.group(1).split(",");
+                this.excludeAreaList.add(new Rectangle(new BigDecimal(points[0]).intValue()
+                        , new BigDecimal(points[1]).intValue()
+                        , new BigDecimal(points[2]).intValue()
+                        , new BigDecimal(points[3]).intValue()
+                ));
+            }
+        }
     }
 
     public ImageCompareBuilder createFactoryOf(final CompareOption.Type targetType) {

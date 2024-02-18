@@ -1,8 +1,8 @@
 package yo.dbunitcli.dataset.compare;
 
-import yo.dbunitcli.dataset.AddSettingColumns;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.IDataSetConverter;
+import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.File;
 import java.util.function.Supplier;
@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 public class DataSetCompareBuilder {
     private ComparableDataSet oldDataSet;
     private ComparableDataSet newDataSet;
-    private AddSettingColumns comparisonKeys;
+    private TableSeparators tableSeparators;
     private IDataSetConverter dataSetConverter;
     private Supplier<DataSetCompare.Manager> compareManagerFactory = DefaultCompareManager::new;
 
@@ -24,8 +24,8 @@ public class DataSetCompareBuilder {
         return this;
     }
 
-    public DataSetCompareBuilder comparisonKeys(final AddSettingColumns comparisonKeys) {
-        this.comparisonKeys = comparisonKeys;
+    public DataSetCompareBuilder tableSeparators(final TableSeparators tableSeparators) {
+        this.tableSeparators = tableSeparators;
         return this;
     }
 
@@ -47,8 +47,8 @@ public class DataSetCompareBuilder {
         return this.newDataSet;
     }
 
-    public AddSettingColumns getComparisonKeys() {
-        return this.comparisonKeys;
+    public TableSeparators getTableSeparators() {
+        return this.tableSeparators;
     }
 
     public IDataSetConverter getDataSetConverter() {

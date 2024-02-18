@@ -6,62 +6,27 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class XlsxRowsTableDefine {
-    private final String tableName;
-    private final ITableMetaData tableMetaData;
-    private final Integer dataStartRow;
-    private final Integer[] cellIndexes;
-    private final String[] breakKey;
-
-    public XlsxRowsTableDefine(final Builder builder) {
-        this.tableName = builder.getTableName();
-        final Column[] columns = builder.getHeader()
-                .stream()
-                .map(columnNames -> new Column(columnNames, DataType.UNKNOWN))
-                .toArray(Column[]::new);
-        this.tableMetaData = new DefaultTableMetaData(this.tableName, columns);
-        this.dataStartRow = builder.getDataStartRow();
-        this.cellIndexes = builder.getCellIndexes().toArray(new Integer[0]);
-        this.breakKey = builder.getBreakKey().toArray(new String[0]);
-    }
-
-    public String getTableName() {
-        return this.tableName;
-    }
-
-    public ITableMetaData getTableMetaData() {
-        return this.tableMetaData;
-    }
-
-    public Integer getDataStartRow() {
-        return this.dataStartRow;
-    }
-
-    public Integer[] getCellIndexes() {
-        return this.cellIndexes;
-    }
-
-    public String[] getBreakKey() {
-        return this.breakKey;
-    }
+public record XlsxRowsTableDefine(String tableName
+        , ITableMetaData tableMetaData
+        , Integer dataStartRow
+        , Integer[] cellIndexes
+        , String[] breakKey
+        , boolean addOptional) {
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @Override
-    public String toString() {
-        return "XlsxRowsTableDefine{" +
-                "tableName='" + this.tableName + '\'' +
-                ", tableMetaData=" + this.tableMetaData +
-                ", dataStartRow=" + this.dataStartRow +
-                ", cellIndexes=" + Arrays.toString(this.cellIndexes) +
-                ", breakKey=" + Arrays.toString(this.breakKey) +
-                '}';
+    public XlsxRowsTableDefine(final Builder builder) {
+        this(builder.getTableName()
+                , builder.getTableMetaData()
+                , builder.getDataStartRow()
+                , builder.getCellIndexes().toArray(new Integer[0])
+                , builder.getBreakKey().toArray(new String[0])
+                , builder.getAddOptional());
     }
 
     public static class Builder {
@@ -70,9 +35,18 @@ public class XlsxRowsTableDefine {
         private Integer dataStartRow;
         private final List<Integer> cellIndexes = new ArrayList<>();
         private final List<String> breakKey = new ArrayList<>();
+        private boolean addOptional = false;
 
         public String getTableName() {
             return this.tableName;
+        }
+
+        public ITableMetaData getTableMetaData() {
+            final Column[] columns = this.getHeader()
+                    .stream()
+                    .map(columnNames -> new Column(columnNames, DataType.UNKNOWN))
+                    .toArray(Column[]::new);
+            return new DefaultTableMetaData(this.tableName, columns);
         }
 
         public List<String> getHeader() {
@@ -89,6 +63,10 @@ public class XlsxRowsTableDefine {
 
         public List<String> getBreakKey() {
             return this.breakKey;
+        }
+
+        public boolean getAddOptional() {
+            return this.addOptional;
         }
 
         public Builder setTableName(final String tableName) {
@@ -116,8 +94,14 @@ public class XlsxRowsTableDefine {
             return this;
         }
 
+        public Builder setAddOptional(final boolean addOptional) {
+            this.addOptional = addOptional;
+            return this;
+        }
+
         public XlsxRowsTableDefine build() {
             return new XlsxRowsTableDefine(this);
         }
+
     }
 }

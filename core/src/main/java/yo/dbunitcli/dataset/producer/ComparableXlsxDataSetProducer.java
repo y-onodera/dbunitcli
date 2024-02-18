@@ -1,7 +1,5 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
@@ -16,6 +14,8 @@ import org.apache.poi.xssf.model.StylesTable;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -32,13 +32,13 @@ import java.io.InputStream;
 import java.util.Arrays;
 
 public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private IDataSetConsumer consumer = new DefaultConsumer();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
     private final File[] src;
     private final TableNameFilter filter;
     private final XlsxSchema schema;
     private final ComparableDataSetParam param;
     private final boolean loadData;
+    private IDataSetConsumer consumer = new DefaultConsumer();
 
     public ComparableXlsxDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
@@ -60,12 +60,12 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
 
     @Override
     public void produce() throws DataSetException {
-        LOGGER.info("produce() - start");
+        ComparableXlsxDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
-        LOGGER.info("produce() - end");
+        ComparableXlsxDataSetProducer.LOGGER.info("produce() - end");
     }
 
     public void processSheet(
@@ -87,7 +87,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     }
 
     protected void produceFromFile(final File sourceFile) {
-        LOGGER.info("produce - start fileName={}", sourceFile);
+        ComparableXlsxDataSetProducer.LOGGER.info("produce - start fileName={}", sourceFile);
         try (final OPCPackage pkg = OPCPackage.open(sourceFile, PackageAccess.READ)) {
             final ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);
             final XSSFReader xssfReader = new XSSFReader(pkg);
@@ -98,16 +98,17 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
                 try (final InputStream stream = iterator.next()) {
                     final String sheetName = iterator.getSheetName();
                     if (this.filter.predicate(sheetName) && this.schema.contains(sheetName)) {
-                        LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
-                        this.processSheet(styles, strings, this.schema.createHandler(this.consumer, sheetName, this.loadData), stream);
-                        LOGGER.info("produce - end   sheetName={},index={}", sheetName, index - 1);
+                        ComparableXlsxDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
+                        this.processSheet(styles, strings, this.schema.addFileInfo(sourceFile, sheetName)
+                                .createHandler(this.consumer, sheetName, this.loadData), stream);
+                        ComparableXlsxDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", sheetName, index - 1);
                     }
                 }
             }
         } catch (final IOException | SAXException | OpenXML4JException e) {
             throw new AssertionError(e);
         }
-        LOGGER.info("produce - end   fileName={}", sourceFile);
+        ComparableXlsxDataSetProducer.LOGGER.info("produce - end   fileName={}", sourceFile);
     }
 }
 

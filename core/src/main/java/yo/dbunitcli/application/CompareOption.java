@@ -1,8 +1,6 @@
 package yo.dbunitcli.application;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.application.argument.DataSetConverterOption;
 import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.application.argument.DefaultArgumentMapper;
@@ -13,7 +11,6 @@ import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -24,43 +21,39 @@ public class CompareOption extends CommandLineOption {
 
     public static final DefaultArgumentMapper IMAGE_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
-        public String[] map(final String[] arguments, final String prefix, final CmdLineParser parser) {
+        public String[] map(final String[] arguments, final String prefix, final CommandLine cmdLine) {
             final List<String> newArg = Arrays.stream(arguments)
                     .filter(it -> !it.contains("srcType=") && !it.contains("extension="))
                     .collect(Collectors.toList());
             newArg.add("-srcType=file");
             newArg.add("-extension=png");
-            return newArg.toArray(new String[]{});
+            return newArg.toArray(new String[0]);
         }
     };
 
     public static final DefaultArgumentMapper PDF_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
-        public String[] map(final String[] arguments, final String prefix, final CmdLineParser parser) {
+        public String[] map(final String[] arguments, final String prefix, final CommandLine cmdLine) {
             final List<String> newArg = Arrays.stream(arguments)
                     .filter(it -> !it.contains("srcType=") && !it.contains("extension="))
                     .collect(Collectors.toList());
             newArg.add("-srcType=file");
             newArg.add("-extension=pdf");
-            return newArg.toArray(new String[]{});
+            return newArg.toArray(new String[0]);
         }
     };
 
-    @Option(name = "-setting", usage = "file comparison settings")
-    private String setting;
-
-    @Option(name = "-targetType")
-    private Type targetType = Type.data;
-
     private final DataSetLoadOption expectData = new DataSetLoadOption("expect");
-
     private final DataSetLoadOption oldData = new DataSetLoadOption("old");
-
     private final DataSetLoadOption newData = new DataSetLoadOption("new");
-
     private final ImageCompareOption imageOption = new ImageCompareOption("image");
-
-    private ColumnSettings columnSettings;
+    @CommandLine.Option(names = "-setting", description = "file comparison settings")
+    private String setting;
+    @CommandLine.Option(names = "-settingEncoding", description = "settings encoding")
+    private String settingEncoding = System.getProperty("file.encoding");
+    @CommandLine.Option(names = "-targetType")
+    private Type targetType = Type.data;
+    private TableSeparators tableSeparators;
 
     public CompareOption() {
         super(Parameter.none());
@@ -83,16 +76,16 @@ public class CompareOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
-        super.setUpComponent(parser, expandArgs);
+    public void setUpComponent(final CommandLine.ParseResult parseResult, final String[] expandArgs) {
+        super.setUpComponent(parseResult, expandArgs);
         if (this.targetType.isAny(Type.image, Type.pdf)) {
             this.imageOption.parseArgument(expandArgs);
             if (this.targetType == Type.image) {
-                this.newData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
-                this.oldData.setArgumentMapper(IMAGE_TYPE_PARAM_MAPPER);
+                this.newData.setArgumentMapper(CompareOption.IMAGE_TYPE_PARAM_MAPPER);
+                this.oldData.setArgumentMapper(CompareOption.IMAGE_TYPE_PARAM_MAPPER);
             } else if (this.targetType == Type.pdf) {
-                this.newData.setArgumentMapper(PDF_TYPE_PARAM_MAPPER);
-                this.oldData.setArgumentMapper(PDF_TYPE_PARAM_MAPPER);
+                this.newData.setArgumentMapper(CompareOption.PDF_TYPE_PARAM_MAPPER);
+                this.oldData.setArgumentMapper(CompareOption.PDF_TYPE_PARAM_MAPPER);
             }
         }
         this.newData.parseArgument(expandArgs);
@@ -100,12 +93,12 @@ public class CompareOption extends CommandLineOption {
         if (Arrays.stream(expandArgs).anyMatch(it -> it.startsWith("-expect.src"))) {
             this.expectData.parseArgument(expandArgs);
             if (Arrays.stream(expandArgs).noneMatch(it -> it.startsWith("-expect.setting"))) {
-                this.expectData.getParam().editColumnSettings(editor -> editor.setKeyEdit(it ->
-                        it.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, new ArrayList<>())
-                ));
+                this.expectData.getParam().editColumnSettings(separator ->
+                        separator.addSetting(TableSeparator.builder().build())
+                );
             }
         }
-        this.populateSettings(parser);
+        this.populateSettings();
         this.getConverterOption().parseArgument(expandArgs);
     }
 
@@ -117,6 +110,7 @@ public class CompareOption extends CommandLineOption {
             result.putAll(this.imageOption.createOptionParam(args));
         }
         result.putFile("-setting", this.setting == null ? null : new File(this.setting));
+        result.put("-settingEncoding", this.settingEncoding);
         result.putAll(this.newData.createOptionParam(args));
         result.putAll(this.oldData.createOptionParam(args));
         result.putAll(this.getConverterOption().createOptionParam(args));
@@ -124,48 +118,39 @@ public class CompareOption extends CommandLineOption {
         return result;
     }
 
-    public CompareResult compare() {
+    public boolean compare() {
         final CompareResult result = this.getDataSetCompareBuilder()
                 .newDataSet(this.newDataSet())
                 .oldDataSet(this.oldDataSet())
-                .comparisonKeys(this.getComparisonKeys())
+                .tableSeparators(this.getTableSeparators())
                 .dataSetConverter(this.converter())
                 .build()
                 .result();
         if (this.getExpectData().getParam().getSrc() != null) {
-            if (new DataSetCompareBuilder()
+            return !new DataSetCompareBuilder()
                     .newDataSet(this.resultDataSet())
                     .oldDataSet(this.expectDataSet())
-                    .comparisonKeys(this.getExpectData().getParam().getColumnSettings().comparisonKeys())
+                    .tableSeparators(this.getExpectData().getParam().getTableSeparators())
                     .dataSetConverter(this.expectedDiffConverter())
                     .build()
-                    .result().existDiff()) {
-                throw new AssertionError("unexpected diff found.");
-            }
-        } else {
-            if (result.existDiff()) {
-                throw new AssertionError("unexpected diff found.");
-            }
+                    .result().existDiff();
         }
-        return result;
+        return !result.existDiff();
     }
 
-    public AddSettingColumns getComparisonKeys() {
-        return this.columnSettings.comparisonKeys();
-    }
-
-    public ColumnSettings getColumnSettings() {
-        return this.columnSettings;
+    public TableSeparators getTableSeparators() {
+        return this.tableSeparators;
     }
 
     public ComparableDataSet newDataSet() {
         final ComparableDataSetParam.Builder loadParam = this.newData.getParam()
                 .ifMatch(this.targetType != Type.data
-                        , it -> it.setColumnSettings(it
-                                .getColumnSettings()
-                                .apply(builder -> builder.setSeparatorEdit(separator ->
-                                        separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
-                                                .setNewName("TARGET").build()))))
+                        , it -> it.editColumnSettings(separator ->
+                                separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
+                                                .setNewName("TARGET").build())
+                                        .addSetting(TableSeparator.builder().setComparisonKeys(List.of("NAME"))
+                                                .build())
+                        )
                 );
         return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
     }
@@ -173,11 +158,12 @@ public class CompareOption extends CommandLineOption {
     public ComparableDataSet oldDataSet() {
         final ComparableDataSetParam.Builder loadParam = this.oldData.getParam()
                 .ifMatch(this.targetType != Type.data
-                        , it -> it.setColumnSettings(it
-                                .getColumnSettings()
-                                .apply(builder -> builder.setSeparatorEdit(separator ->
-                                        separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
-                                                .setNewName("TARGET").build()))))
+                        , it -> it.editColumnSettings(separator ->
+                                separator.setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder()
+                                                .setNewName("TARGET").build())
+                                        .addSetting(TableSeparator.builder().setComparisonKeys(List.of("NAME"))
+                                                .build())
+                        )
                 );
         return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
     }
@@ -186,7 +172,7 @@ public class CompareOption extends CommandLineOption {
         final DataSetConverterOption converterOption = this.getConverterOption();
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
-                        .setColumnSettings(this.expectData.getParam().getColumnSettings())
+                        .setTableSeparators(this.expectData.getParam().getTableSeparators())
                         .setSrc(converterOption.getResultDir())
                         .setSource(converterOption.getResultType())
                         .setEncoding(converterOption.getOutputEncoding())
@@ -211,15 +197,15 @@ public class CompareOption extends CommandLineOption {
         return this.converter();
     }
 
-    protected void populateSettings(final CmdLineParser parser) throws CmdLineException {
+    protected void populateSettings() {
         try {
-            this.columnSettings = new FromJsonColumnSettingsBuilder().build(this.setting);
+            this.tableSeparators = new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting);
         } catch (final IOException e) {
-            throw new CmdLineException(parser, e);
+            throw new AssertionError(e);
         }
         if (this.targetType != Type.data) {
-            this.columnSettings = this.columnSettings.apply(it -> it
-                    .setKeyEdit(setting -> setting.addPattern(AddSettingColumns.ALL_MATCH_PATTERN, List.of("NAME")))
+            this.tableSeparators = this.tableSeparators.map(separator -> separator.addSetting(TableSeparator.builder()
+                    .setComparisonKeys(List.of("NAME")).build())
             );
         }
     }

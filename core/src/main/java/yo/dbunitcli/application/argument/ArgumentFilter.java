@@ -1,11 +1,16 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.CmdLineParser;
+import picocli.CommandLine;
 
-import java.util.Map;
+import java.util.function.Function;
 
 public interface ArgumentFilter {
 
-    Map<String, String> filterArguments(String prefix, CmdLineParser parser, String[] expandArgs);
+    String[] filterArguments(String prefix, CommandLine commandLine, String[] expandArgs);
+
+    default Function<String, String> extractKey() {
+        return it -> it.replaceAll("(-[^=]+=).+", "$1");
+    }
+
 
 }

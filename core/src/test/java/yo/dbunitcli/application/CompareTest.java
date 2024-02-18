@@ -1,9 +1,10 @@
 package yo.dbunitcli.application;
 
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.integration.junit5.JMockitExtension;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -14,7 +15,7 @@ public class CompareTest {
 
     private String baseDir;
 
-    @Before
+    @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
         this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
                 .replace("target/test-classes", "src/test/resources");
@@ -117,7 +118,7 @@ public class CompareTest {
 
     @Test
     public void testComparePdfDiffAllPage() throws Exception {
-        Assume.assumeTrue(System.getProperty("os.name").toLowerCase().startsWith("win"));
+        Assumptions.assumeTrue(System.getProperty("os.name").toLowerCase().startsWith("win"));
         Compare.main(new String[]{"@" + this.baseDir + "/paramComparePdfDiffAllPage.txt"});
     }
 
@@ -146,25 +147,53 @@ public class CompareTest {
         Compare.main(new String[]{"@" + this.baseDir + "/paramCompareXlsxAndXlsWithSchema.txt"});
     }
 
-    @Test
-    public void testFailedResultDiffNotExpected() {
-        Assert.assertThrows(AssertionError.class,
-                () -> Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffNotExpected.txt"})
-        );
-    }
+    @Tag("jvmTest")
+    @Nested
+    @ExtendWith(JMockitExtension.class)
+    class ExitCodeTest {
+        @Test
+        public void testFailedResultDiffNotExpected() throws Exception {
+            new MockUp<System>() {
+                @Mock
+                public void exit(final int value) {
+                    throw new RuntimeException(String.valueOf(value));
+                }
+            };
+            try {
+                Compare.main(new String[]{"@" + CompareTest.this.baseDir + "/paramCompareResultDiffNotExpected.txt"});
+            } catch (final RuntimeException ex) {
+                Assertions.assertEquals("1", ex.getMessage());
+            }
+        }
 
-    @Test
-    public void testFailedResultDiffDifferExpected() {
-        Assert.assertThrows(AssertionError.class,
-                () -> Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffInValidExpected.txt"})
-        );
-    }
+        @Test
+        public void testFailedResultDiffDifferExpected() throws Exception {
+            new MockUp<System>() {
+                @Mock
+                public void exit(final int value) {
+                    throw new RuntimeException(String.valueOf(value));
+                }
+            };
+            try {
+                Compare.main(new String[]{"@" + CompareTest.this.baseDir + "/paramCompareResultDiffInValidExpected.txt"});
+            } catch (final RuntimeException ex) {
+                Assertions.assertEquals("1", ex.getMessage());
+            }
+        }
 
-    @Test
-    public void testFailedUnExpectedNoDiff() {
-        Assert.assertThrows(AssertionError.class,
-                () -> Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"})
-        );
+        @Test
+        public void testFailedUnExpectedNoDiff() throws Exception {
+            new MockUp<System>() {
+                @Mock
+                public void exit(final int value) {
+                    throw new RuntimeException(String.valueOf(value));
+                }
+            };
+            try {
+                Compare.main(new String[]{"@" + CompareTest.this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"});
+            } catch (final RuntimeException ex) {
+                Assertions.assertEquals("1", ex.getMessage());
+            }
+        }
     }
-
 }

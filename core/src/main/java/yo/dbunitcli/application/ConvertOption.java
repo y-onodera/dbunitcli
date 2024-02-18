@@ -1,7 +1,6 @@
 package yo.dbunitcli.application;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
+import picocli.CommandLine;
 import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.Parameter;
@@ -26,8 +25,8 @@ public class ConvertOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
-        super.setUpComponent(parser, expandArgs);
+    public void setUpComponent(final CommandLine.ParseResult parseResult, final String[] expandArgs) {
+        super.setUpComponent(parseResult, expandArgs);
         this.src.parseArgument(expandArgs);
         this.getConverterOption().parseArgument(expandArgs);
     }

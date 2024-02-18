@@ -1,8 +1,6 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
@@ -11,22 +9,22 @@ import java.util.Map;
 
 public class TemplateRenderOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
 
-    @Option(name = "-encoding", usage = "template file encoding")
+    @CommandLine.Option(names = "-encoding", description = "template file encoding")
     private String encoding = System.getProperty("file.encoding");
 
-    @Option(name = "-templateGroup", usage = "StringTemplate4 templateGroup file.")
+    @CommandLine.Option(names = "-templateGroup", description = "StringTemplate4 templateGroup file.")
     private File templateGroup;
 
-    @Option(name = "-templateParameterAttribute", usage = "attributeName that is used to for access parameter in StringTemplate expression default 'param'.")
+    @CommandLine.Option(names = "-templateParameterAttribute", description = "attributeName that is used to for access parameter in StringTemplate expression default 'param'.")
     private String templateParameterAttribute = "param";
 
-    @Option(name = "-templateVarStart", usage = "StringTemplate expression start char.default '$'")
+    @CommandLine.Option(names = "-templateVarStart", description = "StringTemplate expression start char.default '$'")
     private char templateVarStart = '$';
 
-    @Option(name = "-templateVarStop", usage = "StringTemplate expression stop char.default '$'\"")
+    @CommandLine.Option(names = "-templateVarStop", description = "StringTemplate expression stop char.default '$'\"")
     private char templateVarStop = '$';
 
-    @Option(name = "-formulaProcess", usage = "default true.if false xlsx output use LowerMemory but cellRef in formula isn't along with row increase")
+    @CommandLine.Option(names = "-formulaProcess", description = "default true.if false xlsx output use LowerMemory but cellRef in formula isn't along with row increase")
     private String formulaProcess = "true";
 
     public TemplateRenderOption(final String prefix) {
@@ -72,10 +70,10 @@ public class TemplateRenderOption extends DefaultArgumentsParser implements Comp
     }
 
     @Override
-    public void setUpComponent(final CmdLineParser parser, final String[] expandArgs) throws CmdLineException {
+    public void setUpComponent(final CommandLine.ParseResult parser, final String[] expandArgs) {
         if (this.templateGroup != null) {
             if (!this.templateGroup.exists() || !this.templateGroup.isFile()) {
-                throw new CmdLineException(parser, this.templateGroup + " is not exist file"
+                throw new AssertionError(this.templateGroup + " is not exist file"
                         , new IllegalArgumentException(this.templateGroup.toString()));
             }
         }

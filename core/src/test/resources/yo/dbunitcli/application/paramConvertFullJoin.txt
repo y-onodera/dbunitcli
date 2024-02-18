@@ -1,0 +1,5 @@
+-src=src/test/resources/yo/dbunitcli/application/csv/multi
+-srcType=csv
+-setting=src/test/resources/yo/dbunitcli/application/join/setting_full_join.json
+-result=target/test-classes/yo/dbunitcli/application/join/result
+-resultType=xlsx

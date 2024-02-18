@@ -1,0 +1,13 @@
+{
+  "settings": [
+    {
+      "name": "combikey",
+      "tableName": "distinct",
+      "include": [
+        "key1",
+        "col1"
+      ],
+      "distinct": true
+    }
+  ]
+}

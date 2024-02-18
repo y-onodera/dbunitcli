@@ -1,16 +1,16 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Map;
 
 public class RegexOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
 
-    @Option(name = "-regDataSplit", usage = "regex to use split data row")
+    @CommandLine.Option(names = "-regDataSplit", description = "regex to use split data row")
     private String regDataSplit;
 
-    @Option(name = "-regHeaderSplit", usage = "regex to use split header row")
+    @CommandLine.Option(names = "-regHeaderSplit", description = "regex to use split header row")
     private String regHeaderSplit;
 
     public RegexOption(final String prefix) {

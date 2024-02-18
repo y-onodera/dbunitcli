@@ -1,10 +1,10 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.TableNameFilter;
@@ -17,16 +17,13 @@ import java.util.function.Predicate;
 
 public class ComparableFileDataSetProducer implements ComparableDataSetProducer {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableFileDataSetProducer.class);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    private IDataSetConsumer consumer;
     private final File src;
     private final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final boolean loadData;
-
-    private final boolean recursive;
-
+    private IDataSetConsumer consumer;
     private int rows = 0;
 
     public ComparableFileDataSetProducer(final ComparableDataSetParam param) {
@@ -34,7 +31,6 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
         this.src = this.param.src().getAbsoluteFile();
         this.filter = this.param.tableNameFilter();
         this.loadData = this.param.loadData();
-        this.recursive = this.param.recursive();
     }
 
     @Override
@@ -49,11 +45,11 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
 
     @Override
     public void produce() throws DataSetException {
-        LOGGER.info("produce() - start");
+        ComparableFileDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         final ITableMetaData metaData = new ComparableFileTableMetaData(this.src.getName());
         this.consumer.startTable(metaData);
-        LOGGER.info("produce - start fileName={}", this.src);
+        ComparableFileDataSetProducer.LOGGER.info("produce - start fileName={}", this.src);
         if (this.loadData) {
             try {
                 this.param.getWalk()
@@ -65,10 +61,10 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
             }
         }
         this.consumer.endTable();
-        LOGGER.info("produce - rows={}", this.rows);
-        LOGGER.info("produce - end   fileName={}", this.src);
+        ComparableFileDataSetProducer.LOGGER.info("produce - rows={}", this.rows);
+        ComparableFileDataSetProducer.LOGGER.info("produce - end   fileName={}", this.src);
         this.consumer.endDataSet();
-        LOGGER.info("produce() - end");
+        ComparableFileDataSetProducer.LOGGER.info("produce() - end");
     }
 
     protected Predicate<Path> fileTypeFilter() {
@@ -86,7 +82,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
         row[2] = file.getParent();
         row[3] = this.src.toPath().relativize(file.getAbsoluteFile().toPath()).toString();
         row[4] = file.length() / 1024;
-        row[5] = DATE_FORMAT.format(file.lastModified());
+        row[5] = ComparableFileDataSetProducer.DATE_FORMAT.format(file.lastModified());
         try {
             this.consumer.row(row);
             this.rows++;

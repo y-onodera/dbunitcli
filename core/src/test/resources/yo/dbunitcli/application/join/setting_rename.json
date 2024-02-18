@@ -1,0 +1,75 @@
+{
+  "settings": [
+    {
+      "name": "multi1",
+      "distinct": true,
+      "exclude": [
+        "column1",
+        "column2",
+        "column3"
+      ],
+      "number": {
+        "key": "key == 2 ? key : key * 10"
+      },
+      "string": {
+        "columna": "key == 2 ? column1 :'column1:' + column1",
+        "columnb": "key == 2 ? column2 :'column2:' + column2",
+        "columnc": "'column3:' + column3"
+      }
+    },
+    {
+      "pattern": "multi2",
+      "tableName": "merge",
+      "number": {
+        "key": "key == 1 ?  key * 10 : key"
+      },
+      "string": {
+        "columna": "key != 10 ? columna :'column1:' + columna",
+        "columnb": "key != 10 ? columnb :'column2:' + columnb",
+        "columnc": "'column3:' + columnc"
+      }
+    },
+    {
+      "innerJoin": {
+        "left": "multi1",
+        "right": "merge",
+        "column": [
+          "key"
+        ]
+      },
+      "tableName": "join",
+      "include": [
+        "key",
+        "columna",
+        "columnb",
+        "columnc"
+      ],
+      "number": {
+        "key": "multi1_key"
+      },
+      "string": {
+        "columnab": "merge_columna + multi1_columnb",
+        "columnbc": "merge_columnb + multi1_columnc",
+        "columnca": "merge_columnc + multi1_columna"
+      }
+    },
+    {
+      "name": "join",
+      "separate": [
+        {
+          "tableName": "under3",
+          "filter": [
+            "key < 3"
+          ]
+        },
+        {
+          "tableName": "over1",
+          "filter": [
+            "key > 1"
+          ]
+        }
+      ]
+    }
+  ],
+  "commonSettings": []
+}

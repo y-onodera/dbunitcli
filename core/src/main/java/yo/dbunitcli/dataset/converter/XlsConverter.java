@@ -1,7 +1,5 @@
 package yo.dbunitcli.dataset.converter;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -10,6 +8,8 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.datatype.TypeCastException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
@@ -28,20 +28,15 @@ import java.util.stream.IntStream;
 
 public class XlsConverter implements IDataSetConverter {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(XlsConverter.class);
     private static final String ZEROS = "0000000000000000000000000000000000000000000000000000";
     private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     protected final File resultDir;
-
-    protected String filename;
-
     protected final TableExportType tableExport;
-
     protected final boolean exportEmptyTable;
-
     private final Map<Workbook, Map<Short, CellStyle>> cellStyleMap = new HashMap<>();
-
+    protected String filename;
     private Workbook workbook;
 
     private ITableMetaData metaData;
@@ -51,6 +46,10 @@ public class XlsConverter implements IDataSetConverter {
     private int sheetIndex = 0;
 
     private int rowIndex = 1;
+
+    protected static String createZeros(final int count) {
+        return XlsConverter.ZEROS.substring(0, count);
+    }
 
     public XlsConverter(final DataSetConsumerParam param) {
         this(param.resultDir()
@@ -67,16 +66,6 @@ public class XlsConverter implements IDataSetConverter {
     }
 
     @Override
-    public boolean isSplittable() {
-        return this.tableExport != TableExportType.SHEET;
-    }
-
-    @Override
-    public IDataSetConverter split() {
-        return new XlsConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable);
-    }
-
-    @Override
     public void startDataSet() throws DataSetException {
         if (this.tableExport == TableExportType.SHEET) {
             this.workbook = this.createWorkbook();
@@ -85,8 +74,15 @@ public class XlsConverter implements IDataSetConverter {
     }
 
     @Override
+    public void endDataSet() throws DataSetException {
+        if (this.tableExport == TableExportType.SHEET) {
+            this.flush();
+        }
+    }
+
+    @Override
     public void startTable(final ITableMetaData metaData) throws DataSetException {
-        LOGGER.info("convert - start sheetName={}", metaData.getTableName());
+        XlsConverter.LOGGER.info("convert - start sheetName={}", metaData.getTableName());
         this.metaData = metaData;
         if (this.tableExport == TableExportType.BOOK) {
             this.filename = this.metaData.getTableName();
@@ -101,16 +97,13 @@ public class XlsConverter implements IDataSetConverter {
     }
 
     @Override
-    public void reStartTable(final ITableMetaData metaData, final Integer writeRows) {
-        LOGGER.info("convert - reStart sheetName={},rows={}", metaData.getTableName(), writeRows);
-        this.metaData = metaData;
+    public void endTable() throws DataSetException {
+        XlsConverter.LOGGER.info("convert - rows={} ", this.rowIndex - 1);
+        XlsConverter.LOGGER.info("convert - end   sheetName={}", this.metaData.getTableName());
         if (this.tableExport == TableExportType.BOOK) {
-            this.filename = this.metaData.getTableName();
-            this.workbook = this.createWorkbook(this.writeTo());
-            this.sheetIndex = 0;
+            this.flush();
         }
-        this.sheet = this.workbook.getSheet(this.metaData.getTableName());
-        this.rowIndex = writeRows + 1;
+        this.rowIndex = 1;
     }
 
     @Override
@@ -138,20 +131,21 @@ public class XlsConverter implements IDataSetConverter {
     }
 
     @Override
-    public void endTable() throws DataSetException {
-        LOGGER.info("convert - rows={} ", this.rowIndex - 1);
-        LOGGER.info("convert - end   sheetName={}", this.metaData.getTableName());
-        if (this.tableExport == TableExportType.BOOK) {
-            this.flush();
-        }
-        this.rowIndex = 1;
+    public boolean isExportEmptyTable() {
+        return this.exportEmptyTable;
     }
 
     @Override
-    public void endDataSet() throws DataSetException {
-        if (this.tableExport == TableExportType.SHEET) {
-            this.flush();
+    public void reStartTable(final ITableMetaData metaData, final Integer writeRows) {
+        XlsConverter.LOGGER.info("convert - reStart sheetName={},rows={}", metaData.getTableName(), writeRows);
+        this.metaData = metaData;
+        if (this.tableExport == TableExportType.BOOK) {
+            this.filename = this.metaData.getTableName();
+            this.workbook = this.createWorkbook(this.writeTo());
+            this.sheetIndex = 0;
         }
+        this.sheet = this.workbook.getSheet(this.metaData.getTableName());
+        this.rowIndex = writeRows + 1;
     }
 
     @Override
@@ -160,13 +154,18 @@ public class XlsConverter implements IDataSetConverter {
     }
 
     @Override
-    public boolean isExportEmptyTable() {
-        return this.exportEmptyTable;
+    public boolean isSplittable() {
+        return this.tableExport != TableExportType.SHEET;
+    }
+
+    @Override
+    public IDataSetConverter split() {
+        return new XlsConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable);
     }
 
     protected void flush() {
         final File writeTo = this.writeTo();
-        LOGGER.info("flush - start fileName={}", writeTo);
+        XlsConverter.LOGGER.info("flush - start fileName={}", writeTo);
         try {
             if (!this.resultDir.exists()) {
                 Files.createDirectories(this.resultDir.toPath());
@@ -181,7 +180,7 @@ public class XlsConverter implements IDataSetConverter {
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
-        LOGGER.info("flush - end   fileName={}", writeTo);
+        XlsConverter.LOGGER.info("flush - end   fileName={}", writeTo);
     }
 
     protected File writeTo() {
@@ -200,7 +199,7 @@ public class XlsConverter implements IDataSetConverter {
             if (value.scale() <= 0) {
                 format = df.getFormat("####");
             } else {
-                final String zeros = createZeros(value.scale());
+                final String zeros = XlsConverter.createZeros(value.scale());
                 format = df.getFormat("####." + zeros);
             }
             cell.setCellStyle(this.getCellStyle(workbook, format));
@@ -210,7 +209,7 @@ public class XlsConverter implements IDataSetConverter {
     }
 
     protected void setDateCell(final Cell cell, final Date value) {
-        cell.setCellValue(SDF.format(value));
+        cell.setCellValue(XlsConverter.SDF.format(value));
     }
 
     protected Workbook createWorkbook() {
@@ -252,19 +251,15 @@ public class XlsConverter implements IDataSetConverter {
         return cellStyle;
     }
 
-    protected static String createZeros(final int count) {
-        return ZEROS.substring(0, count);
-    }
-
-    public enum TableExportType {
-        SHEET, BOOK
-    }
-
     private String getString(final Object value) {
         try {
             return DataType.asString(value);
         } catch (final TypeCastException e) {
             throw new AssertionError(e);
         }
+    }
+
+    public enum TableExportType {
+        SHEET, BOOK
     }
 }

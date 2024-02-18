@@ -1,9 +1,10 @@
 package yo.dbunitcli.application;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import yo.dbunitcli.dataset.AddSettingColumns;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import picocli.CommandLine;
+import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -11,7 +12,9 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 public class CompareOptionTest {
 
@@ -19,7 +22,7 @@ public class CompareOptionTest {
 
     private CompareOption target;
 
-    @Before
+    @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
         this.target = new CompareOption();
         this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
@@ -28,34 +31,36 @@ public class CompareOptionTest {
 
     @Test
     public void parseRequiredOldFileDir() {
-        Assert.assertThrows("Option \"-src\" is required", AssertionError.class,
-                () -> this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-setting=" + this.baseDir + "/multidiff/setting.json"}));
+        assertThrows(CommandLine.MissingParameterException.class
+                , () -> this.target.parse(new String[]{"-new=" + this.baseDir + "/multidiff/new", "-setting=" + this.baseDir + "/multidiff/setting.json"})
+                , "Option \"-src\" is required");
     }
 
     @Test
     public void parseRequiredNewFileDir() {
-        Assert.assertThrows("Option \"-src\" is required", AssertionError.class,
-                () -> this.target.parse(new String[]{"-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"})
+        assertThrows(CommandLine.MissingParameterException.class
+                , () -> this.target.parse(new String[]{"-old=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"})
+                , "Option \"-src\" is required"
         );
     }
 
     @Test
     public void parseRequiredOldFileDirExists() {
-        Assert.assertThrows(AssertionError.class,
+        assertThrows(AssertionError.class,
                 () -> this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/notExists", "-setting=" + this.baseDir + "/multidiff/setting.json"})
         );
     }
 
     @Test
     public void parseRequiredNewFileDirExists() {
-        Assert.assertThrows(AssertionError.class,
+        assertThrows(AssertionError.class,
                 () -> this.target.parse(new String[]{"-new.src=" + this.baseDir + "/notExists", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"})
         );
     }
 
     @Test
     public void parseRequiredSettingFileExists() {
-        Assert.assertThrows(AssertionError.class,
+        assertThrows(AssertionError.class,
                 () -> this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/NotExists.json"})
         );
     }
@@ -65,13 +70,10 @@ public class CompareOptionTest {
         this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/filter/setting.json"});
         assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewData().getParam().getSrc());
         assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldData().getParam().getSrc());
-        assertEquals(2, this.target.getComparisonKeys().byNameSize());
-        assertEquals(1, this.target.getComparisonKeys().getColumns("columnadd").size());
-        assertEquals("key", this.target.getComparisonKeys().getColumns("columnadd").get(0));
-        assertEquals(2, this.target.getColumnSettings().excludeColumns().byNameSize());
-        assertEquals(2, this.target.getColumnSettings().excludeColumns().getColumns("columnadd").size());
-        assertEquals("AddColumn", this.target.getColumnSettings().excludeColumns().getColumns("columnadd").get(0));
-        assertEquals("ChangeColumn", this.target.getColumnSettings().excludeColumns().getColumns("columnadd").get(1));
+        assertEquals(2, this.target.getTableSeparators().settings().size());
+        final ComparableTable columnadd = this.target.oldDataSet().getTable("columnadd");
+        assertEquals(1, columnadd.getTableMetaData().getPrimaryKeys().length);
+        assertEquals("key", columnadd.getTableMetaData().getPrimaryKeys()[0].getColumnName());
     }
 
     @Test
@@ -79,8 +81,12 @@ public class CompareOptionTest {
         this.target.parse(new String[]{"@" + this.baseDir + "/paramCompareResultDiffValidExpected.txt"});
         assertEquals(new File(this.baseDir + "/multidiff", "new"), this.target.getNewData().getParam().getSrc().getAbsoluteFile());
         assertEquals(new File(this.baseDir + "/multidiff", "old"), this.target.getOldData().getParam().getSrc().getAbsoluteFile());
-        assertEquals(1, this.target.getComparisonKeys().getColumns("columnadd").size());
-        assertEquals("key", this.target.getComparisonKeys().getColumns("columnadd").get(0));
+        final ComparableTable columnadd = this.target.oldDataSet().getTable("columnadd");
+        assertEquals(1, columnadd.getTableMetaData().getPrimaryKeys().length);
+        assertEquals("key", columnadd.getTableMetaData().getPrimaryKeys()[0].getColumnName());
+        final ComparableTable columndrop = this.target.oldDataSet().getTable("columndrop");
+        assertEquals(1, columndrop.getTableMetaData().getPrimaryKeys().length);
+        assertEquals("key", columndrop.getTableMetaData().getPrimaryKeys()[0].getColumnName());
     }
 
     @Test
@@ -101,9 +107,7 @@ public class CompareOptionTest {
     @Test
     public void parseNoSettingFile() {
         this.target.parse(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old"});
-        assertEquals(AddSettingColumns.NONE, this.target.getComparisonKeys());
-        assertEquals(AddSettingColumns.NONE, this.target.getColumnSettings().excludeColumns());
-        assertEquals(AddSettingColumns.NONE, this.target.getColumnSettings().orderColumns());
+        assertEquals(TableSeparators.NONE, this.target.getTableSeparators());
     }
 
 

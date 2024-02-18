@@ -1,0 +1,7 @@
+-src=src/test/resources/yo/dbunitcli/application/xlsxwithschema/ComplexLayout.xlsx
+-srcType=xlsx
+-xlsxSchema=src/test/resources/yo/dbunitcli/application/xlsxwithschema/ComplexSchemaAddFileInfo.json
+-setting=src/test/resources/yo/dbunitcli/application/xlsxwithschema/setting_fileInfo_join.json
+-settingEncoding=MS932
+-result=target/test-classes/yo/dbunitcli/application/xlsxwithschema/result
+-resultType=xlsx

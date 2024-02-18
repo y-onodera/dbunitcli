@@ -1,0 +1,57 @@
+{
+  "settings": [
+    {
+      "name": "multi1",
+      "tableName": "merge",
+      "distinct": true,
+      "exclude": [
+        "column1",
+        "column2",
+        "column3"
+      ],
+      "number": {
+        "key": "key == 2 ? key : key * 10"
+      },
+      "string": {
+        "columna": "key == 2 ? column1 :'column1:' + column1",
+        "columnb": "key == 2 ? column2 :'column2:' + column2",
+        "columnc": "'column3:' + column3"
+      }
+    },
+    {
+      "pattern": {
+        "string": "multi",
+        "exclude": [
+          "multi1"
+        ]
+      },
+      "tableName": "merge",
+      "number": {
+        "key": "key == 1 ?  key * 10 : key"
+      },
+      "string": {
+        "columna": "key != 10 ? columna :'column1:' + columna",
+        "columnb": "key != 10 ? columnb :'column2:' + columnb",
+        "columnc": "'column3:' + columnc"
+      }
+    },
+    {
+      "name": "merge",
+      "distinct": true,
+      "include": [
+        "key",
+        "columna"
+      ],
+      "order": [
+        "key"
+      ]
+    }
+  ],
+  "commonSettings": [
+    {
+      "number": {
+        "key": "key"
+      }
+    }
+  ]
+}

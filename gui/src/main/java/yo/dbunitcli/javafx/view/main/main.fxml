@@ -5,10 +5,10 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.*?>
 <?import org.tbee.javafx.scene.layout.fxml.*?>
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity"
-            minHeight="-Infinity" minWidth="-Infinity"
-            prefHeight="500.0" prefWidth="600.0"
-            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity"
+            maxWidth="-Infinity" minHeight="-Infinity"
+            minWidth="-Infinity" prefHeight="500.0"
+            prefWidth="600.0" xmlns="http://javafx.com/javafx/8"
             fx:controller="yo.dbunitcli.javafx.view.main.MainPresenter">
     <BorderPane id="borderMain" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="425.0"
                 prefWidth="550.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
@@ -17,7 +17,7 @@
             <HBox alignment="CENTER" styleClass="toolbar" HBox.hgrow="ALWAYS">
                 <MigPane cols="[500,grow]push[]">
                     <Label styleClass="menu-label" text="DBUnit CLI Param Editor"/>
-                    <MFXButton text="" onAction="#close" MigPane.cc="align right">
+                    <MFXButton onAction="#close" contentDisplay="GRAPHIC_ONLY" MigPane.cc="align right">
                         <graphic>
                             <MFXFontIcon description="fas-x" color="white" size="16"/>
                         </graphic>
@@ -28,19 +28,21 @@
         <center>
             <MFXScrollPane>
                 <MigPane fx:id="commandPane" cols="[300,grow][100,right]" rows="[30,shrink]" prefWidth="550.0">
-                    <MFXComboBox floatingText="command" floatMode="INLINE" fx:id="commandTypeSelect"
-                                 onAction="#selectCommandType" MigPane.cc="wrap"/>
+                    <HBox fx:id="commandBox" spacing="10">
+                        <MFXComboBox floatingText="command" floatMode="INLINE" fx:id="commandTypeSelect"
+                                     onAction="#selectCommandType"/>
+                    </HBox>
                 </MigPane>
             </MFXScrollPane>
         </center>
         <bottom>
             <MigPane cols="push[35][35][35]" rows="[50]" maxHeight="50" prefWidth="550.0" styleClass="bottom-background">
-                <MFXButton fx:id="reset" rippleColor="white" buttonType="FLAT" styleClass="text-button" mnemonicParsing="false" text="reset" onAction="#reset"
+                <MFXButton fx:id="reset" buttonType="FLAT" minWidth="70.0" styleClass="text-button" text="reset" onAction="#reset"
                            MigPane.cc="right"/>
-                <MFXButton fx:id="exec" rippleColor="white" buttonType="RAISED" styleClass="outline-button" mnemonicParsing="false" text="exec" onAction="#execCmd"
+                <MFXButton fx:id="exec" buttonType="FLAT" minWidth="70.0" styleClass="text-button" text="exec" onAction="#execCmd"
                            MigPane.cc="right"/>
-                <MFXButton id="save" rippleColor="white" buttonType="RAISED" styleClass="contain-button" mnemonicParsing="false" text="save" onAction="#saveFile"
-                           MigPane.cc="right" rippleAnimateShadow=""/>
+                <MFXButton id="save" buttonType="FLAT" minWidth="70.0" styleClass="text-button" text="save" onAction="#saveFile"
+                           MigPane.cc="right"/>
             </MigPane>
         </bottom>
     </BorderPane>

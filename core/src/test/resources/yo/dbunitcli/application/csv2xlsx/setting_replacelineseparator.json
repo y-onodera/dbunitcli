@@ -1,0 +1,22 @@
+{
+  "settings": [
+    {
+      "name": "multi1",
+      "string": {
+        "column1": "(column1 ? column1 :'').replaceAll('\\r\\n','\\n')"
+      },
+      "keys": [
+        "key"
+      ]
+    },
+    {
+      "name": "multi2",
+      "string": {
+        "columna": "(columna ? columna :'').replaceAll('\\r\\n','\\n')"
+      },
+      "keys": [
+        "key"
+      ]
+    }
+  ]
+}

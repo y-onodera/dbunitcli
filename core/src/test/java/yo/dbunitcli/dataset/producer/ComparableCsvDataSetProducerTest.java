@@ -3,9 +3,9 @@ package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
@@ -19,118 +19,118 @@ public class ComparableCsvDataSetProducerTest {
 
     private String resource;
 
-    @Before
+    @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
         this.resource = URLDecoder.decode(this.getClass().getResource(".").getPath(), "UTF-8")
-                .replace("target/test-classes","src/test/resources");
+                .replace("target/test-classes", "src/test/resources");
     }
 
     @Test
     public void createEmptyDataSetFromNoFileDirectory() throws DataSetException {
-        File src = new File(this.resource, "nofile");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final File src = new File(this.resource, "nofile");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
                                 .setSrc(src)
                                 .setEncoding("windows-31j")
                                 .build()));
-        Assert.assertEquals(src.getPath(), actual.getSrc());
-        Assert.assertEquals(actual.getTables().length, 0);
+        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        Assertions.assertEquals(actual.getTables().length, 0);
     }
 
     @Test
     public void createDataSetFromDirectoryContainsShiftJisFile() throws DataSetException {
-        File src = new File(this.resource, "singlefile");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final File src = new File(this.resource, "singlefile");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
                                 .setSrc(src)
                                 .setEncoding("windows-31j")
                                 .build()));
-        Assert.assertEquals(src.getPath(), actual.getSrc());
-        Assert.assertEquals(1, actual.getTables().length);
-        ITable actualTable = actual.getTables()[0];
-        Assert.assertEquals("single", actualTable.getTableMetaData().getTableName());
-        Assert.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
-        Assert.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
-        Assert.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("column1"));
-        Assert.assertEquals(2, actualTable.getTableMetaData().getColumnIndex("column2"));
-        Assert.assertEquals(3, actualTable.getTableMetaData().getColumnIndex("column3"));
-        Assert.assertEquals(3, actualTable.getRowCount());
-        Assert.assertEquals("1", actualTable.getValue(0, "key"));
-        Assert.assertEquals("2", actualTable.getValue(1, "key"));
-        Assert.assertEquals("3", actualTable.getValue(2, "key"));
-        Assert.assertEquals("2", actualTable.getValue(0, "column1"));
-        Assert.assertEquals("あ\nいうえお", actualTable.getValue(1, "column1"));
-        Assert.assertEquals("", actualTable.getValue(2, "column1"));
-        Assert.assertEquals("3", actualTable.getValue(0, "column2"));
-        Assert.assertEquals("test", actualTable.getValue(1, "column2"));
-        Assert.assertEquals("", actualTable.getValue(2, "column2"));
-        Assert.assertEquals("4", actualTable.getValue(0, "column3"));
-        Assert.assertEquals("5", actualTable.getValue(1, "column3"));
-        Assert.assertEquals("", actualTable.getValue(2, "column3"));
+        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        Assertions.assertEquals(1, actual.getTables().length);
+        final ITable actualTable = actual.getTables()[0];
+        Assertions.assertEquals("single", actualTable.getTableMetaData().getTableName());
+        Assertions.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
+        Assertions.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
+        Assertions.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("column1"));
+        Assertions.assertEquals(2, actualTable.getTableMetaData().getColumnIndex("column2"));
+        Assertions.assertEquals(3, actualTable.getTableMetaData().getColumnIndex("column3"));
+        Assertions.assertEquals(3, actualTable.getRowCount());
+        Assertions.assertEquals("1", actualTable.getValue(0, "key"));
+        Assertions.assertEquals("2", actualTable.getValue(1, "key"));
+        Assertions.assertEquals("3", actualTable.getValue(2, "key"));
+        Assertions.assertEquals("2", actualTable.getValue(0, "column1"));
+        Assertions.assertEquals("あ\nいうえお", actualTable.getValue(1, "column1"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column1"));
+        Assertions.assertEquals("3", actualTable.getValue(0, "column2"));
+        Assertions.assertEquals("test", actualTable.getValue(1, "column2"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column2"));
+        Assertions.assertEquals("4", actualTable.getValue(0, "column3"));
+        Assertions.assertEquals("5", actualTable.getValue(1, "column3"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column3"));
     }
 
     @Test
     public void createDataSetFromDirectoryContainsUTF8File() throws DataSetException {
-        File src = new File(this.resource, "multifile");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final File src = new File(this.resource, "multifile");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
                                 .setSrc(src)
                                 .setEncoding("UTF8")
                                 .build()));
-        Assert.assertEquals(src.getPath(), actual.getSrc());
-        Assert.assertEquals(2, actual.getTables().length);
+        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        Assertions.assertEquals(2, actual.getTables().length);
         ComparableTable actualTable = actual.getTable("multi1");
-        Assert.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
-        Assert.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
-        Assert.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
-        Assert.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("column1"));
-        Assert.assertEquals(2, actualTable.getTableMetaData().getColumnIndex("column2"));
-        Assert.assertEquals(3, actualTable.getTableMetaData().getColumnIndex("column3"));
-        Assert.assertEquals(3, actualTable.getRowCount());
-        Assert.assertEquals("1", actualTable.getValue(0, "key"));
-        Assert.assertEquals("2", actualTable.getValue(1, "key"));
-        Assert.assertEquals("3", actualTable.getValue(2, "key"));
-        Assert.assertEquals("2", actualTable.getValue(0, "column1"));
-        Assert.assertEquals("あ\nいうえお", actualTable.getValue(1, "column1"));
-        Assert.assertEquals("", actualTable.getValue(2, "column1"));
-        Assert.assertEquals("3", actualTable.getValue(0, "column2"));
-        Assert.assertEquals("test", actualTable.getValue(1, "column2"));
-        Assert.assertEquals("", actualTable.getValue(2, "column2"));
-        Assert.assertEquals("4", actualTable.getValue(0, "column3"));
-        Assert.assertEquals("5", actualTable.getValue(1, "column3"));
-        Assert.assertEquals("", actualTable.getValue(2, "column3"));
+        Assertions.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
+        Assertions.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
+        Assertions.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
+        Assertions.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("column1"));
+        Assertions.assertEquals(2, actualTable.getTableMetaData().getColumnIndex("column2"));
+        Assertions.assertEquals(3, actualTable.getTableMetaData().getColumnIndex("column3"));
+        Assertions.assertEquals(3, actualTable.getRowCount());
+        Assertions.assertEquals("1", actualTable.getValue(0, "key"));
+        Assertions.assertEquals("2", actualTable.getValue(1, "key"));
+        Assertions.assertEquals("3", actualTable.getValue(2, "key"));
+        Assertions.assertEquals("2", actualTable.getValue(0, "column1"));
+        Assertions.assertEquals("あ\nいうえお", actualTable.getValue(1, "column1"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column1"));
+        Assertions.assertEquals("3", actualTable.getValue(0, "column2"));
+        Assertions.assertEquals("test", actualTable.getValue(1, "column2"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column2"));
+        Assertions.assertEquals("4", actualTable.getValue(0, "column3"));
+        Assertions.assertEquals("5", actualTable.getValue(1, "column3"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column3"));
         actualTable = actual.getTable("multi2");
-        Assert.assertEquals("multi2", actualTable.getTableMetaData().getTableName());
-        Assert.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
-        Assert.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
-        Assert.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("column1"));
-        Assert.assertEquals("", actualTable.getTableMetaData().getColumns()[2].getColumnName());
-        Assert.assertEquals("", actualTable.getTableMetaData().getColumns()[3].getColumnName());
-        Assert.assertEquals(3, actualTable.getRowCount());
-        Assert.assertEquals("1", actualTable.getValue(0, 0));
-        Assert.assertEquals("2", actualTable.getValue(1, 0));
-        Assert.assertEquals("3", actualTable.getValue(2, 0));
-        Assert.assertEquals("2", actualTable.getValue(0, 1));
-        Assert.assertEquals("あ\nいうえお", actualTable.getValue(1, 1));
-        Assert.assertEquals("", actualTable.getValue(2, 1));
-        Assert.assertEquals("3", actualTable.getValue(0, 2));
-        Assert.assertEquals("test", actualTable.getValue(1, 2));
-        Assert.assertEquals("", actualTable.getValue(2, 2));
-        Assert.assertEquals("4", actualTable.getValue(0, 3));
-        Assert.assertEquals("5", actualTable.getValue(1, 3));
-        Assert.assertEquals("", actualTable.getValue(2, 3));
+        Assertions.assertEquals("multi2", actualTable.getTableMetaData().getTableName());
+        Assertions.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
+        Assertions.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
+        Assertions.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("column1"));
+        Assertions.assertEquals("", actualTable.getTableMetaData().getColumns()[2].getColumnName());
+        Assertions.assertEquals("", actualTable.getTableMetaData().getColumns()[3].getColumnName());
+        Assertions.assertEquals(3, actualTable.getRowCount());
+        Assertions.assertEquals("1", actualTable.getValue(0, 0));
+        Assertions.assertEquals("2", actualTable.getValue(1, 0));
+        Assertions.assertEquals("3", actualTable.getValue(2, 0));
+        Assertions.assertEquals("2", actualTable.getValue(0, 1));
+        Assertions.assertEquals("あ\nいうえお", actualTable.getValue(1, 1));
+        Assertions.assertEquals("", actualTable.getValue(2, 1));
+        Assertions.assertEquals("3", actualTable.getValue(0, 2));
+        Assertions.assertEquals("test", actualTable.getValue(1, 2));
+        Assertions.assertEquals("", actualTable.getValue(2, 2));
+        Assertions.assertEquals("4", actualTable.getValue(0, 3));
+        Assertions.assertEquals("5", actualTable.getValue(1, 3));
+        Assertions.assertEquals("", actualTable.getValue(2, 3));
     }
 
     @Test
     public void createDataSetFromDirectoryIncludeFile() throws DataSetException {
-        File src = new File(this.resource, "multifile");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final File src = new File(this.resource, "multifile");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
@@ -138,34 +138,34 @@ public class ComparableCsvDataSetProducerTest {
                                 .setEncoding("UTF8")
                                 .setRegInclude("multi1")
                                 .build()));
-        Assert.assertEquals(src.getPath(), actual.getSrc());
-        Assert.assertEquals(1, actual.getTables().length);
-        ComparableTable actualTable = actual.getTable("multi1");
-        Assert.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
-        Assert.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
-        Assert.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
-        Assert.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("column1"));
-        Assert.assertEquals(2, actualTable.getTableMetaData().getColumnIndex("column2"));
-        Assert.assertEquals(3, actualTable.getTableMetaData().getColumnIndex("column3"));
-        Assert.assertEquals(3, actualTable.getRowCount());
-        Assert.assertEquals("1", actualTable.getValue(0, "key"));
-        Assert.assertEquals("2", actualTable.getValue(1, "key"));
-        Assert.assertEquals("3", actualTable.getValue(2, "key"));
-        Assert.assertEquals("2", actualTable.getValue(0, "column1"));
-        Assert.assertEquals("あ\nいうえお", actualTable.getValue(1, "column1"));
-        Assert.assertEquals("", actualTable.getValue(2, "column1"));
-        Assert.assertEquals("3", actualTable.getValue(0, "column2"));
-        Assert.assertEquals("test", actualTable.getValue(1, "column2"));
-        Assert.assertEquals("", actualTable.getValue(2, "column2"));
-        Assert.assertEquals("4", actualTable.getValue(0, "column3"));
-        Assert.assertEquals("5", actualTable.getValue(1, "column3"));
-        Assert.assertEquals("", actualTable.getValue(2, "column3"));
+        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        Assertions.assertEquals(1, actual.getTables().length);
+        final ComparableTable actualTable = actual.getTable("multi1");
+        Assertions.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
+        Assertions.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
+        Assertions.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
+        Assertions.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("column1"));
+        Assertions.assertEquals(2, actualTable.getTableMetaData().getColumnIndex("column2"));
+        Assertions.assertEquals(3, actualTable.getTableMetaData().getColumnIndex("column3"));
+        Assertions.assertEquals(3, actualTable.getRowCount());
+        Assertions.assertEquals("1", actualTable.getValue(0, "key"));
+        Assertions.assertEquals("2", actualTable.getValue(1, "key"));
+        Assertions.assertEquals("3", actualTable.getValue(2, "key"));
+        Assertions.assertEquals("2", actualTable.getValue(0, "column1"));
+        Assertions.assertEquals("あ\nいうえお", actualTable.getValue(1, "column1"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column1"));
+        Assertions.assertEquals("3", actualTable.getValue(0, "column2"));
+        Assertions.assertEquals("test", actualTable.getValue(1, "column2"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column2"));
+        Assertions.assertEquals("4", actualTable.getValue(0, "column3"));
+        Assertions.assertEquals("5", actualTable.getValue(1, "column3"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column3"));
     }
 
     @Test
     public void createDataSetFromDirectoryExcludeFile() throws DataSetException {
-        File src = new File(this.resource, "multifile");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final File src = new File(this.resource, "multifile");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
@@ -173,61 +173,61 @@ public class ComparableCsvDataSetProducerTest {
                                 .setEncoding("UTF8")
                                 .setRegExclude("multi2")
                                 .build()));
-        Assert.assertEquals(src.getPath(), actual.getSrc());
-        Assert.assertEquals(1, actual.getTables().length);
-        ComparableTable actualTable = actual.getTable("multi1");
-        Assert.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
-        Assert.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
-        Assert.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
-        Assert.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("column1"));
-        Assert.assertEquals(2, actualTable.getTableMetaData().getColumnIndex("column2"));
-        Assert.assertEquals(3, actualTable.getTableMetaData().getColumnIndex("column3"));
-        Assert.assertEquals(3, actualTable.getRowCount());
-        Assert.assertEquals("1", actualTable.getValue(0, "key"));
-        Assert.assertEquals("2", actualTable.getValue(1, "key"));
-        Assert.assertEquals("3", actualTable.getValue(2, "key"));
-        Assert.assertEquals("2", actualTable.getValue(0, "column1"));
-        Assert.assertEquals("あ\nいうえお", actualTable.getValue(1, "column1"));
-        Assert.assertEquals("", actualTable.getValue(2, "column1"));
-        Assert.assertEquals("3", actualTable.getValue(0, "column2"));
-        Assert.assertEquals("test", actualTable.getValue(1, "column2"));
-        Assert.assertEquals("", actualTable.getValue(2, "column2"));
-        Assert.assertEquals("4", actualTable.getValue(0, "column3"));
-        Assert.assertEquals("5", actualTable.getValue(1, "column3"));
-        Assert.assertEquals("", actualTable.getValue(2, "column3"));
+        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        Assertions.assertEquals(1, actual.getTables().length);
+        final ComparableTable actualTable = actual.getTable("multi1");
+        Assertions.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
+        Assertions.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
+        Assertions.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
+        Assertions.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("column1"));
+        Assertions.assertEquals(2, actualTable.getTableMetaData().getColumnIndex("column2"));
+        Assertions.assertEquals(3, actualTable.getTableMetaData().getColumnIndex("column3"));
+        Assertions.assertEquals(3, actualTable.getRowCount());
+        Assertions.assertEquals("1", actualTable.getValue(0, "key"));
+        Assertions.assertEquals("2", actualTable.getValue(1, "key"));
+        Assertions.assertEquals("3", actualTable.getValue(2, "key"));
+        Assertions.assertEquals("2", actualTable.getValue(0, "column1"));
+        Assertions.assertEquals("あ\nいうえお", actualTable.getValue(1, "column1"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column1"));
+        Assertions.assertEquals("3", actualTable.getValue(0, "column2"));
+        Assertions.assertEquals("test", actualTable.getValue(1, "column2"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column2"));
+        Assertions.assertEquals("4", actualTable.getValue(0, "column3"));
+        Assertions.assertEquals("5", actualTable.getValue(1, "column3"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column3"));
     }
 
     @Test
     public void createDataSetFromFile() throws DataSetException {
-        File src = new File(this.resource, "multifile/multi1.csv");
-        ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final File src = new File(this.resource, "multifile/multi1.csv");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
                                 .setSource(DataSourceType.csv)
                                 .setEncoding("UTF8")
                                 .build()));
-        Assert.assertEquals(src.getPath(), actual.getSrc());
-        Assert.assertEquals(1, actual.getTables().length);
-        ComparableTable actualTable = actual.getTable("multi1");
-        Assert.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
-        Assert.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
-        Assert.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
-        Assert.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("column1"));
-        Assert.assertEquals(2, actualTable.getTableMetaData().getColumnIndex("column2"));
-        Assert.assertEquals(3, actualTable.getTableMetaData().getColumnIndex("column3"));
-        Assert.assertEquals(3, actualTable.getRowCount());
-        Assert.assertEquals("1", actualTable.getValue(0, "key"));
-        Assert.assertEquals("2", actualTable.getValue(1, "key"));
-        Assert.assertEquals("3", actualTable.getValue(2, "key"));
-        Assert.assertEquals("2", actualTable.getValue(0, "column1"));
-        Assert.assertEquals("あ\nいうえお", actualTable.getValue(1, "column1"));
-        Assert.assertEquals("", actualTable.getValue(2, "column1"));
-        Assert.assertEquals("3", actualTable.getValue(0, "column2"));
-        Assert.assertEquals("test", actualTable.getValue(1, "column2"));
-        Assert.assertEquals("", actualTable.getValue(2, "column2"));
-        Assert.assertEquals("4", actualTable.getValue(0, "column3"));
-        Assert.assertEquals("5", actualTable.getValue(1, "column3"));
-        Assert.assertEquals("", actualTable.getValue(2, "column3"));
+        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        Assertions.assertEquals(1, actual.getTables().length);
+        final ComparableTable actualTable = actual.getTable("multi1");
+        Assertions.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
+        Assertions.assertEquals(4, actualTable.getTableMetaData().getColumns().length);
+        Assertions.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("key"));
+        Assertions.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("column1"));
+        Assertions.assertEquals(2, actualTable.getTableMetaData().getColumnIndex("column2"));
+        Assertions.assertEquals(3, actualTable.getTableMetaData().getColumnIndex("column3"));
+        Assertions.assertEquals(3, actualTable.getRowCount());
+        Assertions.assertEquals("1", actualTable.getValue(0, "key"));
+        Assertions.assertEquals("2", actualTable.getValue(1, "key"));
+        Assertions.assertEquals("3", actualTable.getValue(2, "key"));
+        Assertions.assertEquals("2", actualTable.getValue(0, "column1"));
+        Assertions.assertEquals("あ\nいうえお", actualTable.getValue(1, "column1"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column1"));
+        Assertions.assertEquals("3", actualTable.getValue(0, "column2"));
+        Assertions.assertEquals("test", actualTable.getValue(1, "column2"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column2"));
+        Assertions.assertEquals("4", actualTable.getValue(0, "column3"));
+        Assertions.assertEquals("5", actualTable.getValue(1, "column3"));
+        Assertions.assertEquals("", actualTable.getValue(2, "column3"));
     }
 }

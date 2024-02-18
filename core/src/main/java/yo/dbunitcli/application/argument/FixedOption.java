@@ -1,17 +1,17 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Map;
 
 public class FixedOption extends DefaultArgumentsParser implements ComparableDataSetParamOption {
+    @CommandLine.Option(names = "-fixedLength", description = "comma separate column Lengths")
+    private String fixedLength;
+
     public FixedOption(final String prefix) {
         super(prefix);
     }
-
-    @Option(name = "-fixedLength", usage = "comma separate column Lengths")
-    private String fixedLength;
 
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {

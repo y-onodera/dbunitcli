@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 
 public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
-    public static ManualRowsMappingTableBuilder NO_TARGET = new ManualRowsMappingTableBuilder(new ArrayList<>()) {
+    public static ManualRowsMappingTableBuilder NO_TARGET = new ManualRowsMappingTableBuilder(new ArrayList<>(), XlsxSchema.FileInfo.NONE) {
         @Override
         public void handle(final CellReference reference, final int currentCol, final String formattedValue) {
             // no handle
@@ -31,15 +31,16 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
     private int currentTableIndex = -1;
     private ITableMetaData nowProcessing = null;
 
-    public ManualRowsMappingTableBuilder(final List<XlsxRowsTableDefine> tableDefines) {
+    public ManualRowsMappingTableBuilder(final List<XlsxRowsTableDefine> tableDefines, final XlsxSchema.FileInfo fileInfo) {
         this.tableNames = new String[tableDefines.size()];
         IntStream.range(0, tableDefines.size()).forEach(i -> {
             final XlsxRowsTableDefine def = tableDefines.get(i);
-            this.tableNames[i] = def.getTableName();
-            this.tableStartRow.put(def.getTableName(), def.getDataStartRow());
-            this.tableMetaDataMap.put(def.getTableName(), def.getTableMetaData());
-            this.targetIndex.put(def.getTableName(), Arrays.asList(def.getCellIndexes()));
-            this.breakKey.put(def.getTableName(), def.getBreakKey());
+            this.tableNames[i] = def.tableName();
+            this.tableStartRow.put(def.tableName(), def.dataStartRow());
+            this.tableMetaDataMap.put(def.tableName()
+                    , def.addOptional() ? fileInfo.wrap(def.tableMetaData()) : def.tableMetaData());
+            this.targetIndex.put(def.tableName(), Arrays.asList(def.cellIndexes()));
+            this.breakKey.put(def.tableName(), def.breakKey());
         });
     }
 
@@ -95,6 +96,9 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
             IntStream.range(this.rowValues.size(), this.getColumnLength())
                     .forEach(i -> this.rowValues.add(""));
         }
+        if (this.nowProcessing instanceof XlsxSchema.FileInfo.AddFileInfoMetaData option) {
+            option.setValueTo(this.rowValues);
+        }
         return this.rowValues.toArray(new String[0]);
     }
 
@@ -128,5 +132,4 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
             throw new AssertionError(e);
         }
     }
-
 }

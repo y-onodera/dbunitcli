@@ -12,7 +12,7 @@ import java.util.stream.IntStream;
 
 public class XlsxCellsToTableBuilder {
 
-    public static XlsxCellsToTableBuilder NO_TARGET = new XlsxCellsToTableBuilder(new ArrayList<>()) {
+    public static XlsxCellsToTableBuilder NO_TARGET = new XlsxCellsToTableBuilder(new ArrayList<>(), XlsxSchema.FileInfo.NONE) {
         @Override
         public void handle(final CellReference reference, final String formattedValue) {
             // no handle
@@ -26,22 +26,29 @@ public class XlsxCellsToTableBuilder {
 
     private final Map<String, List<String[]>> row = new HashMap<>();
 
-    public XlsxCellsToTableBuilder(final List<XlsxCellsTableDefine> tableDefines) {
+    public XlsxCellsToTableBuilder(final List<XlsxCellsTableDefine> tableDefines, final XlsxSchema.FileInfo fileInfo) {
         this.tableNames = new String[tableDefines.size()];
         IntStream.range(0, this.tableNames.length).forEach(i -> {
             final XlsxCellsTableDefine def = tableDefines.get(i);
-            this.tableNames[i] = def.getTableName();
-            this.tableMetaDataMap.put(def.getTableName(), def.getTableMetaData());
+            this.tableNames[i] = def.tableName();
+            this.tableMetaDataMap.put(def.tableName()
+                    , def.addOptional() ? fileInfo.wrap(def.tableMetaData()) : def.tableMetaData());
             def.getTargetAddresses().forEach(cellAddress -> {
                 if (!this.columnDefine.containsKey(cellAddress)) {
                     this.columnDefine.put(cellAddress, new ArrayList<>());
                 }
                 this.columnDefine.get(cellAddress).add(def);
             });
-            this.row.put(def.getTableName(), new ArrayList<>());
-            final List<String[]> targetRows = this.row.get(def.getTableName());
+            this.row.put(def.tableName(), new ArrayList<>());
+            final List<String[]> targetRows = this.row.get(def.tableName());
             IntStream.range(0, def.rowCount())
-                    .forEach(rowIndex -> targetRows.add(rowIndex, new String[def.columnCount()]));
+                    .forEach(rowIndex -> {
+                        if (def.addOptional()) {
+                            targetRows.add(rowIndex, fileInfo.defaultColumnValues(def.columnCount()));
+                        } else {
+                            targetRows.add(rowIndex, new String[def.columnCount()]);
+                        }
+                    });
         });
     }
 
@@ -51,9 +58,9 @@ public class XlsxCellsToTableBuilder {
                 .replaceAll("\\$", "");
         if (this.columnDefine.containsKey(ref)) {
             this.columnDefine.get(ref).forEach(it -> {
-                final ITableMetaData metaData = this.tableMetaDataMap.get(it.getTableName());
+                final ITableMetaData metaData = this.tableMetaDataMap.get(it.tableName());
                 try {
-                    this.row.get(it.getTableName())
+                    this.row.get(it.tableName())
                             .get(it.getRowIndex(ref))[metaData.getColumnIndex(it.getColumnName(ref))] = formattedValue;
                 } catch (final DataSetException e) {
                     throw new AssertionError(e);

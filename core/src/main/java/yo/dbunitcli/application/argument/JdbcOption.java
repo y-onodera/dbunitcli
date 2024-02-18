@@ -1,8 +1,6 @@
 package yo.dbunitcli.application.argument;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import picocli.CommandLine;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.File;
@@ -15,16 +13,16 @@ import java.util.stream.Stream;
 
 public class JdbcOption extends DefaultArgumentsParser {
 
-    @Option(name = "-jdbcProperties", usage = "use connect database. [url=,user=,pass=]")
+    @CommandLine.Option(names = "-jdbcProperties", description = "use connect database. [url=,user=,pass=]")
     private File jdbcProperties;
 
-    @Option(name = "-jdbcUrl", usage = "use connect database. override jdbcProperties value")
+    @CommandLine.Option(names = "-jdbcUrl", description = "use connect database. override jdbcProperties value")
     private String jdbcUrl;
 
-    @Option(name = "-jdbcUser", usage = "use connect database. override jdbcProperties value")
+    @CommandLine.Option(names = "-jdbcUser", description = "use connect database. override jdbcProperties value")
     private String jdbcUser;
 
-    @Option(name = "-jdbcPass", usage = "use connect database. override jdbcProperties value")
+    @CommandLine.Option(names = "-jdbcPass", description = "use connect database. override jdbcProperties value")
     private String jdbcPass;
 
     private Properties jdbcProp;
@@ -42,16 +40,6 @@ public class JdbcOption extends DefaultArgumentsParser {
     }
 
     @Override
-    public void setUpComponent(final CmdLineParser parser, final String[] args) throws CmdLineException {
-        try {
-            this.loadJdbcTemplate();
-        } catch (final IOException e) {
-            throw new CmdLineException(parser, e.getMessage(), e);
-        }
-        this.validate(parser);
-    }
-
-    @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putFile("-jdbcProperties", this.jdbcProperties);
@@ -63,14 +51,24 @@ public class JdbcOption extends DefaultArgumentsParser {
         return result;
     }
 
-    protected void validate(final CmdLineParser parser) throws CmdLineException {
+    @Override
+    public void setUpComponent(final CommandLine.ParseResult parser, final String[] args) {
+        try {
+            this.loadJdbcTemplate();
+        } catch (final IOException e) {
+            throw new AssertionError(e.getMessage(), e);
+        }
+        this.validate();
+    }
+
+    protected void validate() {
         if (Stream.of(this.jdbcUrl, this.jdbcUser, this.jdbcPass)
                 .anyMatch(it -> Optional.ofNullable(it).orElse("").isEmpty())) {
             if (this.jdbcProperties == null) {
-                throw new CmdLineException(parser, "need jdbcProperties option", new IllegalArgumentException());
+                throw new AssertionError("need jdbcProperties option", new IllegalArgumentException());
             }
             if (!this.jdbcProperties.exists()) {
-                throw new CmdLineException(parser, this.jdbcProperties.toString() + " is not exist file", new IllegalArgumentException(this.jdbcProperties.toString()));
+                throw new AssertionError(this.jdbcProperties.toString() + " is not exist file", new IllegalArgumentException(this.jdbcProperties.toString()));
             }
         }
     }

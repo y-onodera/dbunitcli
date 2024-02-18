@@ -1,0 +1,59 @@
+{
+  "settings": [
+    {
+      "name": "multi1",
+      "separate": [
+        {
+          "number": {
+            "key": "key"
+          },
+          "filter": [
+            "true"
+          ]
+        },
+        {
+          "name": "multi1",
+          "tableName": "keyChange",
+          "number": {
+            "key": "key == 2 ? key : key * 10"
+          },
+          "filter": [
+            "true"
+          ]
+        }
+      ]
+    },
+    {
+      "pattern": "multi2",
+      "number": {
+        "key": "key == 1 ?  key * 10 : key"
+      }
+    },
+    {
+      "innerJoin": {
+        "left": "multi1",
+        "right": "multi2",
+        "column": [
+          "key"
+        ]
+      },
+      "tableName": "firstJoin",
+      "number": {
+        "key": "multi1_key"
+      }
+    },
+    {
+      "fullJoin": {
+        "left": "firstJoin",
+        "right": "keyChange",
+        "column": [
+          "key"
+        ]
+      },
+      "exclude": [
+        "firstJoin_key"
+      ]
+    }
+  ],
+  "commonSettings": []
+}

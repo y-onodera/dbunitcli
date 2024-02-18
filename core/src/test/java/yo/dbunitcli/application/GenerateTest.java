@@ -1,8 +1,8 @@
 package yo.dbunitcli.application;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class GenerateTest {
 
     private String subDirectory;
 
-    @Before
+    @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
         this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8);
         this.testResourcesDir = this.baseDir.replace("target/test-classes", "src/test/resources");
@@ -156,6 +156,6 @@ public class GenerateTest {
     private void assertGenerateFileEquals(final String target, final String encode) throws IOException {
         final String expect = Files.readString(new File(this.testResourcesDir + this.subDirectory + "/expect/txt", target).toPath(), Charset.forName(encode));
         final String actual = Files.readString(new File(this.baseDir + this.subDirectory + "/result", target).toPath(), Charset.forName(encode));
-        Assert.assertEquals(expect, actual);
+        Assertions.assertEquals(expect, actual);
     }
 }
