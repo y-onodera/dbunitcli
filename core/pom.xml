@@ -43,7 +43,7 @@
                             <imageName>dbunit-cli</imageName>
                             <fallback>false</fallback>
                             <buildArgs>
-                                -J-Dfile.encoding=COMPAT
+                                -J-Dfile.encoding=MS932
                                 -H:+AddAllCharsets
                                 -H:+UnlockExperimentalVMOptions
                                 -H:ReflectionConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/reflect-config.json
