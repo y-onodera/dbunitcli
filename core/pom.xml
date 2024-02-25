@@ -50,6 +50,7 @@
                                 -H:ResourceConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/resource-config.json
                                 -H:JNIConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/jni-config.json
                                 -H:SerializationConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/serialization-config.json
+                                --initialize-at-build-time=org.openxmlformats.schemas.spreadsheetml.x2006.main.impl
                             </buildArgs>
                         </configuration>
                     </plugin>
