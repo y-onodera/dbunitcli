@@ -3148,21 +3148,6 @@
       {
         "name": "threadLocalRandomProbe"
       }
-    ],
-    "methods": [
-      {
-        "name": "ofVirtual",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "java.lang.ThreadBuilders$VirtualThreadBuilder",
-    "methods": [
-      {
-        "name": "factory",
-        "parameterTypes": []
-      }
     ]
   },
   {
@@ -5204,26 +5189,6 @@
     ]
   },
   {
-    "name": "java.util.concurrent.Executors",
-    "methods": [
-      {
-        "name": "newVirtualThreadPerTaskExecutor",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "java.util.concurrent.ForkJoinTask",
-    "fields": [
-      {
-        "name": "aux"
-      },
-      {
-        "name": "status"
-      }
-    ]
-  },
-  {
     "name": "java.util.concurrent.atomic.AtomicBoolean",
     "fields": [
       {
@@ -5345,9 +5310,6 @@
   },
   {
     "name": "javax.smartcardio.CardPermission"
-  },
-  {
-    "name": "jdk.internal.misc.Unsafe"
   },
   {
     "name": "jdk.management.jfr.ConfigurationInfo",
@@ -5637,17 +5599,6 @@
   },
   {
     "name": "org.apache.poi.schemas.vmldrawing.impl.XmlDocumentImpl",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "org.apache.xmlbeans.SchemaType"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "org.apache.xmlbeans.impl.values.XmlComplexContentImpl",
     "methods": [
       {
         "name": "<init>",
@@ -6202,6 +6153,17 @@
   },
   {
     "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTCommentsImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTDxfImpl",
     "methods": [
       {
         "name": "<init>",
