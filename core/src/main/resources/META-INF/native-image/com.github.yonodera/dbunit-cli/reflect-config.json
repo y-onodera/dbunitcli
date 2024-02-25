@@ -5647,6 +5647,17 @@
     ]
   },
   {
+    "name": "org.apache.xmlbeans.impl.values.XmlComplexContentImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
     "name": "org.apache.xerces.util.SecurityManager"
   },
   {
