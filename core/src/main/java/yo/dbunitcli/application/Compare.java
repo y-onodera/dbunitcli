@@ -9,7 +9,14 @@ public class Compare implements Command<CompareOption> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Compare.class);
 
     public static void main(final String[] args) throws Exception {
-        new Compare().exec(args);
+        try {
+            new Compare().exec(args);
+        } catch (final Throwable th) {
+            if (!(th instanceof CommandFailException)) {
+                Compare.LOGGER.error("error:", th);
+            }
+            throw th;
+        }
     }
 
     @Override
