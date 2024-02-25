@@ -98,6 +98,9 @@
         "pattern": "\\Qorg/apache/pdfbox/resources/glyphlist/zapfdingbats.txt\\E"
       },
       {
+        "pattern": "org/apache/poi/schemas/ooxml/element/*/.*\\.xsb"
+      },
+      {
         "pattern": "org/apache/poi/schemas/ooxml/system/ooxml/.*\\.xsb"
       },
       {
