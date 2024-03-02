@@ -107,6 +107,12 @@
         "pattern": "\\Qorg/apache/poi/ss/formula/function/functionMetadata.txt\\E"
       },
       {
+        "pattern": "\\Qorg/apache/poi/ss/formula/function/functionMetadata-asGenerated.txt\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/poi/ss/formula/function/functionMetadataCetab.txt\\E"
+      },
+      {
         "pattern": "\\Qorg/apache/xmlbeans/metadata/system/sXMLCONFIG/index.xsb\\E"
       },
       {
