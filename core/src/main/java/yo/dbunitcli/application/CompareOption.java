@@ -76,8 +76,24 @@ public class CompareOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final CommandLine.ParseResult parseResult, final String[] expandArgs) {
-        super.setUpComponent(parseResult, expandArgs);
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(this.getPrefix(), args);
+        result.put("-targetType", this.targetType, Type.class);
+        if (Type.valueOf(result.get("-targetType")).isAny(Type.pdf, Type.image)) {
+            result.putAll(this.imageOption.createOptionParam(args));
+        }
+        result.putFile("-setting", this.setting == null ? null : new File(this.setting));
+        result.put("-settingEncoding", this.settingEncoding);
+        result.putAll(this.newData.createOptionParam(args));
+        result.putAll(this.oldData.createOptionParam(args));
+        result.putAll(this.getConverterOption().createOptionParam(args));
+        result.putAll(this.expectData.createOptionParam(args));
+        return result;
+    }
+
+    @Override
+    public void setUpComponent(final String[] expandArgs) {
+        super.setUpComponent(expandArgs);
         if (this.targetType.isAny(Type.image, Type.pdf)) {
             this.imageOption.parseArgument(expandArgs);
             if (this.targetType == Type.image) {
@@ -100,22 +116,6 @@ public class CompareOption extends CommandLineOption {
         }
         this.populateSettings();
         this.getConverterOption().parseArgument(expandArgs);
-    }
-
-    @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(this.getPrefix(), args);
-        result.put("-targetType", this.targetType, Type.class);
-        if (Type.valueOf(result.get("-targetType")).isAny(Type.pdf, Type.image)) {
-            result.putAll(this.imageOption.createOptionParam(args));
-        }
-        result.putFile("-setting", this.setting == null ? null : new File(this.setting));
-        result.put("-settingEncoding", this.settingEncoding);
-        result.putAll(this.newData.createOptionParam(args));
-        result.putAll(this.oldData.createOptionParam(args));
-        result.putAll(this.getConverterOption().createOptionParam(args));
-        result.putAll(this.expectData.createOptionParam(args));
-        return result;
     }
 
     public boolean compare() {

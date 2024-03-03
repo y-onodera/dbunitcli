@@ -70,7 +70,7 @@ public class TemplateRenderOption extends DefaultArgumentsParser implements Comp
     }
 
     @Override
-    public void setUpComponent(final CommandLine.ParseResult parser, final String[] expandArgs) {
+    public void setUpComponent(final String[] expandArgs) {
         if (this.templateGroup != null) {
             if (!this.templateGroup.exists() || !this.templateGroup.isFile()) {
                 throw new AssertionError(this.templateGroup + " is not exist file"

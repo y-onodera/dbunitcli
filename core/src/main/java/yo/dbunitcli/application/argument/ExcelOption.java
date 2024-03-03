@@ -27,7 +27,7 @@ public class ExcelOption extends DefaultArgumentsParser implements ComparableDat
     }
 
     @Override
-    public void setUpComponent(final CommandLine.ParseResult parser, final String[] args) {
+    public void setUpComponent(final String[] args) {
         try {
             this.xlsxSchema = new FromJsonXlsxSchemaBuilder().build(this.xlsxSchemaSource);
         } catch (final Exception e) {

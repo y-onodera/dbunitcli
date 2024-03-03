@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import picocli.CommandLine;
 import yo.dbunitcli.application.argument.DataSetLoadOption;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.Parameter;
@@ -25,18 +24,18 @@ public class ConvertOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final CommandLine.ParseResult parseResult, final String[] expandArgs) {
-        super.setUpComponent(parseResult, expandArgs);
-        this.src.parseArgument(expandArgs);
-        this.getConverterOption().parseArgument(expandArgs);
-    }
-
-    @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putAll(this.src.createOptionParam(args));
         result.putAll(this.getConverterOption().createOptionParam(args));
         return result;
+    }
+
+    @Override
+    public void setUpComponent(final String[] expandArgs) {
+        super.setUpComponent(expandArgs);
+        this.src.parseArgument(expandArgs);
+        this.getConverterOption().parseArgument(expandArgs);
     }
 
     public ComparableDataSet targetDataSet() {

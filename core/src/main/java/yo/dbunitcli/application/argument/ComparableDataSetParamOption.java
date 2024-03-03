@@ -1,6 +1,5 @@
 package yo.dbunitcli.application.argument;
 
-import picocli.CommandLine;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Map;
@@ -19,7 +18,7 @@ public interface ComparableDataSetParamOption extends ArgumentsParser {
     }
 
     @Override
-    default void setUpComponent(final CommandLine.ParseResult parseResult, final String[] expandArgs) {
+    default void setUpComponent(final String[] expandArgs) {
         // nothing
     }
 

@@ -75,7 +75,7 @@ public class ImageCompareOption extends DefaultArgumentsParser {
     }
 
     @Override
-    public void setUpComponent(final CommandLine.ParseResult parser, final String[] expandArgs) {
+    public void setUpComponent(final String[] expandArgs) {
         if (!Optional.ofNullable(this.excludedAreas).orElse("").isEmpty()) {
             final Matcher m = ImageCompareOption.AREA_REGEX.matcher(this.excludedAreas);
             while (m.find()) {

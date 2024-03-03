@@ -59,7 +59,7 @@ public class DataSetConverterOption extends DefaultArgumentsParser {
     }
 
     @Override
-    public void setUpComponent(final CommandLine.ParseResult parser, final String[] expandArgs) {
+    public void setUpComponent(final String[] expandArgs) {
         if (this.resultType == DataSourceType.table) {
             this.jdbcOption.parseArgument(expandArgs);
         }

@@ -79,14 +79,6 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final CommandLine.ParseResult parser, final String[] expandArgs) {
-        super.setUpComponent(parser, expandArgs);
-        this.param.setArgumentMapper(ParameterizeOption.NONE_PARAM_MAPPER);
-        this.param.parseArgument(expandArgs);
-        this.templateOption.parseArgument(expandArgs);
-    }
-
-    @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.putAll(this.param.createOptionParam(args));
@@ -97,6 +89,14 @@ public class ParameterizeOption extends CommandLineOption {
         result.putFile("-template", this.template, true);
         result.putAll(this.templateOption.createOptionParam(args));
         return result;
+    }
+
+    @Override
+    public void setUpComponent(final String[] expandArgs) {
+        super.setUpComponent(expandArgs);
+        this.param.setArgumentMapper(ParameterizeOption.NONE_PARAM_MAPPER);
+        this.param.parseArgument(expandArgs);
+        this.templateOption.parseArgument(expandArgs);
     }
 
     public Stream<Map<String, Object>> loadParams() {

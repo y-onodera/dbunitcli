@@ -56,7 +56,7 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
     }
 
     @Override
-    public void setUpComponent(final CommandLine.ParseResult parseResult, final String[] expandArgs) {
+    public void setUpComponent(final String[] expandArgs) {
         this.parameter.getMap().putAll(this.inputParam);
     }
 

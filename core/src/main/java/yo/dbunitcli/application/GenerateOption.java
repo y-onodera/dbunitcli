@@ -79,8 +79,8 @@ public class GenerateOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final CommandLine.ParseResult parser, final String[] expandArgs) {
-        super.setUpComponent(parser, expandArgs);
+    public void setUpComponent(final String[] expandArgs) {
+        super.setUpComponent(expandArgs);
         this.getConverterOption().parseArgument(expandArgs);
         this.src.parseArgument(expandArgs);
         this.templateOption.parseArgument(expandArgs);

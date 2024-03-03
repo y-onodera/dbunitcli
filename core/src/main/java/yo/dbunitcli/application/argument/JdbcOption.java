@@ -52,7 +52,7 @@ public class JdbcOption extends DefaultArgumentsParser {
     }
 
     @Override
-    public void setUpComponent(final CommandLine.ParseResult parser, final String[] args) {
+    public void setUpComponent(final String[] args) {
         try {
             this.loadJdbcTemplate();
         } catch (final IOException e) {

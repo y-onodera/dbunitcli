@@ -14,8 +14,8 @@ public interface ArgumentsParser {
     default void parseArgument(final String[] args) {
         final CommandLine cmdLine = new CommandLine(this);
         final String[] targetArgs = this.getArgumentMapper().map(args, this.getPrefix(), cmdLine);
-        final CommandLine.ParseResult result = cmdLine.parseArgs(this.filterArguments(cmdLine, targetArgs));
-        this.setUpComponent(result, targetArgs);
+        cmdLine.parseArgs(this.filterArguments(cmdLine, targetArgs));
+        this.setUpComponent(targetArgs);
     }
 
     default String[] filterArguments(final CommandLine commandLine, final String[] expandArgs) {
@@ -37,7 +37,7 @@ public interface ArgumentsParser {
 
     OptionParam createOptionParam(Map<String, String> args);
 
-    void setUpComponent(CommandLine.ParseResult parseResult, String[] expandArgs);
+    void setUpComponent(String[] expandArgs);
 
     enum ParamType {
         TEXT, ENUM, FILE, DIR, FILE_OR_DIR,
