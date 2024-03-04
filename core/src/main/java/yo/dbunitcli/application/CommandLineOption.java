@@ -12,9 +12,9 @@ import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 abstract public class CommandLineOption extends DefaultArgumentsParser {
 
@@ -66,26 +66,6 @@ abstract public class CommandLineOption extends DefaultArgumentsParser {
 
     protected ComparableDataSetParam.Builder getDataSetParamBuilder() {
         return ComparableDataSetParam.builder();
-    }
-
-    protected String[] getExpandArgs(final String[] args) {
-        final List<String> result = new ArrayList<>();
-        for (final String arg : args) {
-            if (arg.startsWith("@")) {
-                final File file = new File(arg.substring(1));
-                if (!file.exists()) {
-                    throw new AssertionError("file not exists :" + file.getPath());
-                }
-                try {
-                    result.addAll(Files.readAllLines(file.toPath()));
-                } catch (final IOException ex) {
-                    throw new AssertionError("Failed to parse " + file, ex);
-                }
-            } else {
-                result.add(arg);
-            }
-        }
-        return result.toArray(new String[0]);
     }
 
     protected String getResultPath() {

@@ -55,6 +55,8 @@ public class MainPresenter {
     @FXML
     public MFXButton reset;
     @FXML
+    public MFXButton paramLoad;
+    @FXML
     public HBox commandBox;
     @FXML
     private MigPane commandPane;
@@ -70,12 +72,28 @@ public class MainPresenter {
         for (final String cmdType : this.commandTypes()) {
             this.commandTypeSelect.getItems().add(cmdType);
         }
+        this.paramLoad.visibleProperty().bind(this.commandTypeSelect.selectedItemProperty().isNotEqualTo(""));
         this.reset();
     }
 
     @FXML
     public void close() {
         Platform.exit();
+    }
+
+    @FXML
+    public void loadParam() {
+        final FileChooser fileSave = new FileChooser();
+        fileSave.setTitle("Save Parameter File");
+        fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("(*.txt)", "*.txt"));
+        fileSave.setInitialDirectory(new File("."));
+        final File file = fileSave.showOpenDialog(this.commandTypeSelect.getScene().getWindow());
+        if (file != null) {
+            this.parser = this.createCommand(this.selectedCommand).getOptions();
+            final ArgumentsParser.OptionParam option = this.parser.createOptionParam(new String[]{"@" + file.getPath()});
+            this.clearInputFields(this.commandTypeSelect);
+            this.setInputFields(this.commandTypeSelect, option);
+        }
     }
 
     @FXML
@@ -142,6 +160,10 @@ public class MainPresenter {
     private void resetInput(final MFXComboBox<String> selected, final Node form) {
         final ArgumentsParser.OptionParam option = this.parser.createOptionParam(this.inputToArg());
         this.clearInputFields(form);
+        this.setInputFields(selected, option);
+    }
+
+    private void setInputFields(final MFXComboBox<String> selected, final ArgumentsParser.OptionParam option) {
         int row = 1;
         final MFXValidator validator = new MFXValidator();
         validator.validProperty().addListener((observable, oldVal, newVal) -> this.exec.setDisable(!newVal));

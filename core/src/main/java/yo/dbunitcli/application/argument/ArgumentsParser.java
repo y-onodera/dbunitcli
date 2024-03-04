@@ -3,6 +3,8 @@ package yo.dbunitcli.application.argument;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,9 +37,38 @@ public interface ArgumentsParser {
         return "";
     }
 
+    default OptionParam createOptionParam(final String[] args) {
+        final String[] expandArgs = this.getExpandArgs(args);
+        this.parseArgument(expandArgs);
+        return this.createOptionParam(Arrays.stream(expandArgs)
+                .collect(Collectors.toMap(this.getArgumentFilter().extractKey()
+                        , it -> it.replace(this.getArgumentFilter().extractKey().apply(it) + "=", "")
+                )));
+    }
+
     OptionParam createOptionParam(Map<String, String> args);
 
     void setUpComponent(String[] expandArgs);
+
+    default String[] getExpandArgs(final String[] args) {
+        final List<String> result = new ArrayList<>();
+        for (final String arg : args) {
+            if (arg.startsWith("@")) {
+                final File file = new File(arg.substring(1));
+                if (!file.exists()) {
+                    throw new AssertionError("file not exists :" + file.getPath());
+                }
+                try {
+                    result.addAll(Files.readAllLines(file.toPath()));
+                } catch (final IOException ex) {
+                    throw new AssertionError("Failed to parse " + file, ex);
+                }
+            } else {
+                result.add(arg);
+            }
+        }
+        return result.toArray(new String[0]);
+    }
 
     enum ParamType {
         TEXT, ENUM, FILE, DIR, FILE_OR_DIR,
