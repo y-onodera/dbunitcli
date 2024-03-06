@@ -7,13 +7,17 @@ import java.io.File;
 
 public record DataSetConsumerParam(
         DatabaseConnectionLoader databaseConnectionLoader
-        , DataSourceType resultType
+        , ResultType resultType
         , DBConverter.Operation operation
         , File resultDir
         , String fileName
         , String outputEncoding
         , String excelTable
         , boolean exportEmptyTable) {
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public DataSetConsumerParam(final Builder builder) {
         this(builder.getDatabaseConnectionLoader()
@@ -27,13 +31,9 @@ public record DataSetConsumerParam(
         );
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public static class Builder {
         private DatabaseConnectionLoader databaseConnectionLoader;
-        private DataSourceType resultType;
+        private ResultType resultType;
         private DBConverter.Operation operation;
         private File resultDir;
         private String outputEncoding;
@@ -54,11 +54,11 @@ public record DataSetConsumerParam(
             return this;
         }
 
-        public DataSourceType getResultType() {
+        public ResultType getResultType() {
             return this.resultType;
         }
 
-        public Builder setResultType(final DataSourceType resultType) {
+        public Builder setResultType(final ResultType resultType) {
             this.resultType = resultType;
             return this;
         }

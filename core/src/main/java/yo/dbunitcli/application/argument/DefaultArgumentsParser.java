@@ -13,11 +13,6 @@ public abstract class DefaultArgumentsParser implements ArgumentsParser {
     }
 
     @Override
-    public String getPrefix() {
-        return this.prefix;
-    }
-
-    @Override
     public ArgumentFilter getArgumentFilter() {
         return this.argumentFilter;
     }
@@ -27,6 +22,11 @@ public abstract class DefaultArgumentsParser implements ArgumentsParser {
         return this.argumentMapper;
     }
 
+    @Override
+    public String getPrefix() {
+        return this.prefix;
+    }
+
     public void setArgumentFilter(final ArgumentFilter argumentFilter) {
         this.argumentFilter = argumentFilter;
     }
@@ -34,4 +34,5 @@ public abstract class DefaultArgumentsParser implements ArgumentsParser {
     public void setArgumentMapper(final ArgumentMapper argumentMapper) {
         this.argumentMapper = argumentMapper;
     }
+
 }

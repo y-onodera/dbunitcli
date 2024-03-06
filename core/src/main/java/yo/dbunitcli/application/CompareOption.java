@@ -44,15 +44,22 @@ public class CompareOption extends CommandLineOption {
     };
 
     private final DataSetLoadOption expectData = new DataSetLoadOption("expect");
+
     private final DataSetLoadOption oldData = new DataSetLoadOption("old");
+
     private final DataSetLoadOption newData = new DataSetLoadOption("new");
+
     private final ImageCompareOption imageOption = new ImageCompareOption("image");
+
     @CommandLine.Option(names = "-setting", description = "file comparison settings")
     private String setting;
+
     @CommandLine.Option(names = "-settingEncoding", description = "settings encoding")
     private String settingEncoding = System.getProperty("file.encoding");
+
     @CommandLine.Option(names = "-targetType")
     private Type targetType = Type.data;
+
     private TableSeparators tableSeparators;
 
     public CompareOption() {
@@ -174,7 +181,7 @@ public class CompareOption extends CommandLineOption {
                 this.getDataSetParamBuilder()
                         .setTableSeparators(this.expectData.getParam().getTableSeparators())
                         .setSrc(converterOption.getResultDir())
-                        .setSource(converterOption.getResultType())
+                        .setSource(converterOption.getResultType().toDataSourceType())
                         .setEncoding(converterOption.getOutputEncoding())
                         .setRecursive(false)
                         .build()

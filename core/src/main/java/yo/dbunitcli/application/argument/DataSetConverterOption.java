@@ -3,6 +3,7 @@ package yo.dbunitcli.application.argument;
 import picocli.CommandLine;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
 import yo.dbunitcli.dataset.DataSourceType;
+import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.converter.DBConverter;
 
 import java.io.File;
@@ -15,7 +16,7 @@ public class DataSetConverterOption extends DefaultArgumentsParser {
     @CommandLine.Option(names = "-result", description = "directory result files at")
     private File resultDir = new File(".");
     @CommandLine.Option(names = "-resultType")
-    private DataSourceType resultType = DataSourceType.csv;
+    private ResultType resultType = ResultType.csv;
     @CommandLine.Option(names = "-exportEmptyTable", description = "if true then empty table is not export")
     private String exportEmptyTable = "true";
     @CommandLine.Option(names = "-resultPath", description = "result file relative path from -result=dir.")
@@ -36,7 +37,7 @@ public class DataSetConverterOption extends DefaultArgumentsParser {
     @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(this.getPrefix(), args);
-        result.put("-resultType", ResultType.valueOf(this.resultType.toString()), ResultType.class);
+        result.put("-resultType", this.resultType, ResultType.class);
         if (!result.hasValue("-resultType")) {
             return result;
         }
@@ -60,7 +61,7 @@ public class DataSetConverterOption extends DefaultArgumentsParser {
 
     @Override
     public void setUpComponent(final String[] expandArgs) {
-        if (this.resultType == DataSourceType.table) {
+        if (this.resultType == ResultType.table) {
             this.jdbcOption.parseArgument(expandArgs);
         }
     }
@@ -78,7 +79,7 @@ public class DataSetConverterOption extends DefaultArgumentsParser {
                 ;
     }
 
-    public DataSourceType getResultType() {
+    public ResultType getResultType() {
         return this.resultType;
     }
 
@@ -104,10 +105,6 @@ public class DataSetConverterOption extends DefaultArgumentsParser {
 
     public void setResultPath(final String resultPath) {
         this.resultPath = resultPath;
-    }
-
-    public enum ResultType {
-        csv, xls, xlsx, table
     }
 
 }
