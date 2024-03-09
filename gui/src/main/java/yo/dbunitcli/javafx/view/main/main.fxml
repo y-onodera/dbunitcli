@@ -31,7 +31,7 @@
                     <HBox fx:id="commandBox" spacing="10">
                         <MFXComboBox floatingText="command" floatMode="INLINE" fx:id="commandTypeSelect"
                                      onAction="#selectCommandType"/>
-                        <MFXButton fx:id="paramLoad" onAction="#loadParam" text="param" alignment="CENTER">
+                        <MFXButton fx:id="paramLoad" onAction="#loadParam" text="load param" alignment="CENTER">
                             <graphic>
                                 <MFXFontIcon description="fas-file-import" size="32"/>
                             </graphic>
