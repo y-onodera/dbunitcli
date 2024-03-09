@@ -170,53 +170,61 @@ public class MainPresenter {
         for (final String key : option.keySet()) {
             final Map.Entry<String, ArgumentsParser.Attribute> entry = option.getColumn(key);
             if (entry.getValue().getType() == ArgumentsParser.ParamType.ENUM) {
-                if (selected.getFloatingText().equals(key)) {
-                    this.argument.put(key, selected);
-                } else {
-                    final MFXComboBox<String> select = new MFXComboBox<>(FXCollections.observableArrayList(
-                            entry.getValue().getSelectOption()
-                    ));
-                    select.setFloatingText(key);
-                    select.setFloatMode(FloatMode.INLINE);
-                    select.setEditable(true);
-                    select.getSelectionModel().selectItem(entry.getKey());
-                    if (entry.getValue().isRequired()) {
-                        final VBox vbox = this.addRequiredValidation(validator, select);
-                        this.commandPane.add(vbox, "cell 0 " + row);
-                        select.getSelectionModel().selectedItemProperty()
-                                .addListener((observable, newVal, oldVal) -> this.resetInput(select, vbox));
-                    } else {
-                        this.commandPane.add(select, "width 80,cell 0 " + row);
-                        select.getSelectionModel().selectedItemProperty()
-                                .addListener((observable, newVal, oldVal) -> this.resetInput(select));
-                    }
-                    this.argument.put(key, select);
-                }
+                this.setInputFieldsEnumValue(selected, row, validator, key, entry);
             } else {
-                final MFXTextField text = new MFXTextField();
-                text.setPrefWidth(400);
-                text.setText(option.get(key));
-                text.setFloatingText(key);
-                text.setFloatMode(FloatMode.INLINE);
-                if (entry.getValue().isRequired()) {
-                    final VBox vbox = this.addRequiredValidation(validator, text);
-                    this.commandPane.add(vbox, "cell 0 " + row);
-                } else {
-                    this.commandPane.add(text, "cell 0 " + row);
-                }
-                this.argument.put(key, text);
-                if (entry.getValue().getType() == ArgumentsParser.ParamType.DIR) {
-                    text.setTrailingIcon(this.createDirectoryChoiceButton(text));
-                } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE) {
-                    text.setTrailingIcon(this.createFileChoiceButton(text));
-                } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE_OR_DIR) {
-                    final HBox hBox = new HBox();
-                    hBox.getChildren().addAll(this.createDirectoryChoiceButton(text), this.createFileChoiceButton(text));
-                    hBox.setSpacing(5);
-                    text.setTrailingIcon(hBox);
-                }
+                this.setInputFieldsTextValue(option, row, validator, key, entry);
             }
             row++;
+        }
+    }
+
+    private void setInputFieldsTextValue(final ArgumentsParser.OptionParam option, final int row, final MFXValidator validator, final String key, final Map.Entry<String, ArgumentsParser.Attribute> entry) {
+        final MFXTextField text = new MFXTextField();
+        text.setPrefWidth(400);
+        text.setText(option.get(key));
+        text.setFloatingText(key);
+        text.setFloatMode(FloatMode.INLINE);
+        if (entry.getValue().isRequired()) {
+            final VBox vbox = this.addRequiredValidation(validator, text);
+            this.commandPane.add(vbox, "cell 0 " + row);
+        } else {
+            this.commandPane.add(text, "cell 0 " + row);
+        }
+        this.argument.put(key, text);
+        if (entry.getValue().getType() == ArgumentsParser.ParamType.DIR) {
+            text.setTrailingIcon(this.createDirectoryChoiceButton(text));
+        } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE) {
+            text.setTrailingIcon(this.createFileChoiceButton(text));
+        } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE_OR_DIR) {
+            final HBox hBox = new HBox();
+            hBox.getChildren().addAll(this.createDirectoryChoiceButton(text), this.createFileChoiceButton(text));
+            hBox.setSpacing(5);
+            text.setTrailingIcon(hBox);
+        }
+    }
+
+    private void setInputFieldsEnumValue(final MFXComboBox<String> selected, final int row, final MFXValidator validator, final String key, final Map.Entry<String, ArgumentsParser.Attribute> entry) {
+        if (selected.getFloatingText().equals(key)) {
+            this.argument.put(key, selected);
+        } else {
+            final MFXComboBox<String> select = new MFXComboBox<>(FXCollections.observableArrayList(
+                    entry.getValue().getSelectOption()
+            ));
+            select.setFloatingText(key);
+            select.setFloatMode(FloatMode.INLINE);
+            select.setEditable(true);
+            select.getSelectionModel().selectItem(entry.getKey());
+            if (entry.getValue().isRequired()) {
+                final VBox vbox = this.addRequiredValidation(validator, select);
+                this.commandPane.add(vbox, "cell 0 " + row);
+                select.getSelectionModel().selectedItemProperty()
+                        .addListener((observable, newVal, oldVal) -> this.resetInput(select, vbox));
+            } else {
+                this.commandPane.add(select, "width 80,cell 0 " + row);
+                select.getSelectionModel().selectedItemProperty()
+                        .addListener((observable, newVal, oldVal) -> this.resetInput(select));
+            }
+            this.argument.put(key, select);
         }
     }
 
@@ -248,7 +256,7 @@ public class MainPresenter {
 
     private StackPane createDirectoryChoiceButton(final MFXTextField text) {
         return this.createChoiceButton(new MFXFontIcon("fas-folder-plus", 32), event -> {
-            final File choice = this.openDirChooser();
+            final File choice = this.openDirChooser(text.getText());
             if (choice != null) {
                 text.setText(this.relative(choice));
             }
@@ -257,7 +265,7 @@ public class MainPresenter {
 
     private StackPane createFileChoiceButton(final MFXTextField text) {
         return this.createChoiceButton(new MFXFontIcon("fas-file-circle-plus", 32), event -> {
-            final File choice = this.openFileChooser();
+            final File choice = this.openFileChooser(text.getText());
             if (choice != null) {
                 text.setText(this.relative(choice));
             }
@@ -284,17 +292,27 @@ public class MainPresenter {
         return stack;
     }
 
-    private File openFileChooser() {
+    private File openFileChooser(final String path) {
+        final File defaultDir = Optional.ofNullable(path)
+                .filter(it -> !it.isEmpty())
+                .map(it -> new File(it).getParentFile())
+                .filter(File::exists)
+                .orElse(new File("."));
         final FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(new File("."));
+        fileChooser.setInitialDirectory(defaultDir);
         final Stage stage = new Stage();
         stage.initOwner(this.commandTypeSelect.getScene().getWindow());
         return fileChooser.showOpenDialog(stage);
     }
 
-    private File openDirChooser() {
+    private File openDirChooser(final String path) {
+        final File defaultDir = Optional.ofNullable(path)
+                .filter(it -> !it.isEmpty())
+                .map(File::new)
+                .filter(File::exists)
+                .orElse(new File("."));
         final DirectoryChooser fileChooser = new DirectoryChooser();
-        fileChooser.setInitialDirectory(new File("."));
+        fileChooser.setInitialDirectory(defaultDir);
         final Stage stage = new Stage();
         stage.initOwner(this.commandTypeSelect.getScene().getWindow());
         return fileChooser.showDialog(stage);
@@ -313,8 +331,8 @@ public class MainPresenter {
                             && !Optional.ofNullable(choiceBox.getSelectionModel().getSelectedItem().toString()).orElse("").isEmpty();
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, it -> {
-                    if (it.getValue() instanceof TextField) {
-                        return ((TextField) it.getValue()).getText();
+                    if (it.getValue() instanceof TextField textField) {
+                        return textField.getText();
                     }
                     return it.getValue() instanceof ChoiceBox<?> choiceBox
                             ? choiceBox.getSelectionModel().getSelectedItem().toString() : "";
