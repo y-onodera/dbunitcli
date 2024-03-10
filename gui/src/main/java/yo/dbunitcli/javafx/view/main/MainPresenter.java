@@ -160,14 +160,14 @@ public class MainPresenter {
     private void resetInput(final MFXComboBox<String> selected, final Node form) {
         final Stage loading = new LoadingView().open(this.commandBox.getScene().getWindow());
         this.commandPane.setVisible(false);
-        this.clearInputFields(form);
         final Thread background = new Thread(() -> {
+            final ArgumentsParser.OptionParam option = this.parser.createOptionParam(this.inputToArg());
+            Platform.runLater(() -> this.clearInputFields(form));
             try {
-                Thread.sleep(100);
+                Thread.sleep(50);
             } catch (final InterruptedException e) {
                 throw new RuntimeException(e);
             } finally {
-                final ArgumentsParser.OptionParam option = this.parser.createOptionParam(this.inputToArg());
                 Platform.runLater(() -> {
                     this.setInputFields(selected, option);
                     this.commandPane.setVisible(true);
