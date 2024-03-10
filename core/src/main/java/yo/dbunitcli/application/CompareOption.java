@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 public class CompareOption extends CommandLineOption {
 
-    public static final DefaultArgumentMapper IMAGE_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
+    private static final DefaultArgumentMapper IMAGE_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
         public String[] map(final String[] arguments, final String prefix, final CommandLine cmdLine) {
             final List<String> newArg = Arrays.stream(arguments)
@@ -31,7 +31,7 @@ public class CompareOption extends CommandLineOption {
         }
     };
 
-    public static final DefaultArgumentMapper PDF_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
+    private static final DefaultArgumentMapper PDF_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
         public String[] map(final String[] arguments, final String prefix, final CommandLine cmdLine) {
             final List<String> newArg = Arrays.stream(arguments)
