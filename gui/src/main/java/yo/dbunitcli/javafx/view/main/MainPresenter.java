@@ -31,12 +31,15 @@ import org.tbee.javafx.scene.layout.MigPane;
 import yo.dbunitcli.application.*;
 import yo.dbunitcli.application.argument.ArgumentsParser;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class MainPresenter {
@@ -90,9 +93,8 @@ public class MainPresenter {
         final File file = fileSave.showOpenDialog(this.commandTypeSelect.getScene().getWindow());
         if (file != null) {
             this.parser = this.createCommand(this.selectedCommand).getOptions();
-            final ArgumentsParser.OptionParam option = this.parser.createOptionParam(new String[]{"@" + file.getPath()});
-            this.clearInputFields(this.commandTypeSelect);
-            this.setInputFields(this.commandTypeSelect, option);
+            this.refresh(this.commandTypeSelect, this.commandTypeSelect
+                    , () -> this.parser.createOptionParam(new String[]{"@" + file.getPath()}));
         }
     }
 
@@ -104,15 +106,23 @@ public class MainPresenter {
 
     @FXML
     public void execCmd() {
-        try {
-            final String[] args = this.inputToArg().entrySet()
-                    .stream()
-                    .map(it -> it.getKey() + "=" + it.getValue())
-                    .toArray(String[]::new);
-            this.createCommand(this.selectedCommand).exec(args);
-        } catch (final Exception e) {
-            e.printStackTrace();
-        }
+        final Map<String, String> inputArgs = this.inputToArg();
+        final String[] args = inputArgs.entrySet()
+                .stream()
+                .map(it -> it.getKey() + "=" + it.getValue())
+                .toArray(String[]::new);
+        final Thread background = new Thread(() -> {
+            final Command<?> command = this.createCommand(this.selectedCommand);
+            command.exec(args);
+            try {
+                Desktop.getDesktop().open(new File(Optional.ofNullable(inputArgs.get("-result.result"))
+                        .orElse(".")));
+            } catch (final IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        background.setDaemon(true);
+        background.start();
     }
 
     @FXML
@@ -150,18 +160,22 @@ public class MainPresenter {
             return;
         }
         this.parser = this.createCommand(this.selectedCommand).getOptions();
-        this.resetInput(this.commandTypeSelect);
+        this.refresh(this.commandTypeSelect);
     }
 
-    private void resetInput(final MFXComboBox<String> selected) {
-        this.resetInput(selected, selected);
+    private void refresh(final MFXComboBox<String> selected) {
+        this.refresh(selected, selected);
     }
 
-    private void resetInput(final MFXComboBox<String> selected, final Node form) {
+    private void refresh(final MFXComboBox<String> selected, final Node form) {
+        this.refresh(selected, form, () -> this.parser.createOptionParam(this.inputToArg()));
+    }
+
+    private void refresh(final MFXComboBox<String> selected, final Node form, final Supplier<ArgumentsParser.OptionParam> loadOption) {
         final Stage loading = new LoadingView().open(this.commandBox.getScene().getWindow());
         this.commandPane.setVisible(false);
         final Thread background = new Thread(() -> {
-            final ArgumentsParser.OptionParam option = this.parser.createOptionParam(this.inputToArg());
+            final ArgumentsParser.OptionParam option = loadOption.get();
             Platform.runLater(() -> this.clearInputFields(form));
             try {
                 Thread.sleep(50);
@@ -235,11 +249,11 @@ public class MainPresenter {
                 final VBox vbox = this.addRequiredValidation(validator, select);
                 this.commandPane.add(vbox, "cell 0 " + row);
                 select.getSelectionModel().selectedItemProperty()
-                        .addListener((observable, newVal, oldVal) -> this.resetInput(select, vbox));
+                        .addListener((observable, newVal, oldVal) -> this.refresh(select, vbox));
             } else {
                 this.commandPane.add(select, "width 80,cell 0 " + row);
                 select.getSelectionModel().selectedItemProperty()
-                        .addListener((observable, newVal, oldVal) -> this.resetInput(select));
+                        .addListener((observable, newVal, oldVal) -> this.refresh(select));
             }
             this.argument.put(key, select);
         }
