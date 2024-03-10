@@ -3,10 +3,8 @@ package yo.dbunitcli.javafx.view.main;
 import com.airhacks.afterburner.views.FXMLView;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 
 public class MainView extends FXMLView {
-    private Window window;
     private double xOffset = 0;
     private double yOffset = 0;
 
@@ -15,7 +13,6 @@ public class MainView extends FXMLView {
         stage.setScene(scene);
         stage.setResizable(true);
         stage.show();
-        this.window = scene.getWindow();
         //マウス・ボタンが押されたとき
         scene.setOnMousePressed(event -> {
             this.xOffset = event.getSceneX();
