@@ -94,7 +94,12 @@ public class MainPresenter {
         if (file != null) {
             this.parser = this.createCommand(this.selectedCommand).getOptions();
             this.refresh(this.commandTypeSelect, this.commandTypeSelect
-                    , () -> this.parser.createOptionParam(new String[]{"@" + file.getPath()}));
+                    , () -> this.parser.createOptionParam(Arrays
+                            .stream(this.parser.getExpandArgs(new String[]{"@" + file.getPath()}))
+                            .collect(Collectors.toMap(
+                                    it -> it.replaceAll("(-[^=]+)=.+", "$1")
+                                    , it -> it.replaceAll("(-[^=]+=)(.+)", "$2")
+                            ))));
         }
     }
 

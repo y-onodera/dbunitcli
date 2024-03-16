@@ -37,15 +37,6 @@ public interface ArgumentsParser {
         return "";
     }
 
-    default OptionParam createOptionParam(final String[] args) {
-        final String[] expandArgs = this.getExpandArgs(args);
-        this.parseArgument(expandArgs);
-        return this.createOptionParam(Arrays.stream(expandArgs)
-                .collect(Collectors.toMap(this.getArgumentFilter().extractKey()
-                        , it -> it.replace(this.getArgumentFilter().extractKey().apply(it) + "=", "")
-                )));
-    }
-
     OptionParam createOptionParam(Map<String, String> args);
 
     void setUpComponent(String[] expandArgs);
@@ -148,13 +139,13 @@ public interface ArgumentsParser {
         }
 
         public void put(final String key, final String value, final Attribute type) {
-            if (Optional.ofNullable(this.args.get(this.withPrefix(key))).orElse("").isEmpty()) {
+            if (!this.args.containsKey(this.withPrefix(key))) {
                 this.options.put(this.withPrefix(key), new HashMap<>() {{
-                    this.put(OptionParam.this.args.getOrDefault(key, Optional.ofNullable(value).orElse("")), type);
+                    this.put(Optional.ofNullable(value).orElse(""), type);
                 }});
             } else {
                 this.options.put(this.withPrefix(key), new HashMap<>() {{
-                    this.put(OptionParam.this.args.getOrDefault(OptionParam.this.withPrefix(key), value), type);
+                    this.put(OptionParam.this.args.get(OptionParam.this.withPrefix(key)), type);
                 }});
             }
             this.keys.add(this.withPrefix(key));
