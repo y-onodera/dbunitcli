@@ -1,5 +1,5 @@
 DropEmpty ::= ["": [], default: key]
-value(row ,column) ::=<<$if (!DropEmpty.(row.(column.columnName)))$null$elseif (column.dataType.number)$$row.(column.columnName)$$else$'$row.(column.columnName); format="escapeSql"$'$endif$>>
+value(row ,column) ::=<<$if (!DropEmpty.(row.(column.columnName)))$null$elseif (column.dataType.number)$$row.(column.columnName)$$else$$row.(column.columnName); format="escapeSql"$$endif$>>
 insert() ::= <<
 $rows:{row |insert into $tableName$ ($columns:{column | $column.columnName$ }; separator=","$) values ($columns:{column | $value(row,column)$ }; separator=","$);
 }$
@@ -9,7 +9,7 @@ $rows:{row |delete from $tableName$ where $primaryKeys:{column | $column.columnN
 }$
 >>
 update() ::= <<
-$rows:{row |update $tableName$ set $columnsExcludeKey:{column | $column.columnName$ = $value(row,column)$ }; separator=","$ where $primaryKeys:{column | $column.columnName$ = '$row.(column.columnName); format="escapeSql"$' }; separator="and "$;
+$rows:{row |update $tableName$ set $columnsExcludeKey:{column | $column.columnName$ = $value(row,column)$ }; separator=","$ where $primaryKeys:{column | $column.columnName$ = $value(row,column)$ }; separator="and "$;
 }$
 >>
 deleteAll() ::= <<
