@@ -1,5 +1,5 @@
 -src=src/test/resources/yo/dbunitcli/application/csv/multi
 -srcType=csv
 -setting=src/test/resources/yo/dbunitcli/application/csv2xlsx/setting.json
--result=target/test-classes/yo/dbunitcli/application/csv2xlsx/result
+-result=target/test-classes/yo/dbunitcli/application/convert/csv2xlsx/result
 -resultType=xlsx

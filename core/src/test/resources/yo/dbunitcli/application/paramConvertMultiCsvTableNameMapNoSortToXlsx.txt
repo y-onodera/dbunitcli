@@ -1,6 +1,6 @@
 -src=src/test/resources/yo/dbunitcli/application/csv/multi
 -srcType=csv
 -setting=src/test/resources/yo/dbunitcli/application/tablenamemap/setting_nosort.json
--result=target/test-classes/yo/dbunitcli/application/tablenamemap/NoSortXlsx/result
+-result=target/test-classes/yo/dbunitcli/application/convert/tablenamemap/NoSortXlsx/result
 -result.excelTable=SHEET
 -resultType=xlsx

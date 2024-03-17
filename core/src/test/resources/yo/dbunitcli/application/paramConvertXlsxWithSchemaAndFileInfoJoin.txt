@@ -3,5 +3,5 @@
 -xlsxSchema=src/test/resources/yo/dbunitcli/application/xlsxwithschema/ComplexSchemaAddFileInfo.json
 -setting=src/test/resources/yo/dbunitcli/application/xlsxwithschema/setting_fileInfo_join.json
 -settingEncoding=MS932
--result=target/test-classes/yo/dbunitcli/application/xlsxwithschema/result
+-result=target/test-classes/yo/dbunitcli/application/convert/xlsxwithschema2xlsx/result
 -resultType=xlsx

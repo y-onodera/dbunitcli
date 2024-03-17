@@ -1,5 +1,5 @@
 -src=src/test/resources/yo/dbunitcli/application/csv/combikey
 -srcType=csv
 -setting=src/test/resources/yo/dbunitcli/application/tablenamemap/setting_distinct.json
--result=target/test-classes/yo/dbunitcli/application/tablenamemap/distinct/result
+-result=target/test-classes/yo/dbunitcli/application/convert/distinct/resultrename
 -resultType=xlsx
