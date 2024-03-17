@@ -90,6 +90,7 @@ public class XlsConverter implements IDataSetConverter {
             this.sheetIndex = 0;
         }
         this.sheet = this.workbook.createSheet(this.metaData.getTableName());
+        this.sheet.setDisplayZeros(true);
         this.workbook.setSheetName(this.sheetIndex++, this.metaData.getTableName());
         final Row headerRow = this.sheet.createRow(0);
         final Column[] columns = this.metaData.getColumns();

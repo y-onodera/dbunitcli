@@ -1,8 +1,9 @@
 package yo.dbunitcli.dataset.converter;
 
-import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.FontScheme;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import yo.dbunitcli.dataset.DataSetConsumerParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
@@ -37,9 +38,11 @@ public class XlsxConverter extends XlsConverter {
         if (writeTo == null) {
             result = new SXSSFWorkbook(1000);
             result.setCompressTempFiles(true);
-            final Font font = result.getFontAt(0);
+            final XSSFFont font = (XSSFFont) result.getFontAt(0);
             font.setFontName("МＳ ゴシック");
             font.setFontHeightInPoints((short) 8);
+            font.setFamily(3);
+            font.setScheme(FontScheme.NONE);
         } else {
             try (final FileInputStream is = new FileInputStream(writeTo)) {
                 result = new SXSSFWorkbook(new XSSFWorkbook(is), 1000, true);
