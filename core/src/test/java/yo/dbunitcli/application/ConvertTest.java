@@ -176,7 +176,7 @@ public class ConvertTest {
     @Test
     public void testXlsWithSchemaToCsv() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertXlsWithSchemaToCsv.txt"});
-        final File src = new File(this.baseDir + "/convert/xlsxwithschema2csv/result");
+        final File src = new File(this.baseDir + "/convert/xlswithschema2csv/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
