@@ -46,10 +46,10 @@
                                 -J-Dfile.encoding=MS932
                                 -H:+AddAllCharsets
                                 -H:+UnlockExperimentalVMOptions
-                                -H:ReflectionConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/reflect-config.json
-                                -H:ResourceConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/resource-config.json
-                                -H:JNIConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/jni-config.json
-                                -H:SerializationConfigurationFiles=${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/serialization-config.json
+                                -H:ReflectionConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/reflect-config.json
+                                -H:ResourceConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/resource-config.json
+                                -H:JNIConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/jni-config.json
+                                -H:SerializationConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/serialization-config.json
                             </buildArgs>
                         </configuration>
                     </plugin>
@@ -81,7 +81,7 @@
                                         <stage>main</stage>
                                     </disabledStages>
                                     <merge>true</merge>
-                                    <outputDirectory>${project.resources[1].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}</outputDirectory>
+                                    <outputDirectory>${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}</outputDirectory>
                                 </metadataCopy>
                             </agent>
                         </configuration>
@@ -122,6 +122,7 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
+                    <release>17</release>
                     <encoding>UTF-8</encoding>
                     <annotationProcessorPaths>
                         <path>
