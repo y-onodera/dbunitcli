@@ -1,22 +1,11 @@
 package yo.dbunitcli.application;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.Parameter;
 
 public class Compare implements Command<CompareOption> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Compare.class);
-
     public static void main(final String[] args) throws Exception {
-        try {
-            new Compare().exec(args);
-        } catch (final Throwable th) {
-            if (!(th instanceof CommandFailException)) {
-                Compare.LOGGER.error("error:", th);
-            }
-            throw th;
-        }
+        new Compare().exec(args);
     }
 
     @Override

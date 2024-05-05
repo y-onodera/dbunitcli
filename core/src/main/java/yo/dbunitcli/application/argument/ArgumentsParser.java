@@ -15,7 +15,7 @@ public interface ArgumentsParser {
      */
     default void parseArgument(final String[] args) {
         final CommandLine cmdLine = new CommandLine(this);
-        final String[] targetArgs = this.getArgumentMapper().map(args, this.getPrefix(), cmdLine);
+        final String[] targetArgs = this.getArgumentMapper().map(args, this.getPrefix());
         cmdLine.parseArgs(this.filterArguments(cmdLine, targetArgs));
         this.setUpComponent(targetArgs);
     }
@@ -111,6 +111,10 @@ public interface ArgumentsParser {
 
         public void putFile(final String key, final File value, final boolean required) {
             this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.FILE, required));
+        }
+
+        public void putFile(final String key, final String path, final boolean required) {
+            this.put(key, path, new Attribute(ParamType.FILE, required));
         }
 
         public void putDir(final String key, final File value) {

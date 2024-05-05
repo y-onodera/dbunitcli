@@ -1,11 +1,9 @@
 package yo.dbunitcli.application.argument;
 
-import picocli.CommandLine;
-
 public class DefaultArgumentMapper implements ArgumentMapper {
 
     @Override
-    public String[] map(final String[] args, final String prefix, final CommandLine cmdLine) {
+    public String[] map(final String[] args, final String prefix) {
         return args;
     }
 }

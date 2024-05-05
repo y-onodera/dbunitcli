@@ -1,7 +1,5 @@
 package yo.dbunitcli.application;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.Parameter;
 
 import java.io.File;
@@ -9,17 +7,8 @@ import java.io.IOException;
 
 public class Generate implements Command<GenerateOption> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Generate.class);
-
     public static void main(final String[] strings) throws Exception {
-        try {
-            new Generate().exec(strings);
-        } catch (final Throwable th) {
-            if (!(th instanceof CommandFailException)) {
-                Generate.LOGGER.error("error:", th);
-            }
-            throw th;
-        }
+        new Generate().exec(strings);
     }
 
     @Override

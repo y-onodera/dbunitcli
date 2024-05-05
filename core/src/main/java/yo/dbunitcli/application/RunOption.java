@@ -72,7 +72,7 @@ public class RunOption extends CommandLineOption {
         return result;
     }
 
-    enum ScriptType {
+    public enum ScriptType {
         cmd, bat, sql {
             @Override
             public Runner createRunner(final RunOption aOption) {

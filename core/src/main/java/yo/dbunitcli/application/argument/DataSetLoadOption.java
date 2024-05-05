@@ -41,6 +41,9 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(this.getPrefix(), args);
         result.put("-srcType", this.srcType, DataSourceType.class, true);
+        if (Optional.ofNullable(result.get("-srcType")).orElse("").isEmpty()) {
+            return result;
+        }
         result.putFileOrDir("-src", this.src, true);
         result.putFile("-setting", this.setting == null ? null : new File(this.setting));
         result.put("-settingEncoding", this.settingEncoding);
@@ -48,9 +51,6 @@ public class DataSetLoadOption extends DefaultArgumentsParser {
         result.put("-includeMetaData", this.includeMetaData);
         result.put("-regInclude", this.regInclude);
         result.put("-regExclude", this.regExclude);
-        if (Optional.ofNullable(result.get("-srcType")).orElse("").isEmpty()) {
-            return result;
-        }
         try {
             final DataSourceType type = DataSourceType.valueOf(result.get("-srcType"));
             final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), type);

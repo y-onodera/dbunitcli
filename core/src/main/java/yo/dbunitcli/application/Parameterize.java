@@ -11,14 +11,7 @@ public class Parameterize implements Command<ParameterizeOption> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Parameterize.class);
 
     public static void main(final String[] args) throws Exception {
-        try {
-            new Parameterize().exec(args);
-        } catch (final Throwable th) {
-            if (!(th instanceof CommandFailException)) {
-                Parameterize.LOGGER.error("error:", th);
-            }
-            throw th;
-        }
+        new Parameterize().exec(args);
     }
 
     @Override

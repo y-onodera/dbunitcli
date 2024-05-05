@@ -1,22 +1,11 @@
 package yo.dbunitcli.application;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.Parameter;
 
 public class Run implements Command<RunOption> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Run.class);
-
     public static void main(final String[] strings) throws Exception {
-        try {
-            new Run().exec(strings);
-        } catch (final Throwable th) {
-            if (!(th instanceof CommandFailException)) {
-                Run.LOGGER.error("error:", th);
-            }
-            throw th;
-        }
+        new Run().exec(strings);
     }
 
     @Override

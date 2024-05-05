@@ -21,7 +21,7 @@ public class CompareOption extends CommandLineOption {
 
     private static final DefaultArgumentMapper IMAGE_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
-        public String[] map(final String[] arguments, final String prefix, final CommandLine cmdLine) {
+        public String[] map(final String[] arguments, final String prefix) {
             final List<String> newArg = Arrays.stream(arguments)
                     .filter(it -> !it.contains("srcType=") && !it.contains("extension="))
                     .collect(Collectors.toList());
@@ -33,7 +33,7 @@ public class CompareOption extends CommandLineOption {
 
     private static final DefaultArgumentMapper PDF_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
-        public String[] map(final String[] arguments, final String prefix, final CommandLine cmdLine) {
+        public String[] map(final String[] arguments, final String prefix) {
             final List<String> newArg = Arrays.stream(arguments)
                     .filter(it -> !it.contains("srcType=") && !it.contains("extension="))
                     .collect(Collectors.toList());

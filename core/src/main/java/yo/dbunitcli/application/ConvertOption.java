@@ -1,7 +1,6 @@
 package yo.dbunitcli.application;
 
 import yo.dbunitcli.application.argument.DataSetLoadOption;
-import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.Parameter;
 
 import java.util.Map;
@@ -36,10 +35,6 @@ public class ConvertOption extends CommandLineOption {
         super.setUpComponent(expandArgs);
         this.src.parseArgument(expandArgs);
         this.getConverterOption().parseArgument(expandArgs);
-    }
-
-    public ComparableDataSet targetDataSet() {
-        return this.getComparableDataSetLoader().loadDataSet(this.src.getParam().build());
     }
 
 }
