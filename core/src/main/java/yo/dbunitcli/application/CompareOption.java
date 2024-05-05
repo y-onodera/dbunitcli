@@ -1,7 +1,6 @@
 package yo.dbunitcli.application;
 
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.application.cli.CommandLineOption;
 import yo.dbunitcli.application.cli.CommandLineParser;
 import yo.dbunitcli.application.cli.DefaultArgumentMapper;
 import yo.dbunitcli.application.option.DataSetConverterOption;
@@ -112,22 +111,6 @@ public class CompareOption extends CommandLineOption<CompareDto> {
     }
 
     @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(args);
-        result.put("-targetType", this.targetType, Type.class);
-        if (Type.valueOf(result.get("-targetType")).isAny(Type.pdf, Type.image)) {
-            result.putAll(this.imageOption.createOptionParam(args));
-        }
-        result.putFile("-setting", this.setting == null ? null : new File(this.setting));
-        result.put("-settingEncoding", this.settingEncoding);
-        result.putAll(this.newData.createOptionParam(args));
-        result.putAll(this.oldData.createOptionParam(args));
-        result.putAll(this.getConverterOption().createOptionParam(args));
-        result.putAll(this.expectData.createOptionParam(args));
-        return result;
-    }
-
-    @Override
     public void setUpComponent(final CompareDto dto) {
         super.setUpComponent(dto);
         this.setting = dto.getSetting();
@@ -151,6 +134,22 @@ public class CompareOption extends CommandLineOption<CompareDto> {
         }
         this.populateSettings();
         this.getConverterOption().setUpComponent(dto.getDataSetConverter());
+    }
+
+    @Override
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(args);
+        result.put("-targetType", this.targetType, Type.class);
+        if (Type.valueOf(result.get("-targetType")).isAny(Type.pdf, Type.image)) {
+            result.putAll(this.imageOption.createOptionParam(args));
+        }
+        result.putFile("-setting", this.setting == null ? null : new File(this.setting));
+        result.put("-settingEncoding", this.settingEncoding);
+        result.putAll(this.newData.createOptionParam(args));
+        result.putAll(this.oldData.createOptionParam(args));
+        result.putAll(this.getConverterOption().createOptionParam(args));
+        result.putAll(this.expectData.createOptionParam(args));
+        return result;
     }
 
     public boolean compare() {

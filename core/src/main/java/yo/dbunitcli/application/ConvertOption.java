@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import yo.dbunitcli.application.cli.CommandLineOption;
 import yo.dbunitcli.application.cli.CommandLineParser;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.dataset.Parameter;
@@ -35,18 +34,18 @@ public class ConvertOption extends CommandLineOption<ConvertDto> {
     }
 
     @Override
+    public void setUpComponent(final ConvertDto dto) {
+        super.setUpComponent(dto);
+        this.src.setUpComponent(dto.getDataSetLoad());
+        this.getConverterOption().setUpComponent(dto.getDataSetConverter());
+    }
+
+    @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(args);
         result.putAll(this.src.createOptionParam(args));
         result.putAll(this.getConverterOption().createOptionParam(args));
         return result;
-    }
-
-    @Override
-    public void setUpComponent(final ConvertDto dto) {
-        super.setUpComponent(dto);
-        this.src.setUpComponent(dto.getDataSetLoad());
-        this.getConverterOption().setUpComponent(dto.getDataSetConverter());
     }
 
 }

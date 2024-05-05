@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import yo.dbunitcli.application.cli.CommandDto;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 
 public class ConvertDto extends CommandDto {

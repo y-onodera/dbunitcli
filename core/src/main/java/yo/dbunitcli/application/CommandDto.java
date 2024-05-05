@@ -1,4 +1,4 @@
-package yo.dbunitcli.application.cli;
+package yo.dbunitcli.application;
 
 import picocli.CommandLine;
 import yo.dbunitcli.application.dto.DataSetConverterDto;

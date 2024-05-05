@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import yo.dbunitcli.application.cli.CommandLineOption;
 import yo.dbunitcli.application.cli.CommandLineParser;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.JdbcOption;
@@ -64,6 +63,17 @@ public class RunOption extends CommandLineOption<RunDto> {
     }
 
     @Override
+    public void setUpComponent(final RunDto dto) {
+        super.setUpComponent(dto);
+        if (dto.getScriptType() != null) {
+            this.scriptType = dto.getScriptType();
+        }
+        this.templateOption.setUpComponent(dto.getTemplateRender());
+        this.jdbcOption.setUpComponent(dto.getJdbc());
+        this.src.setUpComponent(dto.getDataSetLoad());
+    }
+
+    @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(args);
         result.putAll(this.src.createOptionParam(args));
@@ -73,17 +83,6 @@ public class RunOption extends CommandLineOption<RunDto> {
             result.putAll(this.jdbcOption.createOptionParam(args));
         }
         return result;
-    }
-
-    @Override
-    public void setUpComponent(final RunDto dto) {
-        super.setUpComponent(dto);
-        if (dto.getScriptType() != null) {
-            this.scriptType = dto.getScriptType();
-        }
-        this.templateOption.setUpComponent(dto.getTemplateRender());
-        this.jdbcOption.setUpComponent(dto.getJdbc());
-        this.src.setUpComponent(dto.getDataSetLoad());
     }
 
     public enum ScriptType {

@@ -3,7 +3,6 @@ package yo.dbunitcli.application;
 import org.dbunit.dataset.DataSetException;
 import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.application.cli.CommandLineOption;
 import yo.dbunitcli.application.cli.CommandLineParser;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
@@ -84,6 +83,37 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
     }
 
     @Override
+    public void setUpComponent(final GenerateDto dto) {
+        super.setUpComponent(dto);
+        if (dto.getGenerateType() != null) {
+            this.generateType = dto.getGenerateType();
+        }
+        if (dto.getUnit() != null) {
+            this.unit = dto.getUnit();
+        }
+        this.operation = dto.getOperation();
+        if (Strings.isNotEmpty(dto.getSqlFilePrefix())) {
+            this.sqlFilePrefix = dto.getSqlFilePrefix();
+        }
+        if (Strings.isNotEmpty(dto.getSqlFileSuffix())) {
+            this.sqlFileSuffix = dto.getSqlFileSuffix();
+        }
+        if (Strings.isNotEmpty(dto.getCommit())) {
+            this.commit = Boolean.parseBoolean(dto.getCommit());
+        }
+        if (Strings.isNotEmpty(dto.getTemplate())) {
+            this.template = new File(dto.getTemplate());
+        }
+        if (Strings.isNotEmpty(dto.getOutputEncoding())) {
+            this.outputEncoding = dto.getOutputEncoding();
+        }
+        this.getConverterOption().setUpComponent(dto.getDataSetConverter());
+        this.src.setUpComponent(dto.getDataSetLoad());
+        this.templateOption.setUpComponent(dto.getTemplateRender());
+        this.getGenerateType().populateSettings(this);
+    }
+
+    @Override
     protected String getResultPath() {
         if (this.getGenerateType() == GenerateType.sql) {
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
@@ -116,37 +146,6 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
             result.put("-outputEncoding", this.outputEncoding);
         }
         return result;
-    }
-
-    @Override
-    public void setUpComponent(final GenerateDto dto) {
-        super.setUpComponent(dto);
-        if (dto.getGenerateType() != null) {
-            this.generateType = dto.getGenerateType();
-        }
-        if (dto.getUnit() != null) {
-            this.unit = dto.getUnit();
-        }
-        this.operation = dto.getOperation();
-        if (Strings.isNotEmpty(dto.getSqlFilePrefix())) {
-            this.sqlFilePrefix = dto.getSqlFilePrefix();
-        }
-        if (Strings.isNotEmpty(dto.getSqlFileSuffix())) {
-            this.sqlFileSuffix = dto.getSqlFileSuffix();
-        }
-        if (Strings.isNotEmpty(dto.getCommit())) {
-            this.commit = Boolean.parseBoolean(dto.getCommit());
-        }
-        if (Strings.isNotEmpty(dto.getTemplate())) {
-            this.template = new File(dto.getTemplate());
-        }
-        if (Strings.isNotEmpty(dto.getOutputEncoding())) {
-            this.outputEncoding = dto.getOutputEncoding();
-        }
-        this.getConverterOption().setUpComponent(dto.getDataSetConverter());
-        this.src.setUpComponent(dto.getDataSetLoad());
-        this.templateOption.setUpComponent(dto.getTemplateRender());
-        this.getGenerateType().populateSettings(this);
     }
 
     public ComparableDataSet targetDataSet() {

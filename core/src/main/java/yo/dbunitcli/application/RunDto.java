@@ -1,7 +1,6 @@
 package yo.dbunitcli.application;
 
 import picocli.CommandLine;
-import yo.dbunitcli.application.cli.CommandDto;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.dto.JdbcDto;
 import yo.dbunitcli.application.dto.TemplateRenderDto;
