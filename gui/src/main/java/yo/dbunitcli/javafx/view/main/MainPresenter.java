@@ -29,7 +29,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.tbee.javafx.scene.layout.MigPane;
 import yo.dbunitcli.application.*;
-import yo.dbunitcli.application.argument.ArgumentsParser;
+import yo.dbunitcli.application.option.OptionParser;
 
 import java.awt.*;
 import java.io.File;
@@ -66,7 +66,7 @@ public class MainPresenter {
     @FXML
     private MFXComboBox<String> commandTypeSelect;
     private String selectedCommand;
-    private ArgumentsParser parser;
+    private CommandLineOption parser;
 
     @FXML
     void initialize() {
@@ -176,11 +176,11 @@ public class MainPresenter {
         this.refresh(selected, form, () -> this.parser.createOptionParam(this.inputToArg()));
     }
 
-    private void refresh(final MFXComboBox<String> selected, final Node form, final Supplier<ArgumentsParser.OptionParam> loadOption) {
+    private void refresh(final MFXComboBox<String> selected, final Node form, final Supplier<OptionParser.OptionParam> loadOption) {
         final Stage loading = new LoadingView().open(this.commandBox.getScene().getWindow());
         this.commandPane.setVisible(false);
         final Thread background = new Thread(() -> {
-            final ArgumentsParser.OptionParam option = loadOption.get();
+            final OptionParser.OptionParam option = loadOption.get();
             Platform.runLater(() -> this.clearInputFields(form));
             try {
                 Thread.sleep(50);
@@ -199,13 +199,13 @@ public class MainPresenter {
         background.start();
     }
 
-    private void setInputFields(final MFXComboBox<String> selected, final ArgumentsParser.OptionParam option) {
+    private void setInputFields(final MFXComboBox<String> selected, final OptionParser.OptionParam option) {
         int row = 1;
         final MFXValidator validator = new MFXValidator();
         validator.validProperty().addListener((observable, oldVal, newVal) -> this.exec.setDisable(!newVal));
         for (final String key : option.keySet()) {
-            final Map.Entry<String, ArgumentsParser.Attribute> entry = option.getColumn(key);
-            if (entry.getValue().getType() == ArgumentsParser.ParamType.ENUM) {
+            final Map.Entry<String, OptionParser.Attribute> entry = option.getColumn(key);
+            if (entry.getValue().getType() == OptionParser.ParamType.ENUM) {
                 this.setInputFieldsEnumValue(selected, row, validator, key, entry);
             } else {
                 this.setInputFieldsTextValue(option, row, validator, key, entry);
@@ -214,7 +214,7 @@ public class MainPresenter {
         }
     }
 
-    private void setInputFieldsTextValue(final ArgumentsParser.OptionParam option, final int row, final MFXValidator validator, final String key, final Map.Entry<String, ArgumentsParser.Attribute> entry) {
+    private void setInputFieldsTextValue(final OptionParser.OptionParam option, final int row, final MFXValidator validator, final String key, final Map.Entry<String, OptionParser.Attribute> entry) {
         final MFXTextField text = new MFXTextField();
         text.setPrefWidth(400);
         text.setText(option.get(key));
@@ -227,11 +227,11 @@ public class MainPresenter {
             this.commandPane.add(text, "cell 0 " + row);
         }
         this.argument.put(key, text);
-        if (entry.getValue().getType() == ArgumentsParser.ParamType.DIR) {
+        if (entry.getValue().getType() == OptionParser.ParamType.DIR) {
             text.setTrailingIcon(this.createDirectoryChoiceButton(text));
-        } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE) {
+        } else if (entry.getValue().getType() == OptionParser.ParamType.FILE) {
             text.setTrailingIcon(this.createFileChoiceButton(text));
-        } else if (entry.getValue().getType() == ArgumentsParser.ParamType.FILE_OR_DIR) {
+        } else if (entry.getValue().getType() == OptionParser.ParamType.FILE_OR_DIR) {
             final HBox hBox = new HBox();
             hBox.getChildren().addAll(this.createDirectoryChoiceButton(text), this.createFileChoiceButton(text));
             hBox.setSpacing(5);
@@ -239,7 +239,7 @@ public class MainPresenter {
         }
     }
 
-    private void setInputFieldsEnumValue(final MFXComboBox<String> selected, final int row, final MFXValidator validator, final String key, final Map.Entry<String, ArgumentsParser.Attribute> entry) {
+    private void setInputFieldsEnumValue(final MFXComboBox<String> selected, final int row, final MFXValidator validator, final String key, final Map.Entry<String, OptionParser.Attribute> entry) {
         if (selected.getFloatingText().equals(key)) {
             this.argument.put(key, selected);
         } else {
