@@ -19,6 +19,12 @@ public class CompareTest {
     public void setUp() throws UnsupportedEncodingException {
         this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
                 .replace("target/test-classes", "src/test/resources");
+        new MockUp<System>() {
+            @Mock
+            public void exit(final int value) {
+                throw new RuntimeException(String.valueOf(value));
+            }
+        };
     }
 
     @Test
@@ -153,12 +159,6 @@ public class CompareTest {
     class ExitCodeTest {
         @Test
         public void testFailedResultDiffNotExpected() throws Exception {
-            new MockUp<System>() {
-                @Mock
-                public void exit(final int value) {
-                    throw new RuntimeException(String.valueOf(value));
-                }
-            };
             try {
                 Compare.main(new String[]{"@" + CompareTest.this.baseDir + "/paramCompareResultDiffNotExpected.txt"});
             } catch (final RuntimeException ex) {
@@ -168,12 +168,6 @@ public class CompareTest {
 
         @Test
         public void testFailedResultDiffDifferExpected() throws Exception {
-            new MockUp<System>() {
-                @Mock
-                public void exit(final int value) {
-                    throw new RuntimeException(String.valueOf(value));
-                }
-            };
             try {
                 Compare.main(new String[]{"@" + CompareTest.this.baseDir + "/paramCompareResultDiffInValidExpected.txt"});
             } catch (final RuntimeException ex) {
@@ -183,12 +177,6 @@ public class CompareTest {
 
         @Test
         public void testFailedUnExpectedNoDiff() throws Exception {
-            new MockUp<System>() {
-                @Mock
-                public void exit(final int value) {
-                    throw new RuntimeException(String.valueOf(value));
-                }
-            };
             try {
                 Compare.main(new String[]{"@" + CompareTest.this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"});
             } catch (final RuntimeException ex) {

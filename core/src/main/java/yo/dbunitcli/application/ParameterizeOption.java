@@ -1,7 +1,10 @@
 package yo.dbunitcli.application;
 
 import picocli.CommandLine;
-import yo.dbunitcli.application.argument.*;
+import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.cli.*;
+import yo.dbunitcli.application.option.DataSetLoadOption;
+import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.resource.Files;
 
@@ -10,10 +13,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@CommandLine.Command(name = "parameterizeExecute", mixinStandardHelpOptions = true)
-public class ParameterizeOption extends CommandLineOption {
+@CommandLine.Command(name = "parameterize", mixinStandardHelpOptions = true)
+public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
 
-    public static final DefaultArgumentMapper NONE_PARAM_MAPPER = new DefaultArgumentMapper() {
+    private static final DefaultArgumentMapper NONE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
         public String[] map(final String[] arguments, final String prefix) {
             final List<String> list = Arrays.asList(arguments);
@@ -41,20 +44,13 @@ public class ParameterizeOption extends CommandLineOption {
                     || list.stream().noneMatch(it -> it.startsWith("-srcType=") || it.startsWith("-param.srcType="));
         }
     };
-
     private final DataSetLoadOption param = new DataSetLoadOption("param");
     private final TemplateRenderOption templateOption = new TemplateRenderOption("template");
-    @CommandLine.Option(names = "-ignoreFail", description = "case when cmd is compare and unexpected diff found, then continue other cmd")
-    private String ignoreFail = "false";
-    @CommandLine.Option(names = "-cmd", description = "data driven target cmd")
+    private final Map<String, String> args = new HashMap<>();
+    private boolean ignoreFail = false;
     private String cmd;
-    @CommandLine.Option(names = "-cmdParam", description = "columnName parameterFile for cmd. dynamically set fileName from param dataset")
     private String cmdParam;
-    @CommandLine.Option(names = {"-arg", "-A"})
-    private Map<String, String> args = new HashMap<>();
-    @CommandLine.Option(names = "-parameterize", defaultValue = "true", description = "whether cmdParam is template or not. if true, then cmdParam populate by param")
-    private String parameterize = "true";
-    @CommandLine.Option(names = "-template", description = "default template file. case when cmdParam exists,this option is ignore.")
+    private boolean parameterize = true;
     private File template;
 
     public ParameterizeOption() {
@@ -66,37 +62,59 @@ public class ParameterizeOption extends CommandLineOption {
     }
 
     public boolean isIgnoreFail() {
-        return Boolean.parseBoolean(this.ignoreFail);
+        return this.ignoreFail;
     }
 
     public boolean isParameterize() {
-        return Boolean.parseBoolean(this.parameterize);
+        return this.parameterize;
     }
 
     @Override
-    public ArgumentFilter getArgumentFilter() {
+    public void parseArgument(final String[] args) {
+        final ParameterizeDto dto = new ParameterizeDto();
+        new CommandLineParser("", this.getArgumentMapper(), this.getArgumentFilter())
+                .parseArgument(args, dto);
+        new CommandLineParser(this.param.getPrefix(), ParameterizeOption.NONE_PARAM_MAPPER)
+                .parseArgument(args, dto.getDateSetLoad());
+        new CommandLineParser(this.templateOption.getPrefix()).parseArgument(args, dto.getTemplateRender());
+        this.setUpComponent(dto);
+    }
+
+    @Override
+    protected ArgumentFilter getArgumentFilter() {
         return new DefaultArgumentFilter("-P", "-A", "-arg");
     }
 
     @Override
-    public void setUpComponent(final String[] expandArgs) {
-        super.setUpComponent(expandArgs);
-        this.param.setArgumentMapper(ParameterizeOption.NONE_PARAM_MAPPER);
-        this.param.parseArgument(expandArgs);
-        this.templateOption.parseArgument(expandArgs);
-    }
-
-    @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(this.getPrefix(), args);
+        final OptionParam result = new OptionParam(args);
         result.putAll(this.param.createOptionParam(args));
-        result.put("-parameterize", this.parameterize);
-        result.put("-ignoreFail", this.ignoreFail);
+        result.put("-parameterize", Boolean.toString(this.parameterize));
+        result.put("-ignoreFail", Boolean.toString(this.ignoreFail));
         result.put("-cmd", this.cmd);
         result.put("-cmdParam", this.cmdParam);
         result.putFile("-template", this.template, true);
         result.putAll(this.templateOption.createOptionParam(args));
         return result;
+    }
+
+    @Override
+    public void setUpComponent(final ParameterizeDto dto) {
+        super.setUpComponent(dto);
+        this.cmd = dto.getCmd();
+        this.cmdParam = dto.getCmdParam();
+        this.args.putAll(dto.getArg());
+        if (Strings.isNotEmpty(dto.getIgnoreFail())) {
+            this.ignoreFail = Boolean.parseBoolean(dto.getIgnoreFail());
+        }
+        if (Strings.isNotEmpty(dto.getParameterize())) {
+            this.parameterize = Boolean.parseBoolean(dto.getParameterize());
+        }
+        if (Strings.isNotEmpty(dto.getTemplate())) {
+            this.template = new File(dto.getTemplate());
+        }
+        this.param.setUpComponent(dto.getDateSetLoad());
+        this.templateOption.setUpComponent(dto.getTemplateRender());
     }
 
     public Stream<Map<String, Object>> loadParams() {
@@ -124,7 +142,7 @@ public class ParameterizeOption extends CommandLineOption {
         return this.createCommand(this.templateOption.getTemplateRender().render(this.cmd, aParam.getMap()));
     }
 
-    protected Command<? extends CommandLineOption> createCommand(final String cmdType) {
+    protected Command<? extends CommandLineOption<?>> createCommand(final String cmdType) {
         return switch (cmdType) {
             case "compare" -> new Compare();
             case "convert" -> new Convert();

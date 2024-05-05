@@ -1,10 +1,12 @@
 package yo.dbunitcli.application;
 
-import picocli.CommandLine;
-import yo.dbunitcli.application.argument.DataSetConverterOption;
-import yo.dbunitcli.application.argument.DataSetLoadOption;
-import yo.dbunitcli.application.argument.DefaultArgumentMapper;
-import yo.dbunitcli.application.argument.ImageCompareOption;
+import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.cli.CommandLineOption;
+import yo.dbunitcli.application.cli.CommandLineParser;
+import yo.dbunitcli.application.cli.DefaultArgumentMapper;
+import yo.dbunitcli.application.option.DataSetConverterOption;
+import yo.dbunitcli.application.option.DataSetLoadOption;
+import yo.dbunitcli.application.option.ImageCompareOption;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.compare.CompareResult;
 import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
@@ -17,7 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class CompareOption extends CommandLineOption {
+public class CompareOption extends CommandLineOption<CompareDto> {
 
     private static final DefaultArgumentMapper IMAGE_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
@@ -51,13 +53,10 @@ public class CompareOption extends CommandLineOption {
 
     private final ImageCompareOption imageOption = new ImageCompareOption("image");
 
-    @CommandLine.Option(names = "-setting", description = "file comparison settings")
     private String setting;
 
-    @CommandLine.Option(names = "-settingEncoding", description = "settings encoding")
     private String settingEncoding = System.getProperty("file.encoding");
 
-    @CommandLine.Option(names = "-targetType")
     private Type targetType = Type.data;
 
     private TableSeparators tableSeparators;
@@ -83,8 +82,38 @@ public class CompareOption extends CommandLineOption {
     }
 
     @Override
+    public void parseArgument(final String[] args) {
+        final CompareDto dto = new CompareDto();
+        new CommandLineParser("", this.getArgumentMapper(), this.getArgumentFilter())
+                .parseArgument(args, dto);
+        if (dto.getTargetType().isAny(Type.image, Type.pdf)) {
+            new CommandLineParser(this.imageOption.getPrefix())
+                    .parseArgument(args, dto.getImageCompare());
+        }
+        if (dto.getTargetType() == Type.image) {
+            new CommandLineParser(this.newData.getPrefix(), CompareOption.IMAGE_TYPE_PARAM_MAPPER)
+                    .parseArgument(args, dto.getNewDataSetLoad());
+            new CommandLineParser(this.oldData.getPrefix(), CompareOption.IMAGE_TYPE_PARAM_MAPPER)
+                    .parseArgument(args, dto.getOldDataSetLoad());
+        } else if (dto.getTargetType() == Type.pdf) {
+            new CommandLineParser(this.newData.getPrefix(), CompareOption.PDF_TYPE_PARAM_MAPPER)
+                    .parseArgument(args, dto.getNewDataSetLoad());
+            new CommandLineParser(this.oldData.getPrefix(), CompareOption.PDF_TYPE_PARAM_MAPPER)
+                    .parseArgument(args, dto.getOldDataSetLoad());
+        } else {
+            new CommandLineParser(this.newData.getPrefix()).parseArgument(args, dto.getNewDataSetLoad());
+            new CommandLineParser(this.oldData.getPrefix()).parseArgument(args, dto.getOldDataSetLoad());
+        }
+        if (Arrays.stream(args).anyMatch(it -> it.startsWith("-" + this.expectData.getPrefix() + ".src"))) {
+            new CommandLineParser(this.expectData.getPrefix()).parseArgument(args, dto.getExpectDataSetLoad());
+        }
+        new CommandLineParser(this.getConverterOption().getPrefix()).parseArgument(args, dto.getDataSetConverter());
+        this.setUpComponent(dto);
+    }
+
+    @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(this.getPrefix(), args);
+        final OptionParam result = new OptionParam(args);
         result.put("-targetType", this.targetType, Type.class);
         if (Type.valueOf(result.get("-targetType")).isAny(Type.pdf, Type.image)) {
             result.putAll(this.imageOption.createOptionParam(args));
@@ -99,30 +128,29 @@ public class CompareOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final String[] expandArgs) {
-        super.setUpComponent(expandArgs);
-        if (this.targetType.isAny(Type.image, Type.pdf)) {
-            this.imageOption.parseArgument(expandArgs);
-            if (this.targetType == Type.image) {
-                this.newData.setArgumentMapper(CompareOption.IMAGE_TYPE_PARAM_MAPPER);
-                this.oldData.setArgumentMapper(CompareOption.IMAGE_TYPE_PARAM_MAPPER);
-            } else if (this.targetType == Type.pdf) {
-                this.newData.setArgumentMapper(CompareOption.PDF_TYPE_PARAM_MAPPER);
-                this.oldData.setArgumentMapper(CompareOption.PDF_TYPE_PARAM_MAPPER);
-            }
+    public void setUpComponent(final CompareDto dto) {
+        super.setUpComponent(dto);
+        this.setting = dto.getSetting();
+        if (Strings.isNotEmpty(dto.getSettingEncoding())) {
+            this.settingEncoding = dto.getSettingEncoding();
         }
-        this.newData.parseArgument(expandArgs);
-        this.oldData.parseArgument(expandArgs);
-        if (Arrays.stream(expandArgs).anyMatch(it -> it.startsWith("-expect.src"))) {
-            this.expectData.parseArgument(expandArgs);
-            if (Arrays.stream(expandArgs).noneMatch(it -> it.startsWith("-expect.setting"))) {
+        if (dto.getTargetType() != null) {
+            this.targetType = dto.getTargetType();
+        }
+        if (this.targetType.isAny(Type.image, Type.pdf)) {
+            this.imageOption.setUpComponent(dto.getImageCompare());
+        }
+        this.newData.setUpComponent(dto.getNewDataSetLoad());
+        this.oldData.setUpComponent(dto.getOldDataSetLoad());
+        if (Strings.isNotEmpty(dto.getExpectDataSetLoad().getSrc())) {
+            this.expectData.setUpComponent(dto.getExpectDataSetLoad());
+            if (Strings.isEmpty(dto.getExpectDataSetLoad().getSetting())) {
                 this.expectData.getParam().editColumnSettings(separator ->
-                        separator.addSetting(TableSeparator.builder().build())
-                );
+                        separator.addSetting(TableSeparator.builder().build()));
             }
         }
         this.populateSettings();
-        this.getConverterOption().parseArgument(expandArgs);
+        this.getConverterOption().setUpComponent(dto.getDataSetConverter());
     }
 
     public boolean compare() {

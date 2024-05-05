@@ -1,9 +1,10 @@
 package yo.dbunitcli.application;
 
-import picocli.CommandLine;
-import yo.dbunitcli.application.argument.DataSetLoadOption;
-import yo.dbunitcli.application.argument.JdbcOption;
-import yo.dbunitcli.application.argument.TemplateRenderOption;
+import yo.dbunitcli.application.cli.CommandLineOption;
+import yo.dbunitcli.application.cli.CommandLineParser;
+import yo.dbunitcli.application.option.DataSetLoadOption;
+import yo.dbunitcli.application.option.JdbcOption;
+import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.producer.ComparableFileTableMetaData;
@@ -16,12 +17,11 @@ import java.io.File;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class RunOption extends CommandLineOption {
+public class RunOption extends CommandLineOption<RunDto> {
 
     private final DataSetLoadOption src = new DataSetLoadOption("");
     private final TemplateRenderOption templateOption = new TemplateRenderOption("");
     private final JdbcOption jdbcOption = new JdbcOption("");
-    @CommandLine.Option(names = "-scriptType")
     private ScriptType scriptType = ScriptType.sql;
 
     public RunOption() {
@@ -53,16 +53,19 @@ public class RunOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final String[] expandArgs) {
-        super.setUpComponent(expandArgs);
-        this.templateOption.parseArgument(expandArgs);
-        this.jdbcOption.parseArgument(expandArgs);
-        this.src.parseArgument(expandArgs);
+    public void parseArgument(final String[] args) {
+        final RunDto dto = new RunDto();
+        new CommandLineParser("", this.getArgumentMapper(), this.getArgumentFilter())
+                .parseArgument(args, dto);
+        new CommandLineParser(this.src.getPrefix()).parseArgument(args, dto.getDataSetLoad());
+        new CommandLineParser(this.jdbcOption.getPrefix()).parseArgument(args, dto.getJdbc());
+        new CommandLineParser(this.templateOption.getPrefix()).parseArgument(args, dto.getTemplateRender());
+        this.setUpComponent(dto);
     }
 
     @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(this.getPrefix(), args);
+        final OptionParam result = new OptionParam(args);
         result.putAll(this.src.createOptionParam(args));
         result.put("-scriptType", this.scriptType, ScriptType.class);
         result.putAll(this.templateOption.createOptionParam(args));
@@ -70,6 +73,17 @@ public class RunOption extends CommandLineOption {
             result.putAll(this.jdbcOption.createOptionParam(args));
         }
         return result;
+    }
+
+    @Override
+    public void setUpComponent(final RunDto dto) {
+        super.setUpComponent(dto);
+        if (dto.getScriptType() != null) {
+            this.scriptType = dto.getScriptType();
+        }
+        this.templateOption.setUpComponent(dto.getTemplateRender());
+        this.jdbcOption.setUpComponent(dto.getJdbc());
+        this.src.setUpComponent(dto.getDataSetLoad());
     }
 
     public enum ScriptType {

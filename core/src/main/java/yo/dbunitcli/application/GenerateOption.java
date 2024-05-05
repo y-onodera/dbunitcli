@@ -2,9 +2,11 @@ package yo.dbunitcli.application;
 
 import org.dbunit.dataset.DataSetException;
 import org.stringtemplate.v4.STGroup;
-import picocli.CommandLine;
-import yo.dbunitcli.application.argument.DataSetLoadOption;
-import yo.dbunitcli.application.argument.TemplateRenderOption;
+import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.cli.CommandLineOption;
+import yo.dbunitcli.application.cli.CommandLineParser;
+import yo.dbunitcli.application.option.DataSetLoadOption;
+import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
@@ -23,25 +25,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class GenerateOption extends CommandLineOption {
+public class GenerateOption extends CommandLineOption<GenerateDto> {
 
     private final DataSetLoadOption src = new DataSetLoadOption("src");
     private final TemplateRenderOption templateOption = new TemplateRenderOption("template");
-    @CommandLine.Option(names = "-generateType")
     private GenerateType generateType = GenerateType.txt;
-    @CommandLine.Option(names = "-unit")
     private GenerateUnit unit = GenerateUnit.record;
-    @CommandLine.Option(names = "-commit", description = "default commit;whether commit or not generate sql")
-    private String commit = "true";
-    @CommandLine.Option(names = "-sqlFileSuffix", description = "generate sqlFile fileName suffix")
+    private boolean commit = true;
     private String sqlFileSuffix = "";
-    @CommandLine.Option(names = "-sqlFilePrefix", description = "generate sqlFile fileName prefix")
     private String sqlFilePrefix = "";
-    @CommandLine.Option(names = "-op")
     private DBConverter.Operation operation;
-    @CommandLine.Option(names = "-outputEncoding", description = "output file encoding")
     private String outputEncoding = "UTF-8";
-    @CommandLine.Option(names = "-template", description = "template file")
     private File template;
     private String templateString;
 
@@ -66,7 +60,7 @@ public class GenerateOption extends CommandLineOption {
     }
 
     public Stream<Map<String, Object>> parameterStream() {
-        this.getParameter().getMap().put("commit", Boolean.valueOf(this.commit));
+        this.getParameter().getMap().put("commit", this.commit);
         return this.getUnit().parameterStream(this.getParameter().getMap(), this.targetDataSet());
     }
 
@@ -79,12 +73,14 @@ public class GenerateOption extends CommandLineOption {
     }
 
     @Override
-    public void setUpComponent(final String[] expandArgs) {
-        super.setUpComponent(expandArgs);
-        this.getConverterOption().parseArgument(expandArgs);
-        this.src.parseArgument(expandArgs);
-        this.templateOption.parseArgument(expandArgs);
-        this.getGenerateType().populateSettings(this);
+    public void parseArgument(final String[] args) {
+        final GenerateDto dto = new GenerateDto();
+        new CommandLineParser("", this.getArgumentMapper(), this.getArgumentFilter())
+                .parseArgument(args, dto);
+        new CommandLineParser(this.src.getPrefix()).parseArgument(args, dto.getDataSetLoad());
+        new CommandLineParser(this.templateOption.getPrefix()).parseArgument(args, dto.getTemplateRender());
+        new CommandLineParser(this.getConverterOption().getPrefix()).parseArgument(args, dto.getDataSetConverter());
+        this.setUpComponent(dto);
     }
 
     @Override
@@ -98,7 +94,7 @@ public class GenerateOption extends CommandLineOption {
 
     @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(this.getPrefix(), args);
+        final OptionParam result = new OptionParam(args);
         result.putAll(this.src.createOptionParam(args));
         result.put("-generateType", this.generateType, GenerateType.class);
         if (result.hasValue("-generateType")
@@ -108,7 +104,7 @@ public class GenerateOption extends CommandLineOption {
             result.putFile("-template", this.template, true);
         }
         if (result.hasValue("-generateType") && GenerateType.valueOf(result.get("-generateType")) == GenerateType.sql) {
-            result.put("-commit", this.commit);
+            result.put("-commit", Boolean.toString(this.commit));
             result.put("-op", this.operation, DBConverter.Operation.class);
             result.put("-sqlFilePrefix", this.sqlFilePrefix);
             result.put("-sqlFileSuffix", this.sqlFileSuffix);
@@ -120,6 +116,37 @@ public class GenerateOption extends CommandLineOption {
             result.put("-outputEncoding", this.outputEncoding);
         }
         return result;
+    }
+
+    @Override
+    public void setUpComponent(final GenerateDto dto) {
+        super.setUpComponent(dto);
+        if (dto.getGenerateType() != null) {
+            this.generateType = dto.getGenerateType();
+        }
+        if (dto.getUnit() != null) {
+            this.unit = dto.getUnit();
+        }
+        this.operation = dto.getOperation();
+        if (Strings.isNotEmpty(dto.getSqlFilePrefix())) {
+            this.sqlFilePrefix = dto.getSqlFilePrefix();
+        }
+        if (Strings.isNotEmpty(dto.getSqlFileSuffix())) {
+            this.sqlFileSuffix = dto.getSqlFileSuffix();
+        }
+        if (Strings.isNotEmpty(dto.getCommit())) {
+            this.commit = Boolean.parseBoolean(dto.getCommit());
+        }
+        if (Strings.isNotEmpty(dto.getTemplate())) {
+            this.template = new File(dto.getTemplate());
+        }
+        if (Strings.isNotEmpty(dto.getOutputEncoding())) {
+            this.outputEncoding = dto.getOutputEncoding();
+        }
+        this.getConverterOption().setUpComponent(dto.getDataSetConverter());
+        this.src.setUpComponent(dto.getDataSetLoad());
+        this.templateOption.setUpComponent(dto.getTemplateRender());
+        this.getGenerateType().populateSettings(this);
     }
 
     public ComparableDataSet targetDataSet() {
