@@ -4,6 +4,7 @@ import yo.dbunitcli.Strings;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -18,6 +19,19 @@ public record Workspace(Path path, Options options, Resources resources) {
 
     public Stream<Path> parameterFiles(final CommandType type) {
         return this.options().parameterFiles(type);
+    }
+
+    public void save(final CommandType type, final String name, final List<String> args) throws IOException {
+        final File parent = new File(this.path.toFile(), "option/" + type.name());
+        if (!parent.exists()) {
+            Files.createDirectories(parent.toPath());
+        }
+        final File saveTo = new File(parent, name + ".txt");
+        if (!saveTo.exists()) {
+            Files.createFile(saveTo.toPath());
+        }
+        Files.writeString(saveTo.toPath(), String.join("\r\n", args), Charset.forName(System.getProperty("file.encoding")));
+        this.options().save(type, saveTo.toPath());
     }
 
     public static class Builder {

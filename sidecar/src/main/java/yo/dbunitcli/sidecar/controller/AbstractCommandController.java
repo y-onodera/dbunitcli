@@ -49,11 +49,11 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
-    public String save(@Body final DTO input) {
+    public String save(@Body final OptionDto<DTO> input) {
         try {
             final OPTION option = this.getOption();
-            option.setUpComponent(input);
-            System.out.println(option.toArgs(false));
+            option.setUpComponent(input.getValue());
+            this.workspace.save(this.getCommandType(), input.getName(), option.toArgs(false));
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             return "failed";

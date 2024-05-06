@@ -16,6 +16,11 @@ public record Options(Map<CommandType, List<Path>> parameterFiles) {
         return this.parameterFiles().get(type).stream();
     }
 
+    public void save(final CommandType type, final Path path) {
+        this.parameterFiles().get(type).removeIf(it -> it.toAbsolutePath().equals(path.toAbsolutePath()));
+        this.parameterFiles().get(type).add(path);
+    }
+
     public static class Builder {
         private final Map<CommandType, List<Path>> parameterFiles = new HashMap<>();
 
