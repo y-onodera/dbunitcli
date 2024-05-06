@@ -28,7 +28,13 @@ public class CsvOption implements ComparableDataSetParamOption {
     @Override
     public OptionParam createOptionParam(final Map<String, String> args) {
         final OptionParam result = new OptionParam(this.getPrefix(), args);
-        result.put("-delimiter", this.delimiter);
+        result.put("-delimiter", String.valueOf(this.delimiter)
+                .replace("\b", "\\b")
+                .replace("\t", "\\t")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\f", "\\f")
+        );
         return result;
     }
 
