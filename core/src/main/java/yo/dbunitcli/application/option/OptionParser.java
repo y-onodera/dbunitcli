@@ -37,6 +37,16 @@ public interface OptionParser<T> {
             this.args = args;
         }
 
+        public List<String> toList(final boolean containNoValue) {
+            final List<String> result = new ArrayList<>();
+            for (final String key : this.keySet()) {
+                if (containNoValue || this.hasValue(key)) {
+                    result.add(key + "=" + this.get(key));
+                }
+            }
+            return result;
+        }
+
         public void putAll(final OptionParam other) {
             other.keySet()
                     .forEach(it -> {
