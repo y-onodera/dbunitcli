@@ -66,7 +66,7 @@ public class MainPresenter {
     @FXML
     private MFXComboBox<String> commandTypeSelect;
     private String selectedCommand;
-    private CommandLineOption parser;
+    private CommandLineOption<?> parser;
 
     @FXML
     void initialize() {
