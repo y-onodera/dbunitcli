@@ -25,7 +25,7 @@ public class DataSetLoadDto implements CompositeDto {
     @CommandLine.Option(names = "-delimiter", description = "default is comma")
     private String delimiter;
     @CommandLine.Option(names = "-encoding", description = "csv file encoding")
-    private String encoding = System.getProperty("file.encoding");
+    private String encoding;
     @CommandLine.Option(names = "-xlsxSchema", description = "schema use read xlsx")
     private String xlsxSchemaSource;
     @CommandLine.Option(names = "-extension", description = "target extension")
@@ -35,9 +35,9 @@ public class DataSetLoadDto implements CompositeDto {
     @CommandLine.Option(names = "-headerName", description = "comma separate header name. if set,all rows treat data rows")
     private String headerName;
     @CommandLine.Option(names = "-useJdbcMetaData", description = "default false. whether load metaData from jdbc or not")
-    private String useJdbcMetaData = "false";
+    private String useJdbcMetaData;
     @CommandLine.Option(names = "-recursive", description = "default true. whether traversal recursively")
-    private String recursive = "true";
+    private String recursive;
     @CommandLine.Option(names = "-regDataSplit", description = "regex to use split data row")
     private String regDataSplit;
 
