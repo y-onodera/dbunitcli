@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,6 +66,10 @@ abstract public class CommandLineOption<T extends CommandDto> implements OptionP
         this.setUpComponent(this.toDto(args));
     }
 
+    public List<String> toArgs(final boolean containNoValue) {
+        return this.createOptionParam(new HashMap<>()).toList(containNoValue);
+    }
+
     public abstract T toDto(String[] args);
 
     public Parameter getParameter() {
@@ -105,4 +110,5 @@ abstract public class CommandLineOption<T extends CommandDto> implements OptionP
     protected ArgumentMapper getArgumentMapper() {
         return new DefaultArgumentMapper();
     }
+
 }
