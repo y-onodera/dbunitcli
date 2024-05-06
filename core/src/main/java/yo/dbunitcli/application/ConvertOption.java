@@ -24,13 +24,13 @@ public class ConvertOption extends CommandLineOption<ConvertDto> {
     }
 
     @Override
-    public void parseArgument(final String[] args) {
+    public ConvertDto toDto(final String[] args) {
         final ConvertDto dto = new ConvertDto();
         new CommandLineParser("", this.getArgumentMapper(), this.getArgumentFilter())
                 .parseArgument(args, dto);
         new CommandLineParser(this.src.getPrefix()).parseArgument(args, dto.getDataSetLoad());
         new CommandLineParser(this.getConverterOption().getPrefix()).parseArgument(args, dto.getDataSetConverter());
-        this.setUpComponent(dto);
+        return dto;
     }
 
     @Override

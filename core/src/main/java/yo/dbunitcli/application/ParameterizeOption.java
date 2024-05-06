@@ -2,7 +2,10 @@ package yo.dbunitcli.application;
 
 import picocli.CommandLine;
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.application.cli.*;
+import yo.dbunitcli.application.cli.ArgumentFilter;
+import yo.dbunitcli.application.cli.CommandLineParser;
+import yo.dbunitcli.application.cli.DefaultArgumentFilter;
+import yo.dbunitcli.application.cli.DefaultArgumentMapper;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.dataset.Parameter;
@@ -70,32 +73,14 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
     }
 
     @Override
-    public void parseArgument(final String[] args) {
+    public ParameterizeDto toDto(final String[] args) {
         final ParameterizeDto dto = new ParameterizeDto();
         new CommandLineParser("", this.getArgumentMapper(), this.getArgumentFilter())
                 .parseArgument(args, dto);
         new CommandLineParser(this.param.getPrefix(), ParameterizeOption.NONE_PARAM_MAPPER)
                 .parseArgument(args, dto.getDateSetLoad());
         new CommandLineParser(this.templateOption.getPrefix()).parseArgument(args, dto.getTemplateRender());
-        this.setUpComponent(dto);
-    }
-
-    @Override
-    protected ArgumentFilter getArgumentFilter() {
-        return new DefaultArgumentFilter("-P", "-A", "-arg");
-    }
-
-    @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(args);
-        result.putAll(this.param.createOptionParam(args));
-        result.put("-parameterize", Boolean.toString(this.parameterize));
-        result.put("-ignoreFail", Boolean.toString(this.ignoreFail));
-        result.put("-cmd", this.cmd);
-        result.put("-cmdParam", this.cmdParam);
-        result.putFile("-template", this.template, true);
-        result.putAll(this.templateOption.createOptionParam(args));
-        return result;
+        return dto;
     }
 
     @Override
@@ -115,6 +100,24 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
         }
         this.param.setUpComponent(dto.getDateSetLoad());
         this.templateOption.setUpComponent(dto.getTemplateRender());
+    }
+
+    @Override
+    protected ArgumentFilter getArgumentFilter() {
+        return new DefaultArgumentFilter("-P", "-A", "-arg");
+    }
+
+    @Override
+    public OptionParam createOptionParam(final Map<String, String> args) {
+        final OptionParam result = new OptionParam(args);
+        result.putAll(this.param.createOptionParam(args));
+        result.put("-parameterize", Boolean.toString(this.parameterize));
+        result.put("-ignoreFail", Boolean.toString(this.ignoreFail));
+        result.put("-cmd", this.cmd);
+        result.put("-cmdParam", this.cmdParam);
+        result.putFile("-template", this.template, true);
+        result.putAll(this.templateOption.createOptionParam(args));
+        return result;
     }
 
     public Stream<Map<String, Object>> loadParams() {

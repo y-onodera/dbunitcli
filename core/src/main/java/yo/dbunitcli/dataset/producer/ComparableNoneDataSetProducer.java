@@ -17,6 +17,11 @@ public class ComparableNoneDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
+    public String getSrc() {
+        return "";
+    }
+
+    @Override
     public ComparableDataSetParam getParam() {
         return this.param;
     }

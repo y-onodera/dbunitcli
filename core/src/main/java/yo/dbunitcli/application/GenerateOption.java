@@ -72,14 +72,14 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
     }
 
     @Override
-    public void parseArgument(final String[] args) {
+    public GenerateDto toDto(final String[] args) {
         final GenerateDto dto = new GenerateDto();
         new CommandLineParser("", this.getArgumentMapper(), this.getArgumentFilter())
                 .parseArgument(args, dto);
         new CommandLineParser(this.src.getPrefix()).parseArgument(args, dto.getDataSetLoad());
         new CommandLineParser(this.templateOption.getPrefix()).parseArgument(args, dto.getTemplateRender());
         new CommandLineParser(this.getConverterOption().getPrefix()).parseArgument(args, dto.getDataSetConverter());
-        this.setUpComponent(dto);
+        return dto;
     }
 
     @Override

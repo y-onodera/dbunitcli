@@ -61,7 +61,11 @@ abstract public class CommandLineOption<T extends CommandDto> implements OptionP
     /**
      * @param args option
      */
-    public abstract void parseArgument(final String[] args);
+    public void parseArgument(final String[] args) {
+        this.setUpComponent(this.toDto(args));
+    }
+
+    public abstract T toDto(String[] args);
 
     public Parameter getParameter() {
         return this.parameter;

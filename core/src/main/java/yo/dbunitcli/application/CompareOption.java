@@ -81,7 +81,7 @@ public class CompareOption extends CommandLineOption<CompareDto> {
     }
 
     @Override
-    public void parseArgument(final String[] args) {
+    public CompareDto toDto(final String[] args) {
         final CompareDto dto = new CompareDto();
         new CommandLineParser("", this.getArgumentMapper(), this.getArgumentFilter())
                 .parseArgument(args, dto);
@@ -107,7 +107,7 @@ public class CompareOption extends CommandLineOption<CompareDto> {
             new CommandLineParser(this.expectData.getPrefix()).parseArgument(args, dto.getExpectDataSetLoad());
         }
         new CommandLineParser(this.getConverterOption().getPrefix()).parseArgument(args, dto.getDataSetConverter());
-        this.setUpComponent(dto);
+        return dto;
     }
 
     @Override

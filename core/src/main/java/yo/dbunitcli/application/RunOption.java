@@ -52,14 +52,14 @@ public class RunOption extends CommandLineOption<RunDto> {
     }
 
     @Override
-    public void parseArgument(final String[] args) {
+    public RunDto toDto(final String[] args) {
         final RunDto dto = new RunDto();
         new CommandLineParser("", this.getArgumentMapper(), this.getArgumentFilter())
                 .parseArgument(args, dto);
         new CommandLineParser(this.src.getPrefix()).parseArgument(args, dto.getDataSetLoad());
         new CommandLineParser(this.jdbcOption.getPrefix()).parseArgument(args, dto.getJdbc());
         new CommandLineParser(this.templateOption.getPrefix()).parseArgument(args, dto.getTemplateRender());
-        this.setUpComponent(dto);
+        return dto;
     }
 
     @Override

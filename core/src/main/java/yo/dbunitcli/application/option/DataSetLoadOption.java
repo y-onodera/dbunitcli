@@ -61,9 +61,12 @@ public class DataSetLoadOption implements OptionParser<DataSetLoadDto> {
 
     @Override
     public void setUpComponent(final DataSetLoadDto dto) {
-        this.src = new File(dto.getSrc());
         if (dto.getSrcType() != null) {
             this.srcType = dto.getSrcType();
+        }
+        if (this.srcType != DataSourceType.none) {
+            this.src = new File(dto.getSrc());
+            this.assertFileExists(this.src);
         }
         this.setting = dto.getSetting();
         if (Strings.isNotEmpty(dto.getSettingEncoding())) {
@@ -81,7 +84,6 @@ public class DataSetLoadOption implements OptionParser<DataSetLoadDto> {
         if (Strings.isNotEmpty(dto.getRegInclude())) {
             this.regInclude = dto.getRegInclude();
         }
-        this.assertFileExists(this.src);
         this.populateSettings();
         this.builder.setSource(this.srcType)
                 .setSrc(this.src)
