@@ -20,11 +20,12 @@ public class DataSetLoadOption implements OptionParser<DataSetLoadDto> {
     private DataSourceType srcType = DataSourceType.csv;
     private String setting;
     private String settingEncoding = System.getProperty("file.encoding");
-    private String loadData = "true";
-    private String includeMetaData = "false";
+    private boolean loadData = true;
+    private boolean includeMetaData = false;
     private String regInclude;
     private String regExclude;
     private TableSeparators tableSeparators;
+    private ComparableDataSetParamOption dataSetParam;
 
     public DataSetLoadOption(final String prefix) {
         this.prefix = prefix;
@@ -46,14 +47,18 @@ public class DataSetLoadOption implements OptionParser<DataSetLoadDto> {
         result.putFileOrDir("-src", this.src, true);
         result.putFile("-setting", this.setting == null ? null : new File(this.setting));
         result.put("-settingEncoding", this.settingEncoding);
-        result.put("-loadData", this.loadData);
-        result.put("-includeMetaData", this.includeMetaData);
+        result.put("-loadData", Boolean.toString(this.loadData));
+        result.put("-includeMetaData", Boolean.toString(this.includeMetaData));
         result.put("-regInclude", this.regInclude);
         result.put("-regExclude", this.regExclude);
         try {
-            final DataSourceType type = DataSourceType.valueOf(result.get("-srcType"));
-            final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), type);
-            result.putAll(option.createOptionParam(args));
+            if (this.dataSetParam == null) {
+                final DataSourceType type = DataSourceType.valueOf(result.get("-srcType"));
+                final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), type);
+                result.putAll(option.createOptionParam(args));
+            } else {
+                result.putAll(this.dataSetParam.createOptionParam(args));
+            }
         } catch (final Throwable ignored) {
         }
         return result;
@@ -73,10 +78,10 @@ public class DataSetLoadOption implements OptionParser<DataSetLoadDto> {
             this.settingEncoding = dto.getSettingEncoding();
         }
         if (Strings.isNotEmpty(dto.getLoadData())) {
-            this.loadData = dto.getLoadData();
+            this.loadData = Boolean.parseBoolean(dto.getLoadData());
         }
         if (Strings.isNotEmpty(dto.getIncludeMetaData())) {
-            this.includeMetaData = dto.getIncludeMetaData();
+            this.includeMetaData = Boolean.parseBoolean(dto.getIncludeMetaData());
         }
         if (Strings.isNotEmpty(dto.getRegExclude())) {
             this.regExclude = dto.getRegExclude();
@@ -88,14 +93,14 @@ public class DataSetLoadOption implements OptionParser<DataSetLoadDto> {
         this.builder.setSource(this.srcType)
                 .setSrc(this.src)
                 .setTableSeparators(this.tableSeparators)
-                .setLoadData(Boolean.parseBoolean(this.loadData))
-                .setMapIncludeMetaData(Boolean.parseBoolean(this.includeMetaData))
+                .setLoadData(this.loadData)
+                .setMapIncludeMetaData(this.includeMetaData)
                 .setRegInclude(this.regInclude)
                 .setRegExclude(this.regExclude)
         ;
-        final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), this.srcType);
-        option.setUpComponent(dto);
-        option.populate(this.builder);
+        this.dataSetParam = new DataSourceTypeOptionFactory().create(this.getPrefix(), this.srcType);
+        this.dataSetParam.setUpComponent(dto);
+        this.dataSetParam.populate(this.builder);
     }
 
     public ComparableDataSetParam.Builder getParam() {
