@@ -13,11 +13,11 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 17
+      - name: Set up graalvm
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'zulu'
+          java-version: '21'
+          distribution: 'graalvm'
           cache: 'maven'
       - name: postgresql setup
         uses: ikalnytskyi/action-setup-postgres@v4
