@@ -2,8 +2,8 @@ package yo.dbunitcli.sidecar.controller;
 
 import io.micronaut.http.annotation.Controller;
 import yo.dbunitcli.application.Run;
-import yo.dbunitcli.application.RunDto;
 import yo.dbunitcli.application.RunOption;
+import yo.dbunitcli.application.RunDto;
 import yo.dbunitcli.sidecar.domain.project.CommandType;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
@@ -17,11 +17,6 @@ public class RunController extends AbstractCommandController<RunDto, RunOption, 
     @Override
     protected Run getCommand() {
         return new Run();
-    }
-
-    @Override
-    protected RunOption getOption() {
-        return new RunOption();
     }
 
     @Override

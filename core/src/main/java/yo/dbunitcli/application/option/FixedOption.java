@@ -3,14 +3,13 @@ package yo.dbunitcli.application.option;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
-import java.util.Map;
-
 public class FixedOption implements ComparableDataSetParamOption {
     private final String prefix;
-    private String fixedLength;
+    private final String fixedLength;
 
-    public FixedOption(final String prefix) {
+    public FixedOption(final String prefix, final DataSetLoadDto dto) {
         this.prefix = prefix;
+        this.fixedLength = dto.getFixedLength();
     }
 
     @Override
@@ -24,14 +23,10 @@ public class FixedOption implements ComparableDataSetParamOption {
     }
 
     @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(this.getPrefix(), args);
+    public CommandLineArgs toCommandLineArgs() {
+        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
         result.put("-fixedLength", this.fixedLength);
         return result;
     }
 
-    @Override
-    public void setUpComponent(final DataSetLoadDto dto) {
-        this.fixedLength = dto.getFixedLength();
-    }
 }

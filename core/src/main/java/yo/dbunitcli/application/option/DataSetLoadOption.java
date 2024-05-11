@@ -9,27 +9,56 @@ import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 
-public class DataSetLoadOption implements OptionParser<DataSetLoadDto> {
+public class DataSetLoadOption implements Option<DataSetLoadDto> {
 
     private final String prefix;
-    private final ComparableDataSetParam.Builder builder;
-    private File src;
-    private DataSourceType srcType = DataSourceType.csv;
-    private String setting;
-    private String settingEncoding = System.getProperty("file.encoding");
-    private boolean loadData = true;
-    private boolean includeMetaData = false;
-    private String regInclude;
-    private String regExclude;
-    private TableSeparators tableSeparators;
-    private ComparableDataSetParamOption dataSetParam;
+    private final DataSourceType srcType;
+    private final String setting;
+    private final String settingEncoding;
+    private final boolean loadData;
+    private final boolean includeMetaData;
+    private final ComparableDataSetParamOption dataSetParam;
+    private final File src;
+    private final String regInclude;
+    private final String regExclude;
 
     public DataSetLoadOption(final String prefix) {
+        this(prefix, new DataSetLoadDto());
+    }
+
+    public DataSetLoadOption(final String prefix, final DataSetLoadDto dto) {
         this.prefix = prefix;
-        this.builder = ComparableDataSetParam.builder();
+        if (dto.getSrcType() != null) {
+            this.srcType = dto.getSrcType();
+        } else {
+            this.srcType = DataSourceType.csv;
+        }
+        if (this.srcType != DataSourceType.none && Strings.isNotEmpty(dto.getSrc())) {
+            this.src = new File(dto.getSrc());
+        } else {
+            this.src = null;
+        }
+        this.setting = dto.getSetting();
+        if (Strings.isNotEmpty(dto.getSettingEncoding())) {
+            this.settingEncoding = dto.getSettingEncoding();
+        } else {
+            this.settingEncoding = System.getProperty("file.encoding");
+        }
+        if (Strings.isNotEmpty(dto.getLoadData())) {
+            this.loadData = Boolean.parseBoolean(dto.getLoadData());
+        } else {
+            this.loadData = true;
+        }
+        if (Strings.isNotEmpty(dto.getIncludeMetaData())) {
+            this.includeMetaData = Boolean.parseBoolean(dto.getIncludeMetaData());
+        } else {
+            this.includeMetaData = false;
+        }
+        this.regExclude = dto.getRegExclude();
+        this.regInclude = dto.getRegInclude();
+        this.dataSetParam = new DataSourceTypeOptionFactory().create(this.getPrefix(), this.srcType, dto);
     }
 
     @Override
@@ -38,8 +67,8 @@ public class DataSetLoadOption implements OptionParser<DataSetLoadDto> {
     }
 
     @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(this.getPrefix(), args);
+    public CommandLineArgs toCommandLineArgs() {
+        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
         result.put("-srcType", this.srcType, DataSourceType.class, true);
         if (Optional.ofNullable(result.get("-srcType")).orElse("").isEmpty()) {
             return result;
@@ -47,64 +76,37 @@ public class DataSetLoadOption implements OptionParser<DataSetLoadDto> {
         result.putFileOrDir("-src", this.src, true);
         result.putFile("-setting", this.setting == null ? null : new File(this.setting));
         result.put("-settingEncoding", this.settingEncoding);
-        result.put("-loadData", Boolean.toString(this.loadData));
-        result.put("-includeMetaData", Boolean.toString(this.includeMetaData));
+        result.put("-loadData", this.loadData);
+        result.put("-includeMetaData", this.includeMetaData);
         result.put("-regInclude", this.regInclude);
         result.put("-regExclude", this.regExclude);
         try {
             if (this.dataSetParam == null) {
                 final DataSourceType type = DataSourceType.valueOf(result.get("-srcType"));
-                final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory().create(this.getPrefix(), type);
-                result.putAll(option.createOptionParam(args));
+                final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory()
+                        .create(this.getPrefix(), type, new DataSetLoadDto());
+                result.putAll(option.toCommandLineArgs());
             } else {
-                result.putAll(this.dataSetParam.createOptionParam(args));
+                result.putAll(this.dataSetParam.toCommandLineArgs());
             }
         } catch (final Throwable ignored) {
         }
         return result;
     }
 
-    @Override
-    public void setUpComponent(final DataSetLoadDto dto) {
-        if (dto.getSrcType() != null) {
-            this.srcType = dto.getSrcType();
-        }
+    public ComparableDataSetParam.Builder getParam() {
         if (this.srcType != DataSourceType.none) {
-            this.src = new File(dto.getSrc());
             this.assertFileExists(this.src);
         }
-        this.setting = dto.getSetting();
-        if (Strings.isNotEmpty(dto.getSettingEncoding())) {
-            this.settingEncoding = dto.getSettingEncoding();
-        }
-        if (Strings.isNotEmpty(dto.getLoadData())) {
-            this.loadData = Boolean.parseBoolean(dto.getLoadData());
-        }
-        if (Strings.isNotEmpty(dto.getIncludeMetaData())) {
-            this.includeMetaData = Boolean.parseBoolean(dto.getIncludeMetaData());
-        }
-        if (Strings.isNotEmpty(dto.getRegExclude())) {
-            this.regExclude = dto.getRegExclude();
-        }
-        if (Strings.isNotEmpty(dto.getRegInclude())) {
-            this.regInclude = dto.getRegInclude();
-        }
-        this.populateSettings();
-        this.builder.setSource(this.srcType)
+        return this.dataSetParam.populate(ComparableDataSetParam
+                .builder()
+                .setSource(this.srcType)
                 .setSrc(this.src)
-                .setTableSeparators(this.tableSeparators)
+                .setTableSeparators(this.getTableSeparators())
                 .setLoadData(this.loadData)
                 .setMapIncludeMetaData(this.includeMetaData)
                 .setRegInclude(this.regInclude)
-                .setRegExclude(this.regExclude)
-        ;
-        this.dataSetParam = new DataSourceTypeOptionFactory().create(this.getPrefix(), this.srcType);
-        this.dataSetParam.setUpComponent(dto);
-        this.dataSetParam.populate(this.builder);
-    }
-
-    public ComparableDataSetParam.Builder getParam() {
-        return this.builder;
+                .setRegExclude(this.regExclude));
     }
 
     protected void assertFileExists(final File file) {
@@ -113,12 +115,19 @@ public class DataSetLoadOption implements OptionParser<DataSetLoadDto> {
         }
     }
 
-    protected void populateSettings() {
+    protected TableSeparators getTableSeparators() {
         try {
-            this.tableSeparators = new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting);
+            return new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting);
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
     }
 
+    public File getSrc() {
+        return this.src;
+    }
+
+    public String getSetting() {
+        return this.setting;
+    }
 }

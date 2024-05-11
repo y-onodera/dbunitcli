@@ -4,17 +4,20 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
-import java.util.Map;
-
 public class JdbcLoadOption implements ComparableDataSetParamOption {
 
     private final String prefix;
     private final JdbcOption jdbc;
-    private String useJdbcMetaData = "false";
+    private final String useJdbcMetaData;
 
-    public JdbcLoadOption(final String prefix) {
+    public JdbcLoadOption(final String prefix, final DataSetLoadDto dto) {
         this.prefix = prefix;
-        this.jdbc = new JdbcOption(this.prefix);
+        this.jdbc = new JdbcOption(this.prefix, dto.getJdbc());
+        if (Strings.isNotEmpty(dto.getUseJdbcMetaData())) {
+            this.useJdbcMetaData = dto.getUseJdbcMetaData();
+        } else {
+            this.useJdbcMetaData = "false";
+        }
     }
 
     @Override
@@ -29,18 +32,10 @@ public class JdbcLoadOption implements ComparableDataSetParamOption {
     }
 
     @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = this.jdbc.createOptionParam(args);
+    public CommandLineArgs toCommandLineArgs() {
+        final CommandLineArgs result = this.jdbc.toCommandLineArgs();
         result.put("-useJdbcMetaData", this.useJdbcMetaData);
         return result;
-    }
-
-    @Override
-    public void setUpComponent(final DataSetLoadDto dto) {
-        if (Strings.isNotEmpty(dto.getUseJdbcMetaData())) {
-            this.useJdbcMetaData = dto.getUseJdbcMetaData();
-        }
-        this.jdbc.setUpComponent(dto.getJdbc());
     }
 
 }

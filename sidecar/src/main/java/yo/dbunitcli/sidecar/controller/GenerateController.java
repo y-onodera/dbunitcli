@@ -2,8 +2,8 @@ package yo.dbunitcli.sidecar.controller;
 
 import io.micronaut.http.annotation.Controller;
 import yo.dbunitcli.application.Generate;
-import yo.dbunitcli.application.GenerateDto;
 import yo.dbunitcli.application.GenerateOption;
+import yo.dbunitcli.application.GenerateDto;
 import yo.dbunitcli.sidecar.domain.project.CommandType;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
@@ -17,11 +17,6 @@ public class GenerateController extends AbstractCommandController<GenerateDto, G
     @Override
     protected Generate getCommand() {
         return new Generate();
-    }
-
-    @Override
-    protected GenerateOption getOption() {
-        return new GenerateOption();
     }
 
     @Override

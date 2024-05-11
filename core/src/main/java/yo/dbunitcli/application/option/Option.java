@@ -4,21 +4,19 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public interface OptionParser<T> {
+public interface Option<T> {
 
     default String getPrefix() {
         return "";
     }
 
-    OptionParam createOptionParam(Map<String, String> args);
-
-    void setUpComponent(T expandArgs);
+    CommandLineArgs toCommandLineArgs();
 
     enum ParamType {
         TEXT, ENUM, FILE, DIR, FILE_OR_DIR,
     }
 
-    class OptionParam {
+    class CommandLineArgs {
 
         private final Map<String, Map<String, Attribute>> options = new HashMap<>();
 
@@ -26,15 +24,12 @@ public interface OptionParser<T> {
 
         private final String prefix;
 
-        private final Map<String, String> args;
-
-        public OptionParam(final Map<String, String> args) {
-            this("", args);
+        public CommandLineArgs() {
+            this("");
         }
 
-        public OptionParam(final String prefix, final Map<String, String> args) {
+        public CommandLineArgs(final String prefix) {
             this.prefix = prefix;
-            this.args = args;
         }
 
         public List<String> toList(final boolean containNoValue) {
@@ -47,7 +42,7 @@ public interface OptionParser<T> {
             return result;
         }
 
-        public void putAll(final OptionParam other) {
+        public void putAll(final CommandLineArgs other) {
             other.keySet()
                     .forEach(it -> {
                         final Map.Entry<String, Attribute> entry = other.getColumn(it);
@@ -58,6 +53,10 @@ public interface OptionParser<T> {
 
         public void put(final String key, final char value) {
             this.put(key, value, false);
+        }
+
+        public void put(final String key, final boolean value) {
+            this.put(key, Boolean.toString(value), false);
         }
 
         public void put(final String key, final char value, final boolean required) {
@@ -106,15 +105,9 @@ public interface OptionParser<T> {
         }
 
         public void put(final String key, final String value, final Attribute type) {
-            if (!this.args.containsKey(this.withPrefix(key))) {
-                this.options.put(this.withPrefix(key), new HashMap<>() {{
-                    this.put(Optional.ofNullable(value).orElse(""), type);
-                }});
-            } else {
-                this.options.put(this.withPrefix(key), new HashMap<>() {{
-                    this.put(OptionParam.this.args.get(OptionParam.this.withPrefix(key)), type);
-                }});
-            }
+            this.options.put(this.withPrefix(key), new HashMap<>() {{
+                this.put(Optional.ofNullable(value).orElse(""), type);
+            }});
             this.keys.add(this.withPrefix(key));
         }
 

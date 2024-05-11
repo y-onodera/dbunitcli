@@ -13,7 +13,7 @@ public record Options(Map<CommandType, List<Path>> parameterFiles) {
     }
 
     public Stream<Path> parameterFiles(final CommandType type) {
-        return this.parameterFiles().get(type).stream();
+        return this.parameterFiles().getOrDefault(type, new ArrayList<>()).stream();
     }
 
     public void save(final CommandType type, final Path path) {

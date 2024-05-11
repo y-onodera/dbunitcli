@@ -6,7 +6,7 @@ import yo.dbunitcli.dataset.Parameter;
 
 import java.util.Map;
 
-public class Parameterize implements Command<ParameterizeOption> {
+public class Parameterize implements Command<ParameterizeDto, ParameterizeOption> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Parameterize.class);
 
@@ -44,12 +44,13 @@ public class Parameterize implements Command<ParameterizeOption> {
     }
 
     @Override
-    public ParameterizeOption getOptions() {
-        return new ParameterizeOption();
+    public ParameterizeDto createDto(final String[] args) {
+        return ParameterizeOption.toDto(args);
     }
 
     @Override
-    public ParameterizeOption getOptions(final Parameter param) {
-        return new ParameterizeOption(param);
+    public ParameterizeOption getOptions(final String resultFile, final ParameterizeDto dto, final Parameter param) {
+        return new ParameterizeOption(resultFile, dto, param);
     }
+
 }

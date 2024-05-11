@@ -21,7 +21,7 @@ public record Workspace(Path path, Options options, Resources resources) {
         return this.options().parameterFiles(type);
     }
 
-    public void save(final CommandType type, final String name, final List<String> args) throws IOException {
+    public void save(final CommandType type, final String name, final String[] args) throws IOException {
         final File parent = new File(this.path.toFile(), "option/" + type.name());
         if (!parent.exists()) {
             Files.createDirectories(parent.toPath());

@@ -2,7 +2,7 @@ package yo.dbunitcli.application;
 
 import yo.dbunitcli.dataset.Parameter;
 
-public class Convert implements Command<ConvertOption> {
+public class Convert implements Command<ConvertDto, ConvertOption> {
 
     public static void main(final String[] args) throws Exception {
         new Convert().exec(args);
@@ -14,13 +14,12 @@ public class Convert implements Command<ConvertOption> {
     }
 
     @Override
-    public ConvertOption getOptions() {
-        return new ConvertOption();
+    public ConvertDto createDto(final String[] args) {
+        return ConvertOption.toDto(args);
     }
 
     @Override
-    public ConvertOption getOptions(final Parameter param) {
-        return new ConvertOption(param);
+    public ConvertOption getOptions(final String resultFile, final ConvertDto dto, final Parameter param) {
+        return new ConvertOption(resultFile, dto, param);
     }
-
 }

@@ -3,15 +3,14 @@ package yo.dbunitcli.application.option;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
-import java.util.Map;
-
 public class HeaderNameOption implements ComparableDataSetParamOption {
 
     private final String prefix;
-    private String headerName;
+    private final String headerName;
 
-    public HeaderNameOption(final String prefix) {
+    public HeaderNameOption(final String prefix, final DataSetLoadDto dto) {
         this.prefix = prefix;
+        this.headerName = dto.getHeaderName();
     }
 
     @Override
@@ -25,15 +24,11 @@ public class HeaderNameOption implements ComparableDataSetParamOption {
     }
 
     @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(this.getPrefix(), args);
+    public CommandLineArgs toCommandLineArgs() {
+        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
         result.put("-headerName", this.headerName);
         return result;
     }
 
-    @Override
-    public void setUpComponent(final DataSetLoadDto dto) {
-        this.headerName = dto.getHeaderName();
-    }
 
 }

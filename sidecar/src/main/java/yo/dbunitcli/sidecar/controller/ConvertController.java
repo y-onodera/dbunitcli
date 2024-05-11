@@ -19,11 +19,6 @@ public class ConvertController extends AbstractCommandController<ConvertDto, Con
     }
 
     @Override
-    protected ConvertOption getOption() {
-        return new ConvertOption();
-    }
-
-    @Override
     protected CommandType getCommandType() {
         return CommandType.convert;
     }

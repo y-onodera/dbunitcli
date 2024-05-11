@@ -5,7 +5,7 @@ import yo.dbunitcli.dataset.Parameter;
 import java.io.File;
 import java.io.IOException;
 
-public class Generate implements Command<GenerateOption> {
+public class Generate implements Command<GenerateDto, GenerateOption> {
 
     public static void main(final String[] strings) throws Exception {
         new Generate().exec(strings);
@@ -31,12 +31,12 @@ public class Generate implements Command<GenerateOption> {
     }
 
     @Override
-    public GenerateOption getOptions() {
-        return new GenerateOption();
+    public GenerateDto createDto(final String[] args) {
+        return GenerateOption.toDto(args);
     }
 
     @Override
-    public GenerateOption getOptions(final Parameter param) {
-        return new GenerateOption(param);
+    public GenerateOption getOptions(final String resultFile, final GenerateDto dto, final Parameter param) {
+        return new GenerateOption(resultFile, dto, param);
     }
 }

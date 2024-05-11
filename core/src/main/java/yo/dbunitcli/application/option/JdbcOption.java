@@ -7,26 +7,32 @@ import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class JdbcOption implements OptionParser<JdbcDto> {
+public class JdbcOption implements Option<JdbcDto> {
 
     private final String prefix;
-    private File jdbcProperties;
-
-    private String jdbcUrl;
-
-    private String jdbcUser;
-
-    private String jdbcPass;
-
-    private Properties jdbcProp;
+    private final String jdbcUrl;
+    private final String jdbcUser;
+    private final String jdbcPass;
+    private final File jdbcProperties;
 
     public JdbcOption(final String prefix) {
+        this(prefix, new JdbcDto());
+    }
+
+    public JdbcOption(final String prefix, final JdbcDto dto) {
         this.prefix = prefix;
+        if (Strings.isNotEmpty(dto.getJdbcProperties())) {
+            this.jdbcProperties = new File(dto.getJdbcProperties());
+        } else {
+            this.jdbcProperties = null;
+        }
+        this.jdbcUrl = dto.getJdbcUrl();
+        this.jdbcUser = dto.getJdbcUser();
+        this.jdbcPass = dto.getJdbcPass();
     }
 
     @Override
@@ -35,8 +41,8 @@ public class JdbcOption implements OptionParser<JdbcDto> {
     }
 
     @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(this.getPrefix(), args);
+    public CommandLineArgs toCommandLineArgs() {
+        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
         result.putFile("-jdbcProperties", this.jdbcProperties);
         if (Optional.ofNullable(result.get("-jdbcProperties")).orElse("").isEmpty()) {
             result.put("-jdbcUrl", this.jdbcUrl);
@@ -46,28 +52,29 @@ public class JdbcOption implements OptionParser<JdbcDto> {
         return result;
     }
 
-    @Override
-    public void setUpComponent(final JdbcDto dto) {
-        if (Strings.isNotEmpty(dto.getJdbcProperties())) {
-            this.jdbcProperties = new File(dto.getJdbcProperties());
-        }
-        this.jdbcUrl = dto.getJdbcUrl();
-        this.jdbcUser = dto.getJdbcUser();
-        this.jdbcPass = dto.getJdbcPass();
+    public DatabaseConnectionLoader getDatabaseConnectionLoader() {
         try {
-            this.loadJdbcTemplate();
+            return new DatabaseConnectionLoader(this.loadJdbcTemplate());
         } catch (final IOException e) {
             throw new AssertionError(e.getMessage(), e);
         }
-        this.validate();
     }
 
-    public Properties getJdbcProp() {
-        return this.jdbcProp;
-    }
-
-    public DatabaseConnectionLoader getDatabaseConnectionLoader() {
-        return new DatabaseConnectionLoader(this.getJdbcProp());
+    protected Properties loadJdbcTemplate() throws IOException {
+        final Properties jdbcProp = new Properties();
+        if (this.jdbcProperties != null) {
+            jdbcProp.load(new FileInputStream(this.jdbcProperties));
+        }
+        if (!Optional.ofNullable(this.jdbcUrl).orElse("").isEmpty()) {
+            jdbcProp.put("url", this.jdbcUrl);
+        }
+        if (!Optional.ofNullable(this.jdbcUser).orElse("").isEmpty()) {
+            jdbcProp.put("user", this.jdbcUser);
+        }
+        if (!Optional.ofNullable(this.jdbcPass).orElse("").isEmpty()) {
+            jdbcProp.put("pass", this.jdbcPass);
+        }
+        return jdbcProp;
     }
 
     protected void validate() {
@@ -77,24 +84,8 @@ public class JdbcOption implements OptionParser<JdbcDto> {
                 throw new AssertionError("need jdbcProperties option", new IllegalArgumentException());
             }
             if (!this.jdbcProperties.exists()) {
-                throw new AssertionError(this.jdbcProperties.toString() + " is not exist file", new IllegalArgumentException(this.jdbcProperties.toString()));
+                throw new AssertionError(this.jdbcProperties + " is not exist file", new IllegalArgumentException(this.jdbcProperties.toString()));
             }
-        }
-    }
-
-    protected void loadJdbcTemplate() throws IOException {
-        this.jdbcProp = new Properties();
-        if (this.jdbcProperties != null) {
-            this.jdbcProp.load(new FileInputStream(this.jdbcProperties));
-        }
-        if (!Optional.ofNullable(this.jdbcUrl).orElse("").isEmpty()) {
-            this.jdbcProp.put("url", this.jdbcUrl);
-        }
-        if (!Optional.ofNullable(this.jdbcUser).orElse("").isEmpty()) {
-            this.jdbcProp.put("user", this.jdbcUser);
-        }
-        if (!Optional.ofNullable(this.jdbcPass).orElse("").isEmpty()) {
-            this.jdbcProp.put("pass", this.jdbcPass);
         }
     }
 

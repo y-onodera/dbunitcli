@@ -29,7 +29,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.tbee.javafx.scene.layout.MigPane;
 import yo.dbunitcli.application.*;
-import yo.dbunitcli.application.option.OptionParser;
+import yo.dbunitcli.application.option.Option;
 
 import java.awt.*;
 import java.io.File;
@@ -40,7 +40,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class MainPresenter {
 
@@ -66,7 +65,7 @@ public class MainPresenter {
     @FXML
     private MFXComboBox<String> commandTypeSelect;
     private String selectedCommand;
-    private CommandLineOption<?> parser;
+    private Command<?, ?> parser;
 
     @FXML
     void initialize() {
@@ -92,14 +91,10 @@ public class MainPresenter {
         fileSave.setInitialDirectory(new File("."));
         final File file = fileSave.showOpenDialog(this.commandTypeSelect.getScene().getWindow());
         if (file != null) {
-            this.parser = this.createCommand(this.selectedCommand).getOptions();
+            this.parser = this.createCommand(this.selectedCommand);
             this.refresh(this.commandTypeSelect, this.commandTypeSelect
-                    , () -> this.parser.createOptionParam(Arrays
-                            .stream(this.parser.getExpandArgs(new String[]{"@" + file.getPath()}))
-                            .collect(Collectors.toMap(
-                                    it -> it.replaceAll("(-[^=]+)=.+", "$1")
-                                    , it -> it.replaceAll("(-[^=]+=)(.+)", "$2")
-                            ))));
+                    , () -> this.parser.parseOption(this.parser.getExpandArgs(new String[]{"@" + file.getPath()}))
+                            .toCommandLineArgs());
         }
     }
 
@@ -111,17 +106,11 @@ public class MainPresenter {
 
     @FXML
     public void execCmd() {
-        final Map<String, String> inputArgs = this.inputToArg();
-        final String[] args = inputArgs.entrySet()
-                .stream()
-                .map(it -> it.getKey() + "=" + it.getValue())
-                .toArray(String[]::new);
+        final String[] args = this.inputToArg();
         final Thread background = new Thread(() -> {
-            final Command<?> command = this.createCommand(this.selectedCommand);
-            command.exec(args);
+            final File result = this.execCommand(this.selectedCommand, args);
             try {
-                Desktop.getDesktop().open(new File(Optional.ofNullable(inputArgs.get("-result.result"))
-                        .orElse(".")));
+                Desktop.getDesktop().open(result);
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
@@ -132,10 +121,7 @@ public class MainPresenter {
 
     @FXML
     public void saveFile() throws IOException {
-        final String content = this.inputToArg().entrySet()
-                .stream()
-                .map(it -> it.getKey() + "=" + it.getValue())
-                .collect(Collectors.joining("\r\n"));
+        final String content = String.join("\r\n", this.inputToArg());
         final FileChooser fileSave = new FileChooser();
         fileSave.setTitle("Save Parameter File");
         fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("(*.txt)", "*.txt"));
@@ -164,7 +150,7 @@ public class MainPresenter {
             this.exec.setDisable(true);
             return;
         }
-        this.parser = this.createCommand(this.selectedCommand).getOptions();
+        this.parser = this.createCommand(this.selectedCommand);
         this.refresh(this.commandTypeSelect);
     }
 
@@ -173,14 +159,14 @@ public class MainPresenter {
     }
 
     private void refresh(final MFXComboBox<String> selected, final Node form) {
-        this.refresh(selected, form, () -> this.parser.createOptionParam(this.inputToArg()));
+        this.refresh(selected, form, () -> this.parser.parseOption(this.inputToArg()).toCommandLineArgs());
     }
 
-    private void refresh(final MFXComboBox<String> selected, final Node form, final Supplier<OptionParser.OptionParam> loadOption) {
+    private void refresh(final MFXComboBox<String> selected, final Node form, final Supplier<Option.CommandLineArgs> loadOption) {
         final Stage loading = new LoadingView().open(this.commandBox.getScene().getWindow());
         this.commandPane.setVisible(false);
         final Thread background = new Thread(() -> {
-            final OptionParser.OptionParam option = loadOption.get();
+            final Option.CommandLineArgs option = loadOption.get();
             Platform.runLater(() -> this.clearInputFields(form));
             try {
                 Thread.sleep(50);
@@ -199,13 +185,13 @@ public class MainPresenter {
         background.start();
     }
 
-    private void setInputFields(final MFXComboBox<String> selected, final OptionParser.OptionParam option) {
+    private void setInputFields(final MFXComboBox<String> selected, final Option.CommandLineArgs option) {
         int row = 1;
         final MFXValidator validator = new MFXValidator();
         validator.validProperty().addListener((observable, oldVal, newVal) -> this.exec.setDisable(!newVal));
         for (final String key : option.keySet()) {
-            final Map.Entry<String, OptionParser.Attribute> entry = option.getColumn(key);
-            if (entry.getValue().getType() == OptionParser.ParamType.ENUM) {
+            final Map.Entry<String, Option.Attribute> entry = option.getColumn(key);
+            if (entry.getValue().getType() == Option.ParamType.ENUM) {
                 this.setInputFieldsEnumValue(selected, row, validator, key, entry);
             } else {
                 this.setInputFieldsTextValue(option, row, validator, key, entry);
@@ -214,7 +200,7 @@ public class MainPresenter {
         }
     }
 
-    private void setInputFieldsTextValue(final OptionParser.OptionParam option, final int row, final MFXValidator validator, final String key, final Map.Entry<String, OptionParser.Attribute> entry) {
+    private void setInputFieldsTextValue(final Option.CommandLineArgs option, final int row, final MFXValidator validator, final String key, final Map.Entry<String, Option.Attribute> entry) {
         final MFXTextField text = new MFXTextField();
         text.setPrefWidth(400);
         text.setText(option.get(key));
@@ -227,11 +213,11 @@ public class MainPresenter {
             this.commandPane.add(text, "cell 0 " + row);
         }
         this.argument.put(key, text);
-        if (entry.getValue().getType() == OptionParser.ParamType.DIR) {
+        if (entry.getValue().getType() == Option.ParamType.DIR) {
             text.setTrailingIcon(this.createDirectoryChoiceButton(text));
-        } else if (entry.getValue().getType() == OptionParser.ParamType.FILE) {
+        } else if (entry.getValue().getType() == Option.ParamType.FILE) {
             text.setTrailingIcon(this.createFileChoiceButton(text));
-        } else if (entry.getValue().getType() == OptionParser.ParamType.FILE_OR_DIR) {
+        } else if (entry.getValue().getType() == Option.ParamType.FILE_OR_DIR) {
             final HBox hBox = new HBox();
             hBox.getChildren().addAll(this.createDirectoryChoiceButton(text), this.createFileChoiceButton(text));
             hBox.setSpacing(5);
@@ -239,7 +225,7 @@ public class MainPresenter {
         }
     }
 
-    private void setInputFieldsEnumValue(final MFXComboBox<String> selected, final int row, final MFXValidator validator, final String key, final Map.Entry<String, OptionParser.Attribute> entry) {
+    private void setInputFieldsEnumValue(final MFXComboBox<String> selected, final int row, final MFXValidator validator, final String key, final Map.Entry<String, Option.Attribute> entry) {
         if (selected.getFloatingText().equals(key)) {
             this.argument.put(key, selected);
         } else {
@@ -354,7 +340,7 @@ public class MainPresenter {
         return fileChooser.showDialog(stage);
     }
 
-    private Map<String, String> inputToArg() {
+    private String[] inputToArg() {
         return this.argument.entrySet()
                 .stream()
                 .filter(it -> {
@@ -366,13 +352,17 @@ public class MainPresenter {
                             && it.getValue() instanceof ChoiceBox<?> choiceBox
                             && !Optional.ofNullable(choiceBox.getSelectionModel().getSelectedItem().toString()).orElse("").isEmpty();
                 })
-                .collect(Collectors.toMap(Map.Entry::getKey, it -> {
+                .map(it -> {
+                    final String value;
                     if (it.getValue() instanceof TextField textField) {
-                        return textField.getText();
+                        value = textField.getText();
+                    } else {
+                        value = it.getValue() instanceof ChoiceBox<?> choiceBox
+                                ? choiceBox.getSelectionModel().getSelectedItem().toString() : "";
                     }
-                    return it.getValue() instanceof ChoiceBox<?> choiceBox
-                            ? choiceBox.getSelectionModel().getSelectedItem().toString() : "";
-                }, (s, a) -> s, LinkedHashMap::new));
+                    return it.getKey() + "=" + value;
+                })
+                .toArray(String[]::new);
     }
 
     private String[] commandTypes() {
@@ -384,12 +374,42 @@ public class MainPresenter {
         this.argument.clear();
     }
 
-    private Command<?> createCommand(final String command) {
+    private Command<?, ?> createCommand(final String command) {
         return switch (command) {
             case "Convert" -> new Convert();
             case "Compare" -> new Compare();
             case "Generate" -> new Generate();
             case "Run" -> new Run();
+            default -> null;
+        };
+    }
+
+    private File execCommand(final String selectedCommand, final String[] args) {
+        return switch (selectedCommand) {
+            case "Convert" -> {
+                final Convert command = new Convert();
+                final ConvertOption option = command.parseOption(args);
+                command.exec(option);
+                yield option.getConverterOption().getResultDir();
+            }
+            case "Compare" -> {
+                final Compare command = new Compare();
+                final CompareOption option = command.parseOption(args);
+                command.exec(option);
+                yield option.getConverterOption().getResultDir();
+            }
+            case "Generate" -> {
+                final Generate command = new Generate();
+                final GenerateOption option = command.parseOption(args);
+                command.exec(option);
+                yield option.getConverterOption().getResultDir();
+            }
+            case "Run" -> {
+                final Run command = new Run();
+                final RunOption option = command.parseOption(args);
+                command.exec(option);
+                yield option.getConverterOption().getResultDir();
+            }
             default -> null;
         };
     }

@@ -4,48 +4,42 @@ import yo.dbunitcli.application.cli.CommandLineParser;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.dataset.Parameter;
 
-import java.util.Map;
-
 public class ConvertOption extends CommandLineOption<ConvertDto> {
 
-    private final DataSetLoadOption src = new DataSetLoadOption("");
+    private final DataSetLoadOption src;
 
-    public ConvertOption() {
-        this(Parameter.none());
-    }
-
-    public ConvertOption(final Parameter param) {
-        super(param);
-    }
-
-    public void convertDataset() {
-        this.getConverterOption().setResultPath(this.getResultPath());
-        this.getComparableDataSetLoader().loadDataSet(this.src.getParam().setConverter(this.converter()).build());
-    }
-
-    @Override
-    public ConvertDto toDto(final String[] args) {
+    public static ConvertDto toDto(final String[] args) {
         final ConvertDto dto = new ConvertDto();
-        new CommandLineParser("", this.getArgumentMapper(), this.getArgumentFilter())
+        new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, CommandLineOption.DEFAULT_COMMANDLINE_FILTER)
                 .parseArgument(args, dto);
-        new CommandLineParser(this.src.getPrefix()).parseArgument(args, dto.getDataSetLoad());
-        new CommandLineParser(this.getConverterOption().getPrefix()).parseArgument(args, dto.getDataSetConverter());
+        new CommandLineParser("").parseArgument(args, dto.getDataSetLoad());
+        new CommandLineParser("result").parseArgument(args, dto.getDataSetConverter());
         return dto;
     }
 
-    @Override
-    public void setUpComponent(final ConvertDto dto) {
-        super.setUpComponent(dto);
-        this.src.setUpComponent(dto.getDataSetLoad());
-        this.getConverterOption().setUpComponent(dto.getDataSetConverter());
+    public ConvertOption(final String resultFile, final ConvertDto dto, final Parameter param) {
+        super(resultFile, dto, param);
+        this.src = new DataSetLoadOption("", dto.getDataSetLoad());
     }
 
     @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(args);
-        result.putAll(this.src.createOptionParam(args));
-        result.putAll(this.getConverterOption().createOptionParam(args));
+    public ConvertDto toDto() {
+        return ConvertOption.toDto(this.toArgs(true));
+    }
+
+    @Override
+    public CommandLineArgs toCommandLineArgs() {
+        final CommandLineArgs result = new CommandLineArgs();
+        result.putAll(this.src.toCommandLineArgs());
+        result.putAll(this.getConverterOption().toCommandLineArgs());
         return result;
+    }
+
+    public void convertDataset() {
+        this.getComparableDataSetLoader()
+                .loadDataSet(this.src.getParam()
+                        .setConverter(this.converter(it -> it.setResultPath(this.getResultPath())))
+                        .build());
     }
 
 }

@@ -47,45 +47,28 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
                     || list.stream().noneMatch(it -> it.startsWith("-srcType=") || it.startsWith("-param.srcType="));
         }
     };
-    private final DataSetLoadOption param = new DataSetLoadOption("param");
-    private final TemplateRenderOption templateOption = new TemplateRenderOption("template");
+    private static final ArgumentFilter ARGS_IGNORE_FILTER = new DefaultArgumentFilter("-P", "-A", "-arg");
+    private final DataSetLoadOption param;
+    private final TemplateRenderOption templateOption;
     private final Map<String, String> args = new HashMap<>();
+    private final String cmd;
+    private final String cmdParam;
     private boolean ignoreFail = false;
-    private String cmd;
-    private String cmdParam;
     private boolean parameterize = true;
     private File template;
 
-    public ParameterizeOption() {
-        super(Parameter.none());
-    }
-
-    public ParameterizeOption(final Parameter param) {
-        super(param);
-    }
-
-    public boolean isIgnoreFail() {
-        return this.ignoreFail;
-    }
-
-    public boolean isParameterize() {
-        return this.parameterize;
-    }
-
-    @Override
-    public ParameterizeDto toDto(final String[] args) {
+    public static ParameterizeDto toDto(final String[] args) {
         final ParameterizeDto dto = new ParameterizeDto();
-        new CommandLineParser("", this.getArgumentMapper(), this.getArgumentFilter())
+        new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, ParameterizeOption.ARGS_IGNORE_FILTER)
                 .parseArgument(args, dto);
-        new CommandLineParser(this.param.getPrefix(), ParameterizeOption.NONE_PARAM_MAPPER)
+        new CommandLineParser("param", ParameterizeOption.NONE_PARAM_MAPPER)
                 .parseArgument(args, dto.getDateSetLoad());
-        new CommandLineParser(this.templateOption.getPrefix()).parseArgument(args, dto.getTemplateRender());
+        new CommandLineParser("template").parseArgument(args, dto.getTemplateRender());
         return dto;
     }
 
-    @Override
-    public void setUpComponent(final ParameterizeDto dto) {
-        super.setUpComponent(dto);
+    public ParameterizeOption(final String resultFile, final ParameterizeDto dto, final Parameter param) {
+        super(resultFile, dto, param);
         this.cmd = dto.getCmd();
         this.cmdParam = dto.getCmdParam();
         this.args.putAll(dto.getArg());
@@ -98,25 +81,33 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
         if (Strings.isNotEmpty(dto.getTemplate())) {
             this.template = new File(dto.getTemplate());
         }
-        this.param.setUpComponent(dto.getDateSetLoad());
-        this.templateOption.setUpComponent(dto.getTemplateRender());
+        this.param = new DataSetLoadOption("param", dto.getDateSetLoad());
+        this.templateOption = new TemplateRenderOption("template", dto.getTemplateRender());
+    }
+
+    public boolean isIgnoreFail() {
+        return this.ignoreFail;
+    }
+
+    public boolean isParameterize() {
+        return this.parameterize;
     }
 
     @Override
-    protected ArgumentFilter getArgumentFilter() {
-        return new DefaultArgumentFilter("-P", "-A", "-arg");
+    public ParameterizeDto toDto() {
+        return ParameterizeOption.toDto(this.toArgs(true));
     }
 
     @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(args);
-        result.putAll(this.param.createOptionParam(args));
-        result.put("-parameterize", Boolean.toString(this.parameterize));
-        result.put("-ignoreFail", Boolean.toString(this.ignoreFail));
+    public CommandLineArgs toCommandLineArgs() {
+        final CommandLineArgs result = new CommandLineArgs();
+        result.putAll(this.param.toCommandLineArgs());
+        result.put("-parameterize", this.parameterize);
+        result.put("-ignoreFail", this.ignoreFail);
         result.put("-cmd", this.cmd);
         result.put("-cmdParam", this.cmdParam);
         result.putFile("-template", this.template, true);
-        result.putAll(this.templateOption.createOptionParam(args));
+        result.putAll(this.templateOption.toCommandLineArgs());
         return result;
     }
 
@@ -134,18 +125,18 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
             return result;
         }
         final Map<String, String> mergeResult = Arrays.stream(result)
-                .collect(Collectors.toMap(this.getArgumentFilter().extractKey(), it -> it));
+                .collect(Collectors.toMap(ParameterizeOption.ARGS_IGNORE_FILTER.extractKey(), it -> it));
         mergeResult.putAll(this.args.entrySet()
                 .stream()
                 .collect(Collectors.toMap(entry -> entry.getKey() + "=", entry -> entry.getKey() + "=" + entry.getValue())));
         return mergeResult.values().toArray(new String[0]);
     }
 
-    public Command<?> createCommand(final Parameter aParam) {
+    public Command<?, ?> createCommand(final Parameter aParam) {
         return this.createCommand(this.templateOption.getTemplateRender().render(this.cmd, aParam.getMap()));
     }
 
-    protected Command<? extends CommandLineOption<?>> createCommand(final String cmdType) {
+    protected Command<?, ?> createCommand(final String cmdType) {
         return switch (cmdType) {
             case "compare" -> new Compare();
             case "convert" -> new Convert();

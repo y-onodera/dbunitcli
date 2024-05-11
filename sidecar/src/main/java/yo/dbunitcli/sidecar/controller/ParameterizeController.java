@@ -2,8 +2,8 @@ package yo.dbunitcli.sidecar.controller;
 
 import io.micronaut.http.annotation.Controller;
 import yo.dbunitcli.application.Parameterize;
-import yo.dbunitcli.application.ParameterizeDto;
 import yo.dbunitcli.application.ParameterizeOption;
+import yo.dbunitcli.application.ParameterizeDto;
 import yo.dbunitcli.sidecar.domain.project.CommandType;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
@@ -17,11 +17,6 @@ public class ParameterizeController extends AbstractCommandController<Parameteri
     @Override
     protected Parameterize getCommand() {
         return new Parameterize();
-    }
-
-    @Override
-    protected ParameterizeOption getOption() {
-        return new ParameterizeOption();
     }
 
     @Override

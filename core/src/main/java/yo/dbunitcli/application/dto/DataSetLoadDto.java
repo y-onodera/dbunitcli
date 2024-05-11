@@ -6,7 +6,7 @@ import yo.dbunitcli.dataset.DataSourceType;
 import java.util.stream.Stream;
 
 public class DataSetLoadDto implements CompositeDto {
-    @CommandLine.Option(names = "-src", description = "resource to load", required = true)
+    @CommandLine.Option(names = "-src", description = "resource to load")
     private String src;
     @CommandLine.Option(names = "-srcType")
     private DataSourceType srcType;

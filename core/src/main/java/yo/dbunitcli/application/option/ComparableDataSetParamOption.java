@@ -3,9 +3,7 @@ package yo.dbunitcli.application.option;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
-import java.util.Map;
-
-public interface ComparableDataSetParamOption extends OptionParser<DataSetLoadDto> {
+public interface ComparableDataSetParamOption extends Option<DataSetLoadDto> {
 
     static ComparableDataSetParamOption join(final ComparableDataSetParamOption... leaf) {
         return new CompositeOption(leaf);
@@ -14,12 +12,9 @@ public interface ComparableDataSetParamOption extends OptionParser<DataSetLoadDt
     ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder);
 
     @Override
-    default OptionParam createOptionParam(final Map<String, String> args) {
-        return new OptionParam(this.getPrefix(), args);
+    default CommandLineArgs toCommandLineArgs() {
+        return new CommandLineArgs(this.getPrefix());
     }
-
-    @Override
-    void setUpComponent(DataSetLoadDto dto);
 
     class CompositeOption implements ComparableDataSetParamOption {
         private final ComparableDataSetParamOption[] leaf;
@@ -37,23 +32,17 @@ public interface ComparableDataSetParamOption extends OptionParser<DataSetLoadDt
         }
 
         @Override
-        public OptionParam createOptionParam(final Map<String, String> args) {
-            OptionParam result = null;
+        public CommandLineArgs toCommandLineArgs() {
+            CommandLineArgs result = null;
             for (final ComparableDataSetParamOption delegate : this.leaf) {
                 if (result == null) {
-                    result = delegate.createOptionParam(args);
+                    result = delegate.toCommandLineArgs();
                 } else {
-                    result.putAll(delegate.createOptionParam(args));
+                    result.putAll(delegate.toCommandLineArgs());
                 }
             }
             return result;
         }
 
-        @Override
-        public void setUpComponent(final DataSetLoadDto dto) {
-            for (final ComparableDataSetParamOption delegate : this.leaf) {
-                delegate.setUpComponent(dto);
-            }
-        }
     }
 }

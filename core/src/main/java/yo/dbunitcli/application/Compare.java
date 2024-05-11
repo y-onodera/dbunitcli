@@ -2,10 +2,26 @@ package yo.dbunitcli.application;
 
 import yo.dbunitcli.dataset.Parameter;
 
-public class Compare implements Command<CompareOption> {
+import java.util.Arrays;
+
+public class Compare implements Command<CompareDto, CompareOption> {
 
     public static void main(final String[] args) throws Exception {
         new Compare().exec(args);
+    }
+
+    @Override
+    public void exec(final String[] args) {
+        try {
+            this.exec(this.parseOption(args, Parameter.none()));
+        } catch (final CommandFailException ex) {
+            Command.LOGGER.info(ex.getMessage());
+            System.exit(1);
+        } catch (final Throwable th) {
+            Command.LOGGER.error("args:" + Arrays.toString(args));
+            Command.LOGGER.error("error:", th);
+            throw th;
+        }
     }
 
     @Override
@@ -19,12 +35,13 @@ public class Compare implements Command<CompareOption> {
     }
 
     @Override
-    public CompareOption getOptions() {
-        return new CompareOption();
+    public CompareDto createDto(final String[] args) {
+        return CompareOption.toDto(args);
     }
 
     @Override
-    public CompareOption getOptions(final Parameter param) {
-        return new CompareOption(param);
+    public CompareOption getOptions(final String resultFile, final CompareDto dto, final Parameter param) {
+        return new CompareOption(resultFile, dto, param);
     }
+
 }

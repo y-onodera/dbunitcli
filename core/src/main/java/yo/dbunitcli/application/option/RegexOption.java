@@ -3,17 +3,17 @@ package yo.dbunitcli.application.option;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
-import java.util.Map;
-
 public class RegexOption implements ComparableDataSetParamOption {
     private final String prefix;
 
-    private String regDataSplit;
+    private final String regDataSplit;
 
-    private String regHeaderSplit;
+    private final String regHeaderSplit;
 
-    public RegexOption(final String prefix) {
+    public RegexOption(final String prefix, final DataSetLoadDto dto) {
         this.prefix = prefix;
+        this.regHeaderSplit = dto.getRegHeaderSplit();
+        this.regDataSplit = dto.getRegDataSplit();
     }
 
     @Override
@@ -28,17 +28,11 @@ public class RegexOption implements ComparableDataSetParamOption {
     }
 
     @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(this.getPrefix(), args);
+    public CommandLineArgs toCommandLineArgs() {
+        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
         result.put("-regDataSplit", this.regDataSplit);
         result.put("-regHeaderSplit", this.regHeaderSplit);
         return result;
-    }
-
-    @Override
-    public void setUpComponent(final DataSetLoadDto dto) {
-        this.regHeaderSplit = dto.getRegHeaderSplit();
-        this.regDataSplit = dto.getRegDataSplit();
     }
 
 }

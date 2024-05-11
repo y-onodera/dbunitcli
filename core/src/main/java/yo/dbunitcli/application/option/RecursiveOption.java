@@ -4,15 +4,18 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
-import java.util.Map;
-
 public class RecursiveOption implements ComparableDataSetParamOption {
 
     private final String prefix;
-    private String recursive = "true";
+    private final boolean recursive;
 
-    public RecursiveOption(final String prefix) {
+    public RecursiveOption(final String prefix, final DataSetLoadDto dto) {
         this.prefix = prefix;
+        if (Strings.isNotEmpty(dto.getRecursive())) {
+            this.recursive = Boolean.parseBoolean(dto.getRecursive());
+        } else {
+            this.recursive = true;
+        }
     }
 
     @Override
@@ -22,21 +25,14 @@ public class RecursiveOption implements ComparableDataSetParamOption {
 
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
-        return builder.setRecursive(Boolean.parseBoolean(this.recursive));
+        return builder.setRecursive(this.recursive);
     }
 
     @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(this.getPrefix(), args);
+    public CommandLineArgs toCommandLineArgs() {
+        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
         result.put("-recursive", this.recursive);
         return result;
-    }
-
-    @Override
-    public void setUpComponent(final DataSetLoadDto dto) {
-        if (Strings.isNotEmpty(dto.getRecursive())) {
-            this.recursive = dto.getRecursive();
-        }
     }
 
 }

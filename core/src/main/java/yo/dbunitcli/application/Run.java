@@ -2,7 +2,7 @@ package yo.dbunitcli.application;
 
 import yo.dbunitcli.dataset.Parameter;
 
-public class Run implements Command<RunOption> {
+public class Run implements Command<RunDto, RunOption> {
 
     public static void main(final String[] strings) throws Exception {
         new Run().exec(strings);
@@ -14,12 +14,14 @@ public class Run implements Command<RunOption> {
     }
 
     @Override
-    public RunOption getOptions() {
-        return new RunOption();
+    public RunDto createDto(final String[] args) {
+        return RunOption.toDto(args);
     }
 
     @Override
-    public RunOption getOptions(final Parameter param) {
-        return new RunOption(param);
+    public RunOption getOptions(final String resultFile, final RunDto dto, final Parameter param) {
+        return new RunOption(resultFile, dto, param);
     }
 }
+
+

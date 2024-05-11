@@ -13,22 +13,35 @@ import yo.dbunitcli.fileprocessor.Runner;
 import yo.dbunitcli.fileprocessor.SqlRunner;
 
 import java.io.File;
-import java.util.Map;
 import java.util.stream.Stream;
 
 public class RunOption extends CommandLineOption<RunDto> {
 
-    private final DataSetLoadOption src = new DataSetLoadOption("");
-    private final TemplateRenderOption templateOption = new TemplateRenderOption("");
-    private final JdbcOption jdbcOption = new JdbcOption("");
-    private ScriptType scriptType = ScriptType.sql;
+    private final DataSetLoadOption src;
+    private final TemplateRenderOption templateOption;
+    private final JdbcOption jdbcOption;
+    private final ScriptType scriptType;
 
-    public RunOption() {
-        super(Parameter.none());
+    public static RunDto toDto(final String[] args) {
+        final RunDto dto = new RunDto();
+        new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, CommandLineOption.DEFAULT_COMMANDLINE_FILTER)
+                .parseArgument(args, dto);
+        new CommandLineParser("").parseArgument(args, dto.getDataSetLoad());
+        new CommandLineParser("").parseArgument(args, dto.getJdbc());
+        new CommandLineParser("").parseArgument(args, dto.getTemplateRender());
+        return dto;
     }
 
-    public RunOption(final Parameter param) {
-        super(param);
+    public RunOption(final String resultFile, final RunDto dto, final Parameter param) {
+        super(resultFile, dto, param);
+        if (dto.getScriptType() != null) {
+            this.scriptType = dto.getScriptType();
+        } else {
+            this.scriptType = ScriptType.sql;
+        }
+        this.templateOption = new TemplateRenderOption("", dto.getTemplateRender());
+        this.jdbcOption = new JdbcOption("", dto.getJdbc());
+        this.src = new DataSetLoadOption("", dto.getDataSetLoad());
     }
 
     public ScriptType getScriptType() {
@@ -52,35 +65,18 @@ public class RunOption extends CommandLineOption<RunDto> {
     }
 
     @Override
-    public RunDto toDto(final String[] args) {
-        final RunDto dto = new RunDto();
-        new CommandLineParser("", this.getArgumentMapper(), this.getArgumentFilter())
-                .parseArgument(args, dto);
-        new CommandLineParser(this.src.getPrefix()).parseArgument(args, dto.getDataSetLoad());
-        new CommandLineParser(this.jdbcOption.getPrefix()).parseArgument(args, dto.getJdbc());
-        new CommandLineParser(this.templateOption.getPrefix()).parseArgument(args, dto.getTemplateRender());
-        return dto;
+    public RunDto toDto() {
+        return RunOption.toDto(this.toArgs(true));
     }
 
     @Override
-    public void setUpComponent(final RunDto dto) {
-        super.setUpComponent(dto);
-        if (dto.getScriptType() != null) {
-            this.scriptType = dto.getScriptType();
-        }
-        this.templateOption.setUpComponent(dto.getTemplateRender());
-        this.jdbcOption.setUpComponent(dto.getJdbc());
-        this.src.setUpComponent(dto.getDataSetLoad());
-    }
-
-    @Override
-    public OptionParam createOptionParam(final Map<String, String> args) {
-        final OptionParam result = new OptionParam(args);
-        result.putAll(this.src.createOptionParam(args));
+    public CommandLineArgs toCommandLineArgs() {
+        final CommandLineArgs result = new CommandLineArgs();
+        result.putAll(this.src.toCommandLineArgs());
         result.put("-scriptType", this.scriptType, ScriptType.class);
-        result.putAll(this.templateOption.createOptionParam(args));
+        result.putAll(this.templateOption.toCommandLineArgs());
         if (result.get("-scriptType").equals(ScriptType.sql.name())) {
-            result.putAll(this.jdbcOption.createOptionParam(args));
+            result.putAll(this.jdbcOption.toCommandLineArgs());
         }
         return result;
     }
