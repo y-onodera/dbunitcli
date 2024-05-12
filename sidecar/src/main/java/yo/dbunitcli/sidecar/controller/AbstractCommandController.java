@@ -26,6 +26,26 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
         this.workspace = workspace;
     }
 
+    @Get(uri = "init", produces = MediaType.APPLICATION_JSON)
+    public String init() throws IOException {
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(this.getCommand()
+                        .parseOption(new String[]{})
+                        .toCommandLineArgs()
+                        .toMap());
+    }
+
+    @Post(uri = "reload", produces = MediaType.APPLICATION_JSON)
+    public String reload(@Body final DTO input) throws IOException {
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(this.getCommand()
+                        .parseOption(input)
+                        .toCommandLineArgs()
+                        .toMap());
+    }
+
     @Get(uri = "list", produces = MediaType.APPLICATION_JSON)
     public String list() throws IOException {
         return ObjectMapper
@@ -46,8 +66,10 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                         return ObjectMapper
                                 .getDefault()
                                 .writeValueAsString(this.getCommand()
-                                        .createDto(Files.readAllLines(target)
-                                                .toArray(new String[0])));
+                                        .parseOption(Files.readAllLines(target)
+                                                .toArray(new String[0]))
+                                        .toCommandLineArgs()
+                                        .toMap());
                     } catch (final IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -58,8 +80,9 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
     public String save(@Body final OptionDto<DTO> input) {
         try {
-            final OPTION option = this.getCommand().parseOption(input.getValue());
-            this.workspace.save(this.getCommandType(), input.getName(), option.toArgs(false));
+            this.workspace.save(this.getCommandType()
+                    , input.getName()
+                    , this.getCommand().parseOption(input.getValue()).toArgs(false));
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             return "failed";
@@ -70,8 +93,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     @Post(uri = "exec", produces = MediaType.TEXT_PLAIN)
     public String exec(@Body final DTO input) {
         try {
-            final OPTION option = this.getCommand().parseOption(input);
-            this.getCommand().exec(option);
+            this.getCommand().exec(this.getCommand().parseOption(input));
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             return "failed";

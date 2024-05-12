@@ -35,7 +35,7 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
     void exec(T options);
 
     default DTO createDto() {
-        return this.createDto(new String[]{});
+        return this.createDto(this.parseOption(new String[]{}).toArgs(true));
     }
 
     DTO createDto(String[] args);

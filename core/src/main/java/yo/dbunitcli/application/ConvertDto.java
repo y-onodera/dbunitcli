@@ -4,14 +4,14 @@ import yo.dbunitcli.application.dto.DataSetLoadDto;
 
 public class ConvertDto extends CommandDto {
 
-    private DataSetLoadDto dataSetLoad = new DataSetLoadDto();
+    private DataSetLoadDto srcData = new DataSetLoadDto();
 
-    public DataSetLoadDto getDataSetLoad() {
-        return this.dataSetLoad;
+    public DataSetLoadDto getSrcData() {
+        return this.srcData;
     }
 
-    public void setDataSetLoad(final DataSetLoadDto dataSetLoad) {
-        this.dataSetLoad = dataSetLoad;
+    public void setSrcData(final DataSetLoadDto srcData) {
+        this.srcData = srcData;
     }
 
 }

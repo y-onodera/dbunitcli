@@ -26,16 +26,17 @@ public class JdbcLoadOption implements ComparableDataSetParamOption {
     }
 
     @Override
-    public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
-        return builder.setUseJdbcMetaData(Boolean.parseBoolean(this.useJdbcMetaData))
-                .setDatabaseConnectionLoader(this.jdbc.getDatabaseConnectionLoader());
+    public CommandLineArgs toCommandLineArgs() {
+        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
+        result.put("-useJdbcMetaData", this.useJdbcMetaData);
+        result.addComponent("jdbc", this.jdbc.toCommandLineArgs());
+        return result;
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = this.jdbc.toCommandLineArgs();
-        result.put("-useJdbcMetaData", this.useJdbcMetaData);
-        return result;
+    public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
+        return builder.setUseJdbcMetaData(Boolean.parseBoolean(this.useJdbcMetaData))
+                .setDatabaseConnectionLoader(this.jdbc.getDatabaseConnectionLoader());
     }
 
 }

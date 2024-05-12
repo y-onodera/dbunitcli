@@ -6,20 +6,20 @@ import yo.dbunitcli.dataset.Parameter;
 
 public class ConvertOption extends CommandLineOption<ConvertDto> {
 
-    private final DataSetLoadOption src;
+    private final DataSetLoadOption srcData;
 
     public static ConvertDto toDto(final String[] args) {
         final ConvertDto dto = new ConvertDto();
         new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, CommandLineOption.DEFAULT_COMMANDLINE_FILTER)
                 .parseArgument(args, dto);
-        new CommandLineParser("").parseArgument(args, dto.getDataSetLoad());
-        new CommandLineParser("result").parseArgument(args, dto.getDataSetConverter());
+        new CommandLineParser("").parseArgument(args, dto.getSrcData());
+        new CommandLineParser("result").parseArgument(args, dto.getConvertResult());
         return dto;
     }
 
     public ConvertOption(final String resultFile, final ConvertDto dto, final Parameter param) {
         super(resultFile, dto, param);
-        this.src = new DataSetLoadOption("", dto.getDataSetLoad());
+        this.srcData = new DataSetLoadOption("", dto.getSrcData());
     }
 
     @Override
@@ -30,14 +30,14 @@ public class ConvertOption extends CommandLineOption<ConvertDto> {
     @Override
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs();
-        result.putAll(this.src.toCommandLineArgs());
-        result.putAll(this.getConverterOption().toCommandLineArgs());
+        result.addComponent("srcData", this.srcData.toCommandLineArgs());
+        result.addComponent("convertResult", this.getConvertResult().toCommandLineArgs());
         return result;
     }
 
     public void convertDataset() {
         this.getComparableDataSetLoader()
-                .loadDataSet(this.src.getParam()
+                .loadDataSet(this.srcData.getParam()
                         .setConverter(this.converter(it -> it.setResultPath(this.getResultPath())))
                         .build());
     }

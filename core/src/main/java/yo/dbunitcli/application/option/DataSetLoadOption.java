@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
-public class DataSetLoadOption implements Option<DataSetLoadDto> {
+public class DataSetLoadOption implements Option {
 
     private final String prefix;
     private final DataSourceType srcType;

@@ -7,24 +7,24 @@ import yo.dbunitcli.dataset.converter.DBConverter;
 
 public class GenerateDto extends CommandDto {
     @CommandLine.Option(names = "-generateType")
-    private GenerateOption.GenerateType generateType = GenerateOption.GenerateType.txt;
+    private GenerateOption.GenerateType generateType;
     @CommandLine.Option(names = "-unit")
-    private GenerateOption.GenerateUnit unit = GenerateOption.GenerateUnit.record;
+    private GenerateOption.GenerateUnit unit;
     @CommandLine.Option(names = "-commit", description = "default commit;whether commit or not generate sql")
-    private String commit = "true";
+    private String commit;
     @CommandLine.Option(names = "-sqlFileSuffix", description = "generate sqlFile fileName suffix")
-    private String sqlFileSuffix = "";
+    private String sqlFileSuffix;
     @CommandLine.Option(names = "-sqlFilePrefix", description = "generate sqlFile fileName prefix")
-    private String sqlFilePrefix = "";
+    private String sqlFilePrefix;
     @CommandLine.Option(names = "-op")
     private DBConverter.Operation operation;
     @CommandLine.Option(names = "-outputEncoding", description = "output file encoding")
-    private String outputEncoding = "UTF-8";
+    private String outputEncoding;
     @CommandLine.Option(names = "-template", description = "template file")
     private String template;
-    private DataSetLoadDto dataSetLoad = new DataSetLoadDto();
+    private DataSetLoadDto srcData = new DataSetLoadDto();
 
-    private TemplateRenderDto templateRender = new TemplateRenderDto();
+    private TemplateRenderDto templateOption = new TemplateRenderDto();
 
     public GenerateOption.GenerateType getGenerateType() {
         return this.generateType;
@@ -90,19 +90,19 @@ public class GenerateDto extends CommandDto {
         this.template = template;
     }
 
-    public DataSetLoadDto getDataSetLoad() {
-        return this.dataSetLoad;
+    public DataSetLoadDto getSrcData() {
+        return this.srcData;
     }
 
-    public void setDataSetLoad(final DataSetLoadDto dataSetLoad) {
-        this.dataSetLoad = dataSetLoad;
+    public void setSrcData(final DataSetLoadDto srcData) {
+        this.srcData = srcData;
     }
 
-    public TemplateRenderDto getTemplateRender() {
-        return this.templateRender;
+    public TemplateRenderDto getTemplateOption() {
+        return this.templateOption;
     }
 
-    public void setTemplateRender(final TemplateRenderDto templateRender) {
-        this.templateRender = templateRender;
+    public void setTemplateOption(final TemplateRenderDto templateOption) {
+        this.templateOption = templateOption;
     }
 }

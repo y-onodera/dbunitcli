@@ -36,8 +36,8 @@ public class ParameterizeControllerTest {
         request.getArg().put("-srcType", "file");
         request.getArg().put("-resultPath", "result");
         request.getArg().put("-resultType", "xlsx");
-        request.setDateSetLoad(new DataSetLoadDto());
-        request.getDateSetLoad().setSrcType(DataSourceType.none);
+        request.setParamData(new DataSetLoadDto());
+        request.getParamData().setSrcType(DataSourceType.none);
         final String response = this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/parameterize/exec"
                 , ObjectMapper.getDefault()
                         .writeValueAsString(request)));

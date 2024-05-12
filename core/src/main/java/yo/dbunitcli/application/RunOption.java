@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class RunOption extends CommandLineOption<RunDto> {
 
-    private final DataSetLoadOption src;
+    private final DataSetLoadOption srcData;
     private final TemplateRenderOption templateOption;
     private final JdbcOption jdbcOption;
     private final ScriptType scriptType;
@@ -26,9 +26,9 @@ public class RunOption extends CommandLineOption<RunDto> {
         final RunDto dto = new RunDto();
         new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, CommandLineOption.DEFAULT_COMMANDLINE_FILTER)
                 .parseArgument(args, dto);
-        new CommandLineParser("").parseArgument(args, dto.getDataSetLoad());
-        new CommandLineParser("").parseArgument(args, dto.getJdbc());
-        new CommandLineParser("").parseArgument(args, dto.getTemplateRender());
+        new CommandLineParser("").parseArgument(args, dto.getSrcData());
+        new CommandLineParser("").parseArgument(args, dto.getJdbcOption());
+        new CommandLineParser("").parseArgument(args, dto.getTemplateOption());
         return dto;
     }
 
@@ -39,9 +39,9 @@ public class RunOption extends CommandLineOption<RunDto> {
         } else {
             this.scriptType = ScriptType.sql;
         }
-        this.templateOption = new TemplateRenderOption("", dto.getTemplateRender());
-        this.jdbcOption = new JdbcOption("", dto.getJdbc());
-        this.src = new DataSetLoadOption("", dto.getDataSetLoad());
+        this.templateOption = new TemplateRenderOption("", dto.getTemplateOption());
+        this.jdbcOption = new JdbcOption("", dto.getJdbcOption());
+        this.srcData = new DataSetLoadOption("", dto.getSrcData());
     }
 
     public ScriptType getScriptType() {
@@ -50,7 +50,7 @@ public class RunOption extends CommandLineOption<RunDto> {
 
     public Stream<File> targetFiles() {
         return this.getComparableDataSetLoader().loadDataSet(
-                        this.src.getParam()
+                        this.srcData.getParam()
                                 .setSource(DataSourceType.file)
                                 .setExtension(this.scriptType.getExtension())
                                 .setMapIncludeMetaData(false)
@@ -72,11 +72,11 @@ public class RunOption extends CommandLineOption<RunDto> {
     @Override
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs();
-        result.putAll(this.src.toCommandLineArgs());
+        result.addComponent("srcData", this.srcData.toCommandLineArgs());
         result.put("-scriptType", this.scriptType, ScriptType.class);
-        result.putAll(this.templateOption.toCommandLineArgs());
+        result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
         if (result.get("-scriptType").equals(ScriptType.sql.name())) {
-            result.putAll(this.jdbcOption.toCommandLineArgs());
+            result.addComponent("jdbcOption", this.jdbcOption.toCommandLineArgs());
         }
         return result;
     }

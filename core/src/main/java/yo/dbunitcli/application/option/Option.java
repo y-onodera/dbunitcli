@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public interface Option<T> {
+public interface Option {
 
     default String getPrefix() {
         return "";
@@ -18,9 +18,9 @@ public interface Option<T> {
 
     class CommandLineArgs {
 
-        private final Map<String, Map<String, Attribute>> options = new HashMap<>();
+        private final Map<String, Arg> options = new LinkedHashMap<>();
 
-        private final ArrayList<String> keys = new ArrayList<>();
+        private final Map<String, CommandLineArgs> subComponents = new LinkedHashMap<>();
 
         private final String prefix;
 
@@ -30,6 +30,15 @@ public interface Option<T> {
 
         public CommandLineArgs(final String prefix) {
             this.prefix = prefix;
+        }
+
+        public Map<String, Object> toMap() {
+            final Map<String, Object> result = new LinkedHashMap<>();
+            this.options.forEach((key, value) -> result.put(key
+                    .replace("-" + this.prefix + ".", "-")
+                    .replace("-", ""), value));
+            this.subComponents.forEach((key, value) -> result.put(key, value.toMap()));
+            return result;
         }
 
         public List<String> toList(final boolean containNoValue) {
@@ -42,13 +51,41 @@ public interface Option<T> {
             return result;
         }
 
-        public void putAll(final CommandLineArgs other) {
-            other.keySet()
-                    .forEach(it -> {
-                        final Map.Entry<String, Attribute> entry = other.getColumn(it);
-                        this.put(it, entry.getKey(), entry.getValue());
-                    });
+        public List<String> keySet() {
+            final List<String> results = new ArrayList<>(this.options.keySet());
+            this.subComponents.forEach((key, value) -> results.addAll(value.keySet()));
+            return results;
+        }
 
+        public Arg getArg(final String key) {
+            return this.subComponents.values()
+                    .stream()
+                    .filter(it -> it.keySet().contains(key))
+                    .map(it -> it.getArg(key))
+                    .findFirst()
+                    .orElseGet(() -> this.getArgFromOptions(key));
+        }
+
+        public String get(final String key) {
+            return this.subComponents.values()
+                    .stream()
+                    .filter(it -> it.keySet().contains(key))
+                    .map(it -> it.get(key))
+                    .findFirst()
+                    .orElseGet(() -> this.getFromOptions(key));
+        }
+
+        public void putAll(final CommandLineArgs other) {
+            other.options.keySet()
+                    .forEach(it -> {
+                        final Arg entry = other.getArg(it);
+                        this.put(it, entry.value, entry.attribute());
+                    });
+            other.subComponents.forEach(this::addComponent);
+        }
+
+        public void addComponent(final String name, final CommandLineArgs subComponent) {
+            this.subComponents.put(name, subComponent);
         }
 
         public void put(final String key, final char value) {
@@ -105,46 +142,43 @@ public interface Option<T> {
         }
 
         public void put(final String key, final String value, final Attribute type) {
-            this.options.put(this.withPrefix(key), new HashMap<>() {{
-                this.put(Optional.ofNullable(value).orElse(""), type);
-            }});
-            this.keys.add(this.withPrefix(key));
-        }
-
-        public Iterable<String> keySet() {
-            return this.keys;
-        }
-
-        public Map.Entry<String, Attribute> getColumn(final String key) {
-            if (this.options.containsKey(this.withPrefix(key))) {
-                return this.options.get(this.withPrefix(key)).entrySet().iterator().next();
-            } else if (this.options.containsKey(key)) {
-                return this.options.get(key).entrySet().iterator().next();
-            }
-            return null;
-        }
-
-        public String get(final String key) {
-            if (this.options.containsKey(this.withPrefix(key))) {
-                return this.options.get(this.withPrefix(key)).keySet().iterator().next();
-            } else if (this.options.containsKey(key)) {
-                return this.options.get(key).keySet().iterator().next();
-            }
-            return "";
+            this.options.put(this.withPrefix(key), new Arg(Optional.ofNullable(value).orElse(""), type));
         }
 
         public boolean hasValue(final String key) {
             return !Optional.ofNullable(this.get(key)).orElse("").isEmpty();
         }
 
-        protected String withPrefix(final String key) {
+        private String withPrefix(final String key) {
             if (Optional.ofNullable(this.prefix).orElse("").isEmpty() || key.startsWith("-" + this.prefix + ".")) {
                 return key;
             }
             return key.replace("-", "-" + this.prefix + ".");
         }
 
+        private Arg getArgFromOptions(final String key) {
+            if (this.options.containsKey(this.withPrefix(key))) {
+                return this.options.get(this.withPrefix(key));
+            } else if (this.options.containsKey(key)) {
+                return this.options.get(key);
+            }
+            return null;
+        }
+
+        private String getFromOptions(final String key) {
+            if (this.options.containsKey(this.withPrefix(key))) {
+                return this.options.get(this.withPrefix(key)).value();
+            } else if (this.options.containsKey(key)) {
+                return this.options.get(key).value();
+            }
+            return "";
+        }
+
     }
+
+    record Arg(String value, Attribute attribute) {
+    }
+
 
     class Attribute {
 

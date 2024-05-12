@@ -190,8 +190,8 @@ public class MainPresenter {
         final MFXValidator validator = new MFXValidator();
         validator.validProperty().addListener((observable, oldVal, newVal) -> this.exec.setDisable(!newVal));
         for (final String key : option.keySet()) {
-            final Map.Entry<String, Option.Attribute> entry = option.getColumn(key);
-            if (entry.getValue().getType() == Option.ParamType.ENUM) {
+            final Option.Arg entry = option.getArg(key);
+            if (entry.attribute().getType() == Option.ParamType.ENUM) {
                 this.setInputFieldsEnumValue(selected, row, validator, key, entry);
             } else {
                 this.setInputFieldsTextValue(option, row, validator, key, entry);
@@ -200,24 +200,24 @@ public class MainPresenter {
         }
     }
 
-    private void setInputFieldsTextValue(final Option.CommandLineArgs option, final int row, final MFXValidator validator, final String key, final Map.Entry<String, Option.Attribute> entry) {
+    private void setInputFieldsTextValue(final Option.CommandLineArgs option, final int row, final MFXValidator validator, final String key, final Option.Arg entry) {
         final MFXTextField text = new MFXTextField();
         text.setPrefWidth(400);
         text.setText(option.get(key));
         text.setFloatingText(key);
         text.setFloatMode(FloatMode.INLINE);
-        if (entry.getValue().isRequired()) {
+        if (entry.attribute().isRequired()) {
             final VBox vbox = this.addRequiredValidation(validator, text);
             this.commandPane.add(vbox, "cell 0 " + row);
         } else {
             this.commandPane.add(text, "cell 0 " + row);
         }
         this.argument.put(key, text);
-        if (entry.getValue().getType() == Option.ParamType.DIR) {
+        if (entry.attribute().getType() == Option.ParamType.DIR) {
             text.setTrailingIcon(this.createDirectoryChoiceButton(text));
-        } else if (entry.getValue().getType() == Option.ParamType.FILE) {
+        } else if (entry.attribute().getType() == Option.ParamType.FILE) {
             text.setTrailingIcon(this.createFileChoiceButton(text));
-        } else if (entry.getValue().getType() == Option.ParamType.FILE_OR_DIR) {
+        } else if (entry.attribute().getType() == Option.ParamType.FILE_OR_DIR) {
             final HBox hBox = new HBox();
             hBox.getChildren().addAll(this.createDirectoryChoiceButton(text), this.createFileChoiceButton(text));
             hBox.setSpacing(5);
@@ -225,18 +225,18 @@ public class MainPresenter {
         }
     }
 
-    private void setInputFieldsEnumValue(final MFXComboBox<String> selected, final int row, final MFXValidator validator, final String key, final Map.Entry<String, Option.Attribute> entry) {
+    private void setInputFieldsEnumValue(final MFXComboBox<String> selected, final int row, final MFXValidator validator, final String key, final Option.Arg entry) {
         if (selected.getFloatingText().equals(key)) {
             this.argument.put(key, selected);
         } else {
             final MFXComboBox<String> select = new MFXComboBox<>(FXCollections.observableArrayList(
-                    entry.getValue().getSelectOption()
+                    entry.attribute().getSelectOption()
             ));
             select.setFloatingText(key);
             select.setFloatMode(FloatMode.INLINE);
             select.setEditable(true);
-            select.getSelectionModel().selectItem(entry.getKey());
-            if (entry.getValue().isRequired()) {
+            select.getSelectionModel().selectItem(entry.value());
+            if (entry.attribute().isRequired()) {
                 final VBox vbox = this.addRequiredValidation(validator, select);
                 this.commandPane.add(vbox, "cell 0 " + row);
                 select.getSelectionModel().selectedItemProperty()
@@ -390,25 +390,25 @@ public class MainPresenter {
                 final Convert command = new Convert();
                 final ConvertOption option = command.parseOption(args);
                 command.exec(option);
-                yield option.getConverterOption().getResultDir();
+                yield option.getConvertResult().getResultDir();
             }
             case "Compare" -> {
                 final Compare command = new Compare();
                 final CompareOption option = command.parseOption(args);
                 command.exec(option);
-                yield option.getConverterOption().getResultDir();
+                yield option.getConvertResult().getResultDir();
             }
             case "Generate" -> {
                 final Generate command = new Generate();
                 final GenerateOption option = command.parseOption(args);
                 command.exec(option);
-                yield option.getConverterOption().getResultDir();
+                yield option.getConvertResult().getResultDir();
             }
             case "Run" -> {
                 final Run command = new Run();
                 final RunOption option = command.parseOption(args);
                 command.exec(option);
-                yield option.getConverterOption().getResultDir();
+                yield option.getConvertResult().getResultDir();
             }
             default -> null;
         };

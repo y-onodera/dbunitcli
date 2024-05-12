@@ -8,13 +8,13 @@ import yo.dbunitcli.application.dto.TemplateRenderDto;
 public class RunDto extends CommandDto {
 
     @CommandLine.Option(names = "-scriptType")
-    private RunOption.ScriptType scriptType = RunOption.ScriptType.sql;
+    private RunOption.ScriptType scriptType;
 
-    private DataSetLoadDto dataSetLoad = new DataSetLoadDto();
+    private DataSetLoadDto srcData = new DataSetLoadDto();
 
-    private TemplateRenderDto templateRender = new TemplateRenderDto();
+    private TemplateRenderDto templateOption = new TemplateRenderDto();
 
-    private JdbcDto jdbc = new JdbcDto();
+    private JdbcDto jdbcOption = new JdbcDto();
 
     public RunOption.ScriptType getScriptType() {
         return this.scriptType;
@@ -24,27 +24,27 @@ public class RunDto extends CommandDto {
         this.scriptType = scriptType;
     }
 
-    public DataSetLoadDto getDataSetLoad() {
-        return this.dataSetLoad;
+    public DataSetLoadDto getSrcData() {
+        return this.srcData;
     }
 
-    public void setDataSetLoad(final DataSetLoadDto dataSetLoad) {
-        this.dataSetLoad = dataSetLoad;
+    public void setSrcData(final DataSetLoadDto srcData) {
+        this.srcData = srcData;
     }
 
-    public TemplateRenderDto getTemplateRender() {
-        return this.templateRender;
+    public TemplateRenderDto getTemplateOption() {
+        return this.templateOption;
     }
 
-    public void setTemplateRender(final TemplateRenderDto templateRender) {
-        this.templateRender = templateRender;
+    public void setTemplateOption(final TemplateRenderDto templateOption) {
+        this.templateOption = templateOption;
     }
 
-    public JdbcDto getJdbc() {
-        return this.jdbc;
+    public JdbcDto getJdbcOption() {
+        return this.jdbcOption;
     }
 
-    public void setJdbc(final JdbcDto jdbc) {
-        this.jdbc = jdbc;
+    public void setJdbcOption(final JdbcDto jdbcOption) {
+        this.jdbcOption = jdbcOption;
     }
 }

@@ -16,19 +16,19 @@ import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 
-public abstract class CommandLineOption<T extends CommandDto> implements Option<T> {
+public abstract class CommandLineOption<T extends CommandDto> implements Option {
 
     public static ArgumentFilter DEFAULT_COMMANDLINE_FILTER = new DefaultArgumentFilter("-P");
     public static ArgumentMapper DEFAULT_COMMANDLINE_MAPPER = new DefaultArgumentMapper();
     private final Parameter parameter;
-    private final DataSetConverterOption converterOption;
+    private final DataSetConverterOption convertResult;
     private final String resultFile;
 
     public CommandLineOption(final String resultFile, final T dto, final Parameter param) {
         this.parameter = param;
         this.parameter.getMap().putAll(dto.getInputParam());
         this.resultFile = resultFile;
-        this.converterOption = new DataSetConverterOption("result", dto.getDataSetConverter());
+        this.convertResult = new DataSetConverterOption("result", dto.getConvertResult());
     }
 
     public String[] toArgs(final boolean containNoValue) {
@@ -41,16 +41,16 @@ public abstract class CommandLineOption<T extends CommandDto> implements Option<
         return this.parameter;
     }
 
-    public DataSetConverterOption getConverterOption() {
-        return this.converterOption;
+    public DataSetConverterOption getConvertResult() {
+        return this.convertResult;
     }
 
     public IDataSetConverter converter() {
-        return new DataSetConverterLoader().get(this.converterOption.getParam().build());
+        return new DataSetConverterLoader().get(this.convertResult.getParam().build());
     }
 
     public IDataSetConverter converter(final UnaryOperator<DataSetConsumerParam.Builder> customizer) {
-        return new DataSetConverterLoader().get(customizer.apply(this.converterOption.getParam()).build());
+        return new DataSetConverterLoader().get(customizer.apply(this.convertResult.getParam()).build());
     }
 
     protected ComparableDataSetLoader getComparableDataSetLoader() {
@@ -62,7 +62,7 @@ public abstract class CommandLineOption<T extends CommandDto> implements Option<
     }
 
     protected String getResultPath() {
-        return Optional.ofNullable(this.converterOption.getResultPath())
+        return Optional.ofNullable(this.convertResult.getResultPath())
                 .filter(it -> !it.isEmpty())
                 .orElse(this.resultFile);
     }

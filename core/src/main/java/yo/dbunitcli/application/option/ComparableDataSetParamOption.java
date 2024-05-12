@@ -1,20 +1,14 @@
 package yo.dbunitcli.application.option;
 
-import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
-public interface ComparableDataSetParamOption extends Option<DataSetLoadDto> {
+public interface ComparableDataSetParamOption extends Option {
 
     static ComparableDataSetParamOption join(final ComparableDataSetParamOption... leaf) {
         return new CompositeOption(leaf);
     }
 
     ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder);
-
-    @Override
-    default CommandLineArgs toCommandLineArgs() {
-        return new CommandLineArgs(this.getPrefix());
-    }
 
     class CompositeOption implements ComparableDataSetParamOption {
         private final ComparableDataSetParamOption[] leaf;
@@ -37,6 +31,8 @@ public interface ComparableDataSetParamOption extends Option<DataSetLoadDto> {
             for (final ComparableDataSetParamOption delegate : this.leaf) {
                 if (result == null) {
                     result = delegate.toCommandLineArgs();
+                } else if (delegate instanceof TemplateRenderOption) {
+                    result.addComponent("templateRender", delegate.toCommandLineArgs());
                 } else {
                     result.putAll(delegate.toCommandLineArgs());
                 }

@@ -15,13 +15,13 @@ public class CompareDto extends CommandDto {
     @CommandLine.Option(names = "-targetType")
     private CompareOption.Type targetType = CompareOption.Type.data;
 
-    private ImageCompareDto imageCompare = new ImageCompareDto();
+    private ImageCompareDto imageOption = new ImageCompareDto();
 
-    private DataSetLoadDto expectDataSetLoad = new DataSetLoadDto();
+    private DataSetLoadDto expectData = new DataSetLoadDto();
 
-    private DataSetLoadDto oldDataSetLoad = new DataSetLoadDto();
+    private DataSetLoadDto oldData = new DataSetLoadDto();
 
-    private DataSetLoadDto newDataSetLoad = new DataSetLoadDto();
+    private DataSetLoadDto newData = new DataSetLoadDto();
 
     public String getSetting() {
         return this.setting;
@@ -47,36 +47,36 @@ public class CompareDto extends CommandDto {
         this.targetType = targetType;
     }
 
-    public ImageCompareDto getImageCompare() {
-        return this.imageCompare;
+    public ImageCompareDto getImageOption() {
+        return this.imageOption;
     }
 
-    public void setImageCompare(final ImageCompareDto imageCompare) {
-        this.imageCompare = imageCompare;
+    public void setImageOption(final ImageCompareDto imageOption) {
+        this.imageOption = imageOption;
     }
 
-    public DataSetLoadDto getExpectDataSetLoad() {
-        return this.expectDataSetLoad;
+    public DataSetLoadDto getExpectData() {
+        return this.expectData;
     }
 
-    public void setExpectDataSetLoad(final DataSetLoadDto expectDataSetLoad) {
-        this.expectDataSetLoad = expectDataSetLoad;
+    public void setExpectData(final DataSetLoadDto expectData) {
+        this.expectData = expectData;
     }
 
-    public DataSetLoadDto getOldDataSetLoad() {
-        return this.oldDataSetLoad;
+    public DataSetLoadDto getOldData() {
+        return this.oldData;
     }
 
-    public void setOldDataSetLoad(final DataSetLoadDto oldDataSetLoad) {
-        this.oldDataSetLoad = oldDataSetLoad;
+    public void setOldData(final DataSetLoadDto oldData) {
+        this.oldData = oldData;
     }
 
-    public DataSetLoadDto getNewDataSetLoad() {
-        return this.newDataSetLoad;
+    public DataSetLoadDto getNewData() {
+        return this.newData;
     }
 
-    public void setNewDataSetLoad(final DataSetLoadDto newDataSetLoad) {
-        this.newDataSetLoad = newDataSetLoad;
+    public void setNewData(final DataSetLoadDto newData) {
+        this.newData = newData;
     }
 
 }

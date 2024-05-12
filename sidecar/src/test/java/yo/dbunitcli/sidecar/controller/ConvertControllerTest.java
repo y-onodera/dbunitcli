@@ -5,16 +5,11 @@ import io.micronaut.http.HttpRequest;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.runtime.server.EmbeddedServer;
-import io.micronaut.serde.ObjectMapper;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import yo.dbunitcli.application.ConvertDto;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
-
-import java.io.File;
-import java.io.IOException;
 
 @MicronautTest
 @Property(name = "yo.dbunit.cli.sidecar.workspace", value = "src/test/resources/workspace/sample")
@@ -29,11 +24,9 @@ class ConvertControllerTest {
     Workspace workspace;
 
     @Test
-    public void testLoadAndExec() {
-        final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/convert/load"
-                , "csvToXlsx.txt"));
-        final String response = this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/convert/exec", jsonResponse));
-        Assertions.assertEquals("success", response);
+    public void testInit() {
+        final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/convert/init"));
+        Assertions.assertEquals("{\"srcData\":{\"srcType\":{\"value\":\"csv\",\"attribute\":{\"type\":\"ENUM\",\"selectOption\":[\"none\",\"table\",\"sql\",\"file\",\"dir\",\"csv\",\"csvq\",\"reg\",\"fixed\",\"xls\",\"xlsx\"],\"required\":true}},\"src\":{\"attribute\":{\"type\":\"FILE_OR_DIR\",\"required\":true}},\"setting\":{\"attribute\":{\"type\":\"FILE\",\"required\":false}},\"settingEncoding\":{\"value\":\"UTF-8\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"loadData\":{\"value\":\"true\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"includeMetaData\":{\"value\":\"false\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"regInclude\":{\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"regExclude\":{\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"encoding\":{\"value\":\"UTF-8\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"headerName\":{\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"delimiter\":{\"value\":\",\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"extension\":{\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"recursive\":{\"value\":\"true\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}}},\"convertResult\":{\"resultType\":{\"value\":\"csv\",\"attribute\":{\"type\":\"ENUM\",\"selectOption\":[\"csv\",\"xls\",\"xlsx\",\"table\"],\"required\":false}},\"result\":{\"value\":\".\",\"attribute\":{\"type\":\"DIR\",\"required\":false}},\"resultPath\":{\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"exportEmptyTable\":{\"value\":\"true\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"outputEncoding\":{\"value\":\"UTF-8\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}}}}", jsonResponse);
     }
 
     @Test
@@ -43,22 +36,10 @@ class ConvertControllerTest {
     }
 
     @Test
-    public void testSave() throws IOException {
+    public void testLoad() {
         final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/convert/load"
                 , "csvToXlsx.txt"));
-        final ConvertDto dto = ObjectMapper.getDefault()
-                .readValue(jsonResponse, ConvertDto.class);
-        final OptionDto<ConvertDto> input = new OptionDto<>();
-        dto.getDataSetLoad().setRecursive("false");
-        dto.getDataSetLoad().setDelimiter("\\t");
-        input.setName("newName");
-        input.setValue(dto);
-        final String response = this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/convert/save"
-                , ObjectMapper.getDefault().writeValueAsString(input)));
-        Assertions.assertEquals("success", response);
-        Assertions.assertTrue(new File(this.workspace.path().toFile(), "option/convert/newName.txt").exists());
-        Assertions.assertTrue(new File(this.workspace.path().toFile(), "option/convert/newName.txt").delete());
+        Assertions.assertEquals("{\"srcData\":{\"srcType\":{\"value\":\"csv\",\"attribute\":{\"type\":\"ENUM\",\"selectOption\":[\"none\",\"table\",\"sql\",\"file\",\"dir\",\"csv\",\"csvq\",\"reg\",\"fixed\",\"xls\",\"xlsx\"],\"required\":true}},\"src\":{\"value\":\"src\\\\test\\\\resources\\\\workspace\\\\sample\\\\resources\\\\src\\\\csv\",\"attribute\":{\"type\":\"FILE_OR_DIR\",\"required\":true}},\"setting\":{\"attribute\":{\"type\":\"FILE\",\"required\":false}},\"settingEncoding\":{\"value\":\"UTF-8\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"loadData\":{\"value\":\"true\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"includeMetaData\":{\"value\":\"false\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"regInclude\":{\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"regExclude\":{\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"encoding\":{\"value\":\"UTF-8\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"headerName\":{\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"delimiter\":{\"value\":\",\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"extension\":{\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"recursive\":{\"value\":\"true\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}}},\"convertResult\":{\"resultType\":{\"value\":\"xlsx\",\"attribute\":{\"type\":\"ENUM\",\"selectOption\":[\"csv\",\"xls\",\"xlsx\",\"table\"],\"required\":false}},\"result\":{\"value\":\"target\\\\convert\\\\result\",\"attribute\":{\"type\":\"DIR\",\"required\":false}},\"resultPath\":{\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"exportEmptyTable\":{\"value\":\"true\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}},\"excelTable\":{\"value\":\"SHEET\",\"attribute\":{\"type\":\"TEXT\",\"required\":false}}}}", jsonResponse);
     }
-
 
 }

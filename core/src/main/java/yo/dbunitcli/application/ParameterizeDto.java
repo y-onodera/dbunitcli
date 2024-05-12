@@ -21,9 +21,9 @@ public class ParameterizeDto extends CommandDto {
     @CommandLine.Option(names = "-template", description = "default template file. case when cmdParam exists,this option is ignore.")
     private String template;
 
-    private TemplateRenderDto templateRender = new TemplateRenderDto();
+    private DataSetLoadDto paramData = new DataSetLoadDto();
 
-    private DataSetLoadDto dateSetLoad = new DataSetLoadDto();
+    private TemplateRenderDto templateOption = new TemplateRenderDto();
 
     public String getIgnoreFail() {
         return this.ignoreFail;
@@ -73,20 +73,20 @@ public class ParameterizeDto extends CommandDto {
         this.arg = arg;
     }
 
-    public TemplateRenderDto getTemplateRender() {
-        return this.templateRender;
+    public TemplateRenderDto getTemplateOption() {
+        return this.templateOption;
     }
 
-    public void setTemplateRender(final TemplateRenderDto templateRender) {
-        this.templateRender = templateRender;
+    public void setTemplateOption(final TemplateRenderDto templateOption) {
+        this.templateOption = templateOption;
     }
 
-    public DataSetLoadDto getDateSetLoad() {
-        return this.dateSetLoad;
+    public DataSetLoadDto getParamData() {
+        return this.paramData;
     }
 
-    public void setDateSetLoad(final DataSetLoadDto dateSetLoad) {
-        this.dateSetLoad = dateSetLoad;
+    public void setParamData(final DataSetLoadDto paramData) {
+        this.paramData = paramData;
     }
 
 }

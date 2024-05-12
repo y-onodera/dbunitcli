@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 public class GenerateOption extends CommandLineOption<GenerateDto> {
 
-    private final DataSetLoadOption src;
+    private final DataSetLoadOption srcData;
     private final TemplateRenderOption templateOption;
     private final GenerateType generateType;
     private final DBConverter.Operation operation;
@@ -41,9 +41,9 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
         final GenerateDto dto = new GenerateDto();
         new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, CommandLineOption.DEFAULT_COMMANDLINE_FILTER)
                 .parseArgument(args, dto);
-        new CommandLineParser("src").parseArgument(args, dto.getDataSetLoad());
-        new CommandLineParser("template").parseArgument(args, dto.getTemplateRender());
-        new CommandLineParser("result").parseArgument(args, dto.getDataSetConverter());
+        new CommandLineParser("src").parseArgument(args, dto.getSrcData());
+        new CommandLineParser("template").parseArgument(args, dto.getTemplateOption());
+        new CommandLineParser("result").parseArgument(args, dto.getConvertResult());
         return dto;
     }
 
@@ -87,8 +87,8 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
         } else {
             this.outputEncoding = "UTF-8";
         }
-        this.src = new DataSetLoadOption("src", dto.getDataSetLoad());
-        this.templateOption = new TemplateRenderOption("template", dto.getTemplateRender());
+        this.srcData = new DataSetLoadOption("src", dto.getSrcData());
+        this.templateOption = new TemplateRenderOption("template", dto.getTemplateOption());
     }
 
     public String templateString() {
@@ -113,7 +113,7 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
     }
 
     public File getResultDir() {
-        return this.getConverterOption().getResultDir();
+        return this.getConvertResult().getResultDir();
     }
 
     public void write(final File resultFile, final Map<String, Object> param) throws IOException {
@@ -137,31 +137,29 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
     @Override
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs();
-        result.putAll(this.src.toCommandLineArgs());
         result.put("-generateType", this.generateType, GenerateType.class);
-        if (result.hasValue("-generateType")
-                && GenerateType.valueOf(result.get("-generateType")) == GenerateType.txt
-                || GenerateType.valueOf(result.get("-generateType")) == GenerateType.xlsx) {
-            result.put("-unit", this.unit, GenerateUnit.class);
-            result.putFile("-template", this.template, true);
+        if (result.hasValue("-generateType")) {
+            final GenerateType resultGenerateType = GenerateType.valueOf(result.get("-generateType"));
+            if (!resultGenerateType.isFixedTemplate()) {
+                result.put("-unit", this.unit, GenerateUnit.class);
+                result.putFile("-template", this.template, true);
+            } else if (resultGenerateType == GenerateType.sql) {
+                result.put("-commit", Boolean.toString(this.commit));
+                result.put("-op", this.operation, DBConverter.Operation.class);
+                result.put("-sqlFilePrefix", this.sqlFilePrefix);
+                result.put("-sqlFileSuffix", this.sqlFileSuffix);
+            }
+            if (!(resultGenerateType == GenerateType.xls || resultGenerateType == GenerateType.xlsx)) {
+                result.put("-outputEncoding", this.outputEncoding);
+            }
         }
-        if (result.hasValue("-generateType") && GenerateType.valueOf(result.get("-generateType")) == GenerateType.sql) {
-            result.put("-commit", Boolean.toString(this.commit));
-            result.put("-op", this.operation, DBConverter.Operation.class);
-            result.put("-sqlFilePrefix", this.sqlFilePrefix);
-            result.put("-sqlFileSuffix", this.sqlFileSuffix);
-        }
-        result.putAll(this.templateOption.toCommandLineArgs());
-        if (result.hasValue("-generateType")
-                && !(GenerateType.valueOf(result.get("-generateType")) == GenerateType.sql
-                || GenerateType.valueOf(result.get("-generateType")) == GenerateType.settings)) {
-            result.put("-outputEncoding", this.outputEncoding);
-        }
+        result.addComponent("srcData", this.srcData.toCommandLineArgs());
+        result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
         return result;
     }
 
     public ComparableDataSet targetDataSet() {
-        final ComparableDataSetParam.Builder builder = this.src.getParam();
+        final ComparableDataSetParam.Builder builder = this.srcData.getParam();
         if (this.getGenerateType() == GenerateType.settings) {
             builder.setUseJdbcMetaData(true);
             builder.setLoadData(false);
@@ -320,15 +318,15 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
                     , option.outputEncoding);
         }
 
-        public boolean isFixedTemplate() {
+        protected boolean isFixedTemplate() {
             return false;
         }
 
-        public GenerateUnit getFixedUnit() {
+        protected GenerateUnit getFixedUnit() {
             return null;
         }
 
-        public String getTemplateString(final GenerateOption option) {
+        protected String getTemplateString(final GenerateOption option) {
             return null;
         }
     }

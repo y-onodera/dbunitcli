@@ -11,7 +11,7 @@ public class CommandDto {
     @CommandLine.Option(names = "-P")
     private Map<String, String> inputParam = new HashMap<>();
 
-    private DataSetConverterDto dataSetConverter = new DataSetConverterDto();
+    private DataSetConverterDto convertResult = new DataSetConverterDto();
 
     public Map<String, String> getInputParam() {
         return this.inputParam;
@@ -21,11 +21,11 @@ public class CommandDto {
         this.inputParam = inputParam;
     }
 
-    public DataSetConverterDto getDataSetConverter() {
-        return this.dataSetConverter;
+    public DataSetConverterDto getConvertResult() {
+        return this.convertResult;
     }
 
-    public void setDataSetConverter(final DataSetConverterDto dataSetConverter) {
-        this.dataSetConverter = dataSetConverter;
+    public void setConvertResult(final DataSetConverterDto convertResult) {
+        this.convertResult = convertResult;
     }
 }

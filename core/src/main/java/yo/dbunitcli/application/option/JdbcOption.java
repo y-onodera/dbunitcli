@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class JdbcOption implements Option<JdbcDto> {
+public class JdbcOption implements Option {
 
     private final String prefix;
     private final String jdbcUrl;

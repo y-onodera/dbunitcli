@@ -9,7 +9,7 @@ import yo.dbunitcli.dataset.converter.DBConverter;
 
 import java.io.File;
 
-public class DataSetConverterOption implements Option<DataSetConverterDto> {
+public class DataSetConverterOption implements Option {
 
     private final String prefix;
     private final JdbcOption jdbcOption;
@@ -73,7 +73,7 @@ public class DataSetConverterOption implements Option<DataSetConverterDto> {
         if (type == DataSourceType.table) {
             result.put("-op", this.operation == null ? DBConverter.Operation.CLEAN_INSERT : this.operation
                     , DBConverter.Operation.class);
-            result.putAll(this.jdbcOption.toCommandLineArgs());
+            result.addComponent("jdbc", this.jdbcOption.toCommandLineArgs());
         } else {
             result.putDir("-result", this.resultDir);
             result.put("-resultPath", this.resultPath);

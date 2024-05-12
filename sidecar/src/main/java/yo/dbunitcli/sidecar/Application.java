@@ -7,9 +7,12 @@ import io.micronaut.runtime.Micronaut;
 import io.micronaut.serde.annotation.SerdeImport;
 import yo.dbunitcli.application.*;
 import yo.dbunitcli.application.dto.*;
+import yo.dbunitcli.application.option.Option;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
 
+@SerdeImport(value = Option.Arg.class)
+@SerdeImport(value = Option.Attribute.class)
 @SerdeImport(value = CommandDto.class)
 @SerdeImport(value = ParameterizeDto.class)
 @SerdeImport(value = ConvertDto.class)

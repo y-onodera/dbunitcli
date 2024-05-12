@@ -8,4 +8,8 @@ public class NoneOption implements ComparableDataSetParamOption {
         return builder;
     }
 
+    @Override
+    public CommandLineArgs toCommandLineArgs() {
+        return new CommandLineArgs(this.getPrefix());
+    }
 }
