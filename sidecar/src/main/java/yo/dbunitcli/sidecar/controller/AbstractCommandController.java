@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.CommandDto;
 import yo.dbunitcli.application.CommandLineOption;
+import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.sidecar.domain.project.CommandType;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
@@ -24,26 +25,6 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
 
     public AbstractCommandController(final Workspace workspace) {
         this.workspace = workspace;
-    }
-
-    @Get(uri = "init", produces = MediaType.APPLICATION_JSON)
-    public String init() throws IOException {
-        return ObjectMapper
-                .getDefault()
-                .writeValueAsString(this.getCommand()
-                        .parseOption(new String[]{})
-                        .toCommandLineArgs()
-                        .toMap());
-    }
-
-    @Post(uri = "reload", produces = MediaType.APPLICATION_JSON)
-    public String reload(@Body final DTO input) throws IOException {
-        return ObjectMapper
-                .getDefault()
-                .writeValueAsString(this.getCommand()
-                        .parseOption(input)
-                        .toCommandLineArgs()
-                        .toMap());
     }
 
     @Get(uri = "list", produces = MediaType.APPLICATION_JSON)
@@ -77,6 +58,26 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                 .orElse("{}");
     }
 
+    @Get(uri = "reset", produces = MediaType.APPLICATION_JSON)
+    public String reset() throws IOException {
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(this.getCommand()
+                        .parseOption(new String[]{})
+                        .toCommandLineArgs()
+                        .toMap());
+    }
+
+    @Post(uri = "refresh", produces = MediaType.APPLICATION_JSON)
+    public String refresh(@Body final DTO input) throws IOException {
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(this.getCommand()
+                        .parseOption(input)
+                        .toCommandLineArgs()
+                        .toMap());
+    }
+
     @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
     public String save(@Body final OptionDto<DTO> input) {
         try {
@@ -91,9 +92,10 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "exec", produces = MediaType.TEXT_PLAIN)
-    public String exec(@Body final DTO input) {
+    public String exec(@Body final OptionDto<DTO> input) {
         try {
-            this.getCommand().exec(this.getCommand().parseOption(input));
+            this.getCommand().exec(this.getCommand()
+                    .getOptions(input.getName(), input.getValue(), Parameter.none()));
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             return "failed";

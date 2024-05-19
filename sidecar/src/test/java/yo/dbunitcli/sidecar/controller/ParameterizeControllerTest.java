@@ -27,6 +27,7 @@ public class ParameterizeControllerTest {
 
     @Test
     public void testPost() throws IOException {
+        final OptionDto<ParameterizeDto> input = new OptionDto<>();
         final ParameterizeDto request = new ParameterizeDto();
         request.setIgnoreFail("false");
         request.setCmd("convert");
@@ -38,9 +39,11 @@ public class ParameterizeControllerTest {
         request.getArg().put("-resultType", "xlsx");
         request.setParamData(new DataSetLoadDto());
         request.getParamData().setSrcType(DataSourceType.none);
+        input.setValue(request);
+        input.setName("parameterizeTest");
         final String response = this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/parameterize/exec"
                 , ObjectMapper.getDefault()
-                        .writeValueAsString(request)));
+                        .writeValueAsString(input)));
         Assertions.assertEquals("success", response);
     }
 
