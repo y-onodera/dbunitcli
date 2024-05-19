@@ -1,5 +1,7 @@
 package yo.dbunitcli.sidecar.domain.project;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
 
 import java.io.File;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public record Workspace(Path path, Options options, Resources resources) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Workspace.class);
 
     public static Builder builder() {
         return new Builder();
@@ -75,6 +78,7 @@ public record Workspace(Path path, Options options, Resources resources) {
                             .addParameterFiles(CommandType.run, Builder.loadFiles(optionDir, "run"));
                 }
             }
+            Workspace.LOGGER.info(String.format("current workspace:%s", baseDir.getAbsolutePath()));
             return new Workspace(baseDir.toPath(), options.build(), resources.build());
         }
     }

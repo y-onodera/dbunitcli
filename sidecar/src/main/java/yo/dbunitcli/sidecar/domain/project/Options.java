@@ -1,5 +1,8 @@
 package yo.dbunitcli.sidecar.domain.project;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +11,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public record Options(Map<CommandType, List<Path>> parameterFiles) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Options.class);
+
     public static Builder builder() {
         return new Builder();
     }
@@ -17,8 +22,14 @@ public record Options(Map<CommandType, List<Path>> parameterFiles) {
     }
 
     public void save(final CommandType type, final Path path) {
-        this.parameterFiles().get(type).removeIf(it -> it.toAbsolutePath().equals(path.toAbsolutePath()));
-        this.parameterFiles().get(type).add(path);
+        if (this.parameterFiles(type)
+                .filter(it -> it.toAbsolutePath().equals(path.toAbsolutePath()))
+                .findAny()
+                .isEmpty()) {
+            this.parameterFiles().put(type, Stream.concat(this.parameterFiles(type), Stream.of(path))
+                    .toList());
+            Options.LOGGER.info(String.format("type:%s include:%s", type, this.parameterFiles(type).toList()));
+        }
     }
 
     public static class Builder {
