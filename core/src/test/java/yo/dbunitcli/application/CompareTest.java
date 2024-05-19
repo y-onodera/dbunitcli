@@ -1,7 +1,5 @@
 package yo.dbunitcli.application;
 
-import mockit.Mock;
-import mockit.MockUp;
 import mockit.integration.junit5.JMockitExtension;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,12 +17,6 @@ public class CompareTest {
     public void setUp() throws UnsupportedEncodingException {
         this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
                 .replace("target/test-classes", "src/test/resources");
-        new MockUp<System>() {
-            @Mock
-            public void exit(final int value) {
-                throw new RuntimeException(String.valueOf(value));
-            }
-        };
     }
 
     @Test
