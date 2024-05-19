@@ -75,6 +75,12 @@ jobs:
             ./core/target/*.dll
             ./core/target/dbunit-cli.exe
             ./core/target/lib
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-image-sidecar
+          path: |
+            ./sidecar/target/*.dll
+            ./sidecar/target/*.exe
 
   report-deploy:
     needs: [ build ]
