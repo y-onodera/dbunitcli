@@ -1,5 +1,7 @@
 package yo.dbunitcli.application;
 
+import mockit.Mock;
+import mockit.MockUp;
 import mockit.integration.junit5.JMockitExtension;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -149,6 +151,17 @@ public class CompareTest {
     @Nested
     @ExtendWith(JMockitExtension.class)
     class ExitCodeTest {
+
+        @BeforeEach
+        public void setUp() {
+            new MockUp<System>() {
+                @Mock
+                public void exit(final int value) {
+                    throw new RuntimeException(String.valueOf(value));
+                }
+            };
+        }
+
         @Test
         public void testFailedResultDiffNotExpected() throws Exception {
             try {
