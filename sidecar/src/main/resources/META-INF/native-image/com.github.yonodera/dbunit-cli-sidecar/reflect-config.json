@@ -11624,116 +11624,57 @@
     ]
   },
   {
-    "name": "yo.dbunitcli.application.CommandLineOption",
+    "name": "yo.dbunitcli.application.CommandDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.CompareOption",
+    "name": "yo.dbunitcli.application.CompareDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.ConvertOption",
+    "name": "yo.dbunitcli.application.ConvertDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.GenerateOption",
+    "name": "yo.dbunitcli.application.GenerateDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.ParameterizeOption",
+    "name": "yo.dbunitcli.application.ParameterizeDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.RunOption",
+    "name": "yo.dbunitcli.application.RunDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.argument.CsvOption",
+    "name": "yo.dbunitcli.application.dto.DataSetConverterDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.argument.DataSetConverterOption",
+    "name": "yo.dbunitcli.application.dto.DataSetLoadDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.argument.DataSetLoadOption",
+    "name": "yo.dbunitcli.application.dto.ImageCompareDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.argument.DefaultArgumentsParser",
+    "name": "yo.dbunitcli.application.dto.JdbcDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.argument.EncodingOption",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.argument.EscapeSequenceEnableCharConverter",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "yo.dbunitcli.application.argument.ExcelOption",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.argument.ExtensionOption",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.argument.FixedOption",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.argument.HeaderNameOption",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.argument.ImageCompareOption",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.argument.JdbcLoadOption",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.argument.JdbcOption",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.argument.RecursiveOption",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.argument.RegexOption",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.argument.TemplateRenderOption",
+    "name": "yo.dbunitcli.application.dto.TemplateRenderDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   }

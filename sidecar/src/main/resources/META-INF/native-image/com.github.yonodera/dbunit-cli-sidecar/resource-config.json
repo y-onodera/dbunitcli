@@ -161,9 +161,6 @@
         "pattern": "\\Qyo/dbunitcli/dataset/producer/.\\E"
       },
       {
-        "pattern": "\\Qapplication.properties\\E"
-      },
-      {
         "pattern": "java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfkc.nrm\\E"
       },
       {
