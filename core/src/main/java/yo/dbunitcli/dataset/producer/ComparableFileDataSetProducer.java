@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -20,7 +19,6 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableFileDataSetProducer.class);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     private final File src;
-    private final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final boolean loadData;
     private IDataSetConsumer consumer;
@@ -29,7 +27,6 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     public ComparableFileDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.src().getAbsoluteFile();
-        this.filter = this.param.tableNameFilter();
         this.loadData = this.param.loadData();
     }
 
@@ -54,7 +51,6 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
             try {
                 this.param.getWalk()
                         .filter(this.fileTypeFilter())
-                        .filter(path -> this.filter.predicate(path.toString()))
                         .forEach(path -> this.produceFromFile(path.toFile()));
             } catch (final AssertionError e) {
                 throw new DataSetException("error producing dataSet for '" + this.src + "'", e);

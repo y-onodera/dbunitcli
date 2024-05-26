@@ -18,16 +18,20 @@ public class DataSetLoadDto implements CompositeDto {
     private String loadData;
     @CommandLine.Option(names = "-includeMetaData", description = "whether param include tableName and columns or not ")
     private String includeMetaData;
-    @CommandLine.Option(names = "-regInclude", description = "regex to include table")
+    @CommandLine.Option(names = "-regInclude", description = "regex to include src file")
     private String regInclude;
-    @CommandLine.Option(names = "-regExclude", description = "regex to exclude table")
+    @CommandLine.Option(names = "-regExclude", description = "regex to exclude src file")
     private String regExclude;
     @CommandLine.Option(names = "-delimiter", description = "default is comma")
     private String delimiter;
     @CommandLine.Option(names = "-encoding", description = "csv file encoding")
     private String encoding;
-    @CommandLine.Option(names = "-xlsxSchema", description = "schema use read xlsx")
+    @CommandLine.Option(names = "-xlsxSchema", description = "schema use read xlsx(zls)")
     private String xlsxSchemaSource;
+    @CommandLine.Option(names = "-regSheetInclude", description = "regex to include xlsx(zls) sheet")
+    private String regSheetInclude;
+    @CommandLine.Option(names = "-regSheetExclude", description = "regex to exclude xlsx(zls) sheet")
+    private String regSheetExclude;
     @CommandLine.Option(names = "-extension", description = "target extension")
     private String extension;
     @CommandLine.Option(names = "-fixedLength", description = "comma separate column Lengths")
@@ -210,5 +214,21 @@ public class DataSetLoadDto implements CompositeDto {
 
     public void setTemplateRender(final TemplateRenderDto templateRender) {
         this.templateRender = templateRender;
+    }
+
+    public String getRegSheetInclude() {
+        return this.regSheetInclude;
+    }
+
+    public void setRegSheetInclude(final String regSheetInclude) {
+        this.regSheetInclude = regSheetInclude;
+    }
+
+    public String getRegSheetExclude() {
+        return this.regSheetExclude;
+    }
+
+    public void setRegSheetExclude(final String regSheetExclude) {
+        this.regSheetExclude = regSheetExclude;
     }
 }

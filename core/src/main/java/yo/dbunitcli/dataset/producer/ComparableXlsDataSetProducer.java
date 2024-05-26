@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.TableNameFilter;
+import yo.dbunitcli.dataset.NameFilter;
 import yo.dbunitcli.resource.poi.ExcelMappingDataSetConsumerWrapper;
 
 import java.io.File;
@@ -27,10 +27,10 @@ import java.util.List;
 public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWrapper implements ComparableDataSetProducer, HSSFListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableXlsDataSetProducer.class);
-    private final TableNameFilter filter;
     private final ComparableDataSetParam param;
 
     private final File[] src;
+    private final NameFilter sheetNameFilter;
 
     private int lastRowNumber;
 
@@ -53,7 +53,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
         super(new DefaultConsumer(), param.xlsxSchema(), param.loadData());
         this.param = param;
         this.src = this.param.getSrcFiles();
-        this.filter = this.param.tableNameFilter();
+        this.sheetNameFilter = param.sheetNameFilter();
     }
 
     @Override
@@ -101,7 +101,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                         ComparableXlsDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex - 1].getSheetname(), this.sheetIndex - 1);
                     }
                     final String tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
-                    if (this.filter.predicate(tableName)) {
+                    if (this.sheetNameFilter.predicate(tableName)) {
                         this.handleSheetStart(tableName);
                         ComparableXlsDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", tableName, this.sheetIndex);
                     }

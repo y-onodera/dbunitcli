@@ -22,6 +22,7 @@ public class ComparableFileDataSetProducerTest {
                                 .setSource(DataSourceType.file)
                                 .setRegInclude("DataSetProducer")
                                 .setRegExclude("Csv")
+                                .setRecursive(true)
                                 .build()));
         Assertions.assertEquals(src.getPath(), actual.getSrc());
         Assertions.assertEquals(1, actual.getTables().length);

@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +22,6 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     protected final IDatabaseConnection connection;
     protected final File[] src;
     protected final String encoding;
-    protected final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final boolean loadData;
     protected IDataSetConsumer consumer;
@@ -38,7 +36,6 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
             this.src = new File[]{this.getParam().src()};
         }
         this.encoding = this.param.encoding();
-        this.filter = this.param.tableNameFilter();
         this.loadData = this.param.loadData();
     }
 
@@ -66,7 +63,6 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                     }
                 })
                 .flatMap(Collection::stream)
-                .filter(this.filter::predicate)
                 .distinct()
                 .forEach(this::executeTable);
         this.consumer.endDataSet();

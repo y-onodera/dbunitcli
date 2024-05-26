@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,24 +23,18 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
     private final String encoding;
     private final String[] headerNames;
     private final List<Integer> columnLengths;
-    private final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final boolean loadData;
     private IDataSetConsumer consumer;
 
     public ComparableFixedFileDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
-        if (this.param.src().isDirectory()) {
-            this.src = this.param.src().listFiles(File::isFile);
-        } else {
-            this.src = new File[]{this.param.src()};
-        }
+        this.src = this.param.getSrcFiles();
         this.encoding = this.param.encoding();
         this.headerNames = this.param.headerName().split(",");
         this.columnLengths = Arrays.stream(this.param.fixedLength().split(","))
                 .map(Integer::valueOf)
                 .collect(Collectors.toCollection(ArrayList::new));
-        this.filter = this.param.tableNameFilter();
         this.loadData = this.param.loadData();
     }
 
@@ -60,7 +53,6 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
         ComparableFixedFileDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
-                .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableFixedFileDataSetProducer.LOGGER.info("produce() - end");

@@ -1,5 +1,6 @@
 package yo.dbunitcli.dataset;
 
+import yo.dbunitcli.Strings;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -22,9 +23,10 @@ public record ComparableDataSetParam(
         , TableSeparators tableSeparators
         , String headerSplitPattern
         , String dataSplitPattern
-        , TableNameFilter tableNameFilter
+        , NameFilter srcPathFilter
         , boolean mapIncludeMetaData
         , XlsxSchema xlsxSchema
+        , NameFilter sheetNameFilter
         , boolean useJdbcMetaData
         , boolean loadData
         , String headerName
@@ -37,6 +39,10 @@ public record ComparableDataSetParam(
         , IDataSetConverter converter
 ) {
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public ComparableDataSetParam(final Builder builder) {
         this(builder.getSrc()
                 , builder.getEncoding()
@@ -44,9 +50,10 @@ public record ComparableDataSetParam(
                 , builder.getTableSeparators()
                 , builder.getHeaderSplitPattern()
                 , builder.getDataSplitPattern()
-                , builder.getTableNameFilter()
+                , builder.getSrcPathFilter()
                 , builder.isMapIncludeMetaData()
                 , builder.getXlsxSchema()
+                , builder.getSheetNameFilter()
                 , builder.isUseJdbcMetaData()
                 , builder.isLoadData()
                 , builder.getHeaderName()
@@ -60,16 +67,12 @@ public record ComparableDataSetParam(
         );
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public File[] getSrcFiles() {
         if (this.src().isDirectory()) {
-            final String end = "." + this.extension().toUpperCase();
             final File[] result = this.getWalk()
                     .map(Path::toFile)
-                    .filter(it -> it.isFile() && it.getName().toUpperCase().endsWith(end))
+                    .filter(it -> it.isFile() && it.length() > 0 && (Strings.isEmpty(this.extension)
+                            || it.getName().toUpperCase().endsWith("." + this.extension().toUpperCase())))
                     .toArray(File[]::new);
             Arrays.sort(result);
             return result;
@@ -80,10 +83,8 @@ public record ComparableDataSetParam(
 
     public Stream<Path> getWalk() {
         try {
-            if (this.recursive) {
-                return Files.walk(this.src.toPath());
-            }
-            return Files.walk(this.src.toPath(), 1);
+            return Files.walk(this.src.toPath(), this.recursive() ? Integer.MAX_VALUE : 1)
+                    .filter(path -> this.srcPathFilter().predicate(path.toString()));
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
@@ -109,7 +110,9 @@ public record ComparableDataSetParam(
         private DatabaseConnectionLoader databaseConnectionLoader;
         private IDataSetConverter converter;
         private char delimiter = ',';
-        private boolean recursive = true;
+        private boolean recursive = false;
+        private String regSheetInclude;
+        private String regSheetExclude;
 
         public Builder setSrc(final File src) {
             this.src = src;
@@ -147,12 +150,16 @@ public record ComparableDataSetParam(
             return this.mapIncludeMetaData;
         }
 
-        public TableNameFilter getTableNameFilter() {
-            return new TableNameFilter(this.regInclude, this.regExclude);
+        public NameFilter getSrcPathFilter() {
+            return new NameFilter(this.regInclude, this.regExclude);
         }
 
         public XlsxSchema getXlsxSchema() {
             return this.xlsxSchema;
+        }
+
+        public NameFilter getSheetNameFilter() {
+            return new NameFilter(this.regSheetInclude, this.regSheetExclude);
         }
 
         public boolean isUseJdbcMetaData() {
@@ -305,6 +312,24 @@ public record ComparableDataSetParam(
 
         public ComparableDataSetParam build() {
             return new ComparableDataSetParam(this);
+        }
+
+        public Builder setRegSheetInclude(final String regSheetInclude) {
+            this.regSheetInclude = regSheetInclude;
+            return this;
+        }
+
+        public String getRegSheetInclude() {
+            return this.regSheetInclude;
+        }
+
+        public Builder setRegSheetExclude(final String regSheetExclude) {
+            this.regSheetExclude = regSheetExclude;
+            return this;
+        }
+
+        public String getRegSheetExclude() {
+            return this.regSheetExclude;
         }
 
     }

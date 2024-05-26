@@ -20,6 +20,7 @@ public class ComparableDirectoryDataSetProducerTest {
                                 .setSrc(src)
                                 .setRegInclude("yo[/\\\\]+dbunitcli[/\\\\]+")
                                 .setRegExclude("application")
+                                .setRecursive(true)
                                 .build()));
         Assertions.assertEquals(src.getPath(), actual.getSrc());
         Assertions.assertEquals(1, actual.getTables().length);

@@ -22,7 +22,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.TableNameFilter;
+import yo.dbunitcli.dataset.NameFilter;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,16 +34,16 @@ import java.util.Arrays;
 public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
     private final File[] src;
-    private final TableNameFilter filter;
     private final XlsxSchema schema;
     private final ComparableDataSetParam param;
     private final boolean loadData;
+    private final NameFilter sheetNameFilter;
     private IDataSetConsumer consumer = new DefaultConsumer();
 
     public ComparableXlsxDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrcFiles();
-        this.filter = this.param.tableNameFilter();
+        this.sheetNameFilter = this.param.sheetNameFilter();
         this.schema = this.param.xlsxSchema();
         this.loadData = this.param.loadData();
     }
@@ -97,7 +97,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
             while (iterator.hasNext()) {
                 try (final InputStream stream = iterator.next()) {
                     final String sheetName = iterator.getSheetName();
-                    if (this.filter.predicate(sheetName) && this.schema.contains(sheetName)) {
+                    if (this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName)) {
                         ComparableXlsxDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
                         this.processSheet(styles, strings, this.schema.addFileInfo(sourceFile, sheetName)
                                 .createHandler(this.consumer, sheetName, this.loadData), stream);

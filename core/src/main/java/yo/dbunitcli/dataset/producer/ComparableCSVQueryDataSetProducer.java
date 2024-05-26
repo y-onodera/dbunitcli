@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.Parameter;
-import yo.dbunitcli.dataset.TableNameFilter;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
@@ -23,19 +22,13 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     private static final String URL = "jdbc:h2:mem:test;MODE=Oracle";
     private final File[] src;
     private final Parameter parameter;
-    private final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final boolean loadData;
     private IDataSetConsumer consumer;
 
     public ComparableCSVQueryDataSetProducer(final ComparableDataSetParam param, final Parameter parameter) {
         this.param = param;
-        if (this.param.src().isDirectory()) {
-            this.src = this.param.src().listFiles(File::isFile);
-        } else {
-            this.src = new File[]{this.param.src()};
-        }
-        this.filter = param.tableNameFilter();
+        this.src = this.param.getSrcFiles();
         this.parameter = parameter;
         this.loadData = this.param.loadData();
     }
@@ -63,7 +56,6 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
         ComparableCSVQueryDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
-                .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableCSVQueryDataSetProducer.LOGGER.info("produce() - end");

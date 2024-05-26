@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -20,7 +19,6 @@ import java.util.Optional;
 public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
     private final File[] src;
-    private final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final String encoding;
     private final String[] headerNames;
@@ -34,7 +32,6 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         this.param = param;
         this.src = this.param.getSrcFiles();
         this.encoding = this.param.encoding();
-        this.filter = this.param.tableNameFilter();
         this.loadData = this.param.loadData();
         final String headerName = this.param.headerName();
         if (!Optional.ofNullable(headerName).orElse("").isEmpty()) {
@@ -61,7 +58,6 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         ComparableCsvDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
-                .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableCsvDataSetProducer.LOGGER.info("produce() - end");

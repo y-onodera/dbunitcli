@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.TableNameFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +20,6 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     private final File[] src;
     private final String encoding;
     private final Pattern dataSplitPattern;
-    private final TableNameFilter filter;
     private final ComparableDataSetParam param;
     private final boolean loadData;
     private IDataSetConsumer consumer;
@@ -30,11 +28,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
 
     public ComparableRegexSplitDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
-        if (this.param.src().isDirectory()) {
-            this.src = this.param.src().listFiles(File::isFile);
-        } else {
-            this.src = new File[]{this.param.src()};
-        }
+        this.src = this.param.getSrcFiles();
         this.encoding = this.param.encoding();
         final String headerName = this.param.headerName();
         if (!Optional.ofNullable(headerName).orElse("").isEmpty()) {
@@ -44,7 +38,6 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
             this.headerSplitPattern = Pattern.compile(this.param.headerSplitPattern());
         }
         this.dataSplitPattern = Pattern.compile(this.param.dataSplitPattern());
-        this.filter = this.param.tableNameFilter();
         this.loadData = this.param.loadData();
     }
 
@@ -63,7 +56,6 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
         ComparableRegexSplitDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
-                .filter(file -> this.filter.predicate(file.getAbsolutePath()) && file.length() > 0)
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableRegexSplitDataSetProducer.LOGGER.info("produce() - end");
