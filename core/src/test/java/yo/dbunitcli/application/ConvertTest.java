@@ -471,7 +471,7 @@ public class ConvertTest {
 
     @Test
     public void testConvertFilePathToCsv() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFilePathToCsv.txt"});
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFilePathToCsv.txt", "-recursive=true"});
         final File src = new File(this.baseDir + "/convert/file2csv/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(
@@ -511,7 +511,7 @@ public class ConvertTest {
 
     @Test
     public void testConvertFilePathToCsvFilterExtension() throws Exception {
-        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFilePathToCsv.txt", "-extension=txt"});
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFilePathToCsv.txt", "-recursive=true", "-extension=txt"});
         final File src = new File(this.baseDir + "/convert/file2csv/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
                 new ComparableCsvDataSetProducer(

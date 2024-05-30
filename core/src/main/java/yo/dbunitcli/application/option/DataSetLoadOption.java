@@ -21,8 +21,6 @@ public class DataSetLoadOption implements Option {
     private final boolean includeMetaData;
     private final ComparableDataSetParamOption dataSetParam;
     private final File src;
-    private final String regInclude;
-    private final String regExclude;
 
     public DataSetLoadOption(final String prefix) {
         this(prefix, new DataSetLoadDto());
@@ -56,8 +54,6 @@ public class DataSetLoadOption implements Option {
         } else {
             this.includeMetaData = false;
         }
-        this.regExclude = dto.getRegExclude();
-        this.regInclude = dto.getRegInclude();
         this.dataSetParam = new DataSourceTypeOptionFactory().create(this.getPrefix(), this.srcType, dto);
     }
 
@@ -78,8 +74,6 @@ public class DataSetLoadOption implements Option {
         result.put("-settingEncoding", this.settingEncoding);
         result.put("-loadData", this.loadData);
         result.put("-includeMetaData", this.includeMetaData);
-        result.put("-regInclude", this.regInclude);
-        result.put("-regExclude", this.regExclude);
         try {
             if (this.dataSetParam == null) {
                 final DataSourceType type = DataSourceType.valueOf(result.get("-srcType"));
@@ -105,8 +99,7 @@ public class DataSetLoadOption implements Option {
                 .setTableSeparators(this.getTableSeparators())
                 .setLoadData(this.loadData)
                 .setMapIncludeMetaData(this.includeMetaData)
-                .setRegInclude(this.regInclude)
-                .setRegExclude(this.regExclude));
+        );
     }
 
     protected void assertFileExists(final File file) {
