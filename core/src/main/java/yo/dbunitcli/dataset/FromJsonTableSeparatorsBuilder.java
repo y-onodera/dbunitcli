@@ -11,10 +11,6 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
 
     private final String settingEncoding;
 
-    public FromJsonTableSeparatorsBuilder() {
-        this(System.getProperty("file.encoding"));
-    }
-
     public FromJsonTableSeparatorsBuilder(final String settingEncoding) {
         this.settingEncoding = settingEncoding;
     }

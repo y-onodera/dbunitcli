@@ -91,7 +91,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
         }
     }
 
-    public String getEncoding() {
+    private String getEncoding() {
         return this.encoding;
     }
 
