@@ -15,4 +15,4 @@ $rows:{row |update $tableName$ set $columnsExcludeKey:{column | $column.columnNa
 deleteAll() ::= <<
 delete from $tableName$;
 >>
-commit() ::= <<$if(_paramMap.commit)$commit;$endif$>>
+commit() ::= <<$if(inputParam.commit)$commit;$endif$>>

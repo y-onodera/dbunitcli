@@ -18,6 +18,8 @@ public class ParameterizeDto extends CommandDto {
     private Map<String, String> arg = new HashMap<>();
     @CommandLine.Option(names = "-parameterize", defaultValue = "true", description = "whether cmdParam is template or not. if true, then cmdParam populate by param")
     private String parameterize;
+    @CommandLine.Option(names = "-unit", description = "pass parameter to template. row or table or dataset")
+    private ParameterUnit unit;
     @CommandLine.Option(names = "-template", description = "default template file. case when cmdParam exists,this option is ignore.")
     private String template;
 
@@ -89,4 +91,11 @@ public class ParameterizeDto extends CommandDto {
         this.paramData = paramData;
     }
 
+    public ParameterUnit getUnit() {
+        return this.unit;
+    }
+
+    public void setUnit(final ParameterUnit unit) {
+        this.unit = unit;
+    }
 }

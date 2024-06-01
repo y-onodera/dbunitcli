@@ -43,8 +43,8 @@ public class ParameterizeTest {
     @Test
     public void testExecCommandNoneParameter() throws Exception {
         Parameterize.main(new String[]{
-                "-cmd=$param.cmdName$"
-                , "-cmdParam=$param.templateName$"
+                "-cmd=$param.inputParam.cmdName$"
+                , "-cmdParam=$param.inputParam.templateName$"
                 , "-arg=-result=target/test-classes/yo/dbunitcli/application/param/csv2xlsx/result"
                 , "-P=cmdName=convert"
                 , "-PtemplateName=" + this.baseDir + "/paramConvertCsvToXlsx.txt"

@@ -1,6 +1,7 @@
 -srcType=csv
 -src=src/test/resources/yo/dbunitcli/application/generate/row/source/csv
 -encoding=UTF-8
+-includeMetaData=true
 -setting=src/test/resources/yo/dbunitcli/application/generate/row/templateSettings.json
 -template=src/test/resources/yo/dbunitcli/application/generate/row/template.txt
 -templateEncoding=UTF-8

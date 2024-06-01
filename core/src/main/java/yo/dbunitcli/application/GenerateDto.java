@@ -8,8 +8,8 @@ import yo.dbunitcli.dataset.converter.DBConverter;
 public class GenerateDto extends CommandDto {
     @CommandLine.Option(names = "-generateType")
     private GenerateOption.GenerateType generateType;
-    @CommandLine.Option(names = "-unit")
-    private GenerateOption.GenerateUnit unit;
+    @CommandLine.Option(names = "-unit", description = "generate by row or table or dataset")
+    private ParameterUnit unit;
     @CommandLine.Option(names = "-commit", description = "default commit;whether commit or not generate sql")
     private String commit;
     @CommandLine.Option(names = "-sqlFileSuffix", description = "generate sqlFile fileName suffix")
@@ -34,11 +34,11 @@ public class GenerateDto extends CommandDto {
         this.generateType = generateType;
     }
 
-    public GenerateOption.GenerateUnit getUnit() {
+    public ParameterUnit getUnit() {
         return this.unit;
     }
 
-    public void setUnit(final GenerateOption.GenerateUnit unit) {
+    public void setUnit(final ParameterUnit unit) {
         this.unit = unit;
     }
 

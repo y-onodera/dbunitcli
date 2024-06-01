@@ -1,4 +1,4 @@
-package $_paramMap.package$;
+package $inputParam.package$;
 
 import java.math.BigDecimal;
 

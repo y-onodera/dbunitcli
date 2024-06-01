@@ -49,6 +49,7 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
     };
     private static final ArgumentFilter ARGS_IGNORE_FILTER = new DefaultArgumentFilter("-P", "-A", "-arg");
     private final DataSetLoadOption paramData;
+    private final ParameterUnit unit;
     private final TemplateRenderOption templateOption;
     private final Map<String, String> args = new HashMap<>();
     private final String cmd;
@@ -78,6 +79,11 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
         if (Strings.isNotEmpty(dto.getParameterize())) {
             this.parameterize = Boolean.parseBoolean(dto.getParameterize());
         }
+        if (dto.getUnit() != null) {
+            this.unit = dto.getUnit();
+        } else {
+            this.unit = ParameterUnit.record;
+        }
         if (Strings.isNotEmpty(dto.getTemplate())) {
             this.template = new File(dto.getTemplate());
         }
@@ -102,6 +108,7 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs();
         result.addComponent("paramData", this.paramData.toCommandLineArgs());
+        result.put("-unit", this.unit, ParameterUnit.class);
         result.put("-parameterize", this.parameterize);
         result.put("-ignoreFail", this.ignoreFail);
         result.put("-cmd", this.cmd);
@@ -111,8 +118,8 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
         return result;
     }
 
-    public Stream<Map<String, Object>> loadParams() {
-        return this.getComparableDataSetLoader().loadParam(this.paramData.getParam().build());
+    public Stream<Parameter> loadParams() {
+        return this.unit.loadStream(this.getComparableDataSetLoader(), this.paramData.getParam().build());
     }
 
     public String[] createArgs(final Parameter aParam) {

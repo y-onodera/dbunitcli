@@ -91,9 +91,10 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     public Stream<Map<String, Object>> toMap(final boolean includeMetaData) {
         try {
             if (this.param.source() == DataSourceType.none) {
-                return Stream.of(new HashMap<>());
+                return Stream.of(Map.of("rowNumber", 0));
             }
-            return Arrays.stream(this.getTableNames()).map(tableName -> this.getTable(tableName).toMap(includeMetaData))
+            return Arrays.stream(this.getTableNames())
+                    .map(tableName -> this.getTable(tableName).toMap(includeMetaData))
                     .flatMap(Collection::stream);
         } catch (final DataSetException e) {
             throw new AssertionError(e);

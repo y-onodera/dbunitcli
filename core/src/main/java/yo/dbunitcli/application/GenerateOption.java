@@ -1,14 +1,11 @@
 package yo.dbunitcli.application;
 
-import org.dbunit.dataset.DataSetException;
 import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.cli.CommandLineParser;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
-import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.converter.DBConverter;
 import yo.dbunitcli.resource.Files;
@@ -17,20 +14,16 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GenerateOption extends CommandLineOption<GenerateDto> {
 
     private final DataSetLoadOption srcData;
+    private final ParameterUnit unit;
     private final TemplateRenderOption templateOption;
     private final GenerateType generateType;
     private final DBConverter.Operation operation;
-    private final GenerateUnit unit;
     private final boolean commit;
     private final String sqlFileSuffix;
     private final String sqlFilePrefix;
@@ -59,7 +52,7 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
         } else if (dto.getUnit() != null) {
             this.unit = dto.getUnit();
         } else {
-            this.unit = GenerateUnit.record;
+            this.unit = ParameterUnit.record;
         }
         this.operation = dto.getOperation();
         if (Strings.isNotEmpty(dto.getSqlFilePrefix())) {
@@ -95,7 +88,7 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
         return this.generateType.getTemplateString(this);
     }
 
-    public GenerateUnit getUnit() {
+    public ParameterUnit getUnit() {
         return this.unit;
     }
 
@@ -103,21 +96,21 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
         return this.generateType;
     }
 
-    public Stream<Map<String, Object>> parameterStream() {
+    public Stream<Parameter> parameterStream() {
         this.getParameter().getMap().put("commit", this.commit);
-        return this.getUnit().parameterStream(this.getParameter().getMap(), this.targetDataSet());
+        return this.getUnit().loadStream(this.getComparableDataSetLoader(), this.dataSetParam());
     }
 
-    public String resultPath(final Map<String, Object> param) {
-        return this.templateOption.getTemplateRender().render(this.getResultPath(), param);
+    public String resultPath(final Parameter param) {
+        return this.templateOption.getTemplateRender().render(this.getResultPath(), param.getMap());
     }
 
     public File getResultDir() {
         return this.getConvertResult().getResultDir();
     }
 
-    public void write(final File resultFile, final Map<String, Object> param) throws IOException {
-        this.getGenerateType().write(this, resultFile, param);
+    public void write(final File resultFile, final Parameter param) throws IOException {
+        this.getGenerateType().write(this, resultFile, param.getMap());
     }
 
     @Override
@@ -141,7 +134,7 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
         if (result.hasValue("-generateType")) {
             final GenerateType resultGenerateType = GenerateType.valueOf(result.get("-generateType"));
             if (!resultGenerateType.isFixedTemplate()) {
-                result.put("-unit", this.unit, GenerateUnit.class);
+                result.put("-unit", this.unit, ParameterUnit.class);
                 result.putFile("-template", this.template, true);
             } else if (resultGenerateType == GenerateType.sql) {
                 result.put("-commit", Boolean.toString(this.commit));
@@ -158,7 +151,7 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
         return result;
     }
 
-    public ComparableDataSet targetDataSet() {
+    public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
         if (this.getGenerateType() == GenerateType.settings) {
             builder.setUseJdbcMetaData(true);
@@ -166,7 +159,7 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
         } else if (this.getGenerateType() == GenerateType.sql) {
             builder.setUseJdbcMetaData(true);
         }
-        return this.getComparableDataSetLoader().loadDataSet(builder.build());
+        return builder.build();
     }
 
     protected String getSqlTemplate() {
@@ -177,54 +170,6 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
             case CLEAN_INSERT -> "sql/cleanInsertTemplate.txt";
             default -> "sql/deleteInsertTemplate.txt";
         };
-    }
-
-    public enum GenerateUnit {
-        record {
-            @Override
-            public Stream<Map<String, Object>> parameterStream(final Map<String, Object> map, final ComparableDataSet dataSet) {
-                return dataSet.toMap(true)
-                        .flatMap(it -> ((List<Map<String, Object>>) it.get("rows")).stream()
-                                .map(row -> {
-                                    final Map<String, Object> result = new HashMap<>(it);
-                                    result.put("row", row);
-                                    result.put("_paramMap", map);
-                                    return result;
-                                })
-                        );
-            }
-        },
-
-        table {
-            @Override
-            public Stream<Map<String, Object>> parameterStream(final Map<String, Object> map, final ComparableDataSet dataSet) {
-                try {
-                    return Stream.of(dataSet.getTableNames())
-                            .map(it -> {
-                                final Map<String, Object> param = new HashMap<>();
-                                param.put("_paramMap", map);
-                                final ComparableTable table = dataSet.getTable(it);
-                                param.put("tableName", it);
-                                param.put("primaryKeys", table.getTableMetaData().getPrimaryKeys());
-                                param.put("columns", table.getTableMetaData().getColumns());
-                                param.put("columnsExcludeKey", table.getColumnsExcludeKey());
-                                param.put("rows", table.toMap());
-                                return param;
-                            });
-                } catch (final DataSetException e) {
-                    throw new AssertionError(e);
-                }
-            }
-        },
-        dataset;
-
-        public Stream<Map<String, Object>> parameterStream(final Map<String, Object> map, final ComparableDataSet dataSet) {
-            final Map<String, Object> param = new HashMap<>();
-            param.put("_paramMap", map);
-            param.put("dataSet", dataSet.toMap(true)
-                    .collect(Collectors.toMap(it -> it.get("tableName").toString(), it -> it, (old, other) -> other, LinkedHashMap::new)));
-            return Stream.of(param);
-        }
     }
 
     public enum GenerateType {
@@ -264,8 +209,8 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
             }
 
             @Override
-            public GenerateUnit getFixedUnit() {
-                return GenerateUnit.dataset;
+            public ParameterUnit getFixedUnit() {
+                return ParameterUnit.dataset;
             }
 
             @Override
@@ -288,8 +233,8 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
             }
 
             @Override
-            public GenerateUnit getFixedUnit() {
-                return GenerateUnit.table;
+            public ParameterUnit getFixedUnit() {
+                return ParameterUnit.table;
             }
 
             @Override
@@ -322,7 +267,7 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
             return false;
         }
 
-        protected GenerateUnit getFixedUnit() {
+        protected ParameterUnit getFixedUnit() {
             return null;
         }
 

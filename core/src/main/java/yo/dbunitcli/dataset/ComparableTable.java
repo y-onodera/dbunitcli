@@ -30,13 +30,13 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
 
     @Override
     public int getRowCount() {
-        return this.rows.size();
+        return this.getRows().size();
     }
 
     @Override
     public Object getValue(final int i, final String s) {
         try {
-            return this.getValue(i, this.addSettingTableMetaData.getColumnIndex(s));
+            return this.getValue(i, this.getTableMetaData().getColumnIndex(s));
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
@@ -47,15 +47,11 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
     }
 
     public int getNumberOfColumns() {
-        return this.addSettingTableMetaData.columns().length;
+        return this.getTableMetaData().columns().length;
     }
 
     public AddSettingTableMetaData.Rows getRows() {
         return this.rows;
-    }
-
-    public List<Map<String, Object>> toMap() {
-        return this.toMap(false);
     }
 
     public List<Map<String, Object>> toMap(final boolean includeMetaData) {
@@ -64,8 +60,9 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
         final List<Map<String, Object>> rowMap = new ArrayList<>();
         if (includeMetaData) {
             withMetaDataMap.put("tableName", this.getTableMetaData().getTableName());
-            withMetaDataMap.put("columns", this.addSettingTableMetaData.getColumns());
-            withMetaDataMap.put("primaryKeys", this.addSettingTableMetaData.getPrimaryKeys());
+            withMetaDataMap.put("columns", this.getTableMetaData().getColumns());
+            withMetaDataMap.put("primaryKeys", this.getTableMetaData().getPrimaryKeys());
+            withMetaDataMap.put("columnsExcludeKey", this.getColumnsExcludeKey());
             withMetaDataMap.put("rows", rowMap);
             result.add(withMetaDataMap);
         }
@@ -134,7 +131,7 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
 
     public Object getValue(final int i, final int j) {
         final Object[] row = this.getRow(i);
-        return row[j] == null ? NO_VALUE : row[j];
+        return row[j] == null ? ITable.NO_VALUE : row[j];
     }
 
     private int getOriginalRowIndex(final int sortedIndex) {
