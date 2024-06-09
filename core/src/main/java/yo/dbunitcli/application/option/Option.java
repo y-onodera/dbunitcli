@@ -119,7 +119,7 @@ public interface Option {
         }
 
         public void putFile(final String key, final File value, final boolean required) {
-            this.put(key, value == null ? "" : value.toURI().getPath().substring(1), new Attribute(ParamType.FILE, required));
+            this.put(key, value == null ? "" : this.getSlashSeparatorPath(value), new Attribute(ParamType.FILE, required));
         }
 
         public void putDir(final String key, final File value) {
@@ -127,11 +127,11 @@ public interface Option {
         }
 
         public void putDir(final String key, final File value, final boolean required) {
-            this.put(key, value == null ? "" : value.toURI().getPath().substring(1), new Attribute(ParamType.DIR, required));
+            this.put(key, value == null ? "" : this.getSlashSeparatorPath(value), new Attribute(ParamType.DIR, required));
         }
 
         public void putFileOrDir(final String key, final File value, final boolean required) {
-            this.put(key, value == null ? "" : value.toURI().getPath().substring(1), new Attribute(ParamType.FILE_OR_DIR, required));
+            this.put(key, value == null ? "" : this.getSlashSeparatorPath(value), new Attribute(ParamType.FILE_OR_DIR, required));
         }
 
         public <T extends Enum<?>> void put(final String key, final T value, final Class<T> type) {
@@ -178,6 +178,10 @@ public interface Option {
                 return this.options.get(key).value();
             }
             return "";
+        }
+
+        private String getSlashSeparatorPath(final File value) {
+            return value.getPath().replaceAll("\\\\", "/");
         }
 
     }
