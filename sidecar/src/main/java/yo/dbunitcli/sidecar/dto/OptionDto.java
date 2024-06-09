@@ -1,4 +1,4 @@
-package yo.dbunitcli.sidecar.controller;
+package yo.dbunitcli.sidecar.dto;
 
 import io.micronaut.serde.annotation.Serdeable;
 import yo.dbunitcli.application.CommandDto;

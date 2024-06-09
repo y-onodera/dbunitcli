@@ -24,12 +24,6 @@ class ConvertControllerTest {
     Workspace workspace;
 
     @Test
-    public void testList() {
-        final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/convert/list"));
-        Assertions.assertEquals("[\"csvToXlsx.txt\"]", jsonResponse);
-    }
-
-    @Test
     public void testLoad() {
         final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/convert/load"
                 , "csvToXlsx.txt"));

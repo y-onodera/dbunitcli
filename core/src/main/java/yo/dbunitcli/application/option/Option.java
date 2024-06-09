@@ -1,5 +1,7 @@
 package yo.dbunitcli.application.option;
 
+import yo.dbunitcli.Strings;
+
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,7 +40,7 @@ public interface Option {
             final List<Map<String, Object>> elements = new ArrayList<>();
             this.options.forEach((key, value) -> {
                 final Map<String, Object> element = new LinkedHashMap<>();
-                element.put("name", key.replace("-" + this.prefix + ".", ""));
+                element.put("name", key.replace(Strings.isNotEmpty(this.prefix) ? "-" + this.prefix + "." : "-", ""));
                 element.put("attribute", value);
                 elements.add(element);
             });

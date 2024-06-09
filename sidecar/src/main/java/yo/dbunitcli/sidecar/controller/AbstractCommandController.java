@@ -13,6 +13,7 @@ import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.sidecar.domain.project.CommandType;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
+import yo.dbunitcli.sidecar.dto.OptionDto;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,16 +26,6 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
 
     public AbstractCommandController(final Workspace workspace) {
         this.workspace = workspace;
-    }
-
-    @Get(uri = "list", produces = MediaType.APPLICATION_JSON)
-    public String list() throws IOException {
-        return ObjectMapper
-                .getDefault()
-                .writeValueAsString(this.workspace.parameterFiles(this.getCommandType())
-                        .map(it -> it.toFile().getName())
-                        .toList()
-                );
     }
 
     @Post(uri = "load", produces = MediaType.APPLICATION_JSON)
