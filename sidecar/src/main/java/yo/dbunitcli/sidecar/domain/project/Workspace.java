@@ -3,6 +3,7 @@ package yo.dbunitcli.sidecar.domain.project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.sidecar.dto.ParametersDto;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +19,15 @@ public record Workspace(Path path, Options options, Resources resources) {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public ParametersDto parameterFiles() {
+        final ParametersDto result = new ParametersDto();
+        result.setConvert(this.options().parameterNames(CommandType.convert).toList());
+        result.setCompare(this.options().parameterNames(CommandType.compare).toList());
+        result.setGenerate(this.options().parameterNames(CommandType.generate).toList());
+        result.setRun(this.options().parameterNames(CommandType.run).toList());
+        return result;
     }
 
     public Stream<Path> parameterFiles(final CommandType type) {

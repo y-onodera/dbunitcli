@@ -21,6 +21,10 @@ public record Options(Map<CommandType, List<Path>> parameterFiles) {
         return this.parameterFiles().getOrDefault(type, new ArrayList<>()).stream();
     }
 
+    public Stream<String> parameterNames(final CommandType type) {
+        return this.parameterFiles(type).map(it -> it.toFile().getName().replaceAll(".txt", ""));
+    }
+
     public void save(final CommandType type, final Path path) {
         if (this.parameterFiles(type)
                 .filter(it -> it.toAbsolutePath().equals(path.toAbsolutePath()))
