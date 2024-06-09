@@ -12,14 +12,14 @@ public class ConvertOption extends CommandLineOption<ConvertDto> {
         final ConvertDto dto = new ConvertDto();
         new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, CommandLineOption.DEFAULT_COMMANDLINE_FILTER)
                 .parseArgument(args, dto);
-        new CommandLineParser("").parseArgument(args, dto.getSrcData());
+        new CommandLineParser("src").parseArgument(args, dto.getSrcData());
         new CommandLineParser("result").parseArgument(args, dto.getConvertResult());
         return dto;
     }
 
     public ConvertOption(final String resultFile, final ConvertDto dto, final Parameter param) {
         super(resultFile, dto, param);
-        this.srcData = new DataSetLoadOption("", dto.getSrcData());
+        this.srcData = new DataSetLoadOption("src", dto.getSrcData());
     }
 
     @Override

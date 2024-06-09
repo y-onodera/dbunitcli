@@ -13,7 +13,7 @@ public interface Option {
     CommandLineArgs toCommandLineArgs();
 
     enum ParamType {
-        TEXT, ENUM, FILE, DIR, FILE_OR_DIR,
+        TEXT, ENUM, FLG, FILE, DIR, FILE_OR_DIR,
     }
 
     class CommandLineArgs {
@@ -34,9 +34,15 @@ public interface Option {
 
         public Map<String, Object> toMap() {
             final Map<String, Object> result = new LinkedHashMap<>();
-            this.options.forEach((key, value) -> result.put(key
-                    .replace("-" + this.prefix + ".", "-")
-                    .replace("-", ""), value));
+            result.put("prefix", this.prefix);
+            final List<Map<String, Object>> elements = new ArrayList<>();
+            this.options.forEach((key, value) -> {
+                final Map<String, Object> element = new LinkedHashMap<>();
+                element.put("name", key.replace("-" + this.prefix + ".", ""));
+                element.put("attribute", value);
+                elements.add(element);
+            });
+            result.put("elements", elements);
             this.subComponents.forEach((key, value) -> result.put(key, value.toMap()));
             return result;
         }
@@ -93,7 +99,7 @@ public interface Option {
         }
 
         public void put(final String key, final boolean value) {
-            this.put(key, Boolean.toString(value), false);
+            this.put(key, Boolean.toString(value), new Attribute(ParamType.FLG, false));
         }
 
         public void put(final String key, final char value, final boolean required) {
@@ -113,7 +119,7 @@ public interface Option {
         }
 
         public void putFile(final String key, final File value, final boolean required) {
-            this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.FILE, required));
+            this.put(key, value == null ? "" : value.toURI().getPath().substring(1), new Attribute(ParamType.FILE, required));
         }
 
         public void putDir(final String key, final File value) {
@@ -121,11 +127,11 @@ public interface Option {
         }
 
         public void putDir(final String key, final File value, final boolean required) {
-            this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.DIR, required));
+            this.put(key, value == null ? "" : value.toURI().getPath().substring(1), new Attribute(ParamType.DIR, required));
         }
 
         public void putFileOrDir(final String key, final File value, final boolean required) {
-            this.put(key, value == null ? "" : value.getPath(), new Attribute(ParamType.FILE_OR_DIR, required));
+            this.put(key, value == null ? "" : value.toURI().getPath().substring(1), new Attribute(ParamType.FILE_OR_DIR, required));
         }
 
         public <T extends Enum<?>> void put(final String key, final T value, final Class<T> type) {
@@ -179,23 +185,12 @@ public interface Option {
     record Arg(String value, Attribute attribute) {
     }
 
-
-    class Attribute {
-
-        private final ParamType type;
-
-        private final ArrayList<String> selectOption;
-
-        private final boolean required;
+    record Attribute(ParamType type
+            , ArrayList<String> selectOption
+            , boolean required) {
 
         public Attribute(final ParamType type, final boolean required) {
             this(type, new ArrayList<>(), required);
-        }
-
-        public Attribute(final ParamType type, final ArrayList<String> selectOption, final boolean required) {
-            this.type = type;
-            this.selectOption = selectOption;
-            this.required = required;
         }
 
         public ParamType getType() {

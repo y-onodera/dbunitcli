@@ -26,9 +26,9 @@ public class RunOption extends CommandLineOption<RunDto> {
         final RunDto dto = new RunDto();
         new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, CommandLineOption.DEFAULT_COMMANDLINE_FILTER)
                 .parseArgument(args, dto);
-        new CommandLineParser("").parseArgument(args, dto.getSrcData());
-        new CommandLineParser("").parseArgument(args, dto.getJdbcOption());
-        new CommandLineParser("").parseArgument(args, dto.getTemplateOption());
+        new CommandLineParser("src").parseArgument(args, dto.getSrcData());
+        new CommandLineParser("jdbc").parseArgument(args, dto.getJdbcOption());
+        new CommandLineParser("template").parseArgument(args, dto.getTemplateOption());
         return dto;
     }
 
@@ -39,9 +39,9 @@ public class RunOption extends CommandLineOption<RunDto> {
         } else {
             this.scriptType = ScriptType.sql;
         }
-        this.templateOption = new TemplateRenderOption("", dto.getTemplateOption());
-        this.jdbcOption = new JdbcOption("", dto.getJdbcOption());
-        this.srcData = new DataSetLoadOption("", dto.getSrcData());
+        this.templateOption = new TemplateRenderOption("template", dto.getTemplateOption());
+        this.jdbcOption = new JdbcOption("jdbc", dto.getJdbcOption());
+        this.srcData = new DataSetLoadOption("src", dto.getSrcData());
     }
 
     public ScriptType getScriptType() {
