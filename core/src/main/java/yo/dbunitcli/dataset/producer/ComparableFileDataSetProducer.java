@@ -73,9 +73,10 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
 
     protected void produceFromFile(final File file) {
         final Object[] row = new Object[6];
-        row[0] = file.toPath().toAbsolutePath().normalize().toString();
+        final Path normalize = file.toPath().toAbsolutePath().normalize();
+        row[0] = normalize.toString();
         row[1] = file.getName();
-        row[2] = file.getParent();
+        row[2] = normalize.getParent().toString();
         row[3] = this.src.toPath().relativize(file.getAbsoluteFile().toPath()).toString();
         row[4] = file.length() / 1024;
         row[5] = ComparableFileDataSetProducer.DATE_FORMAT.format(file.lastModified());
