@@ -3,7 +3,7 @@ package yo.dbunitcli.dataset.converter;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
-import yo.dbunitcli.dataset.DataSetConsumerParam;
+import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.converter.db.*;
 
@@ -14,7 +14,7 @@ public class DBConverter implements IDataSetConverter {
     private final boolean exportEmptyTable;
     private final DBOperator operator;
 
-    public DBConverter(final DataSetConsumerParam param) {
+    public DBConverter(final DataSetConverterParam param) {
         this(param.databaseConnectionLoader().loadConnection()
                 , param.operation()
                 , param.exportEmptyTable());
@@ -28,39 +28,8 @@ public class DBConverter implements IDataSetConverter {
     }
 
     @Override
-    public IDataSetConverter split() {
-        try {
-            final IDataSetConverter result = new DBConverter(this.connection, this.operation, this.exportEmptyTable);
-            result.startDataSet();
-            return result;
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    @Override
     public void startDataSet() throws DataSetException {
         this.operator.startDataSet();
-    }
-
-    @Override
-    public void startTable(final ITableMetaData iTableMetaData) throws DataSetException {
-        this.operator.startTable(iTableMetaData);
-    }
-
-    @Override
-    public void reStartTable(final ITableMetaData tableMetaData, final Integer writeRows) {
-        this.operator.reStartTable(tableMetaData);
-    }
-
-    @Override
-    public void row(final Object[] objects) throws DataSetException {
-        this.operator.row(objects);
-    }
-
-    @Override
-    public void endTable() throws DataSetException {
-        this.operator.endTable();
     }
 
     @Override
@@ -69,8 +38,39 @@ public class DBConverter implements IDataSetConverter {
     }
 
     @Override
+    public void startTable(final ITableMetaData iTableMetaData) throws DataSetException {
+        this.operator.startTable(iTableMetaData);
+    }
+
+    @Override
+    public void endTable() throws DataSetException {
+        this.operator.endTable();
+    }
+
+    @Override
+    public void row(final Object[] objects) throws DataSetException {
+        this.operator.row(objects);
+    }
+
+    @Override
     public boolean isExportEmptyTable() {
         return this.exportEmptyTable;
+    }
+
+    @Override
+    public void reStartTable(final ITableMetaData tableMetaData, final Integer writeRows) {
+        this.operator.reStartTable(tableMetaData);
+    }
+
+    @Override
+    public IDataSetConverter split() {
+        try {
+            final IDataSetConverter result = new DBConverter(this.connection, this.operation, this.exportEmptyTable);
+            result.startDataSet();
+            return result;
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public enum Operation {

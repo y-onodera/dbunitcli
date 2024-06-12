@@ -5,7 +5,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import yo.dbunitcli.dataset.DataSetConsumerParam;
+import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.io.File;
@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class XlsxConverter extends XlsConverter {
 
-    public XlsxConverter(final DataSetConsumerParam param) {
+    public XlsxConverter(final DataSetConverterParam param) {
         super(param);
     }
 

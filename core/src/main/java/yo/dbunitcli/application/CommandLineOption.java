@@ -7,7 +7,7 @@ import yo.dbunitcli.application.cli.DefaultArgumentMapper;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.Option;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.DataSetConsumerParam;
+import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
@@ -49,7 +49,7 @@ public abstract class CommandLineOption<T extends CommandDto> implements Option 
         return new DataSetConverterLoader().get(this.convertResult.getParam().build());
     }
 
-    public IDataSetConverter converter(final UnaryOperator<DataSetConsumerParam.Builder> customizer) {
+    public IDataSetConverter converter(final UnaryOperator<DataSetConverterParam.Builder> customizer) {
         return new DataSetConverterLoader().get(customizer.apply(this.convertResult.getParam()).build());
     }
 

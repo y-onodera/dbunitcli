@@ -8,7 +8,7 @@ import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.datatype.TypeCastException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.DataSetConsumerParam;
+import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.io.*;
@@ -32,7 +32,7 @@ public class CsvConverter implements IDataSetConverter {
     private File file;
     private Writer writer;
 
-    public CsvConverter(final DataSetConsumerParam param) {
+    public CsvConverter(final DataSetConverterParam param) {
         this(param.resultDir().getAbsolutePath()
                 , param.resultDir()
                 , param.outputEncoding()

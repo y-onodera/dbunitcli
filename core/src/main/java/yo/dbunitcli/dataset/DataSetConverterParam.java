@@ -5,7 +5,7 @@ import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.File;
 
-public record DataSetConsumerParam(
+public record DataSetConverterParam(
         DatabaseConnectionLoader databaseConnectionLoader
         , ResultType resultType
         , DBConverter.Operation operation
@@ -19,7 +19,7 @@ public record DataSetConsumerParam(
         return new Builder();
     }
 
-    public DataSetConsumerParam(final Builder builder) {
+    public DataSetConverterParam(final Builder builder) {
         this(builder.getDatabaseConnectionLoader()
                 , builder.getResultType()
                 , builder.getOperation()
@@ -41,8 +41,8 @@ public record DataSetConsumerParam(
         private boolean exportEmptyTable;
         private String resultPath;
 
-        public DataSetConsumerParam build() {
-            return new DataSetConsumerParam(this);
+        public DataSetConverterParam build() {
+            return new DataSetConverterParam(this);
         }
 
         public DatabaseConnectionLoader getDatabaseConnectionLoader() {

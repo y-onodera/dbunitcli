@@ -2,7 +2,7 @@ package yo.dbunitcli.application.option;
 
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetConverterDto;
-import yo.dbunitcli.dataset.DataSetConsumerParam;
+import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.converter.DBConverter;
@@ -87,8 +87,8 @@ public class DataSetConverterOption implements Option {
         return result;
     }
 
-    public DataSetConsumerParam.Builder getParam() {
-        return DataSetConsumerParam.builder()
+    public DataSetConverterParam.Builder getParam() {
+        return DataSetConverterParam.builder()
                 .setResultType(this.resultType)
                 .setExportEmptyTable(this.exportEmptyTable)
                 .setResultDir(this.resultDir)

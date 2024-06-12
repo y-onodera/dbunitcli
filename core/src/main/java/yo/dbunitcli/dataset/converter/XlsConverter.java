@@ -10,7 +10,7 @@ import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.datatype.TypeCastException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.DataSetConsumerParam;
+import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.io.File;
@@ -51,7 +51,7 @@ public class XlsConverter implements IDataSetConverter {
         return XlsConverter.ZEROS.substring(0, count);
     }
 
-    public XlsConverter(final DataSetConsumerParam param) {
+    public XlsConverter(final DataSetConverterParam param) {
         this(param.resultDir()
                 , param.fileName()
                 , TableExportType.valueOf(param.excelTable())
@@ -115,12 +115,12 @@ public class XlsConverter implements IDataSetConverter {
             final Object value = objects[k];
             if (value != null) {
                 final Cell cell = row.createCell(k);
-                if (value instanceof Date) {
-                    this.setDateCell(cell, (Date) value);
-                } else if (value instanceof BigDecimal) {
-                    this.setNumericCell(cell, (BigDecimal) value, this.workbook);
-                } else if (value instanceof Long) {
-                    this.setDateCell(cell, new Date((Long) value));
+                if (value instanceof Date date) {
+                    this.setDateCell(cell, date);
+                } else if (value instanceof BigDecimal numeric) {
+                    this.setNumericCell(cell, numeric, this.workbook);
+                } else if (value instanceof Long numeric) {
+                    this.setNumericCell(cell, new BigDecimal(numeric), this.workbook);
                 } else {
                     final String stringValue = this.getString(value);
                     if (!Optional.ofNullable(stringValue).orElse("").isEmpty()) {
