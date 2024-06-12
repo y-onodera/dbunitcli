@@ -73,7 +73,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
 
     protected void produceFromFile(final File file) {
         final Object[] row = new Object[6];
-        row[0] = file.getAbsolutePath();
+        row[0] = file.toPath().toAbsolutePath().normalize().toString();
         row[1] = file.getName();
         row[2] = file.getParent();
         row[3] = this.src.toPath().relativize(file.getAbsoluteFile().toPath()).toString();
