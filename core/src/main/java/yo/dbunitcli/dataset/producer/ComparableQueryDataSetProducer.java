@@ -27,6 +27,7 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
         ComparableQueryDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
+                .filter(it -> this.getParam().tableNameFilter().predicate(this.getTableName(it)))
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableQueryDataSetProducer.LOGGER.info("produce() - end");

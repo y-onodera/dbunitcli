@@ -17,6 +17,8 @@ public class DataSetLoadOption implements Option {
     private final DataSourceType srcType;
     private final String setting;
     private final String settingEncoding;
+    private final String regTableInclude;
+    private final String regTableExclude;
     private final boolean loadData;
     private final boolean includeMetaData;
     private final ComparableDataSetParamOption dataSetParam;
@@ -44,6 +46,8 @@ public class DataSetLoadOption implements Option {
         } else {
             this.settingEncoding = System.getProperty("file.encoding");
         }
+        this.regTableInclude = dto.getRegTableInclude();
+        this.regTableExclude = dto.getRegTableExclude();
         if (Strings.isNotEmpty(dto.getLoadData())) {
             this.loadData = Boolean.parseBoolean(dto.getLoadData());
         } else {
@@ -72,6 +76,8 @@ public class DataSetLoadOption implements Option {
         result.putFileOrDir("-src", this.src, true);
         result.putFile("-setting", this.setting == null ? null : new File(this.setting));
         result.put("-settingEncoding", this.settingEncoding);
+        result.put("-regTableInclude", this.regTableInclude);
+        result.put("-regTableExclude", this.regTableExclude);
         result.put("-loadData", this.loadData);
         result.put("-includeMetaData", this.includeMetaData);
         try {
@@ -97,6 +103,8 @@ public class DataSetLoadOption implements Option {
                 .setSource(this.srcType)
                 .setSrc(this.src)
                 .setTableSeparators(this.getTableSeparators())
+                .setRegTableInclude(this.regTableInclude)
+                .setRegTableExclude(this.regTableExclude)
                 .setLoadData(this.loadData)
                 .setMapIncludeMetaData(this.includeMetaData)
         );

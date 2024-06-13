@@ -29,7 +29,7 @@ public class ComparableXlsDataSetProducerTest {
                 new ComparableXlsDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
-                                .setRegSheetInclude("multi1")
+                                .setRegTableInclude("multi1")
                                 .build()));
 
         Assertions.assertEquals(src.getPath(), actual.getSrc());
@@ -114,7 +114,7 @@ public class ComparableXlsDataSetProducerTest {
                 new ComparableXlsDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
-                                .setRegSheetExclude("multi2")
+                                .setRegTableExclude("multi2")
                                 .build()));
 
         Assertions.assertEquals(src.getPath(), actual.getSrc());

@@ -21,7 +21,6 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     private final String encoding;
     private final Pattern dataSplitPattern;
     private final ComparableDataSetParam param;
-    private final boolean loadData;
     private IDataSetConsumer consumer;
     private String[] headerNames;
     private Pattern headerSplitPattern;
@@ -38,7 +37,6 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
             this.headerSplitPattern = Pattern.compile(this.param.headerSplitPattern());
         }
         this.dataSplitPattern = Pattern.compile(this.param.dataSplitPattern());
-        this.loadData = this.param.loadData();
     }
 
     @Override
@@ -56,6 +54,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
         ComparableRegexSplitDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
+                .filter(it -> this.param.tableNameFilter().predicate(this.getTableName(it)))
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableRegexSplitDataSetProducer.LOGGER.info("produce() - end");
@@ -66,7 +65,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
             ComparableRegexSplitDataSetProducer.LOGGER.info("produce - start fileName={}", aFile);
             if (this.headerNames != null) {
                 this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
-                if (!this.loadData) {
+                if (!this.param.loadData()) {
                     this.consumer.endTable();
                     return;
                 }
@@ -75,7 +74,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
             for (final String s : Files.readAllLines(aFile.toPath(), Charset.forName(this.getEncoding()))) {
                 if (lineNum == 0 && this.headerNames == null) {
                     this.consumer.startTable(this.createMetaData(aFile, this.headerSplitPattern.split(s)));
-                    if (!this.loadData) {
+                    if (!this.getParam().loadData()) {
                         break;
                     }
                 } else {

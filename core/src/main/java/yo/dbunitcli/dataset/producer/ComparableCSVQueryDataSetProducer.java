@@ -23,14 +23,12 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     private final File[] src;
     private final Parameter parameter;
     private final ComparableDataSetParam param;
-    private final boolean loadData;
     private IDataSetConsumer consumer;
 
     public ComparableCSVQueryDataSetProducer(final ComparableDataSetParam param, final Parameter parameter) {
         this.param = param;
         this.src = this.param.getSrcFiles();
         this.parameter = parameter;
-        this.loadData = this.param.loadData();
     }
 
     @Override
@@ -56,6 +54,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
         ComparableCSVQueryDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
+                .filter(it -> this.getParam().tableNameFilter().predicate(this.getTableName(it)))
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableCSVQueryDataSetProducer.LOGGER.info("produce() - end");
@@ -75,7 +74,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
                     columns[i - 1] = new Column(metaData.getColumnName(i).trim(), DataType.UNKNOWN);
                 }
                 this.consumer.startTable(this.createMetaData(aFile, columns));
-                if (this.loadData) {
+                if (this.param.loadData()) {
                     int readRows = 0;
                     while (rst.next()) {
                         final Object[] row = new Object[metaData.getColumnCount()];

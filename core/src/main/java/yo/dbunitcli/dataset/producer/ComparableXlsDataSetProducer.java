@@ -53,7 +53,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
         super(new DefaultConsumer(), param.xlsxSchema(), param.loadData());
         this.param = param;
         this.src = this.param.getSrcFiles();
-        this.sheetNameFilter = param.sheetNameFilter();
+        this.sheetNameFilter = param.tableNameFilter();
     }
 
     @Override

@@ -43,7 +43,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     public ComparableXlsxDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrcFiles();
-        this.sheetNameFilter = this.param.sheetNameFilter();
+        this.sheetNameFilter = this.param.tableNameFilter();
         this.schema = this.param.xlsxSchema();
         this.loadData = this.param.loadData();
     }

@@ -20,10 +20,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
     private final File[] src;
     private final ComparableDataSetParam param;
-    private final String encoding;
     private final String[] headerNames;
-    private final boolean loadData;
-    private final char delimiter;
     private IDataSetConsumer consumer;
     private int processRow;
     private Pipeline pipeline;
@@ -31,15 +28,12 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     public ComparableCsvDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrcFiles();
-        this.encoding = this.param.encoding();
-        this.loadData = this.param.loadData();
         final String headerName = this.param.headerName();
         if (!Optional.ofNullable(headerName).orElse("").isEmpty()) {
             this.headerNames = headerName.split(",");
         } else {
             this.headerNames = null;
         }
-        this.delimiter = param.delimiter();
         this.resetThePipeline();
     }
 
@@ -58,6 +52,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         ComparableCsvDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
+                .filter(it -> this.getParam().tableNameFilter().predicate(this.getTableName(it)))
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableCsvDataSetProducer.LOGGER.info("produce() - end");
@@ -72,7 +67,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
 
     protected void parse(final File file) {
         try (final FileInputStream fi = new FileInputStream(file)) {
-            final Reader reader = new BufferedReader(new InputStreamReader(fi, this.encoding));
+            final Reader reader = new BufferedReader(new InputStreamReader(fi, this.param.encoding()));
             final LineNumberReader lineNumberReader = new LineNumberReader(reader);
             String[] headerName = this.headerNames;
             if (headerName == null) {
@@ -80,7 +75,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             }
             this.consumer.startTable(this.createMetaData(file, headerName));
             this.processRow = 0;
-            if (this.loadData) {
+            if (this.param.loadData()) {
                 this.parseTheData(headerName, lineNumberReader);
             }
             this.consumer.endTable();
@@ -169,7 +164,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             @Override
             public void putFront(final PipelineComponent component) {
                 if (component instanceof WhitespacesHandler) {
-                    super.putFront(IgnoreDelimiterWhitespacesHandler.GET(ComparableCsvDataSetProducer.this.delimiter, component));
+                    super.putFront(IgnoreDelimiterWhitespacesHandler.GET(ComparableCsvDataSetProducer.this.param.delimiter(), component));
                 } else if (component instanceof EnforceHandler) {
                     super.putFront(LightEnforceHandler.ENFORCE((EnforceHandler) component));
                 } else {
@@ -177,7 +172,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
                 }
             }
         };
-        this.pipeline.getPipelineConfig().setSeparatorChar(this.delimiter);
+        this.pipeline.getPipelineConfig().setSeparatorChar(this.param.delimiter());
         this.pipeline.putFront(SeparatorHandler.ENDPIECE());
         this.pipeline.putFront(EscapeHandler.ACCEPT());
         this.pipeline.putFront(IsAlnumHandler.QUOTE());

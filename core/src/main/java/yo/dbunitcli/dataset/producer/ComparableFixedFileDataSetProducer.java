@@ -20,22 +20,18 @@ import java.util.stream.Collectors;
 public class ComparableFixedFileDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableFixedFileDataSetProducer.class);
     private final File[] src;
-    private final String encoding;
     private final String[] headerNames;
     private final List<Integer> columnLengths;
     private final ComparableDataSetParam param;
-    private final boolean loadData;
     private IDataSetConsumer consumer;
 
     public ComparableFixedFileDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrcFiles();
-        this.encoding = this.param.encoding();
         this.headerNames = this.param.headerName().split(",");
         this.columnLengths = Arrays.stream(this.param.fixedLength().split(","))
                 .map(Integer::valueOf)
                 .collect(Collectors.toCollection(ArrayList::new));
-        this.loadData = this.param.loadData();
     }
 
     @Override
@@ -53,6 +49,7 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
         ComparableFixedFileDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
+                .filter(it -> this.getParam().tableNameFilter().predicate(this.getTableName(it)))
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableFixedFileDataSetProducer.LOGGER.info("produce() - end");
@@ -62,7 +59,7 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
         try {
             ComparableFixedFileDataSetProducer.LOGGER.info("produce - start fileName={}", aFile);
             this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
-            if (this.loadData) {
+            if (this.param.loadData()) {
                 int rows = 0;
                 for (final String s : Files.readAllLines(aFile.toPath(), Charset.forName(this.getEncoding()))) {
                     this.consumer.row(this.split(s));
@@ -79,18 +76,18 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
 
     protected Object[] split(final String s) throws UnsupportedEncodingException {
         final Object[] result = new Object[this.columnLengths.size()];
-        final byte[] bytes = s.getBytes(this.encoding);
+        final byte[] bytes = s.getBytes(this.getEncoding());
         int from = 0;
         int to = 0;
         for (int index = 0, max = this.columnLengths.size(); index < max; index++) {
             to = to + this.columnLengths.get(index);
-            result[index] = new String(Arrays.copyOfRange(bytes, from, to), this.encoding);
+            result[index] = new String(Arrays.copyOfRange(bytes, from, to), this.getEncoding());
             from = from + this.columnLengths.get(index);
         }
         return result;
     }
 
-    public String getEncoding() {
-        return this.encoding;
+    protected String getEncoding() {
+        return this.param.encoding();
     }
 }

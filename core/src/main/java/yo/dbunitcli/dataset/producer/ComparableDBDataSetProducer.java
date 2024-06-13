@@ -21,9 +21,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDBDataSetProducer.class);
     protected final IDatabaseConnection connection;
     protected final File[] src;
-    protected final String encoding;
     private final ComparableDataSetParam param;
-    private final boolean loadData;
     protected IDataSetConsumer consumer;
     private IDataSet databaseDataSet;
 
@@ -35,8 +33,6 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         } else {
             this.src = new File[]{this.getParam().src()};
         }
-        this.encoding = this.param.encoding();
-        this.loadData = this.param.loadData();
     }
 
     @Override
@@ -57,13 +53,14 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         Stream.of(this.src)
                 .map(it -> {
                     try {
-                        return Files.readAllLines(it.toPath(), Charset.forName(this.encoding));
+                        return Files.readAllLines(it.toPath(), Charset.forName(this.param.encoding()));
                     } catch (final IOException e) {
                         throw new AssertionError(e);
                     }
                 })
                 .flatMap(Collection::stream)
                 .distinct()
+                .filter(it -> this.getParam().tableNameFilter().predicate(it))
                 .forEach(this::executeTable);
         this.consumer.endDataSet();
         ComparableDBDataSetProducer.LOGGER.info("produce() - end");
@@ -87,7 +84,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         try {
             ComparableDBDataSetProducer.LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
             this.consumer.startTable(table.getTableMetaData());
-            if (this.loadData) {
+            if (this.param.loadData()) {
                 final Column[] columns = table.getTableMetaData().getColumns();
                 int row = 0;
                 for (; true; row++) {

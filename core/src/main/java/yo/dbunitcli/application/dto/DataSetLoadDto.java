@@ -28,10 +28,10 @@ public class DataSetLoadDto implements CompositeDto {
     private String encoding;
     @CommandLine.Option(names = "-xlsxSchema", description = "schema use read xlsx(zls)")
     private String xlsxSchemaSource;
-    @CommandLine.Option(names = "-regSheetInclude", description = "regex to include xlsx(zls) sheet")
-    private String regSheetInclude;
-    @CommandLine.Option(names = "-regSheetExclude", description = "regex to exclude xlsx(zls) sheet")
-    private String regSheetExclude;
+    @CommandLine.Option(names = "-regTableInclude", description = "regex to include table name")
+    private String regTableInclude;
+    @CommandLine.Option(names = "-regTableExclude", description = "regex to exclude table name")
+    private String regTableExclude;
     @CommandLine.Option(names = "-extension", description = "target extension")
     private String extension;
     @CommandLine.Option(names = "-fixedLength", description = "comma separate column Lengths")
@@ -216,19 +216,19 @@ public class DataSetLoadDto implements CompositeDto {
         this.templateRender = templateRender;
     }
 
-    public String getRegSheetInclude() {
-        return this.regSheetInclude;
+    public String getRegTableInclude() {
+        return this.regTableInclude;
     }
 
-    public void setRegSheetInclude(final String regSheetInclude) {
-        this.regSheetInclude = regSheetInclude;
+    public void setRegTableInclude(final String regTableInclude) {
+        this.regTableInclude = regTableInclude;
     }
 
-    public String getRegSheetExclude() {
-        return this.regSheetExclude;
+    public String getRegTableExclude() {
+        return this.regTableExclude;
     }
 
-    public void setRegSheetExclude(final String regSheetExclude) {
-        this.regSheetExclude = regSheetExclude;
+    public void setRegTableExclude(final String regTableExclude) {
+        this.regTableExclude = regTableExclude;
     }
 }

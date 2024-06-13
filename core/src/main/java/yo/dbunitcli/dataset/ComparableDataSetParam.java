@@ -26,7 +26,7 @@ public record ComparableDataSetParam(
         , NameFilter srcPathFilter
         , boolean mapIncludeMetaData
         , XlsxSchema xlsxSchema
-        , NameFilter sheetNameFilter
+        , NameFilter tableNameFilter
         , boolean useJdbcMetaData
         , boolean loadData
         , String headerName
@@ -53,7 +53,7 @@ public record ComparableDataSetParam(
                 , builder.getSrcPathFilter()
                 , builder.isMapIncludeMetaData()
                 , builder.getXlsxSchema()
-                , builder.getSheetNameFilter()
+                , builder.getTableNameFilter()
                 , builder.isUseJdbcMetaData()
                 , builder.isLoadData()
                 , builder.getHeaderName()
@@ -111,8 +111,8 @@ public record ComparableDataSetParam(
         private IDataSetConverter converter;
         private char delimiter = ',';
         private boolean recursive = false;
-        private String regSheetInclude;
-        private String regSheetExclude;
+        private String regTableInclude;
+        private String regTableExclude;
 
         public Builder setSrc(final File src) {
             this.src = src;
@@ -158,8 +158,8 @@ public record ComparableDataSetParam(
             return this.xlsxSchema;
         }
 
-        public NameFilter getSheetNameFilter() {
-            return new NameFilter(this.regSheetInclude, this.regSheetExclude);
+        public NameFilter getTableNameFilter() {
+            return new NameFilter(this.regTableInclude, this.regTableExclude);
         }
 
         public boolean isUseJdbcMetaData() {
@@ -314,22 +314,22 @@ public record ComparableDataSetParam(
             return new ComparableDataSetParam(this);
         }
 
-        public Builder setRegSheetInclude(final String regSheetInclude) {
-            this.regSheetInclude = regSheetInclude;
+        public Builder setRegTableInclude(final String regTableInclude) {
+            this.regTableInclude = regTableInclude;
             return this;
         }
 
-        public String getRegSheetInclude() {
-            return this.regSheetInclude;
+        public String getRegTableInclude() {
+            return this.regTableInclude;
         }
 
-        public Builder setRegSheetExclude(final String regSheetExclude) {
-            this.regSheetExclude = regSheetExclude;
+        public Builder setRegTableExclude(final String regTableExclude) {
+            this.regTableExclude = regTableExclude;
             return this;
         }
 
-        public String getRegSheetExclude() {
-            return this.regSheetExclude;
+        public String getRegTableExclude() {
+            return this.regTableExclude;
         }
 
     }
