@@ -198,10 +198,10 @@ public class XlsConverter implements IDataSetConverter {
             final DataFormat df = workbook.createDataFormat();
             final short format;
             if (value.scale() <= 0) {
-                format = df.getFormat("###0");
+                format = df.getFormat("0");
             } else {
                 final String zeros = XlsConverter.createZeros(value.scale());
-                format = df.getFormat("####." + zeros);
+                format = df.getFormat("0." + zeros);
             }
             cell.setCellStyle(this.getCellStyle(workbook, format));
         } else {
