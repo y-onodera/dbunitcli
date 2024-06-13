@@ -5,6 +5,7 @@ import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.CompareKeys;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +14,7 @@ import java.util.stream.Stream;
 
 public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler {
     private static final String COLUMN_NAME_ROW_INDEX = "$ROW_INDEX";
-    private static final Column COLUMN_ROW_INDEX = new Column(COLUMN_NAME_ROW_INDEX, DataType.NUMERIC);
+    private static final Column COLUMN_ROW_INDEX = new Column(DiffWriteRowCompareResultHandler.COLUMN_NAME_ROW_INDEX, DataType.NUMERIC);
     private final TableCompare tableCompare;
     private final DiffTable modifyDiffTable;
     private final DefaultTable deleteDiffTable;
@@ -30,7 +31,7 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
     public void handleModify(final Object[] oldRow, final Object[] newRow, final CompareKeys key) {
         final List<Integer> targetRows = new ArrayList<>();
         IntStream.range(0, oldRow.length).forEach(columnIndex -> {
-            if (!Objects.equals(oldRow[columnIndex], newRow[columnIndex])) {
+            if (!Objects.equals(this.toString(oldRow[columnIndex]), this.toString(newRow[columnIndex]))) {
                 if (targetRows.size() == 0) {
                     targetRows.addAll(this.modifyDiffTable.addRow(key, columnIndex, oldRow, newRow));
                 } else {
@@ -87,11 +88,11 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
     }
 
     protected void writeDeleteRowsTable() {
-        this.writeTable(this.deleteDiffTable, new Column[]{COLUMN_ROW_INDEX});
+        this.writeTable(this.deleteDiffTable, new Column[]{DiffWriteRowCompareResultHandler.COLUMN_ROW_INDEX});
     }
 
     protected void writeAddRowsTable() {
-        this.writeTable(this.addDiffTable, new Column[]{COLUMN_ROW_INDEX});
+        this.writeTable(this.addDiffTable, new Column[]{DiffWriteRowCompareResultHandler.COLUMN_ROW_INDEX});
     }
 
     protected void writeTable(final DefaultTable diffTable, final Column[] columns) {
@@ -109,12 +110,21 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
     protected DefaultTable toITable(final ComparableTable oldTable, final String aTableName) {
         try {
             final ITableMetaData origin = oldTable.getTableMetaData();
-            final Column[] columns = Stream.concat(Stream.of(COLUMN_ROW_INDEX), Stream.of(origin.getColumns()))
+            final Column[] columns = Stream.concat(Stream.of(DiffWriteRowCompareResultHandler.COLUMN_ROW_INDEX), Stream.of(origin.getColumns()))
                     .toArray(Column[]::new);
-            final DefaultTableMetaData metaData = new DefaultTableMetaData(origin.getTableName() + aTableName, columns, new String[]{COLUMN_NAME_ROW_INDEX});
+            final DefaultTableMetaData metaData = new DefaultTableMetaData(origin.getTableName() + aTableName, columns, new String[]{DiffWriteRowCompareResultHandler.COLUMN_NAME_ROW_INDEX});
             return new DefaultTable(metaData);
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
+    }
+
+    protected String toString(final Object value) {
+        if (value == null) {
+            return null;
+        } else if (value instanceof BigDecimal num) {
+            return num.toPlainString();
+        }
+        return value.toString();
     }
 }
