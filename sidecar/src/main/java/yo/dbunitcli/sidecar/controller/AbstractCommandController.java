@@ -28,6 +28,33 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
         this.workspace = workspace;
     }
 
+    @Get(uri = "add", produces = MediaType.APPLICATION_JSON)
+    public String add() throws IOException {
+        this.workspace.save(this.getCommandType()
+                , "new item"
+                , this.getCommand().parseOption(new String[]{}).toArgs(false)
+        );
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(this.workspace.parameterFiles());
+    }
+
+    @Post(uri = "delete", produces = MediaType.APPLICATION_JSON)
+    public String delete(@Body final String parameterFile) throws IOException {
+        this.workspace.delete(this.getCommandType(), parameterFile);
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(this.workspace.parameterFiles());
+    }
+
+    @Post(uri = "rename", produces = MediaType.APPLICATION_JSON)
+    public String rename(@Body final String oldName, final String newName) throws IOException {
+        this.workspace.rename(this.getCommandType(), oldName, newName);
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(this.workspace.parameterFiles());
+    }
+
     @Post(uri = "load", produces = MediaType.APPLICATION_JSON)
     public String load(@Body final String parameterFile) {
         return this.workspace.parameterFiles(this.getCommandType())

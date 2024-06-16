@@ -13,7 +13,7 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 
 @MicronautTest
 @Property(name = "yo.dbunit.cli.sidecar.workspace", value = "src/test/resources/workspace/sample")
-class ExistParameterControllerTest {
+class ParameterListControllerTest {
     @Inject
     EmbeddedServer server;
     @Inject

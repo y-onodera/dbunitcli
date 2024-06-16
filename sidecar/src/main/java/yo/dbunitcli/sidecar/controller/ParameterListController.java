@@ -9,10 +9,10 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import java.io.IOException;
 
 @Controller("/parameter")
-public class ExistParameterController {
+public class ParameterListController {
     private final Workspace workspace;
 
-    public ExistParameterController(final Workspace workspace) {
+    public ParameterListController(final Workspace workspace) {
         this.workspace = workspace;
     }
 
