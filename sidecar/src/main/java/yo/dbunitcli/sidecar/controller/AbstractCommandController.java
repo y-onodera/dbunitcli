@@ -36,29 +36,29 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
         );
         return ObjectMapper
                 .getDefault()
-                .writeValueAsString(this.workspace.parameterFiles());
+                .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
     }
 
     @Post(uri = "delete", produces = MediaType.APPLICATION_JSON)
-    public String delete(@Body final String parameterFile) throws IOException {
-        this.workspace.delete(this.getCommandType(), parameterFile);
+    public String delete(@Body final OptionDto<DTO> input) throws IOException {
+        this.workspace.delete(this.getCommandType(), input.getName());
         return ObjectMapper
                 .getDefault()
-                .writeValueAsString(this.workspace.parameterFiles());
+                .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
     }
 
     @Post(uri = "rename", produces = MediaType.APPLICATION_JSON)
-    public String rename(@Body final String oldName, final String newName) throws IOException {
-        this.workspace.rename(this.getCommandType(), oldName, newName);
+    public String rename(@Body final OptionDto<DTO> input) throws IOException {
+        this.workspace.rename(this.getCommandType(), input.getOldName(), input.getNewName());
         return ObjectMapper
                 .getDefault()
-                .writeValueAsString(this.workspace.parameterFiles());
+                .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
     }
 
     @Post(uri = "load", produces = MediaType.APPLICATION_JSON)
-    public String load(@Body final String parameterFile) {
+    public String load(@Body final OptionDto<DTO> input) {
         return this.workspace.parameterFiles(this.getCommandType())
-                .filter(it -> it.toFile().getName().equals(parameterFile))
+                .filter(it -> it.toFile().getName().equals(input.getName() + ".txt"))
                 .findFirst()
                 .map(target -> {
                     try {

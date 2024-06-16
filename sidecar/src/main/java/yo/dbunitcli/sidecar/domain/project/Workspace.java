@@ -26,6 +26,10 @@ public record Workspace(Path path, Options options, Resources resources) {
         return result;
     }
 
+    public Stream<String> parameterNames(final CommandType type) {
+        return this.options().parameterNames(type);
+    }
+
     public Stream<Path> parameterFiles(final CommandType type) {
         return this.options().parameterFiles(type);
     }
