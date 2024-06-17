@@ -41,7 +41,8 @@ public interface Option {
             this.options.forEach((key, value) -> {
                 final Map<String, Object> element = new LinkedHashMap<>();
                 element.put("name", key.replace(Strings.isNotEmpty(this.prefix) ? "-" + this.prefix + "." : "-", ""));
-                element.put("attribute", value);
+                element.put("attribute", value.attribute());
+                element.put("value", value.value());
                 elements.add(element);
             });
             result.put("elements", elements);
