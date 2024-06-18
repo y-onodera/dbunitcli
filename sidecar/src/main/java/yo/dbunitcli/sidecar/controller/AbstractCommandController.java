@@ -17,6 +17,9 @@ import yo.dbunitcli.sidecar.dto.OptionDto;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 public abstract class AbstractCommandController<DTO extends CommandDto, OPTION extends CommandLineOption<DTO>, T extends Command<DTO, OPTION>> {
 
@@ -30,8 +33,16 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
 
     @Get(uri = "add", produces = MediaType.APPLICATION_JSON)
     public String add() throws IOException {
+        final List<String> alreadyExists = this.workspace.parameterNames(this.getCommandType())
+                .filter(it -> Pattern.compile("new item(\\([0-9]+\\))*").matcher(it).matches())
+                .toList();
+        final String name = IntStream.iterate(1, it -> it + 1)
+                .filter(it -> !alreadyExists.contains("new item(%s)".formatted(it)))
+                .mapToObj("new item(%s)"::formatted)
+                .findFirst()
+                .get();
         this.workspace.save(this.getCommandType()
-                , "new item"
+                , alreadyExists.size() == 0 ? "new item" : name
                 , this.getCommand().parseOption(new String[]{}).toArgs(false)
         );
         return ObjectMapper
