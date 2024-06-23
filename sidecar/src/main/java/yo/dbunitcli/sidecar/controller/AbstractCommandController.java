@@ -3,6 +3,7 @@ package yo.dbunitcli.sidecar.controller;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
@@ -105,6 +106,17 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                         .parseOption(input)
                         .toCommandLineArgs()
                         .toMap());
+    }
+
+    @Post(uri = "refresh/{name}", produces = MediaType.APPLICATION_JSON)
+    public String refreshComponent(@PathVariable final String name, @Body final DTO input) throws IOException {
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(this.getCommand()
+                        .parseOption(input)
+                        .toCommandLineArgs()
+                        .toMap()
+                        .get(name));
     }
 
     @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
