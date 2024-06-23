@@ -23,6 +23,7 @@ public record Workspace(Path path, Options options, Resources resources) {
         result.setCompare(this.options().parameterNames(CommandType.compare).toList());
         result.setGenerate(this.options().parameterNames(CommandType.generate).toList());
         result.setRun(this.options().parameterNames(CommandType.run).toList());
+        result.setParameterize(this.options().parameterNames(CommandType.parameterize).toList());
         return result;
     }
 
@@ -51,7 +52,7 @@ public record Workspace(Path path, Options options, Resources resources) {
         private String path;
 
         public String getPath() {
-            return this.path;
+            return Strings.isEmpty(this.path) ? "." : this.path;
         }
 
         public Builder setPath(final String path) {
@@ -60,7 +61,7 @@ public record Workspace(Path path, Options options, Resources resources) {
         }
 
         public Workspace build() {
-            final File baseDir = new File(Strings.isEmpty(this.path) ? "." : this.path);
+            final File baseDir = new File(this.getPath());
             final Resources.Builder resources = Resources.builder();
             final Options.Builder options = Options.builder();
             if (baseDir.exists() || baseDir.mkdirs()) {

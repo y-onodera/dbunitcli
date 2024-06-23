@@ -18,6 +18,8 @@ public class ParametersDto {
 
     private List<String> run = new ArrayList<>();
 
+    private List<String> parameterize = new ArrayList<>();
+
     public List<String> getConvert() {
         return this.convert;
     }
@@ -48,5 +50,13 @@ public class ParametersDto {
 
     public void setRun(final List<String> run) {
         this.run = run;
+    }
+
+    public List<String> getParameterize() {
+        return this.parameterize;
+    }
+
+    public void setParameterize(final List<String> parameterize) {
+        this.parameterize = parameterize;
     }
 }

@@ -26,7 +26,7 @@ class ParameterListControllerTest {
     @Test
     public void testList() {
         final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/parameter/list"));
-        Assertions.assertEquals("{\"convert\":[\"csvToXlsx\"],\"compare\":[],\"generate\":[],\"run\":[]}", jsonResponse);
+        Assertions.assertEquals("{\"convert\":[\"csvToXlsx\"],\"compare\":[],\"generate\":[],\"run\":[],\"parameterize\":[]}", jsonResponse);
     }
 
 }
