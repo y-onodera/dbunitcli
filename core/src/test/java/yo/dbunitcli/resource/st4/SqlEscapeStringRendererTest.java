@@ -63,9 +63,21 @@ class SqlEscapeStringRendererTest {
     }
 
     @Test
+    void testToStringCamelToKebab() {
+        assertEquals("camel-case", this.target.toString((Object) "camelCase", "camelToKebab", Locale.JAPANESE));
+        assertEquals("camelcase", this.target.toString((Object) "camelcase", "camelToKebab", Locale.JAPANESE));
+    }
+
+    @Test
     void testToStringCamelToUpperSnake() {
         assertEquals("CAMEL_CASE", this.target.toString((Object) "camelCase", "camelToUpperSnake", Locale.JAPANESE));
         assertEquals("CAMELCASE", this.target.toString((Object) "camelcase", "camelToUpperSnake", Locale.JAPANESE));
+    }
+
+    @Test
+    void testToStringCamelToUpperKebab() {
+        assertEquals("CAMEL-CASE", this.target.toString((Object) "camelCase", "camelToUpperKebab", Locale.JAPANESE));
+        assertEquals("CAMELCASE", this.target.toString((Object) "camelcase", "camelToUpperKebab", Locale.JAPANESE));
     }
 
     @Test
@@ -77,11 +89,27 @@ class SqlEscapeStringRendererTest {
     }
 
     @Test
+    void testToStringUpperKebabToCamel() {
+        assertEquals("camelCase", this.target.toString((Object) "CAMEL-CASE", "kebabToCamel", Locale.JAPANESE));
+        assertEquals("camelCase", this.target.toString((Object) "camel-case", "kebabToCamel", Locale.JAPANESE));
+        assertEquals("camelcase", this.target.toString((Object) "camelcase", "kebabToCamel", Locale.JAPANESE));
+        assertEquals("camelcase", this.target.toString((Object) "CAMELCASE", "kebabToCamel", Locale.JAPANESE));
+    }
+
+    @Test
     void testToStringUpperSnakeToUpperCamel() {
         assertEquals("CamelCase", this.target.toString((Object) "CAMEL_CASE", "snakeToUpperCamel", Locale.JAPANESE));
         assertEquals("CamelCase", this.target.toString((Object) "camel_case", "snakeToUpperCamel", Locale.JAPANESE));
         assertEquals("Camelcase", this.target.toString((Object) "camelcase", "snakeToUpperCamel", Locale.JAPANESE));
         assertEquals("Camelcase", this.target.toString((Object) "CAMELCASE", "snakeToUpperCamel", Locale.JAPANESE));
+    }
+
+    @Test
+    void testToStringUpperKebabToUpperCamel() {
+        assertEquals("CamelCase", this.target.toString((Object) "CAMEL-CASE", "kebabToUpperCamel", Locale.JAPANESE));
+        assertEquals("CamelCase", this.target.toString((Object) "camel-case", "kebabToUpperCamel", Locale.JAPANESE));
+        assertEquals("Camelcase", this.target.toString((Object) "camelcase", "kebabToUpperCamel", Locale.JAPANESE));
+        assertEquals("Camelcase", this.target.toString((Object) "CAMELCASE", "kebabToUpperCamel", Locale.JAPANESE));
     }
 
     private String readString(final String fileName) throws IOException {

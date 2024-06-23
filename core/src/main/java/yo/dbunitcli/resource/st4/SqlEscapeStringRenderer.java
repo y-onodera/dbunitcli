@@ -1,11 +1,11 @@
 package yo.dbunitcli.resource.st4;
 
 import org.stringtemplate.v4.StringRenderer;
+import yo.dbunitcli.Strings;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.function.Function;
 
 public class SqlEscapeStringRenderer extends StringRenderer {
 
@@ -14,13 +14,21 @@ public class SqlEscapeStringRenderer extends StringRenderer {
         if (formatString == null) {
             return o.toString();
         } else if (formatString.equals("camelToSnake")) {
-            return this.camelToSnake(o.toString(), Character::toLowerCase);
+            return Strings.camelToSnake(o.toString(), Character::toLowerCase);
         } else if (formatString.equals("camelToUpperSnake")) {
-            return this.camelToSnake(o.toString(), Character::toUpperCase);
+            return Strings.camelToSnake(o.toString(), Character::toUpperCase);
         } else if (formatString.equals("snakeToCamel")) {
-            return this.snakeToCamel(o.toString(), Character::toLowerCase);
+            return Strings.snakeToCamel(o.toString(), Character::toLowerCase);
         } else if (formatString.equals("snakeToUpperCamel")) {
-            return this.snakeToCamel(o.toString(), Character::toUpperCase);
+            return Strings.snakeToCamel(o.toString(), Character::toUpperCase);
+        } else if (formatString.equals("camelToKebab")) {
+            return Strings.camelToKebab(o.toString(), Character::toLowerCase);
+        } else if (formatString.equals("camelToUpperKebab")) {
+            return Strings.camelToKebab(o.toString(), Character::toUpperCase);
+        } else if (formatString.equals("kebabToCamel")) {
+            return Strings.kebabToCamel(o.toString(), Character::toLowerCase);
+        } else if (formatString.equals("kebabToUpperCamel")) {
+            return Strings.kebabToCamel(o.toString(), Character::toUpperCase);
         } else if (formatString.equals("escapeSql")) {
             return this.toClob(o.toString().replace("'", "''"));
         } else if (formatString.equals("jexlExp")) {
@@ -66,35 +74,4 @@ public class SqlEscapeStringRenderer extends StringRenderer {
         return result.toString();
     }
 
-    private String camelToSnake(final String camel, final Function<Character, Character> caseFormat) {
-        if (camel.isEmpty()) {
-            return "";
-        }
-        final StringBuilder sb = new StringBuilder(camel.length() + camel.length());
-        for (int i = 0; i < camel.length(); i++) {
-            final char c = camel.charAt(i);
-            if (Character.isUpperCase(c)) {
-                sb.append(sb.length() != 0 ? '_' : "").append(caseFormat.apply(c));
-            } else {
-                sb.append(caseFormat.apply(c));
-            }
-        }
-        return sb.toString();
-    }
-
-    private String snakeToCamel(final String snake, final Function<Character, Character> caseFormat) {
-        if (snake.isEmpty()) {
-            return "";
-        }
-        final StringBuilder sb = new StringBuilder(snake.length() + snake.length());
-        for (int i = 0; i < snake.length(); i++) {
-            final char c = snake.charAt(i);
-            if (c == '_') {
-                sb.append((i + 1) < snake.length() ? Character.toUpperCase(snake.charAt(++i)) : "");
-            } else {
-                sb.append(sb.length() == 0 ? caseFormat.apply(c) : Character.toLowerCase(c));
-            }
-        }
-        return sb.toString();
-    }
 }
