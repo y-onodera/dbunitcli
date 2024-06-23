@@ -27,13 +27,6 @@ public class CompareTest {
     }
 
     @Test
-    public void test() {
-        System.out.println("new item(%s)".formatted(1));
-        System.out.println("new item(1)".matches("new item(\\([0-9]+\\))*"));
-        System.out.println("new item(99)".matches("new item(\\([0-9]+\\))*"));
-    }
-
-    @Test
     public void testResultXlsx() throws Exception {
         Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffXlsx.txt"});
     }
