@@ -106,7 +106,9 @@ public record Options(File baseDir, Map<CommandType, List<Path>> parameterFiles)
                 this.addParameterFiles(CommandType.compare)
                         .addParameterFiles(CommandType.convert)
                         .addParameterFiles(CommandType.generate)
-                        .addParameterFiles(CommandType.run);
+                        .addParameterFiles(CommandType.run)
+                        .addParameterFiles(CommandType.parameterize)
+                ;
             }
         }
 
