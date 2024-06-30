@@ -51,6 +51,26 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                 .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
     }
 
+    @Post(uri = "copy", produces = MediaType.APPLICATION_JSON)
+    public String copy(@Body final OptionDto<DTO> input) throws IOException {
+        this.workspace.parameterFiles(this.getCommandType())
+                .filter(it -> it.toFile().getName().equals(input.getName() + ".txt"))
+                .findFirst()
+                .ifPresent(target -> {
+                    try {
+                        this.workspace.save(this.getCommandType()
+                                , target.getFileName().toString().replace(".txt", "") + "(1)"
+                                , Files.readAllLines(target).toArray(new String[0])
+                        );
+                    } catch (final IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                });
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
+    }
+
     @Post(uri = "delete", produces = MediaType.APPLICATION_JSON)
     public String delete(@Body final OptionDto<DTO> input) throws IOException {
         this.workspace.delete(this.getCommandType(), input.getName());
