@@ -77,7 +77,7 @@
         "pattern": "\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
       },
       {
-        "pattern": "\\Qlogback-test.scmo\\E"
+        "pattern": "\\application.properties\\E"
       },
       {
         "pattern": "\\Qlogback.scmo\\E"
