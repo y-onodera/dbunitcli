@@ -2,6 +2,7 @@ package yo.dbunitcli.application;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.Strings;
 import yo.dbunitcli.dataset.Parameter;
 
 import java.io.File;
@@ -10,6 +11,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO>> {
 
@@ -32,32 +34,37 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
         this.exec(this.parseOption(args, param));
     }
 
-    void exec(T options);
-
-    default DTO createDto() {
-        return this.createDto(this.parseOption(new String[]{}).toArgs(true));
+    default void exec(final String resultFile, final String[] args, final Parameter param) {
+        this.exec(this.parseOption(resultFile, args, param));
     }
+
+    void exec(T options);
 
     DTO createDto(String[] args);
 
     T getOptions(String resultFile, DTO dto, final Parameter param);
-
-    default T parseOption(final DTO dto) {
-        return this.getOptions("result", dto, Parameter.NONE);
-    }
 
     default T parseOption(final String[] args) {
         return this.parseOption(args, Parameter.NONE);
     }
 
     default T parseOption(final String[] args, final Parameter param) {
+        return this.parseOption(null, args, param);
+    }
+
+    default T parseOption(final String result, final String[] args, final Parameter param) {
         final String[] expandArgs = this.getExpandArgs(args);
-        String resultFile = "result";
-        if (args.length > 0 && args[0].startsWith("@")) {
-            resultFile = new File(args[0].replace("@", "")).getName();
-            resultFile = resultFile.substring(0, resultFile.lastIndexOf("."));
-        }
-        return this.getOptions(resultFile, this.createDto(expandArgs), param);
+        return this.getOptions(Optional.ofNullable(result)
+                .filter(Strings::isNotEmpty)
+                .orElseGet(() -> {
+                            String resultFile = "result";
+                            if (args.length > 0 && args[0].startsWith("@")) {
+                                resultFile = new File(args[0].replace("@", "")).getName();
+                                resultFile = resultFile.substring(0, resultFile.lastIndexOf("."));
+                            }
+                            return resultFile;
+                        }
+                ), this.createDto(expandArgs), param);
     }
 
     default String[] getExpandArgs(final String[] args) {

@@ -1,26 +1,15 @@
 package yo.dbunitcli.sidecar.dto;
 
 import io.micronaut.serde.annotation.Serdeable;
-import yo.dbunitcli.application.CommandDto;
 
 @Serdeable
-public class OptionDto<T extends CommandDto> {
-
-    private T value;
+public class OptionDto {
 
     private String name;
 
     private String oldName;
 
     private String newName;
-
-    public T getValue() {
-        return this.value;
-    }
-
-    public void setValue(final T value) {
-        this.value = value;
-    }
 
     public String getName() {
         return this.name;

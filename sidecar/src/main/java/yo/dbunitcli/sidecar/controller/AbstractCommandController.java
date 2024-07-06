@@ -19,6 +19,7 @@ import yo.dbunitcli.sidecar.dto.OptionDto;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
@@ -52,7 +53,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "copy", produces = MediaType.APPLICATION_JSON)
-    public String copy(@Body final OptionDto<DTO> input) throws IOException {
+    public String copy(@Body final OptionDto input) throws IOException {
         this.workspace.parameterFiles(this.getCommandType())
                 .filter(it -> it.toFile().getName().equals(input.getName() + ".txt"))
                 .findFirst()
@@ -72,7 +73,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "delete", produces = MediaType.APPLICATION_JSON)
-    public String delete(@Body final OptionDto<DTO> input) throws IOException {
+    public String delete(@Body final OptionDto input) throws IOException {
         this.workspace.delete(this.getCommandType(), input.getName());
         return ObjectMapper
                 .getDefault()
@@ -80,7 +81,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "rename", produces = MediaType.APPLICATION_JSON)
-    public String rename(@Body final OptionDto<DTO> input) throws IOException {
+    public String rename(@Body final OptionDto input) throws IOException {
         this.workspace.rename(this.getCommandType(), input.getOldName(), input.getNewName());
         return ObjectMapper
                 .getDefault()
@@ -88,7 +89,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "load", produces = MediaType.APPLICATION_JSON)
-    public String load(@Body final OptionDto<DTO> input) {
+    public String load(@Body final OptionDto input) {
         return this.workspace.parameterFiles(this.getCommandType())
                 .filter(it -> it.toFile().getName().equals(input.getName() + ".txt"))
                 .findFirst()
@@ -119,32 +120,26 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "refresh", produces = MediaType.APPLICATION_JSON)
-    public String refresh(@Body final DTO input) throws IOException {
+    public String refresh(@Body final Map<String, String> input) throws IOException {
         return ObjectMapper
                 .getDefault()
-                .writeValueAsString(this.getCommand()
-                        .parseOption(input)
-                        .toCommandLineArgs()
-                        .toMap());
+                .writeValueAsString(this.requestToMap(input));
     }
 
     @Post(uri = "refresh/{name}", produces = MediaType.APPLICATION_JSON)
-    public String refreshComponent(@PathVariable final String name, @Body final DTO input) throws IOException {
+    public String refreshComponent(@PathVariable final String name, @Body final Map<String, String> input) throws IOException {
         return ObjectMapper
                 .getDefault()
-                .writeValueAsString(this.getCommand()
-                        .parseOption(input)
-                        .toCommandLineArgs()
-                        .toMap()
-                        .get(name));
+                .writeValueAsString(this.requestToMap(input).get(name));
     }
 
-    @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
-    public String save(@Body final OptionDto<DTO> input) {
+    @Post(uri = "save/{name}", produces = MediaType.TEXT_PLAIN)
+    public String save(@PathVariable final String name, @Body final Map<String, String> input) {
         try {
             this.workspace.save(this.getCommandType()
-                    , input.getName()
-                    , this.getCommand().parseOption(input.getValue()).toArgs(false));
+                    , name
+                    , this.getCommand().parseOption(this.requestToArgs(input))
+                            .toArgs(false));
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             return "failed";
@@ -152,11 +147,11 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
         return "success";
     }
 
-    @Post(uri = "exec", produces = MediaType.TEXT_PLAIN)
-    public String exec(@Body final OptionDto<DTO> input) {
+    @Post(uri = "exec/{name}", produces = MediaType.TEXT_PLAIN)
+    public String exec(@PathVariable final String name, @Body final Map<String, String> input) {
         try {
             this.getCommand().exec(this.getCommand()
-                    .getOptions(input.getName(), input.getValue(), Parameter.none()));
+                    .parseOption(name, this.requestToArgs(input), Parameter.none()));
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             return "failed";
@@ -167,5 +162,19 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     abstract protected T getCommand();
 
     abstract protected CommandType getCommandType();
+
+    private Map<String, Object> requestToMap(final Map<String, String> input) {
+        return this.getCommand()
+                .parseOption(this.requestToArgs(input))
+                .toCommandLineArgs()
+                .toMap();
+    }
+
+    private String[] requestToArgs(final Map<String, String> input) {
+        return input.entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .toArray(String[]::new);
+    }
 
 }
