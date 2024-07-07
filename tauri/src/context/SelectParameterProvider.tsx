@@ -12,6 +12,7 @@ export type CommandParam ={
 }
 export type CommandParams = {
   handleTypeSelect:Function;
+  name: string;
   prefix:string;
   elements: CommandParam[]
 }

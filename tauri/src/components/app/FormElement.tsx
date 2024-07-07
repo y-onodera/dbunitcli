@@ -1,10 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { open } from '@tauri-apps/api/dialog'
-import { Body, fetch, ResponseType } from "@tauri-apps/api/http";
-import { environment } from "../../feature/httpClient";
-import { CommandParam, CommandParams, useSetSelectParameter, currentCommand, Parameter, SelectParameter } from "../../context/SelectParameterProvider";
-import { formData } from "./Form";
-import "../../App.css";
+import { useEffect, useState } from "react";
+import { open } from "@tauri-apps/api/dialog";
+import { CommandParam, CommandParams } from "../../context/SelectParameterProvider";
 
 type Prop = {
   prefix: string;
@@ -17,75 +13,16 @@ type FileProp = Prop & {
 type SelectProp = Prop & {
   handleTypeSelect:Function;
 }
-export default function Forms(prop:SelectParameter) {
-  const command = currentCommand(prop);
-  const setParameter = useSetSelectParameter();
-  const handleTypeSelect = async () => {      
-    await fetch(environment.serverUrl()+ command +"/refresh"
-      ,{
-        method:"POST"
-        ,responseType:ResponseType.JSON
-        ,headers: {'Content-Type': 'application/json'}
-        ,body: Body.json(formData())
-      })
-      .then(response => setParameter(response.data as Parameter,command,prop.name))
-    .catch((ex)=>alert(ex))
-  }
-  return (
-    <>
-      {command == 'convert' ? 
-        <>
-          <Form handleTypeSelect={handleTypeSelect} prefix={prop.convert.srcData.prefix} elements={prop.convert.srcData.elements} />
-          <Form handleTypeSelect={handleTypeSelect} prefix={prop.convert.srcData.prefix} elements={prop.convert.srcData.jdbc ? prop.convert.srcData.jdbc.elements : []} />
-          <Form handleTypeSelect={handleTypeSelect} prefix={prop.convert.srcData.prefix} elements={prop.convert.srcData.templateRender ? prop.convert.srcData.templateRender.elements : []} />
-          <Form handleTypeSelect={handleTypeSelect} prefix={prop.convert.convertResult.prefix} elements={prop.convert.convertResult.elements} />
-        </>
-       : command == 'compare' ?
-        <>
-          <Form handleTypeSelect={handleTypeSelect} prefix="" elements={prop.compare.elements} />
-          {prop.compare.imageOption ? <Form handleTypeSelect={handleTypeSelect} prefix={prop.compare.imageOption.prefix} elements={prop.compare.imageOption.elements} />
-                                    :<></>}
-          <Form handleTypeSelect={handleTypeSelect} prefix={prop.compare.newData.prefix} elements={prop.compare.newData.elements} />
-          <Form handleTypeSelect={handleTypeSelect} prefix={prop.compare.oldData.prefix} elements={prop.compare.oldData.elements} />
-          <Form handleTypeSelect={handleTypeSelect} prefix={prop.compare.convertResult.prefix} elements={prop.compare.convertResult.elements} />
-          <Form handleTypeSelect={handleTypeSelect} prefix={prop.compare.expectData.prefix} elements={prop.compare.expectData.elements} />
-        </>
-       : command == 'generate' ?
-       <>
-         <Form handleTypeSelect={handleTypeSelect} prefix="" elements={prop.generate.elements} />
-         <Form handleTypeSelect={handleTypeSelect} prefix={prop.generate.srcData.prefix} elements={prop.generate.srcData.elements} />
-         <Form handleTypeSelect={handleTypeSelect} prefix={prop.generate.templateOption.prefix} elements={prop.generate.templateOption.elements} />
-       </>
-       : command == 'run' ?
-       <>
-         <Form handleTypeSelect={handleTypeSelect} prefix="" elements={prop.run.elements} />
-         <Form handleTypeSelect={handleTypeSelect} prefix={prop.run.srcData.prefix} elements={prop.run.srcData.elements} />
-         <Form handleTypeSelect={handleTypeSelect} prefix={prop.run.templateOption.prefix} elements={prop.run.templateOption.elements} />
-          {prop.run.jdbcOption ?<Form handleTypeSelect={handleTypeSelect} prefix={prop.run.jdbcOption.prefix} elements={prop.run.jdbcOption.elements} />
-                               :<></>
-          }
-       </>
-       : command == 'parameterize' ?
-       <>
-         <Form handleTypeSelect={handleTypeSelect} prefix="" elements={prop.parameterize.elements} />
-         <Form handleTypeSelect={handleTypeSelect} prefix={prop.parameterize.paramData.prefix} elements={prop.parameterize.paramData.elements} />
-         <Form handleTypeSelect={handleTypeSelect} prefix={prop.parameterize.templateOption.prefix} elements={prop.parameterize.templateOption.elements} />
-       </>
-      :<></>
-      }
-    </>
-  )
-}
-const Form:React.FC<CommandParams> = (prop) => {
+export default function FormElements(prop:CommandParams){
   return (
     <>
       {prop.elements.map((element) => {
         if (element.attribute.type == 'FLG') {
-          return <Check prefix={prop.prefix} element={element} key={prop.prefix+element.name}/>
+          return <Check prefix={prop.prefix} element={element} key={prop.name+prop.prefix+element.name}/>
         } else if (element.attribute.type == 'ENUM') {
-          return <Select handleTypeSelect={prop.handleTypeSelect} prefix={prop.prefix} element={element} key={prop.prefix+element.name}/>
+          return <Select handleTypeSelect={prop.handleTypeSelect} prefix={prop.prefix} element={element} key={prop.name+prop.prefix+element.name}/>
         }
-        return <Text prefix={prop.prefix} element={element} key={prop.prefix+element.name}/>
+        return <Text prefix={prop.prefix} element={element} key={prop.name+prop.prefix+element.name}/>
       })}
     </>
   );
@@ -244,5 +181,5 @@ const Select:React.FC<SelectProp> = ({handleTypeSelect ,prefix ,element}) => {
         })};
       </select>
     </div> 
-);
+  );
 }
