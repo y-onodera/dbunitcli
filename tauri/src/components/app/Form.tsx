@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { open } from '@tauri-apps/api/dialog'
 import { Body, fetch, ResponseType } from "@tauri-apps/api/http";
 import { environment } from "../../feature/httpClient";
-import { CommandParameter, CommandParameters, CommandParametersProp, CompareParameters, ConvertParameters, GenerateParameters, ParameterizeParameters, RunParameters, useSetSelectParameter } from "../../context/SelectParameterProvider";
+import { CommandParam, CommandParams, SelectParameter, useSetSelectParameter, currentCommand, Parameter } from "../../context/SelectParameterProvider";
 import "../../App.css";
 
 type Prop = {
   prefix: string;
-  element: CommandParameter
+  element: CommandParam
   setPath?: Function
 }
 type FileProp = Prop & {
@@ -16,9 +16,10 @@ type FileProp = Prop & {
 type SelectProp = Prop & {
   handleTypeSelect:Function;
 }
-const Forms:React.FC<CommandParametersProp> = (prop) => {
+const Forms:React.FC<SelectParameter> = (prop) => {
+  const command = currentCommand(prop);
   const setParameter = useSetSelectParameter();
-  const handleTypeSelect = async (command:string) => {      
+  const handleTypeSelect = async () => {      
     const formData = new FormData(document.querySelector('#commandForm') as HTMLFormElement);
     const data = Object.fromEntries(formData.entries());
     await fetch(environment.serverUrl()+ command +"/refresh"
@@ -28,70 +29,55 @@ const Forms:React.FC<CommandParametersProp> = (prop) => {
         ,headers: {'Content-Type': 'application/json'}
         ,body: Body.json(data)
       })
-    .then(response => {
-      const newParam = {} as CommandParametersProp
-      newParam.name = prop.name;
-      if (command == "convert"){
-        newParam.convert = response.data as ConvertParameters
-      } if (command == "compare"){
-        newParam.compare = response.data as CompareParameters
-      } if (command == "generate"){
-        newParam.generate = response.data as GenerateParameters
-      } if (command == "run"){
-        newParam.run = response.data as RunParameters
-      } if (command == "parameterize"){
-        newParam.parameterize = response.data as ParameterizeParameters
-      }
-      setParameter(newParam)
-    })
+      .then(response => setParameter(response.data as Parameter,command,prop.name))
     .catch((ex)=>alert(ex))
   }
 return (
     <>
-      {prop.convert != undefined ? 
+      {command == 'convert' ? 
         <>
-          <Form handleTypeSelect={()=>handleTypeSelect('convert')} prefix={prop.convert.srcData.prefix} elements={prop.convert.srcData.elements} />
-          <Form handleTypeSelect={()=>handleTypeSelect('convert')} prefix={prop.convert.srcData.prefix} elements={prop.convert.srcData.jdbc ? prop.convert.srcData.jdbc.elements : []} />
-          <Form handleTypeSelect={()=>handleTypeSelect('convert')} prefix={prop.convert.srcData.prefix} elements={prop.convert.srcData.templateRender ? prop.convert.srcData.templateRender.elements : []} />
-          <Form handleTypeSelect={()=>handleTypeSelect('convert')} prefix={prop.convert.convertResult.prefix} elements={prop.convert.convertResult.elements} />
+          <Form handleTypeSelect={handleTypeSelect} prefix={prop.convert.srcData.prefix} elements={prop.convert.srcData.elements} />
+          <Form handleTypeSelect={handleTypeSelect} prefix={prop.convert.srcData.prefix} elements={prop.convert.srcData.jdbc ? prop.convert.srcData.jdbc.elements : []} />
+          <Form handleTypeSelect={handleTypeSelect} prefix={prop.convert.srcData.prefix} elements={prop.convert.srcData.templateRender ? prop.convert.srcData.templateRender.elements : []} />
+          <Form handleTypeSelect={handleTypeSelect} prefix={prop.convert.convertResult.prefix} elements={prop.convert.convertResult.elements} />
         </>
-       : prop.compare != undefined ?
+       : command == 'compare' ?
         <>
-          <Form handleTypeSelect={()=>handleTypeSelect('compare')} prefix="" elements={prop.compare.elements} />
-          {prop.compare.imageOption ? <Form handleTypeSelect={()=>handleTypeSelect('compare')} prefix={prop.compare.imageOption.prefix} elements={prop.compare.imageOption.elements} />
+          <Form handleTypeSelect={handleTypeSelect} prefix="" elements={prop.compare.elements} />
+          {prop.compare.imageOption ? <Form handleTypeSelect={handleTypeSelect} prefix={prop.compare.imageOption.prefix} elements={prop.compare.imageOption.elements} />
                                     :<></>}
-          <Form handleTypeSelect={()=>handleTypeSelect('compare')} prefix={prop.compare.newData.prefix} elements={prop.compare.newData.elements} />
-          <Form handleTypeSelect={()=>handleTypeSelect('compare')} prefix={prop.compare.oldData.prefix} elements={prop.compare.oldData.elements} />
-          <Form handleTypeSelect={()=>handleTypeSelect('compare')} prefix={prop.compare.convertResult.prefix} elements={prop.compare.convertResult.elements} />
-          <Form handleTypeSelect={()=>handleTypeSelect('compare')} prefix={prop.compare.expectData.prefix} elements={prop.compare.expectData.elements} />
+          <Form handleTypeSelect={handleTypeSelect} prefix={prop.compare.newData.prefix} elements={prop.compare.newData.elements} />
+          <Form handleTypeSelect={handleTypeSelect} prefix={prop.compare.oldData.prefix} elements={prop.compare.oldData.elements} />
+          <Form handleTypeSelect={handleTypeSelect} prefix={prop.compare.convertResult.prefix} elements={prop.compare.convertResult.elements} />
+          <Form handleTypeSelect={handleTypeSelect} prefix={prop.compare.expectData.prefix} elements={prop.compare.expectData.elements} />
         </>
-       : prop.generate != undefined ?
+       : command == 'generate' ?
        <>
-         <Form handleTypeSelect={()=>handleTypeSelect('generate')} prefix="" elements={prop.generate.elements} />
-         <Form handleTypeSelect={()=>handleTypeSelect('generate')} prefix={prop.generate.srcData.prefix} elements={prop.generate.srcData.elements} />
-         <Form handleTypeSelect={()=>handleTypeSelect('generate')} prefix={prop.generate.templateOption.prefix} elements={prop.generate.templateOption.elements} />
+         <Form handleTypeSelect={handleTypeSelect} prefix="" elements={prop.generate.elements} />
+         <Form handleTypeSelect={handleTypeSelect} prefix={prop.generate.srcData.prefix} elements={prop.generate.srcData.elements} />
+         <Form handleTypeSelect={handleTypeSelect} prefix={prop.generate.templateOption.prefix} elements={prop.generate.templateOption.elements} />
        </>
-       : prop.run != undefined ?
+       : command == 'run' ?
        <>
-         <Form handleTypeSelect={()=>handleTypeSelect('run')} prefix="" elements={prop.run.elements} />
-         <Form handleTypeSelect={()=>handleTypeSelect('run')} prefix={prop.run.srcData.prefix} elements={prop.run.srcData.elements} />
-         <Form handleTypeSelect={()=>handleTypeSelect('run')} prefix={prop.run.templateOption.prefix} elements={prop.run.templateOption.elements} />
-          {prop.run.jdbcOption ?<Form handleTypeSelect={()=>handleTypeSelect('run')} prefix={prop.run.jdbcOption.prefix} elements={prop.run.jdbcOption.elements} />
+         <Form handleTypeSelect={handleTypeSelect} prefix="" elements={prop.run.elements} />
+         <Form handleTypeSelect={handleTypeSelect} prefix={prop.run.srcData.prefix} elements={prop.run.srcData.elements} />
+         <Form handleTypeSelect={handleTypeSelect} prefix={prop.run.templateOption.prefix} elements={prop.run.templateOption.elements} />
+          {prop.run.jdbcOption ?<Form handleTypeSelect={handleTypeSelect} prefix={prop.run.jdbcOption.prefix} elements={prop.run.jdbcOption.elements} />
                                :<></>
           }
        </>
-       : prop.parameterize != undefined ?
+       : command == 'parameterize' ?
        <>
-         <Form handleTypeSelect={()=>handleTypeSelect('parameterize')} prefix="" elements={prop.parameterize.elements} />
-         <Form handleTypeSelect={()=>handleTypeSelect('parameterize')} prefix={prop.parameterize.paramData.prefix} elements={prop.parameterize.paramData.elements} />
-         <Form handleTypeSelect={()=>handleTypeSelect('parameterize')} prefix={prop.parameterize.templateOption.prefix} elements={prop.parameterize.templateOption.elements} />
+         <Form handleTypeSelect={handleTypeSelect} prefix="" elements={prop.parameterize.elements} />
+         <Form handleTypeSelect={handleTypeSelect} prefix={prop.parameterize.paramData.prefix} elements={prop.parameterize.paramData.elements} />
+         <Form handleTypeSelect={handleTypeSelect} prefix={prop.parameterize.templateOption.prefix} elements={prop.parameterize.templateOption.elements} />
        </>
       :<></>
       }
     </>
   )
 }
-const Form:React.FC<CommandParameters> = (prop) => {
+const Form:React.FC<CommandParams> = (prop) => {
   return (
     <>
       {prop.elements.map((element) => {

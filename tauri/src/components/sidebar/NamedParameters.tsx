@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Body, fetch, ResponseType } from "@tauri-apps/api/http";
 import { environment } from "../../feature/httpClient";
 import { EditName, useSetEditName } from "../../context/EditNameProvider";
-import { CommandParametersProp, CompareParameters, ConvertParameters, GenerateParameters, ParameterizeParameters, RunParameters, useSetSelectParameter } from "../../context/SelectParameterProvider";
+import { Parameter, useSetSelectParameter } from "../../context/SelectParameterProvider";
 
 type NamedParameters = {
     convert:string[]
@@ -27,22 +27,7 @@ export default function NamedParameters() {
           ,headers: {'Content-Type': 'application/json'}
           ,body: Body.json({name})
         })
-      .then(response => {
-        const newParam = {} as CommandParametersProp
-        newParam.name = name;
-        if (command == "convert"){
-          newParam.convert = response.data as ConvertParameters
-        } if (command == "compare"){
-          newParam.compare = response.data as CompareParameters
-        } if (command == "generate"){
-          newParam.generate = response.data as GenerateParameters
-        } if (command == "run"){
-          newParam.run = response.data as RunParameters
-        } if (command == "parameterize"){
-          newParam.parameterize = response.data as ParameterizeParameters
-        }
-        setParameter(newParam)
-      })
+      .then(response => setParameter(response.data as Parameter,command,name))
       .catch((ex)=>alert(ex))
     }
     const [parameters ,setParameters] = useState<NamedParameters>();

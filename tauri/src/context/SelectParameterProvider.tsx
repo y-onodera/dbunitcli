@@ -5,64 +5,65 @@ export type Attribute = {
     required: boolean;
     selectOption: string[];
 }
-export type CommandParameter ={
+export type CommandParam ={
     name: string;
     value: string;
     attribute: Attribute;
 }
-export type CommandParameters = {
+export type CommandParams = {
   handleTypeSelect:Function;
   prefix:string;
-  elements: CommandParameter[]
+  elements: CommandParam[]
 }
-export type DatasetSource = CommandParameters & {
-  jdbc: CommandParameters;
-  templateRender: CommandParameters;
+export type DatasetSource = CommandParams & {
+  jdbc: CommandParams;
+  templateRender: CommandParams;
 }
-export type ConvertParameters = {
+export type Parameter = ConvertParams | CompareParams | GenerateParams | RunParams | ParameterizeParams
+export type ConvertParams = {
   srcData: DatasetSource;
-  convertResult: CommandParameters;
+  convertResult: CommandParams;
 }
-export type CompareParameters = {
-  elements: CommandParameter[]
+export type CompareParams = {
+  elements: CommandParam[]
   newData: DatasetSource;
   oldData: DatasetSource;
-  imageOption: CommandParameters;
-  convertResult: CommandParameters;
+  imageOption: CommandParams;
+  convertResult: CommandParams;
   expectData: DatasetSource;
 }
-export type GenerateParameters = {
-  elements: CommandParameter[]
+export type GenerateParams = {
+  elements: CommandParam[]
   srcData: DatasetSource;
-  templateOption: CommandParameters;
-  convertResult: CommandParameters;
+  templateOption: CommandParams;
+  convertResult: CommandParams;
 }
-export type RunParameters = {
-  elements: CommandParameter[]
+export type RunParams = {
+  elements: CommandParam[]
   srcData: DatasetSource;
-  templateOption: CommandParameters;
-  jdbcOption: CommandParameters;
-  convertResult: CommandParameters;
+  templateOption: CommandParams;
+  jdbcOption: CommandParams;
+  convertResult: CommandParams;
 }
-export type ParameterizeParameters = {
-  elements: CommandParameter[]
+export type ParameterizeParams = {
+  elements: CommandParam[]
   paramData: DatasetSource;
-  templateOption: CommandParameters;
+  templateOption: CommandParams;
 }
-export type CommandParametersProp = {
+export type SelectParameter = {
   name:string;
-  convert:ConvertParameters;
-  compare:CompareParameters;
-  generate:GenerateParameters;
-  run:RunParameters;
-  parameterize:ParameterizeParameters;
+  convert:ConvertParams;
+  compare:CompareParams;
+  generate:GenerateParams;
+  run:RunParams;
+  parameterize:ParameterizeParams;
 }
-const selectParameterContext = createContext<CommandParametersProp>({} as CommandParametersProp);
-const setSelectParameterContext = createContext<Dispatch<SetStateAction<CommandParametersProp>>>(
+const selectParameterContext = createContext<SelectParameter>({} as SelectParameter);
+const setSelectParameterContext = createContext<Dispatch<SetStateAction<SelectParameter>>>(
     () => undefined
 );
 export default function SelectParameterProvider(props:{children:ReactNode}) {
-    const [parameter, setParameter] = useState<CommandParametersProp>({} as CommandParametersProp);
+    const [parameter, setParameter] = useState<SelectParameter>({} as SelectParameter);
     return (
         <selectParameterContext.Provider value={parameter}>
           <setSelectParameterContext.Provider value={setParameter}>
@@ -72,7 +73,25 @@ export default function SelectParameterProvider(props:{children:ReactNode}) {
       );
 }
 export const useSelectParameter = () => useContext(selectParameterContext);
-export const useSetSelectParameter = () => useContext(setSelectParameterContext);
-export function currentCommand(parameter:CommandParametersProp) {
-  return parameter.convert ? 'convert' : parameter.compare ? 'compare' : parameter.generate ? 'generate' : parameter.run ? 'run' : 'parameterize';
+export const useSetSelectParameter = () => {
+  const setParameter = useContext(setSelectParameterContext)
+  return (response:Parameter,command:string,name:string) => {
+    const newParam = {} as SelectParameter
+    newParam.name = name;
+    if (command == "convert"){
+      newParam.convert = response as ConvertParams
+    } if (command == "compare"){
+      newParam.compare = response as CompareParams
+    } if (command == "generate"){
+      newParam.generate = response as GenerateParams
+    } if (command == "run"){
+      newParam.run = response as RunParams
+    } if (command == "parameterize"){
+      newParam.parameterize = response as ParameterizeParams
+    }
+    setParameter(newParam)
+  }
+};
+export function currentCommand(parameter:SelectParameter) {
+  return parameter.convert ? 'convert' : parameter.compare ? 'compare' : parameter.generate ? 'generate' : parameter.run ? 'run' : parameter.parameterize ? 'parameterize' : '';
 }
