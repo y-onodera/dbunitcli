@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { open } from '@tauri-apps/api/dialog'
 import { Body, fetch, ResponseType } from "@tauri-apps/api/http";
 import { environment } from "../../feature/httpClient";
-import { CommandParam, CommandParams, SelectParameter, useSetSelectParameter, currentCommand, Parameter, useSelectParameter } from "../../context/SelectParameterProvider";
-import "../../App.css";
+import { CommandParam, CommandParams, useSetSelectParameter, currentCommand, Parameter, SelectParameter } from "../../context/SelectParameterProvider";
 import { formData } from "./Form";
+import "../../App.css";
 
 type Prop = {
   prefix: string;
@@ -17,8 +17,7 @@ type FileProp = Prop & {
 type SelectProp = Prop & {
   handleTypeSelect:Function;
 }
-export default function Forms() {
-  const prop = useSelectParameter();
+export default function Forms(prop:SelectParameter) {
   const command = currentCommand(prop);
   const setParameter = useSetSelectParameter();
   const handleTypeSelect = async () => {      

@@ -2,7 +2,6 @@ import App from "./App";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import SelectParameterProvider from "../context/SelectParameterProvider";
-import EditNmaeProvider from "../context/EditNameProvider";
 import "../styles.css";
 
 export default function Layout() {
@@ -26,9 +25,7 @@ export default function Layout() {
                                                 border-r border-gray-200 
                                                 sm:translate-x-0 
                                                 dark:bg-gray-800 dark:border-gray-700" aria-label="Sidebar">
-              <EditNmaeProvider>
-                <Sidebar />
-              </EditNmaeProvider>
+              <Sidebar />
             </aside>
             <div className="p-4 sm:ml-48">
               <App/>
