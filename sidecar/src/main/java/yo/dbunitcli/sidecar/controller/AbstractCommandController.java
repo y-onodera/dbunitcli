@@ -3,7 +3,6 @@ package yo.dbunitcli.sidecar.controller;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Get;
-import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
@@ -126,19 +125,12 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                 .writeValueAsString(this.requestToMap(input));
     }
 
-    @Post(uri = "refresh/{name}", produces = MediaType.APPLICATION_JSON)
-    public String refreshComponent(@PathVariable final String name, @Body final Map<String, String> input) throws IOException {
-        return ObjectMapper
-                .getDefault()
-                .writeValueAsString(this.requestToMap(input).get(name));
-    }
-
-    @Post(uri = "save/{name}", produces = MediaType.TEXT_PLAIN)
-    public String save(@PathVariable final String name, @Body final Map<String, String> input) {
+    @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
+    public String save(@Body final OptionDto body) {
         try {
             this.workspace.save(this.getCommandType()
-                    , name
-                    , this.getCommand().parseOption(this.requestToArgs(input))
+                    , body.getName()
+                    , this.getCommand().parseOption(this.requestToArgs(body.getInput()))
                             .toArgs(false));
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
@@ -147,11 +139,13 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
         return "success";
     }
 
-    @Post(uri = "exec/{name}", produces = MediaType.TEXT_PLAIN)
-    public String exec(@PathVariable final String name, @Body final Map<String, String> input) {
+    @Post(uri = "exec", produces = MediaType.TEXT_PLAIN)
+    public String exec(@Body final OptionDto body) {
         try {
             this.getCommand().exec(this.getCommand()
-                    .parseOption(name, this.requestToArgs(input), Parameter.none()));
+                    .parseOption(body.getName()
+                            , this.requestToArgs(body.getInput())
+                            , Parameter.none()));
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             return "failed";

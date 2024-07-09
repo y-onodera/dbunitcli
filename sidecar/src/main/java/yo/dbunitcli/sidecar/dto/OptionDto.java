@@ -2,6 +2,8 @@ package yo.dbunitcli.sidecar.dto;
 
 import io.micronaut.serde.annotation.Serdeable;
 
+import java.util.Map;
+
 @Serdeable
 public class OptionDto {
 
@@ -10,6 +12,8 @@ public class OptionDto {
     private String oldName;
 
     private String newName;
+
+    private Map<String, String> input;
 
     public String getName() {
         return this.name;
@@ -33,5 +37,13 @@ public class OptionDto {
 
     public void setNewName(final String newName) {
         this.newName = newName;
+    }
+
+    public Map<String, String> getInput() {
+        return this.input;
+    }
+
+    public void setInput(final Map<String, String> input) {
+        this.input = input;
     }
 }
