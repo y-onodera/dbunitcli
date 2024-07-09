@@ -1,11 +1,12 @@
 import { Body, fetch, ResponseType } from "@tauri-apps/api/http";
 import { environment } from "../../feature/httpClient";
-import { useSetSelectParameter, currentCommand, Parameter, SelectParameter, ConvertParams, CompareParams, GenerateParams, RunParams, ParameterizeParams } from "../../context/SelectParameterProvider";
+import { useSetSelectParameter, currentCommand, Parameter, ConvertParams, CompareParams, GenerateParams, RunParams, ParameterizeParams, useSelectParameter, DatasetSource } from "../../context/SelectParameterProvider";
 import { formData } from "./Form";
 import FormElements from "./FormElement";
 import "../../App.css";
 
-export default function CommandForm(prop:SelectParameter) {
+export default function CommandForm() {
+  const prop = useSelectParameter();
   const command = currentCommand(prop);
   const setParameter = useSetSelectParameter();
   const handleTypeSelect = async () => {      
@@ -36,19 +37,17 @@ export default function CommandForm(prop:SelectParameter) {
     </>
   )
 }
-function ConvertForm(prop:{handleTypeSelect:Function,name:string,convert:ConvertParams}) {
+export function ConvertForm(prop:{handleTypeSelect:Function,name:string,convert:ConvertParams}) {
   const srcData = prop.convert.srcData;
   const convertResult = prop.convert.convertResult;
   return (
     <>
-      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={srcData.prefix} elements={srcData.elements} />
-      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={srcData.prefix} elements={srcData.jdbc ? srcData.jdbc.elements : []} />
-      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={srcData.prefix} elements={srcData.templateRender ? srcData.templateRender.elements : []} />
+      <DatasetLoadForm handleTypeSelect={prop.handleTypeSelect} name={prop.name} srcData={srcData} />
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={convertResult.prefix} elements={convertResult.elements} />
     </>
   );
 }
-function CompareForm(prop:{handleTypeSelect:Function,name:string,compare:CompareParams}) {
+export function CompareForm(prop:{handleTypeSelect:Function,name:string,compare:CompareParams}) {
   const imageOption = prop.compare.imageOption;
   const newData = prop.compare.newData;
   const oldData = prop.compare.oldData;
@@ -59,32 +58,32 @@ function CompareForm(prop:{handleTypeSelect:Function,name:string,compare:Compare
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix="" elements={prop.compare.elements} />
       {prop.compare.imageOption ? <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={imageOption.prefix} elements={imageOption.elements} />
                                 :<></>}
-      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={newData.prefix} elements={newData.elements} />
-      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={oldData.prefix} elements={oldData.elements} />
+      <DatasetLoadForm handleTypeSelect={prop.handleTypeSelect} name={prop.name} srcData={newData} />
+      <DatasetLoadForm handleTypeSelect={prop.handleTypeSelect} name={prop.name} srcData={oldData} />
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={convertResult.prefix} elements={convertResult.elements} />
-      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={expectData.prefix} elements={expectData.elements} />
+      <DatasetLoadForm handleTypeSelect={prop.handleTypeSelect} name={prop.name} srcData={expectData} />
     </>
   );
 }
-function GenerateForm(prop:{handleTypeSelect:Function,name:string,generate:GenerateParams}) {
+export function GenerateForm(prop:{handleTypeSelect:Function,name:string,generate:GenerateParams}) {
   const srcData = prop.generate.srcData;
   const templateOption = prop.generate.templateOption;
   return (
     <>
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix="" elements={prop.generate.elements} />
-      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={srcData.prefix} elements={srcData.elements} />
+      <DatasetLoadForm handleTypeSelect={prop.handleTypeSelect} name={prop.name} srcData={srcData} />
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={templateOption.prefix} elements={templateOption.elements} />
     </>
   );
 }
-function RunForm(prop:{handleTypeSelect:Function,name:string,run:RunParams}) {
+export function RunForm(prop:{handleTypeSelect:Function,name:string,run:RunParams}) {
   const srcData = prop.run.srcData;
   const templateOption = prop.run.templateOption;
   const jdbcOption = prop.run.jdbcOption;
   return (
     <>
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix="" elements={prop.run.elements} />
-      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={srcData.prefix} elements={srcData.elements} />
+      <DatasetLoadForm handleTypeSelect={prop.handleTypeSelect} name={prop.name} srcData={srcData} />
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={templateOption.prefix} elements={templateOption.elements} />
        {prop.run.jdbcOption ?<FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={jdbcOption.prefix} elements={jdbcOption.elements} />
                             :<></>
@@ -92,14 +91,23 @@ function RunForm(prop:{handleTypeSelect:Function,name:string,run:RunParams}) {
     </>
   );
 }
-function ParameterizeForm(prop:{handleTypeSelect:Function,name:string,parameterize:ParameterizeParams}) {
+export function ParameterizeForm(prop:{handleTypeSelect:Function,name:string,parameterize:ParameterizeParams}) {
   const paramData = prop.parameterize.paramData;
   const templateOption = prop.parameterize.templateOption;
   return (
     <>
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix="" elements={prop.parameterize.elements} />
-      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={paramData.prefix} elements={paramData.elements} />
+      <DatasetLoadForm handleTypeSelect={prop.handleTypeSelect} name={prop.name} srcData={paramData} />
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={templateOption.prefix} elements={templateOption.elements} />
+    </>
+  );
+}
+export function DatasetLoadForm(prop:{handleTypeSelect:Function,name:string,srcData:DatasetSource}) {
+  return (
+    <>
+      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={prop.srcData.prefix} elements={prop.srcData.elements} />
+      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={prop.srcData.prefix} elements={prop.srcData.jdbc ? prop.srcData.jdbc.elements : []} />
+      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={prop.srcData.prefix} elements={prop.srcData.templateRender ? prop.srcData.templateRender.elements : []} />
     </>
   );
 }

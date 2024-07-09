@@ -1,16 +1,17 @@
 import { Body, fetch, ResponseType } from "@tauri-apps/api/http";
 import { environment } from "../../feature/httpClient";
-import { currentCommand, SelectParameter } from "../../context/SelectParameterProvider";
+import { currentCommand, useSelectParameter } from "../../context/SelectParameterProvider";
 import { formData } from "./Form";
 
-export default function Footer(parameter:SelectParameter){
+export default function Footer(){
+    const parameter = useSelectParameter();
     const handleClickSave = async (command:string,name:string) => {      
-      await fetch(environment.serverUrl()+ command +"/save/"+name
+      await fetch(environment.serverUrl()+ command +"/save"
         ,{
           method:"POST"
           ,responseType:ResponseType.Text
           ,headers: {'Content-Type': 'application/json'}
-          ,body: Body.json(formData())
+          ,body: Body.json({name,input:formData()})
         })
       .then(response => {
         alert(response.data)
@@ -18,12 +19,12 @@ export default function Footer(parameter:SelectParameter){
       .catch((ex)=>alert(ex))
     }
     const handleClickExec = async (command:string,name:string) => {      
-      await fetch(environment.serverUrl()+ command +"/exec/"+name
+      await fetch(environment.serverUrl()+ command +"/exec"
         ,{
           method:"POST"
           ,responseType:ResponseType.Text
           ,headers: {'Content-Type': 'application/json'}
-          ,body: Body.json(formData())
+          ,body: Body.json({name,input:formData()})
         })
       .then(response => {
         alert(response.data)

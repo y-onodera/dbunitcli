@@ -1,7 +1,11 @@
-import App from "./App";
 import Header from "./Header";
-import Sidebar from "./Sidebar";
 import SelectParameterProvider from "../context/SelectParameterProvider";
+import EditNmaeProvider from "../context/EditNameProvider";
+import NameEditMenu from "./sidebar/NameEditMenu";
+import NamedParameters from "./sidebar/NamedParameters";
+import Form from "./app/Form";
+import CommandForm from "./app/CommandForm";
+import Footer from "./app/Footer";
 import "../styles.css";
 
 export default function Layout() {
@@ -25,10 +29,20 @@ export default function Layout() {
                                                 border-r border-gray-200 
                                                 sm:translate-x-0 
                                                 dark:bg-gray-800 dark:border-gray-700" aria-label="Sidebar">
-              <Sidebar />
+              <div className="h-full px-3 pb-4 overflow-y-auto dark:bg-gray-800">
+                <EditNmaeProvider>
+                  <NameEditMenu/>
+                  <ul className="space-y-2 font-medium">
+                    <NamedParameters/>
+                  </ul>
+                </EditNmaeProvider>
+              </div>
             </aside>
             <div className="p-4 sm:ml-48">
-              <App/>
+              <Form>
+               <CommandForm />
+               <Footer />
+              </Form>
             </div>
           </SelectParameterProvider>
         </>
