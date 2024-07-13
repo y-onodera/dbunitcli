@@ -70,10 +70,10 @@ public record RunOption(
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs();
         result.addComponent("srcData", this.srcData.toCommandLineArgs()
-                .remove("-srcType")
-                .remove("-extension")
-                .remove("-includeMetaData")
-                .remove("-loadData")
+                .remove("-src.srcType")
+                .remove("-src.extension")
+                .remove("-src.includeMetaData")
+                .remove("-src.loadData")
         );
         result.put("-scriptType", this.scriptType, ScriptType.class);
         result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
