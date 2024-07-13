@@ -4,26 +4,9 @@ import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.runtime.Micronaut;
-import io.micronaut.serde.annotation.SerdeImport;
-import yo.dbunitcli.application.*;
-import yo.dbunitcli.application.dto.*;
-import yo.dbunitcli.application.option.Option;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
 
-@SerdeImport(value = Option.Arg.class)
-@SerdeImport(value = Option.Attribute.class)
-@SerdeImport(value = CommandDto.class)
-@SerdeImport(value = ParameterizeDto.class)
-@SerdeImport(value = ConvertDto.class)
-@SerdeImport(value = CompareDto.class)
-@SerdeImport(value = RunDto.class)
-@SerdeImport(value = GenerateDto.class)
-@SerdeImport(value = TemplateRenderDto.class)
-@SerdeImport(value = DataSetLoadDto.class)
-@SerdeImport(value = DataSetConverterDto.class)
-@SerdeImport(value = JdbcDto.class)
-@SerdeImport(value = ImageCompareDto.class)
 @Factory
 public class Application {
 
