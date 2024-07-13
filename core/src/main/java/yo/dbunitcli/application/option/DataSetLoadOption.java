@@ -9,7 +9,6 @@ import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 
 public record DataSetLoadOption(
         String prefix
@@ -57,7 +56,7 @@ public record DataSetLoadOption(
         final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
         result.put("-srcType", this.srcType
                 , DataSourceType.class, Filter.exclude(DataSourceType.none), true);
-        if (Optional.ofNullable(result.get("-srcType")).orElse("").isEmpty()) {
+        if (Strings.isEmpty(result.get("-srcType"))) {
             return result;
         }
         result.putFileOrDir("-src", this.src, true);

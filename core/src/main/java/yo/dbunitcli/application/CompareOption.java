@@ -123,7 +123,7 @@ public class CompareOption extends CommandLineOption<CompareDto> {
     @Override
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs();
-        result.put("-targetType", this.targetType, Type.class);
+        result.put("-targetType", this.targetType, this.targetType.getDeclaringClass());
         if (Type.valueOf(result.get("-targetType")).isAny(Type.pdf, Type.image)) {
             result.addComponent("imageOption", this.imageOption.toCommandLineArgs());
         }

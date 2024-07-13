@@ -25,15 +25,15 @@ public interface Option {
 
     record Filter<T extends Enum<?>>(FilterType type, T[] target) implements Predicate<T> {
 
-        static <T extends Enum<?>> Filter<T> any() {
+        public static <T extends Enum<?>> Filter<T> any() {
             return new Filter<>(FilterType.ANY, null);
         }
 
-        static <T extends Enum<?>> Filter<T> include(final T... target) {
+        public static <T extends Enum<?>> Filter<T> include(final T... target) {
             return new Filter<>(FilterType.INCLUDE, target);
         }
 
-        static <T extends Enum<?>> Filter<T> exclude(final T... target) {
+        public static <T extends Enum<?>> Filter<T> exclude(final T... target) {
             return new Filter<>(FilterType.EXCLUDE, target);
         }
 
@@ -221,6 +221,10 @@ public interface Option {
             return value.getPath().replaceAll("\\\\", "/");
         }
 
+        public CommandLineArgs remove(final String key) {
+            this.options.remove(key);
+            return this;
+        }
     }
 
     record Arg(String value, Attribute attribute) {

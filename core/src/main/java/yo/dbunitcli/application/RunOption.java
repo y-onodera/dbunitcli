@@ -72,7 +72,12 @@ public class RunOption extends CommandLineOption<RunDto> {
     @Override
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs();
-        result.addComponent("srcData", this.srcData.toCommandLineArgs());
+        result.addComponent("srcData", this.srcData.toCommandLineArgs()
+                .remove("-srcType")
+                .remove("-extension")
+                .remove("-includeMetaData")
+                .remove("-loadData")
+        );
         result.put("-scriptType", this.scriptType, ScriptType.class);
         result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
         if (result.get("-scriptType").equals(ScriptType.sql.name())) {
