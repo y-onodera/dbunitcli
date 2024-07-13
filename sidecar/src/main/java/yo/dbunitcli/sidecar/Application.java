@@ -4,9 +4,13 @@ import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.runtime.Micronaut;
+import io.micronaut.serde.annotation.SerdeImport;
+import yo.dbunitcli.application.option.Option;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
 
+@SerdeImport(value = Option.Arg.class)
+@SerdeImport(value = Option.Attribute.class)
 @Factory
 public class Application {
 
