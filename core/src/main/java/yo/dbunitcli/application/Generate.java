@@ -36,7 +36,7 @@ public class Generate implements Command<GenerateDto, GenerateOption> {
     }
 
     @Override
-    public GenerateOption getOptions(final String resultFile, final GenerateDto dto, final Parameter param) {
+    public GenerateOption parseOption(final String resultFile, final GenerateDto dto, final Parameter param) {
         return new GenerateOption(resultFile, dto, param);
     }
 }

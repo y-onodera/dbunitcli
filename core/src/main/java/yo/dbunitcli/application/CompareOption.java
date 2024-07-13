@@ -6,6 +6,7 @@ import yo.dbunitcli.application.cli.DefaultArgumentMapper;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ImageCompareOption;
+import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.compare.CompareResult;
 import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
@@ -18,7 +19,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record CompareOption(
-        BaseOption base
+        Parameter parameter
+        , ResultOption result
         , String setting
         , String settingEncoding
         , Type targetType
@@ -87,7 +89,8 @@ public record CompareOption(
     }
 
     public CompareOption(final String resultFile, final CompareDto dto, final Parameter param) {
-        this(new BaseOption(resultFile, dto, param)
+        this(param
+                , new ResultOption(resultFile, dto.getConvertResult())
                 , dto.getSetting()
                 , Strings.isNotEmpty(dto.getSettingEncoding())
                         ? dto.getSettingEncoding() : System.getProperty("file.encoding")
@@ -105,23 +108,6 @@ public record CompareOption(
     }
 
     @Override
-    public BaseOption base() {
-        return this.base;
-    }
-
-    public DataSetLoadOption getOldData() {
-        return this.oldData;
-    }
-
-    public DataSetLoadOption getNewData() {
-        return this.newData;
-    }
-
-    public DataSetLoadOption getExpectData() {
-        return this.expectData;
-    }
-
-    @Override
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs();
         result.put("-targetType", this.targetType, this.targetType.getDeclaringClass());
@@ -132,7 +118,7 @@ public record CompareOption(
         result.put("-settingEncoding", this.settingEncoding);
         result.addComponent("newData", this.newData.toCommandLineArgs());
         result.addComponent("oldData", this.oldData.toCommandLineArgs());
-        result.addComponent("convertResult", this.getConvertResult().toCommandLineArgs());
+        result.addComponent("convertResult", this.result().convertResult().toCommandLineArgs());
         result.addComponent("expectData", this.expectData.toCommandLineArgs());
         return result;
     }
@@ -142,14 +128,14 @@ public record CompareOption(
                 .newDataSet(this.newDataSet())
                 .oldDataSet(this.oldDataSet())
                 .tableSeparators(this.getTableSeparators())
-                .dataSetConverter(this.converter())
+                .dataSetConverter(this.result().converter())
                 .build()
                 .result();
-        if (this.getExpectData().srcType() != DataSourceType.none) {
+        if (this.expectData().srcType() != DataSourceType.none) {
             return !new DataSetCompareBuilder()
                     .newDataSet(this.resultDataSet())
                     .oldDataSet(this.expectDataSet())
-                    .tableSeparators(this.getExpectData().getParam().getTableSeparators())
+                    .tableSeparators(this.expectData().getParam().getTableSeparators())
                     .dataSetConverter(this.expectedDiffConverter())
                     .build()
                     .result().existDiff();
@@ -198,7 +184,7 @@ public record CompareOption(
     }
 
     public ComparableDataSet resultDataSet() {
-        final DataSetConverterOption converterOption = this.getConvertResult();
+        final DataSetConverterOption converterOption = this.result().convertResult();
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
                         .setTableSeparators(this.getExpectTableSeparators())
@@ -228,8 +214,8 @@ public record CompareOption(
     }
 
     public IDataSetConverter expectedDiffConverter() {
-        return this.converter(it ->
-                it.setResultDir(new File(this.getConvertResult().resultDir(), "expectedDiff")));
+        return this.result().converter(it ->
+                it.setResultDir(new File(this.result().convertResult().resultDir(), "expectedDiff")));
     }
 
     private TableSeparators getExpectTableSeparators() {

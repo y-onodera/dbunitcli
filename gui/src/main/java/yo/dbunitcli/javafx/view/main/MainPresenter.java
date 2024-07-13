@@ -109,10 +109,12 @@ public class MainPresenter {
         final String[] args = this.inputToArg();
         final Thread background = new Thread(() -> {
             final File result = this.execCommand(this.selectedCommand, args);
-            try {
-                Desktop.getDesktop().open(result);
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
+            if (result != null) {
+                try {
+                    Desktop.getDesktop().open(result);
+                } catch (final IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
         background.setDaemon(true);
@@ -390,25 +392,25 @@ public class MainPresenter {
                 final Convert command = new Convert();
                 final ConvertOption option = command.parseOption(args);
                 command.exec(option);
-                yield option.getConvertResult().getResultDir();
+                yield option.result().convertResult().resultDir();
             }
             case "Compare" -> {
                 final Compare command = new Compare();
                 final CompareOption option = command.parseOption(args);
                 command.exec(option);
-                yield option.getConvertResult().getResultDir();
+                yield option.result().convertResult().resultDir();
             }
             case "Generate" -> {
                 final Generate command = new Generate();
                 final GenerateOption option = command.parseOption(args);
                 command.exec(option);
-                yield option.getConvertResult().getResultDir();
+                yield option.resultDir();
             }
             case "Run" -> {
                 final Run command = new Run();
                 final RunOption option = command.parseOption(args);
                 command.exec(option);
-                yield option.getConvertResult().getResultDir();
+                yield null;
             }
             default -> null;
         };

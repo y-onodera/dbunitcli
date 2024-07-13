@@ -1,6 +1,7 @@
 package yo.dbunitcli.application;
 
 import picocli.CommandLine;
+import yo.dbunitcli.application.dto.DataSetConverterDto;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.dto.ImageCompareDto;
 
@@ -22,6 +23,16 @@ public class CompareDto extends CommandDto {
     private DataSetLoadDto oldData = new DataSetLoadDto();
 
     private DataSetLoadDto newData = new DataSetLoadDto();
+
+    private DataSetConverterDto convertResult = new DataSetConverterDto();
+
+    public DataSetConverterDto getConvertResult() {
+        return this.convertResult;
+    }
+
+    public void setConvertResult(final DataSetConverterDto convertResult) {
+        this.convertResult = convertResult;
+    }
 
     public String getSetting() {
         return this.setting;

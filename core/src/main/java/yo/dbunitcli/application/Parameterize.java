@@ -21,7 +21,7 @@ public class Parameterize implements Command<ParameterizeDto, ParameterizeOption
                         Parameterize.LOGGER.info(fail.getMessage());
                         return 1;
                     } catch (final AssertionError ae) {
-                        if (!options.isIgnoreFail()) {
+                        if (!options.ignoreFail()) {
                             throw ae;
                         } else {
                             Parameterize.LOGGER.info(ae.getMessage());
@@ -43,8 +43,8 @@ public class Parameterize implements Command<ParameterizeDto, ParameterizeOption
     }
 
     @Override
-    public ParameterizeOption getOptions(final String resultFile, final ParameterizeDto dto, final Parameter param) {
-        return new ParameterizeOption(resultFile, dto, param);
+    public ParameterizeOption parseOption(final String resultFile, final ParameterizeDto dto, final Parameter param) {
+        return new ParameterizeOption(dto, param);
     }
 
 }

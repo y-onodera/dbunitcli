@@ -40,7 +40,7 @@ public class Compare implements Command<CompareDto, CompareOption> {
     }
 
     @Override
-    public CompareOption getOptions(final String resultFile, final CompareDto dto, final Parameter param) {
+    public CompareOption parseOption(final String resultFile, final CompareDto dto, final Parameter param) {
         return new CompareOption(resultFile, dto, param);
     }
 

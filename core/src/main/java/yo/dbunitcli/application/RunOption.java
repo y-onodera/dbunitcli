@@ -16,13 +16,12 @@ import java.io.File;
 import java.util.stream.Stream;
 
 public record RunOption(
-        BaseOption base
+        Parameter parameter
         , ScriptType scriptType
         , DataSetLoadOption srcData
         , TemplateRenderOption templateOption
         , JdbcOption jdbcOption
 ) implements CommandLineOption<RunDto> {
-
 
     public static RunDto toDto(final String[] args) {
         final RunDto dto = new RunDto();
@@ -37,17 +36,13 @@ public record RunOption(
         return dto;
     }
 
-    public RunOption(final String resultFile, final RunDto dto, final Parameter param) {
-        this(new BaseOption(resultFile, dto, param)
+    public RunOption(final RunDto dto, final Parameter param) {
+        this(param
                 , dto.getScriptType() != null ? dto.getScriptType() : ScriptType.sql
                 , new DataSetLoadOption("src", dto.getSrcData())
                 , new TemplateRenderOption("template", dto.getTemplateOption())
                 , new JdbcOption("jdbc", dto.getJdbcOption())
         );
-    }
-
-    public ScriptType getScriptType() {
-        return this.scriptType;
     }
 
     public Stream<File> targetFiles() {
@@ -63,17 +58,12 @@ public record RunOption(
     }
 
     public Runner runner() {
-        return this.getScriptType().createRunner(this);
+        return this.scriptType().createRunner(this);
     }
 
     @Override
     public RunDto toDto() {
         return RunOption.toDto(this.toArgs(true));
-    }
-
-    @Override
-    public BaseOption base() {
-        return this.base;
     }
 
     @Override
@@ -98,14 +88,14 @@ public record RunOption(
             @Override
             public Runner createRunner(final RunOption aOption) {
                 return new SqlRunner(aOption.jdbcOption.getDatabaseConnectionLoader()
-                        , aOption.getParameter().getMap()
+                        , aOption.parameter().getMap()
                         , aOption.templateOption.getTemplateRender()
                 );
             }
         }, ant {
             @Override
             public Runner createRunner(final RunOption aOption) {
-                return new AntRunner(aOption.getParameter().getMap());
+                return new AntRunner(aOption.parameter().getMap());
             }
 
             @Override
@@ -115,7 +105,7 @@ public record RunOption(
         };
 
         public Runner createRunner(final RunOption aOption) {
-            return new CmdRunner(aOption.getParameter().getMap()
+            return new CmdRunner(aOption.parameter().getMap()
                     , aOption.templateOption.getTemplateRender()
             );
         }

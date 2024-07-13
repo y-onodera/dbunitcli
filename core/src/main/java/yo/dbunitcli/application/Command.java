@@ -42,8 +42,6 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
 
     DTO createDto(String[] args);
 
-    T getOptions(String resultFile, DTO dto, final Parameter param);
-
     default T parseOption(final String[] args) {
         return this.parseOption(args, Parameter.NONE);
     }
@@ -53,8 +51,8 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
     }
 
     default T parseOption(final String result, final String[] args, final Parameter param) {
-        final String[] expandArgs = this.getExpandArgs(args);
-        return this.getOptions(Optional.ofNullable(result)
+        final DTO dto = this.createDto(this.getExpandArgs(args));
+        return this.parseOption(Optional.ofNullable(result)
                 .filter(Strings::isNotEmpty)
                 .orElseGet(() -> {
                             String resultFile = "result";
@@ -64,8 +62,10 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
                             }
                             return resultFile;
                         }
-                ), this.createDto(expandArgs), param);
+                ), dto, param.addAll(dto.getInputParam()));
     }
+
+    T parseOption(String resultFile, DTO dto, final Parameter param);
 
     default String[] getExpandArgs(final String[] args) {
         final List<String> result = new ArrayList<>();

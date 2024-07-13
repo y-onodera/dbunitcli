@@ -15,10 +15,13 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public record GenerateOption(
-        BaseOption base
+        Parameter parameter
+        , File resultDir
+        , String resultPath
         , GenerateType generateType
         , ParameterUnit unit
         , DBConverter.Operation operation
@@ -37,7 +40,6 @@ public record GenerateOption(
                 .parseArgument(args, dto);
         new CommandLineParser("src").parseArgument(args, dto.getSrcData());
         new CommandLineParser("template").parseArgument(args, dto.getTemplateOption());
-        new CommandLineParser("result").parseArgument(args, dto.getConvertResult());
         return dto;
     }
 
@@ -46,7 +48,12 @@ public record GenerateOption(
     }
 
     public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
-        this(new BaseOption(resultFile, dto, param)
+        this(param
+                , Strings.isNotEmpty(dto.getResultDir())
+                        ? new File(dto.getResultDir()) : new File(".")
+                , Optional.ofNullable(dto.getResultPath())
+                        .filter(it -> !it.isEmpty())
+                        .orElse(resultFile)
                 , GenerateOption.getGenerateType(dto)
                 , GenerateOption.getGenerateType(dto).isFixedTemplate()
                         ? GenerateOption.getGenerateType(dto).getFixedUnit()
@@ -67,7 +74,7 @@ public record GenerateOption(
     }
 
     public Stream<Parameter> parameterStream() {
-        this.getParameter().getMap().put("commit", this.commit);
+        this.parameter().getMap().put("commit", this.commit);
         return this.unit().loadStream(this.getComparableDataSetLoader(), this.dataSetParam());
     }
 
@@ -76,7 +83,7 @@ public record GenerateOption(
     }
 
     public File getResultDir() {
-        return this.getConvertResult().resultDir();
+        return this.resultDir();
     }
 
     public void write(final File resultFile, final Parameter param) throws IOException {
@@ -88,18 +95,12 @@ public record GenerateOption(
         return GenerateOption.toDto(this.toArgs(true));
     }
 
-    @Override
     public String getResultPath() {
         if (this.generateType() == GenerateType.sql) {
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
-            return CommandLineOption.super.getResultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
+            return this.resultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
         }
-        return CommandLineOption.super.getResultPath();
-    }
-
-    @Override
-    public BaseOption base() {
-        return this.base;
+        return this.resultPath();
     }
 
     @Override
@@ -132,6 +133,8 @@ public record GenerateOption(
                 result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
             }
         }
+        result.putDir("-result", this.resultDir);
+        result.put("-resultPath", this.resultPath);
         return result;
     }
 

@@ -2,9 +2,11 @@ package yo.dbunitcli.application;
 
 import yo.dbunitcli.application.cli.CommandLineParser;
 import yo.dbunitcli.application.option.DataSetLoadOption;
+import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.dataset.Parameter;
 
-public record ConvertOption(BaseOption base, DataSetLoadOption srcData) implements CommandLineOption<ConvertDto> {
+public record ConvertOption(Parameter parameter, ResultOption result,
+                            DataSetLoadOption srcData) implements CommandLineOption<ConvertDto> {
 
     public static ConvertDto toDto(final String[] args) {
         final ConvertDto dto = new ConvertDto();
@@ -16,7 +18,9 @@ public record ConvertOption(BaseOption base, DataSetLoadOption srcData) implemen
     }
 
     public ConvertOption(final String resultFile, final ConvertDto dto, final Parameter param) {
-        this(new BaseOption(resultFile, dto, param), new DataSetLoadOption("src", dto.getSrcData()));
+        this(param
+                , new ResultOption(resultFile, dto.getConvertResult())
+                , new DataSetLoadOption("src", dto.getSrcData()));
     }
 
     @Override
@@ -25,22 +29,17 @@ public record ConvertOption(BaseOption base, DataSetLoadOption srcData) implemen
     }
 
     @Override
-    public BaseOption base() {
-        return this.base;
-    }
-
-    @Override
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs();
         result.addComponent("srcData", this.srcData.toCommandLineArgs());
-        result.addComponent("convertResult", this.getConvertResult().toCommandLineArgs());
+        result.addComponent("convertResult", this.result().convertResult().toCommandLineArgs());
         return result;
     }
 
     public void convertDataset() {
         this.getComparableDataSetLoader()
                 .loadDataSet(this.srcData.getParam()
-                        .setConverter(this.converter(it -> it.setResultPath(this.getResultPath())))
+                        .setConverter(this.result().converter(it -> it.setResultPath(this.result().getResultPath())))
                         .build());
     }
 

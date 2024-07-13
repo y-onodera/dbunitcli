@@ -8,6 +8,10 @@ import yo.dbunitcli.dataset.converter.DBConverter;
 public class GenerateDto extends CommandDto {
     @CommandLine.Option(names = "-generateType")
     private GenerateOption.GenerateType generateType;
+    @CommandLine.Option(names = "-result", description = "directory result files at")
+    private String resultDir;
+    @CommandLine.Option(names = "-resultPath", description = "result file relative path from -result=dir.")
+    private String resultPath;
     @CommandLine.Option(names = "-unit", description = "generate by row or table or dataset")
     private ParameterUnit unit;
     @CommandLine.Option(names = "-commit", description = "default commit;whether commit or not generate sql")
@@ -32,6 +36,22 @@ public class GenerateDto extends CommandDto {
 
     public void setGenerateType(final GenerateOption.GenerateType generateType) {
         this.generateType = generateType;
+    }
+
+    public String getResultDir() {
+        return this.resultDir;
+    }
+
+    public void setResultDir(final String resultDir) {
+        this.resultDir = resultDir;
+    }
+
+    public String getResultPath() {
+        return this.resultPath;
+    }
+
+    public void setResultPath(final String resultPath) {
+        this.resultPath = resultPath;
     }
 
     public ParameterUnit getUnit() {

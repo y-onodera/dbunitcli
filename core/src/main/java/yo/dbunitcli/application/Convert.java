@@ -19,7 +19,7 @@ public class Convert implements Command<ConvertDto, ConvertOption> {
     }
 
     @Override
-    public ConvertOption getOptions(final String resultFile, final ConvertDto dto, final Parameter param) {
+    public ConvertOption parseOption(final String resultFile, final ConvertDto dto, final Parameter param) {
         return new ConvertOption(resultFile, dto, param);
     }
 }

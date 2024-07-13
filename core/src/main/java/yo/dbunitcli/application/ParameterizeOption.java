@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record ParameterizeOption(
-        BaseOption base
+        Parameter parameter
         , String cmd
         , String cmdParam
         , Map<String, String> args
@@ -26,7 +26,6 @@ public record ParameterizeOption(
         , File template
         , DataSetLoadOption paramData
         , TemplateRenderOption templateOption
-
 ) implements CommandLineOption<ParameterizeDto> {
 
     private static final DefaultArgumentMapper NONE_PARAM_MAPPER = new DefaultArgumentMapper() {
@@ -69,8 +68,8 @@ public record ParameterizeOption(
         return dto;
     }
 
-    public ParameterizeOption(final String resultFile, final ParameterizeDto dto, final Parameter param) {
-        this(new BaseOption(resultFile, dto, param)
+    public ParameterizeOption(final ParameterizeDto dto, final Parameter param) {
+        this(param
                 , dto.getCmd()
                 , dto.getCmdParam()
                 , new HashMap<>(dto.getArg())
@@ -83,22 +82,9 @@ public record ParameterizeOption(
         );
     }
 
-    public boolean isIgnoreFail() {
-        return this.ignoreFail;
-    }
-
-    public boolean isParameterize() {
-        return this.parameterize;
-    }
-
     @Override
     public ParameterizeDto toDto() {
         return ParameterizeOption.toDto(this.toArgs(true));
-    }
-
-    @Override
-    public BaseOption base() {
-        return this.base;
     }
 
     @Override
@@ -120,7 +106,7 @@ public record ParameterizeOption(
     }
 
     public String[] createArgs(final Parameter aParam) {
-        final String parameterList = this.isParameterize()
+        final String parameterList = this.parameterize()
                 ? this.templateOption.getTemplateRender()
                 .render(this.getTemplateArgs(aParam.getMap()), aParam.getMap())
                 : this.getTemplateArgs(aParam.getMap());
@@ -140,7 +126,7 @@ public record ParameterizeOption(
         return this.createCommand(this.templateOption.getTemplateRender().render(this.cmd, aParam.getMap()));
     }
 
-    protected Command<?, ?> createCommand(final String cmdType) {
+    private Command<?, ?> createCommand(final String cmdType) {
         return switch (cmdType) {
             case "compare" -> new Compare();
             case "convert" -> new Convert();
@@ -151,7 +137,7 @@ public record ParameterizeOption(
         };
     }
 
-    protected String getTemplateArgs(final Map<String, Object> aParam) {
+    private String getTemplateArgs(final Map<String, Object> aParam) {
         File template = this.template;
         if (!Optional.ofNullable(this.cmdParam).orElse("").isEmpty()) {
             template = new File(this.templateOption.getTemplateRender().render(this.cmdParam, aParam));
