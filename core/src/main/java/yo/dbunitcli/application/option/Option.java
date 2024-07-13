@@ -4,6 +4,7 @@ import yo.dbunitcli.Strings;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public interface Option {
@@ -16,6 +17,34 @@ public interface Option {
 
     enum ParamType {
         TEXT, ENUM, FLG, FILE, DIR, FILE_OR_DIR,
+    }
+
+    enum FilterType {
+        ANY, INCLUDE, EXCLUDE
+    }
+
+    record Filter<T extends Enum<?>>(FilterType type, T[] target) implements Predicate<T> {
+
+        static <T extends Enum<?>> Filter<T> any() {
+            return new Filter<>(FilterType.ANY, null);
+        }
+
+        static <T extends Enum<?>> Filter<T> include(final T... target) {
+            return new Filter<>(FilterType.INCLUDE, target);
+        }
+
+        static <T extends Enum<?>> Filter<T> exclude(final T... target) {
+            return new Filter<>(FilterType.EXCLUDE, target);
+        }
+
+        @Override
+        public boolean test(final T t) {
+            return switch (this.type()) {
+                case ANY -> true;
+                case EXCLUDE -> !List.of(this.target).contains(t);
+                case INCLUDE -> List.of(this.target).contains(t);
+            };
+        }
     }
 
     class CommandLineArgs {
@@ -142,8 +171,13 @@ public interface Option {
         }
 
         public <T extends Enum<?>> void put(final String key, final T value, final Class<T> type, final boolean required) {
+            this.put(key, value, type, Filter.any(), required);
+        }
+
+        public <T extends Enum<?>> void put(final String key, final T value, final Class<T> type, final Filter<T> filter, final boolean required) {
             this.put(key, value == null ? "" : value.toString(), new Attribute(ParamType.ENUM,
                     Arrays.stream(type.getEnumConstants())
+                            .filter(filter)
                             .map(Object::toString)
                             .collect(Collectors.toCollection(ArrayList::new))
                     , required)

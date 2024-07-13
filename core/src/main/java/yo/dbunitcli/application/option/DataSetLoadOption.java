@@ -11,54 +11,40 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
-public class DataSetLoadOption implements Option {
+public record DataSetLoadOption(
+        String prefix
+        , DataSourceType srcType
+        , File src
+        , String setting
+        , String settingEncoding
+        , String regTableInclude
+        , String regTableExclude
+        , boolean loadData
+        , boolean includeMetaData
+        , ComparableDataSetParamOption dataSetParam
+) implements Option {
 
-    private final String prefix;
-    private final DataSourceType srcType;
-    private final String setting;
-    private final String settingEncoding;
-    private final String regTableInclude;
-    private final String regTableExclude;
-    private final boolean loadData;
-    private final boolean includeMetaData;
-    private final ComparableDataSetParamOption dataSetParam;
-    private final File src;
 
-    public DataSetLoadOption(final String prefix) {
-        this(prefix, new DataSetLoadDto());
+    private static DataSourceType getSrcType(final DataSetLoadDto dto) {
+        return dto.getSrcType() != null ? dto.getSrcType() : DataSourceType.csv;
     }
 
     public DataSetLoadOption(final String prefix, final DataSetLoadDto dto) {
-        this.prefix = prefix;
-        if (dto.getSrcType() != null) {
-            this.srcType = dto.getSrcType();
-        } else {
-            this.srcType = DataSourceType.csv;
-        }
-        if (this.srcType != DataSourceType.none && Strings.isNotEmpty(dto.getSrc())) {
-            this.src = new File(dto.getSrc());
-        } else {
-            this.src = null;
-        }
-        this.setting = dto.getSetting();
-        if (Strings.isNotEmpty(dto.getSettingEncoding())) {
-            this.settingEncoding = dto.getSettingEncoding();
-        } else {
-            this.settingEncoding = System.getProperty("file.encoding");
-        }
-        this.regTableInclude = dto.getRegTableInclude();
-        this.regTableExclude = dto.getRegTableExclude();
-        if (Strings.isNotEmpty(dto.getLoadData())) {
-            this.loadData = Boolean.parseBoolean(dto.getLoadData());
-        } else {
-            this.loadData = true;
-        }
-        if (Strings.isNotEmpty(dto.getIncludeMetaData())) {
-            this.includeMetaData = Boolean.parseBoolean(dto.getIncludeMetaData());
-        } else {
-            this.includeMetaData = false;
-        }
-        this.dataSetParam = new DataSourceTypeOptionFactory().create(this.getPrefix(), this.srcType, dto);
+        this(prefix
+                , DataSetLoadOption.getSrcType(dto)
+                , DataSetLoadOption.getSrcType(dto) != DataSourceType.none && Strings.isNotEmpty(dto.getSrc())
+                        ? new File(dto.getSrc())
+                        : null
+                , dto.getSetting()
+                , Strings.isNotEmpty(dto.getSettingEncoding())
+                        ? dto.getSettingEncoding()
+                        : System.getProperty("file.encoding")
+                , dto.getRegTableInclude()
+                , dto.getRegTableExclude()
+                , !Strings.isNotEmpty(dto.getLoadData()) || Boolean.parseBoolean(dto.getLoadData())
+                , Strings.isNotEmpty(dto.getIncludeMetaData()) && Boolean.parseBoolean(dto.getIncludeMetaData())
+                , new DataSourceTypeOptionFactory().create(prefix, DataSetLoadOption.getSrcType(dto), dto)
+        );
     }
 
     @Override
@@ -69,7 +55,8 @@ public class DataSetLoadOption implements Option {
     @Override
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
-        result.put("-srcType", this.srcType, DataSourceType.class, true);
+        result.put("-srcType", this.srcType
+                , DataSourceType.class, Filter.exclude(DataSourceType.none), true);
         if (Optional.ofNullable(result.get("-srcType")).orElse("").isEmpty()) {
             return result;
         }
@@ -110,13 +97,13 @@ public class DataSetLoadOption implements Option {
         );
     }
 
-    protected void assertFileExists(final File file) {
+    public void assertFileExists(final File file) {
         if (!file.exists()) {
             throw new AssertionError(file + " is not exist", new IllegalArgumentException(file.toString()));
         }
     }
 
-    protected TableSeparators getTableSeparators() {
+    public TableSeparators getTableSeparators() {
         try {
             return new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting);
         } catch (final IOException e) {

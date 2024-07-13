@@ -71,8 +71,10 @@ public class CompareOption extends CommandLineOption<CompareDto> {
             new CommandLineParser("new").parseArgument(args, dto.getNewData());
             new CommandLineParser("old").parseArgument(args, dto.getOldData());
         }
-        if (Arrays.stream(args).anyMatch(it -> it.startsWith("-expect.src"))) {
+        if (Arrays.stream(args).anyMatch(it -> it.startsWith("-expect.srcType") || it.startsWith("-expect.src="))) {
             new CommandLineParser("expect").parseArgument(args, dto.getExpectData());
+        } else {
+            dto.getExpectData().setSrcType(DataSourceType.none);
         }
         new CommandLineParser("result").parseArgument(args, dto.getConvertResult());
         return dto;
@@ -98,11 +100,7 @@ public class CompareOption extends CommandLineOption<CompareDto> {
         }
         this.newData = new DataSetLoadOption("new", dto.getNewData());
         this.oldData = new DataSetLoadOption("old", dto.getOldData());
-        if (Strings.isNotEmpty(dto.getExpectData().getSrc())) {
-            this.expectData = new DataSetLoadOption("expect", dto.getExpectData());
-        } else {
-            this.expectData = new DataSetLoadOption("expect");
-        }
+        this.expectData = new DataSetLoadOption("expect", dto.getExpectData());
     }
 
     @Override
@@ -146,7 +144,7 @@ public class CompareOption extends CommandLineOption<CompareDto> {
                 .dataSetConverter(this.converter())
                 .build()
                 .result();
-        if (this.getExpectData().getSrc() != null) {
+        if (this.getExpectData().srcType() != DataSourceType.none) {
             return !new DataSetCompareBuilder()
                     .newDataSet(this.resultDataSet())
                     .oldDataSet(this.expectDataSet())
