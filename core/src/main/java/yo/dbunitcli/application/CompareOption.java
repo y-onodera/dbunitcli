@@ -99,7 +99,7 @@ public record CompareOption(
                         ? new ImageCompareOption("image", dto.getImageOption()) : new ImageCompareOption("image")
                 , new DataSetLoadOption("new", dto.getNewData())
                 , new DataSetLoadOption("old", dto.getOldData())
-                , new DataSetLoadOption("expect", dto.getExpectData()));
+                , new DataSetLoadOption("expect", dto.getExpectData(), true));
     }
 
     @Override

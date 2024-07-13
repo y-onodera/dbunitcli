@@ -77,7 +77,7 @@ public record ParameterizeOption(
                 , !Strings.isNotEmpty(dto.getParameterize()) || Boolean.parseBoolean(dto.getParameterize())
                 , dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record
                 , Strings.isNotEmpty(dto.getTemplate()) ? new File(dto.getTemplate()) : null
-                , new DataSetLoadOption("param", dto.getParamData())
+                , new DataSetLoadOption("param", dto.getParamData(), true)
                 , new TemplateRenderOption("template", dto.getTemplateOption())
         );
     }

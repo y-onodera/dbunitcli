@@ -12,6 +12,7 @@ import java.io.IOException;
 
 public record DataSetLoadOption(
         String prefix
+        , boolean enableSrcTypeNone
         , DataSourceType srcType
         , File src
         , String setting
@@ -29,7 +30,12 @@ public record DataSetLoadOption(
     }
 
     public DataSetLoadOption(final String prefix, final DataSetLoadDto dto) {
+        this(prefix, dto, false);
+    }
+
+    public DataSetLoadOption(final String prefix, final DataSetLoadDto dto, final boolean enableSrcTypeNone) {
         this(prefix
+                , enableSrcTypeNone
                 , DataSetLoadOption.getSrcType(dto)
                 , DataSetLoadOption.getSrcType(dto) != DataSourceType.none && Strings.isNotEmpty(dto.getSrc())
                         ? new File(dto.getSrc())
@@ -54,9 +60,10 @@ public record DataSetLoadOption(
     @Override
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
-        result.put("-srcType", this.srcType
-                , DataSourceType.class, Filter.exclude(DataSourceType.none), true);
-        if (Strings.isEmpty(result.get("-srcType"))) {
+        result.put("-srcType", this.srcType, DataSourceType.class
+                , this.enableSrcTypeNone ? Filter.any() : Filter.exclude(DataSourceType.none), true);
+        if (Strings.isEmpty(result.get("-srcType"))
+                || DataSourceType.valueOf(result.get("-srcType")) == DataSourceType.none) {
             return result;
         }
         result.putFileOrDir("-src", this.src, true);
