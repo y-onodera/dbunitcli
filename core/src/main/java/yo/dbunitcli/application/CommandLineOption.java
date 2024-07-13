@@ -62,7 +62,7 @@ public abstract class CommandLineOption<T extends CommandDto> implements Option 
     }
 
     protected String getResultPath() {
-        return Optional.ofNullable(this.convertResult.getResultPath())
+        return Optional.ofNullable(this.convertResult.resultPath())
                 .filter(it -> !it.isEmpty())
                 .orElse(this.resultFile);
     }

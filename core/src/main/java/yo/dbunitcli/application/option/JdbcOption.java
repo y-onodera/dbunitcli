@@ -11,28 +11,25 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class JdbcOption implements Option {
+public record JdbcOption(
+        String prefix
+        , File jdbcProperties
+        , String jdbcUrl
+        , String jdbcUser
+        , String jdbcPass
+) implements Option {
 
-    private final String prefix;
-    private final String jdbcUrl;
-    private final String jdbcUser;
-    private final String jdbcPass;
-    private final File jdbcProperties;
 
     public JdbcOption(final String prefix) {
         this(prefix, new JdbcDto());
     }
 
     public JdbcOption(final String prefix, final JdbcDto dto) {
-        this.prefix = prefix;
-        if (Strings.isNotEmpty(dto.getJdbcProperties())) {
-            this.jdbcProperties = new File(dto.getJdbcProperties());
-        } else {
-            this.jdbcProperties = null;
-        }
-        this.jdbcUrl = dto.getJdbcUrl();
-        this.jdbcUser = dto.getJdbcUser();
-        this.jdbcPass = dto.getJdbcPass();
+        this(prefix
+                , Strings.isNotEmpty(dto.getJdbcProperties()) ? new File(dto.getJdbcProperties()) : null
+                , dto.getJdbcUrl()
+                , dto.getJdbcUser()
+                , dto.getJdbcPass());
     }
 
     @Override

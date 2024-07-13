@@ -201,9 +201,9 @@ public class CompareOption extends CommandLineOption<CompareDto> {
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
                         .setTableSeparators(this.getExpectTableSeparators())
-                        .setSrc(converterOption.getResultDir())
-                        .setSource(converterOption.getResultType().toDataSourceType())
-                        .setEncoding(converterOption.getOutputEncoding())
+                        .setSrc(converterOption.resultDir())
+                        .setSource(converterOption.resultType().toDataSourceType())
+                        .setEncoding(converterOption.outputEncoding())
                         .setRecursive(false)
                         .build()
         );
@@ -228,7 +228,7 @@ public class CompareOption extends CommandLineOption<CompareDto> {
 
     public IDataSetConverter expectedDiffConverter() {
         return this.converter(it ->
-                it.setResultDir(new File(this.getConvertResult().getResultDir(), "expectedDiff")));
+                it.setResultDir(new File(this.getConvertResult().resultDir(), "expectedDiff")));
     }
 
     private TableSeparators getExpectTableSeparators() {

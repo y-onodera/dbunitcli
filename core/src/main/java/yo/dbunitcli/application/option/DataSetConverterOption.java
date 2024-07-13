@@ -9,52 +9,33 @@ import yo.dbunitcli.dataset.converter.DBConverter;
 
 import java.io.File;
 
-public class DataSetConverterOption implements Option {
+public record DataSetConverterOption(
+        String prefix
+        , ResultType resultType
+        , File resultDir
+        , String resultPath
+        , boolean exportEmptyTable
+        , JdbcOption jdbcOption
+        , DBConverter.Operation operation
+        , String outputEncoding
+        , String excelTable
+) implements Option {
 
-    private final String prefix;
-    private final JdbcOption jdbcOption;
-    private final DBConverter.Operation operation;
-    private final ResultType resultType;
-    private final boolean exportEmptyTable;
-    private final String outputEncoding;
-    private final File resultDir;
-    private final String resultPath;
-    private final String excelTable;
+    private static ResultType resultType(final DataSetConverterDto dto) {
+        return dto.getResultType() != null ? dto.getResultType() : ResultType.csv;
+    }
 
     public DataSetConverterOption(final String prefix, final DataSetConverterDto dto) {
-        this.prefix = prefix;
-        if (dto.getResultType() != null) {
-            this.resultType = dto.getResultType();
-        } else {
-            this.resultType = ResultType.csv;
-        }
-        if (Strings.isNotEmpty(dto.getResultDir())) {
-            this.resultDir = new File(dto.getResultDir());
-        } else {
-            this.resultDir = new File(".");
-        }
-        this.resultPath = dto.getResultPath();
-        if (Strings.isNotEmpty(dto.getExportEmptyTable())) {
-            this.exportEmptyTable = Boolean.parseBoolean(dto.getExportEmptyTable());
-        } else {
-            this.exportEmptyTable = true;
-        }
-        if (Strings.isNotEmpty(dto.getOutputEncoding())) {
-            this.outputEncoding = dto.getOutputEncoding();
-        } else {
-            this.outputEncoding = "UTF-8";
-        }
-        this.operation = dto.getOperation();
-        if (Strings.isNotEmpty(dto.getExcelTable())) {
-            this.excelTable = dto.getExcelTable();
-        } else {
-            this.excelTable = "SHEET";
-        }
-        if (this.resultType == ResultType.table) {
-            this.jdbcOption = new JdbcOption(prefix, dto.getJdbc());
-        } else {
-            this.jdbcOption = new JdbcOption(prefix);
-        }
+        this(prefix
+                , DataSetConverterOption.resultType(dto)
+                , Strings.isNotEmpty(dto.getResultDir()) ? new File(dto.getResultDir()) : new File(".")
+                , dto.getResultPath()
+                , !Strings.isNotEmpty(dto.getExportEmptyTable()) || Boolean.parseBoolean(dto.getExportEmptyTable())
+                , DataSetConverterOption.resultType(dto) == ResultType.table ? new JdbcOption(prefix, dto.getJdbc()) : new JdbcOption(prefix)
+                , dto.getOperation()
+                , Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8"
+                , Strings.isNotEmpty(dto.getExcelTable()) ? dto.getExcelTable() : "SHEET"
+        );
     }
 
     @Override
@@ -98,22 +79,6 @@ public class DataSetConverterOption implements Option {
                 .setOutputEncoding(this.outputEncoding)
                 .setExcelTable(this.excelTable)
                 ;
-    }
-
-    public ResultType getResultType() {
-        return this.resultType;
-    }
-
-    public File getResultDir() {
-        return this.resultDir;
-    }
-
-    public String getResultPath() {
-        return this.resultPath;
-    }
-
-    public String getOutputEncoding() {
-        return this.outputEncoding;
     }
 
 }

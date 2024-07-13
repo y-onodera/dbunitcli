@@ -7,17 +7,12 @@ import yo.dbunitcli.resource.poi.FromJsonXlsxSchemaBuilder;
 
 import java.io.File;
 
-public class ExcelOption implements ComparableDataSetParamOption {
-    private final String prefix;
-    private final File xlsxSchemaSource;
+public record ExcelOption(String prefix, File xlsxSchemaSource) implements ComparableDataSetParamOption {
 
     public ExcelOption(final String prefix, final DataSetLoadDto dto) {
-        this.prefix = prefix;
-        if (Strings.isNotEmpty(dto.getXlsxSchemaSource())) {
-            this.xlsxSchemaSource = new File(dto.getXlsxSchemaSource());
-        } else {
-            this.xlsxSchemaSource = null;
-        }
+        this(prefix, Strings.isNotEmpty(dto.getXlsxSchemaSource())
+                ? new File(dto.getXlsxSchemaSource())
+                : null);
     }
 
     @Override

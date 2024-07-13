@@ -4,22 +4,19 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
-public class TraverseOption implements ComparableDataSetParamOption {
+public record TraverseOption(
+        String prefix
+        , boolean recursive
+        , String regExclude
+        , String regInclude
+) implements ComparableDataSetParamOption {
 
-    private final String prefix;
-    private final boolean recursive;
-    private final String regInclude;
-    private final String regExclude;
 
     public TraverseOption(final String prefix, final DataSetLoadDto dto) {
-        this.prefix = prefix;
-        if (Strings.isNotEmpty(dto.getRecursive())) {
-            this.recursive = Boolean.parseBoolean(dto.getRecursive());
-        } else {
-            this.recursive = false;
-        }
-        this.regExclude = dto.getRegExclude();
-        this.regInclude = dto.getRegInclude();
+        this(prefix
+                , Strings.isNotEmpty(dto.getRecursive()) && Boolean.parseBoolean(dto.getRecursive())
+                , dto.getRegExclude()
+                , dto.getRegInclude());
     }
 
     @Override

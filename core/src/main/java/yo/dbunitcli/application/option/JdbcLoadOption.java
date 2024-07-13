@@ -4,20 +4,17 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
-public class JdbcLoadOption implements ComparableDataSetParamOption {
+public record JdbcLoadOption(
+        String prefix
+        , JdbcOption jdbc
+        , boolean useJdbcMetaData
+) implements ComparableDataSetParamOption {
 
-    private final String prefix;
-    private final JdbcOption jdbc;
-    private final String useJdbcMetaData;
 
     public JdbcLoadOption(final String prefix, final DataSetLoadDto dto) {
-        this.prefix = prefix;
-        this.jdbc = new JdbcOption(this.prefix, dto.getJdbc());
-        if (Strings.isNotEmpty(dto.getUseJdbcMetaData())) {
-            this.useJdbcMetaData = dto.getUseJdbcMetaData();
-        } else {
-            this.useJdbcMetaData = "false";
-        }
+        this(prefix, new JdbcOption(prefix, dto.getJdbc())
+                , Strings.isNotEmpty(dto.getUseJdbcMetaData())
+                        && Boolean.parseBoolean(dto.getUseJdbcMetaData()));
     }
 
     @Override
@@ -35,7 +32,7 @@ public class JdbcLoadOption implements ComparableDataSetParamOption {
 
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
-        return builder.setUseJdbcMetaData(Boolean.parseBoolean(this.useJdbcMetaData))
+        return builder.setUseJdbcMetaData(this.useJdbcMetaData)
                 .setDatabaseConnectionLoader(this.jdbc.getDatabaseConnectionLoader());
     }
 

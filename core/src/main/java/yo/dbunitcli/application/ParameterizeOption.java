@@ -161,7 +161,7 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
         } else if (template == null) {
             return "";
         }
-        return Files.read(template, this.templateOption.getTemplateEncoding());
+        return Files.read(template, this.templateOption.encoding());
     }
 
 }

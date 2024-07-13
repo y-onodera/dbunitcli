@@ -106,7 +106,7 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
     }
 
     public File getResultDir() {
-        return this.getConvertResult().getResultDir();
+        return this.getConvertResult().resultDir();
     }
 
     public void write(final File resultFile, final Parameter param) throws IOException {
@@ -189,15 +189,15 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
                     throw new AssertionError(option.template + " is not exist file"
                             , new IllegalArgumentException(String.valueOf(option.template)));
                 }
-                return Files.read(option.template, option.templateOption.getTemplateEncoding());
+                return Files.read(option.template, option.templateOption.encoding());
             }
         },
         xlsx {
             @Override
             protected void write(final GenerateOption option, final File resultFile, final Map<String, Object> param) throws IOException {
                 JxlsTemplateRender.builder()
-                        .setTemplateParameterAttribute(option.templateOption.getTemplateParameterAttribute())
-                        .setFormulaProcess(option.templateOption.isFormulaProcess())
+                        .setTemplateParameterAttribute(option.templateOption.templateParameterAttribute())
+                        .setFormulaProcess(option.templateOption.formulaProcess())
                         .build()
                         .render(option.template, resultFile, param);
             }
@@ -206,7 +206,7 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
             @Override
             protected void write(final GenerateOption option, final File resultFile, final Map<String, Object> param) throws IOException {
                 JxlsTemplateRender.builder()
-                        .setTemplateParameterAttribute(option.templateOption.getTemplateParameterAttribute())
+                        .setTemplateParameterAttribute(option.templateOption.templateParameterAttribute())
                         .build()
                         .render(option.template, resultFile, param);
             }

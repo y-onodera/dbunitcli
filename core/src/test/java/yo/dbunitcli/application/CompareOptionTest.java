@@ -54,7 +54,7 @@ public class CompareOptionTest {
     @Test
     public void parseDefaultResultDirEqualsCurrentDir() {
         final CompareOption option = this.target.parseOption(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"});
-        assertEquals(new File(".").getAbsoluteFile(), option.getConvertResult().getResultDir().getAbsoluteFile());
+        assertEquals(new File(".").getAbsoluteFile(), option.getConvertResult().resultDir().getAbsoluteFile());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class CompareOptionTest {
                 , "-old.src=" + this.baseDir + "/multidiff/old"
                 , "-setting=" + this.baseDir + "/multidiff/setting.json"
                 , "-result=" + this.baseDir + "/result"});
-        assertEquals(new File(this.baseDir, "result"), option.getConvertResult().getResultDir());
+        assertEquals(new File(this.baseDir, "result"), option.getConvertResult().resultDir());
     }
 
     @Test

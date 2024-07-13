@@ -10,12 +10,7 @@ public interface ComparableDataSetParamOption extends Option {
 
     ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder);
 
-    class CompositeOption implements ComparableDataSetParamOption {
-        private final ComparableDataSetParamOption[] leaf;
-
-        public CompositeOption(final ComparableDataSetParamOption... leaf) {
-            this.leaf = leaf;
-        }
+    record CompositeOption(ComparableDataSetParamOption[] leaf) implements ComparableDataSetParamOption {
 
         @Override
         public ComparableDataSetParam.Builder populate(ComparableDataSetParam.Builder builder) {

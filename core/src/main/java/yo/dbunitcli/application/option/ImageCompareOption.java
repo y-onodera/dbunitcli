@@ -15,69 +15,47 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ImageCompareOption implements Option {
+public record ImageCompareOption(
+        String prefix
+        , boolean drawExcludedRectangles
+        , String threshold
+        , String pixelToleranceLevel
+        , String allowingPercentOfDifferentPixels
+        , String rectangleLineWidth
+        , String minimalRectangleSize
+        , String maximalRectangleCount
+        , boolean fillDifferenceRectangles
+        , String percentOpacityDifferenceRectangles
+        , String differenceRectangleColor
+        , String excludedAreas
+        , boolean fillExcludedRectangles
+        , String percentOpacityExcludedRectangles
+        , String excludedRectangleColor
+) implements Option {
 
     private static final Pattern AREA_REGEX = Pattern.compile("(?=\\[)\\[((\\d+\\.?\\d*,){3}(\\d+\\.?\\d*))\\]((?=\\[)|$)");
-    private final String prefix;
-    private final List<Rectangle> excludeAreaList = new ArrayList<>();
-    private final boolean drawExcludedRectangles;
-    private final String threshold;
-    private final String pixelToleranceLevel;
-    private final String allowingPercentOfDifferentPixels;
-    private final String rectangleLineWidth;
-    private final String minimalRectangleSize;
-    private final String maximalRectangleCount;
-    private final boolean fillDifferenceRectangles;
-    private final String percentOpacityDifferenceRectangles;
-    private final String differenceRectangleColor;
-    private final String excludedAreas;
-    private final boolean fillExcludedRectangles;
-    private final String percentOpacityExcludedRectangles;
-    private final String excludedRectangleColor;
 
     public ImageCompareOption(final String prefix) {
         this(prefix, new ImageCompareDto());
     }
 
     public ImageCompareOption(final String prefix, final ImageCompareDto dto) {
-        this.prefix = prefix;
-        if (Strings.isNotEmpty(dto.getDrawExcludedRectangles())) {
-            this.drawExcludedRectangles = Boolean.parseBoolean(dto.getDrawExcludedRectangles());
-        } else {
-            this.drawExcludedRectangles = true;
-        }
-        this.threshold = dto.getThreshold();
-        this.pixelToleranceLevel = dto.getPixelToleranceLevel();
-        this.allowingPercentOfDifferentPixels = dto.getAllowingPercentOfDifferentPixels();
-        this.rectangleLineWidth = dto.getRectangleLineWidth();
-        this.minimalRectangleSize = dto.getMinimalRectangleSize();
-        this.maximalRectangleCount = dto.getMaximalRectangleCount();
-        if (Strings.isNotEmpty(dto.getFillDifferenceRectangles())) {
-            this.fillDifferenceRectangles = Boolean.parseBoolean(dto.getFillDifferenceRectangles());
-        } else {
-            this.fillDifferenceRectangles = false;
-        }
-        this.percentOpacityDifferenceRectangles = dto.getPercentOpacityDifferenceRectangles();
-        this.differenceRectangleColor = dto.getDifferenceRectangleColor();
-        this.excludedAreas = dto.getExcludedAreas();
-        if (Strings.isNotEmpty(dto.getFillExcludedRectangles())) {
-            this.fillExcludedRectangles = Boolean.parseBoolean(dto.getFillExcludedRectangles());
-        } else {
-            this.fillExcludedRectangles = false;
-        }
-        this.percentOpacityExcludedRectangles = dto.getPercentOpacityExcludedRectangles();
-        this.excludedRectangleColor = dto.getExcludedRectangleColor();
-        if (!Optional.ofNullable(this.excludedAreas).orElse("").isEmpty()) {
-            final Matcher m = ImageCompareOption.AREA_REGEX.matcher(this.excludedAreas);
-            while (m.find()) {
-                final String[] points = m.group(1).split(",");
-                this.excludeAreaList.add(new Rectangle(new BigDecimal(points[0]).intValue()
-                        , new BigDecimal(points[1]).intValue()
-                        , new BigDecimal(points[2]).intValue()
-                        , new BigDecimal(points[3]).intValue()
-                ));
-            }
-        }
+        this(prefix
+                , !Strings.isNotEmpty(dto.getDrawExcludedRectangles()) || Boolean.parseBoolean(dto.getDrawExcludedRectangles())
+                , dto.getThreshold()
+                , dto.getPixelToleranceLevel()
+                , dto.getAllowingPercentOfDifferentPixels()
+                , dto.getRectangleLineWidth()
+                , dto.getMinimalRectangleSize()
+                , dto.getMaximalRectangleCount()
+                , Strings.isNotEmpty(dto.getFillDifferenceRectangles()) && Boolean.parseBoolean(dto.getFillDifferenceRectangles())
+                , dto.getPercentOpacityDifferenceRectangles()
+                , dto.getDifferenceRectangleColor()
+                , dto.getExcludedAreas()
+                , Strings.isNotEmpty(dto.getFillExcludedRectangles()) && Boolean.parseBoolean(dto.getFillExcludedRectangles())
+                , dto.getPercentOpacityExcludedRectangles()
+                , dto.getExcludedRectangleColor()
+        );
     }
 
     @Override
@@ -117,12 +95,28 @@ public class ImageCompareOption implements Option {
                 .setFillDifferenceRectangles(this.fillDifferenceRectangles)
                 .setPercentOpacityDifferenceRectangles(Double.parseDouble(Optional.ofNullable(this.percentOpacityDifferenceRectangles).orElse("20.0")))
                 .setDifferenceRectangleColor(Optional.ofNullable(Color.getColor(this.differenceRectangleColor)).orElse(Color.red))
-                .setExcludeAreaList(this.excludeAreaList)
+                .setExcludeAreaList(this.excludeAreaList())
                 .setDrawExcludedRectangles(this.drawExcludedRectangles)
                 .setFillExcludedRectangles(this.fillExcludedRectangles)
                 .setPercentOpacityExcludedRectangles(Double.parseDouble(Optional.ofNullable(this.percentOpacityExcludedRectangles).orElse("20.0")))
                 .setExcludedRectangleColor(Optional.ofNullable(Color.getColor(this.excludedRectangleColor)).orElse(Color.green))
                 ;
+    }
+
+    private List<Rectangle> excludeAreaList() {
+        final ArrayList<Rectangle> excludeAreaList = new ArrayList<>();
+        if (!Optional.ofNullable(this.excludedAreas).orElse("").isEmpty()) {
+            final Matcher m = ImageCompareOption.AREA_REGEX.matcher(this.excludedAreas);
+            while (m.find()) {
+                final String[] points = m.group(1).split(",");
+                excludeAreaList.add(new Rectangle(new BigDecimal(points[0]).intValue()
+                        , new BigDecimal(points[1]).intValue()
+                        , new BigDecimal(points[2]).intValue()
+                        , new BigDecimal(points[3]).intValue()
+                ));
+            }
+        }
+        return excludeAreaList;
     }
 
 }
