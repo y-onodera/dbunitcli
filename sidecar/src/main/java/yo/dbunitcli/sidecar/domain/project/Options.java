@@ -126,7 +126,7 @@ public record Options(File baseDir, Map<CommandType, List<Path>> parameterFiles)
             if (subDir.exists() && subDir.isDirectory()) {
                 try (final Stream<Path> pathStream = Files.walk(subDir.toPath(), 1)) {
                     files.addAll(pathStream
-                            .filter(it -> !it.toAbsolutePath().toString().equals(subDir.getAbsolutePath()))
+                            .filter(it -> it.toFile().isFile() && !it.toAbsolutePath().toString().equals(subDir.getAbsolutePath()))
                             .toList());
                 } catch (final IOException e) {
                     throw new RuntimeException(e);
