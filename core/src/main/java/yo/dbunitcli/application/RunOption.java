@@ -26,6 +26,9 @@ public class RunOption extends CommandLineOption<RunDto> {
         final RunDto dto = new RunDto();
         new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, CommandLineOption.DEFAULT_COMMANDLINE_FILTER)
                 .parseArgument(args, dto);
+        dto.getSrcData().setSrcType(DataSourceType.file);
+        dto.getSrcData().setIncludeMetaData("false");
+        dto.getSrcData().setLoadData("true");
         new CommandLineParser("src").parseArgument(args, dto.getSrcData());
         new CommandLineParser("jdbc").parseArgument(args, dto.getJdbcOption());
         new CommandLineParser("template").parseArgument(args, dto.getTemplateOption());

@@ -131,23 +131,32 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs();
         result.put("-generateType", this.generateType, GenerateType.class);
+        final CommandLineArgs srcComponent = this.srcData.toCommandLineArgs();
         if (result.hasValue("-generateType")) {
             final GenerateType resultGenerateType = GenerateType.valueOf(result.get("-generateType"));
             if (!resultGenerateType.isFixedTemplate()) {
                 result.put("-unit", this.unit, ParameterUnit.class);
                 result.putFile("-template", this.template, true);
-            } else if (resultGenerateType == GenerateType.sql) {
-                result.put("-commit", Boolean.toString(this.commit));
-                result.put("-op", this.operation, DBConverter.Operation.class);
-                result.put("-sqlFilePrefix", this.sqlFilePrefix);
-                result.put("-sqlFileSuffix", this.sqlFileSuffix);
             }
-            if (!(resultGenerateType == GenerateType.xls || resultGenerateType == GenerateType.xlsx)) {
-                result.put("-outputEncoding", this.outputEncoding);
+            switch (resultGenerateType) {
+                case sql -> {
+                    result.put("-commit", Boolean.toString(this.commit));
+                    result.put("-op", this.operation, DBConverter.Operation.class);
+                    result.put("-sqlFilePrefix", this.sqlFilePrefix);
+                    result.put("-sqlFileSuffix", this.sqlFileSuffix);
+                    srcComponent.remove("-useJdbcMetaData");
+                }
+                case settings -> {
+                    srcComponent.remove("-useJdbcMetaData");
+                    srcComponent.remove("-loadData");
+                }
+                case xls, xlsx -> result.put("-outputEncoding", this.outputEncoding);
+            }
+            result.addComponent("srcData", srcComponent);
+            if (!resultGenerateType.isFixedTemplate()) {
+                result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
             }
         }
-        result.addComponent("srcData", this.srcData.toCommandLineArgs());
-        result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
         return result;
     }
 
