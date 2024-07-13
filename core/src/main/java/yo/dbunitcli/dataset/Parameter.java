@@ -28,7 +28,7 @@ public class Parameter {
         return this;
     }
 
-    public Parameter addAll(final Map<String, Object> other) {
+    public Parameter addAll(final Map<String, ? extends Object> other) {
         this.map.putAll(other);
         return this;
     }

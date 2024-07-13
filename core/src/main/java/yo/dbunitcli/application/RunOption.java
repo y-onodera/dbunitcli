@@ -15,12 +15,14 @@ import yo.dbunitcli.fileprocessor.SqlRunner;
 import java.io.File;
 import java.util.stream.Stream;
 
-public class RunOption extends CommandLineOption<RunDto> {
+public record RunOption(
+        BaseOption base
+        , ScriptType scriptType
+        , DataSetLoadOption srcData
+        , TemplateRenderOption templateOption
+        , JdbcOption jdbcOption
+) implements CommandLineOption<RunDto> {
 
-    private final DataSetLoadOption srcData;
-    private final TemplateRenderOption templateOption;
-    private final JdbcOption jdbcOption;
-    private final ScriptType scriptType;
 
     public static RunDto toDto(final String[] args) {
         final RunDto dto = new RunDto();
@@ -36,15 +38,12 @@ public class RunOption extends CommandLineOption<RunDto> {
     }
 
     public RunOption(final String resultFile, final RunDto dto, final Parameter param) {
-        super(resultFile, dto, param);
-        if (dto.getScriptType() != null) {
-            this.scriptType = dto.getScriptType();
-        } else {
-            this.scriptType = ScriptType.sql;
-        }
-        this.templateOption = new TemplateRenderOption("template", dto.getTemplateOption());
-        this.jdbcOption = new JdbcOption("jdbc", dto.getJdbcOption());
-        this.srcData = new DataSetLoadOption("src", dto.getSrcData());
+        this(new BaseOption(resultFile, dto, param)
+                , dto.getScriptType() != null ? dto.getScriptType() : ScriptType.sql
+                , new DataSetLoadOption("src", dto.getSrcData())
+                , new TemplateRenderOption("template", dto.getTemplateOption())
+                , new JdbcOption("jdbc", dto.getJdbcOption())
+        );
     }
 
     public ScriptType getScriptType() {
@@ -70,6 +69,11 @@ public class RunOption extends CommandLineOption<RunDto> {
     @Override
     public RunDto toDto() {
         return RunOption.toDto(this.toArgs(true));
+    }
+
+    @Override
+    public BaseOption base() {
+        return this.base;
     }
 
     @Override

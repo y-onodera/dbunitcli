@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import picocli.CommandLine;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.cli.ArgumentFilter;
 import yo.dbunitcli.application.cli.CommandLineParser;
@@ -16,8 +15,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@CommandLine.Command(name = "parameterize", mixinStandardHelpOptions = true)
-public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
+public record ParameterizeOption(
+        BaseOption base
+        , String cmd
+        , String cmdParam
+        , Map<String, String> args
+        , boolean ignoreFail
+        , boolean parameterize
+        , ParameterUnit unit
+        , File template
+        , DataSetLoadOption paramData
+        , TemplateRenderOption templateOption
+
+) implements CommandLineOption<ParameterizeDto> {
 
     private static final DefaultArgumentMapper NONE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
@@ -48,15 +58,6 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
         }
     };
     private static final ArgumentFilter ARGS_IGNORE_FILTER = new DefaultArgumentFilter("-P", "-A", "-arg");
-    private final DataSetLoadOption paramData;
-    private final ParameterUnit unit;
-    private final TemplateRenderOption templateOption;
-    private final Map<String, String> args = new HashMap<>();
-    private final String cmd;
-    private final String cmdParam;
-    private boolean ignoreFail = false;
-    private boolean parameterize = true;
-    private File template;
 
     public static ParameterizeDto toDto(final String[] args) {
         final ParameterizeDto dto = new ParameterizeDto();
@@ -69,26 +70,17 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
     }
 
     public ParameterizeOption(final String resultFile, final ParameterizeDto dto, final Parameter param) {
-        super(resultFile, dto, param);
-        this.cmd = dto.getCmd();
-        this.cmdParam = dto.getCmdParam();
-        this.args.putAll(dto.getArg());
-        if (Strings.isNotEmpty(dto.getIgnoreFail())) {
-            this.ignoreFail = Boolean.parseBoolean(dto.getIgnoreFail());
-        }
-        if (Strings.isNotEmpty(dto.getParameterize())) {
-            this.parameterize = Boolean.parseBoolean(dto.getParameterize());
-        }
-        if (dto.getUnit() != null) {
-            this.unit = dto.getUnit();
-        } else {
-            this.unit = ParameterUnit.record;
-        }
-        if (Strings.isNotEmpty(dto.getTemplate())) {
-            this.template = new File(dto.getTemplate());
-        }
-        this.paramData = new DataSetLoadOption("param", dto.getParamData());
-        this.templateOption = new TemplateRenderOption("template", dto.getTemplateOption());
+        this(new BaseOption(resultFile, dto, param)
+                , dto.getCmd()
+                , dto.getCmdParam()
+                , new HashMap<>(dto.getArg())
+                , Strings.isNotEmpty(dto.getIgnoreFail()) && Boolean.parseBoolean(dto.getIgnoreFail())
+                , !Strings.isNotEmpty(dto.getParameterize()) || Boolean.parseBoolean(dto.getParameterize())
+                , dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record
+                , Strings.isNotEmpty(dto.getTemplate()) ? new File(dto.getTemplate()) : null
+                , new DataSetLoadOption("param", dto.getParamData())
+                , new TemplateRenderOption("template", dto.getTemplateOption())
+        );
     }
 
     public boolean isIgnoreFail() {
@@ -102,6 +94,11 @@ public class ParameterizeOption extends CommandLineOption<ParameterizeDto> {
     @Override
     public ParameterizeDto toDto() {
         return ParameterizeOption.toDto(this.toArgs(true));
+    }
+
+    @Override
+    public BaseOption base() {
+        return this.base;
     }
 
     @Override

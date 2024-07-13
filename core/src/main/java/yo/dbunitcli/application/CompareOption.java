@@ -17,7 +17,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class CompareOption extends CommandLineOption<CompareDto> {
+public record CompareOption(
+        BaseOption base
+        , String setting
+        , String settingEncoding
+        , Type targetType
+        , ImageCompareOption imageOption
+        , DataSetLoadOption newData
+        , DataSetLoadOption oldData
+        , DataSetLoadOption expectData
+) implements CommandLineOption<CompareDto> {
 
     private static final DefaultArgumentMapper IMAGE_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
         @Override
@@ -42,13 +51,6 @@ public class CompareOption extends CommandLineOption<CompareDto> {
             return newArg.toArray(new String[0]);
         }
     };
-    private final DataSetLoadOption oldData;
-    private final DataSetLoadOption newData;
-    private final String setting;
-    private final String settingEncoding;
-    private final Type targetType;
-    private final DataSetLoadOption expectData;
-    private final ImageCompareOption imageOption;
 
     public static CompareDto toDto(final String[] args) {
         final CompareDto dto = new CompareDto();
@@ -80,32 +82,31 @@ public class CompareOption extends CommandLineOption<CompareDto> {
         return dto;
     }
 
+    private static Type getTargetType(final CompareDto dto) {
+        return dto.getTargetType() != null ? dto.getTargetType() : Type.data;
+    }
+
     public CompareOption(final String resultFile, final CompareDto dto, final Parameter param) {
-        super(resultFile, dto, param);
-        this.setting = dto.getSetting();
-        if (Strings.isNotEmpty(dto.getSettingEncoding())) {
-            this.settingEncoding = dto.getSettingEncoding();
-        } else {
-            this.settingEncoding = System.getProperty("file.encoding");
-        }
-        if (dto.getTargetType() != null) {
-            this.targetType = dto.getTargetType();
-        } else {
-            this.targetType = Type.data;
-        }
-        if (this.targetType.isAny(Type.image, Type.pdf)) {
-            this.imageOption = new ImageCompareOption("image", dto.getImageOption());
-        } else {
-            this.imageOption = new ImageCompareOption("image");
-        }
-        this.newData = new DataSetLoadOption("new", dto.getNewData());
-        this.oldData = new DataSetLoadOption("old", dto.getOldData());
-        this.expectData = new DataSetLoadOption("expect", dto.getExpectData());
+        this(new BaseOption(resultFile, dto, param)
+                , dto.getSetting()
+                , Strings.isNotEmpty(dto.getSettingEncoding())
+                        ? dto.getSettingEncoding() : System.getProperty("file.encoding")
+                , CompareOption.getTargetType(dto)
+                , CompareOption.getTargetType(dto).isAny(Type.image, Type.pdf)
+                        ? new ImageCompareOption("image", dto.getImageOption()) : new ImageCompareOption("image")
+                , new DataSetLoadOption("new", dto.getNewData())
+                , new DataSetLoadOption("old", dto.getOldData())
+                , new DataSetLoadOption("expect", dto.getExpectData()));
     }
 
     @Override
     public CompareDto toDto() {
         return CompareOption.toDto(this.toArgs(true));
+    }
+
+    @Override
+    public BaseOption base() {
+        return this.base;
     }
 
     public DataSetLoadOption getOldData() {

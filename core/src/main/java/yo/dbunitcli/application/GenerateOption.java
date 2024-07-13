@@ -17,18 +17,19 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class GenerateOption extends CommandLineOption<GenerateDto> {
-
-    private final DataSetLoadOption srcData;
-    private final ParameterUnit unit;
-    private final TemplateRenderOption templateOption;
-    private final GenerateType generateType;
-    private final DBConverter.Operation operation;
-    private final boolean commit;
-    private final String sqlFileSuffix;
-    private final String sqlFilePrefix;
-    private final String outputEncoding;
-    private final File template;
+public record GenerateOption(
+        BaseOption base
+        , GenerateType generateType
+        , ParameterUnit unit
+        , DBConverter.Operation operation
+        , String sqlFilePrefix
+        , String sqlFileSuffix
+        , boolean commit
+        , File template
+        , String outputEncoding
+        , DataSetLoadOption srcData
+        , TemplateRenderOption templateOption
+) implements CommandLineOption<GenerateDto> {
 
     public static GenerateDto toDto(final String[] args) {
         final GenerateDto dto = new GenerateDto();
@@ -40,65 +41,34 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
         return dto;
     }
 
+    private static GenerateType getGenerateType(final GenerateDto dto) {
+        return dto.getGenerateType() != null ? dto.getGenerateType() : GenerateType.txt;
+    }
+
     public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
-        super(resultFile, dto, param);
-        if (dto.getGenerateType() != null) {
-            this.generateType = dto.getGenerateType();
-        } else {
-            this.generateType = GenerateType.txt;
-        }
-        if (this.generateType.isFixedTemplate()) {
-            this.unit = this.generateType.getFixedUnit();
-        } else if (dto.getUnit() != null) {
-            this.unit = dto.getUnit();
-        } else {
-            this.unit = ParameterUnit.record;
-        }
-        this.operation = dto.getOperation();
-        if (Strings.isNotEmpty(dto.getSqlFilePrefix())) {
-            this.sqlFilePrefix = dto.getSqlFilePrefix();
-        } else {
-            this.sqlFilePrefix = "";
-        }
-        if (Strings.isNotEmpty(dto.getSqlFileSuffix())) {
-            this.sqlFileSuffix = dto.getSqlFileSuffix();
-        } else {
-            this.sqlFileSuffix = "";
-        }
-        if (Strings.isNotEmpty(dto.getCommit())) {
-            this.commit = Boolean.parseBoolean(dto.getCommit());
-        } else {
-            this.commit = true;
-        }
-        if (Strings.isNotEmpty(dto.getTemplate())) {
-            this.template = new File(dto.getTemplate());
-        } else {
-            this.template = null;
-        }
-        if (Strings.isNotEmpty(dto.getOutputEncoding())) {
-            this.outputEncoding = dto.getOutputEncoding();
-        } else {
-            this.outputEncoding = "UTF-8";
-        }
-        this.srcData = new DataSetLoadOption("src", dto.getSrcData());
-        this.templateOption = new TemplateRenderOption("template", dto.getTemplateOption());
+        this(new BaseOption(resultFile, dto, param)
+                , GenerateOption.getGenerateType(dto)
+                , GenerateOption.getGenerateType(dto).isFixedTemplate()
+                        ? GenerateOption.getGenerateType(dto).getFixedUnit()
+                        : dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record
+                , dto.getOperation()
+                , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
+                , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
+                , !Strings.isNotEmpty(dto.getCommit()) || Boolean.parseBoolean(dto.getCommit())
+                , Strings.isNotEmpty(dto.getTemplate()) ? new File(dto.getTemplate()) : null
+                , Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8"
+                , new DataSetLoadOption("src", dto.getSrcData())
+                , new TemplateRenderOption("template", dto.getTemplateOption())
+        );
     }
 
     public String templateString() {
         return this.generateType.getTemplateString(this);
     }
 
-    public ParameterUnit getUnit() {
-        return this.unit;
-    }
-
-    public GenerateType getGenerateType() {
-        return this.generateType;
-    }
-
     public Stream<Parameter> parameterStream() {
         this.getParameter().getMap().put("commit", this.commit);
-        return this.getUnit().loadStream(this.getComparableDataSetLoader(), this.dataSetParam());
+        return this.unit().loadStream(this.getComparableDataSetLoader(), this.dataSetParam());
     }
 
     public String resultPath(final Parameter param) {
@@ -110,7 +80,7 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
     }
 
     public void write(final File resultFile, final Parameter param) throws IOException {
-        this.getGenerateType().write(this, resultFile, param.getMap());
+        this.generateType().write(this, resultFile, param.getMap());
     }
 
     @Override
@@ -119,12 +89,17 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
     }
 
     @Override
-    protected String getResultPath() {
-        if (this.getGenerateType() == GenerateType.sql) {
+    public String getResultPath() {
+        if (this.generateType() == GenerateType.sql) {
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
-            return super.getResultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
+            return CommandLineOption.super.getResultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
         }
-        return super.getResultPath();
+        return CommandLineOption.super.getResultPath();
+    }
+
+    @Override
+    public BaseOption base() {
+        return this.base;
     }
 
     @Override
@@ -162,16 +137,16 @@ public class GenerateOption extends CommandLineOption<GenerateDto> {
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
-        if (this.getGenerateType() == GenerateType.settings) {
+        if (this.generateType() == GenerateType.settings) {
             builder.setUseJdbcMetaData(true);
             builder.setLoadData(false);
-        } else if (this.getGenerateType() == GenerateType.sql) {
+        } else if (this.generateType() == GenerateType.sql) {
             builder.setUseJdbcMetaData(true);
         }
         return builder.build();
     }
 
-    protected String getSqlTemplate() {
+    private String getSqlTemplate() {
         return switch (this.operation) {
             case INSERT -> "sql/insertTemplate.txt";
             case DELETE -> "sql/deleteTemplate.txt";

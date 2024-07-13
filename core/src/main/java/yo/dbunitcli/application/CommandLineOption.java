@@ -16,55 +16,73 @@ import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 
-public abstract class CommandLineOption<T extends CommandDto> implements Option {
+public interface CommandLineOption<T extends CommandDto> extends Option {
 
-    public static ArgumentFilter DEFAULT_COMMANDLINE_FILTER = new DefaultArgumentFilter("-P");
-    public static ArgumentMapper DEFAULT_COMMANDLINE_MAPPER = new DefaultArgumentMapper();
-    private final Parameter parameter;
-    private final DataSetConverterOption convertResult;
-    private final String resultFile;
+    ArgumentFilter DEFAULT_COMMANDLINE_FILTER = new DefaultArgumentFilter("-P");
+    ArgumentMapper DEFAULT_COMMANDLINE_MAPPER = new DefaultArgumentMapper();
 
-    public CommandLineOption(final String resultFile, final T dto, final Parameter param) {
-        this.parameter = param;
-        this.parameter.getMap().putAll(dto.getInputParam());
-        this.resultFile = resultFile;
-        this.convertResult = new DataSetConverterOption("result", dto.getConvertResult());
-    }
-
-    public String[] toArgs(final boolean containNoValue) {
+    default String[] toArgs(final boolean containNoValue) {
         return this.toCommandLineArgs().toList(containNoValue).toArray(new String[0]);
     }
 
-    public abstract T toDto();
+    T toDto();
 
-    public Parameter getParameter() {
-        return this.parameter;
+    default Parameter getParameter() {
+        return this.base().parameter();
     }
 
-    public DataSetConverterOption getConvertResult() {
-        return this.convertResult;
+    default DataSetConverterOption getConvertResult() {
+        return this.base().convertResult();
     }
 
-    public IDataSetConverter converter() {
-        return new DataSetConverterLoader().get(this.convertResult.getParam().build());
+    default IDataSetConverter converter() {
+        return this.base().converter();
     }
 
-    public IDataSetConverter converter(final UnaryOperator<DataSetConverterParam.Builder> customizer) {
-        return new DataSetConverterLoader().get(customizer.apply(this.convertResult.getParam()).build());
+    default IDataSetConverter converter(final UnaryOperator<DataSetConverterParam.Builder> customizer) {
+        return this.base().converter(customizer);
     }
 
-    protected ComparableDataSetLoader getComparableDataSetLoader() {
-        return new ComparableDataSetLoader(this.parameter);
+    default ComparableDataSetLoader getComparableDataSetLoader() {
+        return this.base().getComparableDataSetLoader();
     }
 
-    protected ComparableDataSetParam.Builder getDataSetParamBuilder() {
+    default ComparableDataSetParam.Builder getDataSetParamBuilder() {
         return ComparableDataSetParam.builder();
     }
 
-    protected String getResultPath() {
-        return Optional.ofNullable(this.convertResult.resultPath())
-                .filter(it -> !it.isEmpty())
-                .orElse(this.resultFile);
+    default String getResultPath() {
+        return this.base().getResultPath();
+    }
+
+    BaseOption base();
+
+    record BaseOption(Parameter parameter
+            , String resultFile
+            , DataSetConverterOption convertResult) {
+        BaseOption(final String resultFile, final CommandDto dto, final Parameter param) {
+            this(param.addAll(dto.getInputParam())
+                    , resultFile
+                    , new DataSetConverterOption("result", dto.getConvertResult()));
+        }
+
+        IDataSetConverter converter() {
+            return new DataSetConverterLoader().get(this.convertResult.getParam().build());
+        }
+
+        IDataSetConverter converter(final UnaryOperator<DataSetConverterParam.Builder> customizer) {
+            return new DataSetConverterLoader().get(customizer.apply(this.convertResult.getParam()).build());
+        }
+
+        ComparableDataSetLoader getComparableDataSetLoader() {
+            return new ComparableDataSetLoader(this.parameter);
+        }
+
+        String getResultPath() {
+            return Optional.ofNullable(this.convertResult.resultPath())
+                    .filter(it -> !it.isEmpty())
+                    .orElse(this.resultFile);
+        }
     }
 
 }

@@ -4,9 +4,7 @@ import yo.dbunitcli.application.cli.CommandLineParser;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.dataset.Parameter;
 
-public class ConvertOption extends CommandLineOption<ConvertDto> {
-
-    private final DataSetLoadOption srcData;
+public record ConvertOption(BaseOption base, DataSetLoadOption srcData) implements CommandLineOption<ConvertDto> {
 
     public static ConvertDto toDto(final String[] args) {
         final ConvertDto dto = new ConvertDto();
@@ -18,13 +16,17 @@ public class ConvertOption extends CommandLineOption<ConvertDto> {
     }
 
     public ConvertOption(final String resultFile, final ConvertDto dto, final Parameter param) {
-        super(resultFile, dto, param);
-        this.srcData = new DataSetLoadOption("src", dto.getSrcData());
+        this(new BaseOption(resultFile, dto, param), new DataSetLoadOption("src", dto.getSrcData()));
     }
 
     @Override
     public ConvertDto toDto() {
         return ConvertOption.toDto(this.toArgs(true));
+    }
+
+    @Override
+    public BaseOption base() {
+        return this.base;
     }
 
     @Override
