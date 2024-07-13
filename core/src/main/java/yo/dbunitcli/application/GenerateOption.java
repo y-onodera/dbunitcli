@@ -106,7 +106,7 @@ public record GenerateOption(
     @Override
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs();
-        result.put("-generateType", this.generateType, GenerateType.class);
+        result.put("-generateType", this.generateType, GenerateType.class, true);
         final CommandLineArgs srcComponent = this.srcData.toCommandLineArgs();
         if (result.hasValue("-generateType")) {
             final GenerateType resultGenerateType = GenerateType.valueOf(result.get("-generateType"));
@@ -120,21 +120,23 @@ public record GenerateOption(
                     result.put("-op", this.operation, DBConverter.Operation.class);
                     result.put("-sqlFilePrefix", this.sqlFilePrefix);
                     result.put("-sqlFileSuffix", this.sqlFileSuffix);
-                    srcComponent.remove("-useJdbcMetaData");
+                    srcComponent.remove("-src.useJdbcMetaData");
                 }
                 case settings -> {
-                    srcComponent.remove("-useJdbcMetaData");
-                    srcComponent.remove("-loadData");
+                    srcComponent.remove("-src.useJdbcMetaData");
+                    srcComponent.remove("-src.loadData");
                 }
-                case xls, xlsx -> result.put("-outputEncoding", this.outputEncoding);
             }
             result.addComponent("srcData", srcComponent);
             if (!resultGenerateType.isFixedTemplate()) {
                 result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
             }
+            result.putDir("-result", this.resultDir);
+            result.put("-resultPath", this.resultPath);
+            if (!(resultGenerateType == GenerateType.xlsx || resultGenerateType == GenerateType.xls)) {
+                result.put("-outputEncoding", this.outputEncoding);
+            }
         }
-        result.putDir("-result", this.resultDir);
-        result.put("-resultPath", this.resultPath);
         return result;
     }
 
