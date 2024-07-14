@@ -9,7 +9,7 @@ use tauri::WindowEvent;
 #[tauri::command]
 fn main() {
     let (tx,rx) = sync_channel::<i64>(1);
-    let mut child = Command::new("backend/dbunit-cli-sidecar-x86_64-pc-windows-msvc.exe")
+    let mut child = Command::new("backend/dbunit-cli-sidecar.exe")
           .arg("-Djava.home=backend")
           .arg("-Dyo.dbunit.cli.sidecar.workspace=target")
           .stdout(Stdio::piped())
