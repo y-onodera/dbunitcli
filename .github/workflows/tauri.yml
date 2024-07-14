@@ -1,0 +1,24 @@
+name: tauri ci
+on:
+  push:
+    paths:
+      - 'tauri/**'
+      - '.github/workflows/tauri.yml'
+
+jobs:
+  build-tauri:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+      - name: Install dependencies
+        run: |
+          cd tauri
+          bun install
