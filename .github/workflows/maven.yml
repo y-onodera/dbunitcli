@@ -5,9 +5,9 @@ name: Java CI with Maven
 
 on:
   push:
-    paths:
-      - 'core/**'
-      - 'sidecar/**'
+    branches:
+      - 'main/core/**'
+      - 'main/sidecar/**'
 
 jobs:
   build:
