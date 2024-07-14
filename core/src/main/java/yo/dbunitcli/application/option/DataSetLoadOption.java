@@ -61,7 +61,7 @@ public record DataSetLoadOption(
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
         result.put("-srcType", this.srcType, DataSourceType.class
-                , this.enableSrcTypeNone ? Filter.any() : Filter.exclude(DataSourceType.none), true);
+                , this.enableSrcTypeNone ? Filter.any() : Filter.exclude(DataSourceType.none), false);
         if (Strings.isEmpty(result.get("-srcType"))
                 || DataSourceType.valueOf(result.get("-srcType")) == DataSourceType.none) {
             return result;

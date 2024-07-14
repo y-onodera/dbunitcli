@@ -152,7 +152,6 @@ class GenerateOptionTest {
             assertEquals(Arrays.stream(GenerateOption.GenerateType.values())
                     .map(Enum::toString)
                     .toList(), generateType.attribute().selectOption());
-            assertTrue(generateType.attribute().required());
             assertEquals(GenerateOptionTest.this.src.getUnit().toString(), result.getArg("-unit").value());
             assertNull(result.getArg("-sqlFilePrefix"));
             assertNull(result.getArg("-sqlFileSuffix"));
@@ -165,7 +164,6 @@ class GenerateOptionTest {
                     .filter(it -> it != DataSourceType.none)
                     .map(Enum::toString)
                     .toList(), srcType.attribute().selectOption());
-            assertTrue(srcType.attribute().required());
             assertEquals(GenerateOptionTest.this.src.getSrcData().getUseJdbcMetaData(), result.getArg("-src.useJdbcMetaData").value());
             assertEquals(GenerateOptionTest.this.src.getSrcData().getLoadData(), result.getArg("-src.loadData").value());
             assertEquals(GenerateOptionTest.this.src.getTemplateOption().getEncoding(), result.getArg("-template.encoding").value());

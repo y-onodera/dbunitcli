@@ -106,7 +106,7 @@ public record GenerateOption(
     @Override
     public CommandLineArgs toCommandLineArgs() {
         final CommandLineArgs result = new CommandLineArgs();
-        result.put("-generateType", this.generateType, GenerateType.class, true);
+        result.put("-generateType", this.generateType, GenerateType.class);
         final CommandLineArgs srcComponent = this.srcData.toCommandLineArgs();
         if (result.hasValue("-generateType")) {
             final GenerateType resultGenerateType = GenerateType.valueOf(result.get("-generateType"));
