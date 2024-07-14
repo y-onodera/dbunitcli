@@ -34,18 +34,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
 
     @Get(uri = "add", produces = MediaType.APPLICATION_JSON)
     public String add() throws IOException {
-        final List<String> alreadyExists = this.workspace.parameterNames(this.getCommandType())
-                .filter(it -> Pattern.compile("new item(\\([0-9]+\\))*").matcher(it).matches())
-                .toList();
-        final String name = IntStream.iterate(1, it -> it + 1)
-                .filter(it -> !alreadyExists.contains("new item(%s)".formatted(it)))
-                .mapToObj("new item(%s)"::formatted)
-                .findFirst()
-                .get();
-        this.workspace.save(this.getCommandType()
-                , alreadyExists.size() == 0 ? "new item" : name
-                , this.getCommand().parseOption(new String[]{}).toArgs(false)
-        );
+        this.saveNewFile("new item", this.getCommand().parseOption(new String[]{}).toArgs(false));
         return ObjectMapper
                 .getDefault()
                 .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
@@ -58,10 +47,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                 .findFirst()
                 .ifPresent(target -> {
                     try {
-                        this.workspace.save(this.getCommandType()
-                                , target.getFileName().toString().replace(".txt", "") + "(1)"
-                                , Files.readAllLines(target).toArray(new String[0])
-                        );
+                        this.saveNewFile(target.getFileName() + "(1)", Files.readAllLines(target).toArray(new String[0]));
                     } catch (final IOException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -156,6 +142,20 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     abstract protected T getCommand();
 
     abstract protected CommandType getCommandType();
+
+    private void saveNewFile(final String fileName, final String[] args) throws IOException {
+        final List<String> alreadyExists = this.workspace.parameterNames(this.getCommandType())
+                .filter(it -> Pattern.compile(fileName + "(\\([0-9]+\\))*").matcher(it).matches())
+                .toList();
+        final String name = IntStream.iterate(1, it -> it + 1)
+                .filter(it -> !alreadyExists.contains(fileName + "(%s)".formatted(it)))
+                .mapToObj((fileName + "(%s)")::formatted)
+                .findFirst()
+                .get();
+        this.workspace.save(this.getCommandType()
+                , alreadyExists.size() == 0 ? fileName : name
+                , args);
+    }
 
     private Map<String, Object> requestToMap(final Map<String, String> input) {
         return this.getCommand()
