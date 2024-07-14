@@ -19,11 +19,11 @@ jobs:
           run-id: 9927113644
       - name: deploy backend
         run: |
-          mkdir tauri/backend
-          mkdir tauri/backend/lib
-          copy -path "*.dll" ./tauri/backend
-          copy -path "*.exe" ./tauri/backend
-          copy -path "./lib/font*" ./tauri/backend/lib
+          mkdir tauri/src-tauri/backend
+          mkdir tauri/src-tauri/backend/lib
+          copy -path "*.dll" ./tauri/src-tauri/backend
+          copy -path "*.exe" ./tauri/src-tauri/backend
+          copy -path "./lib/font*" ./tauri/src-tauri/backend/lib
       - name: setup node
         uses: actions/setup-node@v4
         with:
