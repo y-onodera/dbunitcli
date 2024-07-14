@@ -11,25 +11,28 @@ export default function Footer(){
           method:"POST"
           ,responseType:ResponseType.Text
           ,headers: {'Content-Type': 'application/json'}
-          ,body: Body.json({name,input:formData()})
+          ,body: Body.json({name,input:formData(false)})
         })
       .then(response => {
         alert(response.data)
       })
       .catch((ex)=>alert(ex))
     }
-    const handleClickExec = async (command:string,name:string) => {      
-      await fetch(environment.serverUrl()+ command +"/exec"
-        ,{
-          method:"POST"
-          ,responseType:ResponseType.Text
-          ,headers: {'Content-Type': 'application/json'}
-          ,body: Body.json({name,input:formData()})
+    const handleClickExec = async (command:string,name:string) => {
+      const input = formData(true)
+      if(!input.validationError) {
+        await fetch(environment.serverUrl()+ command +"/exec"
+          ,{
+            method:"POST"
+            ,responseType:ResponseType.Text
+            ,headers: {'Content-Type': 'application/json'}
+            ,body: Body.json({name,input})
+          })
+        .then(response => {
+          alert(response.data)
         })
-      .then(response => {
-        alert(response.data)
-      })
-      .catch((ex)=>alert(ex))
+        .catch((ex)=>alert(ex))
+      }
     }
   return (
       <>

@@ -15,7 +15,7 @@ export default function CommandForm() {
         method:"POST"
         ,responseType:ResponseType.JSON
         ,headers: {'Content-Type': 'application/json'}
-        ,body: Body.json(formData())
+        ,body: Body.json(formData(false))
       })
       .then(response => setParameter(response.data as Parameter,command,prop.name))
     .catch((ex)=>alert(ex))
@@ -57,7 +57,8 @@ export function CompareForm(prop:{handleTypeSelect:Function,name:string,compare:
     <>
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix="" elements={prop.compare.elements} />
       {prop.compare.imageOption ? <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={imageOption.prefix} elements={imageOption.elements} />
-                                :<></>}
+                                : <></>
+                              }
       <DatasetLoadForm handleTypeSelect={prop.handleTypeSelect} name={prop.name} srcData={newData} />
       <DatasetLoadForm handleTypeSelect={prop.handleTypeSelect} name={prop.name} srcData={oldData} />
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={convertResult.prefix} elements={convertResult.elements} />
@@ -67,12 +68,14 @@ export function CompareForm(prop:{handleTypeSelect:Function,name:string,compare:
 }
 export function GenerateForm(prop:{handleTypeSelect:Function,name:string,generate:GenerateParams}) {
   const srcData = prop.generate.srcData;
-  const templateOption = prop.generate.templateOption;
   return (
     <>
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix="" elements={prop.generate.elements} />
       <DatasetLoadForm handleTypeSelect={prop.handleTypeSelect} name={prop.name} srcData={srcData} />
-      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={templateOption.prefix} elements={templateOption.elements} />
+      {prop.generate.templateOption
+                                ? <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={prop.generate.templateOption.prefix} elements={prop.generate.templateOption.elements} />
+                                : <></>
+      }
     </>
   );
 }
