@@ -66,9 +66,11 @@ jobs:
           cache: 'maven'
       - name: Build native-image
         run: |
-          mvn clean package -fcore/pom.xml -Pnative "-Dmaven.test.skip=true"
+          mvn clean package -Pnative "-Dmaven.test.skip=true"
           mkdir core/target/lib
+          mkdir sidecar/target/lib
           copy -path "$env:GRAALVM_HOME/lib/font*" ./core/target/lib
+          copy -path "$env:GRAALVM_HOME/lib/font*" ./sidecar/target/lib
         shell: cmd
       - uses: actions/upload-artifact@v4
         with:
@@ -77,6 +79,13 @@ jobs:
             ./core/target/*.dll
             ./core/target/dbunit-cli.exe
             ./core/target/lib
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-image-sidecar
+          path: |
+            ./sidecar/target/*.dll
+            ./sidecar/target/*.exe
+            ./sidecar/target/lib
 
   report-deploy:
     needs: [ build ]
@@ -93,30 +102,3 @@ jobs:
         with:
           branch: gh-pages
           folder: 'allure-maven-plugin'
-
-  native-sidecar:
-    needs: [ build ]
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up graalvm
-        uses: graalvm/setup-graalvm@v1
-        with:
-          java-version: '21'
-          distribution: 'graalvm'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          native-image-job-reports: 'true'
-          cache: 'maven'
-      - name: Build native-image
-        run: |
-          mvn clean package -fsidecar/pom.xml -Pnative "-Dmaven.test.skip=true"
-          mkdir sidecar/target/lib
-          copy -path "$env:GRAALVM_HOME/lib/font*" ./sidecar/target/lib
-        shell: cmd
-      - uses: actions/upload-artifact@v4
-        with:
-          name: native-image-sidecar
-          path: |
-            ./sidecar/target/*.dll
-            ./sidecar/target/*.exe
-            ./sidecar/target/lib
