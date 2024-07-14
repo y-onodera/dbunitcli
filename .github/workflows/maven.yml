@@ -71,7 +71,6 @@ jobs:
           mkdir sidecar/target/lib
           copy -path "$env:GRAALVM_HOME/lib/font*" ./core/target/lib
           copy -path "$env:GRAALVM_HOME/lib/font*" ./sidecar/target/lib
-        shell: cmd
       - uses: actions/upload-artifact@v4
         with:
           name: native-image
