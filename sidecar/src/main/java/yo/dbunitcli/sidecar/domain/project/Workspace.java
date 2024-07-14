@@ -8,6 +8,9 @@ import yo.dbunitcli.sidecar.dto.ParametersDto;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public record Workspace(Path path, Options options, Resources resources) {
@@ -36,7 +39,18 @@ public record Workspace(Path path, Options options, Resources resources) {
     }
 
     public void save(final CommandType type, final String name, final String[] args) throws IOException {
-        this.options().save(type, name, args);
+        final List<String> alreadyExists = this.parameterNames(type)
+                .filter(it -> Pattern.compile(Pattern.quote(name) + "(\\([0-9]+\\))*").matcher(it).matches())
+                .toList();
+        this.options().save(type
+                , alreadyExists.size() == 0
+                        ? name
+                        : IntStream.iterate(1, it -> it + 1)
+                        .filter(it -> !alreadyExists.contains(name + "(%s)".formatted(it)))
+                        .mapToObj((name + "(%s)")::formatted)
+                        .findFirst()
+                        .get()
+                , args);
     }
 
     public void delete(final CommandType type, final String name) throws IOException {

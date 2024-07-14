@@ -17,10 +17,7 @@ import yo.dbunitcli.sidecar.dto.OptionDto;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.IntStream;
 
 public abstract class AbstractCommandController<DTO extends CommandDto, OPTION extends CommandLineOption<DTO>, T extends Command<DTO, OPTION>> {
 
@@ -34,7 +31,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
 
     @Get(uri = "add", produces = MediaType.APPLICATION_JSON)
     public String add() throws IOException {
-        this.saveNewFile("new item", this.getCommand().parseOption(new String[]{}).toArgs(false));
+        this.workspace.save(this.getCommandType(), "new item", this.getCommand().parseOption(new String[]{}).toArgs(false));
         return ObjectMapper
                 .getDefault()
                 .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
@@ -47,7 +44,9 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                 .findFirst()
                 .ifPresent(target -> {
                     try {
-                        this.saveNewFile(target.getFileName() + "(1)", Files.readAllLines(target).toArray(new String[0]));
+                        this.workspace.save(this.getCommandType()
+                                , target.getFileName().toString().replaceAll(".txt", "")
+                                , Files.readAllLines(target).toArray(new String[0]));
                     } catch (final IOException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -142,20 +141,6 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     abstract protected T getCommand();
 
     abstract protected CommandType getCommandType();
-
-    private void saveNewFile(final String fileName, final String[] args) throws IOException {
-        final List<String> alreadyExists = this.workspace.parameterNames(this.getCommandType())
-                .filter(it -> Pattern.compile(fileName + "(\\([0-9]+\\))*").matcher(it).matches())
-                .toList();
-        final String name = IntStream.iterate(1, it -> it + 1)
-                .filter(it -> !alreadyExists.contains(fileName + "(%s)".formatted(it)))
-                .mapToObj((fileName + "(%s)")::formatted)
-                .findFirst()
-                .get();
-        this.workspace.save(this.getCommandType()
-                , alreadyExists.size() == 0 ? fileName : name
-                , args);
-    }
 
     private Map<String, Object> requestToMap(final Map<String, String> input) {
         return this.getCommand()
