@@ -47,7 +47,7 @@
                         </executions>
                         <configuration>
                             <mainClass>${exec.mainClass}</mainClass>
-                            <imageName>dbunit-cli-sidecar-x86_64-pc-windows-msvc</imageName>
+                            <imageName>dbunit-cli-sidecar</imageName>
                             <fallback>false</fallback>
                             <buildArgs>
                                 -J-Dfile.encoding=MS932
