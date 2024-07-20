@@ -3,3 +3,9 @@
 /core/.allure/
 /core/logs/
 /core/target/
+/core/allure-results/
+/sidecar/allure-results/
+/tauri/src-tauri/backend/
+/target/
+/logs/
+/.idea/
