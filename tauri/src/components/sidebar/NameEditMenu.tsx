@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { EditName, useEditName, useSetEditName } from "../../context/EditNameProvider";
-import { environment } from "../../feature/httpClient";
 import { Body, fetch, ResponseType } from "@tauri-apps/api/http";
+import { useEnviroment } from "../../context/EnviromentProvider";
 
 type MenuEditProp = {
     name:string;
@@ -13,6 +13,7 @@ export default function NameEditMenu() {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const editName = useEditName();
     const setEditName = useSetEditName();
+    const environment = useEnviroment();
     useEffect(() => {
         function handleClickOutside(event:Event) {
           if (wrapperRef.current && !wrapperRef.current.contains(event.target as HTMLElement)) {
@@ -25,7 +26,7 @@ export default function NameEditMenu() {
         };
     }, [wrapperRef]);
     const handleMenuDelete = async () => {
-        await fetch(environment.serverUrl()+ editName.command +"/delete"
+        await fetch(environment.apiUrl + editName.command + "/delete"
           ,{
             method:"POST"
             ,responseType:ResponseType.JSON
@@ -36,7 +37,7 @@ export default function NameEditMenu() {
         .catch((ex)=>alert(ex)) 
     }
     const handleMenuCopy = async () => {
-        await fetch(environment.serverUrl()+ editName.command +"/copy"
+        await fetch(environment.apiUrl + editName.command + "/copy"
           ,{
             method:"POST"
             ,responseType:ResponseType.JSON
@@ -47,7 +48,7 @@ export default function NameEditMenu() {
         .catch((ex)=>alert(ex)) 
     }
     const handleMenuRename = async (newName:string) => {
-        await fetch(environment.serverUrl()+ editName.command +"/rename"
+        await fetch(environment.apiUrl + editName.command + "/rename"
           ,{
             method:"POST"
             ,responseType:ResponseType.JSON

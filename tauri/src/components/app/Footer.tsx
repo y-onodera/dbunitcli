@@ -1,12 +1,13 @@
 import { Body, fetch, ResponseType } from "@tauri-apps/api/http";
-import { environment } from "../../feature/httpClient";
 import { currentCommand, useSelectParameter } from "../../context/SelectParameterProvider";
 import { formData } from "./Form";
+import { useEnviroment } from "../../context/EnviromentProvider";
 
 export default function Footer(){
-    const parameter = useSelectParameter();
+  const environment = useEnviroment();
+  const parameter = useSelectParameter();
     const handleClickSave = async (command:string,name:string) => {      
-      await fetch(environment.serverUrl()+ command +"/save"
+      await fetch(environment.apiUrl+ command + "/save"
         ,{
           method:"POST"
           ,responseType:ResponseType.Text
@@ -21,7 +22,7 @@ export default function Footer(){
     const handleClickExec = async (command:string,name:string) => {
       const input = formData(true)
       if(!input.validationError) {
-        await fetch(environment.serverUrl()+ command +"/exec"
+        await fetch(environment.apiUrl+ command + "/exec"
           ,{
             method:"POST"
             ,responseType:ResponseType.Text

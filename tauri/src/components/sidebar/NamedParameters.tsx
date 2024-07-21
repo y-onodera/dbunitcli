@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Body, fetch, ResponseType } from "@tauri-apps/api/http";
-import { environment } from "../../feature/httpClient";
 import { EditName, useSetEditName } from "../../context/EditNameProvider";
 import { Parameter, useSetSelectParameter } from "../../context/SelectParameterProvider";
+import { useEnviroment } from "../../context/EnviromentProvider";
 
 type NamedParameters = {
     convert:string[]
@@ -18,9 +18,10 @@ type NamedParameterProp = {
   handleEditNamed:Function;
 }
 export default function NamedParameters() {
+    const environment = useEnviroment();
     const setParameter = useSetSelectParameter();
     const handleParameterSelect = async (command:string,name:string) => {
-      await fetch(environment.serverUrl()+ command +"/load"
+      await fetch(environment.apiUrl + command + "/load"
         ,{
           method:"POST"
           ,responseType:ResponseType.JSON
@@ -32,7 +33,7 @@ export default function NamedParameters() {
     }
     const [parameters ,setParameters] = useState<NamedParameters>();
     const handlMenuInit = async () => {
-      await fetch(environment.serverUrl()+"parameter/list"
+      await fetch(environment.apiUrl + "parameter/list"
         ,{method:"GET",responseType:ResponseType.JSON})
       .then(response => setParameters(response.data  as NamedParameters))
       .catch((ex)=>alert(ex))
@@ -86,10 +87,11 @@ function Category(prop:NamedParameterProp) {
     );
   }
   function Parameters(prop:NamedParameterProp) {
+    const environment = useEnviroment();
     const [menuList, setMenuList] = useState([] as string[]);
     useEffect( () => setMenuList(prop.namedParameters ? [...prop.namedParameters] : [...menuList]) ,[prop.namedParameters])
     const handleAddNewName = async () => {
-        await fetch(environment.serverUrl()+ prop.command.toLowerCase() +"/add"
+        await fetch(environment.apiUrl + prop.command.toLowerCase() + "/add"
           ,{method:"GET",responseType:ResponseType.JSON})
         .then(response => setMenuList(response.data as string[]) )
         .catch((ex)=>alert(ex)) 

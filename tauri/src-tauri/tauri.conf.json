@@ -19,7 +19,7 @@
       },
       "http": {
         "all": true, 
-        "scope": [ "http://localhost:8080/*" ]
+        "scope": [ "http://localhost*" ]
       },
       "shell": {
         "all": false,
@@ -34,6 +34,18 @@
           }
         ]
       }
+    },
+    "cli": {
+      "args": [
+        {
+          "name": "port",
+          "takesValue": true
+        },
+        {
+          "name": "workspace",
+          "takesValue": true
+        }
+      ]
     },
     "windows": [
       {
