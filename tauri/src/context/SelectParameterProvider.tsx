@@ -15,6 +15,7 @@ export type CommandParams = {
   name: string;
   prefix:string;
   elements: CommandParam[]
+  jdbc?: CommandParams;
 }
 export type DatasetSource = CommandParams & {
   jdbc: CommandParams;

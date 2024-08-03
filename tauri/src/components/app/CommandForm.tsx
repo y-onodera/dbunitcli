@@ -45,6 +45,7 @@ export function ConvertForm(prop:{handleTypeSelect:Function,name:string,convert:
     <>
       <DatasetLoadForm handleTypeSelect={prop.handleTypeSelect} name={prop.name} srcData={srcData} />
       <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={convertResult.prefix} elements={convertResult.elements} />
+      <FormElements handleTypeSelect={prop.handleTypeSelect} name={prop.name} prefix={convertResult.prefix} elements={convertResult.jdbc ? convertResult.jdbc.elements : []} />
     </>
   );
 }
