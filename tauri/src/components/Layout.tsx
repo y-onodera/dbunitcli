@@ -11,15 +11,15 @@ import "../styles.css";
 export default function Layout() {
   return (
       <>
-        <nav className="fixed top-0
-                        z-50 
-                        w-full 
-                        bg-white 
-                        border-b border-gray-200 
-                        dark:bg-gray-800 dark:border-gray-700">
-          <Header />
-        </nav>
         <SelectParameterProvider>
+          <nav className="fixed top-0
+                          z-50 
+                          w-full 
+                          bg-white 
+                          border-b border-gray-200 
+                          dark:bg-gray-800 dark:border-gray-700">
+            <Header />
+          </nav>
           <aside id="logo-sidebar" className="fixed top-0 left-0 
                                               z-40 
                                               w-4=8 h-screen 
