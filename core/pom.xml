@@ -50,7 +50,9 @@
                                 -H:ResourceConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/resource-config.json
                                 -H:JNIConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/jni-config.json
                                 -H:SerializationConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/serialization-config.json
+                                --initialize-at-build-time=oracle.sql.converter.I18CharacterConvertersWrapper
                                 --initialize-at-build-time=oracle.i18n.text.OraCharsetWithConverter
+                                --initialize-at-build-time=oracle.i18n.text.converter.CharacterConverter1Byte
                                 --strict-image-heap
                             </buildArgs>
                         </configuration>
