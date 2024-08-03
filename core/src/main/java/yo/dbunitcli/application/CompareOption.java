@@ -118,8 +118,14 @@ public record CompareOption(
         result.put("-settingEncoding", this.settingEncoding);
         result.addComponent("newData", this.newData.toCommandLineArgs());
         result.addComponent("oldData", this.oldData.toCommandLineArgs());
-        result.addComponent("convertResult", this.result().convertResult().toCommandLineArgs());
-        result.addComponent("expectData", this.expectData.toCommandLineArgs());
+        final CommandLineArgs resultArgs = this.result().convertResult().toCommandLineArgs();
+        resultArgs.put("-resultType", this.result().convertResult().resultType()
+                , ResultType.class, Filter.exclude(ResultType.table), true);
+        result.addComponent("convertResult", resultArgs);
+        final CommandLineArgs expectArgs = this.expectData.toCommandLineArgs();
+        expectArgs.put("-srcType", this.expectData.srcType(), DataSourceType.class
+                , Filter.include(DataSourceType.csv, DataSourceType.xls, DataSourceType.xlsx, DataSourceType.none), false);
+        result.addComponent("expectData", expectArgs);
         return result;
     }
 
