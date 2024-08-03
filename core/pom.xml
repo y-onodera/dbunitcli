@@ -51,7 +51,7 @@
                                 -H:JNIConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/jni-config.json
                                 -H:SerializationConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/serialization-config.json
                                 --initialize-at-build-time=oracle.i18n.text.OraCharsetWithConverter
-                                -H:-StrictImageHeap
+                                --strict-image-heap
                             </buildArgs>
                         </configuration>
                     </plugin>
