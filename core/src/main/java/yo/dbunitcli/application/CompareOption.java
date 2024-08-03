@@ -124,7 +124,8 @@ public record CompareOption(
         result.addComponent("convertResult", resultArgs);
         final CommandLineArgs expectArgs = this.expectData.toCommandLineArgs();
         expectArgs.put("-srcType", this.expectData.srcType(), DataSourceType.class
-                , Filter.include(DataSourceType.csv, DataSourceType.xls, DataSourceType.xlsx, DataSourceType.none), false);
+                , Filter.include(DataSourceType.csv, DataSourceType.csvq, DataSourceType.xls, DataSourceType.xlsx, DataSourceType.sql, DataSourceType.none)
+                , false);
         result.addComponent("expectData", expectArgs);
         return result;
     }
