@@ -19,6 +19,23 @@ type NamedParameterProp = {
 }
 export default function NamedParameters() {
     const environment = useEnviroment();
+    const [parameters ,setParameters] = useState<NamedParameters>();
+    const handlMenuInit = async () => {
+      await fetch(environment.apiUrl + "parameter/list"
+        ,{method:"GET",responseType:ResponseType.JSON})
+      .then(response => {
+        if (!response.ok) {
+          console.error('response.ok:', response.ok);
+          console.error('esponse.status:', response.status);
+          throw new Error(response.data as string);
+        }
+        setParameters(response.data  as NamedParameters)
+      })
+      .catch((ex)=>alert(ex))
+    }
+    useEffect(()=>{
+      handlMenuInit();
+    },[])
     const setParameter = useSetSelectParameter();
     const handleParameterSelect = async (command:string,name:string) => {
       await fetch(environment.apiUrl + command + "/load"
@@ -28,19 +45,16 @@ export default function NamedParameters() {
           ,headers: {'Content-Type': 'application/json'}
           ,body: Body.json({name})
         })
-      .then(response => setParameter(response.data as Parameter,command,name))
+      .then(response => {
+        if (!response.ok) {
+          console.error('response.ok:', response.ok);
+          console.error('esponse.status:', response.status);
+          throw new Error(response.data as string);
+        }
+        setParameter(response.data as Parameter,command,name)
+      })
       .catch((ex)=>alert(ex))
     }
-    const [parameters ,setParameters] = useState<NamedParameters>();
-    const handlMenuInit = async () => {
-      await fetch(environment.apiUrl + "parameter/list"
-        ,{method:"GET",responseType:ResponseType.JSON})
-      .then(response => setParameters(response.data  as NamedParameters))
-      .catch((ex)=>alert(ex))
-    }
-    useEffect(()=>{
-      handlMenuInit();
-    },[])
     const setEditName = useSetEditName()
     const handleEditNamed = (selected:EditName)=> setEditName(selected)
     return (
@@ -93,7 +107,14 @@ function Category(prop:NamedParameterProp) {
     const handleAddNewName = async () => {
         await fetch(environment.apiUrl + prop.command.toLowerCase() + "/add"
           ,{method:"GET",responseType:ResponseType.JSON})
-        .then(response => setMenuList(response.data as string[]) )
+        .then(response => {
+          if (!response.ok) {
+            console.error('response.ok:', response.ok);
+            console.error('esponse.status:', response.status);
+            throw new Error(response.data as string);
+          }
+          setMenuList(response.data as string[]) 
+        })
         .catch((ex)=>alert(ex)) 
     }
     return (

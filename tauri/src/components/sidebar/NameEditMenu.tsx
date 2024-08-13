@@ -36,7 +36,14 @@ export default function NameEditMenu() {
             ,headers: {'Content-Type': 'application/json'}
             ,body: Body.json({name:editName.name})
           })
-        .then(response => editName.setMenuList(response.data as string[]) )
+        .then(response => {
+          if (!response.ok) {
+            console.error('response.ok:', response.ok);
+            console.error('esponse.status:', response.status);
+            throw new Error(response.data as string);
+          }
+          editName.setMenuList(response.data as string[]) 
+        })
         .catch((ex)=>alert(ex)) 
     }
     const handleMenuCopy = async () => {
@@ -47,7 +54,14 @@ export default function NameEditMenu() {
             ,headers: {'Content-Type': 'application/json'}
             ,body: Body.json({name:editName.name})
           })
-        .then(response => editName.setMenuList(response.data as string[]) )
+        .then(response => {
+          if (!response.ok) {
+            console.error('response.ok:', response.ok);
+            console.error('esponse.status:', response.status);
+            throw new Error(response.data as string);
+          }
+          editName.setMenuList(response.data as string[]) 
+        })
         .catch((ex)=>alert(ex)) 
     }
     const handleMenuRename = async (newName:string) => {
@@ -59,6 +73,11 @@ export default function NameEditMenu() {
             ,body: Body.json({oldName:editName.name,newName})
           })
         .then(response => {
+          if (!response.ok) {
+            console.error('response.ok:', response.ok);
+            console.error('esponse.status:', response.status);
+            throw new Error(response.data as string);
+          }
           editName.setMenuList(response.data as string[]) 
           if(parameter.command == editName.command && parameter.name == editName.name){
             setParameter(parameter.currentParameter() ,parameter.command ,newName)
