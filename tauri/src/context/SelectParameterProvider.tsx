@@ -54,11 +54,13 @@ export type ParameterizeParams = {
 }
 export type SelectParameter = {
   name:string;
+  command:string;
   convert:ConvertParams;
   compare:CompareParams;
   generate:GenerateParams;
   run:RunParams;
   parameterize:ParameterizeParams;
+  currentParameter:()=>Parameter
 }
 const selectParameterContext = createContext<SelectParameter>({} as SelectParameter);
 const setSelectParameterContext = createContext<Dispatch<SetStateAction<SelectParameter>>>(
@@ -91,9 +93,19 @@ export const useSetSelectParameter = () => {
     } if (command == "parameterize"){
       newParam.parameterize = response as ParameterizeParams
     }
+    newParam.command = command
+    newParam.currentParameter = () => {
+      if(newParam.command == "convert") {
+        return newParam.convert
+      } else if(newParam.command == "compare"){
+        return newParam.compare
+      } else if(newParam.command == "generate"){
+        return newParam.generate
+      } else if(newParam.command == "run"){
+        return newParam.run
+      }
+      return newParam.parameterize
+    }
     setParameter(newParam)
   }
-};
-export function currentCommand(parameter:SelectParameter) {
-  return parameter.convert ? 'convert' : parameter.compare ? 'compare' : parameter.generate ? 'generate' : parameter.run ? 'run' : parameter.parameterize ? 'parameterize' : '';
 }

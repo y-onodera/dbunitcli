@@ -1,5 +1,5 @@
 import { Body, fetch, ResponseType } from "@tauri-apps/api/http";
-import { useSetSelectParameter, currentCommand, Parameter, ConvertParams, CompareParams, GenerateParams, RunParams, ParameterizeParams, useSelectParameter, DatasetSource } from "../../context/SelectParameterProvider";
+import { useSetSelectParameter, Parameter, ConvertParams, CompareParams, GenerateParams, RunParams, ParameterizeParams, useSelectParameter, DatasetSource } from "../../context/SelectParameterProvider";
 import { formData } from "./Form";
 import FormElements from "./FormElement";
 import "../../App.css";
@@ -8,7 +8,7 @@ import { useEnviroment } from "../../context/EnviromentProvider";
 export default function CommandForm() {
   const environment = useEnviroment();
   const prop = useSelectParameter();
-  const command = currentCommand(prop);
+  const command = prop.command;
   const setParameter = useSetSelectParameter();
   const handleTypeSelect = async () => {      
     await fetch(environment.apiUrl + command + "/refresh"

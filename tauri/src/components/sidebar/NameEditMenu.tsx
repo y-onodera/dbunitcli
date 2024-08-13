@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { EditName, useEditName, useSetEditName } from "../../context/EditNameProvider";
 import { Body, fetch, ResponseType } from "@tauri-apps/api/http";
 import { useEnviroment } from "../../context/EnviromentProvider";
+import { useSelectParameter, useSetSelectParameter } from "../../context/SelectParameterProvider";
 
 type MenuEditProp = {
     name:string;
@@ -13,6 +14,8 @@ export default function NameEditMenu() {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const editName = useEditName();
     const setEditName = useSetEditName();
+    const parameter = useSelectParameter();
+    const setParameter = useSetSelectParameter();
     const environment = useEnviroment();
     useEffect(() => {
         function handleClickOutside(event:Event) {
@@ -55,7 +58,12 @@ export default function NameEditMenu() {
             ,headers: {'Content-Type': 'application/json'}
             ,body: Body.json({oldName:editName.name,newName})
           })
-        .then(response => editName.setMenuList(response.data as string[]) )
+        .then(response => {
+          editName.setMenuList(response.data as string[]) 
+          if(parameter.command == editName.command && parameter.name == editName.name){
+            setParameter(parameter.currentParameter() ,parameter.command ,newName)
+          }
+        })
         .catch((ex)=>alert(ex)) 
     }
     return (

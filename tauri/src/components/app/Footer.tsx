@@ -1,5 +1,5 @@
 import { Body, fetch, ResponseType } from "@tauri-apps/api/http";
-import { currentCommand, useSelectParameter } from "../../context/SelectParameterProvider";
+import { useSelectParameter } from "../../context/SelectParameterProvider";
 import { formData } from "./Form";
 import { useEnviroment } from "../../context/EnviromentProvider";
 
@@ -37,7 +37,7 @@ export default function Footer(){
     }
   return (
       <>
-        {currentCommand(parameter) != '' &&
+        {parameter.command &&
             <div className="fixed bottom-0 right-1 
                             w-full z-50 
                             flex items-center justify-end ">
@@ -52,7 +52,8 @@ export default function Footer(){
                                  hover:bg-indigo-600 
                                  active:bg-indigo-700 
                                  md:text-base"
-                      onClick={()=>handleClickExec(currentCommand(parameter),parameter.name)}>Exec</button>
+                      onClick={()=>handleClickExec(parameter.command,parameter.name)}
+                      >Exec</button>
               <button className="text-center text-sm font-semibold text-white 
                                  bg-indigo-500 
                                  rounded-e-lg rounded-s-gray-100 rounded-s-2 
@@ -64,7 +65,7 @@ export default function Footer(){
                                  hover:bg-indigo-600 
                                  active:bg-indigo-700 
                                  md:text-base"
-                        onClick={()=>handleClickSave(currentCommand(parameter),parameter.name)}>Save</button>
+                        onClick={()=>handleClickSave(parameter.command,parameter.name)}>Save</button>
               <span className="text-sm text-gray-500">*Required</span>
             </div>
           }
