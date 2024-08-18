@@ -48,7 +48,10 @@ export default function Footer() {
       setLoading(false);
       setResultDir(response.data as string);
     })
-    .catch((ex)=>alert(ex))
+    .catch((ex)=>{
+      alert(ex)
+      setLoading(false);
+    })
   }
   const openDirectory = async function(path:string){
     await tauri.invoke('open_directory', {path})
