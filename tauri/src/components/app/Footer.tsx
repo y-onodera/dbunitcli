@@ -49,8 +49,8 @@ export default function Footer() {
       setResultDir(response.data as string);
     })
     .catch((ex)=>{
-      alert(ex)
       setLoading(false);
+      alert(ex)
     })
   }
   const openDirectory = async function(path:string){
