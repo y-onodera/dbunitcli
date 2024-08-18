@@ -15,7 +15,7 @@ public class Generate implements Command<GenerateDto, GenerateOption> {
     public void exec(final GenerateOption options) {
         options.parameterStream()
                 .forEach(param -> {
-                            final File resultFile = new File(options.getResultDir(), options.resultPath(param));
+                            final File resultFile = options.resultFile(param);
                             if (!resultFile.getParentFile().exists()) {
                                 if (!resultFile.getParentFile().mkdirs()) {
                                     throw new AssertionError("failed create directory " + resultFile.getParentFile());

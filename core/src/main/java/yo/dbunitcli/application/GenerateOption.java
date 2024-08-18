@@ -78,12 +78,21 @@ public record GenerateOption(
         return this.unit().loadStream(this.getComparableDataSetLoader(), this.dataSetParam());
     }
 
-    public String resultPath(final Parameter param) {
-        return this.templateOption.getTemplateRender().render(this.getResultPath(), param.getMap());
+    public File resultFile(final Parameter param) {
+        return new File(this.resultDir(), this.resultPath(param));
     }
 
-    public File getResultDir() {
-        return this.resultDir();
+    public String resultPath(final Parameter param) {
+        return this.templateOption.getTemplateRender().render(this.resultPath(), param.getMap());
+    }
+
+    @Override
+    public String resultPath() {
+        if (this.generateType() == GenerateType.sql) {
+            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
+            return this.resultPath + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
+        }
+        return this.resultPath;
     }
 
     public void write(final File resultFile, final Parameter param) throws IOException {
@@ -93,14 +102,6 @@ public record GenerateOption(
     @Override
     public GenerateDto toDto() {
         return GenerateOption.toDto(this.toArgs(true));
-    }
-
-    public String getResultPath() {
-        if (this.generateType() == GenerateType.sql) {
-            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
-            return this.resultPath() + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
-        }
-        return this.resultPath();
     }
 
     @Override

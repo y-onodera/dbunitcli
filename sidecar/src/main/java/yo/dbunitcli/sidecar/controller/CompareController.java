@@ -2,8 +2,8 @@ package yo.dbunitcli.sidecar.controller;
 
 import io.micronaut.http.annotation.Controller;
 import yo.dbunitcli.application.Compare;
-import yo.dbunitcli.application.CompareOption;
 import yo.dbunitcli.application.CompareDto;
+import yo.dbunitcli.application.CompareOption;
 import yo.dbunitcli.sidecar.domain.project.CommandType;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
@@ -12,6 +12,11 @@ public class CompareController extends AbstractCommandController<CompareDto, Com
 
     public CompareController(final Workspace workspace) {
         super(workspace);
+    }
+
+    @Override
+    protected String resultDir(final CompareOption options) {
+        return options.result().convertResult().resultDir().getAbsoluteFile().getPath();
     }
 
     @Override

@@ -127,15 +127,20 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     @Post(uri = "exec", produces = MediaType.TEXT_PLAIN)
     public String exec(@Body final OptionDto body) {
         try {
-            this.getCommand().exec(this.getCommand()
+            final OPTION options = this.getCommand()
                     .parseOption(body.getName()
                             , this.requestToArgs(body.getInput())
-                            , Parameter.none()));
+                            , Parameter.none());
+            this.getCommand().exec(options);
+            return this.resultDir(options);
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
-            return "failed";
+            return "";
         }
-        return "success";
+    }
+
+    protected String resultDir(final OPTION options) {
+        return "";
     }
 
     abstract protected T getCommand();
