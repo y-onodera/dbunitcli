@@ -2,11 +2,17 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{process::{Command, Stdio}, sync::mpsc::sync_channel, thread};
-
 use tauri::WindowEvent;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
+fn open_directory(path: String) {
+  println!("{:?}", path);
+  Command::new("explorer")
+  .args([path]) 
+  .spawn()
+  .unwrap();
+}
 fn main() {
     let (tx,rx) = sync_channel::<i64>(1);
     tauri::Builder::default()
@@ -55,6 +61,7 @@ fn main() {
             }
             _ => {}
           })
-        .run(tauri::generate_context!())
+          .invoke_handler(tauri::generate_handler![open_directory])
+          .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

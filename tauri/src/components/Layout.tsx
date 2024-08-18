@@ -7,6 +7,7 @@ import Form from "./app/Form";
 import CommandForm from "./app/CommandForm";
 import Footer from "./app/Footer";
 import "../styles.css";
+import { Suspense } from "react";
 
 export default function Layout() {
   return (
@@ -38,10 +39,23 @@ export default function Layout() {
               </div>
             </aside>
             <div className="p-4 sm:ml-48">
-              <Form>
-                <CommandForm />
-                <Footer />
-              </Form>
+                <Form>
+                  <CommandForm />
+                  <Suspense fallback={
+                    <div className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 ">
+                      <div className="relative p-4 w-full max-w-md max-h-full">
+                        <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                          <div className="p-4 md:p-5 flex flex-col justify-center items-center">
+                            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Now Execution</h3>
+                            <div className="block animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"/>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }>
+                    <Footer />
+                  </Suspense>
+                </Form>
             </div>
           </EditNmaeProvider>
         </SelectParameterProvider>
