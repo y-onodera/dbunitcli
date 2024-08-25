@@ -13,8 +13,8 @@ public class RunDto extends CommandDto {
     @CommandLine.Option(names = "-antTarget")
     private String antTarget;
 
-    @CommandLine.Option(names = "-antBaseDir")
-    private String antBaseDir;
+    @CommandLine.Option(names = "-baseDir")
+    private String baseDir;
 
     private DataSetLoadDto srcData = new DataSetLoadDto();
 
@@ -34,12 +34,12 @@ public class RunDto extends CommandDto {
         return this.antTarget;
     }
 
-    public String getAntBaseDir() {
-        return this.antBaseDir;
+    public String getBaseDir() {
+        return this.baseDir;
     }
 
-    public void setAntBaseDir(final String antBaseDir) {
-        this.antBaseDir = antBaseDir;
+    public void setBaseDir(final String baseDir) {
+        this.baseDir = baseDir;
     }
 
     public void setAntTarget(final String antTarget) {

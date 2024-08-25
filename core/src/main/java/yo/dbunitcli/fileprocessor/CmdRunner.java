@@ -1,6 +1,7 @@
 package yo.dbunitcli.fileprocessor;
 
-import yo.dbunitcli.resource.st4.TemplateRender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,43 +10,30 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class CmdRunner implements Runner {
+public record CmdRunner(String baseDir, Map<String, Object> parameter) implements Runner {
 
-    private final Map<String, Object> parameter;
-    private final TemplateRender templateRender;
-
-    public CmdRunner(final Map<String, Object> parameter
-            , final TemplateRender templateRender) {
-        this.parameter = parameter;
-        this.templateRender = templateRender;
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(CmdRunner.class);
 
     @Override
     public void runScript(final Stream<File> targetFiles) {
         targetFiles.forEach(target -> {
             try {
-                final ProcessBuilder pb = new ProcessBuilder(this.getTemplateRender()
-                        .render(target, this.getParameter()));
+                final ProcessBuilder pb = new ProcessBuilder(target.getPath())
+                        .directory(new File(this.baseDir));
+                this.parameter().forEach((key, value) -> pb.environment().put(key, value.toString()));
                 // 標準エラー出力を標準出力にマージする
                 pb.redirectErrorStream(true);
                 final Process process = pb.start();
                 final InputStream in = process.getInputStream();
                 final BufferedReader br = new BufferedReader(new InputStreamReader(in, "MS932"));
-                while (br.readLine() != null) {
-                    // skip input
+                String stdout = "";
+                while ((stdout = br.readLine()) != null) {
+                    CmdRunner.LOGGER.info(stdout);
                 }
                 process.waitFor();
             } catch (final Throwable var30) {
                 throw new AssertionError(var30);
             }
         });
-    }
-
-    public Map<String, Object> getParameter() {
-        return this.parameter;
-    }
-
-    public TemplateRender getTemplateRender() {
-        return this.templateRender;
     }
 }

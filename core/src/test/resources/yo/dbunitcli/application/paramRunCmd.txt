@@ -1,0 +1,3 @@
+-scriptType=cmd
+-src=src/test/resources/yo/dbunitcli/application/cmd
+-PcopyTarget=テスト.txt

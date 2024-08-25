@@ -1,0 +1,4 @@
+-scriptType=bat
+-src=src/test/resources/yo/dbunitcli/application/bat
+-baseDir=..
+-PcopyTarget=テスト.txt

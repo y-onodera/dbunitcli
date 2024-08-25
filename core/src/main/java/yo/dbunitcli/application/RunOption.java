@@ -1,5 +1,6 @@
 package yo.dbunitcli.application;
 
+import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.cli.CommandLineParser;
 import yo.dbunitcli.application.option.AntOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
@@ -19,10 +20,11 @@ import java.util.stream.Stream;
 public record RunOption(
         Parameter parameter
         , ScriptType scriptType
-        , TemplateRenderOption templateOption
         , DataSetLoadOption srcData
+        , TemplateRenderOption templateOption
         , JdbcOption jdbcOption
         , AntOption antOption
+        , String baseDir
 ) implements CommandLineOption<RunDto> {
 
     public static RunDto toDto(final String[] args) {
@@ -41,10 +43,11 @@ public record RunOption(
     public RunOption(final RunDto dto, final Parameter param) {
         this(param
                 , dto.getScriptType() != null ? dto.getScriptType() : ScriptType.sql
-                , new TemplateRenderOption("template", dto.getTemplateOption())
                 , new DataSetLoadOption("src", dto.getSrcData())
+                , new TemplateRenderOption("template", dto.getTemplateOption())
                 , new JdbcOption("jdbc", dto.getJdbcOption())
-                , new AntOption(dto.getAntBaseDir(), dto.getAntTarget())
+                , new AntOption(dto.getAntTarget())
+                , dto.getBaseDir()
         );
     }
 
@@ -79,13 +82,22 @@ public record RunOption(
                 .remove("-src.loadData")
         );
         result.put("-scriptType", this.scriptType, ScriptType.class);
-        result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
         if (result.get("-scriptType").equals(ScriptType.sql.name())) {
+            result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
             result.addComponent("jdbcOption", this.jdbcOption.toCommandLineArgs());
         } else if (result.get("-scriptType").equals(ScriptType.ant.name())) {
             result.putAll(this.antOption.toCommandLineArgs());
         }
+        if (!result.get("-scriptType").equals(ScriptType.sql.name())) {
+            result.put("-baseDir", this.baseDir);
+        }
         return result;
+    }
+
+    @Override
+    public String baseDir() {
+        return new File(Strings.isNotEmpty(this.baseDir) ? this.baseDir : ".")
+                .getAbsoluteFile().toPath().normalize().toString();
     }
 
     public enum ScriptType {
@@ -100,7 +112,7 @@ public record RunOption(
         }, ant {
             @Override
             public Runner createRunner(final RunOption aOption) {
-                return new AntRunner(aOption.antOption().baseDir(), aOption.antOption().target(), aOption.parameter().getMap());
+                return new AntRunner(aOption.baseDir(), aOption.antOption().target(), aOption.parameter().getMap());
             }
 
             @Override
@@ -110,8 +122,8 @@ public record RunOption(
         };
 
         public Runner createRunner(final RunOption aOption) {
-            return new CmdRunner(aOption.parameter().getMap()
-                    , aOption.templateOption.getTemplateRender()
+            return new CmdRunner(aOption.baseDir()
+                    , aOption.parameter().getMap()
             );
         }
 
