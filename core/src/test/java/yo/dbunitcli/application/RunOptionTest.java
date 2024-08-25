@@ -23,6 +23,7 @@ class RunOptionTest {
         this.src.getSrcData().setLoadData("true");
         this.src.getTemplateOption().setEncoding("UTF-8");
         this.src.getJdbcOption().setJdbcProperties("test.properties");
+        this.src.setBaseDir(".");
         this.src.setAntTarget("default");
     }
 
@@ -48,9 +49,10 @@ class RunOptionTest {
             assertNull(result.getArg("-src.extension"));
             assertNull(result.getArg("-src.includeMetaData"));
             assertNull(result.getArg("-src.loadData"));
-            assertEquals(RunOptionTest.this.src.getTemplateOption().getEncoding(), result.getArg("-template.encoding").value());
+            assertNull(result.getArg("-template.encoding"));
             assertNull(result.getArg("-jdbc.jdbcProperties"));
             assertNull(result.getArg("-antTarget"));
+            assertEquals(RunOptionTest.this.src.getBaseDir(), result.getArg("-baseDir").value());
         }
     }
 
@@ -72,9 +74,10 @@ class RunOptionTest {
             assertNull(result.getArg("-src.extension"));
             assertNull(result.getArg("-src.includeMetaData"));
             assertNull(result.getArg("-src.loadData"));
-            assertEquals(RunOptionTest.this.src.getTemplateOption().getEncoding(), result.getArg("-template.encoding").value());
+            assertNull(result.getArg("-template.encoding"));
             assertNull(result.getArg("-jdbc.jdbcProperties"));
             assertEquals(RunOptionTest.this.src.getAntTarget(), result.getArg("-antTarget").value());
+            assertEquals(RunOptionTest.this.src.getBaseDir(), result.getArg("-baseDir").value());
         }
     }
 
@@ -96,9 +99,10 @@ class RunOptionTest {
             assertNull(result.getArg("-src.extension"));
             assertNull(result.getArg("-src.includeMetaData"));
             assertNull(result.getArg("-src.loadData"));
-            assertEquals(RunOptionTest.this.src.getTemplateOption().getEncoding(), result.getArg("-template.encoding").value());
+            assertNull(result.getArg("-template.encoding"));
             assertNull(result.getArg("-jdbc.jdbcProperties"));
             assertNull(result.getArg("-antTarget"));
+            assertEquals(RunOptionTest.this.src.getBaseDir(), result.getArg("-baseDir").value());
         }
     }
 
@@ -123,6 +127,7 @@ class RunOptionTest {
             assertEquals(RunOptionTest.this.src.getTemplateOption().getEncoding(), result.getArg("-template.encoding").value());
             assertEquals(RunOptionTest.this.src.getJdbcOption().getJdbcProperties(), result.getArg("-jdbc.jdbcProperties").value());
             assertNull(result.getArg("-antTarget"));
+            assertNull(result.getArg("-baseDir"));
         }
     }
 }
