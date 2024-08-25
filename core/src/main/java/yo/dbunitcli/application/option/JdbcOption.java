@@ -9,7 +9,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.stream.Stream;
 
 public record JdbcOption(
         String prefix
@@ -57,7 +56,7 @@ public record JdbcOption(
         }
     }
 
-    protected Properties loadJdbcTemplate() throws IOException {
+    private Properties loadJdbcTemplate() throws IOException {
         final Properties jdbcProp = new Properties();
         if (this.jdbcProperties != null) {
             jdbcProp.load(new FileInputStream(this.jdbcProperties));
@@ -72,18 +71,6 @@ public record JdbcOption(
             jdbcProp.put("pass", this.jdbcPass);
         }
         return jdbcProp;
-    }
-
-    protected void validate() {
-        if (Stream.of(this.jdbcUrl, this.jdbcUser, this.jdbcPass)
-                .anyMatch(it -> Optional.ofNullable(it).orElse("").isEmpty())) {
-            if (this.jdbcProperties == null) {
-                throw new AssertionError("need jdbcProperties option", new IllegalArgumentException());
-            }
-            if (!this.jdbcProperties.exists()) {
-                throw new AssertionError(this.jdbcProperties + " is not exist file", new IllegalArgumentException(this.jdbcProperties.toString()));
-            }
-        }
     }
 
 }

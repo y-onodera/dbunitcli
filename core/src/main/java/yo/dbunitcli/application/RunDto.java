@@ -10,6 +10,12 @@ public class RunDto extends CommandDto {
     @CommandLine.Option(names = "-scriptType")
     private RunOption.ScriptType scriptType;
 
+    @CommandLine.Option(names = "-antTarget")
+    private String antTarget;
+
+    @CommandLine.Option(names = "-antBaseDir")
+    private String antBaseDir;
+
     private DataSetLoadDto srcData = new DataSetLoadDto();
 
     private TemplateRenderDto templateOption = new TemplateRenderDto();
@@ -22,6 +28,22 @@ public class RunDto extends CommandDto {
 
     public void setScriptType(final RunOption.ScriptType scriptType) {
         this.scriptType = scriptType;
+    }
+
+    public String getAntTarget() {
+        return this.antTarget;
+    }
+
+    public String getAntBaseDir() {
+        return this.antBaseDir;
+    }
+
+    public void setAntBaseDir(final String antBaseDir) {
+        this.antBaseDir = antBaseDir;
+    }
+
+    public void setAntTarget(final String antTarget) {
+        this.antTarget = antTarget;
     }
 
     public DataSetLoadDto getSrcData() {

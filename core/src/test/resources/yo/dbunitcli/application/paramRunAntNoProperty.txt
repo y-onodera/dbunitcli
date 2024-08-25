@@ -1,0 +1,3 @@
+-scriptType=ant
+-src=src/test/resources/yo/dbunitcli/application/ant
+-antTarget=copyFile

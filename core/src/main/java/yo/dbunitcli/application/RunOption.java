@@ -1,6 +1,7 @@
 package yo.dbunitcli.application;
 
 import yo.dbunitcli.application.cli.CommandLineParser;
+import yo.dbunitcli.application.option.AntOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.JdbcOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
@@ -18,9 +19,10 @@ import java.util.stream.Stream;
 public record RunOption(
         Parameter parameter
         , ScriptType scriptType
-        , DataSetLoadOption srcData
         , TemplateRenderOption templateOption
+        , DataSetLoadOption srcData
         , JdbcOption jdbcOption
+        , AntOption antOption
 ) implements CommandLineOption<RunDto> {
 
     public static RunDto toDto(final String[] args) {
@@ -39,9 +41,10 @@ public record RunOption(
     public RunOption(final RunDto dto, final Parameter param) {
         this(param
                 , dto.getScriptType() != null ? dto.getScriptType() : ScriptType.sql
-                , new DataSetLoadOption("src", dto.getSrcData())
                 , new TemplateRenderOption("template", dto.getTemplateOption())
+                , new DataSetLoadOption("src", dto.getSrcData())
                 , new JdbcOption("jdbc", dto.getJdbcOption())
+                , new AntOption(dto.getAntBaseDir(), dto.getAntTarget())
         );
     }
 
@@ -79,6 +82,8 @@ public record RunOption(
         result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
         if (result.get("-scriptType").equals(ScriptType.sql.name())) {
             result.addComponent("jdbcOption", this.jdbcOption.toCommandLineArgs());
+        } else if (result.get("-scriptType").equals(ScriptType.ant.name())) {
+            result.putAll(this.antOption.toCommandLineArgs());
         }
         return result;
     }
@@ -95,7 +100,7 @@ public record RunOption(
         }, ant {
             @Override
             public Runner createRunner(final RunOption aOption) {
-                return new AntRunner(aOption.parameter().getMap());
+                return new AntRunner(aOption.antOption().baseDir(), aOption.antOption().target(), aOption.parameter().getMap());
             }
 
             @Override
