@@ -1,9 +1,8 @@
 import { tauri } from "@tauri-apps/api";
 import { Body, ResponseType, fetch } from "@tauri-apps/api/http";
 import { useState } from "react";
-import { useEnviroment } from "../../context/EnviromentProvider";
-import { useSelectParameter } from "../../context/SelectParameterProvider";
-import { formData } from "./Form";
+import { useEnviroment } from "../../../context/EnviromentProvider";
+import { useSelectParameter } from "../../../context/SelectParameterProvider";
 import ResultDialog from "./ResultDialog";
 
 type Running = {
@@ -12,7 +11,12 @@ type Running = {
 	resultDir: string;
 };
 
-export default function Footer() {
+export default function Footer(prop: {
+	formData: (validate: boolean) => {
+		values: { [k: string]: FormDataEntryValue };
+		validationError: boolean;
+	};
+}) {
 	const [running, setRunning] = useState({
 		command: "",
 		resultMessage: "",
@@ -25,7 +29,7 @@ export default function Footer() {
 			method: "POST",
 			responseType: ResponseType.Text,
 			headers: { "Content-Type": "application/json" },
-			body: Body.json({ name, input: formData(false) }),
+			body: Body.json({ name, input: prop.formData(false).values }),
 		})
 			.then((response) => {
 				if (!response.ok) {
@@ -44,7 +48,7 @@ export default function Footer() {
 			});
 	};
 	const handleClickExec = async (command: string, name: string) => {
-		const input = formData(true);
+		const input = prop.formData(true).values;
 		await fetch(`${environment.apiUrl + command}/exec`, {
 			method: "POST",
 			responseType: ResponseType.Text,
@@ -142,7 +146,7 @@ export default function Footer() {
                                  active:bg-indigo-700 
                                  md:text-base"
 						onClick={() => {
-							const input = formData(true);
+							const input = prop.formData(true);
 							if (!input.validationError) {
 								setRunning({
 									command: "exec",

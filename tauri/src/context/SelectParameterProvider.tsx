@@ -6,64 +6,15 @@ import {
 	useContext,
 	useState,
 } from "react";
+import type {
+	CompareParams,
+	ConvertParams,
+	GenerateParams,
+	Parameter,
+	ParameterizeParams,
+	RunParams,
+} from "../model/CommandParam";
 
-export type Attribute = {
-	type: string;
-	required: boolean;
-	selectOption: string[];
-};
-export type CommandParam = {
-	name: string;
-	value: string;
-	attribute: Attribute;
-};
-export type CommandParams = {
-	handleTypeSelect: () => Promise<void>;
-	name: string;
-	prefix: string;
-	elements: CommandParam[];
-	jdbc?: CommandParams;
-};
-export type DatasetSource = CommandParams & {
-	jdbc: CommandParams;
-	templateRender: CommandParams;
-};
-export type Parameter =
-	| ConvertParams
-	| CompareParams
-	| GenerateParams
-	| RunParams
-	| ParameterizeParams;
-export type ConvertParams = {
-	srcData: DatasetSource;
-	convertResult: CommandParams;
-};
-export type CompareParams = {
-	elements: CommandParam[];
-	newData: DatasetSource;
-	oldData: DatasetSource;
-	imageOption: CommandParams;
-	convertResult: CommandParams;
-	expectData: DatasetSource;
-};
-export type GenerateParams = {
-	elements: CommandParam[];
-	srcData: DatasetSource;
-	templateOption: CommandParams;
-	convertResult: CommandParams;
-};
-export type RunParams = {
-	elements: CommandParam[];
-	srcData: DatasetSource;
-	templateOption: CommandParams;
-	jdbcOption: CommandParams;
-	convertResult: CommandParams;
-};
-export type ParameterizeParams = {
-	elements: CommandParam[];
-	paramData: DatasetSource;
-	templateOption: CommandParams;
-};
 export type SelectParameter = {
 	name: string;
 	command: string;

@@ -1,9 +1,6 @@
 import { open } from "@tauri-apps/api/dialog";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
-import type {
-	CommandParam,
-	CommandParams,
-} from "../../context/SelectParameterProvider";
+import type { CommandParam, CommandParams } from "../../model/CommandParam";
 
 type Prop = {
 	prefix: string;

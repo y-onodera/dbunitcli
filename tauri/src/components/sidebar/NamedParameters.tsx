@@ -2,10 +2,8 @@ import { Body, ResponseType, fetch } from "@tauri-apps/api/http";
 import { useEffect, useState } from "react";
 import { type EditName, useSetEditName } from "../../context/EditNameProvider";
 import { useEnviroment } from "../../context/EnviromentProvider";
-import {
-	type Parameter,
-	useSetSelectParameter,
-} from "../../context/SelectParameterProvider";
+import { useSetSelectParameter } from "../../context/SelectParameterProvider";
+import type { Parameter } from "../../model/CommandParam";
 
 type NamedParameters = {
 	convert: string[];
