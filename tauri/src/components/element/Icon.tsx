@@ -97,6 +97,20 @@ export function SettingIcon(props: { title?: string, fill?: string }) {
         </svg>
     )
 }
+export function FixIcon(props: { title?: string, fill?: string }) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill={props.fill ? props.fill : "#5f6368"}
+        >
+            <title>{props.title ? props.title : "fix"}</title>
+            <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+        </svg>
+    )
+}
 export function ExpandIcon(props: { title?: string, close: boolean }) {
     return (
         <svg

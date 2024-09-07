@@ -1,13 +1,13 @@
 import { type ReactNode, useEffect, useState } from "react";
 
-export function InputLabel(props: { name: string, id: string, required: boolean }) {
+export function InputLabel(props: { name: string, id: string, w?: string, required: boolean }) {
     return (
         <label
             htmlFor={props.id}
-            className="block 
-                   mb-2 
-                   text-sm text-gray-900 
-                   font-medium "
+            className={`block mb-2 
+                   ${props.w ? props.w : "w-full"}
+                   font-medium text-sm text-gray-900 
+                   `}
         >
             {props.name}{props.required && "*"}
         </label>
@@ -43,6 +43,19 @@ export function CheckBox(props: { name: string, id: string, defaultValue?: strin
                 value={`${checked}`}
             />
         </>
+    )
+}
+export function ControllTextBox(props: { name: string, id: string, required: boolean, w?: string, value: string, handleChange: (text: React.ChangeEvent<HTMLInputElement>) => void }) {
+    return (
+        <input
+            name={props.name}
+            id={props.id}
+            type="text"
+            className={inputStyle(props.w ? props.w : "w-full")}
+            required={props.required}
+            value={props.value}
+            onChange={props.handleChange}
+        />
     )
 }
 export function TextBox(props: { name: string, id: string, required: boolean, defaultValue?: string }) {
@@ -82,9 +95,8 @@ export function SelectBox(props: { name: string, id: string, required: boolean, 
 }
 function inputStyle(w: string) {
     return `block 
-               ${w} 
                p-2.5 
-               z-20 
+               ${w} z-20 
                bg-gray-50 
                text-sm text-gray-900
                rounded-lg 

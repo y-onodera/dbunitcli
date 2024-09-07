@@ -22,7 +22,7 @@ export default function Layout() {
 						id="logo-sidebar"
 						className="fixed top-0 left-0 
                                     z-40 w-4=8 h-screen 
-                                    pt-20 
+                                    pt-16 
                                     transition-transform 
                                     -translate-x-full 
                                     border-r border-gray-200 

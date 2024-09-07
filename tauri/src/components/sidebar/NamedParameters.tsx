@@ -4,9 +4,9 @@ import { type EditName, useSetEditName } from "../../context/EditNameProvider";
 import { useEnviroment } from "../../context/EnviromentProvider";
 import { useSetSelectParameter } from "../../context/SelectParameterProvider";
 import type { Parameter } from "../../model/CommandParam";
-import { LinkeButton } from "../element/Button";
-import { AddButton } from "../element/ButtonIcon";
-import { ExpandIcon, SettingIcon } from "../element/Icon";
+import { LinkButton } from "../element/Button";
+import { AddButton, ButtonIcon, SettingButton } from "../element/ButtonIcon";
+import { ExpandIcon } from "../element/Icon";
 
 type NamedParameters = {
 	convert: string[];
@@ -97,24 +97,12 @@ export default function NamedParameters() {
 		</ul>
 	);
 }
-function Category(prop: NamedParameterProp) {
+function Category(props: NamedParameterProp) {
 	const [close, setClose] = useState(true);
 	const toggleMenu = () => setClose(!close);
 	return (
 		<li>
-			<button
-				type="button"
-				onClick={toggleMenu}
-				className="flex items-center 
-                            w-full 
-							p-2 
-                            text-base text-gray-900 
-                            rounded-lg 
-                            group 
-                            ring-indigo-300 
-                            focus-visible:ring
-                            hover:bg-gray-100 "
-			>
+			<ButtonIcon title="" handleClick={toggleMenu} >
 				<ExpandIcon close={close} />
 				<span
 					className="ms-2  
@@ -122,32 +110,32 @@ function Category(prop: NamedParameterProp) {
                            rtl:text-right 
                            whitespace-nowrap"
 				>
-					{prop.command}
+					{props.command}
 				</span>
-			</button>
-			<ul id={`${prop.command}-list`} className="py-1 space-y-1" hidden={close}>
+			</ButtonIcon>
+			<ul id={`${props.command}-list`} className="py-1 space-y-1" hidden={close}>
 				<Parameters
-					command={prop.command}
-					namedParameters={prop.namedParameters}
-					handleParameterSelect={prop.handleParameterSelect}
-					handleEditNamed={prop.handleEditNamed}
+					command={props.command}
+					namedParameters={props.namedParameters}
+					handleParameterSelect={props.handleParameterSelect}
+					handleEditNamed={props.handleEditNamed}
 				/>
 			</ul>
 		</li>
 	);
 }
-function Parameters(prop: NamedParameterProp) {
+function Parameters(props: NamedParameterProp) {
 	const environment = useEnviroment();
 	const [menuList, setMenuList] = useState([] as string[]);
 	useEffect(
 		() =>
 			setMenuList((current) =>
-				prop.namedParameters ? [...prop.namedParameters] : current,
+				props.namedParameters ? [...props.namedParameters] : current,
 			),
-		[prop.namedParameters],
+		[props.namedParameters],
 	);
 	const handleAddNewName = async () => {
-		await fetch(`${environment.apiUrl + prop.command.toLowerCase()}/add`, {
+		await fetch(`${environment.apiUrl + props.command.toLowerCase()}/add`, {
 			method: "GET",
 			responseType: ResponseType.JSON,
 		})
@@ -166,29 +154,21 @@ function Parameters(prop: NamedParameterProp) {
 			{menuList?.map((menu) => {
 				return (
 					<li key={menu} className="flex">
-						<LinkeButton title={menu}
+						<LinkButton title={menu}
 							handleClick={() =>
-								prop.handleParameterSelect(prop.command.toLowerCase(), menu)
+								props.handleParameterSelect(props.command.toLowerCase(), menu)
 							}
 						/>
-						<button
-							type="button"
-							onClick={(target) =>
-								prop.handleEditNamed({
-									command: prop.command.toLowerCase(),
-									name: menu,
-									x: target.clientX,
-									y: target.clientY,
-									afterEdge: target.clientY > 300,
-									setMenuList,
-								})
-							}
-							className="p-1
-                           ring-indigo-300 
-                           focus-visible:ring "
-						>
-							<SettingIcon />
-						</button>
+						<SettingButton title="" handleClick={(target) =>
+							props.handleEditNamed({
+								command: props.command.toLowerCase(),
+								name: menu,
+								x: target.clientX,
+								y: target.clientY,
+								afterEdge: target.clientY > 300,
+								setMenuList,
+							})
+						} />
 					</li>
 				);
 			})}

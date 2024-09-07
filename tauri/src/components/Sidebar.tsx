@@ -4,11 +4,9 @@ import NamedParameters from "./sidebar/NamedParameters";
 
 export default function Sidebar() {
 	return (
-		<div className="h-full px-3 pb-4 overflow-y-auto dark:bg-gray-800">
+		<div className="h-full px-3 pb-4 pt-4 overflow-y-auto ">
 			<NameEditMenu />
-			<ul className="space-y-2 font-medium">
-				<NamedParameters />
-			</ul>
+			<NamedParameters />
 		</div>
 	);
 }
