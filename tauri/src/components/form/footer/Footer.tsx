@@ -3,7 +3,7 @@ import { Body, ResponseType, fetch } from "@tauri-apps/api/http";
 import { useState } from "react";
 import { useEnviroment } from "../../../context/EnviromentProvider";
 import { useSelectParameter } from "../../../context/SelectParameterProvider";
-import { BlueButton, WhiteButton } from "../../element/button/Button";
+import { BlueButton, WhiteButton } from "../../element/Button";
 import ResultDialog from "./ResultDialog";
 
 type Running = {

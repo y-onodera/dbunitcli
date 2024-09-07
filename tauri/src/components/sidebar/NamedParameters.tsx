@@ -4,7 +4,9 @@ import { type EditName, useSetEditName } from "../../context/EditNameProvider";
 import { useEnviroment } from "../../context/EnviromentProvider";
 import { useSetSelectParameter } from "../../context/SelectParameterProvider";
 import type { Parameter } from "../../model/CommandParam";
-import { AddButton } from "../element/button/ButtonIcon";
+import { LinkeButton } from "../element/Button";
+import { AddButton } from "../element/ButtonIcon";
+import { ExpandIcon, SettingIcon } from "../element/Icon";
 
 type NamedParameters = {
 	convert: string[];
@@ -104,32 +106,16 @@ function Category(prop: NamedParameterProp) {
 				type="button"
 				onClick={toggleMenu}
 				className="flex items-center 
-                                       w-full p-2 
-                                       text-base text-gray-900 
-                                       transition duration-75 
-                                       rounded-lg 
-                                       group 
-                                       ring-indigo-300 
-                                       focus-visible:ring
-                                       hover:bg-gray-100 
-                                       dark:text-white dark:hover:bg-gray-700"
+                            w-full 
+							p-2 
+                            text-base text-gray-900 
+                            rounded-lg 
+                            group 
+                            ring-indigo-300 
+                            focus-visible:ring
+                            hover:bg-gray-100 "
 			>
-				<svg
-					className="w-3 h-3"
-					aria-hidden="true"
-					xmlns="http://www.w3.org/2000/svg"
-					fill="none"
-					viewBox="0 0 10 6"
-				>
-					<path
-						stroke="currentColor"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						strokeWidth="2"
-						d="m1 1 4 4 4-4"
-						transform={close ? "rotate(270,5,2.5)" : ""}
-					/>
-				</svg>
+				<ExpandIcon close={close} />
 				<span
 					className="ms-2  
                            text-left 
@@ -180,25 +166,11 @@ function Parameters(prop: NamedParameterProp) {
 			{menuList?.map((menu) => {
 				return (
 					<li key={menu} className="flex">
-						<button
-							type="button"
-							onClick={() =>
+						<LinkeButton title={menu}
+							handleClick={() =>
 								prop.handleParameterSelect(prop.command.toLowerCase(), menu)
 							}
-							className="flex items-center justify-start
-                          outline-none 
-                          ms-2 w-full p-1 
-                          text-gray-900 
-                          transition duration-75 
-                          rounded-lg 
-                          focus:outline-none
-                          ring-indigo-300 
-                          focus-visible:ring
-                          hover:bg-gray-100 
-                          dark:text-white dark:hover:bg-gray-700"
-						>
-							{menu}
-						</button>
+						/>
 						<button
 							type="button"
 							onClick={(target) =>
@@ -215,16 +187,7 @@ function Parameters(prop: NamedParameterProp) {
                            ring-indigo-300 
                            focus-visible:ring "
 						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								height="24px"
-								viewBox="0 -960 960 960"
-								width="24px"
-								fill="#5f6368"
-							>
-								<title>edit</title>
-								<path d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z" />
-							</svg>
+							<SettingIcon />
 						</button>
 					</li>
 				);

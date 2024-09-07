@@ -1,10 +1,9 @@
 import { open } from "@tauri-apps/api/dialog";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import type { CommandParam, CommandParams } from "../../model/CommandParam";
-import { ButtonWithIcon } from "../element/button/Button";
-import DirIcon from "../element/icon/DirIcon";
-import FileIcon from "../element/icon/FileIcon";
-import { CheckBox, InputLabel, SelectBox, TextBox } from "../element/input/Input";
+import { ButtonWithIcon } from "../element/Button";
+import { DirIcon, EditIcon, FileIcon } from "../element/Icon";
+import { CheckBox, InputLabel, SelectBox, TextBox } from "../element/Input";
 
 type Prop = {
 	prefix: string;

@@ -1,8 +1,5 @@
 import type { ReactNode } from "react";
-import AddIcon from "../icon/AddIcon";
-import CopyIcon from "../icon/CopyIcon";
-import DeleteIcon from "../icon/DeleteIcon";
-import EditIcon from "../icon/EditIcon";
+import { AddIcon, CopyIcon, DeleteIcon, EditIcon } from "./Icon";
 
 export function EditButton(prop: { title?: string, handleClick: () => void }) {
     return (
@@ -37,14 +34,13 @@ export function ButtonIcon(props: { title?: string, handleClick: () => void, chi
         <button
             type="button"
             onClick={props.handleClick}
-            className="flex items-center
+            className="flex items-center group
                         p-1 
                         text-gray-500
-                        hover:text-blue-600
                         ring-indigo-300 
                         focus:ring 
                         focus-visible:ring
-                        group"
+                        hover:text-blue-600"
         >
             {props.children}
             {props.title}

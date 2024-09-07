@@ -10,7 +10,7 @@ import {
 	useSelectParameter,
 	useSetSelectParameter,
 } from "../../context/SelectParameterProvider";
-import { CopyButton, DeleteButton, EditButton } from "../element/button/ButtonIcon";
+import { CopyButton, DeleteButton, EditButton } from "../element/ButtonIcon";
 
 type MenuEditProp = {
 	name: string;
