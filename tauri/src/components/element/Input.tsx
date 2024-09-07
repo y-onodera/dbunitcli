@@ -4,13 +4,38 @@ export function InputLabel(props: { name: string, id: string, w?: string, requir
     return (
         <label
             htmlFor={props.id}
-            className={`block mb-2 
+            className={`block 
                    ${props.w ? props.w : "w-full"}
                    font-medium text-sm text-gray-900 
                    `}
         >
             {props.name}{props.required && "*"}
         </label>
+    )
+}
+export function ControllTextBox(props: { name: string, id: string, required: boolean, w?: string, value: string, handleChange: (text: React.ChangeEvent<HTMLInputElement>) => void }) {
+    return (
+        <input
+            name={props.name}
+            id={props.id}
+            type="text"
+            className={inputStyle(props.w ? props.w : "w-full")}
+            required={props.required}
+            value={props.value}
+            onChange={props.handleChange}
+        />
+    )
+}
+export function TextBox(props: { name: string, id: string, required: boolean, w?: string, defaultValue?: string }) {
+    return (
+        <input
+            name={props.name}
+            id={props.id}
+            type="text"
+            className={inputStyle(props.w ? props.w : "w-full")}
+            required={props.required}
+            defaultValue={props.defaultValue}
+        />
     )
 }
 export function CheckBox(props: { name: string, id: string, defaultValue?: string }) {
@@ -45,31 +70,6 @@ export function CheckBox(props: { name: string, id: string, defaultValue?: strin
         </>
     )
 }
-export function ControllTextBox(props: { name: string, id: string, required: boolean, w?: string, value: string, handleChange: (text: React.ChangeEvent<HTMLInputElement>) => void }) {
-    return (
-        <input
-            name={props.name}
-            id={props.id}
-            type="text"
-            className={inputStyle(props.w ? props.w : "w-full")}
-            required={props.required}
-            value={props.value}
-            onChange={props.handleChange}
-        />
-    )
-}
-export function TextBox(props: { name: string, id: string, required: boolean, defaultValue?: string }) {
-    return (
-        <input
-            name={props.name}
-            id={props.id}
-            type="text"
-            className={inputStyle("w-full")}
-            required={props.required}
-            defaultValue={props.defaultValue}
-        />
-    )
-}
 export function SelectBox(props: { name: string, id: string, required: boolean, defaultValue?: string, handleOnChange?: () => Promise<void>, children: ReactNode }) {
     const [selected, setSelected] = useState("");
     useEffect(() => {
@@ -97,8 +97,8 @@ function inputStyle(w: string) {
     return `block 
                p-2.5 
                ${w} z-20 
-               bg-gray-50 
                text-sm text-gray-900
+               bg-gray-50 
                rounded-lg 
                border border-gray-300 
                ring-indigo-300 
