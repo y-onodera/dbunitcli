@@ -10,7 +10,8 @@ import {
 	useSelectParameter,
 	useSetSelectParameter,
 } from "../../context/SelectParameterProvider";
-import { CopyButton, DeleteButton, EditButton } from "../element/ButtonIcon";
+import { CopyButton, DeleteButton, EditButton, FixButton } from "../element/ButtonIcon";
+import { ControllTextBox } from "../element/Input";
 
 type MenuEditProp = {
 	name: string;
@@ -133,7 +134,7 @@ export default function NameEditMenu() {
 	);
 }
 function MenuEdit(prop: MenuEditProp) {
-	const [visible, setVisible] = useState(false);
+	const [hidden, setHidden] = useState(true);
 	const [newName, setNewName] = useState(prop.name);
 	const handleRenameTextOnChange = (text: string) => setNewName(text);
 	return (
@@ -142,48 +143,18 @@ function MenuEdit(prop: MenuEditProp) {
 				<DeleteButton handleClick={prop.handleMenuDelete} />
 			</li>
 			<li>
-				<div className="flex">
-					<EditButton title="rename" handleClick={() => setVisible(!visible)} />
-					<input
-						type="text"
-						onChange={(text) => handleRenameTextOnChange(text.target.value)}
-						className="p-2.5 
-                      w-50 
-                      z-20 
-                      text-sm text-gray-900 
-                      bg-gray-50 
-                      rounded-lg 
-                      border border-gray-300 
-                      ring-indigo-300 
-                      focus-visible:ring 
-                      dark:bg-gray-700 
-                      dark:border-gray-600 
-                      dark:placeholder-gray-400 
-                      dark:text-white 
-                      dark:focus:border-blue-500"
-						value={newName}
-						hidden={!visible}
-					/>
-					<button
-						type="button"
-						className="p-1"
-						hidden={!visible}
-						onClick={() => {
-							setVisible(!visible);
+				<div className="flex gap-x-0.5">
+					<EditButton title="rename" handleClick={() => setHidden((current) => !current)} />
+					{!hidden && <>
+						<ControllTextBox name="menuRename" id="menuRename" required={false} w="w-50"
+							value={newName} handleChange={(text) => handleRenameTextOnChange(text.target.value)} />
+						<FixButton title="" handleClick={() => {
+							setHidden((current) => !current);
 							prop.handleMenuRename(newName);
 						}}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							height="24px"
-							viewBox="0 -960 960 960"
-							width="24px"
-							fill="#5f6368"
-						>
-							<title>fix</title>
-							<path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
-						</svg>
-					</button>
+						/>
+					</>
+					}
 				</div>
 			</li>
 			<li>
