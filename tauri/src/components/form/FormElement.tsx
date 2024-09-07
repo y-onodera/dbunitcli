@@ -1,11 +1,14 @@
 import { open } from "@tauri-apps/api/dialog";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import type { CommandParam, CommandParams } from "../../model/CommandParam";
+import { ButtonWithIcon } from "../element/button/Button";
+import DirIcon from "../element/icon/DirIcon";
+import FileIcon from "../element/icon/FileIcon";
+import { CheckBox, InputLabel, SelectBox, TextBox } from "../element/input/Input";
 
 type Prop = {
 	prefix: string;
 	element: CommandParam;
-	setPath?: Dispatch<SetStateAction<string>>;
 };
 type FileProp = Prop & {
 	setPath: Dispatch<SetStateAction<string>>;
@@ -54,38 +57,15 @@ const Text: React.FC<Prop> = ({ prefix, element }) => {
 	}, [element]);
 	return (
 		<div>
-			<label
-				htmlFor={`${prefix}_${element.name}`}
-				className="block 
-          mb-2 
-          text-sm text-gray-900 
-          font-medium 
-          dark:text-white"
-			>
-				-{prefix && `${prefix}.`}
-				{element.name}
-				{element.attribute.required && "*"}
-			</label>
+			<InputLabel
+				name={prefix ? `-${prefix}.${element.name}` : `-${element.name}`}
+				id={`${prefix}_${element.name}`}
+				required={element.attribute.required}
+			/>
 			<div className="flex">
-				<input
+				<TextBox
 					name={prefix ? `-${prefix}.${element.name}` : `-${element.name}`}
 					id={`${prefix}_${element.name}`}
-					type="text"
-					className="block 
-                  p-2.5 
-                  w-full 
-                  z-20 
-                  text-sm text-gray-900 
-                  bg-gray-50 
-                  rounded-lg 
-                  border border-gray-300 
-                  ring-indigo-300 
-                  focus-visible:ring 
-                  dark:bg-gray-700 
-                  dark:border-gray-600 
-                  dark:placeholder-gray-400 
-                  dark:text-white 
-                  dark:focus:border-blue-500"
 					required={element.attribute.required}
 					defaultValue={path}
 				/>
@@ -108,38 +88,12 @@ const FileChooser: React.FC<FileProp> = ({ prefix, element, setPath }) => {
 		open().then((files) => files && setPath(files as string));
 	};
 	return (
-		<>
-			<button
-				type="button"
-				id={`${prefix}_${element.name}FileChooser`}
-				onClick={handleFileChooserClick}
-				className="p-2.5 
-                            ms-2 
-                            text-sm 
-                            font-medium 
-                            text-white 
-                            bg-indigo-500 
-                            rounded-lg 
-                            border border-gray-300 
-                            ring-indigo-300 
-                            focus-visible:ring 
-                            hover:bg-indigo-600 
-                            dark:bg-blue-600 
-                            dark:hover:bg-indigo-700 
-                            dark:focus:ring-indigo-800"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					height="24px"
-					viewBox="0 -960 960 960"
-					width="24px"
-					fill="white"
-				>
-					<title>FileChooser</title>
-					<path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v240h-80v-200H520v-200H240v640h360v80H240Zm638 15L760-183v89h-80v-226h226v80h-90l118 118-56 57Zm-638-95v-640 640Z" />
-				</svg>
-			</button>
-		</>
+		<ButtonWithIcon
+			handleClick={handleFileChooserClick}
+			id={`${prefix}_${element.name}FileChooser`}
+		>
+			<FileIcon title="FileChooser" fill="white" />
+		</ButtonWithIcon>
 	);
 };
 const DirectoryChooser: React.FC<FileProp> = ({ prefix, element, setPath }) => {
@@ -149,82 +103,26 @@ const DirectoryChooser: React.FC<FileProp> = ({ prefix, element, setPath }) => {
 		);
 	};
 	return (
-		<>
-			<button
-				type="button"
-				id={`${prefix}_${element.name}DirectoryChooser`}
-				onClick={handleDirectoryChooserClick}
-				className="p-2.5 
-                            ms-2 
-                            text-sm 
-                            font-medium 
-                            text-white 
-                            bg-indigo-500 
-                            rounded-lg 
-                            border border-gray-300 
-                            ring-indigo-300 
-                            focus-visible:ring 
-                            hover:bg-indigo-600 
-                            dark:bg-blue-600 
-                            dark:hover:bg-indigo-700 
-                            dark:focus:ring-indigo-800"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					height="24px"
-					viewBox="0 -960 960 960"
-					width="24px"
-					fill="white"
-				>
-					<title>DirectoryChooser</title>
-					<path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640H447l-80-80H160v480l96-320h684L837-217q-8 26-29.5 41.5T760-160H160Zm84-80h516l72-240H316l-72 240Zm0 0 72-240-72 240Zm-84-400v-80 80Z" />
-				</svg>
-			</button>
-		</>
+		<ButtonWithIcon
+			handleClick={handleDirectoryChooserClick}
+			id={`${prefix}_${element.name}DirectoryChooser`}
+		>
+			<DirIcon title="DirectoryChooser" fill="white" />
+		</ButtonWithIcon>
 	);
 };
 const Check: React.FC<Prop> = ({ prefix, element }) => {
-	const [checked, setChecked] = useState(false);
-	useEffect(() => {
-		setChecked(element.value === "true");
-	}, [element]);
 	return (
 		<div>
-			<label
-				htmlFor={`${prefix}_${element.name}`}
-				className="block 
-                                         mb-2 
-                                         text-sm text-gray-900 
-                                         font-medium 
-                                         dark:text-gray-300"
-			>
-				-{prefix && `${prefix}.`}
-				{element.name}
-			</label>
-			<input
+			<InputLabel
 				name={prefix ? `-${prefix}.${element.name}` : `-${element.name}`}
 				id={`${prefix}_${element.name}`}
-				type="checkbox"
-				className="w-4 h-4 
-                                                                      text-indigo-500 
-                                                                      bg-gray-50 
-                                                                      border border-gray-300 
-                                                                      ring-indigo-300 
-                                                                      focus-visible:ring 
-                                                                      dark:bg-blue-600 
-                                                                      dark:hover:bg-indigo-700 
-                                                                      dark:focus:ring-indigo-800"
-				checked={checked}
-				value={`${checked}`}
-				onChange={() => {
-					setChecked(!checked);
-				}}
+				required={false}
 			/>
-			<input
+			<CheckBox
 				name={prefix ? `-${prefix}.${element.name}` : `-${element.name}`}
-				id={`${prefix}_${element.name}hidden`}
-				type="hidden"
-				value={`${checked}`}
+				id={`${prefix}_${element.name}`}
+				defaultValue={element.value}
 			/>
 		</div>
 	);
@@ -234,50 +132,19 @@ const Select: React.FC<SelectProp> = ({
 	prefix,
 	element,
 }) => {
-	const [selected, setSelected] = useState("");
-	useEffect(() => {
-		setSelected(element.value);
-	}, [element]);
 	return (
 		<div>
-			<label
-				htmlFor={`${prefix}_${element.name}`}
-				className="block
-                                        mb-2 
-                                        text-sm text-gray-900
-                                        font-medium 
-                                        dark:text-white"
-			>
-				-{prefix && `${prefix}.`}
-				{element.name}
-				{element.attribute.required && "*"}
-			</label>
-			<select
+			<InputLabel
 				name={prefix ? `-${prefix}.${element.name}` : `-${element.name}`}
 				id={`${prefix}_${element.name}`}
-				className="block 
-                                                     w-40 
-                                                     p-2.5 
-                                                     z-20 
-                                                     bg-gray-50 
-                                                     text-sm text-gray-900
-                                                     rounded-lg 
-                                                     border border-gray-300 
-                                                     ring-indigo-300 
-                                                     focus:ring 
-                                                     focus-visible:ring 
-                                                     dark:bg-gray-700 
-                                                     dark:border-gray-600 
-                                                     dark:placeholder-gray-400 
-                                                     dark:text-white 
-                                                     dark:focus:ring-blue-500 
-                                                     dark:focus:border-blue-500"
-				required
-				value={selected}
-				onChange={(event) => {
-					setSelected(event.currentTarget.value);
-					handleTypeSelect?.();
-				}}
+				required={element.attribute.required}
+			/>
+			<SelectBox
+				name={prefix ? `-${prefix}.${element.name}` : `-${element.name}`}
+				id={`${prefix}_${element.name}`}
+				required={true}
+				handleOnChange={handleTypeSelect}
+				defaultValue={element.value}
 			>
 				{element.attribute.selectOption.map((value) => {
 					return (
@@ -286,7 +153,7 @@ const Select: React.FC<SelectProp> = ({
 						</option>
 					);
 				})}
-			</select>
+			</SelectBox>
 		</div>
 	);
 };

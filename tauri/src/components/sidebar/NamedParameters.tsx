@@ -4,6 +4,7 @@ import { type EditName, useSetEditName } from "../../context/EditNameProvider";
 import { useEnviroment } from "../../context/EnviromentProvider";
 import { useSetSelectParameter } from "../../context/SelectParameterProvider";
 import type { Parameter } from "../../model/CommandParam";
+import { AddButton } from "../element/button/ButtonIcon";
 
 type NamedParameters = {
 	convert: string[];
@@ -229,29 +230,7 @@ function Parameters(prop: NamedParameterProp) {
 				);
 			})}
 			<li>
-				<button
-					type="button"
-					onClick={handleAddNewName}
-					className="flex items-center justify-start border-2 border-gray-200 border-dashed
-                                      ms-2 w-full p-1 
-                                      text-gray-900 
-                                      transition duration-75 
-                                      rounded-lg 
-                                      ring-indigo-300 
-                                      focus-visible:ring 
-                                      hover:bg-gray-100 
-                                      dark:text-white dark:hover:bg-gray-700"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						height="24px"
-						viewBox="0 -960 960 960"
-						width="24px"
-					>
-						<title>add</title>
-						<path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
-					</svg>
-				</button>
+				<AddButton handleClick={handleAddNewName} />
 			</li>
 		</>
 	);

@@ -10,6 +10,7 @@ import {
 	useSelectParameter,
 	useSetSelectParameter,
 } from "../../context/SelectParameterProvider";
+import { CopyButton, DeleteButton, EditButton } from "../element/button/ButtonIcon";
 
 type MenuEditProp = {
 	name: string;
@@ -138,43 +139,11 @@ function MenuEdit(prop: MenuEditProp) {
 	return (
 		<ul className="space-y-4">
 			<li>
-				<button
-					type="button"
-					onClick={() => prop.handleMenuDelete()}
-					className="flex p-1 items-center text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500 group"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						height="24px"
-						width="24px"
-						viewBox="0 -960 960 960"
-						fill="#5f6368"
-					>
-						<title>delete</title>
-						<path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
-					</svg>
-					delete
-				</button>
+				<DeleteButton handleClick={prop.handleMenuDelete} />
 			</li>
 			<li>
 				<div className="flex">
-					<button
-						type="button"
-						onClick={() => setVisible(!visible)}
-						className="flex p-1 items-center text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500 group"
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							height="24"
-							viewBox="0 0 24 24"
-							width="24"
-						>
-							<title>rename</title>
-							<path d="M0 0h24v24H0z" fill="none" />
-							<path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-						</svg>
-						rename
-					</button>
+					<EditButton title="rename" handleClick={() => setVisible(!visible)} />
 					<input
 						type="text"
 						onChange={(text) => handleRenameTextOnChange(text.target.value)}
@@ -218,23 +187,7 @@ function MenuEdit(prop: MenuEditProp) {
 				</div>
 			</li>
 			<li>
-				<button
-					type="button"
-					onClick={() => prop.handleMenuCopy()}
-					className="flex p-1 items-center text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500 group"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						height="24"
-						viewBox="0 0 24 24"
-						width="24"
-					>
-						<title>copy</title>
-						<path d="M0 0h24v24H0z" fill="none" />
-						<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
-					</svg>
-					copy
-				</button>
+				<CopyButton handleClick={prop.handleMenuCopy} />
 			</li>
 		</ul>
 	);

@@ -12,25 +12,21 @@ export default function Layout() {
 				<EditNmaeProvider>
 					<nav
 						className="fixed top-0
-                            z-50 
-                            w-full 
-                            bg-white 
-                            border-b border-gray-200 
-                            dark:bg-gray-800 dark:border-gray-700"
+                                    w-full z-50 
+                                    bg-white 
+                                    border-b border-gray-200"
 					>
 						<Header />
 					</nav>
 					<aside
 						id="logo-sidebar"
 						className="fixed top-0 left-0 
-                                                z-40 
-                                                w-4=8 h-screen 
-                                                pt-20 
-                                                transition-transform 
-                                                -translate-x-full 
-                                                border-r border-gray-200 
-                                                sm:translate-x-0 
-                                                dark:bg-gray-800 dark:border-gray-700"
+                                    z-40 w-4=8 h-screen 
+                                    pt-20 
+                                    transition-transform 
+                                    -translate-x-full 
+                                    border-r border-gray-200 
+                                    sm:translate-x-0"
 						aria-label="Sidebar"
 					>
 						<Sidebar />

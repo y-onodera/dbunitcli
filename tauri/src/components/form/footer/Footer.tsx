@@ -3,6 +3,7 @@ import { Body, ResponseType, fetch } from "@tauri-apps/api/http";
 import { useState } from "react";
 import { useEnviroment } from "../../../context/EnviromentProvider";
 import { useSelectParameter } from "../../../context/SelectParameterProvider";
+import { BlueButton, WhiteButton } from "../../element/button/Button";
 import ResultDialog from "./ResultDialog";
 
 type Running = {
@@ -87,100 +88,35 @@ export default function Footer(prop: {
 						{running.resultMessage}
 					</h3>
 					{running.resultDir && (
-						<button
-							type="button"
-							onClick={() => openDirectory(running.resultDir)}
-							className="text-center text-sm font-semibold text-white 
-                                       bg-indigo-500 
-                                       rounded-e-lg rounded-s-gray-100 rounded-s-2 
-                                       border border-gray-300 
-                                       transition 
-                                       duration-100 
-                                       ring-indigo-300 
-                                       focus-visible:ring 
-                                       hover:bg-indigo-600 
-                                       active:bg-indigo-700 
-                                       md:text-base"
-						>
-							Open Directory
-						</button>
+						<BlueButton title="Open Directory" handleClick={() => openDirectory(running.resultDir)} />
 					)}
-					<button
-						type="button"
-						onClick={() => {
-							setRunning({ command: "", resultMessage: "", resultDir: "" });
-						}}
-						className="text-center text-sm 
-                                     bg-white 
-                                     rounded-e-lg rounded-s-gray-100 rounded-s-2 
-                                     border border-gray-300 
-                                     transition 
-                                     duration-100 
-                                     ring-glay-300 
-                                     focus-visible:ring 
-                                     hover:bg-glay-600 
-                                     active:bg-glay-700 
-                                     md:text-base"
-					>
-						Close
-					</button>
+					<WhiteButton title="Close" handleClick={(() => {
+						setRunning({ command: "", resultMessage: "", resultDir: "" });
+					})} />
 				</div>
 			</ResultDialog>
 			{parameter.command && (
-				<div
-					className="fixed bottom-0 right-1 
-                            w-full z-50 
-                            flex items-center justify-end "
+				<div className="fixed bottom-0 right-1 
+                                w-full z-50 
+                                flex items-center justify-end "
 				>
-					<button
-						type="button"
-						className="text-center text-sm font-semibold text-white 
-                                 bg-indigo-500 
-                                 rounded-e-lg rounded-s-gray-100 rounded-s-2 
-                                 border border-gray-300 
-                                 transition 
-                                 duration-100 
-                                 ring-indigo-300 
-                                 focus-visible:ring 
-                                 hover:bg-indigo-600 
-                                 active:bg-indigo-700 
-                                 md:text-base"
-						onClick={() => {
-							const input = prop.formData(true);
-							if (!input.validationError) {
-								setRunning({
-									command: "exec",
-									resultMessage: "",
-									resultDir: "",
-								});
-							}
-						}}
-					>
-						Exec
-					</button>
-					<button
-						type="button"
-						className="text-center text-sm font-semibold text-white 
-                                 bg-indigo-500 
-                                 rounded-e-lg rounded-s-gray-100 rounded-s-2 
-                                 border border-gray-300 
-                                 transition 
-                                 duration-100 
-                                 ring-indigo-300 
-                                 focus-visible:ring 
-                                 hover:bg-indigo-600 
-                                 active:bg-indigo-700 
-                                 md:text-base"
-						onClick={() => {
+					<BlueButton title="Exec" handleClick={() => {
+						const input = prop.formData(true);
+						if (!input.validationError) {
 							setRunning({
-								command: "save",
+								command: "exec",
 								resultMessage: "",
 								resultDir: "",
 							});
-						}}
-					>
-						Save
-					</button>
+						}
+					}} />
+					<BlueButton title="Save" handleClick={() => {
+						setRunning({
+							command: "save",
+							resultMessage: "",
+							resultDir: "",
+						});
+					}} />
 					<span className="text-sm text-gray-500">*Required</span>
 				</div>
 			)}
