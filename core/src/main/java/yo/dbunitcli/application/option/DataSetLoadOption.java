@@ -67,12 +67,8 @@ public record DataSetLoadOption(
             return result;
         }
         result.putFileOrDir("-src", this.src, true);
-        result.putFile("-setting", this.setting == null ? null : new File(this.setting));
-        result.put("-settingEncoding", this.settingEncoding);
         result.put("-regTableInclude", this.regTableInclude);
         result.put("-regTableExclude", this.regTableExclude);
-        result.put("-loadData", this.loadData);
-        result.put("-includeMetaData", this.includeMetaData);
         try {
             if (this.dataSetParam == null) {
                 final DataSourceType type = DataSourceType.valueOf(result.get("-srcType"));
@@ -84,6 +80,10 @@ public record DataSetLoadOption(
             }
         } catch (final Throwable ignored) {
         }
+        result.put("-loadData", this.loadData);
+        result.put("-includeMetaData", this.includeMetaData);
+        result.putFile("-setting", this.setting == null ? null : new File(this.setting));
+        result.put("-settingEncoding", this.settingEncoding);
         return result;
     }
 
