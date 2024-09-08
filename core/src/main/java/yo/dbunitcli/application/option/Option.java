@@ -29,10 +29,12 @@ public interface Option {
             return new Filter<>(FilterType.ANY, null);
         }
 
+        @SafeVarargs
         public static <T extends Enum<?>> Filter<T> include(final T... target) {
             return new Filter<>(FilterType.INCLUDE, target);
         }
 
+        @SafeVarargs
         public static <T extends Enum<?>> Filter<T> exclude(final T... target) {
             return new Filter<>(FilterType.EXCLUDE, target);
         }
