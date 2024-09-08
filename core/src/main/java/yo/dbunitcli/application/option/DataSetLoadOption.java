@@ -67,8 +67,6 @@ public record DataSetLoadOption(
             return result;
         }
         result.putFileOrDir("-src", this.src, true);
-        result.put("-regTableInclude", this.regTableInclude);
-        result.put("-regTableExclude", this.regTableExclude);
         try {
             if (this.dataSetParam == null) {
                 final DataSourceType type = DataSourceType.valueOf(result.get("-srcType"));
@@ -80,6 +78,8 @@ public record DataSetLoadOption(
             }
         } catch (final Throwable ignored) {
         }
+        result.put("-regTableInclude", this.regTableInclude);
+        result.put("-regTableExclude", this.regTableExclude);
         result.put("-loadData", this.loadData);
         result.put("-includeMetaData", this.includeMetaData);
         result.putFile("-setting", this.setting == null ? null : new File(this.setting));
