@@ -32,6 +32,7 @@ public record ComparableDataSetParam(
         , String headerName
         , String fixedLength
         , char delimiter
+        , boolean ignoreQuoted
         , String extension
         , boolean recursive
         , TemplateRender templateRender
@@ -59,6 +60,7 @@ public record ComparableDataSetParam(
                 , builder.getHeaderName()
                 , builder.getFixedLength()
                 , builder.getDelimiter()
+                , builder.isIgnoreQuoted()
                 , builder.getExtension()
                 , builder.isRecursive()
                 , builder.getStTemplateLoader()
@@ -113,6 +115,7 @@ public record ComparableDataSetParam(
         private boolean recursive = false;
         private String regTableInclude;
         private String regTableExclude;
+        private boolean ignoreQuoted = false;
 
         public Builder setSrc(final File src) {
             this.src = src;
@@ -332,5 +335,13 @@ public record ComparableDataSetParam(
             return this.regTableExclude;
         }
 
+        public boolean isIgnoreQuoted() {
+            return this.ignoreQuoted;
+        }
+
+        public Builder setIgnoreQuoted(final boolean ignoreQuoted) {
+            this.ignoreQuoted = ignoreQuoted;
+            return this;
+        }
     }
 }

@@ -82,6 +82,24 @@ public class ConvertTest {
     }
 
     @Test
+    public void testFromCsvIgnoreQuoteToXlsx() throws Exception {
+        Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvIgnoreQuotedToXlsx.txt"});
+        final File src = new File(this.baseDir + "/convert/csv2xlsx/quoted/result/paramConvertCsvIgnoreQuotedToXlsx.xlsx");
+        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                new ComparableXlsxDataSetProducer(
+                        ComparableDataSetParam.builder()
+                                .setSrc(src)
+                                .build()));
+        Assertions.assertEquals(1, actual.getTableNames().length);
+        final ComparableTable table = actual.getTable("quoted");
+        Assertions.assertEquals(3, table.getRowCount());
+        Assertions.assertEquals("\"1\"", table.getValue(0, "\"key\""));
+        Assertions.assertEquals("\"\"2\"\"", table.getValue(0, "\"column1\""));
+        Assertions.assertEquals("\"3\"", table.getValue(0, "\"column2\""));
+        Assertions.assertEquals("\"4\"", table.getValue(0, "\"column3\""));
+    }
+
+    @Test
     public void testFromCsvToMultiXlsx() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvToMultiXlsx.txt"});
         final File src = new File(this.baseDir + "/convert/csv2xlsx/resultmultixlsx");
@@ -112,7 +130,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testparamConvertFixedFileToCsv() throws Exception {
+    public void testFromFixedFileToCsv() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFixedFileToCsv.txt"});
         final File src = new File(this.baseDir + "/convert/fixed2csv/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -156,7 +174,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testXlsxWithSchemaToCsv() throws Exception {
+    public void testFromXlsxWithSchemaToCsv() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertXlsxWithSchemaToCsv.txt"});
         final File src = new File(this.baseDir + "convert/xlsxwithschema2csv/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -174,7 +192,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testXlsWithSchemaToCsv() throws Exception {
+    public void testFromXlsWithSchemaToCsv() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertXlsWithSchemaToCsv.txt"});
         final File src = new File(this.baseDir + "/convert/xlswithschema2csv/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -342,7 +360,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertCsvSplitMultiXlsx() throws Exception {
+    public void testFromCsvToSplitMultiXlsx() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvSplitMultiXlsx.txt"});
         final File src = new File(this.baseDir + "/convert/split/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -398,7 +416,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertCsvSplitByColumnMultiXlsx() throws Exception {
+    public void testFromCsvToSplitByColumnMultiXlsx() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvSplitByColumnMultiXlsx.txt"});
         final File src = new File(this.baseDir + "/convert/split/keysplit_result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -446,7 +464,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertCsvSeparateMultiXlsx() throws Exception {
+    public void testFromCsvToSeparateMultiXlsx() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertCsvSeparateMultiXlsx.txt"});
         final File src = new File(this.baseDir + "/convert/separate/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -470,7 +488,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertFilePathToCsv() throws Exception {
+    public void testFromFilePathToCsv() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFilePathToCsv.txt", "-recursive=true"});
         final File src = new File(this.baseDir + "/convert/file2csv/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -491,7 +509,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertFilePathToCsvNotRecursive() throws Exception {
+    public void testFromFilePathToCsvNotRecursive() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFilePathToCsv.txt", "-recursive=false"});
         final File src = new File(this.baseDir + "/convert/file2csv/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -510,7 +528,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertFilePathToCsvFilterExtension() throws Exception {
+    public void testFromFilePathToCsvFilterExtension() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFilePathToCsv.txt", "-recursive=true", "-extension=txt"});
         final File src = new File(this.baseDir + "/convert/file2csv/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -529,7 +547,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertFilePathToCsvWithSetting() throws Exception {
+    public void testFromFilePathToCsvWithSetting() throws Exception {
         Files.writeString(new File(this.baseDir, "testConvertFilePathToCsvWithSetting.json").toPath(), """
                 {
                   "commonSettings":[
@@ -556,7 +574,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertDistinctColumn() throws Exception {
+    public void testDistinctColumn() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertDistinctColumn.txt"});
         final File src = new File(this.baseDir + "/convert/distinct/result");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -584,7 +602,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertDistinctWithTableNameMap() throws Exception {
+    public void testDistinctWithTableNameMap() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertDistinctWithTableNameMap.txt"});
         final File src = new File(this.baseDir + "/convert/distinct/resultrename");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -612,7 +630,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertDistinctWithMerge() throws Exception {
+    public void testDistinctWithMerge() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertDistinctWithMerge.txt"});
         final File src = new File(this.baseDir + "/convert/distinct/resultmerge");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -634,7 +652,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertOuterJoin() throws Exception {
+    public void testOuterJoin() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertOuterJoin.txt"});
         final File src = new File(this.baseDir + "/convert/join/result/paramConvertOuterJoin.xlsx");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -673,7 +691,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertFullJoin() throws Exception {
+    public void testFullJoin() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertFullJoin.txt"});
         final File src = new File(this.baseDir + "/convert/join/result/paramConvertFullJoin.xlsx");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -720,7 +738,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertInnerJoin() throws Exception {
+    public void testInnerJoin() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertInnerJoin.txt"});
         final File src = new File(this.baseDir + "/convert/join/result/paramConvertInnerJoin.xlsx");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -751,7 +769,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertInnerJoinByExpression() throws Exception {
+    public void testInnerJoinByExpression() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertInnerJoinByExpression.txt"});
         final File src = new File(this.baseDir + "/convert/join/result/paramConvertInnerJoinByExpression.xlsx");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -806,7 +824,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertInnerJoinWithSplit() throws Exception {
+    public void testInnerJoinWithSplit() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertInnerJoinWithSplit.txt"});
         final File src = new File(this.baseDir + "/convert/join/result/paramConvertInnerJoinWithSplit.xlsx");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -832,7 +850,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertInnerJoinWithSeparate() throws Exception {
+    public void testInnerJoinWithSeparate() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertInnerJoinWithSeparate.txt"});
         final File src = new File(this.baseDir + "/convert/join/result/paramConvertInnerJoinWithSeparate.xlsx");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -877,7 +895,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertInnerJoinWithRename() throws Exception {
+    public void testInnerJoinWithRename() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertInnerJoinWithRename.txt"});
         final File src = new File(this.baseDir + "/convert/join/result/paramConvertInnerJoinWithRename.xlsx");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -907,7 +925,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertJoinMultiple() throws Exception {
+    public void testJoinMultiple() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertJoinMultiple.txt"});
         final File src = new File(this.baseDir + "/convert/join/result/paramConvertJoinMultiple.xlsx");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -970,7 +988,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void testConvertXlsxWithSchemaAddFileInfo() throws Exception {
+    public void testAddFileInfo() throws Exception {
         Convert.main(new String[]{"@" + this.testResourceDir + "/paramConvertXlsxWithSchemaAndFileInfoJoin.txt"});
         final File src = new File(this.baseDir + "/convert/xlsxwithschema2xlsx/result/paramConvertXlsxWithSchemaAndFileInfoJoin.xlsx");
         final ComparableDataSetImpl actual = new ComparableDataSetImpl(

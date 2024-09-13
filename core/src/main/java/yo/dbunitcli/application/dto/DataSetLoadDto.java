@@ -24,6 +24,8 @@ public class DataSetLoadDto implements CompositeDto {
     private String regExclude;
     @CommandLine.Option(names = "-delimiter", description = "default is comma")
     private String delimiter;
+    @CommandLine.Option(names = "-ignoreQuoted", description = "if true, double quote(\") regard as simple char.default false")
+    private boolean ignoreQuoted = false;
     @CommandLine.Option(names = "-encoding", description = "csv file encoding")
     private String encoding;
     @CommandLine.Option(names = "-xlsxSchema", description = "schema use read xlsx(zls)")
@@ -230,5 +232,13 @@ public class DataSetLoadDto implements CompositeDto {
 
     public void setRegTableExclude(final String regTableExclude) {
         this.regTableExclude = regTableExclude;
+    }
+
+    public boolean getIgnoreQuoted() {
+        return this.ignoreQuoted;
+    }
+
+    public void setIgnoreQuoted(final boolean ignoreQuoted) {
+        this.ignoreQuoted = ignoreQuoted;
     }
 }

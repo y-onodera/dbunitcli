@@ -176,7 +176,9 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         this.pipeline.putFront(SeparatorHandler.ENDPIECE());
         this.pipeline.putFront(EscapeHandler.ACCEPT());
         this.pipeline.putFront(IsAlnumHandler.QUOTE());
-        this.pipeline.putFront(QuoteHandler.QUOTE());
+        if (!this.param.ignoreQuoted()) {
+            this.pipeline.putFront(QuoteHandler.QUOTE());
+        }
         this.pipeline.putFront(EscapeHandler.ESCAPE());
         this.pipeline.putFront(WhitespacesHandler.IGNORE());
         this.pipeline.putFront(TransparentHandler.IGNORE());
