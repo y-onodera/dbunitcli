@@ -125,6 +125,9 @@
         "pattern": "\\Qorg/apache/xmlbeans/metadata/system/sXMLTOOLS/index.xsb\\E"
       },
       {
+        "pattern": "\\Qorg/eclipse/parsson/message.properties\\E"
+      },
+      {
         "pattern": "\\Qorg/h2/util/data.zip\\E"
       },
       {
@@ -193,6 +196,13 @@
       "classNames": [
         "oracle.jdbc.driver.ErrorMessages",
         "oracle.jdbc.driver.ErrorMessages_ja"
+      ]
+    },
+    {
+      "name": "org.eclipse.parsson.messages",
+      "locales": [
+        "",
+        "ja"
       ]
     },
     {
