@@ -1,0 +1,13 @@
+{
+  "settings": [
+    {
+      "name" : "Test1" ,"keys":["Key" ,"Column1" ,"Column2" ,"Column3"]
+    }
+  , {
+      "name" : "Test2" ,"keys":["PrimaryKey" ,"ColumnA" ,"ColumnB"]
+    }
+  , {
+      "name" : "Test3" ,"keys":["PrimaryKey" ,"PrimaryKey2" ,"ColumnA" ,"ColumnB"]
+    }
+  ]
+}

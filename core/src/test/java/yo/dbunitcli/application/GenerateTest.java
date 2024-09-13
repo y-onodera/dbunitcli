@@ -91,6 +91,13 @@ public class GenerateTest {
     }
 
     @Test
+    public void testGenerateSettingsIfNoKeyUseAllColumns() throws Exception {
+        Generate.main(new String[]{"@" + this.testResourcesDir + "/paramGenerateSettingsNoKeys.txt"});
+        this.subDirectory = "generate/settings";
+        this.assertGenerateFileEquals("settings_no_keys.json", "UTF-8");
+    }
+
+    @Test
     public void testGenerateInsert() throws Exception {
         Generate.main(new String[]{"@" + this.testResourcesDir + "/paramGenerateInsert.txt"});
         this.subDirectory = "generate/sql/insert";

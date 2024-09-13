@@ -1,5 +1,14 @@
+DropEmpty ::= ["": [], default: key]
 setting(table) ::= <<
+$if (strip(table.primaryKeys))$$usePrimaryKeys(table)$$else$$useColumns(table)$$endif$
+>>
+usePrimaryKeys(table) ::= <<
     {
       "name" : "$table.tableName$" ,"keys":[$table.primaryKeys:{column | "$column.columnName$"}; separator=" ,"$]
+    }
+>>
+useColumns(table) ::= <<
+    {
+      "name" : "$table.tableName$" ,"keys":[$table.columns:{column | "$column.columnName$"}; separator=" ,"$]
     }
 >>
