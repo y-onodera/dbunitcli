@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public record Options(File baseDir, Map<CommandType, List<Path>> parameterFiles) {
@@ -42,7 +44,7 @@ public record Options(File baseDir, Map<CommandType, List<Path>> parameterFiles)
     }
 
     public void rename(final CommandType type, final String oldName, final String newName) {
-        final Path dest = new File(this.getParent(type), newName + ".txt").toPath();
+        final Path dest = new File(this.getParent(type), this.getUniqueName(type, newName) + ".txt").toPath();
         if (this.parameterFiles(type)
                 .filter(it -> it.getFileName().toString().equals(oldName + ".txt"))
                 .map(it -> {
@@ -63,8 +65,15 @@ public record Options(File baseDir, Map<CommandType, List<Path>> parameterFiles)
                     })
                     .toList());
             Options.LOGGER.info(String.format("type:%s include:%s", type, this.parameterFiles(type).toList()));
-
         }
+    }
+
+    public void add(final CommandType type, final String name, final String[] args) throws IOException {
+        this.save(type, this.getUniqueName(type, name), args);
+    }
+
+    public void update(final CommandType type, final String name, final String[] args) throws IOException {
+        this.save(type, name, args);
     }
 
     public void save(final CommandType type, final String name, final String[] args) throws IOException {
@@ -89,6 +98,19 @@ public record Options(File baseDir, Map<CommandType, List<Path>> parameterFiles)
 
     private File getParent(final CommandType type) {
         return new File(this.baseDir, type.name());
+    }
+
+    private String getUniqueName(final CommandType type, final String name) {
+        final List<String> alreadyExists = this.parameterNames(type)
+                .filter(it -> Pattern.compile(Pattern.quote(name) + "(\\([0-9]+\\))*").matcher(it).matches())
+                .toList();
+        return alreadyExists.size() == 0
+                ? name
+                : IntStream.iterate(1, it -> it + 1)
+                .filter(it -> !alreadyExists.contains(name + "(%s)".formatted(it)))
+                .mapToObj((name + "(%s)")::formatted)
+                .findFirst()
+                .get();
     }
 
     public static class Builder {

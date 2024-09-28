@@ -37,7 +37,13 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     @Get(uri = "add", produces = MediaType.APPLICATION_JSON)
     public String add() {
         try {
-            this.workspace.add(this.getCommandType(), "new item", this.getCommand().parseOption(new String[]{}).toArgs(false));
+            this.workspace
+                    .options()
+                    .add(this.getCommandType()
+                            , "new item"
+                            , this.getCommand()
+                                    .parseOption(new String[]{})
+                                    .toArgs(false));
             return ObjectMapper
                     .getDefault()
                     .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
@@ -55,9 +61,11 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                     .findFirst()
                     .ifPresent(target -> {
                         try {
-                            this.workspace.add(this.getCommandType()
-                                    , target.getFileName().toString().replaceAll(".txt", "")
-                                    , Files.readAllLines(target).toArray(new String[0]));
+                            this.workspace
+                                    .options()
+                                    .add(this.getCommandType()
+                                            , target.getFileName().toString().replaceAll(".txt", "")
+                                            , Files.readAllLines(target).toArray(new String[0]));
                         } catch (final IOException ex) {
                             throw new RuntimeException(ex);
                         }
@@ -74,7 +82,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     @Post(uri = "delete", produces = MediaType.APPLICATION_JSON)
     public String delete(@Body final OptionDto input) {
         try {
-            this.workspace.delete(this.getCommandType(), input.getName());
+            this.workspace.options().delete(this.getCommandType(), input.getName());
             return ObjectMapper
                     .getDefault()
                     .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
@@ -87,7 +95,9 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     @Post(uri = "rename", produces = MediaType.APPLICATION_JSON)
     public String rename(@Body final OptionDto input) {
         try {
-            this.workspace.rename(this.getCommandType(), input.getOldName(), input.getNewName());
+            this.workspace
+                    .options()
+                    .rename(this.getCommandType(), input.getOldName(), input.getNewName());
             return ObjectMapper
                     .getDefault()
                     .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
@@ -149,7 +159,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
     public String save(@Body final OptionDto body) {
         try {
-            this.workspace.update(this.getCommandType()
+            this.workspace.options().update(this.getCommandType()
                     , body.getName()
                     , this.getCommand().parseOption(this.requestToArgs(body.getInput()))
                             .toArgs(false));
