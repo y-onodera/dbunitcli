@@ -127,6 +127,8 @@
                     <exclude>**/*.tsv</exclude>
                     <exclude>**/*.xls</exclude>
                     <exclude>**/*.xlsx</exclude>
+                    <exclude>**/*.png</exclude>
+                    <exclude>**/*.pdf</exclude>
                 </excludes>
             </testResource>
         </testResources>
