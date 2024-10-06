@@ -7,6 +7,9 @@ import yo.dbunitcli.application.option.Option;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.Parameter;
 
+import java.io.File;
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -40,7 +43,7 @@ class RunOptionTest {
         }
 
         @Test
-        void toCommandLineArgs() {
+        void toCommandLineArgs() throws IOException {
             final RunOption target = RunOptionTest.this.createTarget();
             final Option.CommandLineArgs result = target.toCommandLineArgs();
             assertEquals(RunOptionTest.this.src.getScriptType().toString(), result.getArg("-scriptType").value());
@@ -52,7 +55,7 @@ class RunOptionTest {
             assertNull(result.getArg("-template.encoding"));
             assertNull(result.getArg("-jdbc.jdbcProperties"));
             assertNull(result.getArg("-antTarget"));
-            assertEquals(RunOptionTest.this.src.getBaseDir(), result.getArg("-baseDir").value());
+            assertEquals(new File(RunOptionTest.this.src.getBaseDir()).getCanonicalPath(), result.getArg("-baseDir").value());
         }
     }
 
@@ -65,7 +68,7 @@ class RunOptionTest {
         }
 
         @Test
-        void toCommandLineArgs() {
+        void toCommandLineArgs() throws IOException {
             final RunOption target = RunOptionTest.this.createTarget();
             final Option.CommandLineArgs result = target.toCommandLineArgs();
             assertEquals(RunOptionTest.this.src.getScriptType().toString(), result.getArg("-scriptType").value());
@@ -77,7 +80,7 @@ class RunOptionTest {
             assertNull(result.getArg("-template.encoding"));
             assertNull(result.getArg("-jdbc.jdbcProperties"));
             assertEquals(RunOptionTest.this.src.getAntTarget(), result.getArg("-antTarget").value());
-            assertEquals(RunOptionTest.this.src.getBaseDir(), result.getArg("-baseDir").value());
+            assertEquals(new File(RunOptionTest.this.src.getBaseDir()).getCanonicalPath(), result.getArg("-baseDir").value());
         }
     }
 
@@ -90,7 +93,7 @@ class RunOptionTest {
         }
 
         @Test
-        void toCommandLineArgs() {
+        void toCommandLineArgs() throws IOException {
             final RunOption target = RunOptionTest.this.createTarget();
             final Option.CommandLineArgs result = target.toCommandLineArgs();
             assertEquals(RunOptionTest.this.src.getScriptType().toString(), result.getArg("-scriptType").value());
@@ -102,7 +105,7 @@ class RunOptionTest {
             assertNull(result.getArg("-template.encoding"));
             assertNull(result.getArg("-jdbc.jdbcProperties"));
             assertNull(result.getArg("-antTarget"));
-            assertEquals(RunOptionTest.this.src.getBaseDir(), result.getArg("-baseDir").value());
+            assertEquals(new File(RunOptionTest.this.src.getBaseDir()).getCanonicalPath(), result.getArg("-baseDir").value());
         }
     }
 
