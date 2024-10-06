@@ -1,6 +1,6 @@
--src=src/test/resources/yo/dbunitcli/application/csv/quoted
+-src=src/test/resources/yo/dbunitcli/application/src/csv/quoted
 -srcType=csv
 -ignoreQuoted=true
--setting=src/test/resources/yo/dbunitcli/application/csv2xlsx/setting.json
+-setting=src/test/resources/yo/dbunitcli/application/settings/csv2xlsx/setting.json
 -result=target/test-classes/yo/dbunitcli/application/convert/csv2xlsx/quoted/result
 -resultType=xlsx

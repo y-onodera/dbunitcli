@@ -6,6 +6,7 @@ import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.CompareKeys;
+import yo.dbunitcli.resource.FileResources;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -70,11 +71,6 @@ public class ImageCompareManager extends DefaultCompareManager {
     }
 
     @Override
-    public Stream<Function<DataSetCompare, List<CompareDiff>>> getStrategies() {
-        return Stream.of(this.searchModifyTables());
-    }
-
-    @Override
     protected Stream<Function<TableCompare, List<CompareDiff>>> getTableCompareStrategies() {
         return Stream.of(this.rowCount(), this.compareRow()
         );
@@ -83,6 +79,11 @@ public class ImageCompareManager extends DefaultCompareManager {
     @Override
     protected RowCompareResultHandler getRowResultHandler(final TableCompare it) {
         return new ImageFileCompareHandler(it);
+    }
+
+    @Override
+    public Stream<Function<DataSetCompare, List<CompareDiff>>> getStrategies() {
+        return Stream.of(this.searchModifyTables());
     }
 
     public class ImageFileCompareHandler implements RowCompareResultHandler {
@@ -104,7 +105,7 @@ public class ImageCompareManager extends DefaultCompareManager {
 
         @Override
         public void handleModify(final Object[] oldRow, final Object[] newRow, final CompareKeys key) {
-            this.compareFile(new File(oldRow[0].toString()), new File(newRow[0].toString()), key);
+            this.compareFile(FileResources.searchInOrderDatasetBase(oldRow[0].toString()), FileResources.searchInOrderDatasetBase(newRow[0].toString()), key);
         }
 
         @Override

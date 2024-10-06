@@ -1,6 +1,6 @@
 -targetType=image
--old.src=src/test/resources/yo/dbunitcli/application/compare/image/old
--new.src=src/test/resources/yo/dbunitcli/application/compare/image/new
+-old.src=src/test/resources/yo/dbunitcli/application/src/compare/image/old
+-new.src=src/test/resources/yo/dbunitcli/application/src/compare/image/new
 -result=target/test-classes/yo/dbunitcli/application/compare/image/result
--expect.src=src/test/resources/yo/dbunitcli/application/compare/image/expected_diff
--expect.setting=src/test/resources/yo/dbunitcli/application/compare/image/expectsetting.json
+-expect.src=src/test/resources/yo/dbunitcli/application/expect/compare/image/expected_diff
+-expect.setting=src/test/resources/yo/dbunitcli/application/settings/compare/image/expectsetting.json

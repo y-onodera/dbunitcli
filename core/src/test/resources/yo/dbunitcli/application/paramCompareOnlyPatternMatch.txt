@@ -1,6 +1,6 @@
--old.src=src/test/resources/yo/dbunitcli/application/pattern/old
--new.src=src/test/resources/yo/dbunitcli/application/pattern/new
--setting=src/test/resources/yo/dbunitcli/application/pattern/setting.json
+-old.src=src/test/resources/yo/dbunitcli/application/src/pattern/old
+-new.src=src/test/resources/yo/dbunitcli/application/src/pattern/new
+-setting=src/test/resources/yo/dbunitcli/application/settings/pattern/setting.json
 -result=target/test-classes/yo/dbunitcli/application/pattern/result
--expect.src=src/test/resources/yo/dbunitcli/application/pattern/expect
--expect.setting=src/test/resources/yo/dbunitcli/application/expectsetting.json
+-expect.src=src/test/resources/yo/dbunitcli/application/expect/pattern/expect
+-expect.setting=src/test/resources/yo/dbunitcli/application/settings/expectsetting.json

@@ -20,7 +20,7 @@ class SqlEscapeStringRendererTest {
 
     @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
-        this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
+        baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
                 .replace("target/test-classes", "src/test/resources");
     }
 
@@ -113,6 +113,6 @@ class SqlEscapeStringRendererTest {
     }
 
     private String readString(final String fileName) throws IOException {
-        return Files.readString(new File(this.baseDir, fileName).toPath(), StandardCharsets.UTF_8);
+        return Files.readString(new File(baseDir, fileName).toPath(), StandardCharsets.UTF_8);
     }
 }

@@ -4,7 +4,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 import org.stringtemplate.v4.misc.ErrorManager;
-import yo.dbunitcli.resource.Files;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +17,10 @@ public record TemplateRender(
         , char templateVarStart
         , char templateVarStop
         , String encoding) {
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public TemplateRender() {
         this(new Builder());
@@ -31,12 +35,8 @@ public record TemplateRender(
         );
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public String render(final File aFile, final Map<String, Object> parameter) {
-        return this.render(Files.read(aFile, this.encoding()), parameter);
+        return this.render(FileResources.read(aFile, this.encoding()), parameter);
     }
 
     public String render(final String target, final Map<String, Object> parameter) {

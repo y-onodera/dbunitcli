@@ -1,8 +1,8 @@
 -srcType=csv
--src=src/test/resources/yo/dbunitcli/application/generate/table/source/csv
+-src=src/test/resources/yo/dbunitcli/application/src/generate/table/source/csv
 -encoding=MS932
--template=src/test/resources/yo/dbunitcli/application/generate/table/template.txt
--templateGroup=src/test/resources/yo/dbunitcli/application/generate/table/templateGroup.stg
+-template=src/test/resources/yo/dbunitcli/application/settings/generate/table/template.txt
+-templateGroup=src/test/resources/yo/dbunitcli/application/settings/generate/table/templateGroup.stg
 -template.encoding=UTF-8
 -templateParameterAttribute=
 -unit=table

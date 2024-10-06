@@ -1,0 +1,4 @@
+"OLD_PATH","NEW_PATH","TARGET_NAME","DIFF"
+"src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\image\\old","src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\image\\new","add.png","File Add"
+"src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\image\\old","src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\image\\new","delete.png","File Delete"
+"src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\image\\old","src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\image\\new","test.png","[150.0,116.0,173.0,131.0]"

@@ -1,7 +1,7 @@
 -old.srcType=xlsx
--old.src=src/test/resources/yo/dbunitcli/application/db/file
+-old.src=src/test/resources/yo/dbunitcli/application/src/db/file
 -new.srcType=table
--new.src=src/test/resources/yo/dbunitcli/application/db/table
+-new.src=src/test/resources/yo/dbunitcli/application/src/db/table
 -jdbcUser=admin
 -jdbcPass=admin
 -jdbcUrl=jdbc:postgresql://localhost:5433/test

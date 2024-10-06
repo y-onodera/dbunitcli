@@ -1,8 +1,8 @@
 -old.srcType=csvq
--old.src=src/test/resources/yo/dbunitcli/application/csvq/old
+-old.src=src/test/resources/yo/dbunitcli/application/src/csvq/old
 -new.srcType=csvq
--new.src=src/test/resources/yo/dbunitcli/application/csvq/new
--setting=src/test/resources/yo/dbunitcli/application/csvq/setting.json
+-new.src=src/test/resources/yo/dbunitcli/application/src/csvq/new
+-setting=src/test/resources/yo/dbunitcli/application/settings/csvq/setting.json
 -result=target/test-classes/yo/dbunitcli/application/csvq/compare/result
--expect.src=src/test/resources/yo/dbunitcli/application/csvq/expect
--expect.setting=src/test/resources/yo/dbunitcli/application/expectsetting.json
+-expect.src=src/test/resources/yo/dbunitcli/application/expect/csvq/expect
+-expect.setting=src/test/resources/yo/dbunitcli/application/settings/expectsetting.json

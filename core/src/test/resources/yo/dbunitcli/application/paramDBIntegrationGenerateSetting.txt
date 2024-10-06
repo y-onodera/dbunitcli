@@ -1,6 +1,6 @@
 -generateType=settings
 -srcType=table
--src=src/test/resources/yo/dbunitcli/application/db/table
+-src=src/test/resources/yo/dbunitcli/application/src/db/table
 -jdbcUser=admin
 -jdbcPass=admin
 -jdbcUrl=jdbc:postgresql://localhost:5433/test

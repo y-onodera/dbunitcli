@@ -1,6 +1,6 @@
 -generateType=sql
 -srcType=table
--src=src/test/resources/yo/dbunitcli/application/db/table
+-src=src/test/resources/yo/dbunitcli/application/src/db/table
 -op=REFRESH
 -jdbcUser=admin
 -jdbcPass=admin

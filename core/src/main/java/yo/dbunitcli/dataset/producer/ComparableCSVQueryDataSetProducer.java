@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
@@ -19,7 +20,7 @@ import java.util.Map;
 public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
-    private static final String URL = "jdbc:h2:mem:test;MODE=Oracle";
+    private static final String URL = "jdbc:h2:file:" + FileResources.datasetDir().getAbsolutePath() + ";MODE=Oracle";
     private final File[] src;
     private final Parameter parameter;
     private final ComparableDataSetParam param;

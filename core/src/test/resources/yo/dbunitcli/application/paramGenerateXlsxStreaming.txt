@@ -1,7 +1,7 @@
 -srcType=csv
--src=src/test/resources/yo/dbunitcli/application/generate/table/source/csv
+-src=src/test/resources/yo/dbunitcli/application/src/generate/table/source/csv
 -encoding=MS932
--template=src/test/resources/yo/dbunitcli/application/generate/table/template.xlsx
+-template=src/test/resources/yo/dbunitcli/application/settings/generate/table/template.xlsx
 -template.formulaProcess=false
 -unit=table
 -generateType=xlsx

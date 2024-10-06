@@ -1,6 +1,6 @@
 -targetType=image
--old.src=src/test/resources/yo/dbunitcli/application/compare/image/old
--new.src=src/test/resources/yo/dbunitcli/application/compare/image/new
+-old.src=src/test/resources/yo/dbunitcli/application/src/compare/image/old
+-new.src=src/test/resources/yo/dbunitcli/application/src/compare/image/new
 -regInclude=test\.png
 -excludedAreas=[150.0,116.0,173.0,131.0]
 -result=target/test-classes/yo/dbunitcli/application/compare/image/result_excluded

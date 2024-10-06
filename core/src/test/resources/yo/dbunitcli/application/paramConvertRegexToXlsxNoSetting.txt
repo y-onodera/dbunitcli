@@ -1,4 +1,4 @@
--src=src/test/resources/yo/dbunitcli/application/regex2xlsx/src
+-src=src/test/resources/yo/dbunitcli/application/src/regex2xlsx/src
 -srcType=reg
 -regHeaderSplit=,Time,
 -regDataSplit=,\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}

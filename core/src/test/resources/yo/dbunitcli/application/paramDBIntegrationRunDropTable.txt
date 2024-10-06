@@ -1,5 +1,5 @@
 -scriptType=sql
--src=src/test/resources/yo/dbunitcli/application/db/sql/ddl
+-src=src/test/resources/yo/dbunitcli/application/src/db/sql/ddl
 -regExclude=create*
 -jdbcUser=admin
 -jdbcPass=admin

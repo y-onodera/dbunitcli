@@ -10,6 +10,7 @@ import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.TableSeparators;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.util.*;
@@ -56,7 +57,7 @@ public class DataSetCompare {
             final Delete delete = new Delete();
             final Project project = new Project();
             project.setName("dbunit-cli");
-            project.setBaseDir(new File("."));
+            project.setBaseDir(FileResources.resultDir());
             project.setProperty("java.io.tmpdir", System.getProperty("java.io.tmpdir"));
             delete.setProject(project);
             delete.setDir(dir);
@@ -74,6 +75,22 @@ public class DataSetCompare {
 
     public IDataSetConverter getConverter() {
         return this.converter;
+    }
+
+    public String[] getOldTableNames() {
+        return this.getTableNames(this.oldDataSet);
+    }
+
+    public String[] getNewTableNames() {
+        return this.getTableNames(this.newDataSet);
+    }
+
+    protected String[] getTableNames(final ComparableDataSet dataSet) {
+        try {
+            return dataSet.getTableNames();
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public interface Manager {
@@ -158,22 +175,6 @@ public class DataSetCompare {
         List<CompareDiff> compareTable(TableCompare tableCompare);
 
         CompareResult toCompareResult(ComparableDataSet oldDataSet, ComparableDataSet newDataSet, List<CompareDiff> results);
-    }
-
-    public String[] getOldTableNames() {
-        return this.getTableNames(this.oldDataSet);
-    }
-
-    public String[] getNewTableNames() {
-        return this.getTableNames(this.newDataSet);
-    }
-
-    protected String[] getTableNames(final ComparableDataSet dataSet) {
-        try {
-            return dataSet.getTableNames();
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
     }
 
 }

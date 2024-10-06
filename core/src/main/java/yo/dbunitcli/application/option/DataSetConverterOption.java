@@ -6,6 +6,7 @@ import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.converter.DBConverter;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 
@@ -28,7 +29,7 @@ public record DataSetConverterOption(
     public DataSetConverterOption(final String prefix, final DataSetConverterDto dto) {
         this(prefix
                 , DataSetConverterOption.resultType(dto)
-                , Strings.isNotEmpty(dto.getResultDir()) ? new File(dto.getResultDir()) : new File(".")
+                , FileResources.resultDir(dto.getResultDir())
                 , dto.getResultPath()
                 , !Strings.isNotEmpty(dto.getExportEmptyTable()) || Boolean.parseBoolean(dto.getExportEmptyTable())
                 , DataSetConverterOption.resultType(dto) == ResultType.table ? new JdbcOption(prefix, dto.getJdbc()) : new JdbcOption(prefix)

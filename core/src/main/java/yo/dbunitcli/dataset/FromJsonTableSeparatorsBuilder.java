@@ -1,6 +1,7 @@
 package yo.dbunitcli.dataset;
 
 import jakarta.json.*;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.*;
 import java.util.*;
@@ -20,7 +21,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
             return this.build((File) null);
         } else {
             return this.build(Arrays.stream(settings.split(","))
-                    .map(File::new)
+                    .map(FileResources::searchInOrderWorkspace)
                     .toArray(File[]::new));
         }
     }

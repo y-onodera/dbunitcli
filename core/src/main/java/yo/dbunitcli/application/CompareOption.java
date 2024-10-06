@@ -10,6 +10,7 @@ import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.compare.CompareResult;
 import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
@@ -114,7 +115,7 @@ public record CompareOption(
         if (Type.valueOf(result.get("-targetType")).isAny(Type.pdf, Type.image)) {
             result.addComponent("imageOption", this.imageOption.toCommandLineArgs());
         }
-        result.putFile("-setting", this.setting == null ? null : new File(this.setting));
+        result.putFile("-setting", this.setting == null ? null : FileResources.searchInOrderWorkspace(this.setting));
         result.put("-settingEncoding", this.settingEncoding);
         result.addComponent("newData", this.newData.toCommandLineArgs());
         result.addComponent("oldData", this.oldData.toCommandLineArgs());

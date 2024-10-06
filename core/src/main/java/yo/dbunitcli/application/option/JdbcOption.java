@@ -2,6 +2,7 @@ package yo.dbunitcli.application.option;
 
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.JdbcDto;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.File;
@@ -25,7 +26,7 @@ public record JdbcOption(
 
     public JdbcOption(final String prefix, final JdbcDto dto) {
         this(prefix
-                , Strings.isNotEmpty(dto.getJdbcProperties()) ? new File(dto.getJdbcProperties()) : null
+                , Strings.isNotEmpty(dto.getJdbcProperties()) ? FileResources.searchInOrderWorkspace(dto.getJdbcProperties()) : null
                 , dto.getJdbcUrl()
                 , dto.getJdbcUser()
                 , dto.getJdbcPass());

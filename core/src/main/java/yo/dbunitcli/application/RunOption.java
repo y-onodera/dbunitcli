@@ -13,6 +13,7 @@ import yo.dbunitcli.fileprocessor.AntRunner;
 import yo.dbunitcli.fileprocessor.CmdRunner;
 import yo.dbunitcli.fileprocessor.Runner;
 import yo.dbunitcli.fileprocessor.SqlRunner;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.util.stream.Stream;
@@ -47,7 +48,10 @@ public record RunOption(
                 , new TemplateRenderOption("template", dto.getTemplateOption())
                 , new JdbcOption("jdbc", dto.getJdbcOption())
                 , new AntOption(dto.getAntTarget())
-                , dto.getBaseDir()
+                , (Strings.isNotEmpty(dto.getBaseDir())
+                        ? FileResources.searchInOrderDatasetBase(dto.getBaseDir())
+                        : FileResources.datasetDir())
+                        .getAbsoluteFile().toPath().normalize().toString()
         );
     }
 
@@ -60,7 +64,7 @@ public record RunOption(
                                 .setLoadData(true)
                                 .build())
                 .toMap()
-                .map(it -> new File(it.get(ComparableFileTableMetaData.PK.getColumnName()).toString()));
+                .map(it -> FileResources.searchInOrderDatasetBase(it.get(ComparableFileTableMetaData.PK.getColumnName()).toString()));
     }
 
     public Runner runner() {
@@ -92,12 +96,6 @@ public record RunOption(
             result.put("-baseDir", this.baseDir);
         }
         return result;
-    }
-
-    @Override
-    public String baseDir() {
-        return new File(Strings.isNotEmpty(this.baseDir) ? this.baseDir : ".")
-                .getAbsoluteFile().toPath().normalize().toString();
     }
 
     public enum ScriptType {

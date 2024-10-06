@@ -1,7 +1,7 @@
--setting=src/test/resources/yo/dbunitcli/application/xlsxwithschema/compareSetting.json
--xlsxSchema=src/test/resources/yo/dbunitcli/application/xlsxwithschema/ComplexLayoutSchema.json
--old.src=src/test/resources/yo/dbunitcli/application/xlsxwithschema/ComplexLayout.xlsx
+-setting=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/compareSetting.json
+-xlsxSchema=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/ComplexLayoutSchema.json
+-old.src=src/test/resources/yo/dbunitcli/application/src/xlsxwithschema/ComplexLayout.xlsx
 -old.srcType=xlsx
--new.src=src/test/resources/yo/dbunitcli/application/xlsxwithschema/ComplexLayout.xls
+-new.src=src/test/resources/yo/dbunitcli/application/src/xlsxwithschema/ComplexLayout.xls
 -new.srcType=xls
 -result=target/test-classes/yo/dbunitcli/application/xlsxwithschema/compare/result

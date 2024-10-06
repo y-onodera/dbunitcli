@@ -1,6 +1,6 @@
 -targetType=pdf
--old.src=src/test/resources/yo/dbunitcli/application/compare/pdf/old
--new.src=src/test/resources/yo/dbunitcli/application/compare/pdf/new
+-old.src=src/test/resources/yo/dbunitcli/application/src/compare/pdf/old
+-new.src=src/test/resources/yo/dbunitcli/application/src/compare/pdf/new
 -regInclude=Test1\.pdf
 -result=target/test-classes/yo/dbunitcli/application/compare/pdf/result
 -image.excludedAreas=[51.0,53.0,265.0,54.0][51.0,95.0,360.0,96.0][51.0,102.0,159.0,146.0][235.0,102.0,271.0,146.0]

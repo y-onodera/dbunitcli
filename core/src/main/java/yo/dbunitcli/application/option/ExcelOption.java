@@ -3,6 +3,7 @@ package yo.dbunitcli.application.option;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.poi.FromJsonXlsxSchemaBuilder;
 
 import java.io.File;
@@ -11,7 +12,7 @@ public record ExcelOption(String prefix, File xlsxSchemaSource) implements Compa
 
     public ExcelOption(final String prefix, final DataSetLoadDto dto) {
         this(prefix, Strings.isNotEmpty(dto.getXlsxSchemaSource())
-                ? new File(dto.getXlsxSchemaSource())
+                ? FileResources.searchInOrderWorkspace(dto.getXlsxSchemaSource())
                 : null);
     }
 

@@ -1,7 +1,7 @@
 -srcType=csv
--src=src/test/resources/yo/dbunitcli/application/generate/with_metadata/source/csv
+-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv
 -encoding=UTF-8
--setting=src/test/resources/yo/dbunitcli/application/generate/with_metadata/settings.json
+-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/settings.json
 -generateType=sql
 -op=INSERT
 -resultPath=target/test-classes/yo/dbunitcli/application/generate/sql/no-commit/result

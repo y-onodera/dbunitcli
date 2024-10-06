@@ -1,3 +1,0 @@
-OLD_PATH, NEW_PATH, TARGET_NAME, DIFF, OLD_VALUE, NEW_VALUE, COLUMN_INDEX, DIFF_ROWS
-"src\\test\\resources\\yo\\dbunitcli\\application\\csvq\\old","src\\test\\resources\\yo\\dbunitcli\\application\\csvq\\new","joinQuery","MODIFY_VALUE","COLUMN3","COLUMN3","3","1"
-"src\\test\\resources\\yo\\dbunitcli\\application\\csvq\\old","src\\test\\resources\\yo\\dbunitcli\\application\\csvq\\new","joinQuery","MODIFY_VALUE","COLUMNA","COLUMNA","4","1"

@@ -3,148 +3,315 @@ package yo.dbunitcli.application;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.integration.junit5.JMockitExtension;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.taskdefs.Copy;
+import org.apache.tools.ant.taskdefs.Delete;
+import org.apache.tools.ant.taskdefs.Replace;
+import org.apache.tools.ant.types.FileSet;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import yo.dbunitcli.resource.FileResources;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Properties;
 
 public class CompareTest {
 
-    private String baseDir;
+    private static final Project PROJECT = new Project();
+    private static final Properties backup = new Properties();
+    private static String baseDir;
 
-    @BeforeEach
-    public void setUp() throws UnsupportedEncodingException {
-        this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
+    private static void copy(final String from, final String to) {
+        final Copy copy = new Copy();
+        copy.setProject(CompareTest.PROJECT);
+        final FileSet src = new FileSet();
+        src.setDir(new File(from));
+        copy.addFileset(src);
+        copy.setTodir(new File(to));
+        copy.execute();
+    }
+
+    private static void clean(final String target) {
+        final Delete delete = new Delete();
+        delete.setProject(CompareTest.PROJECT);
+        delete.setDir(new File(target));
+        delete.execute();
+    }
+
+    @BeforeAll
+    public static void setUp() throws UnsupportedEncodingException {
+        CompareTest.baseDir = URLDecoder.decode(Objects.requireNonNull(CompareTest.class.getResource(".")).getPath(), StandardCharsets.UTF_8)
                 .replace("target/test-classes", "src/test/resources");
+        CompareTest.PROJECT.setName("compareTest");
+        CompareTest.PROJECT.setBaseDir(new File("."));
+        CompareTest.PROJECT.setProperty("java.io.tmpdir", System.getProperty("java.io.tmpdir"));
+        CompareTest.backup.putAll(System.getProperties());
     }
 
-    @Test
-    public void testSuccessResultDiffExpected() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffValidExpected.txt"});
+    abstract static class TestCase {
+        @Test
+        public void testSuccessResultDiffExpected() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareResultDiffValidExpected.txt"});
+        }
+
+        @Test
+        public void testResultXlsx() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareResultDiffXlsx.txt"});
+        }
+
+        @Test
+        public void testSuccessNoDiffExpected() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareResultNoDiff.txt"});
+        }
+
+        @Test
+        public void testSuccessNoDiffWithCommonSetting() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareResultNoDiffWithCommonSetting.txt"});
+        }
+
+        @Test
+        public void testComparePatternMatch() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareOnlyPatternMatch.txt"});
+        }
+
+        @Test
+        public void testCompareIgnoreNoSettingTables() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareTableNoMatch.txt"});
+        }
+
+        @Test
+        public void testCompareWithRowNum() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareWithRow.txt"});
+        }
+
+        @Test
+        public void testCompareWithRowFilter() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareWithFilterRow.txt"});
+        }
+
+        @Test
+        public void testCompareCsvAndXlsx() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareCsvAndXlsx.txt"});
+        }
+
+        @Test
+        public void testCompareCsvAndTsv() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareCsvAndTsv.txt"});
+        }
+
+        @Test
+        public void testCompareXlsxAndCsv() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareXlsxAndCsv.txt"});
+        }
+
+        @Test
+        public void testCompareXlsxAndXls() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareXlsxAndXls.txt"});
+        }
+
+        @Test
+        public void testCompareXlsAndXlsx() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareXlsAndXlsx.txt"});
+        }
+
+        @Test
+        public void testCompareCsvqToCsvq() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareCsvqAndCsvq.txt"});
+        }
+
+        @Test
+        public void testCompareNoHeaderRegexTxtToCsv() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareNoHeaderRegexTxtAndCsv.txt"});
+        }
+
+        @Test
+        public void testCompareNoHeaderRegexTxtToNoHeaderCsv() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareNoHeaderRegexTxtAndNoHeaderCsv.txt"});
+        }
+
+        @Test
+        public void testCompareFilter() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareColumnFilter.txt"});
+        }
+
+        @Test
+        public void testCompareSort() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareColumnSort.txt"});
+        }
+
+        @Test
+        public void testComparePdf() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramComparePdf.txt"});
+        }
+
+        @Test
+        public void testComparePdfDiffAllPage() throws Exception {
+            Assumptions.assumeTrue(System.getProperty("os.name").toLowerCase().startsWith("win"));
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramComparePdfDiffAllPage.txt"});
+        }
+
+        @Test
+        public void testCompareImage() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareImage.txt"});
+        }
+
+        @Test
+        public void testCompareImageExcludedAreas() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareImageExcludedAreas.txt"});
+        }
+
+        @Test
+        public void testSettingMerge() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareSettingMerge.txt"});
+        }
+
+        @Test
+        public void testSettingImport() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareSettingImport.txt"});
+        }
+
+        @Test
+        public void testExcelWithSchema() throws Exception {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareXlsxAndXlsWithSchema.txt"});
+        }
     }
 
-    @Test
-    public void testResultXlsx() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultDiffXlsx.txt"});
+    @Nested
+    class NoSystemPropertyTest extends CompareTest.TestCase {
     }
 
-    @Test
-    public void testSuccessNoDiffExpected() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiff.txt"});
+    @Nested
+    class AllSystemPropertyTest extends CompareTest.TestCase {
+
+        @BeforeAll
+        static void backup() {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(CompareTest.backup);
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/compare/all/base");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/compare/all/result");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/compare/all/dataset");
+            System.setProperties(newProperty);
+            CompareTest.clean("target/test-temp/compare/all");
+            CompareTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/compare/all/base/src/test/resources/yo/dbunitcli/application/settings");
+            CompareTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/compare/all/dataset/src/test/resources/yo/dbunitcli/application/src");
+            CompareTest.copy("src/test/resources/yo/dbunitcli/application/expect", "target/test-temp/compare/all/dataset/src/test/resources/yo/dbunitcli/application/expect");
+            final Replace replace = new Replace();
+            replace.setDir(new File("target/test-temp/compare/all/dataset/src/test/resources/yo/dbunitcli/application/expect"));
+            replace.setIncludes("**/*.csv");
+            final Replace.Replacefilter filter1 = replace.createReplacefilter();
+            filter1.setToken("src/test/resources");
+            filter1.setValue("target/test-temp/compare/all/dataset/src/test/resources");
+            final Replace.Replacefilter filter2 = replace.createReplacefilter();
+            filter2.setToken("src\\\\test\\\\resources");
+            filter2.setValue("target\\\\test-temp\\\\compare\\\\all\\\\dataset\\\\src\\\\test\\\\resources");
+            replace.setProject(CompareTest.PROJECT);
+            replace.execute();
+        }
+
+        @AfterAll
+        static void restore() {
+            System.setProperties(CompareTest.backup);
+        }
+
+        @Test
+        @Override
+        public void testResultXlsx() {
+            //super.testResultXlsx();
+        }
     }
 
-    @Test
-    public void testSuccessNoDiffWithCommonSetting() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareResultNoDiffWithCommonSetting.txt"});
+    @Nested
+    class ChangeWorkSpaceTest extends CompareTest.TestCase {
+        @BeforeAll
+        static void backup() {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(CompareTest.backup);
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/compare/base");
+            System.setProperties(newProperty);
+            CompareTest.clean("target/test-temp/compare/base");
+            CompareTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/compare/base/src/test/resources/yo/dbunitcli/application");
+            final Replace replace = new Replace();
+            replace.setDir(new File("target/test-temp/compare/base/src/test/resources/yo/dbunitcli/application/expect"));
+            replace.setIncludes("**/*.csv");
+            final Replace.Replacefilter filter1 = replace.createReplacefilter();
+            filter1.setToken("src/test/resources");
+            filter1.setValue("target/test-temp/compare/base/src/test/resources");
+            final Replace.Replacefilter filter2 = replace.createReplacefilter();
+            filter2.setToken("src\\\\test\\\\resources");
+            filter2.setValue("target\\\\test-temp\\\\compare\\\\base\\\\src\\\\test\\\\resources");
+            replace.setProject(CompareTest.PROJECT);
+            replace.execute();
+        }
+
+        @AfterAll
+        static void restore() {
+            System.setProperties(CompareTest.backup);
+        }
+
+        @Test
+        @Override
+        public void testResultXlsx() {
+            //super.testResultXlsx();
+        }
+
     }
 
-    @Test
-    public void testComparePatternMatch() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareOnlyPatternMatch.txt"});
+    @Nested
+    class ChangeResultBaseTest extends CompareTest.TestCase {
+        @BeforeAll
+        static void backup() {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(CompareTest.backup);
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/compare/result");
+            System.setProperties(newProperty);
+            CompareTest.clean("target/test-temp/compare/result");
+        }
+
+        @AfterAll
+        static void restore() {
+            System.setProperties(CompareTest.backup);
+        }
+
     }
 
-    @Test
-    public void testCompareIgnoreNoSettingTables() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareTableNoMatch.txt"});
-    }
+    @Nested
+    class ChangeDataSetBaseTest extends CompareTest.TestCase {
+        @BeforeAll
+        static void backup() {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(CompareTest.backup);
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/compare/dataset");
+            System.setProperties(newProperty);
+            CompareTest.clean("target/test-temp/compare/dataset");
+            CompareTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/compare/dataset/src/test/resources/yo/dbunitcli/application/src");
+            CompareTest.copy("src/test/resources/yo/dbunitcli/application/expect", "target/test-temp/compare/dataset/src/test/resources/yo/dbunitcli/application/expect");
+            final Replace replace = new Replace();
+            replace.setDir(new File("target/test-temp/compare/dataset/src/test/resources/yo/dbunitcli/application/expect"));
+            replace.setIncludes("**/*.csv");
+            final Replace.Replacefilter filter1 = replace.createReplacefilter();
+            filter1.setToken("src/test/resources");
+            filter1.setValue("target/test-temp/compare/dataset/src/test/resources");
+            final Replace.Replacefilter filter2 = replace.createReplacefilter();
+            filter2.setToken("src\\\\test\\\\resources");
+            filter2.setValue("target\\\\test-temp\\\\compare\\\\dataset\\\\src\\\\test\\\\resources");
+            replace.setProject(CompareTest.PROJECT);
+            replace.execute();
+        }
 
-    @Test
-    public void testCompareWithRowNum() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareWithRow.txt"});
-    }
+        @AfterAll
+        static void restore() {
+            System.setProperties(CompareTest.backup);
+        }
 
-    @Test
-    public void testCompareWithRowFilter() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareWithFilterRow.txt"});
-    }
-
-    @Test
-    public void testCompareCsvAndXlsx() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareCsvAndXlsx.txt"});
-    }
-
-    @Test
-    public void testCompareCsvAndTsv() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareCsvAndTsv.txt"});
-    }
-
-    @Test
-    public void testCompareXlsxAndCsv() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareXlsxAndCsv.txt"});
-    }
-
-    @Test
-    public void testCompareXlsxAndXls() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareXlsxAndXls.txt"});
-    }
-
-    @Test
-    public void testCompareXlsAndXlsx() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareXlsAndXlsx.txt"});
-    }
-
-    @Test
-    public void testCompareCsvqToCsvq() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareCsvqAndCsvq.txt"});
-    }
-
-    @Test
-    public void testCompareNoHeaderRegexTxtToCsv() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareNoHeaderRegexTxtAndCsv.txt"});
-    }
-
-    @Test
-    public void testCompareNoHeaderRegexTxtToNoHeaderCsv() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareNoHeaderRegexTxtAndNoHeaderCsv.txt"});
-    }
-
-    @Test
-    public void testCompareFilter() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareColumnFilter.txt"});
-    }
-
-    @Test
-    public void testCompareSort() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareColumnSort.txt"});
-    }
-
-    @Test
-    public void testComparePdf() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramComparePdf.txt"});
-    }
-
-    @Test
-    public void testComparePdfDiffAllPage() throws Exception {
-        Assumptions.assumeTrue(System.getProperty("os.name").toLowerCase().startsWith("win"));
-        Compare.main(new String[]{"@" + this.baseDir + "/paramComparePdfDiffAllPage.txt"});
-    }
-
-    @Test
-    public void testCompareImage() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareImage.txt"});
-    }
-
-    @Test
-    public void testCompareImageExcludedAreas() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareImageExcludedAreas.txt"});
-    }
-
-    @Test
-    public void testSettingMerge() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareSettingMerge.txt"});
-    }
-
-    @Test
-    public void testSettingImport() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareSettingImport.txt"});
-    }
-
-    @Test
-    public void testExcelWithSchema() throws Exception {
-        Compare.main(new String[]{"@" + this.baseDir + "/paramCompareXlsxAndXlsWithSchema.txt"});
+        @Test
+        @Override
+        public void testResultXlsx() {
+            //super.testResultXlsx();
+        }
     }
 
     @Tag("jvmTest")
@@ -165,7 +332,7 @@ public class CompareTest {
         @Test
         public void testFailedResultDiffNotExpected() throws Exception {
             try {
-                Compare.main(new String[]{"@" + CompareTest.this.baseDir + "/paramCompareResultDiffNotExpected.txt"});
+                Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareResultDiffNotExpected.txt"});
             } catch (final RuntimeException ex) {
                 Assertions.assertEquals("1", ex.getMessage());
             }
@@ -174,7 +341,7 @@ public class CompareTest {
         @Test
         public void testFailedResultDiffDifferExpected() throws Exception {
             try {
-                Compare.main(new String[]{"@" + CompareTest.this.baseDir + "/paramCompareResultDiffInValidExpected.txt"});
+                Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareResultDiffInValidExpected.txt"});
             } catch (final RuntimeException ex) {
                 Assertions.assertEquals("1", ex.getMessage());
             }
@@ -183,7 +350,7 @@ public class CompareTest {
         @Test
         public void testFailedUnExpectedNoDiff() throws Exception {
             try {
-                Compare.main(new String[]{"@" + CompareTest.this.baseDir + "/paramCompareResultNoDiffUnExpected.txt"});
+                Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareResultNoDiffUnExpected.txt"});
             } catch (final RuntimeException ex) {
                 Assertions.assertEquals("1", ex.getMessage());
             }

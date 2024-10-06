@@ -1,5 +1,5 @@
--src=src/test/resources/yo/dbunitcli/application/xlsxwithschema/ComplexLayout.xlsx
+-src=src/test/resources/yo/dbunitcli/application/src/xlsxwithschema/ComplexLayout.xlsx
 -srcType=xlsx
--xlsxSchema=src/test/resources/yo/dbunitcli/application/xlsxwithschema/ComplexLayoutSchema.json
+-xlsxSchema=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/ComplexLayoutSchema.json
 -result=target/test-classes/yo/dbunitcli/application/convert/xlsxwithschema2csv/result
 -outputEncoding=MS932

@@ -1,6 +1,6 @@
--old.src=src/test/resources/yo/dbunitcli/application/pattern/old
--new.src=src/test/resources/yo/dbunitcli/application/pattern/new
--setting=src/test/resources/yo/dbunitcli/application/pattern/settingCompareWithFilterRow.json
+-old.src=src/test/resources/yo/dbunitcli/application/src/pattern/old
+-new.src=src/test/resources/yo/dbunitcli/application/src/pattern/new
+-setting=src/test/resources/yo/dbunitcli/application/settings/pattern/settingCompareWithFilterRow.json
 -result=target/test-classes/yo/dbunitcli/application/pattern/result_filter_row_compare
--expect.src=src/test/resources/yo/dbunitcli/application/pattern/expect/result_filter_row_compare
--expect.setting=src/test/resources/yo/dbunitcli/application/expectsetting.json
+-expect.src=src/test/resources/yo/dbunitcli/application/expect/pattern/expect/result_filter_row_compare
+-expect.setting=src/test/resources/yo/dbunitcli/application/settings/expectsetting.json

@@ -6,6 +6,7 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.dataset.TableSeparators;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +39,7 @@ public record DataSetLoadOption(
                 , enableSrcTypeNone
                 , DataSetLoadOption.getSrcType(dto)
                 , DataSetLoadOption.getSrcType(dto) != DataSourceType.none && Strings.isNotEmpty(dto.getSrc())
-                        ? new File(dto.getSrc())
+                        ? FileResources.searchInOrderDatasetBase(dto.getSrc())
                         : null
                 , dto.getSetting()
                 , Strings.isNotEmpty(dto.getSettingEncoding())
@@ -82,7 +83,7 @@ public record DataSetLoadOption(
         result.put("-regTableExclude", this.regTableExclude);
         result.put("-loadData", this.loadData);
         result.put("-includeMetaData", this.includeMetaData);
-        result.putFile("-setting", this.setting == null ? null : new File(this.setting));
+        result.putFile("-setting", this.setting == null ? null : FileResources.searchInOrderWorkspace(this.setting));
         result.put("-settingEncoding", this.settingEncoding);
         return result;
     }

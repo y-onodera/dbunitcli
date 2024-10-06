@@ -3,6 +3,7 @@ package yo.dbunitcli.application.option;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.TemplateRenderDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
@@ -24,7 +25,7 @@ public record TemplateRenderOption(
                 , Strings.isNotEmpty(dto.getTemplateVarStart()) ? dto.getTemplateVarStart().charAt(0) : '$'
                 , Strings.isNotEmpty(dto.getTemplateVarStop()) ? dto.getTemplateVarStop().charAt(0) : '$'
                 , !Strings.isNotEmpty(dto.getFormulaProcess()) || Boolean.parseBoolean(dto.getFormulaProcess())
-                , Strings.isNotEmpty(dto.getTemplateGroup()) ? new File(dto.getTemplateGroup()) : null
+                , Strings.isNotEmpty(dto.getTemplateGroup()) ? FileResources.searchInOrderWorkspace(dto.getTemplateGroup()) : null
         );
     }
 

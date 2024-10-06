@@ -1,0 +1,6 @@
+"OLD_PATH","NEW_PATH","TARGET_NAME","DIFF"
+"src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\pdf\\old","src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\pdf\\new","Add.pdf","File Add"
+"src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\pdf\\old","src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\pdf\\new","Delete.pdf","File Delete"
+"src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\pdf\\old","src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\pdf\\new","PageChange.pdf","Page Number Change[new:3,old:2]"
+"src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\pdf\\old","src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\pdf\\new","Test1.pdf page1","[53.0,112.0,55.0,115.0][96.0,125.0,99.0,133.0][80.0,139.0,81.0,146.0]"
+"src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\pdf\\old","src\\test\\resources\\yo\\dbunitcli\\application\\src\\compare\\pdf\\new","Test1.pdf page2","[134.0,56.0,134.0,56.0][236.0,102.0,270.0,145.0][52.0,103.0,109.0,145.0][115.0,103.0,158.0,145.0]"

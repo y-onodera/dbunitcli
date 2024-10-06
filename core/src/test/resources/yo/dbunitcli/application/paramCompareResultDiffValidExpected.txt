@@ -1,6 +1,6 @@
--old.src=src/test/resources/yo/dbunitcli/application/multidiff/old
--new.src=src/test/resources/yo/dbunitcli/application/multidiff/new
--setting=src/test/resources/yo/dbunitcli/application/multidiff/setting.json
+-old.src=src/test/resources/yo/dbunitcli/application/src/multidiff/old
+-new.src=src/test/resources/yo/dbunitcli/application/src/multidiff/new
+-setting=src/test/resources/yo/dbunitcli/application/settings/multidiff/setting.json
 -result=target/test-classes/yo/dbunitcli/application/multidiff/result
--expect.src=src/test/resources/yo/dbunitcli/application/multidiff/expect
--expect.setting=src/test/resources/yo/dbunitcli/application/expectsetting.json
+-expect.src=src/test/resources/yo/dbunitcli/application/expect/multidiff/expect
+-expect.setting=src/test/resources/yo/dbunitcli/application/settings/expectsetting.json

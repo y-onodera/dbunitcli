@@ -1,0 +1,6 @@
+template,cmd,src,srcType,resultType,outputEncoding,table
+src/test/resources/yo/dbunitcli/application/settings/param/templateParameterizeCmd.txt,convert,srcq,csvq,csv,windows-31j,src2/sample2.csv
+src/test/resources/yo/dbunitcli/application/settings/param/templateParameterizeCmd.txt,convert,src1,csv,csv,windows-31j,
+src/test/resources/yo/dbunitcli/application/settings/param/templateParameterizeCmd.txt,convert,src2,csv,csv,utf-8,
+src/test/resources/yo/dbunitcli/application/settings/param/templateParameterizeCmd.txt,convert,src2,csv,xls,,
+src/test/resources/yo/dbunitcli/application/settings/param/templateParameterizeCmd.txt,convert,src1,csv,xlsx,,

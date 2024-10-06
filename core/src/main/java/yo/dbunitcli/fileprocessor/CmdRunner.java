@@ -2,6 +2,7 @@ package yo.dbunitcli.fileprocessor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,7 +20,7 @@ public record CmdRunner(String baseDir, Map<String, Object> parameter) implement
         targetFiles.forEach(target -> {
             try {
                 final ProcessBuilder pb = new ProcessBuilder(target.getPath())
-                        .directory(new File(this.baseDir));
+                        .directory(FileResources.searchInOrderDatasetBase(baseDir));
                 this.parameter().forEach((key, value) -> pb.environment().put(key, value.toString()));
                 // 標準エラー出力を標準出力にマージする
                 pb.redirectErrorStream(true);

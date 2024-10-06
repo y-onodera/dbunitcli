@@ -1,4 +1,4 @@
--src=src/test/resources/yo/dbunitcli/application/fixed2csv/src
+-src=src/test/resources/yo/dbunitcli/application/src/fixed2csv/src
 -srcType=fixed
 -headerName=半角,数値,全角
 -fixedLength=3,50,15

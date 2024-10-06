@@ -8,7 +8,7 @@ import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.converter.DBConverter;
-import yo.dbunitcli.resource.Files;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.poi.JxlsTemplateRender;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
@@ -49,8 +49,7 @@ public record GenerateOption(
 
     public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
         this(param
-                , Strings.isNotEmpty(dto.getResultDir())
-                        ? new File(dto.getResultDir()) : new File(".")
+                , FileResources.resultDir(dto.getResultDir())
                 , Optional.ofNullable(dto.getResultPath())
                         .filter(it -> !it.isEmpty())
                         .orElse(resultFile)
@@ -62,7 +61,7 @@ public record GenerateOption(
                 , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
                 , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
                 , !Strings.isNotEmpty(dto.getCommit()) || Boolean.parseBoolean(dto.getCommit())
-                , Strings.isNotEmpty(dto.getTemplate()) ? new File(dto.getTemplate()) : null
+                , Strings.isNotEmpty(dto.getTemplate()) ? FileResources.searchInOrderWorkspace(dto.getTemplate()) : null
                 , Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8"
                 , new DataSetLoadOption("src", dto.getSrcData())
                 , new TemplateRenderOption("template", dto.getTemplateOption())
@@ -170,7 +169,7 @@ public record GenerateOption(
                     throw new AssertionError(option.template + " is not exist file"
                             , new IllegalArgumentException(String.valueOf(option.template)));
                 }
-                return Files.read(option.template, option.templateOption.encoding());
+                return FileResources.read(option.template, option.templateOption.encoding());
             }
         },
         xlsx {
@@ -205,7 +204,7 @@ public record GenerateOption(
 
             @Override
             public String getTemplateString(final GenerateOption option) {
-                return Files.readClasspathResource("settings/settingTemplate.txt");
+                return FileResources.readClasspathResource("settings/settingTemplate.txt");
             }
 
             @Override
@@ -229,7 +228,7 @@ public record GenerateOption(
 
             @Override
             public String getTemplateString(final GenerateOption option) {
-                return Files.readClasspathResource(option.getSqlTemplate());
+                return FileResources.readClasspathResource(option.getSqlTemplate());
             }
 
             @Override

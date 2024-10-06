@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +58,7 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
                 .orElseGet(() -> {
                             String resultFile = "result";
                             if (args.length > 0 && args[0].startsWith("@")) {
-                                resultFile = new File(args[0].replace("@", "")).getName();
+                                resultFile = FileResources.resultDir(args[0].replace("@", "")).getName();
                                 resultFile = resultFile.substring(0, resultFile.lastIndexOf("."));
                             }
                             return resultFile;
@@ -71,7 +72,7 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
         final List<String> result = new ArrayList<>();
         for (final String arg : args) {
             if (arg.startsWith("@")) {
-                final File file = new File(arg.substring(1));
+                final File file = FileResources.searchInOrderWorkspace(arg.substring(1));
                 if (!file.exists()) {
                     throw new AssertionError("file not exists :" + file.getPath());
                 }

@@ -8,7 +8,7 @@ import yo.dbunitcli.application.cli.DefaultArgumentMapper;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.dataset.Parameter;
-import yo.dbunitcli.resource.Files;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.util.*;
@@ -76,7 +76,7 @@ public record ParameterizeOption(
                 , Strings.isNotEmpty(dto.getIgnoreFail()) && Boolean.parseBoolean(dto.getIgnoreFail())
                 , !Strings.isNotEmpty(dto.getParameterize()) || Boolean.parseBoolean(dto.getParameterize())
                 , dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record
-                , Strings.isNotEmpty(dto.getTemplate()) ? new File(dto.getTemplate()) : null
+                , Strings.isNotEmpty(dto.getTemplate()) ? FileResources.searchInOrderWorkspace(dto.getTemplate()) : null
                 , new DataSetLoadOption("param", dto.getParamData(), true)
                 , new TemplateRenderOption("template", dto.getTemplateOption())
         );
@@ -140,11 +140,11 @@ public record ParameterizeOption(
     private String getTemplateArgs(final Map<String, Object> aParam) {
         File template = this.template;
         if (!Optional.ofNullable(this.cmdParam).orElse("").isEmpty()) {
-            template = new File(this.templateOption.getTemplateRender().render(this.cmdParam, aParam));
+            template = FileResources.searchInOrderWorkspace(this.templateOption.getTemplateRender().render(this.cmdParam, aParam));
         } else if (template == null) {
             return "";
         }
-        return Files.read(template, this.templateOption.encoding());
+        return FileResources.read(template, this.templateOption.encoding());
     }
 
 }

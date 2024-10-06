@@ -1,4 +1,4 @@
 -scriptType=ant
--src=src/test/resources/yo/dbunitcli/application/ant
+-src=src/test/resources/yo/dbunitcli/application/src/ant
 -baseDir=..
 -P=replace=world

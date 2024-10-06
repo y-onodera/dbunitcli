@@ -1,0 +1,14 @@
+<project name="noProperty" default="copyFileAndReplace">
+    <target name="copyFile">
+        <delete dir="target/test-classes/yo/dbunitcli/application/ant/copy"/>
+        <copy file="src/test/resources/yo/dbunitcli/application/src/ant/txt/テスト.txt"
+              tofile="target/test-classes/yo/dbunitcli/application/ant/copy/no-property.txt"/>
+    </target>
+    <target name="copyFileAndReplace">
+        <delete dir="core/target/test-classes/yo/dbunitcli/application/ant/replace"/>
+        <copy file="core/src/test/resources/yo/dbunitcli/application/src/ant/txt/テスト.txt"
+              tofile="core/target/test-classes/yo/dbunitcli/application/ant/replace/replace-property.txt"/>
+        <replace file="core/target/test-classes/yo/dbunitcli/application/ant/replace/replace-property.txt"
+                 token="replace" value="${replace}"/>
+    </target>
+</project>
