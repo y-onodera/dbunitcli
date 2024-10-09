@@ -6,6 +6,7 @@ import io.micronaut.context.annotation.Factory;
 import io.micronaut.runtime.Micronaut;
 import io.micronaut.serde.annotation.SerdeImport;
 import yo.dbunitcli.application.option.Option;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
 
@@ -21,6 +22,6 @@ public class Application {
     @Context
     public Workspace load(final ApplicationContext context) {
         return Workspace.builder().setPath(context.getEnvironment()
-                .get("yo.dbunit.cli.sidecar.workspace", String.class, ".")).build();
+                .get(FileResources.PROPERTY_WORKSPACE, String.class, ".")).build();
     }
 }

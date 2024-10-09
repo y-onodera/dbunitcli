@@ -9,10 +9,11 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
 @MicronautTest
-@Property(name = "yo.dbunit.cli.sidecar.workspace", value = "src/test/resources/workspace/sample")
+@Property(name = FileResources.PROPERTY_WORKSPACE, value = "src/test/resources/workspace/sample")
 class ConvertControllerTest {
     @Inject
     EmbeddedServer server;
@@ -22,6 +23,14 @@ class ConvertControllerTest {
 
     @Inject
     Workspace workspace;
+
+    @Test
+    public void testLoad() {
+        final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/convert/load"
+                , "{\"name\":\"csvToXlsx\"}"));
+        System.out.println(jsonResponse);
+        Assertions.assertEquals("{\"prefix\":\"\",\"elements\":[],\"srcData\":{\"prefix\":\"src\",\"elements\":[{\"name\":\"srcType\",\"attribute\":{\"type\":\"ENUM\",\"selectOption\":[\"table\",\"sql\",\"file\",\"dir\",\"csv\",\"csvq\",\"reg\",\"fixed\",\"xls\",\"xlsx\"],\"required\":false},\"value\":\"csv\"},{\"name\":\"src\",\"attribute\":{\"type\":\"FILE_OR_DIR\",\"required\":true},\"value\":\"src/test/resources/workspace/sample/resources/src/csv\"},{\"name\":\"recursive\",\"attribute\":{\"type\":\"FLG\",\"required\":false},\"value\":\"false\"},{\"name\":\"regInclude\",\"attribute\":{\"type\":\"TEXT\",\"required\":false},\"value\":\"\"},{\"name\":\"regExclude\",\"attribute\":{\"type\":\"TEXT\",\"required\":false},\"value\":\"\"},{\"name\":\"extension\",\"attribute\":{\"type\":\"TEXT\",\"required\":false},\"value\":\"\"},{\"name\":\"encoding\",\"attribute\":{\"type\":\"TEXT\",\"required\":false},\"value\":\"UTF-8\"},{\"name\":\"headerName\",\"attribute\":{\"type\":\"TEXT\",\"required\":false},\"value\":\"\"},{\"name\":\"delimiter\",\"attribute\":{\"type\":\"TEXT\",\"required\":false},\"value\":\",\"},{\"name\":\"ignoreQuoted\",\"attribute\":{\"type\":\"FLG\",\"required\":false},\"value\":\"false\"},{\"name\":\"regTableInclude\",\"attribute\":{\"type\":\"TEXT\",\"required\":false},\"value\":\"\"},{\"name\":\"regTableExclude\",\"attribute\":{\"type\":\"TEXT\",\"required\":false},\"value\":\"\"},{\"name\":\"loadData\",\"attribute\":{\"type\":\"FLG\",\"required\":false},\"value\":\"true\"},{\"name\":\"includeMetaData\",\"attribute\":{\"type\":\"FLG\",\"required\":false},\"value\":\"false\"},{\"name\":\"setting\",\"attribute\":{\"type\":\"FILE\",\"required\":false},\"value\":\"\"},{\"name\":\"settingEncoding\",\"attribute\":{\"type\":\"TEXT\",\"required\":false},\"value\":\"UTF-8\"}]},\"convertResult\":{\"prefix\":\"result\",\"elements\":[{\"name\":\"resultType\",\"attribute\":{\"type\":\"ENUM\",\"selectOption\":[\"csv\",\"xls\",\"xlsx\",\"table\"],\"required\":false},\"value\":\"xlsx\"},{\"name\":\"result\",\"attribute\":{\"type\":\"DIR\",\"required\":false},\"value\":\"./target/convert/result\"},{\"name\":\"resultPath\",\"attribute\":{\"type\":\"TEXT\",\"required\":false},\"value\":\"\"},{\"name\":\"exportEmptyTable\",\"attribute\":{\"type\":\"FLG\",\"required\":false},\"value\":\"true\"},{\"name\":\"excelTable\",\"attribute\":{\"type\":\"TEXT\",\"required\":false},\"value\":\"SHEET\"}]}}", jsonResponse);
+    }
 
     @Test
     public void testReset() {
