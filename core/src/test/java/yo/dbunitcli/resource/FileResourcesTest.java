@@ -1,0 +1,371 @@
+package yo.dbunitcli.resource;
+
+import org.junit.jupiter.api.*;
+
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.util.Properties;
+
+class FileResourcesTest {
+
+    private static final Properties backup = new Properties();
+
+    @BeforeAll
+    public static void setUp() throws UnsupportedEncodingException {
+        FileResourcesTest.backup.putAll(System.getProperties());
+    }
+
+    @Nested
+    class NoSystemPropertyTest {
+        @Test
+        void resultDir() {
+            Assertions.assertEquals(new File("."), FileResources.resultDir());
+        }
+
+        @Test
+        void datasetDir() {
+            Assertions.assertEquals(new File("."), FileResources.datasetDir());
+        }
+
+        @Test
+        void baseDir() {
+            Assertions.assertEquals(new File("."), FileResources.baseDir());
+        }
+    }
+
+    @Nested
+    class SetWorkspaceTest {
+        @BeforeAll
+        static void setProperty() {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(FileResourcesTest.backup);
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, "src");
+            System.setProperties(newProperty);
+        }
+
+        @AfterAll
+        static void restore() {
+            System.setProperties(FileResourcesTest.backup);
+        }
+
+        @Test
+        void searchInOrderDatasetBase() {
+            final File result = FileResources.searchInOrderDatasetBase("main");
+            Assertions.assertEquals(new File("src\\main"), result);
+        }
+
+        @Test
+        void searchInOrderDatasetBaseNotFoundWorkspace() {
+            final File result = FileResources.searchInOrderDatasetBase("src");
+            Assertions.assertEquals(new File("src"), result);
+        }
+
+        @Test
+        void searchInOrderDatasetBaseAbsolutePath() {
+            final File result = FileResources.searchInOrderDatasetBase("C:\\test");
+            Assertions.assertEquals(new File("C:\\test"), result);
+        }
+
+        @Test
+        void searchInOrderWorkspace() {
+            final File result = FileResources.searchInOrderWorkspace("main");
+            Assertions.assertEquals(new File("src\\main"), result);
+        }
+
+        @Test
+        void searchInOrderWorkspaceNotFoundWorkspace() {
+            final File result = FileResources.searchInOrderWorkspace("src");
+            Assertions.assertEquals(new File("src"), result);
+        }
+
+        @Test
+        void searchInOrderWorkspaceAbsolutePath() {
+            final File result = FileResources.searchInOrderWorkspace("C:\\test");
+            Assertions.assertEquals(new File("C:\\test"), result);
+        }
+
+        @Test
+        void resultDir() {
+            Assertions.assertEquals(new File("src"), FileResources.resultDir());
+        }
+
+        @Test
+        void datasetDir() {
+            Assertions.assertEquals(new File("src"), FileResources.datasetDir());
+        }
+
+        @Test
+        void baseDir() {
+            Assertions.assertEquals(new File("src"), FileResources.baseDir());
+        }
+    }
+
+    @Nested
+    class SetDatasetBaseTest {
+        @BeforeAll
+        static void setProperty() {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(FileResourcesTest.backup);
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "src");
+            System.setProperties(newProperty);
+        }
+
+        @AfterAll
+        static void restore() {
+            System.setProperties(FileResourcesTest.backup);
+        }
+
+
+        @Test
+        void searchInOrderDatasetBase() {
+            final File result = FileResources.searchInOrderDatasetBase("main");
+            Assertions.assertEquals(new File("src\\main"), result);
+        }
+
+        @Test
+        void searchInOrderDatasetBaseNotFoundWorkspace() {
+            final File result = FileResources.searchInOrderDatasetBase("src");
+            Assertions.assertEquals(new File("src"), result);
+        }
+
+        @Test
+        void searchInOrderDatasetBaseAbsolutePath() {
+            final File result = FileResources.searchInOrderDatasetBase("C:\\test");
+            Assertions.assertEquals(new File("C:\\test"), result);
+        }
+
+        @Test
+        void searchInOrderWorkspace() {
+            final File result = FileResources.searchInOrderWorkspace("main");
+            Assertions.assertEquals(new File("main"), result);
+        }
+
+        @Test
+        void searchInOrderWorkspaceNotFoundWorkspace() {
+            final File result = FileResources.searchInOrderWorkspace("src");
+            Assertions.assertEquals(new File("src"), result);
+        }
+
+        @Test
+        void searchInOrderWorkspaceAbsolutePath() {
+            final File result = FileResources.searchInOrderWorkspace("C:\\test");
+            Assertions.assertEquals(new File("C:\\test"), result);
+        }
+
+        @Test
+        void resultDir() {
+            Assertions.assertEquals(new File("."), FileResources.resultDir());
+        }
+
+        @Test
+        void datasetDir() {
+            Assertions.assertEquals(new File("src"), FileResources.datasetDir());
+        }
+
+        @Test
+        void baseDir() {
+            Assertions.assertEquals(new File("."), FileResources.baseDir());
+        }
+    }
+
+    @Nested
+    class SetResultBaseTest {
+        @BeforeAll
+        static void setProperty() {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(FileResourcesTest.backup);
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "result");
+            System.setProperties(newProperty);
+        }
+
+        @AfterAll
+        static void restore() {
+            System.setProperties(FileResourcesTest.backup);
+        }
+
+        @Test
+        void searchInOrderDatasetBase() {
+            final File result = FileResources.searchInOrderDatasetBase("main");
+            Assertions.assertEquals(new File("main"), result);
+        }
+
+        @Test
+        void searchInOrderDatasetBaseNotFoundWorkspace() {
+            final File result = FileResources.searchInOrderDatasetBase("src");
+            Assertions.assertEquals(new File("src"), result);
+        }
+
+        @Test
+        void searchInOrderDatasetBaseAbsolutePath() {
+            final File result = FileResources.searchInOrderDatasetBase("C:\\test");
+            Assertions.assertEquals(new File("C:\\test"), result);
+        }
+
+        @Test
+        void searchInOrderWorkspace() {
+            final File result = FileResources.searchInOrderWorkspace("main");
+            Assertions.assertEquals(new File("main"), result);
+        }
+
+        @Test
+        void searchInOrderWorkspaceNotFoundWorkspace() {
+            final File result = FileResources.searchInOrderWorkspace("src");
+            Assertions.assertEquals(new File("src"), result);
+        }
+
+        @Test
+        void searchInOrderWorkspaceAbsolutePath() {
+            final File result = FileResources.searchInOrderWorkspace("C:\\test");
+            Assertions.assertEquals(new File("C:\\test"), result);
+        }
+
+        @Test
+        void resultDir() {
+            Assertions.assertEquals(new File("result"), FileResources.resultDir());
+        }
+
+        @Test
+        void datasetDir() {
+            Assertions.assertEquals(new File("."), FileResources.datasetDir());
+        }
+
+        @Test
+        void baseDir() {
+            Assertions.assertEquals(new File("."), FileResources.baseDir());
+        }
+    }
+
+    @Nested
+    class SetWorkspaceAndResultBaseTest {
+        @BeforeAll
+        static void setProperty() {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(FileResourcesTest.backup);
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, "workspace");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "result");
+            System.setProperties(newProperty);
+        }
+
+        @AfterAll
+        static void restore() {
+            System.setProperties(FileResourcesTest.backup);
+        }
+
+
+        @Test
+        void resultDir() {
+            Assertions.assertEquals(new File("result"), FileResources.resultDir());
+        }
+
+        @Test
+        void datasetDir() {
+            Assertions.assertEquals(new File("workspace"), FileResources.datasetDir());
+        }
+
+        @Test
+        void baseDir() {
+            Assertions.assertEquals(new File("workspace"), FileResources.baseDir());
+        }
+    }
+
+    @Nested
+    class SetWorkspaceAndDatasetBaseTest {
+        @BeforeAll
+        static void setProperty() {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(FileResourcesTest.backup);
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, "src/main");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "src/test");
+            System.setProperties(newProperty);
+        }
+
+        @AfterAll
+        static void restore() {
+            System.setProperties(FileResourcesTest.backup);
+        }
+
+        @Test
+        void searchInOrderDatasetBase() {
+            final File result = FileResources.searchInOrderDatasetBase("java");
+            Assertions.assertEquals(new File("src/test/java"), result);
+        }
+
+        @Test
+        void searchInOrderDatasetBaseNotFoundWorkspace() {
+            final File result = FileResources.searchInOrderDatasetBase("src");
+            Assertions.assertEquals(new File("src"), result);
+        }
+
+        @Test
+        void searchInOrderDatasetBaseAbsolutePath() {
+            final File result = FileResources.searchInOrderDatasetBase("C:\\test");
+            Assertions.assertEquals(new File("C:\\test"), result);
+        }
+
+        @Test
+        void searchInOrderWorkspace() {
+            final File result = FileResources.searchInOrderWorkspace("java");
+            Assertions.assertEquals(new File("src/main/java"), result);
+        }
+
+        @Test
+        void searchInOrderWorkspaceNotFoundWorkspace() {
+            final File result = FileResources.searchInOrderWorkspace("src");
+            Assertions.assertEquals(new File("src"), result);
+        }
+
+        @Test
+        void searchInOrderWorkspaceAbsolutePath() {
+            final File result = FileResources.searchInOrderWorkspace("C:\\test");
+            Assertions.assertEquals(new File("C:\\test"), result);
+        }
+
+        @Test
+        void resultDir() {
+            Assertions.assertEquals(new File("src/main"), FileResources.resultDir());
+        }
+
+        @Test
+        void datasetDir() {
+            Assertions.assertEquals(new File("src/test"), FileResources.datasetDir());
+        }
+
+        @Test
+        void baseDir() {
+            Assertions.assertEquals(new File("src/main"), FileResources.baseDir());
+        }
+    }
+
+    @Nested
+    class SetAllPropertyTest {
+        @BeforeAll
+        static void setProperty() {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(FileResourcesTest.backup);
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, "workspace");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "data");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "result");
+            System.setProperties(newProperty);
+        }
+
+        @AfterAll
+        static void restore() {
+            System.setProperties(FileResourcesTest.backup);
+        }
+
+        @Test
+        void resultDir() {
+            Assertions.assertEquals(new File("result"), FileResources.resultDir());
+        }
+
+        @Test
+        void datasetDir() {
+            Assertions.assertEquals(new File("data"), FileResources.datasetDir());
+        }
+
+        @Test
+        void baseDir() {
+            Assertions.assertEquals(new File("workspace"), FileResources.baseDir());
+        }
+    }
+}
