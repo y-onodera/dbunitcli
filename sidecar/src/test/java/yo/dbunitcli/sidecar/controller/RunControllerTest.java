@@ -9,10 +9,11 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
 @MicronautTest
-@Property(name = "yo.dbunit.cli.sidecar.workspace", value = "src/test/resources/workspace/sample")
+@Property(name = FileResources.PROPERTY_WORKSPACE, value = "src/test/resources/workspace/sample")
 class RunControllerTest {
 
     @Inject

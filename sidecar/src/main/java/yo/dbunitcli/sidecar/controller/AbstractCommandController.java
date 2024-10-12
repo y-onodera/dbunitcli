@@ -16,6 +16,7 @@ import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.CommandDto;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.CommandType;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.OptionDto;
@@ -173,6 +174,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     @Post(uri = "exec", produces = MediaType.TEXT_PLAIN)
     public String exec(@Body final OptionDto body) {
         try {
+            AbstractCommandController.LOGGER.info(System.getProperty(FileResources.PROPERTY_WORKSPACE));
             final OPTION options = this.getCommand()
                     .parseOption(body.getName()
                             , this.requestToArgs(body.getInput())
