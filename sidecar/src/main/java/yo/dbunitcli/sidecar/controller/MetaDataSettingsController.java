@@ -8,16 +8,12 @@ import io.micronaut.http.annotation.Error;
 import io.micronaut.http.annotation.*;
 import io.micronaut.http.hateoas.JsonError;
 import io.micronaut.serde.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
 import java.io.IOException;
 
 @Controller("metadata")
 public class MetaDataSettingsController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetaDataSettingsController.class);
 
     private final Workspace workspace;
 
