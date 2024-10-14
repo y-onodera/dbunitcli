@@ -14,7 +14,7 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 
 @MicronautTest
 @Property(name = FileResources.PROPERTY_WORKSPACE, value = "src/test/resources/workspace/sample")
-class ParameterListControllerTest {
+class WorkspaceControllerTest {
     @Inject
     EmbeddedServer server;
     @Inject
@@ -26,8 +26,8 @@ class ParameterListControllerTest {
 
     @Test
     public void testList() {
-        final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/parameter/list"));
-        Assertions.assertEquals("{\"convert\":[\"csvToXlsx\"],\"compare\":[],\"generate\":[],\"run\":[],\"parameterize\":[]}", jsonResponse);
+        final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/workspace/resources"));
+        Assertions.assertEquals("{\"parameterList\":{\"convert\":[\"csvToXlsx\"],\"compare\":[],\"generate\":[],\"run\":[],\"parameterize\":[]},\"resources\":{\"datasetSettings\":[]}}", jsonResponse);
     }
 
 }

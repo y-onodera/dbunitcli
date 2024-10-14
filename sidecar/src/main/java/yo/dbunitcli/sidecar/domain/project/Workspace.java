@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
+import yo.dbunitcli.sidecar.dto.ResourcesDto;
+import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -17,13 +19,18 @@ public record Workspace(Path path, Options options, Resources resources) {
         return new Builder();
     }
 
-    public ParametersDto parameterFiles() {
-        final ParametersDto result = new ParametersDto();
-        result.setConvert(this.options().parameterNames(CommandType.convert).toList());
-        result.setCompare(this.options().parameterNames(CommandType.compare).toList());
-        result.setGenerate(this.options().parameterNames(CommandType.generate).toList());
-        result.setRun(this.options().parameterNames(CommandType.run).toList());
-        result.setParameterize(this.options().parameterNames(CommandType.parameterize).toList());
+    public WorkspaceDto toDto() {
+        final WorkspaceDto result = new WorkspaceDto();
+        final ParametersDto parameters = new ParametersDto();
+        parameters.setConvert(this.options().parameterNames(CommandType.convert).toList());
+        parameters.setCompare(this.options().parameterNames(CommandType.compare).toList());
+        parameters.setGenerate(this.options().parameterNames(CommandType.generate).toList());
+        parameters.setRun(this.options().parameterNames(CommandType.run).toList());
+        parameters.setParameterize(this.options().parameterNames(CommandType.parameterize).toList());
+        result.setParameterList(parameters);
+        final ResourcesDto resources = new ResourcesDto();
+        resources.setDatasetSettings(this.settings());
+        result.setResources(resources);
         return result;
     }
 

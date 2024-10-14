@@ -8,19 +8,19 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 
 import java.io.IOException;
 
-@Controller("/parameter")
-public class ParameterListController {
+@Controller("/workspace")
+public class WorkspaceController {
     private final Workspace workspace;
 
-    public ParameterListController(final Workspace workspace) {
+    public WorkspaceController(final Workspace workspace) {
         this.workspace = workspace;
     }
 
-    @Get(uri = "list", produces = MediaType.APPLICATION_JSON)
-    public String list() throws IOException {
+    @Get(uri = "resources", produces = MediaType.APPLICATION_JSON)
+    public String resources() throws IOException {
         return ObjectMapper
                 .getDefault()
-                .writeValueAsString(this.workspace.parameterFiles());
+                .writeValueAsString(this.workspace.toDto());
     }
 
 }

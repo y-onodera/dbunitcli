@@ -59,4 +59,5 @@ public class ParametersDto {
     public void setParameterize(final List<String> parameterize) {
         this.parameterize = parameterize;
     }
+
 }
