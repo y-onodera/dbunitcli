@@ -1,5 +1,6 @@
 import { Body, ResponseType, fetch } from "@tauri-apps/api/http";
 import {
+	useRefreshSelectParameter,
 	useSelectParameter,
 	useSetSelectParameter,
 } from "../../context/SelectParameterProvider";
@@ -18,22 +19,10 @@ export default function CommandForm(prop: {
 		validationError: boolean;
 	};
 }) {
-	const environment = useEnviroment();
 	const select = useSelectParameter();
 	const command = select.command;
-	const setParameter = useSetSelectParameter();
-	const handleTypeSelect = async () => {
-		await fetch(`${environment.apiUrl + command}/refresh`, {
-			method: "POST",
-			responseType: ResponseType.JSON,
-			headers: { "Content-Type": "application/json" },
-			body: Body.json(prop.formData(false).values),
-		})
-			.then((response) =>
-				setParameter(response.data as Parameter, command, select.name),
-			)
-			.catch((ex) => alert(ex));
-	};
+	const refreshSelect = useRefreshSelectParameter(command)
+	const handleTypeSelect = () => refreshSelect(prop.formData(false).values)
 	return (
 		<>
 			{command === "convert" ? (

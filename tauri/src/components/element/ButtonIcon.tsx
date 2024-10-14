@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { AddIcon, CopyIcon, DeleteIcon, EditIcon, FixIcon, SettingIcon } from "./Icon";
+import { Button } from "./Button";
+import { AddIcon, CopyIcon, DeleteIcon, EditIcon, FixIcon, RemoveIcon, SettingIcon } from "./Icon";
 
 export function EditButton(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
     return (
@@ -29,6 +30,13 @@ export function AddButton(props: { title?: string, handleClick: React.MouseEvent
         </ButtonIcon>
     );
 }
+export function RemoveButton(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
+    return (
+        <ButtonIcon title={props.title === undefined ? "remove" : props.title} handleClick={props.handleClick}>
+            <RemoveIcon title={props.title ? props.title : "remove"} />
+        </ButtonIcon>
+    );
+}
 export function SettingButton(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
     return (
         <ButtonIcon title={props.title === undefined ? "setting" : props.title} handleClick={props.handleClick}>
@@ -45,19 +53,15 @@ export function FixButton(props: { title?: string, handleClick: React.MouseEvent
 }
 export function ButtonIcon(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement>, children: ReactNode }) {
     return (
-        <button
-            type="button"
-            onClick={props.handleClick}
-            className="flex items-center group
-                        p-1 
-                        text-gray-500
-                        ring-indigo-300 
-                        focus:ring 
-                        focus-visible:ring
-                        hover:text-blue-600"
+        <Button
+            buttonstyle="flex items-center group p-1"
+            bgcolor=""
+            textstyle="text-gray-500 hover:text-blue-600"
+            border="outline-none"
+            handleClick={props.handleClick}
         >
             {props.children}
             {props.title}
-        </button>
+        </Button>
     );
 }

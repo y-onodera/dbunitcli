@@ -1,6 +1,6 @@
 import type { GenerateParams } from "../../model/CommandParam";
+import CommandFormElements from "./CommandFormElement";
 import { DatasetLoadForm } from "./DatasetLoadForm";
-import FormElements from "./FormElement";
 
 export function GenerateForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -10,7 +10,7 @@ export function GenerateForm(prop: {
 	const srcData = prop.generate.srcData;
 	return (
 		<>
-			<FormElements
+			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				prefix=""
@@ -22,7 +22,7 @@ export function GenerateForm(prop: {
 				srcData={srcData}
 			/>
 			{prop.generate.templateOption && (
-				<FormElements
+				<CommandFormElements
 					handleTypeSelect={prop.handleTypeSelect}
 					name={prop.name}
 					prefix={prop.generate.templateOption.prefix}

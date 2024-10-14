@@ -1,20 +1,11 @@
-import { Body, ResponseType, fetch } from "@tauri-apps/api/http";
 import { useEffect, useState } from "react";
 import { type EditName, useSetEditName } from "../../context/EditNameProvider";
-import { useEnviroment } from "../../context/EnviromentProvider";
-import { useSetSelectParameter } from "../../context/SelectParameterProvider";
-import type { Parameter } from "../../model/CommandParam";
+import { useLoadSelectParameter } from "../../context/SelectParameterProvider";
+import { useAddParameter, useParameterList } from "../../context/WorkspaceResourcesProvider";
 import { LinkButton } from "../element/Button";
 import { AddButton, ButtonIcon, SettingButton } from "../element/ButtonIcon";
 import { ExpandIcon } from "../element/Icon";
 
-type NamedParameters = {
-	convert: string[];
-	compare: string[];
-	generate: string[];
-	run: string[];
-	parameterize: string[];
-};
 type NamedParameterProp = {
 	command: string;
 	namedParameters?: string[];
@@ -22,44 +13,8 @@ type NamedParameterProp = {
 	handleEditNamed: (selected: EditName) => void;
 };
 export default function NamedParameters() {
-	const environment = useEnviroment();
-	const [parameters, setParameters] = useState<NamedParameters>();
-	useEffect(() => {
-		const handlMenuInit = async () => {
-			await fetch(`${environment.apiUrl}parameter/list`, {
-				method: "GET",
-				responseType: ResponseType.JSON,
-			})
-				.then((response) => {
-					if (!response.ok) {
-						console.error("response.ok:", response.ok);
-						console.error("esponse.status:", response.status);
-						throw new Error(response.data as string);
-					}
-					setParameters(response.data as NamedParameters);
-				})
-				.catch((ex) => alert(ex));
-		};
-		handlMenuInit();
-	}, [environment]);
-	const setParameter = useSetSelectParameter();
-	const handleParameterSelect = async (command: string, name: string) => {
-		await fetch(`${environment.apiUrl + command}/load`, {
-			method: "POST",
-			responseType: ResponseType.JSON,
-			headers: { "Content-Type": "application/json" },
-			body: Body.json({ name }),
-		})
-			.then((response) => {
-				if (!response.ok) {
-					console.error("response.ok:", response.ok);
-					console.error("esponse.status:", response.status);
-					throw new Error(response.data as string);
-				}
-				setParameter(response.data as Parameter, command, name);
-			})
-			.catch((ex) => alert(ex));
-	};
+	const parameters = useParameterList();
+	const handleParameterSelect = useLoadSelectParameter();
 	const setEditName = useSetEditName();
 	const handleEditNamed = (selected: EditName) => setEditName(selected);
 	return (
@@ -125,30 +80,12 @@ function Category(props: NamedParameterProp) {
 	);
 }
 function Parameters(props: NamedParameterProp) {
-	const environment = useEnviroment();
 	const [menuList, setMenuList] = useState([] as string[]);
 	useEffect(
-		() =>
-			setMenuList((current) =>
-				props.namedParameters ? [...props.namedParameters] : current,
-			),
-		[props.namedParameters],
+		() => setMenuList((current) => props.namedParameters ? [...props.namedParameters] : current)
+		, [props.namedParameters],
 	);
-	const handleAddNewName = async () => {
-		await fetch(`${environment.apiUrl + props.command.toLowerCase()}/add`, {
-			method: "GET",
-			responseType: ResponseType.JSON,
-		})
-			.then((response) => {
-				if (!response.ok) {
-					console.error("response.ok:", response.ok);
-					console.error("esponse.status:", response.status);
-					throw new Error(response.data as string);
-				}
-				setMenuList(response.data as string[]);
-			})
-			.catch((ex) => alert(ex));
-	};
+	const handleAddNewName = useAddParameter(props.command)
 	return (
 		<>
 			{menuList?.map((menu) => {

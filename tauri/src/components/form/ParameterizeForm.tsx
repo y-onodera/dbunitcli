@@ -1,6 +1,6 @@
 import type { ParameterizeParams } from "../../model/CommandParam";
+import CommandFormElements from "./CommandFormElement";
 import { DatasetLoadForm } from "./DatasetLoadForm";
-import FormElements from "./FormElement";
 
 export function ParameterizeForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -11,7 +11,7 @@ export function ParameterizeForm(prop: {
 	const templateOption = prop.parameterize.templateOption;
 	return (
 		<>
-			<FormElements
+			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				prefix=""
@@ -22,7 +22,7 @@ export function ParameterizeForm(prop: {
 				name={prop.name}
 				srcData={paramData}
 			/>
-			<FormElements
+			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				prefix={templateOption.prefix}

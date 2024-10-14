@@ -1,6 +1,6 @@
 import type { ConvertParams } from "../../model/CommandParam";
+import CommandFormElements from "./CommandFormElement";
 import { DatasetLoadForm } from "./DatasetLoadForm";
-import FormElements from "./FormElement";
 
 export function ConvertForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -16,13 +16,13 @@ export function ConvertForm(prop: {
 				name={prop.name}
 				srcData={srcData}
 			/>
-			<FormElements
+			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				prefix={convertResult.prefix}
 				elements={convertResult.elements}
 			/>
-			<FormElements
+			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				prefix={convertResult.prefix}

@@ -1,5 +1,6 @@
+import MetadataSettingsProvider from "../../context/MetadataSettingsProvider";
 import type { DatasetSource } from "../../model/CommandParam";
-import FormElements from "./FormElement";
+import CommandFormElements from "./CommandFormElement";
 
 export function DatasetLoadForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -7,20 +8,20 @@ export function DatasetLoadForm(prop: {
 	srcData: DatasetSource;
 }) {
 	return (
-		<>
-			<FormElements
+		<MetadataSettingsProvider>
+			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				prefix={prop.srcData.prefix}
 				elements={prop.srcData.elements}
 			/>
-			<FormElements
+			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				prefix={prop.srcData.prefix}
 				elements={prop.srcData.jdbc ? prop.srcData.jdbc.elements : []}
 			/>
-			<FormElements
+			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				prefix={prop.srcData.prefix}
@@ -30,6 +31,6 @@ export function DatasetLoadForm(prop: {
 						: []
 				}
 			/>
-		</>
+		</MetadataSettingsProvider>
 	);
 }

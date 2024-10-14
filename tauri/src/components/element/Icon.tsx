@@ -12,7 +12,8 @@ export function EditIcon(props: { title?: string, fill?: string }) {
             <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
         </svg>
     )
-} export function AddIcon(props: { title?: string, fill?: string }) {
+}
+export function AddIcon(props: { title?: string, fill?: string }) {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -23,6 +24,20 @@ export function EditIcon(props: { title?: string, fill?: string }) {
         >
             <title>{props.title ? props.title : "add"}</title>
             <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+        </svg>
+    )
+}
+export function RemoveIcon(props: { title?: string, fill?: string }) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill={props.fill ? props.fill : "#5f6368"}
+        >
+            <title>{props.title ? props.title : "remove"}</title>
+            <path d="M200-440v-80h560v80H200Z" />
         </svg>
     )
 }

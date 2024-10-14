@@ -1,11 +1,11 @@
 import { type ReactNode, useEffect, useState } from "react";
 
-export function InputLabel(props: { name: string, id: string, w?: string, required: boolean }) {
+export function InputLabel(props: { name: string, id: string, required: boolean, wStyle?: string }) {
     return (
         <label
             htmlFor={props.id}
             className={`block 
-                   ${props.w ? props.w : "w-full"}
+                   ${props.wStyle ? props.wStyle : "w-full"}
                    font-medium text-sm text-gray-900 
                    `}
         >
@@ -13,32 +13,50 @@ export function InputLabel(props: { name: string, id: string, w?: string, requir
         </label>
     )
 }
-export function ControllTextBox(props: { name: string, id: string, required: boolean, w?: string, value: string, handleChange: (text: React.ChangeEvent<HTMLInputElement>) => void }) {
+export function ControllTextBox(props: {
+    name: string, id: string, required: boolean, value: string
+    , wStyle?: string, list?: string
+    , handleChange: (ev: React.ChangeEvent<HTMLInputElement>) => void
+    , handleBlur?: (ev: React.FocusEvent<HTMLInputElement>) => void
+}) {
     return (
         <input
             name={props.name}
             id={props.id}
             type="text"
-            className={inputStyle(props.w ? props.w : "w-full")}
+            list={props.list ?? ""}
+            className={inputStyle(props.wStyle ? props.wStyle : "w-full")}
             required={props.required}
             value={props.value}
             onChange={props.handleChange}
+            onBlur={ev => props.handleBlur?.(ev)}
         />
     )
 }
-export function TextBox(props: { name: string, id: string, required: boolean, w?: string, defaultValue?: string }) {
+export function SelectBox(props: { name: string, id: string, required: boolean, wStyle?: string, defaultValue?: string, handleOnChange?: (selected: string) => Promise<void>, children: ReactNode }) {
+    const [selected, setSelected] = useState("");
+    useEffect(() => {
+        if (props.defaultValue) {
+            setSelected(props.defaultValue);
+        }
+    }, [props.defaultValue]);
     return (
-        <input
+        <select
             name={props.name}
             id={props.id}
-            type="text"
-            className={inputStyle(props.w ? props.w : "w-full")}
+            className={inputStyle(props.wStyle ? props.wStyle : "w-40")}
             required={props.required}
-            defaultValue={props.defaultValue}
-        />
-    )
+            value={selected}
+            onChange={(event) => {
+                setSelected(event.currentTarget.value);
+                props.handleOnChange?.(event.currentTarget.value);
+            }}
+        >
+            {props.children}
+        </select>
+    );
 }
-export function CheckBox(props: { name: string, id: string, defaultValue?: string }) {
+export function CheckBox(props: { name: string, id: string, defaultValue?: string, handleOnChange?: (checked: boolean) => Promise<void> }) {
     const [checked, setChecked] = useState(false);
     useEffect(() => {
         setChecked(props.defaultValue === "true");
@@ -59,6 +77,7 @@ export function CheckBox(props: { name: string, id: string, defaultValue?: strin
                 value={`${checked}`}
                 onChange={() => {
                     setChecked(!checked);
+                    props.handleOnChange?.(!checked)
                 }}
             />
             <input
@@ -70,38 +89,15 @@ export function CheckBox(props: { name: string, id: string, defaultValue?: strin
         </>
     )
 }
-export function SelectBox(props: { name: string, id: string, required: boolean, defaultValue?: string, handleOnChange?: () => Promise<void>, children: ReactNode }) {
-    const [selected, setSelected] = useState("");
-    useEffect(() => {
-        if (props.defaultValue) {
-            setSelected(props.defaultValue);
-        }
-    }, [props.defaultValue]);
-    return (
-        <select
-            name={props.name}
-            id={props.id}
-            className={inputStyle("w-40")}
-            required={props.required}
-            value={selected}
-            onChange={(event) => {
-                setSelected(event.currentTarget.value);
-                props.handleOnChange?.();
-            }}
-        >
-            {props.children}
-        </select>
-    );
-}
-function inputStyle(w: string) {
+function inputStyle(wStyle: string) {
     return `block 
                p-2.5 
-               ${w} z-20 
+               ${wStyle} 
+               z-20 
                text-sm text-gray-900
-               bg-gray-50 
                rounded-lg 
+               bg-gray-50 
                border border-gray-300 
                ring-indigo-300 
-               focus:ring 
                focus-visible:ring `
 }

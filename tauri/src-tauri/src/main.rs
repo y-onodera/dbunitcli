@@ -14,12 +14,14 @@ fn open_directory(path: String) {
   .unwrap();
 }
 fn main() {
-    let (tx,rx) = sync_channel::<i64>(1);
+  let (tx,rx) = sync_channel::<i64>(1);
     tauri::Builder::default()
          .setup(|app: &mut tauri::App| {
             let mut args = vec!["-Djava.home=backend"];
             let mut arg1 = String::from("-Dmicronaut.server.port=");
-            let mut arg2 = String::from("-Dyo.dbunit.cli.sidecar.workspace=");
+            let mut arg2 = String::from("-Dyo.dbunit.cli.workspace=");
+            let mut arg3 = String::from("-Dyo.dbunit.cli.dataset.base=");
+            let mut arg4 = String::from("-Dyo.dbunit.cli.result.base=");
             match app.get_cli_matches() {
               Ok(matches) => {
                 if let Some(port)= matches.args.get("port").clone() {
@@ -36,6 +38,20 @@ fn main() {
                   }                    
                   args.push(&arg2);
                 }
+                if let Some(dataset_base) = matches.args.get("dataset.base").clone() {
+                  match dataset_base.value.as_str() {
+                    Some(s) => arg3.push_str(s),
+                    None =>arg3.push_str(".")
+                  }                    
+                  args.push(&arg3);
+                }
+                if let Some(result_base) = matches.args.get("result.base").clone() {
+                  match result_base.value.as_str() {
+                    Some(s) => arg4.push_str(s),
+                    None =>arg4.push_str(".")
+                  }                    
+                  args.push(&arg4);
+                }
               }
               Err(e) => println!("{:?}", e),
             }
@@ -45,7 +61,7 @@ fn main() {
             .stderr(Stdio::piped())
             .spawn()
             .expect("Failed to spawn child process");
-            thread::spawn(move || {
+          thread::spawn(move || {
               loop{
                 let s = rx.recv();
                 if s.unwrap()==-1 {

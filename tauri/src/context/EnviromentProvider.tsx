@@ -12,24 +12,20 @@ export type Enviroment = {
 	loaded: boolean;
 };
 const enviromentContext = createContext<Enviroment>({} as Enviroment);
-const matches = await getMatches();
 export default function EnviromentProvider(props: { children: ReactNode }) {
 	const [enviroment, setEnviroment] = useState<Enviroment>({
 		loaded: false,
 	} as Enviroment);
 	useEffect(() => {
-		if (matches.args.port?.value) {
-			const newEnviroment = {
-				apiUrl: `${`http://localhost:${matches.args.port.value}` as string}/dbunit-cli/`,
-				loaded: true,
-			} as Enviroment;
-			setEnviroment(newEnviroment);
-		} else {
+		const getEnviroment = async () => {
+			const matches = await getMatches();
+			const port = matches.args.port.value ? matches.args.port.value : "8080"
 			setEnviroment({
-				apiUrl: "http://localhost:8080/dbunit-cli/",
+				apiUrl: `${`http://localhost:${port}` as string}/dbunit-cli/`,
 				loaded: true,
 			});
 		}
+		getEnviroment()
 	}, []);
 	return (
 		<enviromentContext.Provider value={enviroment}>

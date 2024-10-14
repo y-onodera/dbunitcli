@@ -1,6 +1,6 @@
 import type { RunParams } from "../../model/CommandParam";
+import CommandFormElements from "./CommandFormElement";
 import { DatasetLoadForm } from "./DatasetLoadForm";
-import FormElements from "./FormElement";
 
 export function RunForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -12,7 +12,7 @@ export function RunForm(prop: {
 	const jdbcOption = prop.run.jdbcOption;
 	return (
 		<>
-			<FormElements
+			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				prefix=""
@@ -24,7 +24,7 @@ export function RunForm(prop: {
 				srcData={srcData}
 			/>
 			{prop.run.jdbcOption && (
-				<FormElements
+				<CommandFormElements
 					handleTypeSelect={prop.handleTypeSelect}
 					name={prop.name}
 					prefix={templateOption.prefix}
@@ -32,7 +32,7 @@ export function RunForm(prop: {
 				/>
 			)}
 			{prop.run.jdbcOption && (
-				<FormElements
+				<CommandFormElements
 					handleTypeSelect={prop.handleTypeSelect}
 					name={prop.name}
 					prefix={jdbcOption.prefix}

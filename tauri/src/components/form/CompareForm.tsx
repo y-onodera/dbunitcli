@@ -1,6 +1,6 @@
 import type { CompareParams } from "../../model/CommandParam";
+import CommandFormElements from "./CommandFormElement";
 import { DatasetLoadForm } from "./DatasetLoadForm";
-import FormElements from "./FormElement";
 
 export function CompareForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -14,14 +14,14 @@ export function CompareForm(prop: {
 	const convertResult = prop.compare.convertResult;
 	return (
 		<>
-			<FormElements
+			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				prefix=""
 				elements={prop.compare.elements}
 			/>
 			{prop.compare.imageOption && (
-				<FormElements
+				<CommandFormElements
 					handleTypeSelect={prop.handleTypeSelect}
 					name={prop.name}
 					prefix={imageOption.prefix}
@@ -38,7 +38,7 @@ export function CompareForm(prop: {
 				name={prop.name}
 				srcData={oldData}
 			/>
-			<FormElements
+			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				prefix={convertResult.prefix}

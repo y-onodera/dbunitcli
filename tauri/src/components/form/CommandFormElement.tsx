@@ -1,21 +1,27 @@
 import { open } from "@tauri-apps/api/dialog";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { useEnviroment } from "../../context/EnviromentProvider";
+import { loadMetadataSettings, useSetMetadataSettings } from "../../context/MetadataSettingsProvider";
+import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import type { CommandParam, CommandParams } from "../../model/CommandParam";
+import type { MetadataSettings } from "../../model/MetadataSettings";
 import { ButtonWithIcon } from "../element/Button";
-import { DirIcon, FileIcon } from "../element/Icon";
-import { CheckBox, InputLabel, SelectBox, TextBox } from "../element/Input";
+import { DirIcon, EditIcon, FileIcon } from "../element/Icon";
+import { CheckBox, ControllTextBox, InputLabel, SelectBox } from "../element/Input";
+import SettingsDaialog from "./settings/SettingsDialog";
 
 type Prop = {
 	prefix: string;
 	element: CommandParam;
 };
 type FileProp = Prop & {
+	path: string;
 	setPath: Dispatch<SetStateAction<string>>;
 };
 type SelectProp = Prop & {
 	handleTypeSelect: () => Promise<void>;
 };
-export default function FormElements(prop: CommandParams) {
+export default function CommandFormElements(prop: CommandParams) {
 	return (
 		<>
 			{prop.elements.map((element) => {
@@ -57,29 +63,70 @@ const Text: React.FC<Prop> = ({ prefix, element }) => {
 	return (
 		<div>
 			<InputLabel
-				name={prefix ? `-${prefix}.${element.name}` : `-${element.name}`}
-				id={`${prefix}_${element.name}`}
+				name={getName(prefix, element.name)}
+				id={getId(prefix, element.name)}
 				required={element.attribute.required}
 			/>
 			<div className="flex">
-				<TextBox
-					name={prefix ? `-${prefix}.${element.name}` : `-${element.name}`}
-					id={`${prefix}_${element.name}`}
+				<ControllTextBox
+					name={getName(prefix, element.name)}
+					id={getId(prefix, element.name)}
+					list={element.name === "setting" ? `${getId(prefix, element.name)}_list` : undefined}
 					required={element.attribute.required}
-					defaultValue={path}
+					value={path}
+					handleChange={(ev) => setPath(ev.target.value)}
 				/>
+				{element.name === "setting" && (
+					<SettingEdit prefix={prefix} element={element} path={path} setPath={setPath} />
+				)}
 				{element.attribute.type.includes("FILE") && (
-					<FileChooser prefix={prefix} element={element} setPath={setPath} />
+					<FileChooser prefix={prefix} element={element} path={path} setPath={setPath} />
 				)}
 				{element.attribute.type.includes("DIR") && (
-					<DirectoryChooser
-						prefix={prefix}
-						element={element}
-						setPath={setPath}
-					/>
+					<DirectoryChooser prefix={prefix} element={element} path={path} setPath={setPath} />
 				)}
 			</div>
 		</div>
+	);
+};
+const SettingEdit: React.FC<FileProp> = ({ prefix, element, path, setPath }) => {
+	const environment = useEnviroment();
+	const [dialogEdit, setDialogEdit] = useState(false);
+	const setMetadataSettings = useSetMetadataSettings();
+	const settings = useResourcesSettings().datasetSettings;
+	const handleDialogOpen = () => {
+		loadMetadataSettings(environment.apiUrl, path ?? "")
+			.then((settings: MetadataSettings) => setMetadataSettings(settings))
+			.catch((ex) => alert(ex));
+		setDialogEdit(true);
+	};
+	const handleSave = (path: string) => {
+		setPath(path)
+		setDialogEdit(false);
+	};
+	return (
+		<>
+			<datalist id={`${getId(prefix, element.name)}_list`} >
+				{settings?.map((setting) => {
+					return (
+						<option key={setting} value={setting}>{setting}</option>
+					)
+				})}
+			</datalist>
+			{dialogEdit && (
+				<SettingsDaialog
+					settingName={path}
+					handleDialogClose={() => setDialogEdit(false)}
+					handleSave={handleSave}
+				/>
+			)}
+			<ButtonWithIcon
+				handleClick={handleDialogOpen}
+				id={`${getId(prefix, element.name)}_edit`}
+			>
+				<EditIcon fill="white" />
+			</ButtonWithIcon>
+		</>
 	);
 };
 const FileChooser: React.FC<FileProp> = ({ prefix, element, setPath }) => {
@@ -156,3 +203,9 @@ const Select: React.FC<SelectProp> = ({
 		</div>
 	);
 };
+function getId(prefix: string, name: string): string {
+	return prefix ? `${prefix}_${name}` : `${name}`;
+}
+function getName(prefix: string, name: string): string {
+	return prefix ? `-${prefix}.${name}` : `-${name}`;
+}
