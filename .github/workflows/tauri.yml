@@ -18,7 +18,6 @@ jobs:
           name: native-image-sidecar
           repository: y-onodera/dbunitcli
           github-token: ${{ secrets.GH_PAT }}
-          run-id: 9927113644
       - name: deploy backend
         run: |
           mkdir tauri/src-tauri/backend
