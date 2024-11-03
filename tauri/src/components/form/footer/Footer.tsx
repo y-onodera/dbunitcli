@@ -1,16 +1,8 @@
 import { tauri } from "@tauri-apps/api";
-import { Body, ResponseType, fetch } from "@tauri-apps/api/http";
 import { useState } from "react";
-import { useEnviroment } from "../../../context/EnviromentProvider";
-import { useSelectParameter } from "../../../context/SelectParameterProvider";
+import { type Running, execParameter, saveParameter, useSelectParameter } from "../../../context/SelectParameterProvider";
 import { BlueButton, WhiteButton } from "../../element/Button";
 import ResultDialog from "./ResultDialog";
-
-type Running = {
-	command: string;
-	resultMessage: string;
-	resultDir: string;
-};
 
 export default function Footer(prop: {
 	formData: (validate: boolean) => {
@@ -23,53 +15,12 @@ export default function Footer(prop: {
 		resultMessage: "",
 		resultDir: "",
 	} as Running);
-	const environment = useEnviroment();
 	const parameter = useSelectParameter();
-	const handleClickSave = async (command: string, name: string) => {
-		await fetch(`${environment.apiUrl + command}/save`, {
-			method: "POST",
-			responseType: ResponseType.Text,
-			headers: { "Content-Type": "application/json" },
-			body: Body.json({ name, input: prop.formData(false).values }),
-		})
-			.then((response) => {
-				if (!response.ok) {
-					console.error("response.ok:", response.ok);
-					console.error("esponse.status:", response.status);
-					throw new Error(response.data as string);
-				}
-				setRunning({
-					command: "",
-					resultMessage: "Save Success",
-					resultDir: "",
-				});
-			})
-			.catch((ex) => {
-				setRunning({ command: "", resultMessage: ex.message, resultDir: "" });
-			});
+	const handleClickSave = (command: string, name: string) => {
+		saveParameter(command, name, prop.formData(false).values, setRunning)
 	};
-	const handleClickExec = async (command: string, name: string) => {
-		const input = prop.formData(true).values;
-		await fetch(`${environment.apiUrl + command}/exec`, {
-			method: "POST",
-			responseType: ResponseType.Text,
-			headers: { "Content-Type": "application/json" },
-			body: Body.json({ name, input }),
-		})
-			.then((response) => {
-				if (!response.ok) {
-					console.error("esponse.status:", response.status);
-					throw new Error(response.data as string);
-				}
-				setRunning({
-					command: "",
-					resultMessage: "Execution Success",
-					resultDir: response.data as string,
-				});
-			})
-			.catch((ex) => {
-				setRunning({ command: "", resultMessage: ex.message, resultDir: "" });
-			});
+	const handleClickExec = (command: string, name: string) => {
+		execParameter(command, name, prop.formData(true).values, setRunning)
 	};
 	const openDirectory = async (path: string) => {
 		await tauri.invoke("open_directory", { path });
