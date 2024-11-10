@@ -33,3 +33,18 @@ export async function loadMetadataSettings(apiUrl: string, name: string): Promis
         return MetadataSettings.build(response.data as MetadataSettingsBuilder);
     });
 }
+export async function saveMetadataSettings(apiUrl: string, name: string, input: MetadataSettings): Promise<string> {
+    return await fetch(`${apiUrl}metadata/save`, {
+        method: "POST",
+        responseType: ResponseType.Text,
+        headers: { "Content-Type": "application/json" },
+        body: Body.json({ name, input }),
+    }).then((response) => {
+        if (!response.ok) {
+            console.error("response.ok:", response.ok);
+            console.error("esponse.status:", response.status);
+            throw new Error(response.data as string);
+        }
+        return response.data as string;
+    });
+}

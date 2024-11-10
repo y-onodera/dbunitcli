@@ -1,7 +1,7 @@
 import { open } from "@tauri-apps/api/dialog";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { useEnviroment } from "../../context/EnviromentProvider";
-import { loadMetadataSettings, useSetMetadataSettings } from "../../context/MetadataSettingsProvider";
+import { loadMetadataSettings, saveMetadataSettings, useMetadataSettings, useSetMetadataSettings } from "../../context/MetadataSettingsProvider";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import type { CommandParam, CommandParams } from "../../model/CommandParam";
 import type { MetadataSettings } from "../../model/MetadataSettings";
@@ -55,58 +55,61 @@ export default function CommandFormElements(prop: CommandParams) {
 		</>
 	);
 }
-const Text: React.FC<Prop> = ({ prefix, element }) => {
+function Text(prop: Prop) {
 	const [path, setPath] = useState("");
 	useEffect(() => {
-		setPath(element.value);
-	}, [element]);
+		setPath(prop.element.value);
+	}, [prop.element]);
 	return (
 		<div>
 			<InputLabel
-				name={getName(prefix, element.name)}
-				id={getId(prefix, element.name)}
-				required={element.attribute.required}
+				name={getName(prop.prefix, prop.element.name)}
+				id={getId(prop.prefix, prop.element.name)}
+				required={prop.element.attribute.required}
 			/>
 			<div className="flex">
 				<ControllTextBox
-					name={getName(prefix, element.name)}
-					id={getId(prefix, element.name)}
-					list={element.name === "setting" ? `${getId(prefix, element.name)}_list` : undefined}
-					required={element.attribute.required}
+					name={getName(prop.prefix, prop.element.name)}
+					id={getId(prop.prefix, prop.element.name)}
+					list={prop.element.name === "setting" ? `${getId(prop.prefix, prop.element.name)}_list` : undefined}
+					required={prop.element.attribute.required}
 					value={path}
 					handleChange={(ev) => setPath(ev.target.value)}
 				/>
-				{element.name === "setting" && (
-					<SettingEdit prefix={prefix} element={element} path={path} setPath={setPath} />
+				{prop.element.name === "setting" && (
+					<SettingEdit prefix={prop.prefix} element={prop.element} path={path} setPath={setPath} />
 				)}
-				{element.attribute.type.includes("FILE") && (
-					<FileChooser prefix={prefix} element={element} path={path} setPath={setPath} />
+				{prop.element.attribute.type.includes("FILE") && (
+					<FileChooser prefix={prop.prefix} element={prop.element} path={path} setPath={setPath} />
 				)}
-				{element.attribute.type.includes("DIR") && (
-					<DirectoryChooser prefix={prefix} element={element} path={path} setPath={setPath} />
+				{prop.element.attribute.type.includes("DIR") && (
+					<DirectoryChooser prefix={prop.prefix} element={prop.element} path={path} setPath={setPath} />
 				)}
 			</div>
 		</div>
 	);
 };
-const SettingEdit: React.FC<FileProp> = ({ prefix, element, path, setPath }) => {
+function SettingEdit(prop: FileProp) {
 	const environment = useEnviroment();
 	const [dialogEdit, setDialogEdit] = useState(false);
+	const metadataSettings = useMetadataSettings();
 	const setMetadataSettings = useSetMetadataSettings();
 	const settings = useResourcesSettings().datasetSettings;
 	const handleDialogOpen = () => {
-		loadMetadataSettings(environment.apiUrl, path ?? "")
+		loadMetadataSettings(environment.apiUrl, prop.path ?? "")
 			.then((settings: MetadataSettings) => setMetadataSettings(settings))
 			.catch((ex) => alert(ex));
 		setDialogEdit(true);
 	};
+	const [text, setText] = useState(prop.path);
 	const handleSave = (path: string) => {
-		setPath(path)
+		saveMetadataSettings(environment.apiUrl, text, metadataSettings);
+		prop.setPath(path)
 		setDialogEdit(false);
 	};
 	return (
 		<>
-			<datalist id={`${getId(prefix, element.name)}_list`} >
+			<datalist id={`${getId(prop.prefix, prop.element.name)}_list`} >
 				{settings?.map((setting) => {
 					return (
 						<option key={setting} value={setting}>{setting}</option>
@@ -115,86 +118,83 @@ const SettingEdit: React.FC<FileProp> = ({ prefix, element, path, setPath }) => 
 			</datalist>
 			{dialogEdit && (
 				<SettingsDaialog
-					settingName={path}
+					fileName={text}
+					setFileName={setText}
 					handleDialogClose={() => setDialogEdit(false)}
 					handleSave={handleSave}
 				/>
 			)}
 			<ButtonWithIcon
 				handleClick={handleDialogOpen}
-				id={`${getId(prefix, element.name)}_edit`}
+				id={`${getId(prop.prefix, prop.element.name)}_edit`}
 			>
 				<EditIcon fill="white" />
 			</ButtonWithIcon>
 		</>
 	);
 };
-const FileChooser: React.FC<FileProp> = ({ prefix, element, setPath }) => {
+function FileChooser(prop: FileProp) {
 	const handleFileChooserClick = () => {
-		open().then((files) => files && setPath(files as string));
+		open().then((files) => files && prop.setPath(files as string));
 	};
 	return (
 		<ButtonWithIcon
 			handleClick={handleFileChooserClick}
-			id={`${prefix}_${element.name}FileChooser`}
+			id={`${prop.prefix}_${prop.element.name}FileChooser`}
 		>
 			<FileIcon title="FileChooser" fill="white" />
 		</ButtonWithIcon>
 	);
 };
-const DirectoryChooser: React.FC<FileProp> = ({ prefix, element, setPath }) => {
+function DirectoryChooser(prop: FileProp) {
 	const handleDirectoryChooserClick = () => {
 		open({ directory: true }).then(
-			(files) => files && setPath(files as string),
+			(files) => files && prop.setPath(files as string),
 		);
 	};
 	return (
 		<ButtonWithIcon
 			handleClick={handleDirectoryChooserClick}
-			id={`${prefix}_${element.name}DirectoryChooser`}
+			id={`${prop.prefix}_${prop.element.name}DirectoryChooser`}
 		>
 			<DirIcon title="DirectoryChooser" fill="white" />
 		</ButtonWithIcon>
 	);
 };
-const Check: React.FC<Prop> = ({ prefix, element }) => {
+function Check(prop: Prop) {
 	return (
 		<div>
 			<InputLabel
-				name={prefix ? `-${prefix}.${element.name}` : `-${element.name}`}
-				id={`${prefix}_${element.name}`}
+				name={prop.prefix ? `-${prop.prefix}.${prop.element.name}` : `-${prop.element.name}`}
+				id={`${prop.prefix}_${prop.element.name}`}
 				required={false}
 			/>
 			<CheckBox
-				name={prefix ? `-${prefix}.${element.name}` : `-${element.name}`}
-				id={`${prefix}_${element.name}`}
-				defaultValue={element.value}
+				name={prop.prefix ? `-${prop.prefix}.${prop.element.name}` : `-${prop.element.name}`}
+				id={`${prop.prefix}_${prop.element.name}`}
+				defaultValue={prop.element.value}
 			/>
 		</div>
 	);
 };
-const Select: React.FC<SelectProp> = ({
-	handleTypeSelect,
-	prefix,
-	element,
-}) => {
+function Select(prop: SelectProp) {
 	return (
 		<div>
 			<InputLabel
-				name={prefix ? `-${prefix}.${element.name}` : `-${element.name}`}
-				id={`${prefix}_${element.name}`}
-				required={element.attribute.required}
+				name={prop.prefix ? `-${prop.prefix}.${prop.element.name}` : `-${prop.element.name}`}
+				id={`${prop.prefix}_${prop.element.name}`}
+				required={prop.element.attribute.required}
 			/>
 			<SelectBox
-				name={prefix ? `-${prefix}.${element.name}` : `-${element.name}`}
-				id={`${prefix}_${element.name}`}
+				name={prop.prefix ? `-${prop.prefix}.${prop.element.name}` : `-${prop.element.name}`}
+				id={`${prop.prefix}_${prop.element.name}`}
 				required={true}
-				handleOnChange={handleTypeSelect}
-				defaultValue={element.value}
+				handleOnChange={prop.handleTypeSelect}
+				defaultValue={prop.element.value}
 			>
-				{element.attribute.selectOption.map((value) => {
+				{prop.element.attribute.selectOption.map((value) => {
 					return (
-						<option key={prefix + element.name + value} value={value}>
+						<option key={prop.prefix + prop.element.name + value} value={value}>
 							{value}
 						</option>
 					);

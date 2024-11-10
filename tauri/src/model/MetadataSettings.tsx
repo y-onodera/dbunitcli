@@ -1,3 +1,21 @@
+export type Pattern = {
+    string: string
+    exclude?: string[]
+}
+export type TableJoin = {
+    left?: string
+    right?: string
+    column?: string[]
+    on?: string
+}
+export type Split = {
+    prefix?: string
+    tableName?: string
+    suffix?: string
+    breakKey?: string[]
+    filter?: string[]
+    limit?: string
+}
 export type MetadataSettingsBuilder = {
     settings: MetadataSettingBuilder[]
     commonSettings: MetadataSettingBuilder[]
@@ -9,7 +27,9 @@ export type MetadataSettingBuilder = {
     outerJoin?: TableJoin
     fullJoin?: TableJoin
     separate?: MetadataSettingBuilder[]
-    tableName?: string | TableName
+    prefix?: string
+    tableName?: string
+    suffix?: string
     split?: Split
     keys?: string[]
     string?: object
@@ -76,7 +96,9 @@ export class MetadataSetting {
     readonly innerJoin?: TableJoin
     readonly outerJoin?: TableJoin
     readonly fullJoin?: TableJoin
-    readonly tableName?: TableName
+    readonly prefix?: string
+    readonly tableName?: string
+    readonly suffix?: string
     readonly split?: Split
 
     constructor(builder: MetadataSettingBuilder) {
@@ -96,7 +118,9 @@ export class MetadataSetting {
         this.innerJoin = builder.innerJoin
         this.outerJoin = builder.outerJoin
         this.fullJoin = builder.fullJoin
-        this.tableName = toTableName(builder.tableName)
+        this.prefix = builder.prefix
+        this.tableName = builder.tableName
+        this.suffix = builder.suffix
         this.split = builder.split
     }
 
@@ -169,8 +193,9 @@ export class MetadataSetting {
 
     withSplit(isSplit: boolean): MetadataSetting {
         return this.with({
-            tableName: isSplit ? undefined : this.split ? { prefix: this.split.prefix, tableName: this.split.tableName, suffix: this.split.suffix } : { tableName: "" }
-            , split: isSplit ? this.tableName ? this.tableName : { tableName: "" } : undefined
+            tableName: isSplit ? undefined
+                : this.split ? this.split.tableName : ""
+            , split: isSplit ? this.tableName ? { tableName: this.tableName } : { tableName: "" } : undefined
         })
     }
 
@@ -184,10 +209,6 @@ export class MetadataSetting {
 
     removeSplitBreakKey(index: number): MetadataSetting {
         return this.replaceSplit({ breakKey: removeArray(this.split?.breakKey ?? [], index) })
-    }
-
-    replaceTableName(newVal: TableName): MetadataSetting {
-        return this.with({ tableName: { ...this.tableName, ...newVal } })
     }
 
     replaceKeys(newOne: string, index: number): MetadataSetting {
@@ -301,32 +322,6 @@ function replaceArray(array: string[], newOne: string, index: number): string[] 
 }
 function removeArray(array: string[], remove: number): string[] {
     return [...array].filter((_, index) => index !== remove)
-}
-function toTableName(from: string | TableName | undefined): TableName | undefined {
-    if (!from) {
-        return undefined
-    }
-    return typeof from === "string" ? { tableName: from } : from
-}
-export type Pattern = {
-    string: string
-    exclude?: string[]
-}
-export type TableJoin = {
-    left?: string
-    right?: string
-    column?: string[]
-    on?: string
-}
-export type TableName = {
-    prefix?: string
-    tableName?: string
-    suffix?: string
-}
-export type Split = TableName & {
-    breakKey?: string[]
-    filter?: string[]
-    limit?: string
 }
 export function newMetadataSetting(): MetadataSetting {
     return new MetadataSetting({} as MetadataSettingBuilder)

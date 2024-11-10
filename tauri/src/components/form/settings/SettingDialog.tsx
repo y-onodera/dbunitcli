@@ -100,14 +100,14 @@ export default function SettingDaialog(props: {
                         </>
                         :
                         <>
-                            <Text name="prefix" value={target.tableName?.prefix ?? ""}
-                                handleChange={newVal => setTarget(cur => cur.replaceTableName({ prefix: newVal.target.value }))}
+                            <Text name="prefix" value={target.prefix ?? ""}
+                                handleChange={newVal => setTarget(cur => cur.with({ prefix: newVal.target.value }))}
                             />
-                            <Text name="tableName" value={target.tableName?.tableName ?? ""}
-                                handleChange={newVal => setTarget(cur => cur.replaceTableName({ tableName: newVal.target.value }))}
+                            <Text name="tableName" value={target.tableName ?? ""}
+                                handleChange={newVal => setTarget(cur => cur.with({ tableName: newVal.target.value }))}
                             />
-                            <Text name="suffix" value={target.tableName?.suffix ?? ""}
-                                handleChange={newVal => setTarget(cur => cur.replaceTableName({ suffix: newVal.target.value }))}
+                            <Text name="suffix" value={target.suffix ?? ""}
+                                handleChange={newVal => setTarget(cur => cur.with({ suffix: newVal.target.value }))}
                             />
                         </>
                     }

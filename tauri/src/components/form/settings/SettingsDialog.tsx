@@ -7,13 +7,13 @@ import { ControllTextBox, InputLabel } from "../../element/Input";
 import SettingDaialog from "./SettingDialog";
 
 export default function SettingsDaialog(props: {
-	settingName: string
+	fileName: string
+	setFileName: (fileName: string) => void
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	useEffect(() => { dialogRef.current?.showModal() }, [])
-	const [fileName, setFileName] = useState(props.settingName);
 	const metaDataSettings = useMetadataSettings();
 	const setMetadataSettings = useSetMetadataSettings();
 	return (
@@ -40,12 +40,12 @@ export default function SettingsDaialog(props: {
 					<div className="grid grid-cols-5 pb-2">
 						<InputLabel id="fileNameLabel" name="name" required={false} wStyle="p-2.5 w=1/5" />
 						<ControllTextBox name="fileName" id="fileName" required={true} wStyle="col-start-2 col-span-4 mr-2"
-							value={fileName}
-							handleChange={ev => setFileName(ev.target.value)}
+							value={props.fileName}
+							handleChange={ev => props.setFileName(ev.target.value)}
 						/>
 					</div>
 					<div className="pb-2">
-						<BlueButton title="Save" handleClick={() => props.handleSave(fileName)} />
+						<BlueButton title="Save" handleClick={() => props.handleSave(props.fileName)} />
 						<WhiteButton title="Close" handleClick={props.handleDialogClose} />
 					</div>
 				</div>
