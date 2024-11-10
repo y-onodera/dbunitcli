@@ -29,7 +29,7 @@ public record Workspace(Path path, Options options, Resources resources) {
         parameters.setParameterize(this.options().parameterNames(CommandType.parameterize).toList());
         result.setParameterList(parameters);
         final ResourcesDto resources = new ResourcesDto();
-        resources.setDatasetSettings(this.settings());
+        resources.setDatasetSettings(this.metadataSettings());
         result.setResources(resources);
         return result;
     }
@@ -42,16 +42,16 @@ public record Workspace(Path path, Options options, Resources resources) {
         return this.options().parameterFiles(type);
     }
 
-    public List<String> settings() {
+    public List<String> metadataSettings() {
         return this.resources()
-                .setting()
+                .metadataSetting()
                 .stream()
                 .map(it -> it.getFileName().toString())
                 .toList();
     }
 
-    public String setting(final String name) {
-        return this.resources().setting(name);
+    public String metadataSetting(final String name) {
+        return this.resources().metadataSetting(name);
     }
 
     public static class Builder {

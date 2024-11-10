@@ -53,7 +53,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         }
     }
 
-    protected FromJsonTableSeparatorsBuilder configureSetting(final JsonObject setting) {
+    public FromJsonTableSeparatorsBuilder configureSetting(final JsonObject setting) {
         if (!setting.containsKey("settings")) {
             return this;
         }

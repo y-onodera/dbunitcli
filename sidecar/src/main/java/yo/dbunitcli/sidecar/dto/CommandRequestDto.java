@@ -5,7 +5,7 @@ import io.micronaut.serde.annotation.Serdeable;
 import java.util.Map;
 
 @Serdeable
-public class OptionDto {
+public class CommandRequestDto {
 
     private String name;
 

@@ -19,7 +19,7 @@ import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.CommandType;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
-import yo.dbunitcli.sidecar.dto.OptionDto;
+import yo.dbunitcli.sidecar.dto.CommandRequestDto;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,7 +55,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "copy", produces = MediaType.APPLICATION_JSON)
-    public String copy(@Body final OptionDto input) {
+    public String copy(@Body final CommandRequestDto input) {
         try {
             this.workspace.parameterFiles(this.getCommandType())
                     .filter(it -> it.toFile().getName().equals(input.getName() + ".txt"))
@@ -81,7 +81,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "delete", produces = MediaType.APPLICATION_JSON)
-    public String delete(@Body final OptionDto input) {
+    public String delete(@Body final CommandRequestDto input) {
         try {
             this.workspace.options().delete(this.getCommandType(), input.getName());
             return ObjectMapper
@@ -94,7 +94,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "rename", produces = MediaType.APPLICATION_JSON)
-    public String rename(@Body final OptionDto input) {
+    public String rename(@Body final CommandRequestDto input) {
         try {
             this.workspace
                     .options()
@@ -109,7 +109,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "load", produces = MediaType.APPLICATION_JSON)
-    public String load(@Body final OptionDto input) {
+    public String load(@Body final CommandRequestDto input) {
         return this.workspace.parameterFiles(this.getCommandType())
                 .filter(it -> it.toFile().getName().equals(input.getName() + ".txt"))
                 .findFirst()
@@ -158,7 +158,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
-    public String save(@Body final OptionDto body) {
+    public String save(@Body final CommandRequestDto body) {
         try {
             this.workspace.options().update(this.getCommandType()
                     , body.getName()
@@ -172,7 +172,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     @Post(uri = "exec", produces = MediaType.TEXT_PLAIN)
-    public String exec(@Body final OptionDto body) {
+    public String exec(@Body final CommandRequestDto body) {
         try {
             AbstractCommandController.LOGGER.info(System.getProperty(FileResources.PROPERTY_WORKSPACE));
             final OPTION options = this.getCommand()
