@@ -23,6 +23,8 @@ import yo.dbunitcli.sidecar.dto.CommandRequestDto;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractCommandController<DTO extends CommandDto, OPTION extends CommandLineOption<DTO>, T extends Command<DTO, OPTION>> {
@@ -30,6 +32,29 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCommandController.class);
 
     private final Workspace workspace;
+
+    private static String[] readParameters(final Path target) throws IOException {
+        return Files.readAllLines(target).toArray(new String[0]);
+    }
+
+    private static String[] requestToArgs(final Map<String, String> input) {
+        return input.entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .toArray(String[]::new);
+    }
+
+    private static String toJson(final Map<String, Object> object) throws IOException {
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(object);
+    }
+
+    private static String toJson(final List<String> object) throws IOException {
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(object);
+    }
 
     public AbstractCommandController(final Workspace workspace) {
         this.workspace = workspace;
@@ -45,9 +70,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                             , this.getCommand()
                                     .parseOption(new String[]{})
                                     .toArgs(false));
-            return ObjectMapper
-                    .getDefault()
-                    .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
+            return this.parameterNames();
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -66,14 +89,12 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                                     .options()
                                     .add(this.getCommandType()
                                             , target.getFileName().toString().replaceAll(".txt", "")
-                                            , Files.readAllLines(target).toArray(new String[0]));
+                                            , readParameters(target));
                         } catch (final IOException ex) {
                             throw new RuntimeException(ex);
                         }
                     });
-            return ObjectMapper
-                    .getDefault()
-                    .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
+            return this.parameterNames();
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -84,9 +105,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     public String delete(@Body final CommandRequestDto input) {
         try {
             this.workspace.options().delete(this.getCommandType(), input.getName());
-            return ObjectMapper
-                    .getDefault()
-                    .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
+            return this.parameterNames();
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -99,9 +118,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
             this.workspace
                     .options()
                     .rename(this.getCommandType(), input.getOldName(), input.getNewName());
-            return ObjectMapper
-                    .getDefault()
-                    .writeValueAsString(this.workspace.parameterNames(this.getCommandType()).toList());
+            return this.parameterNames();
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -115,13 +132,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                 .findFirst()
                 .map(target -> {
                     try {
-                        return ObjectMapper
-                                .getDefault()
-                                .writeValueAsString(this.getCommand()
-                                        .parseOption(Files.readAllLines(target)
-                                                .toArray(new String[0]))
-                                        .toCommandLineArgs()
-                                        .toMap());
+                        return toJson(this.argsToMap(readParameters(target)));
                     } catch (final IOException th) {
                         AbstractCommandController.LOGGER.error("cause:", th);
                         throw new ApplicationException(th);
@@ -133,12 +144,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     @Get(uri = "reset", produces = MediaType.APPLICATION_JSON)
     public String reset() {
         try {
-            return ObjectMapper
-                    .getDefault()
-                    .writeValueAsString(this.getCommand()
-                            .parseOption(new String[]{})
-                            .toCommandLineArgs()
-                            .toMap());
+            return toJson(this.argsToMap(new String[]{}));
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -148,9 +154,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     @Post(uri = "refresh", produces = MediaType.APPLICATION_JSON)
     public String refresh(@Body final Map<String, String> input) {
         try {
-            return ObjectMapper
-                    .getDefault()
-                    .writeValueAsString(this.requestToMap(input));
+            return toJson(this.requestToMap(input));
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -162,7 +166,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
         try {
             this.workspace.options().update(this.getCommandType()
                     , body.getName()
-                    , this.getCommand().parseOption(this.requestToArgs(body.getInput()))
+                    , this.getCommand().parseOption(requestToArgs(body.getInput()))
                             .toArgs(false));
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);
@@ -177,7 +181,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
             AbstractCommandController.LOGGER.info(System.getProperty(FileResources.PROPERTY_WORKSPACE));
             final OPTION options = this.getCommand()
                     .parseOption(body.getName()
-                            , this.requestToArgs(body.getInput())
+                            , requestToArgs(body.getInput())
                             , Parameter.none());
             this.getCommand().exec(options);
             return this.resultDir(options);
@@ -201,18 +205,19 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
 
     abstract protected CommandType getCommandType();
 
-    private Map<String, Object> requestToMap(final Map<String, String> input) {
-        return this.getCommand()
-                .parseOption(this.requestToArgs(input))
-                .toCommandLineArgs()
-                .toMap();
+    private String parameterNames() throws IOException {
+        return toJson(this.workspace.parameterNames(this.getCommandType()).toList());
     }
 
-    private String[] requestToArgs(final Map<String, String> input) {
-        return input.entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .toArray(String[]::new);
+    private Map<String, Object> requestToMap(final Map<String, String> input) {
+        return this.argsToMap(requestToArgs(input));
+    }
+
+    private Map<String, Object> argsToMap(final String[] args) {
+        return this.getCommand()
+                .parseOption(args)
+                .toCommandLineArgs()
+                .toMap();
     }
 
 }
