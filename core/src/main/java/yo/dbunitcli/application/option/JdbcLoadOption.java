@@ -23,11 +23,10 @@ public record JdbcLoadOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
-        result.put("-useJdbcMetaData", this.useJdbcMetaData);
-        result.addComponent("jdbc", this.jdbc.toCommandLineArgs());
-        return result;
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder(this.getPrefix())
+                .put("-useJdbcMetaData", this.useJdbcMetaData)
+                .addComponent("jdbc", this.jdbc.toCommandLineArgs());
     }
 
     @Override

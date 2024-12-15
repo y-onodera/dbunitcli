@@ -16,11 +16,10 @@ public record RegexOption(String prefix, String regHeaderSplit,
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
-        result.put("-regDataSplit", this.regDataSplit);
-        result.put("-regHeaderSplit", this.regHeaderSplit);
-        return result;
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder(this.getPrefix())
+                .put("-regDataSplit", this.regDataSplit)
+                .put("-regHeaderSplit", this.regHeaderSplit);
     }
 
     @Override

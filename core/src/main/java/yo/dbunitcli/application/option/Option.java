@@ -13,7 +13,11 @@ public interface Option {
         return "";
     }
 
-    CommandLineArgs toCommandLineArgs();
+    default CommandLineArgs toCommandLineArgs() {
+        return this.toCommandLineArgsBuilder().build();
+    }
+
+    CommandLineArgsBuilder toCommandLineArgsBuilder();
 
     enum ParamType {
         TEXT, ENUM, FLG, FILE, DIR, FILE_OR_DIR,
@@ -49,22 +53,7 @@ public interface Option {
         }
     }
 
-    class CommandLineArgs {
-
-        private final Map<String, Arg> options = new LinkedHashMap<>();
-
-        private final Map<String, CommandLineArgs> subComponents = new LinkedHashMap<>();
-
-        private final String prefix;
-
-        public CommandLineArgs() {
-            this("");
-        }
-
-        public CommandLineArgs(final String prefix) {
-            this.prefix = prefix;
-        }
-
+    record CommandLineArgs(String prefix, Map<String, Arg> options, Map<String, CommandLineArgs> subComponents) {
         public Map<String, Object> toMap() {
             final Map<String, Object> result = new LinkedHashMap<>();
             result.put("prefix", this.prefix);
@@ -115,90 +104,8 @@ public interface Option {
                     .orElseGet(() -> this.getFromOptions(key));
         }
 
-        public void putAll(final CommandLineArgs other) {
-            other.options.keySet()
-                    .forEach(it -> {
-                        final Arg entry = other.getArg(it);
-                        this.put(it, entry.value, entry.attribute());
-                    });
-            other.subComponents.forEach(this::addComponent);
-        }
-
-        public void addComponent(final String name, final CommandLineArgs subComponent) {
-            this.subComponents.put(name, subComponent);
-        }
-
-        public void put(final String key, final char value) {
-            this.put(key, value, false);
-        }
-
-        public void put(final String key, final boolean value) {
-            this.put(key, Boolean.toString(value), new Attribute(ParamType.FLG, false));
-        }
-
-        public void put(final String key, final char value, final boolean required) {
-            this.put(key, String.valueOf(value), new Attribute(ParamType.TEXT, required));
-        }
-
-        public void put(final String key, final String value) {
-            this.put(key, value, false);
-        }
-
-        public void put(final String key, final String value, final boolean required) {
-            this.put(key, value, new Attribute(ParamType.TEXT, required));
-        }
-
-        public void putFile(final String key, final File value) {
-            this.putFile(key, value, false);
-        }
-
-        public void putFile(final String key, final File value, final boolean required) {
-            this.put(key, value == null ? "" : this.getSlashSeparatorPath(value), new Attribute(ParamType.FILE, required));
-        }
-
-        public void putDir(final String key, final File value) {
-            this.putDir(key, value, false);
-        }
-
-        public void putDir(final String key, final File value, final boolean required) {
-            this.put(key, value == null ? "" : this.getSlashSeparatorPath(value), new Attribute(ParamType.DIR, required));
-        }
-
-        public void putFileOrDir(final String key, final File value, final boolean required) {
-            this.put(key, value == null ? "" : this.getSlashSeparatorPath(value), new Attribute(ParamType.FILE_OR_DIR, required));
-        }
-
-        public <T extends Enum<?>> void put(final String key, final T value, final Class<T> type) {
-            this.put(key, value, type, false);
-        }
-
-        public <T extends Enum<?>> void put(final String key, final T value, final Class<T> type, final boolean required) {
-            this.put(key, value, type, Filter.any(), required);
-        }
-
-        public <T extends Enum<?>> void put(final String key, final T value, final Class<T> type, final Filter<T> filter, final boolean required) {
-            this.put(key, value == null ? "" : value.toString(), new Attribute(ParamType.ENUM,
-                    Arrays.stream(type.getEnumConstants())
-                            .filter(filter)
-                            .map(Object::toString)
-                            .collect(Collectors.toCollection(ArrayList::new))
-                    , required)
-            );
-        }
-
-        public void put(final String key, final String value, final Attribute type) {
-            this.options.put(this.withPrefix(key), new Arg(Optional.ofNullable(value).orElse(""), type));
-        }
-
         public boolean hasValue(final String key) {
             return !Optional.ofNullable(this.get(key)).orElse("").isEmpty();
-        }
-
-        private String withPrefix(final String key) {
-            if (Optional.ofNullable(this.prefix).orElse("").isEmpty() || key.startsWith("-" + this.prefix + ".")) {
-                return key;
-            }
-            return key.replace("-", "-" + this.prefix + ".");
         }
 
         private Arg getArgFromOptions(final String key) {
@@ -219,13 +126,139 @@ public interface Option {
             return "";
         }
 
+        private String withPrefix(final String key) {
+            if (Optional.ofNullable(this.prefix).orElse("").isEmpty() || key.startsWith("-" + this.prefix + ".")) {
+                return key;
+            }
+            return key.replace("-", "-" + this.prefix + ".");
+        }
+
+    }
+
+    class CommandLineArgsBuilder {
+
+        private final Map<String, Arg> options = new LinkedHashMap<>();
+
+        private final Map<String, CommandLineArgs> subComponents = new LinkedHashMap<>();
+
+        private final String prefix;
+
+        public CommandLineArgsBuilder() {
+            this("");
+        }
+
+        public CommandLineArgsBuilder(final String prefix) {
+            this.prefix = prefix;
+        }
+
+        public CommandLineArgs build() {
+            return new CommandLineArgs(this.prefix, new LinkedHashMap<>(this.options), new LinkedHashMap<>(this.subComponents));
+        }
+
+        public void putAll(final CommandLineArgs other) {
+            other.options.keySet()
+                    .forEach(it -> {
+                        final Arg entry = other.getArg(it);
+                        this.put(it, entry.value, entry.attribute());
+                    });
+            other.subComponents.forEach(this::addComponent);
+        }
+
+        public CommandLineArgsBuilder addComponent(final String name, final CommandLineArgs subComponent) {
+            this.subComponents.put(name, subComponent);
+            return this;
+        }
+
+        public CommandLineArgsBuilder put(final String key, final char value) {
+            this.put(key, value, false);
+            return this;
+        }
+
+        public CommandLineArgsBuilder put(final String key, final boolean value) {
+            this.put(key, Boolean.toString(value), new Attribute(ParamType.FLG, false));
+            return this;
+        }
+
+        public CommandLineArgsBuilder put(final String key, final char value, final boolean required) {
+            this.put(key, String.valueOf(value), new Attribute(ParamType.TEXT, required));
+            return this;
+        }
+
+        public CommandLineArgsBuilder put(final String key, final String value) {
+            this.put(key, value, false);
+            return this;
+        }
+
+        public CommandLineArgsBuilder put(final String key, final String value, final boolean required) {
+            this.put(key, value, new Attribute(ParamType.TEXT, required));
+            return this;
+        }
+
+        public CommandLineArgsBuilder putFile(final String key, final File value) {
+            this.putFile(key, value, false);
+            return this;
+        }
+
+        public CommandLineArgsBuilder putFile(final String key, final File value, final boolean required) {
+            this.put(key, value == null ? "" : this.getSlashSeparatorPath(value), new Attribute(ParamType.FILE, required));
+            return this;
+        }
+
+        public CommandLineArgsBuilder putDir(final String key, final File value) {
+            this.putDir(key, value, false);
+            return this;
+        }
+
+        public CommandLineArgsBuilder putDir(final String key, final File value, final boolean required) {
+            this.put(key, value == null ? "" : this.getSlashSeparatorPath(value), new Attribute(ParamType.DIR, required));
+            return this;
+        }
+
+        public CommandLineArgsBuilder putFileOrDir(final String key, final File value, final boolean required) {
+            this.put(key, value == null ? "" : this.getSlashSeparatorPath(value), new Attribute(ParamType.FILE_OR_DIR, required));
+            return this;
+        }
+
+        public <T extends Enum<?>> CommandLineArgsBuilder put(final String key, final T value, final Class<T> type) {
+            this.put(key, value, type, false);
+            return this;
+        }
+
+        public <T extends Enum<?>> CommandLineArgsBuilder put(final String key, final T value, final Class<T> type, final boolean required) {
+            this.put(key, value, type, Filter.any(), required);
+            return this;
+        }
+
+        public <T extends Enum<?>> CommandLineArgsBuilder put(final String key, final T value, final Class<T> type, final Filter<T> filter, final boolean required) {
+            this.put(key, value == null ? "" : value.toString(), new Attribute(ParamType.ENUM,
+                    Arrays.stream(type.getEnumConstants())
+                            .filter(filter)
+                            .map(Object::toString)
+                            .collect(Collectors.toCollection(ArrayList::new))
+                    , required)
+            );
+            return this;
+        }
+
+        public CommandLineArgsBuilder put(final String key, final String value, final Attribute type) {
+            this.options.put(this.withPrefix(key), new Arg(Optional.ofNullable(value).orElse(""), type));
+            return this;
+        }
+
+        public CommandLineArgsBuilder remove(final String key) {
+            this.options.remove(key);
+            return this;
+        }
+
         private String getSlashSeparatorPath(final File value) {
             return value.getPath().replaceAll("\\\\", "/");
         }
 
-        public CommandLineArgs remove(final String key) {
-            this.options.remove(key);
-            return this;
+        private String withPrefix(final String key) {
+            if (Optional.ofNullable(this.prefix).orElse("").isEmpty() || key.startsWith("-" + this.prefix + ".")) {
+                return key;
+            }
+            return key.replace("-", "-" + this.prefix + ".");
         }
     }
 

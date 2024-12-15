@@ -45,21 +45,21 @@ public record DataSetConverterOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        final CommandLineArgsBuilder result = new CommandLineArgsBuilder(this.getPrefix());
         result.put("-resultType", this.resultType, ResultType.class);
-        if (!result.hasValue("-resultType")) {
+        if (this.resultType == null) {
             return result;
         }
-        final DataSourceType type = DataSourceType.valueOf(result.get("-resultType"));
+        final DataSourceType type = DataSourceType.valueOf(this.resultType.name());
         if (type == DataSourceType.table) {
             result.put("-op", this.operation == null ? DBConverter.Operation.CLEAN_INSERT : this.operation
-                    , DBConverter.Operation.class);
-            result.addComponent("jdbc", this.jdbcOption.toCommandLineArgs());
+                            , DBConverter.Operation.class)
+                    .addComponent("jdbc", this.jdbcOption.toCommandLineArgs());
         } else {
-            result.putDir("-result", this.resultDir);
-            result.put("-resultPath", this.resultPath);
-            result.put("-exportEmptyTable", this.exportEmptyTable);
+            result.putDir("-result", this.resultDir)
+                    .put("-resultPath", this.resultPath)
+                    .put("-exportEmptyTable", this.exportEmptyTable);
             if (type == DataSourceType.csv) {
                 result.put("-outputEncoding", this.outputEncoding);
             } else {

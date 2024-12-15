@@ -29,11 +29,10 @@ public record ConvertOption(Parameter parameter, ResultOption result,
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs();
-        result.addComponent("srcData", this.srcData.toCommandLineArgs());
-        result.addComponent("convertResult", this.result().convertResult().toCommandLineArgs());
-        return result;
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder()
+                .addComponent("srcData", this.srcData.toCommandLineArgs())
+                .addComponent("convertResult", this.result().convertResult().toCommandLineArgs());
     }
 
     public void convertDataset() {

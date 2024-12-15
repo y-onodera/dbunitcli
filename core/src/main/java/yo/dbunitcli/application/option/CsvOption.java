@@ -33,17 +33,16 @@ public record CsvOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
-        result.put("-delimiter", String.valueOf(this.delimiter)
-                .replace("\b", "\\b")
-                .replace("\t", "\\t")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\f", "\\f")
-        );
-        result.put("-ignoreQuoted", this.ignoreQuoted);
-        return result;
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder(this.getPrefix())
+                .put("-delimiter", String.valueOf(this.delimiter)
+                        .replace("\b", "\\b")
+                        .replace("\t", "\\t")
+                        .replace("\n", "\\n")
+                        .replace("\r", "\\r")
+                        .replace("\f", "\\f")
+                )
+                .put("-ignoreQuoted", this.ignoreQuoted);
     }
 
     @Override

@@ -18,10 +18,9 @@ public record EncodingOption(String prefix, String encoding) implements Comparab
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
-        result.put("-encoding", this.encoding);
-        return result;
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder(this.getPrefix())
+                .put("-encoding", this.encoding);
     }
 
     @Override

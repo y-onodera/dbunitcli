@@ -104,38 +104,38 @@ public record GenerateOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs();
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        final CommandLineArgsBuilder result = new CommandLineArgsBuilder();
+        if (this.generateType == null) {
+            return result;
+        }
         result.put("-generateType", this.generateType, GenerateType.class);
-        final CommandLineArgs srcComponent = this.srcData.toCommandLineArgs();
-        if (result.hasValue("-generateType")) {
-            final GenerateType resultGenerateType = GenerateType.valueOf(result.get("-generateType"));
-            if (!resultGenerateType.isFixedTemplate()) {
-                result.put("-unit", this.unit, ParameterUnit.class);
-                result.putFile("-template", this.template, true);
+        if (!this.generateType.isFixedTemplate()) {
+            result.put("-unit", this.unit, ParameterUnit.class)
+                    .putFile("-template", this.template, true);
+        }
+        final CommandLineArgsBuilder srcComponent = this.srcData.toCommandLineArgsBuilder();
+        switch (this.generateType) {
+            case sql -> {
+                result.put("-commit", Boolean.toString(this.commit))
+                        .put("-op", this.operation, DBConverter.Operation.class)
+                        .put("-sqlFilePrefix", this.sqlFilePrefix)
+                        .put("-sqlFileSuffix", this.sqlFileSuffix);
+                srcComponent.remove("-src.useJdbcMetaData");
             }
-            switch (resultGenerateType) {
-                case sql -> {
-                    result.put("-commit", Boolean.toString(this.commit));
-                    result.put("-op", this.operation, DBConverter.Operation.class);
-                    result.put("-sqlFilePrefix", this.sqlFilePrefix);
-                    result.put("-sqlFileSuffix", this.sqlFileSuffix);
-                    srcComponent.remove("-src.useJdbcMetaData");
-                }
-                case settings -> {
-                    srcComponent.remove("-src.useJdbcMetaData");
-                    srcComponent.remove("-src.loadData");
-                }
+            case settings -> {
+                srcComponent.remove("-src.useJdbcMetaData")
+                        .remove("-src.loadData");
             }
-            result.addComponent("srcData", srcComponent);
-            if (!resultGenerateType.isFixedTemplate()) {
-                result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
-            }
-            result.putDir("-result", this.resultDir);
-            result.put("-resultPath", this.resultPath);
-            if (!(resultGenerateType == GenerateType.xlsx || resultGenerateType == GenerateType.xls)) {
-                result.put("-outputEncoding", this.outputEncoding);
-            }
+        }
+        result.addComponent("srcData", srcComponent.build());
+        if (!this.generateType.isFixedTemplate()) {
+            result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
+        }
+        result.putDir("-result", this.resultDir)
+                .put("-resultPath", this.resultPath);
+        if (!(this.generateType.isAny(GenerateType.xlsx, GenerateType.xls))) {
+            result.put("-outputEncoding", this.outputEncoding);
         }
         return result;
     }
@@ -239,6 +239,10 @@ public record GenerateOption(
                         .createSTGroup("sql/sqlTemplate.stg");
             }
         };
+
+        public boolean isAny(final GenerateType... expects) {
+            return Stream.of(expects).anyMatch(it -> it == this);
+        }
 
         protected STGroup getStGroup() {
             return null;

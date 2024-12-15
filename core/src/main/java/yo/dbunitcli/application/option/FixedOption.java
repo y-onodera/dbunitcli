@@ -18,10 +18,9 @@ public record FixedOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
-        result.put("-fixedLength", this.fixedLength);
-        return result;
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder(this.getPrefix())
+                .put("-fixedLength", this.fixedLength);
     }
 
     @Override

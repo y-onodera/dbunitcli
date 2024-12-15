@@ -64,23 +64,22 @@ public record ImageCompareOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
-        result.put("-threshold", this.threshold);
-        result.put("-pixelToleranceLevel", this.pixelToleranceLevel);
-        result.put("-allowingPercentOfDifferentPixels", this.allowingPercentOfDifferentPixels);
-        result.put("-rectangleLineWidth", this.rectangleLineWidth);
-        result.put("-minimalRectangleSize", this.minimalRectangleSize);
-        result.put("-maximalRectangleCount", this.maximalRectangleCount);
-        result.put("-excludedAreas", this.excludedAreas);
-        result.put("-drawExcludedRectangles", this.drawExcludedRectangles);
-        result.put("-fillExcludedRectangles", this.fillExcludedRectangles);
-        result.put("-percentOpacityExcludedRectangles", this.percentOpacityExcludedRectangles);
-        result.put("-excludedRectangleColor", this.excludedRectangleColor);
-        result.put("-fillDifferenceRectangles", this.fillDifferenceRectangles);
-        result.put("-percentOpacityDifferenceRectangles", this.percentOpacityDifferenceRectangles);
-        result.put("-differenceRectangleColor", this.differenceRectangleColor);
-        return result;
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder(this.getPrefix())
+                .put("-threshold", this.threshold)
+                .put("-pixelToleranceLevel", this.pixelToleranceLevel)
+                .put("-allowingPercentOfDifferentPixels", this.allowingPercentOfDifferentPixels)
+                .put("-rectangleLineWidth", this.rectangleLineWidth)
+                .put("-minimalRectangleSize", this.minimalRectangleSize)
+                .put("-maximalRectangleCount", this.maximalRectangleCount)
+                .put("-excludedAreas", this.excludedAreas)
+                .put("-drawExcludedRectangles", this.drawExcludedRectangles)
+                .put("-fillExcludedRectangles", this.fillExcludedRectangles)
+                .put("-percentOpacityExcludedRectangles", this.percentOpacityExcludedRectangles)
+                .put("-excludedRectangleColor", this.excludedRectangleColor)
+                .put("-fillDifferenceRectangles", this.fillDifferenceRectangles)
+                .put("-percentOpacityDifferenceRectangles", this.percentOpacityDifferenceRectangles)
+                .put("-differenceRectangleColor", this.differenceRectangleColor);
     }
 
     public ImageCompareBuilder createFactoryOf(final CompareOption.Type targetType) {

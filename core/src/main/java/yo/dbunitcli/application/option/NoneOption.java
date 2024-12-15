@@ -9,7 +9,7 @@ public record NoneOption() implements ComparableDataSetParamOption {
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        return new CommandLineArgs(this.getPrefix());
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder(this.getPrefix());
     }
 }

@@ -77,22 +77,23 @@ public record RunOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs();
-        result.addComponent("srcData", this.srcData.toCommandLineArgs()
-                .remove("-src.srcType")
-                .remove("-src.extension")
-                .remove("-src.includeMetaData")
-                .remove("-src.loadData")
-        );
-        result.put("-scriptType", this.scriptType, ScriptType.class);
-        if (result.get("-scriptType").equals(ScriptType.sql.name())) {
-            result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
-            result.addComponent("jdbcOption", this.jdbcOption.toCommandLineArgs());
-        } else if (result.get("-scriptType").equals(ScriptType.ant.name())) {
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        final CommandLineArgsBuilder result = new CommandLineArgsBuilder()
+                .addComponent("srcData", this.srcData.toCommandLineArgsBuilder()
+                        .remove("-src.srcType")
+                        .remove("-src.extension")
+                        .remove("-src.includeMetaData")
+                        .remove("-src.loadData")
+                        .build()
+                )
+                .put("-scriptType", this.scriptType, ScriptType.class);
+        if (this.scriptType == ScriptType.sql) {
+            result.addComponent("templateOption", this.templateOption.toCommandLineArgs())
+                    .addComponent("jdbcOption", this.jdbcOption.toCommandLineArgs());
+        } else if (this.scriptType == ScriptType.ant) {
             result.putAll(this.antOption.toCommandLineArgs());
         }
-        if (!result.get("-scriptType").equals(ScriptType.sql.name())) {
+        if (this.scriptType != ScriptType.sql) {
             result.put("-baseDir", this.baseDir);
         }
         return result;

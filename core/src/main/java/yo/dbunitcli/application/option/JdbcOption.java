@@ -38,15 +38,12 @@ public record JdbcOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
-        result.putFile("-jdbcProperties", this.jdbcProperties);
-        if (Optional.ofNullable(result.get("-jdbcProperties")).orElse("").isEmpty()) {
-            result.put("-jdbcUrl", this.jdbcUrl);
-            result.put("-jdbcUser", this.jdbcUser);
-            result.put("-jdbcPass", this.jdbcPass);
-        }
-        return result;
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder(this.getPrefix())
+                .putFile("-jdbcProperties", this.jdbcProperties)
+                .put("-jdbcUrl", this.jdbcUrl)
+                .put("-jdbcUser", this.jdbcUser)
+                .put("-jdbcPass", this.jdbcPass);
     }
 
     public DatabaseConnectionLoader getDatabaseConnectionLoader() {

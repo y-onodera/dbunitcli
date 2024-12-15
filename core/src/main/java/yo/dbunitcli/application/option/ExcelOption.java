@@ -22,10 +22,9 @@ public record ExcelOption(String prefix, File xlsxSchemaSource) implements Compa
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
-        result.putFile("-xlsxSchema", this.xlsxSchemaSource);
-        return result;
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder(this.getPrefix())
+                .putFile("-xlsxSchema", this.xlsxSchemaSource);
     }
 
     @Override

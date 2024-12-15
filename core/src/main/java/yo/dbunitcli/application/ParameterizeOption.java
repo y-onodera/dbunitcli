@@ -88,17 +88,16 @@ public record ParameterizeOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs();
-        result.addComponent("paramData", this.paramData.toCommandLineArgs());
-        result.put("-unit", this.unit, ParameterUnit.class);
-        result.put("-parameterize", this.parameterize);
-        result.put("-ignoreFail", this.ignoreFail);
-        result.put("-cmd", this.cmd);
-        result.put("-cmdParam", this.cmdParam);
-        result.putFile("-template", this.template, true);
-        result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
-        return result;
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder()
+                .addComponent("paramData", this.paramData.toCommandLineArgs())
+                .put("-unit", this.unit, ParameterUnit.class)
+                .put("-parameterize", this.parameterize)
+                .put("-ignoreFail", this.ignoreFail)
+                .put("-cmd", this.cmd)
+                .put("-cmdParam", this.cmdParam)
+                .putFile("-template", this.template, true)
+                .addComponent("templateOption", this.templateOption.toCommandLineArgs());
     }
 
     public Stream<Parameter> loadParams() {

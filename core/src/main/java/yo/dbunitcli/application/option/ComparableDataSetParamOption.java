@@ -21,11 +21,11 @@ public interface ComparableDataSetParamOption extends Option {
         }
 
         @Override
-        public CommandLineArgs toCommandLineArgs() {
-            CommandLineArgs result = null;
+        public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+            CommandLineArgsBuilder result = null;
             for (final ComparableDataSetParamOption delegate : this.leaf) {
                 if (result == null) {
-                    result = delegate.toCommandLineArgs();
+                    result = delegate.toCommandLineArgsBuilder();
                 } else if (delegate instanceof TemplateRenderOption) {
                     result.addComponent("templateRender", delegate.toCommandLineArgs());
                 } else {

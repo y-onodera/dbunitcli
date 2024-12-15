@@ -109,26 +109,26 @@ public record CompareOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs();
-        result.put("-targetType", this.targetType, this.targetType.getDeclaringClass());
-        if (Type.valueOf(result.get("-targetType")).isAny(Type.pdf, Type.image)) {
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        final CommandLineArgsBuilder result = new CommandLineArgsBuilder()
+                .put("-targetType", this.targetType, this.targetType.getDeclaringClass());
+        if (this.targetType.isAny(Type.pdf, Type.image)) {
             result.addComponent("imageOption", this.imageOption.toCommandLineArgs());
         }
-        result.putFile("-setting", this.setting == null ? null : FileResources.searchInOrderWorkspace(this.setting));
-        result.put("-settingEncoding", this.settingEncoding);
-        result.addComponent("newData", this.newData.toCommandLineArgs());
-        result.addComponent("oldData", this.oldData.toCommandLineArgs());
-        final CommandLineArgs resultArgs = this.result().convertResult().toCommandLineArgs();
-        resultArgs.put("-resultType", this.result().convertResult().resultType()
-                , ResultType.class, Filter.exclude(ResultType.table), true);
-        result.addComponent("convertResult", resultArgs);
-        final CommandLineArgs expectArgs = this.expectData.toCommandLineArgs();
-        expectArgs.put("-srcType", this.expectData.srcType(), DataSourceType.class
-                , Filter.include(DataSourceType.csv, DataSourceType.csvq, DataSourceType.xls, DataSourceType.xlsx, DataSourceType.sql, DataSourceType.none)
-                , false);
-        result.addComponent("expectData", expectArgs);
-        return result;
+        return result
+                .putFile("-setting", this.setting == null ? null : FileResources.searchInOrderWorkspace(this.setting))
+                .put("-settingEncoding", this.settingEncoding)
+                .addComponent("newData", this.newData.toCommandLineArgs())
+                .addComponent("oldData", this.oldData.toCommandLineArgs())
+                .addComponent("convertResult", this.result().convertResult().toCommandLineArgsBuilder()
+                        .put("-resultType", this.result().convertResult().resultType()
+                                , ResultType.class, Filter.exclude(ResultType.table), true)
+                        .build())
+                .addComponent("expectData", this.expectData.toCommandLineArgsBuilder()
+                        .put("-srcType", this.expectData.srcType(), DataSourceType.class
+                                , Filter.include(DataSourceType.csv, DataSourceType.csvq, DataSourceType.xls, DataSourceType.xlsx, DataSourceType.sql, DataSourceType.none)
+                                , false)
+                        .build());
     }
 
     public boolean compare() {

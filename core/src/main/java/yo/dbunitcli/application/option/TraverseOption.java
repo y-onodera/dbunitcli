@@ -25,12 +25,11 @@ public record TraverseOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
-        result.put("-recursive", this.recursive);
-        result.put("-regInclude", this.regInclude);
-        result.put("-regExclude", this.regExclude);
-        return result;
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder(this.getPrefix())
+                .put("-recursive", this.recursive)
+                .put("-regInclude", this.regInclude)
+                .put("-regExclude", this.regExclude);
     }
 
     @Override

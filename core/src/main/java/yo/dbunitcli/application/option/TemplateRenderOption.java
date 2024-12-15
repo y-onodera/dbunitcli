@@ -35,14 +35,13 @@ public record TemplateRenderOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
-        result.put("-encoding", this.encoding);
-        result.putFile("-templateGroup", this.templateGroup);
-        result.put("-templateParameterAttribute", this.templateParameterAttribute);
-        result.put("-templateVarStart", this.templateVarStart);
-        result.put("-templateVarStop", this.templateVarStop);
-        return result;
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        return new CommandLineArgsBuilder(this.getPrefix())
+                .put("-encoding", this.encoding)
+                .putFile("-templateGroup", this.templateGroup)
+                .put("-templateParameterAttribute", this.templateParameterAttribute)
+                .put("-templateVarStart", this.templateVarStart)
+                .put("-templateVarStop", this.templateVarStop);
     }
 
     @Override

@@ -59,33 +59,27 @@ public record DataSetLoadOption(
     }
 
     @Override
-    public CommandLineArgs toCommandLineArgs() {
-        final CommandLineArgs result = new CommandLineArgs(this.getPrefix());
+    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
+        final CommandLineArgsBuilder result = new CommandLineArgsBuilder(this.getPrefix());
         result.put("-srcType", this.srcType, DataSourceType.class
                 , this.enableSrcTypeNone ? Filter.any() : Filter.exclude(DataSourceType.none), false);
-        if (Strings.isEmpty(result.get("-srcType"))
-                || DataSourceType.valueOf(result.get("-srcType")) == DataSourceType.none) {
+        if (this.srcType == null || this.srcType == DataSourceType.none) {
             return result;
         }
         result.putFileOrDir("-src", this.src, true);
-        try {
-            if (this.dataSetParam == null) {
-                final DataSourceType type = DataSourceType.valueOf(result.get("-srcType"));
-                final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory()
-                        .create(this.getPrefix(), type, new DataSetLoadDto());
-                result.putAll(option.toCommandLineArgs());
-            } else {
-                result.putAll(this.dataSetParam.toCommandLineArgs());
-            }
-        } catch (final Throwable ignored) {
+        if (this.dataSetParam == null) {
+            final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory()
+                    .create(this.getPrefix(), this.srcType, new DataSetLoadDto());
+            result.putAll(option.toCommandLineArgs());
+        } else {
+            result.putAll(this.dataSetParam.toCommandLineArgs());
         }
-        result.put("-regTableInclude", this.regTableInclude);
-        result.put("-regTableExclude", this.regTableExclude);
-        result.put("-loadData", this.loadData);
-        result.put("-includeMetaData", this.includeMetaData);
-        result.putFile("-setting", this.setting == null ? null : FileResources.searchInOrderWorkspace(this.setting));
-        result.put("-settingEncoding", this.settingEncoding);
-        return result;
+        return result.put("-regTableInclude", this.regTableInclude)
+                .put("-regTableExclude", this.regTableExclude)
+                .put("-loadData", this.loadData)
+                .put("-includeMetaData", this.includeMetaData)
+                .putFile("-setting", this.setting == null ? null : FileResources.searchInOrderWorkspace(this.setting))
+                .put("-settingEncoding", this.settingEncoding);
     }
 
     public ComparableDataSetParam.Builder getParam() {
