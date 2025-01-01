@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 public record GenerateOption(
         Parameter parameter
-        , File resultDir
+        , String resultDir
         , String resultPath
         , GenerateType generateType
         , ParameterUnit unit
@@ -28,7 +28,7 @@ public record GenerateOption(
         , String sqlFilePrefix
         , String sqlFileSuffix
         , boolean commit
-        , File template
+        , String template
         , String outputEncoding
         , DataSetLoadOption srcData
         , TemplateRenderOption templateOption
@@ -49,7 +49,7 @@ public record GenerateOption(
 
     public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
         this(param
-                , FileResources.resultDir(dto.getResultDir())
+                , dto.getResultDir()
                 , Optional.ofNullable(dto.getResultPath())
                         .filter(it -> !it.isEmpty())
                         .orElse(resultFile)
@@ -61,7 +61,7 @@ public record GenerateOption(
                 , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
                 , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
                 , !Strings.isNotEmpty(dto.getCommit()) || Boolean.parseBoolean(dto.getCommit())
-                , Strings.isNotEmpty(dto.getTemplate()) ? FileResources.searchInOrderWorkspace(dto.getTemplate()) : null
+                , dto.getTemplate()
                 , Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8"
                 , new DataSetLoadOption("src", dto.getSrcData())
                 , new TemplateRenderOption("template", dto.getTemplateOption())
@@ -78,7 +78,11 @@ public record GenerateOption(
     }
 
     public File resultFile(final Parameter param) {
-        return new File(this.resultDir(), this.resultPath(param));
+        return new File(this.getResultDir(), this.resultPath(param));
+    }
+
+    public File getResultDir() {
+        return FileResources.resultDir(this.resultDir());
     }
 
     public String resultPath(final Parameter param) {
@@ -112,7 +116,7 @@ public record GenerateOption(
         result.put("-generateType", this.generateType, GenerateType.class);
         if (!this.generateType.isFixedTemplate()) {
             result.put("-unit", this.unit, ParameterUnit.class)
-                    .putFile("-template", this.template, true);
+                    .putFile("-template", Strings.isNotEmpty(this.template) ? new File(this.template) : null, true);
         }
         final CommandLineArgsBuilder srcComponent = this.srcData.toCommandLineArgsBuilder();
         switch (this.generateType) {
@@ -132,7 +136,7 @@ public record GenerateOption(
         if (!this.generateType.isFixedTemplate()) {
             result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
         }
-        result.putDir("-result", this.resultDir)
+        result.putDir("-result", Strings.isNotEmpty(this.resultDir) ? new File(this.resultDir) : null)
                 .put("-resultPath", this.resultPath);
         if (!(this.generateType.isAny(GenerateType.xlsx, GenerateType.xls))) {
             result.put("-outputEncoding", this.outputEncoding);
@@ -151,6 +155,10 @@ public record GenerateOption(
         return builder.build();
     }
 
+    public File getTemplatePath() {
+        return FileResources.searchTemplate(this.template());
+    }
+
     private String getSqlTemplate() {
         return switch (this.operation) {
             case INSERT -> "sql/insertTemplate.txt";
@@ -165,11 +173,12 @@ public record GenerateOption(
         txt {
             @Override
             public String getTemplateString(final GenerateOption option) {
-                if (option.template == null || !option.template.exists() || !option.template.isFile()) {
+                final File templatePath = option.getTemplatePath();
+                if (templatePath == null || !templatePath.exists() || !templatePath.isFile()) {
                     throw new AssertionError(option.template + " is not exist file"
                             , new IllegalArgumentException(String.valueOf(option.template)));
                 }
-                return FileResources.read(option.template, option.templateOption.encoding());
+                return FileResources.read(templatePath, option.templateOption.encoding());
             }
         },
         xlsx {
@@ -179,7 +188,7 @@ public record GenerateOption(
                         .setTemplateParameterAttribute(option.templateOption.templateParameterAttribute())
                         .setFormulaProcess(option.templateOption.formulaProcess())
                         .build()
-                        .render(option.template, resultFile, param);
+                        .render(option.getTemplatePath(), resultFile, param);
             }
         },
         xls {
@@ -188,7 +197,7 @@ public record GenerateOption(
                 JxlsTemplateRender.builder()
                         .setTemplateParameterAttribute(option.templateOption.templateParameterAttribute())
                         .build()
-                        .render(option.template, resultFile, param);
+                        .render(option.getTemplatePath(), resultFile, param);
             }
         },
         settings {

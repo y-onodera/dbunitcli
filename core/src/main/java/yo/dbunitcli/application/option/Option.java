@@ -70,10 +70,14 @@ public interface Option {
             return result;
         }
 
-        public List<String> toList(final boolean containNoValue) {
+        public String[] toArgs(final boolean containDefaultValue) {
+            return this.toList(containDefaultValue).toArray(new String[0]);
+        }
+
+        public List<String> toList(final boolean containDefaultValue) {
             final List<String> result = new ArrayList<>();
             for (final String key : this.keySet()) {
-                if (containNoValue || this.hasValue(key)) {
+                if (containDefaultValue || this.hasValue(key)) {
                     result.add(key + "=" + this.get(key));
                 }
             }
@@ -137,11 +141,11 @@ public interface Option {
 
     class CommandLineArgsBuilder {
 
+        private final String prefix;
+
         private final Map<String, Arg> options = new LinkedHashMap<>();
 
         private final Map<String, CommandLineArgs> subComponents = new LinkedHashMap<>();
-
-        private final String prefix;
 
         public CommandLineArgsBuilder() {
             this("");
@@ -162,6 +166,10 @@ public interface Option {
                         this.put(it, entry.value, entry.attribute());
                     });
             other.subComponents.forEach(this::addComponent);
+        }
+
+        public String get(final String key) {
+            return this.options.get(this.withPrefix(key)).value;
         }
 
         public CommandLineArgsBuilder addComponent(final String name, final CommandLineArgs subComponent) {

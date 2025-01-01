@@ -167,6 +167,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
             this.workspace.options().update(this.getCommandType()
                     , body.getName()
                     , this.getCommand().parseOption(requestToArgs(body.getInput()))
+                            .toCommandLineArgs()
                             .toArgs(false));
         } catch (final Throwable th) {
             AbstractCommandController.LOGGER.error("cause:", th);

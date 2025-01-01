@@ -19,7 +19,7 @@ public class ConvertController extends AbstractCommandController<ConvertDto, Con
         if (options.result().convertResult().resultType() == ResultType.table) {
             return "";
         }
-        return options.result().convertResult().resultDir().getAbsoluteFile().getPath();
+        return options.result().convertResult().getResultDir().getAbsoluteFile().getPath();
     }
 
     @Override

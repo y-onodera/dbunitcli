@@ -16,7 +16,7 @@ public class CompareController extends AbstractCommandController<CompareDto, Com
 
     @Override
     protected String resultDir(final CompareOption options) {
-        return options.result().convertResult().resultDir().getAbsoluteFile().getPath();
+        return options.result().convertResult().getResultDir().getAbsoluteFile().getPath();
     }
 
     @Override

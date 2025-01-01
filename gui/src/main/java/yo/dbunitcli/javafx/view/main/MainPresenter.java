@@ -392,19 +392,19 @@ public class MainPresenter {
                 final Convert command = new Convert();
                 final ConvertOption option = command.parseOption(args);
                 command.exec(option);
-                yield option.result().convertResult().resultDir();
+                yield option.result().convertResult().getResultDir();
             }
             case "Compare" -> {
                 final Compare command = new Compare();
                 final CompareOption option = command.parseOption(args);
                 command.exec(option);
-                yield option.result().convertResult().resultDir();
+                yield option.result().convertResult().getResultDir();
             }
             case "Generate" -> {
                 final Generate command = new Generate();
                 final GenerateOption option = command.parseOption(args);
                 command.exec(option);
-                yield option.resultDir();
+                yield option.getResultDir();
             }
             case "Run" -> {
                 final Run command = new Run();

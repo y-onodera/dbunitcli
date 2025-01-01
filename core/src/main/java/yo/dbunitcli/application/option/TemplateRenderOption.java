@@ -15,7 +15,7 @@ public record TemplateRenderOption(
         , char templateVarStart
         , char templateVarStop
         , boolean formulaProcess
-        , File templateGroup
+        , String templateGroup
 ) implements ComparableDataSetParamOption {
 
     public TemplateRenderOption(final String prefix, final TemplateRenderDto dto) {
@@ -25,7 +25,7 @@ public record TemplateRenderOption(
                 , Strings.isNotEmpty(dto.getTemplateVarStart()) ? dto.getTemplateVarStart().charAt(0) : '$'
                 , Strings.isNotEmpty(dto.getTemplateVarStop()) ? dto.getTemplateVarStop().charAt(0) : '$'
                 , !Strings.isNotEmpty(dto.getFormulaProcess()) || Boolean.parseBoolean(dto.getFormulaProcess())
-                , Strings.isNotEmpty(dto.getTemplateGroup()) ? FileResources.searchInOrderWorkspace(dto.getTemplateGroup()) : null
+                , dto.getTemplateGroup()
         );
     }
 
@@ -38,7 +38,7 @@ public record TemplateRenderOption(
     public CommandLineArgsBuilder toCommandLineArgsBuilder() {
         return new CommandLineArgsBuilder(this.getPrefix())
                 .put("-encoding", this.encoding)
-                .putFile("-templateGroup", this.templateGroup)
+                .putFile("-templateGroup", Strings.isNotEmpty(this.templateGroup) ? new File(this.templateGroup) : null)
                 .put("-templateParameterAttribute", this.templateParameterAttribute)
                 .put("-templateVarStart", this.templateVarStart)
                 .put("-templateVarStop", this.templateVarStop);
@@ -51,7 +51,7 @@ public record TemplateRenderOption(
 
     public TemplateRender getTemplateRender() {
         return TemplateRender.builder()
-                .setTemplateGroup(this.templateGroup)
+                .setTemplateGroup(FileResources.searchTemplate(this.templateGroup))
                 .setTemplateVarStart(this.templateVarStart)
                 .setTemplateVarStop(this.templateVarStop)
                 .setTemplateParameterAttribute(this.templateParameterAttribute)

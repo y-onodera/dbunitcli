@@ -72,7 +72,7 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
         final List<String> result = new ArrayList<>();
         for (final String arg : args) {
             if (arg.startsWith("@")) {
-                final File file = FileResources.searchInOrderWorkspace(arg.substring(1));
+                final File file = FileResources.searchWorkspace(arg.substring(1));
                 if (!file.exists()) {
                     throw new AssertionError("file not exists :" + file.getPath());
                 }

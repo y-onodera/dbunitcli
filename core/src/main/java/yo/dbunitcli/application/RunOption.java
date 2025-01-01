@@ -48,10 +48,7 @@ public record RunOption(
                 , new TemplateRenderOption("template", dto.getTemplateOption())
                 , new JdbcOption("jdbc", dto.getJdbcOption())
                 , new AntOption(dto.getAntTarget())
-                , (Strings.isNotEmpty(dto.getBaseDir())
-                        ? FileResources.searchInOrderDatasetBase(dto.getBaseDir())
-                        : FileResources.datasetDir())
-                        .getAbsoluteFile().toPath().normalize().toString()
+                , dto.getBaseDir()
         );
     }
 
@@ -64,7 +61,7 @@ public record RunOption(
                                 .setLoadData(true)
                                 .build())
                 .toMap()
-                .map(it -> FileResources.searchInOrderDatasetBase(it.get(ComparableFileTableMetaData.PK.getColumnName()).toString()));
+                .map(it -> FileResources.searchDatasetBase(it.get(ComparableFileTableMetaData.PK.getColumnName()).toString()));
     }
 
     public Runner runner() {
@@ -99,6 +96,12 @@ public record RunOption(
         return result;
     }
 
+    public File getBaseDir() {
+        return Strings.isNotEmpty(this.baseDir())
+                ? FileResources.searchDatasetBase(this.baseDir())
+                : FileResources.datasetDir();
+    }
+
     public enum ScriptType {
         cmd, bat, sql {
             @Override
@@ -111,7 +114,7 @@ public record RunOption(
         }, ant {
             @Override
             public Runner createRunner(final RunOption aOption) {
-                return new AntRunner(aOption.baseDir(), aOption.antOption().target(), aOption.parameter().getMap());
+                return new AntRunner(aOption.getBaseDir(), aOption.antOption().target(), aOption.parameter().getMap());
             }
 
             @Override
@@ -121,7 +124,7 @@ public record RunOption(
         };
 
         public Runner createRunner(final RunOption aOption) {
-            return new CmdRunner(aOption.baseDir()
+            return new CmdRunner(aOption.getBaseDir()
                     , aOption.parameter().getMap()
             );
         }
@@ -130,4 +133,5 @@ public record RunOption(
             return this.toString();
         }
     }
+
 }

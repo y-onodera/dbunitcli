@@ -105,7 +105,7 @@ public class ImageCompareManager extends DefaultCompareManager {
 
         @Override
         public void handleModify(final Object[] oldRow, final Object[] newRow, final CompareKeys key) {
-            this.compareFile(FileResources.searchInOrderDatasetBase(oldRow[0].toString()), FileResources.searchInOrderDatasetBase(newRow[0].toString()), key);
+            this.compareFile(FileResources.searchDatasetBase(oldRow[0].toString()), FileResources.searchDatasetBase(newRow[0].toString()), key);
         }
 
         @Override

@@ -8,12 +8,10 @@ import yo.dbunitcli.resource.poi.FromJsonXlsxSchemaBuilder;
 
 import java.io.File;
 
-public record ExcelOption(String prefix, File xlsxSchemaSource) implements ComparableDataSetParamOption {
+public record ExcelOption(String prefix, String xlsxSchemaSource) implements ComparableDataSetParamOption {
 
     public ExcelOption(final String prefix, final DataSetLoadDto dto) {
-        this(prefix, Strings.isNotEmpty(dto.getXlsxSchemaSource())
-                ? FileResources.searchInOrderWorkspace(dto.getXlsxSchemaSource())
-                : null);
+        this(prefix, dto.getXlsxSchemaSource());
     }
 
     @Override
@@ -24,13 +22,15 @@ public record ExcelOption(String prefix, File xlsxSchemaSource) implements Compa
     @Override
     public CommandLineArgsBuilder toCommandLineArgsBuilder() {
         return new CommandLineArgsBuilder(this.getPrefix())
-                .putFile("-xlsxSchema", this.xlsxSchemaSource);
+                .putFile("-xlsxSchema", Strings.isNotEmpty(this.xlsxSchemaSource)
+                        ? new File(this.xlsxSchemaSource)
+                        : null);
     }
 
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         try {
-            return builder.setXlsxSchema(new FromJsonXlsxSchemaBuilder().build(this.xlsxSchemaSource))
+            return builder.setXlsxSchema(new FromJsonXlsxSchemaBuilder().build(FileResources.searchXlsxSchema(this.xlsxSchemaSource)))
                     ;
         } catch (final Exception e) {
             throw new AssertionError(e.getMessage(), e);

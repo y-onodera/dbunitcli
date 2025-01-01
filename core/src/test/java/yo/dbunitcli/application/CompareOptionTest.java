@@ -23,15 +23,15 @@ public class CompareOptionTest {
     @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
         this.target = new Compare();
-        baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
+        this.baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
                 .replace("target/test-classes", "src/test/resources");
     }
 
     @Test
     public void parseSettingTargetDirAndSettingFiles() {
-        final CompareOption option = this.target.parseOption(new String[]{"-new.src=" + baseDir + "/src/multidiff/new", "-old.src=" + baseDir + "/src/multidiff/old", "-setting=" + baseDir + "/settings/filter/setting.json"});
-        assertEquals(new File(baseDir + "/src/multidiff", "new"), option.newData().getParam().getSrc());
-        assertEquals(new File(baseDir + "/src/multidiff", "old"), option.oldData().getParam().getSrc());
+        final CompareOption option = this.target.parseOption(new String[]{"-new.src=" + this.baseDir + "/src/multidiff/new", "-old.src=" + this.baseDir + "/src/multidiff/old", "-setting=" + this.baseDir + "/settings/filter/setting.json"});
+        assertEquals(new File(this.baseDir + "/src/multidiff", "new"), option.newData().getParam().getSrc());
+        assertEquals(new File(this.baseDir + "/src/multidiff", "old"), option.oldData().getParam().getSrc());
         assertEquals(2, option.getTableSeparators().settings().size());
         final ComparableTable columnadd = option.oldDataSet().getTable("columnadd");
         assertEquals(1, columnadd.getTableMetaData().getPrimaryKeys().length);
@@ -40,9 +40,9 @@ public class CompareOptionTest {
 
     @Test
     public void parseArgumentsLoadableFromParameterFile() {
-        final CompareOption option = this.target.parseOption(new String[]{"@" + baseDir + "/paramCompareResultDiffValidExpected.txt"});
-        assertEquals(new File(baseDir + "/src/multidiff", "new"), option.newData().getParam().getSrc().getAbsoluteFile());
-        assertEquals(new File(baseDir + "/src/multidiff", "old"), option.oldData().getParam().getSrc().getAbsoluteFile());
+        final CompareOption option = this.target.parseOption(new String[]{"@" + this.baseDir + "/paramCompareResultDiffValidExpected.txt"});
+        assertEquals(new File(this.baseDir + "/src/multidiff", "new"), option.newData().getParam().getSrc().getAbsoluteFile());
+        assertEquals(new File(this.baseDir + "/src/multidiff", "old"), option.oldData().getParam().getSrc().getAbsoluteFile());
         final ComparableTable columnadd = option.oldDataSet().getTable("columnadd");
         assertEquals(1, columnadd.getTableMetaData().getPrimaryKeys().length);
         assertEquals("key", columnadd.getTableMetaData().getPrimaryKeys()[0].getColumnName());
@@ -53,22 +53,22 @@ public class CompareOptionTest {
 
     @Test
     public void parseDefaultResultDirEqualsCurrentDir() {
-        final CompareOption option = this.target.parseOption(new String[]{"-new.src=" + baseDir + "/multidiff/new", "-old.src=" + baseDir + "/multidiff/old", "-setting=" + baseDir + "/multidiff/setting.json"});
-        assertEquals(new File(".").getAbsoluteFile(), option.result().convertResult().resultDir().getAbsoluteFile());
+        final CompareOption option = this.target.parseOption(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old", "-setting=" + this.baseDir + "/multidiff/setting.json"});
+        assertEquals(new File(".").getAbsoluteFile(), option.result().convertResult().getResultDir().getAbsoluteFile());
     }
 
     @Test
     public void parseResultDirChangeableCommandLineParameter() {
-        final CompareOption option = this.target.parseOption(new String[]{"-new.src=" + baseDir + "/multidiff/new"
-                , "-old.src=" + baseDir + "/multidiff/old"
-                , "-setting=" + baseDir + "/multidiff/setting.json"
-                , "-result=" + baseDir + "/result"});
-        assertEquals(new File(baseDir, "result"), option.result().convertResult().resultDir());
+        final CompareOption option = this.target.parseOption(new String[]{"-new.src=" + this.baseDir + "/multidiff/new"
+                , "-old.src=" + this.baseDir + "/multidiff/old"
+                , "-setting=" + this.baseDir + "/multidiff/setting.json"
+                , "-result=" + this.baseDir + "/result"});
+        assertEquals(new File(this.baseDir, "result"), option.result().convertResult().getResultDir());
     }
 
     @Test
     public void parseNoSettingFile() {
-        final CompareOption option = this.target.parseOption(new String[]{"-new.src=" + baseDir + "/multidiff/new", "-old.src=" + baseDir + "/multidiff/old"});
+        final CompareOption option = this.target.parseOption(new String[]{"-new.src=" + this.baseDir + "/multidiff/new", "-old.src=" + this.baseDir + "/multidiff/old"});
         assertEquals(TableSeparators.NONE, option.getTableSeparators());
     }
 

@@ -14,8 +14,8 @@ public interface CommandLineOption<T extends CommandDto> extends Option {
     ArgumentFilter DEFAULT_COMMANDLINE_FILTER = new DefaultArgumentFilter("-P");
     ArgumentMapper DEFAULT_COMMANDLINE_MAPPER = new DefaultArgumentMapper();
 
-    default String[] toArgs(final boolean containNoValue) {
-        return this.toCommandLineArgs().toList(containNoValue).toArray(new String[0]);
+    default String[] toArgs(final boolean containDefaultValue) {
+        return this.toCommandLineArgs().toList(containDefaultValue).toArray(new String[0]);
     }
 
     T toDto();

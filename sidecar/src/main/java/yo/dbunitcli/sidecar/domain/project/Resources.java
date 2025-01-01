@@ -2,7 +2,6 @@ package yo.dbunitcli.sidecar.domain.project;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,8 +20,12 @@ public record Resources(
         return new Builder();
     }
 
+    private static File getSettingDir(final File baseDir1) {
+        return new File(baseDir1, "setting");
+    }
+
     public String metadataSetting(final String name) {
-        return this.metadataSetting.stream()
+        return this.metadataSetting().stream()
                 .filter(it -> it.getFileName().toString().equals(name))
                 .findFirst()
                 .map(it -> {
@@ -35,8 +38,8 @@ public record Resources(
                 .orElse("{}");
     }
 
-    public void update(String name, String contents) throws IOException {
-        final File parent = getSettingDir(baseDir);
+    public void update(final String name, final String contents) throws IOException {
+        final File parent = getSettingDir(this.baseDir());
         if (!parent.exists()) {
             Files.createDirectories(parent.toPath());
         }
@@ -50,9 +53,9 @@ public record Resources(
 
     public static class Builder {
         private List<String> jdbc = new ArrayList<>();
-        private  List<Path> metadataSetting = new ArrayList<>();
-        private  List<String> template = new ArrayList<>();
-        private  List<String> xlsxSchema = new ArrayList<>();
+        private List<Path> metadataSetting = new ArrayList<>();
+        private List<String> template = new ArrayList<>();
+        private List<String> xlsxSchema = new ArrayList<>();
         private File baseDir;
 
         public Resources build() {
@@ -78,34 +81,30 @@ public record Resources(
             }
         }
 
-        public Builder setJdbc(List<String> jdbc) {
+        public Builder setJdbc(final List<String> jdbc) {
             this.jdbc = jdbc;
             return this;
         }
 
-        public Builder setMetadataSetting(List<Path> metadataSetting) {
+        public Builder setMetadataSetting(final List<Path> metadataSetting) {
             this.metadataSetting = metadataSetting;
             return this;
         }
 
-        public Builder setTemplate(List<String> template) {
+        public Builder setTemplate(final List<String> template) {
             this.template = template;
             return this;
         }
 
-        public Builder setXlsxSchema(List<String> xlsxSchema) {
+        public Builder setXlsxSchema(final List<String> xlsxSchema) {
             this.xlsxSchema = xlsxSchema;
             return this;
         }
 
-        public Builder setBaseDir(File baseDir) {
+        public Builder setBaseDir(final File baseDir) {
             this.baseDir = baseDir;
             return this;
         }
-    }
-
-    private static File getSettingDir(File baseDir1) {
-        return new File(baseDir1, "setting");
     }
 
 }

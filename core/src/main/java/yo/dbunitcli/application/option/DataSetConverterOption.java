@@ -13,7 +13,7 @@ import java.io.File;
 public record DataSetConverterOption(
         String prefix
         , ResultType resultType
-        , File resultDir
+        , String resultDir
         , String resultPath
         , boolean exportEmptyTable
         , JdbcOption jdbcOption
@@ -29,7 +29,7 @@ public record DataSetConverterOption(
     public DataSetConverterOption(final String prefix, final DataSetConverterDto dto) {
         this(prefix
                 , DataSetConverterOption.resultType(dto)
-                , FileResources.resultDir(dto.getResultDir())
+                , dto.getResultDir()
                 , dto.getResultPath()
                 , !Strings.isNotEmpty(dto.getExportEmptyTable()) || Boolean.parseBoolean(dto.getExportEmptyTable())
                 , DataSetConverterOption.resultType(dto) == ResultType.table ? new JdbcOption(prefix, dto.getJdbc()) : new JdbcOption(prefix)
@@ -57,7 +57,7 @@ public record DataSetConverterOption(
                             , DBConverter.Operation.class)
                     .addComponent("jdbc", this.jdbcOption.toCommandLineArgs());
         } else {
-            result.putDir("-result", this.resultDir)
+            result.putDir("-result", new File(this.resultDir))
                     .put("-resultPath", this.resultPath)
                     .put("-exportEmptyTable", this.exportEmptyTable);
             if (type == DataSourceType.csv) {
@@ -73,13 +73,17 @@ public record DataSetConverterOption(
         return DataSetConverterParam.builder()
                 .setResultType(this.resultType)
                 .setExportEmptyTable(this.exportEmptyTable)
-                .setResultDir(this.resultDir)
+                .setResultDir(this.getResultDir())
                 .setResultPath(this.resultPath)
                 .setOperation(this.operation)
                 .setDatabaseConnectionLoader(this.jdbcOption.getDatabaseConnectionLoader())
                 .setOutputEncoding(this.outputEncoding)
                 .setExcelTable(this.excelTable)
                 ;
+    }
+
+    public File getResultDir() {
+        return FileResources.resultDir(this.resultDir);
     }
 
 }

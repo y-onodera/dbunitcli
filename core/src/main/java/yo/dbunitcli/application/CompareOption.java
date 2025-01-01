@@ -10,7 +10,6 @@ import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.compare.CompareResult;
 import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
-import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
@@ -116,7 +115,7 @@ public record CompareOption(
             result.addComponent("imageOption", this.imageOption.toCommandLineArgs());
         }
         return result
-                .putFile("-setting", this.setting == null ? null : FileResources.searchInOrderWorkspace(this.setting))
+                .putFile("-setting", this.setting == null ? null : new File(this.setting))
                 .put("-settingEncoding", this.settingEncoding)
                 .addComponent("newData", this.newData.toCommandLineArgs())
                 .addComponent("oldData", this.oldData.toCommandLineArgs())
@@ -196,7 +195,7 @@ public record CompareOption(
         return this.getComparableDataSetLoader().loadDataSet(
                 this.getDataSetParamBuilder()
                         .setTableSeparators(this.getExpectTableSeparators())
-                        .setSrc(converterOption.resultDir())
+                        .setSrc(converterOption.getResultDir())
                         .setSource(converterOption.resultType().toDataSourceType())
                         .setEncoding(converterOption.outputEncoding())
                         .setRecursive(false)

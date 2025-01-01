@@ -8,7 +8,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public record AntRunner(String baseDir, String target, Map<String, Object> parameter) implements Runner {
+public record AntRunner(File baseDir, String target, Map<String, Object> parameter) implements Runner {
     @Override
     public void runScript(final Stream<File> targetFiles) {
         targetFiles.forEach(target -> {
@@ -18,7 +18,7 @@ public record AntRunner(String baseDir, String target, Map<String, Object> param
             final ProjectHelper helper = ProjectHelper.getProjectHelper();
             p.addReference("ant.projectHelper", helper);
             helper.parse(p, target);
-            p.setBasedir(baseDir());
+            p.setBasedir(this.baseDir().getPath());
             this.parameter.forEach((k, v) -> p.setProperty(k, v.toString()));
             p.executeTarget(Strings.isNotEmpty(this.target()) ? this.target() : p.getDefaultTarget());
         });

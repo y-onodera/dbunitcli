@@ -50,37 +50,37 @@ class FileResourcesTest {
 
         @Test
         void searchInOrderDatasetBase() {
-            final File result = FileResources.searchInOrderDatasetBase("main");
+            final File result = FileResources.searchDatasetBase("main");
             Assertions.assertEquals(new File("src\\main"), result);
         }
 
         @Test
         void searchInOrderDatasetBaseNotFoundWorkspace() {
-            final File result = FileResources.searchInOrderDatasetBase("src");
+            final File result = FileResources.searchDatasetBase("src");
             Assertions.assertEquals(new File("src"), result);
         }
 
         @Test
         void searchInOrderDatasetBaseAbsolutePath() {
-            final File result = FileResources.searchInOrderDatasetBase("C:\\test");
+            final File result = FileResources.searchDatasetBase("C:\\test");
             Assertions.assertEquals(new File("C:\\test"), result);
         }
 
         @Test
         void searchInOrderWorkspace() {
-            final File result = FileResources.searchInOrderWorkspace("main");
+            final File result = FileResources.searchWorkspace("main");
             Assertions.assertEquals(new File("src\\main"), result);
         }
 
         @Test
         void searchInOrderWorkspaceNotFoundWorkspace() {
-            final File result = FileResources.searchInOrderWorkspace("src");
+            final File result = FileResources.searchWorkspace("src");
             Assertions.assertEquals(new File("src"), result);
         }
 
         @Test
         void searchInOrderWorkspaceAbsolutePath() {
-            final File result = FileResources.searchInOrderWorkspace("C:\\test");
+            final File result = FileResources.searchWorkspace("C:\\test");
             Assertions.assertEquals(new File("C:\\test"), result);
         }
 
@@ -118,37 +118,37 @@ class FileResourcesTest {
 
         @Test
         void searchInOrderDatasetBase() {
-            final File result = FileResources.searchInOrderDatasetBase("main");
+            final File result = FileResources.searchDatasetBase("main");
             Assertions.assertEquals(new File("src\\main"), result);
         }
 
         @Test
         void searchInOrderDatasetBaseNotFoundWorkspace() {
-            final File result = FileResources.searchInOrderDatasetBase("src");
+            final File result = FileResources.searchDatasetBase("src");
             Assertions.assertEquals(new File("src"), result);
         }
 
         @Test
         void searchInOrderDatasetBaseAbsolutePath() {
-            final File result = FileResources.searchInOrderDatasetBase("C:\\test");
+            final File result = FileResources.searchDatasetBase("C:\\test");
             Assertions.assertEquals(new File("C:\\test"), result);
         }
 
         @Test
         void searchInOrderWorkspace() {
-            final File result = FileResources.searchInOrderWorkspace("main");
+            final File result = FileResources.searchWorkspace("main");
             Assertions.assertEquals(new File("main"), result);
         }
 
         @Test
         void searchInOrderWorkspaceNotFoundWorkspace() {
-            final File result = FileResources.searchInOrderWorkspace("src");
+            final File result = FileResources.searchWorkspace("src");
             Assertions.assertEquals(new File("src"), result);
         }
 
         @Test
         void searchInOrderWorkspaceAbsolutePath() {
-            final File result = FileResources.searchInOrderWorkspace("C:\\test");
+            final File result = FileResources.searchWorkspace("C:\\test");
             Assertions.assertEquals(new File("C:\\test"), result);
         }
 
@@ -185,37 +185,37 @@ class FileResourcesTest {
 
         @Test
         void searchInOrderDatasetBase() {
-            final File result = FileResources.searchInOrderDatasetBase("main");
+            final File result = FileResources.searchDatasetBase("main");
             Assertions.assertEquals(new File("main"), result);
         }
 
         @Test
         void searchInOrderDatasetBaseNotFoundWorkspace() {
-            final File result = FileResources.searchInOrderDatasetBase("src");
+            final File result = FileResources.searchDatasetBase("src");
             Assertions.assertEquals(new File("src"), result);
         }
 
         @Test
         void searchInOrderDatasetBaseAbsolutePath() {
-            final File result = FileResources.searchInOrderDatasetBase("C:\\test");
+            final File result = FileResources.searchDatasetBase("C:\\test");
             Assertions.assertEquals(new File("C:\\test"), result);
         }
 
         @Test
         void searchInOrderWorkspace() {
-            final File result = FileResources.searchInOrderWorkspace("main");
+            final File result = FileResources.searchWorkspace("main");
             Assertions.assertEquals(new File("main"), result);
         }
 
         @Test
         void searchInOrderWorkspaceNotFoundWorkspace() {
-            final File result = FileResources.searchInOrderWorkspace("src");
+            final File result = FileResources.searchWorkspace("src");
             Assertions.assertEquals(new File("src"), result);
         }
 
         @Test
         void searchInOrderWorkspaceAbsolutePath() {
-            final File result = FileResources.searchInOrderWorkspace("C:\\test");
+            final File result = FileResources.searchWorkspace("C:\\test");
             Assertions.assertEquals(new File("C:\\test"), result);
         }
 
@@ -286,37 +286,37 @@ class FileResourcesTest {
 
         @Test
         void searchInOrderDatasetBase() {
-            final File result = FileResources.searchInOrderDatasetBase("java");
+            final File result = FileResources.searchDatasetBase("java");
             Assertions.assertEquals(new File("src/test/java"), result);
         }
 
         @Test
         void searchInOrderDatasetBaseNotFoundWorkspace() {
-            final File result = FileResources.searchInOrderDatasetBase("src");
+            final File result = FileResources.searchDatasetBase("src");
             Assertions.assertEquals(new File("src"), result);
         }
 
         @Test
         void searchInOrderDatasetBaseAbsolutePath() {
-            final File result = FileResources.searchInOrderDatasetBase("C:\\test");
+            final File result = FileResources.searchDatasetBase("C:\\test");
             Assertions.assertEquals(new File("C:\\test"), result);
         }
 
         @Test
         void searchInOrderWorkspace() {
-            final File result = FileResources.searchInOrderWorkspace("java");
+            final File result = FileResources.searchWorkspace("java");
             Assertions.assertEquals(new File("src/main/java"), result);
         }
 
         @Test
         void searchInOrderWorkspaceNotFoundWorkspace() {
-            final File result = FileResources.searchInOrderWorkspace("src");
+            final File result = FileResources.searchWorkspace("src");
             Assertions.assertEquals(new File("src"), result);
         }
 
         @Test
         void searchInOrderWorkspaceAbsolutePath() {
-            final File result = FileResources.searchInOrderWorkspace("C:\\test");
+            final File result = FileResources.searchWorkspace("C:\\test");
             Assertions.assertEquals(new File("C:\\test"), result);
         }
 

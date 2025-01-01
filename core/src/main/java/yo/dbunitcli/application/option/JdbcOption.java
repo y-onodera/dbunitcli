@@ -8,12 +8,11 @@ import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.Properties;
 
 public record JdbcOption(
         String prefix
-        , File jdbcProperties
+        , String jdbcProperties
         , String jdbcUrl
         , String jdbcUser
         , String jdbcPass
@@ -26,7 +25,7 @@ public record JdbcOption(
 
     public JdbcOption(final String prefix, final JdbcDto dto) {
         this(prefix
-                , Strings.isNotEmpty(dto.getJdbcProperties()) ? FileResources.searchInOrderWorkspace(dto.getJdbcProperties()) : null
+                , dto.getJdbcProperties()
                 , dto.getJdbcUrl()
                 , dto.getJdbcUser()
                 , dto.getJdbcPass());
@@ -40,7 +39,7 @@ public record JdbcOption(
     @Override
     public CommandLineArgsBuilder toCommandLineArgsBuilder() {
         return new CommandLineArgsBuilder(this.getPrefix())
-                .putFile("-jdbcProperties", this.jdbcProperties)
+                .putFile("-jdbcProperties", Strings.isNotEmpty(this.jdbcProperties) ? new File(this.jdbcProperties) : null)
                 .put("-jdbcUrl", this.jdbcUrl)
                 .put("-jdbcUser", this.jdbcUser)
                 .put("-jdbcPass", this.jdbcPass);
@@ -56,16 +55,16 @@ public record JdbcOption(
 
     private Properties loadJdbcTemplate() throws IOException {
         final Properties jdbcProp = new Properties();
-        if (this.jdbcProperties != null) {
-            jdbcProp.load(new FileInputStream(this.jdbcProperties));
+        if (Strings.isNotEmpty(this.jdbcProperties)) {
+            jdbcProp.load(new FileInputStream(FileResources.searchJdbc(this.jdbcProperties)));
         }
-        if (!Optional.ofNullable(this.jdbcUrl).orElse("").isEmpty()) {
+        if (Strings.isNotEmpty(this.jdbcUrl)) {
             jdbcProp.put("url", this.jdbcUrl);
         }
-        if (!Optional.ofNullable(this.jdbcUser).orElse("").isEmpty()) {
+        if (Strings.isNotEmpty(this.jdbcUser)) {
             jdbcProp.put("user", this.jdbcUser);
         }
-        if (!Optional.ofNullable(this.jdbcPass).orElse("").isEmpty()) {
+        if (Strings.isNotEmpty(this.jdbcPass)) {
             jdbcProp.put("pass", this.jdbcPass);
         }
         return jdbcProp;

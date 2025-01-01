@@ -15,7 +15,7 @@ public record DataSetLoadOption(
         String prefix
         , boolean enableSrcTypeNone
         , DataSourceType srcType
-        , File src
+        , String src
         , String setting
         , String settingEncoding
         , String regTableInclude
@@ -39,7 +39,7 @@ public record DataSetLoadOption(
                 , enableSrcTypeNone
                 , DataSetLoadOption.getSrcType(dto)
                 , DataSetLoadOption.getSrcType(dto) != DataSourceType.none && Strings.isNotEmpty(dto.getSrc())
-                        ? FileResources.searchInOrderDatasetBase(dto.getSrc())
+                        ? dto.getSrc()
                         : null
                 , dto.getSetting()
                 , Strings.isNotEmpty(dto.getSettingEncoding())
@@ -66,7 +66,7 @@ public record DataSetLoadOption(
         if (this.srcType == null || this.srcType == DataSourceType.none) {
             return result;
         }
-        result.putFileOrDir("-src", this.src, true);
+        result.putFileOrDir("-src", this.src == null ? null : new File(this.src), true);
         if (this.dataSetParam == null) {
             final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory()
                     .create(this.getPrefix(), this.srcType, new DataSetLoadDto());
@@ -78,18 +78,19 @@ public record DataSetLoadOption(
                 .put("-regTableExclude", this.regTableExclude)
                 .put("-loadData", this.loadData)
                 .put("-includeMetaData", this.includeMetaData)
-                .putFile("-setting", this.setting == null ? null : FileResources.searchInOrderWorkspace(this.setting))
+                .putFile("-setting", this.setting == null ? null : new File(this.setting))
                 .put("-settingEncoding", this.settingEncoding);
     }
 
     public ComparableDataSetParam.Builder getParam() {
+        final File srcFile = Strings.isNotEmpty(this.src) ? FileResources.searchDatasetBase(this.src) : new File(".");
         if (this.srcType != DataSourceType.none) {
-            this.assertFileExists(this.src);
+            this.assertFileExists(srcFile);
         }
         return this.dataSetParam.populate(ComparableDataSetParam
                 .builder()
                 .setSource(this.srcType)
-                .setSrc(this.src)
+                .setSrc(srcFile)
                 .setTableSeparators(this.getTableSeparators())
                 .setRegTableInclude(this.regTableInclude)
                 .setRegTableExclude(this.regTableExclude)
@@ -110,10 +111,6 @@ public record DataSetLoadOption(
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
-    }
-
-    public File getSrc() {
-        return this.src;
     }
 
     public String getSetting() {

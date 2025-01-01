@@ -23,7 +23,7 @@ public record ParameterizeOption(
         , boolean ignoreFail
         , boolean parameterize
         , ParameterUnit unit
-        , File template
+        , String template
         , DataSetLoadOption paramData
         , TemplateRenderOption templateOption
 ) implements CommandLineOption<ParameterizeDto> {
@@ -76,7 +76,7 @@ public record ParameterizeOption(
                 , Strings.isNotEmpty(dto.getIgnoreFail()) && Boolean.parseBoolean(dto.getIgnoreFail())
                 , !Strings.isNotEmpty(dto.getParameterize()) || Boolean.parseBoolean(dto.getParameterize())
                 , dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record
-                , Strings.isNotEmpty(dto.getTemplate()) ? FileResources.searchInOrderWorkspace(dto.getTemplate()) : null
+                , dto.getTemplate()
                 , new DataSetLoadOption("param", dto.getParamData(), true)
                 , new TemplateRenderOption("template", dto.getTemplateOption())
         );
@@ -96,7 +96,7 @@ public record ParameterizeOption(
                 .put("-ignoreFail", this.ignoreFail)
                 .put("-cmd", this.cmd)
                 .put("-cmdParam", this.cmdParam)
-                .putFile("-template", this.template, true)
+                .putFile("-template", Strings.isNotEmpty(this.template) ? new File(this.template) : null, true)
                 .addComponent("templateOption", this.templateOption.toCommandLineArgs());
     }
 
@@ -137,13 +137,15 @@ public record ParameterizeOption(
     }
 
     private String getTemplateArgs(final Map<String, Object> aParam) {
-        File template = this.template;
-        if (!Optional.ofNullable(this.cmdParam).orElse("").isEmpty()) {
-            template = FileResources.searchInOrderWorkspace(this.templateOption.getTemplateRender().render(this.cmdParam, aParam));
-        } else if (template == null) {
+        final File template;
+        if (Strings.isNotEmpty(this.cmdParam)) {
+            template = FileResources.searchTemplate(this.templateOption.getTemplateRender().render(this.cmdParam, aParam));
+        } else if (Strings.isEmpty(this.template)) {
             return "";
+        } else {
+            template = FileResources.searchTemplate(this.template);
         }
-        return FileResources.read(template, this.templateOption.encoding());
+        return FileResources.read(Objects.requireNonNull(template), this.templateOption.encoding());
     }
 
 }

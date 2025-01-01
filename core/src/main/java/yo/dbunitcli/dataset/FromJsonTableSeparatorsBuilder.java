@@ -21,7 +21,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
             return this.build((File) null);
         } else {
             return this.build(Arrays.stream(settings.split(","))
-                    .map(FileResources::searchInOrderWorkspace)
+                    .map(FileResources::searchSetting)
                     .toArray(File[]::new));
         }
     }

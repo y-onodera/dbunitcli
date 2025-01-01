@@ -2,7 +2,6 @@ package yo.dbunitcli.fileprocessor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.resource.FileResources;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,7 +10,7 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public record CmdRunner(String baseDir, Map<String, Object> parameter) implements Runner {
+public record CmdRunner(File baseDir, Map<String, Object> parameter) implements Runner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmdRunner.class);
 
@@ -20,7 +19,7 @@ public record CmdRunner(String baseDir, Map<String, Object> parameter) implement
         targetFiles.forEach(target -> {
             try {
                 final ProcessBuilder pb = new ProcessBuilder(target.getPath())
-                        .directory(FileResources.searchInOrderDatasetBase(baseDir));
+                        .directory(this.baseDir);
                 this.parameter().forEach((key, value) -> pb.environment().put(key, value.toString()));
                 // 標準エラー出力を標準出力にマージする
                 pb.redirectErrorStream(true);
