@@ -57,7 +57,7 @@ public record DataSetConverterOption(
                             , DBConverter.Operation.class)
                     .addComponent("jdbc", this.jdbcOption.toCommandLineArgs());
         } else {
-            result.putDir("-result", new File(this.resultDir))
+            result.putDir("-result", Strings.isNotEmpty(this.resultDir) ? new File(this.resultDir) : null)
                     .put("-resultPath", this.resultPath)
                     .put("-exportEmptyTable", this.exportEmptyTable);
             if (type == DataSourceType.csv) {
