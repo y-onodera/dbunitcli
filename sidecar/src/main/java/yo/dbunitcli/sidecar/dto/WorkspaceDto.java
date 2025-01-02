@@ -1,10 +1,8 @@
 package yo.dbunitcli.sidecar.dto;
 
-import io.micronaut.serde.annotation.SerdeImport;
 import io.micronaut.serde.annotation.Serdeable;
 import yo.dbunitcli.resource.FileResources;
 
-@SerdeImport(value = FileResources.FileResourcesContext.class)
 @Serdeable
 public class WorkspaceDto {
     private ParametersDto parameterList = new ParametersDto();
