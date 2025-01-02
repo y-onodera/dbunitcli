@@ -3,6 +3,7 @@ package yo.dbunitcli.sidecar.domain.project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
 import yo.dbunitcli.sidecar.dto.ResourcesDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
@@ -31,6 +32,7 @@ public record Workspace(Path path, Options options, Resources resources) {
         final ResourcesDto resources = new ResourcesDto();
         resources.setDatasetSettings(this.metadataSettings());
         result.setResources(resources);
+        result.setContext(FileResources.getContext());
         return result;
     }
 

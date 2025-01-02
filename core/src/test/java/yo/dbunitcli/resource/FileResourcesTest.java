@@ -15,6 +15,12 @@ class FileResourcesTest {
         FileResourcesTest.backup.putAll(System.getProperties());
     }
 
+    @AfterAll
+    static void restore() {
+        System.setProperties(FileResourcesTest.backup);
+        FileResources.setContext(new FileResources.FileResourcesContext());
+    }
+
     @Nested
     class NoSystemPropertyTest {
         @Test
@@ -41,11 +47,12 @@ class FileResourcesTest {
             newProperty.putAll(FileResourcesTest.backup);
             newProperty.put(FileResources.PROPERTY_WORKSPACE, "src");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
         }
 
         @AfterAll
         static void restore() {
-            System.setProperties(FileResourcesTest.backup);
+            FileResourcesTest.restore();
         }
 
         @Test
@@ -108,11 +115,12 @@ class FileResourcesTest {
             newProperty.putAll(FileResourcesTest.backup);
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "src");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
         }
 
         @AfterAll
         static void restore() {
-            System.setProperties(FileResourcesTest.backup);
+            FileResourcesTest.restore();
         }
 
 
@@ -176,11 +184,12 @@ class FileResourcesTest {
             newProperty.putAll(FileResourcesTest.backup);
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "result");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
         }
 
         @AfterAll
         static void restore() {
-            System.setProperties(FileResourcesTest.backup);
+            FileResourcesTest.restore();
         }
 
         @Test
@@ -244,13 +253,13 @@ class FileResourcesTest {
             newProperty.put(FileResources.PROPERTY_WORKSPACE, "workspace");
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "result");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
         }
 
         @AfterAll
         static void restore() {
-            System.setProperties(FileResourcesTest.backup);
+            FileResourcesTest.restore();
         }
-
 
         @Test
         void resultDir() {
@@ -277,11 +286,12 @@ class FileResourcesTest {
             newProperty.put(FileResources.PROPERTY_WORKSPACE, "src/main");
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "src/test");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
         }
 
         @AfterAll
         static void restore() {
-            System.setProperties(FileResourcesTest.backup);
+            FileResourcesTest.restore();
         }
 
         @Test
@@ -346,11 +356,12 @@ class FileResourcesTest {
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "data");
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "result");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
         }
 
         @AfterAll
         static void restore() {
-            System.setProperties(FileResourcesTest.backup);
+            FileResourcesTest.restore();
         }
 
         @Test

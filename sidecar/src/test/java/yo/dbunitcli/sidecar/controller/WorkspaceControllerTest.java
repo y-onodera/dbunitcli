@@ -27,7 +27,8 @@ class WorkspaceControllerTest {
     @Test
     public void testList() {
         final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/workspace/resources"));
-        Assertions.assertEquals("{\"parameterList\":{\"convert\":[\"csvToXlsx\"],\"compare\":[],\"generate\":[],\"run\":[],\"parameterize\":[]},\"resources\":{}}", jsonResponse);
+        System.out.println(jsonResponse);
+        Assertions.assertEquals("{\"parameterList\":{\"convert\":[\"csvToXlsx\"],\"compare\":[],\"generate\":[],\"run\":[],\"parameterize\":[]},\"resources\":{\"context\":{\"workspace\":\"src/test/resources/workspace/sample\",\"settingBase\":\"src\\\\test\\\\resources\\\\workspace\\\\sample\\\\resources\\\\setting\",\"templateBase\":\"src\\\\test\\\\resources\\\\workspace\\\\sample\\\\resources\\\\template\",\"jdbcBase\":\"src\\\\test\\\\resources\\\\workspace\\\\sample\\\\resources\\\\jdbc\",\"xlsxSchemaBase\":\"src\\\\test\\\\resources\\\\workspace\\\\sample\\\\resources\\\\xlsxschema\"}}}", jsonResponse);
     }
 
 }

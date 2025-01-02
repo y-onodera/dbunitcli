@@ -53,6 +53,12 @@ public class CompareTest {
     }
 
     abstract static class TestCase {
+        @AfterAll
+        public static void restore() {
+            System.setProperties(backup);
+            FileResources.setContext(new FileResources.FileResourcesContext());
+        }
+
         @Test
         public void testSuccessResultDiffExpected() throws Exception {
             Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareResultDiffValidExpected.txt"});
@@ -195,6 +201,7 @@ public class CompareTest {
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/compare/all/result");
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/compare/all/dataset");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
             CompareTest.clean("target/test-temp/compare/all");
             CompareTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/compare/all/base/src/test/resources/yo/dbunitcli/application/settings");
             CompareTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/compare/all/dataset/src/test/resources/yo/dbunitcli/application/src");
@@ -212,11 +219,6 @@ public class CompareTest {
             replace.execute();
         }
 
-        @AfterAll
-        static void restore() {
-            System.setProperties(CompareTest.backup);
-        }
-
         @Test
         @Override
         public void testResultXlsx() {
@@ -232,6 +234,7 @@ public class CompareTest {
             newProperty.putAll(CompareTest.backup);
             newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/compare/base");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
             CompareTest.clean("target/test-temp/compare/base");
             CompareTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/compare/base/src/test/resources/yo/dbunitcli/application");
             final Replace replace = new Replace();
@@ -245,11 +248,6 @@ public class CompareTest {
             filter2.setValue("target\\\\test-temp\\\\compare\\\\base\\\\src\\\\test\\\\resources");
             replace.setProject(CompareTest.PROJECT);
             replace.execute();
-        }
-
-        @AfterAll
-        static void restore() {
-            System.setProperties(CompareTest.backup);
         }
 
         @Test
@@ -268,12 +266,8 @@ public class CompareTest {
             newProperty.putAll(CompareTest.backup);
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/compare/result");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
             CompareTest.clean("target/test-temp/compare/result");
-        }
-
-        @AfterAll
-        static void restore() {
-            System.setProperties(CompareTest.backup);
         }
 
     }
@@ -286,6 +280,7 @@ public class CompareTest {
             newProperty.putAll(CompareTest.backup);
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/compare/dataset");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
             CompareTest.clean("target/test-temp/compare/dataset");
             CompareTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/compare/dataset/src/test/resources/yo/dbunitcli/application/src");
             CompareTest.copy("src/test/resources/yo/dbunitcli/application/expect", "target/test-temp/compare/dataset/src/test/resources/yo/dbunitcli/application/expect");
@@ -300,11 +295,6 @@ public class CompareTest {
             filter2.setValue("target\\\\test-temp\\\\compare\\\\dataset\\\\src\\\\test\\\\resources");
             replace.setProject(CompareTest.PROJECT);
             replace.execute();
-        }
-
-        @AfterAll
-        static void restore() {
-            System.setProperties(CompareTest.backup);
         }
 
         @Test

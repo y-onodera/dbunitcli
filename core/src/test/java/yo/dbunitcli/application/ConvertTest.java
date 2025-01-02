@@ -40,16 +40,6 @@ public class ConvertTest {
                 .toArray(String[]::new);
     }
 
-    @BeforeAll
-    public static void setUp() throws UnsupportedEncodingException {
-        ConvertTest.baseDir = URLDecoder.decode(Objects.requireNonNull(ConvertTest.class.getResource(".")).getPath(), StandardCharsets.UTF_8);
-        ConvertTest.testResourceDir = ConvertTest.baseDir.replace("target/test-classes", "src/test/resources");
-        ConvertTest.PROJECT.setName("convertTest");
-        ConvertTest.PROJECT.setBaseDir(new File("."));
-        ConvertTest.PROJECT.setProperty("java.io.tmpdir", System.getProperty("java.io.tmpdir"));
-        ConvertTest.backup.putAll(System.getProperties());
-    }
-
     private static void copy(final String from, final String to) {
         final Copy copy = new Copy();
         copy.setProject(ConvertTest.PROJECT);
@@ -67,7 +57,23 @@ public class ConvertTest {
         delete.execute();
     }
 
+    @BeforeAll
+    public static void setUp() throws UnsupportedEncodingException {
+        ConvertTest.baseDir = URLDecoder.decode(Objects.requireNonNull(ConvertTest.class.getResource(".")).getPath(), StandardCharsets.UTF_8);
+        ConvertTest.testResourceDir = ConvertTest.baseDir.replace("target/test-classes", "src/test/resources");
+        ConvertTest.PROJECT.setName("convertTest");
+        ConvertTest.PROJECT.setBaseDir(new File("."));
+        ConvertTest.PROJECT.setProperty("java.io.tmpdir", System.getProperty("java.io.tmpdir"));
+        ConvertTest.backup.putAll(System.getProperties());
+    }
+
     abstract static class TestCase {
+        @AfterAll
+        static void restore() {
+            System.setProperties(backup);
+            FileResources.setContext(new FileResources.FileResourcesContext());
+        }
+
         @Test
         public void testFromRegexToXlsx() throws Exception {
             Convert.main(this.getArgs("/paramConvertRegexToXlsx.txt"));
@@ -1072,14 +1078,10 @@ public class ConvertTest {
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/convert/all/result");
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/convert/all/dataset");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
             ConvertTest.clean("target/test-temp/convert/all");
             ConvertTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/convert/all/base/src/test/resources/yo/dbunitcli/application/settings");
             ConvertTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/convert/all/dataset/src/test/resources/yo/dbunitcli/application/src");
-        }
-
-        @AfterAll
-        static void restore() {
-            System.setProperties(ConvertTest.backup);
         }
 
         @Override
@@ -1096,13 +1098,9 @@ public class ConvertTest {
             newProperty.putAll(ConvertTest.backup);
             newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/convert/base");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
             ConvertTest.clean("target/test-temp/convert/base");
             ConvertTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/convert/base/src/test/resources/yo/dbunitcli/application");
-        }
-
-        @AfterAll
-        static void restore() {
-            System.setProperties(ConvertTest.backup);
         }
 
         @Override
@@ -1119,12 +1117,8 @@ public class ConvertTest {
             newProperty.putAll(ConvertTest.backup);
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/convert/result");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
             ConvertTest.clean("target/test-temp/convert/result");
-        }
-
-        @AfterAll
-        static void restore() {
-            System.setProperties(ConvertTest.backup);
         }
 
         @Override
@@ -1141,13 +1135,10 @@ public class ConvertTest {
             newProperty.putAll(ConvertTest.backup);
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/convert/dataset");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
             ConvertTest.clean("target/test-temp/convert/dataset");
             ConvertTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/convert/dataset/src/test/resources/yo/dbunitcli/application/src");
         }
 
-        @AfterAll
-        static void restore() {
-            System.setProperties(ConvertTest.backup);
-        }
     }
 }

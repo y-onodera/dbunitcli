@@ -1,12 +1,17 @@
 package yo.dbunitcli.sidecar.dto;
 
+import io.micronaut.serde.annotation.SerdeImport;
 import io.micronaut.serde.annotation.Serdeable;
+import yo.dbunitcli.resource.FileResources;
 
+@SerdeImport(value = FileResources.FileResourcesContext.class)
 @Serdeable
 public class WorkspaceDto {
     private ParametersDto parameterList = new ParametersDto();
 
     private ResourcesDto resources = new ResourcesDto();
+
+    private FileResources.FileResourcesContext context = FileResources.getContext();
 
     public ParametersDto getParameterList() {
         return this.parameterList;
@@ -22,5 +27,13 @@ public class WorkspaceDto {
 
     public void setResources(final ResourcesDto resources) {
         this.resources = resources;
+    }
+
+    public FileResources.FileResourcesContext getContext() {
+        return this.context;
+    }
+
+    public void setContext(final FileResources.FileResourcesContext context) {
+        this.context = context;
     }
 }

@@ -24,16 +24,6 @@ public class GenerateTest {
     private static String baseDir;
     private static String subDirectory;
 
-    @BeforeAll
-    public static void setUp() throws UnsupportedEncodingException {
-        GenerateTest.baseDir = URLDecoder.decode(Objects.requireNonNull(GenerateTest.class.getResource(".")).getPath(), StandardCharsets.UTF_8);
-        GenerateTest.testResourcesDir = GenerateTest.baseDir.replace("target/test-classes", "src/test/resources");
-        GenerateTest.PROJECT.setName("generateTest");
-        GenerateTest.PROJECT.setBaseDir(new File("."));
-        GenerateTest.PROJECT.setProperty("java.io.tmpdir", System.getProperty("java.io.tmpdir"));
-        GenerateTest.backup.putAll(System.getProperties());
-    }
-
     private static void copy(final String from, final String to) {
         final Copy copy = new Copy();
         copy.setProject(GenerateTest.PROJECT);
@@ -51,7 +41,23 @@ public class GenerateTest {
         delete.execute();
     }
 
+    @BeforeAll
+    public static void setUp() throws UnsupportedEncodingException {
+        GenerateTest.baseDir = URLDecoder.decode(Objects.requireNonNull(GenerateTest.class.getResource(".")).getPath(), StandardCharsets.UTF_8);
+        GenerateTest.testResourcesDir = GenerateTest.baseDir.replace("target/test-classes", "src/test/resources");
+        GenerateTest.PROJECT.setName("generateTest");
+        GenerateTest.PROJECT.setBaseDir(new File("."));
+        GenerateTest.PROJECT.setProperty("java.io.tmpdir", System.getProperty("java.io.tmpdir"));
+        GenerateTest.backup.putAll(System.getProperties());
+    }
+
     abstract static class TestCase {
+
+        @AfterAll
+        static void restore() {
+            System.setProperties(backup);
+            FileResources.setContext(new FileResources.FileResourcesContext());
+        }
 
         @Test
         public void testGenerateXlsx() throws Exception {
@@ -213,15 +219,11 @@ public class GenerateTest {
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/generate/all/result");
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/generate/all/dataset");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
             GenerateTest.clean("target/test-temp/generate/all");
             GenerateTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/generate/all/base/src/test/resources/yo/dbunitcli/application/settings");
             GenerateTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/generate/all/dataset/src/test/resources/yo/dbunitcli/application/src");
             GenerateTest.copy("src/test/resources/yo/dbunitcli/application/expect", "target/test-temp/generate/all/dataset/src/test/resources/yo/dbunitcli/application/expect");
-        }
-
-        @AfterAll
-        static void restore() {
-            System.setProperties(GenerateTest.backup);
         }
 
         @Override
@@ -238,13 +240,9 @@ public class GenerateTest {
             newProperty.putAll(GenerateTest.backup);
             newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/generate/base");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
             GenerateTest.clean("target/test-temp/generate/base");
             GenerateTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/generate/base/src/test/resources/yo/dbunitcli/application");
-        }
-
-        @AfterAll
-        static void restore() {
-            System.setProperties(GenerateTest.backup);
         }
 
         @Override
@@ -261,12 +259,8 @@ public class GenerateTest {
             newProperty.putAll(GenerateTest.backup);
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/generate/result");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
             GenerateTest.clean("target/test-temp/generate/result");
-        }
-
-        @AfterAll
-        static void restore() {
-            System.setProperties(GenerateTest.backup);
         }
 
         @Override
@@ -283,14 +277,11 @@ public class GenerateTest {
             newProperty.putAll(GenerateTest.backup);
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/generate/dataset");
             System.setProperties(newProperty);
+            FileResources.setContext(new FileResources.FileResourcesContext());
             GenerateTest.clean("target/test-temp/generate/dataset");
             GenerateTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/generate/dataset/src/test/resources/yo/dbunitcli/application/src");
         }
 
-        @AfterAll
-        static void restore() {
-            System.setProperties(GenerateTest.backup);
-        }
     }
 
 }
