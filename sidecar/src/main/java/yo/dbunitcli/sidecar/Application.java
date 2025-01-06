@@ -10,7 +10,6 @@ import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
 
-@SerdeImport(value = FileResources.FileResourcesContext.class)
 @SerdeImport(value = Option.Arg.class)
 @SerdeImport(value = Option.Attribute.class)
 @Factory

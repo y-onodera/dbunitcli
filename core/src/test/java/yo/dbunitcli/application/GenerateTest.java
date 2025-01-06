@@ -56,7 +56,6 @@ public class GenerateTest {
         @AfterAll
         static void restore() {
             System.setProperties(backup);
-            FileResources.setContext(new FileResources.FileResourcesContext());
         }
 
         @Test
@@ -219,7 +218,6 @@ public class GenerateTest {
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/generate/all/result");
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/generate/all/dataset");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             GenerateTest.clean("target/test-temp/generate/all");
             GenerateTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/generate/all/base/src/test/resources/yo/dbunitcli/application/settings");
             GenerateTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/generate/all/dataset/src/test/resources/yo/dbunitcli/application/src");
@@ -240,7 +238,6 @@ public class GenerateTest {
             newProperty.putAll(GenerateTest.backup);
             newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/generate/base");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             GenerateTest.clean("target/test-temp/generate/base");
             GenerateTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/generate/base/src/test/resources/yo/dbunitcli/application");
         }
@@ -259,7 +256,6 @@ public class GenerateTest {
             newProperty.putAll(GenerateTest.backup);
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/generate/result");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             GenerateTest.clean("target/test-temp/generate/result");
         }
 
@@ -277,7 +273,6 @@ public class GenerateTest {
             newProperty.putAll(GenerateTest.backup);
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/generate/dataset");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             GenerateTest.clean("target/test-temp/generate/dataset");
             GenerateTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/generate/dataset/src/test/resources/yo/dbunitcli/application/src");
         }

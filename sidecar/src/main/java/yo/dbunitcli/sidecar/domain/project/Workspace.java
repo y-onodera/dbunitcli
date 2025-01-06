@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.sidecar.dto.ContextDto;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
 import yo.dbunitcli.sidecar.dto.ResourcesDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
@@ -32,7 +33,15 @@ public record Workspace(Path path, Options options, Resources resources) {
         final ResourcesDto resources = new ResourcesDto();
         resources.setDatasetSettings(this.metadataSettings());
         result.setResources(resources);
-        result.setContext(FileResources.getContext());
+        final ContextDto context = new ContextDto();
+        result.setContext(context);
+        context.setWorkspace(FileResources.getWorkspace());
+        context.setDatasetBase(FileResources.getDatasetBase());
+        context.setResultBase(FileResources.getResultBase());
+        context.setSettingBase(FileResources.getSettingBase());
+        context.setTemplateBase(FileResources.getTemplateBase());
+        context.setJdbcBase(FileResources.getJdbcBase());
+        context.setXlsxSchemaBase(FileResources.getXlsxSchemaBase());
         return result;
     }
 

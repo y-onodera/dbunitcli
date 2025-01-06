@@ -58,7 +58,6 @@ public class RunTest {
         @AfterAll
         static void restore() {
             System.setProperties(backup);
-            FileResources.setContext(new FileResources.FileResourcesContext());
         }
 
         @Test
@@ -115,7 +114,6 @@ public class RunTest {
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/run/all/result");
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/run/all/dataset");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             RunTest.clean("target/test-temp/run/all");
             RunTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/run/all/base/src/test/resources/yo/dbunitcli/application/settings");
             RunTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/run/all/dataset/src/test/resources/yo/dbunitcli/application/src");
@@ -155,7 +153,6 @@ public class RunTest {
             newProperty.putAll(RunTest.backup);
             newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/run/base");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             RunTest.clean("target/test-temp/run/base");
             RunTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/run/base/src/test/resources/yo/dbunitcli/application");
             final Replace replace = new Replace();
@@ -193,7 +190,6 @@ public class RunTest {
             newProperty.putAll(RunTest.backup);
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/run/result");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             RunTest.clean("target/test-temp/run/result");
         }
 
@@ -207,7 +203,6 @@ public class RunTest {
             newProperty.putAll(RunTest.backup);
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/run/dataset");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             RunTest.clean("target/test-temp/run/dataset");
             RunTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/run/dataset/src/test/resources/yo/dbunitcli/application/src");
             RunTest.copy("src/test/resources/yo/dbunitcli/application/expect", "target/test-temp/run/dataset/src/test/resources/yo/dbunitcli/application/expect");

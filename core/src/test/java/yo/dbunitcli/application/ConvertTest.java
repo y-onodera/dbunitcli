@@ -71,7 +71,6 @@ public class ConvertTest {
         @AfterAll
         static void restore() {
             System.setProperties(backup);
-            FileResources.setContext(new FileResources.FileResourcesContext());
         }
 
         @Test
@@ -1078,7 +1077,6 @@ public class ConvertTest {
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/convert/all/result");
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/convert/all/dataset");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             ConvertTest.clean("target/test-temp/convert/all");
             ConvertTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/convert/all/base/src/test/resources/yo/dbunitcli/application/settings");
             ConvertTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/convert/all/dataset/src/test/resources/yo/dbunitcli/application/src");
@@ -1098,7 +1096,6 @@ public class ConvertTest {
             newProperty.putAll(ConvertTest.backup);
             newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/convert/base");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             ConvertTest.clean("target/test-temp/convert/base");
             ConvertTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/convert/base/src/test/resources/yo/dbunitcli/application");
         }
@@ -1117,7 +1114,6 @@ public class ConvertTest {
             newProperty.putAll(ConvertTest.backup);
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/convert/result");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             ConvertTest.clean("target/test-temp/convert/result");
         }
 
@@ -1135,7 +1131,6 @@ public class ConvertTest {
             newProperty.putAll(ConvertTest.backup);
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/convert/dataset");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             ConvertTest.clean("target/test-temp/convert/dataset");
             ConvertTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/convert/dataset/src/test/resources/yo/dbunitcli/application/src");
         }

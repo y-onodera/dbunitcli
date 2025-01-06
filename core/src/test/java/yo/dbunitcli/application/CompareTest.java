@@ -56,7 +56,6 @@ public class CompareTest {
         @AfterAll
         public static void restore() {
             System.setProperties(backup);
-            FileResources.setContext(new FileResources.FileResourcesContext());
         }
 
         @Test
@@ -201,7 +200,6 @@ public class CompareTest {
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/compare/all/result");
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/compare/all/dataset");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             CompareTest.clean("target/test-temp/compare/all");
             CompareTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/compare/all/base/src/test/resources/yo/dbunitcli/application/settings");
             CompareTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/compare/all/dataset/src/test/resources/yo/dbunitcli/application/src");
@@ -234,7 +232,6 @@ public class CompareTest {
             newProperty.putAll(CompareTest.backup);
             newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/compare/base");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             CompareTest.clean("target/test-temp/compare/base");
             CompareTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/compare/base/src/test/resources/yo/dbunitcli/application");
             final Replace replace = new Replace();
@@ -266,7 +263,6 @@ public class CompareTest {
             newProperty.putAll(CompareTest.backup);
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/compare/result");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             CompareTest.clean("target/test-temp/compare/result");
         }
 
@@ -280,7 +276,6 @@ public class CompareTest {
             newProperty.putAll(CompareTest.backup);
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/compare/dataset");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             CompareTest.clean("target/test-temp/compare/dataset");
             CompareTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/compare/dataset/src/test/resources/yo/dbunitcli/application/src");
             CompareTest.copy("src/test/resources/yo/dbunitcli/application/expect", "target/test-temp/compare/dataset/src/test/resources/yo/dbunitcli/application/expect");

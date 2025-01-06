@@ -53,7 +53,6 @@ public class ParameterizeTest {
         @AfterAll
         static void restore() {
             System.setProperties(backup);
-            FileResources.setContext(new FileResources.FileResourcesContext());
         }
 
         @Test
@@ -127,7 +126,6 @@ public class ParameterizeTest {
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/parameterize/all/result");
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/parameterize/all/dataset");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             ParameterizeTest.clean("target/test-temp/parameterize/all");
             ParameterizeTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/parameterize/all/base/src/test/resources/yo/dbunitcli/application/settings");
             ParameterizeTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/parameterize/all/dataset/src/test/resources/yo/dbunitcli/application/src");
@@ -147,7 +145,6 @@ public class ParameterizeTest {
             newProperty.putAll(ParameterizeTest.backup);
             newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/parameterize/base");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             ParameterizeTest.clean("target/test-temp/parameterize/base");
             ParameterizeTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/parameterize/base/src/test/resources/yo/dbunitcli/application");
         }
@@ -166,7 +163,6 @@ public class ParameterizeTest {
             newProperty.putAll(ParameterizeTest.backup);
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/parameterize/result");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             ParameterizeTest.clean("target/test-temp/parameterize/result");
         }
 
@@ -184,7 +180,6 @@ public class ParameterizeTest {
             newProperty.putAll(ParameterizeTest.backup);
             newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/parameterize/dataset");
             System.setProperties(newProperty);
-            FileResources.setContext(new FileResources.FileResourcesContext());
             ParameterizeTest.clean("target/test-temp/parameterize/dataset");
             ParameterizeTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/parameterize/dataset/src/test/resources/yo/dbunitcli/application/src");
         }
