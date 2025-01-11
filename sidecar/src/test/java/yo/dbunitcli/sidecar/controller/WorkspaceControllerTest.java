@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
+import java.io.File;
+
 @MicronautTest
 @Property(name = FileResources.PROPERTY_WORKSPACE, value = "src/test/resources/workspace/sample")
 @Property(name = FileResources.PROPERTY_DATASET_BASE, value = "dataset")
@@ -30,7 +32,15 @@ class WorkspaceControllerTest {
     public void testList() {
         final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/workspace/resources"));
         System.out.println(jsonResponse);
-        Assertions.assertEquals("{\"parameterList\":{\"convert\":[\"csvToXlsx\"],\"compare\":[],\"generate\":[],\"run\":[],\"parameterize\":[]},\"resources\":{},\"context\":{\"workspace\":\"src/test/resources/workspace/sample\",\"datasetBase\":\"dataset\",\"resultBase\":\"target/resources\",\"settingBase\":\"src\\\\test\\\\resources\\\\workspace\\\\sample\\\\resources\\\\setting\",\"templateBase\":\"src\\\\test\\\\resources\\\\workspace\\\\sample\\\\resources\\\\template\",\"jdbcBase\":\"src\\\\test\\\\resources\\\\workspace\\\\sample\\\\resources\\\\jdbc\",\"xlsxSchemaBase\":\"src\\\\test\\\\resources\\\\workspace\\\\sample\\\\resources\\\\xlsxschema\"}}", jsonResponse);
+        Assertions.assertEquals(String.format("{\"parameterList\":{\"convert\":[\"csvToXlsx\"],\"compare\":[],\"generate\":[],\"run\":[],\"parameterize\":[]},\"resources\":{},\"context\":{\"workspace\":\"%s\",\"datasetBase\":\"%s\",\"resultBase\":\"%s\",\"settingBase\":\"%s\",\"templateBase\":\"%s\",\"jdbcBase\":\"%s\",\"xlsxSchemaBase\":\"%s\"}}"
+                , new File("src/test/resources/workspace/sample").getAbsolutePath().replace("\\", "\\\\")
+                , new File("dataset").getAbsolutePath().replace("\\", "\\\\")
+                , new File("target/resources").getAbsolutePath().replace("\\", "\\\\")
+                , new File("src/test/resources/workspace/sample/resources/setting").getAbsolutePath().replace("\\", "\\\\")
+                , new File("src/test/resources/workspace/sample/resources/template").getAbsolutePath().replace("\\", "\\\\")
+                , new File("src/test/resources/workspace/sample/resources/jdbc").getAbsolutePath().replace("\\", "\\\\")
+                , new File("src/test/resources/workspace/sample/resources/xlsxschema").getAbsolutePath().replace("\\", "\\\\")
+        ), jsonResponse);
     }
 
 }

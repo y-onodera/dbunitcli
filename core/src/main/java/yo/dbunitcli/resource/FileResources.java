@@ -39,34 +39,34 @@ public record FileResources() {
         }
     }
 
+    public static File searchWorkspace(final String path) {
+        return FileResources.searchInOrder(path, baseDir().toPath().normalize().toString(), File::new);
+    }
+
     public static File searchDatasetBase(final String path) {
-        return FileResources.searchInOrder(path, getDatasetBase(), FileResources::searchWorkspace);
+        return FileResources.searchInOrder(path, datasetDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
     public static File searchSetting(final String settingPath) {
-        return FileResources.searchInOrder(settingPath, getSettingBase(), FileResources::searchWorkspace);
+        return FileResources.searchInOrder(settingPath, settingDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
     public static File searchTemplate(final String templatePath) {
         if (Strings.isEmpty(templatePath)) {
             return null;
         }
-        return FileResources.searchInOrder(templatePath, getTemplateBase(), FileResources::searchWorkspace);
+        return FileResources.searchInOrder(templatePath, templateFileDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
     public static File searchJdbc(final String jdbcPath) {
-        return FileResources.searchInOrder(jdbcPath, getJdbcBase(), FileResources::searchWorkspace);
+        return FileResources.searchInOrder(jdbcPath, jdbcPropDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
     public static File searchXlsxSchema(final String xlsxSchemaPath) {
         if (Strings.isEmpty(xlsxSchemaPath)) {
             return null;
         }
-        return FileResources.searchInOrder(xlsxSchemaPath, getXlsxSchemaBase(), FileResources::searchWorkspace);
-    }
-
-    public static File searchWorkspace(final String path) {
-        return FileResources.searchInOrder(path, getWorkspace(), File::new);
+        return FileResources.searchInOrder(xlsxSchemaPath, xlsxSchemaDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
     private static File searchInOrder(final String path, final String parent, final Function<String, File> next) {
@@ -93,52 +93,38 @@ public record FileResources() {
     }
 
     public static File resultDir() {
-        final String resultBase = getResultBase();
-        return Strings.isNotEmpty(resultBase)
-                ? new File(resultBase)
-                : FileResources.baseDir();
+        return Optional.ofNullable(System.getProperty(PROPERTY_RESULT_BASE))
+                .map(File::new)
+                .orElse(FileResources.baseDir());
     }
 
     public static File datasetDir() {
-        final String resultBase = getDatasetBase();
-        return Strings.isNotEmpty(resultBase)
-                ? new File(resultBase)
-                : FileResources.baseDir();
+        return Optional.ofNullable(System.getProperty(PROPERTY_DATASET_BASE))
+                .map(File::new)
+                .orElse(FileResources.baseDir());
     }
 
     public static File baseDir() {
-        return Optional.of(getWorkspace())
+        return Optional.ofNullable(System.getProperty(PROPERTY_WORKSPACE))
                 .filter(it -> !it.isEmpty())
                 .map(File::new)
                 .orElse(new File("."));
     }
 
-    public static String getWorkspace() {
-        return Optional.ofNullable(System.getProperty(PROPERTY_WORKSPACE)).orElse("");
+    public static File settingDir() {
+        return new File(baseDir(), "resources/setting");
     }
 
-    public static String getDatasetBase() {
-        return Optional.ofNullable(System.getProperty(PROPERTY_DATASET_BASE)).orElse("");
+    public static File templateFileDir() {
+        return new File(baseDir(), "resources/template");
     }
 
-    public static String getResultBase() {
-        return Optional.ofNullable(System.getProperty(PROPERTY_RESULT_BASE)).orElse("");
+    public static File jdbcPropDir() {
+        return new File(baseDir(), "resources/jdbc");
     }
 
-    public static String getSettingBase() {
-        return new File(getWorkspace(), "resources/setting").getPath();
-    }
-
-    public static String getTemplateBase() {
-        return new File(getWorkspace(), "resources/template").getPath();
-    }
-
-    public static String getJdbcBase() {
-        return new File(getWorkspace(), "resources/jdbc").getPath();
-    }
-
-    public static String getXlsxSchemaBase() {
-        return new File(getWorkspace(), "resources/xlsxschema").getPath();
+    public static File xlsxSchemaDir() {
+        return new File(baseDir(), "resources/xlsxschema");
     }
 
 }

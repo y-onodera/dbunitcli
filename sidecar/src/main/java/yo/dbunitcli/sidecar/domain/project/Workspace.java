@@ -35,13 +35,13 @@ public record Workspace(Path path, Options options, Resources resources) {
         result.setResources(resources);
         final ContextDto context = new ContextDto();
         result.setContext(context);
-        context.setWorkspace(FileResources.getWorkspace());
-        context.setDatasetBase(FileResources.getDatasetBase());
-        context.setResultBase(FileResources.getResultBase());
-        context.setSettingBase(FileResources.getSettingBase());
-        context.setTemplateBase(FileResources.getTemplateBase());
-        context.setJdbcBase(FileResources.getJdbcBase());
-        context.setXlsxSchemaBase(FileResources.getXlsxSchemaBase());
+        context.setWorkspace(FileResources.baseDir().getAbsolutePath());
+        context.setDatasetBase(FileResources.datasetDir().getAbsolutePath());
+        context.setResultBase(FileResources.resultDir().getAbsolutePath());
+        context.setSettingBase(FileResources.settingDir().getAbsolutePath());
+        context.setTemplateBase(FileResources.templateFileDir().getAbsolutePath());
+        context.setJdbcBase(FileResources.jdbcPropDir().getAbsolutePath());
+        context.setXlsxSchemaBase(FileResources.xlsxSchemaDir().getAbsolutePath());
         return result;
     }
 
