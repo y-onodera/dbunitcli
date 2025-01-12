@@ -55,5 +55,5 @@ export class ParameterList {
     }
 }
 export type ResourcesSettings = {
-    datasetSettings: []
+    datasetSettings: string[]
 }
