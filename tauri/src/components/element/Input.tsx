@@ -30,6 +30,7 @@ export function ControllTextBox(props: {
             value={props.value}
             onChange={props.handleChange}
             onBlur={ev => props.handleBlur?.(ev)}
+            autoComplete={props.list ? "off" : "on"}
         />
     )
 }
