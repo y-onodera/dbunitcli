@@ -116,7 +116,7 @@ public record GenerateOption(
         result.put("-generateType", this.generateType, GenerateType.class);
         if (!this.generateType.isFixedTemplate()) {
             result.put("-unit", this.unit, ParameterUnit.class)
-                    .putFile("-template", Strings.isNotEmpty(this.template) ? new File(this.template) : null, true);
+                    .putFile("-template", this.template, true, BaseDir.TEMPLATE);
         }
         final CommandLineArgsBuilder srcComponent = this.srcData.toCommandLineArgsBuilder();
         switch (this.generateType) {
@@ -136,7 +136,7 @@ public record GenerateOption(
         if (!this.generateType.isFixedTemplate()) {
             result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
         }
-        result.putDir("-result", Strings.isNotEmpty(this.resultDir) ? new File(this.resultDir) : null)
+        result.putDir("-result", this.resultDir, BaseDir.RESULT)
                 .put("-resultPath", this.resultPath);
         if (!(this.generateType.isAny(GenerateType.xlsx, GenerateType.xls))) {
             result.put("-outputEncoding", this.outputEncoding);

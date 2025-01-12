@@ -6,8 +6,6 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
-import java.io.File;
-
 public record TemplateRenderOption(
         String prefix
         , String encoding
@@ -38,7 +36,7 @@ public record TemplateRenderOption(
     public CommandLineArgsBuilder toCommandLineArgsBuilder() {
         return new CommandLineArgsBuilder(this.getPrefix())
                 .put("-encoding", this.encoding)
-                .putFile("-templateGroup", Strings.isNotEmpty(this.templateGroup) ? new File(this.templateGroup) : null)
+                .putFile("-templateGroup", this.templateGroup, BaseDir.TEMPLATE)
                 .put("-templateParameterAttribute", this.templateParameterAttribute)
                 .put("-templateVarStart", this.templateVarStart)
                 .put("-templateVarStop", this.templateVarStop);

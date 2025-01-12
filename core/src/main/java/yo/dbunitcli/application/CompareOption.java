@@ -115,7 +115,7 @@ public record CompareOption(
             result.addComponent("imageOption", this.imageOption.toCommandLineArgs());
         }
         return result
-                .putFile("-setting", this.setting == null ? null : new File(this.setting))
+                .putFile("-setting", this.setting, BaseDir.SETTING)
                 .put("-settingEncoding", this.settingEncoding)
                 .addComponent("newData", this.newData.toCommandLineArgs())
                 .addComponent("oldData", this.oldData.toCommandLineArgs())

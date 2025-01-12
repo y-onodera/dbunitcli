@@ -1,12 +1,9 @@
 package yo.dbunitcli.application.option;
 
-import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.poi.FromJsonXlsxSchemaBuilder;
-
-import java.io.File;
 
 public record ExcelOption(String prefix, String xlsxSchemaSource) implements ComparableDataSetParamOption {
 
@@ -22,9 +19,7 @@ public record ExcelOption(String prefix, String xlsxSchemaSource) implements Com
     @Override
     public CommandLineArgsBuilder toCommandLineArgsBuilder() {
         return new CommandLineArgsBuilder(this.getPrefix())
-                .putFile("-xlsxSchema", Strings.isNotEmpty(this.xlsxSchemaSource)
-                        ? new File(this.xlsxSchemaSource)
-                        : null);
+                .putFile("-xlsxSchema", this.xlsxSchemaSource, BaseDir.XLSX_SCHEMA);
     }
 
     @Override

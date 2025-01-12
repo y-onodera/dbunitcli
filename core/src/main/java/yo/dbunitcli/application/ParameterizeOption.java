@@ -96,7 +96,7 @@ public record ParameterizeOption(
                 .put("-ignoreFail", this.ignoreFail)
                 .put("-cmd", this.cmd)
                 .put("-cmdParam", this.cmdParam)
-                .putFile("-template", Strings.isNotEmpty(this.template) ? new File(this.template) : null, true)
+                .putFile("-template", this.template, true, BaseDir.TEMPLATE)
                 .addComponent("templateOption", this.templateOption.toCommandLineArgs());
     }
 

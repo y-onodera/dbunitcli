@@ -23,6 +23,10 @@ public interface Option {
         TEXT, ENUM, FLG, FILE, DIR, FILE_OR_DIR,
     }
 
+    enum BaseDir {
+        WORKSPACE, COMMAND_PARAM, DATASET, RESULT, SETTING, TEMPLATE, JDBC, XLSX_SCHEMA,
+    }
+
     enum FilterType {
         ANY, INCLUDE, EXCLUDE
     }
@@ -178,74 +182,61 @@ public interface Option {
         }
 
         public CommandLineArgsBuilder put(final String key, final char value) {
-            this.put(key, value, false);
-            return this;
+            return this.put(key, value, false);
         }
 
         public CommandLineArgsBuilder put(final String key, final boolean value) {
-            this.put(key, Boolean.toString(value), new Attribute(ParamType.FLG, false));
-            return this;
+            return this.put(key, Boolean.toString(value), new Attribute(ParamType.FLG, false));
         }
 
         public CommandLineArgsBuilder put(final String key, final char value, final boolean required) {
-            this.put(key, String.valueOf(value), new Attribute(ParamType.TEXT, required));
-            return this;
+            return this.put(key, String.valueOf(value), new Attribute(ParamType.TEXT, required));
         }
 
         public CommandLineArgsBuilder put(final String key, final String value) {
-            this.put(key, value, false);
-            return this;
+            return this.put(key, value, false);
         }
 
         public CommandLineArgsBuilder put(final String key, final String value, final boolean required) {
-            this.put(key, value, new Attribute(ParamType.TEXT, required));
-            return this;
+            return this.put(key, value, new Attribute(ParamType.TEXT, required));
         }
 
-        public CommandLineArgsBuilder putFile(final String key, final File value) {
-            this.putFile(key, value, false);
-            return this;
+        public CommandLineArgsBuilder putFile(final String key, final String value, final BaseDir defaultPath) {
+            return this.putFile(key, value, false, defaultPath);
         }
 
-        public CommandLineArgsBuilder putFile(final String key, final File value, final boolean required) {
-            this.put(key, value == null ? "" : this.getSlashSeparatorPath(value), new Attribute(ParamType.FILE, required));
-            return this;
+        public CommandLineArgsBuilder putFile(final String key, final String value, final boolean required, final BaseDir defaultPath) {
+            return this.putFile(key, value, new Attribute(ParamType.FILE, required, defaultPath));
         }
 
-        public CommandLineArgsBuilder putDir(final String key, final File value) {
-            this.putDir(key, value, false);
-            return this;
+        public CommandLineArgsBuilder putDir(final String key, final String value, final BaseDir defaultPath) {
+            return this.putFile(key, value, new Attribute(ParamType.DIR, false, defaultPath));
         }
 
-        public CommandLineArgsBuilder putDir(final String key, final File value, final boolean required) {
-            this.put(key, value == null ? "" : this.getSlashSeparatorPath(value), new Attribute(ParamType.DIR, required));
-            return this;
+        public CommandLineArgsBuilder putFileOrDir(final String key, final String value, final boolean required, final BaseDir defaultPath) {
+            return this.putFile(key, value, new Attribute(ParamType.FILE_OR_DIR, required, defaultPath));
         }
 
-        public CommandLineArgsBuilder putFileOrDir(final String key, final File value, final boolean required) {
-            this.put(key, value == null ? "" : this.getSlashSeparatorPath(value), new Attribute(ParamType.FILE_OR_DIR, required));
-            return this;
+        public CommandLineArgsBuilder putFile(final String key, final String value, final Attribute attribute) {
+            return this.put(key, Strings.isEmpty(value) ? "" : this.getSlashSeparatorPath(new File(value)), attribute);
         }
 
         public <T extends Enum<?>> CommandLineArgsBuilder put(final String key, final T value, final Class<T> type) {
-            this.put(key, value, type, false);
-            return this;
+            return this.put(key, value, type, false);
         }
 
         public <T extends Enum<?>> CommandLineArgsBuilder put(final String key, final T value, final Class<T> type, final boolean required) {
-            this.put(key, value, type, Filter.any(), required);
-            return this;
+            return this.put(key, value, type, Filter.any(), required);
         }
 
         public <T extends Enum<?>> CommandLineArgsBuilder put(final String key, final T value, final Class<T> type, final Filter<T> filter, final boolean required) {
-            this.put(key, value == null ? "" : value.toString(), new Attribute(ParamType.ENUM,
+            return this.put(key, value == null ? "" : value.toString(), new Attribute(ParamType.ENUM,
                     Arrays.stream(type.getEnumConstants())
                             .filter(filter)
                             .map(Object::toString)
                             .collect(Collectors.toCollection(ArrayList::new))
                     , required)
             );
-            return this;
         }
 
         public CommandLineArgsBuilder put(final String key, final String value, final Attribute type) {
@@ -275,22 +266,19 @@ public interface Option {
 
     record Attribute(ParamType type
             , ArrayList<String> selectOption
-            , boolean required) {
+            , boolean required
+            , BaseDir defaultPath) {
 
         public Attribute(final ParamType type, final boolean required) {
-            this(type, new ArrayList<>(), required);
+            this(type, new ArrayList<>(), required, BaseDir.WORKSPACE);
         }
 
-        public ParamType getType() {
-            return this.type;
+        public Attribute(final ParamType type, final boolean required, final BaseDir defaultPath) {
+            this(type, new ArrayList<>(), required, defaultPath);
         }
 
-        public ArrayList<String> getSelectOption() {
-            return this.selectOption;
-        }
-
-        public boolean isRequired() {
-            return this.required;
+        public Attribute(final ParamType type, final ArrayList<String> selectOption, final boolean required) {
+            this(type, selectOption, required, BaseDir.WORKSPACE);
         }
     }
 

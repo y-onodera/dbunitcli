@@ -66,7 +66,7 @@ public record DataSetLoadOption(
         if (this.srcType == null || this.srcType == DataSourceType.none) {
             return result;
         }
-        result.putFileOrDir("-src", this.src == null ? null : new File(this.src), true);
+        result.putFileOrDir("-src", this.src, true, BaseDir.DATASET);
         if (this.dataSetParam == null) {
             final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory()
                     .create(this.getPrefix(), this.srcType, new DataSetLoadDto());
@@ -78,7 +78,7 @@ public record DataSetLoadOption(
                 .put("-regTableExclude", this.regTableExclude)
                 .put("-loadData", this.loadData)
                 .put("-includeMetaData", this.includeMetaData)
-                .putFile("-setting", this.setting == null ? null : new File(this.setting))
+                .putFile("-setting", this.setting, BaseDir.SETTING)
                 .put("-settingEncoding", this.settingEncoding);
     }
 

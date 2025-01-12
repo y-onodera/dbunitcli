@@ -5,7 +5,6 @@ import yo.dbunitcli.application.dto.JdbcDto;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
@@ -39,7 +38,7 @@ public record JdbcOption(
     @Override
     public CommandLineArgsBuilder toCommandLineArgsBuilder() {
         return new CommandLineArgsBuilder(this.getPrefix())
-                .putFile("-jdbcProperties", Strings.isNotEmpty(this.jdbcProperties) ? new File(this.jdbcProperties) : null)
+                .putFile("-jdbcProperties", this.jdbcProperties, BaseDir.JDBC)
                 .put("-jdbcUrl", this.jdbcUrl)
                 .put("-jdbcUser", this.jdbcUser)
                 .put("-jdbcPass", this.jdbcPass);

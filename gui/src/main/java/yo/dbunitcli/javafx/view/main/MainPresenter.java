@@ -193,7 +193,7 @@ public class MainPresenter {
         validator.validProperty().addListener((observable, oldVal, newVal) -> this.exec.setDisable(!newVal));
         for (final String key : option.keySet()) {
             final Option.Arg entry = option.getArg(key);
-            if (entry.attribute().getType() == Option.ParamType.ENUM) {
+            if (entry.attribute().type() == Option.ParamType.ENUM) {
                 this.setInputFieldsEnumValue(selected, row, validator, key, entry);
             } else {
                 this.setInputFieldsTextValue(option, row, validator, key, entry);
@@ -208,18 +208,18 @@ public class MainPresenter {
         text.setText(option.get(key));
         text.setFloatingText(key);
         text.setFloatMode(FloatMode.INLINE);
-        if (entry.attribute().isRequired()) {
+        if (entry.attribute().required()) {
             final VBox vbox = this.addRequiredValidation(validator, text);
             this.commandPane.add(vbox, "cell 0 " + row);
         } else {
             this.commandPane.add(text, "cell 0 " + row);
         }
         this.argument.put(key, text);
-        if (entry.attribute().getType() == Option.ParamType.DIR) {
+        if (entry.attribute().type() == Option.ParamType.DIR) {
             text.setTrailingIcon(this.createDirectoryChoiceButton(text));
-        } else if (entry.attribute().getType() == Option.ParamType.FILE) {
+        } else if (entry.attribute().type() == Option.ParamType.FILE) {
             text.setTrailingIcon(this.createFileChoiceButton(text));
-        } else if (entry.attribute().getType() == Option.ParamType.FILE_OR_DIR) {
+        } else if (entry.attribute().type() == Option.ParamType.FILE_OR_DIR) {
             final HBox hBox = new HBox();
             hBox.getChildren().addAll(this.createDirectoryChoiceButton(text), this.createFileChoiceButton(text));
             hBox.setSpacing(5);
@@ -232,13 +232,13 @@ public class MainPresenter {
             this.argument.put(key, selected);
         } else {
             final MFXComboBox<String> select = new MFXComboBox<>(FXCollections.observableArrayList(
-                    entry.attribute().getSelectOption()
+                    entry.attribute().selectOption()
             ));
             select.setFloatingText(key);
             select.setFloatMode(FloatMode.INLINE);
             select.setEditable(true);
             select.getSelectionModel().selectItem(entry.value());
-            if (entry.attribute().isRequired()) {
+            if (entry.attribute().required()) {
                 final VBox vbox = this.addRequiredValidation(validator, select);
                 this.commandPane.add(vbox, "cell 0 " + row);
                 select.getSelectionModel().selectedItemProperty()
