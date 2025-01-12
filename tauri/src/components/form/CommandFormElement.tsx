@@ -57,10 +57,7 @@ export default function CommandFormElements(prop: CommandParams) {
 	);
 }
 function Text(prop: Prop) {
-	const [path, setPath] = useState("");
-	useEffect(() => {
-		setPath(prop.element.value);
-	}, [prop.element]);
+	const [path, setPath] = useState(prop.element.value);
 	return (
 		<div>
 			<InputLabel
@@ -113,7 +110,7 @@ function SettingEdit(prop: FileProp) {
 			<datalist id={`${getId(prop.prefix, prop.element.name)}_list`} >
 				{settings?.map((setting) => {
 					return (
-						<option key={setting} value={setting}>{setting}</option>
+						<option key={setting} value={setting} />
 					)
 				})}
 			</datalist>
