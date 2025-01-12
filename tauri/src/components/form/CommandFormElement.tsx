@@ -2,9 +2,10 @@ import { open } from "@tauri-apps/api/dialog";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { useEnviroment } from "../../context/EnviromentProvider";
 import { loadMetadataSettings, saveMetadataSettings, useMetadataSettings, useSetMetadataSettings } from "../../context/MetadataSettingsProvider";
-import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
-import type { CommandParam, CommandParams } from "../../model/CommandParam";
+import { useResourcesSettings, useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
+import type { Attribute, CommandParam, CommandParams } from "../../model/CommandParam";
 import type { MetadataSettings } from "../../model/MetadataSettings";
+import type { WorkspaceContext } from "../../model/WorkspaceResources";
 import { ButtonWithIcon } from "../element/Button";
 import { DirIcon, EditIcon, FileIcon } from "../element/Icon";
 import { CheckBox, ControllTextBox, InputLabel, SelectBox } from "../element/Input";
@@ -134,8 +135,9 @@ function SettingEdit(prop: FileProp) {
 	);
 };
 function FileChooser(prop: FileProp) {
+	const context = useWorkspaceContext()
 	const handleFileChooserClick = () => {
-		open().then((files) => files && prop.setPath(files as string));
+		open({ defaultPath: getPath(context, prop.element.attribute) }).then((files) => files && prop.setPath(files as string));
 	};
 	return (
 		<ButtonWithIcon
@@ -147,8 +149,9 @@ function FileChooser(prop: FileProp) {
 	);
 };
 function DirectoryChooser(prop: FileProp) {
+	const context = useWorkspaceContext()
 	const handleDirectoryChooserClick = () => {
-		open({ directory: true }).then(
+		open({ defaultPath: getPath(context, prop.element.attribute), directory: true }).then(
 			(files) => files && prop.setPath(files as string),
 		);
 	};
@@ -208,4 +211,25 @@ function getId(prefix: string, name: string): string {
 }
 function getName(prefix: string, name: string): string {
 	return prefix ? `-${prefix}.${name}` : `-${name}`;
+}
+function getPath(context: WorkspaceContext, attribute: Attribute): string {
+	if (attribute.defaultPath === "DATASET") {
+		return context.datasetBase
+	}
+	if (attribute.defaultPath === "RESULT") {
+		return context.resultBase
+	}
+	if (attribute.defaultPath === "SETTING") {
+		return context.settingBase
+	}
+	if (attribute.defaultPath === "TEMPLATE") {
+		return context.templateBase
+	}
+	if (attribute.defaultPath === "JDBC") {
+		return context.jdbcBase
+	}
+	if (attribute.defaultPath === "XLSX_SCHEMA") {
+		return context.xlsxSchemaBase
+	}
+	return context.workspace
 }

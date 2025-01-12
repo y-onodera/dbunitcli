@@ -1,6 +1,16 @@
 export type WorkspaceResources = {
     parameterList: ParameterListBuilder;
     resources: ResourcesSettings;
+    context: WorkspaceContext;
+}
+export type WorkspaceContext = {
+    workspace: string;
+    datasetBase: string;
+    resultBase: string;
+    settingBase: string;
+    templateBase: string;
+    jdbcBase: string;
+    xlsxSchemaBase: string;
 }
 export type ParameterListBuilder = {
     convert: string[];

@@ -1,9 +1,13 @@
 import { Body, ResponseType, fetch } from "@tauri-apps/api/http";
 import { type Dispatch, type ReactNode, type SetStateAction, createContext, useContext, useEffect, useState } from "react";
-import { ParameterList, type ResourcesSettings, type WorkspaceResources } from "../model/WorkspaceResources";
+import { ParameterList, type ResourcesSettings, type WorkspaceContext, type WorkspaceResources } from "../model/WorkspaceResources";
 import { useEnviroment } from "./EnviromentProvider";
 import { useSelectParameter, useSetSelectParameter } from "./SelectParameterProvider";
 
+const workspaceContext = createContext<WorkspaceContext>({} as WorkspaceContext);
+const setWorkspaceContext = createContext<Dispatch<SetStateAction<WorkspaceContext>>>(
+	() => undefined,
+);
 const parameterListContext = createContext<ParameterList>({} as ParameterList);
 const setParameterListContext = createContext<Dispatch<SetStateAction<ParameterList>>>(
 	() => undefined,
@@ -15,6 +19,7 @@ const setResourcesSettingsContext = createContext<Dispatch<SetStateAction<Resour
 export default function WorkspaceResourcesProvider(props: {
 	children: ReactNode;
 }) {
+	const [context, setContext] = useState<WorkspaceContext>({} as WorkspaceContext);
 	const [paramterList, setParameterList] = useState<ParameterList>(ParameterList.create());
 	const [resourcesSettings, setResourcesSettings] = useState<ResourcesSettings>({} as ResourcesSettings);
 	const environment = useEnviroment();
@@ -31,6 +36,7 @@ export default function WorkspaceResourcesProvider(props: {
 						throw new Error(response.data as string);
 					}
 					const resources = response.data as WorkspaceResources
+					setContext(resources.context);
 					setParameterList(ParameterList.from(resources.parameterList));
 					setResourcesSettings(resources.resources)
 				})
@@ -39,17 +45,22 @@ export default function WorkspaceResourcesProvider(props: {
 		workspaceReload();
 	}, [environment]);
 	return (
-		<parameterListContext.Provider value={paramterList}>
-			<setParameterListContext.Provider value={setParameterList}>
-				<resourcesSettingsContext.Provider value={resourcesSettings}>
-					<setResourcesSettingsContext.Provider value={setResourcesSettings}>
-						{props.children}
-					</setResourcesSettingsContext.Provider>
-				</resourcesSettingsContext.Provider>
-			</setParameterListContext.Provider>
-		</parameterListContext.Provider>
+		<workspaceContext.Provider value={context}>
+			<setWorkspaceContext.Provider value={setContext}>
+				<parameterListContext.Provider value={paramterList}>
+					<setParameterListContext.Provider value={setParameterList}>
+						<resourcesSettingsContext.Provider value={resourcesSettings}>
+							<setResourcesSettingsContext.Provider value={setResourcesSettings}>
+								{props.children}
+							</setResourcesSettingsContext.Provider>
+						</resourcesSettingsContext.Provider>
+					</setParameterListContext.Provider>
+				</parameterListContext.Provider>
+			</setWorkspaceContext.Provider>
+		</workspaceContext.Provider>
 	);
 }
+export const useWorkspaceContext = () => useContext(workspaceContext);
 export const useParameterList = () => useContext(parameterListContext);
 export const useSetParameterList = () => useContext(setParameterListContext);
 export const useResourcesSettings = () => useContext(resourcesSettingsContext);

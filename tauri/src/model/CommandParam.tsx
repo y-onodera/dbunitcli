@@ -42,10 +42,12 @@ export class SelectParameter {
 		return this.parameterize;
 	}
 }
+export type DefaultPath = "WORKSPACE" | "DATASET" | "RESULT" | "SETTING" | "TEMPLATE" | "JDBC" | "XLSX_SCHEMA"
 export type Attribute = {
 	type: string;
 	required: boolean;
 	selectOption: string[];
+	defaultPath: DefaultPath;
 };
 export type CommandParam = {
 	name: string;
