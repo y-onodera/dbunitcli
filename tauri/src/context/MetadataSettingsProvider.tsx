@@ -19,6 +19,9 @@ export default function MetadataSettingsProvider(props: { children: ReactNode })
 export const useMetadataSettings = () => useContext(metadataSettingsContext);
 export const useSetMetadataSettings = () => useContext(setMetadataSettingsContext);
 export async function loadMetadataSettings(apiUrl: string, name: string): Promise<MetadataSettings> {
+    if (name === "") {
+        return MetadataSettings.create();
+    }
     return await fetch(`${apiUrl}metadata/load`, {
         method: "POST",
         responseType: ResponseType.JSON,

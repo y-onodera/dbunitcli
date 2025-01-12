@@ -43,13 +43,16 @@ export type MetadataSettingBuilder = {
     order?: string[]
 }
 export class MetadataSettings {
+    static create(): MetadataSettings {
+        return new MetadataSettings([new MetadataSetting({})], [new MetadataSetting({})])
+    }
     constructor(readonly settings: MetadataSetting[], readonly commonSettings: MetadataSetting[]) {
     }
 
     static build(builder: MetadataSettingsBuilder): MetadataSettings {
         return new MetadataSettings(
-            builder.settings.length > 0 ? builder.settings.map(it => new MetadataSetting(it)) : [new MetadataSetting({})]
-            , builder.commonSettings.length > 0 ? builder.commonSettings.map(it => new MetadataSetting(it)) : [new MetadataSetting({})]
+            builder.settings?.length > 0 ? builder.settings.map(it => new MetadataSetting(it)) : [new MetadataSetting({})]
+            , builder.commonSettings?.length > 0 ? builder.commonSettings.map(it => new MetadataSetting(it)) : [new MetadataSetting({})]
         );
     }
 
