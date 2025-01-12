@@ -35,13 +35,13 @@ public record Workspace(Path path, Options options, Resources resources) {
         result.setResources(resources);
         final ContextDto context = new ContextDto();
         result.setContext(context);
-        context.setWorkspace(FileResources.baseDir().getAbsolutePath());
-        context.setDatasetBase(FileResources.datasetDir().getAbsolutePath());
-        context.setResultBase(FileResources.resultDir().getAbsolutePath());
-        context.setSettingBase(FileResources.settingDir().getAbsolutePath());
-        context.setTemplateBase(FileResources.templateFileDir().getAbsolutePath());
-        context.setJdbcBase(FileResources.jdbcPropDir().getAbsolutePath());
-        context.setXlsxSchemaBase(FileResources.xlsxSchemaDir().getAbsolutePath());
+        context.setWorkspace(FileResources.baseDir().toPath().normalize().toAbsolutePath().toString());
+        context.setDatasetBase(FileResources.datasetDir().toPath().normalize().toAbsolutePath().toString());
+        context.setResultBase(FileResources.resultDir().toPath().normalize().toAbsolutePath().toString());
+        context.setSettingBase(FileResources.settingDir().toPath().normalize().toAbsolutePath().toString());
+        context.setTemplateBase(FileResources.templateFileDir().toPath().normalize().toAbsolutePath().toString());
+        context.setJdbcBase(FileResources.jdbcPropDir().toPath().normalize().toAbsolutePath().toString());
+        context.setXlsxSchemaBase(FileResources.xlsxSchemaDir().toPath().normalize().toAbsolutePath().toString());
         return result;
     }
 
