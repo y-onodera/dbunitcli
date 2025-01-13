@@ -50,15 +50,15 @@ public class MetaDataSettingsController {
 
     @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
     public String save(@Body final MetaDataRequestDto body) throws IOException {
-        JsonObject jsonObject = Json.createReader(new StringReader(JsonMapper.createDefault()
+        final JsonObject jsonObject = Json.createReader(new StringReader(JsonMapper.createDefault()
                         .writeValueAsString(body.getInput())))
                 .readObject();
         // test parse success
         new FromJsonTableSeparatorsBuilder("UTF-8")
                 .configureSetting(jsonObject)
                 .build();
-        StringWriter stringWriter = new StringWriter();
-        JsonWriter jsonWriter = Json.createWriterFactory(
+        final StringWriter stringWriter = new StringWriter();
+        final JsonWriter jsonWriter = Json.createWriterFactory(
                         Collections.singletonMap(JsonGenerator.PRETTY_PRINTING, true))
                 .createWriter(stringWriter);
         jsonWriter.writeObject(jsonObject);
