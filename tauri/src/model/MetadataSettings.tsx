@@ -317,8 +317,12 @@ function target(setting: MetadataSetting): string {
 function replaceArray(array: string[], newOne: string, index: number): string[] {
     let result = [...array]
     if (result.length > index) {
-        result[index] = newOne
-    } else {
+        if (newOne) {
+            result[index] = newOne
+        } else {
+            result = removeArray(result, index)
+        }
+    } else if (newOne) {
         result = result.concat(newOne)
     }
     return result
