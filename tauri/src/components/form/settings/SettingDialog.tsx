@@ -234,7 +234,7 @@ function Arrays(props: {
             <div className="grid grid-cols-5 justify-center pb-2">
                 {(props.values.length > 0 && props.values[props.values.length - 1]) &&
                     <div className="col-start-2">
-                        <AddButton handleClick={() => props.handleChange("", props.values.length + 1)} />
+                        <AddButton handleClick={() => props.handleChange("new item", props.values.length + 1)} />
                     </div>
                 }
             </div>

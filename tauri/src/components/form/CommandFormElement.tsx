@@ -89,19 +89,18 @@ function Text(prop: Prop) {
 };
 function SettingEdit(prop: FileProp) {
 	const environment = useEnviroment();
-	const [dialogEdit, setDialogEdit] = useState(false);
 	const metadataSettings = useMetadataSettings();
 	const setMetadataSettings = useSetMetadataSettings();
 	const settings = useResourcesSettings().datasetSettings;
+	const [dialogEdit, setDialogEdit] = useState(false);
 	const handleDialogOpen = () => {
 		loadMetadataSettings(environment.apiUrl, prop.path ?? "")
 			.then((settings: MetadataSettings) => setMetadataSettings(settings))
 			.catch((ex) => alert(ex));
 		setDialogEdit(true);
 	};
-	const [text, setText] = useState(prop.path);
 	const handleSave = (path: string) => {
-		saveMetadataSettings(environment.apiUrl, text, metadataSettings);
+		saveMetadataSettings(environment.apiUrl, path, metadataSettings);
 		prop.setPath(path)
 		setDialogEdit(false);
 	};
@@ -116,8 +115,8 @@ function SettingEdit(prop: FileProp) {
 			</datalist>
 			{dialogEdit && (
 				<SettingsDaialog
-					fileName={text}
-					setFileName={setText}
+					fileName={prop.path}
+					setFileName={prop.setPath}
 					handleDialogClose={() => setDialogEdit(false)}
 					handleSave={handleSave}
 				/>
