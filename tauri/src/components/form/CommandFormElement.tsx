@@ -1,4 +1,6 @@
 import { open } from "@tauri-apps/api/dialog";
+import { exists } from "@tauri-apps/api/fs";
+import { isAbsolute, sep } from "@tauri-apps/api/path";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { useEnviroment } from "../../context/EnviromentProvider";
 import { loadMetadataSettings, saveMetadataSettings, useMetadataSettings, useSetMetadataSettings } from "../../context/MetadataSettingsProvider";
@@ -101,7 +103,7 @@ function SettingEdit(prop: FileProp) {
 	};
 	const handleSave = (path: string) => {
 		saveMetadataSettings(environment.apiUrl, path, metadataSettings);
-		prop.setPath(path)
+		prop.setPath(path);
 		setDialogEdit(false);
 	};
 	return (
@@ -133,7 +135,11 @@ function SettingEdit(prop: FileProp) {
 function FileChooser(prop: FileProp) {
 	const context = useWorkspaceContext()
 	const handleFileChooserClick = () => {
-		open({ defaultPath: getPath(context, prop.element.attribute) }).then((files) => files && prop.setPath(files as string));
+		const getDefaultPath = async (): Promise<string> => {
+			return await isAbsolute(prop.path) ? prop.path
+				: prop.path ? getPath(context, prop.element.attribute) + sep + prop.path : getPath(context, prop.element.attribute);
+		};
+		getDefaultPath().then(defaultPath => open({ defaultPath }).then((files) => files && prop.setPath(files as string)));
 	};
 	return (
 		<ButtonWithIcon
@@ -147,9 +153,11 @@ function FileChooser(prop: FileProp) {
 function DirectoryChooser(prop: FileProp) {
 	const context = useWorkspaceContext()
 	const handleDirectoryChooserClick = () => {
-		open({ defaultPath: getPath(context, prop.element.attribute), directory: true }).then(
-			(files) => files && prop.setPath(files as string),
-		);
+		const getDefaultPath = async (): Promise<string> => {
+			return await isAbsolute(prop.path) ? prop.path
+				: prop.path ? getPath(context, prop.element.attribute) + sep + prop.path : getPath(context, prop.element.attribute);
+		};
+		getDefaultPath().then(defaultPath => open({ defaultPath, directory: true }).then((files) => files && prop.setPath(files as string)));
 	};
 	return (
 		<ButtonWithIcon
