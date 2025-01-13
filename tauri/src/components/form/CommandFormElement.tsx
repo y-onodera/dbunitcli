@@ -139,7 +139,8 @@ function FileChooser(prop: FileProp) {
 			return await isAbsolute(prop.path) ? prop.path
 				: prop.path ? getPath(context, prop.element.attribute) + sep + prop.path : getPath(context, prop.element.attribute);
 		};
-		getDefaultPath().then(defaultPath => open({ defaultPath }).then((files) => files && prop.setPath(files as string)));
+		getDefaultPath().then(defaultPath => open({ defaultPath })
+			.then((files) => files && prop.setPath((files as string).replace(getPath(context, prop.element.attribute) + sep, ""))));
 	};
 	return (
 		<ButtonWithIcon
@@ -157,7 +158,8 @@ function DirectoryChooser(prop: FileProp) {
 			return await isAbsolute(prop.path) ? prop.path
 				: prop.path ? getPath(context, prop.element.attribute) + sep + prop.path : getPath(context, prop.element.attribute);
 		};
-		getDefaultPath().then(defaultPath => open({ defaultPath, directory: true }).then((files) => files && prop.setPath(files as string)));
+		getDefaultPath().then(defaultPath => open({ defaultPath, directory: true })
+			.then((files) => files && prop.setPath((files as string).replace(getPath(context, prop.element.attribute) + sep, ""))));
 	};
 	return (
 		<ButtonWithIcon
