@@ -1,5 +1,4 @@
 import { open } from "@tauri-apps/api/dialog";
-import { exists } from "@tauri-apps/api/fs";
 import { isAbsolute, sep } from "@tauri-apps/api/path";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { useEnviroment } from "../../context/EnviromentProvider";
