@@ -65,6 +65,24 @@ public class DBIntegrationTest {
     }
 
     @Test
+    @Order(6)
+    public void exportFromDBChangeHeaderName() throws Exception {
+        Convert.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationExportChangeHeaderName.txt"});
+    }
+
+    @Test
+    @Order(6)
+    public void exportQuery() throws Exception {
+        Convert.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationQueryExport.txt"});
+    }
+
+    @Test
+    @Order(6)
+    public void exportQueryChangeHeaderName() throws Exception {
+        Convert.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationQueryExportChangeHeaderName.txt"});
+    }
+
+    @Test
     @Order(7)
     public void runSql() throws Exception {
         Run.main(new String[]{"@" + DBIntegrationTest.testResourcesDir + "/paramDBIntegrationRunDml.txt"});

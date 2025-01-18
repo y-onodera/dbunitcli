@@ -25,9 +25,9 @@ public class ExcelMappingDataSetConsumerWrapper {
         this.loadData = loadData;
     }
 
-    protected void handleSheetStart(final String tableName) {
-        this.rowsTableBuilder = this.schema.getRowsTableBuilder(tableName);
-        this.randomCellRecordBuilder = this.schema.getCellRecordBuilder(tableName);
+    protected void handleSheetStart(final String tableName, final String[] headerNames) {
+        this.rowsTableBuilder = this.schema.getRowsTableBuilder(tableName, headerNames);
+        this.randomCellRecordBuilder = this.schema.getCellRecordBuilder(tableName, headerNames);
     }
 
     protected void handleSheetEnd() {

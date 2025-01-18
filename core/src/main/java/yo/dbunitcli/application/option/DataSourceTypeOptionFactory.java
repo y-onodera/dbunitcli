@@ -9,6 +9,7 @@ public class DataSourceTypeOptionFactory {
         return switch (type) {
             case xls, xlsx -> ComparableDataSetParamOption.join(
                     new FileTraverseOption(prefix, dto)
+                    , new HeaderNameOption(prefix, dto)
                     , new ExcelOption(prefix, dto)
             );
             case csv -> ComparableDataSetParamOption.join(
@@ -32,11 +33,13 @@ public class DataSourceTypeOptionFactory {
             case csvq -> ComparableDataSetParamOption.join(
                     new FileTraverseOption(prefix, dto)
                     , new EncodingOption(prefix, dto)
+                    , new HeaderNameOption(prefix, dto)
                     , new TemplateRenderOption(prefix, dto.getTemplateRender())
             );
             case table, sql -> ComparableDataSetParamOption.join(
                     new FileTraverseOption(prefix, dto)
                     , new EncodingOption(prefix, dto)
+                    , new HeaderNameOption(prefix, dto)
                     , new JdbcLoadOption(prefix, dto)
                     , new TemplateRenderOption(prefix, dto.getTemplateRender())
             );

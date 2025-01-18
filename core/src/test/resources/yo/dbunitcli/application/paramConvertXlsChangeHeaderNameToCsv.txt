@@ -1,0 +1,5 @@
+-src=src/test/resources/yo/dbunitcli/application/src/csv2xlsx/single.xls
+-srcType=xls
+-headerName=key,col1,col2,col3
+-result=target/test-classes/yo/dbunitcli/application/convert/xls/with-header/result
+-outputEncoding=MS932

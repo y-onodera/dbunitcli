@@ -28,20 +28,30 @@ public interface XlsxSchema {
         return true;
     }
 
-    default XSSFSheetXMLHandler.SheetContentsHandler createHandler(final IDataSetConsumer consumer, final String sheetName, final boolean loadData) {
-        return new XlsxSchemaHandler(consumer, sheetName, this, loadData);
+    default XSSFSheetXMLHandler.SheetContentsHandler createHandler(final IDataSetConsumer consumer, final String sheetName, final String[] headerNames, final boolean loadData) {
+        return new XlsxSchemaHandler(consumer, sheetName, headerNames, this, loadData);
     }
 
-    default XlsxRowsToTableBuilder getRowsTableBuilder(final String sheetName) {
-        return new FirstRowAsColumnTableBuilder(sheetName);
+    default XlsxRowsToTableBuilder getRowsTableBuilder(final String sheetName, final String[] headerNames) {
+        return new FirstRowAsColumnTableBuilder(sheetName, headerNames);
     }
 
-    default XlsxCellsToTableBuilder getCellRecordBuilder(final String sheetName) {
+    default XlsxCellsToTableBuilder getCellRecordBuilder(final String sheetName, final String[] headerNames) {
         return XlsxCellsToTableBuilder.NO_TARGET;
     }
 
     default XlsxSchema addFileInfo(final File sourceFile, final String sheetName) {
         return this;
+    }
+
+    interface Builder {
+        Map<String, List<XlsxRowsTableDefine>> getRowsTableDefMap();
+
+        Map<String, List<XlsxCellsTableDefine>> getCellsTableDefMap();
+
+        default XlsxSchema build() {
+            return new SimpleImpl(this);
+        }
     }
 
     record FileInfo(String filePath, String fileName, String sheetName) {
@@ -82,14 +92,14 @@ public interface XlsxSchema {
 
             private final FileInfo fileInfo;
 
-            private AddFileInfoMetaData(final ITableMetaData tableMetaData, final FileInfo fileInfo) throws DataSetException {
-                super(tableMetaData.getTableName(), getColumns(tableMetaData), tableMetaData.getPrimaryKeys());
-                this.fileInfo = fileInfo;
-            }
-
             private static Column[] getColumns(final ITableMetaData tableMetaData) throws DataSetException {
                 return Stream.concat(Arrays.stream(tableMetaData.getColumns()), Arrays.stream(OPTION_COLUMNS))
                         .toArray(Column[]::new);
+            }
+
+            private AddFileInfoMetaData(final ITableMetaData tableMetaData, final FileInfo fileInfo) throws DataSetException {
+                super(tableMetaData.getTableName(), getColumns(tableMetaData), tableMetaData.getPrimaryKeys());
+                this.fileInfo = fileInfo;
             }
 
             public void setValueTo(final List<String> rowValues) {
@@ -113,7 +123,7 @@ public interface XlsxSchema {
         }
 
         @Override
-        public XlsxRowsToTableBuilder getRowsTableBuilder(final String sheetName) {
+        public XlsxRowsToTableBuilder getRowsTableBuilder(final String sheetName, final String[] headerNames) {
             if (this.rowsTableDefMap.containsKey(sheetName)) {
                 return new ManualRowsMappingTableBuilder(this.rowsTableDefMap.get(sheetName), this.fileInfo());
             }
@@ -121,7 +131,7 @@ public interface XlsxSchema {
         }
 
         @Override
-        public XlsxCellsToTableBuilder getCellRecordBuilder(final String sheetName) {
+        public XlsxCellsToTableBuilder getCellRecordBuilder(final String sheetName, final String[] headerNames) {
             if (this.cellsTableDefMap.containsKey(sheetName)) {
                 return new XlsxCellsToTableBuilder(this.cellsTableDefMap.get(sheetName), this.fileInfo());
             }
@@ -132,16 +142,6 @@ public interface XlsxSchema {
         public XlsxSchema addFileInfo(final File sourceFile, final String sheetName) {
             return new SimpleImpl(this.rowsTableDefMap(), this.cellsTableDefMap()
                     , new FileInfo(sourceFile.getAbsolutePath().replaceAll("\\\\", "/"), sourceFile.getName(), sheetName));
-        }
-    }
-
-    interface Builder {
-        Map<String, List<XlsxRowsTableDefine>> getRowsTableDefMap();
-
-        Map<String, List<XlsxCellsTableDefine>> getCellsTableDefMap();
-
-        default XlsxSchema build() {
-            return new SimpleImpl(this);
         }
     }
 }

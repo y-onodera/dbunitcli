@@ -16,6 +16,8 @@ import java.io.File;
 import java.sql.*;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProducer {
 
@@ -24,12 +26,14 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     private final File[] src;
     private final Parameter parameter;
     private final ComparableDataSetParam param;
+    private final String[] headerNames;
     private IDataSetConsumer consumer;
 
     public ComparableCSVQueryDataSetProducer(final ComparableDataSetParam param, final Parameter parameter) {
         this.param = param;
         this.src = this.param.getSrcFiles();
         this.parameter = parameter;
+        this.headerNames = param.headerNames();
     }
 
     @Override
@@ -70,23 +74,30 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
                  final ResultSet rst = stmt.executeQuery(query)
             ) {
                 final ResultSetMetaData metaData = rst.getMetaData();
-                final Column[] columns = new Column[metaData.getColumnCount()];
-                for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                    columns[i - 1] = new Column(metaData.getColumnName(i).trim(), DataType.UNKNOWN);
-                }
+                final Column[] columns = IntStream.range(0, metaData.getColumnCount())
+                        .mapToObj(i -> {
+                            try {
+                                return this.headerNames != null ? this.headerNames[i] : metaData.getColumnName(i + 1);
+                            } catch (final SQLException e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                        .map(name -> new Column(name.trim(), DataType.UNKNOWN))
+                        .toArray(Column[]::new);
                 this.consumer.startTable(this.createMetaData(aFile, columns));
                 if (this.param.loadData()) {
                     int readRows = 0;
                     while (rst.next()) {
-                        final Object[] row = new Object[metaData.getColumnCount()];
-                        for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                            if (rst.getString(i) != null) {
-                                row[i - 1] = rst.getString(i);
-                            } else {
-                                row[i - 1] = "";
-                            }
-                        }
-                        this.consumer.row(row);
+                        this.consumer.row(IntStream.rangeClosed(1, metaData.getColumnCount())
+                                .mapToObj(i -> {
+                                    try {
+                                        return Optional.ofNullable(rst.getString(i))
+                                                .orElse("");
+                                    } catch (final SQLException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                })
+                                .toArray());
                         readRows++;
                     }
                     ComparableCSVQueryDataSetProducer.LOGGER.info("produce - rows={}", readRows);

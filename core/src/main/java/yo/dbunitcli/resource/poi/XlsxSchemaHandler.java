@@ -10,9 +10,9 @@ public class XlsxSchemaHandler extends ExcelMappingDataSetConsumerWrapper implem
     private int currentRow = -1;
     private int currentCol = -1;
 
-    public XlsxSchemaHandler(final IDataSetConsumer delegate, final String sheetName, final XlsxSchema schema, final boolean loadData) {
+    public XlsxSchemaHandler(final IDataSetConsumer delegate, final String sheetName, final String[] headerNames, final XlsxSchema schema, final boolean loadData) {
         super(delegate, schema, loadData);
-        this.handleSheetStart(sheetName);
+        this.handleSheetStart(sheetName, headerNames);
     }
 
     @Override

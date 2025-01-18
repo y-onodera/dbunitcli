@@ -14,7 +14,6 @@ import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
@@ -28,12 +27,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     public ComparableCsvDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrcFiles();
-        final String headerName = this.param.headerName();
-        if (!Optional.ofNullable(headerName).orElse("").isEmpty()) {
-            this.headerNames = headerName.split(",");
-        } else {
-            this.headerNames = null;
-        }
+        this.headerNames = this.param.headerNames();
         this.resetThePipeline();
     }
 

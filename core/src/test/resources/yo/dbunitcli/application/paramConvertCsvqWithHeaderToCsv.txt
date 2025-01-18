@@ -1,0 +1,6 @@
+-srcType=csvq
+-src=src/test/resources/yo/dbunitcli/application/src/csvq/old
+-headerName=(key),col1,col2,(col3),"A",b,C
+-outputEncoding=Shift-Jis
+-setting=src/test/resources/yo/dbunitcli/application/settings/csvq/setting.json
+-result=target/test-classes/yo/dbunitcli/application/convert/csvq-with-header-2csv/result

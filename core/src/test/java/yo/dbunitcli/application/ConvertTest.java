@@ -203,6 +203,69 @@ public class ConvertTest {
                                     .build()));
             Assertions.assertEquals(1, actual.getTableNames().length);
             Assertions.assertEquals("joinQuery", actual.getTableNames()[0]);
+            final ComparableTable result = actual.getTable("joinQuery");
+            Assertions.assertEquals(3, result.getRowCount());
+            Assertions.assertEquals(7, result.getNumberOfColumns());
+            Assertions.assertEquals("3", result.getValue(0, "KEYCOLUMN"));
+            Assertions.assertEquals("", result.getValue(0, "COLUMN1"));
+            Assertions.assertEquals("", result.getValue(0, "COLUMN2"));
+            Assertions.assertEquals("", result.getValue(0, "COLUMN3"));
+            Assertions.assertEquals("", result.getValue(0, "COLUMNA"));
+            Assertions.assertEquals("", result.getValue(0, "COLUMNB"));
+            Assertions.assertEquals("", result.getValue(0, "COLUMNC"));
+            Assertions.assertEquals("2", result.getValue(1, "KEYCOLUMN"));
+            Assertions.assertEquals("あ\nいうえお", result.getValue(1, "COLUMN1"));
+            Assertions.assertEquals("test", result.getValue(1, "COLUMN2"));
+            Assertions.assertEquals("5", result.getValue(1, "COLUMN3"));
+            Assertions.assertEquals("あ\nいうえ", result.getValue(1, "COLUMNA"));
+            Assertions.assertEquals("test", result.getValue(1, "COLUMNB"));
+            Assertions.assertEquals("5", result.getValue(1, "COLUMNC"));
+            Assertions.assertEquals("1", result.getValue(2, "KEYCOLUMN"));
+            Assertions.assertEquals("2", result.getValue(2, "COLUMN1"));
+            Assertions.assertEquals("3", result.getValue(2, "COLUMN2"));
+            Assertions.assertEquals("4", result.getValue(2, "COLUMN3"));
+            Assertions.assertEquals("2", result.getValue(2, "COLUMNA"));
+            Assertions.assertEquals("3", result.getValue(2, "COLUMNB"));
+            Assertions.assertEquals("4", result.getValue(2, "COLUMNC"));
+        }
+
+        @Test
+        public void testFromCsvqWithHeaderToCsv() throws Exception {
+            Convert.main(this.getArgs("/paramConvertCsvqWithHeaderToCsv.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/csvq-with-header-2csv/result");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableCsvDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSource(DataSourceType.csv)
+                                    .setSrc(src)
+                                    .setEncoding("Shift-Jis")
+                                    .build()));
+            Assertions.assertEquals(1, actual.getTableNames().length);
+            Assertions.assertEquals("joinQuery", actual.getTableNames()[0]);
+            final ComparableTable result = actual.getTable("joinQuery");
+            Assertions.assertEquals(3, result.getRowCount());
+            Assertions.assertEquals(7, result.getNumberOfColumns());
+            Assertions.assertEquals("3", result.getValue(0, "(key)"));
+            Assertions.assertEquals("", result.getValue(0, "col1"));
+            Assertions.assertEquals("", result.getValue(0, "col2"));
+            Assertions.assertEquals("", result.getValue(0, "(col3)"));
+            Assertions.assertEquals("", result.getValue(0, "\"A\""));
+            Assertions.assertEquals("", result.getValue(0, "b"));
+            Assertions.assertEquals("", result.getValue(0, "c"));
+            Assertions.assertEquals("2", result.getValue(1, "(key)"));
+            Assertions.assertEquals("あ\nいうえお", result.getValue(1, "col1"));
+            Assertions.assertEquals("test", result.getValue(1, "col2"));
+            Assertions.assertEquals("5", result.getValue(1, "(col3)"));
+            Assertions.assertEquals("あ\nいうえ", result.getValue(1, "\"A\""));
+            Assertions.assertEquals("test", result.getValue(1, "b"));
+            Assertions.assertEquals("5", result.getValue(1, "c"));
+            Assertions.assertEquals("1", result.getValue(2, "(key)"));
+            Assertions.assertEquals("2", result.getValue(2, "col1"));
+            Assertions.assertEquals("3", result.getValue(2, "col2"));
+            Assertions.assertEquals("4", result.getValue(2, "(col3)"));
+            Assertions.assertEquals("2", result.getValue(2, "\"A\""));
+            Assertions.assertEquals("3", result.getValue(2, "b"));
+            Assertions.assertEquals("4", result.getValue(2, "c"));
         }
 
         @Test
@@ -1050,6 +1113,60 @@ public class ConvertTest {
                     , result.getRow(3));
             Assertions.assertArrayEquals(new String[]{"ユーザマスタ", "MST_USER", "SUPER_FLEXIBLE_SYSTEM", "すごいシステム", "2020/01/01", "太郎", "5", "メールアドレス", "MAIL", "NVARCHAR", "40", "", "", "", "", "", ""}
                     , result.getRow(4));
+        }
+
+        @Test
+        public void testFromXlsChangeHeaderNameToCsv() throws Exception {
+            Convert.main(this.getArgs("/paramConvertXlsChangeHeaderNameToCsv.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/xls/with-header/result");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableCsvDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSrc(src)
+                                    .setSource(DataSourceType.csv)
+                                    .setEncoding("MS932")
+                                    .build()));
+            final ITable result = actual.getTables()[0];
+            Assertions.assertEquals(3, result.getRowCount());
+            Assertions.assertEquals("1", result.getValue(0, "key"));
+            Assertions.assertEquals("2", result.getValue(0, "col1"));
+            Assertions.assertEquals("3", result.getValue(0, "col2"));
+            Assertions.assertEquals("4", result.getValue(0, "col3"));
+            Assertions.assertEquals("2", result.getValue(1, "key"));
+            Assertions.assertEquals("あ\nいうえお", result.getValue(1, "col1"));
+            Assertions.assertEquals("test", result.getValue(1, "col2"));
+            Assertions.assertEquals("5", result.getValue(1, "col3"));
+            Assertions.assertEquals("3", result.getValue(2, "key"));
+            Assertions.assertEquals("", result.getValue(2, "col1"));
+            Assertions.assertEquals("", result.getValue(2, "col2"));
+            Assertions.assertEquals("", result.getValue(2, "col3"));
+        }
+
+        @Test
+        public void testFromXlsxChangeHeaderNameToCsv() throws Exception {
+            Convert.main(this.getArgs("/paramConvertXlsxChangeHeaderNameToCsv.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/xlsx/with-header/result");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableCsvDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSrc(src)
+                                    .setSource(DataSourceType.csv)
+                                    .setEncoding("MS932")
+                                    .build()));
+            final ITable result = actual.getTables()[0];
+            Assertions.assertEquals(3, result.getRowCount());
+            Assertions.assertEquals("1", result.getValue(0, "key"));
+            Assertions.assertEquals("2", result.getValue(0, "col1"));
+            Assertions.assertEquals("3", result.getValue(0, "col2"));
+            Assertions.assertEquals("4", result.getValue(0, "col3"));
+            Assertions.assertEquals("2", result.getValue(1, "key"));
+            Assertions.assertEquals("あ\nいうえお", result.getValue(1, "col1"));
+            Assertions.assertEquals("test", result.getValue(1, "col2"));
+            Assertions.assertEquals("5", result.getValue(1, "col3"));
+            Assertions.assertEquals("3", result.getValue(2, "key"));
+            Assertions.assertEquals("", result.getValue(2, "col1"));
+            Assertions.assertEquals("", result.getValue(2, "col2"));
+            Assertions.assertEquals("", result.getValue(2, "col3"));
         }
 
         protected String[] getArgs(final String parameterFile) {

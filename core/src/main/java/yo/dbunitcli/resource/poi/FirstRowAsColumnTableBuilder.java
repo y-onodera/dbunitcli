@@ -11,15 +11,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
 
     private final String tableName;
     private final List<String> rowValues = new ArrayList<>();
+    private final String[] headerNames;
     private ITableMetaData nowProcessing = null;
 
-    public FirstRowAsColumnTableBuilder(final String tableName) {
+    public FirstRowAsColumnTableBuilder(final String tableName, final String[] headerNames) {
         this.tableName = tableName;
+        this.headerNames = headerNames;
     }
 
     @Override
@@ -34,9 +37,7 @@ public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public ITableMetaData startNewTable() {
-        this.nowProcessing = new DefaultTableMetaData(this.tableName, this.rowValues.stream()
-                .map(rowValue -> new Column(rowValue, DataType.UNKNOWN))
-                .toArray(Column[]::new));
+        this.nowProcessing = new DefaultTableMetaData(this.tableName, this.getColumns());
         return this.nowProcessing;
     }
 
@@ -67,6 +68,13 @@ public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
     @Override
     public boolean isNowProcessing() {
         return this.nowProcessing != null;
+    }
+
+    private Column[] getColumns() {
+        final Stream<String> columnNames = this.headerNames == null ? this.rowValues.stream() : Arrays.stream(this.headerNames);
+        return columnNames
+                .map(rowValue -> new Column(rowValue, DataType.UNKNOWN))
+                .toArray(Column[]::new);
     }
 
     private Column[] getNowProcessingColumns() {

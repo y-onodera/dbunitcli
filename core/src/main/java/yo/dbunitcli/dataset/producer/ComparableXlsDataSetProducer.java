@@ -31,6 +31,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
 
     private final File[] src;
     private final NameFilter sheetNameFilter;
+    private final String[] headerNames;
 
     private int lastRowNumber;
 
@@ -54,6 +55,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
         this.param = param;
         this.src = this.param.getSrcFiles();
         this.sheetNameFilter = param.tableNameFilter();
+        this.headerNames = this.param.headerNames();
     }
 
     @Override
@@ -102,7 +104,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                     }
                     final String tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
                     if (this.sheetNameFilter.predicate(tableName)) {
-                        this.handleSheetStart(tableName);
+                        this.handleSheetStart(tableName, this.headerNames);
                         ComparableXlsDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", tableName, this.sheetIndex);
                     }
                 }

@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class ComparableRegexSplitDataSetProducer implements ComparableDataSetProducer {
@@ -22,17 +21,14 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     private final Pattern dataSplitPattern;
     private final ComparableDataSetParam param;
     private IDataSetConsumer consumer;
-    private String[] headerNames;
+    private final String[] headerNames;
     private Pattern headerSplitPattern;
 
     public ComparableRegexSplitDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrcFiles();
         this.encoding = this.param.encoding();
-        final String headerName = this.param.headerName();
-        if (!Optional.ofNullable(headerName).orElse("").isEmpty()) {
-            this.headerNames = headerName.split(",");
-        }
+        this.headerNames = this.param.headerNames();
         if (this.headerNames == null) {
             this.headerSplitPattern = Pattern.compile(this.param.headerSplitPattern());
         }

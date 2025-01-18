@@ -3,6 +3,7 @@ package yo.dbunitcli.dataset.producer;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.database.IResultSetTable;
 import org.dbunit.dataset.*;
+import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -22,6 +24,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     protected final IDatabaseConnection connection;
     protected final File[] src;
     private final ComparableDataSetParam param;
+    private final String[] headerNames;
     protected IDataSetConsumer consumer;
     private IDataSet databaseDataSet;
 
@@ -33,6 +36,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         } else {
             this.src = new File[]{this.getParam().src()};
         }
+        this.headerNames = param.headerNames();
     }
 
     @Override
@@ -83,7 +87,26 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     protected void executeTable(final ITable table) {
         try {
             ComparableDBDataSetProducer.LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
-            this.consumer.startTable(table.getTableMetaData());
+            if (this.headerNames != null) {
+                final ITableMetaData metaData = table.getTableMetaData();
+                final Column[] columns = Arrays.stream(this.headerNames, 0, metaData.getColumns().length)
+                        .map(name -> new Column(name.trim(), DataType.UNKNOWN))
+                        .toArray(Column[]::new);
+                this.consumer.startTable(new DefaultTableMetaData(table.getTableMetaData().getTableName()
+                        , columns
+                        , Arrays.stream(table.getTableMetaData().getPrimaryKeys())
+                        .mapToInt(column -> {
+                            try {
+                                return metaData.getColumnIndex(column.getColumnName());
+                            } catch (final DataSetException e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                        .mapToObj(i -> columns[i])
+                        .toArray(Column[]::new)));
+            } else {
+                this.consumer.startTable(table.getTableMetaData());
+            }
             if (this.param.loadData()) {
                 final Column[] columns = table.getTableMetaData().getColumns();
                 int row = 0;

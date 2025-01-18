@@ -92,6 +92,12 @@ public record ComparableDataSetParam(
         }
     }
 
+    public String[] headerNames() {
+        return Optional.ofNullable(this.headerName())
+                .map(it -> it.split(","))
+                .orElse(null);
+    }
+
     public static class Builder {
         private File src;
         private String encoding;
