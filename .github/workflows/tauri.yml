@@ -17,7 +17,9 @@ jobs:
       - name: Run tauri-build
         run: echo "tauri-build executed for push trigger"
       - name: Execute tauri-build
-        run: ./.github/workflows/tauri-build.yml
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: tauri-build.yml
 
   build-tauri-workflow:
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.name == 'Java-CI' && github.event.workflow_run.head_commit.message == 'native-build' }}
@@ -26,4 +28,6 @@ jobs:
       - name: Run tauri-build
         run: echo "tauri-build executed for workflow_run trigger"
       - name: Execute tauri-build
-        run: ./.github/workflows/tauri-build.yml
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: tauri-build.yml
