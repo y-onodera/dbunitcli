@@ -12,13 +12,20 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Get latest successful run-id
+        id: get_run_id
+        run: |
+          GH_RUN_ID=$(curl -s -H "Authorization: token ${{ secrets.GH_PAT }}" \
+          "https://api.github.com/repos/y-onodera/dbunitcli/actions/workflows/Java-CI/runs?status=success&per_page=1" \
+          | jq -r '.workflow_runs[0].id')
+          echo "run-id=$GH_RUN_ID" >> $GITHUB_ENV
       - name: Download native-image-sidecar
         uses: actions/download-artifact@v4
         with:
           name: native-image-sidecar
           repository: y-onodera/dbunitcli
           github-token: ${{ secrets.GH_PAT }}
-          run-id: 12572217723
+          run-id: ${{ env.run-id }}
       - name: deploy backend
         run: |
           mkdir tauri/src-tauri/backend
