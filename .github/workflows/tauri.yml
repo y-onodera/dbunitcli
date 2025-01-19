@@ -10,8 +10,7 @@ on:
       - completed
 
 jobs:
-  build-tauri:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.name == 'Java-CI' && github.event.workflow_run.head_commit.message == 'native-build' }}
+  common-steps:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -54,3 +53,18 @@ jobs:
         with:
           name: installer
           path: ./tauri/src-tauri/target/release/bundle/nsis/*.exe
+
+  build-tauri-push:
+    needs: [ common-steps ]
+    runs-on: windows-latest
+    steps:
+      - name: Run common steps
+        run: echo "Common steps executed for push trigger"
+
+  build-tauri-workflow:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.name == 'Java-CI' && github.event.workflow_run.head_commit.message == 'native-build' }}
+    needs: [ common-steps ]
+    runs-on: windows-latest
+    steps:
+      - name: Run common steps
+        run: echo "Common steps executed for workflow_run trigger"
