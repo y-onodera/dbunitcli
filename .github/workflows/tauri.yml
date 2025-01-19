@@ -6,9 +6,12 @@ on:
       - '.github/workflows/tauri.yml'
   workflow_run:
     workflows: Java-CI
+    types:
+      - completed
 
 jobs:
   build-tauri:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.name == 'Java-CI' && github.event.workflow_run.head_commit.message == 'native-build' }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
