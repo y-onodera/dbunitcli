@@ -346,20 +346,20 @@ public class MainPresenter {
         return this.argument.entrySet()
                 .stream()
                 .filter(it -> {
-                    if (it.getValue() instanceof TextField textField) {
+                    if (it.getValue() instanceof final TextField textField) {
                         return !Optional.ofNullable(it.getKey()).orElse("").isEmpty()
                                 && !Optional.ofNullable(textField.getText()).orElse("").isEmpty();
                     }
                     return !Optional.ofNullable(it.getKey()).orElse("").isEmpty()
-                            && it.getValue() instanceof ChoiceBox<?> choiceBox
+                            && it.getValue() instanceof final ChoiceBox<?> choiceBox
                             && !Optional.ofNullable(choiceBox.getSelectionModel().getSelectedItem().toString()).orElse("").isEmpty();
                 })
                 .map(it -> {
                     final String value;
-                    if (it.getValue() instanceof TextField textField) {
+                    if (it.getValue() instanceof final TextField textField) {
                         value = textField.getText();
                     } else {
-                        value = it.getValue() instanceof ChoiceBox<?> choiceBox
+                        value = it.getValue() instanceof final ChoiceBox<?> choiceBox
                                 ? choiceBox.getSelectionModel().getSelectedItem().toString() : "";
                     }
                     return it.getKey() + "=" + value;
