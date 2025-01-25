@@ -10,6 +10,7 @@ import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 public record DataSetLoadOption(
         String prefix
@@ -44,7 +45,7 @@ public record DataSetLoadOption(
                 , dto.getSetting()
                 , Strings.isNotEmpty(dto.getSettingEncoding())
                         ? dto.getSettingEncoding()
-                        : System.getProperty("file.encoding")
+                        : Charset.defaultCharset().displayName()
                 , dto.getRegTableInclude()
                 , dto.getRegTableExclude()
                 , !Strings.isNotEmpty(dto.getLoadData()) || Boolean.parseBoolean(dto.getLoadData())
