@@ -69,12 +69,12 @@ public record DataSetLoadOption(
         }
         return result.putFileOrDir("-src", this.src, true, BaseDir.DATASET)
                 .putAll(this.dataSetParam.toCommandLineArgs())
+                .putFile("-setting", this.setting, BaseDir.SETTING)
+                .put("-settingEncoding", this.settingEncoding)
                 .put("-regTableInclude", this.regTableInclude)
                 .put("-regTableExclude", this.regTableExclude)
                 .put("-loadData", this.loadData)
-                .put("-includeMetaData", this.includeMetaData)
-                .putFile("-setting", this.setting, BaseDir.SETTING)
-                .put("-settingEncoding", this.settingEncoding);
+                .put("-includeMetaData", this.includeMetaData);
     }
 
     public ComparableDataSetParam.Builder getParam() {
