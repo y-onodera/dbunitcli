@@ -5,7 +5,7 @@ on:
       - 'tauri/**'
       - '.github/workflows/tauri*.yml'
   workflow_run:
-    workflows: Java-CI
+    workflows: [Java-CI]
     types:
       - completed
 
