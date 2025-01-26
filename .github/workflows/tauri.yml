@@ -22,7 +22,7 @@ jobs:
           workflow: tauri-build.yml
 
   build-tauri-workflow:
-    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.name == 'Java-CI' && github.event.workflow_run.head_commit.message == 'native-build' }}
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
     runs-on: windows-latest
     steps:
       - name: Run tauri-build
