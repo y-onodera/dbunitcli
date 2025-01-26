@@ -67,15 +67,9 @@ public record DataSetLoadOption(
         if (this.srcType == null || this.srcType == DataSourceType.none) {
             return result;
         }
-        result.putFileOrDir("-src", this.src, true, BaseDir.DATASET);
-        if (this.dataSetParam == null) {
-            final ComparableDataSetParamOption option = new DataSourceTypeOptionFactory()
-                    .create(this.getPrefix(), this.srcType, new DataSetLoadDto());
-            result.putAll(option.toCommandLineArgs());
-        } else {
-            result.putAll(this.dataSetParam.toCommandLineArgs());
-        }
-        return result.put("-regTableInclude", this.regTableInclude)
+        return result.putFileOrDir("-src", this.src, true, BaseDir.DATASET)
+                .putAll(this.dataSetParam.toCommandLineArgs())
+                .put("-regTableInclude", this.regTableInclude)
                 .put("-regTableExclude", this.regTableExclude)
                 .put("-loadData", this.loadData)
                 .put("-includeMetaData", this.includeMetaData)

@@ -26,8 +26,6 @@ public interface ComparableDataSetParamOption extends Option {
             for (final ComparableDataSetParamOption delegate : this.leaf) {
                 if (result == null) {
                     result = delegate.toCommandLineArgsBuilder();
-                } else if (delegate instanceof TemplateRenderOption) {
-                    result.addComponent("templateRender", delegate.toCommandLineArgs());
                 } else {
                     result.putAll(delegate.toCommandLineArgs());
                 }

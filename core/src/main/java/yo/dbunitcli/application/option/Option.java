@@ -163,17 +163,20 @@ public interface Option {
             return new CommandLineArgs(this.prefix, new LinkedHashMap<>(this.options), new LinkedHashMap<>(this.subComponents));
         }
 
-        public void putAll(final CommandLineArgs other) {
-            other.options.keySet()
-                    .forEach(it -> {
-                        final Arg entry = other.getArg(it);
-                        this.put(it, entry.value, entry.attribute());
-                    });
-            other.subComponents.forEach(this::addComponent);
-        }
-
         public String get(final String key) {
             return this.options.get(this.withPrefix(key)).value;
+        }
+
+        public CommandLineArgsBuilder putAll(final CommandLineArgs other) {
+            other.options.keySet()
+                    .forEach(it -> {
+                        if (!this.options.containsKey(it)) {
+                            final Arg entry = other.getArg(it);
+                            this.put(it, entry.value, entry.attribute());
+                        }
+                    });
+            other.subComponents.forEach(this::addComponent);
+            return this;
         }
 
         public CommandLineArgsBuilder addComponent(final String name, final CommandLineArgs subComponent) {
