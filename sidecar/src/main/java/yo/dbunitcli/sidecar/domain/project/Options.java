@@ -39,7 +39,7 @@ public record Options(File baseDir, Map<CommandType, List<Path>> parameterFiles)
             this.parameterFiles().put(type, this.parameterFiles(type)
                     .filter(it -> !it.toAbsolutePath().equals(deleteTo.toAbsolutePath()))
                     .toList());
-            Options.LOGGER.info(String.format("type:%s include:%s", type, this.parameterFiles(type).toList()));
+            this.loggingCurrentFiles(type);
         }
     }
 
@@ -64,7 +64,7 @@ public record Options(File baseDir, Map<CommandType, List<Path>> parameterFiles)
                         return it;
                     })
                     .toList());
-            Options.LOGGER.info(String.format("type:%s include:%s", type, this.parameterFiles(type).toList()));
+            this.loggingCurrentFiles(type);
         }
     }
 
@@ -85,14 +85,14 @@ public record Options(File baseDir, Map<CommandType, List<Path>> parameterFiles)
         if (!saveTo.toFile().exists()) {
             Files.createFile(saveTo);
         }
-        Files.writeString(saveTo, String.join("\r\n", args), Charset.forName(System.getProperty("file.encoding")));
+        Files.writeString(saveTo, String.join("\r\n", args), Charset.forName(Charset.defaultCharset().displayName()));
         if (this.parameterFiles(type)
                 .filter(it -> it.toAbsolutePath().equals(saveTo.toAbsolutePath()))
                 .findAny()
                 .isEmpty()) {
             this.parameterFiles().put(type, Stream.concat(this.parameterFiles(type), Stream.of(saveTo))
                     .toList());
-            Options.LOGGER.info(String.format("type:%s include:%s", type, this.parameterFiles(type).toList()));
+            this.loggingCurrentFiles(type);
         }
     }
 
@@ -104,13 +104,17 @@ public record Options(File baseDir, Map<CommandType, List<Path>> parameterFiles)
         final List<String> alreadyExists = this.parameterNames(type)
                 .filter(it -> Pattern.compile(Pattern.quote(name) + "(\\([0-9]+\\))*").matcher(it).matches())
                 .toList();
-        return alreadyExists.size() == 0
+        return alreadyExists.isEmpty()
                 ? name
                 : IntStream.iterate(1, it -> it + 1)
                 .filter(it -> !alreadyExists.contains(name + "(%s)".formatted(it)))
                 .mapToObj((name + "(%s)")::formatted)
                 .findFirst()
-                .get();
+                .orElse("");
+    }
+
+    private void loggingCurrentFiles(final CommandType type) {
+        Options.LOGGER.info("type:{} include:{}", type, this.parameterFiles(type).toList());
     }
 
     public static class Builder {

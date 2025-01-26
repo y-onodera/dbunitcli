@@ -6,6 +6,8 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
+import java.nio.charset.Charset;
+
 public record TemplateRenderOption(
         String prefix
         , String encoding
@@ -18,7 +20,7 @@ public record TemplateRenderOption(
 
     public TemplateRenderOption(final String prefix, final TemplateRenderDto dto) {
         this(prefix
-                , Strings.isNotEmpty(dto.getEncoding()) ? dto.getEncoding() : System.getProperty("file.encoding")
+                , Strings.isNotEmpty(dto.getEncoding()) ? dto.getEncoding() : Charset.defaultCharset().displayName()
                 , dto.getTemplateParameterAttribute() != null ? dto.getTemplateParameterAttribute() : "param"
                 , Strings.isNotEmpty(dto.getTemplateVarStart()) ? dto.getTemplateVarStart().charAt(0) : '$'
                 , Strings.isNotEmpty(dto.getTemplateVarStop()) ? dto.getTemplateVarStop().charAt(0) : '$'

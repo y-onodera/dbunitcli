@@ -8,6 +8,7 @@ import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ public record TemplateRender(
     }
 
     public String render(final String target, final Map<String, Object> parameter) {
-        if (parameter.size() > 0) {
+        if (!parameter.isEmpty()) {
             return this.createST(target, parameter).render();
         }
         return target;
@@ -120,7 +121,7 @@ public record TemplateRender(
 
         private char templateVarStop = '$';
 
-        private String encoding = System.getProperty("file.encoding");
+        private String encoding = Charset.defaultCharset().displayName();
 
         public File getTemplateGroup() {
             return this.templateGroup;

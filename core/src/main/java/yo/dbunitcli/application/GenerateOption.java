@@ -127,10 +127,8 @@ public record GenerateOption(
                         .put("-sqlFileSuffix", this.sqlFileSuffix);
                 srcComponent.remove("-src.useJdbcMetaData");
             }
-            case settings -> {
-                srcComponent.remove("-src.useJdbcMetaData")
-                        .remove("-src.loadData");
-            }
+            case settings -> srcComponent.remove("-src.useJdbcMetaData")
+                    .remove("-src.loadData");
         }
         result.addComponent("srcData", srcComponent.build());
         if (!this.generateType.isFixedTemplate()) {

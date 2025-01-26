@@ -5,13 +5,15 @@ import yo.dbunitcli.application.dto.DataSetConverterDto;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.dto.ImageCompareDto;
 
+import java.nio.charset.Charset;
+
 public class CompareDto extends CommandDto {
 
     @CommandLine.Option(names = "-setting", description = "file comparison settings")
     private String setting;
 
     @CommandLine.Option(names = "-settingEncoding", description = "settings encoding")
-    private String settingEncoding = System.getProperty("file.encoding");
+    private String settingEncoding = Charset.defaultCharset().displayName();
 
     @CommandLine.Option(names = "-targetType")
     private CompareOption.Type targetType = CompareOption.Type.data;

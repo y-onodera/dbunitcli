@@ -13,6 +13,7 @@ import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -93,7 +94,7 @@ public record CompareOption(
                 , new ResultOption(resultFile, dto.getConvertResult())
                 , dto.getSetting()
                 , Strings.isNotEmpty(dto.getSettingEncoding())
-                        ? dto.getSettingEncoding() : System.getProperty("file.encoding")
+                        ? dto.getSettingEncoding() : Charset.defaultCharset().displayName()
                 , CompareOption.getTargetType(dto)
                 , CompareOption.getTargetType(dto).isAny(Type.image, Type.pdf)
                         ? new ImageCompareOption("image", dto.getImageOption()) : new ImageCompareOption("image")

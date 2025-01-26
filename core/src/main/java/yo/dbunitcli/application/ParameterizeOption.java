@@ -110,7 +110,7 @@ public record ParameterizeOption(
                 .render(this.getTemplateArgs(aParam.getMap()), aParam.getMap())
                 : this.getTemplateArgs(aParam.getMap());
         final String[] result = parameterList.split("\\r?\\n");
-        if (this.args.size() == 0) {
+        if (this.args.isEmpty()) {
             return result;
         }
         final Map<String, String> mergeResult = Arrays.stream(result)

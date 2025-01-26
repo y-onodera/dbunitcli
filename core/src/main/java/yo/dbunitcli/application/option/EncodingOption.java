@@ -4,12 +4,14 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
+import java.nio.charset.Charset;
+
 public record EncodingOption(String prefix, String encoding) implements ComparableDataSetParamOption {
 
     public EncodingOption(final String prefix, final DataSetLoadDto dto) {
         this(prefix, Strings.isNotEmpty(dto.getEncoding())
                 ? dto.getEncoding()
-                : System.getProperty("file.encoding"));
+                : Charset.defaultCharset().displayName());
     }
 
     @Override
