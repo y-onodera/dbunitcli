@@ -6,6 +6,7 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.MapContext;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.datatype.DataType;
+import yo.dbunitcli.Strings;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -15,12 +16,12 @@ public record ExpressionColumns(List<Expressions> values) {
 
     public static final ExpressionColumns NONE = new Builder().build();
 
-    public ExpressionColumns(final Builder builder) {
-        this(new ArrayList<>(builder.expressions));
-    }
-
     public static Builder builder() {
         return new Builder();
+    }
+
+    public ExpressionColumns(final Builder builder) {
+        this(new ArrayList<>(builder.expressions));
     }
 
     public ExpressionColumns copy() {
@@ -74,7 +75,7 @@ public record ExpressionColumns(List<Expressions> values) {
         final JexlContext jc = new MapContext(param);
         return this.values()
                 .stream()
-                .filter(exp -> exp.contains(columnName))
+                .filter(exp -> exp.contains(columnName) && Strings.isNotEmpty(exp.values().get(columnName)))
                 .map(exp ->
                         switch (exp.type()) {
                             case STRING -> jexl.createExpression(exp.values().get(columnName)).evaluate(jc);
@@ -94,12 +95,6 @@ public record ExpressionColumns(List<Expressions> values) {
                 .orElse("");
     }
 
-    public record Expressions(ParameterType type, Map<String, String> values) {
-        public boolean contains(final String columnName) {
-            return this.values().containsKey(columnName);
-        }
-    }
-
     public enum ParameterType {
         STRING, BOOLEAN, NUMBER, SQL_FUNCTION {
             @Override
@@ -110,6 +105,12 @@ public record ExpressionColumns(List<Expressions> values) {
 
         public String keyName() {
             return this.name().toLowerCase();
+        }
+    }
+
+    public record Expressions(ParameterType type, Map<String, String> values) {
+        public boolean contains(final String columnName) {
+            return this.values().containsKey(columnName);
         }
     }
 
