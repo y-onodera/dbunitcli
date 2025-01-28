@@ -171,7 +171,7 @@ public record AddSettingTableMetaData(
     }
 
     private Object[] filterColumn(final Object[] noFilter) {
-        if (this.filterColumnIndex.size() == 0) {
+        if (this.filterColumnIndex.isEmpty()) {
             return noFilter;
         }
         return IntStream.range(0, noFilter.length)
@@ -205,7 +205,7 @@ public record AddSettingTableMetaData(
         }
 
         public boolean isFiltered() {
-            return this.filteredRowIndexes().size() > 0;
+            return !this.filteredRowIndexes().isEmpty();
         }
 
         public Rows add(final Rows other) {
@@ -260,7 +260,7 @@ public record AddSettingTableMetaData(
             this.columns = this.getColumns(originMetaData, tableSeparator.getColumnFilter());
             this.filterColumnIndex = this.getFilterColumnIndex(originMetaData);
             this.tableSeparator = tableSeparator;
-            if (originMetaData instanceof AddSettingTableMetaData delegate) {
+            if (originMetaData instanceof final AddSettingTableMetaData delegate) {
                 this.preset = delegate;
             }
             this.distinct = tableSeparator.distinct();
