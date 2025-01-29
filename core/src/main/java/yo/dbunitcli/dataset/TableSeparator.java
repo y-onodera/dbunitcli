@@ -78,16 +78,16 @@ public record TableSeparator(TargetFilter targetFilter
     }
 
     public IColumnFilter getColumnFilter() {
-        if (this.excludeColumns.size() == 0 && this.includeColumns.size() == 0) {
+        if (this.excludeColumns.isEmpty() && this.includeColumns.isEmpty()) {
             return null;
         }
         final DefaultColumnFilter result = new DefaultColumnFilter();
-        if (this.includeColumns.size() > 0) {
+        if (!this.includeColumns.isEmpty()) {
             result.includeColumns(this.includeColumns.stream()
                     .map(it -> new Column(it, DataType.UNKNOWN))
                     .toList().toArray(new Column[0]));
         }
-        if (this.excludeColumns.size() > 0) {
+        if (!this.excludeColumns.isEmpty()) {
             result.excludeColumns(this.excludeColumns.stream()
                     .map(it -> new Column(it, DataType.UNKNOWN))
                     .toList().toArray(new Column[0]));
@@ -122,11 +122,11 @@ public record TableSeparator(TargetFilter targetFilter
 
     public boolean hasSettings() {
         return !this.splitter.equals(TableSplitter.NONE)
-                || this.comparisonKeys.size() > 0
+                || !this.comparisonKeys.isEmpty()
                 || this.expressionColumns.size() > 0
-                || this.includeColumns.size() > 0
-                || this.excludeColumns.size() > 0
-                || this.orderColumns.size() > 0
+                || !this.includeColumns.isEmpty()
+                || !this.excludeColumns.isEmpty()
+                || !this.orderColumns.isEmpty()
                 || this.filter != TableSeparator.NO_FILTER
                 || this.distinct
                 ;
@@ -182,7 +182,7 @@ public record TableSeparator(TargetFilter targetFilter
         static JexlEngine JEXL = new JexlBuilder().create();
 
         static RowFilter of(final List<String> expression) {
-            if (expression.size() == 0) {
+            if (expression.isEmpty()) {
                 return TableSeparator.NO_FILTER;
             }
             return new RowFilter(expression
@@ -193,11 +193,11 @@ public record TableSeparator(TargetFilter targetFilter
         }
 
         public boolean isEmpty() {
-            return this.expressions().size() == 0;
+            return this.expressions().isEmpty();
         }
 
         public boolean test(final Map<String, Object> row) {
-            if (this.expressions.size() == 0) {
+            if (this.expressions.isEmpty()) {
                 return true;
             }
             return this.expressions.stream().allMatch(it -> Boolean.parseBoolean(it.evaluate(new MapContext(row)).toString()));
