@@ -1,6 +1,9 @@
 package yo.dbunitcli.dataset;
 
-import org.dbunit.dataset.*;
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.ITableMetaData;
+import org.dbunit.dataset.NoSuchColumnException;
 import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.util.*;
@@ -320,14 +323,12 @@ public record AddSettingTableMetaData(
         }
 
         private Column[] getColumns(final ITableMetaData delegate, final IColumnFilter iColumnFilter) {
-            try {
-                if (iColumnFilter != null) {
-                    return this.additionalExpression.merge(new FilteredTableMetaData(delegate, iColumnFilter).getColumns());
-                }
-                return this.allColumns;
-            } catch (final DataSetException e) {
-                throw new AssertionError(e);
+            if (iColumnFilter != null) {
+                return Arrays.stream(this.allColumns)
+                        .filter(col -> iColumnFilter.accept(delegate.getTableName(), col))
+                        .toArray(Column[]::new);
             }
+            return this.allColumns;
         }
 
         private List<Integer> getFilterColumnIndex(final ITableMetaData delegate) {

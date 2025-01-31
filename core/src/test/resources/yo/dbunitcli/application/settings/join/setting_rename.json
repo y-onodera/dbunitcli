@@ -40,9 +40,9 @@
       "tableName": "join",
       "include": [
         "key",
-        "columna",
-        "columnb",
-        "columnc"
+        "columnab",
+        "columnbc",
+        "columnca"
       ],
       "number": {
         "key": "multi1_key"
