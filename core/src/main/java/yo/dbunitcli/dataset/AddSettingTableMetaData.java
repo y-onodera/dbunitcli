@@ -4,7 +4,6 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.NoSuchColumnException;
-import org.dbunit.dataset.filter.IColumnFilter;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -19,7 +18,7 @@ public record AddSettingTableMetaData(
         Map<String, Integer> columnIndexes,
         Column[] allColumns,
         ExpressionColumns additionalExpression,
-        List<Integer> filterColumnIndex,
+        List<Integer> filteredColumnIndex,
         TableSeparator tableSeparator,
         Boolean distinct,
         AddSettingTableMetaData preset) implements ITableMetaData {
@@ -35,7 +34,7 @@ public record AddSettingTableMetaData(
                 , builder.getColumnIndexes()
                 , builder.getAllColumns()
                 , builder.getAdditionalExpression()
-                , builder.getFilterColumnIndex()
+                , builder.getFilteredColumnIndex()
                 , builder.getTableSeparator()
                 , builder.getDistinct()
                 , builder.getPreset()
@@ -49,7 +48,7 @@ public record AddSettingTableMetaData(
                 , this.columnIndexes
                 , this.allColumns
                 , this.additionalExpression
-                , this.filterColumnIndex
+                , this.filteredColumnIndex
                 , this.tableSeparator
                 , this.distinct
                 , this.preset
@@ -174,12 +173,11 @@ public record AddSettingTableMetaData(
     }
 
     private Object[] filterColumn(final Object[] noFilter) {
-        if (this.filterColumnIndex.isEmpty()) {
+        if (this.filteredColumnIndex.isEmpty()) {
             return noFilter;
         }
-        return IntStream.range(0, noFilter.length)
-                .filter(i -> !this.filterColumnIndex.contains(i))
-                .mapToObj(i -> noFilter[i])
+        return this.filteredColumnIndex.stream()
+                .map(i -> noFilter[i])
                 .toArray(Object[]::new);
     }
 
@@ -250,23 +248,23 @@ public record AddSettingTableMetaData(
         private final Map<String, Integer> columnIndexes;
         private final Column[] allColumns;
         private final ExpressionColumns additionalExpression;
-        private final List<Integer> filterColumnIndex;
+        private final List<Integer> filteredColumnIndex;
         private final TableSeparator tableSeparator;
         private final Boolean distinct;
         private AddSettingTableMetaData preset;
 
         public Builder(final ITableMetaData originMetaData, final Column[] primaryKeys, final TableSeparator tableSeparator) {
-            this.tableName = tableSeparator.rename(originMetaData.getTableName());
-            this.primaryKeys = primaryKeys;
-            this.additionalExpression = tableSeparator.expressionColumns();
-            this.allColumns = this.getAllColumns(originMetaData);
-            this.columns = this.getColumns(originMetaData, tableSeparator.getColumnFilter());
-            this.filterColumnIndex = this.getFilterColumnIndex(originMetaData);
             this.tableSeparator = tableSeparator;
+            this.tableName = this.tableSeparator.rename(originMetaData.getTableName());
+            this.primaryKeys = primaryKeys;
+            this.additionalExpression = this.tableSeparator.expressionColumns();
+            this.allColumns = this.getAllColumns(originMetaData);
+            this.columns = this.tableSeparator.filteredColumns(this.allColumns, originMetaData);
+            this.filteredColumnIndex = this.createFilteredColumnIndex();
             if (originMetaData instanceof final AddSettingTableMetaData delegate) {
                 this.preset = delegate;
             }
-            this.distinct = tableSeparator.distinct();
+            this.distinct = this.tableSeparator.distinct();
             this.columnIndexes = this.createColumnIndexes();
         }
 
@@ -298,8 +296,8 @@ public record AddSettingTableMetaData(
             return this.additionalExpression;
         }
 
-        public List<Integer> getFilterColumnIndex() {
-            return this.filterColumnIndex;
+        public List<Integer> getFilteredColumnIndex() {
+            return this.filteredColumnIndex;
         }
 
         public TableSeparator getTableSeparator() {
@@ -322,37 +320,16 @@ public record AddSettingTableMetaData(
             }
         }
 
-        private Column[] getColumns(final ITableMetaData delegate, final IColumnFilter iColumnFilter) {
-            if (iColumnFilter != null) {
-                return Arrays.stream(this.allColumns)
-                        .filter(col -> iColumnFilter.accept(delegate.getTableName(), col))
-                        .toArray(Column[]::new);
-            }
-            return this.allColumns;
-        }
-
-        private List<Integer> getFilterColumnIndex(final ITableMetaData delegate) {
-            try {
-                final List<Integer> result = new ArrayList<>();
-                final Set<Column> noFilter = new HashSet<>(Arrays.asList(delegate.getColumns()));
-                final Set<Column> filtered = new HashSet<>(Arrays.asList(this.columns));
-                noFilter.stream().filter(it -> !filtered.contains(it)).forEach(column -> {
-                    if (!this.additionalExpression.contains(column.getColumnName())) {
-                        result.add(this.getColumnIndex(delegate, column));
-                    }
-                });
+        private List<Integer> createFilteredColumnIndex() {
+            final List<Integer> result = new ArrayList<>();
+            if (this.tableSeparator.includeColumns().isEmpty() && this.tableSeparator.excludeColumns().isEmpty()) {
                 return result;
-            } catch (final DataSetException e) {
-                throw new AssertionError(e);
             }
-        }
-
-        private int getColumnIndex(final ITableMetaData delegate, final Column column) {
-            try {
-                return delegate.getColumnIndex(column.getColumnName());
-            } catch (final DataSetException e) {
-                throw new AssertionError(e);
-            }
+            Arrays.stream(this.columns).forEach(col -> IntStream.range(0, this.allColumns.length)
+                    .filter(i -> this.allColumns[i].getColumnName().equalsIgnoreCase(col.getColumnName()))
+                    .findFirst()
+                    .ifPresent(result::add));
+            return result;
         }
 
         private HashMap<String, Integer> createColumnIndexes() {

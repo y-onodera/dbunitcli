@@ -11,10 +11,9 @@ import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.filter.IColumnFilter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record TableSeparator(TargetFilter targetFilter
@@ -77,22 +76,27 @@ public record TableSeparator(TargetFilter targetFilter
                 .toArray(Column[]::new);
     }
 
-    public IColumnFilter getColumnFilter() {
-        if (this.excludeColumns.isEmpty() && this.includeColumns.isEmpty()) {
-            return null;
+    public Column[] filteredColumns(final Column[] allColumns, final ITableMetaData originMetaData) {
+        final Column[] result = Optional.ofNullable(this.getColumnFilter())
+                .map(filter -> Arrays.stream(allColumns)
+                        .filter(col -> filter.accept(originMetaData.getTableName(), col))
+                        .toArray(Column[]::new))
+                .orElse(allColumns);
+        if (this.includeColumns().isEmpty()) {
+            return result;
         }
-        final DefaultColumnFilter result = new DefaultColumnFilter();
-        if (!this.includeColumns.isEmpty()) {
-            result.includeColumns(this.includeColumns.stream()
-                    .map(it -> new Column(it, DataType.UNKNOWN))
-                    .toList().toArray(new Column[0]));
-        }
-        if (!this.excludeColumns.isEmpty()) {
-            result.excludeColumns(this.excludeColumns.stream()
-                    .map(it -> new Column(it, DataType.UNKNOWN))
-                    .toList().toArray(new Column[0]));
-        }
-        return result;
+        final ArrayList<String> include = new ArrayList<>(this.includeColumns().stream()
+                .map(String::toUpperCase)
+                .toList());
+        include.removeAll(this.excludeColumns().stream()
+                .map(String::toUpperCase)
+                .toList());
+        final Map<String, Column> columnMap = Arrays.stream(result)
+                .collect(Collectors.toMap(col -> col.getColumnName().toUpperCase(), col -> col));
+        return include.stream()
+                .map(columnMap::get)
+                .filter(Objects::nonNull)
+                .toArray(Column[]::new);
     }
 
     public Column[] getOrderColumns() {
@@ -130,6 +134,24 @@ public record TableSeparator(TargetFilter targetFilter
                 || this.filter != TableSeparator.NO_FILTER
                 || this.distinct
                 ;
+    }
+
+    private IColumnFilter getColumnFilter() {
+        if (this.excludeColumns.isEmpty() && this.includeColumns.isEmpty()) {
+            return null;
+        }
+        final DefaultColumnFilter result = new DefaultColumnFilter();
+        if (!this.includeColumns.isEmpty()) {
+            result.includeColumns(this.includeColumns.stream()
+                    .map(it -> new Column(it, DataType.UNKNOWN))
+                    .toList().toArray(new Column[0]));
+        }
+        if (!this.excludeColumns.isEmpty()) {
+            result.excludeColumns(this.excludeColumns.stream()
+                    .map(it -> new Column(it, DataType.UNKNOWN))
+                    .toList().toArray(new Column[0]));
+        }
+        return result;
     }
 
     public interface TargetFilter {
