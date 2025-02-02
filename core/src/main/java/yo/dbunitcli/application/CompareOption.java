@@ -112,14 +112,18 @@ public record CompareOption(
     public CommandLineArgsBuilder toCommandLineArgsBuilder() {
         final CommandLineArgsBuilder result = new CommandLineArgsBuilder()
                 .put("-targetType", this.targetType, this.targetType.getDeclaringClass());
+        final CommandLineArgsBuilder newDataCommandLineArgs = this.newData.toCommandLineArgsBuilder();
+        final CommandLineArgsBuilder oldDataCommandLineArgs = this.oldData.toCommandLineArgsBuilder();
         if (this.targetType.isAny(Type.pdf, Type.image)) {
             result.addComponent("imageOption", this.imageOption.toCommandLineArgs());
+            newDataCommandLineArgs.put("-srcType", DataSourceType.file, DataSourceType.class, Filter.include(DataSourceType.file), true);
+            oldDataCommandLineArgs.put("-srcType", DataSourceType.file, DataSourceType.class, Filter.include(DataSourceType.file), true);
         }
         return result
                 .putFile("-setting", this.setting, BaseDir.SETTING)
                 .put("-settingEncoding", this.settingEncoding)
-                .addComponent("newData", this.newData.toCommandLineArgs())
-                .addComponent("oldData", this.oldData.toCommandLineArgs())
+                .addComponent("newData", newDataCommandLineArgs.build())
+                .addComponent("oldData", oldDataCommandLineArgs.build())
                 .addComponent("convertResult", this.result().convertResult().toCommandLineArgsBuilder()
                         .put("-resultType", this.result().convertResult().resultType()
                                 , ResultType.class, Filter.exclude(ResultType.table), true)
