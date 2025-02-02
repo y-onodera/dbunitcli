@@ -1,5 +1,6 @@
 package yo.dbunitcli.application.option;
 
+import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
@@ -22,8 +23,10 @@ public record HeaderNameOption(String prefix, String headerName) implements Comp
 
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
+        if (Strings.isEmpty(this.headerName)) {
+            return builder;
+        }
         return builder.setHeaderName(this.headerName);
     }
-
 
 }
