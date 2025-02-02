@@ -8,7 +8,8 @@ import type { Attribute, CommandParam, CommandParams } from "../../model/Command
 import type { MetadataSettings } from "../../model/MetadataSettings";
 import type { WorkspaceContext } from "../../model/WorkspaceResources";
 import { ButtonWithIcon } from "../element/Button";
-import { DirIcon, EditIcon, FileIcon } from "../element/Icon";
+import { ButtonIcon } from "../element/ButtonIcon";
+import { DirIcon, EditIcon, ExpandIcon, FileIcon } from "../element/Icon";
 import { CheckBox, ControllTextBox, InputLabel, SelectBox } from "../element/Input";
 import SettingsDaialog from "./settings/SettingsDialog";
 
@@ -23,35 +24,92 @@ type FileProp = Prop & {
 type SelectProp = Prop & {
 	handleTypeSelect: () => Promise<void>;
 };
+const ToggleButton = (prop: { toggleOptional: () => void, showOptional: boolean, caption: string | undefined }) => (
+	<ButtonIcon key={prop.caption} title="" handleClick={prop.toggleOptional}>
+		<ExpandIcon close={!prop.showOptional} />
+		<span className="ms-2 text-left rtl:text-right whitespace-nowrap">
+			{prop.showOptional ? `Hide ${prop.caption}` : `Show ${prop.caption}`}
+		</span>
+	</ButtonIcon>
+);
 export default function CommandFormElements(prop: CommandParams) {
+	const [showOptional, setShowOptional] = useState(false);
+
+	const toggleOptional = () => {
+		setShowOptional(!showOptional);
+	};
 	return (
 		<>
 			{prop.elements.map((element) => {
+				const displayCaption = prop.optionCaption?.name === element.name
+				if (prop.optional?.includes(element.name) && !showOptional) {
+					if (displayCaption) {
+						return (
+							<ToggleButton
+								key={prop.prefix + prop.optionCaption?.caption}
+								toggleOptional={toggleOptional}
+								showOptional={showOptional}
+								caption={prop.optionCaption?.caption}
+							/>
+						);
+					}
+					return null;
+				}
 				if (element.attribute.type === "FLG") {
 					return (
-						<Check
-							prefix={prop.prefix}
-							element={element}
-							key={prop.name + prop.prefix + element.name}
-						/>
+						<>
+							{displayCaption &&
+								<ToggleButton
+									key={prop.prefix + prop.optionCaption?.caption}
+									toggleOptional={toggleOptional}
+									showOptional={showOptional}
+									caption={prop.optionCaption?.caption}
+								/>
+							}
+							<Check
+								prefix={prop.prefix}
+								element={element}
+								key={prop.name + prop.prefix + element.name}
+							/>
+						</>
 					);
 				}
 				if (element.attribute.type === "ENUM") {
 					return (
-						<Select
-							handleTypeSelect={prop.handleTypeSelect}
+						<>
+							{displayCaption &&
+								<ToggleButton
+									key={prop.prefix + prop.optionCaption?.caption}
+									toggleOptional={toggleOptional}
+									showOptional={showOptional}
+									caption={prop.optionCaption?.caption}
+								/>
+							}
+							<Select
+								handleTypeSelect={prop.handleTypeSelect}
+								prefix={prop.prefix}
+								element={element}
+								key={prop.name + prop.prefix + element.name}
+							/>
+						</>
+					);
+				}
+				return (
+					<>
+						{displayCaption &&
+							<ToggleButton
+								key={prop.prefix + prop.optionCaption?.caption}
+								toggleOptional={toggleOptional}
+								showOptional={showOptional}
+								caption={prop.optionCaption?.caption}
+							/>
+						}
+						<Text
 							prefix={prop.prefix}
 							element={element}
 							key={prop.name + prop.prefix + element.name}
 						/>
-					);
-				}
-				return (
-					<Text
-						prefix={prop.prefix}
-						element={element}
-						key={prop.name + prop.prefix + element.name}
-					/>
+					</>
 				);
 			})}
 		</>

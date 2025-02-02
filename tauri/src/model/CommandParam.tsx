@@ -11,18 +11,25 @@ export class SelectParameter {
 		this.name = name;
 		if (command === "convert") {
 			this.convert = response as ConvertParams;
+			setIndexOfSetting(this.convert.srcData);
 		}
 		if (command === "compare") {
 			this.compare = response as CompareParams;
+			setIndexOfSetting(this.compare.newData);
+			setIndexOfSetting(this.compare.oldData);
+			setIndexOfSetting(this.compare.expectData);
 		}
 		if (command === "generate") {
 			this.generate = response as GenerateParams;
+			setIndexOfSetting(this.generate.srcData);
 		}
 		if (command === "run") {
 			this.run = response as RunParams;
+			setIndexOfSetting(this.run.srcData);
 		}
 		if (command === "parameterize") {
 			this.parameterize = response as ParameterizeParams;
+			setIndexOfSetting(this.parameterize.paramData);
 		}
 		this.command = command;
 	}
@@ -53,19 +60,21 @@ export type CommandParam = {
 	name: string;
 	value: string;
 	attribute: Attribute;
+	optional: boolean;
 };
 export type CommandParams = {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
 	prefix: string;
 	elements: CommandParam[];
+	optionCaption?: { caption: string, name: string };
+	optional?: string[];
 };
 export type ConvertResult = CommandParams & {
 	jdbc: CommandParams;
 };
 export type DatasetSource = CommandParams & {
-	jdbc: CommandParams;
-	templateRender: CommandParams;
+	indexOfSetting: () => number;
 };
 export type Parameter =
 	| ConvertParams
@@ -101,3 +110,14 @@ export type ParameterizeParams = {
 	paramData: DatasetSource;
 	templateOption: CommandParams;
 };
+function setIndexOfSetting(srcData: DatasetSource) {
+	srcData.indexOfSetting = () => {
+		const result = -1;
+		for (let i = 0; i < srcData.elements.length; i++) {
+			if (srcData.elements[i].name === "setting") {
+				return i;
+			}
+		}
+		return result;
+	}
+}
