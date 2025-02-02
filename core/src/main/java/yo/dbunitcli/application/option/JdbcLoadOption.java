@@ -10,7 +10,6 @@ public record JdbcLoadOption(
         , boolean useJdbcMetaData
 ) implements ComparableDataSetParamOption {
 
-
     public JdbcLoadOption(final String prefix, final DataSetLoadDto dto) {
         this(prefix, new JdbcOption(prefix, dto.getJdbc())
                 , Strings.isNotEmpty(dto.getUseJdbcMetaData())
@@ -25,14 +24,14 @@ public record JdbcLoadOption(
     @Override
     public CommandLineArgsBuilder toCommandLineArgsBuilder() {
         return new CommandLineArgsBuilder(this.getPrefix())
-                .put("-useJdbcMetaData", this.useJdbcMetaData)
-                .putAll(this.jdbc.toCommandLineArgs());
+                .putAll(this.jdbc.toCommandLineArgs())
+                .put("-useJdbcMetaData", this.useJdbcMetaData);
     }
 
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
-        return builder.setUseJdbcMetaData(this.useJdbcMetaData)
-                .setDatabaseConnectionLoader(this.jdbc.getDatabaseConnectionLoader());
+        return builder.setDatabaseConnectionLoader(this.jdbc.getDatabaseConnectionLoader())
+                .setUseJdbcMetaData(this.useJdbcMetaData);
     }
 
 }
