@@ -2,11 +2,11 @@ import { Body, ResponseType, fetch } from "@tauri-apps/api/http";
 import { type Dispatch, type ReactNode, type SetStateAction, createContext, useContext, useState } from "react";
 import { MetadataSettings, type MetadataSettingsBuilder } from "../model/MetadataSettings";
 
-const metadataSettingsContext = createContext<MetadataSettings>({} as MetadataSettings);
+const metadataSettingsContext = createContext<MetadataSettings>(MetadataSettings.create());
 const setMetadataSettingsContext = createContext<Dispatch<SetStateAction<MetadataSettings>>>(() => undefined);
 export default function MetadataSettingsProvider(props: { children: ReactNode }) {
     const [settings, setSettings] = useState<MetadataSettings>(
-        {} as MetadataSettings,
+        MetadataSettings.create()
     );
     return (
         <metadataSettingsContext.Provider value={settings}>
