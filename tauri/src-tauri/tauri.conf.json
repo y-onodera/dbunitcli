@@ -17,6 +17,9 @@
         "open": true,
         "save": true
       },
+      "path": {
+        "all": true
+      },
       "http": {
         "all": true, 
         "scope": [ "http://localhost*" ]
