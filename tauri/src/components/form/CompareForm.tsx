@@ -1,3 +1,4 @@
+import MetadataSettingsProvider from "../../context/MetadataSettingsProvider";
 import type { CompareParams } from "../../model/CommandParam";
 import CommandFormElements from "./CommandFormElement";
 import { DatasetLoadForm } from "./DatasetLoadForm";
@@ -14,12 +15,14 @@ export function CompareForm(prop: {
 	const convertResult = prop.compare.convertResult;
 	return (
 		<>
-			<CommandFormElements
-				handleTypeSelect={prop.handleTypeSelect}
-				name={prop.name}
-				prefix=""
-				elements={prop.compare.elements}
-			/>
+			<MetadataSettingsProvider>
+				<CommandFormElements
+					handleTypeSelect={prop.handleTypeSelect}
+					name={prop.name}
+					prefix=""
+					elements={prop.compare.elements}
+				/>
+			</MetadataSettingsProvider>
 			{prop.compare.imageOption && (
 				<CommandFormElements
 					handleTypeSelect={prop.handleTypeSelect}
