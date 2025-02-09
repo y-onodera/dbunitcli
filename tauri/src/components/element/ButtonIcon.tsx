@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Button } from "./Button";
-import { AddIcon, CopyIcon, DeleteIcon, EditIcon, FixIcon, RemoveIcon, SettingIcon } from "./Icon";
+import { AddIcon, CopyIcon, DeleteIcon, EditIcon, ExpandIcon, FixIcon, RemoveIcon, SettingIcon } from "./Icon";
 
 export function EditButton(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
     return (
@@ -48,6 +48,16 @@ export function FixButton(props: { title?: string, handleClick: React.MouseEvent
     return (
         <ButtonIcon title={props.title === undefined ? "fix" : props.title} handleClick={props.handleClick}>
             <FixIcon title={props.title ? props.title : "fix"} />
+        </ButtonIcon>
+    );
+}
+export function ExpandButton(prop: { toggleOptional: () => void, showOptional: boolean, caption: string | undefined }) {
+    return (
+        <ButtonIcon key={prop.caption} title="" handleClick={prop.toggleOptional}>
+            <ExpandIcon close={!prop.showOptional} />
+            <span className="ms-2 text-left rtl:text-right whitespace-nowrap">
+                {prop.showOptional ? `Hide ${prop.caption}` : `Show ${prop.caption}`}
+            </span>
         </ButtonIcon>
     );
 }

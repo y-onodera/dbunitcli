@@ -15,7 +15,7 @@ export function InputLabel(props: { name: string, id: string, required: boolean,
 }
 export function ControllTextBox(props: {
     name: string, id: string, required: boolean, value: string
-    , wStyle?: string, list?: string
+    , wStyle?: string, list?: string, disabled?: boolean
     , handleChange: (ev: React.ChangeEvent<HTMLInputElement>) => void
     , handleBlur?: (ev: React.FocusEvent<HTMLInputElement>) => void
 }) {
@@ -27,6 +27,7 @@ export function ControllTextBox(props: {
             list={props.list ?? ""}
             className={inputStyle(props.wStyle ? props.wStyle : "w-full")}
             required={props.required}
+            disabled={!!props.disabled}
             value={props.value}
             onChange={props.handleChange}
             onBlur={ev => props.handleBlur?.(ev)}
@@ -98,6 +99,7 @@ function inputStyle(wStyle: string) {
                text-sm text-gray-900
                rounded-lg 
                bg-gray-50 
+               disabled:bg-gray-300
                border border-gray-300 
                ring-indigo-300 
                focus-visible:ring `

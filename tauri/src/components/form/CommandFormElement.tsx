@@ -8,8 +8,8 @@ import type { Attribute, CommandParam, CommandParams } from "../../model/Command
 import type { MetadataSettings } from "../../model/MetadataSettings";
 import type { WorkspaceContext } from "../../model/WorkspaceResources";
 import { ButtonWithIcon } from "../element/Button";
-import { ButtonIcon } from "../element/ButtonIcon";
-import { DirIcon, EditIcon, ExpandIcon, FileIcon } from "../element/Icon";
+import { ExpandButton } from "../element/ButtonIcon";
+import { DirIcon, EditIcon, FileIcon } from "../element/Icon";
 import { CheckBox, ControllTextBox, InputLabel, SelectBox } from "../element/Input";
 import SettingsDaialog from "./settings/SettingsDialog";
 
@@ -24,20 +24,9 @@ type FileProp = Prop & {
 type SelectProp = Prop & {
 	handleTypeSelect: () => Promise<void>;
 };
-const ToggleButton = (prop: { toggleOptional: () => void, showOptional: boolean, caption: string | undefined }) => (
-	<ButtonIcon key={prop.caption} title="" handleClick={prop.toggleOptional}>
-		<ExpandIcon close={!prop.showOptional} />
-		<span className="ms-2 text-left rtl:text-right whitespace-nowrap">
-			{prop.showOptional ? `Hide ${prop.caption}` : `Show ${prop.caption}`}
-		</span>
-	</ButtonIcon>
-);
 export default function CommandFormElements(prop: CommandParams) {
 	const [showOptional, setShowOptional] = useState(false);
-
-	const toggleOptional = () => {
-		setShowOptional(!showOptional);
-	};
+	const toggleOptional = () => setShowOptional(!showOptional)
 	return (
 		<>
 			{prop.elements.map((element) => {
@@ -45,7 +34,7 @@ export default function CommandFormElements(prop: CommandParams) {
 				if (prop.optional?.includes(element.name) && !showOptional) {
 					if (displayCaption) {
 						return (
-							<ToggleButton
+							<ExpandButton
 								key={prop.prefix + prop.optionCaption?.caption}
 								toggleOptional={toggleOptional}
 								showOptional={showOptional}
@@ -59,7 +48,7 @@ export default function CommandFormElements(prop: CommandParams) {
 					return (
 						<>
 							{displayCaption &&
-								<ToggleButton
+								<ExpandButton
 									key={prop.prefix + prop.optionCaption?.caption}
 									toggleOptional={toggleOptional}
 									showOptional={showOptional}
@@ -78,7 +67,7 @@ export default function CommandFormElements(prop: CommandParams) {
 					return (
 						<>
 							{displayCaption &&
-								<ToggleButton
+								<ExpandButton
 									key={prop.prefix + prop.optionCaption?.caption}
 									toggleOptional={toggleOptional}
 									showOptional={showOptional}
@@ -97,7 +86,7 @@ export default function CommandFormElements(prop: CommandParams) {
 				return (
 					<>
 						{displayCaption &&
-							<ToggleButton
+							<ExpandButton
 								key={prop.prefix + prop.optionCaption?.caption}
 								toggleOptional={toggleOptional}
 								showOptional={showOptional}

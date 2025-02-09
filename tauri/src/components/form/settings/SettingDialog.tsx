@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { MetadataSetting } from "../../../model/MetadataSettings";
 import { BlueButton, WhiteButton } from "../../element/Button";
-import { AddButton, RemoveButton } from "../../element/ButtonIcon";
+import { AddButton, ExpandButton, RemoveButton } from "../../element/ButtonIcon";
 import { CheckBox, ControllTextBox, InputLabel, SelectBox } from "../../element/Input";
 
 export default function SettingDaialog(props: {
@@ -13,6 +13,8 @@ export default function SettingDaialog(props: {
     useEffect(() => { dialogRef.current?.showModal() }, [])
     const [target, setTarget] = useState(props.setting)
     const handleTargetChange = async (select: string) => setTarget(current => current.replace(select))
+    const [showOptional, setShowOptional] = useState(false);
+    const toggleOptional = () => setShowOptional(!showOptional)
     return (
         <>
             <dialog ref={dialogRef} onClose={props.handleDialogClose}
@@ -111,6 +113,31 @@ export default function SettingDaialog(props: {
                             />
                         </>
                     }
+                    <ExpandButton
+                        toggleOptional={toggleOptional}
+                        showOptional={showOptional}
+                        caption="Additinaol Columns"
+                    />
+                    {showOptional && (
+                        <>
+                            <KeyValues name="string" values={target.string}
+                                handleChange={(index, newValue) => setTarget(cur => cur.replaceString(index, newValue))}
+                                handleRemove={(index) => setTarget(cur => cur.removeString(index))}
+                            />
+                            <KeyValues name="number" values={target.number}
+                                handleChange={(index, newValue) => setTarget(cur => cur.replaceNumber(index, newValue))}
+                                handleRemove={(index) => setTarget(cur => cur.removeNumber(index))}
+                            />
+                            <KeyValues name="boolean" values={target.boolean}
+                                handleChange={(index, newValue) => setTarget(cur => cur.replaceBoolean(index, newValue))}
+                                handleRemove={(index) => setTarget(cur => cur.removeBoolean(index))}
+                            />
+                            <KeyValues name="function" values={target.function}
+                                handleChange={(index, newValue) => setTarget(cur => cur.replaceFunction(index, newValue))}
+                                handleRemove={(index) => setTarget(cur => cur.removeFunction(index))}
+                            />
+                        </>
+                    )}
                     <Arrays name="exclude" values={target.exclude}
                         handleChange={(text, index) => setTarget(cur => cur.replaceExclude(text, index))}
                         handleRemove={(index) => setTarget(cur => cur.removeExclude(index))}
@@ -214,7 +241,7 @@ function Arrays(props: {
                         name={props.name}
                         id={props.name}
                         required={true}
-                        wStyle="col-start-2 col-span-3"
+                        wStyle="col-start-2"
                         value={text}
                         handleChange={(ev) => setText(ev.target.value)}
                         handleBlur={(ev) => props.handleChange(ev.target.value, 0)}
@@ -259,10 +286,86 @@ function ArraysText(props: {
                 name={props.name}
                 id={props.name}
                 required={true}
-                wStyle="col-start-2 col-span-3"
+                wStyle="col-start-2"
                 value={text}
                 handleChange={(ev) => setText(ev.target.value)}
                 handleBlur={handleBlur}
+            />
+            {props.index > 0 &&
+                <div className="col-start-3">
+                    <RemoveButton handleClick={handleRemove} />
+                </div>
+            }
+        </div>
+    )
+}
+function KeyValues(props: {
+    name: string, values: object
+    , handleChange: (index: number, value: { [prop: string]: string }) => void
+    , handleRemove: (index: number) => void
+}) {
+    const entries = Object.entries(props.values)
+    return (
+        <>
+            {entries.length === 0
+                ?
+                <KeyValueText propKey={""} name={props.name} value={""} index={0}
+                    handleChange={props.handleChange}
+                    handleRemove={props.handleRemove}
+                />
+                :
+                entries.map(([key, value], index) => {
+                    return (
+                        <KeyValueText key={key} propKey={key} name={props.name} value={value.toString()} index={index}
+                            handleChange={props.handleChange}
+                            handleRemove={props.handleRemove}
+                        />
+                    )
+                })
+            }
+            <div className="grid grid-cols-5 justify-center pb-2">
+                {entries.length > 0 &&
+                    <div className="col-start-2">
+                        <AddButton handleClick={() => props.handleChange(entries.length, { "new item": "" })} />
+                    </div>
+                }
+            </div>
+        </>
+    );
+}
+function KeyValueText(props: {
+    name: string, propKey: string, value: string, index: number
+    , handleChange: (index: number, value: { [prop: string]: string }) => void
+    , handleRemove: (index: number) => void
+}) {
+    const [key, setKey] = useState(props.propKey);
+    const [value, setValue] = useState(props.value);
+    const handleKeyBlur = (newVal: React.FocusEvent<HTMLInputElement>) => props.handleChange(props.index, newVal.target.value ? { [newVal.target.value]: value } : {})
+    const handleValueBlur = (newVal: React.FocusEvent<HTMLInputElement>) => props.handleChange(props.index, { [key]: newVal.target.value })
+    const handleRemove = () => props.handleRemove(props.index)
+    return (
+        <div className="grid grid-cols-5 pb-2">
+            {props.index === 0 &&
+                <InputLabel id={props.name} name={props.name} required={false} wStyle="p-2.5 w=1/5" />
+            }
+            <ControllTextBox
+                name={props.name}
+                id={props.name}
+                required={true}
+                wStyle="col-start-2 p-2.5 w=1/5"
+                value={key}
+                handleChange={(ev) => setKey(ev.target.value)}
+                handleBlur={handleKeyBlur}
+            />
+            <ControllTextBox
+                name={props.name}
+                id={props.name}
+                required={true}
+                wStyle="col-start-3 col-span-2 ml-1 "
+                value={value}
+                disabled={!key || key === ""}
+                handleChange={(ev) => setValue(ev.target.value)}
+                handleBlur={handleValueBlur}
             />
             {props.index > 0 &&
                 <div className="col-start-5">

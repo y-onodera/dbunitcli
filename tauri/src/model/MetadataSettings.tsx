@@ -250,6 +250,54 @@ export class MetadataSetting {
         })
     }
 
+    replaceString(index: number, value: { [prop: string]: string }): MetadataSetting {
+        return this.with({
+            string: replaceObject(this.string, index, value)
+        })
+    }
+
+    removeString(index: number): MetadataSetting {
+        return this.with({
+            string: removeObject(this.string, index)
+        })
+    }
+
+    replaceNumber(index: number, value: { [prop: string]: string }): MetadataSetting {
+        return this.with({
+            number: replaceObject(this.number, index, value)
+        })
+    }
+
+    removeNumber(index: number): MetadataSetting {
+        return this.with({
+            number: removeObject(this.number, index)
+        })
+    }
+
+    replaceBoolean(index: number, value: { [prop: string]: string }): MetadataSetting {
+        return this.with({
+            boolean: replaceObject(this.boolean, index, value)
+        })
+    }
+
+    removeBoolean(index: number): MetadataSetting {
+        return this.with({
+            boolean: removeObject(this.boolean, index)
+        })
+    }
+
+    replaceFunction(index: number, value: { [prop: string]: string }): MetadataSetting {
+        return this.with({
+            function: replaceObject(this.function, index, value)
+        })
+    }
+
+    removeFunction(index: number): MetadataSetting {
+        return this.with({
+            function: removeObject(this.function, index)
+        })
+    }
+
     replaceFilter(newOne: string, index: number): MetadataSetting {
         return this.with({
             filter: replaceArray(this.filter, newOne, index)
@@ -329,6 +377,23 @@ function replaceArray(array: string[], newOne: string, index: number): string[] 
 }
 function removeArray(array: string[], remove: number): string[] {
     return [...array].filter((_, index) => index !== remove)
+}
+function replaceObject(src: object, index: number, value: { [prop: string]: string }): object {
+    const result = {}
+    Object.entries(src).forEach(([k, v], i) => {
+        if (i === index) {
+            Object.assign(result, value)
+        } else {
+            Object.assign(result, { [k]: v })
+        }
+    })
+    if (Object.keys(src).length === index) {
+        Object.assign(result, value)
+    }
+    return result
+}
+function removeObject(src: object, index: number): object {
+    return Object.fromEntries(Object.entries(src).filter(([_], i) => i !== index));
 }
 export function newMetadataSetting(): MetadataSetting {
     return new MetadataSetting({} as MetadataSettingBuilder)
