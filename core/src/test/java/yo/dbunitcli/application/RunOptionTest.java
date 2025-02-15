@@ -7,8 +7,6 @@ import yo.dbunitcli.application.option.Option;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.Parameter;
 
-import java.io.IOException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -42,7 +40,7 @@ class RunOptionTest {
         }
 
         @Test
-        void toCommandLineArgs() throws IOException {
+        void toCommandLineArgs() {
             final RunOption target = RunOptionTest.this.createTarget();
             final Option.CommandLineArgs result = target.toCommandLineArgs();
             assertEquals(RunOptionTest.this.src.getScriptType().toString(), result.getArg("-scriptType").value());
@@ -67,7 +65,7 @@ class RunOptionTest {
         }
 
         @Test
-        void toCommandLineArgs() throws IOException {
+        void toCommandLineArgs() {
             final RunOption target = RunOptionTest.this.createTarget();
             final Option.CommandLineArgs result = target.toCommandLineArgs();
             assertEquals(RunOptionTest.this.src.getScriptType().toString(), result.getArg("-scriptType").value());
@@ -92,7 +90,7 @@ class RunOptionTest {
         }
 
         @Test
-        void toCommandLineArgs() throws IOException {
+        void toCommandLineArgs() {
             final RunOption target = RunOptionTest.this.createTarget();
             final Option.CommandLineArgs result = target.toCommandLineArgs();
             assertEquals(RunOptionTest.this.src.getScriptType().toString(), result.getArg("-scriptType").value());

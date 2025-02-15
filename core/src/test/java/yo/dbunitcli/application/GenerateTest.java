@@ -59,7 +59,7 @@ public class GenerateTest {
         }
 
         @Test
-        public void testGenerateXlsx() throws Exception {
+        public void testGenerateXlsx() {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsx.txt"});
             Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/xlsx/compareResult.txt"
                     , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"
@@ -69,7 +69,7 @@ public class GenerateTest {
         }
 
         @Test
-        public void testGenerateXlsxStreaming() throws Exception {
+        public void testGenerateXlsxStreaming() {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsxStreaming.txt"});
             Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/streamxlsx/compareResult.txt"
                     , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"
@@ -79,7 +79,7 @@ public class GenerateTest {
         }
 
         @Test
-        public void testGenerateXls() throws Exception {
+        public void testGenerateXls() {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXls.txt"});
             Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/xls/compareResult.txt"
                     , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"

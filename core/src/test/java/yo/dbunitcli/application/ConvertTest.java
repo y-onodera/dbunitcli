@@ -754,7 +754,7 @@ public class ConvertTest {
         }
 
         @Test
-        public void testOuterJoin() throws Exception {
+        public void testOuterJoin() {
             Convert.main(this.getArgs("/paramConvertOuterJoin.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertOuterJoin.xlsx");
             final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -793,7 +793,7 @@ public class ConvertTest {
         }
 
         @Test
-        public void testFullJoin() throws Exception {
+        public void testFullJoin() {
             Convert.main(this.getArgs("/paramConvertFullJoin.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertFullJoin.xlsx");
             final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -840,7 +840,7 @@ public class ConvertTest {
         }
 
         @Test
-        public void testInnerJoin() throws Exception {
+        public void testInnerJoin() {
             Convert.main(this.getArgs("/paramConvertInnerJoin.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertInnerJoin.xlsx");
             final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -871,7 +871,7 @@ public class ConvertTest {
         }
 
         @Test
-        public void testInnerJoinByExpression() throws Exception {
+        public void testInnerJoinByExpression() {
             Convert.main(this.getArgs("/paramConvertInnerJoinByExpression.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertInnerJoinByExpression.xlsx");
             final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -926,7 +926,7 @@ public class ConvertTest {
         }
 
         @Test
-        public void testInnerJoinWithSplit() throws Exception {
+        public void testInnerJoinWithSplit() {
             Convert.main(this.getArgs("/paramConvertInnerJoinWithSplit.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertInnerJoinWithSplit.xlsx");
             final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -952,7 +952,7 @@ public class ConvertTest {
         }
 
         @Test
-        public void testInnerJoinWithSeparate() throws Exception {
+        public void testInnerJoinWithSeparate() {
             Convert.main(this.getArgs("/paramConvertInnerJoinWithSeparate.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertInnerJoinWithSeparate.xlsx");
             final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -997,7 +997,7 @@ public class ConvertTest {
         }
 
         @Test
-        public void testInnerJoinWithRename() throws Exception {
+        public void testInnerJoinWithRename() {
             Convert.main(this.getArgs("/paramConvertInnerJoinWithRename.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertInnerJoinWithRename.xlsx");
             final ComparableDataSetImpl actual = new ComparableDataSetImpl(
@@ -1027,7 +1027,7 @@ public class ConvertTest {
         }
 
         @Test
-        public void testJoinMultiple() throws Exception {
+        public void testJoinMultiple() {
             Convert.main(this.getArgs("/paramConvertJoinMultiple.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertJoinMultiple.xlsx");
             final ComparableDataSetImpl actual = new ComparableDataSetImpl(

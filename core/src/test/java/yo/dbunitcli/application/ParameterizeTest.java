@@ -56,17 +56,17 @@ public class ParameterizeTest {
         }
 
         @Test
-        public void testDataDrivenExport() throws Exception {
+        public void testDataDrivenExport() {
             Parameterize.main(new String[]{"@" + ParameterizeTest.baseDir + "/paramDataDrivenExport.txt"});
         }
 
         @Test
-        public void testDataDrivenExecute() throws Exception {
+        public void testDataDrivenExecute() {
             Parameterize.main(new String[]{"@" + ParameterizeTest.baseDir + "/paramDataDrivenExecute.txt"});
         }
 
         @Test
-        public void testSpaceContainsPathAsSrcParameter() throws Exception {
+        public void testSpaceContainsPathAsSrcParameter() {
             Parameterize.main(new String[]{"-param.src=" + ParameterizeTest.baseDir + "src/csv/has space"
                     , "-param.srcType=file"
                     , "-cmd=convert"
@@ -74,7 +74,7 @@ public class ParameterizeTest {
         }
 
         @Test
-        public void testExecCommandNoneParameter() throws Exception {
+        public void testExecCommandNoneParameter() {
             Parameterize.main(new String[]{
                     "-cmd=$param.inputParam.cmdName$"
                     , "-cmdParam=$param.inputParam.templateName$"
