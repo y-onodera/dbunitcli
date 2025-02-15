@@ -8,7 +8,7 @@ public class Parameterize implements Command<ParameterizeDto, ParameterizeOption
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Parameterize.class);
 
-    public static void main(final String[] args) throws Exception {
+    public static void main(final String[] args) {
         new Parameterize().exec(args);
     }
 
