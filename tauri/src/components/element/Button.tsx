@@ -41,7 +41,7 @@ export function LinkButton(props: { title: string, handleClick: React.MouseEvent
         <Button
             buttonstyle="flex items-center justify-start w-full p-1 ms-2"
             bgcolor="hover:bg-gray-100"
-            textstyle="text-gray-500 hover:text-blue-600"
+            textstyle="text-left text-gray-500 hover:text-blue-600"
             border="outline-none"
             handleClick={props.handleClick} >
             {props.title}
