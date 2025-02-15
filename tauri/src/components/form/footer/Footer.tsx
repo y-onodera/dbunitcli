@@ -48,7 +48,8 @@ export default function Footer(prop: {
 			</ResultDialog>
 			{parameter.command && (
 				<div className="fixed bottom-0 right-1 
-                                w-full z-50 
+                                w-full z-50
+								bg-gray-100 
                                 flex items-center justify-end "
 				>
 					<BlueButton title="Exec" handleClick={() => {
