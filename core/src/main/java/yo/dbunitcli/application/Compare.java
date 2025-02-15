@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 public class Compare implements Command<CompareDto, CompareOption> {
 
-    public static void main(final String[] args) throws Exception {
+    public static void main(final String[] args) {
         new Compare().exec(args);
     }
 
@@ -18,7 +18,7 @@ public class Compare implements Command<CompareDto, CompareOption> {
             Command.LOGGER.info(ex.getMessage());
             System.exit(1);
         } catch (final Throwable th) {
-            Command.LOGGER.error("args:" + Arrays.toString(args));
+            Command.LOGGER.error("args:{}", Arrays.toString(args));
             Command.LOGGER.error("error:", th);
             throw th;
         }

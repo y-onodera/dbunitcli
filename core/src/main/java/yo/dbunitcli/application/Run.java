@@ -4,7 +4,7 @@ import yo.dbunitcli.dataset.Parameter;
 
 public class Run implements Command<RunDto, RunOption> {
 
-    public static void main(final String[] strings) throws Exception {
+    public static void main(final String[] strings) {
         new Run().exec(strings);
     }
 

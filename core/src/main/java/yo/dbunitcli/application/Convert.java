@@ -4,7 +4,7 @@ import yo.dbunitcli.dataset.Parameter;
 
 public class Convert implements Command<ConvertDto, ConvertOption> {
 
-    public static void main(final String[] args) throws Exception {
+    public static void main(final String[] args) {
         new Convert().exec(args);
     }
 

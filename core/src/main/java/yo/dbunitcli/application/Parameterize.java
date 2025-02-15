@@ -32,7 +32,7 @@ public class Parameterize implements Command<ParameterizeDto, ParameterizeOption
                 })
                 .reduce(0, Integer::sum);
         if (failCount > 0) {
-            Parameterize.LOGGER.info("total fail count:" + failCount);
+            Parameterize.LOGGER.info("total fail count:{}", failCount);
             throw new Command.CommandFailException("execute has fail count");
         }
     }

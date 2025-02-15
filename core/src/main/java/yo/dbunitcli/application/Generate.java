@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class Generate implements Command<GenerateDto, GenerateOption> {
 
-    public static void main(final String[] strings) throws Exception {
+    public static void main(final String[] strings) {
         new Generate().exec(strings);
     }
 
