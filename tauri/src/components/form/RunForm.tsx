@@ -12,33 +12,36 @@ export function RunForm(prop: {
 	const jdbcOption = prop.run.jdbcOption;
 	return (
 		<>
-			<CommandFormElements
-				handleTypeSelect={prop.handleTypeSelect}
-				name={prop.name}
-				prefix=""
-				elements={prop.run.elements}
-			/>
+			<fieldset className="border border-gray-200 p-3">
+				<legend>run</legend>
+				<CommandFormElements
+					handleTypeSelect={prop.handleTypeSelect}
+					name={prop.name}
+					prefix=""
+					elements={prop.run.elements}
+				/>
+				{prop.run.templateOption && (
+					<CommandFormElements
+						handleTypeSelect={prop.handleTypeSelect}
+						name={prop.name}
+						prefix={templateOption.prefix}
+						elements={templateOption.elements}
+					/>
+				)}
+				{prop.run.jdbcOption && (
+					<CommandFormElements
+						handleTypeSelect={prop.handleTypeSelect}
+						name={prop.name}
+						prefix={jdbcOption.prefix}
+						elements={jdbcOption.elements}
+					/>
+				)}
+			</fieldset>
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={srcData}
 			/>
-			{prop.run.jdbcOption && (
-				<CommandFormElements
-					handleTypeSelect={prop.handleTypeSelect}
-					name={prop.name}
-					prefix={templateOption.prefix}
-					elements={templateOption.elements}
-				/>
-			)}
-			{prop.run.jdbcOption && (
-				<CommandFormElements
-					handleTypeSelect={prop.handleTypeSelect}
-					name={prop.name}
-					prefix={jdbcOption.prefix}
-					elements={jdbcOption.elements}
-				/>
-			)}
 		</>
 	);
 }

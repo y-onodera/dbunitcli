@@ -11,22 +11,25 @@ export function ParameterizeForm(prop: {
 	const templateOption = prop.parameterize.templateOption;
 	return (
 		<>
-			<CommandFormElements
-				handleTypeSelect={prop.handleTypeSelect}
-				name={prop.name}
-				prefix=""
-				elements={prop.parameterize.elements}
-			/>
+			<fieldset className="border border-gray-200 p-3">
+				<legend>execute</legend>
+				<CommandFormElements
+					handleTypeSelect={prop.handleTypeSelect}
+					name={prop.name}
+					prefix=""
+					elements={prop.parameterize.elements}
+				/>
+				<CommandFormElements
+					handleTypeSelect={prop.handleTypeSelect}
+					name={prop.name}
+					prefix={templateOption.prefix}
+					elements={templateOption.elements}
+				/>
+			</fieldset>
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={paramData}
-			/>
-			<CommandFormElements
-				handleTypeSelect={prop.handleTypeSelect}
-				name={prop.name}
-				prefix={templateOption.prefix}
-				elements={templateOption.elements}
 			/>
 		</>
 	);

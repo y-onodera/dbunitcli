@@ -16,18 +16,21 @@ export function ConvertForm(prop: {
 				name={prop.name}
 				srcData={srcData}
 			/>
-			<CommandFormElements
-				handleTypeSelect={prop.handleTypeSelect}
-				name={prop.name}
-				prefix={convertResult.prefix}
-				elements={convertResult.elements}
-			/>
-			<CommandFormElements
-				handleTypeSelect={prop.handleTypeSelect}
-				name={prop.name}
-				prefix={convertResult.prefix}
-				elements={convertResult.jdbc ? convertResult.jdbc.elements : []}
-			/>
+			<fieldset className="border border-gray-200 p-3">
+				<legend>{convertResult.prefix}</legend>
+				<CommandFormElements
+					handleTypeSelect={prop.handleTypeSelect}
+					name={prop.name}
+					prefix={convertResult.prefix}
+					elements={convertResult.elements}
+				/>
+				<CommandFormElements
+					handleTypeSelect={prop.handleTypeSelect}
+					name={prop.name}
+					prefix={convertResult.prefix}
+					elements={convertResult.jdbc ? convertResult.jdbc.elements : []}
+				/>
+			</fieldset>
 		</>
 	);
 }

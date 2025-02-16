@@ -37,7 +37,7 @@ export default function Layout() {
 						>
 							<Sidebar setSidebarWidth={setSidebarWidth} />
 						</aside>
-						<div className="p-4" style={{ marginLeft: `${sidebarWidth}px` }}>
+						<div className="p-2 " style={{ marginLeft: `${sidebarWidth}px` }}>
 							<Form />
 						</div>
 					</EditNmaeProvider>

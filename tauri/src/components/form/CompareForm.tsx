@@ -1,4 +1,3 @@
-import MetadataSettingsProvider from "../../context/MetadataSettingsProvider";
 import type { CompareParams } from "../../model/CommandParam";
 import CommandFormElements from "./CommandFormElement";
 import { DatasetLoadForm } from "./DatasetLoadForm";
@@ -15,22 +14,23 @@ export function CompareForm(prop: {
 	const convertResult = prop.compare.convertResult;
 	return (
 		<>
-			<MetadataSettingsProvider>
+			<fieldset className="border border-gray-200 p-3">
+				<legend>compare</legend>
 				<CommandFormElements
 					handleTypeSelect={prop.handleTypeSelect}
 					name={prop.name}
 					prefix=""
 					elements={prop.compare.elements}
 				/>
-			</MetadataSettingsProvider>
-			{prop.compare.imageOption && (
-				<CommandFormElements
-					handleTypeSelect={prop.handleTypeSelect}
-					name={prop.name}
-					prefix={imageOption.prefix}
-					elements={imageOption.elements}
-				/>
-			)}
+				{prop.compare.imageOption && (
+					<CommandFormElements
+						handleTypeSelect={prop.handleTypeSelect}
+						name={prop.name}
+						prefix={imageOption.prefix}
+						elements={imageOption.elements}
+					/>
+				)}
+			</fieldset>
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
@@ -41,12 +41,15 @@ export function CompareForm(prop: {
 				name={prop.name}
 				srcData={oldData}
 			/>
-			<CommandFormElements
-				handleTypeSelect={prop.handleTypeSelect}
-				name={prop.name}
-				prefix={convertResult.prefix}
-				elements={convertResult.elements}
-			/>
+			<fieldset className="border border-gray-200 p-3">
+				<legend>{convertResult.prefix}</legend>
+				<CommandFormElements
+					handleTypeSelect={prop.handleTypeSelect}
+					name={prop.name}
+					prefix={convertResult.prefix}
+					elements={convertResult.elements}
+				/>
+			</fieldset>
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}

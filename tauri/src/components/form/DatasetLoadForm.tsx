@@ -1,32 +1,41 @@
-import MetadataSettingsProvider from "../../context/MetadataSettingsProvider";
 import type { DatasetSource } from "../../model/CommandParam";
 import CommandFormElements from "./CommandFormElement";
 
-const traversaldetail = ["recursive", "regInclude", "regExclude", "extension"]
-const datasetdetail = ["regTableInclude", "regTableExclude", "loadData", "includeMetaData"]
 export function DatasetLoadForm(prop: {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
 	srcData: DatasetSource;
 }) {
+	const src = prop.srcData.srcElements();
+	const srcTypeSettings = prop.srcData.srcTypeSettings();
+	const settingElements = prop.srcData.settingElements();
 	return (
-		<MetadataSettingsProvider>
+		<fieldset className="border border-gray-200 p-3">
+			<legend>{prop.srcData.prefix}</legend>
 			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
-				name={prop.name}
-				prefix={prop.srcData.prefix}
-				elements={prop.srcData.elements.slice(0, prop.srcData.indexOfSetting())}
-				optional={traversaldetail}
-				optionCaption={{ caption: "traversal detail", name: "recursive" }}
+				prefix={src.prefix}
+				name={src.name}
+				elements={src.elements}
+				optionCaption={src.optionCaption}
+				optional={src.optional}
 			/>
 			<CommandFormElements
 				handleTypeSelect={prop.handleTypeSelect}
-				name={prop.name}
-				prefix={prop.srcData.prefix}
-				elements={prop.srcData.elements.slice(prop.srcData.indexOfSetting())}
-				optional={datasetdetail}
-				optionCaption={{ caption: "dataset detail", name: "regTableInclude" }}
+				prefix={srcTypeSettings.prefix}
+				name={srcTypeSettings.name}
+				elements={srcTypeSettings.elements}
+				optionCaption={srcTypeSettings.optionCaption}
+				optional={srcTypeSettings.optional}
 			/>
-		</MetadataSettingsProvider>
+			<CommandFormElements
+				handleTypeSelect={prop.handleTypeSelect}
+				prefix={settingElements.prefix}
+				name={settingElements.name}
+				elements={settingElements.elements}
+				optionCaption={settingElements.optionCaption}
+				optional={settingElements.optional}
+			/>
+		</fieldset>
 	);
 }

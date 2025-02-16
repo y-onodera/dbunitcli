@@ -30,8 +30,8 @@ export default function CommandFormElements(prop: CommandParams) {
 	return (
 		<>
 			{prop.elements.map((element) => {
-				const displayCaption = prop.optionCaption?.name === element.name
-				if (prop.optional?.includes(element.name) && !showOptional) {
+				const displayCaption = prop.optionCaption?.display(element.name)
+				if (prop.optional?.(element.name) && !showOptional) {
 					if (displayCaption) {
 						return (
 							<ExpandButton

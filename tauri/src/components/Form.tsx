@@ -22,7 +22,7 @@ export default function Form() {
 	};
 	return (
 		<>
-			<div className="p-4 rounded-lg mt-14">
+			<div className="p-2 rounded-lg mt-10">
 				<form
 					id={formid}
 					className="grid gap-6 mb-6 grid-cols-1"
