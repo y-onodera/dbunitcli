@@ -1,5 +1,6 @@
 package yo.dbunitcli.sidecar.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.serde.annotation.Serdeable;
 
@@ -17,6 +18,7 @@ public class MetaDataSettingDto {
     private String prefix;
     private String tableName;
     private String suffix;
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private boolean distinct;
     private SplitDto split;
     private List<String> keys;
@@ -34,162 +36,162 @@ public class MetaDataSettingDto {
     private List<String> order;
 
     public List<String> getName() {
-        return name;
+        return this.name;
     }
 
-    public void setName(List<String> name) {
+    public void setName(final List<String> name) {
         this.name = name;
     }
 
     public PatternDto getPattern() {
-        return pattern;
+        return this.pattern;
     }
 
-    public void setPattern(PatternDto pattern) {
+    public void setPattern(final PatternDto pattern) {
         this.pattern = pattern;
     }
 
     public TableJoinDto getInnerJoin() {
-        return innerJoin;
+        return this.innerJoin;
     }
 
-    public void setInnerJoin(TableJoinDto innerJoin) {
+    public void setInnerJoin(final TableJoinDto innerJoin) {
         this.innerJoin = innerJoin;
     }
 
     public TableJoinDto getOuterJoin() {
-        return outerJoin;
+        return this.outerJoin;
     }
 
-    public void setOuterJoin(TableJoinDto outerJoin) {
+    public void setOuterJoin(final TableJoinDto outerJoin) {
         this.outerJoin = outerJoin;
     }
 
     public TableJoinDto getFullJoin() {
-        return fullJoin;
+        return this.fullJoin;
     }
 
-    public void setFullJoin(TableJoinDto fullJoin) {
+    public void setFullJoin(final TableJoinDto fullJoin) {
         this.fullJoin = fullJoin;
     }
 
     public List<MetaDataSettingDto> getSeparate() {
-        return separate;
+        return this.separate;
     }
 
-    public void setSeparate(List<MetaDataSettingDto> separate) {
+    public void setSeparate(final List<MetaDataSettingDto> separate) {
         this.separate = separate;
     }
 
     public String getPrefix() {
-        return prefix;
+        return this.prefix;
     }
 
-    public void setPrefix(String prefix) {
+    public void setPrefix(final String prefix) {
         this.prefix = prefix;
     }
 
     public String getTableName() {
-        return tableName;
+        return this.tableName;
     }
 
-    public void setTableName(String tableName) {
+    public void setTableName(final String tableName) {
         this.tableName = tableName;
     }
 
     public String getSuffix() {
-        return suffix;
+        return this.suffix;
     }
 
-    public void setSuffix(String suffix) {
+    public void setSuffix(final String suffix) {
         this.suffix = suffix;
     }
 
     public boolean isDistinct() {
-        return distinct;
+        return this.distinct;
     }
 
-    public void setDistinct(boolean distinct) {
+    public void setDistinct(final boolean distinct) {
         this.distinct = distinct;
     }
 
     public SplitDto getSplit() {
-        return split;
+        return this.split;
     }
 
-    public void setSplit(SplitDto split) {
+    public void setSplit(final SplitDto split) {
         this.split = split;
     }
 
     public List<String> getKeys() {
-        return keys;
+        return this.keys;
     }
 
-    public void setKeys(List<String> keys) {
+    public void setKeys(final List<String> keys) {
         this.keys = keys;
     }
 
     public Map<String, String> getStringColumns() {
-        return stringColumns;
+        return this.stringColumns;
     }
 
-    public void setStringColumns(Map<String, String> stringColumns) {
+    public void setStringColumns(final Map<String, String> stringColumns) {
         this.stringColumns = stringColumns;
     }
 
     public Map<String, String> getNumberColumns() {
-        return numberColumns;
+        return this.numberColumns;
     }
 
-    public void setNumberColumns(Map<String, String> numberColumns) {
+    public void setNumberColumns(final Map<String, String> numberColumns) {
         this.numberColumns = numberColumns;
     }
 
     public Map<String, String> getBooleanColumns() {
-        return booleanColumns;
+        return this.booleanColumns;
     }
 
-    public void setBooleanColumns(Map<String, String> booleanColumns) {
+    public void setBooleanColumns(final Map<String, String> booleanColumns) {
         this.booleanColumns = booleanColumns;
     }
 
     public Map<String, String> getFunctionColumns() {
-        return functionColumns;
+        return this.functionColumns;
     }
 
-    public void setFunctionColumns(Map<String, String> functionColumns) {
+    public void setFunctionColumns(final Map<String, String> functionColumns) {
         this.functionColumns = functionColumns;
     }
 
     public List<String> getExclude() {
-        return exclude;
+        return this.exclude;
     }
 
-    public void setExclude(List<String> exclude) {
+    public void setExclude(final List<String> exclude) {
         this.exclude = exclude;
     }
 
     public List<String> getInclude() {
-        return include;
+        return this.include;
     }
 
-    public void setInclude(List<String> include) {
+    public void setInclude(final List<String> include) {
         this.include = include;
     }
 
     public List<String> getFilter() {
-        return filter;
+        return this.filter;
     }
 
-    public void setFilter(List<String> filter) {
+    public void setFilter(final List<String> filter) {
         this.filter = filter;
     }
 
     public List<String> getOrder() {
-        return order;
+        return this.order;
     }
 
-    public void setOrder(List<String> order) {
+    public void setOrder(final List<String> order) {
         this.order = order;
     }
 }
