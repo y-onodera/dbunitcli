@@ -39,8 +39,8 @@ public class DataSourceTypeOptionFactory {
             case table, sql -> ComparableDataSetParamOption.join(
                     new FileTraverseOption(prefix, dto)
                     , new EncodingOption(prefix, dto)
-                    , new HeaderNameOption(prefix, dto)
                     , new JdbcLoadOption(prefix, dto)
+                    , new HeaderNameOption(prefix, dto)
                     , new TemplateRenderOption(prefix, dto.getTemplateRender())
             );
             case dir -> new TraverseOption(prefix, dto);
