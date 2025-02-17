@@ -16,6 +16,7 @@ import SettingsDaialog from "./settings/SettingsDialog";
 type Prop = {
 	prefix: string;
 	element: CommandParam;
+	hidden?: boolean;
 };
 type FileProp = Prop & {
 	path: string;
@@ -30,35 +31,22 @@ export default function CommandFormElements(prop: CommandParams) {
 	return (
 		<>
 			{prop.elements.map((element) => {
-				const displayCaption = prop.optionCaption?.display(element.name)
-				if (prop.optional?.(element.name) && !showOptional) {
-					if (displayCaption) {
-						return (
-							<ExpandButton
-								key={prop.prefix + prop.optionCaption?.caption}
-								toggleOptional={toggleOptional}
-								showOptional={showOptional}
-								caption={prop.optionCaption?.caption}
-							/>
-						);
-					}
-					return null;
-				}
 				if (element.attribute.type === "FLG") {
 					return (
 						<>
-							{displayCaption &&
+							{prop.optionCaption?.display(element.name) && (
 								<ExpandButton
 									key={prop.prefix + prop.optionCaption?.caption}
 									toggleOptional={toggleOptional}
 									showOptional={showOptional}
 									caption={prop.optionCaption?.caption}
 								/>
-							}
+							)}
 							<Check
 								prefix={prop.prefix}
 								element={element}
 								key={prop.name + prop.prefix + element.name}
+								hidden={prop.optional?.(element.name) && !showOptional}
 							/>
 						</>
 					);
@@ -66,37 +54,39 @@ export default function CommandFormElements(prop: CommandParams) {
 				if (element.attribute.type === "ENUM") {
 					return (
 						<>
-							{displayCaption &&
+							{prop.optionCaption?.display(element.name) && (
 								<ExpandButton
 									key={prop.prefix + prop.optionCaption?.caption}
 									toggleOptional={toggleOptional}
 									showOptional={showOptional}
 									caption={prop.optionCaption?.caption}
 								/>
-							}
+							)}
 							<Select
 								handleTypeSelect={prop.handleTypeSelect}
 								prefix={prop.prefix}
 								element={element}
 								key={prop.name + prop.prefix + element.name}
+								hidden={prop.optional?.(element.name) && !showOptional}
 							/>
 						</>
 					);
 				}
 				return (
 					<>
-						{displayCaption &&
+						{prop.optionCaption?.display(element.name) && (
 							<ExpandButton
 								key={prop.prefix + prop.optionCaption?.caption}
 								toggleOptional={toggleOptional}
 								showOptional={showOptional}
 								caption={prop.optionCaption?.caption}
 							/>
-						}
+						)}
 						<Text
 							prefix={prop.prefix}
 							element={element}
 							key={prop.name + prop.prefix + element.name}
+							hidden={prop.optional?.(element.name) && !showOptional}
 						/>
 					</>
 				);
@@ -112,23 +102,25 @@ function Text(prop: Prop) {
 				name={getName(prop.prefix, prop.element.name)}
 				id={getId(prop.prefix, prop.element.name)}
 				required={prop.element.attribute.required}
+				hidden={prop.hidden}
 			/>
 			<div className="flex">
 				<ControllTextBox
 					name={getName(prop.prefix, prop.element.name)}
 					id={getId(prop.prefix, prop.element.name)}
 					list={prop.element.name === "setting" ? `${getId(prop.prefix, prop.element.name)}_list` : undefined}
+					hidden={prop.hidden}
 					required={prop.element.attribute.required}
 					value={path}
 					handleChange={(ev) => setPath(ev.target.value)}
 				/>
-				{prop.element.name === "setting" && (
+				{prop.element.name === "setting" && !prop.hidden && (
 					<SettingEdit prefix={prop.prefix} element={prop.element} path={path} setPath={setPath} />
 				)}
-				{prop.element.attribute.type.includes("FILE") && (
+				{prop.element.attribute.type.includes("FILE") && !prop.hidden && (
 					<FileChooser prefix={prop.prefix} element={prop.element} path={path} setPath={setPath} />
 				)}
-				{prop.element.attribute.type.includes("DIR") && (
+				{prop.element.attribute.type.includes("DIR") && !prop.hidden && (
 					<DirectoryChooser prefix={prop.prefix} element={prop.element} path={path} setPath={setPath} />
 				)}
 			</div>
@@ -223,10 +215,12 @@ function Check(prop: Prop) {
 				name={prop.prefix ? `-${prop.prefix}.${prop.element.name}` : `-${prop.element.name}`}
 				id={`${prop.prefix}_${prop.element.name}`}
 				required={false}
+				hidden={prop.hidden}
 			/>
 			<CheckBox
 				name={prop.prefix ? `-${prop.prefix}.${prop.element.name}` : `-${prop.element.name}`}
 				id={`${prop.prefix}_${prop.element.name}`}
+				hidden={prop.hidden}
 				defaultValue={prop.element.value}
 			/>
 		</div>
@@ -239,11 +233,13 @@ function Select(prop: SelectProp) {
 				name={prop.prefix ? `-${prop.prefix}.${prop.element.name}` : `-${prop.element.name}`}
 				id={`${prop.prefix}_${prop.element.name}`}
 				required={prop.element.attribute.required}
+				hidden={prop.hidden}
 			/>
 			<SelectBox
 				name={prop.prefix ? `-${prop.prefix}.${prop.element.name}` : `-${prop.element.name}`}
 				id={`${prop.prefix}_${prop.element.name}`}
 				required={true}
+				hidden={prop.hidden}
 				handleOnChange={prop.handleTypeSelect}
 				defaultValue={prop.element.value}
 			>

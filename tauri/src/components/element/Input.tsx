@@ -1,9 +1,12 @@
 import { type ReactNode, useEffect, useState } from "react";
 
-export function InputLabel(props: { name: string, id: string, required: boolean, wStyle?: string }) {
+export function InputLabel(props: {
+    name: string, id: string, required: boolean, hidden?: boolean, wStyle?: string
+}) {
     return (
         <label
             htmlFor={props.id}
+            style={props.hidden ? { display: "none" } : {}}
             className={`block 
                    ${props.wStyle ? props.wStyle : "w-full"}
                    font-medium text-sm text-gray-900 
@@ -15,7 +18,7 @@ export function InputLabel(props: { name: string, id: string, required: boolean,
 }
 export function ControllTextBox(props: {
     name: string, id: string, required: boolean, value: string
-    , wStyle?: string, list?: string, disabled?: boolean
+    , wStyle?: string, list?: string, disabled?: boolean, hidden?: boolean
     , handleChange: (ev: React.ChangeEvent<HTMLInputElement>) => void
     , handleBlur?: (ev: React.FocusEvent<HTMLInputElement>) => void
 }) {
@@ -25,6 +28,7 @@ export function ControllTextBox(props: {
             id={props.id}
             type="text"
             list={props.list ?? ""}
+            style={props.hidden ? { display: "none" } : {}}
             className={inputStyle(props.wStyle ? props.wStyle : "w-full")}
             required={props.required}
             disabled={!!props.disabled}
@@ -35,7 +39,7 @@ export function ControllTextBox(props: {
         />
     )
 }
-export function SelectBox(props: { name: string, id: string, required: boolean, wStyle?: string, defaultValue?: string, handleOnChange?: (selected: string) => Promise<void>, children: ReactNode }) {
+export function SelectBox(props: { name: string, id: string, required: boolean, hidden?: boolean, wStyle?: string, defaultValue?: string, handleOnChange?: (selected: string) => Promise<void>, children: ReactNode }) {
     const [selected, setSelected] = useState("");
     useEffect(() => {
         if (props.defaultValue) {
@@ -48,6 +52,7 @@ export function SelectBox(props: { name: string, id: string, required: boolean, 
             id={props.id}
             className={inputStyle(props.wStyle ? props.wStyle : "w-40")}
             required={props.required}
+            style={props.hidden ? { display: "none" } : {}}
             value={selected}
             onChange={(event) => {
                 setSelected(event.currentTarget.value);
@@ -58,7 +63,7 @@ export function SelectBox(props: { name: string, id: string, required: boolean, 
         </select>
     );
 }
-export function CheckBox(props: { name: string, id: string, defaultValue?: string, handleOnChange?: (checked: boolean) => Promise<void> }) {
+export function CheckBox(props: { name: string, id: string, hidden?: boolean, defaultValue?: string, handleOnChange?: (checked: boolean) => Promise<void> }) {
     const [checked, setChecked] = useState(false);
     useEffect(() => {
         setChecked(props.defaultValue === "true");
@@ -75,6 +80,7 @@ export function CheckBox(props: { name: string, id: string, defaultValue?: strin
                            border border-gray-300 
                            ring-indigo-300 
                            focus-visible:ring "
+                style={props.hidden ? { display: "none" } : {}}
                 checked={checked}
                 value={`${checked}`}
                 onChange={() => {
