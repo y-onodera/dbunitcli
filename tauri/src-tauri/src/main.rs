@@ -17,7 +17,7 @@ fn main() {
   let (tx,rx) = sync_channel::<i64>(1);
     tauri::Builder::default()
          .setup(|app: &mut tauri::App| {
-            let mut args = vec!["-Djava.home=backend"];
+            let mut args = vec!["-Djava.home=backend %JAVA_TOOL_OPTIONS% "];
             let mut arg1 = String::from("-Dmicronaut.server.port=");
             let mut arg2 = String::from("-Dyo.dbunit.cli.workspace=");
             let mut arg3 = String::from("-Dyo.dbunit.cli.dataset.base=");
