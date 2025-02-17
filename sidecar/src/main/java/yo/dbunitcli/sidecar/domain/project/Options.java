@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -85,7 +85,7 @@ public record Options(File baseDir, Map<CommandType, List<Path>> parameterFiles)
         if (!saveTo.toFile().exists()) {
             Files.createFile(saveTo);
         }
-        Files.writeString(saveTo, String.join("\r\n", args), Charset.forName(Charset.defaultCharset().displayName()));
+        Files.writeString(saveTo, String.join("\r\n", args), StandardCharsets.UTF_8);
         if (this.parameterFiles(type)
                 .filter(it -> it.toAbsolutePath().equals(saveTo.toAbsolutePath()))
                 .findAny()
