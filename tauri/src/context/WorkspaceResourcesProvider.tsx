@@ -1,4 +1,4 @@
-import { Body, ResponseType, fetch } from "@tauri-apps/api/http";
+import { fetch } from "@tauri-apps/plugin-http";
 import { type Dispatch, type ReactNode, type SetStateAction, createContext, useContext, useEffect, useState } from "react";
 import { ParameterList, type ResourcesSettings, type WorkspaceContext, type WorkspaceResources } from "../model/WorkspaceResources";
 import { useEnviroment } from "./EnviromentProvider";
@@ -27,18 +27,18 @@ export default function WorkspaceResourcesProvider(props: {
 		const workspaceReload = async () => {
 			await fetch(`${environment.apiUrl}workspace/resources`, {
 				method: "GET",
-				responseType: ResponseType.JSON,
 			})
 				.then((response) => {
 					if (!response.ok) {
 						console.error("response.ok:", response.ok);
 						console.error("esponse.status:", response.status);
-						throw new Error(response.data as string);
+						throw new Error(response.statusText);
 					}
-					const resources = response.data as WorkspaceResources
-					setContext(resources.context);
-					setParameterList(ParameterList.from(resources.parameterList));
-					setResourcesSettings(resources.resources)
+					response.json().then((resources: WorkspaceResources) => {
+						setContext(resources.context);
+						setParameterList(ParameterList.from(resources.parameterList));
+						setResourcesSettings(resources.resources)
+					});
 				})
 				.catch((ex) => alert(ex));
 		};
@@ -71,15 +71,16 @@ export const useAddParameter = (command: string) => {
 	return async () => {
 		await fetch(`${environment.apiUrl + command.toLowerCase()}/add`, {
 			method: "GET",
-			responseType: ResponseType.JSON,
 		})
 			.then((response) => {
 				if (!response.ok) {
 					console.error("response.ok:", response.ok);
 					console.error("esponse.status:", response.status);
-					throw new Error(response.data as string);
+					throw new Error(response.statusText);
 				}
-				setParameter(current => current.replace(command.toLowerCase(), response.data as string[]));
+				response.json().then((parameters: string[]) => {
+					setParameter(current => current.replace(command.toLowerCase(), parameters))
+				})
 			})
 			.catch((ex) => alert(ex));
 	}
@@ -90,17 +91,18 @@ export const useDeleteParameter = (command: string, name: string) => {
 	return async () => {
 		await fetch(`${environment.apiUrl + command.toLowerCase()}/delete`, {
 			method: "POST",
-			responseType: ResponseType.JSON,
 			headers: { "Content-Type": "application/json" },
-			body: Body.json({ name: name }),
+			body: JSON.stringify({ name: name }),
 		})
 			.then((response) => {
 				if (!response.ok) {
 					console.error("response.ok:", response.ok);
 					console.error("esponse.status:", response.status);
-					throw new Error(response.data as string);
+					throw new Error(response.statusText);
 				}
-				setParameter(current => current.replace(command.toLowerCase(), response.data as string[]));
+				response.json().then((parameters: string[]) => {
+					setParameter(current => current.replace(command.toLowerCase(), parameters))
+				})
 			})
 			.catch((ex) => alert(ex));
 	}
@@ -111,17 +113,18 @@ export const useCopyParameter = (command: string, name: string) => {
 	return async () => {
 		await fetch(`${environment.apiUrl + command.toLowerCase()}/copy`, {
 			method: "POST",
-			responseType: ResponseType.JSON,
 			headers: { "Content-Type": "application/json" },
-			body: Body.json({ name: name }),
+			body: JSON.stringify({ name: name }),
 		})
 			.then((response) => {
 				if (!response.ok) {
 					console.error("response.ok:", response.ok);
 					console.error("esponse.status:", response.status);
-					throw new Error(response.data as string);
+					throw new Error(response.statusText);
 				}
-				setParameter(current => current.replace(command.toLowerCase(), response.data as string[]));
+				response.json().then((parameters: string[]) => {
+					setParameter(current => current.replace(command.toLowerCase(), parameters))
+				})
 			})
 			.catch((ex) => alert(ex));
 	}
@@ -134,20 +137,21 @@ export const useRenameParameter = (command: string, name: string) => {
 	return async (newName: string) => {
 		await fetch(`${environment.apiUrl + command.toLowerCase()}/rename`, {
 			method: "POST",
-			responseType: ResponseType.JSON,
 			headers: { "Content-Type": "application/json" },
-			body: Body.json({ oldName: name, newName }),
+			body: JSON.stringify({ oldName: name, newName }),
 		})
 			.then((response) => {
 				if (!response.ok) {
 					console.error("response.ok:", response.ok);
 					console.error("esponse.status:", response.status);
-					throw new Error(response.data as string);
+					throw new Error(response.statusText);
 				}
-				setParameterList(current => current.replace(command.toLowerCase(), response.data as string[]));
-				if (parameter.command === command.toLowerCase() && parameter.name === name) {
-					setParameter(parameter.currentParameter(), parameter.command, newName);
-				}
+				response.json().then((parameters: string[]) => {
+					setParameterList(current => current.replace(command.toLowerCase(), parameters))
+					if (parameter.command === command.toLowerCase() && parameter.name === name) {
+						setParameter(parameter.currentParameter(), parameter.command, newName);
+					}
+				})
 			})
 			.catch((ex) => alert(ex));
 	}

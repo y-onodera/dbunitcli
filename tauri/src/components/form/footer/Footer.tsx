@@ -1,4 +1,4 @@
-import { tauri } from "@tauri-apps/api";
+import { core } from "@tauri-apps/api";
 import { useState } from "react";
 import { type Running, execParameter, saveParameter, useSelectParameter } from "../../../context/SelectParameterProvider";
 import { BlueButton, WhiteButton } from "../../element/Button";
@@ -23,7 +23,7 @@ export default function Footer(prop: {
 		execParameter(command, name, prop.formData(true).values, setRunning)
 	};
 	const openDirectory = async (path: string) => {
-		await tauri.invoke("open_directory", { path });
+		await core.invoke("open_directory", { path });
 	};
 	if (running.command === "exec") {
 		throw new Promise(() => handleClickExec(parameter.command, parameter.name));

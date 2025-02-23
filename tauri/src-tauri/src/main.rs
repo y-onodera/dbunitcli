@@ -8,6 +8,7 @@ use std::{
     thread,
 };
 use tauri::WindowEvent;
+use tauri_plugin_cli::CliExt;
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn open_directory(path: String) {
@@ -15,23 +16,27 @@ fn open_directory(path: String) {
     Command::new("explorer").args([path]).spawn().unwrap();
 }
 fn add_arg(
-    matches: &tauri::api::cli::Matches,
+    matches: &tauri_plugin_cli::Matches,
     args: &mut Vec<String>,
     key: &str,
-    arg: &mut String,
+    arg: &str,
     default_value: &str,
 ) {
     if let Some(value) = matches.args.get(key).clone() {
-        match value.value.as_str() {
-            Some(s) => arg.push_str(s),
-            None => arg.push_str(default_value),
-        }
-        args.push(arg.clone());
+        let new_arg = match value.value.as_str() {
+            Some(s) => format!("{}{}", arg, s),
+            None => format!("{}{}", arg, default_value),
+        };
+        args.push(new_arg);
     }
 }
 fn main() {
     let (tx, rx) = sync_channel::<i64>(1);
     tauri::Builder::default()
+        .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_cli::init())
+        .plugin(tauri_plugin_shell::init())
         .setup(|app: &mut tauri::App| {
             let mut args = vec![String::from("-Djava.home=backend")];
 
@@ -41,34 +46,34 @@ fn main() {
                     .extend(java_tool_options.split_whitespace().map(String::from));
             }
 
-            match app.get_cli_matches() {
+            match app.cli().matches() {
                 Ok(matches) => {
                     add_arg(
                         &matches,
                         &mut args,
                         "port",
-                        &mut String::from("-Dmicronaut.server.port="),
+                        "-Dmicronaut.server.port=",
                         "8080",
                     );
                     add_arg(
                         &matches,
                         &mut args,
                         "workspace",
-                        &mut String::from("-Dyo.dbunit.cli.workspace="),
+                        "-Dyo.dbunit.cli.workspace=",
                         ".",
                     );
                     add_arg(
                         &matches,
                         &mut args,
                         "dataset.base",
-                        &mut String::from("-Dyo.dbunit.cli.dataset.base="),
+                        "-Dyo.dbunit.cli.dataset.base=",
                         ".",
                     );
                     add_arg(
                         &matches,
                         &mut args,
                         "result.base",
-                        &mut String::from("-Dyo.dbunit.cli.result.base="),
+                        "-Dyo.dbunit.cli.result.base=",
                         ".",
                     );
                 }
@@ -91,7 +96,7 @@ fn main() {
             });
             Ok(())
         })
-        .on_window_event(move |event| match event.event() {
+        .on_window_event(move |_, event| match event {
             WindowEvent::Destroyed => {
                 tx.send(-1).expect("Failed to stop child process");
             }

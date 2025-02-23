@@ -1,4 +1,4 @@
-import { Body, ResponseType, fetch } from "@tauri-apps/api/http";
+import { fetch } from "@tauri-apps/plugin-http";
 import { type Dispatch, type ReactNode, type SetStateAction, createContext, useContext, useState } from "react";
 import { type Parameter, SelectParameter } from "../model/CommandParam";
 import { useEnviroment } from "./EnviromentProvider";
@@ -35,17 +35,18 @@ export const useLoadSelectParameter = () => {
     return async (command: string, name: string) => {
         await fetch(`${environment.apiUrl + command.toLowerCase()}/load`, {
             method: "POST",
-            responseType: ResponseType.JSON,
             headers: { "Content-Type": "application/json" },
-            body: Body.json({ name }),
+            body: JSON.stringify({ name })
         })
             .then((response) => {
                 if (!response.ok) {
                     console.error("response.ok:", response.ok);
                     console.error("esponse.status:", response.status);
-                    throw new Error(response.data as string);
+                    throw new Error(response.statusText);
                 }
-                setParameter(new SelectParameter(response.data as Parameter, command, name));
+                response.json().then((parameter: Parameter) => {
+                    setParameter(new SelectParameter(parameter, command, name));
+                })
             })
             .catch((ex) => alert(ex));
     }
@@ -56,13 +57,19 @@ export const useRefreshSelectParameter = (command: string) => {
     return async (values: { [k: string]: FormDataEntryValue }) => {
         await fetch(`${environment.apiUrl + command.toLowerCase()}/refresh`, {
             method: "POST",
-            responseType: ResponseType.JSON,
             headers: { "Content-Type": "application/json" },
-            body: Body.json(values),
+            body: JSON.stringify(values)
         })
-            .then((response) =>
-                setParameter(current => new SelectParameter(response.data as Parameter, current.command, current.name))
-            )
+            .then((response) => {
+                if (!response.ok) {
+                    console.error("response.ok:", response.ok);
+                    console.error("esponse.status:", response.status);
+                    throw new Error(response.statusText);
+                }
+                response.json().then((parameter: Parameter) => {
+                    setParameter(current => new SelectParameter(parameter, current.command, current.name))
+                })
+            })
             .catch((ex) => alert(ex));
     }
 }
@@ -80,15 +87,14 @@ export const saveParameter = async (
     const environment = useEnviroment();
     await fetch(`${environment.apiUrl + command}/save`, {
         method: "POST",
-        responseType: ResponseType.Text,
         headers: { "Content-Type": "application/json" },
-        body: Body.json({ name, input }),
+        body: JSON.stringify({ name, input }),
     })
         .then((response) => {
             if (!response.ok) {
                 console.error("response.ok:", response.ok);
                 console.error("esponse.status:", response.status);
-                throw new Error(response.data as string);
+                throw new Error(response.statusText);
             }
             handleResult({
                 command: "",
@@ -109,20 +115,20 @@ export const execParameter = async (
     const environment = useEnviroment();
     await fetch(`${environment.apiUrl + command}/exec`, {
         method: "POST",
-        responseType: ResponseType.Text,
         headers: { "Content-Type": "application/json" },
-        body: Body.json({ name, input }),
+        body: JSON.stringify({ name, input }),
     })
         .then((response) => {
             if (!response.ok) {
                 console.error("esponse.status:", response.status);
-                throw new Error(response.data as string);
+                throw new Error(response.statusText);
             }
-            handleResult({
-                command: "",
-                resultMessage: "Execution Success",
-                resultDir: response.data as string,
-            });
+            response.text().then((resultDir: string) => handleResult(
+                {
+                    command: "",
+                    resultMessage: "Execution Success",
+                    resultDir
+                }));
         })
         .catch((ex) => {
             handleResult({ command: "", resultMessage: ex.message, resultDir: "" });

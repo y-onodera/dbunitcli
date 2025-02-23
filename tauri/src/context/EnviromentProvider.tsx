@@ -1,4 +1,4 @@
-import { getMatches } from "@tauri-apps/api/cli";
+import { getMatches } from "@tauri-apps/plugin-cli";
 import {
 	type ReactNode,
 	createContext,
