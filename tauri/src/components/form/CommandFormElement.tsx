@@ -1,5 +1,5 @@
-import { open } from "@tauri-apps/plugin-dialog";
 import { isAbsolute, sep } from "@tauri-apps/api/path";
+import { open } from "@tauri-apps/plugin-dialog";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { useEnviroment } from "../../context/EnviromentProvider";
 import { loadMetadataSettings, saveMetadataSettings, useMetadataSettings, useSetMetadataSettings } from "../../context/MetadataSettingsProvider";
@@ -175,10 +175,10 @@ function FileChooser(prop: FileProp) {
 	const handleFileChooserClick = () => {
 		const getDefaultPath = async (): Promise<string> => {
 			return await isAbsolute(prop.path) ? prop.path
-				: prop.path ? getPath(context, prop.element.attribute) + sep + prop.path : getPath(context, prop.element.attribute);
+				: prop.path ? getPath(context, prop.element.attribute) + sep() + prop.path : getPath(context, prop.element.attribute);
 		};
 		getDefaultPath().then(defaultPath => open({ defaultPath })
-			.then((files) => files && prop.setPath((files as string).replace(getPath(context, prop.element.attribute) + sep, ""))));
+			.then((files) => files && prop.setPath((files as string).replace(getPath(context, prop.element.attribute) + sep(), ""))));
 	};
 	return (
 		<ButtonWithIcon
@@ -194,10 +194,10 @@ function DirectoryChooser(prop: FileProp) {
 	const handleDirectoryChooserClick = () => {
 		const getDefaultPath = async (): Promise<string> => {
 			return await isAbsolute(prop.path) ? prop.path
-				: prop.path ? getPath(context, prop.element.attribute) + sep + prop.path : getPath(context, prop.element.attribute);
+				: prop.path ? getPath(context, prop.element.attribute) + sep() + prop.path : getPath(context, prop.element.attribute);
 		};
 		getDefaultPath().then(defaultPath => open({ defaultPath, directory: true })
-			.then((files) => files && prop.setPath((files as string).replace(getPath(context, prop.element.attribute) + sep, ""))));
+			.then((files) => files && prop.setPath((files as string).replace(getPath(context, prop.element.attribute) + sep(), ""))));
 	};
 	return (
 		<ButtonWithIcon
