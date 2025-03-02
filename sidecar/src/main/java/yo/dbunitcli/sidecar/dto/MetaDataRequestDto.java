@@ -9,18 +9,18 @@ public class MetaDataRequestDto {
     private MetaDataSettingsDto input;
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
     public MetaDataSettingsDto getInput() {
-        return input;
+        return this.input;
     }
 
-    public void setInput(MetaDataSettingsDto input) {
+    public void setInput(final MetaDataSettingsDto input) {
         this.input = input;
     }
 }
