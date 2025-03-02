@@ -1,5 +1,6 @@
 package yo.dbunitcli.sidecar.domain.project;
 
+import io.micronaut.runtime.context.scope.Refreshable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
@@ -14,8 +15,12 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 
-public record Workspace(Path path, Options options, Resources resources) {
+@Refreshable
+public class Workspace {
     private static final Logger LOGGER = LoggerFactory.getLogger(Workspace.class);
+    private final Options options;
+    private final Resources resources;
+    private final Path path;
 
     public static Workspace contextReload(final String workspace, final String datasetBase, final String resultBase) {
         System.setProperty(FileResources.PROPERTY_WORKSPACE, workspace);
@@ -30,6 +35,24 @@ public record Workspace(Path path, Options options, Resources resources) {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public Workspace(final Path path, final Options options, final Resources resources) {
+        this.path = path;
+        this.options = options;
+        this.resources = resources;
+    }
+
+    public Options options() {
+        return this.options;
+    }
+
+    public Resources resources() {
+        return this.resources;
+    }
+
+    public Path path() {
+        return this.path;
     }
 
     public WorkspaceDto toDto() {
