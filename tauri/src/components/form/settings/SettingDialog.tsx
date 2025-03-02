@@ -180,7 +180,7 @@ function Check(props: {
 }) {
     return (
         <div className="grid grid-cols-5 justify-center">
-            <InputLabel id={props.name} name={props.name} required={false} wStyle="p-2.5 w=1/5" />
+            <InputLabel id={props.name} text={props.name} required={false} wStyle="p-2.5 w=1/5" />
             <div className="p-2.5">
                 <CheckBox
                     name={props.name}
@@ -197,7 +197,7 @@ function Select(props: {
 }) {
     return (
         <div className="grid grid-cols-5 justify-center pb-2">
-            <InputLabel id={props.name} name={props.name} required={false} wStyle="p-2.5 w=1/5" />
+            <InputLabel id={props.name} text={props.name} required={false} wStyle="p-2.5 w=1/5" />
             <SelectBox
                 name={props.name}
                 id={props.name}
@@ -216,7 +216,7 @@ function Text(props: { name: string, value: string, handleChange: (text: React.C
         <>
             <div className="grid grid-cols-5 justify-center pb-2">
                 {!props.ignoreLabel &&
-                    <InputLabel id={props.name} name={props.name} required={false} wStyle="p-2.5 w=1/5" />
+                    <InputLabel id={props.name} text={props.name} required={false} wStyle="p-2.5 w=1/5" />
                 }
                 <ControllTextBox
                     name={props.name}
@@ -243,7 +243,7 @@ function Arrays(props: {
                 ?
                 <div className="grid grid-cols-5 justify-center pb-2">
                     {!props.ignoreLabel &&
-                        <InputLabel id={props.name} name={props.name} required={false} wStyle="p-2.5 w=1/5" />
+                        <InputLabel id={props.name} text={props.name} required={false} wStyle="p-2.5 w=1/5" />
                     }
                     <ControllTextBox
                         name={props.name}
@@ -288,7 +288,7 @@ function ArraysText(props: {
     return (
         <div className="grid grid-cols-5 pb-2">
             {(!props.ignoreLabel && props.index === 0) &&
-                <InputLabel id={props.name} name={props.name} required={false} wStyle="p-2.5 w=1/5" />
+                <InputLabel id={props.name} text={props.name} required={false} wStyle="p-2.5 w=1/5" />
             }
             <ControllTextBox
                 name={props.name}
@@ -354,7 +354,7 @@ function KeyValueText(props: {
     return (
         <div className="grid grid-cols-5 pb-2">
             {props.index === 0 &&
-                <InputLabel id={props.name} name={props.name} required={false} wStyle="p-2.5 w=1/5" />
+                <InputLabel id={props.name} text={props.name} required={false} wStyle="p-2.5 w=1/5" />
             }
             <ControllTextBox
                 name={props.name}

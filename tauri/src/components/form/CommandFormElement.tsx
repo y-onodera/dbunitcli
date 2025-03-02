@@ -99,7 +99,7 @@ function Text(prop: Prop) {
 	return (
 		<div>
 			<InputLabel
-				name={getName(prop.prefix, prop.element.name)}
+				text={getName(prop.prefix, prop.element.name)}
 				id={getId(prop.prefix, prop.element.name)}
 				required={prop.element.attribute.required}
 				hidden={prop.hidden}
@@ -212,7 +212,7 @@ function Check(prop: Prop) {
 	return (
 		<div>
 			<InputLabel
-				name={prop.prefix ? `-${prop.prefix}.${prop.element.name}` : `-${prop.element.name}`}
+				text={prop.prefix ? `-${prop.prefix}.${prop.element.name}` : `-${prop.element.name}`}
 				id={`${prop.prefix}_${prop.element.name}`}
 				required={false}
 				hidden={prop.hidden}
@@ -230,7 +230,7 @@ function Select(prop: SelectProp) {
 	return (
 		<div>
 			<InputLabel
-				name={prop.prefix ? `-${prop.prefix}.${prop.element.name}` : `-${prop.element.name}`}
+				text={prop.prefix ? `-${prop.prefix}.${prop.element.name}` : `-${prop.element.name}`}
 				id={`${prop.prefix}_${prop.element.name}`}
 				required={prop.element.attribute.required}
 				hidden={prop.hidden}

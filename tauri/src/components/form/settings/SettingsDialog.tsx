@@ -38,7 +38,7 @@ export default function SettingsDaialog(props: {
 				/>
 				<div className="right-1 w-full flex items-center justify-end">
 					<div className="grid grid-cols-5 pb-2">
-						<InputLabel id="fileNameLabel" name="name" required={false} wStyle="p-2.5 w=1/5" />
+						<InputLabel id="fileNameLabel" text="name" required={false} wStyle="p-2.5 w=1/5" />
 						<ControllTextBox name="fileName" id="fileName" required={true} wStyle="col-start-2 col-span-4 mr-2"
 							value={props.fileName}
 							handleChange={ev => props.setFileName(ev.target.value)}

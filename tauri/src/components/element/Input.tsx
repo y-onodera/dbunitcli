@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useState } from "react";
 
 export function InputLabel(props: {
-    name: string, id: string, required: boolean, hidden?: boolean, wStyle?: string
+    text: string, id: string, required: boolean, hidden?: boolean, wStyle?: string
 }) {
     return (
         <label
@@ -12,7 +12,7 @@ export function InputLabel(props: {
                    font-medium text-sm text-gray-900 
                    `}
         >
-            {props.name}{props.required && "*"}
+            {props.text}{props.required && "*"}
         </label>
     )
 }
