@@ -23,6 +23,8 @@ export default function WorkspaceResourcesProvider(props: {
 	const [paramterList, setParameterList] = useState<ParameterList>(ParameterList.create());
 	const [resourcesSettings, setResourcesSettings] = useState<ResourcesSettings>({} as ResourcesSettings);
 	const environment = useEnviroment();
+	const [workspace, setWorkspace] = useState<string | null>(null);
+
 	useEffect(() => {
 		const workspaceReload = async () => {
 			await fetch(`${environment.apiUrl}workspace/resources`, {
@@ -37,13 +39,19 @@ export default function WorkspaceResourcesProvider(props: {
 					response.json().then((resources: WorkspaceResources) => {
 						setContext(resources.context);
 						setParameterList(ParameterList.from(resources.parameterList));
-						setResourcesSettings(resources.resources)
+						setResourcesSettings(resources.resources);
+						setWorkspace(resources.context.workspace);
 					});
 				})
 				.catch((ex) => alert(ex));
 		};
 		workspaceReload();
-	}, [environment]);
+	}, [environment, context]);
+
+	if (workspace === null) {
+		return <div>Loading...</div>; // ローディング画面
+	}
+
 	return (
 		<workspaceContext.Provider value={context}>
 			<setWorkspaceContext.Provider value={setContext}>
@@ -61,6 +69,7 @@ export default function WorkspaceResourcesProvider(props: {
 	);
 }
 export const useWorkspaceContext = () => useContext(workspaceContext);
+export const useSetWorkspaceContext = () => useContext(setWorkspaceContext);
 export const useParameterList = () => useContext(parameterListContext);
 export const useSetParameterList = () => useContext(setParameterListContext);
 export const useResourcesSettings = () => useContext(resourcesSettingsContext);
@@ -81,6 +90,26 @@ export const useAddParameter = (command: string) => {
 				response.json().then((parameters: string[]) => {
 					setParameter(current => current.replace(command.toLowerCase(), parameters))
 				})
+			})
+			.catch((ex) => alert(ex));
+	}
+}
+export const useWorkspaceUpdate = () => {
+	const setContext = useSetWorkspaceContext();
+	const environment = useEnviroment();
+	return async (workspace: string, datasetBase: string, resultBase: string) => {
+		await fetch(`${environment.apiUrl}workspace/update`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ workspace, datasetBase, resultBase }),
+		})
+			.then((response) => {
+				if (!response.ok) {
+					console.error("response.ok:", response.ok);
+					console.error("esponse.status:", response.status);
+					throw new Error(response.statusText);
+				}
+				setContext(current => ({ ...current, workspace, datasetBase, resultBase }));
 			})
 			.catch((ex) => alert(ex));
 	}
