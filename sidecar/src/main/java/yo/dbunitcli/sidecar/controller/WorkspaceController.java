@@ -3,8 +3,10 @@ package yo.dbunitcli.sidecar.controller;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
+import yo.dbunitcli.sidecar.dto.ContextDto;
 
 import java.io.IOException;
 
@@ -21,6 +23,12 @@ public class WorkspaceController {
         return ObjectMapper
                 .getDefault()
                 .writeValueAsString(this.workspace.toDto());
+    }
+
+    @Post(uri = "update", produces = MediaType.TEXT_PLAIN)
+    public String update(final ContextDto context) {
+        Workspace.contextReload(context.getWorkspace(), context.getDatasetBase(), context.getResultBase());
+        return "success";
     }
 
 }

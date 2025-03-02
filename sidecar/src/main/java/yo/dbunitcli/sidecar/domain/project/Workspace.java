@@ -17,6 +17,17 @@ import java.util.stream.Stream;
 public record Workspace(Path path, Options options, Resources resources) {
     private static final Logger LOGGER = LoggerFactory.getLogger(Workspace.class);
 
+    public static Workspace contextReload(final String workspace, final String datasetBase, final String resultBase) {
+        System.setProperty(FileResources.PROPERTY_WORKSPACE, workspace);
+        if (Strings.isNotEmpty(datasetBase)) {
+            System.setProperty(FileResources.PROPERTY_DATASET_BASE, datasetBase);
+        }
+        if (Strings.isNotEmpty(resultBase)) {
+            System.setProperty(FileResources.PROPERTY_RESULT_BASE, resultBase);
+        }
+        return Workspace.builder().setPath(workspace).build();
+    }
+
     public static Builder builder() {
         return new Builder();
     }
