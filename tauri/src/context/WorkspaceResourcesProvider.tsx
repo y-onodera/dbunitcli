@@ -4,6 +4,30 @@ import { ParameterList, type ResourcesSettings, type WorkspaceContext, type Work
 import { useEnviroment } from "./EnviromentProvider";
 import { useSelectParameter, useSetSelectParameter } from "./SelectParameterProvider";
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+const handleFetchError = (ex: any, endpoint: string, method: string, requestBody?: any) => {
+	const errorInfo = {
+		message: ex.message || '不明なエラーが発生しました',
+		endpoint: endpoint,
+		method: method,
+		status: ex.response?.status || 'N/A',
+		details: ex.toString(),
+		requestBody: requestBody ? JSON.stringify(requestBody, null, 2) : 'なし'
+	};
+
+	const errorMessage = `
+エラーが発生しました
+メッセージ: ${errorInfo.message}
+エンドポイント: ${errorInfo.endpoint}
+メソッド: ${errorInfo.method}
+ステータス: ${errorInfo.status}
+リクエストボディ: ${errorInfo.requestBody}
+詳細: ${errorInfo.details}
+    `.trim();
+
+	alert(errorMessage);
+	console.error('Fetch Error:', errorInfo);
+};
 const workspaceContext = createContext<WorkspaceContext>({} as WorkspaceContext);
 const setWorkspaceContext = createContext<Dispatch<SetStateAction<WorkspaceContext>>>(
 	() => undefined,
@@ -27,7 +51,9 @@ export default function WorkspaceResourcesProvider(props: {
 
 	useEffect(() => {
 		const workspaceReload = async () => {
-			await fetch(`${environment.apiUrl}workspace/resources`, {
+			console.log(context);
+			const endpoint = `${environment.apiUrl}workspace/resources`;
+			await fetch(endpoint, {
 				method: "GET",
 			})
 				.then((response) => {
@@ -43,13 +69,13 @@ export default function WorkspaceResourcesProvider(props: {
 						setWorkspace(resources.context.workspace);
 					});
 				})
-				.catch((ex) => alert(ex));
+				.catch((ex) => handleFetchError(ex, endpoint, "GET"));
 		};
 		workspaceReload();
-	}, [environment, context]);
+	}, [environment.apiUrl, context]);
 
 	if (workspace === null) {
-		return <div>Loading...</div>; // ローディング画面
+		return <div>Loading...</div>;
 	}
 
 	return (
@@ -78,110 +104,105 @@ export const useAddParameter = (command: string) => {
 	const setParameter = useSetParameterList();
 	const environment = useEnviroment();
 	return async () => {
-		await fetch(`${environment.apiUrl + command.toLowerCase()}/add`, {
+		const endpoint = `${environment.apiUrl + command.toLowerCase()}/add`;
+		await fetch(endpoint, {
 			method: "GET",
 		})
-			.then((response) => {
+			.then(async (response) => {
 				if (!response.ok) {
-					console.error("response.ok:", response.ok);
-					console.error("esponse.status:", response.status);
-					throw new Error(response.statusText);
+					throw new Error(response.statusText || 'パラメータの追加に失敗しました');
 				}
-				response.json().then((parameters: string[]) => {
-					setParameter(current => current.replace(command.toLowerCase(), parameters))
-				})
+				const parameters: string[] = await response.json();
+				setParameter(current => current.replace(command.toLowerCase(), parameters));
 			})
-			.catch((ex) => alert(ex));
-	}
-}
+			.catch((ex) => handleFetchError(ex, endpoint, "GET"));
+	};
+};
 export const useWorkspaceUpdate = () => {
 	const setContext = useSetWorkspaceContext();
 	const environment = useEnviroment();
 	return async (workspace: string, datasetBase: string, resultBase: string) => {
-		await fetch(`${environment.apiUrl}workspace/update`, {
+		const endpoint = `${environment.apiUrl}workspace/update`;
+		const requestBody = { workspace, datasetBase, resultBase };
+		await fetch(endpoint, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ workspace, datasetBase, resultBase }),
+			body: JSON.stringify(requestBody),
 		})
-			.then((response) => {
+			.then(async (response) => {
 				if (!response.ok) {
-					console.error("response.ok:", response.ok);
-					console.error("esponse.status:", response.status);
-					throw new Error(response.statusText);
+					throw new Error(response.statusText || 'ワークスペースの更新に失敗しました');
 				}
-				setContext(current => ({ ...current, workspace, datasetBase, resultBase }));
+				setContext(current => ({ ...current, ...requestBody }));
 			})
-			.catch((ex) => alert(ex));
-	}
-}
+			.catch((ex) => handleFetchError(ex, endpoint, "POST", requestBody));
+	};
+};
 export const useDeleteParameter = (command: string, name: string) => {
 	const setParameter = useSetParameterList();
 	const environment = useEnviroment();
 	return async () => {
-		await fetch(`${environment.apiUrl + command.toLowerCase()}/delete`, {
+		const endpoint = `${environment.apiUrl + command.toLowerCase()}/delete`;
+		const requestBody = { name };
+		await fetch(endpoint, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name: name }),
+			body: JSON.stringify(requestBody),
 		})
-			.then((response) => {
+			.then(async (response) => {
 				if (!response.ok) {
-					console.error("response.ok:", response.ok);
-					console.error("esponse.status:", response.status);
-					throw new Error(response.statusText);
+					throw new Error(response.statusText || 'パラメータの削除に失敗しました');
 				}
-				response.json().then((parameters: string[]) => {
-					setParameter(current => current.replace(command.toLowerCase(), parameters))
-				})
+				const parameters: string[] = await response.json();
+				setParameter(current => current.replace(command.toLowerCase(), parameters));
 			})
-			.catch((ex) => alert(ex));
-	}
-}
+			.catch((ex) => handleFetchError(ex, endpoint, "POST", requestBody));
+	};
+};
 export const useCopyParameter = (command: string, name: string) => {
 	const setParameter = useSetParameterList();
 	const environment = useEnviroment();
 	return async () => {
-		await fetch(`${environment.apiUrl + command.toLowerCase()}/copy`, {
+		const endpoint = `${environment.apiUrl + command.toLowerCase()}/copy`;
+		const requestBody = { name };
+		await fetch(endpoint, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name: name }),
+			body: JSON.stringify(requestBody),
 		})
-			.then((response) => {
+			.then(async (response) => {
 				if (!response.ok) {
-					console.error("response.ok:", response.ok);
-					console.error("esponse.status:", response.status);
-					throw new Error(response.statusText);
+					throw new Error(response.statusText || 'パラメータのコピーに失敗しました');
 				}
-				response.json().then((parameters: string[]) => {
-					setParameter(current => current.replace(command.toLowerCase(), parameters))
-				})
+				const parameters: string[] = await response.json();
+				setParameter(current => current.replace(command.toLowerCase(), parameters));
 			})
-			.catch((ex) => alert(ex));
-	}
-}
+			.catch((ex) => handleFetchError(ex, endpoint, "POST", requestBody));
+	};
+};
 export const useRenameParameter = (command: string, name: string) => {
 	const parameter = useSelectParameter();
 	const setParameter = useSetSelectParameter();
 	const setParameterList = useSetParameterList();
 	const environment = useEnviroment();
 	return async (newName: string) => {
-		await fetch(`${environment.apiUrl + command.toLowerCase()}/rename`, {
+		const endpoint = `${environment.apiUrl + command.toLowerCase()}/rename`;
+		const requestBody = { oldName: name, newName };
+		await fetch(endpoint, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ oldName: name, newName }),
+			body: JSON.stringify(requestBody),
 		})
-			.then((response) => {
+			.then(async (response) => {
 				if (!response.ok) {
-					console.error("response.ok:", response.ok);
-					console.error("esponse.status:", response.status);
-					throw new Error(response.statusText);
+					throw new Error(response.statusText || 'パラメータの名前変更に失敗しました');
 				}
-				response.json().then((parameters: string[]) => {
-					setParameterList(current => current.replace(command.toLowerCase(), parameters))
-					if (parameter.command === command.toLowerCase() && parameter.name === name) {
-						setParameter(parameter.currentParameter(), parameter.command, newName);
-					}
-				})
+				const parameters: string[] = await response.json();
+				setParameterList(current => current.replace(command.toLowerCase(), parameters));
+				if (parameter.command === command.toLowerCase() && parameter.name === name) {
+					setParameter(parameter.currentParameter(), parameter.command, newName);
+				}
 			})
-			.catch((ex) => alert(ex));
-	}
-}
+			.catch((ex) => handleFetchError(ex, endpoint, "POST", requestBody));
+	};
+};
