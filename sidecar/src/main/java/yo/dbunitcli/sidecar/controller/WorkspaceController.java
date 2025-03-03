@@ -1,6 +1,5 @@
 package yo.dbunitcli.sidecar.controller;
 
-import io.micronaut.context.ApplicationContext;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
@@ -14,23 +13,22 @@ import java.io.IOException;
 
 @Controller("/workspace")
 public class WorkspaceController {
-    private final ApplicationContext applicationContext;
+    private final Workspace workspace;
 
-    public WorkspaceController(final ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    public WorkspaceController(final Workspace workspace) {
+        this.workspace = workspace;
     }
 
     @Get(uri = "resources", produces = MediaType.APPLICATION_JSON)
     public String resources() throws IOException {
         return ObjectMapper
                 .getDefault()
-                .writeValueAsString(this.applicationContext.getBean(Workspace.class).toDto());
+                .writeValueAsString(this.workspace.toDto());
     }
 
     @Post(uri = "update", produces = MediaType.TEXT_PLAIN)
     public String update(@Body final ContextDto context) {
-        final Workspace newWorkspace = Workspace.contextReload(context.getWorkspace(), context.getDatasetBase(), context.getResultBase());
-        this.applicationContext.registerSingleton(Workspace.class, newWorkspace);
+        this.workspace.contextReload(context.getWorkspace(), context.getDatasetBase(), context.getResultBase());
         return "success";
     }
 

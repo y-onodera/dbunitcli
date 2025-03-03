@@ -1,6 +1,5 @@
 package yo.dbunitcli.sidecar.domain.project;
 
-import io.micronaut.runtime.context.scope.Refreshable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
@@ -15,23 +14,11 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 
-@Refreshable
 public class Workspace {
     private static final Logger LOGGER = LoggerFactory.getLogger(Workspace.class);
-    private final Options options;
-    private final Resources resources;
-    private final Path path;
-
-    public static Workspace contextReload(final String workspace, final String datasetBase, final String resultBase) {
-        System.setProperty(FileResources.PROPERTY_WORKSPACE, workspace);
-        if (Strings.isNotEmpty(datasetBase)) {
-            System.setProperty(FileResources.PROPERTY_DATASET_BASE, datasetBase);
-        }
-        if (Strings.isNotEmpty(resultBase)) {
-            System.setProperty(FileResources.PROPERTY_RESULT_BASE, resultBase);
-        }
-        return Workspace.builder().setPath(workspace).build();
-    }
+    private Options options;
+    private Resources resources;
+    private Path path;
 
     public static Builder builder() {
         return new Builder();
@@ -41,6 +28,20 @@ public class Workspace {
         this.path = path;
         this.options = options;
         this.resources = resources;
+    }
+
+    public void contextReload(final String workspace, final String datasetBase, final String resultBase) {
+        System.setProperty(FileResources.PROPERTY_WORKSPACE, workspace);
+        if (Strings.isNotEmpty(datasetBase)) {
+            System.setProperty(FileResources.PROPERTY_DATASET_BASE, datasetBase);
+        }
+        if (Strings.isNotEmpty(resultBase)) {
+            System.setProperty(FileResources.PROPERTY_RESULT_BASE, resultBase);
+        }
+        final var newWorkspace = Workspace.builder().setPath(workspace).build();
+        this.options = newWorkspace.options();
+        this.resources = newWorkspace.resources();
+        this.path = newWorkspace.path();
     }
 
     public Options options() {
@@ -120,7 +121,7 @@ public class Workspace {
                 options.workspace(baseDir);
                 resources.workspace(baseDir);
             }
-            Workspace.LOGGER.info(String.format("current workspace:%s", baseDir.getAbsolutePath()));
+            Workspace.LOGGER.info("current workspace:{}", baseDir.getAbsolutePath());
             return new Workspace(baseDir.toPath(), options.build(), resources.build());
         }
     }
