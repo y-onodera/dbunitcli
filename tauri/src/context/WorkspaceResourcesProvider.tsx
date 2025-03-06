@@ -1,33 +1,9 @@
-import { fetch } from "@tauri-apps/plugin-http";
 import { type Dispatch, type ReactNode, type SetStateAction, createContext, useContext, useEffect, useState } from "react";
 import { ParameterList, type ResourcesSettings, type WorkspaceContext, type WorkspaceResources } from "../model/WorkspaceResources";
+import { fetchData, handleFetchError } from "../utils/fetchUtils";
 import { useEnviroment } from "./EnviromentProvider";
 import { useSelectParameter, useSetSelectParameter } from "./SelectParameterProvider";
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-const handleFetchError = (ex: any, endpoint: string, method: string, requestBody?: any) => {
-	const errorInfo = {
-		message: ex.message || '不明なエラーが発生しました',
-		endpoint: endpoint,
-		method: method,
-		status: ex.response?.status || 'N/A',
-		details: ex.toString(),
-		requestBody: requestBody ? JSON.stringify(requestBody, null, 2) : 'なし'
-	};
-
-	const errorMessage = `
-エラーが発生しました
-メッセージ: ${errorInfo.message}
-エンドポイント: ${errorInfo.endpoint}
-メソッド: ${errorInfo.method}
-ステータス: ${errorInfo.status}
-リクエストボディ: ${errorInfo.requestBody}
-詳細: ${errorInfo.details}
-    `.trim();
-
-	alert(errorMessage);
-	console.error('Fetch Error:', errorInfo);
-};
 const workspaceContext = createContext<WorkspaceContext>({} as WorkspaceContext);
 const setWorkspaceContext = createContext<Dispatch<SetStateAction<WorkspaceContext>>>(
 	() => undefined,
@@ -53,23 +29,19 @@ export default function WorkspaceResourcesProvider(props: {
 		const workspaceReload = async () => {
 			console.log(context);
 			const endpoint = `${environment.apiUrl}workspace/resources`;
-			await fetch(endpoint, {
+			await fetchData(endpoint, {
 				method: "GET",
+				headers: { "Content-Type": "application/json" },
 			})
-				.then((response) => {
-					if (!response.ok) {
-						console.error("response.ok:", response.ok);
-						console.error("esponse.status:", response.status);
-						throw new Error(response.statusText);
-					}
-					response.json().then((resources: WorkspaceResources) => {
-						setContext(resources.context);
-						setParameterList(ParameterList.from(resources.parameterList));
-						setResourcesSettings(resources.resources);
-						setWorkspace(resources.context.workspace);
-					});
-				})
-				.catch((ex) => handleFetchError(ex, endpoint, "GET"));
+				.then((response) => response.json())
+				.then((resources: WorkspaceResources) => {
+					setContext(resources.context);
+					setParameterList(ParameterList.from(resources.parameterList));
+					setResourcesSettings(resources.resources);
+					setWorkspace(resources.context.workspace);
+				}).catch((ex) => {
+					handleFetchError(ex);
+				});
 		};
 		workspaceReload();
 	}, [environment.apiUrl, context]);
@@ -105,17 +77,16 @@ export const useAddParameter = (command: string) => {
 	const environment = useEnviroment();
 	return async () => {
 		const endpoint = `${environment.apiUrl + command.toLowerCase()}/add`;
-		await fetch(endpoint, {
+		await fetchData(endpoint, {
 			method: "GET",
+			headers: { "Content-Type": "application/json" },
 		})
-			.then(async (response) => {
-				if (!response.ok) {
-					throw new Error(response.statusText || 'パラメータの追加に失敗しました');
-				}
-				const parameters: string[] = await response.json();
+			.then((response) => response.json())
+			.then((parameters: string[]) => {
 				setParameter(current => current.replace(command.toLowerCase(), parameters));
-			})
-			.catch((ex) => handleFetchError(ex, endpoint, "GET"));
+			}).catch((ex) => {
+				handleFetchError(ex);
+			});
 	};
 };
 export const useWorkspaceUpdate = () => {
@@ -124,18 +95,16 @@ export const useWorkspaceUpdate = () => {
 	return async (workspace: string, datasetBase: string, resultBase: string) => {
 		const endpoint = `${environment.apiUrl}workspace/update`;
 		const requestBody = { workspace, datasetBase, resultBase };
-		await fetch(endpoint, {
+		await fetchData(endpoint, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(requestBody),
 		})
-			.then(async (response) => {
-				if (!response.ok) {
-					throw new Error(response.statusText || 'ワークスペースの更新に失敗しました');
-				}
+			.then(() => {
 				setContext(current => ({ ...current, ...requestBody }));
-			})
-			.catch((ex) => handleFetchError(ex, endpoint, "POST", requestBody));
+			}).catch((ex) => {
+				handleFetchError(ex);
+			});
 	};
 };
 export const useDeleteParameter = (command: string, name: string) => {
@@ -144,19 +113,17 @@ export const useDeleteParameter = (command: string, name: string) => {
 	return async () => {
 		const endpoint = `${environment.apiUrl + command.toLowerCase()}/delete`;
 		const requestBody = { name };
-		await fetch(endpoint, {
+		await fetchData(endpoint, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(requestBody),
 		})
-			.then(async (response) => {
-				if (!response.ok) {
-					throw new Error(response.statusText || 'パラメータの削除に失敗しました');
-				}
-				const parameters: string[] = await response.json();
+			.then((response) => response.json())
+			.then((parameters: string[]) => {
 				setParameter(current => current.replace(command.toLowerCase(), parameters));
-			})
-			.catch((ex) => handleFetchError(ex, endpoint, "POST", requestBody));
+			}).catch((ex) => {
+				handleFetchError(ex);
+			});
 	};
 };
 export const useCopyParameter = (command: string, name: string) => {
@@ -165,19 +132,17 @@ export const useCopyParameter = (command: string, name: string) => {
 	return async () => {
 		const endpoint = `${environment.apiUrl + command.toLowerCase()}/copy`;
 		const requestBody = { name };
-		await fetch(endpoint, {
+		await fetchData(endpoint, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(requestBody),
 		})
-			.then(async (response) => {
-				if (!response.ok) {
-					throw new Error(response.statusText || 'パラメータのコピーに失敗しました');
-				}
-				const parameters: string[] = await response.json();
+			.then((response) => response.json())
+			.then((parameters: string[]) => {
 				setParameter(current => current.replace(command.toLowerCase(), parameters));
-			})
-			.catch((ex) => handleFetchError(ex, endpoint, "POST", requestBody));
+			}).catch((ex) => {
+				handleFetchError(ex);
+			});
 	};
 };
 export const useRenameParameter = (command: string, name: string) => {
@@ -188,21 +153,19 @@ export const useRenameParameter = (command: string, name: string) => {
 	return async (newName: string) => {
 		const endpoint = `${environment.apiUrl + command.toLowerCase()}/rename`;
 		const requestBody = { oldName: name, newName };
-		await fetch(endpoint, {
+		await fetchData(endpoint, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(requestBody),
 		})
-			.then(async (response) => {
-				if (!response.ok) {
-					throw new Error(response.statusText || 'パラメータの名前変更に失敗しました');
-				}
-				const parameters: string[] = await response.json();
+			.then((response) => response.json())
+			.then((parameters: string[]) => {
 				setParameterList(current => current.replace(command.toLowerCase(), parameters));
 				if (parameter.command === command.toLowerCase() && parameter.name === name) {
 					setParameter(parameter.currentParameter(), parameter.command, newName);
 				}
-			})
-			.catch((ex) => handleFetchError(ex, endpoint, "POST", requestBody));
+			}).catch((ex) => {
+				handleFetchError(ex);
+			});
 	};
 };
