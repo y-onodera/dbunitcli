@@ -27,21 +27,22 @@ export default function WorkspaceResourcesProvider(props: {
 
 	useEffect(() => {
 		const workspaceReload = async () => {
-			console.log(context);
-			const endpoint = `${environment.apiUrl}workspace/resources`;
-			await fetchData(endpoint, {
-				method: "GET",
-				headers: { "Content-Type": "application/json" },
-			})
+			context.workspace;
+			const fetchParams = {
+				endpoint: `${environment.apiUrl}workspace/resources`,
+				options: {
+					method: "GET"
+				},
+			};
+			await fetchData(fetchParams)
 				.then((response) => response.json())
 				.then((resources: WorkspaceResources) => {
 					setContext(resources.context);
 					setParameterList(ParameterList.from(resources.parameterList));
 					setResourcesSettings(resources.resources);
 					setWorkspace(resources.context.workspace);
-				}).catch((ex) => {
-					handleFetchError(ex);
-				});
+				})
+				.catch((ex) => handleFetchError(ex, fetchParams));
 		};
 		workspaceReload();
 	}, [environment.apiUrl, context]);
@@ -76,73 +77,78 @@ export const useAddParameter = (command: string) => {
 	const setParameter = useSetParameterList();
 	const environment = useEnviroment();
 	return async () => {
-		const endpoint = `${environment.apiUrl + command.toLowerCase()}/add`;
-		await fetchData(endpoint, {
-			method: "GET",
-			headers: { "Content-Type": "application/json" },
-		})
+		const fetchParams = {
+			endpoint: `${environment.apiUrl + command.toLowerCase()}/add`,
+			options: {
+				method: "GET",
+				headers: { "Content-Type": "application/json" },
+			},
+		};
+		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((parameters: string[]) => {
 				setParameter(current => current.replace(command.toLowerCase(), parameters));
-			}).catch((ex) => {
-				handleFetchError(ex);
-			});
+			})
+			.catch((ex) => handleFetchError(ex, fetchParams));
 	};
 };
 export const useWorkspaceUpdate = () => {
 	const setContext = useSetWorkspaceContext();
 	const environment = useEnviroment();
 	return async (workspace: string, datasetBase: string, resultBase: string) => {
-		const endpoint = `${environment.apiUrl}workspace/update`;
-		const requestBody = { workspace, datasetBase, resultBase };
-		await fetchData(endpoint, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(requestBody),
-		})
+		const fetchParams = {
+			endpoint: `${environment.apiUrl}workspace/update`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ workspace, datasetBase, resultBase }),
+			},
+		};
+		await fetchData(fetchParams)
 			.then(() => {
-				setContext(current => ({ ...current, ...requestBody }));
-			}).catch((ex) => {
-				handleFetchError(ex);
-			});
+				setContext(current => ({ ...current, workspace, datasetBase, resultBase }));
+			})
+			.catch((ex) => handleFetchError(ex, fetchParams));
 	};
 };
 export const useDeleteParameter = (command: string, name: string) => {
 	const setParameter = useSetParameterList();
 	const environment = useEnviroment();
 	return async () => {
-		const endpoint = `${environment.apiUrl + command.toLowerCase()}/delete`;
-		const requestBody = { name };
-		await fetchData(endpoint, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(requestBody),
-		})
+		const fetchParams = {
+			endpoint: `${environment.apiUrl + command.toLowerCase()}/delete`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name }),
+			},
+		};
+		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((parameters: string[]) => {
 				setParameter(current => current.replace(command.toLowerCase(), parameters));
-			}).catch((ex) => {
-				handleFetchError(ex);
-			});
+			})
+			.catch((ex) => handleFetchError(ex, fetchParams));
 	};
 };
 export const useCopyParameter = (command: string, name: string) => {
 	const setParameter = useSetParameterList();
 	const environment = useEnviroment();
 	return async () => {
-		const endpoint = `${environment.apiUrl + command.toLowerCase()}/copy`;
-		const requestBody = { name };
-		await fetchData(endpoint, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(requestBody),
-		})
+		const fetchParams = {
+			endpoint: `${environment.apiUrl + command.toLowerCase()}/copy`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name }),
+			},
+		};
+		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((parameters: string[]) => {
 				setParameter(current => current.replace(command.toLowerCase(), parameters));
-			}).catch((ex) => {
-				handleFetchError(ex);
-			});
+			})
+			.catch((ex) => handleFetchError(ex, fetchParams));
 	};
 };
 export const useRenameParameter = (command: string, name: string) => {
@@ -151,21 +157,22 @@ export const useRenameParameter = (command: string, name: string) => {
 	const setParameterList = useSetParameterList();
 	const environment = useEnviroment();
 	return async (newName: string) => {
-		const endpoint = `${environment.apiUrl + command.toLowerCase()}/rename`;
-		const requestBody = { oldName: name, newName };
-		await fetchData(endpoint, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(requestBody),
-		})
+		const fetchParams = {
+			endpoint: `${environment.apiUrl + command.toLowerCase()}/rename`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ oldName: name, newName }),
+			},
+		};
+		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((parameters: string[]) => {
 				setParameterList(current => current.replace(command.toLowerCase(), parameters));
 				if (parameter.command === command.toLowerCase() && parameter.name === name) {
 					setParameter(parameter.currentParameter(), parameter.command, newName);
 				}
-			}).catch((ex) => {
-				handleFetchError(ex);
-			});
+			})
+			.catch((ex) => handleFetchError(ex, fetchParams));
 	};
 };

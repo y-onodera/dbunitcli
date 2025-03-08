@@ -34,39 +34,40 @@ export const useLoadSelectParameter = () => {
     const setParameter = useContext(setSelectParameterContext);
     const environment = useEnviroment();
     return async (command: string, name: string) => {
-        const endpoint = `${environment.apiUrl + command.toLowerCase()}/load`;
-        const requestBody = { name };
-        await fetchData(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody),
-        })
+        const fetchParams = {
+            endpoint: `${environment.apiUrl + command.toLowerCase()}/load`,
+            options: {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name }),
+            },
+        };
+        await fetchData(fetchParams)
             .then((response) => response.json())
             .then((parameter: Parameter) => {
                 setParameter(new SelectParameter(parameter, command, name));
             })
-            .catch((ex) => {
-                handleFetchError(ex);
-            });
+            .catch((ex) => handleFetchError(ex, fetchParams));
     };
 };
 export const useRefreshSelectParameter = (command: string) => {
     const setParameter = useContext(setSelectParameterContext);
     const environment = useEnviroment();
     return async (values: { [k: string]: FormDataEntryValue }) => {
-        const endpoint = `${environment.apiUrl + command.toLowerCase()}/refresh`;
-        await fetchData(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(values),
-        })
+        const fetchParams = {
+            endpoint: `${environment.apiUrl + command.toLowerCase()}/refresh`,
+            options: {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(values),
+            },
+        };
+        await fetchData(fetchParams)
             .then((response) => response.json())
             .then((parameter: Parameter) => {
                 setParameter(current => new SelectParameter(parameter, current.command, current.name));
             })
-            .catch((ex) => {
-                handleFetchError(ex);
-            });
+            .catch((ex) => handleFetchError(ex, fetchParams));
     };
 };
 export type Running = {
@@ -81,13 +82,15 @@ export const saveParameter = async (
     handleResult: (result: Running) => void
 ) => {
     const environment = useEnviroment();
-    const endpoint = `${environment.apiUrl + command}/save`;
-    const requestBody = { name, input };
-    await fetchData(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-    })
+    const fetchParams = {
+        endpoint: `${environment.apiUrl + command}/save`,
+        options: {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, input }),
+        },
+    };
+    await fetchData(fetchParams)
         .then(() => {
             handleResult({
                 command: "",
@@ -96,6 +99,7 @@ export const saveParameter = async (
             });
         })
         .catch((ex) => {
+            handleFetchError(ex, fetchParams);
             handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
         });
 }
@@ -106,13 +110,15 @@ export const execParameter = async (
     handleResult: (result: Running) => void
 ) => {
     const environment = useEnviroment();
-    const endpoint = `${environment.apiUrl + command}/exec`;
-    const requestBody = { name, input };
-    await fetchData(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-    })
+    const fetchParams = {
+        endpoint: `${environment.apiUrl + command}/exec`,
+        options: {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, input }),
+        },
+    };
+    await fetchData(fetchParams)
         .then((response) => response.text())
         .then((resultDir: string) => handleResult({
             command: "",
@@ -120,6 +126,7 @@ export const execParameter = async (
             resultDir,
         }))
         .catch((ex) => {
+            handleFetchError(ex, fetchParams);
             handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
         });
 }
