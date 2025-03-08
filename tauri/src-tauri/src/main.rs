@@ -3,13 +3,13 @@
 
 use std::{
     env,
+    os::windows::process::CommandExt,
     process::{Command, Stdio},
     sync::mpsc::sync_channel,
     thread,
 };
 use tauri::WindowEvent;
 use tauri_plugin_cli::CliExt;
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn open_directory(path: String) {
     println!("{:?}", path);
@@ -83,6 +83,7 @@ fn main() {
             args.extend(java_tool_options_args);
 
             let mut child = Command::new("backend/dbunit-cli-sidecar.exe")
+                .creation_flags(0x08000000) // CREATE_NO_WINDOW
                 .args(args)
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped())
