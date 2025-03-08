@@ -35,12 +35,14 @@ export default function CommandFormElements(prop: CommandParams) {
 					return (
 						<>
 							{prop.optionCaption?.display(element.name) && (
-								<ExpandButton
-									key={prop.prefix + prop.optionCaption?.caption}
-									toggleOptional={toggleOptional}
-									showOptional={showOptional}
-									caption={prop.optionCaption?.caption}
-								/>
+								<div className="pt-2.5">
+									<ExpandButton
+										key={prop.prefix + prop.optionCaption?.caption}
+										toggleOptional={toggleOptional}
+										showOptional={showOptional}
+										caption={prop.optionCaption?.caption}
+									/>
+								</div>
 							)}
 							<Check
 								prefix={prop.prefix}
@@ -55,12 +57,14 @@ export default function CommandFormElements(prop: CommandParams) {
 					return (
 						<>
 							{prop.optionCaption?.display(element.name) && (
-								<ExpandButton
-									key={prop.prefix + prop.optionCaption?.caption}
-									toggleOptional={toggleOptional}
-									showOptional={showOptional}
-									caption={prop.optionCaption?.caption}
-								/>
+								<div className="pt-2.5">
+									<ExpandButton
+										key={prop.prefix + prop.optionCaption?.caption}
+										toggleOptional={toggleOptional}
+										showOptional={showOptional}
+										caption={prop.optionCaption?.caption}
+									/>
+								</div>
 							)}
 							<Select
 								handleTypeSelect={prop.handleTypeSelect}
@@ -75,12 +79,14 @@ export default function CommandFormElements(prop: CommandParams) {
 				return (
 					<>
 						{prop.optionCaption?.display(element.name) && (
-							<ExpandButton
-								key={prop.prefix + prop.optionCaption?.caption}
-								toggleOptional={toggleOptional}
-								showOptional={showOptional}
-								caption={prop.optionCaption?.caption}
-							/>
+							<div className="pt-2.5">
+								<ExpandButton
+									key={prop.prefix + prop.optionCaption?.caption}
+									toggleOptional={toggleOptional}
+									showOptional={showOptional}
+									caption={prop.optionCaption?.caption}
+								/>
+							</div>
 						)}
 						<Text
 							prefix={prop.prefix}
