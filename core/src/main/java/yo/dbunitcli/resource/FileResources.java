@@ -124,7 +124,7 @@ public record FileResources() {
     }
 
     public static File xlsxSchemaDir() {
-        return new File(baseDir(), "resources/xlsxschema");
+        return new File(baseDir(), "resources/xlsxSchema");
     }
 
 }
