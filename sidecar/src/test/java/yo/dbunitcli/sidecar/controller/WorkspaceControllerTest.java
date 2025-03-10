@@ -39,7 +39,7 @@ class WorkspaceControllerTest {
                 , new File("src/test/resources/workspace/sample/resources/setting").getAbsolutePath().replace("\\", "\\\\")
                 , new File("src/test/resources/workspace/sample/resources/template").getAbsolutePath().replace("\\", "\\\\")
                 , new File("src/test/resources/workspace/sample/resources/jdbc").getAbsolutePath().replace("\\", "\\\\")
-                , new File("src/test/resources/workspace/sample/resources/xlsxschema").getAbsolutePath().replace("\\", "\\\\")
+                , new File("src/test/resources/workspace/sample/resources/xlsxSchema").getAbsolutePath().replace("\\", "\\\\")
         ), jsonResponse);
     }
 
