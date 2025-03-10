@@ -74,7 +74,7 @@ public class CsvConverter implements IDataSetConverter {
             final FileOutputStream fos = new FileOutputStream(this.file);
             this.writer = new OutputStreamWriter(fos, this.encoding);
             this.writeColumnNames();
-            this.write(System.getProperty("line.separator"));
+            this.write(System.lineSeparator());
         } catch (final IOException var3) {
             throw new DataSetException(var3);
         }
@@ -113,7 +113,7 @@ public class CsvConverter implements IDataSetConverter {
                 this.write(",");
             }
         });
-        this.write(System.getProperty("line.separator"));
+        this.write(System.lineSeparator());
         this.writeRows++;
     }
 

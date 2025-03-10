@@ -115,11 +115,11 @@ public class XlsConverter implements IDataSetConverter {
             final Object value = objects[k];
             if (value != null) {
                 final Cell cell = row.createCell(k);
-                if (value instanceof Date date) {
+                if (value instanceof final Date date) {
                     this.setDateCell(cell, date);
-                } else if (value instanceof BigDecimal numeric) {
+                } else if (value instanceof final BigDecimal numeric) {
                     this.setNumericCell(cell, numeric, this.workbook);
-                } else if (value instanceof Long numeric) {
+                } else if (value instanceof final Long numeric) {
                     this.setNumericCell(cell, new BigDecimal(numeric), this.workbook);
                 } else {
                     final String stringValue = this.getString(value);
@@ -175,7 +175,7 @@ public class XlsConverter implements IDataSetConverter {
                 this.workbook.write(out);
                 out.flush();
                 if (this.workbook instanceof SXSSFWorkbook) {
-                    ((SXSSFWorkbook) this.workbook).dispose();
+                    this.workbook.close();
                 }
             }
         } catch (final IOException e) {
