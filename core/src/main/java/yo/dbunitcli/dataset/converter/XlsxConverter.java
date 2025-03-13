@@ -18,13 +18,17 @@ public class XlsxConverter extends XlsConverter {
         super(param);
     }
 
-    public XlsxConverter(final File resultDir, final String filename, final TableExportType tableExport, final boolean exportEmptyTable) {
-        super(resultDir, filename, tableExport, exportEmptyTable);
+    public XlsxConverter(final File resultDir
+            , final String filename
+            , final TableExportType tableExport
+            , final boolean exportEmptyTable
+            , final boolean exportHeader) {
+        super(resultDir, filename, tableExport, exportEmptyTable, exportHeader);
     }
 
     @Override
     public IDataSetConverter split() {
-        return new XlsxConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable);
+        return new XlsxConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable, this.exportHeader);
     }
 
     @Override

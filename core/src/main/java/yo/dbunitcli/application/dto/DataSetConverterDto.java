@@ -15,10 +15,12 @@ public class DataSetConverterDto implements CompositeDto {
     private String exportEmptyTable;
     @CommandLine.Option(names = "-resultPath", description = "result file relative path from -result=dir.")
     private String resultPath;
-    @CommandLine.Option(names = "-outputEncoding", description = "output csv file encoding")
-    private String outputEncoding;
     @CommandLine.Option(names = "-op", description = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
     private DBConverter.Operation operation;
+    @CommandLine.Option(names = "-exportHeader", description = "if true then export file has no header row ")
+    private String exportHeader;
+    @CommandLine.Option(names = "-outputEncoding", description = "output csv file encoding")
+    private String outputEncoding;
     @CommandLine.Option(names = "-excelTable", description = "SHEET or BOOK")
     private String excelTable;
 
@@ -61,20 +63,28 @@ public class DataSetConverterDto implements CompositeDto {
         this.resultPath = resultPath;
     }
 
-    public String getOutputEncoding() {
-        return this.outputEncoding;
-    }
-
-    public void setOutputEncoding(final String outputEncoding) {
-        this.outputEncoding = outputEncoding;
-    }
-
     public DBConverter.Operation getOperation() {
         return this.operation;
     }
 
     public void setOperation(final DBConverter.Operation operation) {
         this.operation = operation;
+    }
+
+    public String getExportHeader() {
+        return this.exportHeader;
+    }
+
+    public void setExportHeader(final String exportHeader) {
+        this.exportHeader = exportHeader;
+    }
+
+    public String getOutputEncoding() {
+        return this.outputEncoding;
+    }
+
+    public void setOutputEncoding(final String outputEncoding) {
+        this.outputEncoding = outputEncoding;
     }
 
     public String getExcelTable() {

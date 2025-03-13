@@ -16,6 +16,7 @@ import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.resource.poi.FromJsonXlsxSchemaBuilder;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -111,6 +112,99 @@ public class ConvertTest {
             Assertions.assertEquals(2, actual.getTableNames().length);
             Assertions.assertEquals("multi1", actual.getTableNames()[0]);
             Assertions.assertEquals("multi2", actual.getTableNames()[1]);
+        }
+
+        @Test
+        public void testFromCsvToCsvWithoutHeader() throws Exception {
+            Convert.main(this.getArgs("/paramConvertCsvToCsvWithoutHeader.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/csv2xlsx/result_without_header/multi1.csv");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableCsvDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSrc(src)
+                                    .setHeaderName("key,col1,col2,col3")
+                                    .setEncoding("MS932")
+                                    .build()));
+            Assertions.assertEquals(1, actual.getTableNames().length);
+            Assertions.assertEquals("multi1", actual.getTableNames()[0]);
+            final ComparableTable multi1 = actual.getTable("multi1");
+            Assertions.assertEquals(3, multi1.rows().size());
+        }
+
+        @Test
+        public void testFromCsvToXlsxWithoutHeader() throws Exception {
+            Convert.main(this.getArgs("/paramConvertCsvToXlsxWithoutHeader.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/csv2xlsx/result_without_header/paramConvertCsvToXlsxWithoutHeader.xlsx");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableXlsxDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSrc(src)
+                                    .setXlsxSchema(new FromJsonXlsxSchemaBuilder().build("""
+                                            {
+                                              "rows": [
+                                                {
+                                                  "tableName": "マルチ1",
+                                                  "sheetName": "multi1",
+                                                  "header": [
+                                                    "キー",
+                                                    "項目1",
+                                                    "項目2",
+                                                    "項目3"
+                                                  ],
+                                                  "dataStart": 0,
+                                                  "columnIndex": [
+                                                    0,
+                                                    1,
+                                                    2,
+                                                    3
+                                                  ],
+                                                  "breakKey": [
+                                                    "キー"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                            """)).build()));
+            Assertions.assertEquals(1, actual.getTableNames().length);
+            Assertions.assertEquals("マルチ1", actual.getTableNames()[0]);
+        }
+
+        @Test
+        public void testFromCsvToXlsWithoutHeader() throws Exception {
+            Convert.main(this.getArgs("/paramConvertCsvToXlsWithoutHeader.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/csv2xlsx/result_without_header/paramConvertCsvToXlsWithoutHeader.xls");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableXlsDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSrc(src)
+                                    .setXlsxSchema(new FromJsonXlsxSchemaBuilder().build("""
+                                            {
+                                              "rows": [
+                                                {
+                                                  "tableName": "マルチ1",
+                                                  "sheetName": "multi1",
+                                                  "header": [
+                                                    "キー",
+                                                    "項目1",
+                                                    "項目2",
+                                                    "項目3"
+                                                  ],
+                                                  "dataStart": 0,
+                                                  "columnIndex": [
+                                                    0,
+                                                    1,
+                                                    2,
+                                                    3
+                                                  ],
+                                                  "breakKey": [
+                                                    "キー"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                            """)).build()));
+            Assertions.assertEquals(1, actual.getTableNames().length);
+            Assertions.assertEquals("マルチ1", actual.getTableNames()[0]);
         }
 
         @Test

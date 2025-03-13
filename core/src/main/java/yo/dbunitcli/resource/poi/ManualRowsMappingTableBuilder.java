@@ -46,8 +46,9 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public boolean isTableStart(final int rowNum) {
-        return this.tableNames.length > this.currentTableIndex + 1
-                && this.tableStartRow.get(this.tableNames[this.currentTableIndex + 1]) == rowNum + 1;
+        if (this.tableNames.length <= this.currentTableIndex + 1) return false;
+        final Integer startRow = this.tableStartRow.get(this.tableNames[this.currentTableIndex + 1]);
+        return (startRow > 0 && startRow == rowNum + 1) || (startRow == rowNum && startRow == 0);
     }
 
     @Override
@@ -96,7 +97,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
             IntStream.range(this.rowValues.size(), this.getColumnLength())
                     .forEach(i -> this.rowValues.add(""));
         }
-        if (this.nowProcessing instanceof XlsxSchema.FileInfo.AddFileInfoMetaData option) {
+        if (this.nowProcessing instanceof final XlsxSchema.FileInfo.AddFileInfoMetaData option) {
             option.setValueTo(this.rowValues);
         }
         return this.rowValues.toArray(new String[0]);

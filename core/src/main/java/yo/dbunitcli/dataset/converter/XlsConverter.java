@@ -35,6 +35,7 @@ public class XlsConverter implements IDataSetConverter {
     protected final File resultDir;
     protected final TableExportType tableExport;
     protected final boolean exportEmptyTable;
+    protected final boolean exportHeader;
     private final Map<Workbook, Map<Short, CellStyle>> cellStyleMap = new HashMap<>();
     protected String filename;
     private Workbook workbook;
@@ -55,14 +56,20 @@ public class XlsConverter implements IDataSetConverter {
         this(param.resultDir()
                 , param.fileName()
                 , TableExportType.valueOf(param.excelTable())
-                , param.exportEmptyTable());
+                , param.exportEmptyTable()
+                , param.exportHeader());
     }
 
-    public XlsConverter(final File resultDir, final String filename, final TableExportType tableExport, final boolean exportEmptyTable) {
+    public XlsConverter(final File resultDir
+            , final String filename
+            , final TableExportType tableExport
+            , final boolean exportEmptyTable
+            , final boolean exportHeader) {
         this.resultDir = resultDir;
         this.filename = Optional.ofNullable(filename).orElse(this.resultDir.getName());
         this.tableExport = tableExport;
         this.exportEmptyTable = exportEmptyTable;
+        this.exportHeader = exportHeader;
     }
 
     @Override
@@ -92,19 +99,21 @@ public class XlsConverter implements IDataSetConverter {
         this.sheet = this.workbook.createSheet(this.metaData.getTableName());
         this.sheet.setDisplayZeros(true);
         this.workbook.setSheetName(this.sheetIndex++, this.metaData.getTableName());
-        final Row headerRow = this.sheet.createRow(0);
-        final Column[] columns = this.metaData.getColumns();
-        IntStream.range(0, columns.length).forEach(i -> headerRow.createCell(i).setCellValue(columns[i].getColumnName()));
+        if (this.exportHeader) {
+            this.rowIndex = 1;
+            this.writeColumnNames();
+        } else {
+            this.rowIndex = 0;
+        }
     }
 
     @Override
     public void endTable() throws DataSetException {
-        XlsConverter.LOGGER.info("convert - rows={} ", this.rowIndex - 1);
+        XlsConverter.LOGGER.info("convert - rows={} ", this.rowIndex - (this.exportHeader ? 1 : 0));
         XlsConverter.LOGGER.info("convert - end   sheetName={}", this.metaData.getTableName());
         if (this.tableExport == TableExportType.BOOK) {
             this.flush();
         }
-        this.rowIndex = 1;
     }
 
     @Override
@@ -161,7 +170,13 @@ public class XlsConverter implements IDataSetConverter {
 
     @Override
     public IDataSetConverter split() {
-        return new XlsConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable);
+        return new XlsConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable, this.exportHeader);
+    }
+
+    protected void writeColumnNames() throws DataSetException {
+        final Row headerRow = this.sheet.createRow(0);
+        final Column[] columns = this.metaData.getColumns();
+        IntStream.range(0, columns.length).forEach(i -> headerRow.createCell(i).setCellValue(columns[i].getColumnName()));
     }
 
     protected void flush() {

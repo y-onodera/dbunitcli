@@ -27,6 +27,7 @@ public class CsvConverter implements IDataSetConverter {
 
     private final String encoding;
     private final String theDirectory;
+    private final boolean exportHeader;
     private ITableMetaData activeMetaData;
     private int writeRows;
     private File file;
@@ -36,14 +37,16 @@ public class CsvConverter implements IDataSetConverter {
         this(param.resultDir().getAbsolutePath()
                 , param.resultDir()
                 , param.outputEncoding()
-                , param.exportEmptyTable());
+                , param.exportEmptyTable()
+                , param.exportHeader());
     }
 
-    public CsvConverter(final String theDirectory, final File resultDir, final String encoding, final boolean exportEmptyTable) {
+    public CsvConverter(final String theDirectory, final File resultDir, final String encoding, final boolean exportEmptyTable, final boolean exportHeader) {
         this.theDirectory = theDirectory;
         this.resultDir = resultDir;
         this.encoding = encoding;
         this.exportEmptyTable = exportEmptyTable;
+        this.exportHeader = exportHeader;
     }
 
     @Override
@@ -73,8 +76,10 @@ public class CsvConverter implements IDataSetConverter {
             Files.createFile(this.file.toPath());
             final FileOutputStream fos = new FileOutputStream(this.file);
             this.writer = new OutputStreamWriter(fos, this.encoding);
-            this.writeColumnNames();
-            this.write(System.lineSeparator());
+            if (this.exportHeader) {
+                this.writeColumnNames();
+                this.write(System.lineSeparator());
+            }
         } catch (final IOException var3) {
             throw new DataSetException(var3);
         }
@@ -144,7 +149,7 @@ public class CsvConverter implements IDataSetConverter {
 
     @Override
     public IDataSetConverter split() {
-        return new CsvConverter(this.theDirectory, this.resultDir, this.encoding, this.exportEmptyTable);
+        return new CsvConverter(this.theDirectory, this.resultDir, this.encoding, this.exportEmptyTable, this.exportHeader);
     }
 
     protected void writeColumnNames() {

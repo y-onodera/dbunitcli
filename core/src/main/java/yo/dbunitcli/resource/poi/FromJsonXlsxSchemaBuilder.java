@@ -4,6 +4,7 @@ import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
+import yo.dbunitcli.Strings;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -23,7 +24,18 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
         if (schema == null) {
             return XlsxSchema.DEFAULT;
         }
-        final JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(schema), "MS932"));
+        return this.build(new InputStreamReader(new FileInputStream(schema), "MS932"));
+    }
+
+    public XlsxSchema build(final String json) {
+        if (Strings.isEmpty(json)) {
+            return XlsxSchema.DEFAULT;
+        }
+        return this.build(new StringReader(json));
+    }
+
+    public XlsxSchema build(final Reader reader) {
+        final JsonReader jsonReader = Json.createReader(reader);
         final JsonObject settingJson = jsonReader.read()
                 .asJsonObject();
         return this.loadRowsSettings(settingJson)

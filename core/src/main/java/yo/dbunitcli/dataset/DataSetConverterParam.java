@@ -13,7 +13,8 @@ public record DataSetConverterParam(
         , String fileName
         , String outputEncoding
         , String excelTable
-        , boolean exportEmptyTable) {
+        , boolean exportEmptyTable
+        , boolean exportHeader) {
 
     public static Builder builder() {
         return new Builder();
@@ -28,6 +29,7 @@ public record DataSetConverterParam(
                 , builder.getOutputEncoding()
                 , builder.getExcelTable()
                 , builder.isExportEmptyTable()
+                , builder.isSkipHeader()
         );
     }
 
@@ -39,6 +41,7 @@ public record DataSetConverterParam(
         private String outputEncoding;
         private String excelTable;
         private boolean exportEmptyTable;
+        private boolean skipHeader;
         private String resultPath;
 
         public DataSetConverterParam build() {
@@ -115,6 +118,15 @@ public record DataSetConverterParam(
 
         public String getResultPath() {
             return this.resultPath;
+        }
+
+        public boolean isSkipHeader() {
+            return this.skipHeader;
+        }
+
+        public Builder setSkipHeader(final boolean skipHeader) {
+            this.skipHeader = skipHeader;
+            return this;
         }
     }
 }
