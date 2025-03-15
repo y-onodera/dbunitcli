@@ -6,12 +6,10 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ContextDto;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
-import yo.dbunitcli.sidecar.dto.ResourcesDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.stream.Stream;
 
 public class Workspace {
@@ -65,9 +63,7 @@ public class Workspace {
         parameters.setRun(this.options().parameterNames(CommandType.run).toList());
         parameters.setParameterize(this.options().parameterNames(CommandType.parameterize).toList());
         result.setParameterList(parameters);
-        final ResourcesDto resources = new ResourcesDto();
-        resources.setDatasetSettings(this.metadataSettings());
-        result.setResources(resources);
+        result.setResources(this.resources().toDto());
         final ContextDto context = new ContextDto();
         result.setContext(context);
         context.setWorkspace(FileResources.baseDir().toPath().toAbsolutePath().normalize().toString());
@@ -86,18 +82,6 @@ public class Workspace {
 
     public Stream<Path> parameterFiles(final CommandType type) {
         return this.options().parameterFiles(type);
-    }
-
-    public List<String> metadataSettings() {
-        return this.resources()
-                .metadataSetting()
-                .stream()
-                .map(it -> it.getFileName().toString())
-                .toList();
-    }
-
-    public String metadataSetting(final String name) {
-        return this.resources().metadataSetting(name);
     }
 
     public static class Builder {
