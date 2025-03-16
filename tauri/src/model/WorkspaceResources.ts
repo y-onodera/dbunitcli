@@ -56,4 +56,5 @@ export class ParameterList {
 }
 export type ResourcesSettings = {
     datasetSettings: string[]
+    xlsxSchemas: string[]
 }
