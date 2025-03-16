@@ -3,7 +3,7 @@ package yo.dbunitcli.sidecar.dto;
 import io.micronaut.serde.annotation.Serdeable;
 
 @Serdeable
-public class MetaDataRequestDto {
+public class MetaDataRequestDto implements ResourceSaveRequest<MetaDataSettingsDto> {
     private String name;
 
     private MetaDataSettingsDto input;

@@ -18,14 +18,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
-import yo.dbunitcli.sidecar.dto.JsonXlsxSchemaRequestDto;
+import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collections;
 
-public abstract class AbstractResourceFileController {
+public abstract class AbstractResourceFileController<DTO extends ResourceSaveRequest<?>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractResourceFileController.class);
     protected final Workspace workspace;
 
@@ -46,7 +46,7 @@ public abstract class AbstractResourceFileController {
     }
 
     @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
-    public String save(@Body final JsonXlsxSchemaRequestDto body) throws IOException {
+    public String save(@Body final DTO body) throws IOException {
         this.saveJson(body.getName(), JsonMapper.createDefault().writeValueAsString(body.getInput()));
         return "success";
     }

@@ -3,7 +3,7 @@ package yo.dbunitcli.sidecar.dto;
 import io.micronaut.serde.annotation.Serdeable;
 
 @Serdeable
-public class JsonXlsxSchemaRequestDto {
+public class JsonXlsxSchemaRequestDto implements ResourceSaveRequest<JsonXlsxSchemaDto> {
     private String name;
 
     private JsonXlsxSchemaDto input;
