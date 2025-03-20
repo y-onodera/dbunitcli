@@ -1,13 +1,13 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import type { MetadataSetting } from "../../../model/MetadataSettings";
+import type { DatasetSetting } from "../../../model/DatasetSettings";
 import { BlueButton, WhiteButton } from "../../element/Button";
 import { AddButton, ExpandButton, RemoveButton } from "../../element/ButtonIcon";
 import { CheckBox, ControllTextBox, InputLabel, SelectBox } from "../../element/Input";
 
 export default function SettingDaialog(props: {
-    setting: MetadataSetting
+    setting: DatasetSetting
     handleDialogClose: () => void;
-    handleCommit: (newSettings: MetadataSetting) => void;
+    handleCommit: (newSettings: DatasetSetting) => void;
 }) {
     const dialogRef = useRef<HTMLDialogElement>(null);
     useEffect(() => { dialogRef.current?.showModal() }, [])
@@ -19,8 +19,7 @@ export default function SettingDaialog(props: {
         <>
             <dialog ref={dialogRef} onClose={props.handleDialogClose}
                 className="overflow-y-auto fixed 
-                        top-0 right-0 left-0 
-                        z-50
+                        top-0 right-0 left-0 z-50
                       bg-white
                         border border-gray-200"
             >
@@ -81,7 +80,7 @@ export default function SettingDaialog(props: {
                     <fieldset className="border border-gray-200 p-2.5 m-2">
                         <Check name="split"
                             value={target.split ? "true" : "false"}
-                            handleOnChange={async checked => setTarget(cur => cur.withSplit(checked))}
+                            handleOnChange={checked => setTarget(cur => cur.withSplit(checked))}
                         />
                         {target.split
                             ?
@@ -176,7 +175,7 @@ export default function SettingDaialog(props: {
     );
 }
 function Check(props: {
-    handleOnChange: ((checked: boolean) => Promise<void>); name: string, value: string
+    handleOnChange: ((checked: boolean) => void); name: string, value: string
 }) {
     return (
         <div className="grid grid-cols-5 justify-center">

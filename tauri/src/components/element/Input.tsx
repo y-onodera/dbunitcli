@@ -63,7 +63,7 @@ export function SelectBox(props: { name: string, id: string, required: boolean, 
         </select>
     );
 }
-export function CheckBox(props: { name: string, id: string, hidden?: boolean, defaultValue?: string, handleOnChange?: (checked: boolean) => Promise<void> }) {
+export function CheckBox(props: { name: string, id: string, hidden?: boolean, defaultValue?: string, handleOnChange?: (checked: boolean) => void }) {
     const [checked, setChecked] = useState(false);
     useEffect(() => {
         setChecked(props.defaultValue === "true");

@@ -1,17 +1,20 @@
 import { isAbsolute, sep } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { type Dispatch, type SetStateAction, useState } from "react";
+import { loadDatasetSettings, useSetDatasetSettings } from "../../context/DatasetSettingsProvider";
 import { useEnviroment } from "../../context/EnviromentProvider";
-import { loadMetadataSettings, saveMetadataSettings, useMetadataSettings, useSetMetadataSettings } from "../../context/MetadataSettingsProvider";
 import { useResourcesSettings, useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
+import { loadXlsxSchema, useSetXlsxSchema } from "../../context/XlsxSchemaProvider";
 import type { Attribute, CommandParam, CommandParams } from "../../model/CommandParam";
-import type { MetadataSettings } from "../../model/MetadataSettings";
+import type { DatasetSettings } from "../../model/DatasetSettings";
 import type { WorkspaceContext } from "../../model/WorkspaceResources";
+import type { XlsxSchema } from "../../model/XlsxSchema";
 import { ButtonWithIcon } from "../element/Button";
 import { ExpandButton } from "../element/ButtonIcon";
 import { DirIcon, EditIcon, FileIcon } from "../element/Icon";
 import { CheckBox, ControllTextBox, InputLabel, SelectBox } from "../element/Input";
-import SettingsDaialog from "./settings/SettingsDialog";
+import SettingsDaialog from "./settings/DatasetSettingsDialog";
+import XlsxSchemaDialog from "./settings/XlsxSchemaDialog";
 
 type Prop = {
 	prefix: string;
@@ -114,7 +117,7 @@ function Text(prop: Prop) {
 				<ControllTextBox
 					name={getName(prop.prefix, prop.element.name)}
 					id={getId(prop.prefix, prop.element.name)}
-					list={prop.element.name === "setting" ? `${getId(prop.prefix, prop.element.name)}_list` : undefined}
+					list={(prop.element.name === "setting" || prop.element.name === "xlsxSchema") ? `${getId(prop.prefix, prop.element.name)}_list` : undefined}
 					hidden={prop.hidden}
 					required={prop.element.attribute.required}
 					value={path}
@@ -122,6 +125,9 @@ function Text(prop: Prop) {
 				/>
 				{prop.element.name === "setting" && !prop.hidden && (
 					<SettingEdit prefix={prop.prefix} element={prop.element} path={path} setPath={setPath} />
+				)}
+				{prop.element.name === "xlsxSchema" && !prop.hidden && (
+					<XlsxSchemaEdit prefix={prop.prefix} element={prop.element} path={path} setPath={setPath} />
 				)}
 				{prop.element.attribute.type.includes("FILE") && !prop.hidden && (
 					<FileChooser prefix={prop.prefix} element={prop.element} path={path} setPath={setPath} />
@@ -135,18 +141,16 @@ function Text(prop: Prop) {
 };
 function SettingEdit(prop: FileProp) {
 	const environment = useEnviroment();
-	const metadataSettings = useMetadataSettings();
-	const setMetadataSettings = useSetMetadataSettings();
+	const setDatasetSettings = useSetDatasetSettings();
 	const settings = useResourcesSettings().datasetSettings;
 	const [dialogEdit, setDialogEdit] = useState(false);
 	const handleDialogOpen = () => {
-		loadMetadataSettings(environment.apiUrl, prop.path ?? "")
-			.then((settings: MetadataSettings) => setMetadataSettings(settings))
+		loadDatasetSettings(environment.apiUrl, prop.path ?? "")
+			.then((settings: DatasetSettings) => setDatasetSettings(settings))
 			.catch((ex) => alert(ex));
 		setDialogEdit(true);
 	};
 	const handleSave = (path: string) => {
-		saveMetadataSettings(environment.apiUrl, path, metadataSettings);
 		prop.setPath(path);
 		setDialogEdit(false);
 	};
@@ -161,6 +165,47 @@ function SettingEdit(prop: FileProp) {
 			</datalist>
 			{dialogEdit && (
 				<SettingsDaialog
+					fileName={prop.path}
+					setFileName={prop.setPath}
+					handleDialogClose={() => setDialogEdit(false)}
+					handleSave={handleSave}
+				/>
+			)}
+			<ButtonWithIcon
+				handleClick={handleDialogOpen}
+				id={`${getId(prop.prefix, prop.element.name)}_edit`}
+			>
+				<EditIcon fill="white" />
+			</ButtonWithIcon>
+		</>
+	);
+};
+function XlsxSchemaEdit(prop: FileProp) {
+	const environment = useEnviroment();
+	const setXlsxSchema = useSetXlsxSchema();
+	const settings = useResourcesSettings().xlsxSchemas;
+	const [dialogEdit, setDialogEdit] = useState(false);
+	const handleDialogOpen = () => {
+		loadXlsxSchema(environment.apiUrl, prop.path ?? "")
+			.then((settings: XlsxSchema) => setXlsxSchema(settings))
+			.catch((ex) => alert(ex));
+		setDialogEdit(true);
+	};
+	const handleSave = (path: string) => {
+		prop.setPath(path);
+		setDialogEdit(false);
+	};
+	return (
+		<>
+			<datalist id={`${getId(prop.prefix, prop.element.name)}_list`} >
+				{settings?.map((setting) => {
+					return (
+						<option key={setting} value={setting} />
+					)
+				})}
+			</datalist>
+			{dialogEdit && (
+				<XlsxSchemaDialog
 					fileName={prop.path}
 					setFileName={prop.setPath}
 					handleDialogClose={() => setDialogEdit(false)}

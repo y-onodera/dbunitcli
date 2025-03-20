@@ -1,13 +1,13 @@
 import { type Dispatch, type ReactNode, type SetStateAction, createContext, useContext, useEffect, useState } from "react";
-import { MetadataSettings, type MetadataSettingsBuilder } from "../model/MetadataSettings";
+import { DatasetSettings, type DatasetSettingsBuilder } from "../model/DatasetSettings";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
 import { useEnviroment } from "./EnviromentProvider";
 
-const metadataSettingsContext = createContext<MetadataSettings>(MetadataSettings.create());
-const setMetadataSettingsContext = createContext<Dispatch<SetStateAction<MetadataSettings>>>(() => undefined);
+const dataSettingsContext = createContext<DatasetSettings>(DatasetSettings.create());
+const setDataSettingsContext = createContext<Dispatch<SetStateAction<DatasetSettings>>>(() => undefined);
 
-export default function MetadataSettingsProvider(props: { children: ReactNode }) {
-    const [settings, setSettings] = useState<MetadataSettings>(MetadataSettings.create());
+export default function DatasetSettingsProvider(props: { children: ReactNode }) {
+    const [settings, setSettings] = useState<DatasetSettings>(DatasetSettings.create());
     const environment = useEnviroment();
 
     useEffect(() => {
@@ -27,20 +27,20 @@ export default function MetadataSettingsProvider(props: { children: ReactNode })
     }, [environment.apiUrl]);
 
     return (
-        <metadataSettingsContext.Provider value={settings}>
-            <setMetadataSettingsContext.Provider value={setSettings}>
+        <dataSettingsContext.Provider value={settings}>
+            <setDataSettingsContext.Provider value={setSettings}>
                 {props.children}
-            </setMetadataSettingsContext.Provider>
-        </metadataSettingsContext.Provider>
+            </setDataSettingsContext.Provider>
+        </dataSettingsContext.Provider>
     );
 }
 
-export const useMetadataSettings = () => useContext(metadataSettingsContext);
-export const useSetMetadataSettings = () => useContext(setMetadataSettingsContext);
+export const useDatasetSettings = () => useContext(dataSettingsContext);
+export const useSetDatasetSettings = () => useContext(setDataSettingsContext);
 
-export async function loadMetadataSettings(apiUrl: string, name: string): Promise<MetadataSettings> {
+export async function loadDatasetSettings(apiUrl: string, name: string): Promise<DatasetSettings> {
     if (name === "") {
-        return MetadataSettings.create();
+        return DatasetSettings.create();
     }
     const fetchParams = {
         endpoint: `${apiUrl}metadata/load`,
@@ -52,14 +52,14 @@ export async function loadMetadataSettings(apiUrl: string, name: string): Promis
     };
     return await fetchData(fetchParams)
         .then((response) => response.json())
-        .then((setting: MetadataSettingsBuilder) => MetadataSettings.build(setting))
+        .then((setting: DatasetSettingsBuilder) => DatasetSettings.build(setting))
         .catch((ex) => {
             handleFetchError(ex, fetchParams);
-            return MetadataSettings.create();
+            return DatasetSettings.create();
         });
 }
 
-export async function saveMetadataSettings(apiUrl: string, name: string, input: MetadataSettings): Promise<string> {
+export async function saveDatasetSettings(apiUrl: string, name: string, input: DatasetSettings): Promise<string> {
     const fetchParams = {
         endpoint: `${apiUrl}metadata/save`,
         options: {

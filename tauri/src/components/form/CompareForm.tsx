@@ -1,4 +1,4 @@
-import MetadataSettingsProvider from "../../context/MetadataSettingsProvider";
+import DatasetSettingsProvider from "../../context/DatasetSettingsProvider";
 import type { CompareParams } from "../../model/CommandParam";
 import CommandFormElements from "./CommandFormElement";
 import { DatasetLoadForm } from "./DatasetLoadForm";
@@ -17,7 +17,7 @@ export function CompareForm(prop: {
 		<>
 			<fieldset className="border border-gray-200 p-3">
 				<legend>compare</legend>
-				<MetadataSettingsProvider>
+				<DatasetSettingsProvider>
 					<CommandFormElements
 						handleTypeSelect={prop.handleTypeSelect}
 						name={prop.name}
@@ -32,7 +32,7 @@ export function CompareForm(prop: {
 							elements={imageOption.elements}
 						/>
 					)}
-				</MetadataSettingsProvider>
+				</DatasetSettingsProvider>
 			</fieldset>
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
