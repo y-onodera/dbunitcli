@@ -1,6 +1,5 @@
 package yo.dbunitcli.resource;
 
-
 import yo.dbunitcli.Strings;
 
 import java.io.*;
@@ -22,10 +21,9 @@ public record FileResources() {
     }
 
     public static String readClasspathResource(final String aURL, final Charset aCharset) {
-        try (final InputStream inputStream = FileResources.class.getClassLoader().getResourceAsStream(aURL)) {
-            return new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream), aCharset))
-                    .lines()
-                    .collect(Collectors.joining(System.lineSeparator()));
+        try (final InputStream inputStream = FileResources.class.getClassLoader().getResourceAsStream(aURL);
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream), aCharset))) {
+            return reader.lines().collect(Collectors.joining(System.lineSeparator()));
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
