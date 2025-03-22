@@ -58,23 +58,74 @@
 
 ## コーディング規約
 
-- Biome の標準的なルールに準拠
+### 1. Biomeの設定
+
+- Biomeの自動フォーマットを有効化
+  - ファイル保存時に自動フォーマット
+  - コード入力時にリアルタイムフォーマット
+- フォーマットルール
+  ```json
+  {
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineWidth": 100
+    },
+    "linter": {
+      "enabled": true,
+      "rules": {
+        "recommended": true,
+        "correctness": {
+          "noUnusedVariables": "error"
+        },
+        "suspicious": {
+          "noExplicitAny": "error"
+        },
+        "style": {
+          "useConst": "error",
+          "noNonNullAssertion": "error"
+        }
+      }
+    },
+    "javascript": {
+      "formatter": {
+        "quoteStyle": "single",
+        "trailingComma": "es5",
+        "semicolons": "always"
+      }
+    }
+  }
+  ```
+
+### 2. コードスタイル
+
 - 関数やコンポーネントには適切なコメントを含める
 - 型のインポートには `import type` を使用
+- インデントは2スペースを使用
+- 行の最大長は100文字
+- シングルクォートを使用
+- 文末のセミコロンは必須
 
 ## コンポーネント設計と実装の規約
 
 ### 1. ディレクトリ構造とファイル配置
 
 - TypeScriptのファイルは `src` に配置
-- UIコンポーネントは `src/components` ディレクトリに配置
-  - UI要素コンポーネントは `src/components/element` に配置
-  - フォーム関連コンポーネントは `src/components/form` に配置
-  - サイドバー関連コンポーネントは `src/components/sidebar` に配置
-- バックエンドからfetchするデータはuseContextで管理することとし、`src/context` ディレクトリに配置
-- useContextで管理するモデルクラスは `src/model` ディレクトリに配置
+  - 機能別コンポーネントは `src/app` ディレクトリに配置
+    - フォーム関連コンポーネントは `src/app/form` に配置
+    - フッター関連コンポーネントは `src/app/footer` に配置
+    - メインレイアウト関連コンポーネントは `src/app/main` に配置
+    - サイドバー関連コンポーネントは `src/app/sidebar` に配置
+    - 設定ダイアログ関連コンポーネントは `src/app/settings` に配置
+    - スタートアップ関連コンポーネントは `src/app/startup` に配置
+  - 共通UIコンポーネントは `src/components` ディレクトリに配置
+    - 共通ダイアログコンポーネントは `src/components/dialog` に配置
+    - 共通UI要素（ボタン、入力フィールドなど）は `src/components/element` に配置
+  - バックエンドからfetchするデータはuseContextで管理することとし、`src/context` ディレクトリに配置
+  - useContextで管理するモデルクラスは `src/model` ディレクトリに配置
+  - ユーティリティ関数は `src/utils` に配置
 - rustのファイルは `src-tauri` に配置
-- ユーティリティ関数は `src/utils` に配置
 
 ### 2. テストに関する規約
 
