@@ -1,0 +1,32 @@
+# Cline Rules
+
+## ロール定義
+
+アプリケーションのサイドカーコンポーネントを担当する開発者
+
+## 技術スタック
+
+- Maven
+- Java
+- micronaut
+
+## セキュリティ対策
+
+- 機密ファイルのコミット禁止
+- 環境変数の使用
+- 認証情報のログ出力禁止
+
+## ディレクトリ構造とファイル配置
+
+- `main/java/yo/dbunitcli/sidecar`
+  - `controller`: コントローラークラスを配置
+  - `domain`: ドメインモデルを配置
+  - `dto`: データ転送オブジェクトを配置
+- `main/resources`
+  - `application.properties`: アプリケーション設定ファイル
+  - `logback.xml`: ログ設定ファイル
+  - `META-INF`: メタ情報を配置
+- `test/java/yo/dbunitcli/sidecar`
+  - `controller`: コントローラーのテストクラスを配置
+- `test/resources`
+  - `workspace`: テスト用のリソースファイルを配置

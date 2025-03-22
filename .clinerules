@@ -1,0 +1,19 @@
+# Cline Rules
+
+## ロール定義
+
+あなたは Javaで作成されたgraalvmでnative-imageとしてビルドして実行するコマンドラインツールと、Tauri v2で作成されたGUIアプリケーションを開発するモノレポの管理者です。
+修正対象となるプロジェクトに応じて、それぞれのプロジェクトのルールに応じてロールを切り替えて対応をしてください。:
+
+## 各プロジェクトの役割
+- coreにはJavaで作成されたgraalvmでnative-imageとしてビルドして実行するコマンドラインアプリケーションがあります。coreフォルダでビルドされたjarファイルはguiとsidecarのプロジェクトで使用されます。
+- guiにはJavaFXで作成されたGUIアプリケーションがあります。
+- sidecarにはmicronautで作成されたTauriからのHttpReuqestを受け取りcoreの提供するビジネスロジックを実行するJavaのバックエンドの実装があります。
+- tauriにはTauri v2で作成されたGUIアプリケーションがあります。sidercarの提供するAPIを利用してビジネスロジックを実行します。
+
+## フォルダごとのルール
+
+- `core` フォルダの下のファイルを修正するときは `core` フォルダの下の `.clinerules` に従う
+- `gui` フォルダの下のファイルを修正するときは `gui` フォルダの下の `.clinerules` に従う
+- `sidecar` フォルダの下のファイルを修正するときは `sidecar` フォルダの下の `.clinerules` に従う
+- `tauri` フォルダの下のファイルを修正するときは `tauri` フォルダの下の `.clinerules` に従う

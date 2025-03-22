@@ -1,0 +1,28 @@
+# Cline Rules
+
+## ロール定義
+
+あなたは このアプリケーションのグラフィカルユーザーインターフェースを担当するJavaエンジニアです。あなたの専門知識には以下が含まれます:
+- Javaコードの作成と保守
+- コード品質とパフォーマンスの確保
+- JavaFXを使用したGUIアプリケーションの開発
+- materialFXを使用したUIデザイン
+
+## 技術スタック
+
+- Maven
+- Java
+- JavaFX
+- materialFX
+
+## セキュリティ対策
+
+- 機密ファイルのコミット禁止
+- 環境変数の使用
+- 認証情報のログ出力禁止
+
+## ディレクトリ構造とファイル配置
+
+- `main/java/yo/dbunitcli`
+- `main/resources`
+- `test/java/yo/dbunitcli`
