@@ -1,6 +1,10 @@
 import { isAbsolute, sep } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { type Dispatch, type SetStateAction, useState } from "react";
+import { ButtonWithIcon } from "../../components/element/Button";
+import { ExpandButton } from "../../components/element/ButtonIcon";
+import { DirIcon, EditIcon, FileIcon } from "../../components/element/Icon";
+import { CheckBox, ControllTextBox, InputLabel, SelectBox } from "../../components/element/Input";
 import { loadDatasetSettings, useSetDatasetSettings } from "../../context/DatasetSettingsProvider";
 import { useEnviroment } from "../../context/EnviromentProvider";
 import { useResourcesSettings, useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
@@ -9,12 +13,8 @@ import type { Attribute, CommandParam, CommandParams } from "../../model/Command
 import type { DatasetSettings } from "../../model/DatasetSettings";
 import type { WorkspaceContext } from "../../model/WorkspaceResources";
 import type { XlsxSchema } from "../../model/XlsxSchema";
-import { ButtonWithIcon } from "../element/Button";
-import { ExpandButton } from "../element/ButtonIcon";
-import { DirIcon, EditIcon, FileIcon } from "../element/Icon";
-import { CheckBox, ControllTextBox, InputLabel, SelectBox } from "../element/Input";
-import SettingsDaialog from "./settings/DatasetSettingsDialog";
-import XlsxSchemaDialog from "./settings/XlsxSchemaDialog";
+import SettingsDaialog from "../settings/DatasetSettingsDialog";
+import XlsxSchemaDialog from "../settings/XlsxSchemaDialog";
 
 type Prop = {
 	prefix: string;

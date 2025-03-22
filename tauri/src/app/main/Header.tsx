@@ -1,5 +1,4 @@
-import "../App.css";
-import { useSelectParameter } from "../context/SelectParameterProvider";
+import { useSelectParameter } from "../../context/SelectParameterProvider";
 
 export default function Header() {
 	const selected = useSelectParameter();

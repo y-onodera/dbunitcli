@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { CopyButton, DeleteButton, EditButton, FixButton } from "../../components/element/ButtonIcon";
+import { ControllTextBox } from "../../components/element/Input";
 import { type EditName, useEditName, useSetEditName } from "../../context/EditNameProvider";
 import { useCopyParameter, useDeleteParameter, useRenameParameter } from "../../context/WorkspaceResourcesProvider";
-import { CopyButton, DeleteButton, EditButton, FixButton } from "../element/ButtonIcon";
-import { ControllTextBox } from "../element/Input";
 
 type MenuEditProp = {
 	name: string;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AddButton, CopyButton, DeleteButton, EditButton } from "../../element/ButtonIcon";
+import { AddButton, CopyButton, DeleteButton, EditButton } from "../element/ButtonIcon";
 
 interface SttingTableProps<T> {
     caption: string;

@@ -1,7 +1,7 @@
 import { core } from "@tauri-apps/api";
 import { useState } from "react";
-import { type Running, execParameter, saveParameter, useSelectParameter } from "../../../context/SelectParameterProvider";
-import { BlueButton, WhiteButton } from "../../element/Button";
+import { BlueButton, WhiteButton } from "../../components/element/Button";
+import { type Running, execParameter, saveParameter, useSelectParameter } from "../../context/SelectParameterProvider";
 import ResultDialog from "./ResultDialog";
 
 export default function Footer(prop: {

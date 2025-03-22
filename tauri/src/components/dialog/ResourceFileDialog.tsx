@@ -1,5 +1,5 @@
-import { BlueButton, WhiteButton } from "../../element/Button";
-import { ControllTextBox, InputLabel } from "../../element/Input";
+import { BlueButton, WhiteButton } from "../element/Button";
+import { ControllTextBox, InputLabel } from "../element/Input";
 
 interface DialogProps {
     children: React.ReactNode;

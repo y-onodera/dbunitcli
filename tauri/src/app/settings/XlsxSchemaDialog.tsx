@@ -1,8 +1,8 @@
-import { useEnviroment } from "../../../context/EnviromentProvider";
-import { saveXlsxSchema, useSetXlsxSchema, useXlsxSchema } from "../../../context/XlsxSchemaProvider";
-import { type CellSetting, type RowSetting, XlsxSchema, createCellSetting, createRowSetting } from "../../../model/XlsxSchema";
-import ResourceFileDialog from "./ResourceFileDialog";
-import SettingTable from "./SettingTable";
+import ResourceFileDialog from "../../components/dialog/ResourceFileDialog";
+import SettingTable from "../../components/dialog/SettingTable";
+import { useEnviroment } from "../../context/EnviromentProvider";
+import { saveXlsxSchema, useSetXlsxSchema, useXlsxSchema } from "../../context/XlsxSchemaProvider";
+import { type CellSetting, type RowSetting, XlsxSchema, createCellSetting, createRowSetting } from "../../model/XlsxSchema";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 

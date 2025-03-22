@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { LinkButton } from "../../components/element/Button";
+import { AddButton, ButtonIcon, SettingButton } from "../../components/element/ButtonIcon";
+import { ExpandIcon } from "../../components/element/Icon";
 import { type EditName, useSetEditName } from "../../context/EditNameProvider";
 import { useLoadSelectParameter } from "../../context/SelectParameterProvider";
 import { useAddParameter, useParameterList } from "../../context/WorkspaceResourcesProvider";
-import { LinkButton } from "../element/Button";
-import { AddButton, ButtonIcon, SettingButton } from "../element/ButtonIcon";
-import { ExpandIcon } from "../element/Icon";
+
 
 type NamedParameterProp = {
 	command: string;

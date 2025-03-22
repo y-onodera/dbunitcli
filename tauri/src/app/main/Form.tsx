@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import CommandForm from "./form/CommandForm";
-import Footer from "./form/footer/Footer";
+import Footer from "../footer/Footer";
+import CommandForm from "../form/CommandForm";
 
 const formid = "commandForm";
 export default function Form() {

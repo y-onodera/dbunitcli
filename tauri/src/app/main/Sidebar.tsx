@@ -1,7 +1,6 @@
-import "../App.css";
 import { useRef, useState } from "react";
-import NameEditMenu from "./sidebar/NameEditMenu";
-import NamedParameters from "./sidebar/NamedParameters";
+import NameEditMenu from "../sidebar/NameEditMenu";
+import NamedParameters from "../sidebar/NamedParameters";
 
 interface SidebarProps {
 	setSidebarWidth: (width: number) => void;

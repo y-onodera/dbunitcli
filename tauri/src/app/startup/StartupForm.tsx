@@ -1,11 +1,10 @@
 import { open } from '@tauri-apps/plugin-dialog';
 import type React from 'react';
 import { type Dispatch, type SetStateAction, useState } from 'react';
-import { useWorkspaceContext, useWorkspaceUpdate } from '../context/WorkspaceResourcesProvider';
-import { BlueButton, ButtonWithIcon } from './element/Button';
-import { DirIcon } from './element/Icon';
-import { ControllTextBox, InputLabel } from './element/Input';
-import "../styles.css";
+import { BlueButton, ButtonWithIcon } from '../../components/element/Button';
+import { DirIcon } from '../../components/element/Icon';
+import { ControllTextBox, InputLabel } from '../../components/element/Input';
+import { useWorkspaceContext, useWorkspaceUpdate } from '../../context/WorkspaceResourcesProvider';
 
 const StartupForm: React.FC<{ onSelect: () => void }> = ({ onSelect }) => {
     const context = useWorkspaceContext();

@@ -1,10 +1,9 @@
 import { useState } from "react";
-import EditNmaeProvider from "../context/EditNameProvider";
-import SelectParameterProvider from "../context/SelectParameterProvider";
+import EditNmaeProvider from "../../context/EditNameProvider";
+import SelectParameterProvider from "../../context/SelectParameterProvider";
 import Form from "./Form";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
-import "../styles.css";
 
 export default function Layout() {
 	const [sidebarWidth, setSidebarWidth] = useState(200);

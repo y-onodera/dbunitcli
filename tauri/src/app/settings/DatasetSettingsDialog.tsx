@@ -1,10 +1,10 @@
-import { saveDatasetSettings, useDatasetSettings, useSetDatasetSettings } from "../../../context/DatasetSettingsProvider";
-import { useEnviroment } from "../../../context/EnviromentProvider";
-import type { DatasetSetting } from "../../../model/DatasetSettings";
-import { DatasetSettings, newDatasetSetting } from "../../../model/DatasetSettings";
-import SettingDialog from "./DatasetSettingDialog";
-import ResourceFileDialog from "./ResourceFileDialog";
-import SettingTable from "./SettingTable";
+import ResourceFileDialog from "../../components/dialog/ResourceFileDialog";
+import SettingTable from "../../components/dialog/SettingTable";
+import { saveDatasetSettings, useDatasetSettings, useSetDatasetSettings } from "../../context/DatasetSettingsProvider";
+import { useEnviroment } from "../../context/EnviromentProvider";
+import type { DatasetSetting } from "../../model/DatasetSettings";
+import { DatasetSettings, newDatasetSetting } from "../../model/DatasetSettings";
+import DatasetSettingDaialog from "./DatasetSettingDialog";
 
 export default function DatasetSettingsDialog(props: {
 	fileName: string;
@@ -37,7 +37,7 @@ export default function DatasetSettingsDialog(props: {
 				updateSettings={(current, before, after) => current.map((setting) => (setting === before ? after : setting))}
 				deleteSettings={(current, settings) => current.filter((setting) => setting !== settings)}
 				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={SettingDialog}
+				SettingDialogComponent={DatasetSettingDaialog}
 				newSetting={newDatasetSetting}
 				getKey={(setting) => setting.displayName()}
 			/>
@@ -52,7 +52,7 @@ export default function DatasetSettingsDialog(props: {
 				updateSettings={(current, before, after) => current.map((setting) => (setting === before ? after : setting))}
 				deleteSettings={(current, settings) => current.filter((setting) => setting !== settings)}
 				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={SettingDialog}
+				SettingDialogComponent={DatasetSettingDaialog}
 				newSetting={newDatasetSetting}
 				getKey={(setting) => setting.displayName()}
 			/>
