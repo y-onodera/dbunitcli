@@ -1,7 +1,9 @@
+import "./App.css";
+import "./styles.css";
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
-import Layout from "./components/Layout";
-import StartupForm from "./components/StartupForm";
+import Layout from "./app/main/Layout";
+import StartupForm from "./app/startup/StartupForm";
 import EnviromentProvider from "./context/EnviromentProvider";
 import WorkspaceResourcesProvider from "./context/WorkspaceResourcesProvider";
 
