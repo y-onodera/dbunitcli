@@ -1,57 +1,90 @@
-import type { ReactNode } from "react";
-import { Button } from "./Button";
-import { AddIcon, CopyIcon, DeleteIcon, EditIcon, ExpandIcon, FixIcon, RemoveIcon, SettingIcon } from "./Icon";
+import type { ReactNode } from 'react';
+import { Button } from './Button';
+import {
+    AddIcon,
+    CopyIcon,
+    DeleteIcon,
+    DirIcon,
+    EditIcon,
+    ExpandIcon,
+    FileIcon,
+    FixIcon,
+    RemoveIcon,
+    SettingIcon,
+} from './Icon';
 
-export function EditButton(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
+export type IconButtonProps = {
+    title?: string;
+    handleClick: React.MouseEventHandler<HTMLButtonElement>;
+};
+
+export type IconType = 'edit' | 'delete' | 'copy' | 'add' | 'remove' | 'setting' | 'fix' | 'file' | 'dir';
+
+const IconComponents: Record<IconType, React.FC<{ title: string }>> = {
+    edit: EditIcon,
+    delete: DeleteIcon,
+    copy: CopyIcon,
+    add: AddIcon,
+    remove: RemoveIcon,
+    setting: SettingIcon,
+    fix: FixIcon,
+    file: FileIcon,
+    dir: DirIcon,
+};
+
+export function IconButton({ iconType, title, handleClick }: IconButtonProps & { iconType: IconType }) {
+    const defaultTitle = iconType;
+    const finalTitle = title === undefined ? defaultTitle : title;
+    const IconComponent = IconComponents[iconType];
+
     return (
-        <ButtonIcon title={props.title === undefined ? "edit" : props.title} handleClick={props.handleClick}>
-            <EditIcon title={props.title ? props.title : "edit"} />
+        <ButtonIcon title={finalTitle} handleClick={handleClick}>
+            <IconComponent title={finalTitle} />
         </ButtonIcon>
     );
 }
-export function DeleteButton(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
-    return (
-        <ButtonIcon title={props.title === undefined ? "delete" : props.title} handleClick={props.handleClick}>
-            <DeleteIcon title={props.title ? props.title : "delete"} />
-        </ButtonIcon>
-    );
+
+export function DirectoryButton(props: IconButtonProps) {
+    return <IconButton iconType="dir" {...props} />;
 }
-export function CopyButton(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
-    return (
-        <ButtonIcon title={props.title === undefined ? "copy" : props.title} handleClick={props.handleClick}>
-            <CopyIcon title={props.title ? props.title : "copy"} />
-        </ButtonIcon>
-    );
+
+export function FileButton(props: IconButtonProps) {
+    return <IconButton iconType="file" {...props} />;
 }
-export function AddButton(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
-    return (
-        <ButtonIcon title={props.title === undefined ? "add" : props.title} handleClick={props.handleClick}>
-            <AddIcon title={props.title ? props.title : "add"} />
-        </ButtonIcon>
-    );
+
+export function EditButton(props: IconButtonProps) {
+    return <IconButton iconType="edit" {...props} />;
 }
-export function RemoveButton(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
-    return (
-        <ButtonIcon title={props.title === undefined ? "remove" : props.title} handleClick={props.handleClick}>
-            <RemoveIcon title={props.title ? props.title : "remove"} />
-        </ButtonIcon>
-    );
+
+export function DeleteButton(props: IconButtonProps) {
+    return <IconButton iconType="delete" {...props} />;
 }
-export function SettingButton(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
-    return (
-        <ButtonIcon title={props.title === undefined ? "setting" : props.title} handleClick={props.handleClick}>
-            <SettingIcon title={props.title ? props.title : "setting"} />
-        </ButtonIcon>
-    );
+
+export function CopyButton(props: IconButtonProps) {
+    return <IconButton iconType="copy" {...props} />;
 }
-export function FixButton(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
-    return (
-        <ButtonIcon title={props.title === undefined ? "fix" : props.title} handleClick={props.handleClick}>
-            <FixIcon title={props.title ? props.title : "fix"} />
-        </ButtonIcon>
-    );
+
+export function AddButton(props: IconButtonProps) {
+    return <IconButton iconType="add" {...props} />;
 }
-export function ExpandButton(prop: { toggleOptional: () => void, showOptional: boolean, caption: string | undefined }) {
+
+export function RemoveButton(props: IconButtonProps) {
+    return <IconButton iconType="remove" {...props} />;
+}
+
+export function SettingButton(props: IconButtonProps) {
+    return <IconButton iconType="setting" {...props} />;
+}
+
+export function FixButton(props: IconButtonProps) {
+    return <IconButton iconType="fix" {...props} />;
+}
+
+export function ExpandButton(prop: {
+    toggleOptional: () => void;
+    showOptional: boolean;
+    caption: string | undefined;
+}) {
     return (
         <ButtonIcon key={prop.caption} title="" handleClick={prop.toggleOptional}>
             <ExpandIcon close={!prop.showOptional} />
@@ -61,7 +94,12 @@ export function ExpandButton(prop: { toggleOptional: () => void, showOptional: b
         </ButtonIcon>
     );
 }
-export function ButtonIcon(props: { title?: string, handleClick: React.MouseEventHandler<HTMLButtonElement>, children: ReactNode }) {
+
+export function ButtonIcon(props: {
+    title?: string;
+    handleClick: React.MouseEventHandler<HTMLButtonElement>;
+    children: ReactNode;
+}) {
     return (
         <Button
             buttonstyle="flex items-center group p-1"
