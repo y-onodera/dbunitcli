@@ -51,6 +51,15 @@ public class ResourceFile {
         Files.writeString(saveTo, contents, StandardCharsets.UTF_8);
     }
 
+    public void delete(final String name) throws IOException {
+        final Path filePath = new File(this.parentDir, name).toPath();
+        if (!filePath.toFile().exists()) {
+            throw new IOException("File not found: " + name);
+        }
+        Files.delete(filePath);
+        this.files.removeIf(path -> path.getFileName().toString().equals(name));
+    }
+
     private Path prepareFileForUpdate(final String name) throws IOException {
         if (!this.parentDir.exists()) {
             Files.createDirectories(this.parentDir.toPath());

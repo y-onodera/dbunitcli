@@ -28,15 +28,17 @@ public class Application {
 
     @Context
     public Workspace load(final ApplicationContext context) {
-        System.setProperty(FileResources.PROPERTY_WORKSPACE, context.getEnvironment()
-                .get(FileResources.PROPERTY_WORKSPACE, String.class, "."));
-        context.getEnvironment()
-                .get(FileResources.PROPERTY_DATASET_BASE, String.class)
-                .ifPresent(it -> System.setProperty(FileResources.PROPERTY_DATASET_BASE, it));
-        context.getEnvironment()
-                .get(FileResources.PROPERTY_RESULT_BASE, String.class)
-                .ifPresent(it -> System.setProperty(FileResources.PROPERTY_RESULT_BASE, it));
-        return Workspace.builder().setPath(context.getEnvironment()
-                .get(FileResources.PROPERTY_WORKSPACE, String.class, ".")).build();
+        final Workspace workspace = Workspace.builder().build();
+        workspace.contextReload(
+                context.getEnvironment()
+                        .get(FileResources.PROPERTY_WORKSPACE, String.class)
+                        .orElse(workspace.path().toString()),
+                context.getEnvironment()
+                        .get(FileResources.PROPERTY_DATASET_BASE, String.class)
+                        .orElse(null),
+                context.getEnvironment()
+                        .get(FileResources.PROPERTY_RESULT_BASE, String.class)
+                        .orElse(null));
+        return workspace;
     }
 }

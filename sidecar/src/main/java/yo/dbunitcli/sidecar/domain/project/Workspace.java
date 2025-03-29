@@ -22,10 +22,11 @@ public class Workspace {
         return new Builder();
     }
 
-    public Workspace(final Path path, final Options options, final Resources resources) {
+    private Workspace(final Path path, final Options options, final Resources resources) {
         this.path = path;
         this.options = options;
         this.resources = resources;
+        System.setProperty(FileResources.PROPERTY_WORKSPACE, this.path().toString());
     }
 
     public void contextReload(final String workspace, final String datasetBase, final String resultBase) {

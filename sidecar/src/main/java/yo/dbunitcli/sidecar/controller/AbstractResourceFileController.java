@@ -46,9 +46,25 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
     }
 
     @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
-    public String save(@Body final DTO body) throws IOException {
-        this.saveJson(body.getName(), JsonMapper.createDefault().writeValueAsString(body.getInput()));
-        return "success";
+    public HttpResponse<String> save(@Body final DTO body) {
+        try {
+            this.saveJson(body.getName(), JsonMapper.createDefault().writeValueAsString(body.getInput()));
+            return HttpResponse.ok("success");
+        } catch (final IOException e) {
+            LOGGER.error("Failed to save file: {}", body, e);
+            return HttpResponse.serverError("Failed to save file: " + e.getMessage());
+        }
+    }
+
+    @Post(uri = "delete", consumes = MediaType.TEXT_PLAIN)
+    public HttpResponse<String> delete(@Body final String name) {
+        try {
+            this.getResourceFile().delete(name);
+            return HttpResponse.ok("success");
+        } catch (final IOException e) {
+            LOGGER.error("Failed to delete file: {}", name, e);
+            return HttpResponse.serverError("Failed to delete file: " + e.getMessage());
+        }
     }
 
     @Error
