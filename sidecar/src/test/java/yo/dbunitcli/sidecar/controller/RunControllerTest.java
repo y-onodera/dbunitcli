@@ -12,6 +12,11 @@ import org.junit.jupiter.api.Test;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.regex.Pattern;
+
 @MicronautTest
 @Property(name = FileResources.PROPERTY_WORKSPACE, value = "src/test/resources/workspace/sample")
 class RunControllerTest {
@@ -26,10 +31,22 @@ class RunControllerTest {
     Workspace workspace;
 
     @Test
-    public void testReset() {
+    public void testReset() throws IOException {
         final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/run/reset"));
         System.out.println(jsonResponse);
-        Assertions.assertEquals("{\"prefix\":\"\",\"elements\":[{\"name\":\"scriptType\",\"attribute\":{\"type\":\"ENUM\",\"selectOption\":[\"cmd\",\"bat\",\"sql\",\"ant\"],\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"sql\"}],\"srcData\":{\"prefix\":\"src\",\"elements\":[{\"name\":\"src\",\"attribute\":{\"type\":\"FILE_OR_DIR\",\"required\":true,\"defaultPath\":\"DATASET\"},\"value\":\"\"},{\"name\":\"recursive\",\"attribute\":{\"type\":\"FLG\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"false\"},{\"name\":\"regInclude\",\"attribute\":{\"type\":\"TEXT\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"\"},{\"name\":\"regExclude\",\"attribute\":{\"type\":\"TEXT\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"\"},{\"name\":\"setting\",\"attribute\":{\"type\":\"FILE\",\"required\":false,\"defaultPath\":\"SETTING\"},\"value\":\"\"},{\"name\":\"settingEncoding\",\"attribute\":{\"type\":\"TEXT\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"UTF-8\"},{\"name\":\"regTableInclude\",\"attribute\":{\"type\":\"TEXT\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"\"},{\"name\":\"regTableExclude\",\"attribute\":{\"type\":\"TEXT\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"\"}]},\"templateOption\":{\"prefix\":\"template\",\"elements\":[{\"name\":\"encoding\",\"attribute\":{\"type\":\"TEXT\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"UTF-8\"},{\"name\":\"templateGroup\",\"attribute\":{\"type\":\"FILE\",\"required\":false,\"defaultPath\":\"TEMPLATE\"},\"value\":\"\"},{\"name\":\"templateParameterAttribute\",\"attribute\":{\"type\":\"TEXT\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"param\"},{\"name\":\"templateVarStart\",\"attribute\":{\"type\":\"TEXT\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"$\"},{\"name\":\"templateVarStop\",\"attribute\":{\"type\":\"TEXT\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"$\"}]},\"jdbcOption\":{\"prefix\":\"jdbc\",\"elements\":[{\"name\":\"jdbcProperties\",\"attribute\":{\"type\":\"FILE\",\"required\":false,\"defaultPath\":\"JDBC\"},\"value\":\"\"},{\"name\":\"jdbcUrl\",\"attribute\":{\"type\":\"TEXT\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"\"},{\"name\":\"jdbcUser\",\"attribute\":{\"type\":\"TEXT\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"\"},{\"name\":\"jdbcPass\",\"attribute\":{\"type\":\"TEXT\",\"required\":false,\"defaultPath\":\"WORKSPACE\"},\"value\":\"\"}]}}", jsonResponse);
+
+        final String expectedJson = Files.readString(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/run-reset-response.json"));
+        // 改行やスペースを無視して比較するために正規化
+        final String normalizedExpected = this.normalizeJson(expectedJson);
+        final String normalizedActual = this.normalizeJson(jsonResponse);
+        Assertions.assertEquals(normalizedExpected, normalizedActual);
     }
 
+    /**
+     * JSONの空白や改行を取り除いて正規化するヘルパーメソッド
+     */
+    private String normalizeJson(final String json) {
+        // 空白、タブ、改行を削除
+        return Pattern.compile("\\s+").matcher(json).replaceAll("");
+    }
 }

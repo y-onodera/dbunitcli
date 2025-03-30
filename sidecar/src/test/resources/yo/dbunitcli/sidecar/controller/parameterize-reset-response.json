@@ -1,0 +1,141 @@
+{
+  "prefix": "",
+  "elements": [
+    {
+      "name": "unit",
+      "attribute": {
+        "type": "ENUM",
+        "selectOption": [
+          "record",
+          "table",
+          "dataset"
+        ],
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "record"
+    },
+    {
+      "name": "parameterize",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "true"
+    },
+    {
+      "name": "ignoreFail",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "false"
+    },
+    {
+      "name": "cmd",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    {
+      "name": "cmdParam",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    {
+      "name": "template",
+      "attribute": {
+        "type": "FILE",
+        "required": true,
+        "defaultPath": "TEMPLATE"
+      },
+      "value": ""
+    }
+  ],
+  "paramData": {
+    "prefix": "param",
+    "elements": [
+      {
+        "name": "srcType",
+        "attribute": {
+          "type": "ENUM",
+          "selectOption": [
+            "none",
+            "table",
+            "sql",
+            "file",
+            "dir",
+            "csv",
+            "csvq",
+            "reg",
+            "fixed",
+            "xls",
+            "xlsx"
+          ],
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": "none"
+      }
+    ]
+  },
+  "templateOption": {
+    "prefix": "template",
+    "elements": [
+      {
+        "name": "encoding",
+        "attribute": {
+          "type": "TEXT",
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": "UTF-8"
+      },
+      {
+        "name": "templateGroup",
+        "attribute": {
+          "type": "FILE",
+          "required": false,
+          "defaultPath": "TEMPLATE"
+        },
+        "value": ""
+      },
+      {
+        "name": "templateParameterAttribute",
+        "attribute": {
+          "type": "TEXT",
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": "param"
+      },
+      {
+        "name": "templateVarStart",
+        "attribute": {
+          "type": "TEXT",
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": "$"
+      },
+      {
+        "name": "templateVarStop",
+        "attribute": {
+          "type": "TEXT",
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": "$"
+      }
+    ]
+  }
+}
