@@ -75,3 +75,20 @@ export async function saveXlsxSchema(apiUrl: string, name: string, input: XlsxSc
             return "failed";
         });
 }
+
+export async function deleteXlsxSchema(apiUrl: string, name: string): Promise<string> {
+    const fetchParams = {
+        endpoint: `${apiUrl}xlsx-schema/delete`,
+        options: {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: name,
+        },
+    };
+    return await fetchData(fetchParams)
+        .then((response) => response.text())
+        .catch((ex) => {
+            handleFetchError(ex, fetchParams);
+            return "failed";
+        });
+}

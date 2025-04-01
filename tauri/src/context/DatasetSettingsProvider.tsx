@@ -75,3 +75,20 @@ export async function saveDatasetSettings(apiUrl: string, name: string, input: D
             return "failed";
         });
 }
+
+export async function deleteDatasetSettings(apiUrl: string, name: string): Promise<string> {
+    const fetchParams = {
+        endpoint: `${apiUrl}metadata/delete`,
+        options: {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: name,
+        },
+    };
+    return await fetchData(fetchParams)
+        .then((response) => response.text())
+        .catch((ex) => {
+            handleFetchError(ex, fetchParams);
+            return "failed";
+        });
+}
