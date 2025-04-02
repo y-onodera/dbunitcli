@@ -12,6 +12,7 @@ import io.micronaut.http.hateoas.JsonError;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.CommandDto;
 import yo.dbunitcli.application.CommandLineOption;
@@ -40,6 +41,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     private static String[] requestToArgs(final Map<String, String> input) {
         return input.entrySet()
                 .stream()
+                .filter(entry -> Strings.isNotEmpty(entry.getValue()))
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .toArray(String[]::new);
     }
