@@ -5,31 +5,26 @@ import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.util.List;
 
-public record Datasource() {
-
-    private static void create(final File file, final String contents) throws IOException {
-        if (!file.exists()) {
-            final File parent = file.getParentFile();
-            if (!parent.exists()) {
-                if (!parent.mkdirs()) {
-                    throw new RuntimeException("Failed to create directory: " + parent.getAbsolutePath());
-                }
-            }
-            Files.createFile(file.toPath());
-        }
-        Files.writeString(file.toPath(), contents, StandardCharsets.UTF_8);
+public record Datasource(DataSourceType type, ResourceFile resourceFile) {
+    public Datasource(final DataSourceType type) {
+        this(type, new ResourceFile(new File(FileResources.datasetDir(), type.toString())));
     }
 
-    public void save(final DataSourceType type, final String fileName, final String contents) throws IOException {
-        final File file = new File(fileName);
-        if (file.isAbsolute()) {
-            create(file, contents);
-        } else {
-            create(new File(new File(FileResources.datasetDir(), type.toString()), fileName), contents);
-        }
+    public void save(final String fileName, final String contents) throws IOException {
+        this.resourceFile.update(fileName, contents);
     }
 
+    public List<String> list() {
+        return this.resourceFile.list();
+    }
+
+    public String read(final String fileName) {
+        return this.resourceFile.read(fileName).orElse("");
+    }
+
+    public void delete(final String fileName) throws IOException {
+        this.resourceFile.delete(fileName);
+    }
 }

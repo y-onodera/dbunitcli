@@ -22,95 +22,89 @@ class ResourceFileTest {
     private File parentDir;
 
     @BeforeEach
-    void setUp() {
-        parentDir = tempDir.toFile();
-        resourceFile = new ResourceFile(parentDir);
+    public void setUp() {
+        this.parentDir = this.tempDir.toFile();
+        this.resourceFile = new ResourceFile(this.parentDir);
     }
 
     @Test
-    void list_空のディレクトリの場合は空のリストを返す() {
-        List<String> files = resourceFile.list();
+    public void list_空のディレクトリの場合は空のリストを返す() {
+        final List<String> files = this.resourceFile.list();
         assertTrue(files.isEmpty());
     }
 
     @Test
-    void list_ファイルが存在する場合はそのリストを返す() throws IOException {
+    public void list_ファイルが存在する場合はそのリストを返す() throws IOException {
         // テストファイルを作成
-        createTestFile("test1.json", "{}");
-        createTestFile("test2.json", "{}");
+        this.createTestFile("test1.json", "{}");
+        this.createTestFile("test2.json", "{}");
 
         // 新しいResourceFileインスタンスを作成（ファイルをスキャンするため）
-        resourceFile = new ResourceFile(parentDir);
+        this.resourceFile = new ResourceFile(this.parentDir);
 
-        List<String> files = resourceFile.list();
+        final List<String> files = this.resourceFile.list();
         assertEquals(2, files.size());
         assertTrue(files.contains("test1.json"));
         assertTrue(files.contains("test2.json"));
     }
 
     @Test
-    void read_存在しないファイルの場合は空のJSONを返す() {
-        String content = resourceFile.read("nonexistent.json");
-        assertEquals("{}", content);
-    }
-
-    @Test
-    void read_ファイルが存在する場合はその内容を返す() throws IOException {
-        String expectedContent = "{\"key\": \"value\"}";
-        createTestFile("test.json", expectedContent);
+    public void read_ファイルが存在する場合はその内容を返す() throws IOException {
+        final String expectedContent = "{\"key\": \"value\"}";
+        this.createTestFile("test.json", expectedContent);
 
         // 新しいResourceFileインスタンスを作成
-        resourceFile = new ResourceFile(parentDir);
+        this.resourceFile = new ResourceFile(this.parentDir);
 
-        String content = resourceFile.read("test.json");
+        final String content = this.resourceFile.read("test.json").get();
         assertEquals(expectedContent, content);
     }
 
     @Test
-    void update_新規ファイルの場合はファイルを作成する() throws IOException {
-        String content = "{\"key\": \"value\"}";
-        resourceFile.update("new.json", content);
+    public void update_新規ファイルの場合はファイルを作成する() throws IOException {
+        final String content = "{\"key\": \"value\"}";
+        this.resourceFile.update("new.json", content);
 
-        Path filePath = tempDir.resolve("new.json");
+        final Path filePath = this.tempDir.resolve("new.json");
         assertTrue(Files.exists(filePath));
         assertEquals(content, Files.readString(filePath));
     }
 
     @Test
-    void update_既存ファイルの場合は上書きする() throws IOException {
-        String initialContent = "{\"key\": \"initial\"}";
-        String updatedContent = "{\"key\": \"updated\"}";
-        
-        createTestFile("test.json", initialContent);
-        resourceFile = new ResourceFile(parentDir);
-        
-        resourceFile.update("test.json", updatedContent);
+    public void update_既存ファイルの場合は上書きする() throws IOException {
+        final String initialContent = "{\"key\": \"initial\"}";
+        final String updatedContent = "{\"key\": \"updated\"}";
 
-        Path filePath = tempDir.resolve("test.json");
+        this.createTestFile("test.json", initialContent);
+        this.resourceFile = new ResourceFile(this.parentDir);
+
+        this.resourceFile.update("test.json", updatedContent);
+
+        final Path filePath = this.tempDir.resolve("test.json");
         assertEquals(updatedContent, Files.readString(filePath));
     }
 
     @Test
-    void delete_存在しないファイルの場合は例外をスローする() {
-        assertThrows(IOException.class, () -> 
-            resourceFile.delete("nonexistent.json")
+    public void delete_存在しないファイルの場合は例外をスローする() {
+        assertThrows(IOException.class, () ->
+                this.resourceFile.delete("nonexistent.json")
         );
     }
 
     @Test
-    void delete_ファイルが存在する場合は削除する() throws IOException {
-        createTestFile("test.json", "{}");
-        resourceFile = new ResourceFile(parentDir);
+    public void delete_ファイルが存在する場合は削除する() throws IOException {
+        this.createTestFile("test.json", "{}");
+        this.resourceFile = new ResourceFile(this.parentDir);
 
-        Path filePath = tempDir.resolve("test.json");
+        final Path filePath = this.tempDir.resolve("test.json");
         assertTrue(Files.exists(filePath));
 
-        resourceFile.delete("test.json");
+        this.resourceFile.delete("test.json");
         assertFalse(Files.exists(filePath));
     }
 
-    private void createTestFile(String filename, String content) throws IOException {
-        Path filePath = tempDir.resolve(filename);
+    private void createTestFile(final String filename, final String content) throws IOException {
+        final Path filePath = this.tempDir.resolve(filename);
         Files.write(filePath, content.getBytes(StandardCharsets.UTF_8));
     }
 }

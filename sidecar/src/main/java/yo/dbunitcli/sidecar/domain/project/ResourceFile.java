@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ResourceFile {
@@ -32,7 +33,7 @@ public class ResourceFile {
                 .toList();
     }
 
-    public String read(final String name) {
+    public Optional<String> read(final String name) {
         return this.files.stream()
                 .filter(it -> it.getFileName().toString().equals(name))
                 .findFirst()
@@ -42,8 +43,7 @@ public class ResourceFile {
                     } catch (final IOException e) {
                         throw new RuntimeException(e);
                     }
-                })
-                .orElse("{}");
+                });
     }
 
     public void update(final String name, final String contents) throws IOException {
@@ -61,10 +61,20 @@ public class ResourceFile {
     }
 
     private Path prepareFileForUpdate(final String name) throws IOException {
-        if (!this.parentDir.exists()) {
-            Files.createDirectories(this.parentDir.toPath());
+        final File file = new File(name);
+        if (file.isAbsolute()) {
+            return this.create(file);
         }
-        final Path saveTo = new File(this.parentDir, name).toPath();
+
+        return this.create(new File(this.parentDir, name));
+    }
+
+    private Path create(final File file) throws IOException {
+        final File parentFile = file.getParentFile();
+        if (!parentFile.exists()) {
+            Files.createDirectories(parentFile.toPath());
+        }
+        final Path saveTo = file.toPath();
         if (!saveTo.toFile().exists()) {
             Files.createFile(saveTo);
             this.files.add(saveTo);

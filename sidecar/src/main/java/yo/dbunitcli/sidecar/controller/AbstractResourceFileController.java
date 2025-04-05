@@ -42,7 +42,7 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
 
     @Post(uri = "load", consumes = MediaType.TEXT_PLAIN, produces = MediaType.APPLICATION_JSON)
     public String load(@Body final String name) {
-        return this.getResourceFile().read(name);
+        return this.getResourceFile().read(name).orElse("{}");
     }
 
     @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
