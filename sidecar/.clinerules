@@ -18,15 +18,24 @@
 
 ## ディレクトリ構造とファイル配置
 
+### パッケージ構造
+
+```
+yo.dbunitcli.sidecar
+├── controller        # REST APIエンドポイントを提供するコントローラー
+├── domain           # ビジネスロジックとドメインモデル
+│   └── project     # プロジェクト関連のドメインモデル
+└── dto             # APIリクエスト/レスポンス用のデータ転送オブジェクト
+```
+
+### ファイル配置
+
 - `main/java/yo/dbunitcli/sidecar`
-  - `controller`: コントローラークラスを配置
-  - `domain`: ドメインモデルを配置
-  - `dto`: データ転送オブジェクトを配置
+  - `controller`: データソース管理のコントローラークラスを配置
+  - `domain/project`: プロジェクト関連のドメインモデルを配置
+  - `dto`: データソース操作用のDTOを配置
 - `main/resources`
-  - `application.properties`: アプリケーション設定ファイル
+  - `application.yml`: アプリケーション設定ファイル
   - `logback.xml`: ログ設定ファイル
-  - `META-INF`: メタ情報を配置
 - `test/java/yo/dbunitcli/sidecar`
   - `controller`: コントローラーのテストクラスを配置
-- `test/resources`
-  - `workspace`: テスト用のリソースファイルを配置
