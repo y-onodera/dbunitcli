@@ -1,15 +1,18 @@
 import { isAbsolute, sep } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { type Dispatch, type SetStateAction, useEffect, useRef, useState } from "react";
-import SqlEditorDialog from "../../components/dialog/SqlEditorDialog";
 import { ButtonWithIcon } from "../../components/element/Button";
-import { DirectoryButton, EditButton, ExpandButton, FileButton } from "../../components/element/ButtonIcon";
+import { DirectoryButton, ExpandButton, FileButton } from "../../components/element/ButtonIcon";
 import { SettingIcon } from "../../components/element/Icon";
 import { CheckBox, ControllTextBox, InputLabel, SelectBox } from "../../components/element/Input";
+import { fetchDatasources } from "../../context/DataSourceProvider";
+import { useEnviroment } from "../../context/EnviromentProvider";
 import { useResourcesSettings, useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
 import type { Attribute, CommandParam, CommandParams } from "../../model/CommandParam";
+import { type QueryDatasourceType, isSqlRelatedType } from "../../model/QueryDatasource";
 import type { WorkspaceContext } from "../../model/WorkspaceResources";
 import DatasetSettingEditButton, { RemoveDatasetSettingButton } from "../settings/DatasetSettingEditButton";
+import SqlEditorButton, { RemoveSqlEditorButton } from "../settings/SqlEditorButton";
 import XlsxSchemaEditButton, { RemoveXlsxSchemaButton } from "../settings/XlsxSchemaEditButton";
 
 type Prop = {
@@ -114,10 +117,26 @@ export default function CommandFormElements(prop: CommandParams) {
 function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
 	const { srcType } = prop;
+	const environment = useEnviroment();
+	const [datasources, setDatasources] = useState<string[]>([]);
+
+	useEffect(() => {
+		const loadDatasources = async () => {
+			if (prop.element.name === "src" && isSqlRelatedType(srcType ?? "")) {
+				const sources = await fetchDatasources(environment.apiUrl, srcType as QueryDatasourceType);
+				if (sources !== 'failed') {
+					setDatasources(sources);
+				}
+			}
+		};
+		loadDatasources();
+	}, [environment.apiUrl, prop.element.name, srcType]);
+
 	const settings = useResourcesSettings();
 
 	function showDatalist(elment: CommandParam): boolean {
-		return elment.name === "setting" || elment.name === "xlsxSchema";
+		return elment.name === "setting" || elment.name === "xlsxSchema" ||
+			(elment.name === "src" && isSqlRelatedType(srcType ?? ""));
 	}
 
 	function showDopDownMenu(elment: CommandParam): boolean {
@@ -126,7 +145,14 @@ function Text(prop: Prop) {
 
 	function isValueInDatalist(): boolean {
 		if (!showDatalist(prop.element)) return false;
-		const resources = prop.element.name === "setting" ? settings.datasetSettings : settings.xlsxSchemas;
+		let resources: string[] | undefined;
+		if (prop.element.name === "setting") {
+			resources = settings.datasetSettings;
+		} else if (prop.element.name === "xlsxSchema") {
+			resources = settings.xlsxSchemas;
+		} else if (prop.element.name === "src") {
+			resources = datasources;
+		}
 		return resources?.includes(path) || false;
 	}
 
@@ -150,16 +176,22 @@ function Text(prop: Prop) {
 						handleChange={(ev) => setPath(ev.target.value)}
 					/>
 					{showDatalist(prop.element) && !prop.hidden && (
-						<ResourceDatalist prefix={prop.prefix} element={prop.element} />
+						<ResourceDatalist
+							prefix={prop.prefix}
+							element={prop.element}
+							datasources={datasources}
+						/>
 					)}
 				</div>
 				<div className="flex">
 					{isValueInDatalist() && !prop.hidden && (
 						prop.element.name === 'setting' ? (
 							<RemoveDatasetSettingButton path={path} setPath={setPath} />
-						) : (
+						) : prop.element.name === 'xlsxSchema' ? (
 							<RemoveXlsxSchemaButton path={path} setPath={setPath} />
-						)
+						) : (srcType === "sql" || srcType === "table") ? (
+							<RemoveSqlEditorButton path={path} setPath={setPath} type={srcType as QueryDatasourceType} />
+						) : null
 					)}
 					{showDopDownMenu(prop.element) && !prop.hidden && (
 						<DropDownMenu
@@ -169,6 +201,7 @@ function Text(prop: Prop) {
 							setPath={setPath}
 							hidden={prop.hidden}
 							srcType={srcType}
+							datasources={datasources}
 						/>
 					)}
 				</div>
@@ -176,44 +209,6 @@ function Text(prop: Prop) {
 		</div>
 	);
 };
-type SqlEditorProps = {
-	type: 'sql' | 'table';
-	path: string;
-	setPath: (value: string) => void;
-	closeMenu: () => void;
-};
-
-function SqlEditor({ type, path, setPath, closeMenu }: SqlEditorProps) {
-	const [showDialog, setShowDialog] = useState(false);
-
-	const handleClose = () => {
-		setShowDialog(false);
-		closeMenu();
-	};
-
-	const handleSave = (path: string) => {
-		setPath(path);
-		setShowDialog(false);
-		closeMenu();
-	};
-
-	return (
-		<li>
-			<EditButton handleClick={() => setShowDialog(true)} />
-			{showDialog && (
-				<SqlEditorDialog
-					type={type}
-					fileName={path}
-					setFileName={setPath}
-					value=""
-					handleDialogClose={handleClose}
-					handleSave={handleSave}
-				/>
-			)}
-		</li>
-	);
-}
-
 function DropDownMenu({
 	prefix,
 	element,
@@ -221,7 +216,7 @@ function DropDownMenu({
 	setPath,
 	hidden,
 	srcType,
-}: FileProp & { srcType?: string }) {
+}: FileProp & { srcType?: string, datasources?: string[] }) {
 	const [showMenu, setShowMenu] = useState(false);
 	const buttonRef = useRef<HTMLDivElement>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
@@ -279,14 +274,16 @@ function DropDownMenu({
 								<XlsxSchemaEditButton path={path} setPath={setPath} />
 							</li>
 						)}
-						{element.name === "src" && (srcType === "sql" || srcType === "table") && !hidden && (
-							<SqlEditor
-								type={srcType as "sql" | "table"}
-								path={path}
-								setPath={setPath}
-								closeMenu={() => setShowMenu(false)}
-							/>
-						)}
+						{element.name === "src" && !hidden && isSqlRelatedType(srcType ?? "") && (
+							<li>
+								<SqlEditorButton
+									type={srcType as "sql" | "table"}
+									path={path}
+									setPath={setPath}
+								/>
+							</li>
+						)
+						}
 						{element.attribute.type.includes("FILE") && (
 							<li>
 								<FileChooser
@@ -315,11 +312,22 @@ function DropDownMenu({
 		</div>
 	);
 }
-function ResourceDatalist(prop: { prefix: string, element: CommandParam }) {
+function ResourceDatalist(prop: { prefix: string, element: CommandParam, datasources?: string[] }) {
 	const settings = useResourcesSettings();
+	const { element, datasources } = prop;
+	let resources: string[] | undefined;
+
+	if (element.name === "setting") {
+		resources = settings.datasetSettings;
+	} else if (element.name === "xlsxSchema") {
+		resources = settings.xlsxSchemas;
+	} else if (element.name === "src") {
+		resources = datasources;
+	}
+
 	return (
-		<datalist id={`${getId(prop.prefix, prop.element.name)}_list`}>
-			{(prop.element.name === "setting" ? settings.datasetSettings : settings.xlsxSchemas)?.map((resource) => (
+		<datalist id={`${getId(prop.prefix, element.name)}_list`}>
+			{resources?.map((resource) => (
 				<option key={resource} value={resource} />
 			))}
 		</datalist>

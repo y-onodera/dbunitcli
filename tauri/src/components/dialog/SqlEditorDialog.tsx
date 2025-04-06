@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { saveDataSource } from '../../context/DataSourceProvider';
 import { useEnviroment } from '../../context/EnviromentProvider';
+import type { QueryDatasourceType } from '../../model/QueryDatasource';
 import ResourceFileDialog from './ResourceFileDialog';
 
 type SqlEditorSetting = {
@@ -8,7 +9,7 @@ type SqlEditorSetting = {
 };
 
 type SqlEditorDialogProps = {
-    type: 'sql' | 'table';
+    type: QueryDatasourceType;
     fileName: string;
     setFileName: (fileName: string) => void;
     handleDialogClose: () => void;
@@ -22,8 +23,8 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 
     const handleCommit = async (path: string) => {
         const result = await saveDataSource(environment.apiUrl, {
-            type: props.type as 'sql' | 'table',
-            fileName: path,
+            type: props.type as QueryDatasourceType,
+            name: path,
             contents: setting.value
         });
         if (result !== 'failed') {
