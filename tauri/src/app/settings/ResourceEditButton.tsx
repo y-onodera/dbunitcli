@@ -1,5 +1,5 @@
 import { type ReactElement, useState } from 'react';
-import { EditButton } from '../../components/element/ButtonIcon';
+import { EditButton, RemoveButton } from '../../components/element/ButtonIcon';
 import { useEnviroment } from '../../context/EnviromentProvider';
 
 /**
@@ -79,7 +79,7 @@ export function RemoveResource({ deleteResource, path, setPath }: RemoveResource
         }
     };
 
-    return <EditButton handleClick={handleRemove} />;
+    return <RemoveButton title="" handleClick={handleRemove} />;
 }
 
 /**
