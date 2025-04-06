@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.resource.FileResources;
-import yo.dbunitcli.sidecar.dto.DataSourceDto;
+import yo.dbunitcli.sidecar.dto.QueryDataSourceDto;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @MicronautTest
-public class DatasourceControllerTest {
+public class QueryDatasourceControllerTest {
 
     private final String beforeContents = "before test";
     @Inject
@@ -48,17 +48,17 @@ public class DatasourceControllerTest {
 
     @Test
     void testList() {
-        final String response = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/datasource/list?type=csv"));
+        final String response = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/query-datasource/list?type=csv"));
         Assertions.assertNotNull(response);
     }
 
     @Test
     void testLoad() {
-        final DataSourceDto request = new DataSourceDto();
+        final QueryDataSourceDto request = new QueryDataSourceDto();
         request.setType(DataSourceType.sql);
-        request.setFileName("test.sql");
+        request.setName("test.sql");
 
-        final HttpRequest<DataSourceDto> httpRequest = HttpRequest.POST("dbunit-cli/datasource/load", request)
+        final HttpRequest<QueryDataSourceDto> httpRequest = HttpRequest.POST("dbunit-cli/query-datasource/load", request)
                 .contentType(MediaType.APPLICATION_JSON_TYPE);
         final HttpResponse<String> response = this.client.toBlocking().exchange(httpRequest, String.class);
         Assertions.assertEquals(HttpStatus.OK, response.getStatus());
@@ -67,12 +67,12 @@ public class DatasourceControllerTest {
 
     @Test
     void testSave() throws IOException {
-        final DataSourceDto request = new DataSourceDto();
+        final QueryDataSourceDto request = new QueryDataSourceDto();
         request.setType(DataSourceType.sql);
-        request.setFileName("test.sql");
+        request.setName("test.sql");
         final String contents = "test";
         request.setContents(contents);
-        final HttpResponse<String> response = this.client.toBlocking().exchange(HttpRequest.POST("dbunit-cli/datasource/save", request), String.class);
+        final HttpResponse<String> response = this.client.toBlocking().exchange(HttpRequest.POST("dbunit-cli/query-datasource/save", request), String.class);
         Assertions.assertEquals(HttpStatus.OK, response.getStatus());
         Assertions.assertEquals("success", response.body());
         Assertions.assertEquals(contents, Files.readString(this.target.toPath()));
@@ -80,10 +80,10 @@ public class DatasourceControllerTest {
 
     @Test
     void testDelete() {
-        final DataSourceDto request = new DataSourceDto();
+        final QueryDataSourceDto request = new QueryDataSourceDto();
         request.setType(DataSourceType.sql);
-        request.setFileName("test.sql");
-        final HttpRequest<DataSourceDto> httpRequest = HttpRequest.POST("dbunit-cli/datasource/delete", request)
+        request.setName("test.sql");
+        final HttpRequest<QueryDataSourceDto> httpRequest = HttpRequest.POST("dbunit-cli/query-datasource/delete", request)
                 .contentType(MediaType.APPLICATION_JSON_TYPE);
         final HttpResponse<String> response = this.client.toBlocking().exchange(httpRequest, String.class);
         Assertions.assertEquals(HttpStatus.OK, response.getStatus());

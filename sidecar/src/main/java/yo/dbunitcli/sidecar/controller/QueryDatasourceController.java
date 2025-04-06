@@ -12,14 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.sidecar.domain.project.Datasource;
-import yo.dbunitcli.sidecar.dto.DataSourceDto;
+import yo.dbunitcli.sidecar.dto.QueryDataSourceDto;
 
 import java.io.IOException;
 
-@Controller("/datasource")
-public class DatasourceController {
+@Controller("/query-datasource")
+public class QueryDatasourceController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatasourceController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryDatasourceController.class);
 
     @Get(uri = "list", produces = MediaType.APPLICATION_JSON)
     public String list(@QueryValue final DataSourceType type) throws IOException {
@@ -29,14 +29,14 @@ public class DatasourceController {
     }
 
     @Post(uri = "load", produces = MediaType.TEXT_PLAIN)
-    public String load(@Body final DataSourceDto request) {
-        return new Datasource(request.getType()).read(request.getFileName());
+    public String load(@Body final QueryDataSourceDto request) {
+        return new Datasource(request.getType()).read(request.getName());
     }
 
     @Post(uri = "save")
-    public HttpResponse<String> save(@Body final DataSourceDto request) {
+    public HttpResponse<String> save(@Body final QueryDataSourceDto request) {
         try {
-            new Datasource(request.getType()).save(request.getFileName(), request.getContents());
+            new Datasource(request.getType()).save(request.getName(), request.getContents());
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             return HttpResponse.serverError("Failed to save file: " + th.getMessage());
@@ -45,12 +45,12 @@ public class DatasourceController {
     }
 
     @Post(uri = "delete")
-    public HttpResponse<String> delete(@Body final DataSourceDto request) {
+    public HttpResponse<String> delete(@Body final QueryDataSourceDto request) {
         try {
-            new Datasource(request.getType()).delete(request.getFileName());
+            new Datasource(request.getType()).delete(request.getName());
             return HttpResponse.ok("success");
         } catch (final IOException e) {
-            LOGGER.error("Failed to delete file: {}", request.getFileName(), e);
+            LOGGER.error("Failed to delete file: {}", request.getName(), e);
             return HttpResponse.serverError("Failed to delete file: " + e.getMessage());
         }
     }

@@ -4,11 +4,11 @@ import io.micronaut.serde.annotation.Serdeable;
 import yo.dbunitcli.dataset.DataSourceType;
 
 @Serdeable
-public class DataSourceDto {
+public class QueryDataSourceDto {
 
     private DataSourceType type;
 
-    private String fileName;
+    private String name;
 
     private String contents;
 
@@ -20,12 +20,12 @@ public class DataSourceDto {
         this.type = type;
     }
 
-    public String getFileName() {
-        return this.fileName;
+    public String getName() {
+        return this.name;
     }
 
-    public void setFileName(final String fileName) {
-        this.fileName = fileName;
+    public void setName(final String name) {
+        this.name = name;
     }
 
     public String getContents() {
