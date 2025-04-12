@@ -32,9 +32,9 @@ public record Resources(
         public Resources build() {
             return new Resources(this.baseDir
                     , new ArrayList<>(this.jdbc)
-                    , new ResourceFile(new File(this.baseDir, "setting"))
+                    , new ResourceFile(new File(this.baseDir, "dataset-setting"))
                     , new ArrayList<>(this.template)
-                    , new ResourceFile(new File(this.baseDir, "xlsxSchema"))
+                    , new ResourceFile(new File(this.baseDir, "xlsx-schema"))
             );
         }
 
