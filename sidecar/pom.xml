@@ -14,7 +14,7 @@
         <packaging>jar</packaging>
         <jdk.version>21</jdk.version>
         <release.version>21</release.version>
-        <micronaut.version>4.8.1</micronaut.version>
+        <micronaut.version>4.8.9</micronaut.version>
         <micronaut.aot.enabled>false</micronaut.aot.enabled>
         <micronaut.aot.packageName>yo.dbunitcli.sidecar.generated</micronaut.aot.packageName>
         <micronaut.runtime>netty</micronaut.runtime>
@@ -161,6 +161,12 @@
                             <groupId>io.micronaut.serde</groupId>
                             <artifactId>micronaut-serde-processor</artifactId>
                             <version>2.14.0</version>
+                            <exclusions>
+                                <exclusion>
+                                    <groupId>io.micronaut</groupId>
+                                    <artifactId>micronaut-inject</artifactId>
+                                </exclusion>
+                            </exclusions>
                         </path>
                     </annotationProcessorPaths>
                     <annotationProcessorPathsUseDepMgmt>true</annotationProcessorPathsUseDepMgmt>
