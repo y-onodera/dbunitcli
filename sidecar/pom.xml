@@ -14,7 +14,7 @@
         <packaging>jar</packaging>
         <jdk.version>21</jdk.version>
         <release.version>21</release.version>
-        <micronaut.version>4.8.9</micronaut.version>
+        <micronaut.version>4.8.1</micronaut.version>
         <micronaut.aot.enabled>false</micronaut.aot.enabled>
         <micronaut.aot.packageName>yo.dbunitcli.sidecar.generated</micronaut.aot.packageName>
         <micronaut.runtime>netty</micronaut.runtime>
@@ -140,20 +140,45 @@
             <plugin>
                 <groupId>io.micronaut.maven</groupId>
                 <artifactId>micronaut-maven-plugin</artifactId>
-                <version>4.4.2</version>
+                <version>4.8.2</version>
                 <configuration>
                     <configFile>aot-${packaging}.properties</configFile>
                 </configuration>
             </plugin>
             <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <encoding>UTF-8</encoding>
+                    <annotationProcessorPaths combine.children="append">
+                        <path>
+                            <groupId>io.micronaut</groupId>
+                            <artifactId>micronaut-inject-java</artifactId>
+                            <version>${micronaut.version}</version>
+                        </path>
+                        <path>
+                            <groupId>io.micronaut.serde</groupId>
+                            <artifactId>micronaut-serde-processor</artifactId>
+                            <version>2.14.0</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <annotationProcessorPathsUseDepMgmt>true</annotationProcessorPathsUseDepMgmt>
+                    <compilerArgs>
+                        <arg>-Amicronaut.processing.group=com.github.yonodera</arg>
+                        <arg>-Amicronaut.processing.module=dbunit-cli-sidecar</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.5.0</version>
                 <dependencies>
                     <dependency>
                         <groupId>io.micronaut.maven</groupId>
                         <artifactId>micronaut-maven-enforcer-rules</artifactId>
-                        <version>4.4.2</version>
+                        <version>4.8.2</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -171,42 +196,6 @@
                         </requireJavaVersion>
                         <checkSnakeYaml/>
                     </rules>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>21</source>
-                    <target>21</target>
-                    <encoding>UTF-8</encoding>
-                    <annotationProcessorPaths combine.children="append">
-                        <path>
-                            <groupId>io.micronaut</groupId>
-                            <artifactId>micronaut-http-validation</artifactId>
-                            <version>${micronaut.version}</version>
-                        </path>
-                        <path>
-                            <groupId>io.micronaut</groupId>
-                            <artifactId>micronaut-inject-java</artifactId>
-                            <version>${micronaut.version}</version>
-                        </path>
-                        <path>
-                            <groupId>io.micronaut.serde</groupId>
-                            <artifactId>micronaut-serde-processor</artifactId>
-                            <version>2.8.2</version>
-                            <exclusions>
-                                <exclusion>
-                                    <groupId>io.micronaut</groupId>
-                                    <artifactId>micronaut-inject</artifactId>
-                                </exclusion>
-                            </exclusions>
-                        </path>
-                    </annotationProcessorPaths>
-                    <annotationProcessorPathsUseDepMgmt>true</annotationProcessorPathsUseDepMgmt>
-                    <compilerArgs>
-                        <arg>-Amicronaut.processing.group=com.github.yonodera</arg>
-                        <arg>-Amicronaut.processing.module=dbunit-cli-sidecar</arg>
-                    </compilerArgs>
                 </configuration>
             </plugin>
         </plugins>
