@@ -8,6 +8,9 @@ on:
       - 'core/**'
       - 'sidecar/**'
       - '.github/workflows/maven.yml'
+    paths-ignore:
+      - '**/.roo/**'
+      - '**/docs/**'
 
 jobs:
   build:

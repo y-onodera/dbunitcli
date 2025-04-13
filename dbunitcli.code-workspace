@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "core"
+		},
+		{
+			"path": "gui"
+		},
+		{
+			"path": "sidecar"
+		},
+		{
+			"path": ".roo"
+		}
+	],
+	"settings": {
+        "terminal.integrated.cwd": "${workspaceFolder}"
+	   ,"files.exclude": {
+		  "**/.git": true,
+		  "**/node_modules": true,
+		  "**/target": true
+		},
+	  }
+}

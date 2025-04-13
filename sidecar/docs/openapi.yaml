@@ -1,0 +1,998 @@
+openapi: 3.1.0
+info:
+  title: DbUnitCLI Sidecar API
+  description: Tauriフロントエンドと連携するためのSidecar REST API仕様
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080 # Micronautのデフォルトポートを想定
+    description: Local development server
+tags:
+  - name: Workspace
+    description: ワークスペース全体に関する操作
+  - name: Command Settings
+    description: 各コマンドの設定ファイルに関する操作 (compare, convert, generate, parameterize, run)
+  - name: Resource Files
+    description: メタデータやExcelスキーマなどのリソースファイルに関する操作
+  - name: Query Datasource
+    description: データソース設定に関する操作
+paths:
+  /workspace/resources:
+    get:
+      summary: ワークスペースリソース取得
+      description: ワークスペースの状態（設定ファイルリスト、ディレクトリパスなど）を取得します。
+      operationId: getWorkspaceResources
+      tags:
+        - Workspace
+      responses:
+        '200':
+          description: 成功。WorkspaceDtoをシリアライズしたJSON文字列。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceDto'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /workspace/update:
+    post:
+      summary: ワークスペース設定更新
+      description: ワークスペースのベースディレクトリ設定などを更新します。
+      operationId: updateWorkspaceContext
+      tags:
+        - Workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContextDto'
+      responses:
+        '200':
+          description: 成功
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: success
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /{command}/add:
+    get:
+      summary: 新規コマンド設定追加
+      description: 新しい設定ファイルを作成し、現在の設定リストを返します。
+      operationId: addCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '#/components/parameters/CommandName'
+      responses:
+        '200':
+          description: 成功。設定名リストのJSON配列文字列。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          $ref: '#/components/responses/ApplicationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /{command}/copy:
+    post:
+      summary: コマンド設定コピー
+      description: 既存の設定ファイルをコピーし、現在の設定リストを返します。
+      operationId: copyCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: コピー元の設定名
+              required:
+                - name
+      responses:
+        '200':
+          description: 成功。設定名リストのJSON配列文字列。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          $ref: '#/components/responses/ApplicationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /{command}/delete:
+    post:
+      summary: コマンド設定削除
+      description: 設定ファイルを削除し、現在の設定リストを返します。
+      operationId: deleteCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 削除する設定名
+              required:
+                - name
+      responses:
+        '200':
+          description: 成功。設定名リストのJSON配列文字列。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          $ref: '#/components/responses/ApplicationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /{command}/rename:
+    post:
+      summary: コマンド設定名変更
+      description: 設定ファイル名を変更し、現在の設定リストを返します。
+      operationId: renameCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oldName:
+                  type: string
+                  description: 変更前の設定名
+                newName:
+                  type: string
+                  description: 変更後の設定名
+              required:
+                - oldName
+                - newName
+      responses:
+        '200':
+          description: 成功。設定名リストのJSON配列文字列。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          $ref: '#/components/responses/ApplicationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /{command}/load:
+    post:
+      summary: コマンド設定読み込み
+      description: 設定ファイルの内容を読み込み、パラメータMapのJSON文字列を返します。
+      operationId: loadCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 読み込む設定名
+              required:
+                - name
+      responses:
+        '200':
+          description: 成功。パラメータMapのJSON文字列。ファイルが存在しない場合は `{}`。
+          content:
+            application/json:
+              schema:
+                description: |
+                  コマンド設定のパラメータMap。
+                  `command` パスパラメータの値に応じて、以下のいずれかのスキーマに準拠します。
+                  - compare: CoreCompareOption
+                  - convert: CoreConvertOption
+                  - generate: CoreGenerateOption
+                  - parameterize: CoreParameterizeOption
+                  - run: CoreRunOption
+                oneOf:
+                  - $ref: '#/components/schemas/CoreCompareOption'
+                  - $ref: '#/components/schemas/CoreConvertOption'
+                  - $ref: '#/components/schemas/CoreGenerateOption'
+                  - $ref: '#/components/schemas/CoreParameterizeOption'
+                  - $ref: '#/components/schemas/CoreRunOption'
+        '400':
+          $ref: '#/components/responses/ApplicationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /{command}/reset:
+    get:
+      summary: コマンド設定リセット
+      description: デフォルトのパラメータMapのJSON文字列を返します。
+      operationId: resetCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '#/components/parameters/CommandName'
+      responses:
+        '200':
+          description: 成功。デフォルトパラメータMapのJSON文字列。
+          content:
+            application/json:
+              schema:
+                description: |
+                  デフォルトのコマンドパラメータMap。
+                  `command` パスパラメータの値に応じて、以下のいずれかのスキーマに準拠します。
+                  - compare: CoreCompareOption
+                  - convert: CoreConvertOption
+                  - generate: CoreGenerateOption
+                  - parameterize: CoreParameterizeOption
+                  - run: CoreRunOption
+                oneOf:
+                  - $ref: '#/components/schemas/CoreCompareOption'
+                  - $ref: '#/components/schemas/CoreConvertOption'
+                  - $ref: '#/components/schemas/CoreGenerateOption'
+                  - $ref: '#/components/schemas/CoreParameterizeOption'
+                  - $ref: '#/components/schemas/CoreRunOption'
+        '400':
+          $ref: '#/components/responses/ApplicationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /{command}/refresh:
+    post:
+      summary: コマンド設定リフレッシュ
+      description: リクエストのMapをパースし、パラメータMapのJSON文字列を返します。
+      operationId: refreshCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+      responses:
+        '200':
+          description: 成功。パースされたパラメータMapのJSON文字列。
+          content:
+            application/json:
+              schema:
+                description: |
+                  パースされたコマンドパラメータMap。
+                  `command` パスパラメータの値に応じて、以下のいずれかのスキーマに準拠します。
+                  - compare: CoreCompareOption
+                  - convert: CoreConvertOption
+                  - generate: CoreGenerateOption
+                  - parameterize: CoreParameterizeOption
+                  - run: CoreRunOption
+                oneOf:
+                  - $ref: '#/components/schemas/CoreCompareOption'
+                  - $ref: '#/components/schemas/CoreConvertOption'
+                  - $ref: '#/components/schemas/CoreGenerateOption'
+                  - $ref: '#/components/schemas/CoreParameterizeOption'
+                  - $ref: '#/components/schemas/CoreRunOption'
+        '400':
+          $ref: '#/components/responses/ApplicationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /{command}/save:
+    post:
+      summary: コマンド設定保存
+      description: 設定ファイルにパラメータを保存します。
+      operationId: saveCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommandRequestDto'
+      responses:
+        '200':
+          description: 成功
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: success
+        '400':
+          $ref: '#/components/responses/ApplicationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /{command}/exec:
+    post:
+      summary: コマンド実行
+      description: 指定された設定でコマンドを実行します。
+      operationId: executeCommand
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommandRequestDto'
+      responses:
+        '200':
+          description: 成功。結果ディレクトリのパス（現状は空文字列）。
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/ApplicationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /{resource}/list:
+    get:
+      summary: リソースファイルリスト取得
+      description: 指定された種類のリソースファイル名リストを取得します。
+      operationId: listResourceFiles
+      tags:
+        - Resource Files
+      parameters:
+        - $ref: '#/components/parameters/ResourceName'
+      responses:
+        '200':
+          description: 成功。ファイル名リストのJSON配列文字列。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /{resource}/load:
+    post:
+      summary: リソースファイル読み込み
+      description: 指定されたリソースファイルの内容をJSON文字列として返します。
+      operationId: loadResourceFile
+      tags:
+        - Resource Files
+      parameters:
+        - $ref: '#/components/parameters/ResourceName'
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: 読み込むファイル名
+      responses:
+        '200':
+          description: 成功。ファイル内容のJSON文字列。ファイルが存在しない場合は `{}`。
+          content:
+            application/json:
+              schema:
+                type: object # 実際の内容はリソースタイプによる
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /{resource}/save:
+    post:
+      summary: リソースファイル保存
+      description: リソースファイルの内容を保存します。
+      operationId: saveResourceFile
+      tags:
+        - Resource Files
+      parameters:
+        - $ref: '#/components/parameters/ResourceName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf: # リソースタイプによってDTOが異なる
+                - $ref: '#/components/schemas/MetaDataRequestDto'
+                - $ref: '#/components/schemas/JsonXlsxSchemaRequestDto'
+      responses:
+        '200':
+          description: 成功
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: success
+        '500':
+          description: 保存失敗
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'Failed to save file: エラーメッセージ' # Quote added
+  /{resource}/delete:
+    post:
+      summary: リソースファイル削除
+      description: リソースファイルを削除します。
+      operationId: deleteResourceFile
+      tags:
+        - Resource Files
+      parameters:
+        - $ref: '#/components/parameters/ResourceName'
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: 削除するファイル名
+      responses:
+        '200':
+          description: 成功
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: success
+        '500':
+          description: 削除失敗
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'Failed to delete file: エラーメッセージ' # Quote added
+
+  /query-datasource/list:
+    get:
+      summary: データソースリスト取得
+      description: 指定されたタイプのデータソース名リストを取得します。
+      operationId: listQueryDatasources
+      tags:
+        - Query Datasource
+      parameters:
+        - name: type
+          in: query
+          required: true
+          description: データソースタイプ
+          schema:
+            $ref: '#/components/schemas/DataSourceType'
+      responses:
+        '200':
+          description: 成功。データソース名リストのJSON配列文字列。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /query-datasource/load:
+    post:
+      summary: データソース読み込み
+      description: データソース設定ファイルの内容を文字列として返します。
+      operationId: loadQueryDatasource
+      tags:
+        - Query Datasource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryDataSourceDto_LoadDelete'
+      responses:
+        '200':
+          description: 成功。設定ファイルの内容。
+          content:
+            text/plain:
+              schema:
+                type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /query-datasource/save:
+    post:
+      summary: データソース保存
+      description: データソース設定ファイルに内容を保存します。
+      operationId: saveQueryDatasource
+      tags:
+        - Query Datasource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryDataSourceDto_Save'
+      responses:
+        '200':
+          description: 成功
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: success
+        '500':
+          description: 保存失敗
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'Failed to save file: エラーメッセージ' # Quote added
+  /query-datasource/delete:
+    post:
+      summary: データソース削除
+      description: データソース設定ファイルを削除します。
+      operationId: deleteQueryDatasource
+      tags:
+        - Query Datasource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryDataSourceDto_LoadDelete'
+      responses:
+        '200':
+          description: 成功
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: success
+        '500':
+          description: 削除失敗
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'Failed to delete file: エラーメッセージ' # Quote added
+
+components:
+  schemas:
+    WorkspaceDto:
+      type: object
+      properties:
+        parameterList:
+          type: object
+          properties:
+            convert:
+              type: array
+              items: { type: string }
+            compare:
+              type: array
+              items: { type: string }
+            generate:
+              type: array
+              items: { type: string }
+            run:
+              type: array
+              items: { type: string }
+            parameterize:
+              type: array
+              items: { type: string }
+        resources:
+          type: object
+          properties:
+            datasetSettings:
+              type: array
+              items: { type: string }
+            xlsxSchemas:
+              type: array
+              items: { type: string }
+            queryDataSources:
+              type: array
+              items: { type: string }
+        context:
+          $ref: '#/components/schemas/ContextDto'
+    ContextDto:
+      type: object
+      properties:
+        workspace: { type: string }
+        datasetBase: { type: string }
+        resultBase: { type: string }
+        settingBase: { type: string }
+        templateBase: { type: string }
+        jdbcBase: { type: string }
+        xlsxSchemaBase: { type: string }
+    CommandRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 設定名 (コピー・削除・読み込み・保存・実行時)
+        input:
+          type: object
+          additionalProperties:
+            type: string
+          description: コマンドパラメータ (保存・実行時)
+        oldName:
+          type: string
+          description: 変更前の設定名 (リネーム時)
+        newName:
+          type: string
+          description: 変更後の設定名 (リネーム時)
+    MetaDataRequestDto:
+      type: object
+      required:
+        - name
+        - input
+      properties:
+        name:
+          type: string
+          description: 保存するファイル名
+        input:
+          $ref: '#/components/schemas/MetaDataSettingsDto'
+    MetaDataSettingsDto:
+      type: object
+      properties:
+        settings:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetaDataSettingDto'
+        commonSettings:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetaDataSettingDto'
+    MetaDataSettingDto:
+      type: object
+      properties:
+        name: { type: array, items: { type: string } }
+        pattern: { $ref: '#/components/schemas/PatternDto' }
+        innerJoin: { $ref: '#/components/schemas/TableJoinDto' }
+        outerJoin: { $ref: '#/components/schemas/TableJoinDto' }
+        fullJoin: { $ref: '#/components/schemas/TableJoinDto' }
+        separate: { type: array, items: { $ref: '#/components/schemas/MetaDataSettingDto' } }
+        prefix: { type: string }
+        tableName: { type: string }
+        suffix: { type: string }
+        distinct: { type: boolean }
+        split: { $ref: '#/components/schemas/SplitDto' }
+        keys: { type: array, items: { type: string } }
+        string: { type: object, additionalProperties: { type: string } }
+        number: { type: object, additionalProperties: { type: string } }
+        boolean: { type: object, additionalProperties: { type: string } }
+        function: { type: object, additionalProperties: { type: string } }
+        exclude: { type: array, items: { type: string } }
+        include: { type: array, items: { type: string } }
+        filter: { type: array, items: { type: string } }
+        order: { type: array, items: { type: string } }
+    PatternDto:
+      type: object
+      properties:
+        string: { type: string }
+        exclude: { type: array, items: { type: string } }
+    TableJoinDto:
+      type: object
+      properties:
+        left: { type: string }
+        right: { type: string }
+        column: { type: array, items: { type: string } }
+        on: { type: string }
+    SplitDto:
+      type: object
+      properties:
+        prefix: { type: string }
+        tableName: { type: string }
+        suffix: { type: string }
+        breakKey: { type: array, items: { type: string } }
+        filter: { type: array, items: { type: string } }
+        limit: { type: integer }
+    JsonXlsxSchemaRequestDto:
+      type: object
+      required:
+        - name
+        - input
+      properties:
+        name:
+          type: string
+          description: 保存するファイル名
+        input:
+          $ref: '#/components/schemas/JsonXlsxSchemaDto'
+    JsonXlsxSchemaDto:
+      type: object
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RowSetting'
+        cells:
+          type: array
+          items:
+            $ref: '#/components/schemas/CellSetting'
+    RowSetting:
+      type: object
+      properties:
+        sheetName: { type: string }
+        tableName: { type: string }
+        header: { type: array, items: { type: string } }
+        dataStart: { type: integer }
+        columnIndex: { type: array, items: { type: integer } }
+        breakKey: { type: array, items: { type: string } }
+        addFileInfo: { type: boolean }
+    CellSetting:
+      type: object
+      properties:
+        sheetName: { type: string }
+        tableName: { type: string }
+        header: { type: array, items: { type: string } }
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/CellSettingRow'
+        addFileInfo: { type: boolean }
+    CellSettingRow:
+      type: object
+      properties:
+        cellAddress: { type: array, items: { type: string } }
+    DataSourceType:
+      type: string
+      enum: [JDBC, CSV, EXCEL] # 実際のEnum値を確認する必要あり
+    QueryDataSourceDto_LoadDelete:
+      type: object
+      required:
+        - type
+        - name
+      properties:
+        type:
+          $ref: '#/components/schemas/DataSourceType'
+        name:
+          type: string
+          description: データソース名
+    QueryDataSourceDto_Save:
+      type: object
+      required:
+        - type
+        - name
+        - contents
+      properties:
+        type:
+          $ref: '#/components/schemas/DataSourceType'
+        name:
+          type: string
+          description: データソース名
+        contents:
+          type: string
+          description: 保存する設定内容（プロパティ形式文字列など）
+    JsonError:
+      type: object
+      properties:
+        message: { type: string }
+        _links:
+          type: object
+          properties:
+            self:
+              type: object
+              properties:
+                href: { type: string }
+                templated: { type: boolean }
+        _embedded: # バリデーションエラーの場合
+          type: object
+          properties:
+            errors:
+              type: array
+              items:
+                type: object
+                properties:
+                  message: { type: string }
+
+  parameters:
+    CommandName:
+      name: command
+      in: path
+      required: true
+      description: コマンド名 (compare, convert, generate, parameterize, run)
+      schema:
+        type: string
+        enum: [compare, convert, generate, parameterize, run]
+    ResourceName:
+      name: resource
+      in: path
+      required: true
+      description: リソース名 (metadata, xlsx-schema)
+      schema:
+        type: string
+        enum: [metadata, xlsx-schema]
+
+  responses:
+    ApplicationError:
+      description: アプリケーションエラー (コマンド実行時など)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JsonError'
+    InternalServerError:
+      description: 内部サーバーエラー (ファイルIOエラーなど)
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: 'Internal Server Error: エラーメッセージ' # Quote added
+    BadRequest:
+      description: 不正なリクエスト (バリデーションエラーなど)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JsonError' # Micronautのデフォルトエラー形式に合わせる
+    NotFound:
+      description: リソースが見つからない
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JsonError' # Micronautのデフォルトエラー形式に合わせる
+
+    # --- Core Command Option Schemas (from .roo-artifacts-core-json.md) ---
+    CoreDataSetLoadOption:
+      type: object
+      description: coreプロジェクトのDataSetLoadOptionに相当するJSON構造
+      properties:
+        srcType: { type: string, description: 'データソースタイプ (DB, FILE, csv, xls, xlsx, json, xml)' }
+        src: { type: string, description: 'データソースパス or 接続情報' }
+        setting: { type: string, description: 'メタデータ設定ファイルパス' }
+        settingEncoding: { type: string, description: '設定ファイルのエンコーディング' }
+        regTableInclude: { type: string, description: '対象テーブル名の正規表現' }
+        regTableExclude: { type: string, description: '除外テーブル名の正規表現' }
+        loadData: { type: boolean }
+        includeMetaData: { type: boolean }
+        # Merged from specific DataSource Options
+        url: { type: string, description: 'JDBC URL (srcType=DB)' }
+        user: { type: string, description: 'DBユーザー (srcType=DB)' }
+        password: { type: string, description: 'DBパスワード (srcType=DB)' }
+        useJdbcMetaData: { type: boolean, description: 'JDBCメタデータ使用フラグ (srcType=DB)' }
+        delimiter: { type: string, description: '区切り文字 (srcType=csv)' }
+        quote: { type: string, description: '引用符 (srcType=csv)' }
+        escape: { type: string, description: 'エスケープ文字 (srcType=csv)' }
+        encoding: { type: string, description: 'ファイルエンコーディング (srcType=csv, json, xml, file)' }
+        header: { type: boolean, description: 'ヘッダー行有無 (srcType=csv, xls, xlsx)' }
+        sheet: { type: string, description: 'シート名 (srcType=xls, xlsx)' }
+        schema: { type: string, description: 'Excelスキーマファイルパス (srcType=xls, xlsx)' }
+        schemaEncoding: { type: string, description: 'Excelスキーマファイルのエンコーディング (srcType=xls, xlsx)' }
+        extension: { type: string, description: 'ファイル拡張子 (srcType=file)' }
+      # 注意: encoding, header は複数のDataSource Optionに含まれる可能性がある
+      # 注意: DTOに存在する sql, sqlFile, fetchSize, queryTimeout は Option#toCommandLineArgs().toMap() の結果には含まれない
+
+    CoreDataSetConverterOption:
+      type: object
+      description: coreプロジェクトのDataSetConverterOptionに相当するJSON構造
+      properties:
+        resultType: { type: string, description: '出力形式 (csv, xlsx, json, xml, table)' }
+        op: { type: string, description: 'DB操作 (INSERT, DELETE, ...) (resultType=table)' }
+        result: { type: string, description: '結果出力ディレクトリパス (resultType!=table)' }
+        resultPath: { type: string, description: '結果出力ファイルパスパターン (resultType!=table)' }
+        exportEmptyTable: { type: boolean, description: '空テーブル出力フラグ (resultType!=table)' }
+        exportHeader: { type: boolean, description: 'ヘッダー出力フラグ (resultType!=table)' }
+        outputEncoding: { type: string, description: '出力エンコーディング (resultType=csv)' }
+        excelTable: { type: string, description: 'Excelテーブル名 (resultType=xlsx)' }
+        # Merged from JdbcOption (if resultType="table")
+        url: { type: string, description: 'JDBC URL (resultType=table)' }
+        user: { type: string, description: 'DBユーザー (resultType=table)' }
+        password: { type: string, description: 'DBパスワード (resultType=table)' }
+
+    CoreImageCompareOption:
+      type: object
+      description: coreプロジェクトのImageCompareOptionに相当するJSON構造
+      properties:
+        threshold: { type: integer }
+        pixelToleranceLevel: { type: number, format: double }
+        allowingPercentOfDifferentPixels: { type: number, format: double }
+        rectangleLineWidth: { type: integer }
+        minimalRectangleSize: { type: integer }
+        maximalRectangleCount: { type: integer }
+        excludedAreas: { type: string, description: '"[x1,y1,x2,y2][...]" 形式' }
+        drawExcludedRectangles: { type: boolean }
+        fillExcludedRectangles: { type: boolean }
+        percentOpacityExcludedRectangles: { type: number, format: double }
+        excludedRectangleColor: { type: string, description: '色名' }
+        fillDifferenceRectangles: { type: boolean }
+        percentOpacityDifferenceRectangles: { type: number, format: double }
+        differenceRectangleColor: { type: string, description: '色名' }
+
+    CoreTemplateRenderOption:
+      type: object
+      description: coreプロジェクトのTemplateRenderOptionに相当するJSON構造
+      properties:
+        encoding: { type: string, description: 'テンプレートファイルのエンコーディング' }
+        templateGroup: { type: string, description: 'ST4テンプレートグループファイルパス' }
+        templateParameterAttribute: { type: string, description: 'パラメータマップ参照属性名' }
+        templateVarStart: { type: string, description: '開始デリミタ(char)' }
+        templateVarStop: { type: string, description: '終了デリミタ(char)' }
+        formulaProcess: { type: boolean }
+
+    CoreJdbcOption:
+      type: object
+      description: coreプロジェクトのJdbcOptionに相当するJSON構造
+      required: [url]
+      properties:
+        url: { type: string, description: 'JDBC URL' }
+        user: { type: string, description: 'DBユーザー' }
+        password: { type: string, description: 'DBパスワード' }
+
+    CoreAntOption:
+      type: object
+      description: coreプロジェクトのAntOptionに相当するJSON構造
+      properties:
+        target: { type: string, description: 'Antターゲット名' }
+
+    CoreCompareOption:
+      type: object
+      description: coreプロジェクトのCompareOptionに相当するJSON構造
+      properties:
+        targetType: { type: string, enum: [data, image, pdf], description: '比較対象タイプ' }
+        setting: { type: string, description: '比較設定ファイルパス' }
+        settingEncoding: { type: string, description: '設定ファイルのエンコーディング' }
+        newData: { $ref: '#/components/schemas/CoreDataSetLoadOption' }
+        oldData: { $ref: '#/components/schemas/CoreDataSetLoadOption' }
+        expectData: { $ref: '#/components/schemas/CoreDataSetLoadOption' }
+        convertResult: { $ref: '#/components/schemas/CoreDataSetConverterOption' }
+        imageOption: { $ref: '#/components/schemas/CoreImageCompareOption' }
+
+    CoreConvertOption:
+      type: object
+      description: coreプロジェクトのConvertOptionに相当するJSON構造
+      properties:
+        parameter: { type: string, description: '詳細不明' }
+        srcData: { $ref: '#/components/schemas/CoreDataSetLoadOption' }
+        convertResult: { $ref: '#/components/schemas/CoreDataSetConverterOption' }
+
+    CoreGenerateOption:
+      type: object
+      description: coreプロジェクトのGenerateOptionに相当するJSON構造
+      properties:
+        generateType: { type: string, enum: [txt, xlsx, xls, settings, sql], description: '生成タイプ' }
+        unit: { type: string, enum: [record, table, dataset], description: '生成単位' }
+        template: { type: string, description: 'テンプレートファイルパス' }
+        commit: { type: boolean, description: 'コミットフラグ (generateType=sql)' }
+        op: { type: string, description: 'DB操作 (INSERT, DELETE, ...) (generateType=sql)' }
+        sqlFilePrefix: { type: string, description: 'SQLファイルプレフィックス (generateType=sql)' }
+        sqlFileSuffix: { type: string, description: 'SQLファイルサフィックス (generateType=sql)' }
+        result: { type: string, description: '結果出力ディレクトリパス' }
+        resultPath: { type: string, description: '結果出力ファイルパスパターン' }
+        outputEncoding: { type: string, description: '出力エンコーディング' }
+        srcData: { $ref: '#/components/schemas/CoreDataSetLoadOption' }
+        templateOption: { $ref: '#/components/schemas/CoreTemplateRenderOption' }
+
+    CoreParameterizeOption:
+      type: object
+      description: coreプロジェクトのParameterizeOptionに相当するJSON構造
+      properties:
+        unit: { type: string, enum: [record, table, dataset], description: '処理単位' }
+        parameterize: { type: boolean }
+        ignoreFail: { type: boolean }
+        cmd: { type: string, enum: [compare, convert, generate, run], description: '実行するコマンド名' }
+        cmdParam: { type: string, description: 'コマンドパラメータテンプレートファイルパス' }
+        template: { type: string, description: 'コマンドパラメータテンプレートファイルパス (cmdParamと同じ？)' }
+        paramData: { $ref: '#/components/schemas/CoreDataSetLoadOption' }
+        templateOption: { $ref: '#/components/schemas/CoreTemplateRenderOption' }
+
+    CoreRunOption:
+      type: object
+      description: coreプロジェクトのRunOptionに相当するJSON構造
+      properties:
+        scriptType: { type: string, enum: [cmd, bat, sql, ant], description: 'スクリプトタイプ' }
+        baseDir: { type: string, description: 'ベースディレクトリ (scriptType!=sql)' }
+        srcData: { $ref: '#/components/schemas/CoreDataSetLoadOption' }
+        templateOption: { $ref: '#/components/schemas/CoreTemplateRenderOption' }
+        jdbcOption: { $ref: '#/components/schemas/CoreJdbcOption' }
+        antOption: { $ref: '#/components/schemas/CoreAntOption' }

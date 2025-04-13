@@ -6,12 +6,12 @@
 
 ### 引数
 * -targetType: 比較対象のタイプ(data/image/pdf) - [詳細な設定](#targettype)
-* -setting: 比較設定ファイルパス - [スキーマ定義](.roo-artifacts-json-schema.md#1-比較設定ファイル-setting)
+* -setting: 比較設定ファイルパス - [スキーマ定義](04-json-schema.md#1-比較設定ファイル-setting)
 * -settingEncoding: 設定ファイルのエンコーディング
-* new.* : 新データセットの設定 - [データソース設定の詳細](.roo-artifacts-settings.md#datasetloadoption-srcnewoldparam)
-* old.* : 旧データセットの設定 - [データソース設定の詳細](.roo-artifacts-settings.md#datasetloadoption-srcnewoldparam)
-* expect.* : 期待値データセットの設定（オプション） - [データソース設定の詳細](.roo-artifacts-settings.md#datasetloadoption-srcnewoldparam)
-* result.* : 結果出力オプション - [出力設定の詳細](.roo-artifacts-settings.md#resultoption-result)
+* new.* : 新データセットの設定 - [データソース設定の詳細](03-settings.md#datasetloadoption-srcnewoldparam)
+* old.* : 旧データセットの設定 - [データソース設定の詳細](03-settings.md#datasetloadoption-srcnewoldparam)
+* expect.* : 期待値データセットの設定（オプション） - [データソース設定の詳細](03-settings.md#datasetloadoption-srcnewoldparam)
+* result.* : 結果出力オプション - [出力設定の詳細](03-settings.md#resultoption-result)
 
 ### タイプ別オプション
 #### targetType
@@ -22,12 +22,12 @@
   * settingEncoding: 設定ファイルのエンコーディング
 
 - image: 画像比較モード
-  * image.*: [画像比較オプション設定](.roo-artifacts-settings.md#imagecompareoption-image)
+  * image.*: [画像比較オプション設定](03-settings.md#imagecompareoption-image)
   * new/old.srcType: 自動的に'file'に設定
   * new/old.extension: 自動的に'png'に設定
 
 - pdf: PDF比較モード
-  * image.*: [画像比較オプション設定](.roo-artifacts-settings.md#imagecompareoption-image)（PDFを画像として比較）
+  * image.*: [画像比較オプション設定](03-settings.md#imagecompareoption-image)（PDFを画像として比較）
   * new/old.srcType: 自動的に'file'に設定
   * new/old.extension: 自動的に'pdf'に設定
 
@@ -53,8 +53,8 @@ dbunit compare -targetType image \
 データセットの形式を別の形式に変換します。例えば、CSVからExcel、データベースからCSVなど、様々な形式間の変換に対応しています。
 
 ### 引数
-* src.* : 変換元データセットの設定 - [データソース設定の詳細](.roo-artifacts-settings.md#datasetloadoption-srcnewoldparam)
-* result.* : 変換結果の出力設定 - [出力設定の詳細](.roo-artifacts-settings.md#resultoption-result)
+* src.* : 変換元データセットの設定 - [データソース設定の詳細](03-settings.md#datasetloadoption-srcnewoldparam)
+* result.* : 変換結果の出力設定 - [出力設定の詳細](03-settings.md#resultoption-result)
 * -parameter : パラメータ設定
 
 ### 使用例
@@ -83,8 +83,8 @@ dbunit convert \
 * -resultDir: 出力先ディレクトリ
 * -resultPath: 出力ファイルパス
 * -outputEncoding: 出力エンコーディング
-* src.* : ソースデータセットの設定 - [データソース設定の詳細](.roo-artifacts-settings.md#datasetloadoption-srcnewoldparam)
-* template.* : テンプレート設定 - [テンプレート設定の詳細](.roo-artifacts-settings.md#templaterenderoption-template)
+* src.* : ソースデータセットの設定 - [データソース設定の詳細](03-settings.md#datasetloadoption-srcnewoldparam)
+* template.* : テンプレート設定 - [テンプレート設定の詳細](03-settings.md#templaterenderoption-template)
 
 ### タイプ別オプション
 #### generateType
@@ -144,7 +144,7 @@ dbunit generate -generateType xlsx \
 
 ### 引数
 * -scriptType: スクリプトタイプ(cmd/bat/sql/ant) - [詳細な設定](#scripttype)
-* src.* : 実行するスクリプトファイルの設定 - [データソース設定の詳細](.roo-artifacts-settings.md#datasetloadoption-srcnewoldparam)
+* src.* : 実行するスクリプトファイルの設定 - [データソース設定の詳細](03-settings.md#datasetloadoption-srcnewoldparam)
 
 ### タイプ別オプション
 #### scriptType
@@ -156,8 +156,8 @@ dbunit generate -generateType xlsx \
   * src.extension: スクリプトの拡張子（cmdまたはbat）
 
 - sql: SQL実行
-  * jdbc.*: [データベース接続設定](.roo-artifacts-settings.md#jdbc-データベース接続設定)
-  * template.*: [SQLテンプレート設定](.roo-artifacts-settings.md#templaterenderoption-template)
+  * jdbc.*: [データベース接続設定](03-settings.md#jdbc-データベース接続設定)
+  * template.*: [SQLテンプレート設定](03-settings.md#templaterenderoption-template)
   * src.srcType: 自動的に'file'に設定
   * src.extension: 自動的に'sql'に設定
 
@@ -193,8 +193,8 @@ dbunit run -scriptType ant \
 * -template: テンプレートファイルパス
 * -ignoreFail: 失敗を無視するかどうか
 * -parameterize: パラメータ化を有効にするかどうか
-* param.* : パラメータデータセットの設定 - [データソース設定の詳細](.roo-artifacts-settings.md#datasetloadoption-srcnewoldparam)
-* template.* : テンプレート設定 - [テンプレート設定の詳細](.roo-artifacts-settings.md#templaterenderoption-template)
+* param.* : パラメータデータセットの設定 - [データソース設定の詳細](03-settings.md#datasetloadoption-srcnewoldparam)
+* template.* : テンプレート設定 - [テンプレート設定の詳細](03-settings.md#templaterenderoption-template)
 
 ### 使用例
 ```bash

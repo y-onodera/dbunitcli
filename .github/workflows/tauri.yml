@@ -4,6 +4,9 @@ on:
     paths:
       - 'tauri/**'
       - '.github/workflows/tauri*.yml'
+    paths-ignore:
+      - '**/.roo/**'
+      - '**/docs/**'
   workflow_run:
     workflows: [Java-CI]
     types:

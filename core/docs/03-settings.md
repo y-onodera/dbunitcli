@@ -27,7 +27,7 @@
   * -headerName: ヘッダー行の名前指定（指定がない場合は先頭行をヘッダーとして扱う）
 
 - xls/xlsx: Excelファイル形式
-  * -xlsxSchema: Excel形式定義ファイル - [スキーマ定義](.roo-artifacts-json-schema.md#2-excelスキーマファイル-xlsxschema)
+  * -xlsxSchema: Excel形式定義ファイル - [スキーマ定義](04-json-schema.md#2-excelスキーマファイル-xlsxschema)
   * -extension: 処理対象とする拡張子
   * -headerName: ヘッダー行の名前指定（指定がない場合は先頭行をヘッダーとして扱う）
 
