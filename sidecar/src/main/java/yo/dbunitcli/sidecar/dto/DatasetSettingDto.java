@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 @Serdeable
-public class MetaDataSettingDto {
+public class DatasetSettingDto {
     private List<String> name;
     private PatternDto pattern;
     private TableJoinDto innerJoin;
     private TableJoinDto outerJoin;
     private TableJoinDto fullJoin;
-    private List<MetaDataSettingDto> separate;
+    private List<DatasetSettingDto> separate;
     private String prefix;
     private String tableName;
     private String suffix;
@@ -75,11 +75,11 @@ public class MetaDataSettingDto {
         this.fullJoin = fullJoin;
     }
 
-    public List<MetaDataSettingDto> getSeparate() {
+    public List<DatasetSettingDto> getSeparate() {
         return this.separate;
     }
 
-    public void setSeparate(final List<MetaDataSettingDto> separate) {
+    public void setSeparate(final List<DatasetSettingDto> separate) {
         this.separate = separate;
     }
 

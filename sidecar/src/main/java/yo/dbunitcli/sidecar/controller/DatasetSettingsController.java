@@ -3,12 +3,12 @@ package yo.dbunitcli.sidecar.controller;
 import io.micronaut.http.annotation.Controller;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
-import yo.dbunitcli.sidecar.dto.MetaDataRequestDto;
+import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
 
-@Controller("metadata")
-public class MetaDataSettingsController extends AbstractResourceFileController<MetaDataRequestDto> {
+@Controller("dataset-setting")
+public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
 
-    public MetaDataSettingsController(final Workspace workspace) {
+    public DatasetSettingsController(final Workspace workspace) {
         super(workspace);
     }
 

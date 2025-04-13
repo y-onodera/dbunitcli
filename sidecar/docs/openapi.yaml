@@ -1,20 +1,40 @@
 openapi: 3.1.0
 info:
   title: DbUnitCLI Sidecar API
-  description: Tauriフロントエンドと連携するためのSidecar REST API仕様
+  description: |
+    TauriフロントエンドからcoreプロジェクトのCLI機能を利用するためのREST API仕様です。
+    GUIアプリケーションからのリクエストを受け付け、coreプロジェクトの機能を呼び出し、結果をGUI表示用に最適化して返します。
   version: 1.0.0
 servers:
-  - url: http://localhost:8080 # Micronautのデフォルトポートを想定
-    description: Local development server
+  - url: http://localhost:8080
+    description: Micronautアプリケーションサーバー
 tags:
   - name: Workspace
-    description: ワークスペース全体に関する操作
+    description: |
+      ワークスペース全体に関する操作を提供します。
+      - ディレクトリ構造の管理
+      - 設定ファイルの一覧取得
+      - リソースファイルの管理
   - name: Command Settings
-    description: 各コマンドの設定ファイルに関する操作 (compare, convert, generate, parameterize, run)
+    description: |
+      各コマンドの設定ファイルに関する操作を提供します。
+      対象コマンド:
+      - compare: データセット比較
+      - convert: フォーマット変換
+      - generate: データ生成
+      - parameterize: パラメータ化
+      - run: コマンド実行
   - name: Resource Files
-    description: メタデータやExcelスキーマなどのリソースファイルに関する操作
+    description: |
+      各種リソースファイルに関する操作を提供します。
+      - データセット設定: データセットのメタ情報
+      - Excelスキーマ: Excel形式のデータ構造定義
+      - テンプレート: データ生成用のテンプレート
   - name: Query Datasource
-    description: データソース設定に関する操作
+    description: |
+      データソース設定に関する操作を提供します。
+      - データベース接続情報の管理
+      - クエリー実行用の設定
 paths:
   /workspace/resources:
     get:
@@ -357,15 +377,13 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /{resource}/list:
+  /dataset-setting/list:
     get:
-      summary: リソースファイルリスト取得
-      description: 指定された種類のリソースファイル名リストを取得します。
-      operationId: listResourceFiles
+      summary: データセット設定リスト取得
+      description: データセット設定ファイル名のリストを取得します。
+      operationId: listDatasetSettings
       tags:
         - Resource Files
-      parameters:
-        - $ref: '#/components/parameters/ResourceName'
       responses:
         '200':
           description: 成功。ファイル名リストのJSON配列文字列。
@@ -377,15 +395,13 @@ paths:
                   type: string
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /{resource}/load:
+  /dataset-setting/load:
     post:
-      summary: リソースファイル読み込み
-      description: 指定されたリソースファイルの内容をJSON文字列として返します。
-      operationId: loadResourceFile
+      summary: データセット設定読み込み
+      description: 指定されたデータセット設定ファイルの内容をJSON文字列として返します。
+      operationId: loadDatasetSetting
       tags:
         - Resource Files
-      parameters:
-        - $ref: '#/components/parameters/ResourceName'
       requestBody:
         required: true
         content:
@@ -402,22 +418,20 @@ paths:
                 type: object # 実際の内容はリソースタイプによる
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /{resource}/save:
+  /dataset-setting/save:
     post:
-      summary: リソースファイル保存
-      description: リソースファイルの内容を保存します。
-      operationId: saveResourceFile
+      summary: データセット設定保存
+      description: データセット設定ファイルの内容を保存します。
+      operationId: saveDatasetSetting
       tags:
         - Resource Files
-      parameters:
-        - $ref: '#/components/parameters/ResourceName'
       requestBody:
         required: true
         content:
           application/json:
             schema:
               oneOf: # リソースタイプによってDTOが異なる
-                - $ref: '#/components/schemas/MetaDataRequestDto'
+                - $ref: '#/components/schemas/DatasetRequestDto'
                 - $ref: '#/components/schemas/JsonXlsxSchemaRequestDto'
       responses:
         '200':
@@ -434,15 +448,13 @@ paths:
               schema:
                 type: string
                 example: 'Failed to save file: エラーメッセージ' # Quote added
-  /{resource}/delete:
+  /dataset-setting/delete:
     post:
-      summary: リソースファイル削除
-      description: リソースファイルを削除します。
-      operationId: deleteResourceFile
+      summary: データセット設定削除
+      description: データセット設定ファイルを削除します。
+      operationId: deleteDatasetSetting
       tags:
         - Resource Files
-      parameters:
-        - $ref: '#/components/parameters/ResourceName'
       requestBody:
         required: true
         content:
@@ -644,18 +656,18 @@ components:
           type: string
           description: 保存するファイル名
         input:
-          $ref: '#/components/schemas/MetaDataSettingsDto'
+          $ref: '#/components/schemas/DatasetSettingsDto'
     MetaDataSettingsDto:
       type: object
       properties:
         settings:
           type: array
           items:
-            $ref: '#/components/schemas/MetaDataSettingDto'
+            $ref: '#/components/schemas/DatasetSettingDto'
         commonSettings:
           type: array
           items:
-            $ref: '#/components/schemas/MetaDataSettingDto'
+            $ref: '#/components/schemas/DatasetSettingDto'
     MetaDataSettingDto:
       type: object
       properties:
@@ -664,7 +676,7 @@ components:
         innerJoin: { $ref: '#/components/schemas/TableJoinDto' }
         outerJoin: { $ref: '#/components/schemas/TableJoinDto' }
         fullJoin: { $ref: '#/components/schemas/TableJoinDto' }
-        separate: { type: array, items: { $ref: '#/components/schemas/MetaDataSettingDto' } }
+        separate: { type: array, items: { $ref: '#/components/schemas/DatasetSettingDto' } }
         prefix: { type: string }
         tableName: { type: string }
         suffix: { type: string }
