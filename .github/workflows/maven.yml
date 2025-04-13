@@ -5,12 +5,11 @@ name: Java-CI
 on:
   push:
     paths:
-      - 'core/**'
-      - 'sidecar/**'
+      - 'core/src/**'
+      - 'core/pom.xml'
+      - 'sidecar/src/**'
+      - 'sidecar/pom.xml'
       - '.github/workflows/maven.yml'
-    paths-ignore:
-      - '**/.roo/**'
-      - '**/docs/**'
 
 jobs:
   build:

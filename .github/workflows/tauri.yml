@@ -2,11 +2,9 @@ name: tauri-CI
 on:
   push:
     paths:
-      - 'tauri/**'
+      - 'tauri/src/**'
+      - 'tauri/src-tauri/**'
       - '.github/workflows/tauri*.yml'
-    paths-ignore:
-      - '**/.roo/**'
-      - '**/docs/**'
   workflow_run:
     workflows: [Java-CI]
     types:
