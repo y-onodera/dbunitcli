@@ -1,0 +1,46 @@
+components:
+  schemas:
+    WorkspaceDto:
+      type: object
+      properties:
+        baseDir:
+          type: string
+          description: ワークスペースのベースディレクトリパス
+        datasetBase:
+          type: string
+          description: データセットファイルのベースディレクトリパス
+        resultBase:
+          type: string
+          description: 実行結果のベースディレクトリパス
+        settings:
+          type: array
+          description: 設定ファイル一覧
+          items:
+            $ref: '#/components/schemas/SettingFileDto'
+      required:
+        - baseDir
+        - datasetBase
+        - resultBase
+        - settings
+
+    SettingFileDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 設定ファイル名
+        path:
+          type: string
+          description: 設定ファイルパス
+      required:
+        - name
+        - path
+
+    ContextDto:
+      type: object
+      properties:
+        baseDir:
+          type: string
+          description: 更新するベースディレクトリパス
+      required:
+        - baseDir

@@ -1,0 +1,55 @@
+components:
+  parameters:
+    CommandName:
+      name: command
+      in: path
+      required: true
+      description: |
+        コマンドタイプ
+        - compare: データセット比較
+        - convert: フォーマット変換
+        - generate: データ生成
+        - parameterize: パラメータ化
+        - run: コマンド実行
+      schema:
+        type: string
+        enum:
+          - compare
+          - convert
+          - generate
+          - parameterize
+          - run
+
+  schemas:
+    CommandRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 設定ファイル名
+        parameters:
+          type: object
+          description: コマンドパラメータ
+          additionalProperties:
+            type: string
+      required:
+        - name
+        - parameters
+
+    CommandOption:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - compare
+            - convert
+            - generate
+            - parameterize
+            - run
+        parameters:
+          type: object
+          additionalProperties:
+            type: string

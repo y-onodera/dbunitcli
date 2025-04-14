@@ -1,0 +1,50 @@
+paths:
+  /{command}/add:
+    get:
+      summary: 新規コマンド設定追加
+      description: 新しい設定ファイルを作成し、現在の設定リストを返します。
+      operationId: addCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '../schemas/command.yaml#/components/parameters/CommandName'
+      responses:
+        '200':
+          description: 成功。設定名リストのJSON配列文字列。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          $ref: '../schemas/common.yaml#/components/responses/ApplicationError'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+  /{command}/exec:
+    post:
+      summary: コマンド実行
+      description: 指定された設定でコマンドを実行します。
+      operationId: executeCommand
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '../schemas/command.yaml#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/command.yaml#/components/schemas/CommandRequestDto'
+      responses:
+        '200':
+          description: 成功。結果ディレクトリのパス。
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          $ref: '../schemas/common.yaml#/components/responses/ApplicationError'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'

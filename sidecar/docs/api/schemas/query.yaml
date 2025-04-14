@@ -1,0 +1,43 @@
+components:
+  schemas:
+    DataSourceType:
+      type: string
+      description: データソースのタイプ
+      enum:
+        - postgresql
+        - mysql
+        - oracle
+        - sqlserver
+
+    QueryDatasourceSettings:
+      type: object
+      properties:
+        datasources:
+          type: array
+          description: データソース設定の一覧
+          items:
+            $ref: '#/components/schemas/DatasourceConfig'
+
+    DatasourceConfig:
+      type: object
+      properties:
+        name:
+          type: string
+          description: データソース名
+        type:
+          $ref: '#/components/schemas/DataSourceType'
+        url:
+          type: string
+          description: JDBC接続URL
+        username:
+          type: string
+          description: 接続ユーザー名
+        properties:
+          type: object
+          description: その他の接続プロパティ
+          additionalProperties:
+            type: string
+      required:
+        - name
+        - type
+        - url

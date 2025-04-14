@@ -1,0 +1,46 @@
+openapi: 3.1.0
+info:
+  title: DbUnitCLI Sidecar API
+  description: |
+    TauriフロントエンドからcoreプロジェクトのCLI機能を利用するためのREST API仕様です。
+    GUIアプリケーションからのリクエストを受け付け、coreプロジェクトの機能を呼び出し、結果をGUI表示用に最適化して返します。
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Micronautアプリケーションサーバー
+
+tags:
+  - name: Workspace
+    description: |
+      ワークスペース全体に関する操作を提供します。
+      - ディレクトリ構造の管理
+      - 設定ファイルの一覧取得
+      - リソースファイルの管理
+
+  - name: Command Settings
+    description: |
+      各コマンドの設定ファイルに関する操作を提供します。
+      対象コマンド:
+      - compare: データセット比較
+      - convert: フォーマット変換
+      - generate: データ生成
+      - parameterize: パラメータ化
+      - run: コマンド実行
+
+  - name: Resource Files
+    description: |
+      各種リソースファイルに関する操作を提供します。
+      - データセット設定: データセットのメタ情報
+      - Excelスキーマ: Excel形式のデータ構造定義
+      - テンプレート: データ生成用のテンプレート
+
+  - name: Query Datasource
+    description: |
+      データソース設定に関する操作を提供します。
+      - データベース接続情報の管理
+      - クエリー実行用の設定
+
+# 各パスの定義は個別のファイルに分割
+paths:
+  $ref: './paths/workspace.yaml#/paths'

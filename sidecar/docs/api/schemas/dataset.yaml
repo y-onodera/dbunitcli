@@ -1,0 +1,48 @@
+components:
+  schemas:
+    DatasetSettingDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: データセット設定名
+        type:
+          type: string
+          description: データセットタイプ
+          enum:
+            - csv
+            - excel
+            - json
+        metadata:
+          type: object
+          description: メタデータ情報
+          additionalProperties: true
+      required:
+        - name
+        - type
+
+    DatasetRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 保存するファイル名
+        content:
+          $ref: '#/components/schemas/DatasetSettingDto'
+      required:
+        - name
+        - content
+
+    JsonXlsxSchemaRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 保存するファイル名
+        content:
+          type: object
+          description: Excelスキーマ定義
+          additionalProperties: true
+      required:
+        - name
+        - content

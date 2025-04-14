@@ -1,0 +1,43 @@
+paths:
+  /dataset-setting/list:
+    get:
+      summary: データセット設定リスト取得
+      description: データセット設定ファイル名のリストを取得します。
+      operationId: listDatasetSettings
+      tags:
+        - Resource Files
+      responses:
+        '200':
+          description: 成功。ファイル名リストのJSON配列文字列。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+  /dataset-setting/load:
+    post:
+      summary: データセット設定読み込み
+      description: 指定されたデータセット設定ファイルの内容をJSON文字列として返します。
+      operationId: loadDatasetSetting
+      tags:
+        - Resource Files
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: 読み込むファイル名
+      responses:
+        '200':
+          description: 成功。ファイル内容のJSON文字列。
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/dataset.yaml#/components/schemas/DatasetSettingDto'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'

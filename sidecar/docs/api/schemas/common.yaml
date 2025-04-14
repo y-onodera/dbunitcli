@@ -1,0 +1,35 @@
+components:
+  responses:
+    InternalServerError:
+      description: 内部サーバーエラー
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: 'Internal server error: エラーメッセージ'
+
+    ApplicationError:
+      description: アプリケーションエラー
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: 'Application error: エラーメッセージ'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: エラーコード
+        message:
+          type: string
+          description: エラーメッセージ
+        details:
+          type: object
+          description: エラー詳細情報
+          additionalProperties: true
+      required:
+        - code
+        - message

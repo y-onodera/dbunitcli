@@ -1,0 +1,41 @@
+paths:
+  /workspace/resources:
+    get:
+      summary: ワークスペースリソース取得
+      description: ワークスペースの状態（設定ファイルリスト、ディレクトリパスなど）を取得します。
+      operationId: getWorkspaceResources
+      tags:
+        - Workspace
+      responses:
+        '200':
+          description: 成功。WorkspaceDtoをシリアライズしたJSON文字列。
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/workspace.yaml#/components/schemas/WorkspaceDto'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+  /workspace/update:
+    post:
+      summary: ワークスペース設定更新
+      description: ワークスペースのベースディレクトリ設定などを更新します。
+      operationId: updateWorkspaceContext
+      tags:
+        - Workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/workspace.yaml#/components/schemas/ContextDto'
+      responses:
+        '200':
+          description: 成功
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: success
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'

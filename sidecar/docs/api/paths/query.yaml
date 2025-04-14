@@ -1,0 +1,43 @@
+paths:
+  /query-datasource/list:
+    get:
+      summary: データソースリスト取得
+      description: 指定されたタイプのデータソース名リストを取得します。
+      operationId: listQueryDatasources
+      tags:
+        - Query Datasource
+      parameters:
+        - name: type
+          in: query
+          required: true
+          description: データソースタイプ
+          schema:
+            $ref: '../schemas/query.yaml#/components/schemas/DataSourceType'
+      responses:
+        '200':
+          description: 成功。データソース名リストのJSON配列文字列。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+  /query-datasource/settings:
+    get:
+      summary: データソース設定取得
+      description: データソース設定の一覧を取得します。
+      operationId: getQueryDatasourceSettings
+      tags:
+        - Query Datasource
+      responses:
+        '200':
+          description: 成功。データソース設定のJSON文字列。
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/query.yaml#/components/schemas/QueryDatasourceSettings'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
