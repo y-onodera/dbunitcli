@@ -123,6 +123,13 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateSettingsWithIncludeAllColumns() throws Exception {
+            Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateSettingsWithIncludeAllColumns.txt"});
+            GenerateTest.subDirectory = "generate/settings";
+            this.assertGenerateFileEquals("settings_with_include.json", "UTF-8");
+        }
+
+        @Test
         public void testGenerateSettingsIfNoKeyUseAllColumns() throws Exception {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateSettingsNoKeys.txt"});
             GenerateTest.subDirectory = "generate/settings";

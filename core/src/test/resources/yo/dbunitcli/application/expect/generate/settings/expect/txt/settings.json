@@ -1,13 +1,16 @@
 {
   "settings": [
     {
-      "name" : "Test1" ,"keys":["Key"]
+      "name" : "Test1"
+     ,"keys":["Key"]
     }
   , {
-      "name" : "Test2" ,"keys":["PrimaryKey"]
+      "name" : "Test2"
+     ,"keys":["PrimaryKey"]
     }
   , {
-      "name" : "Test3" ,"keys":["PrimaryKey" ,"PrimaryKey2"]
+      "name" : "Test3"
+     ,"keys":["PrimaryKey" ,"PrimaryKey2"]
     }
   ]
 }

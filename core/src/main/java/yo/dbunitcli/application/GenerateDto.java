@@ -26,6 +26,8 @@ public class GenerateDto extends CommandDto {
     private String outputEncoding;
     @CommandLine.Option(names = "-template", description = "template file")
     private String template;
+    @CommandLine.Option(names = "-includeAllColumns", description = "include all columns in settings generation")
+    private String includeAllColumns;
     private DataSetLoadDto srcData = new DataSetLoadDto();
 
     private TemplateRenderDto templateOption = new TemplateRenderDto();
@@ -108,6 +110,14 @@ public class GenerateDto extends CommandDto {
 
     public void setTemplate(final String template) {
         this.template = template;
+    }
+
+    public String getIncludeAllColumns() {
+        return this.includeAllColumns;
+    }
+
+    public void setIncludeAllColumns(final String includeAllColumns) {
+        this.includeAllColumns = includeAllColumns;
     }
 
     public DataSetLoadDto getSrcData() {

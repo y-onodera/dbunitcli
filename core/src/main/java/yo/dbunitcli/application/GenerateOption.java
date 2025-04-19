@@ -32,6 +32,7 @@ public record GenerateOption(
         , String outputEncoding
         , DataSetLoadOption srcData
         , TemplateRenderOption templateOption
+        , boolean includeAllColumns
 ) implements CommandLineOption<GenerateDto> {
 
     public static GenerateDto toDto(final String[] args) {
@@ -65,6 +66,7 @@ public record GenerateOption(
                 , Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8"
                 , new DataSetLoadOption("src", dto.getSrcData())
                 , new TemplateRenderOption("template", dto.getTemplateOption())
+                , Strings.isNotEmpty(dto.getIncludeAllColumns()) && Boolean.parseBoolean(dto.getIncludeAllColumns())
         );
     }
 
@@ -74,6 +76,7 @@ public record GenerateOption(
 
     public Stream<Parameter> parameterStream() {
         this.parameter().getMap().put("commit", this.commit);
+        this.parameter().getMap().put("includeAllColumns", this.includeAllColumns);
         return this.unit().loadStream(this.getComparableDataSetLoader(), this.dataSetParam());
     }
 
@@ -127,8 +130,11 @@ public record GenerateOption(
                         .put("-sqlFileSuffix", this.sqlFileSuffix);
                 srcComponent.remove("-src.useJdbcMetaData");
             }
-            case settings -> srcComponent.remove("-src.useJdbcMetaData")
-                    .remove("-src.loadData");
+            case settings -> {
+                result.put("-includeAllColumns", Boolean.toString(this.includeAllColumns));
+                srcComponent.remove("-src.useJdbcMetaData")
+                        .remove("-src.loadData");
+            }
         }
         result.addComponent("srcData", srcComponent.build());
         if (!this.generateType.isFixedTemplate()) {

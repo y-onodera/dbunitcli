@@ -4,11 +4,35 @@ $if (strip(table.primaryKeys))$$usePrimaryKeys(table)$$else$$useColumns(table)$$
 >>
 usePrimaryKeys(table) ::= <<
     {
-      "name" : "$table.tableName$" ,"keys":[$table.primaryKeys:{column | "$column.columnName$"}; separator=" ,"$]
+      "name" : "$table.tableName$"
+     ,"keys":[$table.primaryKeys:{column | "$column.columnName$"}; separator=" ,"$]
+     $if(inputParam.includeAllColumns)$,"include":[$table.columns:{column | "$column.columnName$"}; separator=" ,"$]
+,"exclude":[]
+,"string":{$table.columns:{column | $if(!column.numeric)$
+   "$column.columnName$":"$column.columnName$"
+$endif$}; separator="  ,"$}
+,"number":{$table.columns:{column | $if(column.numeric)$
+   "$column.columnName$":"$column.columnName$"
+$endif$}; separator="  ,"$}
+,"boolean":{}
+,"sqlFunction":{}
+$endif$
     }
 >>
 useColumns(table) ::= <<
     {
-      "name" : "$table.tableName$" ,"keys":[$table.columns:{column | "$column.columnName$"}; separator=" ,"$]
+      "name" : "$table.tableName$"
+     ,"keys":[$table.columns:{column | "$column.columnName$"}; separator=" ,"$]
+     $if(inputParam.includeAllColumns)$,"include":[$table.columns:{column | "$column.columnName$"}; separator=" ,"$]
+,"exclude":[]
+,"string":{$table.columns:{column | $if(!column.numeric)$
+   "$column.columnName$":"$column.columnName$"
+$endif$}; separator="  ,"$}
+,"number":{$table.columns:{column | $if(column.numeric)$
+   "$column.columnName$":"$column.columnName$"
+$endif$}; separator="  ,"$}
+,"boolean":{}
+,"sqlFunction":{}
+$endif$
     }
 >>

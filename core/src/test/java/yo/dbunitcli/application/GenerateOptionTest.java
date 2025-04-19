@@ -25,6 +25,7 @@ class GenerateOptionTest {
         this.src.setSqlFilePrefix("prefix");
         this.src.setSqlFileSuffix("suffix");
         this.src.setCommit("false");
+        this.src.setIncludeAllColumns("false");
         this.src.getSrcData().setSrcType(DataSourceType.table);
         this.src.getSrcData().setUseJdbcMetaData("false");
         this.src.getSrcData().setLoadData("true");
@@ -94,9 +95,29 @@ class GenerateOptionTest {
         }
 
         @Test
-        void toCommandLineArgs() {
+        void toCommandLineArgsWithoutIncludeAllColumns() {
             final GenerateOption target = GenerateOptionTest.this.createTarget();
             final Option.CommandLineArgs result = target.toCommandLineArgs();
+            assertNull(result.getArg("-unit"));
+            assertNull(result.getArg("-sqlFilePrefix"));
+            assertNull(result.getArg("-sqlFileSuffix"));
+            assertNull(result.getArg("-commit"));
+            assertEquals(GenerateOptionTest.this.src.getOutputEncoding(), result.getArg("-outputEncoding").value());
+            assertNull(result.getArg("-template"));
+            assertEquals(GenerateOptionTest.this.src.getSrcData().getSrcType().toString(), result.getArg("-src.srcType").value());
+            assertNull(result.getArg("-src.useJdbcMetaData"));
+            assertNull(result.getArg("-src.loadData"));
+            assertTrue(result.keySet().stream().filter(it -> it.startsWith("-template.")).findAny().isEmpty());
+            assertEquals("false", result.getArg("-includeAllColumns").value());
+        }
+
+        @Test
+        void toCommandLineArgsWithIncludeAllColumns() {
+            GenerateOptionTest.this.src.setIncludeAllColumns("true");
+            final GenerateOption target = GenerateOptionTest.this.createTarget();
+            final Option.CommandLineArgs result = target.toCommandLineArgs();
+
+            assertEquals("true", result.getArg("-includeAllColumns").value());
             assertNull(result.getArg("-unit"));
             assertNull(result.getArg("-sqlFilePrefix"));
             assertNull(result.getArg("-sqlFileSuffix"));

@@ -1,0 +1,49 @@
+{
+  "settings": [
+    {
+      "name" : "Test1"
+     ,"keys":["Key"]
+     ,"include":["Key" ,"Column1" ,"Column2" ,"Column3" ,"now"]
+     ,"exclude":[]
+     ,"string":{
+        "Key":"Key"
+       ,"Column1":"Column1"
+       ,"Column2":"Column2"
+       ,"Column3":"Column3"
+       ,"now":"now"
+     }
+     ,"number":{}
+     ,"boolean":{}
+     ,"sqlFunction":{}
+    }
+  , {
+      "name" : "Test2"
+     ,"keys":["PrimaryKey"]
+     ,"include":["PrimaryKey" ,"ColumnA" ,"ColumnB"]
+     ,"exclude":[]
+     ,"string":{
+        "PrimaryKey":"PrimaryKey"
+       ,"ColumnA":"ColumnA"
+       ,"ColumnB":"ColumnB"
+     }
+     ,"number":{}
+     ,"boolean":{}
+     ,"sqlFunction":{}
+    }
+  , {
+      "name" : "Test3"
+     ,"keys":["PrimaryKey" ,"PrimaryKey2"]
+     ,"include":["PrimaryKey" ,"PrimaryKey2" ,"ColumnA" ,"ColumnB"]
+     ,"exclude":[]
+     ,"string":{
+        "PrimaryKey":"PrimaryKey"
+       ,"PrimaryKey2":"PrimaryKey2"
+       ,"ColumnA":"ColumnA"
+       ,"ColumnB":"ColumnB"
+     }
+     ,"number":{}
+     ,"boolean":{}
+     ,"sqlFunction":{}
+    }
+  ]
+}
