@@ -1,22 +1,26 @@
-# コマンドオプション定義
+# DBUnit CLI ドキュメント
 
-このドキュメントはdbunitcliで利用可能な各コマンドとそのオプションについて説明します。
+このドキュメントは、dbunitcliの機能と使用方法について説明します。
 
 ## 目次
 
-* [コマンド一覧](02-commands.md)
-  * [Compareコマンド](02-commands.md#1-compareコマンド)
-  * [Convertコマンド](02-commands.md#2-convertコマンド)
-  * [Generateコマンド](02-commands.md#3-generateコマンド)
-  * [Runコマンド](02-commands.md#4-runコマンド)
-  * [Parameterizeコマンド](02-commands.md#5-parameterizeコマンド)
+### 1. プロジェクト情報
+- [プロジェクト概要と技術スタック](02-overview.md)
+- [アーキテクチャと構造](03-architecture.md)
 
-* [共通設定項目](03-settings.md)
-  * [データソース関連設定](03-settings.md#1-データソース関連設定)
-  * [出力関連設定](03-settings.md#2-出力関連設定)
-  * [データベース関連設定](03-settings.md#3-データベース関連設定)
-  * [画像比較設定](03-settings.md#4-画像比較設定)
+### 2. コマンドリファレンス
+- [Compareコマンド](commands/01-compare.md)
+- [Convertコマンド](commands/02-convert.md)
+- [Generateコマンド](commands/03-generate.md)
+- [Runコマンド](commands/04-run.md)
+- [Parameterizeコマンド](commands/05-parameterize.md)
 
-* [JSONスキーマ定義](04-json-schema.md)
-  * [比較設定ファイル](04-json-schema.md#1-比較設定ファイル-setting)
-  * [Excelスキーマファイル](04-json-schema.md#2-excelスキーマファイル-xlsxschema)
+### 3. 設定リファレンス
+- [データソース設定](settings/01-data-source.md)
+- [出力設定](settings/02-output.md)
+- [データベース設定](settings/03-database.md)
+- [画像比較設定](settings/04-image.md)
+
+### 4. JSONスキーマ
+- [比較設定ファイル](schemas/01-comparison.md)
+- [Excelスキーマファイル](schemas/02-excel.md)
