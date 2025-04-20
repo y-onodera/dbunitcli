@@ -5,7 +5,7 @@
 
 ## 引数
 * src.* : 変換元データセットの設定 - [データソース設定](../options/01-data-source.md)
-* result.* : 変換結果の出力設定 - [出力設定](../options/02-output.md)
+* result.* : 変換結果の出力設定 - [出力設定](../options/02-result.md)
 * -parameter : パラメータ設定
 
 ## 使用例

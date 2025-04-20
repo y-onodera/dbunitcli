@@ -5,23 +5,23 @@
 
 ## 引数
 * -generateType: 生成タイプ(txt/xlsx/xls/settings/sql)
-* -unit: パラメータ化の単位
+* -unit: [パラメータ単位](template/01-parameter-units.md)
 * -template: テンプレートファイルパス
 * -resultDir: 出力先ディレクトリ
 * -resultPath: 出力ファイルパス
 * -outputEncoding: 出力エンコーディング
 * src.* : ソースデータセットの設定 - [データソース設定](../options/01-data-source.md)
-* template.* : テンプレート設定 - [テンプレート設定](../options/03-database.md#templaterenderoption-template)
+* template.* : テンプレート設定 - [テンプレート設定](../options/04-template.md#templaterenderoption-template)
 
 ## 生成タイプ別の設定
 
 ### txt: テキストファイル生成
 * -template: テンプレートファイルパス
-* -unit: パラメータ単位を指定して生成
+* -unit: [パラメータ単位](template/01-parameter-units.md)を指定して生成
 
 ### xlsx/xls: Excelファイル生成
 * -template: テンプレートファイルパス
-* -unit: パラメータ単位（record/table/dataset）
+* -unit: [パラメータ単位](template/01-parameter-units.md)を指定（record/table/dataset）
 * template.formulaProcess: Excel数式処理の有効化（xlsxのみ）
 
 ### settings: 設定ファイル生成
@@ -47,19 +47,23 @@
   "keys": ["主キーカラム名"],
   "include": ["全カラム名のリスト"],
   "exclude": [],
-  "string": ["文字列型カラム名のリスト"],
-  "number": ["数値型カラム名のリスト"],
-  "boolean": [],
-  "sqlFunction": []
+  "string": {
+    "カラム名": "カラム名"
+  },
+  "number": {
+    "カラム名": "カラム名"
+  },
+  "boolean": {},
+  "sqlFunction": {}
 }
 ```
 
 * includeセクション: テーブルの全カラム名を出力
 * excludeセクション: 除外するカラム名を指定（デフォルト空配列）
-* stringセクション: 文字列型のカラム名を出力
-* numberセクション: 数値型のカラム名を出力（NUMERIC, DECIMAL, INTEGER, BIGINT, SMALLINT, FLOAT, DOUBLE, REALなど）
-* booleanセクション: 真偽値変換が必要なカラム名を指定（デフォルト空配列）
-* sqlFunctionセクション: SQL関数式を適用するカラム名を指定（デフォルト空配列）
+* stringセクション: 文字列型のカラム名を指定
+* numberセクション: 数値型のカラム名を指定（NUMERIC, DECIMAL, INTEGER, BIGINT, SMALLINT, FLOAT, DOUBLE, REALなど）
+* booleanセクション: 真偽値変換が必要なカラム名を指定
+* sqlFunctionセクション: SQL関数式を適用するカラム名を指定
 
 ### sql: SQLファイル生成
 * 固定テンプレート使用

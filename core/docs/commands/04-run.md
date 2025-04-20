@@ -15,8 +15,8 @@
 * src.extension: スクリプトの拡張子（cmdまたはbat）
 
 ### sql: SQL実行
-* jdbc.*: [データベース接続設定](../options/03-database.md)
-* template.*: [SQLテンプレート設定](../options/03-database.md#templaterenderoption-template)
+* jdbc.*: [データベース接続設定](../options/03-jdbc.md)
+* template.*: [SQLテンプレート設定](../options/04-template.md#templaterenderoption-template)
 * src.srcType: 自動的に'file'に設定
 * src.extension: 自動的に'sql'に設定
 

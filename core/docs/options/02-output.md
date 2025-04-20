@@ -38,7 +38,7 @@
   - CLEAN_INSERT: TRUNCATE+INSERT
   - DELETE_INSERT: DELETE+INSERT
 * -commit: コミット有無（デフォルト: true）
-* jdbc.*: [データベース接続設定](03-database.md#jdbc-データベース接続設定)
+* jdbc.*: [データベース接続設定](03-jdbc.md#jdbc-データベース接続設定)
 
 ## エンコーディング設定
 * -encoding: ファイルの文字エンコーディング

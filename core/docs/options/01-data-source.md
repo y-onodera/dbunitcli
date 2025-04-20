@@ -31,7 +31,7 @@
 * -headerName: ヘッダー行の名前指定
 
 ### xls/xlsx: Excelファイル形式
-* -xlsxSchema: Excel形式定義ファイル
+* -xlsxSchema: Excel形式定義ファイル - [スキーマ定義](../json/excel/01-structured.md)
 * -extension: 処理対象とする拡張子
 * -headerName: ヘッダー行の名前指定
 

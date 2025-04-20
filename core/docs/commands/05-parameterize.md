@@ -6,57 +6,15 @@
 ## 引数
 * -cmd: 実行するコマンド
 * -cmdParam: コマンドパラメータ
-* -unit: パラメータ単位 - [詳細な設定](#パラメータ単位)
+* -unit: [パラメータ単位](template/02-processing-units.md)
 * -template: テンプレートファイルパス
 * -ignoreFail: 失敗を無視するかどうか
 * -parameterize: パラメータ化を有効にするかどうか
 * param.* : パラメータデータセットの設定 - [データソース設定](../options/01-data-source.md)
-* template.* : テンプレート設定 - [テンプレート設定](../options/03-database.md#templaterenderoption-template)
+* template.* : テンプレート設定 - [テンプレート設定](../options/04-template.md#templaterenderoption-template)
 
-## パラメータ単位
-
-### record
-* データセットの各行を個別のパラメータとして処理
-* パラメータ構造：
-```json
-{
-  "rowNum": "行番号（0から開始）",
-  "tableName": "テーブル名",
-  "row": {
-    "列名1": "値1",
-    "列名2": "値2"
-  }
-}
-```
-
-### table
-* 各テーブルを1つのパラメータとして処理
-* パラメータ構造：
-```json
-{
-  "tableName": "テーブル名",
-  "rows": [
-    {
-      "列名1": "値1",
-      "列名2": "値2"
-    }
-  ]
-}
-```
-
-### dataset
-* データセット全体を1つのパラメータとして処理
-* パラメータ構造：
-```json
-{
-  "dataSet": {
-    "テーブル名1": {
-      "tableName": "テーブル名1",
-      "rows": [/* レコード配列 */]
-    }
-  }
-}
-```
+詳細な説明は以下を参照してください：
+- [パラメータ単位の詳細](template/01-overview.md)
 
 ## 使用例
 ```bash
