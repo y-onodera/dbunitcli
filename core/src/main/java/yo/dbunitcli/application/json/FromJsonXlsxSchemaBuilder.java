@@ -23,6 +23,8 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
 
     private final Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap = new HashMap<>();
 
+    private final Map<String, String> sheetPatterns = new HashMap<>();
+
     public XlsxSchema build(final File schema) throws FileNotFoundException, UnsupportedEncodingException {
         if (schema == null) {
             return XlsxSchema.DEFAULT;
@@ -41,7 +43,8 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
         final JsonReader jsonReader = Json.createReader(reader);
         final JsonObject settingJson = jsonReader.read()
                 .asJsonObject();
-        return this.loadRowsSettings(settingJson)
+        return this.loadSheetPatterns(settingJson)
+                .loadRowsSettings(settingJson)
                 .loadCellsSettings(settingJson)
                 .build();
     }
@@ -54,6 +57,21 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
     @Override
     public Map<String, List<XlsxCellsTableDefine>> getCellsTableDefMap() {
         return this.cellsTableDefMap;
+    }
+
+    @Override
+    public Map<String, String> getSheetPatterns() {
+        return this.sheetPatterns;
+    }
+
+    protected FromJsonXlsxSchemaBuilder loadSheetPatterns(final JsonObject setting) {
+        if (!setting.containsKey("patterns")) {
+            return this;
+        }
+
+        final JsonObject patterns = setting.getJsonObject("patterns");
+        patterns.keySet().forEach(key -> this.sheetPatterns.put(key, patterns.getString(key)));
+        return this;
     }
 
     protected FromJsonXlsxSchemaBuilder loadRowsSettings(final JsonObject setting) {

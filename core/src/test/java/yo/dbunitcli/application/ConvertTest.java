@@ -363,6 +363,11 @@ public class ConvertTest {
         }
 
         @Test
+        public void testFromXlsxWithSchemaUsePatternToCsv() throws Exception {
+            Convert.main(this.getArgs("/paramConvertXlsxWithSchemaUsePatternToCsv.txt"));
+        }
+
+        @Test
         public void testFromXlsxWithSchemaToCsv() throws Exception {
             Convert.main(this.getArgs("/paramConvertXlsxWithSchemaToCsv.txt"));
             final File src = new File(this.getBaseDir() + "convert/xlsxwithschema2csv/result");

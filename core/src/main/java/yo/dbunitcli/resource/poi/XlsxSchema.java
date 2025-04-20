@@ -49,6 +49,8 @@ public interface XlsxSchema {
 
         Map<String, List<XlsxCellsTableDefine>> getCellsTableDefMap();
 
+        Map<String, String> getSheetPatterns();
+
         default XlsxSchema build() {
             return new SimpleImpl(this);
         }
@@ -111,36 +113,69 @@ public interface XlsxSchema {
 
     record SimpleImpl(Map<String, List<XlsxRowsTableDefine>> rowsTableDefMap
             , Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap
+            , Map<String, String> sheetPatterns
             , FileInfo fileInfo) implements XlsxSchema {
 
         SimpleImpl(final Builder builder) {
-            this(new HashMap<>(builder.getRowsTableDefMap()), new HashMap<>(builder.getCellsTableDefMap()), FileInfo.NONE);
+            this(new HashMap<>(builder.getRowsTableDefMap()),
+                    new HashMap<>(builder.getCellsTableDefMap()),
+                    new HashMap<>(builder.getSheetPatterns()),
+                    FileInfo.NONE);
         }
 
         @Override
         public boolean contains(final String sheetName) {
-            return this.rowsTableDefMap.containsKey(sheetName) || this.cellsTableDefMap.containsKey(sheetName);
+            // 完全一致のチェック
+            if (this.rowsTableDefMap.containsKey(sheetName) || this.cellsTableDefMap.containsKey(sheetName)) {
+                return true;
+            }
+
+            // パターンマッチのチェック
+            return this.sheetPatterns.entrySet().stream()
+                    .anyMatch(entry -> sheetName.matches(entry.getValue()));
         }
 
         @Override
         public XlsxRowsToTableBuilder getRowsTableBuilder(final String sheetName, final String[] headerNames) {
+            // 完全一致のチェック
             if (this.rowsTableDefMap.containsKey(sheetName)) {
                 return new ManualRowsMappingTableBuilder(this.rowsTableDefMap.get(sheetName), this.fileInfo());
             }
-            return ManualRowsMappingTableBuilder.NO_TARGET;
+
+            // パターンマッチのチェック
+            final var matchingPattern = this.sheetPatterns.entrySet().stream()
+                    .filter(entry -> sheetName.matches(entry.getValue()))
+                    .map(Map.Entry::getKey)
+                    .filter(this.rowsTableDefMap::containsKey)
+                    .findFirst();
+
+            return matchingPattern
+                    .map(s -> new ManualRowsMappingTableBuilder(this.rowsTableDefMap.get(s), this.fileInfo()))
+                    .orElseGet(() -> ManualRowsMappingTableBuilder.NO_TARGET);
         }
 
         @Override
         public XlsxCellsToTableBuilder getCellRecordBuilder(final String sheetName, final String[] headerNames) {
+            // 完全一致のチェック
             if (this.cellsTableDefMap.containsKey(sheetName)) {
                 return new XlsxCellsToTableBuilder(this.cellsTableDefMap.get(sheetName), this.fileInfo());
             }
-            return XlsxCellsToTableBuilder.NO_TARGET;
+
+            // パターンマッチのチェック
+            final var matchingPattern = this.sheetPatterns.entrySet().stream()
+                    .filter(entry -> sheetName.matches(entry.getValue()))
+                    .map(Map.Entry::getKey)
+                    .filter(this.cellsTableDefMap::containsKey)
+                    .findFirst();
+
+            return matchingPattern
+                    .map(s -> new XlsxCellsToTableBuilder(this.cellsTableDefMap.get(s), this.fileInfo()))
+                    .orElseGet(() -> XlsxCellsToTableBuilder.NO_TARGET);
         }
 
         @Override
         public XlsxSchema addFileInfo(final File sourceFile, final String sheetName) {
-            return new SimpleImpl(this.rowsTableDefMap(), this.cellsTableDefMap()
+            return new SimpleImpl(this.rowsTableDefMap(), this.cellsTableDefMap(), this.sheetPatterns()
                     , new FileInfo(sourceFile.getAbsolutePath().replaceAll("\\\\", "/"), sourceFile.getName(), sheetName));
         }
     }
