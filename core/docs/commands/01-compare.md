@@ -7,10 +7,10 @@
 * -targetType: 比較対象のタイプ(data/image/pdf) - [詳細な設定](#targettype)
 * -setting: 比較設定ファイルパス - [スキーマ定義](../schemas/01-comparison.md)
 * -settingEncoding: 設定ファイルのエンコーディング
-* new.* : 新データセットの設定 - [データソース設定](../settings/01-data-source.md)
-* old.* : 旧データセットの設定 - [データソース設定](../settings/01-data-source.md)
-* expect.* : 期待値データセットの設定（オプション） - [データソース設定](../settings/01-data-source.md)
-* result.* : 結果出力オプション - [出力設定](../settings/02-output.md)
+* new.* : 新データセットの設定 - [データソース設定](../options/01-data-source.md)
+* old.* : 旧データセットの設定 - [データソース設定](../options/01-data-source.md)
+* expect.* : 期待値データセットの設定（オプション） - [データソース設定](../options/01-data-source.md)
+* result.* : 結果出力オプション - [出力設定](../options/02-output.md)
 
 ## タイプ別オプション
 ### targetType
@@ -20,12 +20,12 @@
 * settingEncoding: 設定ファイルのエンコーディング
 
 #### image: 画像比較モード
-* image.*: [画像比較オプション](../settings/04-image.md)
+* image.*: [画像比較オプション](../options/04-image.md)
 * new/old.srcType: 自動的に'file'に設定
 * new/old.extension: 自動的に'png'に設定
 
 #### pdf: PDF比較モード
-* image.*: [画像比較オプション](../settings/04-image.md)（PDFを画像として比較）
+* image.*: [画像比較オプション](../options/04-image.md)（PDFを画像として比較）
 * new/old.srcType: 自動的に'file'に設定
 * new/old.extension: 自動的に'pdf'に設定
 

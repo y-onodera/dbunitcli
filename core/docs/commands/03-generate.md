@@ -10,8 +10,8 @@
 * -resultDir: 出力先ディレクトリ
 * -resultPath: 出力ファイルパス
 * -outputEncoding: 出力エンコーディング
-* src.* : ソースデータセットの設定 - [データソース設定](../settings/01-data-source.md)
-* template.* : テンプレート設定 - [テンプレート設定](../settings/03-database.md#templaterenderoption-template)
+* src.* : ソースデータセットの設定 - [データソース設定](../options/01-data-source.md)
+* template.* : テンプレート設定 - [テンプレート設定](../options/03-database.md#templaterenderoption-template)
 
 ## 生成タイプ別の設定
 
@@ -27,8 +27,39 @@
 ### settings: 設定ファイル生成
 * 固定テンプレート使用
 * -unit: datasetに固定
+* -includeAllColumns: カラム情報の出力制御（true/false）
 * src.useJdbcMetaData: 自動的に'true'に設定
 * src.loadData: 自動的に'false'に設定
+
+#### 出力形式
+##### includeAllColumns=false（デフォルト）
+```json
+{
+  "name": "テーブル名",
+  "keys": ["主キーカラム名"]
+}
+```
+
+##### includeAllColumns=true
+```json
+{
+  "name": "テーブル名",
+  "keys": ["主キーカラム名"],
+  "include": ["全カラム名のリスト"],
+  "exclude": [],
+  "string": ["文字列型カラム名のリスト"],
+  "number": ["数値型カラム名のリスト"],
+  "boolean": [],
+  "sqlFunction": []
+}
+```
+
+* includeセクション: テーブルの全カラム名を出力
+* excludeセクション: 除外するカラム名を指定（デフォルト空配列）
+* stringセクション: 文字列型のカラム名を出力
+* numberセクション: 数値型のカラム名を出力（NUMERIC, DECIMAL, INTEGER, BIGINT, SMALLINT, FLOAT, DOUBLE, REALなど）
+* booleanセクション: 真偽値変換が必要なカラム名を指定（デフォルト空配列）
+* sqlFunctionセクション: SQL関数式を適用するカラム名を指定（デフォルト空配列）
 
 ### sql: SQLファイル生成
 * 固定テンプレート使用

@@ -10,8 +10,8 @@
 * -template: テンプレートファイルパス
 * -ignoreFail: 失敗を無視するかどうか
 * -parameterize: パラメータ化を有効にするかどうか
-* param.* : パラメータデータセットの設定 - [データソース設定](../settings/01-data-source.md)
-* template.* : テンプレート設定 - [テンプレート設定](../settings/03-database.md#templaterenderoption-template)
+* param.* : パラメータデータセットの設定 - [データソース設定](../options/01-data-source.md)
+* template.* : テンプレート設定 - [テンプレート設定](../options/03-database.md#templaterenderoption-template)
 
 ## パラメータ単位
 

@@ -1,7 +1,5 @@
 # DBUnit CLI ドキュメント
 
-このドキュメントは、dbunitcliの機能と使用方法について説明します。
-
 ## 目次
 
 ### 1. プロジェクト情報
@@ -16,11 +14,10 @@
 - [Parameterizeコマンド](commands/05-parameterize.md)
 
 ### 3. 設定リファレンス
-- [データソース設定](settings/01-data-source.md)
-- [出力設定](settings/02-output.md)
-- [データベース設定](settings/03-database.md)
-- [画像比較設定](settings/04-image.md)
+- [データソース設定](options/01-data-source.md)
+- [出力設定](options/02-output.md)
+- [データベース設定](options/03-database.md)
+- [画像比較設定](options/04-image.md)
 
 ### 4. JSONスキーマ
-- [比較設定ファイル](schemas/01-comparison.md)
-- [Excelスキーマファイル](schemas/02-excel.md)
+- [スキーマリファレンス](schemas/01-index.md)
