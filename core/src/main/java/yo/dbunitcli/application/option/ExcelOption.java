@@ -1,9 +1,9 @@
 package yo.dbunitcli.application.option;
 
 import yo.dbunitcli.application.dto.DataSetLoadDto;
+import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.resource.FileResources;
-import yo.dbunitcli.resource.poi.FromJsonXlsxSchemaBuilder;
 
 public record ExcelOption(String prefix, String xlsxSchemaSource) implements ComparableDataSetParamOption {
 

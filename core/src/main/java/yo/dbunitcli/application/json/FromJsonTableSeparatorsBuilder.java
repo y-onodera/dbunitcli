@@ -1,6 +1,7 @@
-package yo.dbunitcli.dataset;
+package yo.dbunitcli.application.json;
 
 import jakarta.json.*;
+import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.*;
@@ -174,7 +175,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
 
     protected TableSeparator.TargetFilter getTargetFilter(final JsonObject settingJson) {
         if (settingJson.containsKey("name")) {
-            if (settingJson.get("name") instanceof JsonString targetName) {
+            if (settingJson.get("name") instanceof final JsonString targetName) {
                 return TableSeparator.TargetFilter.any(targetName.getString());
             } else {
                 final JsonArray names = settingJson.getJsonArray("name");
@@ -183,7 +184,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
                         .toArray(String[]::new));
             }
         } else if (settingJson.containsKey("pattern")) {
-            if (settingJson.get("pattern") instanceof JsonString targetString) {
+            if (settingJson.get("pattern") instanceof final JsonString targetString) {
                 return TableSeparator.TargetFilter.contain(targetString.getString());
             } else {
                 final JsonObject pattern = settingJson.getJsonObject("pattern");

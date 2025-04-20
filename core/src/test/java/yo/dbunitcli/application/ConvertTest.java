@@ -8,6 +8,7 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.junit.jupiter.api.*;
+import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.dataset.ComparableDataSetImpl;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
@@ -16,7 +17,6 @@ import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
-import yo.dbunitcli.resource.poi.FromJsonXlsxSchemaBuilder;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;

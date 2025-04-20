@@ -3,6 +3,7 @@ package yo.dbunitcli.application;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.cli.CommandLineParser;
 import yo.dbunitcli.application.cli.DefaultArgumentMapper;
+import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ImageCompareOption;
