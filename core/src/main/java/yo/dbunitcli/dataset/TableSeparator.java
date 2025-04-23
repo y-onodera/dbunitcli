@@ -10,6 +10,7 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.filter.IColumnFilter;
+import yo.dbunitcli.common.filter.TargetFilter;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -27,8 +28,8 @@ public record TableSeparator(TargetFilter targetFilter
         , boolean distinct
 ) {
 
-    public static final TargetFilter ACCEPT_ALL = new TargetFilter.Always(true);
-    public static final TargetFilter REJECT_ALL = new TargetFilter.Always(false);
+    public static final TargetFilter ACCEPT_ALL = TargetFilter.always(true);
+    public static final TargetFilter REJECT_ALL = TargetFilter.always(false);
     public static final RowFilter NO_FILTER = new RowFilter(new ArrayList<>());
 
     public static final TableSeparator NONE = TableSeparator.builder().build();
@@ -152,51 +153,6 @@ public record TableSeparator(TargetFilter targetFilter
                     .toList().toArray(new Column[0]));
         }
         return result;
-    }
-
-    public interface TargetFilter {
-
-        static TargetFilter any(final String... names) {
-            return new Any(List.of(names));
-        }
-
-        static TargetFilter contain(final String pattern) {
-            return new Contain(pattern);
-        }
-
-        default TargetFilter exclude(final List<String> names) {
-            return new Exclude(this, names);
-        }
-
-        boolean test(String tableName);
-
-        record Exclude(TargetFilter base, List<String> names) implements TargetFilter {
-            @Override
-            public boolean test(final String tableName) {
-                return this.base.test(tableName) && !this.names().contains(tableName);
-            }
-        }
-
-        record Any(List<String> names) implements TargetFilter {
-            @Override
-            public boolean test(final String tableName) {
-                return this.names().contains(tableName);
-            }
-        }
-
-        record Contain(String patternString) implements TargetFilter {
-            @Override
-            public boolean test(final String tableName) {
-                return tableName.contains(this.patternString()) || this.patternString().equals("*");
-            }
-        }
-
-        record Always(boolean result) implements TargetFilter {
-            @Override
-            public boolean test(final String tableName) {
-                return this.result();
-            }
-        }
     }
 
     public record RowFilter(List<JexlExpression> expressions) {

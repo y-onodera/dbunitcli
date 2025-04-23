@@ -7,6 +7,7 @@ import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import yo.dbunitcli.common.filter.TargetFilter;
 
 import java.io.File;
 import java.util.Arrays;
@@ -49,7 +50,7 @@ public interface XlsxSchema {
 
         Map<String, List<XlsxCellsTableDefine>> getCellsTableDefMap();
 
-        Map<String, String> getSheetPatterns();
+        Map<String, TargetFilter> getSheetPatterns();
 
         default XlsxSchema build() {
             return new SimpleImpl(this);
@@ -113,7 +114,7 @@ public interface XlsxSchema {
 
     record SimpleImpl(Map<String, List<XlsxRowsTableDefine>> rowsTableDefMap
             , Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap
-            , Map<String, String> sheetPatterns
+            , Map<String, TargetFilter> sheetPatterns
             , FileInfo fileInfo) implements XlsxSchema {
 
         SimpleImpl(final Builder builder) {
@@ -132,7 +133,7 @@ public interface XlsxSchema {
 
             // パターンマッチのチェック
             return this.sheetPatterns.entrySet().stream()
-                    .anyMatch(entry -> sheetName.matches(entry.getValue()));
+                    .anyMatch(entry -> entry.getValue().test(sheetName));
         }
 
         @Override
@@ -142,9 +143,9 @@ public interface XlsxSchema {
                 return new ManualRowsMappingTableBuilder(this.rowsTableDefMap.get(sheetName), this.fileInfo());
             }
 
-            // パターンマッチのチェック
+            // パターンマッチのチェック - 共通のTargetFilterを使用
             final var matchingPattern = this.sheetPatterns.entrySet().stream()
-                    .filter(entry -> sheetName.matches(entry.getValue()))
+                    .filter(entry -> entry.getValue().test(sheetName))
                     .map(Map.Entry::getKey)
                     .filter(this.rowsTableDefMap::containsKey)
                     .findFirst();
@@ -161,9 +162,9 @@ public interface XlsxSchema {
                 return new XlsxCellsToTableBuilder(this.cellsTableDefMap.get(sheetName), this.fileInfo());
             }
 
-            // パターンマッチのチェック
+            // パターンマッチのチェック - 共通のTargetFilterを使用
             final var matchingPattern = this.sheetPatterns.entrySet().stream()
-                    .filter(entry -> sheetName.matches(entry.getValue()))
+                    .filter(entry -> entry.getValue().test(sheetName))
                     .map(Map.Entry::getKey)
                     .filter(this.cellsTableDefMap::containsKey)
                     .findFirst();

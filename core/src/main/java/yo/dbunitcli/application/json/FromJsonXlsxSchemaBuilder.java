@@ -1,10 +1,8 @@
 package yo.dbunitcli.application.json;
 
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
+import jakarta.json.*;
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.common.filter.TargetFilter;
 import yo.dbunitcli.resource.poi.XlsxCellsTableDefine;
 import yo.dbunitcli.resource.poi.XlsxRowsTableDefine;
 import yo.dbunitcli.resource.poi.XlsxSchema;
@@ -23,7 +21,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
 
     private final Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap = new HashMap<>();
 
-    private final Map<String, String> sheetPatterns = new HashMap<>();
+    private final Map<String, TargetFilter> sheetPatterns = new HashMap<>();
 
     public XlsxSchema build(final File schema) throws FileNotFoundException, UnsupportedEncodingException {
         if (schema == null) {
@@ -60,7 +58,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
     }
 
     @Override
-    public Map<String, String> getSheetPatterns() {
+    public Map<String, TargetFilter> getSheetPatterns() {
         return this.sheetPatterns;
     }
 
@@ -70,7 +68,24 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
         }
 
         final JsonObject patterns = setting.getJsonObject("patterns");
-        patterns.keySet().forEach(key -> this.sheetPatterns.put(key, patterns.getString(key)));
+        patterns.keySet().forEach(key -> {
+            final var value = patterns.get(key);
+            if (value.getValueType() == JsonValue.ValueType.STRING) {
+                this.sheetPatterns.put(key, TargetFilter.contain(patterns.getString(key)));
+            } else if (value.getValueType() == JsonValue.ValueType.ARRAY) {
+                this.sheetPatterns.put(key, TargetFilter.any(this.jsonArrayToStream(value.asJsonArray())
+                        .toArray(String[]::new)));
+            } else if (value.getValueType() == JsonValue.ValueType.OBJECT) {
+                final var obj = value.asJsonObject();
+                final var containsPattern = TargetFilter.contain(obj.getString("string"));
+                if (obj.containsKey("exclude")) {
+                    this.sheetPatterns.put(key, containsPattern
+                            .exclude(this.jsonArrayToStream(obj.getJsonArray("exclude")).toList()));
+                } else {
+                    this.sheetPatterns.put(key, containsPattern);
+                }
+            }
+        });
         return this;
     }
 

@@ -3,6 +3,7 @@ package yo.dbunitcli.application.json;
 import jakarta.json.*;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.common.filter.TargetFilter;
 
 import java.io.*;
 import java.util.*;
@@ -126,7 +127,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         other.add(this.build());
     }
 
-    protected void addTableSeparate(final JsonObject json, final TableSeparator.TargetFilter targetFilter) {
+    protected void addTableSeparate(final JsonObject json, final TargetFilter targetFilter) {
         if (json.containsKey("innerJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("innerJoin")
                     , ComparableTableJoin.innerJoin(this.getJoinOn(json.getJsonObject("innerJoin")))
@@ -144,7 +145,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         }
     }
 
-    protected List<TableSeparator> getTableSeparators(final JsonObject settingJson, final TableSeparator.TargetFilter targetFilter) {
+    protected List<TableSeparator> getTableSeparators(final JsonObject settingJson, final TargetFilter targetFilter) {
         if (settingJson.containsKey("separate")) {
             final JsonArray expressions = settingJson.getJsonArray("separate");
             return IntStream.range(0, expressions.size())
@@ -159,7 +160,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         return this.getTableSeparator(settingJson, this.getTargetFilter(settingJson));
     }
 
-    protected TableSeparator getTableSeparator(final JsonObject settingJson, final TableSeparator.TargetFilter targetFilter) {
+    protected TableSeparator getTableSeparator(final JsonObject settingJson, final TargetFilter targetFilter) {
         return TableSeparator.builder()
                 .setTargetFilter(targetFilter)
                 .setSplitter(this.getSplitter(settingJson))
@@ -173,24 +174,24 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
                 .build();
     }
 
-    protected TableSeparator.TargetFilter getTargetFilter(final JsonObject settingJson) {
+    protected TargetFilter getTargetFilter(final JsonObject settingJson) {
         if (settingJson.containsKey("name")) {
             if (settingJson.get("name") instanceof final JsonString targetName) {
-                return TableSeparator.TargetFilter.any(targetName.getString());
+                return TargetFilter.any(targetName.getString());
             } else {
                 final JsonArray names = settingJson.getJsonArray("name");
-                return TableSeparator.TargetFilter.any(IntStream.range(0, names.size())
+                return TargetFilter.any(IntStream.range(0, names.size())
                         .mapToObj(names::getString)
                         .toArray(String[]::new));
             }
         } else if (settingJson.containsKey("pattern")) {
             if (settingJson.get("pattern") instanceof final JsonString targetString) {
-                return TableSeparator.TargetFilter.contain(targetString.getString());
+                return TargetFilter.contain(targetString.getString());
             } else {
                 final JsonObject pattern = settingJson.getJsonObject("pattern");
-                TableSeparator.TargetFilter result = TableSeparator.ACCEPT_ALL;
+                TargetFilter result = TableSeparator.ACCEPT_ALL;
                 if (pattern.containsKey("string")) {
-                    result = TableSeparator.TargetFilter.contain(pattern.getString("string"));
+                    result = TargetFilter.contain(pattern.getString("string"));
                 }
                 if (pattern.containsKey("exclude")) {
                     final JsonArray names = pattern.getJsonArray("exclude");

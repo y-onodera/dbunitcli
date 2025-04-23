@@ -25,6 +25,6 @@ public class ComparableDirectoryDataSetProducerTest {
         Assertions.assertEquals(src.getPath(), actual.getSrc());
         Assertions.assertEquals(1, actual.getTables().length);
         final ITable table = actual.getTable("java");
-        Assertions.assertEquals(4, table.getRowCount());
+        Assertions.assertEquals(6, table.getRowCount());
     }
 }
