@@ -61,7 +61,3 @@ $subTemplate()$      // サブテンプレート
 ```
 $! This is a comment !$
 ```
-
-型の定義や使用方法の詳細は以下を参照：
-- [データ型の定義](../../json/settings/tables/types/01-data-types.md)
-- [テンプレート機能概要](01-overview.md)

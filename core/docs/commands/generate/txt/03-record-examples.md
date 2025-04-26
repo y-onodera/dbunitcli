@@ -1,5 +1,7 @@
 # テンプレートのデータ処理：基本編
 
+> [テキストファイル生成機能](../02-txt-generate.md)のレコード単位での処理例です。
+
 generateコマンドでtxtを指定した場合のパラメータ単位別の生成例を説明します。
 
 ## record単位の処理
@@ -73,7 +75,3 @@ $rowNum + 1$. $row.name$ ($row.email$)
 1. John (john@example.com)
 2. Alice (alice@example.com)
 ```
-
-詳細は以下を参照してください：
-- [パラメータ単位](02-processing-units.md.md)
-- [テンプレート構文](04-syntax.md)

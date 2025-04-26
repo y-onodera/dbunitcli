@@ -1,4 +1,6 @@
-# テンプレートのデータ処理：応用編
+# テンプレートのデータ処理：テーブル単位
+
+> [テキストファイル生成機能](../02-txt-generate.md)のテーブル単位での処理例です。
 
 table単位での生成例を説明します。
 
@@ -42,7 +44,3 @@ INSERT INTO users (id, name, email, role) VALUES
 (2, 'Alice', 'alice@example.com', 'user'),
 (3, 'Bob', 'bob@example.com', 'user');
 ```
-
-詳細は以下を参照してください：
-- [パラメータ単位](02-processing-units.md.md)
-- [テンプレート構文](04-syntax.md)

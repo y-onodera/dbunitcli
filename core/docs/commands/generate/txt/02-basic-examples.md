@@ -1,5 +1,7 @@
 # テキストファイル生成の基本
 
+> [テキストファイル生成機能](../02-txt-generate.md)の基本的な使用例です。
+
 generateコマンドでtypeにtxtを指定した場合のテンプレート作成方法を説明します。
 
 ## 基本的な使い方
@@ -54,6 +56,3 @@ VALUES ('John', 'john@example.com');
 INSERT INTO users (name, email)
 VALUES ('Alice', 'alice@example.com');
 ```
-詳細は以下を参照してください：
-- [パラメータ単位](02-processing-units.md.md)
-- [テンプレート構文](04-syntax.md)

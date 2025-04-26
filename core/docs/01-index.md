@@ -18,23 +18,16 @@
 #### テンプレート機能
 
 **基本概念**
-- [テンプレート機能の概要](commands/template/01-overview.md)：基本的な使用方法
-- [処理単位](commands/template/02-processing-units.md)：record/table/dataset
-- [データ構造](commands/template/03-data-structures.md)：パラメータのデータ形式
+- [テンプレート機能の概要](options/template/01-overview.md)：基本的な使用方法
+- [処理単位](options/template/02-processing-units.md)：record/table/dataset
+- [データ構造](options/template/03-data-structures.md)：パラメータのデータ形式
 - [テンプレート構文](commands/template/04-syntax.md)：ST4の文法と機能
 
-**テキスト生成**
-- [基本的な例](commands/template/05-basic-examples.md)：SQL/テキスト生成
-- [レコード単位処理](commands/template/06-record-examples.md)：1行ごとの処理
-- [テーブル単位処理](commands/template/07-table-examples.md)：テーブル単位の処理
-- [テーブル単位処理](commands/template/08-dataset-examples.md)：データセット単位の処理
-
 **コマンドでのテンプレート処理**
-- [パラメータ処理例](commands/template/09-parameter-examples.md)：Parameterizeコマンド
-- [共通利用ガイド](commands/template/10-common-usage.md)：
-  - Runコマンドでの動的SQL実行
+- [共通利用ガイド](options/template/05-common-usage.md)：
   - DataSetLoadOptionでのテンプレート使用
   - コマンド間の連携パターン
+- [パラメータ処理例](options/template/06-parameter-examples.md)：Parameterizeコマンド
 
 ### 3. オプションリファレンス
 - [データソース設定](options/01-data-source.md)：データの読み込み設定

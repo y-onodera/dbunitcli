@@ -9,6 +9,9 @@
 * -templateGroup: テンプレートグループファイルのパス
 * -encoding: テンプレートのエンコーディング
 * -formulaProcess: Excel数式処理の有効化（xlsxのみ）
+* -evaluateFormulas: Excel数式の評価制御（デフォルト: true）
+  - formulaProcessがtrueの場合のみ有効
+  - falseの場合は数式がそのまま保持される
 
 ### テンプレート変数の制御
 * -templateParameterAttribute: テンプレートパラメータの属性名（デフォルト: "param"）
@@ -41,12 +44,33 @@ dbunit generate -generateType txt \
   -template.templateVarStop "@"
 ```
 
-## 注意事項
-- テンプレートファイルのエンコーディングを正しく指定
-- 大きなデータセットを扱う場合はメモリ使用に注意
-- テンプレート変数の記号が他の部分と競合しないよう注意
+## Excel数式の処理
+
+### 数式処理の制御
+Excel出力時の数式処理は以下の2つのオプションで制御されます：
+
+1. formulaProcess
+   - 数式処理機能の有効/無効を制御
+   - falseの場合、メモリ使用量を抑制できるが、行の増減に応じたセル参照の自動調整が無効
+
+2. evaluateFormulas
+   - 数式の評価有無を制御
+   - formulaProcessがtrueの場合のみ有効
+   - falseの場合は数式をそのまま保持（計算結果への置換を行わない）
+
+### 使用例
+```bash
+# 数式を評価して結果を出力
+dbunit generate -generateType xlsx \
+  -template.formulaProcess true \
+  -evaluateFormulas true
+
+# 数式をそのまま保持
+dbunit generate -generateType xlsx \
+  -template.formulaProcess true \
+  -evaluateFormulas false
+```
 
 詳細な使用例は以下を参照：
-- [テンプレート構文](../commands/template/04-syntax.md)
-- [基本的な例](../commands/template/05-basic-examples.md)
-- [共通利用ガイド](../commands/template/10-common-usage.md)
+- [テンプレート構文](template/04-syntax.md)
+- [共通利用ガイド](template/05-common-usage.md)

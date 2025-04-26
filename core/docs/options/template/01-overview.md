@@ -22,7 +22,7 @@ StringTemplate 4（ST4）の基本的な使い方：
 - 条件分岐で使用する場合は、boolean型として定義が必要
 - 条件分岐で式（例：price > 1000）を使用する場合は、boolean型のカラムとして式を定義
 
-型定義の詳細は[データ型の定義](../json/settings/tables/types/01-data-types.md)を参照
+型定義の詳細は[データ型の定義](../../json/settings/tables/types/01-data-types.md)を参照
 
 ## パラメータの渡し方
 
@@ -66,16 +66,13 @@ dbunit generate -generateType txt \
 
 ### テキスト生成
 generateコマンドでのテンプレート活用例：
-- [基本的な使用例](05-basic-examples.md)：シンプルなテキスト生成
-- [レコード単位の処理](06-record-examples.md)：1行ごとの処理
-- [テーブル単位の処理](07-table-examples.md)：複数行の一括処理
-- [データセット単位の処理](08-dataset-examples.md)：複数テーブルの一括処理
+- [テキスト生成](../../commands/generate/02-txt-generate.md)：シンプルなテキスト生成
 
 ### コマンドでの活用
-- [パラメータ処理](09-parameter-examples.md)：Parameterizeコマンドでの使用
-- [共通利用ガイド](10-common-usage.md)：
+- [共通利用ガイド](05-common-usage.md)：
   - Runコマンドでの動的SQL実行
   - DataSetLoadOptionでのテンプレート使用
   - コマンド間の連携パターン
+- [パラメータ処理](06-parameter-examples.md)：Parameterizeコマンドでの使用
 
 より詳細な使い方は各セクションのドキュメントを参照してください。

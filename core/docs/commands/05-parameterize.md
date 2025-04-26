@@ -6,7 +6,7 @@
 ## 引数
 * -cmd: 実行するコマンド
 * -cmdParam: コマンドパラメータ
-* -unit: [パラメータ単位](template/02-processing-units.md)
+* -unit: [パラメータ単位](../options/template/02-processing-units.md)
 * -template: テンプレートファイルパス
 * -ignoreFail: 失敗を無視するかどうか
 * -parameterize: パラメータ化を有効にするかどうか
@@ -14,7 +14,7 @@
 * template.* : テンプレート設定 - [テンプレート設定](../options/04-template.md#templaterenderoption-template)
 
 詳細な説明は以下を参照してください：
-- [パラメータ単位の詳細](template/01-overview.md)
+- [パラメータ単位の詳細](../options/template/01-overview.md)
 
 ## 使用例
 ```bash

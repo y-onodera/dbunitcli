@@ -1,90 +1,61 @@
 # Generateコマンド
 
-## 基本機能
-テンプレートを使用してファイルを生成します。SQL、設定ファイル、テキストファイル、Excelファイルなど、様々な形式のファイル生成に対応しています。データセットの内容に基づいて動的にファイルを生成できます。
+## 概要
+generateコマンドは、データセットの内容に基づいて様々な形式のファイルを生成します。
+データベース構造やテンプレートを入力として、以下のような成果物を生成できます：
 
-## 引数
-* -generateType: 生成タイプ(txt/xlsx/xls/settings/sql)
-* -unit: [パラメータ単位](template/01-parameter-units.md)
-* -template: テンプレートファイルパス
-* -resultDir: 出力先ディレクトリ
-* -resultPath: 出力ファイルパス
-* -outputEncoding: 出力エンコーディング
-* src.* : ソースデータセットの設定 - [データソース設定](../options/01-data-source.md)
-* template.* : テンプレート設定 - [テンプレート設定](../options/04-template.md#templaterenderoption-template)
+- テキストファイル - StringTemplate4による柔軟なテキスト生成
+- Excelファイル - jxlsによる高度なExcel生成（xls/xlsx）
+- 設定ファイル - データベース構造に基づく設定情報
+- SQLファイル - データ操作用のSQL文
 
-## 生成タイプ別の設定
-
-### txt: テキストファイル生成
-* -template: テンプレートファイルパス
-* -unit: [パラメータ単位](template/01-parameter-units.md)を指定して生成
-
-### xlsx/xls: Excelファイル生成
-* -template: テンプレートファイルパス
-* -unit: [パラメータ単位](template/01-parameter-units.md)を指定（record/table/dataset）
-* template.formulaProcess: Excel数式処理の有効化（xlsxのみ）
-
-### settings: 設定ファイル生成
-* 固定テンプレート使用
-* -unit: datasetに固定
-* -includeAllColumns: カラム情報の出力制御（true/false）
-* src.useJdbcMetaData: 自動的に'true'に設定
-* src.loadData: 自動的に'false'に設定
-
-#### 出力形式
-##### includeAllColumns=false（デフォルト）
-```json
-{
-  "name": "テーブル名",
-  "keys": ["主キーカラム名"]
-}
-```
-
-##### includeAllColumns=true
-```json
-{
-  "name": "テーブル名",
-  "keys": ["主キーカラム名"],
-  "include": ["全カラム名のリスト"],
-  "exclude": [],
-  "string": {
-    "カラム名": "カラム名"
-  },
-  "number": {
-    "カラム名": "カラム名"
-  },
-  "boolean": {},
-  "sqlFunction": {}
-}
-```
-
-* includeセクション: テーブルの全カラム名を出力
-* excludeセクション: 除外するカラム名を指定（デフォルト空配列）
-* stringセクション: 文字列型のカラム名を指定
-* numberセクション: 数値型のカラム名を指定（NUMERIC, DECIMAL, INTEGER, BIGINT, SMALLINT, FLOAT, DOUBLE, REALなど）
-* booleanセクション: 真偽値変換が必要なカラム名を指定
-* sqlFunctionセクション: SQL関数式を適用するカラム名を指定
-
-### sql: SQLファイル生成
-* 固定テンプレート使用
-* -unit: tableに固定
-* -operation: SQL操作タイプ（INSERT/DELETE/UPDATE/CLEAN_INSERT/DELETE_INSERT）
-* -commit: コミット有無（デフォルト: true）
-* -sqlFilePrefix: 生成SQLファイル名のプレフィックス
-* -sqlFileSuffix: 生成SQLファイル名のサフィックス
-* src.useJdbcMetaData: 自動的に'true'に設定
-
-## 使用例
+## 基本的な使用方法
 ```bash
-# テーブルデータからSQL生成
-dbunit generate -generateType sql \
-  -operation INSERT \
-  -src.srcType table -src.src "users" \
-  -jdbc.url "jdbc:mysql://localhost/testdb" \
-  -resultDir ./sql
+dbunit generate -generateType <生成タイプ> -unit <生成単位> -template <テンプレート> -result <出力先>
+```
 
-# テンプレートを使用してExcelファイル生成
-dbunit generate -generateType xlsx \
-  -template template.xlsx \
-  -src.srcType csv -src.src data.csv \
-  -resultPath output.xlsx
+### 主要な引数
+| 引数 | 説明 | 必須 |
+|------|------|------|
+| -generateType | 生成する形式（txt/xlsx/xls/settings/sql） | ○ |
+| -unit | 生成単位（record/table/dataset） | ○ |
+| -template | テンプレートファイルのパス | △ |
+| -result | 出力先ディレクトリ | ○ |
+
+※ △：generateTypeにより必須/任意が変わります
+
+## 生成タイプ
+各生成タイプの詳細は以下のドキュメントを参照してください：
+
+- [テキストファイル生成](generate/02-txt-generate.md)
+  - StringTemplate4によるテキスト生成
+  - 柔軟なテンプレート構文
+  - 多様な出力形式に対応
+
+- [Excelファイル生成](generate/03-excel-generate.md)
+  - jxlsによるExcelファイル生成
+  - 複雑なレイアウトに対応
+  - 数式の処理制御が可能
+
+- [設定ファイル生成](generate/04-settings-generate.md)
+  - DB構造から設定情報を生成
+  - 主キー情報の自動抽出
+  - カラム情報の制御
+
+- [SQLファイル生成](generate/05-sql-generate.md)
+  - データ操作SQLの生成
+  - 複数の操作タイプに対応
+  - コミット制御が可能
+
+## 共通設定
+generateコマンドの基本機能と共通引数の詳細については[基本機能と共通引数](generate/01-overview.md)を参照してください。
+
+## 出力先の指定
+生成されたファイルは以下のルールで出力されます：
+
+1. -resultPathが指定された場合
+   - 指定されたパスに直接出力
+
+2. -resultDirが指定された場合
+   - 生成タイプとunitに応じて自動的にファイル名を決定
+   - 詳細は各生成タイプのドキュメントを参照
