@@ -18,6 +18,8 @@ public class JxlsTemplateRender {
 
     private final boolean formulaProcess;
 
+    private final boolean evaluateFormulas;
+
     public static Builder builder() {
         return new Builder();
     }
@@ -25,6 +27,7 @@ public class JxlsTemplateRender {
     public JxlsTemplateRender(final Builder builder) {
         this.templateParameterAttribute = builder.getTemplateParameterAttribute();
         this.formulaProcess = builder.isFormulaProcess();
+        this.evaluateFormulas = builder.isEvaluateFormulas();
     }
 
     public String getTemplateParameterAttribute() {
@@ -41,13 +44,15 @@ public class JxlsTemplateRender {
         try (final InputStream is = new FileInputStream(aTemplate)) {
             if (!aResultFile.getName().endsWith(".xls") && !this.formulaProcess) {
                 JxlsPoiTemplateFillerBuilder.newInstance()
-                        .withStreaming(JxlsStreaming.AUTO_DETECT)
+                        .withStreaming(JxlsStreaming.STREAMING_ON)
                         .withTemplate(is)
                         .withUpdateCellDataArea(false)
                         .buildAndFill(context, new JxlsOutputFile(aResultFile));
             } else {
                 JxlsPoiTemplateFillerBuilder.newInstance()
                         .withTemplate(is)
+                        .withRecalculateFormulasBeforeSaving(this.evaluateFormulas)
+                        .withRecalculateFormulasOnOpening(!this.evaluateFormulas)
                         .buildAndFill(context, new JxlsOutputFile(aResultFile));
             }
         }
@@ -58,6 +63,8 @@ public class JxlsTemplateRender {
         private String templateParameterAttribute = "param";
 
         private boolean formulaProcess;
+
+        private boolean evaluateFormulas = true;
 
         public String getTemplateParameterAttribute() {
             return this.templateParameterAttribute;
@@ -75,6 +82,15 @@ public class JxlsTemplateRender {
         public Builder setFormulaProcess(final boolean formulaProcess) {
             this.formulaProcess = formulaProcess;
             return this;
+        }
+
+        public Builder setEvaluateFormulas(final boolean evaluateFormulas) {
+            this.evaluateFormulas = evaluateFormulas;
+            return this;
+        }
+
+        public boolean isEvaluateFormulas() {
+            return this.evaluateFormulas;
         }
 
         public JxlsTemplateRender build() {

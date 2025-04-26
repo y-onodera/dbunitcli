@@ -18,8 +18,11 @@ public class TemplateRenderDto {
     @CommandLine.Option(names = "-templateVarStop", description = "StringTemplate expression stop char.default '$'\"")
     private String templateVarStop;
 
-    @CommandLine.Option(names = "-formulaProcess", description = "default true.if false xlsx output use LowerMemory but cellRef in formula isn't along with row increase")
+    @CommandLine.Option(names = "-formulaProcess", description = "default true. if false xlsx output use LowerMemory but cellRef in formula isn't along with row increase")
     private String formulaProcess;
+
+    @CommandLine.Option(names = "-evaluateFormulas", description = "default true. evaluate Excel formulas when formula process is enabled")
+    private String evaluateFormulas;
 
     public String getEncoding() {
         return this.encoding;
@@ -67,5 +70,13 @@ public class TemplateRenderDto {
 
     public void setFormulaProcess(final String formulaProcess) {
         this.formulaProcess = formulaProcess;
+    }
+
+    public String getEvaluateFormulas() {
+        return this.evaluateFormulas;
+    }
+
+    public void setEvaluateFormulas(final String evaluateFormulas) {
+        this.evaluateFormulas = evaluateFormulas;
     }
 }

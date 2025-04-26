@@ -138,11 +138,11 @@ public record GenerateOption(
         }
         result.addComponent("srcData", srcComponent.build());
         if (!this.generateType.isFixedTemplate()) {
-            result.addComponent("templateOption", this.templateOption.toCommandLineArgs());
+            result.addComponent("templateOption", this.templateOptionArgs());
         }
         result.putDir("-result", this.resultDir, BaseDir.RESULT)
                 .put("-resultPath", this.resultPath);
-        if (!(this.generateType.isAny(GenerateType.xlsx, GenerateType.xls))) {
+        if (!this.generateType.isExcel()) {
             result.put("-outputEncoding", this.outputEncoding);
         }
         return result;
@@ -161,6 +161,17 @@ public record GenerateOption(
 
     public File getTemplatePath() {
         return FileResources.searchTemplate(this.template());
+    }
+
+    private CommandLineArgs templateOptionArgs() {
+        final CommandLineArgsBuilder templateComponent = this.templateOption.toCommandLineArgsBuilder();
+        if (this.generateType.isExcel()) {
+            if (this.generateType == GenerateType.xlsx) {
+                templateComponent.put("-formulaProcess", this.templateOption.formulaProcess());
+            }
+            templateComponent.put("-evaluateFormulas", this.templateOption.evaluateFormulas());
+        }
+        return templateComponent.build();
     }
 
     private String getSqlTemplate() {
@@ -191,6 +202,7 @@ public record GenerateOption(
                 JxlsTemplateRender.builder()
                         .setTemplateParameterAttribute(option.templateOption.templateParameterAttribute())
                         .setFormulaProcess(option.templateOption.formulaProcess())
+                        .setEvaluateFormulas(option.templateOption.evaluateFormulas())
                         .build()
                         .render(option.getTemplatePath(), resultFile, param);
             }
@@ -200,6 +212,8 @@ public record GenerateOption(
             protected void write(final GenerateOption option, final File resultFile, final Map<String, Object> param) throws IOException {
                 JxlsTemplateRender.builder()
                         .setTemplateParameterAttribute(option.templateOption.templateParameterAttribute())
+                        .setFormulaProcess(option.templateOption.formulaProcess())
+                        .setEvaluateFormulas(option.templateOption.evaluateFormulas())
                         .build()
                         .render(option.getTemplatePath(), resultFile, param);
             }
@@ -279,6 +293,10 @@ public record GenerateOption(
 
         protected String getTemplateString(final GenerateOption option) {
             return null;
+        }
+
+        private boolean isExcel() {
+            return this.isAny(xlsx, xls);
         }
     }
 }

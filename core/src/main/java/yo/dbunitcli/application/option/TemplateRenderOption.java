@@ -15,6 +15,7 @@ public record TemplateRenderOption(
         , char templateVarStart
         , char templateVarStop
         , boolean formulaProcess
+        , boolean evaluateFormulas
         , String templateGroup
 ) implements ComparableDataSetParamOption {
 
@@ -24,7 +25,8 @@ public record TemplateRenderOption(
                 , dto.getTemplateParameterAttribute() != null ? dto.getTemplateParameterAttribute() : "param"
                 , Strings.isNotEmpty(dto.getTemplateVarStart()) ? dto.getTemplateVarStart().charAt(0) : '$'
                 , Strings.isNotEmpty(dto.getTemplateVarStop()) ? dto.getTemplateVarStop().charAt(0) : '$'
-                , !Strings.isNotEmpty(dto.getFormulaProcess()) || Boolean.parseBoolean(dto.getFormulaProcess())
+                , Strings.isEmpty(dto.getFormulaProcess()) || Boolean.parseBoolean(dto.getFormulaProcess())
+                , Strings.isEmpty(dto.getEvaluateFormulas()) || Boolean.parseBoolean(dto.getEvaluateFormulas())
                 , dto.getTemplateGroup()
         );
     }
@@ -51,11 +53,11 @@ public record TemplateRenderOption(
 
     public TemplateRender getTemplateRender() {
         return TemplateRender.builder()
+                .setEncoding(this.encoding())
                 .setTemplateGroup(FileResources.searchTemplate(this.templateGroup))
+                .setTemplateParameterAttribute(this.templateParameterAttribute)
                 .setTemplateVarStart(this.templateVarStart)
                 .setTemplateVarStop(this.templateVarStop)
-                .setTemplateParameterAttribute(this.templateParameterAttribute)
-                .setEncoding(this.encoding())
                 .build();
     }
 

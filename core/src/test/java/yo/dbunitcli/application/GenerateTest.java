@@ -69,6 +69,16 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateXlsxWithoutFormulaEvaluation() {
+            Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsxWithoutEvaluate.txt"});
+            Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/xlsx/compareResult.txt"
+                    , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"
+                    , "-new.src=" + GenerateTest.baseDir + "/generate/table/result/xlsx/Test1_withoutEvaluate.xlsx"
+                    , "-result=" + GenerateTest.baseDir + "/generate/table/result/xlsx/Test1WithoutEvaluate"
+            });
+        }
+
+        @Test
         public void testGenerateXlsxStreaming() {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsxStreaming.txt"});
             Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/streamxlsx/compareResult.txt"
