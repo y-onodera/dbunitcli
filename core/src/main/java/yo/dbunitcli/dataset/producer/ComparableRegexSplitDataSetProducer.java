@@ -20,14 +20,16 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     private final String encoding;
     private final Pattern dataSplitPattern;
     private final ComparableDataSetParam param;
-    private IDataSetConsumer consumer;
+    private final int startRow;
     private final String[] headerNames;
+    private IDataSetConsumer consumer;
     private Pattern headerSplitPattern;
 
     public ComparableRegexSplitDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrcFiles();
         this.encoding = this.param.encoding();
+        this.startRow = this.param.startRow();
         this.headerNames = this.param.headerNames();
         if (this.headerNames == null) {
             this.headerSplitPattern = Pattern.compile(this.param.headerSplitPattern());
@@ -66,19 +68,19 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
                     return;
                 }
             }
-            int lineNum = 0;
+            int row = 1;
             for (final String s : Files.readAllLines(aFile.toPath(), Charset.forName(this.getEncoding()))) {
-                if (lineNum == 0 && this.headerNames == null) {
+                if (row == this.startRow && this.headerNames == null) {
                     this.consumer.startTable(this.createMetaData(aFile, this.headerSplitPattern.split(s)));
                     if (!this.getParam().loadData()) {
                         break;
                     }
-                } else {
+                } else if (row >= this.startRow) {
                     this.consumer.row(this.dataSplitPattern.split(s));
                 }
-                lineNum++;
+                row++;
             }
-            ComparableRegexSplitDataSetProducer.LOGGER.info("produce - rows={}", lineNum);
+            ComparableRegexSplitDataSetProducer.LOGGER.info("produce - rows={}", row);
             this.consumer.endTable();
             ComparableRegexSplitDataSetProducer.LOGGER.info("produce - end   fileName={}", aFile);
         } catch (final IOException | DataSetException e) {

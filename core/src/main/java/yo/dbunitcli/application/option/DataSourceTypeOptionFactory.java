@@ -9,24 +9,28 @@ public class DataSourceTypeOptionFactory {
         return switch (type) {
             case xls, xlsx -> ComparableDataSetParamOption.join(
                     new FileTraverseOption(prefix, dto)
+                    , new StartRowOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
                     , new ExcelOption(prefix, dto)
             );
             case csv -> ComparableDataSetParamOption.join(
                     new FileTraverseOption(prefix, dto)
                     , new EncodingOption(prefix, dto)
+                    , new StartRowOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
                     , new CsvOption(prefix, dto)
             );
             case reg -> ComparableDataSetParamOption.join(
                     new FileTraverseOption(prefix, dto)
                     , new EncodingOption(prefix, dto)
+                    , new StartRowOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
                     , new RegexOption(prefix, dto)
             );
             case fixed -> ComparableDataSetParamOption.join(
                     new FileTraverseOption(prefix, dto)
                     , new EncodingOption(prefix, dto)
+                    , new StartRowOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
                     , new FixedOption(prefix, dto)
             );

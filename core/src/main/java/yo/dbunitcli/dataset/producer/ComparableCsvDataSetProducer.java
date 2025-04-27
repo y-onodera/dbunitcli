@@ -19,6 +19,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
     private final File[] src;
     private final ComparableDataSetParam param;
+    private final int startRow;
     private final String[] headerNames;
     private IDataSetConsumer consumer;
     private int processRow;
@@ -27,6 +28,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     public ComparableCsvDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrcFiles();
+        this.startRow = this.param.startRow();
         this.headerNames = this.param.headerNames();
         this.resetThePipeline();
     }
@@ -63,6 +65,8 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         try (final FileInputStream fi = new FileInputStream(file)) {
             final Reader reader = new BufferedReader(new InputStreamReader(fi, this.param.encoding()));
             final LineNumberReader lineNumberReader = new LineNumberReader(reader);
+
+            this.skipToStartRow(lineNumberReader);
             String[] headerName = this.headerNames;
             if (headerName == null) {
                 headerName = this.parseFirstLine(lineNumberReader, file.getAbsolutePath());
@@ -150,6 +154,18 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             }
         } catch (final IOException e) {
             throw new AssertionError(e);
+        }
+    }
+
+    protected void skipToStartRow(final LineNumberReader reader) throws IOException {
+        // startRow-1行を読み飛ばす
+        for (int i = 1; i < this.startRow; i++) {
+            final String line = reader.readLine();
+            if (line == null) {
+                throw new IllegalStateException(
+                        String.format("File has fewer lines than startRow. Required: %d, Actual: %d",
+                                this.startRow, i));
+            }
         }
     }
 

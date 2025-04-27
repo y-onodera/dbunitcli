@@ -13,26 +13,28 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
+public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
 
     private final String tableName;
     private final List<String> rowValues = new ArrayList<>();
     private final String[] headerNames;
+    private final int startRow;
     private ITableMetaData nowProcessing = null;
 
-    public FirstRowAsColumnTableBuilder(final String tableName, final String[] headerNames) {
+    public StartRowAsColumnTableBuilder(final String tableName, final int startRow, final String[] headerNames) {
         this.tableName = tableName;
         this.headerNames = headerNames;
+        this.startRow = startRow;
     }
 
     @Override
     public boolean isTableStart(final int rowNum) {
-        return rowNum == 0;
+        return rowNum == this.startRow - 1;
     }
 
     @Override
     public boolean hasRow(final int rowNum) {
-        return rowNum > 0;
+        return rowNum >= this.startRow;
     }
 
     @Override
@@ -84,5 +86,4 @@ public class FirstRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
             throw new AssertionError(e);
         }
     }
-
 }

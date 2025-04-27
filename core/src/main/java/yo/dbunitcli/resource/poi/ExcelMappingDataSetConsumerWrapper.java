@@ -14,19 +14,21 @@ public class ExcelMappingDataSetConsumerWrapper {
 
     protected final boolean loadData;
     private final XlsxSchema schema;
+    private final int startRow;
     protected IDataSetConsumer consumer;
     protected XlsxCellsToTableBuilder randomCellRecordBuilder;
     protected XlsxRowsToTableBuilder rowsTableBuilder;
     private int rowTableRows = 0;
 
-    public ExcelMappingDataSetConsumerWrapper(final IDataSetConsumer consumer, final XlsxSchema schema, final boolean loadData) {
+    public ExcelMappingDataSetConsumerWrapper(final IDataSetConsumer consumer, final int startRow, final XlsxSchema schema, final boolean loadData) {
         this.consumer = consumer;
+        this.startRow = startRow;
         this.schema = schema;
         this.loadData = loadData;
     }
 
     protected void handleSheetStart(final String tableName, final String[] headerNames) {
-        this.rowsTableBuilder = this.schema.getRowsTableBuilder(tableName, headerNames);
+        this.rowsTableBuilder = this.schema.getRowsTableBuilder(tableName, this.startRow, headerNames);
         this.randomCellRecordBuilder = this.schema.getCellRecordBuilder(tableName, headerNames);
     }
 
@@ -67,6 +69,10 @@ public class ExcelMappingDataSetConsumerWrapper {
                     }
                     this.consumer.startTable(this.rowsTableBuilder.startNewTable());
                     this.rowTableRows = 0;
+                    if (this.rowsTableBuilder.hasRow(rowNumber)) {
+                        this.addRowToTable(this.rowsTableBuilder.currentRow());
+                        this.rowTableRows++;
+                    }
                 } else if (this.rowsTableBuilder.hasRow(rowNumber)) {
                     if (this.rowsTableBuilder.hasRow(rowNumber)) {
                         this.addRowToTable(this.rowsTableBuilder.currentRow());

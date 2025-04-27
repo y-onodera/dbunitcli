@@ -46,9 +46,10 @@ public class DataSetLoadDto implements CompositeDto {
     private String recursive;
     @CommandLine.Option(names = "-regDataSplit", description = "regex to use split data row")
     private String regDataSplit;
-
     @CommandLine.Option(names = "-regHeaderSplit", description = "regex to use split header row")
     private String regHeaderSplit;
+    @CommandLine.Option(names = "-startRow", description = "start row number to load file (default: 1)")
+    private String startRow;
     private JdbcDto jdbc = new JdbcDto();
 
     private TemplateRenderDto templateRender = new TemplateRenderDto();
@@ -240,5 +241,13 @@ public class DataSetLoadDto implements CompositeDto {
 
     public void setIgnoreQuoted(final boolean ignoreQuoted) {
         this.ignoreQuoted = ignoreQuoted;
+    }
+
+    public String getStartRow() {
+        return this.startRow;
+    }
+
+    public void setStartRow(String startRow) {
+        this.startRow = startRow;
     }
 }

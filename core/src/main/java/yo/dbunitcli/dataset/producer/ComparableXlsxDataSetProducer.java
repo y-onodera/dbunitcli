@@ -34,6 +34,7 @@ import java.util.Arrays;
 public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
     private final File[] src;
+    private final int startRow;
     private final String[] headerNames;
     private final XlsxSchema schema;
     private final ComparableDataSetParam param;
@@ -45,6 +46,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
         this.param = param;
         this.src = this.param.getSrcFiles();
         this.sheetNameFilter = this.param.tableNameFilter();
+        this.startRow = this.param.startRow();
         this.headerNames = this.param.headerNames();
         this.schema = this.param.xlsxSchema();
         this.loadData = this.param.loadData();
@@ -102,7 +104,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
                     if (this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName)) {
                         ComparableXlsxDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
                         this.processSheet(styles, strings, this.schema.addFileInfo(sourceFile, sheetName)
-                                .createHandler(this.consumer, sheetName, this.headerNames, this.loadData), stream);
+                                .createHandler(this.consumer, sheetName, this.startRow, this.headerNames, this.loadData), stream);
                         ComparableXlsxDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", sheetName, index - 1);
                     }
                 }

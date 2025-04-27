@@ -3,8 +3,8 @@ package yo.dbunitcli.dataset.producer;
 import org.apache.poi.hssf.eventusermodel.*;
 import org.apache.poi.hssf.eventusermodel.dummyrecord.LastCellOfRowDummyRecord;
 import org.apache.poi.hssf.eventusermodel.dummyrecord.MissingCellDummyRecord;
-import org.apache.poi.hssf.record.Record;
 import org.apache.poi.hssf.record.*;
+import org.apache.poi.hssf.record.Record;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
@@ -51,7 +51,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
     private boolean outputNextStringRecord;
 
     public ComparableXlsDataSetProducer(final ComparableDataSetParam param) {
-        super(new DefaultConsumer(), param.xlsxSchema(), param.loadData());
+        super(new DefaultConsumer(), param.startRow(), param.xlsxSchema(), param.loadData());
         this.param = param;
         this.src = this.param.getSrcFiles();
         this.sheetNameFilter = param.tableNameFilter();

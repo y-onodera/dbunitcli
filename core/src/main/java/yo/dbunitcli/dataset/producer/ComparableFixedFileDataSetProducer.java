@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class ComparableFixedFileDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableFixedFileDataSetProducer.class);
     private final File[] src;
+    private final int startRow;
     private final String[] headerNames;
     private final List<Integer> columnLengths;
     private final ComparableDataSetParam param;
@@ -28,6 +29,7 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
     public ComparableFixedFileDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.getSrcFiles();
+        this.startRow = this.param.startRow();
         this.headerNames = this.param.headerName().split(",");
         this.columnLengths = Arrays.stream(this.param.fixedLength().split(","))
                 .map(Integer::valueOf)
@@ -60,9 +62,11 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
             ComparableFixedFileDataSetProducer.LOGGER.info("produce - start fileName={}", aFile);
             this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
             if (this.param.loadData()) {
-                int rows = 0;
+                int rows = 1;
                 for (final String s : Files.readAllLines(aFile.toPath(), Charset.forName(this.getEncoding()))) {
-                    this.consumer.row(this.split(s));
+                    if (rows >= this.startRow) {
+                        this.consumer.row(this.split(s));
+                    }
                     rows++;
                 }
                 ComparableFixedFileDataSetProducer.LOGGER.info("produce - rows={}", rows);

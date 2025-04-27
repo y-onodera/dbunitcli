@@ -46,9 +46,10 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public boolean isTableStart(final int rowNum) {
-        if (this.tableNames.length <= this.currentTableIndex + 1) return false;
-        final Integer startRow = this.tableStartRow.get(this.tableNames[this.currentTableIndex + 1]);
-        return (startRow > 0 && startRow == rowNum + 1) || (startRow == rowNum && startRow == 0);
+        if (!this.existsToBeMapping()) {
+            return false;
+        }
+        return this.getStartRow() == rowNum;
     }
 
     @Override
@@ -56,10 +57,9 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
         if (!this.isNowProcessing()) {
             return false;
         }
-        final ITableMetaData metaData = this.tableMetaDataMap.get(this.tableNames[this.currentTableIndex]);
-        for (final String conditionColumn : this.breakKey.get(this.tableNames[this.currentTableIndex])) {
-            if (this.rowValues.size() <= this.getColumnIndex(metaData, conditionColumn)
-                    || Optional.ofNullable(this.rowValues.get(this.getColumnIndex(metaData, conditionColumn)))
+        for (final String conditionColumn : this.breakKey.get(this.getTableName())) {
+            if (this.rowValues.size() <= this.getColumnIndex(this.nowProcessing, conditionColumn)
+                    || Optional.ofNullable(this.rowValues.get(this.getColumnIndex(this.nowProcessing, conditionColumn)))
                     .orElse("").isEmpty()) {
                 return false;
             }
@@ -80,7 +80,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public void handle(final CellReference reference, final int lastCol, final String formattedValue) {
-        if (!this.isNowProcessing()) {
+        if (!this.isNowProcessing() && !(this.existsToBeMapping() && reference.getRow() >= this.getStartRow())) {
             return;
         }
         final int thisCol = reference.getCol();
@@ -109,9 +109,24 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
     }
 
     protected void addValue(final int i, final String o) {
-        if (this.targetIndex.get(this.tableNames[this.currentTableIndex]).contains(i)) {
+        if (this.targetIndex.get(this.getTableName()).contains(i)) {
             this.rowValues.add(o);
         }
+    }
+
+    private boolean existsToBeMapping() {
+        return this.tableNames.length > this.currentTableIndex + 1;
+    }
+
+    private Integer getStartRow() {
+        return this.tableStartRow.get(this.getTableName());
+    }
+
+    private String getTableName() {
+        if (this.isNowProcessing()) {
+            return this.tableNames[this.currentTableIndex];
+        }
+        return this.tableNames[this.currentTableIndex + 1];
     }
 
     private int getColumnLength() {

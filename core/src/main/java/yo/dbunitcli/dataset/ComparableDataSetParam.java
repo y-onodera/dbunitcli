@@ -29,6 +29,7 @@ public record ComparableDataSetParam(
         , NameFilter tableNameFilter
         , boolean useJdbcMetaData
         , boolean loadData
+        , int startRow
         , String headerName
         , String fixedLength
         , char delimiter
@@ -57,6 +58,7 @@ public record ComparableDataSetParam(
                 , builder.getTableNameFilter()
                 , builder.isUseJdbcMetaData()
                 , builder.isLoadData()
+                , builder.getStartRow()
                 , builder.getHeaderName()
                 , builder.getFixedLength()
                 , builder.getDelimiter()
@@ -111,6 +113,7 @@ public record ComparableDataSetParam(
         private XlsxSchema xlsxSchema = XlsxSchema.DEFAULT;
         private boolean useJdbcMetaData;
         private boolean loadData = true;
+        private int startRow = 1;
         private String headerName;
         private String fixedLength;
         private String extension;
@@ -177,6 +180,10 @@ public record ComparableDataSetParam(
 
         public boolean isLoadData() {
             return this.loadData;
+        }
+
+        public int getStartRow() {
+            return this.startRow;
         }
 
         public String getHeaderName() {
@@ -276,6 +283,11 @@ public record ComparableDataSetParam(
 
         public Builder setLoadData(final boolean loadData) {
             this.loadData = loadData;
+            return this;
+        }
+
+        public Builder setStartRow(final int startRow) {
+            this.startRow = startRow;
             return this;
         }
 
