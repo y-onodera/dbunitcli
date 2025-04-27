@@ -27,22 +27,22 @@ dbunit generate -generateType <生成タイプ> -unit <生成単位> -template <
 ## 生成タイプ
 各生成タイプの詳細は以下のドキュメントを参照してください：
 
-- [テキストファイル生成](generate/02-txt-generate.md)
+- [テキストファイル生成](generate/01-txt.md)
   - StringTemplate4によるテキスト生成
   - 柔軟なテンプレート構文
   - 多様な出力形式に対応
 
-- [Excelファイル生成](generate/03-excel-generate.md)
+- [Excelファイル生成](generate/02-excel.md)
   - jxlsによるExcelファイル生成
   - 複雑なレイアウトに対応
   - 数式の処理制御が可能
 
-- [設定ファイル生成](generate/04-settings-generate.md)
+- [設定ファイル生成](generate/03-settings.md)
   - DB構造から設定情報を生成
   - 主キー情報の自動抽出
   - カラム情報の制御
 
-- [SQLファイル生成](generate/05-sql-generate.md)
+- [SQLファイル生成](generate/04-sql.md)
   - データ操作SQLの生成
   - 複数の操作タイプに対応
   - コミット制御が可能

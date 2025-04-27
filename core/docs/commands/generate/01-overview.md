@@ -9,25 +9,25 @@ generateコマンドは、データセットの内容を基に各種ファイル
 - カスタムテンプレート使用可能
 - StringTemplate4エンジン使用
 - エンコーディング指定可能
-- 詳細は[テキストファイル生成](02-txt-generate.md)参照
+- 詳細は[テキストファイル生成](02-txt.md)参照
 
 ### xlsx/xls - Excelファイル生成
 - jxlsテンプレートエンジン使用
 - 数式処理オプション対応
 - セル書式の保持
-- 詳細は[Excelファイル生成](03-excel-generate.md)参照
+- 詳細は[Excelファイル生成](03-excel.md)参照
 
 ### settings - 設定ファイル生成
 - 固定テンプレート使用
 - JSON形式で出力
 - includeAllColumns対応
-- 詳細は[設定ファイル生成](04-settings-generate.md)参照
+- 詳細は[設定ファイル生成](04-settings.md)参照
 
 ### sql - SQLファイル生成
 - 固定テンプレート使用
 - 複数の操作タイプに対応
 - コミット制御可能
-- 詳細は[SQLファイル生成](05-sql-generate.md)参照
+- 詳細は[SQLファイル生成](05-sql.md)参照
 
 ## 共通設定項目
 | 引数 | 説明 | 必須 |

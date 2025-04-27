@@ -64,10 +64,6 @@ dbunit generate -generateType txt \
 
 ## テンプレートの使用例
 
-### テキスト生成
-generateコマンドでのテンプレート活用例：
-- [テキスト生成](../../commands/generate/02-txt-generate.md)：シンプルなテキスト生成
-
 ### コマンドでの活用
 - [共通利用ガイド](05-common-usage.md)：
   - Runコマンドでの動的SQL実行

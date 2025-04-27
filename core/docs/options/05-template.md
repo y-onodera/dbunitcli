@@ -72,5 +72,4 @@ dbunit generate -generateType xlsx \
 ```
 
 詳細な使用例は以下を参照：
-- [テンプレート構文](template/04-syntax.md)
-- [共通利用ガイド](template/05-common-usage.md)
+   - [テンプレート処理](template/01-overview.md)

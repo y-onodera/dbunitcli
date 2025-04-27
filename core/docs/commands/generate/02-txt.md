@@ -8,11 +8,11 @@ StringTemplateV4（St4）テンプレートエンジンを使用してテキス�
 テンプレートファイルはSt4の文法に従って記述します。
 基本的な文法や使用例については以下のドキュメントを参照してください：
 
-- [テンプレートの基本文法](../../options/template/04-syntax.md)
-- [基本的な使用例](txt/02-basic-examples.md)
-- [レコード単位の例](txt/03-record-examples.md)
-- [テーブル単位の例](txt/04-table-examples.md)
-- [データセット単位の例](txt/05-dataset-examples.md)
+- [テンプレート機能概要](../../options/template/01-overview.md)
+- [基本的な使用例](txt/01-basic-examples.md)
+- [レコード単位の例](txt/02-record-examples.md)
+- [テーブル単位の例](txt/03-table-examples.md)
+- [データセット単位の例](txt/04-dataset-examples.md)
 
 ## 設定項目
 | 引数 | 説明 | 必須 |

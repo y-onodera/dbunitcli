@@ -5,29 +5,27 @@
 
 ## 引数
 * -cmd: 実行するコマンド
-* -cmdParam: コマンドパラメータ
-* -unit: [パラメータ単位](../options/template/02-processing-units.md)
-* -template: テンプレートファイルパス
-* -ignoreFail: 失敗を無視するかどうか
-* -parameterize: パラメータ化を有効にするかどうか
 * param.* : パラメータデータセットの設定 - [データソース設定](../options/01-data-source.md)
-* template.* : テンプレート設定 - [テンプレート設定](../options/04-template.md#templaterenderoption-template)
-
-詳細な説明は以下を参照してください：
-- [パラメータ単位の詳細](../options/template/01-overview.md)
+* -cmdParam: パラメータファイル名として使用する列名
+* -template: デフォルトのパラメータファイル（cmdParamが指定された場合は無視）
+* -parameterize:  パラメータファイルをテンプレート展開するか（デフォルトtrue）
+* -unit: [パラメータ単位](../options/template/01-overview.md)
+* -ignoreFail: 失敗を無視するかどうか
+* template.* : テンプレート設定 - [テンプレート設定](../options/04-template.md)
 
 ## 使用例
 ```bash
 # CSVファイルの各行のデータでSQLを実行
 dbunit parameterize \
-  -cmd "run" -cmdParam "-scriptType sql" \
+  -cmd run -cmdParam query_file \
   -param.srcType csv -param.src params.csv \
   -template query.sql \
   -unit record
 
 # 複数のデータセットで比較を実行
 dbunit parameterize \
-  -cmd "compare" \
+  -cmd compare \
   -param.srcType csv -param.src test_cases.csv \
+  -template compare_param.txt \
   -templateGroup templates \
   -unit dataset
