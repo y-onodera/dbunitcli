@@ -29,12 +29,12 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public boolean isTableStart(final int rowNum) {
-        return rowNum == this.startRow - 1;
+        return rowNum + 1 == this.startRow;
     }
 
     @Override
     public boolean hasRow(final int rowNum) {
-        return rowNum >= this.startRow;
+        return rowNum + (this.headerNames != null ? 1 : 0) >= this.startRow;
     }
 
     @Override
@@ -50,6 +50,9 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public void handle(final CellReference reference, final int currentCol, final String formattedValue) {
+        if (reference.getRow() + 1 < this.startRow) {
+            return;
+        }
         final int thisCol = reference.getCol();
         final int missedCols = thisCol - currentCol - 1;
         IntStream.range(0, missedCols).forEach(i -> this.rowValues.add(""));

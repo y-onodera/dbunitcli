@@ -1,5 +1,6 @@
 -src=src/test/resources/yo/dbunitcli/application/src/csv2xlsx/single.xlsx
 -srcType=xlsx
 -headerName=key,col1,col2,col3
+-startRow=2
 -result=target/test-classes/yo/dbunitcli/application/convert/xlsx/with-header/result
 -outputEncoding=MS932
