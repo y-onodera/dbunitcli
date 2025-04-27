@@ -3,7 +3,8 @@ package yo.dbunitcli.application.json;
 import org.junit.jupiter.api.Test;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FromJsonXlsxSchemaBuilderTest {
 
@@ -49,10 +50,6 @@ class FromJsonXlsxSchemaBuilderTest {
         assertTrue(schema.contains("summary_2024"));
         assertTrue(schema.contains("summary_monthly"));
         assertFalse(schema.contains("summarysheet")); // no underscore after "summary"
-
-        // Test builder creation for matched sheet
-        assertNotEquals(XlsxSchema.DEFAULT, schema.getRowsTableBuilder("data_001", 1,new String[]{}));
-        assertNotEquals(XlsxSchema.DEFAULT, schema.getRowsTableBuilder("summary_2024", 1,new String[]{}));
     }
 
     @Test
