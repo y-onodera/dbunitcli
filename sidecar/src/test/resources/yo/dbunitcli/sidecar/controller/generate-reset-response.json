@@ -147,6 +147,15 @@
         "value": "UTF-8"
       },
       {
+        "name": "startRow",
+        "attribute": {
+          "type": "TEXT",
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": "1"
+      },
+      {
         "name": "headerName",
         "attribute": {
           "type": "TEXT",
