@@ -1,13 +1,4 @@
--src.srcType=csv
--src.src=src/test/resources/workspace/sample/resources/src/csv
--src.recursive=false
--src.encoding=windows-31j
--src.delimiter=,
--src.ignoreQuoted=false
--src.settingEncoding=windows-31j
--src.loadData=true
--src.includeMetaData=false
--result.resultType=xlsx
--result.result=target/convert/result
--result.exportEmptyTable=true
--result.excelTable=SHEET
+-src=src/test/resources/workspace/sample/resources/src/csv
+-srcType=csv
+-result=target/convert/result
+-resultType=xlsx
