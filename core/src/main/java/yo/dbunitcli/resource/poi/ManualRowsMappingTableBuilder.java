@@ -49,7 +49,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
         if (!this.existsToBeMapping()) {
             return false;
         }
-        return this.getStartRow() == rowNum;
+        return this.getDataStartRowIndex() == rowNum;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public void handle(final CellReference reference, final int lastCol, final String formattedValue) {
-        if (!this.isNowProcessing() && !(this.existsToBeMapping() && reference.getRow() >= this.getStartRow())) {
+        if (!this.isNowProcessing() && !(this.existsToBeMapping() && reference.getRow() >= this.getDataStartRowIndex())) {
             return;
         }
         final int thisCol = reference.getCol();
@@ -118,7 +118,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
         return this.tableNames.length > this.currentTableIndex + 1;
     }
 
-    private Integer getStartRow() {
+    private Integer getDataStartRowIndex() {
         return this.tableStartRow.get(this.getTableName());
     }
 

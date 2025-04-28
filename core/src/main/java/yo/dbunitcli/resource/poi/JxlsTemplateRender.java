@@ -20,6 +20,8 @@ public class JxlsTemplateRender {
 
     private final boolean evaluateFormulas;
 
+    private final boolean forceFormulaRecalc;
+
     public static Builder builder() {
         return new Builder();
     }
@@ -28,6 +30,7 @@ public class JxlsTemplateRender {
         this.templateParameterAttribute = builder.getTemplateParameterAttribute();
         this.formulaProcess = builder.isFormulaProcess();
         this.evaluateFormulas = builder.isEvaluateFormulas();
+        this.forceFormulaRecalc = builder().isForceFormulaRecalc();
     }
 
     public String getTemplateParameterAttribute() {
@@ -52,7 +55,7 @@ public class JxlsTemplateRender {
                 JxlsPoiTemplateFillerBuilder.newInstance()
                         .withTemplate(is)
                         .withRecalculateFormulasBeforeSaving(this.evaluateFormulas)
-                        .withRecalculateFormulasOnOpening(!this.evaluateFormulas)
+                        .withRecalculateFormulasOnOpening(this.forceFormulaRecalc)
                         .buildAndFill(context, new JxlsOutputFile(aResultFile));
             }
         }
@@ -65,6 +68,7 @@ public class JxlsTemplateRender {
         private boolean formulaProcess;
 
         private boolean evaluateFormulas = true;
+        private boolean forceFormulaRecalc = false;
 
         public String getTemplateParameterAttribute() {
             return this.templateParameterAttribute;
@@ -89,6 +93,11 @@ public class JxlsTemplateRender {
             return this;
         }
 
+        public Builder setForceFormulaRecalc(final boolean forceFormulaRecalc) {
+            this.forceFormulaRecalc = forceFormulaRecalc;
+            return this;
+        }
+
         public boolean isEvaluateFormulas() {
             return this.evaluateFormulas;
         }
@@ -97,5 +106,8 @@ public class JxlsTemplateRender {
             return new JxlsTemplateRender(this);
         }
 
+        public boolean isForceFormulaRecalc() {
+            return this.forceFormulaRecalc;
+        }
     }
 }

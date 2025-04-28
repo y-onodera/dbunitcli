@@ -16,6 +16,7 @@ public record TemplateRenderOption(
         , char templateVarStop
         , boolean formulaProcess
         , boolean evaluateFormulas
+        , boolean forceFormulaRecalc
         , String templateGroup
 ) implements ComparableDataSetParamOption {
 
@@ -27,6 +28,7 @@ public record TemplateRenderOption(
                 , Strings.isNotEmpty(dto.getTemplateVarStop()) ? dto.getTemplateVarStop().charAt(0) : '$'
                 , Strings.isEmpty(dto.getFormulaProcess()) || Boolean.parseBoolean(dto.getFormulaProcess())
                 , Strings.isEmpty(dto.getEvaluateFormulas()) || Boolean.parseBoolean(dto.getEvaluateFormulas())
+                , !Strings.isEmpty(dto.getForceFormulaRecalc()) || Boolean.parseBoolean(dto.getForceFormulaRecalc())
                 , dto.getTemplateGroup()
         );
     }

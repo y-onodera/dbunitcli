@@ -24,6 +24,9 @@ public class TemplateRenderDto {
     @CommandLine.Option(names = "-evaluateFormulas", description = "default true. evaluate Excel formulas when formula process is enabled")
     private String evaluateFormulas;
 
+    @CommandLine.Option(names = "-forceFormulaRecalc", description = "default false. recalculation formulas when opening the file in Excel")
+    private String forceFormulaRecalc;
+
     public String getEncoding() {
         return this.encoding;
     }
@@ -78,5 +81,13 @@ public class TemplateRenderDto {
 
     public void setEvaluateFormulas(final String evaluateFormulas) {
         this.evaluateFormulas = evaluateFormulas;
+    }
+
+    public String getForceFormulaRecalc() {
+        return this.forceFormulaRecalc;
+    }
+
+    public void setForceFormulaRecalc(final String forceFormulaRecalc) {
+        this.forceFormulaRecalc = forceFormulaRecalc;
     }
 }
