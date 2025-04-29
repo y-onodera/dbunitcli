@@ -20,6 +20,8 @@ import java.util.Properties;
 public class GenerateTest {
     private static final Project PROJECT = new Project();
     private static final Properties backup = new Properties();
+    private static final String RESOURCES_DIR = "src/test/resources/yo/dbunitcli/application";
+    private static final String TEMP_DIR = "target/test-temp/generate";
     private static String testResourcesDir;
     private static String baseDir;
     private static String subDirectory;
@@ -216,7 +218,11 @@ public class GenerateTest {
         }
 
         protected String getResult() {
-            return GenerateTest.baseDir + GenerateTest.subDirectory + "/result";
+            return this.getBaseDir() + GenerateTest.subDirectory + "/result";
+        }
+
+        protected String getBaseDir() {
+            return GenerateTest.baseDir;
         }
     }
 
@@ -227,23 +233,24 @@ public class GenerateTest {
     @Nested
     class AllSystemPropertyTest extends GenerateTest.TestCase {
 
+        private static final String TOP_DIR = TEMP_DIR + "/all/";
+
         @BeforeAll
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(GenerateTest.backup);
-            newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/generate/all/base");
-            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/generate/all/result");
-            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/generate/all/dataset");
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, TOP_DIR + "base");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, TOP_DIR + "result");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, TOP_DIR + "dataset");
             System.setProperties(newProperty);
-            GenerateTest.clean("target/test-temp/generate/all");
-            GenerateTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/generate/all/base/src/test/resources/yo/dbunitcli/application/settings");
-            GenerateTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/generate/all/dataset/src/test/resources/yo/dbunitcli/application/src");
-            GenerateTest.copy("src/test/resources/yo/dbunitcli/application/expect", "target/test-temp/generate/all/dataset/src/test/resources/yo/dbunitcli/application/expect");
+            GenerateTest.clean(TOP_DIR);
+            GenerateTest.copy(RESOURCES_DIR + "/settings", TOP_DIR + "base/" + RESOURCES_DIR + "/settings");
+            GenerateTest.copy(RESOURCES_DIR + "/src", TOP_DIR + "dataset/" + RESOURCES_DIR + "/src");
+            GenerateTest.copy(RESOURCES_DIR + "/expect", TOP_DIR + "dataset/" + RESOURCES_DIR + "/expect");
         }
 
-        @Override
-        protected String getResult() {
-            return super.getResult().replaceAll("/target/", "/target/test-temp/generate/all/result/target/");
+        protected String getBaseDir() {
+            return GenerateTest.baseDir.replaceAll("/target/", "/" + TOP_DIR + "result/target/");
         }
     }
 
@@ -253,15 +260,15 @@ public class GenerateTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(GenerateTest.backup);
-            newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/generate/base");
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, TEMP_DIR + "/base");
             System.setProperties(newProperty);
-            GenerateTest.clean("target/test-temp/generate/base");
-            GenerateTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/generate/base/src/test/resources/yo/dbunitcli/application");
+            GenerateTest.clean(TEMP_DIR + "/base");
+            GenerateTest.copy(RESOURCES_DIR, TEMP_DIR + "/base/" + RESOURCES_DIR);
         }
 
         @Override
-        protected String getResult() {
-            return super.getResult().replaceAll("/target/", "/target/test-temp/generate/base/target/");
+        protected String getBaseDir() {
+            return super.getBaseDir().replaceAll("/target/", "/" + TEMP_DIR + "/base/target/");
         }
     }
 
@@ -271,14 +278,14 @@ public class GenerateTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(GenerateTest.backup);
-            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/generate/result");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, TEMP_DIR + "/result");
             System.setProperties(newProperty);
-            GenerateTest.clean("target/test-temp/generate/result");
+            GenerateTest.clean(TEMP_DIR + "/result");
         }
 
         @Override
-        protected String getResult() {
-            return super.getResult().replaceAll("/target/", "/target/test-temp/generate/result/target/");
+        protected String getBaseDir() {
+            return super.getBaseDir().replaceAll("/target/", "/" + TEMP_DIR + "/result/target/");
         }
     }
 
@@ -288,10 +295,10 @@ public class GenerateTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(GenerateTest.backup);
-            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/generate/dataset");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, TEMP_DIR + "/dataset");
             System.setProperties(newProperty);
-            GenerateTest.clean("target/test-temp/generate/dataset");
-            GenerateTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/generate/dataset/src/test/resources/yo/dbunitcli/application/src");
+            GenerateTest.clean(TEMP_DIR + "/dataset");
+            GenerateTest.copy(RESOURCES_DIR + "/src", TEMP_DIR + "/dataset/" + RESOURCES_DIR + "/src");
         }
 
     }

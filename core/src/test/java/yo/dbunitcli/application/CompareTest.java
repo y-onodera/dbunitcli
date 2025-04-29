@@ -23,6 +23,8 @@ public class CompareTest {
 
     private static final Project PROJECT = new Project();
     private static final Properties backup = new Properties();
+    private static final String RESOURCES_DIR = "src/test/resources/yo/dbunitcli/application";
+    private static final String TEMP_DIR = "target/test-temp/compare";
     private static String baseDir;
 
     private static void copy(final String from, final String to) {
@@ -192,29 +194,35 @@ public class CompareTest {
     @Nested
     class AllSystemPropertyTest extends CompareTest.TestCase {
 
+        private static final String TOP_DIR = TEMP_DIR + "/all/";
+
         @BeforeAll
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(CompareTest.backup);
-            newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/compare/all/base");
-            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/compare/all/result");
-            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/compare/all/dataset");
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, TOP_DIR + "base");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, TOP_DIR + "result");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, TOP_DIR + "dataset");
             System.setProperties(newProperty);
-            CompareTest.clean("target/test-temp/compare/all");
-            CompareTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/compare/all/base/src/test/resources/yo/dbunitcli/application/settings");
-            CompareTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/compare/all/dataset/src/test/resources/yo/dbunitcli/application/src");
-            CompareTest.copy("src/test/resources/yo/dbunitcli/application/expect", "target/test-temp/compare/all/dataset/src/test/resources/yo/dbunitcli/application/expect");
+            CompareTest.clean(TEMP_DIR + "/all");
+            CompareTest.copy(RESOURCES_DIR + "/settings", TOP_DIR + "base/" + RESOURCES_DIR + "/settings");
+            CompareTest.copy(RESOURCES_DIR + "/src", TOP_DIR + "dataset/" + RESOURCES_DIR + "/src");
+            CompareTest.copy(RESOURCES_DIR + "/expect", TOP_DIR + "dataset/" + RESOURCES_DIR + "/expect");
+            getReplace().execute();
+        }
+
+        private static Replace getReplace() {
             final Replace replace = new Replace();
-            replace.setDir(new File("target/test-temp/compare/all/dataset/src/test/resources/yo/dbunitcli/application/expect"));
+            replace.setDir(new File(TOP_DIR + "dataset/" + RESOURCES_DIR + "/expect"));
             replace.setIncludes("**/*.csv");
             final Replace.Replacefilter filter1 = replace.createReplacefilter();
             filter1.setToken("src/test/resources");
-            filter1.setValue("target/test-temp/compare/all/dataset/src/test/resources");
+            filter1.setValue(TOP_DIR + "dataset/src/test/resources");
             final Replace.Replacefilter filter2 = replace.createReplacefilter();
             filter2.setToken("src\\\\test\\\\resources");
             filter2.setValue("target\\\\test-temp\\\\compare\\\\all\\\\dataset\\\\src\\\\test\\\\resources");
             replace.setProject(CompareTest.PROJECT);
-            replace.execute();
+            return replace;
         }
 
         @Test
@@ -230,21 +238,25 @@ public class CompareTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(CompareTest.backup);
-            newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/compare/base");
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, TEMP_DIR + "/base");
             System.setProperties(newProperty);
-            CompareTest.clean("target/test-temp/compare/base");
-            CompareTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/compare/base/src/test/resources/yo/dbunitcli/application");
+            CompareTest.clean(TEMP_DIR + "/base");
+            CompareTest.copy(RESOURCES_DIR, TEMP_DIR + "/base/" + RESOURCES_DIR);
+            getReplace().execute();
+        }
+
+        private static Replace getReplace() {
             final Replace replace = new Replace();
-            replace.setDir(new File("target/test-temp/compare/base/src/test/resources/yo/dbunitcli/application/expect"));
+            replace.setDir(new File(TEMP_DIR + "/base/" + RESOURCES_DIR + "/expect"));
             replace.setIncludes("**/*.csv");
             final Replace.Replacefilter filter1 = replace.createReplacefilter();
             filter1.setToken("src/test/resources");
-            filter1.setValue("target/test-temp/compare/base/src/test/resources");
+            filter1.setValue(TEMP_DIR + "/base/src/test/resources");
             final Replace.Replacefilter filter2 = replace.createReplacefilter();
             filter2.setToken("src\\\\test\\\\resources");
             filter2.setValue("target\\\\test-temp\\\\compare\\\\base\\\\src\\\\test\\\\resources");
             replace.setProject(CompareTest.PROJECT);
-            replace.execute();
+            return replace;
         }
 
         @Test
@@ -261,9 +273,9 @@ public class CompareTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(CompareTest.backup);
-            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/compare/result");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, TEMP_DIR + "/result");
             System.setProperties(newProperty);
-            CompareTest.clean("target/test-temp/compare/result");
+            CompareTest.clean(TEMP_DIR + "/result");
         }
 
     }
@@ -274,22 +286,26 @@ public class CompareTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(CompareTest.backup);
-            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/compare/dataset");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, TEMP_DIR + "/dataset");
             System.setProperties(newProperty);
-            CompareTest.clean("target/test-temp/compare/dataset");
-            CompareTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/compare/dataset/src/test/resources/yo/dbunitcli/application/src");
-            CompareTest.copy("src/test/resources/yo/dbunitcli/application/expect", "target/test-temp/compare/dataset/src/test/resources/yo/dbunitcli/application/expect");
+            CompareTest.clean(TEMP_DIR + "/dataset");
+            CompareTest.copy(RESOURCES_DIR + "/src", TEMP_DIR + "/dataset/" + RESOURCES_DIR + "/src");
+            CompareTest.copy(RESOURCES_DIR + "/expect", TEMP_DIR + "/dataset/" + RESOURCES_DIR + "/expect");
+            getReplace().execute();
+        }
+
+        private static Replace getReplace() {
             final Replace replace = new Replace();
-            replace.setDir(new File("target/test-temp/compare/dataset/src/test/resources/yo/dbunitcli/application/expect"));
+            replace.setDir(new File(TEMP_DIR + "/dataset/" + RESOURCES_DIR + "/expect"));
             replace.setIncludes("**/*.csv");
             final Replace.Replacefilter filter1 = replace.createReplacefilter();
             filter1.setToken("src/test/resources");
-            filter1.setValue("target/test-temp/compare/dataset/src/test/resources");
+            filter1.setValue(TEMP_DIR + "/dataset/src/test/resources");
             final Replace.Replacefilter filter2 = replace.createReplacefilter();
             filter2.setToken("src\\\\test\\\\resources");
             filter2.setValue("target\\\\test-temp\\\\compare\\\\dataset\\\\src\\\\test\\\\resources");
             replace.setProject(CompareTest.PROJECT);
-            replace.execute();
+            return replace;
         }
 
         @Test

@@ -32,6 +32,9 @@ public class ConvertTest {
 
     private static final Project PROJECT = new Project();
     private static final Properties backup = new Properties();
+    private static final String RESOURCES_DIR = "src/test/resources/yo/dbunitcli/application";
+    private static final String TEMP_DIR = "target/test-temp/convert";
+
     private static String testResourceDir;
     private static String baseDir;
 
@@ -363,7 +366,7 @@ public class ConvertTest {
         }
 
         @Test
-        public void testFromXlsxWithSchemaUsePatternToCsv() throws Exception {
+        public void testFromXlsxWithSchemaUsePatternToCsv() {
             Convert.main(this.getArgs("/paramConvertXlsxWithSchemaUsePatternToCsv.txt"));
         }
 
@@ -1285,40 +1288,43 @@ public class ConvertTest {
     @Nested
     class AllSystemPropertyTest extends TestCase {
 
+        private static final String TOP_DIR = TEMP_DIR + "/all/";
+
         @BeforeAll
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(ConvertTest.backup);
-            newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/convert/all/base");
-            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/convert/all/result");
-            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/convert/all/dataset");
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, TOP_DIR + "base");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, TOP_DIR + "result");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, TOP_DIR + "dataset");
             System.setProperties(newProperty);
-            ConvertTest.clean("target/test-temp/convert/all");
-            ConvertTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/convert/all/base/src/test/resources/yo/dbunitcli/application/settings");
-            ConvertTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/convert/all/dataset/src/test/resources/yo/dbunitcli/application/src");
+            ConvertTest.clean(TEMP_DIR + "/all");
+            ConvertTest.copy(RESOURCES_DIR + "/settings", TOP_DIR + "base/" + RESOURCES_DIR + "/settings");
+            ConvertTest.copy(RESOURCES_DIR + "/src", TOP_DIR + "dataset/" + RESOURCES_DIR + "/src");
         }
 
         @Override
         protected String getBaseDir() {
-            return ConvertTest.baseDir.replaceAll("/target/", "/target/test-temp/convert/all/result/target/");
+            return super.getBaseDir().replaceAll("/target/", "/" + TOP_DIR + "result/target/");
         }
     }
 
     @Nested
     class ChangeWorkSpaceTest extends TestCase {
+
         @BeforeAll
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(ConvertTest.backup);
-            newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/convert/base");
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, TEMP_DIR + "/base");
             System.setProperties(newProperty);
-            ConvertTest.clean("target/test-temp/convert/base");
-            ConvertTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/convert/base/src/test/resources/yo/dbunitcli/application");
+            ConvertTest.clean(TEMP_DIR + "/" + "base");
+            ConvertTest.copy(RESOURCES_DIR, TEMP_DIR + "/" + "base/" + RESOURCES_DIR);
         }
 
         @Override
         protected String getBaseDir() {
-            return ConvertTest.baseDir.replaceAll("/target/", "/target/test-temp/convert/base/target/");
+            return super.getBaseDir().replaceAll("/target/", "/" + TEMP_DIR + "/base/target/");
         }
     }
 
@@ -1328,14 +1334,14 @@ public class ConvertTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(ConvertTest.backup);
-            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/convert/result");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, TEMP_DIR + "/result");
             System.setProperties(newProperty);
-            ConvertTest.clean("target/test-temp/convert/result");
+            ConvertTest.clean(TEMP_DIR + "/result");
         }
 
         @Override
         protected String getBaseDir() {
-            return ConvertTest.baseDir.replaceAll("/target/", "/target/test-temp/convert/result/target/");
+            return super.getBaseDir().replaceAll("/target/", "/" + TEMP_DIR + "/result/target/");
         }
     }
 
@@ -1345,11 +1351,10 @@ public class ConvertTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(ConvertTest.backup);
-            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/convert/dataset");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, TEMP_DIR + "/dataset");
             System.setProperties(newProperty);
-            ConvertTest.clean("target/test-temp/convert/dataset");
-            ConvertTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/convert/dataset/src/test/resources/yo/dbunitcli/application/src");
+            ConvertTest.clean(TEMP_DIR + "/dataset");
+            ConvertTest.copy(RESOURCES_DIR + "/src", TEMP_DIR + "/dataset/" + RESOURCES_DIR + "/src");
         }
-
     }
 }

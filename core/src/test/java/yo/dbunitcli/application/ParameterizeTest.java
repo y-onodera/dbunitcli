@@ -19,6 +19,8 @@ public class ParameterizeTest {
 
     private static final Project PROJECT = new Project();
     private static final Properties backup = new Properties();
+    private static final String RESOURCES_DIR = "src/test/resources/yo/dbunitcli/application";
+    private static final String TEMP_DIR = "target/test-temp/parameterize";
     private static String baseDir;
 
     private static void copy(final String from, final String to) {
@@ -85,7 +87,7 @@ public class ParameterizeTest {
             Parameterize.main(new String[]{
                     "-cmd=compare"
                     , "-template=" + ParameterizeTest.baseDir + "/paramCompareXlsAndXlsx.txt"
-                    , "-arg=-setting=src/test/resources/yo/dbunitcli/application/settings/csv2xlsx/setting_replacelineseparator.json"
+                    , "-arg=-setting=" + RESOURCES_DIR + "/settings/csv2xlsx/setting_replacelineseparator.json"
                     , "-arg=-new.src=target/test-classes/yo/dbunitcli/application/param/csv2xlsx/result"
                     , "-arg=-result=target/test-classes/yo/dbunitcli/application/param/csv2xlsx/compare/result"
             });
@@ -95,13 +97,13 @@ public class ParameterizeTest {
         public void testExecCommandNoTemplate() throws Exception {
             Parameterize.main(new String[]{
                     "-cmd=generate"
-                    , "-arg=-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/settings.json"
-                    , "-arg=-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
+                    , "-arg=-setting=" + RESOURCES_DIR + "/settings/generate/with_metadata/settings.json"
+                    , "-arg=-src=" + RESOURCES_DIR + "/src/generate/with_metadata/source/csv"
                     , "-A=-encoding=UTF-8"
                     , "-A-resultPath=target/test-classes/yo/dbunitcli/application/param/generate/result/settings.json"
                     , "-A-generateType=settings"
             });
-            final String expect = Files.readString(new File("src/test/resources/yo/dbunitcli/application/expect/generate/settings/expect/txt", "settings.json").toPath(), StandardCharsets.UTF_8);
+            final String expect = Files.readString(new File(RESOURCES_DIR + "/expect/generate/settings/expect/txt", "settings.json").toPath(), StandardCharsets.UTF_8);
             final String actual = Files.readString(new File(this.getResult(), "settings.json").toPath(), StandardCharsets.UTF_8);
             Assertions.assertEquals(expect, actual);
         }
@@ -118,22 +120,24 @@ public class ParameterizeTest {
     @Nested
     class AllSystemPropertyTest extends ParameterizeTest.TestCase {
 
+        private static final String TOP_DIR = TEMP_DIR + "/all/";
+
         @BeforeAll
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(ParameterizeTest.backup);
-            newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/parameterize/all/base");
-            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/parameterize/all/result");
-            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/parameterize/all/dataset");
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, TOP_DIR + "base");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, TOP_DIR + "result");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, TOP_DIR + "dataset");
             System.setProperties(newProperty);
-            ParameterizeTest.clean("target/test-temp/parameterize/all");
-            ParameterizeTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/parameterize/all/base/src/test/resources/yo/dbunitcli/application/settings");
-            ParameterizeTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/parameterize/all/dataset/src/test/resources/yo/dbunitcli/application/src");
+            ParameterizeTest.clean(TEMP_DIR + "/all");
+            ParameterizeTest.copy(RESOURCES_DIR + "/settings", TOP_DIR + "base/" + RESOURCES_DIR + "/settings");
+            ParameterizeTest.copy(RESOURCES_DIR + "/src", TOP_DIR + "dataset/" + RESOURCES_DIR + "/src");
         }
 
         @Override
         protected String getResult() {
-            return super.getResult().replaceAll("/target/", "/target/test-temp/parameterize/all/result/target/");
+            return super.getResult().replaceAll("/target/", "/" + TOP_DIR + "result/target/");
         }
     }
 
@@ -143,15 +147,15 @@ public class ParameterizeTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(ParameterizeTest.backup);
-            newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/parameterize/base");
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, TEMP_DIR + "/base");
             System.setProperties(newProperty);
-            ParameterizeTest.clean("target/test-temp/parameterize/base");
-            ParameterizeTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/parameterize/base/src/test/resources/yo/dbunitcli/application");
+            ParameterizeTest.clean(TEMP_DIR + "/base");
+            ParameterizeTest.copy(RESOURCES_DIR, TEMP_DIR + "/base/" + RESOURCES_DIR);
         }
 
         @Override
         protected String getResult() {
-            return super.getResult().replaceAll("/target/", "/target/test-temp/parameterize/base/target/");
+            return super.getResult().replaceAll("/target/", "/" + TEMP_DIR + "/base/target/");
         }
     }
 
@@ -161,14 +165,14 @@ public class ParameterizeTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(ParameterizeTest.backup);
-            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/parameterize/result");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, TEMP_DIR + "/result");
             System.setProperties(newProperty);
-            ParameterizeTest.clean("target/test-temp/parameterize/result");
+            ParameterizeTest.clean(TEMP_DIR + "/result");
         }
 
         @Override
         protected String getResult() {
-            return super.getResult().replaceAll("/target/", "/target/test-temp/parameterize/result/target/");
+            return super.getResult().replaceAll("/target/", "/" + TEMP_DIR + "/result/target/");
         }
     }
 
@@ -178,10 +182,10 @@ public class ParameterizeTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(ParameterizeTest.backup);
-            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/parameterize/dataset");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, TEMP_DIR + "/dataset");
             System.setProperties(newProperty);
-            ParameterizeTest.clean("target/test-temp/parameterize/dataset");
-            ParameterizeTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/parameterize/dataset/src/test/resources/yo/dbunitcli/application/src");
+            ParameterizeTest.clean(TEMP_DIR + "/dataset");
+            ParameterizeTest.copy(RESOURCES_DIR + "/src", TEMP_DIR + "/dataset/" + RESOURCES_DIR + "/src");
         }
 
     }

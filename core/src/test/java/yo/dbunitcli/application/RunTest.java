@@ -21,6 +21,8 @@ public class RunTest {
 
     private static final Project PROJECT = new Project();
     private static final Properties backup = new Properties();
+    private static final String TEMP_DIR = "target/test-temp/run";
+    private static final String RESOURCES_DIR = "src/test/resources/yo/dbunitcli/application";
     private static String testResourcesDir;
 
     private static String baseDir;
@@ -95,7 +97,11 @@ public class RunTest {
         }
 
         protected String getResult() {
-            return RunTest.baseDir + "/" + RunTest.cmd;
+            return this.getBaseDir() + "/" + RunTest.cmd;
+        }
+
+        protected String getBaseDir() {
+            return RunTest.baseDir;
         }
     }
 
@@ -106,20 +112,26 @@ public class RunTest {
     @Nested
     class AllSystemPropertyTest extends RunTest.TestCase {
 
+        private static final String TOP_DIR = TEMP_DIR + "/all/";
+
         @BeforeAll
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(RunTest.backup);
-            newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/run/all/base");
-            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/run/all/result");
-            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/run/all/dataset");
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, TOP_DIR + "base");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, TOP_DIR + "result");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, TOP_DIR + "dataset");
             System.setProperties(newProperty);
-            RunTest.clean("target/test-temp/run/all");
-            RunTest.copy("src/test/resources/yo/dbunitcli/application/settings", "target/test-temp/run/all/base/src/test/resources/yo/dbunitcli/application/settings");
-            RunTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/run/all/dataset/src/test/resources/yo/dbunitcli/application/src");
-            RunTest.copy("src/test/resources/yo/dbunitcli/application/expect", "target/test-temp/run/all/dataset/src/test/resources/yo/dbunitcli/application/expect");
+            RunTest.clean(TOP_DIR);
+            RunTest.copy(RESOURCES_DIR + "/settings", TOP_DIR + "base/" + RESOURCES_DIR + "/settings");
+            RunTest.copy(RESOURCES_DIR + "/src", TOP_DIR + "dataset/" + RESOURCES_DIR + "/src");
+            RunTest.copy(RESOURCES_DIR + "/expect", TOP_DIR + "dataset/" + RESOURCES_DIR + "/expect");
+            getReplace().execute();
+        }
+
+        private static Replace getReplace() {
             final Replace replace = new Replace();
-            replace.setDir(new File("target/test-temp/run/all/dataset/src/test/resources/yo/dbunitcli/application/src"));
+            replace.setDir(new File(TOP_DIR + "dataset/" + RESOURCES_DIR + "/src"));
             replace.setIncludes("**/*.xml");
             replace.setIncludes("**/*.bat");
             replace.setIncludes("**/*.cmd");
@@ -136,12 +148,11 @@ public class RunTest {
             filter4.setToken("core\\target");
             filter4.setValue("dataset\\target");
             replace.setProject(RunTest.PROJECT);
-            replace.execute();
+            return replace;
         }
 
-        @Override
-        protected String getResult() {
-            return super.getResult().replaceAll("/target/", "/target/test-temp/run/all/dataset/target/");
+        protected String getBaseDir() {
+            return super.getBaseDir().replaceAll("/target/", "/" + TOP_DIR + "dataset/target/");
         }
     }
 
@@ -151,12 +162,16 @@ public class RunTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(RunTest.backup);
-            newProperty.put(FileResources.PROPERTY_WORKSPACE, "target/test-temp/run/base");
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, TEMP_DIR + "/base");
             System.setProperties(newProperty);
-            RunTest.clean("target/test-temp/run/base");
-            RunTest.copy("src/test/resources/yo/dbunitcli/application", "target/test-temp/run/base/src/test/resources/yo/dbunitcli/application");
+            RunTest.clean(TEMP_DIR + "/base");
+            RunTest.copy(RESOURCES_DIR, TEMP_DIR + "/base/" + RESOURCES_DIR);
+            getReplace().execute();
+        }
+
+        private static Replace getReplace() {
             final Replace replace = new Replace();
-            replace.setDir(new File("target/test-temp/run/base/src/test/resources/yo/dbunitcli/application/src"));
+            replace.setDir(new File(TEMP_DIR + "/base/" + RESOURCES_DIR + "/src"));
             replace.setIncludes("**/*.xml");
             replace.setIncludes("**/*.bat");
             replace.setIncludes("**/*.cmd");
@@ -173,12 +188,12 @@ public class RunTest {
             filter4.setToken("core\\target");
             filter4.setValue("base\\target");
             replace.setProject(RunTest.PROJECT);
-            replace.execute();
+            return replace;
         }
 
         @Override
-        protected String getResult() {
-            return super.getResult().replaceAll("/target/", "/target/test-temp/run/base/target/");
+        protected String getBaseDir() {
+            return super.getBaseDir().replaceAll("/target/", "/" + TEMP_DIR + "/base/target/");
         }
     }
 
@@ -188,9 +203,9 @@ public class RunTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(RunTest.backup);
-            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target/test-temp/run/result");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, TEMP_DIR + "/result");
             System.setProperties(newProperty);
-            RunTest.clean("target/test-temp/run/result");
+            RunTest.clean(TEMP_DIR + "/result");
         }
 
     }
@@ -201,13 +216,17 @@ public class RunTest {
         static void backup() {
             final Properties newProperty = new Properties();
             newProperty.putAll(RunTest.backup);
-            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "target/test-temp/run/dataset");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, TEMP_DIR + "/dataset");
             System.setProperties(newProperty);
-            RunTest.clean("target/test-temp/run/dataset");
-            RunTest.copy("src/test/resources/yo/dbunitcli/application/src", "target/test-temp/run/dataset/src/test/resources/yo/dbunitcli/application/src");
-            RunTest.copy("src/test/resources/yo/dbunitcli/application/expect", "target/test-temp/run/dataset/src/test/resources/yo/dbunitcli/application/expect");
+            RunTest.clean(TEMP_DIR + "/dataset");
+            RunTest.copy(RESOURCES_DIR + "/src", TEMP_DIR + "/dataset/" + RESOURCES_DIR + "/src");
+            RunTest.copy(RESOURCES_DIR + "/expect", TEMP_DIR + "/dataset/" + RESOURCES_DIR + "/expect");
+            getReplace().execute();
+        }
+
+        private static Replace getReplace() {
             final Replace replace = new Replace();
-            replace.setDir(new File("target/test-temp/run/dataset/src/test/resources/yo/dbunitcli/application/src"));
+            replace.setDir(new File(TEMP_DIR + "/dataset/" + RESOURCES_DIR + "/src"));
             replace.setIncludes("**/*.xml");
             replace.setIncludes("**/*.bat");
             replace.setIncludes("**/*.cmd");
@@ -224,12 +243,12 @@ public class RunTest {
             filter4.setToken("core\\target");
             filter4.setValue("dataset\\target");
             replace.setProject(RunTest.PROJECT);
-            replace.execute();
+            return replace;
         }
 
         @Override
-        protected String getResult() {
-            return super.getResult().replaceAll("/target/", "/target/test-temp/run/dataset/target/");
+        protected String getBaseDir() {
+            return super.getBaseDir().replaceAll("/target/", "/" + TEMP_DIR + "/dataset/target/");
         }
     }
 
