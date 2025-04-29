@@ -1,0 +1,7 @@
+-old.srcType=csv
+-old.src=src/test/resources/yo/dbunitcli/application/src/csv/header
+-new.srcTyNpe=csv
+-new.src=src/test/resources/yo/dbunitcli/application/src/csv/skip_row
+-new.startRow=4
+-setting=src/test/resources/yo/dbunitcli/application/settings/expectsetting.json
+-result=target/test-classes/yo/dbunitcli/application/compare/csv/skip_row/result

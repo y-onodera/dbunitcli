@@ -131,6 +131,36 @@ public class CompareTest {
         }
 
         @Test
+        public void testCompareNoHeaderCsvToHeaderChangeCsv() {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareNoHeaderCsvToHeaderChangeCsv.txt"});
+        }
+
+        @Test
+        public void testCompareSkipRowCsvToCsv() {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareSkipRowCsvToCsv.txt"});
+        }
+
+        @Test
+        public void testCompareSkipRowNoHeaderCsvToCsv() {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareSkipRowNoHeaderCsvToCsv.txt"});
+        }
+
+        @Test
+        public void testCompareSkipRowFixedToFixed() {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareSkipRowFixedToFixed.txt"});
+        }
+
+        @Test
+        public void testCompareSkipRowRegexToRegex() {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareSkipRowRegexToRegex.txt"});
+        }
+
+        @Test
+        public void testCompareHeaderRegexTxtToCsv() {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareNoHeaderRegexTxtAndCsv.txt"});
+        }
+
+        @Test
         public void testCompareNoHeaderRegexTxtToCsv() {
             Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareNoHeaderRegexTxtAndCsv.txt"});
         }

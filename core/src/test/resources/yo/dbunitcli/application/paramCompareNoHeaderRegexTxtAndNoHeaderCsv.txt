@@ -1,5 +1,5 @@
 -old.srcType=reg
--old.src=src/test/resources/yo/dbunitcli/application/src/compare/regex/noheader
+-old.src=src/test/resources/yo/dbunitcli/application/src/regex/noheader
 -regDataSplit=,\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}
 -new.srcType=csv
 -new.src=src/test/resources/yo/dbunitcli/application/src/csv/noheader

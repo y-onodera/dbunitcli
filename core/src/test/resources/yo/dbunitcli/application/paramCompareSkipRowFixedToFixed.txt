@@ -1,0 +1,9 @@
+-old.src=src/test/resources/yo/dbunitcli/application/src/fixed
+-new.src=src/test/resources/yo/dbunitcli/application/src/fixed/skip_row
+-new.startRow=3
+-srcType=fixed
+-headerName=半角,数値,全角
+-fixedLength=3,50,15
+-encoding=UTF-8
+-setting=src/test/resources/yo/dbunitcli/application/settings/expectsetting.json
+-result=target/test-classes/yo/dbunitcli/application/compare/fixed/skip_row/result
