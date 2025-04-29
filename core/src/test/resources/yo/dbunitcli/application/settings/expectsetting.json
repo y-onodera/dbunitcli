@@ -8,7 +8,15 @@
       }
     },
     {
-      "pattern": "*"
+      "pattern":{
+        "string": "*",
+        "exclude": [
+          "COMPARE_RESULT"
+        ]
+      },
+      "exclude": [
+        "XXXX_DUMMY_SETTING_FOR_EXECUTE_COMPARE"
+      ]
     }
   ]
 }
