@@ -2,6 +2,7 @@
   "settings": [
     {
       "pattern": {
+        "string": "*",
         "exclude": [
           "test_samePattern"
         ]

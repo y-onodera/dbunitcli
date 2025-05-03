@@ -1,9 +1,9 @@
 package yo.dbunitcli.application.json;
 
 import jakarta.json.*;
+import yo.dbunitcli.common.filter.TargetFilter;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.resource.FileResources;
-import yo.dbunitcli.common.filter.TargetFilter;
 
 import java.io.*;
 import java.util.*;
@@ -176,31 +176,9 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
 
     protected TargetFilter getTargetFilter(final JsonObject settingJson) {
         if (settingJson.containsKey("name")) {
-            if (settingJson.get("name") instanceof final JsonString targetName) {
-                return TargetFilter.any(targetName.getString());
-            } else {
-                final JsonArray names = settingJson.getJsonArray("name");
-                return TargetFilter.any(IntStream.range(0, names.size())
-                        .mapToObj(names::getString)
-                        .toArray(String[]::new));
-            }
+            return new TargetFilterParser(settingJson, "name").parseEquals();
         } else if (settingJson.containsKey("pattern")) {
-            if (settingJson.get("pattern") instanceof final JsonString targetString) {
-                return TargetFilter.contain(targetString.getString());
-            } else {
-                final JsonObject pattern = settingJson.getJsonObject("pattern");
-                TargetFilter result = TableSeparator.ACCEPT_ALL;
-                if (pattern.containsKey("string")) {
-                    result = TargetFilter.contain(pattern.getString("string"));
-                }
-                if (pattern.containsKey("exclude")) {
-                    final JsonArray names = pattern.getJsonArray("exclude");
-                    return result.exclude(IntStream.range(0, names.size())
-                            .mapToObj(names::getString)
-                            .toList());
-                }
-                return result;
-            }
+            return new TargetFilterParser(settingJson, "pattern").parsePattern();
         } else if (settingJson.containsKey("innerJoin")
                 || settingJson.containsKey("outerJoin")
                 || settingJson.containsKey("fullJoin")) {

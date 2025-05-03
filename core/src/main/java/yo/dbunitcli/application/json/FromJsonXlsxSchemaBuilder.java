@@ -1,6 +1,9 @@
 package yo.dbunitcli.application.json;
 
-import jakarta.json.*;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.common.filter.TargetFilter;
 import yo.dbunitcli.resource.poi.XlsxCellsTableDefine;
@@ -69,22 +72,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
 
         final JsonObject patterns = setting.getJsonObject("patterns");
         patterns.keySet().forEach(key -> {
-            final var value = patterns.get(key);
-            if (value.getValueType() == JsonValue.ValueType.STRING) {
-                this.sheetPatterns.put(key, TargetFilter.contain(patterns.getString(key)));
-            } else if (value.getValueType() == JsonValue.ValueType.ARRAY) {
-                this.sheetPatterns.put(key, TargetFilter.any(this.jsonArrayToStream(value.asJsonArray())
-                        .toArray(String[]::new)));
-            } else if (value.getValueType() == JsonValue.ValueType.OBJECT) {
-                final var obj = value.asJsonObject();
-                final var containsPattern = TargetFilter.contain(obj.getString("string"));
-                if (obj.containsKey("exclude")) {
-                    this.sheetPatterns.put(key, containsPattern
-                            .exclude(this.jsonArrayToStream(obj.getJsonArray("exclude")).toList()));
-                } else {
-                    this.sheetPatterns.put(key, containsPattern);
-                }
-            }
+            this.sheetPatterns.put(key, new TargetFilterParser(patterns, key).parsePattern());
         });
         return this;
     }

@@ -1,13 +1,16 @@
 package yo.dbunitcli.common.filter;
 
+import java.util.List;
+
 /**
  * パターン文字列を含むかを判定するフィルタ
  *
- * @param patternString パターン文字列
+ * @param patternStrings パターン文字列
  */
-public record ContainFilter(String patternString) implements TargetFilter {
+public record ContainFilter(List<String> patternStrings) implements TargetFilter {
     @Override
     public boolean test(final String tableName) {
-        return tableName.contains(this.patternString()) || this.patternString().equals("*");
+        return this.patternStrings().stream()
+                .anyMatch(patternString -> tableName.contains(patternString) || patternString.equals("*"));
     }
 }

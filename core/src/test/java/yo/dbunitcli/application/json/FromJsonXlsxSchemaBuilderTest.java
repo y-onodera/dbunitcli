@@ -6,10 +6,10 @@ import yo.dbunitcli.resource.poi.XlsxSchema;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class FromJsonXlsxSchemaBuilderTest {
+public class FromJsonXlsxSchemaBuilderTest {
 
     @Test
-    void testBuildWithSheetPattern() {
+    public void testBuildWithSheetPattern() {
         // JSON with sheet pattern definition
         final String json = """
                 {
@@ -53,7 +53,7 @@ class FromJsonXlsxSchemaBuilderTest {
     }
 
     @Test
-    void testBuildWithoutPattern() {
+    public void testBuildWithoutPattern() {
         final String json = """
                 {
                     "rows": [
@@ -78,7 +78,7 @@ class FromJsonXlsxSchemaBuilderTest {
     }
 
     @Test
-    void testBuildWithMixedPatternAndExactMatch() {
+    public void testBuildWithMixedPatternAndExactMatch() {
         final String json = """
                 {
                     "patterns": {
@@ -118,7 +118,7 @@ class FromJsonXlsxSchemaBuilderTest {
     }
 
     @Test
-    void testBuildWithContainsPattern() {
+    public void testBuildWithContainsPattern() {
         final String json = """
                 {
                     "patterns": {
@@ -146,7 +146,7 @@ class FromJsonXlsxSchemaBuilderTest {
     }
 
     @Test
-    void testBuildWithAnyPattern() {
+    public void testBuildWithAnyPattern() {
         final String json = """
                 {
                     "patterns": {
@@ -175,7 +175,7 @@ class FromJsonXlsxSchemaBuilderTest {
     }
 
     @Test
-    void testBuildWithContainsAndExcludePattern() {
+    public void testBuildWithContainsAndExcludePattern() {
         final String json = """
                 {
                     "patterns": {
