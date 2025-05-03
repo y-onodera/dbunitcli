@@ -1,6 +1,6 @@
 -old.src=src/test/resources/yo/dbunitcli/application/src/csv/multi
 -encoding=UTF-8
--new.src=src/test/resources/yo/dbunitcli/application/src/csv2xlsx/multifile.xlsx
+-new.src=src/test/resources/yo/dbunitcli/application/src/xlsx/multifile.xlsx
 -new.srcType=xlsx
 -setting=src/test/resources/yo/dbunitcli/application/settings/csv2xlsx/setting.json
 -expect.src=src/test/resources/yo/dbunitcli/application/expect/csv2xlsx/expectxlsx2csv
