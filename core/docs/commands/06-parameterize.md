@@ -5,13 +5,13 @@
 
 ## 引数
 * -cmd: 実行するコマンド
-* param.* : パラメータデータセットの設定 - [データソース設定](../options/01-data-source.md)
+* param.* : パラメータデータセットの設定 - [データソース設定](../options/02-data-source.md)
 * -cmdParam: パラメータファイル名として使用する列名
 * -template: デフォルトのパラメータファイル（cmdParamが指定された場合は無視）
 * -parameterize:  パラメータファイルをテンプレート展開するか（デフォルトtrue）
 * -unit: [パラメータ単位](../options/template/01-overview.md)
 * -ignoreFail: 失敗を無視するかどうか
-* template.* : テンプレート設定 - [テンプレート設定](../options/04-template.md)
+* template.* : テンプレート設定 - [テンプレート設定](../options/05-template.md)
 
 ## 使用例
 ```bash

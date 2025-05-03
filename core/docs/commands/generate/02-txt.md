@@ -20,7 +20,7 @@ StringTemplateV4（St4）テンプレートエンジンを使用してテキス�
 | -generateType | txt を指定 | ○ |
 | -template | テンプレートファイルパス | ○ |
 | -unit | [処理単位](../../options/template/02-processing-units.md) | ○ |
-| -template.* | [テンプレート設定](../../options/04-template.md) | - |
+| -template.* | [テンプレート設定](../../options/05-template.md) | - |
 
 ## 生成される成果物
 

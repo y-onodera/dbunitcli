@@ -5,7 +5,7 @@
 
 ## 引数
 * -scriptType: スクリプトタイプ(cmd/bat/sql/ant)
-* src.* : 実行するスクリプトファイルの設定 - [データソース設定](../options/01-data-source.md)
+* src.* : 実行するスクリプトファイルの設定 - [データソース設定](../options/02-data-source.md)
 
 ## スクリプトタイプ別の設定
 
@@ -16,7 +16,7 @@
 
 ### sql: SQL実行
 * jdbc.*: [データベース接続設定](../options/03-jdbc.md)
-* template.*: [SQLテンプレート設定](../options/04-template.md#templaterenderoption-template)
+* template.*: [SQLテンプレート設定](../options/05-template.md#templaterenderoption-template)
 * src.srcType: 自動的に'file'に設定
 * src.extension: 自動的に'sql'に設定
 

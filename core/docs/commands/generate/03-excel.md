@@ -9,7 +9,7 @@ jxlsテンプレートエンジンを使用し、Excelテンプレートファ�
 |------|------|------|
 | -generateType | xlsx または xls を指定 | ○ |
 | -template | テンプレートExcelファイルパス | ○ |
-| -template.* | [テンプレート設定](../../options/04-template.md) | - |
+| -template.* | [テンプレート設定](../../options/05-template.md) | - |
 | -unit | [処理単位](../../options/02-processing-units.md)を指定 | ○ |
 | -result | 出力先ディレクトリ | ○ |
 | -resultPath | 出力ファイルパス | - |
@@ -38,7 +38,7 @@ jxlsテンプレートエンジンを使用し、Excelテンプレートファ�
   - 数式をそのまま保持
   - テンプレートの数式がそのまま出力ファイルに保持される
 
-詳しい数式の処理については[テンプレート設定の数式処理](../../options/04-template.md#excel数式の処理)を参照してください。
+詳しい数式の処理については[テンプレート設定の数式処理](../../options/05-template.md#excel数式の処理)を参照してください。
 
 ## 使用例
 ```bash

@@ -4,8 +4,8 @@
 データセットの形式を別の形式に変換します。例えば、CSVからExcel、データベースからCSVなど、様々な形式間の変換に対応しています。
 
 ## 引数
-* src.* : 変換元データセットの設定 - [データソース設定](../options/01-data-source.md)
-* result.* : 変換結果の出力設定 - [出力設定](../options/02-result.md)
+* src.* : 変換元データセットの設定 - [データソース設定](../options/02-data-source.md)
+* result.* : 変換結果の出力設定 - [出力設定](../options/03-result.md)
 * -parameter : パラメータ設定
 
 ## 使用例

@@ -24,7 +24,7 @@ dbunitcliでは2種類のJSONスキーマを使用します：
 - [高度な設定例](settings/03-advanced-examples.md)
 
 ### コマンド別設定
-- [loadコマンドの設定](settings/command/01-load.md)
+- [コマンド共通のデータ読み込み設定](settings/command/01-load.md)
 - [generateコマンドの設定](settings/command/02-generate.md)
 - [compareコマンドの設定](settings/command/03-compare.md)
 

@@ -37,7 +37,7 @@ generateコマンドは、データセットの内容を基に各種ファイル
 | -unit | [処理単位](../template/02-processing-units.md)を指定 | ○ |
 | -result | 出力先ディレクトリ | ○ |
 | -resultPath | 出力ファイルパス | - |
-| -template.* | [テンプレート設定](../../options/04-template.md) | - |
+| -template.* | [テンプレート設定](../../options/05-template.md) | - |
 
 ## 基本的な使用例
 ```bash
