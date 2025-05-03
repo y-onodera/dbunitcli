@@ -2,6 +2,14 @@
 
 dbunitcliで使用するスキーマ定義とその使用方法について説明します。
 
+## フィルター機能
+
+dbunitcliでは、テーブル操作設定とExcel構造定義の両方で使用できるフィルター機能を提供します：
+
+- [機能概要](filter/01-overview.md)
+- [フィルタータイプ](filter/02-filter-types.md)
+- [設定例](filter/03-filter-examples.md)
+
 ## JSONスキーマの種類
 
 dbunitcliでは2種類のJSONスキーマを使用します：
