@@ -136,6 +136,16 @@ public class CompareTest {
         }
 
         @Test
+        public void testCompareNoHeaderXlsxToSkipRowXlsx() {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareNoHeaderXlsxToSkipRowXlsx.txt"});
+        }
+
+        @Test
+        public void testCompareNoHeaderXlsToSkipRowXls() {
+            Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareNoHeaderXlsToSkipRowXls.txt"});
+        }
+
+        @Test
         public void testCompareSkipRowCsvToCsv() {
             Compare.main(new String[]{"@" + CompareTest.baseDir + "/paramCompareSkipRowCsvToCsv.txt"});
         }

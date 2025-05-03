@@ -1,0 +1,7 @@
+-srcType=xlsx
+-old.src=src/test/resources/yo/dbunitcli/application/src/xlsx/noheader
+-old.headerName=key,column1,column2,column3
+-new.src=src/test/resources/yo/dbunitcli/application/src/xlsx/skip_row
+-new.startRow=3
+-setting=src/test/resources/yo/dbunitcli/application/settings/expectsetting.json
+-result=target/test-classes/yo/dbunitcli/application/compare/xlsx/noheader_to_skip_row/result

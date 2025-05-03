@@ -1,5 +1,5 @@
--old.src=src/test/resources/yo/dbunitcli/application/src/multidiff/old
--new.src=src/test/resources/yo/dbunitcli/application/src/multidiff/new
+-old.src=src/test/resources/yo/dbunitcli/application/src/compare/multidiff/old
+-new.src=src/test/resources/yo/dbunitcli/application/src/compare/multidiff/new
 -setting=src/test/resources/yo/dbunitcli/application/settings/multidiff/setting.json
 -result=target/test-classes/yo/dbunitcli/application/multidiff/result
 -expect.src=src/test/resources/yo/dbunitcli/application/expect/multidiff/expect

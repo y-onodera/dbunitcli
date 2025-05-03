@@ -29,9 +29,9 @@ public class CompareOptionTest {
 
     @Test
     public void parseSettingTargetDirAndSettingFiles() {
-        final CompareOption option = this.target.parseOption(new String[]{"-new.src=" + this.baseDir + "/src/multidiff/new", "-old.src=" + this.baseDir + "/src/multidiff/old", "-setting=" + this.baseDir + "/settings/filter/setting.json"});
-        assertEquals(new File(this.baseDir + "/src/multidiff", "new"), option.newData().getParam().getSrc());
-        assertEquals(new File(this.baseDir + "/src/multidiff", "old"), option.oldData().getParam().getSrc());
+        final CompareOption option = this.target.parseOption(new String[]{"-new.src=" + this.baseDir + "/src/compare/multidiff/new", "-old.src=" + this.baseDir + "/src/compare/multidiff/old", "-setting=" + this.baseDir + "/settings/filter/setting.json"});
+        assertEquals(new File(this.baseDir + "/src/compare/multidiff", "new"), option.newData().getParam().getSrc());
+        assertEquals(new File(this.baseDir + "/src/compare/multidiff", "old"), option.oldData().getParam().getSrc());
         assertEquals(2, option.getTableSeparators().settings().size());
         final ComparableTable columnadd = option.oldDataSet().getTable("columnadd");
         assertEquals(1, columnadd.getTableMetaData().getPrimaryKeys().length);
@@ -41,8 +41,8 @@ public class CompareOptionTest {
     @Test
     public void parseArgumentsLoadableFromParameterFile() {
         final CompareOption option = this.target.parseOption(new String[]{"@" + this.baseDir + "/paramCompareResultDiffValidExpected.txt"});
-        assertEquals(new File(this.baseDir + "/src/multidiff", "new"), option.newData().getParam().getSrc().getAbsoluteFile());
-        assertEquals(new File(this.baseDir + "/src/multidiff", "old"), option.oldData().getParam().getSrc().getAbsoluteFile());
+        assertEquals(new File(this.baseDir + "/src/compare/multidiff", "new"), option.newData().getParam().getSrc().getAbsoluteFile());
+        assertEquals(new File(this.baseDir + "/src/compare/multidiff", "old"), option.oldData().getParam().getSrc().getAbsoluteFile());
         final ComparableTable columnadd = option.oldDataSet().getTable("columnadd");
         assertEquals(1, columnadd.getTableMetaData().getPrimaryKeys().length);
         assertEquals("key", columnadd.getTableMetaData().getPrimaryKeys()[0].getColumnName());

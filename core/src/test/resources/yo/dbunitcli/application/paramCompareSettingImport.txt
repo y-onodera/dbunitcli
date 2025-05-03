@@ -1,5 +1,5 @@
--old.src=src/test/resources/yo/dbunitcli/application/src/sort/old
--new.src=src/test/resources/yo/dbunitcli/application/src/sort/new
+-old.src=src/test/resources/yo/dbunitcli/application/src/compare/sort/old
+-new.src=src/test/resources/yo/dbunitcli/application/src/compare/sort/new
 -setting=src/test/resources/yo/dbunitcli/application/settings/setting/setting_base.json
 -result=target/test-classes/yo/dbunitcli/application/setting/result
 -expect.src=src/test/resources/yo/dbunitcli/application/expect/sort/expect

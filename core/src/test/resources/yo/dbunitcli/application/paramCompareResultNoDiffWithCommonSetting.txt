@@ -1,4 +1,4 @@
--old.src=src/test/resources/yo/dbunitcli/application/src/nodiff/old
--new.src=src/test/resources/yo/dbunitcli/application/src/nodiff/new
+-old.src=src/test/resources/yo/dbunitcli/application/src/compare/nodiff/old
+-new.src=src/test/resources/yo/dbunitcli/application/src/compare/nodiff/new
 -setting=src/test/resources/yo/dbunitcli/application/settings/nodiff/settingCommon.json
 -result=target/test-classes/yo/dbunitcli/application/nodiff/resultCommon
