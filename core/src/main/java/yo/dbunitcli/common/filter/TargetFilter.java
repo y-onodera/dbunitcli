@@ -13,8 +13,8 @@ public interface TargetFilter {
      *
      * @param regex 正規表現パターン
      * @return フィルタのインスタンス
-     * @throws PatternSyntaxException   不正な正規表現パターンの場合
-     * @throws IllegalArgumentException パターンがnullの場合
+     * @throws PatternSyntaxException 不正な正規表現パターンの場合
+     * @throws NullPointerException   パターンがnullの場合
      */
     static TargetFilter regex(final String regex) {
         return new RegexFilter(regex);

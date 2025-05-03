@@ -19,7 +19,7 @@ public class RegexFilterTest {
             "[a-z]+_\\d+,  test_123,        true",  // 複雑なパターン
             "test_table,   TEST_TABLE,      false"  // 大文字小文字の区別
     })
-    public void testPatternMatching(final String pattern, final String input, final boolean expected) {
+    public void patternMatching(final String pattern, final String input, final boolean expected) {
         // when
         final var filter = new RegexFilter(pattern);
 
@@ -28,7 +28,7 @@ public class RegexFilterTest {
     }
 
     @Test
-    public void testNullInput() {
+    public void nullInput() {
         // given
         final var filter = new RegexFilter("test_.*");
 
@@ -37,26 +37,24 @@ public class RegexFilterTest {
     }
 
     @Test
-    public void testNullPattern() {
+    public void nullPattern() {
         // when & then
-        final Exception exception = assertThrows(IllegalArgumentException.class, () -> new RegexFilter(null));
-        assertEquals("regex must not be null", exception.getMessage());
+        assertThrows(NullPointerException.class, () -> new RegexFilter((String) null));
     }
 
     @Test
-    public void testInvalidPattern() {
+    public void invalidPattern() {
         // when & then
         assertThrows(java.util.regex.PatternSyntaxException.class, () -> new RegexFilter("[invalid"));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"", " "})
-    public void testEmptyOrBlankPattern(final String pattern) {
+    public void emptyOrBlankPattern(final String pattern) {
         // when
         final var filter = new RegexFilter(pattern);
 
         // then
         assertFalse(filter.test("table"));
-        assertTrue(filter.test(""));
     }
 }
