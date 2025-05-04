@@ -21,15 +21,19 @@ public class WorkspaceController {
 
     @Get(uri = "resources", produces = MediaType.APPLICATION_JSON)
     public String resources() throws IOException {
+        return this.currentResources();
+    }
+
+    @Post(uri = "update", produces = MediaType.APPLICATION_JSON)
+    public String update(@Body final ContextDto context) throws IOException {
+        this.workspace.contextReload(context.getWorkspace(), context.getDatasetBase(), context.getResultBase());
+        return this.currentResources();
+    }
+
+    private String currentResources() throws IOException {
         return ObjectMapper
                 .getDefault()
                 .writeValueAsString(this.workspace.toDto());
-    }
-
-    @Post(uri = "update", produces = MediaType.TEXT_PLAIN)
-    public String update(@Body final ContextDto context) {
-        this.workspace.contextReload(context.getWorkspace(), context.getDatasetBase(), context.getResultBase());
-        return "success";
     }
 
 }

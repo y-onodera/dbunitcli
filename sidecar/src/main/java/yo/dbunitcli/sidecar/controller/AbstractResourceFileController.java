@@ -35,9 +35,7 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
 
     @Get(uri = "list", produces = MediaType.APPLICATION_JSON)
     public String list() throws IOException {
-        return ObjectMapper
-                .getDefault()
-                .writeValueAsString(this.getResourceFile().list());
+        return this.currentFileList();
     }
 
     @Post(uri = "load", consumes = MediaType.TEXT_PLAIN, produces = MediaType.APPLICATION_JSON)
@@ -45,26 +43,24 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
         return this.getResourceFile().read(name).orElse("{}");
     }
 
-    @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
-    public HttpResponse<String> save(@Body final DTO body) {
+    @Post(uri = "save", produces = MediaType.APPLICATION_JSON)
+    public String save(@Body final DTO body) throws IOException {
         try {
             this.saveJson(body.getName(), JsonMapper.createDefault().writeValueAsString(body.getInput()));
-            return HttpResponse.ok("success");
         } catch (final IOException e) {
             LOGGER.error("Failed to save file: {}", body, e);
-            return HttpResponse.serverError("Failed to save file: " + e.getMessage());
         }
+        return this.currentFileList();
     }
 
-    @Post(uri = "delete", consumes = MediaType.TEXT_PLAIN)
-    public HttpResponse<String> delete(@Body final String name) {
+    @Post(uri = "delete", consumes = MediaType.APPLICATION_JSON)
+    public String delete(@Body final String name) throws IOException {
         try {
             this.getResourceFile().delete(name);
-            return HttpResponse.ok("success");
         } catch (final IOException e) {
             LOGGER.error("Failed to delete file: {}", name, e);
-            return HttpResponse.serverError("Failed to delete file: " + e.getMessage());
         }
+        return this.currentFileList();
     }
 
     @Error
@@ -85,4 +81,11 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
     }
 
     protected abstract ResourceFile getResourceFile();
+
+    protected String currentFileList() throws IOException {
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(this.getResourceFile().list());
+    }
+
 }

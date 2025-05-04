@@ -74,7 +74,7 @@ public class QueryDatasourceControllerTest {
         request.setContents(contents);
         final HttpResponse<String> response = this.client.toBlocking().exchange(HttpRequest.POST("dbunit-cli/query-datasource/save", request), String.class);
         Assertions.assertEquals(HttpStatus.OK, response.getStatus());
-        Assertions.assertEquals("success", response.body());
+        Assertions.assertEquals("[\"test.sql\"]", response.body());
         Assertions.assertEquals(contents, Files.readString(this.target.toPath()));
     }
 
@@ -87,7 +87,7 @@ public class QueryDatasourceControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_TYPE);
         final HttpResponse<String> response = this.client.toBlocking().exchange(httpRequest, String.class);
         Assertions.assertEquals(HttpStatus.OK, response.getStatus());
-        Assertions.assertEquals("success", response.body());
+        Assertions.assertEquals("[]", response.body());
         Assertions.assertFalse(this.target.exists());
     }
 

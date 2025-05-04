@@ -23,9 +23,7 @@ public class QueryDatasourceController {
 
     @Get(uri = "list", produces = MediaType.APPLICATION_JSON)
     public String list(@QueryValue final DataSourceType type) throws IOException {
-        return ObjectMapper
-                .getDefault()
-                .writeValueAsString(new Datasource(type).list());
+        return this.currentFileList(type);
     }
 
     @Post(uri = "load", produces = MediaType.TEXT_PLAIN)
@@ -33,32 +31,36 @@ public class QueryDatasourceController {
         return new Datasource(request.getType()).read(request.getName());
     }
 
-    @Post(uri = "save")
-    public HttpResponse<String> save(@Body final QueryDataSourceDto request) {
+    @Post(uri = "save", produces = MediaType.APPLICATION_JSON)
+    public String save(@Body final QueryDataSourceDto request) throws IOException {
         try {
             new Datasource(request.getType()).save(request.getName(), request.getContents());
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
-            return HttpResponse.serverError("Failed to save file: " + th.getMessage());
         }
-        return HttpResponse.ok("success");
+        return this.currentFileList(request.getType());
     }
 
-    @Post(uri = "delete")
-    public HttpResponse<String> delete(@Body final QueryDataSourceDto request) {
+    @Post(uri = "delete", produces = MediaType.APPLICATION_JSON)
+    public String delete(@Body final QueryDataSourceDto request) throws IOException {
         try {
             new Datasource(request.getType()).delete(request.getName());
-            return HttpResponse.ok("success");
         } catch (final IOException e) {
             LOGGER.error("Failed to delete file: {}", request.getName(), e);
-            return HttpResponse.serverError("Failed to delete file: " + e.getMessage());
         }
+        return this.currentFileList(request.getType());
     }
 
     @Error
     public HttpResponse<JsonError> handleException(final HttpRequest<?> request, final ApplicationException ex) {
         return HttpResponse.<JsonError>status(HttpStatus.BAD_REQUEST, "Fix Input Parameter")
                 .body(new JsonError("Execution failed. cause: " + ex.getMessage()));
+    }
+
+    private String currentFileList(final DataSourceType type) throws IOException {
+        return ObjectMapper
+                .getDefault()
+                .writeValueAsString(new Datasource(type).list());
     }
 
 }
