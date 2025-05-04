@@ -1,0 +1,28 @@
+{
+    "patterns": {
+        "Sheet1": {"regex": "^Sheet1$"},
+        "Sheet2": {"regex": "^Sheet2$"}
+    },
+    "rows": [
+        {
+            "sheetName": "Sheet1",
+            "tableName": "Table1",
+            "header": ["Col1", "Col2"],
+            "dataStart": 2,
+            "columnIndex": [0, 1],
+            "breakKey": ["Col1"],
+            "addFileInfo": true
+        }
+    ],
+    "cells": [
+        {
+            "sheetName": "Sheet2",
+            "tableName": "Table2",
+            "header": ["Col3", "Col4"],
+            "rows": [
+                {"cellAddress": ["A1", "B1"]},
+                {"cellAddress": ["A2", "B2"]}
+            ]
+        }
+    ]
+}

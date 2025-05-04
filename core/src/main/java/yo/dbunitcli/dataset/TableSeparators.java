@@ -115,10 +115,6 @@ public record TableSeparators(List<TableSeparator> settings
         private final List<ComparableTableJoinCondition> joins = new ArrayList<>();
         private List<TableSeparator> commonSettings = new ArrayList<>();
 
-        public Builder() {
-            this.commonSettings.add(TableSeparator.NONE);
-        }
-
         public Builder add(final TableSeparators tableSeparators) {
             this.settings.addAll(tableSeparators.settings());
             this.commonSettings.addAll(tableSeparators.commonSettings());
@@ -135,6 +131,9 @@ public record TableSeparators(List<TableSeparator> settings
         }
 
         public List<TableSeparator> getCommonSettings() {
+            if(this.commonSettings.isEmpty()) {
+                this.commonSettings.add(TableSeparator.NONE);
+            }
             return this.commonSettings;
         }
 

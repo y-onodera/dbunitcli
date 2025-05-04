@@ -1,0 +1,15 @@
+{
+    "patterns": {
+        "Sheet1": {"regex": "^Sheet1$"}
+    },
+    "rows": [
+        {
+            "sheetName": "Sheet1",
+            "tableName": "Table1",
+            "header": ["Col1", "Col2"],
+            "dataStart": 2,
+            "columnIndex": [0, 1],
+            "breakKey": ["Col1"]
+        }
+    ]
+}

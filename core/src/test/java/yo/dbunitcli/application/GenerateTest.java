@@ -65,8 +65,8 @@ public class GenerateTest {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsx.txt"});
             Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/xlsx/compareResult.txt"
                     , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"
-                    , "-new.src=" + GenerateTest.baseDir + "/generate/table/result/xlsx/Test1.xlsx"
-                    , "-result=" + GenerateTest.baseDir + "/generate/table/result/xlsx/Test1"
+                    , "-new.src=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1.xlsx"
+                    , "-result=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1"
             });
         }
 
@@ -75,8 +75,8 @@ public class GenerateTest {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsxWithoutEvaluate.txt"});
             Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/xlsx/compareResult.txt"
                     , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"
-                    , "-new.src=" + GenerateTest.baseDir + "/generate/table/result/xlsx/Test1_withoutEvaluate.xlsx"
-                    , "-result=" + GenerateTest.baseDir + "/generate/table/result/xlsx/Test1WithoutEvaluate"
+                    , "-new.src=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1_withoutEvaluate.xlsx"
+                    , "-result=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1WithoutEvaluate"
             });
         }
 
@@ -85,8 +85,8 @@ public class GenerateTest {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsxStreaming.txt"});
             Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/streamxlsx/compareResult.txt"
                     , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"
-                    , "-new.src=" + GenerateTest.baseDir + "/generate/table/result/xlsx/Test1_Stream.xlsx"
-                    , "-result=" + GenerateTest.baseDir + "/generate/table/result/xlsx/Test1Stream"
+                    , "-new.src=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1_Stream.xlsx"
+                    , "-result=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1Stream"
             });
         }
 
@@ -95,8 +95,8 @@ public class GenerateTest {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXls.txt"});
             Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/xls/compareResult.txt"
                     , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"
-                    , "-new.src=" + GenerateTest.baseDir + "/generate/table/result/xls/Test1.xls"
-                    , "-result=" + GenerateTest.baseDir + "/generate/table/result/xls/Test1"
+                    , "-new.src=" + this.getBaseDir() + "/generate/table/result/xls/Test1.xls"
+                    , "-result=" + this.getBaseDir() + "/generate/table/result/xls/Test1"
             });
         }
 

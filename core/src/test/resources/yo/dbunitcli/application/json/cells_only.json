@@ -1,0 +1,17 @@
+{
+    "patterns": {
+        "Sheet1": {"regex": "^Sheet1$"}
+    },
+    "cells": [
+        {
+            "sheetName": "Sheet1",
+            "tableName": "Table1",
+            "header": ["Col1", "Col2"],
+            "rows": [
+                {"cellAddress": ["A1", "B1"]},
+                {"cellAddress": ["A2", "B2"]}
+            ],
+            "addFileInfo": true
+        }
+    ]
+}
