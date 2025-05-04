@@ -10,23 +10,17 @@ paths:
         - $ref: '../schemas/command.yaml#/components/parameters/CommandName'
       responses:
         '200':
-          description: 成功。設定名リストのJSON配列文字列。
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
+          $ref: '../schemas/command.yaml#/components/responses/SettingList'
         '400':
           $ref: '../schemas/common.yaml#/components/responses/ApplicationError'
         '500':
           $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
 
-  /{command}/exec:
+  /{command}/copy:
     post:
-      summary: コマンド実行
-      description: 指定された設定でコマンドを実行します。
-      operationId: executeCommand
+      summary: コマンド設定のコピー
+      description: 既存の設定をコピーして新しい設定を作成します。
+      operationId: copyCommandSetting
       tags:
         - Command Settings
       parameters:
@@ -39,11 +33,53 @@ paths:
               $ref: '../schemas/command.yaml#/components/schemas/CommandRequestDto'
       responses:
         '200':
-          description: 成功。結果ディレクトリのパス。
-          content:
-            text/plain:
-              schema:
-                type: string
+          $ref: '../schemas/command.yaml#/components/responses/SettingList'
+        '400':
+          $ref: '../schemas/common.yaml#/components/responses/ApplicationError'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+  /{command}/delete:
+    post:
+      summary: コマンド設定の削除
+      description: 指定された設定を削除します。
+      operationId: deleteCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '../schemas/command.yaml#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/command.yaml#/components/schemas/CommandRequestDto'
+      responses:
+        '200':
+          $ref: '../schemas/command.yaml#/components/responses/SettingList'
+        '400':
+          $ref: '../schemas/common.yaml#/components/responses/ApplicationError'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+  /{command}/rename:
+    post:
+      summary: コマンド設定名の変更
+      description: 設定の名前を変更します。
+      operationId: renameCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '../schemas/command.yaml#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/command.yaml#/components/schemas/CommandRequestDto'
+      responses:
+        '200':
+          $ref: '../schemas/command.yaml#/components/responses/SettingList'
         '400':
           $ref: '../schemas/common.yaml#/components/responses/ApplicationError'
         '500':

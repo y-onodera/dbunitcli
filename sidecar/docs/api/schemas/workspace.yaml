@@ -3,44 +3,84 @@ components:
     WorkspaceDto:
       type: object
       properties:
-        baseDir:
-          type: string
-          description: ワークスペースのベースディレクトリパス
-        datasetBase:
-          type: string
-          description: データセットファイルのベースディレクトリパス
-        resultBase:
-          type: string
-          description: 実行結果のベースディレクトリパス
-        settings:
-          type: array
-          description: 設定ファイル一覧
-          items:
-            $ref: '#/components/schemas/SettingFileDto'
+        parameterList:
+          $ref: '#/components/schemas/ParametersDto'
+        resources:
+          $ref: '#/components/schemas/ResourcesDto'
+        context:
+          $ref: '#/components/schemas/ContextDto'
       required:
-        - baseDir
-        - datasetBase
-        - resultBase
-        - settings
+        - parameterList
+        - resources
+        - context
 
-    SettingFileDto:
+    ParametersDto:
       type: object
+      description: コマンドパラメータ情報
       properties:
-        name:
-          type: string
-          description: 設定ファイル名
-        path:
-          type: string
-          description: 設定ファイルパス
-      required:
-        - name
-        - path
+        compare:
+          type: array
+          items:
+            type: string
+        convert:
+          type: array
+          items:
+            type: string
+        generate:
+          type: array
+          items:
+            type: string
+        parameterize:
+          type: array
+          items:
+            type: string
+        run:
+          type: array
+          items:
+            type: string
+
+    ResourcesDto:
+      type: object
+      description: リソースファイル情報
+      properties:
+        datasetSettings:
+          type: array
+          items:
+            type: string
+        xlsxSchemas:
+          type: array
+          items:
+            type: string
+        templates:
+          type: array
+          items:
+            type: string
 
     ContextDto:
       type: object
       properties:
-        baseDir:
+        workspace:
           type: string
-          description: 更新するベースディレクトリパス
+          description: ワークスペースディレクトリ
+        datasetBase:
+          type: string
+          description: データセットベースディレクトリ
+        resultBase:
+          type: string
+          description: 結果出力ディレクトリ
+        settingBase:
+          type: string
+          description: 設定ファイルディレクトリ
+        templateBase:
+          type: string
+          description: テンプレートディレクトリ
+        jdbcBase:
+          type: string
+          description: JDBC設定ディレクトリ
+        xlsxSchemaBase:
+          type: string
+          description: Excelスキーマディレクトリ
       required:
-        - baseDir
+        - workspace
+        - datasetBase
+        - resultBase

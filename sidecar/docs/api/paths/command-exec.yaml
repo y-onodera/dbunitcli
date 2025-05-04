@@ -1,0 +1,138 @@
+paths:
+  /{command}/load:
+    post:
+      summary: コマンド設定の読み込み
+      description: 指定された名前の設定内容を読み込みます。
+      operationId: loadCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '../schemas/command.yaml#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/command.yaml#/components/schemas/CommandRequestDto'
+      responses:
+        '200':
+          description: 成功。設定内容のJSON。
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        '400':
+          $ref: '../schemas/common.yaml#/components/responses/ApplicationError'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+  /{command}/reset:
+    get:
+      summary: デフォルト設定の取得
+      description: コマンドのデフォルトパラメータを取得します。
+      operationId: resetCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '../schemas/command.yaml#/components/parameters/CommandName'
+      responses:
+        '200':
+          description: 成功。デフォルトパラメータのJSON。
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        '400':
+          $ref: '../schemas/common.yaml#/components/responses/ApplicationError'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+  /{command}/refresh:
+    post:
+      summary: パラメータの更新とバリデーション
+      description: 入力されたパラメータを検証して更新します。
+      operationId: refreshCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '../schemas/command.yaml#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+      responses:
+        '200':
+          description: 成功。検証済みパラメータのJSON。
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        '400':
+          $ref: '../schemas/common.yaml#/components/responses/ApplicationError'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+  /{command}/save:
+    post:
+      summary: コマンド設定の保存
+      description: 入力された設定内容を保存します。
+      operationId: saveCommandSetting
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '../schemas/command.yaml#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/command.yaml#/components/schemas/CommandRequestDto'
+      responses:
+        '200':
+          description: 成功
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: success
+        '400':
+          $ref: '../schemas/common.yaml#/components/responses/ApplicationError'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+  /{command}/exec:
+    post:
+      summary: コマンド実行
+      description: 指定された設定でコマンドを実行します。
+      operationId: executeCommand
+      tags:
+        - Command Settings
+      parameters:
+        - $ref: '../schemas/command.yaml#/components/parameters/CommandName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/command.yaml#/components/schemas/CommandRequestDto'
+      responses:
+        '200':
+          description: 成功。結果ディレクトリのパス。
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          $ref: '../schemas/common.yaml#/components/responses/ApplicationError'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'

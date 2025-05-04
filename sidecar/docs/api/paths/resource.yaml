@@ -1,0 +1,107 @@
+paths:
+  /{resource}/list:
+    get:
+      summary: リソースファイル一覧取得
+      description: 指定されたリソースタイプのファイル一覧を取得します。
+      operationId: listResourceFiles
+      tags:
+        - Resource Files
+      parameters:
+        - name: resource
+          in: path
+          required: true
+          description: |
+            リソースタイプ
+            - dataset-setting: データセット設定
+            - xlsx-schema: Excelスキーマ
+            - template: テンプレート
+          schema:
+            type: string
+            enum:
+              - dataset-setting
+              - xlsx-schema
+              - template
+      responses:
+        '200':
+          description: 成功。ファイル名リストのJSON。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+  /{resource}/load:
+    post:
+      summary: リソースファイル読み込み
+      description: 指定されたファイルの内容を読み込みます。
+      operationId: loadResourceFile
+      tags:
+        - Resource Files
+      parameters:
+        - $ref: '#/components/parameters/ResourceType'
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: ファイル名
+      responses:
+        '200':
+          description: 成功。ファイル内容のJSON。
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+  /{resource}/save:
+    post:
+      summary: リソースファイル保存
+      description: ファイルを保存します。
+      operationId: saveResourceFile
+      tags:
+        - Resource Files
+      parameters:
+        - $ref: '#/components/parameters/ResourceType'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/resource.yaml#/components/schemas/ResourceSaveRequest'
+      responses:
+        '200':
+          description: 成功。更新後のファイル一覧。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          $ref: '../schemas/common.yaml#/components/responses/ApplicationError'
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
+components:
+  parameters:
+    ResourceType:
+      name: resource
+      in: path
+      required: true
+      description: |
+        リソースタイプ
+        - dataset-setting: データセット設定
+        - xlsx-schema: Excelスキーマ
+        - template: テンプレート
+      schema:
+        type: string
+        enum:
+          - dataset-setting
+          - xlsx-schema
+          - template

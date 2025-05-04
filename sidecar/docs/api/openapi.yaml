@@ -41,6 +41,68 @@ tags:
       - データベース接続情報の管理
       - クエリー実行用の設定
 
-# 各パスの定義は個別のファイルに分割
 paths:
-  $ref: './paths/workspace.yaml#/paths'
+  # ワークスペース管理
+  /workspace/resources:
+    $ref: './paths/workspace.yaml#/paths/~1workspace~1resources'
+  /workspace/update:
+    $ref: './paths/workspace.yaml#/paths/~1workspace~1update'
+
+  # コマンド設定（基本操作）
+  /{command}/add:
+    $ref: './paths/command-basic.yaml#/paths/~1{command}~1add'
+  /{command}/copy:
+    $ref: './paths/command-basic.yaml#/paths/~1{command}~1copy'
+  /{command}/delete:
+    $ref: './paths/command-basic.yaml#/paths/~1{command}~1delete'
+  /{command}/rename:
+    $ref: './paths/command-basic.yaml#/paths/~1{command}~1rename'
+
+  # コマンド設定（実行操作）
+  /{command}/load:
+    $ref: './paths/command-exec.yaml#/paths/~1{command}~1load'
+  /{command}/reset:
+    $ref: './paths/command-exec.yaml#/paths/~1{command}~1reset'
+  /{command}/refresh:
+    $ref: './paths/command-exec.yaml#/paths/~1{command}~1refresh'
+  /{command}/save:
+    $ref: './paths/command-exec.yaml#/paths/~1{command}~1save'
+  /{command}/exec:
+    $ref: './paths/command-exec.yaml#/paths/~1{command}~1exec'
+
+  # リソースファイル管理
+  /{resource}/list:
+    $ref: './paths/resource.yaml#/paths/~1{resource}~1list'
+  /{resource}/load:
+    $ref: './paths/resource.yaml#/paths/~1{resource}~1load'
+  /{resource}/save:
+    $ref: './paths/resource.yaml#/paths/~1{resource}~1save'
+  /{resource}/delete:
+    $ref: './paths/resource.yaml#/paths/~1{resource}~1delete'
+
+components:
+  schemas:
+    # 共通エラーレスポンス
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: エラーメッセージ
+      required:
+        - message
+
+  responses:
+    ApplicationError:
+      description: アプリケーションエラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    InternalServerError:
+      description: 内部サーバーエラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

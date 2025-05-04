@@ -36,10 +36,13 @@
 
 ## API仕様
 
-### [APIエンドポイント定義](./api/01-endpoints.md)
-- REST APIの一覧
-- リクエスト/レスポンス形式
-- エラーハンドリング
+### REST API仕様
+- [APIの概要と共通仕様](./api/01-overview.md)
+- [ワークスペース管理API](./api/02-endpoints-workspace.md)
+- [コマンド設定API - 基本操作](./api/03-endpoints-command-basic.md)
+- [コマンド設定API - 実行操作](./api/04-endpoints-command-exec.md)
+- [リソースファイル管理API](./api/05-endpoints-resource.md)
+- [データソース設定API](./api/06-endpoints-query.md)
 
 ### [OpenAPI仕様](./api/openapi.yaml)
 - APIの詳細仕様

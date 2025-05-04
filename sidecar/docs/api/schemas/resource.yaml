@@ -1,0 +1,65 @@
+components:
+  schemas:
+    ResourceSaveRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 保存するファイル名
+        input:
+          type: object
+          description: 保存するファイルの内容
+      required:
+        - name
+        - input
+
+    DatasetSettingDto:
+      type: object
+      description: データセット設定の内容
+      properties:
+        tables:
+          type: array
+          items:
+            $ref: '#/components/schemas/TableJoinDto'
+
+    TableJoinDto:
+      type: object
+      description: テーブル結合設定
+      properties:
+        name:
+          type: string
+          description: テーブル名
+        joins:
+          type: array
+          description: 結合条件
+          items:
+            type: object
+            properties:
+              table:
+                type: string
+                description: 結合先テーブル
+              keys:
+                type: array
+                description: 結合キー
+                items:
+                  type: string
+
+    JsonXlsxSchemaDto:
+      type: object
+      description: ExcelスキーマのJSONフォーマット
+      properties:
+        worksheetName:
+          type: string
+          description: ワークシート名
+        fields:
+          type: array
+          description: フィールド定義
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: フィールド名
+              type:
+                type: string
+                description: データ型

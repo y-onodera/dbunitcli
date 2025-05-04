@@ -20,21 +20,36 @@ components:
           - parameterize
           - run
 
+  responses:
+    SettingList:
+      description: 設定名リスト
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: string
+
   schemas:
     CommandRequestDto:
       type: object
       properties:
         name:
           type: string
-          description: 設定ファイル名
-        parameters:
+          description: 設定名
+        oldName:
+          type: string
+          description: 変更前の設定名（rename操作時のみ使用）
+        newName:
+          type: string
+          description: 変更後の設定名（rename操作時のみ使用）
+        input:
           type: object
           description: コマンドパラメータ
           additionalProperties:
             type: string
       required:
         - name
-        - parameters
 
     CommandOption:
       type: object
@@ -49,7 +64,7 @@ components:
             - generate
             - parameterize
             - run
-        parameters:
+        input:
           type: object
           additionalProperties:
             type: string
