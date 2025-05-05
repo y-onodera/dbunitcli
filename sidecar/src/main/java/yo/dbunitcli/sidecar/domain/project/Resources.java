@@ -3,14 +3,12 @@ package yo.dbunitcli.sidecar.domain.project;
 import yo.dbunitcli.sidecar.dto.ResourcesDto;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public record Resources(
         File baseDir
-        , List<String> jdbc
+        , ResourceFile jdbc
         , ResourceFile metadataSetting
-        , List<String> template
+        , ResourceFile template
         , ResourceFile xlsxSchema) {
 
     public static Builder builder() {
@@ -20,37 +18,32 @@ public record Resources(
     public ResourcesDto toDto() {
         final ResourcesDto result = new ResourcesDto();
         result.setDatasetSettings(this.metadataSetting().list());
+        result.setJdbcFiles(this.jdbc().list());
+        result.setTemplateFiles(this.template().list());
         result.setXlsxSchemas(this.xlsxSchema().list());
         return result;
     }
 
     public static class Builder {
-        private List<String> jdbc = new ArrayList<>();
-        private List<String> template = new ArrayList<>();
         private File baseDir;
 
         public Resources build() {
-            return new Resources(this.baseDir
-                    , new ArrayList<>(this.jdbc)
-                    , new ResourceFile(new File(this.baseDir, "dataset-setting"))
-                    , new ArrayList<>(this.template)
-                    , new ResourceFile(new File(this.baseDir, "xlsx-schema"))
+            return new Resources(
+                    this.baseDir,
+                    new ResourceFile(new File(this.baseDir, "jdbc")),
+                    new ResourceFile(new File(this.baseDir, "dataset-setting")),
+                    new ResourceFile(new File(this.baseDir, "template")),
+                    new ResourceFile(new File(this.baseDir, "xlsx-schema"))
             );
         }
 
-        public void workspace(final File workspace) {
-            this.baseDir = new File(workspace, "resources");
+        public Builder workspace(final File workspace) {
+            return this.setBaseDir(new File(workspace, "resources"));
         }
 
-        public Builder setJdbc(final List<String> jdbc) {
-            this.jdbc = jdbc;
+        public Builder setBaseDir(final File baseDir) {
+            this.baseDir = baseDir;
             return this;
         }
-
-        public Builder setTemplate(final List<String> template) {
-            this.template = template;
-            return this;
-        }
-
     }
 }
