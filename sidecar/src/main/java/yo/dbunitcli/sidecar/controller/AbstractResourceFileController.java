@@ -53,7 +53,7 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
         return this.currentFileList();
     }
 
-    @Post(uri = "delete", consumes = MediaType.APPLICATION_JSON)
+    @Post(uri = "delete", consumes = MediaType.TEXT_PLAIN, produces = MediaType.APPLICATION_JSON)
     public String delete(@Body final String name) throws IOException {
         try {
             this.getResourceFile().delete(name);
