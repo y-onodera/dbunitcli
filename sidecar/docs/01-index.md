@@ -18,33 +18,41 @@
 - パッケージ構造
 - ワークスペース構成
 - コンポーネント間の関係
+- リソース管理機能
 
 ### [GUIバックエンド設計](./architecture/02-gui-backend.md)
-- Workspaceモデル
-- GUIインターフェース
+- RESTful APIの提供
+- GUIとの連携
 - コマンド管理
+- リソース操作インターフェース
 
-### [coreプロジェクト連携設計](./architecture/03-core-bridge.md)
+### [中間層設計](./architecture/03-middleware.md)
+- ファイルシステム管理
+- オプション管理
+- ファイル操作の抽象化
+
+### [コアプロジェクト連携設計](./architecture/04-core-bridge.md)
 - Command実行フロー
 - データ変換層
 - 結果管理
 
-### [中間層設計](./architecture/04-middleware.md)
-- ファイルシステム管理
-- オプション管理
-- リソース管理
+### [リソースコントローラー](./architecture/05-resource-controllers.md)
+- リソースコントローラーの基本構造
+- 各種コントローラーの責務
+- バリデーション機能
 
 ## API仕様
 
 ### REST API仕様
 - [APIの概要と共通仕様](./api/01-overview.md)
 - [ワークスペース管理API](./api/02-endpoints-workspace.md)
-- [コマンド設定API - 基本操作](./api/03-endpoints-command-basic.md)
-- [コマンド設定API - 実行操作](./api/04-endpoints-command-exec.md)
+- [コマンド設定API](./api/03-endpoints-command-basic.md)
+- [コマンド実行API](./api/04-endpoints-command-exec.md)
 - [リソースファイル管理API](./api/05-endpoints-resource.md)
 - [データソース設定API](./api/06-endpoints-query.md)
 
-### [OpenAPI仕様](./api/openapi.yaml)
+### OpenAPI仕様
+- [API定義](./api/openapi.yaml)
 - APIの詳細仕様
 - スキーマ定義
 - セキュリティ定義

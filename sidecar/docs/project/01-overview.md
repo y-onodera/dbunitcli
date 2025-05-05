@@ -26,4 +26,4 @@
 ## 関連ドキュメント
 - [技術スタック](./02-tech-stack.md)
 - [アーキテクチャ詳細](../architecture/01-overview.md)
-- [API仕様](../api/01-endpoints.md)
+- [API仕様](../api/01-overview.md)

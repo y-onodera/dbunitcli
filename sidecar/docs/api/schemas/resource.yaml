@@ -13,6 +13,36 @@ components:
         - name
         - input
 
+    Resources:
+      type: object
+      description: プロジェクトのリソース定義
+      properties:
+        jdbc:
+          $ref: '#/components/schemas/ResourceFile'
+          description: JDBC接続情報ファイル
+        template:
+          $ref: '#/components/schemas/ResourceFile'
+          description: テンプレートファイル
+        datasetSettings:
+          $ref: '#/components/schemas/ResourceFile'
+          description: データセット設定ファイル
+        xlsxSchema:
+          $ref: '#/components/schemas/ResourceFile'
+          description: Excelスキーマファイル
+
+    ResourceFile:
+      type: object
+      description: リソースファイルの管理情報
+      properties:
+        path:
+          type: string
+          description: ファイルパス
+        files:
+          type: array
+          description: 管理対象ファイル一覧
+          items:
+            type: string
+
     DatasetSettingDto:
       type: object
       description: データセット設定の内容

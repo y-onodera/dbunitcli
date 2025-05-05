@@ -15,12 +15,14 @@ paths:
             - dataset-setting: データセット設定
             - xlsx-schema: Excelスキーマ
             - template: テンプレート
+            - jdbc: JDBC接続情報
           schema:
             type: string
             enum:
               - dataset-setting
               - xlsx-schema
               - template
+              - jdbc
       responses:
         '200':
           description: 成功。ファイル名リストのJSON。
@@ -88,6 +90,34 @@ paths:
         '500':
           $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
 
+  /{resource}/delete:
+    post:
+      summary: リソースファイル削除
+      description: 指定されたファイルを削除します。
+      operationId: deleteResourceFile
+      tags:
+        - Resource Files
+      parameters:
+        - $ref: '#/components/parameters/ResourceType'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              description: 削除するファイル名
+      responses:
+        '200':
+          description: 成功。更新後のファイル一覧。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          $ref: '../schemas/common.yaml#/components/responses/InternalServerError'
+
 components:
   parameters:
     ResourceType:
@@ -99,9 +129,11 @@ components:
         - dataset-setting: データセット設定
         - xlsx-schema: Excelスキーマ
         - template: テンプレート
+        - jdbc: JDBC接続情報
       schema:
         type: string
         enum:
           - dataset-setting
           - xlsx-schema
           - template
+          - jdbc
