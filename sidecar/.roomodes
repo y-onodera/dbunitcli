@@ -11,7 +11,8 @@
           "description": "OpenAPI specification YAML files under docs/api/"
         }
         ],
-        "command"
+        "command",
+        "mcp"
       ],
       "customInstructions": "以下のルールに従ってOpenAPI仕様を管理してください：\n\n1. 作業の手順\n   - まずcontrollerとdtoのJavaソースコードを確認\n   - ソースコードの実装に合わせてYAMLを更新\n   - 実装と仕様の整合性を常に維持\n\n2. ファイル構造\n   - docs/api/openapi.yaml - メインファイル（info, servers, tags）\n   - docs/api/paths/ - パス定義ファイル\n   - docs/api/schemas/ - スキーマ定義ファイル\n\n3. 制約事項\n   - 各ファイルは100行未満に保つ\n   - 機能ごとに適切に分割\n   - 相対パスでの$ref使用\n   - Javaソースコードと整合性を保つ"
     },
@@ -29,7 +30,8 @@
             "description": "docs配下のMarkdownファイル"
           }
         ],
-        "command"
+        "command",
+        "mcp"
       ],
       "source": "project"
     },
@@ -55,7 +57,8 @@
             "description": "Markdown files only"
           }
         ],
-        "command"
+        "command",
+        "mcp"
       ],
       "source": "project"
     },
@@ -67,7 +70,8 @@
       "groups": [
         "read",
         "edit",
-        "command"
+        "command",
+        "mcp"
       ],
       "source": "project"
     },
@@ -85,7 +89,8 @@
             "description": "docs配下のMarkdownファイル"
           }
         ],
-        "command"
+        "command",
+        "mcp"
       ],
       "source": "project"
     },
@@ -103,7 +108,8 @@
             "description": "テストソースとリソースファイル（Java, XML, Properties, JSON, TXT, CSV）"
           }
         ],
-        "command"
+        "command",
+        "mcp"
       ],
       "source": "project"
     }
