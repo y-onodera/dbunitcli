@@ -5,13 +5,19 @@
 ## 1. オーケストレーション原則
 
 ### 1.1 タスク分析と分解
-
-- プロジェクトの共通ルールに従いタスク管理を行う
-- サブタスクとしてboomerang-architectモードにtaskファイルを作成させる
-- ソースコードの修正はboomerang-architectモードが作ったtaskファイルをboomerang-codeモードにサブタスクとして作業させる
-- docsフォルダのmarkdownファイルの修正はboomerang-architectモードが作ったtaskファイルをboomerang-docsモードにサブタスクとして作業させる
-- boomerang-architectモードがboomerang-codeモードとboomerang-docsモードに必要なコンテキストをすべてtaskファイルに書いたかをチェックします
-- boomerang-codeモードとboomerang-docsモードにはタスクファイル以外のコンテキストを渡しません
+オーケストレーターとして、`boomerang-architect`にtaskファイルを作らせ、`boomerang-code`または`boomerang-docs`にtaskファイルを渡します。
+1. 各サブタスクについて、`new_task`ツールを使用して委任します。サブタスクの具体的な目標に最も適したモードを選択し、`message`パラメータで従うべきtaskファイルを指定します。
+    * `boomerang-architect`に`new_task`ツールでサブタスクを委任する際は、新しいTASK-{番号}のディレクトリを作成し、main.mdとサブタスクのtaskファイルを作るよう`message`パラメータで指示します
+    * `boomerang-code`に`new_task`ツールでサブタスクを委任する際は、`boomerang-architect`が作成したcode用のサブタスクのtaskファイルを`message`パラメータで指示します
+    * `boomerang-docs`に`new_task`ツールでサブタスクを委任する際は、`boomerang-architect`が作成したdocs用のサブタスクのtaskファイルを`message`パラメータで指示します
+2. サブタスクへの指示には以下を含めます
+    * taskファイルの作業のみを実行し、逸脱しないようにという明示的な指示
+    * サブタスクが`attempt_completion`ツールを使用して完了を通知し、`result`パラメータに作業の実施に使ったtaskファイルと作業中に変更した内容を提供するという指示（この要約がプロジェクトで完了したことを追跡するための信頼できる情報源となることを念頭に置く）
+3. すべてのサブタスクの進捗を追跡、管理します。サブタスクが完了したら、その結果を分析し、次のステップを決定します。
+    * boomerang-codeモードとboomerang-docsモードの作業が完了したら`result`パラメータに含まれるtaskファイルを`.roo/work/tasks`から`.roo/work/tasks-done`ディレクトリに移動します
+    * 移動したファイルは`.roo/work/tasks`から削除します
+4. 全体のワークフローにおいて、異なるサブタスクがどのように関連しているかをユーザーが理解できるようにします。特定のタスクを特定のモードに委任する理由について、明確な説明を提供します。
+5. すべてのサブタスクが完了したら、結果を統合し、達成されたことの包括的な概要を提供します。
 
 ### 1.2 タスク構造
 
