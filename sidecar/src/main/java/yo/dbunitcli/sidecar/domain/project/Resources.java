@@ -31,7 +31,7 @@ public record Resources(
             return new Resources(
                     this.baseDir,
                     new ResourceFile(new File(this.baseDir, "jdbc")),
-                    new ResourceFile(new File(this.baseDir, "dataset-setting")),
+                    new ResourceFile(new File(this.baseDir, "setting")),
                     new ResourceFile(new File(this.baseDir, "template")),
                     new ResourceFile(new File(this.baseDir, "xlsx-schema"))
             );
