@@ -1,29 +1,38 @@
+import { useEffect, useState } from "react";
 import ResourceFileDialog from "../../components/dialog/ResourceFileDialog";
 import SettingTable from "../../components/dialog/SettingTable";
-import { useEnviroment } from "../../context/EnviromentProvider";
-import { saveXlsxSchema, useSetXlsxSchema, useXlsxSchema } from "../../context/XlsxSchemaProvider";
+import { useLoadXlsxSchema, useSaveXlsxSchema } from "../../context/XlsxSchemaProvider";
 import { type CellSetting, type RowSetting, XlsxSchema, createCellSetting, createRowSetting } from "../../model/XlsxSchema";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 
 export default function XlsxSchemaDialog(props: {
     fileName: string;
-    setFileName: (fileName: string) => void;
     handleDialogClose: () => void;
     handleSave: (path: string) => void;
 }) {
-    const environment = useEnviroment();
-    const xlsxSchema = useXlsxSchema();
-    const setXlsxSchema = useSetXlsxSchema();
-
+    const loadXlsxSchema = useLoadXlsxSchema();
+    const [xlsxSchema, setXlsxSchema] = useState(XlsxSchema.create());
+    const saveSchema = useSaveXlsxSchema();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+    useEffect(() => {
+        loadXlsxSchema(props.fileName)
+            .then((res) => {
+                setXlsxSchema(res);
+            })
+            .catch((ex) => {
+                alert(ex);
+            });
+    }, [props.fileName]);
     return (
         <ResourceFileDialog
             handleDialogClose={props.handleDialogClose}
             fileName={props.fileName}
-            setFileName={props.setFileName}
-            handleSave={(fileName) => {
-                saveXlsxSchema(environment.apiUrl, fileName, xlsxSchema);
-                props.handleSave(fileName);
+            handleSave={async (fileName) => {
+                const result = await saveSchema(fileName, xlsxSchema);
+                if (result === 'success') {
+                    props.handleSave(fileName);
+                }
             }}
         >
             <SettingTable<RowSetting>

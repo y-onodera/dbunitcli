@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { saveDataSource } from '../../context/DataSourceProvider';
-import { useEnviroment } from '../../context/EnviromentProvider';
+import ResourceFileDialog from '../../components/dialog/ResourceFileDialog';
+import { useSaveDataSource } from '../../context/QueryDatasourceProvider';
 import type { QueryDatasourceType } from '../../model/QueryDatasource';
-import ResourceFileDialog from './ResourceFileDialog';
 
 type SqlEditorSetting = {
     value: string;
@@ -11,7 +10,6 @@ type SqlEditorSetting = {
 type SqlEditorDialogProps = {
     type: QueryDatasourceType;
     fileName: string;
-    setFileName: (fileName: string) => void;
     handleDialogClose: () => void;
     handleSave: (path: string) => void;
     value: string;
@@ -19,15 +17,15 @@ type SqlEditorDialogProps = {
 
 export default function SqlEditorDialog(props: SqlEditorDialogProps) {
     const [setting, setSetting] = useState<SqlEditorSetting>({ value: props.value });
-    const environment = useEnviroment();
+    const saveDataSource = useSaveDataSource();
 
     const handleCommit = async (path: string) => {
-        const result = await saveDataSource(environment.apiUrl, {
-            type: props.type as QueryDatasourceType,
+        const result = await saveDataSource({
+            type: props.type,
             name: path,
             contents: setting.value
         });
-        if (result !== 'failed') {
+        if (result === 'success') {
             props.handleSave(path);
         }
     };
@@ -36,7 +34,6 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
         <ResourceFileDialog
             handleDialogClose={props.handleDialogClose}
             fileName={props.fileName}
-            setFileName={props.setFileName}
             handleSave={handleCommit}
         >
             <div className="w-[640px] p-4">

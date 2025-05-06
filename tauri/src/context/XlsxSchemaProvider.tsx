@@ -1,44 +1,37 @@
-import { type Dispatch, type ReactNode, type SetStateAction, createContext, useContext, useEffect, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
+import type { ResourcesSettings } from "../model/WorkspaceResources";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
 import { useEnviroment } from "./EnviromentProvider";
+import { useSetResourcesSettings } from "./WorkspaceResourcesProvider";
 
-const xlsxSchemaContext = createContext<XlsxSchema>(XlsxSchema.create());
-const setXlsxSchemaContext = createContext<Dispatch<SetStateAction<XlsxSchema>>>(() => undefined);
+type OperationResult = 'success' | 'failed';
 
-export default function XlsxSchemaProvider(props: { children: ReactNode }) {
-    const [schema, setSchema] = useState<XlsxSchema>(XlsxSchema.create());
+// コンポーネントでの使用のためのラップ関数
+export function useDeleteXlsxSchema() {
     const environment = useEnviroment();
-
-    useEffect(() => {
-        const loadSchema = async () => {
-            const fetchParams = {
-                endpoint: `${environment.apiUrl}xlsx-schema/list`,
-                options: {
-                    method: "GET"
-                },
-            };
-            await fetchData(fetchParams)
-                .then((response) => response.json())
-                .then((data) => setSchema(data))
-                .catch((ex) => handleFetchError(ex, fetchParams));
-        };
-        loadSchema();
-    }, [environment.apiUrl]);
-
-    return (
-        <xlsxSchemaContext.Provider value={schema}>
-            <setXlsxSchemaContext.Provider value={setSchema}>
-                {props.children}
-            </setXlsxSchemaContext.Provider>
-        </xlsxSchemaContext.Provider>
-    );
+    const setResourcesSettings = useSetResourcesSettings();
+    return async (name: string) => {
+        return deleteXlsxSchema(environment.apiUrl, name, setResourcesSettings);
+    };
 }
 
-export const useXlsxSchema = () => useContext(xlsxSchemaContext);
-export const useSetXlsxSchema = () => useContext(setXlsxSchemaContext);
+export function useSaveXlsxSchema() {
+    const environment = useEnviroment();
+    const setResourcesSettings = useSetResourcesSettings();
+    return async (name: string, input: XlsxSchema) => {
+        return saveXlsxSchema(environment.apiUrl, name, input, setResourcesSettings);
+    };
+}
 
-export async function loadXlsxSchema(apiUrl: string, name: string): Promise<XlsxSchema> {
+export function useLoadXlsxSchema() {
+    const environment = useEnviroment();
+    return async (name: string) => {
+        return loadXlsxSchema(environment.apiUrl, name);
+    };
+}
+
+async function loadXlsxSchema(apiUrl: string, name: string): Promise<XlsxSchema> {
     if (name === "") {
         return XlsxSchema.create();
     }
@@ -59,7 +52,12 @@ export async function loadXlsxSchema(apiUrl: string, name: string): Promise<Xlsx
         });
 }
 
-export async function saveXlsxSchema(apiUrl: string, name: string, input: XlsxSchema): Promise<string> {
+async function saveXlsxSchema(
+    apiUrl: string,
+    name: string,
+    input: XlsxSchema,
+    setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>
+): Promise<OperationResult> {
     const fetchParams = {
         endpoint: `${apiUrl}xlsx-schema/save`,
         options: {
@@ -68,15 +66,27 @@ export async function saveXlsxSchema(apiUrl: string, name: string, input: XlsxSc
             body: JSON.stringify({ name, input }),
         },
     };
+
     return await fetchData(fetchParams)
-        .then((response) => response.text())
+        .then((response) => response.json())
+        .then((schemas: string[]) => {
+            setResourcesSettings(current => ({
+                ...current,
+                xlsxSchemas: schemas
+            }));
+            return 'success' as OperationResult;
+        })
         .catch((ex) => {
             handleFetchError(ex, fetchParams);
-            return "failed";
+            return 'failed' as OperationResult;
         });
 }
 
-export async function deleteXlsxSchema(apiUrl: string, name: string): Promise<string> {
+async function deleteXlsxSchema(
+    apiUrl: string,
+    name: string,
+    setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>
+): Promise<OperationResult> {
     const fetchParams = {
         endpoint: `${apiUrl}xlsx-schema/delete`,
         options: {
@@ -85,10 +95,18 @@ export async function deleteXlsxSchema(apiUrl: string, name: string): Promise<st
             body: name,
         },
     };
+
     return await fetchData(fetchParams)
-        .then((response) => response.text())
+        .then((response) => response.json())
+        .then((schemas: string[]) => {
+            setResourcesSettings(current => ({
+                ...current,
+                xlsxSchemas: schemas
+            }));
+            return 'success' as OperationResult;
+        })
         .catch((ex) => {
             handleFetchError(ex, fetchParams);
-            return "failed";
+            return 'failed' as OperationResult;
         });
 }

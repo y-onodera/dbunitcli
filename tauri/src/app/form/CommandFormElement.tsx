@@ -5,8 +5,7 @@ import { ButtonWithIcon } from "../../components/element/Button";
 import { DirectoryButton, ExpandButton, FileButton } from "../../components/element/ButtonIcon";
 import { SettingIcon } from "../../components/element/Icon";
 import { CheckBox, ControllTextBox, InputLabel, SelectBox } from "../../components/element/Input";
-import { fetchDatasources } from "../../context/DataSourceProvider";
-import { useEnviroment } from "../../context/EnviromentProvider";
+import { useQueryDatasource } from "../../context/QueryDatasourceProvider";
 import { useResourcesSettings, useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
 import type { Attribute, CommandParam, CommandParams } from "../../model/CommandParam";
 import { type QueryDatasourceType, isSqlRelatedType } from "../../model/QueryDatasource";
@@ -117,20 +116,7 @@ export default function CommandFormElements(prop: CommandParams) {
 function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
 	const { srcType } = prop;
-	const environment = useEnviroment();
-	const [datasources, setDatasources] = useState<string[]>([]);
-
-	useEffect(() => {
-		const loadDatasources = async () => {
-			if (prop.element.name === "src" && isSqlRelatedType(srcType ?? "")) {
-				const sources = await fetchDatasources(environment.apiUrl, srcType as QueryDatasourceType);
-				if (sources !== 'failed') {
-					setDatasources(sources);
-				}
-			}
-		};
-		loadDatasources();
-	}, [environment.apiUrl, prop.element.name, srcType]);
+	const datasources = useQueryDatasource();
 
 	const settings = useResourcesSettings();
 
@@ -277,7 +263,7 @@ function DropDownMenu({
 						{element.name === "src" && !hidden && isSqlRelatedType(srcType ?? "") && (
 							<li>
 								<SqlEditorButton
-									type={srcType as "sql" | "table"}
+									type={srcType as QueryDatasourceType}
 									path={path}
 									setPath={setPath}
 								/>

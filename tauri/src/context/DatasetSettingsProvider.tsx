@@ -1,49 +1,42 @@
-import { type Dispatch, type ReactNode, type SetStateAction, createContext, useContext, useEffect, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { DatasetSettings, type DatasetSettingsBuilder } from "../model/DatasetSettings";
+import type { ResourcesSettings } from "../model/WorkspaceResources";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
 import { useEnviroment } from "./EnviromentProvider";
+import { useSetResourcesSettings } from "./WorkspaceResourcesProvider";
 
-const dataSettingsContext = createContext<DatasetSettings>(DatasetSettings.create());
-const setDataSettingsContext = createContext<Dispatch<SetStateAction<DatasetSettings>>>(() => undefined);
+type OperationResult = 'success' | 'failed';
 
-export default function DatasetSettingsProvider(props: { children: ReactNode }) {
-    const [settings, setSettings] = useState<DatasetSettings>(DatasetSettings.create());
+// コンポーネントでの使用のためのラップ関数
+export function useDeleteDatasetSettings() {
     const environment = useEnviroment();
-
-    useEffect(() => {
-        const loadSettings = async () => {
-            const fetchParams = {
-                endpoint: `${environment.apiUrl}metadata/list`,
-                options: {
-                    method: "GET"
-                },
-            };
-            await fetchData(fetchParams)
-                .then((response) => response.json())
-                .then((data) => setSettings(data))
-                .catch((ex) => handleFetchError(ex, fetchParams));
-        };
-        loadSettings();
-    }, [environment.apiUrl]);
-
-    return (
-        <dataSettingsContext.Provider value={settings}>
-            <setDataSettingsContext.Provider value={setSettings}>
-                {props.children}
-            </setDataSettingsContext.Provider>
-        </dataSettingsContext.Provider>
-    );
+    const setResourcesSettings = useSetResourcesSettings();
+    return async (name: string) => {
+        return deleteDatasetSettings(environment.apiUrl, name, setResourcesSettings);
+    };
 }
 
-export const useDatasetSettings = () => useContext(dataSettingsContext);
-export const useSetDatasetSettings = () => useContext(setDataSettingsContext);
+export function useSaveDatasetSettings() {
+    const environment = useEnviroment();
+    const setResourcesSettings = useSetResourcesSettings();
+    return async (name: string, input: DatasetSettings) => {
+        return saveDatasetSettings(environment.apiUrl, name, input, setResourcesSettings);
+    };
+}
 
-export async function loadDatasetSettings(apiUrl: string, name: string): Promise<DatasetSettings> {
+export function useLoadDatasetSettings() {
+    const environment = useEnviroment();
+    return async (name: string) => {
+        return loadDatasetSettings(environment.apiUrl, name);
+    };
+}
+
+async function loadDatasetSettings(apiUrl: string, name: string): Promise<DatasetSettings> {
     if (name === "") {
         return DatasetSettings.create();
     }
     const fetchParams = {
-        endpoint: `${apiUrl}metadata/load`,
+        endpoint: `${apiUrl}dataset-setting/load`,
         options: {
             method: "POST",
             headers: { "Content-Type": "text/plain" },
@@ -59,36 +52,61 @@ export async function loadDatasetSettings(apiUrl: string, name: string): Promise
         });
 }
 
-export async function saveDatasetSettings(apiUrl: string, name: string, input: DatasetSettings): Promise<string> {
+async function saveDatasetSettings(
+    apiUrl: string,
+    name: string,
+    input: DatasetSettings,
+    setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>
+): Promise<OperationResult> {
     const fetchParams = {
-        endpoint: `${apiUrl}metadata/save`,
+        endpoint: `${apiUrl}dataset-setting/save`,
         options: {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, input }),
         },
     };
+
     return await fetchData(fetchParams)
-        .then((response) => response.text())
+        .then((response) => response.json())
+        .then((settings: string[]) => {
+            setResourcesSettings(current => ({
+                ...current,
+                datasetSettings: settings
+            }));
+            return 'success' as OperationResult;
+        })
         .catch((ex) => {
             handleFetchError(ex, fetchParams);
-            return "failed";
+            return 'failed' as OperationResult;
         });
 }
 
-export async function deleteDatasetSettings(apiUrl: string, name: string): Promise<string> {
+async function deleteDatasetSettings(
+    apiUrl: string,
+    name: string,
+    setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>
+): Promise<OperationResult> {
     const fetchParams = {
-        endpoint: `${apiUrl}metadata/delete`,
+        endpoint: `${apiUrl}dataset-setting/delete`,
         options: {
             method: "POST",
             headers: { "Content-Type": "text/plain" },
             body: name,
         },
     };
+
     return await fetchData(fetchParams)
-        .then((response) => response.text())
+        .then((response) => response.json())
+        .then((settings: string[]) => {
+            setResourcesSettings(current => ({
+                ...current,
+                datasetSettings: settings
+            }));
+            return 'success' as OperationResult;
+        })
         .catch((ex) => {
             handleFetchError(ex, fetchParams);
-            return "failed";
+            return 'failed' as OperationResult;
         });
 }

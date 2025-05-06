@@ -49,7 +49,14 @@ export class SelectParameter {
 		return this.parameterize;
 	}
 }
-export type DefaultPath = "WORKSPACE" | "DATASET" | "RESULT" | "SETTING" | "TEMPLATE" | "JDBC" | "XLSX_SCHEMA"
+export type DefaultPath =
+	| "WORKSPACE"
+	| "DATASET"
+	| "RESULT"
+	| "SETTING"
+	| "TEMPLATE"
+	| "JDBC"
+	| "XLSX_SCHEMA";
 export type Attribute = {
 	type: string;
 	required: boolean;
@@ -67,13 +74,14 @@ export type CommandParams = {
 	name: string;
 	prefix: string;
 	elements: CommandParam[];
-	optionCaption?: { caption: string, display: (_: string) => boolean };
+	optionCaption?: { caption: string; display: (_: string) => boolean };
 	optional?: (_: string) => boolean;
 };
 export type ConvertResult = CommandParams & {
 	jdbc: CommandParams;
 };
 export type DatasetSource = CommandParams & {
+	srcType: () => string;
 	srcElements: () => CommandParams;
 	srcTypeSettings: () => CommandParams;
 	settingElements: () => CommandParams;
@@ -112,47 +120,102 @@ export type ParameterizeParams = {
 	paramData: DatasetSource;
 	templateOption: CommandParams;
 };
-const traversaldetail = ["recursive", "regInclude", "regExclude", "extension"]
-const datasetdetail = ["regTableInclude", "regTableExclude", "loadData", "includeMetaData"]
-const srcTypeDetail = new Map<string, { optionCaption: { caption: string, display: (_: string) => boolean }, optional: (_: string) => boolean }>([
-	["table", {
-		optionCaption: { caption: "table option", display: (name: string) => name === "headerName" },
-		optional: (name: string) => name !== "encoding" && !name.startsWith("jdbc")
-	}],
-	["sql", {
-		optionCaption: { caption: "sql option", display: (name: string) => name === "headerName" },
-		optional: (name: string) => name !== "encoding" && !name.startsWith("jdbc")
-	}],
-	["csv", {
-		optionCaption: { caption: "csv option", display: (name: string) => name === "headerName" },
-		optional: (name: string) => name !== "encoding"
-	}],
-	["csvq", {
-		optionCaption: { caption: "csvq option", display: (name: string) => name === "headerName" },
-		optional: (name: string) => name !== "encoding"
-	}],
-	["reg", {
-		optionCaption: { caption: "reg option", display: (_: string) => false },
-		optional: (_: string) => false
-	}],
-	["fixed", {
-		optionCaption: { caption: "fixed option", display: (_: string) => false },
-		optional: (_: string) => false
-	}],
-	["xls", {
-		optionCaption: { caption: "xls option", display: (name: string) => name === "headerName" },
-		optional: (_: string) => true
-	}],
-	["xlsx", {
-		optionCaption: { caption: "xlsx option", display: (name: string) => name === "headerName" },
-		optional: (_: string) => true
-	}]
+const traversaldetail = ["recursive", "regInclude", "regExclude", "extension"];
+const datasetdetail = [
+	"regTableInclude",
+	"regTableExclude",
+	"loadData",
+	"includeMetaData",
+];
+const srcTypeDetail = new Map<
+	string,
+	{
+		optionCaption: { caption: string; display: (_: string) => boolean };
+		optional: (_: string) => boolean;
+	}
+>([
+	[
+		"table",
+		{
+			optionCaption: {
+				caption: "table option",
+				display: (name: string) => name === "headerName",
+			},
+			optional: (name: string) =>
+				name !== "encoding" && !name.startsWith("jdbc"),
+		},
+	],
+	[
+		"sql",
+		{
+			optionCaption: {
+				caption: "sql option",
+				display: (name: string) => name === "headerName",
+			},
+			optional: (name: string) =>
+				name !== "encoding" && !name.startsWith("jdbc"),
+		},
+	],
+	[
+		"csv",
+		{
+			optionCaption: {
+				caption: "csv option",
+				display: (name: string) => name === "startRow",
+			},
+			optional: (name: string) => name !== "encoding",
+		},
+	],
+	[
+		"csvq",
+		{
+			optionCaption: {
+				caption: "csvq option",
+				display: (name: string) => name === "headerName",
+			},
+			optional: (name: string) => name !== "encoding",
+		},
+	],
+	[
+		"reg",
+		{
+			optionCaption: { caption: "reg option", display: (_: string) => false },
+			optional: (_: string) => false,
+		},
+	],
+	[
+		"fixed",
+		{
+			optionCaption: { caption: "fixed option", display: (_: string) => false },
+			optional: (_: string) => false,
+		},
+	],
+	[
+		"xls",
+		{
+			optionCaption: {
+				caption: "xls option",
+				display: (name: string) => name === "startRow",
+			},
+			optional: (_: string) => true,
+		},
+	],
+	[
+		"xlsx",
+		{
+			optionCaption: {
+				caption: "xlsx option",
+				display: (name: string) => name === "startRow",
+			},
+			optional: (_: string) => true,
+		},
+	],
 ]);
 function setFunction(srcData: DatasetSource) {
 	let indexOfSetting = -1;
 	let indexExtension = -1;
 	let indexRegExclude = -1;
-	let srcType = ""
+	let srcType = "";
 	for (let i = 0; i < srcData.elements.length; i++) {
 		if (srcData.elements[i].name === "setting") {
 			indexOfSetting = i;
@@ -167,35 +230,56 @@ function setFunction(srcData: DatasetSource) {
 			srcType = srcData.elements[i].value;
 		}
 	}
+	srcData.srcType = () => {
+		return srcType;
+	};
 	srcData.srcElements = () => {
-		return toCommandParams(srcData, srcData.elements.slice(0, indexExtension === -1 ? indexRegExclude + 1 : indexExtension + 1)
-			, { caption: "traversal option", display: (name) => name === "recursive" }
-			, (param: string) => traversaldetail.includes(param)
+		return toCommandParams(
+			srcData,
+			srcData.elements.slice(
+				0,
+				indexExtension === -1 ? indexRegExclude + 1 : indexExtension + 1,
+			),
+			{ caption: "traversal option", display: (name) => name === "recursive" },
+			(param: string) => traversaldetail.includes(param),
 		);
-	}
+	};
 	srcData.srcTypeSettings = () => {
 		const srcTypeSettings = srcTypeDetail.get(srcType);
-		return toCommandParams(srcData, srcData.elements.slice(indexExtension === -1 ? indexRegExclude + 1 : indexExtension + 1, indexOfSetting)
-			, srcTypeSettings?.optionCaption
-			, srcTypeSettings?.optional
+		return toCommandParams(
+			srcData,
+			srcData.elements.slice(
+				indexExtension === -1 ? indexRegExclude + 1 : indexExtension + 1,
+				indexOfSetting,
+			),
+			srcTypeSettings?.optionCaption,
+			srcTypeSettings?.optional,
 		);
-	}
+	};
 	srcData.settingElements = () => {
-		return toCommandParams(srcData, srcData.elements.slice(indexOfSetting)
-			, { caption: "dataset option", display: (name) => name === "regTableInclude" }
-			, (param: string) => datasetdetail.includes(param)
+		return toCommandParams(
+			srcData,
+			srcData.elements.slice(indexOfSetting),
+			{
+				caption: "dataset option",
+				display: (name) => name === "regTableInclude",
+			},
+			(param: string) => datasetdetail.includes(param),
 		);
-	}
+	};
 }
-function toCommandParams(srcData: CommandParams, elements: CommandParam[]
-	, optionCaption?: { caption: string, display: (_: string) => boolean }, optional?: (_: string) => boolean
+function toCommandParams(
+	srcData: CommandParams,
+	elements: CommandParam[],
+	optionCaption?: { caption: string; display: (_: string) => boolean },
+	optional?: (_: string) => boolean,
 ): CommandParams {
 	return {
-		handleTypeSelect: srcData.handleTypeSelect
-		, name: srcData.name
-		, prefix: srcData.prefix
-		, elements: elements
-		, optionCaption: optionCaption
-		, optional: optional
-	}
+		handleTypeSelect: srcData.handleTypeSelect,
+		name: srcData.name,
+		prefix: srcData.prefix,
+		elements: elements,
+		optionCaption: optionCaption,
+		optional: optional,
+	};
 }

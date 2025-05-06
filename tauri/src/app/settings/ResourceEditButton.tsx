@@ -1,6 +1,5 @@
 import { type ReactElement, useState } from 'react';
 import { EditButton, RemoveButton } from '../../components/element/ButtonIcon';
-import { useEnviroment } from '../../context/EnviromentProvider';
 
 /**
  * ResourcesEditButton と RemoveResource が共通で受け取るプロパティ
@@ -21,31 +20,16 @@ export type ResourceEditButtonProp = {
  */
 type RemoveResourceProp = ResourceEditButtonProp & {
     /**
-     * リソースを読み込むための関数
-     * @param apiUrl APIのエンドポイントURL
+     * リソースを削除するための関数
      * @param path リソースのパス
      */
-    deleteResource: (apiUrl: string, path: string) => Promise<string>;
+    deleteResource: (path: string) => Promise<string>;
 }
 
 /**
  * ResourcesEditButtonが受け取るプロパティ
  */
-type ResourcesEditButtonProps<T> = {
-    /**
-     * 選択中のファイルパス
-     */
-    path: string;
-    /**
-     * リソースを読み込むための関数
-     * @param apiUrl APIのエンドポイントURL
-     * @param path リソースのパス
-     */
-    loadResource: (apiUrl: string, path: string) => Promise<T>;
-    /**
-     * 読み込んだリソースをContextなどに設定するための関数
-     */
-    handleSetResource: (resource: T) => void;
+type ResourcesEditButtonProps = {
     /**
      * ダイアログを描画する関数
      * @param dialogOpen ダイアログ表示状態
@@ -61,14 +45,13 @@ type ResourcesEditButtonProps<T> = {
  * データセット設定またはXlsxスキーマを削除します
  */
 export function RemoveResource({ deleteResource, path, setPath }: RemoveResourceProp) {
-    const environment = useEnviroment();
 
     const handleRemove = async () => {
         const confirmed = await window.confirm(`${path}を削除してもよろしいですか？`);
         if (!confirmed) return;
 
         try {
-            const result = await deleteResource(environment.apiUrl, path);
+            const result = await deleteResource(path);
             if (result === 'success') {
                 setPath('');
             } else {
@@ -86,26 +69,15 @@ export function RemoveResource({ deleteResource, path, setPath }: RemoveResource
  * リソース読み込みとダイアログ表示を共通化したコンポーネント
  * @template T 読み込むリソースの型
  */
-export default function ResourceEditButton<T>({
-    path,
-    loadResource,
-    handleSetResource,
+export default function ResourceEditButton({
     renderDialog,
-}: ResourcesEditButtonProps<T>) {
-    const environment = useEnviroment();
+}: ResourcesEditButtonProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
 
     /**
      * ダイアログを開いてリソースを読み込む
      */
     const openDialog = () => {
-        loadResource(environment.apiUrl, path)
-            .then((res) => {
-                handleSetResource(res);
-            })
-            .catch((ex) => {
-                alert(ex);
-            });
         setDialogOpen(true);
     };
 

@@ -1,5 +1,4 @@
-import { deleteDatasetSettings, loadDatasetSettings, useSetDatasetSettings, } from '../../context/DatasetSettingsProvider';
-import type { DatasetSettings } from '../../model/DatasetSettings';
+import { useDeleteDatasetSettings } from '../../context/DatasetSettingsProvider';
 import DatasetSettingsDialog from './DatasetSettingsDialog';
 import ResourceEditButton, { RemoveResource, type ResourceEditButtonProp } from './ResourceEditButton';
 
@@ -10,7 +9,6 @@ export default function DatasetSettingEditButton({
     path,
     setPath,
 }: ResourceEditButtonProp) {
-    const setDatasetSettings = useSetDatasetSettings();
 
     /**
      * ダイアログを描画するときに呼び出す関数
@@ -23,10 +21,6 @@ export default function DatasetSettingEditButton({
         return (
             <DatasetSettingsDialog
                 fileName={path}
-                setFileName={(fileName: string) => {
-                    setPath(fileName);
-                    closeDialog();
-                }}
                 handleDialogClose={closeDialog}
                 handleSave={(newPath: string) => {
                     setPath(newPath);
@@ -37,23 +31,19 @@ export default function DatasetSettingEditButton({
     };
 
     return (
-        <ResourceEditButton<DatasetSettings>
-            path={path}
-            loadResource={loadDatasetSettings}
-            handleSetResource={setDatasetSettings}
-            renderDialog={renderDialog}
-        />
+        <ResourceEditButton renderDialog={renderDialog} />
     );
 }
 export function RemoveDatasetSettingButton({
     path,
     setPath,
 }: ResourceEditButtonProp) {
+    const deleteSettings = useDeleteDatasetSettings();
     return (
         <RemoveResource
             path={path}
             setPath={setPath}
-            deleteResource={deleteDatasetSettings}
+            deleteResource={deleteSettings}
         />
     );
 }

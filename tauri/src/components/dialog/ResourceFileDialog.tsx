@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { BlueButton, WhiteButton } from "../element/Button";
 import { ControllTextBox, InputLabel } from "../element/Input";
 
@@ -5,12 +6,11 @@ interface DialogProps {
     children: React.ReactNode;
     handleDialogClose: () => void;
     fileName: string;
-    setFileName: (fileName: string) => void;
     handleSave: (path: string) => void;
 }
 
-export default function ResourceFileDialog({ children, handleDialogClose, fileName, setFileName, handleSave }: DialogProps) {
-
+export default function ResourceFileDialog({ children, handleDialogClose, fileName, handleSave }: DialogProps) {
+    const [value, setValue] = useState(fileName);
     return (
         <dialog
             open
@@ -26,12 +26,12 @@ export default function ResourceFileDialog({ children, handleDialogClose, fileNa
                         id="fileName"
                         required={true}
                         wStyle="col-start-2 col-span-4 mr-2"
-                        value={fileName}
-                        handleChange={(ev) => setFileName(ev.target.value)}
+                        value={value}
+                        handleChange={(ev) => setValue(ev.target.value)}
                     />
                 </div>
                 <div className="pb-2">
-                    <BlueButton title="Save" handleClick={() => handleSave(fileName)} />
+                    <BlueButton title="Save" handleClick={() => handleSave(value)} />
                     <WhiteButton title="Close" handleClick={handleDialogClose} />
                 </div>
             </div>

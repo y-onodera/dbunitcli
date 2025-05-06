@@ -1,29 +1,39 @@
-import ResourceFileDialog from "../../components/dialog/ResourceFileDialog";
-import SettingTable from "../../components/dialog/SettingTable";
-import { saveDatasetSettings, useDatasetSettings, useSetDatasetSettings } from "../../context/DatasetSettingsProvider";
-import { useEnviroment } from "../../context/EnviromentProvider";
+import { useEffect, useState } from 'react';
+import ResourceFileDialog from '../../components/dialog/ResourceFileDialog';
+import SettingTable from '../../components/dialog/SettingTable';
+import { useLoadDatasetSettings, useSaveDatasetSettings } from '../../context/DatasetSettingsProvider';
 import type { DatasetSetting } from "../../model/DatasetSettings";
 import { DatasetSettings, newDatasetSetting } from "../../model/DatasetSettings";
 import DatasetSettingDaialog from "./DatasetSettingDialog";
 
 export default function DatasetSettingsDialog(props: {
 	fileName: string;
-	setFileName: (fileName: string) => void;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
-	const environment = useEnviroment();
-	const dataSettings = useDatasetSettings();
-	const setDataSettings = useSetDatasetSettings();
+	const loadSettings = useLoadDatasetSettings();
+	const saveSettings = useSaveDatasetSettings();
+	const [dataSettings, setDataSettings] = useState<DatasetSettings>(DatasetSettings.create());
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		loadSettings(props.fileName)
+			.then((res) => {
+				setDataSettings(res);
+			})
+			.catch((ex) => {
+				alert(ex);
+			});
+	}, [props.fileName]);
 
 	return (
 		<ResourceFileDialog
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			setFileName={props.setFileName}
-			handleSave={(fileName) => {
-				saveDatasetSettings(environment.apiUrl, fileName, dataSettings);
-				props.handleSave(fileName);
+			handleSave={async (fileName) => {
+				const result = await saveSettings(fileName, dataSettings);
+				if (result === 'success') {
+					props.handleSave(fileName);
+				}
 			}}
 		>
 			<SettingTable<DatasetSetting>

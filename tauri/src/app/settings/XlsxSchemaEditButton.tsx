@@ -1,5 +1,4 @@
-import { deleteXlsxSchema, loadXlsxSchema, useSetXlsxSchema, } from '../../context/XlsxSchemaProvider';
-import type { XlsxSchema } from '../../model/XlsxSchema';
+import { useDeleteXlsxSchema } from '../../context/XlsxSchemaProvider';
 import ResourceEditButton, { RemoveResource, type ResourceEditButtonProp } from './ResourceEditButton';
 import XlsxSchemaDialog from './XlsxSchemaDialog';
 
@@ -10,7 +9,6 @@ export default function XlsxSchemaEditButton({
     path,
     setPath,
 }: ResourceEditButtonProp) {
-    const setXlsxSchema = useSetXlsxSchema();
 
     /**
      * ダイアログを描画するときに呼び出す関数
@@ -24,10 +22,6 @@ export default function XlsxSchemaEditButton({
         return (
             <XlsxSchemaDialog
                 fileName={path}
-                setFileName={(fileName: string) => {
-                    setPath(fileName);
-                    closeDialog();
-                }}
                 handleDialogClose={closeDialog}
                 handleSave={(newPath: string) => {
                     setPath(newPath);
@@ -38,23 +32,20 @@ export default function XlsxSchemaEditButton({
     };
 
     return (
-        <ResourceEditButton<XlsxSchema>
-            path={path}
-            loadResource={loadXlsxSchema}
-            handleSetResource={setXlsxSchema}
-            renderDialog={renderDialog}
-        />
+        <ResourceEditButton renderDialog={renderDialog} />
     );
 }
 export function RemoveXlsxSchemaButton({
     path,
     setPath,
 }: ResourceEditButtonProp) {
+    const deleteSchema = useDeleteXlsxSchema();
+
     return (
         <RemoveResource
             path={path}
             setPath={setPath}
-            deleteResource={deleteXlsxSchema}
+            deleteResource={deleteSchema}
         />
     );
 }

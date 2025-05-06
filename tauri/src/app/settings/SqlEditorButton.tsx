@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import SqlEditorDialog from '../../components/dialog/SqlEditorDialog';
 import { EditButton } from '../../components/element/ButtonIcon';
-import { deleteDataSource, loadDataSource } from '../../context/DataSourceProvider';
-import { useEnviroment } from '../../context/EnviromentProvider';
+import { useDeleteDataSource, useLoadDataSource } from '../../context/QueryDatasourceProvider';
 import type { QueryDatasourceType } from '../../model/QueryDatasource';
 import { RemoveResource, type ResourceEditButtonProp } from './ResourceEditButton';
+import SqlEditorDialog from './SqlEditorDialog';
 
 type SqlEditorButtonProps = ResourceEditButtonProp & {
     type: QueryDatasourceType;
@@ -20,12 +19,11 @@ export default function SqlEditorButton({
 }: SqlEditorButtonProps) {
     const [showDialog, setShowDialog] = useState(false);
     const [content, setContent] = useState('');
-    const environment = useEnviroment();
-
+    const loadDataSource = useLoadDataSource();
     const handleOpen = async () => {
         try {
             if (path) {
-                const result = await loadDataSource(environment.apiUrl, type, path);
+                const result = await loadDataSource(type, path);
                 setContent(result);
             }
             setShowDialog(true);
@@ -52,7 +50,6 @@ export default function SqlEditorButton({
                 <SqlEditorDialog
                     type={type}
                     fileName={path}
-                    setFileName={setPath}
                     value={content}
                     handleDialogClose={handleClose}
                     handleSave={handleSave}
@@ -67,13 +64,13 @@ export function RemoveSqlEditorButton({
     setPath,
     type,
 }: SqlEditorButtonProps) {
+    const deleteDataSource = useDeleteDataSource(type);
+
     return (
         <RemoveResource
             path={path}
             setPath={setPath}
-            deleteResource={async (url, path) => {
-                return await deleteDataSource(url, type, path);
-            }}
+            deleteResource={deleteDataSource}
         />
     );
 }
