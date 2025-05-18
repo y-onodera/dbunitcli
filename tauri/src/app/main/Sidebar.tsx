@@ -1,12 +1,21 @@
-import { useRef, useState } from "react";
-import NameEditMenu from "../sidebar/NameEditMenu";
-import NamedParameters from "../sidebar/NamedParameters";
+import { useRef, useState } from 'react';
+import NameEditMenu from '../sidebar/NameEditMenu';
+import NamedParameters from '../sidebar/NamedParameters';
 
 interface SidebarProps {
 	setSidebarWidth: (width: number) => void;
 }
 
+export type EditName = {
+	name: string;
+	command: string;
+	x: number;
+	y: number;
+	afterEdge: boolean;
+	setMenuList: (menuList: string[]) => void;
+};
 export default function Sidebar({ setSidebarWidth }: SidebarProps) {
+	const [editName, setEditName] = useState<EditName>({} as EditName);
 	const sidebarRef = useRef(null);
 	const [width, setWidth] = useState(200);
 	const minWidth = 200;
@@ -40,8 +49,8 @@ export default function Sidebar({ setSidebarWidth }: SidebarProps) {
 			className="h-full overflow-y-auto"
 		>
 			<div className="h-full px-3 pb-4 pt-4">
-				<NameEditMenu />
-				<NamedParameters />
+				<NameEditMenu editName={editName} setEditName={setEditName} />
+				<NamedParameters setEditName={setEditName} />
 			</div>
 			<div
 				onMouseDown={handleMouseDown}

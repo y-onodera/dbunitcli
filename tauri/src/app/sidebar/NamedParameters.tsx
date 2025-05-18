@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { LinkButton } from "../../components/element/Button";
 import { AddButton, ButtonIcon, SettingButton } from "../../components/element/ButtonIcon";
 import { ExpandIcon } from "../../components/element/Icon";
-import { type EditName, useSetEditName } from "../../context/EditNameProvider";
 import { useLoadSelectParameter } from "../../context/SelectParameterProvider";
 import { useAddParameter, useParameterList } from "../../context/WorkspaceResourcesProvider";
-
+import type { EditName } from "../main/Sidebar";
 
 type NamedParameterProp = {
 	command: string;
@@ -13,10 +12,9 @@ type NamedParameterProp = {
 	handleParameterSelect: (command: string, name: string) => Promise<void>;
 	handleEditNamed: (selected: EditName) => void;
 };
-export default function NamedParameters() {
+export default function NamedParameters({ setEditName }: { setEditName: (editName: EditName) => void }) {
 	const parameters = useParameterList();
 	const handleParameterSelect = useLoadSelectParameter();
-	const setEditName = useSetEditName();
 	const handleEditNamed = (selected: EditName) => setEditName(selected);
 	return (
 		<ul className="space-y-2 font-medium">

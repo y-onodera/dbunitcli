@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { CopyButton, DeleteButton, EditButton, FixButton } from "../../components/element/ButtonIcon";
-import { ControllTextBox } from "../../components/element/Input";
-import { type EditName, useEditName, useSetEditName } from "../../context/EditNameProvider";
-import { useCopyParameter, useDeleteParameter, useRenameParameter } from "../../context/WorkspaceResourcesProvider";
+import { useEffect, useRef, useState } from 'react';
+import { CopyButton, DeleteButton, EditButton, FixButton } from '../../components/element/ButtonIcon';
+import { ControllTextBox } from '../../components/element/Input';
+import { useCopyParameter, useDeleteParameter, useRenameParameter } from '../../context/WorkspaceResourcesProvider';
+import type { EditName } from '../main/Sidebar';
 
 type MenuEditProp = {
 	name: string;
@@ -10,10 +10,9 @@ type MenuEditProp = {
 	handleMenuRename: (newName: string) => void;
 	handleMenuCopy: () => void;
 };
-export default function NameEditMenu() {
+
+export default function NameEditMenu({ editName, setEditName }: { editName: EditName; setEditName: (editName: EditName) => void }) {
 	const wrapperRef = useRef<HTMLDivElement>(null);
-	const editName = useEditName();
-	const setEditName = useSetEditName();
 	useEffect(() => {
 		function handleClickOutside(event: Event) {
 			if (wrapperRef.current && !wrapperRef.current.contains(event.target as HTMLElement)) {
