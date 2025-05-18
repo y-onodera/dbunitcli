@@ -115,7 +115,7 @@
         [
           "edit",
           {
-            "fileRegex": "src/tests/.*\\.test\\.ts$",
+            "fileRegex": "src/tests/.*\\.test\\.(ts|tsx|json)$",
             "description": "テストソース"
           }
         ],
@@ -134,7 +134,7 @@
         [
           "edit",
           {
-            "fileRegex": "src/tests/.*\\.test\\.ts$",
+            "fileRegex": "src/tests/.*\\.test\\.(ts|tsx|json)|src/tests/setup.ts*$",
             "description": "テストソース"
           }
         ],
