@@ -2,7 +2,14 @@ import { renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { type Enviroment, enviromentContext } from '../../context/EnviromentProvider';
-import SelectParameterProvider, { useSelectParameter, useSetSelectParameter, useLoadSelectParameter, useRefreshSelectParameter } from '../../context/SelectParameterProvider';
+import SelectParameterProvider, {
+    useSelectParameter,
+    useSetSelectParameter,
+    useLoadSelectParameter,
+    useRefreshSelectParameter,
+    useSaveParameter,
+    useExecParameter
+} from '../../context/SelectParameterProvider';
 import { type CommandParams, type ConvertParams, type GenerateParams, SelectParameter } from '../../model/CommandParam';
 import type { FetchParams } from '../../utils/fetchUtils';
 import { enviromentFixture } from '../setup';
@@ -88,7 +95,8 @@ const { mockFetchData } = vi.hoisted(() => {
     };
 });
 vi.mock('../../utils/fetchUtils', () => ({
-    fetchData: mockFetchData
+    fetchData: mockFetchData,
+    handleFetchError: vi.fn()
 }));
 
 const mockEnviroment: Enviroment = { ...enviromentFixture };
@@ -184,6 +192,130 @@ describe('SelectParameterProviderのテスト', () => {
                 expect(result.current.parameter.name).toBe('test-param');
                 expect(result.current.parameter.command).toBe(command);
                 expect(result.current.parameter).toEqual(new SelectParameter(refreshResponse, command, 'test-param'));
+            });
+        });
+    });
+
+    describe('useSaveParameter', () => {
+        it.each([
+            { command: 'convert', params: mockConvertParams },
+            { command: 'generate', params: mockGenerateParams }
+        ])('パラメータを保存できることを確認', async ({ command, params }) => {
+            const mockHandleResult = vi.fn();
+            const { result } = renderHook(
+                () => ({
+                    parameter: useSelectParameter(),
+                    setParameter: useSetSelectParameter(),
+                    saveParameter: useSaveParameter()
+                }),
+                { wrapper }
+            );
+            await waitFor(() => {
+                expect(result.current.parameter).toEqual({} as SelectParameter);
+            });
+
+            result.current.setParameter(params, command, 'test-param');
+            const mockInput = { test: 'value' };
+            await result.current.saveParameter(mockInput, mockHandleResult);
+
+            await waitFor(() => {
+                expect(mockHandleResult).toHaveBeenCalledWith({
+                    command: '',
+                    resultMessage: 'Save Success',
+                    resultDir: ''
+                });
+            });
+        });
+
+        it.each([
+            { command: 'convert', params: mockConvertParams },
+            { command: 'generate', params: mockGenerateParams }
+        ])('エラー時の処理を確認', async ({ command, params }) => {
+            const mockError = new Error('Save Failed');
+            mockFetchData.mockRejectedValueOnce(mockError);
+
+            const mockHandleResult = vi.fn();
+            const { result } = renderHook(
+                () => ({
+                    parameter: useSelectParameter(),
+                    setParameter: useSetSelectParameter(),
+                    saveParameter: useSaveParameter()
+                }),
+                { wrapper }
+            );
+
+            result.current.setParameter(params, command, 'test-param');
+            const mockInput = { test: 'value' };
+            await result.current.saveParameter(mockInput, mockHandleResult);
+
+            await waitFor(() => {
+                expect(mockHandleResult).toHaveBeenCalledWith({
+                    command: '',
+                    resultMessage: mockError.message,
+                    resultDir: ''
+                });
+            });
+        });
+    });
+
+    describe('useExecParameter', () => {
+        it.each([
+            { command: 'convert', params: mockConvertParams },
+            { command: 'generate', params: mockGenerateParams }
+        ])('パラメータを実行できることを確認', async ({ command, params }) => {
+            const mockHandleResult = vi.fn();
+            const { result } = renderHook(
+                () => ({
+                    parameter: useSelectParameter(),
+                    setParameter: useSetSelectParameter(),
+                    execParameter: useExecParameter()
+                }),
+                { wrapper }
+            );
+            await waitFor(() => {
+                expect(result.current.parameter).toEqual({} as SelectParameter);
+            });
+
+            result.current.setParameter(params, command, 'test-param');
+            const mockInput = { test: 'value' };
+            await result.current.execParameter(mockInput, mockHandleResult);
+
+            await waitFor(() => {
+                expect(mockHandleResult).toHaveBeenCalledWith({
+                    command: '',
+                    resultMessage: 'Execution Success',
+                    resultDir: ''
+                });
+            });
+        });
+
+        it.each([
+            { command: 'convert', params: mockConvertParams },
+            { command: 'generate', params: mockGenerateParams }
+        ])('エラー時の処理を確認', async ({ command, params }) => {
+            const mockError = new Error('Execution Failed');
+            mockFetchData.mockRejectedValueOnce(mockError);
+
+            const mockHandleResult = vi.fn();
+            const { result } = renderHook(
+                () => ({
+                    parameter: useSelectParameter(),
+                    setParameter: useSetSelectParameter(),
+                    execParameter: useExecParameter()
+                }),
+                { wrapper }
+            );
+
+            result.current.setParameter(params, command, 'test-param');
+            const mockInput = { test: 'value' };
+            await result.current.execParameter(mockInput, mockHandleResult);
+
+            await waitFor(() => {
+                expect(mockHandleResult).toHaveBeenCalledWith({
+                    command: '',
+                    resultMessage: mockError.message,
+                    resultDir: ''
+                });
             });
         });
     });
