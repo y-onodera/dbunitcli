@@ -11,36 +11,31 @@ import { SelectParameter } from "../../model/CommandParam";
 describe("SelectParameterクラス", () => {
 	const mockConvertParams: ConvertParams = {
 		srcData: {
-			handleTypeSelect: async () => {},
 			name: "convertSrcData",
 			prefix: "convert",
 			elements: [],
+			srcType: () => "csv",
 			srcElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			srcTypeSettings: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			settingElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 		},
 		convertResult: {
-			handleTypeSelect: async () => {},
 			name: "convertResult",
 			prefix: "convert",
 			elements: [],
 			jdbc: {
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
@@ -51,90 +46,78 @@ describe("SelectParameterクラス", () => {
 	const mockCompareParams: CompareParams = {
 		elements: [],
 		newData: {
-			handleTypeSelect: async () => {},
 			name: "compareNewData",
 			prefix: "compare",
 			elements: [],
+			srcType: () => "csv",
 			srcElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			srcTypeSettings: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			settingElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 		},
 		oldData: {
-			handleTypeSelect: async () => {},
 			name: "compareOldData",
 			prefix: "compare",
 			elements: [],
+			srcType: () => "csv",
 			srcElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			srcTypeSettings: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			settingElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 		},
 		imageOption: {
-			handleTypeSelect: async () => {},
 			name: "",
 			prefix: "",
 			elements: [],
 		},
 		convertResult: {
-			handleTypeSelect: async () => {},
 			name: "compareConvertResult",
 			prefix: "compare",
 			elements: [],
 			jdbc: {
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			},
 		},
 		expectData: {
-			handleTypeSelect: async () => {},
 			name: "compareExpectData",
 			prefix: "compare",
 			elements: [],
+			srcType: () => "csv",
 			srcElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			srcTypeSettings: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			settingElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
@@ -145,31 +128,27 @@ describe("SelectParameterクラス", () => {
 	const mockGenerateParams: GenerateParams = {
 		elements: [],
 		srcData: {
-			handleTypeSelect: async () => {},
 			name: "generateSrcData",
 			prefix: "generate",
 			elements: [],
+			srcType: () => "csv",
 			srcElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			srcTypeSettings: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			settingElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 		},
 		templateOption: {
-			handleTypeSelect: async () => {},
 			name: "",
 			prefix: "",
 			elements: [],
@@ -179,37 +158,32 @@ describe("SelectParameterクラス", () => {
 	const mockRunParams: RunParams = {
 		elements: [],
 		srcData: {
-			handleTypeSelect: async () => {},
 			name: "runSrcData",
 			prefix: "run",
 			elements: [],
+			srcType: () => "csv",
 			srcElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			srcTypeSettings: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			settingElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 		},
 		templateOption: {
-			handleTypeSelect: async () => {},
 			name: "",
 			prefix: "",
 			elements: [],
 		},
 		jdbcOption: {
-			handleTypeSelect: async () => {},
 			name: "",
 			prefix: "",
 			elements: [],
@@ -219,31 +193,27 @@ describe("SelectParameterクラス", () => {
 	const mockParameterizeParams: ParameterizeParams = {
 		elements: [],
 		paramData: {
-			handleTypeSelect: async () => {},
 			name: "parameterizeParamData",
 			prefix: "parameterize",
 			elements: [],
+			srcType: () => "csv",
 			srcElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			srcTypeSettings: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 			settingElements: () => ({
-				handleTypeSelect: async () => {},
 				name: "",
 				prefix: "",
 				elements: [],
 			}),
 		},
 		templateOption: {
-			handleTypeSelect: async () => {},
 			name: "",
 			prefix: "",
 			elements: [],
