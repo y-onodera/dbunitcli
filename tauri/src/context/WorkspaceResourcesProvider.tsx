@@ -27,25 +27,26 @@ export default function WorkspaceResourcesProvider(props: {
 
 	useEffect(() => {
 		const workspaceReload = async () => {
-			context.workspace;
-			const fetchParams = {
-				endpoint: `${environment.apiUrl}workspace/resources`,
-				options: {
-					method: "GET"
-				},
-			};
-			await fetchData(fetchParams)
-				.then((response) => response.json())
-				.then((resources: WorkspaceResources) => {
-					setContext(resources.context);
-					setParameterList(ParameterList.from(resources.parameterList));
-					setResourcesSettings(resources.resources);
-					setWorkspace(resources.context.workspace);
-				})
-				.catch((ex) => handleFetchError(ex, fetchParams));
+			if (environment.loaded) {
+				const fetchParams = {
+					endpoint: `${environment.apiUrl}workspace/resources`,
+					options: {
+						method: "GET"
+					},
+				};
+				await fetchData(fetchParams)
+					.then((response) => response.json())
+					.then((resources: WorkspaceResources) => {
+						setContext(resources.context);
+						setParameterList(ParameterList.from(resources.parameterList));
+						setResourcesSettings(resources.resources);
+						setWorkspace(resources.context.workspace);
+					})
+					.catch((ex) => handleFetchError(ex, fetchParams));
+			}
 		};
 		workspaceReload();
-	}, [environment.apiUrl, context]);
+	}, [environment.apiUrl, environment.loaded]);
 
 	if (workspace === null) {
 		return <div>Loading...</div>;
@@ -73,6 +74,30 @@ export const useParameterList = () => useContext(parameterListContext);
 export const useSetParameterList = () => useContext(setParameterListContext);
 export const useResourcesSettings = () => useContext(resourcesSettingsContext);
 export const useSetResourcesSettings = () => useContext(setResourcesSettingsContext);
+export const useWorkspaceUpdate = () => {
+	const setContext = useSetWorkspaceContext();
+	const setParameterList = useSetParameterList();
+	const setResourcesSettings = useSetResourcesSettings();
+	const environment = useEnviroment();
+	return async (workspace: string, datasetBase: string, resultBase: string) => {
+		const fetchParams = {
+			endpoint: `${environment.apiUrl}workspace/update`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ workspace, datasetBase, resultBase }),
+			},
+		};
+		await fetchData(fetchParams)
+			.then((response) => response.json())
+			.then((resources: WorkspaceResources) => {
+				setContext(resources.context);
+				setParameterList(ParameterList.from(resources.parameterList));
+				setResourcesSettings(resources.resources);
+			})
+			.catch((ex) => handleFetchError(ex, fetchParams));
+	};
+};
 export const useAddParameter = (command: string) => {
 	const setParameter = useSetParameterList();
 	const environment = useEnviroment();
@@ -88,25 +113,6 @@ export const useAddParameter = (command: string) => {
 			.then((response) => response.json())
 			.then((parameters: string[]) => {
 				setParameter(current => current.replace(command.toLowerCase(), parameters));
-			})
-			.catch((ex) => handleFetchError(ex, fetchParams));
-	};
-};
-export const useWorkspaceUpdate = () => {
-	const setContext = useSetWorkspaceContext();
-	const environment = useEnviroment();
-	return async (workspace: string, datasetBase: string, resultBase: string) => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl}workspace/update`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ workspace, datasetBase, resultBase }),
-			},
-		};
-		await fetchData(fetchParams)
-			.then(() => {
-				setContext(current => ({ ...current, workspace, datasetBase, resultBase }));
 			})
 			.catch((ex) => handleFetchError(ex, fetchParams));
 	};

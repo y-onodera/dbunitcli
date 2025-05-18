@@ -63,6 +63,6 @@ export class ParameterList {
 export type ResourcesSettings = {
 	datasetSettings: string[];
 	xlsxSchemas: string[];
-	jdbcFiles: string[]; // jdbcファイル一覧
-	templateFiles: string[]; // テンプレートファイル一覧
+	jdbcFiles: string[];
+	templateFiles: string[];
 };

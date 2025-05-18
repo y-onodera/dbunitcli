@@ -1,7 +1,7 @@
 import { core } from "@tauri-apps/api";
 import { useState } from "react";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
-import { type Running, execParameter, saveParameter, useSelectParameter } from "../../context/SelectParameterProvider";
+import { type Running, useExecParameter, useSaveParameter, useSelectParameter } from "../../context/SelectParameterProvider";
 import ResultDialog from "./ResultDialog";
 
 export default function Footer(prop: {
@@ -16,20 +16,16 @@ export default function Footer(prop: {
 		resultDir: "",
 	} as Running);
 	const parameter = useSelectParameter();
-	const handleClickSave = (command: string, name: string) => {
-		saveParameter(command, name, prop.formData(false).values, setRunning)
-	};
-	const handleClickExec = (command: string, name: string) => {
-		execParameter(command, name, prop.formData(true).values, setRunning)
-	};
+	const saveParameter = useSaveParameter();
+	const execParameter = useExecParameter();
 	const openDirectory = async (path: string) => {
 		await core.invoke("open_directory", { path });
 	};
 	if (running.command === "exec") {
-		throw new Promise(() => handleClickExec(parameter.command, parameter.name));
+		throw new Promise(() => execParameter(prop.formData(true).values, setRunning));
 	}
 	if (running.command === "save") {
-		throw new Promise(() => handleClickSave(parameter.command, parameter.name));
+		throw new Promise(() => saveParameter(prop.formData(false).values, setRunning));
 	}
 	return (
 		<>

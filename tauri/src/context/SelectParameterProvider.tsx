@@ -3,18 +3,10 @@ import { type Parameter, SelectParameter } from "../model/CommandParam";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
 import { useEnviroment } from "./EnviromentProvider";
 
-const selectParameterContext = createContext<SelectParameter>(
-    {} as SelectParameter,
-);
-const setSelectParameterContext = createContext<
-    Dispatch<SetStateAction<SelectParameter>>
->(() => undefined);
-export default function SelectParameterProvider(props: {
-    children: ReactNode;
-}) {
-    const [parameter, setParameter] = useState<SelectParameter>(
-        {} as SelectParameter,
-    );
+const selectParameterContext = createContext<SelectParameter>({} as SelectParameter);
+const setSelectParameterContext = createContext<Dispatch<SetStateAction<SelectParameter>>>(() => undefined);
+export default function SelectParameterProvider(props: { children: ReactNode }) {
+    const [parameter, setParameter] = useState<SelectParameter>({} as SelectParameter);
     return (
         <selectParameterContext.Provider value={parameter}>
             <setSelectParameterContext.Provider value={setParameter}>
@@ -75,58 +67,54 @@ export type Running = {
     resultMessage: string;
     resultDir: string;
 };
-export const saveParameter = async (
-    command: string,
-    name: string,
-    input: { [k: string]: FormDataEntryValue },
-    handleResult: (result: Running) => void
-) => {
+export const useSaveParameter = () => {
+    const parameter = useSelectParameter();
     const environment = useEnviroment();
-    const fetchParams = {
-        endpoint: `${environment.apiUrl + command}/save`,
-        options: {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, input }),
-        },
-    };
-    await fetchData(fetchParams)
-        .then(() => {
-            handleResult({
-                command: "",
-                resultMessage: "Save Success",
-                resultDir: "",
+    return async (input: { [k: string]: FormDataEntryValue }, handleResult: (result: Running) => void) => {
+        const fetchParams = {
+            endpoint: `${environment.apiUrl + parameter.command}/save`,
+            options: {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: parameter.name, input }),
+            },
+        };
+        await fetchData(fetchParams)
+            .then(() => {
+                handleResult({
+                    command: "",
+                    resultMessage: "Save Success",
+                    resultDir: "",
+                });
+            })
+            .catch((ex) => {
+                handleFetchError(ex, fetchParams);
+                handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
             });
-        })
-        .catch((ex) => {
-            handleFetchError(ex, fetchParams);
-            handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
-        });
+    }
 }
-export const execParameter = async (
-    command: string,
-    name: string,
-    input: { [k: string]: FormDataEntryValue },
-    handleResult: (result: Running) => void
-) => {
+export const useExecParameter = () => {
+    const parameter = useSelectParameter();
     const environment = useEnviroment();
-    const fetchParams = {
-        endpoint: `${environment.apiUrl + command}/exec`,
-        options: {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, input }),
-        },
-    };
-    await fetchData(fetchParams)
-        .then((response) => response.text())
-        .then((resultDir: string) => handleResult({
-            command: "",
-            resultMessage: "Execution Success",
-            resultDir,
-        }))
-        .catch((ex) => {
-            handleFetchError(ex, fetchParams);
-            handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
-        });
+    return async (input: { [k: string]: FormDataEntryValue }, handleResult: (result: Running) => void) => {
+        const fetchParams = {
+            endpoint: `${environment.apiUrl + parameter.command}/exec`,
+            options: {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: parameter.name, input }),
+            },
+        };
+        await fetchData(fetchParams)
+            .then((response) => response.text())
+            .then((resultDir: string) => handleResult({
+                command: "",
+                resultMessage: "Execution Success",
+                resultDir,
+            }))
+            .catch((ex) => {
+                handleFetchError(ex, fetchParams);
+                handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
+            });
+    }
 }

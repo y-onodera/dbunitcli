@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
@@ -19,5 +20,13 @@ export default defineConfig(async () => ({
 			// 3. tell vite to ignore watching `src-tauri`
 			ignored: ["**/src-tauri/**"],
 		},
+	},
+	// Vitestの設定
+	test: {
+		globals: true, // グローバルなテストAPI（describe, it, expect）を有効化
+		environment: "jsdom", // テスト環境としてjsdomを使用
+		setupFiles: ["./src/tests/setup.tsx"], // テストのセットアップファイル
+		include: ["src/**/*.{test,spec}.{ts,tsx}"], // テスト対象ファイル
+		mockReset: true, // 各テスト前にモックをリセット
 	},
 }));

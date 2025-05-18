@@ -9,29 +9,57 @@ export class SelectParameter {
 
 	constructor(response: Parameter, command: string, name: string) {
 		this.name = name;
+		this.command = command;
 		if (command === "convert") {
 			this.convert = response as ConvertParams;
-			setFunction(this.convert.srcData);
+			this.convert.srcData = new DatasetSourceImpl(
+				this.convert.srcData.name,
+				this.convert.srcData.prefix,
+				this.convert.srcData.elements,
+			);
 		}
 		if (command === "compare") {
 			this.compare = response as CompareParams;
-			setFunction(this.compare.newData);
-			setFunction(this.compare.oldData);
-			setFunction(this.compare.expectData);
+			this.compare.newData = new DatasetSourceImpl(
+				this.compare.newData.name,
+				this.compare.newData.prefix,
+				this.compare.newData.elements,
+			);
+			this.compare.oldData = new DatasetSourceImpl(
+				this.compare.oldData.name,
+				this.compare.oldData.prefix,
+				this.compare.oldData.elements,
+			);
+			this.compare.expectData = new DatasetSourceImpl(
+				this.compare.expectData.name,
+				this.compare.expectData.prefix,
+				this.compare.expectData.elements,
+			);
 		}
 		if (command === "generate") {
 			this.generate = response as GenerateParams;
-			setFunction(this.generate.srcData);
+			this.generate.srcData = new DatasetSourceImpl(
+				this.generate.srcData.name,
+				this.generate.srcData.prefix,
+				this.generate.srcData.elements,
+			);
 		}
 		if (command === "run") {
 			this.run = response as RunParams;
-			setFunction(this.run.srcData);
+			this.run.srcData = new DatasetSourceImpl(
+				this.run.srcData.name,
+				this.run.srcData.prefix,
+				this.run.srcData.elements,
+			);
 		}
 		if (command === "parameterize") {
 			this.parameterize = response as ParameterizeParams;
-			setFunction(this.parameterize.paramData);
+			this.parameterize.paramData = new DatasetSourceImpl(
+				this.parameterize.paramData.name,
+				this.parameterize.paramData.prefix,
+				this.parameterize.paramData.elements,
+			);
 		}
-		this.command = command;
 	}
 	currentParameter() {
 		if (this.command === "convert") {
@@ -70,21 +98,96 @@ export type CommandParam = {
 	optional: boolean;
 };
 export type CommandParams = {
-	handleTypeSelect: () => Promise<void>;
 	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string; display: (_: string) => boolean };
 	optional?: (_: string) => boolean;
 };
-export type ConvertResult = CommandParams & {
-	jdbc: CommandParams;
-};
 export type DatasetSource = CommandParams & {
 	srcType: () => string;
 	srcElements: () => CommandParams;
 	srcTypeSettings: () => CommandParams;
 	settingElements: () => CommandParams;
+};
+class DatasetSourceImpl implements DatasetSource {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	private indexOfSetting: number;
+	private indexExtension: number;
+	private indexRegExclude: number;
+	private src: string;
+	constructor(name: string, prefix: string, elements: CommandParam[]) {
+		this.name = name;
+		this.prefix = prefix;
+		this.elements = elements;
+		this.indexOfSetting = -1;
+		this.indexExtension = -1;
+		this.indexRegExclude = -1;
+		this.src = "";
+		for (let i = 0; i < elements.length; i++) {
+			if (elements[i].name === "setting") {
+				this.indexOfSetting = i;
+			}
+			if (elements[i].name === "extension") {
+				this.indexExtension = i;
+			}
+			if (elements[i].name === "regExclude") {
+				this.indexRegExclude = i;
+			}
+			if (elements[i].name === "srcType") {
+				this.src = elements[i].value;
+			}
+		}
+	}
+	srcType() {
+		return this.src;
+	}
+	srcElements() {
+		return toCommandParams(
+			this,
+			this.elements.slice(
+				0,
+				this.indexExtension === -1
+					? this.indexRegExclude + 1
+					: this.indexExtension + 1,
+			),
+			{
+				caption: "traversal option",
+				display: (name) => name === "recursive",
+			},
+			(param: string) => traversaldetail.includes(param),
+		);
+	}
+	srcTypeSettings() {
+		const srcTypeSettings = srcTypeDetail.get(this.src);
+		return toCommandParams(
+			this,
+			this.elements.slice(
+				this.indexExtension === -1
+					? this.indexRegExclude + 1
+					: this.indexExtension + 1,
+				this.indexOfSetting,
+			),
+			srcTypeSettings?.optionCaption,
+			srcTypeSettings?.optional,
+		);
+	}
+	settingElements() {
+		return toCommandParams(
+			this,
+			this.elements.slice(this.indexOfSetting),
+			{
+				caption: "dataset option",
+				display: (name) => name === "regTableInclude",
+			},
+			(param: string) => datasetdetail.includes(param),
+		);
+	}
+}
+export type ConvertResult = CommandParams & {
+	jdbc: CommandParams;
 };
 export type Parameter =
 	| ConvertParams
@@ -139,7 +242,7 @@ const srcTypeDetail = new Map<
 		{
 			optionCaption: {
 				caption: "table option",
-				display: (name: string) => name === "headerName",
+				display: (name: string) => name === "useJdbcMetaData",
 			},
 			optional: (name: string) =>
 				name !== "encoding" && !name.startsWith("jdbc"),
@@ -150,7 +253,7 @@ const srcTypeDetail = new Map<
 		{
 			optionCaption: {
 				caption: "sql option",
-				display: (name: string) => name === "headerName",
+				display: (name: string) => name === "useJdbcMetaData",
 			},
 			optional: (name: string) =>
 				name !== "encoding" && !name.startsWith("jdbc"),
@@ -211,63 +314,6 @@ const srcTypeDetail = new Map<
 		},
 	],
 ]);
-function setFunction(srcData: DatasetSource) {
-	let indexOfSetting = -1;
-	let indexExtension = -1;
-	let indexRegExclude = -1;
-	let srcType = "";
-	for (let i = 0; i < srcData.elements.length; i++) {
-		if (srcData.elements[i].name === "setting") {
-			indexOfSetting = i;
-		}
-		if (srcData.elements[i].name === "extension") {
-			indexExtension = i;
-		}
-		if (srcData.elements[i].name === "regExclude") {
-			indexRegExclude = i;
-		}
-		if (srcData.elements[i].name === "srcType") {
-			srcType = srcData.elements[i].value;
-		}
-	}
-	srcData.srcType = () => {
-		return srcType;
-	};
-	srcData.srcElements = () => {
-		return toCommandParams(
-			srcData,
-			srcData.elements.slice(
-				0,
-				indexExtension === -1 ? indexRegExclude + 1 : indexExtension + 1,
-			),
-			{ caption: "traversal option", display: (name) => name === "recursive" },
-			(param: string) => traversaldetail.includes(param),
-		);
-	};
-	srcData.srcTypeSettings = () => {
-		const srcTypeSettings = srcTypeDetail.get(srcType);
-		return toCommandParams(
-			srcData,
-			srcData.elements.slice(
-				indexExtension === -1 ? indexRegExclude + 1 : indexExtension + 1,
-				indexOfSetting,
-			),
-			srcTypeSettings?.optionCaption,
-			srcTypeSettings?.optional,
-		);
-	};
-	srcData.settingElements = () => {
-		return toCommandParams(
-			srcData,
-			srcData.elements.slice(indexOfSetting),
-			{
-				caption: "dataset option",
-				display: (name) => name === "regTableInclude",
-			},
-			(param: string) => datasetdetail.includes(param),
-		);
-	};
-}
 function toCommandParams(
 	srcData: CommandParams,
 	elements: CommandParam[],
@@ -275,7 +321,6 @@ function toCommandParams(
 	optional?: (_: string) => boolean,
 ): CommandParams {
 	return {
-		handleTypeSelect: srcData.handleTypeSelect,
 		name: srcData.name,
 		prefix: srcData.prefix,
 		elements: elements,

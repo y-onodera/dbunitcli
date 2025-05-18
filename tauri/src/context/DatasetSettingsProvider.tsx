@@ -7,7 +7,6 @@ import { useSetResourcesSettings } from "./WorkspaceResourcesProvider";
 
 type OperationResult = 'success' | 'failed';
 
-// コンポーネントでの使用のためのラップ関数
 export function useDeleteDatasetSettings() {
     const environment = useEnviroment();
     const setResourcesSettings = useSetResourcesSettings();

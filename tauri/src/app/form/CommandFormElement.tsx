@@ -29,7 +29,7 @@ type FileProp = Prop & {
 type SelectProp = Prop & {
 	handleTypeSelect: () => Promise<void>;
 };
-export default function CommandFormElements(prop: CommandParams) {
+export default function CommandFormElements(prop: { handleTypeSelect: () => Promise<void>; } & CommandParams) {
 	const [showOptional, setShowOptional] = useState(false);
 	const [srcType, setSrcType] = useState("");
 	const toggleOptional = () => setShowOptional(!showOptional);

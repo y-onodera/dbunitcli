@@ -7,7 +7,7 @@ type ErrorInfo = {
 	requestBody: string;
 };
 
-type FetchParams = {
+export type FetchParams = {
 	endpoint: string;
 	options: RequestInit;
 };

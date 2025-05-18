@@ -14,7 +14,7 @@ export type Enviroment = {
 	result_base: string;
 	loaded: boolean;
 };
-const enviromentContext = createContext<Enviroment>({} as Enviroment);
+export const enviromentContext = createContext<Enviroment>({} as Enviroment);
 export default function EnviromentProvider(props: { children: ReactNode }) {
 	const [enviroment, setEnviroment] = useState<Enviroment>({
 		loaded: false,
