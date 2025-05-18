@@ -1,11 +1,15 @@
-/gui/logs/
-/gui/target/
 /core/.allure/
+/core/.roo/work
 /core/logs/
 /core/target/
 /core/allure-results/
+/gui/logs/
+/gui/target/
 /sidecar/allure-results/
+/sidecar/logs/dbunitcli*.log
+/sidecar/.roo/work
 /tauri/src-tauri/backend/
+/tauri/.roo/work
 /target/
 /logs/
 /.idea/
