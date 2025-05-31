@@ -7,6 +7,12 @@
 ### 1.1 コマンドフォーム
 - `CommandForm`: コマンドの種類に応じたフォームを管理
 - `CommandFormElement`: 共通のフォーム要素を提供
+  - datalist機能により以下のフィールドをサポート:
+    - setting: データセット設定ファイル
+    - xlsxSchema: Excelスキーマファイル
+    - src: SQLクエリファイル（SQLタイプの場合）
+    - jdbcProp: JDBC接続設定ファイル
+    - template: テンプレートファイル
 
 ### 1.2 機能別フォーム
 - `CompareForm`: データセット比較機能

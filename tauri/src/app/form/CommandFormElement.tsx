@@ -121,8 +121,11 @@ function Text(prop: Prop) {
 	const settings = useResourcesSettings();
 
 	function showDatalist(elment: CommandParam): boolean {
-		return elment.name === "setting" || elment.name === "xlsxSchema" ||
-			(elment.name === "src" && isSqlRelatedType(srcType ?? ""));
+		return elment.name === 'setting'
+			|| elment.name === 'xlsxSchema'
+			|| (elment.name === 'src' && isSqlRelatedType(srcType ?? ''))
+			|| elment.name === 'jdbcProperties'
+			|| elment.name === 'templateGroup';
 	}
 
 	function showDopDownMenu(elment: CommandParam): boolean {
@@ -132,12 +135,16 @@ function Text(prop: Prop) {
 	function isValueInDatalist(): boolean {
 		if (!showDatalist(prop.element)) return false;
 		let resources: string[] | undefined;
-		if (prop.element.name === "setting") {
+		if (prop.element.name === 'setting') {
 			resources = settings.datasetSettings;
-		} else if (prop.element.name === "xlsxSchema") {
+		} else if (prop.element.name === 'xlsxSchema') {
 			resources = settings.xlsxSchemas;
-		} else if (prop.element.name === "src") {
+		} else if (prop.element.name === 'src') {
 			resources = datasources;
+		} else if (prop.element.name === 'jdbcProperties') {
+			resources = settings.jdbcFiles;
+		} else if (prop.element.name === 'templateGroup') {
+			resources = settings.templateFiles;
 		}
 		return resources?.includes(path) || false;
 	}
@@ -303,12 +310,16 @@ function ResourceDatalist(prop: { prefix: string, element: CommandParam, datasou
 	const { element, datasources } = prop;
 	let resources: string[] | undefined;
 
-	if (element.name === "setting") {
+	if (element.name === 'setting') {
 		resources = settings.datasetSettings;
-	} else if (element.name === "xlsxSchema") {
+	} else if (element.name === 'xlsxSchema') {
 		resources = settings.xlsxSchemas;
-	} else if (element.name === "src") {
+	} else if (element.name === 'src') {
 		resources = datasources;
+	} else if (element.name === 'jdbcProperties') {
+		resources = settings.jdbcFiles;
+	} else if (element.name === 'templateGroup') {
+		resources = settings.templateFiles;
 	}
 
 	return (
