@@ -127,9 +127,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     }
 
     private void executeJoin() throws AmbiguousTableNameException {
-        boolean isJoinContinue = this.joins.size() > 0;
-        while (isJoinContinue) {
-            final int joinCount = this.joins.size();
+        while (!this.joins.isEmpty()) {
             this._orderedTableNameMap = this.orderedTableNameMapExcludeJoins();
             this.joins.stream()
                     .filter(ComparableTableJoin::isExecutable)
@@ -142,7 +140,6 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
                         join.execute().forEach(this::row);
                         this.endTable();
                     });
-            isJoinContinue = joinCount != this.joins.size();
         }
     }
 

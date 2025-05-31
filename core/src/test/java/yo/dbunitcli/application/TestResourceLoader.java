@@ -14,10 +14,9 @@ public interface TestResourceLoader {
      * target/test-classes → src/test/resources への変換を行います。
      *
      * @return テストリソースのディレクトリパス
-     * @throws Exception URLデコード時に発生する可能性のある例外
      */
-    default String getTestResourceDirectory() throws Exception {
-        return URLDecoder.decode(Objects.requireNonNull(getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
+    default String getTestResourceDirectory() {
+        return URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
                 .replace("target/test-classes", "src/test/resources");
     }
 
@@ -28,8 +27,8 @@ public interface TestResourceLoader {
      * @return テストリソースファイル
      * @throws Exception パス解決時に発生する可能性のある例外
      */
-    default File getTestResourceFile(String fileName) throws Exception {
-        File file = new File(getTestResourceDirectory(), fileName);
+    default File getTestResourceFile(final String fileName) throws Exception {
+        final File file = new File(this.getTestResourceDirectory(), fileName);
         if (!file.exists()) {
             throw new IllegalArgumentException("テストデータファイルが見つかりません: " + fileName);
         }

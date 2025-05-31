@@ -30,11 +30,10 @@ public record TableSeparators(List<TableSeparator> settings
     }
 
     public boolean hasAdditionalSetting(final String tableName) {
-        return this.getSeparators(tableName)
+        return !this.getSeparators(tableName)
                 .stream()
                 .filter(it -> !it.equals(TableSeparator.NONE))
-                .toList()
-                .size() > 0;
+                .toList().isEmpty();
     }
 
     public ComparableTableMapper createMapper(final ComparableTableJoin join) {
@@ -54,7 +53,7 @@ public record TableSeparators(List<TableSeparator> settings
     private ComparableTableMapper createMapper(final Stream<AddSettingTableMetaData> metaData) {
         final List<ComparableTableMapper> results = metaData.map(this::createMapperFrom).collect(Collectors.toList());
         if (results.size() == 1) {
-            return results.get(0);
+            return results.getFirst();
         }
         return new ComparableTableMapperMulti(results);
     }
@@ -71,7 +70,7 @@ public record TableSeparators(List<TableSeparator> settings
         return target.flatMap(it -> {
             if (!Objects.equals(beforeTableName, it.getTableName())) {
                 final Set<TableSeparator> separatorsFromSettings = this.getSeparatorsFromSettings(it.getTableName());
-                if (separatorsFromSettings.size() == 0) {
+                if (separatorsFromSettings.isEmpty()) {
                     return Stream.of(it);
                 }
                 return this.addNewNameSetting(separatorsFromSettings
@@ -89,7 +88,7 @@ public record TableSeparators(List<TableSeparator> settings
 
     private Collection<TableSeparator> getSeparators(final String tableName) {
         final Set<TableSeparator> result = this.getSeparatorsFromSettings(tableName);
-        if (result.size() > 0) {
+        if (!result.isEmpty()) {
             return result;
         }
         result.add(this.getCommonSettings(tableName));
@@ -131,7 +130,7 @@ public record TableSeparators(List<TableSeparator> settings
         }
 
         public List<TableSeparator> getCommonSettings() {
-            if(this.commonSettings.isEmpty()) {
+            if (this.commonSettings.isEmpty()) {
                 this.commonSettings.add(TableSeparator.NONE);
             }
             return this.commonSettings;
