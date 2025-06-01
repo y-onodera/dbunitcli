@@ -1,10 +1,10 @@
 package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 
@@ -20,12 +20,16 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     private final File src;
     private final ComparableDataSetParam param;
+    private final boolean addFileInfo;
+    private final boolean loadData;
     private IDataSetConsumer consumer;
     private int rows = 0;
 
     public ComparableFileDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.src = this.param.src().getAbsoluteFile();
+        this.loadData = this.param.loadData();
+        this.addFileInfo = this.param.addFileInfo();
     }
 
     @Override
@@ -42,10 +46,10 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     public void produce() throws DataSetException {
         ComparableFileDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
-        final ITableMetaData metaData = new ComparableFileTableMetaData(this.src.getName());
-        this.consumer.startTable(metaData);
+        this.consumer.startTable(TableMetaDataWithSource.fileInfo(this.src, this.addFileInfo)
+                .wrap(new ComparableFileTableMetaData(this.src.getName())));
         ComparableFileDataSetProducer.LOGGER.info("produce - start fileName={}", this.src);
-        if (this.param.loadData()) {
+        if (this.loadData) {
             try {
                 this.param.getWalk()
                         .filter(this.fileTypeFilter())

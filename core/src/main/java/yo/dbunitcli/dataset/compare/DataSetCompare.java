@@ -164,7 +164,7 @@ public class DataSetCompare {
                         .forEach(tableName -> {
                             final ComparableTable oldTable = it.getOldDataSet().getTable(tableName);
                             final ComparableTable newTable = it.getNewDataSet().getTable(tableName);
-                            if (it.tableSeparators.hasAdditionalSetting(oldTable.getTableName())) {
+                            if (it.tableSeparators.hasAdditionalSetting(oldTable.getTableMetaData())) {
                                 results.addAll(this.compareTable(new TableCompare(oldTable, newTable, it.getConverter())));
                             }
                         });

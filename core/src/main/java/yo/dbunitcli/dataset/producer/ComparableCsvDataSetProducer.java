@@ -21,6 +21,8 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private final ComparableDataSetParam param;
     private final int startRow;
     private final String[] headerNames;
+    private final boolean loadData;
+    private final boolean addFileInfo;
     private IDataSetConsumer consumer;
     private int processRow;
     private Pipeline pipeline;
@@ -30,6 +32,8 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         this.src = this.param.getSrcFiles();
         this.startRow = this.param.startRow();
         this.headerNames = this.param.headerNames();
+        this.loadData = this.param.loadData();
+        this.addFileInfo = this.param.addFileInfo();
         this.resetThePipeline();
     }
 
@@ -71,9 +75,9 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             if (headerName == null) {
                 headerName = this.parseFirstLine(lineNumberReader, file.getAbsolutePath());
             }
-            this.consumer.startTable(this.createMetaData(file, headerName));
+            this.consumer.startTable(this.createMetaData(file, headerName, this.addFileInfo));
             this.processRow = 0;
-            if (this.param.loadData()) {
+            if (this.loadData) {
                 this.parseTheData(headerName, lineNumberReader);
             }
             this.consumer.endTable();

@@ -14,7 +14,7 @@ public record XlsxRowsTableDefine(String tableName
         , Integer dataStartRow
         , Integer[] cellIndexes
         , String[] breakKey
-        , boolean addOptional) {
+        , boolean addFileInfo) {
 
     public static Builder builder() {
         return new Builder();
@@ -26,16 +26,16 @@ public record XlsxRowsTableDefine(String tableName
                 , builder.getDataStartRow()
                 , builder.getCellIndexes().toArray(new Integer[0])
                 , builder.getBreakKey().toArray(new String[0])
-                , builder.getAddOptional());
+                , builder.getAddFileInfo());
     }
 
     public static class Builder {
-        private String tableName;
         private final List<String> header = new ArrayList<>();
-        private Integer dataStartRow;
         private final List<Integer> cellIndexes = new ArrayList<>();
         private final List<String> breakKey = new ArrayList<>();
-        private boolean addOptional = false;
+        private String tableName;
+        private Integer dataStartRow;
+        private boolean addFileInfo = false;
 
         public String getTableName() {
             return this.tableName;
@@ -65,8 +65,8 @@ public record XlsxRowsTableDefine(String tableName
             return this.breakKey;
         }
 
-        public boolean getAddOptional() {
-            return this.addOptional;
+        public boolean getAddFileInfo() {
+            return this.addFileInfo;
         }
 
         public Builder setTableName(final String tableName) {
@@ -94,8 +94,8 @@ public record XlsxRowsTableDefine(String tableName
             return this;
         }
 
-        public Builder setAddOptional(final boolean addOptional) {
-            this.addOptional = addOptional;
+        public Builder setAddFileInfo(final boolean addFileInfo) {
+            this.addFileInfo = addFileInfo;
             return this;
         }
 

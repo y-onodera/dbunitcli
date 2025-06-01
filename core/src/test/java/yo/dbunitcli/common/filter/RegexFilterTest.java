@@ -33,7 +33,7 @@ public class RegexFilterTest {
         final var filter = new RegexFilter("test_.*");
 
         // when & then
-        assertFalse(filter.test(null));
+        assertFalse(filter.test((String) null));
     }
 
     @Test

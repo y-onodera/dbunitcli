@@ -13,6 +13,7 @@ import org.dbunit.dataset.stream.DefaultConsumer;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.NameFilter;
@@ -31,7 +32,6 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
 
     private final File[] src;
     private final NameFilter sheetNameFilter;
-    private final String[] headerNames;
 
     private int lastRowNumber;
 
@@ -42,6 +42,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
     /**
      * So we known which sheet we're on
      */
+    private File sourceFile;
     private int sheetIndex = -1;
     private BoundSheetRecord[] orderedBSRs;
     private List<BoundSheetRecord> boundSheetRecords = new ArrayList<>();
@@ -51,11 +52,10 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
     private boolean outputNextStringRecord;
 
     public ComparableXlsDataSetProducer(final ComparableDataSetParam param) {
-        super(new DefaultConsumer(), param.startRow(), param.xlsxSchema(), param.loadData());
+        super(new DefaultConsumer(), param.xlsxSchema(), param.startRow(), param.headerNames(), param.loadData(), param.addFileInfo());
         this.param = param;
         this.src = this.param.getSrcFiles();
         this.sheetNameFilter = param.tableNameFilter();
-        this.headerNames = this.param.headerNames();
     }
 
     @Override
@@ -104,7 +104,8 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                     }
                     final String tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
                     if (this.sheetNameFilter.predicate(tableName)) {
-                        this.handleSheetStart(tableName, this.headerNames);
+                        this.handleSheetStart(this.headerNames
+                                , new Source(this.sourceFile, this.addFileInfo).sheetName(tableName));
                         ComparableXlsDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", tableName, this.sheetIndex);
                     }
                 }
@@ -212,7 +213,8 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
 
     protected void produceFromFile(final File sourceFile) {
         ComparableXlsDataSetProducer.LOGGER.info("produce - start fileName={}", sourceFile);
-        try (final POIFSFileSystem newFs = new POIFSFileSystem(sourceFile, true)) {
+        this.sourceFile = sourceFile;
+        try (final POIFSFileSystem newFs = new POIFSFileSystem(this.sourceFile, true)) {
             this.rowsTableBuilder = null;
             this.randomCellRecordBuilder = null;
             this.sheetIndex = -1;

@@ -6,7 +6,7 @@ import java.util.regex.PatternSyntaxException;
 /**
  * 正規表現パターンによるテーブル名/シート名のフィルタリングを行うクラス
  */
-public record RegexFilter(Pattern pattern) implements TargetFilter {
+public record RegexFilter(Pattern pattern) implements SourceFilter {
 
     /**
      * 指定された正規表現パターンでフィルタを作成

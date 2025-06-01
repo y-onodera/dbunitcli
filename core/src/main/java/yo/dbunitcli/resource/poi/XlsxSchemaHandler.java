@@ -5,14 +5,20 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import yo.dbunitcli.common.Source;
 
 public class XlsxSchemaHandler extends ExcelMappingDataSetConsumerWrapper implements XSSFSheetXMLHandler.SheetContentsHandler {
     private int currentRow = -1;
     private int currentCol = -1;
 
-    public XlsxSchemaHandler(final IDataSetConsumer delegate, final String sheetName, final int startRow, final String[] headerNames, final XlsxSchema schema, final boolean loadData) {
-        super(delegate, startRow, schema, loadData);
-        this.handleSheetStart(sheetName, headerNames);
+    public XlsxSchemaHandler(final IDataSetConsumer delegate
+            , final XlsxSchema schema
+            , final int startRow
+            , final String[] headerNames
+            , final boolean loadData
+            , final Source source) {
+        super(delegate, schema, startRow, headerNames, loadData, source.addFileInfo());
+        this.handleSheetStart(headerNames, source);
     }
 
     @Override

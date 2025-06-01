@@ -1,0 +1,19 @@
+{
+  "settings": [
+    {
+      "name":{
+        "any": "multi1",
+        "filePath": ".*/multi/.*"
+      },
+      "tableName": "match"
+    },
+    {
+      "name":{
+        "any": "multi1",
+        "filePath": ".*/not_multi/.*"
+      },
+      "tableName": "unmatch"
+    }
+  ],
+  "commonSettings": []
+}

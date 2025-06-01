@@ -3,6 +3,7 @@ package yo.dbunitcli.dataset.producer;
 import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -16,10 +17,12 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableQueryDataSetProducer.class);
     private final Parameter parameter;
+    private boolean addFileInfo;
 
     public ComparableQueryDataSetProducer(final ComparableDataSetParam param, final Parameter parameter) {
         super(param);
         this.parameter = parameter;
+        this.addFileInfo = this.addFileInfo;
     }
 
     @Override
@@ -45,7 +48,8 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
         try {
             final String query = this.loadQuery(aFile);
             ComparableQueryDataSetProducer.LOGGER.info("produce - start fileName={},query={}", aFile.getName(), query);
-            this.executeTable(this.connection.createQueryTable(this.getTableName(aFile), query));
+            this.executeTable(this.connection.createQueryTable(this.getTableName(aFile), query)
+                    , TableMetaDataWithSource.fileInfo(aFile, this.addFileInfo));
             ComparableQueryDataSetProducer.LOGGER.info("produce - end   fileName={}", aFile.getName());
         } catch (final SQLException | DataSetException e) {
             throw new AssertionError(e);

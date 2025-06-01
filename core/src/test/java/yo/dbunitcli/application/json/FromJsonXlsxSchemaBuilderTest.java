@@ -78,7 +78,7 @@ public class FromJsonXlsxSchemaBuilderTest implements TestResourceLoader {
         assertTrue(simpleSchema.sheetPatterns().containsKey("Sheet1"), "シートパターンが正しく読み込まれていること");
         assertEquals(1, simpleSchema.cellsTableDefMap().get("Sheet1").size(), "セル定義が1つ存在すること");
         assertEquals("Table1", simpleSchema.cellsTableDefMap().get("Sheet1").getFirst().tableName(), "テーブル名が正しく設定されていること");
-        assertTrue(simpleSchema.cellsTableDefMap().get("Sheet1").getFirst().addOptional(), "addFileInfoが正しく設定されていること");
+        assertTrue(simpleSchema.cellsTableDefMap().get("Sheet1").getFirst().addFileInfo(), "addFileInfoが正しく設定されていること");
     }
 
     @Test
@@ -99,7 +99,7 @@ public class FromJsonXlsxSchemaBuilderTest implements TestResourceLoader {
 
         assertEquals(1, simpleSchema.rowsTableDefMap().get("Sheet1").size(), "Sheet1の行定義が1つ存在すること");
         assertEquals("Table1", simpleSchema.rowsTableDefMap().get("Sheet1").getFirst().tableName(), "Sheet1のテーブル名が正しく設定されていること");
-        assertTrue(simpleSchema.rowsTableDefMap().get("Sheet1").getFirst().addOptional(), "Sheet1のaddFileInfoが正しく設定されていること");
+        assertTrue(simpleSchema.rowsTableDefMap().get("Sheet1").getFirst().addFileInfo(), "Sheet1のaddFileInfoが正しく設定されていること");
 
         assertEquals(1, simpleSchema.cellsTableDefMap().get("Sheet2").size(), "Sheet2のセル定義が1つ存在すること");
         assertEquals("Table2", simpleSchema.cellsTableDefMap().get("Sheet2").getFirst().tableName(), "Sheet2のテーブル名が正しく設定されていること");

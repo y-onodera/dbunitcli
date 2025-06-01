@@ -5,31 +5,40 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.common.Source;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ExcelMappingDataSetConsumerWrapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExcelMappingDataSetConsumerWrapper.class);
-
     protected final boolean loadData;
+    protected final String[] headerNames;
     private final XlsxSchema schema;
     private final int startRow;
+    protected boolean addFileInfo;
     protected IDataSetConsumer consumer;
     protected XlsxCellsToTableBuilder randomCellRecordBuilder;
     protected XlsxRowsToTableBuilder rowsTableBuilder;
     private int rowTableRows = 0;
 
-    public ExcelMappingDataSetConsumerWrapper(final IDataSetConsumer consumer, final int startRow, final XlsxSchema schema, final boolean loadData) {
+    public ExcelMappingDataSetConsumerWrapper(final IDataSetConsumer consumer
+            , final XlsxSchema schema
+            , final int startRow
+            , final String[] headerNames
+            , final boolean loadData
+            , final boolean addFileInfo) {
         this.consumer = consumer;
-        this.startRow = startRow;
         this.schema = schema;
+        this.startRow = startRow;
+        this.headerNames = headerNames;
         this.loadData = loadData;
+        this.addFileInfo = addFileInfo;
     }
 
-    protected void handleSheetStart(final String tableName, final String[] headerNames) {
-        this.rowsTableBuilder = this.schema.getRowsTableBuilder(tableName, this.startRow, headerNames);
-        this.randomCellRecordBuilder = this.schema.getCellRecordBuilder(tableName, headerNames);
+    protected void handleSheetStart(final String[] headerNames, final Source source) {
+        this.rowsTableBuilder = this.schema.getRowsTableBuilder(this.startRow, headerNames, source);
+        this.randomCellRecordBuilder = this.schema.getCellRecordBuilder(headerNames, source);
     }
 
     protected void handleSheetEnd() {

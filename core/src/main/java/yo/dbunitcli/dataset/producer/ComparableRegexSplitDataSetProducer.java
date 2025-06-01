@@ -22,8 +22,10 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     private final ComparableDataSetParam param;
     private final int startRow;
     private final String[] headerNames;
-    private IDataSetConsumer consumer;
+    private final boolean loadData;
+    private final boolean addFileInfo;
     private Pattern headerSplitPattern;
+    private IDataSetConsumer consumer;
 
     public ComparableRegexSplitDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
@@ -35,6 +37,8 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
             this.headerSplitPattern = Pattern.compile(this.param.headerSplitPattern());
         }
         this.dataSplitPattern = Pattern.compile(this.param.dataSplitPattern());
+        this.loadData = this.param.loadData();
+        this.addFileInfo = this.param.addFileInfo();
     }
 
     @Override
@@ -62,8 +66,8 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
         try {
             ComparableRegexSplitDataSetProducer.LOGGER.info("produce - start fileName={}", aFile);
             if (this.headerNames != null) {
-                this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
-                if (!this.param.loadData()) {
+                this.consumer.startTable(this.createMetaData(aFile, this.headerNames, this.addFileInfo));
+                if (!this.loadData) {
                     this.consumer.endTable();
                     return;
                 }
@@ -71,8 +75,8 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
             int row = 1;
             for (final String s : Files.readAllLines(aFile.toPath(), Charset.forName(this.getEncoding()))) {
                 if (row == this.startRow && this.headerNames == null) {
-                    this.consumer.startTable(this.createMetaData(aFile, this.headerSplitPattern.split(s)));
-                    if (!this.getParam().loadData()) {
+                    this.consumer.startTable(this.createMetaData(aFile, this.headerSplitPattern.split(s), this.addFileInfo));
+                    if (!this.loadData) {
                         break;
                     }
                 } else if (row >= this.startRow) {

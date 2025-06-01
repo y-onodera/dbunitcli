@@ -20,6 +20,8 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
+import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.NameFilter;
@@ -40,6 +42,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     private final ComparableDataSetParam param;
     private final boolean loadData;
     private final NameFilter sheetNameFilter;
+    private final boolean addFileInfo;
     private IDataSetConsumer consumer = new DefaultConsumer();
 
     public ComparableXlsxDataSetProducer(final ComparableDataSetParam param) {
@@ -50,6 +53,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
         this.headerNames = this.param.headerNames();
         this.schema = this.param.xlsxSchema();
         this.loadData = this.param.loadData();
+        this.addFileInfo = this.param.addFileInfo();
     }
 
     @Override
@@ -93,6 +97,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     protected void produceFromFile(final File sourceFile) {
         ComparableXlsxDataSetProducer.LOGGER.info("produce - start fileName={}", sourceFile);
         try (final OPCPackage pkg = OPCPackage.open(sourceFile, PackageAccess.READ)) {
+            final Source source = TableMetaDataWithSource.fileInfo(sourceFile, this.addFileInfo);
             final ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);
             final XSSFReader xssfReader = new XSSFReader(pkg);
             final StylesTable styles = xssfReader.getStylesTable();
@@ -103,8 +108,12 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
                     final String sheetName = iterator.getSheetName();
                     if (this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName)) {
                         ComparableXlsxDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
-                        this.processSheet(styles, strings, this.schema.addFileInfo(sourceFile, sheetName)
-                                .createHandler(this.consumer, sheetName, this.startRow, this.headerNames, this.loadData), stream);
+                        this.processSheet(styles, strings, this.schema.createHandler(this.consumer
+                                        , this.startRow
+                                        , this.headerNames
+                                        , this.loadData
+                                        , source.sheetName(sheetName))
+                                , stream);
                         ComparableXlsxDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", sheetName, index - 1);
                     }
                 }
@@ -115,4 +124,3 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
         ComparableXlsxDataSetProducer.LOGGER.info("produce - end   fileName={}", sourceFile);
     }
 }
-

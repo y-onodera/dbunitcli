@@ -7,7 +7,7 @@ import java.util.List;
  *
  * @param names 対象とする名前のリスト
  */
-public record AnyFilter(List<String> names) implements TargetFilter {
+public record AnyFilter(List<String> names) implements SourceFilter {
     @Override
     public boolean test(final String tableName) {
         return this.names().contains(tableName);

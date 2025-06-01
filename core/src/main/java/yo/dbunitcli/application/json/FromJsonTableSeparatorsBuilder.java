@@ -1,7 +1,7 @@
 package yo.dbunitcli.application.json;
 
 import jakarta.json.*;
-import yo.dbunitcli.common.filter.TargetFilter;
+import yo.dbunitcli.common.filter.SourceFilter;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.resource.FileResources;
 
@@ -127,42 +127,42 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         other.add(this.build());
     }
 
-    protected void addTableSeparate(final JsonObject json, final TargetFilter targetFilter) {
+    protected void addTableSeparate(final JsonObject json, final SourceFilter sourceFilter) {
         if (json.containsKey("innerJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("innerJoin")
                     , ComparableTableJoin.innerJoin(this.getJoinOn(json.getJsonObject("innerJoin")))
-                    , this.getTableSeparators(json, targetFilter)));
+                    , this.getTableSeparators(json, sourceFilter)));
         } else if (json.containsKey("outerJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("outerJoin")
                     , ComparableTableJoin.outerJoin(this.getJoinOn(json.getJsonObject("outerJoin")))
-                    , this.getTableSeparators(json, targetFilter)));
+                    , this.getTableSeparators(json, sourceFilter)));
         } else if (json.containsKey("fullJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("fullJoin")
                     , ComparableTableJoin.fullJoin(this.getJoinOn(json.getJsonObject("fullJoin")))
-                    , this.getTableSeparators(json, targetFilter)));
+                    , this.getTableSeparators(json, sourceFilter)));
         } else {
-            this.addSettings(this.getTableSeparators(json, targetFilter));
+            this.addSettings(this.getTableSeparators(json, sourceFilter));
         }
     }
 
-    protected List<TableSeparator> getTableSeparators(final JsonObject settingJson, final TargetFilter targetFilter) {
+    protected List<TableSeparator> getTableSeparators(final JsonObject settingJson, final SourceFilter sourceFilter) {
         if (settingJson.containsKey("separate")) {
             final JsonArray expressions = settingJson.getJsonArray("separate");
             return IntStream.range(0, expressions.size())
                     .mapToObj(expressions::getJsonObject)
-                    .map(separate -> this.getTableSeparator(separate, targetFilter))
+                    .map(separate -> this.getTableSeparator(separate, sourceFilter))
                     .collect(Collectors.toList());
         }
-        return List.of(this.getTableSeparator(settingJson, targetFilter));
+        return List.of(this.getTableSeparator(settingJson, sourceFilter));
     }
 
     protected TableSeparator getTableSeparator(final JsonObject settingJson) {
         return this.getTableSeparator(settingJson, this.getTargetFilter(settingJson));
     }
 
-    protected TableSeparator getTableSeparator(final JsonObject settingJson, final TargetFilter targetFilter) {
+    protected TableSeparator getTableSeparator(final JsonObject settingJson, final SourceFilter sourceFilter) {
         return TableSeparator.builder()
-                .setTargetFilter(targetFilter)
+                .setTargetFilter(sourceFilter)
                 .setSplitter(this.getSplitter(settingJson))
                 .setComparisonKeys(this.collectSettings(settingJson, "keys"))
                 .setExpressionColumns(this.collectExpressionColumns(settingJson))
@@ -174,11 +174,11 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
                 .build();
     }
 
-    protected TargetFilter getTargetFilter(final JsonObject settingJson) {
+    protected SourceFilter getTargetFilter(final JsonObject settingJson) {
         if (settingJson.containsKey("name")) {
-            return new TargetFilterParser(settingJson, "name").parseEquals();
+            return new SourceFilterParser(settingJson, "name").parseEquals();
         } else if (settingJson.containsKey("pattern")) {
-            return new TargetFilterParser(settingJson, "pattern").parsePattern();
+            return new SourceFilterParser(settingJson, "pattern").parsePattern();
         } else if (settingJson.containsKey("innerJoin")
                 || settingJson.containsKey("outerJoin")
                 || settingJson.containsKey("fullJoin")) {

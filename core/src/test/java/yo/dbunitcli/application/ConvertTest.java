@@ -1271,6 +1271,20 @@ public class ConvertTest {
             Assertions.assertEquals("", result.getValue(2, "col3"));
         }
 
+        @Test
+        public void testFromCsvToXlsxWithSourceFilterSettings() throws Exception {
+            Convert.main(this.getArgs("/paramConvertWithSourceFilterSettings.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/csv2xlsx/result_with_source_filter/paramConvertWithSourceFilterSettings.xlsx");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableXlsxDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSrc(src)
+                                    .build()));
+            Assertions.assertEquals(2, actual.getTableNames().length);
+            Assertions.assertEquals("match", actual.getTableNames()[0]);
+            Assertions.assertEquals("multi2", actual.getTableNames()[1]);
+        }
+
         protected String[] getArgs(final String parameterFile) {
             return new String[]{"@" + ConvertTest.testResourceDir + parameterFile};
         }

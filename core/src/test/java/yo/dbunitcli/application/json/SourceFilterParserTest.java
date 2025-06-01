@@ -3,17 +3,17 @@ package yo.dbunitcli.application.json;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import org.junit.jupiter.api.Test;
-import yo.dbunitcli.common.filter.TargetFilter;
+import yo.dbunitcli.common.filter.SourceFilter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TargetFilterParserTest {
+class SourceFilterParserTest {
 
     @Test
     void パース_空のJSONの場合_常にtrueのフィルタを返す() {
         final JsonObject json = Json.createObjectBuilder().build();
-        final TargetFilterParser parser = new TargetFilterParser(json, "pattern");
-        final TargetFilter filter = parser.parsePattern();
+        final SourceFilterParser parser = new SourceFilterParser(json, "pattern");
+        final SourceFilter filter = parser.parsePattern();
 
         assertTrue(filter.test("any_table"));
     }
@@ -23,8 +23,8 @@ class TargetFilterParserTest {
         final JsonObject json = Json.createObjectBuilder()
                 .add("other", "value")
                 .build();
-        final TargetFilterParser parser = new TargetFilterParser(json, "pattern");
-        final TargetFilter filter = parser.parsePattern();
+        final SourceFilterParser parser = new SourceFilterParser(json, "pattern");
+        final SourceFilter filter = parser.parsePattern();
 
         assertTrue(filter.test("any_table"));
     }
@@ -34,8 +34,8 @@ class TargetFilterParserTest {
         final JsonObject json = Json.createObjectBuilder()
                 .add("pattern", "test")
                 .build();
-        final TargetFilterParser parser = new TargetFilterParser(json, "pattern");
-        final TargetFilter filter = parser.parsePattern();
+        final SourceFilterParser parser = new SourceFilterParser(json, "pattern");
+        final SourceFilter filter = parser.parsePattern();
 
         assertTrue(filter.test("test_table"));
         assertFalse(filter.test("other_table"));
@@ -48,8 +48,8 @@ class TargetFilterParserTest {
                         .add("regex", "test.*")
                         .build())
                 .build();
-        final TargetFilterParser parser = new TargetFilterParser(json, "pattern");
-        final TargetFilter filter = parser.parsePattern();
+        final SourceFilterParser parser = new SourceFilterParser(json, "pattern");
+        final SourceFilter filter = parser.parsePattern();
 
         assertTrue(filter.test("test_table"));
         assertTrue(filter.test("testing"));
@@ -67,8 +67,8 @@ class TargetFilterParserTest {
                         .build())
                 .build();
 
-        final TargetFilterParser parser = new TargetFilterParser(json, "pattern");
-        final TargetFilter filter = parser.parsePattern();
+        final SourceFilterParser parser = new SourceFilterParser(json, "pattern");
+        final SourceFilter filter = parser.parsePattern();
 
         assertTrue(filter.test("test_table"));
         assertFalse(filter.test("test_exclude"));
@@ -77,7 +77,7 @@ class TargetFilterParserTest {
 
     @Test
     void コンストラクタ_nullの場合_例外をスロー() {
-        assertThrows(IllegalArgumentException.class, () -> new TargetFilterParser(null, null));
+        assertThrows(IllegalArgumentException.class, () -> new SourceFilterParser(null, null));
     }
 
 }

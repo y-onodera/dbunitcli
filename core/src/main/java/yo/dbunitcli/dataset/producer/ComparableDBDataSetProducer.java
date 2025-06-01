@@ -5,8 +5,11 @@ import org.dbunit.database.IResultSetTable;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import org.graalvm.collections.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 
@@ -16,7 +19,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.stream.Stream;
 
 public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
@@ -25,6 +27,8 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     protected final File[] src;
     private final ComparableDataSetParam param;
     private final String[] headerNames;
+    private final boolean loadData;
+    private final boolean addFileInfo;
     protected IDataSetConsumer consumer;
     private IDataSet databaseDataSet;
 
@@ -37,6 +41,8 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
             this.src = new File[]{this.getParam().src()};
         }
         this.headerNames = param.headerNames();
+        this.loadData = this.param.loadData();
+        this.addFileInfo = this.param.addFileInfo();
     }
 
     @Override
@@ -57,14 +63,19 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         Stream.of(this.src)
                 .map(it -> {
                     try {
-                        return Files.readAllLines(it.toPath(), Charset.forName(this.param.encoding()));
+                        return Pair.create(
+                                TableMetaDataWithSource.fileInfo(it, this.addFileInfo)
+                                , Files.readAllLines(it.toPath(), Charset.forName(this.param.encoding()))
+                        );
                     } catch (final IOException e) {
                         throw new AssertionError(e);
                     }
                 })
-                .flatMap(Collection::stream)
-                .distinct()
-                .filter(it -> this.getParam().tableNameFilter().predicate(it))
+                .flatMap(it -> it.getRight()
+                        .stream()
+                        .map(tableName -> it.getLeft().tableName(tableName))
+                )
+                .filter(it -> this.getParam().tableNameFilter().predicate(it.tableName()))
                 .forEach(this::executeTable);
         this.consumer.endDataSet();
         ComparableDBDataSetProducer.LOGGER.info("produce() - end");
@@ -80,11 +91,11 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         }
     }
 
-    protected void executeTable(final String tableName) {
-        this.executeTable(this.getTable(tableName));
+    protected void executeTable(final Source source) {
+        this.executeTable(this.getTable(source.tableName()), source);
     }
 
-    protected void executeTable(final ITable table) {
+    protected void executeTable(final ITable table, final Source source) {
         try {
             ComparableDBDataSetProducer.LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
             if (this.headerNames != null) {
@@ -92,7 +103,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                 final Column[] columns = Arrays.stream(this.headerNames, 0, metaData.getColumns().length)
                         .map(name -> new Column(name.trim(), DataType.UNKNOWN))
                         .toArray(Column[]::new);
-                this.consumer.startTable(new DefaultTableMetaData(table.getTableMetaData().getTableName()
+                this.consumer.startTable(source.wrap(new DefaultTableMetaData(table.getTableMetaData().getTableName()
                         , columns
                         , Arrays.stream(table.getTableMetaData().getPrimaryKeys())
                         .mapToInt(column -> {
@@ -103,11 +114,11 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                             }
                         })
                         .mapToObj(i -> columns[i])
-                        .toArray(Column[]::new)));
+                        .toArray(Column[]::new))));
             } else {
                 this.consumer.startTable(table.getTableMetaData());
             }
-            if (this.param.loadData()) {
+            if (this.loadData) {
                 final Column[] columns = table.getTableMetaData().getColumns();
                 int row = 0;
                 for (; true; row++) {
@@ -126,7 +137,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
             }
             this.consumer.endTable();
             ComparableDBDataSetProducer.LOGGER.info("produce - end   databaseTable={}", table.getTableMetaData().getTableName());
-            if (table instanceof IResultSetTable resultSetTable) {
+            if (table instanceof final IResultSetTable resultSetTable) {
                 resultSetTable.close();
             }
         } catch (final DataSetException e) {

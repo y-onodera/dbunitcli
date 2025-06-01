@@ -7,7 +7,7 @@ import java.util.List;
  *
  * @param patternStrings パターン文字列
  */
-public record ContainFilter(List<String> patternStrings) implements TargetFilter {
+public record ContainFilter(List<String> patternStrings) implements SourceFilter {
     @Override
     public boolean test(final String tableName) {
         return this.patternStrings().stream()

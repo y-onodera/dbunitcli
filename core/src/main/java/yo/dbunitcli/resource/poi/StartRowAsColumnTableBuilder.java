@@ -6,6 +6,7 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
+import yo.dbunitcli.common.Source;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,10 +20,12 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
     private final List<String> rowValues = new ArrayList<>();
     private final String[] headerNames;
     private final int startRow;
+    private final Source source;
     private ITableMetaData nowProcessing = null;
 
-    public StartRowAsColumnTableBuilder(final String tableName, final int startRow, final String[] headerNames) {
-        this.tableName = tableName;
+    public StartRowAsColumnTableBuilder(final int startRow, final String[] headerNames, final Source source) {
+        this.source = source;
+        this.tableName = this.source.sheetName();
         this.headerNames = headerNames;
         this.startRow = startRow;
     }
@@ -39,7 +42,7 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public ITableMetaData startNewTable() {
-        this.nowProcessing = new DefaultTableMetaData(this.tableName, this.getColumns());
+        this.nowProcessing = this.source.wrap(new DefaultTableMetaData(this.tableName, this.getColumns()));
         return this.nowProcessing;
     }
 

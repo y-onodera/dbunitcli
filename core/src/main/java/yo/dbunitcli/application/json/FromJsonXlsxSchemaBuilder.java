@@ -5,7 +5,7 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.common.filter.TargetFilter;
+import yo.dbunitcli.common.filter.SourceFilter;
 import yo.dbunitcli.resource.poi.XlsxCellsTableDefine;
 import yo.dbunitcli.resource.poi.XlsxRowsTableDefine;
 import yo.dbunitcli.resource.poi.XlsxSchema;
@@ -24,7 +24,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
 
     private final Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap = new HashMap<>();
 
-    private final Map<String, TargetFilter> sheetPatterns = new HashMap<>();
+    private final Map<String, SourceFilter> sheetPatterns = new HashMap<>();
 
     public XlsxSchema build(final File schema) throws FileNotFoundException, UnsupportedEncodingException {
         if (schema == null) {
@@ -61,7 +61,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
     }
 
     @Override
-    public Map<String, TargetFilter> getSheetPatterns() {
+    public Map<String, SourceFilter> getSheetPatterns() {
         return this.sheetPatterns;
     }
 
@@ -72,7 +72,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
 
         final JsonObject patterns = setting.getJsonObject("patterns");
         patterns.keySet().forEach(key -> {
-            this.sheetPatterns.put(key, new TargetFilterParser(patterns, key).parsePattern());
+            this.sheetPatterns.put(key, new SourceFilterParser(patterns, key).parsePattern());
         });
         return this;
     }
@@ -97,7 +97,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
                 .setDataStartRow(jsonObject.getInt("dataStart"))
                 .addCellIndexes(this.jsonArrayToIntStream(jsonObject.getJsonArray("columnIndex")))
                 .addBreakKey(this.jsonArrayToStream(jsonObject.getJsonArray("breakKey")))
-                .setAddOptional(jsonObject.containsKey("addFileInfo") && jsonObject.getBoolean("addFileInfo"))
+                .setAddFileInfo(jsonObject.containsKey("addFileInfo") && jsonObject.getBoolean("addFileInfo"))
                 .build()
         );
     }

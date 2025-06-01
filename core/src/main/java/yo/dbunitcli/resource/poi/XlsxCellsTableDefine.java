@@ -18,7 +18,7 @@ public record XlsxCellsTableDefine(String tableName
         , int columnCount
         , ITableMetaData tableMetaData
         , Map<String, int[]> tableIndexMap
-        , boolean addOptional
+        , boolean addFileInfo
 ) {
 
     public static XlsxCellsTableDefine.Builder builder() {
@@ -47,9 +47,9 @@ public record XlsxCellsTableDefine(String tableName
     }
 
     public static class Builder {
-        private String tableName;
         private final List<String> header = new ArrayList<>();
         private final List<String[]> rows = new ArrayList<>();
+        private String tableName;
         private boolean addFileInfo = false;
 
         public String getTableName() {

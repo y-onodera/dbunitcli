@@ -19,11 +19,13 @@ import java.util.stream.Collectors;
 
 public class ComparableFixedFileDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableFixedFileDataSetProducer.class);
+    private final ComparableDataSetParam param;
     private final File[] src;
     private final int startRow;
     private final String[] headerNames;
     private final List<Integer> columnLengths;
-    private final ComparableDataSetParam param;
+    private final boolean loadData;
+    private final boolean addFileInfo;
     private IDataSetConsumer consumer;
 
     public ComparableFixedFileDataSetProducer(final ComparableDataSetParam param) {
@@ -31,6 +33,8 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
         this.src = this.param.getSrcFiles();
         this.startRow = this.param.startRow();
         this.headerNames = this.param.headerName().split(",");
+        this.loadData = this.param.loadData();
+        this.addFileInfo = this.param.addFileInfo();
         this.columnLengths = Arrays.stream(this.param.fixedLength().split(","))
                 .map(Integer::valueOf)
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -60,8 +64,8 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
     protected void produceFromFile(final File aFile) {
         try {
             ComparableFixedFileDataSetProducer.LOGGER.info("produce - start fileName={}", aFile);
-            this.consumer.startTable(this.createMetaData(aFile, this.headerNames));
-            if (this.param.loadData()) {
+            this.consumer.startTable(this.createMetaData(aFile, this.headerNames, this.addFileInfo));
+            if (this.loadData) {
                 int rows = 1;
                 for (final String s : Files.readAllLines(aFile.toPath(), Charset.forName(this.getEncoding()))) {
                     if (rows >= this.startRow) {

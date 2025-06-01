@@ -29,8 +29,8 @@ public record TableSeparators(List<TableSeparator> settings
         return builder.build();
     }
 
-    public boolean hasAdditionalSetting(final String tableName) {
-        return !this.getSeparators(tableName)
+    public boolean hasAdditionalSetting(final ITableMetaData metaData) {
+        return !this.getSeparators(metaData)
                 .stream()
                 .filter(it -> !it.equals(TableSeparator.NONE))
                 .toList().isEmpty();
@@ -40,7 +40,7 @@ public record TableSeparators(List<TableSeparator> settings
         final ITableMetaData joinMetadata = join.joinMetaData();
         return this.createMapper(this.addNewNameSetting(join.getCondition().tableSeparators()
                         .stream()
-                        .map(it -> this.getCommonSettings(joinMetadata.getTableName())
+                        .map(it -> this.getCommonSettings(joinMetadata)
                                 .add(it)
                                 .addSetting(joinMetadata))
                 , joinMetadata.getTableName()));
@@ -69,7 +69,7 @@ public record TableSeparators(List<TableSeparator> settings
     private Stream<AddSettingTableMetaData> addNewNameSetting(final Stream<AddSettingTableMetaData> target, final String beforeTableName) {
         return target.flatMap(it -> {
             if (!Objects.equals(beforeTableName, it.getTableName())) {
-                final Set<TableSeparator> separatorsFromSettings = this.getSeparatorsFromSettings(it.getTableName());
+                final Set<TableSeparator> separatorsFromSettings = this.getSeparatorsFromSettings(it);
                 if (separatorsFromSettings.isEmpty()) {
                     return Stream.of(it);
                 }
@@ -82,30 +82,30 @@ public record TableSeparators(List<TableSeparator> settings
     }
 
     private Stream<AddSettingTableMetaData> addSettings(final ITableMetaData originMetaData) {
-        return this.getSeparators(originMetaData.getTableName()).stream()
+        return this.getSeparators(originMetaData).stream()
                 .map(it -> it.addSetting(originMetaData));
     }
 
-    private Collection<TableSeparator> getSeparators(final String tableName) {
-        final Set<TableSeparator> result = this.getSeparatorsFromSettings(tableName);
+    private Collection<TableSeparator> getSeparators(final ITableMetaData originMetaData) {
+        final Set<TableSeparator> result = this.getSeparatorsFromSettings(originMetaData);
         if (!result.isEmpty()) {
             return result;
         }
-        result.add(this.getCommonSettings(tableName));
+        result.add(this.getCommonSettings(originMetaData));
         return result;
     }
 
-    private Set<TableSeparator> getSeparatorsFromSettings(final String tableName) {
+    private Set<TableSeparator> getSeparatorsFromSettings(final ITableMetaData originMetaData) {
         return new HashSet<>(this.settings.stream()
                 .filter(TableSeparator::hasSettings)
-                .filter(it -> it.targetFilter().test(tableName))
-                .map(this.getCommonSettings(tableName)::add)
+                .filter(it -> it.sourceFilter().test(originMetaData))
+                .map(this.getCommonSettings(originMetaData)::add)
                 .toList());
     }
 
-    private TableSeparator getCommonSettings(final String tableName) {
+    private TableSeparator getCommonSettings(final ITableMetaData originMetaData) {
         return this.commonSettings.stream()
-                .filter(it -> it.targetFilter().test(tableName))
+                .filter(it -> it.sourceFilter().test(originMetaData))
                 .reduce(TableSeparator.NONE, TableSeparator::add);
     }
 

@@ -1,12 +1,14 @@
 package yo.dbunitcli.common.filter;
 
+import org.dbunit.dataset.ITableMetaData;
+
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
 /**
  * テーブル名やシート名に対するフィルタリング機能を提供するインターフェース。
  */
-public interface TargetFilter {
+public interface SourceFilter {
 
     /**
      * 正規表現パターンでマッチングするフィルタを作成
@@ -16,7 +18,7 @@ public interface TargetFilter {
      * @throws PatternSyntaxException 不正な正規表現パターンの場合
      * @throws NullPointerException   パターンがnullの場合
      */
-    static TargetFilter regex(final String regex) {
+    static SourceFilter regex(final String regex) {
         return new RegexFilter(regex);
     }
 
@@ -26,7 +28,7 @@ public interface TargetFilter {
      * @param names 対象とする名前の配列
      * @return フィルタのインスタンス
      */
-    static TargetFilter any(final String... names) {
+    static SourceFilter any(final String... names) {
         return new AnyFilter(List.of(names));
     }
 
@@ -36,7 +38,7 @@ public interface TargetFilter {
      * @param pattern パターン文字列
      * @return フィルタのインスタンス
      */
-    static TargetFilter contain(final String... pattern) {
+    static SourceFilter contain(final String... pattern) {
         return new ContainFilter(List.of(pattern));
     }
 
@@ -46,8 +48,12 @@ public interface TargetFilter {
      * @param result 返す結果
      * @return フィルタのインスタンス
      */
-    static TargetFilter always(final boolean result) {
+    static SourceFilter always(final boolean result) {
         return new AlwaysFilter(result);
+    }
+
+    static SourceFilter withFilePathMatch(final SourceFilter base, final String filePath) {
+        return new WithFilePathMatchFilter(base, filePath);
     }
 
     /**
@@ -56,8 +62,17 @@ public interface TargetFilter {
      * @param names 除外する名前のリスト
      * @return フィルタのインスタンス
      */
-    default TargetFilter exclude(final List<String> names) {
+    default SourceFilter exclude(final List<String> names) {
         return new ExcludeFilter(this, names);
+    }
+
+    /**
+     * フィルタの判定を実行
+     *
+     * @return フィルタ条件に一致する場合true
+     */
+    default boolean test(final ITableMetaData originMetaData) {
+        return this.test(originMetaData.getTableName());
     }
 
     /**

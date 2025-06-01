@@ -28,9 +28,10 @@ public record ComparableDataSetParam(
         , XlsxSchema xlsxSchema
         , NameFilter tableNameFilter
         , boolean useJdbcMetaData
-        , boolean loadData
         , int startRow
         , String headerName
+        , boolean loadData
+        , boolean addFileInfo
         , String fixedLength
         , char delimiter
         , boolean ignoreQuoted
@@ -57,9 +58,10 @@ public record ComparableDataSetParam(
                 , builder.getXlsxSchema()
                 , builder.getTableNameFilter()
                 , builder.isUseJdbcMetaData()
-                , builder.isLoadData()
                 , builder.getStartRow()
                 , builder.getHeaderName()
+                , builder.isLoadData()
+                , builder.addFileInfo()
                 , builder.getFixedLength()
                 , builder.getDelimiter()
                 , builder.isIgnoreQuoted()
@@ -100,6 +102,10 @@ public record ComparableDataSetParam(
                 .orElse(null);
     }
 
+    public boolean addFileInfo() {
+        return this.addFileInfo;
+    }
+
     public static class Builder {
         private File src;
         private String encoding;
@@ -112,9 +118,10 @@ public record ComparableDataSetParam(
         private String regExclude;
         private XlsxSchema xlsxSchema = XlsxSchema.DEFAULT;
         private boolean useJdbcMetaData;
-        private boolean loadData = true;
         private int startRow = 1;
         private String headerName;
+        private boolean loadData = true;
+        private boolean addFileInfo = false;
         private String fixedLength;
         private String extension;
         private TemplateRender templateRender;
@@ -126,9 +133,8 @@ public record ComparableDataSetParam(
         private String regTableExclude;
         private boolean ignoreQuoted = false;
 
-        public Builder setSrc(final File src) {
-            this.src = src;
-            return this;
+        public ComparableDataSetParam build() {
+            return new ComparableDataSetParam(this);
         }
 
         public File getSrc() {
@@ -182,6 +188,10 @@ public record ComparableDataSetParam(
             return this.loadData;
         }
 
+        public boolean addFileInfo() {
+            return this.addFileInfo;
+        }
+
         public int getStartRow() {
             return this.startRow;
         }
@@ -211,6 +221,18 @@ public record ComparableDataSetParam(
             return this.recursive;
         }
 
+        public String getRegTableInclude() {
+            return this.regTableInclude;
+        }
+
+        public String getRegTableExclude() {
+            return this.regTableExclude;
+        }
+
+        public boolean isIgnoreQuoted() {
+            return this.ignoreQuoted;
+        }
+
         public DatabaseConnectionLoader getDatabaseConnectionLoader() {
             return this.databaseConnectionLoader;
         }
@@ -224,6 +246,11 @@ public record ComparableDataSetParam(
                 return this;
             }
             return function.apply(this);
+        }
+
+        public Builder setSrc(final File src) {
+            this.src = src;
+            return this;
         }
 
         public Builder setEncoding(final String encoding) {
@@ -286,6 +313,11 @@ public record ComparableDataSetParam(
             return this;
         }
 
+        public Builder setAddFileInfo(final boolean addFileInfo) {
+            this.addFileInfo = addFileInfo;
+            return this;
+        }
+
         public Builder setStartRow(final int startRow) {
             this.startRow = startRow;
             return this;
@@ -331,17 +363,9 @@ public record ComparableDataSetParam(
             return this;
         }
 
-        public ComparableDataSetParam build() {
-            return new ComparableDataSetParam(this);
-        }
-
         public Builder setRegTableInclude(final String regTableInclude) {
             this.regTableInclude = regTableInclude;
             return this;
-        }
-
-        public String getRegTableInclude() {
-            return this.regTableInclude;
         }
 
         public Builder setRegTableExclude(final String regTableExclude) {
@@ -349,17 +373,10 @@ public record ComparableDataSetParam(
             return this;
         }
 
-        public String getRegTableExclude() {
-            return this.regTableExclude;
-        }
-
-        public boolean isIgnoreQuoted() {
-            return this.ignoreQuoted;
-        }
-
         public Builder setIgnoreQuoted(final boolean ignoreQuoted) {
             this.ignoreQuoted = ignoreQuoted;
             return this;
         }
+
     }
 }

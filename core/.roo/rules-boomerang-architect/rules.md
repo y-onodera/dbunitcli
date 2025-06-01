@@ -1,6 +1,6 @@
 # Coreプロジェクト Boomerangモード開発ルール
 
-このドキュメントは、`core`プロジェクトにおけるBoomerang-artifactモード固有の開発ルールを定義します。
+このドキュメントは、Boomerang-artifactモード固有の開発ルールを定義します。
 
 -  [boomerangモードのオーケストレーション原則](../rules-boomerang/rules.md)に従ってtaskファイルを作成します。
 -  必ず実ファイルが存在すること、存在するファイルの実際のコードの内容を確認してから提案内容を検討します。

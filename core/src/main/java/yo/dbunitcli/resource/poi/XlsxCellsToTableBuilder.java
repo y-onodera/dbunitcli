@@ -3,6 +3,7 @@ package yo.dbunitcli.resource.poi;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
+import yo.dbunitcli.common.Source;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import java.util.stream.IntStream;
 
 public class XlsxCellsToTableBuilder {
 
-    public static XlsxCellsToTableBuilder NO_TARGET = new XlsxCellsToTableBuilder(new ArrayList<>(), XlsxSchema.FileInfo.NONE) {
+    public static XlsxCellsToTableBuilder NO_TARGET = new XlsxCellsToTableBuilder(new ArrayList<>(), Source.NONE) {
         @Override
         public void handle(final CellReference reference, final String formattedValue) {
             // no handle
@@ -26,13 +27,13 @@ public class XlsxCellsToTableBuilder {
 
     private final Map<String, List<String[]>> row = new HashMap<>();
 
-    public XlsxCellsToTableBuilder(final List<XlsxCellsTableDefine> tableDefines, final XlsxSchema.FileInfo fileInfo) {
+    public XlsxCellsToTableBuilder(final List<XlsxCellsTableDefine> tableDefines, final Source source) {
         this.tableNames = new String[tableDefines.size()];
         IntStream.range(0, this.tableNames.length).forEach(i -> {
             final XlsxCellsTableDefine def = tableDefines.get(i);
+            final Source sourceWithTableDefine = source.addFileInfo(def.addFileInfo() || source.addFileInfo());
             this.tableNames[i] = def.tableName();
-            this.tableMetaDataMap.put(def.tableName()
-                    , def.addOptional() ? fileInfo.wrap(def.tableMetaData()) : def.tableMetaData());
+            this.tableMetaDataMap.put(def.tableName(), sourceWithTableDefine.wrap(def.tableMetaData()));
             def.getTargetAddresses().forEach(cellAddress -> {
                 if (!this.columnDefine.containsKey(cellAddress)) {
                     this.columnDefine.put(cellAddress, new ArrayList<>());
@@ -43,11 +44,7 @@ public class XlsxCellsToTableBuilder {
             final List<String[]> targetRows = this.row.get(def.tableName());
             IntStream.range(0, def.rowCount())
                     .forEach(rowIndex -> {
-                        if (def.addOptional()) {
-                            targetRows.add(rowIndex, fileInfo.defaultColumnValues(def.columnCount()));
-                        } else {
-                            targetRows.add(rowIndex, new String[def.columnCount()]);
-                        }
+                        targetRows.add(rowIndex, sourceWithTableDefine.defaultColumnValues(def.columnCount()));
                     });
         });
     }

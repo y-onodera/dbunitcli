@@ -11,10 +11,10 @@ import java.util.regex.PatternSyntaxException;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * {@link TargetFilter}のテストクラス。
+ * {@link SourceFilter}のテストクラス。
  * テーブル名やシート名に対するフィルタリング機能のテストを実施します。
  */
-public class TargetFilterTest {
+public class SourceFilterTest {
 
     private static final String TABLE1 = "table1";
     private static final String TABLE2 = "table2";
@@ -30,7 +30,7 @@ public class TargetFilterTest {
 
     @Test
     public void regexWhenValidPatternShouldMatchTables() {
-        final var filter = TargetFilter.regex("table[0-9]+");
+        final var filter = SourceFilter.regex("table[0-9]+");
         assertTrue(filter.test(TABLE1));
         assertTrue(filter.test(TABLE2));
         assertFalse(filter.test(USER_INFO));
@@ -38,17 +38,17 @@ public class TargetFilterTest {
 
     @Test
     public void regexWhenInvalidPatternShouldThrowPatternSyntaxException() {
-        assertThrows(PatternSyntaxException.class, () -> TargetFilter.regex("["));
+        assertThrows(PatternSyntaxException.class, () -> SourceFilter.regex("["));
     }
 
     @Test
     public void regexWhenNullPatternShouldThrowNullPointerException() {
-        assertThrows(NullPointerException.class, () -> TargetFilter.regex(null));
+        assertThrows(NullPointerException.class, () -> SourceFilter.regex(null));
     }
 
     @Test
     public void anyWhenExactMatchShouldReturnTrue() {
-        final var filter = TargetFilter.any(TABLE1, TABLE2);
+        final var filter = SourceFilter.any(TABLE1, TABLE2);
         assertTrue(filter.test(TABLE1));
         assertTrue(filter.test(TABLE2));
         assertFalse(filter.test(TABLE3));
@@ -56,27 +56,27 @@ public class TargetFilterTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"user_info", "user"})
-    public void containWhenPatternExistsInNameShouldReturnTrue(String tableName) {
-        final var filter = TargetFilter.contain("user");
+    public void containWhenPatternExistsInNameShouldReturnTrue(final String tableName) {
+        final var filter = SourceFilter.contain("user");
         assertTrue(filter.test(tableName));
     }
 
     @Test
     public void containWhenPatternNotExistsInNameShouldReturnFalse() {
-        final var filter = TargetFilter.contain("user");
+        final var filter = SourceFilter.contain("user");
         assertFalse(filter.test(CUSTOMER));
     }
 
     @Test
     public void containWhenAsteriskPatternShouldAlwaysReturnTrue() {
-        final var filter = TargetFilter.contain("*");
+        final var filter = SourceFilter.contain("*");
         assertTrue(filter.test("any_table"));
         assertTrue(filter.test(""));
     }
 
     @Test
     public void excludeWhenNameInExcludeListShouldReturnFalse() {
-        final var filter = TargetFilter.contain("user").exclude(List.of(USER_ADMIN));
+        final var filter = SourceFilter.contain("user").exclude(List.of(USER_ADMIN));
         assertTrue(filter.test(USER_INFO));
         assertFalse(filter.test(USER_ADMIN));
         assertFalse(filter.test(CUSTOMER));
@@ -84,7 +84,7 @@ public class TargetFilterTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void alwaysWhenCalledShouldReturnSpecifiedValue(boolean expected) {
-        assertEquals(expected, TargetFilter.always(expected).test("any"));
+    public void alwaysWhenCalledShouldReturnSpecifiedValue(final boolean expected) {
+        assertEquals(expected, SourceFilter.always(expected).test("any"));
     }
 }
