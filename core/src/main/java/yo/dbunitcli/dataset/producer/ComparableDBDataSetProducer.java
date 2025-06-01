@@ -1,11 +1,11 @@
 package yo.dbunitcli.dataset.producer;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.database.IResultSetTable;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.IDataSetConsumer;
-import org.graalvm.collections.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
@@ -63,7 +63,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         Stream.of(this.src)
                 .map(it -> {
                     try {
-                        return Pair.create(
+                        return Pair.of(
                                 TableMetaDataWithSource.fileInfo(it, this.addFileInfo)
                                 , Files.readAllLines(it.toPath(), Charset.forName(this.param.encoding()))
                         );
