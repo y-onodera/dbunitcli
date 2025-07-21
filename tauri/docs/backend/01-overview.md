@@ -5,11 +5,17 @@
 ## 1. アーキテクチャ
 
 ### 1.1 構成要素
-- Tauri: デスクトップアプリケーションフレームワーク
+- Tauri v2: デスクトップアプリケーションフレームワーク
 - Rust: ネイティブバインディング
 - Java: DBUnit CLIのコア機能
 
-### 1.2 責務
+### 1.2 Tauriプラグイン
+- [`tauri-plugin-shell`]: シェル実行
+- [`tauri-plugin-dialog`]: ダイアログ表示
+- [`tauri-plugin-http`]: HTTP通信
+- [`tauri-plugin-cli`]: CLI引数処理
+
+### 1.3 責務
 - フロントエンドとJavaプロセスの橋渡し
 - プロセス管理
 - ファイルシステム操作
@@ -55,3 +61,22 @@ src-tauri/
 - Javaプロセスの分離実行
 - ウィンドウレス実行モード
 - リソース管理の確実な実施
+
+## 5. 開発環境セットアップ
+
+### 5.1 必要なツール
+- Rust 1.70以上
+- Bun パッケージマネージャ
+- Tauri CLI v2.6.2
+
+### 5.2 セットアップ手順
+```bash
+# Tauri CLIのインストール
+bun add -D @tauri-apps/cli
+
+# 依存関係のインストール
+bun install
+
+# 開発モード起動
+bun tauri dev
+```
