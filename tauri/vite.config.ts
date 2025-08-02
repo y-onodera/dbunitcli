@@ -4,7 +4,13 @@ import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
-	plugins: [react()],
+	plugins: [
+		react({
+			babel: {
+				plugins: [["babel-plugin-react-compiler"]],
+			},
+		}),
+	],
 	build: {
 		target: "esnext",
 	},

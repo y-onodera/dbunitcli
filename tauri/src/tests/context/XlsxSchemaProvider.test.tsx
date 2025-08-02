@@ -79,35 +79,38 @@ describe("XlsxSchemaProviderのテスト", () => {
 
 	describe("useLoadXlsxSchema", () => {
 		it("名前が空文字の場合にデフォルト値を返すことを確認", async () => {
-			const { result } = renderHook(() => useLoadXlsxSchema()(''), { wrapper });
+			const { result, rerender } = renderHook(() => useLoadXlsxSchema()(''), { wrapper });
 			await waitFor(() => {
+				rerender();
 				result.current.then((res) => {
 					expect(res).toEqual(XlsxSchema.create());
 				});
-			});
+			})
 		});
 
 		it("正常なロードが行われることを確認", async () => {
-			const { result } = renderHook(() => useLoadXlsxSchema()('test-setting'), { wrapper });
+			const { result, rerender } = renderHook(() => useLoadXlsxSchema()('test-setting'), { wrapper });
 			await waitFor(() => {
+				rerender();
 				result.current.then((res) => {
 					expect(res.rows).toHaveLength(1);
 					expect(res.cells).toHaveLength(1);
 				});
-			});
+			})
 		});
 	});
 
 	describe("useSaveXlsxSchema", () => {
 		it("正常な保存が行われることを確認", async () => {
-			const { result } = renderHook(() => {
+			const { result, rerender } = renderHook(() => {
 				const saveXlsxSchema = useSaveXlsxSchema();
 				const resources = useResourcesSettings();
 				return { resources, saveXlsxSchema }
 			}, { wrapper });
 			await waitFor(() => {
+				rerender();
 				expect(result.current.resources.xlsxSchemas).toStrictEqual(mockWorkspaceResources.resources.xlsxSchemas);
-			});
+			})
 			result.current.saveXlsxSchema('test-setting', XlsxSchema.create());
 			await waitFor(() => {
 				expect(result.current.resources.xlsxSchemas).toStrictEqual(mockUpdatedSettings);
@@ -117,14 +120,15 @@ describe("XlsxSchemaProviderのテスト", () => {
 
 	describe("useDeleteXlsxSchema", () => {
 		it("正常な削除が行われることを確認", async () => {
-			const { result } = renderHook(() => {
+			const { result, rerender } = renderHook(() => {
 				const deleteXlsxSchema = useDeleteXlsxSchema();
 				const resources = useResourcesSettings();
 				return { resources, deleteXlsxSchema }
 			}, { wrapper });
 			await waitFor(() => {
+				rerender();
 				expect(result.current.resources.xlsxSchemas).toStrictEqual(mockWorkspaceResources.resources.xlsxSchemas);
-			});
+			})
 			result.current.deleteXlsxSchema('test-setting');
 			await waitFor(() => {
 				expect(result.current.resources.xlsxSchemas).toStrictEqual(mockRemainingSettings);

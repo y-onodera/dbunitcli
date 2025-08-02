@@ -12,7 +12,7 @@ import WorkspaceResourcesProvider, {
     useWorkspaceUpdate,
 } from '../../context/WorkspaceResourcesProvider';
 import type { WorkspaceResources } from '../../model/WorkspaceResources';
-import { ParameterList } from '../../model/WorkspaceResources';
+import { ParameterList, ResourcesSettings, WorkspaceContext } from '../../model/WorkspaceResources';
 import type { FetchParams } from '../../utils/fetchUtils';
 import { enviromentFixture, workspaceResourcesFixture } from '../setup';
 
@@ -72,42 +72,36 @@ const { mockFetchData } = vi.hoisted(() => {
 vi.mock('../../utils/fetchUtils', () => ({
     fetchData: mockFetchData,
 }));
-beforeEach(() => {
-    mockEnviroment.loaded = true;
-});
-
 describe('WorkspaceResourcesProviderのテスト', () => {
 
     describe('Workspaceのテスト', () => {
-        it('enviromentがload済みならcontextがセットされる', async () => {
-            const { result } = renderHook(() => ({
-                context: useWorkspaceContext(),
-                parameterList: useParameterList(),
-                resourcesSettings: useResourcesSettings(),
-            }), { wrapper });
-
-            await waitFor(() => {
-                expect(result.current.context).toStrictEqual(mockWorkspaceResources.context);
-                expect(result.current.parameterList).toStrictEqual(ParameterList.from(mockWorkspaceResources.parameterList));
-                expect(result.current.resourcesSettings).toStrictEqual(mockWorkspaceResources.resources);
-            });
-        });
-        it('enviromentがloadが終わっていない場合、loading表示される', async () => {
-            beforeEach(() => {
-                mockEnviroment.loaded = false;
-            });
+        it('suspend中のloading表示の確認', async () => {
             render(<div>test</div>, { wrapper });
             await waitFor(() => {
                 expect(screen.getByText('Loading...')).toBeInTheDocument();
             });
         });
+        it('suspendが解決されるとcontextがセットされる', async () => {
+            const { result, rerender } = renderHook(() => ({
+                context: useWorkspaceContext(),
+                parameterList: useParameterList(),
+                resourcesSettings: useResourcesSettings(),
+            }), { wrapper });
+            await waitFor(() => {
+                rerender();
+                expect(result.current.context).toStrictEqual(WorkspaceContext.from(mockWorkspaceResources.context));
+                expect(result.current.parameterList).toStrictEqual(ParameterList.from(mockWorkspaceResources.parameterList));
+                expect(result.current.resourcesSettings).toStrictEqual(ResourcesSettings.from(mockWorkspaceResources.resources));
+            });
+        });
         it('useWorkspaceUpdateが正常に動作することを確認', async () => {
-            const { result } = renderHook(() => {
+            const { result, rerender } = renderHook(() => {
                 const workspaceUpdate = useWorkspaceUpdate();
                 const context = useWorkspaceContext();
                 return { context, workspaceUpdate };
             }, { wrapper });
             await waitFor(() => {
+                rerender();
                 expect(result.current.context.workspace).toBe('test-workspace');
                 expect(result.current.context.datasetBase).toBe('dataset');
                 expect(result.current.context.resultBase).toBe('result');
@@ -123,12 +117,13 @@ describe('WorkspaceResourcesProviderのテスト', () => {
 
     describe('パラメータ操作のテスト', () => {
         it('useAddParameterが正常に動作することを確認', async () => {
-            const { result } = renderHook(() => {
+            const { result, rerender } = renderHook(() => {
                 const addConvert = useAddParameter('convert');
                 const parameterList = useParameterList();
                 return { parameterList, addConvert };
             }, { wrapper });
             await waitFor(() => {
+                rerender();
                 expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2']);
             });
             result.current.addConvert();
@@ -138,12 +133,13 @@ describe('WorkspaceResourcesProviderのテスト', () => {
         });
 
         it('useDeleteParameterが正常に動作することを確認', async () => {
-            const { result } = renderHook(() => {
+            const { result, rerender } = renderHook(() => {
                 const deleteConvert2 = useDeleteParameter('convert', 'convert2');
                 const parameterList = useParameterList();
                 return { parameterList, deleteConvert2 };
             }, { wrapper });
             await waitFor(() => {
+                rerender();
                 expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2']);
             });
             result.current.deleteConvert2();
@@ -153,12 +149,13 @@ describe('WorkspaceResourcesProviderのテスト', () => {
         });
 
         it('useCopyParameterが正常に動作することを確認', async () => {
-            const { result } = renderHook(() => {
+            const { result, rerender } = renderHook(() => {
                 const copyConvert1 = useCopyParameter('convert', 'convert1');
                 const parameterList = useParameterList();
                 return { parameterList, copyConvert1 };
             }, { wrapper });
             await waitFor(() => {
+                rerender();
                 expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2']);
             });
             result.current.copyConvert1();
@@ -168,12 +165,13 @@ describe('WorkspaceResourcesProviderのテスト', () => {
         });
 
         it('useRenameParameterが正常に動作することを確認', async () => {
-            const { result } = renderHook(() => {
+            const { result, rerender } = renderHook(() => {
                 const renameConvert1 = useRenameParameter('convert', 'convert1');
                 const parameterList = useParameterList();
                 return { parameterList, renameConvert1 };
             }, { wrapper });
             await waitFor(() => {
+                rerender();
                 expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2']);
             });
             result.current.renameConvert1("newName");

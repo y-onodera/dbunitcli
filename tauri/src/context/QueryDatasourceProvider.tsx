@@ -1,4 +1,4 @@
-import { type Dispatch, type ReactNode, type SetStateAction, createContext, useContext, useEffect, useState } from "react";
+import { type Dispatch, type ReactNode, type SetStateAction, Suspense, createContext, use, useState } from "react";
 import { type QueryDatasource, type QueryDatasourceType, isSqlRelatedType } from "../model/QueryDatasource";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
 import { useEnviroment } from "./EnviromentProvider";
@@ -8,10 +8,8 @@ type QueryDatasourceResult = 'success' | 'failed';
 const queryDatasourceContext = createContext<string[]>([]);
 const setQueryDatasourceContext = createContext<Dispatch<SetStateAction<string[]>>>(() => undefined);
 
-export const useQueryDatasource = () => useContext(queryDatasourceContext);
-export const useSetQueryDatasource = () => useContext(setQueryDatasourceContext);
-
-// コンポーネントでの使用のためのラップ関数
+export const useQueryDatasource = () => use(queryDatasourceContext);
+export const useSetQueryDatasource = () => use(setQueryDatasourceContext);
 export function useDeleteDataSource(type: QueryDatasourceType) {
     const environment = useEnviroment();
     const setDatasources = useSetQueryDatasource();
@@ -19,7 +17,6 @@ export function useDeleteDataSource(type: QueryDatasourceType) {
         return deleteDataSource(environment.apiUrl, type, name, setDatasources);
     };
 }
-
 export function useSaveDataSource() {
     const environment = useEnviroment();
     const setDatasources = useSetQueryDatasource();
@@ -27,30 +24,32 @@ export function useSaveDataSource() {
         return saveDataSource(environment.apiUrl, input, setDatasources);
     };
 }
-
 export function useLoadDataSource() {
     const environment = useEnviroment();
     return async (type: QueryDatasourceType, name: string) => {
         return loadDataSource(environment.apiUrl, type, name);
     };
 }
-
 export default function QueryDatasourceProvider(props: { type: string, children: ReactNode }) {
-    const [datasources, setDatasources] = useState<string[]>([]);
     const environment = useEnviroment();
     const srcType = props.type;
-    useEffect(() => {
-        const loadDatasources = async () => {
-            if (isSqlRelatedType(srcType ?? "")) {
-                const sources = await fetchDatasources(environment.apiUrl, srcType as QueryDatasourceType);
-                if (sources !== 'failed') {
-                    setDatasources(sources);
-                }
-            }
-        };
-        loadDatasources();
-    }, [srcType, environment.apiUrl]);
-
+    const loadDatasources = async () => {
+        if (isSqlRelatedType(srcType ?? "")) {
+            return fetchDatasources(environment.apiUrl, srcType as QueryDatasourceType);
+        }
+        return new Promise<string[]>(resolve => resolve([]));
+    };
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <CreateContext promise={loadDatasources()}>
+                {props.children}
+            </CreateContext>
+        </Suspense>
+    );
+}
+function CreateContext(props: { promise: Promise<string[]>, children: ReactNode }) {
+    const source = use(props.promise);
+    const [datasources, setDatasources] = useState<string[]>(source);
     return (
         <queryDatasourceContext.Provider value={datasources}>
             <setQueryDatasourceContext.Provider value={setDatasources}>
@@ -59,8 +58,7 @@ export default function QueryDatasourceProvider(props: { type: string, children:
         </queryDatasourceContext.Provider>
     );
 }
-
-async function fetchDatasources(apiUrl: string, type: QueryDatasourceType): Promise<string[] | 'failed'> {
+async function fetchDatasources(apiUrl: string, type: QueryDatasourceType): Promise<string[]> {
     const fetchParams = {
         endpoint: `${apiUrl}query-datasource/list?type=${type}`,
         options: {
@@ -68,15 +66,10 @@ async function fetchDatasources(apiUrl: string, type: QueryDatasourceType): Prom
             headers: { 'Content-Type': 'application/json' },
         },
     };
-
     return await fetchData(fetchParams)
         .then((response) => response.json())
-        .catch((ex) => {
-            handleFetchError(ex, fetchParams);
-            return 'failed';
-        });
+        .catch((ex) => handleFetchError(ex, fetchParams));
 }
-
 async function loadDataSource(apiUrl: string, type: QueryDatasourceType, name: string): Promise<string> {
     const fetchParams = {
         endpoint: `${apiUrl}query-datasource/load`,
@@ -94,7 +87,6 @@ async function loadDataSource(apiUrl: string, type: QueryDatasourceType, name: s
             return '';
         });
 }
-
 async function deleteDataSource(
     apiUrl: string,
     type: QueryDatasourceType,
@@ -109,7 +101,6 @@ async function deleteDataSource(
             body: JSON.stringify({ type, name }),
         },
     };
-
     return await fetchData(fetchParams)
         .then((response) => response.json())
         .then((sources: string[]) => {
@@ -121,7 +112,6 @@ async function deleteDataSource(
             return 'failed' as QueryDatasourceResult;
         });
 }
-
 async function saveDataSource(
     apiUrl: string,
     input: QueryDatasource,
@@ -135,7 +125,6 @@ async function saveDataSource(
             body: JSON.stringify(input),
         },
     };
-
     return await fetchData(fetchParams)
         .then((response) => response.json())
         .then((sources: string[]) => {

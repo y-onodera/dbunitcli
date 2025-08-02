@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, use, useState } from "react";
 import ResourceFileDialog from "../../components/dialog/ResourceFileDialog";
 import SettingTable from "../../components/dialog/SettingTable";
 import { useLoadXlsxSchema, useSaveXlsxSchema } from "../../context/XlsxSchemaProvider";
@@ -12,18 +12,27 @@ export default function XlsxSchemaDialog(props: {
     handleSave: (path: string) => void;
 }) {
     const loadXlsxSchema = useLoadXlsxSchema();
-    const [xlsxSchema, setXlsxSchema] = useState(XlsxSchema.create());
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <Dialog
+                promise={loadXlsxSchema(props.fileName)}
+                fileName={props.fileName}
+                handleDialogClose={props.handleDialogClose}
+                handleSave={props.handleSave}
+            />
+        </Suspense>
+    );
+}
+function Dialog(props: {
+    promise: Promise<XlsxSchema>;
+    fileName: string;
+    handleDialogClose: () => void;
+    handleSave: (path: string) => void;
+}) {
     const saveSchema = useSaveXlsxSchema();
-    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-    useEffect(() => {
-        loadXlsxSchema(props.fileName)
-            .then((res) => {
-                setXlsxSchema(res);
-            })
-            .catch((ex) => {
-                alert(ex);
-            });
-    }, [props.fileName]);
+    const xlsxSchemaData = use(props.promise);
+    const [xlsxSchema, setXlsxSchema] = useState(xlsxSchemaData);
+
     return (
         <ResourceFileDialog
             handleDialogClose={props.handleDialogClose}

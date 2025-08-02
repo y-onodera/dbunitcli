@@ -60,20 +60,22 @@ describe('DatasetSettingsProviderのテスト', () => {
 
     describe('useLoadDatasetSettingsのテスト', () => {
         it('設定ファイル名が空白のときは初期値が返却されることを確認', async () => {
-            const { result } = renderHook(() => {
+            const { result, rerender } = renderHook(() => {
                 return useLoadDatasetSettings()('');
             }, { wrapper });
             await waitFor(() => {
+                rerender();
                 result.current.then((res) => {
                     expect(res).toEqual(DatasetSettings.create());
                 });
             });
         });
         it('データセット設定を正常に読み込めることを確認', async () => {
-            const { result } = renderHook(() => {
+            const { result, rerender } = renderHook(() => {
                 return useLoadDatasetSettings()('test-setting');
             }, { wrapper });
             await waitFor(() => {
+                rerender();
                 result.current.then((res) => {
                     expect(res.settings).toHaveLength(1);
                     expect(res.settings[0].name).toStrictEqual(mockDatasetSettingsResponse.settings[0].name);
@@ -84,12 +86,13 @@ describe('DatasetSettingsProviderのテスト', () => {
 
     describe('useSaveDatasetSettingsのテスト', () => {
         it('データセット設定を正常に保存できることを確認', async () => {
-            const { result } = renderHook(() => {
+            const { result, rerender } = renderHook(() => {
                 const saveDatasetSettings = useSaveDatasetSettings();
                 const resources = useResourcesSettings();
                 return { resources, saveDatasetSettings }
             }, { wrapper });
             await waitFor(() => {
+                rerender();
                 expect(result.current.resources.datasetSettings).toStrictEqual(mockWorkspaceResources.resources.datasetSettings);
             });
             result.current.saveDatasetSettings('test-setting', DatasetSettings.create());
@@ -101,12 +104,13 @@ describe('DatasetSettingsProviderのテスト', () => {
 
     describe('useDeleteDatasetSettingsのテスト', () => {
         it('データセット設定を正常に削除できることを確認', async () => {
-            const { result } = renderHook(() => {
+            const { result, rerender } = renderHook(() => {
                 const deleteDatasetSettings = useDeleteDatasetSettings();
                 const resources = useResourcesSettings();
                 return { resources, deleteDatasetSettings }
             }, { wrapper });
             await waitFor(() => {
+                rerender();
                 expect(result.current.resources.datasetSettings).toStrictEqual(mockWorkspaceResources.resources.datasetSettings);
             });
             result.current.deleteDatasetSettings('test-setting');

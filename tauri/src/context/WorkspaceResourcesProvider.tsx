@@ -1,5 +1,5 @@
-import { type Dispatch, type ReactNode, type SetStateAction, createContext, useContext, useEffect, useState } from "react";
-import { ParameterList, type ResourcesSettings, type WorkspaceContext, type WorkspaceResources } from "../model/WorkspaceResources";
+import { type Dispatch, type ReactNode, type SetStateAction, Suspense, createContext, use, useState } from "react";
+import { ParameterList, ResourcesSettings, WorkspaceContext, type WorkspaceResources } from "../model/WorkspaceResources";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
 import { useEnviroment } from "./EnviromentProvider";
 import { useSelectParameter, useSetSelectParameter } from "./SelectParameterProvider";
@@ -19,39 +19,31 @@ const setResourcesSettingsContext = createContext<Dispatch<SetStateAction<Resour
 export default function WorkspaceResourcesProvider(props: {
 	children: ReactNode;
 }) {
-	const [context, setContext] = useState<WorkspaceContext>({} as WorkspaceContext);
-	const [paramterList, setParameterList] = useState<ParameterList>(ParameterList.create());
-	const [resourcesSettings, setResourcesSettings] = useState<ResourcesSettings>({} as ResourcesSettings);
 	const environment = useEnviroment();
-	const [workspace, setWorkspace] = useState<string | null>(null);
-
-	useEffect(() => {
-		const workspaceReload = async () => {
-			if (environment.loaded) {
-				const fetchParams = {
-					endpoint: `${environment.apiUrl}workspace/resources`,
-					options: {
-						method: "GET"
-					},
-				};
-				await fetchData(fetchParams)
-					.then((response) => response.json())
-					.then((resources: WorkspaceResources) => {
-						setContext(resources.context);
-						setParameterList(ParameterList.from(resources.parameterList));
-						setResourcesSettings(resources.resources);
-						setWorkspace(resources.context.workspace);
-					})
-					.catch((ex) => handleFetchError(ex, fetchParams));
-			}
+	const workspaceReload = async () => {
+		const fetchParams = {
+			endpoint: `${environment.apiUrl}workspace/resources`,
+			options: {
+				method: "GET"
+			},
 		};
-		workspaceReload();
-	}, [environment.apiUrl, environment.loaded]);
-
-	if (workspace === null) {
-		return <div>Loading...</div>;
+		return await fetchData(fetchParams)
+			.then((response) => response.json())
+			.catch((ex) => handleFetchError(ex, fetchParams));
 	}
-
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<CreateContext promise={workspaceReload()}>
+				{props.children}
+			</CreateContext>
+		</Suspense>
+	);
+}
+function CreateContext(props: { promise: Promise<WorkspaceResources>, children: ReactNode }) {
+	const resources = use(props.promise);
+	const [context, setContext] = useState<WorkspaceContext>(WorkspaceContext.from(resources.context));
+	const [paramterList, setParameterList] = useState<ParameterList>(ParameterList.from(resources.parameterList));
+	const [resourcesSettings, setResourcesSettings] = useState<ResourcesSettings>(ResourcesSettings.from(resources.resources));
 	return (
 		<workspaceContext.Provider value={context}>
 			<setWorkspaceContext.Provider value={setContext}>
@@ -68,12 +60,12 @@ export default function WorkspaceResourcesProvider(props: {
 		</workspaceContext.Provider>
 	);
 }
-export const useWorkspaceContext = () => useContext(workspaceContext);
-export const useSetWorkspaceContext = () => useContext(setWorkspaceContext);
-export const useParameterList = () => useContext(parameterListContext);
-export const useSetParameterList = () => useContext(setParameterListContext);
-export const useResourcesSettings = () => useContext(resourcesSettingsContext);
-export const useSetResourcesSettings = () => useContext(setResourcesSettingsContext);
+export const useWorkspaceContext = () => use(workspaceContext);
+export const useSetWorkspaceContext = () => use(setWorkspaceContext);
+export const useParameterList = () => use(parameterListContext);
+export const useSetParameterList = () => use(setParameterListContext);
+export const useResourcesSettings = () => use(resourcesSettingsContext);
+export const useSetResourcesSettings = () => use(setResourcesSettingsContext);
 export const useWorkspaceUpdate = () => {
 	const setContext = useSetWorkspaceContext();
 	const setParameterList = useSetParameterList();
@@ -91,9 +83,9 @@ export const useWorkspaceUpdate = () => {
 		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((resources: WorkspaceResources) => {
-				setContext(resources.context);
+				setContext(WorkspaceContext.from(resources.context));
 				setParameterList(ParameterList.from(resources.parameterList));
-				setResourcesSettings(resources.resources);
+				setResourcesSettings(ResourcesSettings.from(resources.resources));
 			})
 			.catch((ex) => handleFetchError(ex, fetchParams));
 	};

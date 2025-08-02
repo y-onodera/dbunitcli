@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Suspense, use, useState } from 'react';
 import ResourceFileDialog from '../../components/dialog/ResourceFileDialog';
 import SettingTable from '../../components/dialog/SettingTable';
 import { useLoadDatasetSettings, useSaveDatasetSettings } from '../../context/DatasetSettingsProvider';
@@ -12,19 +12,26 @@ export default function DatasetSettingsDialog(props: {
 	handleSave: (path: string) => void;
 }) {
 	const loadSettings = useLoadDatasetSettings();
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<Dialog
+				promise={loadSettings(props.fileName)}
+				fileName={props.fileName}
+				handleDialogClose={props.handleDialogClose}
+				handleSave={props.handleSave}
+			/>
+		</Suspense>
+	);
+}
+function Dialog(props: {
+	promise: Promise<DatasetSettings>;
+	fileName: string;
+	handleDialogClose: () => void;
+	handleSave: (path: string) => void;
+}) {
 	const saveSettings = useSaveDatasetSettings();
-	const [dataSettings, setDataSettings] = useState<DatasetSettings>(DatasetSettings.create());
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	useEffect(() => {
-		loadSettings(props.fileName)
-			.then((res) => {
-				setDataSettings(res);
-			})
-			.catch((ex) => {
-				alert(ex);
-			});
-	}, [props.fileName]);
-
+	const dataSettingsData = use(props.promise);
+	const [dataSettings, setDataSettings] = useState<DatasetSettings>(dataSettingsData);
 	return (
 		<ResourceFileDialog
 			handleDialogClose={props.handleDialogClose}

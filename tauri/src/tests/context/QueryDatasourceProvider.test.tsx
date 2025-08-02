@@ -49,9 +49,10 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 describe('QueryDatasourceProviderのテスト', () => {
 
     describe('useQueryDatasource', () => {
-        it('初期状態が指定したタイプでfetchした結果であることを確認', () => {
-            const { result } = renderHook(() => useQueryDatasource(), { wrapper });
-            waitFor(() => {
+        it('初期状態が指定したタイプでfetchした結果であることを確認', async () => {
+            const { result, rerender } = renderHook(() => useQueryDatasource(), { wrapper });
+            await waitFor(() => {
+                rerender();
                 expect(result.current).toEqual(mockDatasources);
             });
         });
@@ -59,14 +60,15 @@ describe('QueryDatasourceProviderのテスト', () => {
 
     describe('useSaveDataSource', () => {
         it('正しくデータソースを保存できることを確認', async () => {
-            const { result } = renderHook(() => {
+            const { result, rerender } = renderHook(() => {
                 const saveDataSource = useSaveDataSource();
                 const resources = useQueryDatasource();
                 return { resources, saveDataSource }
             }, { wrapper });
             await waitFor(() => {
+                rerender();
                 expect(result.current.resources).toStrictEqual(mockDatasources);
-            });
+            })
             result.current.saveDataSource({ type: mockType, name: 'test-setting', contents: mockLoadBody });
             await waitFor(() => {
                 expect(result.current.resources).toStrictEqual(mockUpdatedSettings);
@@ -76,14 +78,15 @@ describe('QueryDatasourceProviderのテスト', () => {
 
     describe('useDeleteDataSource', () => {
         it('正しくデータソースを削除できることを確認', async () => {
-            const { result } = renderHook(() => {
+            const { result, rerender } = renderHook(() => {
                 const deleteDataSource = useDeleteDataSource(mockType);
                 const resources = useQueryDatasource();
                 return { resources, deleteDataSource }
             }, { wrapper });
             await waitFor(() => {
+                rerender();
                 expect(result.current.resources).toStrictEqual(mockDatasources);
-            });
+            })
             result.current.deleteDataSource('test-setting');
             await waitFor(() => {
                 expect(result.current.resources).toStrictEqual(mockRemainingSettings);
@@ -93,10 +96,11 @@ describe('QueryDatasourceProviderのテスト', () => {
 
     describe('useLoadDataSource', () => {
         it('正しくデータソースを読み込めることを確認', async () => {
-            const { result } = renderHook(() => {
+            const { result, rerender } = renderHook(() => {
                 return useLoadDataSource()(mockType, 'test-setting');
             }, { wrapper });
             await waitFor(() => {
+                rerender();
                 result.current.then((res) => {
                     expect(res).toEqual(mockLoadBody);
                 });
@@ -104,3 +108,4 @@ describe('QueryDatasourceProviderのテスト', () => {
         });
     });
 });
+;

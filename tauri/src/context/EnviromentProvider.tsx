@@ -1,9 +1,9 @@
 import { getMatches } from "@tauri-apps/plugin-cli";
 import {
 	type ReactNode,
+	Suspense,
 	createContext,
-	useContext,
-	useEffect,
+	use,
 	useState,
 } from "react";
 
@@ -12,34 +12,36 @@ export type Enviroment = {
 	workspace: string;
 	dataset_base: string;
 	result_base: string;
-	loaded: boolean;
 };
 export const enviromentContext = createContext<Enviroment>({} as Enviroment);
 export default function EnviromentProvider(props: { children: ReactNode }) {
-	const [enviroment, setEnviroment] = useState<Enviroment>({
-		loaded: false,
-	} as Enviroment);
-	useEffect(() => {
-		const getEnviroment = async () => {
-			const matches = await getMatches();
-			const port = matches.args.port.value ? matches.args.port.value : "8080"
-			const workspace = matches.args.workspace.value ? matches.args.workspace.value as string : ".";
-			const dataset_base = matches.args['dataset.base'].value ? matches.args['dataset.base'].value as string : ".";
-			const result_base = matches.args['result.base'].value ? matches.args['result.base'].value as string : ".";
-			setEnviroment({
-				apiUrl: `${`http://localhost:${port}` as string}/dbunit-cli/`,
-				workspace,
-				dataset_base,
-				result_base,
-				loaded: true,
-			});
-		}
-		getEnviroment()
-	}, []);
+	const getEnviroment = async () => {
+		const matches = await getMatches();
+		const port = matches.args.port.value ? matches.args.port.value : "8080"
+		const workspace = matches.args.workspace.value ? matches.args.workspace.value as string : ".";
+		const dataset_base = matches.args['dataset.base'].value ? matches.args['dataset.base'].value as string : ".";
+		const result_base = matches.args['result.base'].value ? matches.args['result.base'].value as string : ".";
+		return {
+			apiUrl: `${`http://localhost:${port}` as string}/dbunit-cli/`,
+			workspace,
+			dataset_base,
+			result_base,
+		};
+	}
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<CreateContext promise={getEnviroment()}>
+				{props.children}
+			</CreateContext>
+		</Suspense>
+	);
+}
+function CreateContext(props: { promise: Promise<Enviroment>, children: ReactNode }) {
+	const [enviroment, _] = useState<Enviroment>(use(props.promise));
 	return (
 		<enviromentContext.Provider value={enviroment}>
-			{enviroment.loaded ? props.children : "loading"}
+			{props.children}
 		</enviromentContext.Provider>
 	);
 }
-export const useEnviroment = () => useContext(enviromentContext);
+export const useEnviroment = () => use(enviromentContext);

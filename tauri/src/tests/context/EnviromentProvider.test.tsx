@@ -1,5 +1,4 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { act } from '@testing-library/react';
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -50,7 +49,6 @@ describe('EnviromentProviderのテスト', () => {
                 workspace: `${mockArgs.args.workspace}`,
                 dataset_base: `${mockArgs.args['dataset.base']}`,
                 result_base: `${mockArgs.args['result.base']}`,
-                loaded: true
             });
         });
         expect(mockGetMatches).toHaveBeenCalled();
@@ -68,7 +66,6 @@ describe('EnviromentProviderのテスト', () => {
                 workspace: '.',
                 dataset_base: '.',
                 result_base: '.',
-                loaded: true
             });
         });
     });
@@ -76,13 +73,13 @@ describe('EnviromentProviderのテスト', () => {
     it('ロード完了後に子コンポーネントが表示されることを確認', async () => {
         render(<TestComponent />, { wrapper });
 
-        expect(screen.getByText('loading')).toHaveTextContent('loading');
+        expect(screen.getByText('Loading...')).toHaveTextContent('Loading...');
 
         // 非同期処理の完了を待機
-        await act(async () => {
-            await new Promise(resolve => setTimeout(resolve, 100));
+        await waitFor(() => {
+            render(<TestComponent />, { wrapper });
+            expect(screen.getByTestId('test-component')).toBeInTheDocument();
         });
-        expect(screen.getByTestId('test-component')).toHaveTextContent('Loaded Content');
 
         expect(mockGetMatches).toHaveBeenCalled();
     });

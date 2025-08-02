@@ -32,8 +32,7 @@ export const enviromentFixture: Enviroment = {
 	apiUrl: 'http://localhost:8080/',
 	workspace: '',
 	dataset_base: '',
-	result_base: '',
-	loaded: true
+	result_base: ''
 };
 
 // テスト後のクリーンアップ

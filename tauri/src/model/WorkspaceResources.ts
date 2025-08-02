@@ -3,7 +3,7 @@ export type WorkspaceResources = {
 	resources: ResourcesSettings;
 	context: WorkspaceContext;
 };
-export type WorkspaceContext = {
+export type WorkspaceContextBuilder = {
 	workspace: string;
 	datasetBase: string;
 	resultBase: string;
@@ -12,6 +12,46 @@ export type WorkspaceContext = {
 	jdbcBase: string;
 	xlsxSchemaBase: string;
 };
+export class WorkspaceContext {
+	static from(builder: WorkspaceContextBuilder): WorkspaceContext {
+		return new WorkspaceContext(
+			builder.workspace,
+			builder.datasetBase,
+			builder.resultBase,
+			builder.settingBase,
+			builder.templateBase,
+			builder.jdbcBase,
+			builder.xlsxSchemaBase,
+		);
+	}
+	readonly workspace: string;
+	readonly datasetBase: string;
+	readonly resultBase: string;
+	readonly settingBase: string;
+	readonly templateBase: string;
+	readonly jdbcBase: string;
+	readonly xlsxSchemaBase: string;
+	constructor(
+		workspace: string,
+		datasetBase: string,
+		resultBase: string,
+		settingBase: string,
+		templateBase: string,
+		jdbcBase: string,
+		xlsxSchemaBase: string,
+	) {
+		this.workspace = workspace;
+		this.datasetBase = datasetBase;
+		this.resultBase = resultBase;
+		this.settingBase = settingBase;
+		this.templateBase = templateBase;
+		this.jdbcBase = jdbcBase;
+		this.xlsxSchemaBase = xlsxSchemaBase;
+	}
+	static create(): WorkspaceContext {
+		return new WorkspaceContext("", "", "", "", "", "", "");
+	}
+}
 export type ParameterListBuilder = {
 	convert: string[];
 	compare: string[];
@@ -60,9 +100,37 @@ export class ParameterList {
 		);
 	}
 }
-export type ResourcesSettings = {
+export type ResourcesSettingsBuilder = {
 	datasetSettings: string[];
 	xlsxSchemas: string[];
 	jdbcFiles: string[];
 	templateFiles: string[];
 };
+export class ResourcesSettings {
+	readonly datasetSettings: string[];
+	readonly xlsxSchemas: string[];
+	readonly jdbcFiles: string[];
+	readonly templateFiles: string[];
+	constructor(
+		datasetSettings: string[],
+		xlsxSchemas: string[],
+		jdbcFiles: string[],
+		templateFiles: string[],
+	) {
+		this.datasetSettings = datasetSettings;
+		this.xlsxSchemas = xlsxSchemas;
+		this.jdbcFiles = jdbcFiles;
+		this.templateFiles = templateFiles;
+	}
+	static create(): ResourcesSettings {
+		return new ResourcesSettings([], [], [], []);
+	}
+	static from(builder: ResourcesSettingsBuilder): ResourcesSettings {
+		return new ResourcesSettings(
+			builder.datasetSettings,
+			builder.xlsxSchemas,
+			builder.jdbcFiles,
+			builder.templateFiles,
+		);
+	}
+}
