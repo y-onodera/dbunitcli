@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useState } from "react";
 
 export function InputLabel(props: {
     text: string, id: string, required: boolean, hidden?: boolean, wStyle?: string
@@ -40,12 +40,7 @@ export function ControllTextBox(props: {
     )
 }
 export function SelectBox(props: { name: string, id: string, required: boolean, hidden?: boolean, wStyle?: string, defaultValue?: string, handleOnChange?: (selected: string) => Promise<void>, children: ReactNode }) {
-    const [selected, setSelected] = useState("");
-    useEffect(() => {
-        if (props.defaultValue) {
-            setSelected(props.defaultValue);
-        }
-    }, [props.defaultValue]);
+    const [selected, setSelected] = useState(props.defaultValue ? props.defaultValue : "");
     return (
         <select
             name={props.name}
@@ -64,10 +59,7 @@ export function SelectBox(props: { name: string, id: string, required: boolean, 
     );
 }
 export function CheckBox(props: { name: string, id: string, hidden?: boolean, defaultValue?: string, handleOnChange?: (checked: boolean) => void }) {
-    const [checked, setChecked] = useState(false);
-    useEffect(() => {
-        setChecked(props.defaultValue === "true");
-    }, [props.defaultValue]);
+    const [checked, setChecked] = useState(props.defaultValue === "true");
     return (
         <>
             <input
