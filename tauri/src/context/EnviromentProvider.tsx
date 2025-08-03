@@ -3,8 +3,7 @@ import {
 	type ReactNode,
 	Suspense,
 	createContext,
-	use,
-	useState,
+	use
 } from "react";
 
 export type Enviroment = {
@@ -37,7 +36,7 @@ export default function EnviromentProvider(props: { children: ReactNode }) {
 	);
 }
 function CreateContext(props: { promise: Promise<Enviroment>, children: ReactNode }) {
-	const [enviroment, _] = useState<Enviroment>(use(props.promise));
+	const enviroment = use(props.promise);
 	return (
 		<enviromentContext.Provider value={enviroment}>
 			{props.children}
