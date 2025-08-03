@@ -72,11 +72,11 @@ export class ParameterList {
 		run: string[],
 		parameterize: string[],
 	) {
-		this.convert = convert;
-		this.compare = compare;
-		this.generate = generate;
-		this.run = run;
-		this.parameterize = parameterize;
+		this.convert = convert ? convert : [];
+		this.compare = compare ? compare : [];
+		this.generate = generate ? generate : [];
+		this.run = run ? run : [];
+		this.parameterize = parameterize ? parameterize : [];
 	}
 	static create(): ParameterList {
 		return new ParameterList([], [], [], [], []);

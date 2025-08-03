@@ -1,4 +1,4 @@
-import { type Dispatch, type ReactNode, type SetStateAction, createContext, useContext, useState } from "react";
+import { type Dispatch, type ReactNode, type SetStateAction, createContext, use, useState } from "react";
 import { type Parameter, SelectParameter } from "../model/CommandParam";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
 import { useEnviroment } from "./EnviromentProvider";
@@ -15,15 +15,15 @@ export default function SelectParameterProvider(props: { children: ReactNode }) 
         </selectParameterContext.Provider>
     );
 }
-export const useSelectParameter = () => useContext(selectParameterContext);
+export const useSelectParameter = () => use(selectParameterContext);
 export const useSetSelectParameter = () => {
-    const setParameter = useContext(setSelectParameterContext);
+    const setParameter = use(setSelectParameterContext);
     return (response: Parameter, command: string, name: string) => {
         setParameter(new SelectParameter(response, command, name));
     }
 };
 export const useLoadSelectParameter = () => {
-    const setParameter = useContext(setSelectParameterContext);
+    const setParameter = use(setSelectParameterContext);
     const environment = useEnviroment();
     return async (command: string, name: string) => {
         const fetchParams = {
@@ -43,7 +43,7 @@ export const useLoadSelectParameter = () => {
     };
 };
 export const useRefreshSelectParameter = (command: string) => {
-    const setParameter = useContext(setSelectParameterContext);
+    const setParameter = use(setSelectParameterContext);
     const environment = useEnviroment();
     return async (values: { [k: string]: FormDataEntryValue }) => {
         const fetchParams = {

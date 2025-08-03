@@ -11,9 +11,9 @@ export function DatasetLoadForm(prop: {
 	const srcTypeSettings = prop.srcData.srcTypeSettings();
 	const settingElements = prop.srcData.settingElements();
 	return (
-		<QueryDatasourceProvider type={prop.srcData.srcType()}>
-			<fieldset className="border border-gray-200 p-3">
-				<legend>{prop.srcData.prefix}</legend>
+		<fieldset className="border border-gray-200 p-3">
+			<legend>{prop.srcData.prefix}</legend>
+			<QueryDatasourceProvider type={prop.srcData.srcType()}>
 				<CommandFormElements
 					handleTypeSelect={prop.handleTypeSelect}
 					prefix={src.prefix}
@@ -38,7 +38,7 @@ export function DatasetLoadForm(prop: {
 					optionCaption={settingElements.optionCaption}
 					optional={settingElements.optional}
 				/>
-			</fieldset>
-		</QueryDatasourceProvider>
+			</QueryDatasourceProvider>
+		</fieldset>
 	);
 }

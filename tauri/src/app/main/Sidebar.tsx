@@ -5,14 +5,12 @@ import NamedParameters from '../sidebar/NamedParameters';
 interface SidebarProps {
 	setSidebarWidth: (width: number) => void;
 }
-
 export type EditName = {
 	name: string;
 	command: string;
 	x: number;
 	y: number;
 	afterEdge: boolean;
-	setMenuList: (menuList: string[]) => void;
 };
 export default function Sidebar({ setSidebarWidth }: SidebarProps) {
 	const [editName, setEditName] = useState<EditName>({} as EditName);

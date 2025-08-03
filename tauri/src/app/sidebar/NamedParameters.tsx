@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LinkButton } from "../../components/element/Button";
 import { AddButton, ButtonIcon, SettingButton } from "../../components/element/ButtonIcon";
 import { ExpandIcon } from "../../components/element/Icon";
@@ -20,31 +20,31 @@ export default function NamedParameters({ setEditName }: { setEditName: (editNam
 		<ul className="space-y-2 font-medium">
 			<Category
 				command="Convert"
-				namedParameters={parameters?.convert}
+				namedParameters={parameters.convert}
 				handleParameterSelect={handleParameterSelect}
 				handleEditNamed={handleEditNamed}
 			/>
 			<Category
 				command="Compare"
-				namedParameters={parameters?.compare}
+				namedParameters={parameters.compare}
 				handleParameterSelect={handleParameterSelect}
 				handleEditNamed={handleEditNamed}
 			/>
 			<Category
 				command="Generate"
-				namedParameters={parameters?.generate}
+				namedParameters={parameters.generate}
 				handleParameterSelect={handleParameterSelect}
 				handleEditNamed={handleEditNamed}
 			/>
 			<Category
 				command="Run"
-				namedParameters={parameters?.run}
+				namedParameters={parameters.run}
 				handleParameterSelect={handleParameterSelect}
 				handleEditNamed={handleEditNamed}
 			/>
 			<Category
 				command="Parameterize"
-				namedParameters={parameters?.parameterize}
+				namedParameters={parameters.parameterize}
 				handleParameterSelect={handleParameterSelect}
 				handleEditNamed={handleEditNamed}
 			/>
@@ -79,15 +79,10 @@ function Category(props: NamedParameterProp) {
 	);
 }
 function Parameters(props: NamedParameterProp) {
-	const [menuList, setMenuList] = useState([] as string[]);
-	useEffect(
-		() => setMenuList((current) => props.namedParameters ? [...props.namedParameters] : current)
-		, [props.namedParameters],
-	);
 	const handleAddNewName = useAddParameter(props.command)
 	return (
 		<>
-			{menuList?.map((menu) => {
+			{props.namedParameters?.map((menu) => {
 				return (
 					<li key={menu} className="flex">
 						<LinkButton title={menu}
@@ -101,8 +96,7 @@ function Parameters(props: NamedParameterProp) {
 								name: menu,
 								x: target.clientX,
 								y: target.clientY,
-								afterEdge: target.clientY > 300,
-								setMenuList,
+								afterEdge: target.clientY > 300
 							})
 						} />
 					</li>
