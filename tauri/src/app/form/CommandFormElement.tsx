@@ -31,15 +31,10 @@ type SelectProp = Prop & {
 };
 export default function CommandFormElements(prop: { handleTypeSelect: () => Promise<void>; } & CommandParams) {
 	const [showOptional, setShowOptional] = useState(false);
-	const [srcType, setSrcType] = useState("");
+	const srcTypeElement = prop.elements.find(element => element.name === "srcType");
+	const srcType = srcTypeElement ? srcTypeElement.value : "";
 	const toggleOptional = () => setShowOptional(!showOptional);
 
-	useEffect(() => {
-		const srcTypeElement = prop.elements.find(element => element.name === "srcType");
-		if (srcTypeElement) {
-			setSrcType(srcTypeElement.value);
-		}
-	}, [prop.elements]);
 	return (
 		<>
 			{prop.elements.map((element) => {
@@ -117,7 +112,6 @@ function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
 	const { srcType } = prop;
 	const datasources = useQueryDatasource();
-
 	const settings = useResourcesSettings();
 
 	function showDatalist(elment: CommandParam): boolean {
@@ -127,11 +121,9 @@ function Text(prop: Prop) {
 			|| elment.name === 'jdbcProperties'
 			|| elment.name === 'templateGroup';
 	}
-
 	function showDopDownMenu(elment: CommandParam): boolean {
 		return elment.attribute.type.includes("FILE") || elment.attribute.type.includes("DIR") || showDatalist(elment);
 	}
-
 	function isValueInDatalist(): boolean {
 		if (!showDatalist(prop.element)) return false;
 		let resources: string[] | undefined;
