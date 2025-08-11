@@ -69,10 +69,7 @@ async function saveDatasetSettings(
     return await fetchData(fetchParams)
         .then((response) => response.json())
         .then((settings: string[]) => {
-            setResourcesSettings(current => ({
-                ...current,
-                datasetSettings: settings
-            }));
+            setResourcesSettings(current => current.with({ metadataSetting: settings }));
             return 'success' as OperationResult;
         })
         .catch((ex) => {
@@ -98,10 +95,7 @@ async function deleteDatasetSettings(
     return await fetchData(fetchParams)
         .then((response) => response.json())
         .then((settings: string[]) => {
-            setResourcesSettings(current => ({
-                ...current,
-                datasetSettings: settings
-            }));
+            setResourcesSettings(current => current.with({ metadataSetting: settings }));
             return 'success' as OperationResult;
         })
         .catch((ex) => {

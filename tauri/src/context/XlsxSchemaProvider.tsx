@@ -70,10 +70,7 @@ async function saveXlsxSchema(
     return await fetchData(fetchParams)
         .then((response) => response.json())
         .then((schemas: string[]) => {
-            setResourcesSettings(current => ({
-                ...current,
-                xlsxSchemas: schemas
-            }));
+            setResourcesSettings(current => current.with({ xlsxSchemas: schemas }));
             return 'success' as OperationResult;
         })
         .catch((ex) => {
@@ -99,10 +96,7 @@ async function deleteXlsxSchema(
     return await fetchData(fetchParams)
         .then((response) => response.json())
         .then((schemas: string[]) => {
-            setResourcesSettings(current => ({
-                ...current,
-                xlsxSchemas: schemas
-            }));
+            setResourcesSettings(current => current.with({ xlsxSchemas: schemas }));
             return 'success' as OperationResult;
         })
         .catch((ex) => {

@@ -5,7 +5,6 @@ import { ButtonWithIcon } from "../../components/element/Button";
 import { DirectoryButton, ExpandButton, FileButton } from "../../components/element/ButtonIcon";
 import { SettingIcon } from "../../components/element/Icon";
 import { CheckBox, ControllTextBox, InputLabel, SelectBox } from "../../components/element/Input";
-import { useQueryDatasource } from "../../context/QueryDatasourceProvider";
 import { useResourcesSettings, useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
 import type { Attribute, CommandParam, CommandParams } from "../../model/CommandParam";
 import { type QueryDatasourceType, isSqlRelatedType } from "../../model/QueryDatasource";
@@ -27,9 +26,9 @@ type FileProp = Prop & {
 	srcType?: string;
 };
 type SelectProp = Prop & {
-	handleTypeSelect: () => Promise<void>;
+	handleTypeSelect: (selected: string) => Promise<void>;
 };
-export default function CommandFormElements(prop: { handleTypeSelect: () => Promise<void>; } & CommandParams) {
+export default function CommandFormElements(prop: { handleTypeSelect: (selected: string) => Promise<void>; } & CommandParams) {
 	const [showOptional, setShowOptional] = useState(false);
 	const srcTypeElement = prop.elements.find(element => element.name === "srcType");
 	const srcType = srcTypeElement ? srcTypeElement.value : "";
@@ -110,37 +109,31 @@ export default function CommandFormElements(prop: { handleTypeSelect: () => Prom
 }
 function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
-	const { srcType } = prop;
-	const datasources = useQueryDatasource();
-	const settings = useResourcesSettings();
-
-	function showDatalist(elment: CommandParam): boolean {
-		return elment.name === 'setting'
-			|| elment.name === 'xlsxSchema'
-			|| (elment.name === 'src' && isSqlRelatedType(srcType ?? ''))
-			|| elment.name === 'jdbcProperties'
-			|| elment.name === 'templateGroup';
-	}
-	function showDopDownMenu(elment: CommandParam): boolean {
-		return elment.attribute.type.includes("FILE") || elment.attribute.type.includes("DIR") || showDatalist(elment);
-	}
-	function isValueInDatalist(): boolean {
-		if (!showDatalist(prop.element)) return false;
-		let resources: string[] | undefined;
-		if (prop.element.name === 'setting') {
-			resources = settings.datasetSettings;
-		} else if (prop.element.name === 'xlsxSchema') {
+	const { element, srcType } = prop;
+	function resources(): string[] {
+		const settings = useResourcesSettings();
+		let resources: string[] = [];
+		if (element.name === 'src' && isSqlRelatedType(srcType ?? '')) {
+			resources = settings.querys(srcType);
+		} else if (element.name === 'setting') {
+			resources = settings.metadataSetting;
+		} else if (element.name === 'xlsxSchema') {
 			resources = settings.xlsxSchemas;
-		} else if (prop.element.name === 'src') {
-			resources = datasources;
-		} else if (prop.element.name === 'jdbcProperties') {
+		} else if (element.name === 'jdbcProperties') {
 			resources = settings.jdbcFiles;
-		} else if (prop.element.name === 'templateGroup') {
+		} else if (element.name === 'templateGroup') {
 			resources = settings.templateFiles;
 		}
-		return resources?.includes(path) || false;
+		return resources;
 	}
-
+	const resourceFiles = resources();
+	const showDatalist = element.name === 'setting'
+		|| element.name === 'xlsxSchema'
+		|| (element.name === 'src' && isSqlRelatedType(srcType ?? ''))
+		|| element.name === 'jdbcProperties'
+		|| element.name === 'templateGroup';
+	const showDopDownMenu = element.attribute.type.includes("FILE") || element.attribute.type.includes("DIR") || showDatalist;
+	const isValueInDatalist = resourceFiles?.includes(path) || false;
 	return (
 		<div>
 			<InputLabel
@@ -150,26 +143,26 @@ function Text(prop: Prop) {
 				hidden={prop.hidden}
 			/>
 			<div className="flex">
-				<div className={`flex-1${!showDopDownMenu(prop.element) && !isValueInDatalist() ? " mr-36" : ""}`}>
+				<div className={`flex-1${!showDopDownMenu && !isValueInDatalist ? " mr-36" : ""}`}>
 					<ControllTextBox
 						name={getName(prop.prefix, prop.element.name)}
 						id={getId(prop.prefix, prop.element.name)}
-						list={(showDatalist(prop.element)) ? `${getId(prop.prefix, prop.element.name)}_list` : undefined}
+						list={(showDatalist) ? `${getId(prop.prefix, prop.element.name)}_list` : undefined}
 						hidden={prop.hidden}
 						required={prop.element.attribute.required}
 						value={path}
 						handleChange={(ev) => setPath(ev.target.value)}
 					/>
-					{showDatalist(prop.element) && !prop.hidden && (
+					{showDatalist && !prop.hidden && (
 						<ResourceDatalist
 							prefix={prop.prefix}
 							element={prop.element}
-							datasources={datasources}
+							resources={resourceFiles}
 						/>
 					)}
 				</div>
 				<div className="flex">
-					{isValueInDatalist() && !prop.hidden && (
+					{isValueInDatalist && !prop.hidden && (
 						prop.element.name === 'setting' ? (
 							<RemoveDatasetSettingButton path={path} setPath={setPath} />
 						) : prop.element.name === 'xlsxSchema' ? (
@@ -178,7 +171,7 @@ function Text(prop: Prop) {
 							<RemoveSqlEditorButton path={path} setPath={setPath} type={srcType as QueryDatasourceType} />
 						) : null
 					)}
-					{showDopDownMenu(prop.element) && !prop.hidden && (
+					{showDopDownMenu && !prop.hidden && (
 						<DropDownMenu
 							prefix={prop.prefix}
 							element={prop.element}
@@ -186,7 +179,6 @@ function Text(prop: Prop) {
 							setPath={setPath}
 							hidden={prop.hidden}
 							srcType={srcType}
-							datasources={datasources}
 						/>
 					)}
 				</div>
@@ -224,7 +216,6 @@ function DropDownMenu({
 				setShowMenu(false);
 			}
 		}
-
 		if (showMenu) {
 			document.addEventListener('mousedown', handleClickOutside);
 			return () => {
@@ -274,6 +265,7 @@ function DropDownMenu({
 								<FileChooser
 									prefix={prefix}
 									element={element}
+									srcType={srcType}
 									path={path}
 									setPath={setPath}
 									onSelect={() => setShowMenu(false)}
@@ -285,6 +277,7 @@ function DropDownMenu({
 								<DirectoryChooser
 									prefix={prefix}
 									element={element}
+									srcType={srcType}
 									path={path}
 									setPath={setPath}
 									onSelect={() => setShowMenu(false)}
@@ -297,23 +290,8 @@ function DropDownMenu({
 		</div>
 	);
 }
-function ResourceDatalist(prop: { prefix: string, element: CommandParam, datasources?: string[] }) {
-	const settings = useResourcesSettings();
-	const { element, datasources } = prop;
-	let resources: string[] | undefined;
-
-	if (element.name === 'setting') {
-		resources = settings.datasetSettings;
-	} else if (element.name === 'xlsxSchema') {
-		resources = settings.xlsxSchemas;
-	} else if (element.name === 'src') {
-		resources = datasources;
-	} else if (element.name === 'jdbcProperties') {
-		resources = settings.jdbcFiles;
-	} else if (element.name === 'templateGroup') {
-		resources = settings.templateFiles;
-	}
-
+function ResourceDatalist(prop: { prefix: string, element: CommandParam, resources: string[] }) {
+	const { element, resources } = prop;
 	return (
 		<datalist id={`${getId(prop.prefix, element.name)}_list`}>
 			{resources?.map((resource) => (
@@ -327,12 +305,12 @@ function FileChooser(prop: FileProp) {
 	const handleFileChooserClick = () => {
 		const getDefaultPath = async (): Promise<string> => {
 			return await isAbsolute(prop.path) ? prop.path
-				: prop.path ? getPath(context, prop.element.attribute) + sep() + prop.path : getPath(context, prop.element.attribute);
+				: prop.path ? getPath(context, prop.element.attribute, prop.srcType) + sep() + prop.path : getPath(context, prop.element.attribute, prop.srcType);
 		};
 		getDefaultPath().then(defaultPath => open({ defaultPath })
 			.then((files) => {
 				if (files) {
-					prop.setPath((files as string).replace(getPath(context, prop.element.attribute) + sep(), ""));
+					prop.setPath((files as string).replace(getPath(context, prop.element.attribute, prop.srcType) + sep(), ""));
 					prop.onSelect?.();
 				}
 			}));
@@ -344,12 +322,12 @@ function DirectoryChooser(prop: FileProp) {
 	const handleDirectoryChooserClick = () => {
 		const getDefaultPath = async (): Promise<string> => {
 			return await isAbsolute(prop.path) ? prop.path
-				: prop.path ? getPath(context, prop.element.attribute) + sep() + prop.path : getPath(context, prop.element.attribute);
+				: prop.path ? getPath(context, prop.element.attribute, prop.srcType) + sep() + prop.path : getPath(context, prop.element.attribute, prop.srcType);
 		};
 		getDefaultPath().then(defaultPath => open({ defaultPath, directory: true })
 			.then((files) => {
 				if (files) {
-					prop.setPath((files as string).replace(getPath(context, prop.element.attribute) + sep(), ""));
+					prop.setPath((files as string).replace(getPath(context, prop.element.attribute, prop.srcType) + sep(), ""));
 					prop.onSelect?.();
 				}
 			}));
@@ -408,24 +386,27 @@ function getId(prefix: string, name: string): string {
 function getName(prefix: string, name: string): string {
 	return prefix ? `-${prefix}.${name}` : `-${name}`;
 }
-function getPath(context: WorkspaceContext, attribute: Attribute): string {
+function getPath(context: WorkspaceContext, attribute: Attribute, srcType: string | undefined): string {
 	if (attribute.defaultPath === "DATASET") {
-		return context.datasetBase
+		if (isSqlRelatedType(srcType ?? "")) {
+			return context.datasetBase + sep() + srcType;
+		}
+		return context.datasetBase;
 	}
 	if (attribute.defaultPath === "RESULT") {
-		return context.resultBase
+		return context.resultBase;
 	}
 	if (attribute.defaultPath === "SETTING") {
-		return context.settingBase
+		return context.settingBase;
 	}
 	if (attribute.defaultPath === "TEMPLATE") {
-		return context.templateBase
+		return context.templateBase;
 	}
 	if (attribute.defaultPath === "JDBC") {
-		return context.jdbcBase
+		return context.jdbcBase;
 	}
 	if (attribute.defaultPath === "XLSX_SCHEMA") {
-		return context.xlsxSchemaBase
+		return context.xlsxSchemaBase;
 	}
-	return context.workspace
+	return context.workspace;
 }

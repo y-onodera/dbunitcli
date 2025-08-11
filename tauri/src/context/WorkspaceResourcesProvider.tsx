@@ -43,7 +43,7 @@ function CreateContext(props: { promise: Promise<WorkspaceResources>, children: 
 	const resources = use(props.promise);
 	const [context, setContext] = useState<WorkspaceContext>(WorkspaceContext.from(resources.context));
 	const [paramterList, setParameterList] = useState<ParameterList>(ParameterList.from(resources.parameterList));
-	const [resourcesSettings, setResourcesSettings] = useState<ResourcesSettings>(ResourcesSettings.from(resources.resources));
+	const [resourcesSettings, setResourcesSettings] = useState<ResourcesSettings>(new ResourcesSettings(resources.resources));
 	return (
 		<workspaceContext.Provider value={context}>
 			<setWorkspaceContext.Provider value={setContext}>
@@ -85,7 +85,7 @@ export const useWorkspaceUpdate = () => {
 			.then((resources: WorkspaceResources) => {
 				setContext(WorkspaceContext.from(resources.context));
 				setParameterList(ParameterList.from(resources.parameterList));
-				setResourcesSettings(ResourcesSettings.from(resources.resources));
+				setResourcesSettings(new ResourcesSettings(resources.resources));
 			})
 			.catch((ex) => handleFetchError(ex, fetchParams));
 	};

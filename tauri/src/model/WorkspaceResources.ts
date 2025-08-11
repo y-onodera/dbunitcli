@@ -13,6 +13,9 @@ export type WorkspaceContextBuilder = {
 	xlsxSchemaBase: string;
 };
 export class WorkspaceContext {
+	static create(): WorkspaceContext {
+		return new WorkspaceContext("", "", "", "", "", "", "");
+	}
 	static from(builder: WorkspaceContextBuilder): WorkspaceContext {
 		return new WorkspaceContext(
 			builder.workspace,
@@ -48,9 +51,6 @@ export class WorkspaceContext {
 		this.jdbcBase = jdbcBase;
 		this.xlsxSchemaBase = xlsxSchemaBase;
 	}
-	static create(): WorkspaceContext {
-		return new WorkspaceContext("", "", "", "", "", "", "");
-	}
 }
 export type ParameterListBuilder = {
 	convert: string[];
@@ -60,6 +60,18 @@ export type ParameterListBuilder = {
 	parameterize: string[];
 };
 export class ParameterList {
+	static create(): ParameterList {
+		return new ParameterList([], [], [], [], []);
+	}
+	static from(builder: ParameterListBuilder): ParameterList {
+		return new ParameterList(
+			builder.convert,
+			builder.compare,
+			builder.generate,
+			builder.run,
+			builder.parameterize,
+		);
+	}
 	readonly convert: string[];
 	readonly compare: string[];
 	readonly generate: string[];
@@ -78,18 +90,6 @@ export class ParameterList {
 		this.run = run ? run : [];
 		this.parameterize = parameterize ? parameterize : [];
 	}
-	static create(): ParameterList {
-		return new ParameterList([], [], [], [], []);
-	}
-	static from(builder: ParameterListBuilder): ParameterList {
-		return new ParameterList(
-			builder.convert,
-			builder.compare,
-			builder.generate,
-			builder.run,
-			builder.parameterize,
-		);
-	}
 	replace(command: string, menuList: string[]): ParameterList {
 		return new ParameterList(
 			command === "convert" ? menuList : this.convert,
@@ -101,36 +101,71 @@ export class ParameterList {
 	}
 }
 export type ResourcesSettingsBuilder = {
-	datasetSettings: string[];
-	xlsxSchemas: string[];
-	jdbcFiles: string[];
-	templateFiles: string[];
+	metadataSetting?: string[];
+	xlsxSchemas?: string[];
+	jdbcFiles?: string[];
+	templateFiles?: string[];
+	queryFiles?: QueryFilesBuilder;
 };
 export class ResourcesSettings {
-	readonly datasetSettings: string[];
+	static create(): ResourcesSettings {
+		return new ResourcesSettings({});
+	}
+	readonly metadataSetting: string[];
 	readonly xlsxSchemas: string[];
 	readonly jdbcFiles: string[];
 	readonly templateFiles: string[];
-	constructor(
-		datasetSettings: string[],
-		xlsxSchemas: string[],
-		jdbcFiles: string[],
-		templateFiles: string[],
-	) {
-		this.datasetSettings = datasetSettings;
-		this.xlsxSchemas = xlsxSchemas;
-		this.jdbcFiles = jdbcFiles;
-		this.templateFiles = templateFiles;
+	readonly queryFiles: QueryFiles;
+	constructor(builder: ResourcesSettingsBuilder) {
+		this.metadataSetting = builder.metadataSetting ?? [];
+		this.xlsxSchemas = builder.xlsxSchemas ?? [];
+		this.jdbcFiles = builder.jdbcFiles ?? [];
+		this.templateFiles = builder.templateFiles ?? [];
+		this.queryFiles = new QueryFiles(builder.queryFiles ?? {});
 	}
-	static create(): ResourcesSettings {
-		return new ResourcesSettings([], [], [], []);
+	with(builder: ResourcesSettingsBuilder): ResourcesSettings {
+		return new ResourcesSettings({
+			...this,
+			...builder,
+		});
 	}
-	static from(builder: ResourcesSettingsBuilder): ResourcesSettings {
-		return new ResourcesSettings(
-			builder.datasetSettings,
-			builder.xlsxSchemas,
-			builder.jdbcFiles,
-			builder.templateFiles,
-		);
+	querys(srcType: string | undefined): string[] {
+		return this.queryFiles.of(srcType);
+	}
+}
+export type QueryFilesBuilder = {
+	sql?: string[];
+	table?: string[];
+	csvq?: string[];
+};
+export class QueryFiles {
+	static create(): QueryFiles {
+		return new QueryFiles({});
+	}
+	readonly sql: string[];
+	readonly table: string[];
+	readonly csvq: string[];
+	constructor(builder: QueryFilesBuilder) {
+		this.sql = builder.sql ?? [];
+		this.table = builder.table ?? [];
+		this.csvq = builder.csvq ?? [];
+	}
+	of(srcType: string | undefined): string[] {
+		if (srcType === "sql") {
+			return this.sql;
+		}
+		if (srcType === "table") {
+			return this.table;
+		}
+		if (srcType === "csvq") {
+			return this.csvq;
+		}
+		return [];
+	}
+	replace(type: string, files: string[]): QueryFiles {
+		return new QueryFiles({
+			...this,
+			[type]: files,
+		});
 	}
 }
