@@ -13,3 +13,6 @@
 /target/
 /logs/
 /.idea/
+tauri/src-tauri/Cargo.lock
+tauri/src/App.css
+tauri/bun.lock
