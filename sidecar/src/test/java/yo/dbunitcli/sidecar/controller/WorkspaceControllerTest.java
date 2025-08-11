@@ -32,7 +32,7 @@ class WorkspaceControllerTest {
     public void testList() {
         final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/workspace/resources"));
         System.out.println(jsonResponse);
-        Assertions.assertEquals(String.format("{\"parameterList\":{\"convert\":[\"csvToXlsx\"],\"compare\":[],\"generate\":[],\"run\":[],\"parameterize\":[]},\"resources\":{},\"datasourceFiles\":{\"csvq\":[],\"sql\":[],\"table\":[]},\"context\":{\"workspace\":\"%s\",\"datasetBase\":\"%s\",\"resultBase\":\"%s\",\"settingBase\":\"%s\",\"templateBase\":\"%s\",\"jdbcBase\":\"%s\",\"xlsxSchemaBase\":\"%s\"}}"
+        Assertions.assertEquals(String.format("{\"parameterList\":{\"convert\":[\"csvToXlsx\"],\"compare\":[],\"generate\":[],\"run\":[],\"parameterize\":[]},\"resources\":{\"queryFiles\":{\"csvq\":[],\"sql\":[],\"table\":[]}},\"context\":{\"workspace\":\"%s\",\"datasetBase\":\"%s\",\"resultBase\":\"%s\",\"settingBase\":\"%s\",\"templateBase\":\"%s\",\"jdbcBase\":\"%s\",\"xlsxSchemaBase\":\"%s\"}}"
                 , new File("src/test/resources/workspace/sample").getAbsolutePath().replace("\\", "\\\\")
                 , new File("dataset").getAbsolutePath().replace("\\", "\\\\")
                 , new File("target/resources").getAbsolutePath().replace("\\", "\\\\")

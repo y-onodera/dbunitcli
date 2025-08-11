@@ -8,7 +8,7 @@ import java.util.List;
 
 @Serdeable
 @JsonInclude(JsonInclude.Include.ALWAYS)
-public class DatasourceFilesDto {
+public class QueryFilesDto {
     private List<String> csvq = new ArrayList<>();
     private List<String> sql = new ArrayList<>();
     private List<String> table = new ArrayList<>();

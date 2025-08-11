@@ -8,8 +8,6 @@ public class WorkspaceDto {
 
     private ResourcesDto resources = new ResourcesDto();
 
-    private DatasourceFilesDto datasourceFiles = new DatasourceFilesDto();
-
     private ContextDto context = new ContextDto();
 
     public ParametersDto getParameterList() {
@@ -26,14 +24,6 @@ public class WorkspaceDto {
 
     public void setResources(final ResourcesDto resources) {
         this.resources = resources;
-    }
-
-    public DatasourceFilesDto getDatasourceFiles() {
-        return this.datasourceFiles;
-    }
-
-    public void setDatasourceFiles(final DatasourceFilesDto datasourceFiles) {
-        this.datasourceFiles = datasourceFiles;
     }
 
     public ContextDto getContext() {

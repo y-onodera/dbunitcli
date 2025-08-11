@@ -57,7 +57,7 @@ class WorkspaceTest {
         assertNotNull(dto.getParameterList());
         assertNotNull(dto.getResources());
         assertNotNull(dto.getContext());
-        assertNotNull(dto.getDatasourceFiles());
+        assertNotNull(dto.getResources().getQueryFiles());
 
         final var context = dto.getContext();
         assertEquals(this.tempDir.toAbsolutePath().normalize().toString(), context.getWorkspace());

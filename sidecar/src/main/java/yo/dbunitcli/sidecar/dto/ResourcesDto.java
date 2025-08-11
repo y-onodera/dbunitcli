@@ -16,35 +16,45 @@ public class ResourcesDto {
 
     private List<String> templateFiles = new ArrayList<>();
 
+    private QueryFilesDto queryFiles = new QueryFilesDto();
+
     public List<String> getDatasetSettings() {
         return this.datasetSettings;
     }
 
     public List<String> getXlsxSchemas() {
-        return xlsxSchemas;
+        return this.xlsxSchemas;
     }
 
     public List<String> getJdbcFiles() {
-        return jdbcFiles;
+        return this.jdbcFiles;
     }
 
     public List<String> getTemplateFiles() {
-        return templateFiles;
+        return this.templateFiles;
+    }
+
+    public QueryFilesDto getQueryFiles() {
+        return this.queryFiles;
     }
 
     public void setDatasetSettings(final List<String> datasetSettings) {
         this.datasetSettings = datasetSettings;
     }
 
-    public void setXlsxSchemas(List<String> xlsxSchemas) {
+    public void setXlsxSchemas(final List<String> xlsxSchemas) {
         this.xlsxSchemas = xlsxSchemas;
     }
 
-    public void setJdbcFiles(List<String> jdbcFiles) {
+    public void setJdbcFiles(final List<String> jdbcFiles) {
         this.jdbcFiles = jdbcFiles;
     }
 
-    public void setTemplateFiles(List<String> templateFiles) {
+    public void setTemplateFiles(final List<String> templateFiles) {
         this.templateFiles = templateFiles;
+    }
+
+    public void setQueryFiles(final QueryFilesDto queryFiles) {
+        this.queryFiles = queryFiles;
     }
 }

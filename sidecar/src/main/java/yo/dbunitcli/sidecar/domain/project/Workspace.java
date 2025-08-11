@@ -3,10 +3,8 @@ package yo.dbunitcli.sidecar.domain.project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ContextDto;
-import yo.dbunitcli.sidecar.dto.DatasourceFilesDto;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
@@ -67,12 +65,6 @@ public class Workspace {
         parameters.setParameterize(this.options().parameterNames(CommandType.parameterize).toList());
         result.setParameterList(parameters);
         result.setResources(this.resources().toDto());
-
-        final DatasourceFilesDto datasourceFiles = new DatasourceFilesDto();
-        datasourceFiles.setCsvq(new Datasource(DataSourceType.csvq).list());
-        datasourceFiles.setSql(new Datasource(DataSourceType.sql).list());
-        datasourceFiles.setTable(new Datasource(DataSourceType.table).list());
-        result.setDatasourceFiles(datasourceFiles);
 
         final ContextDto context = new ContextDto();
         result.setContext(context);
