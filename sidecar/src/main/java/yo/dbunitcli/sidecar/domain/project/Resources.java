@@ -7,7 +7,7 @@ import java.io.File;
 public record Resources(
         File baseDir
         , ResourceFile jdbc
-        , ResourceFile metadataSetting
+        , ResourceFile datasetSetting
         , ResourceFile template
         , ResourceFile xlsxSchema) {
 
@@ -17,7 +17,7 @@ public record Resources(
 
     public ResourcesDto toDto() {
         final ResourcesDto result = new ResourcesDto();
-        result.setDatasetSettings(this.metadataSetting().list());
+        result.setDatasetSettings(this.datasetSetting().list());
         result.setJdbcFiles(this.jdbc().list());
         result.setTemplateFiles(this.template().list());
         result.setXlsxSchemas(this.xlsxSchema().list());
