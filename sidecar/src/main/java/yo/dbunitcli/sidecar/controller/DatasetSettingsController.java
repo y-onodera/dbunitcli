@@ -14,6 +14,6 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
 
     @Override
     protected ResourceFile getResourceFile() {
-        return this.workspace.resources().metadataSetting();
+        return this.workspace.resources().datasetSetting();
     }
 }
