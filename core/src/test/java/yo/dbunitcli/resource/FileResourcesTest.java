@@ -372,4 +372,46 @@ class FileResourcesTest {
             Assertions.assertEquals(new File("workspace"), FileResources.baseDir());
         }
     }
+
+    @Nested
+    class EnvironmentVariableTest {
+        @Test
+        void searchWorkspaceWithUserProfile() {
+            final String userProfile = System.getenv("USERPROFILE");
+            final File result = FileResources.searchWorkspace("%USERPROFILE%\\test");
+            final File expected = new File(userProfile + "\\test");
+            Assertions.assertEquals(expected, result);
+        }
+
+        @Test
+        void searchDatasetBaseWithUserProfile() {
+            final String userProfile = System.getenv("USERPROFILE");
+            final File result = FileResources.searchDatasetBase("%USERPROFILE%\\data");
+            final File expected = new File(userProfile + "\\data");
+            Assertions.assertEquals(expected, result);
+        }
+
+        @Test
+        void resultDirWithUserProfile() {
+            final String userProfile = System.getenv("USERPROFILE");
+            final File result = FileResources.resultDir("%USERPROFILE%\\result");
+            final File expected = new File(userProfile + "\\result");
+            Assertions.assertEquals(expected, result);
+        }
+
+        @Test
+        void baseDirWithUserProfileProperty() {
+            final String userProfile = System.getenv("USERPROFILE");
+            final Properties newProperty = new Properties();
+            newProperty.putAll(FileResourcesTest.backup);
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, "%USERPROFILE%\\workspace");
+            System.setProperties(newProperty);
+
+            final File result = FileResources.baseDir();
+            final File expected = new File(userProfile + "\\workspace");
+            Assertions.assertEquals(expected, result);
+
+            FileResourcesTest.restore();
+        }
+    }
 }

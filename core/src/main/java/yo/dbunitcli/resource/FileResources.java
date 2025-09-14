@@ -67,37 +67,55 @@ public record FileResources() {
         return FileResources.searchInOrder(xlsxSchemaPath, xlsxSchemaDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
+    private static String expandEnvironmentVariables(final String path) {
+        if (Strings.isEmpty(path)) {
+            return path;
+        }
+        String expandedPath = path;
+        if (expandedPath.contains("%USERPROFILE%")) {
+            final String userProfile = System.getenv("USERPROFILE");
+            if (Strings.isNotEmpty(userProfile)) {
+                expandedPath = expandedPath.replace("%USERPROFILE%", userProfile);
+            }
+        }
+        return expandedPath;
+    }
+
     private static File searchInOrder(final String path, final String parent, final Function<String, File> next) {
-        if (new File(path).isAbsolute()) {
-            return new File(path);
+        final String expandedPath = expandEnvironmentVariables(path);
+        if (new File(expandedPath).isAbsolute()) {
+            return new File(expandedPath);
         }
         if (Strings.isNotEmpty(parent)) {
-            final File candidate = new File(parent, path);
+            final File candidate = new File(parent, expandedPath);
             if (candidate.exists()) {
                 return candidate;
             }
         }
-        return next.apply(path);
+        return next.apply(expandedPath);
     }
 
     public static File resultDir(final String path) {
         if (Strings.isEmpty(path)) {
             return FileResources.resultDir();
         }
-        if (new File(path).isAbsolute()) {
-            return new File(path);
+        final String expandedPath = expandEnvironmentVariables(path);
+        if (new File(expandedPath).isAbsolute()) {
+            return new File(expandedPath);
         }
-        return new File(FileResources.resultDir(), path);
+        return new File(FileResources.resultDir(), expandedPath);
     }
 
     public static File resultDir() {
         return Optional.ofNullable(System.getProperty(PROPERTY_RESULT_BASE))
+                .map(FileResources::expandEnvironmentVariables)
                 .map(File::new)
                 .orElse(FileResources.baseDir());
     }
 
     public static File datasetDir() {
         return Optional.ofNullable(System.getProperty(PROPERTY_DATASET_BASE))
+                .map(FileResources::expandEnvironmentVariables)
                 .map(File::new)
                 .orElse(FileResources.baseDir());
     }
@@ -105,6 +123,7 @@ public record FileResources() {
     public static File baseDir() {
         return Optional.ofNullable(System.getProperty(PROPERTY_WORKSPACE))
                 .filter(it -> !it.isEmpty())
+                .map(FileResources::expandEnvironmentVariables)
                 .map(File::new)
                 .orElse(new File("."));
     }
