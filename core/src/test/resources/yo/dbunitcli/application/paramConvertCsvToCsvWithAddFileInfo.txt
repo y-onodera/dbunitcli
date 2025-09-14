@@ -1,0 +1,7 @@
+-src=src/test/resources/yo/dbunitcli/application/src/csv/multi
+-srcType=csv
+-srcEncoding=MS932
+-result=target/test-classes/yo/dbunitcli/application/convert/csv2csv/add_file_info_result
+-resultType=csv
+-resultEncoding=UTF-8
+-addFileInfo=true

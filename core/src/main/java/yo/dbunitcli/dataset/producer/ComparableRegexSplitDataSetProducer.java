@@ -4,6 +4,8 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 
@@ -65,6 +67,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     protected void produceFromFile(final File aFile) {
         try {
             ComparableRegexSplitDataSetProducer.LOGGER.info("produce - start fileName={}", aFile);
+            final Source fileInfo = this.getSource(aFile, this.addFileInfo);
             if (this.headerNames != null) {
                 this.consumer.startTable(this.createMetaData(aFile, this.headerNames, this.addFileInfo));
                 if (!this.loadData) {
@@ -75,12 +78,13 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
             int row = 1;
             for (final String s : Files.readAllLines(aFile.toPath(), Charset.forName(this.getEncoding()))) {
                 if (row == this.startRow && this.headerNames == null) {
-                    this.consumer.startTable(this.createMetaData(aFile, this.headerSplitPattern.split(s), this.addFileInfo));
+                    final TableMetaDataWithSource metaData = this.createMetaData(aFile, this.headerSplitPattern.split(s), this.addFileInfo);
+                    this.consumer.startTable(metaData);
                     if (!this.loadData) {
                         break;
                     }
                 } else if (row >= this.startRow) {
-                    this.consumer.row(this.dataSplitPattern.split(s));
+                    this.consumer.row(fileInfo.apply(this.dataSplitPattern.split(s)));
                 }
                 row++;
             }

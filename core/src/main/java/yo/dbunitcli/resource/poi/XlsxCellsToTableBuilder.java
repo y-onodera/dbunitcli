@@ -4,6 +4,7 @@ import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class XlsxCellsToTableBuilder {
     };
     private final String[] tableNames;
 
-    private final Map<String, ITableMetaData> tableMetaDataMap = new HashMap<>();
+    private final Map<String, TableMetaDataWithSource> tableMetaDataMap = new HashMap<>();
 
     private final Map<String, List<XlsxCellsTableDefine>> columnDefine = new HashMap<>();
 
@@ -33,7 +34,8 @@ public class XlsxCellsToTableBuilder {
             final XlsxCellsTableDefine def = tableDefines.get(i);
             final Source sourceWithTableDefine = source.addFileInfo(def.addFileInfo() || source.addFileInfo());
             this.tableNames[i] = def.tableName();
-            this.tableMetaDataMap.put(def.tableName(), sourceWithTableDefine.wrap(def.tableMetaData()));
+            final TableMetaDataWithSource metaData = sourceWithTableDefine.wrap(def.tableMetaData());
+            this.tableMetaDataMap.put(def.tableName(), metaData);
             def.getTargetAddresses().forEach(cellAddress -> {
                 if (!this.columnDefine.containsKey(cellAddress)) {
                     this.columnDefine.put(cellAddress, new ArrayList<>());
@@ -43,9 +45,7 @@ public class XlsxCellsToTableBuilder {
             this.row.put(def.tableName(), new ArrayList<>());
             final List<String[]> targetRows = this.row.get(def.tableName());
             IntStream.range(0, def.rowCount())
-                    .forEach(rowIndex -> {
-                        targetRows.add(rowIndex, sourceWithTableDefine.defaultColumnValues(def.columnCount()));
-                    });
+                    .forEach(rowIndex -> targetRows.add(rowIndex, metaData.defaultColumnValues()));
         });
     }
 

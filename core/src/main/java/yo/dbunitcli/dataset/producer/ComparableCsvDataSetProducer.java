@@ -5,6 +5,7 @@ import org.dbunit.dataset.common.handlers.*;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 
@@ -75,10 +76,11 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
             if (headerName == null) {
                 headerName = this.parseFirstLine(lineNumberReader, file.getAbsolutePath());
             }
-            this.consumer.startTable(this.createMetaData(file, headerName, this.addFileInfo));
+            final TableMetaDataWithSource metaData = this.createMetaData(file, headerName, this.addFileInfo);
+            this.consumer.startTable(metaData);
             this.processRow = 0;
             if (this.loadData) {
-                this.parseTheData(headerName, lineNumberReader);
+                this.parseTheData(metaData, headerName, lineNumberReader);
             }
             this.consumer.endTable();
         } catch (final IOException | DataSetException e) {
@@ -110,11 +112,11 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         return this.pipeline.getProducts();
     }
 
-    protected void parseTheData(final String[] columnsInFirstLine, final LineNumberReader lineNumberReader) {
+    protected void parseTheData(final TableMetaDataWithSource metaData, final String[] columnsInFirstLine, final LineNumberReader lineNumberReader) {
         try {
             List<Object> columns;
             while ((columns = this.collectExpectedNumberOfColumns(columnsInFirstLine.length, lineNumberReader)) != null) {
-                this.consumer.row(columns.toArray(new Object[]{}));
+                this.consumer.row(metaData.source().apply(columns));
                 this.processRow++;
             }
         } catch (final DataSetException e) {
@@ -162,7 +164,6 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     }
 
     protected void skipToStartRow(final LineNumberReader reader) throws IOException {
-        // startRow-1行を読み飛ばす
         for (int i = 1; i < this.startRow; i++) {
             final String line = reader.readLine();
             if (line == null) {

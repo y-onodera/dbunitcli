@@ -1285,6 +1285,166 @@ public class ConvertTest {
             Assertions.assertEquals("multi2", actual.getTableNames()[1]);
         }
 
+        @Test
+        public void testFromCsvToCsvWithAddFileInfo() throws Exception {
+            Convert.main(this.getArgs("/paramConvertCsvToCsvWithAddFileInfo.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/csv2csv/add_file_info_result");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableCsvDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSrc(src)
+                                    .setSource(DataSourceType.csv)
+                                    .setEncoding("UTF-8")
+                                    .build()));
+            Assertions.assertEquals(2, actual.getTableNames().length);
+            Assertions.assertEquals("multi1", actual.getTableNames()[0]);
+            Assertions.assertEquals("multi2", actual.getTableNames()[1]);
+            final ComparableTable multi1 = actual.getTable("multi1");
+            Assertions.assertEquals(3, multi1.getRowCount());
+            Assertions.assertEquals(7, multi1.getNumberOfColumns());
+            Assertions.assertArrayEquals(new String[]{"key", "column1", "column2", "column3", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME"}, ConvertTest.getColumnNames(multi1));
+            Assertions.assertEquals("multi1.csv", multi1.getValue(0, "$FILE_NAME"));
+            Assertions.assertTrue(multi1.getValue(0, "$FILE_PATH").toString().endsWith("multi1.csv"));
+        }
+
+        @Test
+        public void testFromFixedToCsvWithAddFileInfo() throws Exception {
+            Convert.main(this.getArgs("/paramConvertFixedToCsvWithAddFileInfo.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/fixed2csv/add_file_info_result");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableCsvDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSource(DataSourceType.csv)
+                                    .setSrc(src)
+                                    .setEncoding("UTF-8")
+                                    .build()));
+            Assertions.assertEquals(1, actual.getTableNames().length);
+            Assertions.assertEquals("固定長ファイル", actual.getTableNames()[0]);
+            final ComparableTable table = actual.getTable("固定長ファイル");
+            Assertions.assertEquals(4, table.getRowCount());
+            Assertions.assertEquals(6, table.getNumberOfColumns());
+            Assertions.assertArrayEquals(new String[]{"半角", "数値", "全角", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME"}, ConvertTest.getColumnNames(table));
+            Assertions.assertEquals("固定長ファイル.txt", table.getValue(0, "$FILE_NAME"));
+            Assertions.assertTrue(table.getValue(0, "$FILE_PATH").toString().endsWith("固定長ファイル.txt"));
+        }
+
+        @Test
+        public void testFromRegexToCsvWithAddFileInfo() throws Exception {
+            Convert.main(this.getArgs("/paramConvertRegexToCsvWithAddFileInfo.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/regex2csv/add_file_info_result");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableCsvDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSrc(src)
+                                    .setSource(DataSourceType.csv)
+                                    .setEncoding("UTF-8")
+                                    .build()));
+            Assertions.assertEquals(1, actual.getTableNames().length);
+            Assertions.assertEquals("dirty", actual.getTableNames()[0]);
+            final ComparableTable table = actual.getTable("dirty");
+            Assertions.assertTrue(table.getRowCount() > 0);
+            Assertions.assertEquals(5, table.getNumberOfColumns());
+            Assertions.assertArrayEquals(new String[]{"No,Contents", "Option", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME"}, ConvertTest.getColumnNames(table));
+            Assertions.assertEquals("dirty.txt", table.getValue(0, "$FILE_NAME"));
+            Assertions.assertTrue(table.getValue(0, "$FILE_PATH").toString().endsWith("dirty.txt"));
+        }
+
+        @Test
+        public void testFromXlsToCsvWithAddFileInfo() throws Exception {
+            Convert.main(this.getArgs("/paramConvertXlsToCsvWithAddFileInfo.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/xls2csv/add_file_info_result");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableCsvDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSrc(src)
+                                    .setSource(DataSourceType.csv)
+                                    .setEncoding("UTF-8")
+                                    .build()));
+            Assertions.assertEquals(1, actual.getTableNames().length);
+            Assertions.assertEquals("single", actual.getTableNames()[0]);
+            final ComparableTable table = actual.getTable("single");
+            Assertions.assertEquals(3, table.getRowCount());
+            Assertions.assertEquals(7, table.getNumberOfColumns());
+            Assertions.assertArrayEquals(new String[]{"key", "col1", "col2", "col3", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME"}, ConvertTest.getColumnNames(table));
+            Assertions.assertEquals("single.xls", table.getValue(0, "$FILE_NAME"));
+            Assertions.assertTrue(table.getValue(0, "$FILE_PATH").toString().endsWith("single.xls"));
+            Assertions.assertEquals("single", table.getValue(0, "$SHEET_NAME"));
+        }
+
+        @Test
+        public void testFromXlsxToCsvWithAddFileInfo() throws Exception {
+            Convert.main(this.getArgs("/paramConvertXlsxToCsvWithAddFileInfo.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/xlsx2csv/add_file_info_result");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableCsvDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSrc(src)
+                                    .setSource(DataSourceType.csv)
+                                    .setEncoding("UTF-8")
+                                    .build()));
+            Assertions.assertEquals(1, actual.getTableNames().length);
+            Assertions.assertEquals("single", actual.getTableNames()[0]);
+            final ComparableTable table = actual.getTable("single");
+            Assertions.assertEquals(3, table.getRowCount());
+            Assertions.assertEquals(7, table.getNumberOfColumns());
+            Assertions.assertArrayEquals(new String[]{"key", "col1", "col2", "col3", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME"}, ConvertTest.getColumnNames(table));
+            Assertions.assertEquals("single.xlsx", table.getValue(0, "$FILE_NAME"));
+            Assertions.assertTrue(table.getValue(0, "$FILE_PATH").toString().endsWith("single.xlsx"));
+            Assertions.assertEquals("single", table.getValue(0, "$SHEET_NAME"));
+        }
+
+        @Test
+        public void testFromXlsWithSchemaToCsvWithAddFileInfo() throws Exception {
+            Convert.main(this.getArgs("/paramConvertXlsWithSchemaToCsvWithAddFileInfo.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/xlswithschema2csv/add_file_info_result");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableCsvDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSource(DataSourceType.csv)
+                                    .setSrc(src)
+                                    .setEncoding("UTF-8")
+                                    .build()));
+            Assertions.assertEquals(4, actual.getTableNames().length);
+            Assertions.assertEquals("テーブル一覧", actual.getTableNames()[0]);
+            Assertions.assertEquals("ユーザマスタ", actual.getTableNames()[1]);
+            Assertions.assertEquals("ユーザマスタ概要", actual.getTableNames()[2]);
+            Assertions.assertEquals("業務ドメイン", actual.getTableNames()[3]);
+            final ComparableTable userMaster = actual.getTable("ユーザマスタ");
+            Assertions.assertTrue(userMaster.getNumberOfColumns() >= 8); // 元のカラム + 3つのファイル情報カラム
+            final String[] columnNames = ConvertTest.getColumnNames(userMaster);
+            Assertions.assertTrue(Arrays.asList(columnNames).contains("$FILE_PATH"));
+            Assertions.assertTrue(Arrays.asList(columnNames).contains("$FILE_NAME"));
+            Assertions.assertTrue(Arrays.asList(columnNames).contains("$SHEET_NAME"));
+            Assertions.assertEquals("ComplexLayout.xls", userMaster.getValue(0, "$FILE_NAME"));
+            Assertions.assertTrue(userMaster.getValue(0, "$FILE_PATH").toString().endsWith("ComplexLayout.xls"));
+        }
+
+        @Test
+        public void testFromXlsxWithSchemaToCsvWithAddFileInfo() throws Exception {
+            Convert.main(this.getArgs("/paramConvertXlsxWithSchemaToCsvWithAddFileInfo.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/xlsxwithschema2csv/add_file_info_result");
+            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+                    new ComparableCsvDataSetProducer(
+                            ComparableDataSetParam.builder()
+                                    .setSource(DataSourceType.csv)
+                                    .setSrc(src)
+                                    .setEncoding("UTF-8")
+                                    .build()));
+            Assertions.assertEquals(4, actual.getTableNames().length);
+            Assertions.assertEquals("テーブル一覧", actual.getTableNames()[0]);
+            Assertions.assertEquals("ユーザマスタ", actual.getTableNames()[1]);
+            Assertions.assertEquals("ユーザマスタ概要", actual.getTableNames()[2]);
+            Assertions.assertEquals("業務ドメイン", actual.getTableNames()[3]);
+            final ComparableTable userMaster = actual.getTable("ユーザマスタ");
+            Assertions.assertTrue(userMaster.getNumberOfColumns() >= 8); // 元のカラム + 3つのファイル情報カラム
+            final String[] columnNames = ConvertTest.getColumnNames(userMaster);
+            Assertions.assertTrue(Arrays.asList(columnNames).contains("$FILE_PATH"));
+            Assertions.assertTrue(Arrays.asList(columnNames).contains("$FILE_NAME"));
+            Assertions.assertTrue(Arrays.asList(columnNames).contains("$SHEET_NAME"));
+            Assertions.assertEquals("ComplexLayout.xlsx", userMaster.getValue(0, "$FILE_NAME"));
+            Assertions.assertTrue(userMaster.getValue(0, "$FILE_PATH").toString().endsWith("ComplexLayout.xlsx"));
+        }
+
         protected String[] getArgs(final String parameterFile) {
             return new String[]{"@" + ConvertTest.testResourceDir + parameterFile};
         }

@@ -22,34 +22,36 @@ public class DataSetLoadDto implements CompositeDto {
     private String regInclude;
     @CommandLine.Option(names = "-regExclude", description = "regex to exclude src file")
     private String regExclude;
-    @CommandLine.Option(names = "-delimiter", description = "default is comma")
-    private String delimiter;
-    @CommandLine.Option(names = "-ignoreQuoted", description = "if true, double quote(\") regard as simple char.default false")
-    private boolean ignoreQuoted = false;
-    @CommandLine.Option(names = "-encoding", description = "csv file encoding")
-    private String encoding;
-    @CommandLine.Option(names = "-xlsxSchema", description = "schema use read xlsx(zls)")
-    private String xlsxSchemaSource;
+    @CommandLine.Option(names = "-extension", description = "target extension")
+    private String extension;
+    @CommandLine.Option(names = "-recursive", description = "default true. whether traversal recursively")
+    private String recursive;
     @CommandLine.Option(names = "-regTableInclude", description = "regex to include table name")
     private String regTableInclude;
     @CommandLine.Option(names = "-regTableExclude", description = "regex to exclude table name")
     private String regTableExclude;
-    @CommandLine.Option(names = "-extension", description = "target extension")
-    private String extension;
-    @CommandLine.Option(names = "-fixedLength", description = "comma separate column Lengths")
-    private String fixedLength;
+    @CommandLine.Option(names = "-addFileInfo", description = "add file information as columns (default: false)")
+    private boolean addFileInfo = false;
     @CommandLine.Option(names = "-headerName", description = "comma separate header name. if set,all rows treat data rows")
     private String headerName;
-    @CommandLine.Option(names = "-useJdbcMetaData", description = "default false. whether load metaData from jdbc or not")
-    private String useJdbcMetaData;
-    @CommandLine.Option(names = "-recursive", description = "default true. whether traversal recursively")
-    private String recursive;
+    @CommandLine.Option(names = "-startRow", description = "start row number to load file (default: 1)")
+    private String startRow;
+    @CommandLine.Option(names = "-xlsxSchema", description = "schema use read xlsx(zls)")
+    private String xlsxSchemaSource;
+    @CommandLine.Option(names = "-encoding", description = "csv file encoding")
+    private String encoding;
+    @CommandLine.Option(names = "-delimiter", description = "default is comma")
+    private String delimiter;
+    @CommandLine.Option(names = "-ignoreQuoted", description = "if true, double quote(\") regard as simple char.default false")
+    private boolean ignoreQuoted = false;
+    @CommandLine.Option(names = "-fixedLength", description = "comma separate column Lengths")
+    private String fixedLength;
     @CommandLine.Option(names = "-regDataSplit", description = "regex to use split data row")
     private String regDataSplit;
     @CommandLine.Option(names = "-regHeaderSplit", description = "regex to use split header row")
     private String regHeaderSplit;
-    @CommandLine.Option(names = "-startRow", description = "start row number to load file (default: 1)")
-    private String startRow;
+    @CommandLine.Option(names = "-useJdbcMetaData", description = "default false. whether load metaData from jdbc or not")
+    private String useJdbcMetaData;
     private JdbcDto jdbc = new JdbcDto();
 
     private TemplateRenderDto templateRender = new TemplateRenderDto();
@@ -247,7 +249,15 @@ public class DataSetLoadDto implements CompositeDto {
         return this.startRow;
     }
 
-    public void setStartRow(String startRow) {
+    public void setStartRow(final String startRow) {
         this.startRow = startRow;
+    }
+
+    public boolean getAddFileInfo() {
+        return this.addFileInfo;
+    }
+
+    public void setAddFileInfo(final boolean addFileInfo) {
+        this.addFileInfo = addFileInfo;
     }
 }

@@ -11,6 +11,7 @@ public class DataSourceTypeOptionFactory {
                     new FileTraverseOption(prefix, dto)
                     , new StartRowOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
+                    , new AddFileInfoOption(prefix, dto)
                     , new ExcelOption(prefix, dto)
             );
             case csv -> ComparableDataSetParamOption.join(
@@ -18,6 +19,7 @@ public class DataSourceTypeOptionFactory {
                     , new EncodingOption(prefix, dto)
                     , new StartRowOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
+                    , new AddFileInfoOption(prefix, dto)
                     , new CsvOption(prefix, dto)
             );
             case reg -> ComparableDataSetParamOption.join(
@@ -25,6 +27,7 @@ public class DataSourceTypeOptionFactory {
                     , new EncodingOption(prefix, dto)
                     , new StartRowOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
+                    , new AddFileInfoOption(prefix, dto)
                     , new RegexOption(prefix, dto)
             );
             case fixed -> ComparableDataSetParamOption.join(
@@ -32,6 +35,7 @@ public class DataSourceTypeOptionFactory {
                     , new EncodingOption(prefix, dto)
                     , new StartRowOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
+                    , new AddFileInfoOption(prefix, dto)
                     , new FixedOption(prefix, dto)
             );
             case csvq -> ComparableDataSetParamOption.join(

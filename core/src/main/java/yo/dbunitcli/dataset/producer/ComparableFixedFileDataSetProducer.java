@@ -4,6 +4,7 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 
@@ -64,12 +65,13 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
     protected void produceFromFile(final File aFile) {
         try {
             ComparableFixedFileDataSetProducer.LOGGER.info("produce - start fileName={}", aFile);
-            this.consumer.startTable(this.createMetaData(aFile, this.headerNames, this.addFileInfo));
+            final TableMetaDataWithSource metaData = this.createMetaData(aFile, this.headerNames, this.addFileInfo);
+            this.consumer.startTable(metaData);
             if (this.loadData) {
                 int rows = 1;
                 for (final String s : Files.readAllLines(aFile.toPath(), Charset.forName(this.getEncoding()))) {
                     if (rows >= this.startRow) {
-                        this.consumer.row(this.split(s));
+                        this.consumer.row(metaData.source().apply(this.split(s)));
                     }
                     rows++;
                 }

@@ -1,0 +1,9 @@
+-src=src/test/resources/yo/dbunitcli/application/src/fixed
+-srcType=fixed
+-headerName=半角,数値,全角
+-fixedLength=3,50,15
+-encoding=UTF-8
+-result=target/test-classes/yo/dbunitcli/application/convert/fixed2csv/add_file_info_result
+-resultType=csv
+-outputEncoding=UTF-8
+-addFileInfo=true

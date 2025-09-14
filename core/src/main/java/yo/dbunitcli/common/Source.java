@@ -3,7 +3,6 @@ package yo.dbunitcli.common;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
-import yo.dbunitcli.Strings;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -48,33 +47,37 @@ public record Source(String filePath, String fileName, String sheetName, String 
         return tableMetaData.getColumns();
     }
 
-    public String[] toArray(final List<String> rowValues) {
+    public Object[] apply(final List<Object> rowValues) {
         if (this.addFileInfo) {
-            final List<String> result = new ArrayList<>(rowValues);
-            result.set(rowValues.size() - 3, this.filePath);
-            result.set(rowValues.size() - 2, this.fileName);
-            result.set(rowValues.size() - 1, this.sheetName);
-            return result.toArray(new String[0]);
+            final List<Object> result = new ArrayList<>(rowValues);
+            result.add(this.filePath);
+            result.add(this.fileName);
+            result.add(this.sheetName);
+            return result.toArray(new Object[0]);
         }
-        return rowValues.toArray(new String[0]);
+        return rowValues.toArray(new Object[0]);
     }
 
-    public String[] defaultColumnValues(final int originalColumnCount) {
+    public Object[] apply(final Object[] originalValue) {
         if (this.addFileInfo) {
-            final String[] values = new String[originalColumnCount + TableMetaDataWithSource.OPTION_COLUMNS.length];
-            Arrays.fill(values, "");
+            final Object[] result = Arrays.copyOf(originalValue, originalValue.length + 3);
+            result[originalValue.length] = this.filePath;
+            result[originalValue.length + 1] = this.fileName;
+            result[originalValue.length + 2] = this.sheetName;
+            return result;
+        }
+        return originalValue;
+    }
+
+    public String[] defaultColumnValues(final int columnCount) {
+        final String[] values = new String[columnCount];
+        Arrays.fill(values, "");
+        if (this.addFileInfo) {
             values[values.length - 3] = this.filePath;
             values[values.length - 2] = this.fileName;
             values[values.length - 1] = this.sheetName;
-            return values;
         }
-        return new String[originalColumnCount];
+        return values;
     }
 
-    public String targetName() {
-        return Stream.of(this.tableName, this.sheetName, this.fileName)
-                .filter(Strings::isNotEmpty)
-                .findFirst()
-                .orElseThrow();
-    }
 }

@@ -1,7 +1,6 @@
 package yo.dbunitcli.resource.poi;
 
 import org.apache.poi.ss.util.CellReference;
-import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import yo.dbunitcli.common.Source;
@@ -23,7 +22,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
     private final Map<String, Integer> tableStartRow = new HashMap<>();
 
-    private final Map<String, ITableMetaData> tableMetaDataMap = new HashMap<>();
+    private final Map<String, TableMetaDataWithSource> tableMetaDataMap = new HashMap<>();
 
     private final Map<String, List<Integer>> targetIndex = new HashMap<>();
 
@@ -31,7 +30,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
     private final List<String> rowValues = new ArrayList<>();
     private int currentTableIndex = -1;
-    private ITableMetaData nowProcessing = null;
+    private TableMetaDataWithSource nowProcessing = null;
 
     public ManualRowsMappingTableBuilder(final List<XlsxRowsTableDefine> tableDefines, final Source source) {
         this.tableNames = new String[tableDefines.size()];
@@ -59,14 +58,10 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
         if (!this.isNowProcessing()) {
             return false;
         }
-        for (final String conditionColumn : this.breakKey.get(this.getTableName())) {
-            if (this.rowValues.size() <= this.getColumnIndex(this.nowProcessing, conditionColumn)
-                    || Optional.ofNullable(this.rowValues.get(this.getColumnIndex(this.nowProcessing, conditionColumn)))
-                    .orElse("").isEmpty()) {
-                return false;
-            }
-        }
-        return true;
+        final String[] rows = this.currentRow();
+        return Arrays.stream(this.breakKey.get(this.getTableName()))
+                .anyMatch(it -> !Optional.ofNullable(rows[this.getColumnIndex(this.nowProcessing, it)])
+                        .orElse("").isEmpty());
     }
 
     @Override
@@ -93,16 +88,10 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public String[] currentRow() {
-        if (this.getColumnLength() < this.rowValues.size()) {
-            throw new AssertionError(this.rowValues + " large items than header:" + Arrays.toString(this.getNowProcessingColumns()));
-        } else if (this.rowValues.size() < this.getColumnLength()) {
-            IntStream.range(this.rowValues.size(), this.getColumnLength())
-                    .forEach(i -> this.rowValues.add(""));
+        if (this.nowProcessing.getColumnLength() < this.rowValues.size()) {
+            throw new AssertionError(this.rowValues + " large items than header:" + Arrays.toString(this.nowProcessing.getColumns()));
         }
-        if (this.nowProcessing instanceof final TableMetaDataWithSource option) {
-            return option.toArray(this.rowValues);
-        }
-        return this.rowValues.toArray(new String[0]);
+        return this.nowProcessing.withDefaultValuesToArray(this.rowValues);
     }
 
     @Override
@@ -110,7 +99,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
         return this.nowProcessing != null;
     }
 
-    protected void addValue(final int i, final String o) {
+    private void addValue(final int i, final String o) {
         if (this.targetIndex.get(this.getTableName()).contains(i)) {
             this.rowValues.add(o);
         }
@@ -129,18 +118,6 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
             return this.tableNames[this.currentTableIndex];
         }
         return this.tableNames[this.currentTableIndex + 1];
-    }
-
-    private int getColumnLength() {
-        return this.getNowProcessingColumns().length;
-    }
-
-    private Column[] getNowProcessingColumns() {
-        try {
-            return this.nowProcessing.getColumns();
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
     }
 
     private int getColumnIndex(final ITableMetaData metaData, final String conditionColumn) {

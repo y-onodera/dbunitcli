@@ -1,0 +1,7 @@
+-src=src/test/resources/yo/dbunitcli/application/src/xlsxwithschema/ComplexLayout.xlsx
+-srcType=xlsx
+-xlsxSchema=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/ComplexLayoutSchema.json
+-result=target/test-classes/yo/dbunitcli/application/convert/xlsxwithschema2csv/add_file_info_result
+-resultType=csv
+-outputEncoding=UTF-8
+-addFileInfo=true

@@ -1,0 +1,9 @@
+-src=src/test/resources/yo/dbunitcli/application/src/regex
+-srcType=reg
+-regHeaderSplit=,Time,
+-regDataSplit=,\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}
+-setting=src/test/resources/yo/dbunitcli/application/settings/regex2xlsx/setting.json
+-result=target/test-classes/yo/dbunitcli/application/convert/regex2csv/add_file_info_result
+-resultType=csv
+-outputEncoding=UTF-8
+-addFileInfo=true

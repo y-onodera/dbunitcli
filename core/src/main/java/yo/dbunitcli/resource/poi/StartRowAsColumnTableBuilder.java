@@ -2,11 +2,11 @@ package yo.dbunitcli.resource.poi;
 
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,7 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
     private final String[] headerNames;
     private final int startRow;
     private final Source source;
-    private ITableMetaData nowProcessing = null;
+    private TableMetaDataWithSource nowProcessing = null;
 
     public StartRowAsColumnTableBuilder(final int startRow, final String[] headerNames, final Source source) {
         this.source = source;
@@ -64,13 +64,10 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public String[] currentRow() {
-        if (this.getNowProcessingColumns().length < this.rowValues.size()) {
-            throw new AssertionError(this.rowValues + " large items than header:" + Arrays.toString(this.getNowProcessingColumns()));
-        } else if (this.rowValues.size() < this.getNowProcessingColumns().length) {
-            IntStream.range(this.rowValues.size(), this.getNowProcessingColumns().length)
-                    .forEach(i -> this.rowValues.add(""));
+        if (this.nowProcessing.getColumnLength() < this.rowValues.size()) {
+            throw new AssertionError(this.rowValues + " large items than header:" + Arrays.toString(this.nowProcessing.getColumns()));
         }
-        return this.rowValues.toArray(new String[0]);
+        return this.nowProcessing.withDefaultValuesToArray(this.rowValues);
     }
 
     @Override
@@ -85,11 +82,4 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
                 .toArray(Column[]::new);
     }
 
-    private Column[] getNowProcessingColumns() {
-        try {
-            return this.nowProcessing.getColumns();
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
-    }
 }

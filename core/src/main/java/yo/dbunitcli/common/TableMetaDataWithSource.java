@@ -7,7 +7,9 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class TableMetaDataWithSource extends DefaultTableMetaData {
 
@@ -32,8 +34,22 @@ public class TableMetaDataWithSource extends DefaultTableMetaData {
         return this.source;
     }
 
-    public String[] toArray(final List<String> rowValues) {
-        return this.source.toArray(rowValues);
+    public String[] defaultColumnValues() {
+        return this.source.defaultColumnValues(this.getColumnLength());
+    }
+
+    public String[] withDefaultValuesToArray(final List<String> rowValues) {
+        final List<String> results = new ArrayList<>(rowValues);
+        if (results.size() < this.getColumnLength()) {
+            final String[] defaultValues = this.defaultColumnValues();
+            IntStream.range(results.size(), this.getColumnLength())
+                    .forEach(i -> results.add(defaultValues[i]));
+        }
+        return results.toArray(new String[0]);
+    }
+
+    public int getColumnLength() {
+        return this.getColumns().length;
     }
 
 }

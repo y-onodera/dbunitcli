@@ -4,6 +4,7 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.stream.IDataSetProducer;
+import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.io.File;
@@ -24,11 +25,15 @@ public interface ComparableDataSetProducer extends IDataSetProducer {
 
     default TableMetaDataWithSource createMetaData(final File aFile, final Column[] columns, final boolean addFileInfo) {
         try {
-            return TableMetaDataWithSource.fileInfo(aFile, addFileInfo)
+            return this.getSource(aFile, addFileInfo)
                     .wrap(new DefaultTableMetaData(this.getTableName(aFile), columns));
         } catch (final Exception e) {
             throw new RuntimeException("Failed to create metadata with file info", e);
         }
+    }
+
+    default Source getSource(final File aFile, final boolean addFileInfo) {
+        return TableMetaDataWithSource.fileInfo(aFile, addFileInfo);
     }
 
     default String getTableName(final File aFile) {
