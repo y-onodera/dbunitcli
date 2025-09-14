@@ -165,6 +165,15 @@
         "value": ""
       },
       {
+        "name":"addFileInfo",
+        "attribute":{
+          "type":"FLG",
+          "required":false,
+          "defaultPath":"WORKSPACE"
+        },
+        "value": "false"
+      },
+      {
         "name": "delimiter",
         "attribute": {
           "type": "TEXT",
