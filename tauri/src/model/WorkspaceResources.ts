@@ -111,6 +111,9 @@ export class ResourcesSettings {
 	static create(): ResourcesSettings {
 		return new ResourcesSettings({});
 	}
+	static from(builder: ResourcesSettingsBuilder): ResourcesSettings {
+		return new ResourcesSettings(builder);
+	}
 	readonly metadataSetting: string[];
 	readonly xlsxSchemas: string[];
 	readonly jdbcFiles: string[];

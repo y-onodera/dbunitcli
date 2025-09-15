@@ -2,7 +2,7 @@ import { cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { afterEach, vi } from "vitest";
 import type { Enviroment } from "../context/EnviromentProvider";
-import type { WorkspaceResources } from "../model/WorkspaceResources";
+import { QueryFiles, ResourcesSettings, type WorkspaceResources } from "../model/WorkspaceResources";
 
 export const workspaceResourcesFixture: WorkspaceResources = {
 	context: {
@@ -21,13 +21,19 @@ export const workspaceResourcesFixture: WorkspaceResources = {
 		run: ['run1'],
 		parameterize: ['param1'],
 	},
-	resources: {
-		datasetSettings: ['setting1'],
+	resources: ResourcesSettings.from({
+		metadataSetting: ['setting1'],
 		xlsxSchemas: ['schema1'],
 		jdbcFiles: ['jdbc1'],
 		templateFiles: ['template1'],
-	},
+		queryFiles: new QueryFiles({
+			sql: ['sql'],
+			table: [],
+			csvq: []
+		})
+	})
 };
+
 export const enviromentFixture: Enviroment = {
 	apiUrl: 'http://localhost:8080/',
 	workspace: '',

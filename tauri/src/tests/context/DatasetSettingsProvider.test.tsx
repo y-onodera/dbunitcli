@@ -93,11 +93,11 @@ describe('DatasetSettingsProviderのテスト', () => {
             }, { wrapper });
             await waitFor(() => {
                 rerender();
-                expect(result.current.resources.datasetSettings).toStrictEqual(mockWorkspaceResources.resources.datasetSettings);
+                expect(result.current.resources.metadataSetting).toStrictEqual(mockWorkspaceResources.resources.metadataSetting);
             });
             result.current.saveDatasetSettings('test-setting', DatasetSettings.create());
             await waitFor(() => {
-                expect(result.current.resources.datasetSettings).toStrictEqual(mockUpdatedSettings);
+                expect(result.current.resources.metadataSetting).toStrictEqual(mockUpdatedSettings);
             });
         });
     });
@@ -111,11 +111,11 @@ describe('DatasetSettingsProviderのテスト', () => {
             }, { wrapper });
             await waitFor(() => {
                 rerender();
-                expect(result.current.resources.datasetSettings).toStrictEqual(mockWorkspaceResources.resources.datasetSettings);
+                expect(result.current.resources.metadataSetting).toStrictEqual(mockWorkspaceResources.resources.metadataSetting);
             });
             result.current.deleteDatasetSettings('test-setting');
             await waitFor(() => {
-                expect(result.current.resources.datasetSettings).toStrictEqual(mockRemainingSettings);
+                expect(result.current.resources.metadataSetting).toStrictEqual(mockRemainingSettings);
             });
         });
     });

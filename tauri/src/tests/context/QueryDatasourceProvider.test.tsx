@@ -1,111 +1,147 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { type Enviroment, enviromentContext } from '../../context/EnviromentProvider';
-import { useDeleteDataSource, useLoadDataSource, useQueryDatasource, useSaveDataSource } from '../../context/QueryDatasourceProvider';
-import QueryDatasourceProvider from '../../context/QueryDatasourceProvider';
-import type { FetchParams } from '../../utils/fetchUtils';
-import { enviromentFixture } from '../setup';
+import { renderHook, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { type Enviroment, enviromentContext } from "../../context/EnviromentProvider";
+import {
+	useDeleteDataSource,
+	useLoadDataSource,
+	useSaveDataSource,
+} from "../../context/QueryDatasourceProvider";
+import WorkspaceResourcesProvider, { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
+import type { QueryDatasource } from "../../model/QueryDatasource";
+import type { WorkspaceResources } from "../../model/WorkspaceResources";
+import type { FetchParams } from "../../utils/fetchUtils";
+import { enviromentFixture, workspaceResourcesFixture } from "../setup";
 
-// モックの設定
-const mockType = 'sql';
-const mockDatasources = ['datasource1', 'datasource2'];
-const mockLoadBody = 'text content';
-const mockUpdatedSettings = ['test-setting', 'other-setting'];
-const mockRemainingSettings = [] as string[];
+// モックデータ
+const mockQueryDatasource: QueryDatasource = {
+	type: "sql",
+	name: "test-query",
+	contents: "SELECT * FROM test_table;",
+};
 
-const { mockFetchData } = vi.hoisted(() => {
-    return {
-        mockFetchData: vi.fn((params: FetchParams) => {
-            if (params.endpoint.includes(`/query-datasource/list?type=${mockType}`)) {
-                return Promise.resolve(new Response(JSON.stringify(mockDatasources)));
-            }
-            if (params.endpoint.includes('/query-datasource/load')) {
-                return Promise.resolve(new Response(mockLoadBody));
-            }
-            if (params.endpoint.includes('/query-datasource/save')) {
-                return Promise.resolve(new Response(JSON.stringify(mockUpdatedSettings)));
-            }
-            if (params.endpoint.includes('/query-datasource/delete')) {
-                return Promise.resolve(new Response(JSON.stringify(mockRemainingSettings)));
-            }
-            return Promise.resolve(new Response());
-        })
-    };
-});
-vi.mock('../../utils/fetchUtils', () => ({
-    fetchData: mockFetchData,
-}));
-
+const mockWorkspaceResources: WorkspaceResources = { ...workspaceResourcesFixture };
 const mockEnviroment: Enviroment = { ...enviromentFixture };
 
+function MockProvider({ children }: { children: React.ReactNode }) {
+	return <enviromentContext.Provider value={mockEnviroment}><WorkspaceResourcesProvider>{children}</WorkspaceResourcesProvider></enviromentContext.Provider>;
+}
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <enviromentContext.Provider value={mockEnviroment}>
-        <QueryDatasourceProvider type={mockType}>
-            {children}
-        </QueryDatasourceProvider>
-    </enviromentContext.Provider>
+	<MockProvider>{children}</MockProvider>
 );
 
-describe('QueryDatasourceProviderのテスト', () => {
+const mockUpdatedFiles = ['test-query', 'other-query'];
+const mockRemainingFiles = ['other-query'];
+const mockLoadedContents = "SELECT * FROM test_table WHERE id = 1;";
 
-    describe('useQueryDatasource', () => {
-        it('初期状態が指定したタイプでfetchした結果であることを確認', async () => {
-            const { result, rerender } = renderHook(() => useQueryDatasource(), { wrapper });
-            await waitFor(() => {
-                rerender();
-                expect(result.current).toEqual(mockDatasources);
-            });
-        });
-    });
-
-    describe('useSaveDataSource', () => {
-        it('正しくデータソースを保存できることを確認', async () => {
-            const { result, rerender } = renderHook(() => {
-                const saveDataSource = useSaveDataSource();
-                const resources = useQueryDatasource();
-                return { resources, saveDataSource }
-            }, { wrapper });
-            await waitFor(() => {
-                rerender();
-                expect(result.current.resources).toStrictEqual(mockDatasources);
-            })
-            result.current.saveDataSource({ type: mockType, name: 'test-setting', contents: mockLoadBody });
-            await waitFor(() => {
-                expect(result.current.resources).toStrictEqual(mockUpdatedSettings);
-            });
-        });
-    });
-
-    describe('useDeleteDataSource', () => {
-        it('正しくデータソースを削除できることを確認', async () => {
-            const { result, rerender } = renderHook(() => {
-                const deleteDataSource = useDeleteDataSource(mockType);
-                const resources = useQueryDatasource();
-                return { resources, deleteDataSource }
-            }, { wrapper });
-            await waitFor(() => {
-                rerender();
-                expect(result.current.resources).toStrictEqual(mockDatasources);
-            })
-            result.current.deleteDataSource('test-setting');
-            await waitFor(() => {
-                expect(result.current.resources).toStrictEqual(mockRemainingSettings);
-            });
-        });
-    });
-
-    describe('useLoadDataSource', () => {
-        it('正しくデータソースを読み込めることを確認', async () => {
-            const { result, rerender } = renderHook(() => {
-                return useLoadDataSource()(mockType, 'test-setting');
-            }, { wrapper });
-            await waitFor(() => {
-                rerender();
-                result.current.then((res) => {
-                    expect(res).toEqual(mockLoadBody);
-                });
-            });
-        });
-    });
+// API呼び出しのモック
+const { mockFetchData } = vi.hoisted(() => {
+	return {
+		mockFetchData: vi.fn((params: FetchParams) => {
+			if (params.endpoint.includes('/workspace/resources')) {
+				return Promise.resolve(new Response(JSON.stringify(mockWorkspaceResources)));
+			}
+			if (params.endpoint.includes('/query-datasource/load')) {
+				return Promise.resolve(new Response(mockLoadedContents));
+			}
+			if (params.endpoint.includes('/query-datasource/save')) {
+				return Promise.resolve(new Response(JSON.stringify(mockUpdatedFiles)));
+			}
+			if (params.endpoint.includes('/query-datasource/delete')) {
+				return Promise.resolve(new Response(JSON.stringify(mockRemainingFiles)));
+			}
+			return Promise.resolve(new Response());
+		})
+	};
 });
-;
+
+vi.mock("../../utils/fetchUtils", () => ({
+	fetchData: mockFetchData,
+}));
+
+describe("QueryDatasourceProviderのテスト", () => {
+
+	describe("useLoadDataSource", () => {
+		it("正常なロードが行われることを確認", async () => {
+			const { result, rerender } = renderHook(() => useLoadDataSource()("sql", "test-query"), { wrapper });
+			await waitFor(() => {
+				rerender();
+				result.current.then((res) => {
+					expect(res).toBe(mockLoadedContents);
+				});
+			});
+		});
+
+		it("csvqタイプでも正常にロードできることを確認", async () => {
+			const { result, rerender } = renderHook(() => useLoadDataSource()("table", "test-table"), { wrapper });
+			await waitFor(() => {
+				rerender();
+				result.current.then((res) => {
+					expect(res).toBe(mockLoadedContents);
+				});
+			});
+		});
+
+		it("tableタイプでも正常にロードできることを確認", async () => {
+			const { result, rerender } = renderHook(() => useLoadDataSource()("table", "test-table"), { wrapper });
+			await waitFor(() => {
+				rerender();
+				result.current.then((res) => {
+					expect(res).toBe(mockLoadedContents);
+				});
+			});
+		});
+	});
+
+	describe("useSaveDataSource", () => {
+		it("正常な保存が行われることを確認", async () => {
+			const { result, rerender } = renderHook(() => {
+				const saveDataSource = useSaveDataSource();
+				const resources = useResourcesSettings();
+				return { resources, saveDataSource }
+			}, { wrapper });
+
+			await waitFor(() => {
+				rerender();
+				expect(result.current.resources.queryFiles).toStrictEqual(mockWorkspaceResources.resources.queryFiles);
+			});
+
+			const saveResult = await result.current.saveDataSource(mockQueryDatasource);
+			expect(saveResult).toBe('success');
+			expect(mockFetchData).toHaveBeenCalledWith({
+				endpoint: `${mockEnviroment.apiUrl}query-datasource/save`,
+				options: {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(mockQueryDatasource),
+				},
+			});
+		});
+
+	});
+
+	describe("useDeleteDataSource", () => {
+		it("sqlタイプの正常な削除が行われることを確認", async () => {
+			const { result, rerender } = renderHook(() => {
+				const deleteDataSource = useDeleteDataSource("sql");
+				const resources = useResourcesSettings();
+				return { resources, deleteDataSource }
+			}, { wrapper });
+
+			await waitFor(() => {
+				rerender();
+				expect(result.current.resources.queryFiles).toStrictEqual(mockWorkspaceResources.resources.queryFiles);
+			});
+
+			const deleteResult = await result.current.deleteDataSource("test-query");
+			expect(deleteResult).toBe('success');
+			expect(mockFetchData).toHaveBeenCalledWith({
+				endpoint: `${mockEnviroment.apiUrl}query-datasource/delete`,
+				options: {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ type: "sql", name: "test-query" }),
+				},
+			});
+		});
+	});
+});
