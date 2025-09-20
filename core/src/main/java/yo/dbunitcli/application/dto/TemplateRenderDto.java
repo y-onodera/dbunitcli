@@ -27,6 +27,9 @@ public class TemplateRenderDto {
     @CommandLine.Option(names = "-forceFormulaRecalc", description = "default false. recalculation formulas when opening the file in Excel")
     private String forceFormulaRecalc;
 
+    @CommandLine.Option(names = "-fastFormulaProcess", description = "default false. if true use fast formula processor")
+    private String fastFormulaProcess;
+
     public String getEncoding() {
         return this.encoding;
     }
@@ -89,5 +92,13 @@ public class TemplateRenderDto {
 
     public void setForceFormulaRecalc(final String forceFormulaRecalc) {
         this.forceFormulaRecalc = forceFormulaRecalc;
+    }
+
+    public String getFastFormulaProcess() {
+        return this.fastFormulaProcess;
+    }
+
+    public void setFastFormulaProcess(final String fastFormulaProcess) {
+        this.fastFormulaProcess = fastFormulaProcess;
     }
 }

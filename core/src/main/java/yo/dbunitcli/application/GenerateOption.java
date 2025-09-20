@@ -171,6 +171,7 @@ public record GenerateOption(
             }
             templateComponent.put("-evaluateFormulas", this.templateOption.evaluateFormulas());
             templateComponent.put("-forceFormulaRecalc", this.templateOption.forceFormulaRecalc());
+            templateComponent.put("-fastFormulaProcess", this.templateOption.fastFormulaProcess());
         }
         return templateComponent.build();
     }
@@ -205,6 +206,7 @@ public record GenerateOption(
                         .setFormulaProcess(option.templateOption.formulaProcess())
                         .setEvaluateFormulas(option.templateOption.evaluateFormulas())
                         .setForceFormulaRecalc(option.templateOption.forceFormulaRecalc())
+                        .setFastFormulaProcess(option.templateOption.fastFormulaProcess())
                         .build()
                         .render(option.getTemplatePath(), resultFile, param);
             }
@@ -217,6 +219,7 @@ public record GenerateOption(
                         .setFormulaProcess(option.templateOption.formulaProcess())
                         .setEvaluateFormulas(option.templateOption.evaluateFormulas())
                         .setForceFormulaRecalc(option.templateOption.forceFormulaRecalc())
+                        .setFastFormulaProcess(option.templateOption.fastFormulaProcess())
                         .build()
                         .render(option.getTemplatePath(), resultFile, param);
             }

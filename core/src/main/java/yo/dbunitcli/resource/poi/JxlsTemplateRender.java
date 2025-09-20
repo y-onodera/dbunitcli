@@ -12,25 +12,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class JxlsTemplateRender {
-
-    private final String templateParameterAttribute;
-
-    private final boolean formulaProcess;
-
-    private final boolean evaluateFormulas;
-
-    private final boolean forceFormulaRecalc;
+public record JxlsTemplateRender(
+        String templateParameterAttribute,
+        boolean formulaProcess,
+        boolean evaluateFormulas,
+        boolean forceFormulaRecalc,
+        boolean fastFormulaProcess
+) {
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    public JxlsTemplateRender(final Builder builder) {
-        this.templateParameterAttribute = builder.getTemplateParameterAttribute();
-        this.formulaProcess = builder.isFormulaProcess();
-        this.evaluateFormulas = builder.isEvaluateFormulas();
-        this.forceFormulaRecalc = builder().isForceFormulaRecalc();
     }
 
     public String getTemplateParameterAttribute() {
@@ -52,11 +43,16 @@ public class JxlsTemplateRender {
                         .withUpdateCellDataArea(false)
                         .buildAndFill(context, new JxlsOutputFile(aResultFile));
             } else {
-                JxlsPoiTemplateFillerBuilder.newInstance()
+                final JxlsPoiTemplateFillerBuilder builder = JxlsPoiTemplateFillerBuilder.newInstance()
                         .withTemplate(is)
                         .withRecalculateFormulasBeforeSaving(this.evaluateFormulas)
-                        .withRecalculateFormulasOnOpening(this.forceFormulaRecalc)
-                        .buildAndFill(context, new JxlsOutputFile(aResultFile));
+                        .withRecalculateFormulasOnOpening(this.forceFormulaRecalc);
+
+                if (this.fastFormulaProcess) {
+                    builder.withFastFormulaProcessor();
+                }
+
+                builder.buildAndFill(context, new JxlsOutputFile(aResultFile));
             }
         }
     }
@@ -64,11 +60,10 @@ public class JxlsTemplateRender {
     public static class Builder {
 
         private String templateParameterAttribute = "param";
-
         private boolean formulaProcess;
-
         private boolean evaluateFormulas = true;
         private boolean forceFormulaRecalc = false;
+        private boolean fastFormulaProcess = false;
 
         public String getTemplateParameterAttribute() {
             return this.templateParameterAttribute;
@@ -76,6 +71,18 @@ public class JxlsTemplateRender {
 
         public boolean isFormulaProcess() {
             return this.formulaProcess;
+        }
+
+        public boolean isEvaluateFormulas() {
+            return this.evaluateFormulas;
+        }
+
+        public boolean isForceFormulaRecalc() {
+            return this.forceFormulaRecalc;
+        }
+
+        public boolean isFastFormulaProcess() {
+            return this.fastFormulaProcess;
         }
 
         public Builder setTemplateParameterAttribute(final String templateParameterAttribute) {
@@ -98,16 +105,19 @@ public class JxlsTemplateRender {
             return this;
         }
 
-        public boolean isEvaluateFormulas() {
-            return this.evaluateFormulas;
+        public Builder setFastFormulaProcess(final boolean fastFormulaProcess) {
+            this.fastFormulaProcess = fastFormulaProcess;
+            return this;
         }
 
         public JxlsTemplateRender build() {
-            return new JxlsTemplateRender(this);
-        }
-
-        public boolean isForceFormulaRecalc() {
-            return this.forceFormulaRecalc;
+            return new JxlsTemplateRender(
+                    this.templateParameterAttribute,
+                    this.formulaProcess,
+                    this.evaluateFormulas,
+                    this.forceFormulaRecalc,
+                    this.fastFormulaProcess
+            );
         }
     }
 }
