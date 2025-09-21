@@ -39,6 +39,7 @@ public record JxlsTemplateRender(
             if (!aResultFile.getName().endsWith(".xls") && !this.formulaProcess) {
                 JxlsPoiTemplateFillerBuilder.newInstance()
                         .withStreaming(JxlsStreaming.STREAMING_ON)
+                        .withTransformerFactory(new UserFormulasValueClearPoiTransformerFactory())
                         .withTemplate(is)
                         .withUpdateCellDataArea(false)
                         .buildAndFill(context, new JxlsOutputFile(aResultFile));
