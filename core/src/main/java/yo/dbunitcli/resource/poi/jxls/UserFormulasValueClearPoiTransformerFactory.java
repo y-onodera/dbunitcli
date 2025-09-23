@@ -1,9 +1,8 @@
-package yo.dbunitcli.resource.poi;
+package yo.dbunitcli.resource.poi.jxls;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.jxls.builder.JxlsStreaming;
 import org.jxls.transform.Transformer;
-import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.transform.poi.PoiTransformerFactory;
 
 public class UserFormulasValueClearPoiTransformerFactory extends PoiTransformerFactory {
@@ -23,7 +22,7 @@ public class UserFormulasValueClearPoiTransformerFactory extends PoiTransformerF
                     streaming.getRowAccessWindowSize(), streaming.isCompressTmpFiles(), streaming.isUseSharedStringsTable());
 
         } else { // no streaming
-            return new PoiTransformer(workbook, false);
+            return new MergeConditionalFormattingPoiTransformer(workbook, false);
         }
     }
 }

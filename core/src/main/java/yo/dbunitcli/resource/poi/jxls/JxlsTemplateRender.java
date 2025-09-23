@@ -1,4 +1,4 @@
-package yo.dbunitcli.resource.poi;
+package yo.dbunitcli.resource.poi.jxls;
 
 import org.jxls.builder.JxlsOutputFile;
 import org.jxls.builder.JxlsStreaming;

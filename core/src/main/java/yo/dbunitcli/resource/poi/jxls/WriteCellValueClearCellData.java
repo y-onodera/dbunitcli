@@ -1,4 +1,4 @@
-package yo.dbunitcli.resource.poi;
+package yo.dbunitcli.resource.poi.jxls;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;

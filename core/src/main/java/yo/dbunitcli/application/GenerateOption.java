@@ -9,7 +9,7 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.converter.DBConverter;
 import yo.dbunitcli.resource.FileResources;
-import yo.dbunitcli.resource.poi.JxlsTemplateRender;
+import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
