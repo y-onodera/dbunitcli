@@ -36,24 +36,23 @@ public record JxlsTemplateRender(
             context.put(this.getTemplateParameterAttribute(), param);
         }
         try (final InputStream is = new FileInputStream(aTemplate)) {
+            final JxlsPoiTemplateFillerBuilder builder = JxlsPoiTemplateFillerBuilder.newInstance()
+                    .withTemplate(is)
+                    .withTransformerFactory(new UserFormulasValueClearPoiTransformerFactory());
+            if (this.fastFormulaProcess) {
+                builder.withFastFormulaProcessor();
+            }
+
             if (!aResultFile.getName().endsWith(".xls") && !this.formulaProcess) {
-                JxlsPoiTemplateFillerBuilder.newInstance()
+                builder
                         .withStreaming(JxlsStreaming.STREAMING_ON)
-                        .withTransformerFactory(new UserFormulasValueClearPoiTransformerFactory())
-                        .withTemplate(is)
                         .withUpdateCellDataArea(false)
                         .buildAndFill(context, new JxlsOutputFile(aResultFile));
             } else {
-                final JxlsPoiTemplateFillerBuilder builder = JxlsPoiTemplateFillerBuilder.newInstance()
-                        .withTemplate(is)
+                builder
                         .withRecalculateFormulasBeforeSaving(this.evaluateFormulas)
-                        .withRecalculateFormulasOnOpening(this.forceFormulaRecalc);
-
-                if (this.fastFormulaProcess) {
-                    builder.withFastFormulaProcessor();
-                }
-
-                builder.buildAndFill(context, new JxlsOutputFile(aResultFile));
+                        .withRecalculateFormulasOnOpening(this.forceFormulaRecalc)
+                        .buildAndFill(context, new JxlsOutputFile(aResultFile));
             }
         }
     }
