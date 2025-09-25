@@ -8,19 +8,19 @@ import org.jxls.common.CellRef;
 import java.util.stream.Stream;
 
 public record DestConditionalFormat(ConditionalFormatting formatting, ConditionalFormatCellAddress address) {
-    public void merge(final CellRef targetCellRef) {
+    public void merge(final CellRef src, final CellRef target) {
         this.formatting.setFormattingRanges(
                 CellRangeUtil.mergeCellRanges(
                         Stream.concat(
                                         Stream.of(this.formatting().getFormattingRanges())
-                                        , Stream.of(this.address().convert(targetCellRef)))
+                                        , Stream.of(this.address().convert(src, target, this.formatting().getFormattingRanges())))
                                 .toList()
                                 .toArray(new CellRangeAddress[0])
                 )
         );
     }
 
-    public void convert(final CellRef targetCellRef) {
-        this.formatting.setFormattingRanges(this.address().convert(targetCellRef));
+    public void convert(final CellRef src, final CellRef target) {
+        this.formatting.setFormattingRanges(this.address().convert(src, target, this.formatting().getFormattingRanges()));
     }
 }

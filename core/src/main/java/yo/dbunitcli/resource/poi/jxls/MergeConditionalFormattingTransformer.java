@@ -68,13 +68,13 @@ public interface MergeConditionalFormattingTransformer {
         if (this.getFormatSetCells().containsKey(srcCellRef)) {
             final Map<CellRef, List<DestConditionalFormat>> srcCellRules = this.getTransformedFormat().get(destSheet.getSheetName());
             if (srcCellRules.containsKey(srcCellRef)) {
-                srcCellRules.get(srcCellRef).forEach(it -> it.merge(targetCellRef));
+                srcCellRules.get(srcCellRef).forEach(it -> it.merge(srcCellRef, targetCellRef));
             } else {
                 srcCellRules.put(srcCellRef, this.getFormatSetCells().get(srcCellRef)
                         .stream()
                         .map(it -> it.toDest(resultConditionalFormat))
                         .toList());
-                srcCellRules.get(srcCellRef).forEach(it -> it.convert(targetCellRef));
+                srcCellRules.get(srcCellRef).forEach(it -> it.convert(srcCellRef, targetCellRef));
             }
         }
     }
