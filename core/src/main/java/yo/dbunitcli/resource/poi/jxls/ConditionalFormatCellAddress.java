@@ -4,7 +4,7 @@ import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.jxls.common.CellRef;
 
-record ConditionalFormatCellAddress(int index, CellRangeAddress[] addresses) {
+public record ConditionalFormatCellAddress(int index, CellRangeAddress[] addresses) {
 
     public CellRangeAddress[] convert(final CellRef targetCellRef) {
         final CellRangeAddress[] result = new CellRangeAddress[this.addresses.length];

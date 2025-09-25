@@ -7,7 +7,7 @@ import org.jxls.common.CellRef;
 
 import java.util.stream.Stream;
 
-record DestConditionalFormat(ConditionalFormatting formatting, ConditionalFormatCellAddress address) {
+public record DestConditionalFormat(ConditionalFormatting formatting, ConditionalFormatCellAddress address) {
     public void merge(final CellRef targetCellRef) {
         this.formatting.setFormattingRanges(
                 CellRangeUtil.mergeCellRanges(
