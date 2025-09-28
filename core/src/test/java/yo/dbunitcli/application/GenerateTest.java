@@ -1,5 +1,8 @@
 package yo.dbunitcli.application;
 
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Copy;
 import org.apache.tools.ant.taskdefs.Delete;
@@ -61,43 +64,47 @@ public class GenerateTest {
         }
 
         @Test
-        public void testGenerateXlsx() {
+        public void testGenerateXlsx() throws Exception {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsx.txt"});
             Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/xlsx/compareResult.txt"
                     , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"
                     , "-new.src=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1.xlsx"
                     , "-result=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1"
             });
+            this.assertConditionalFormat("/generate/table/result/xlsx/Test1.xlsx", "シート2", 3);
         }
 
         @Test
-        public void testGenerateXlsxWithoutFormulaEvaluation() {
+        public void testGenerateXlsxWithoutFormulaEvaluation() throws IOException {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsxWithoutEvaluate.txt"});
             Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/xlsx/compareResult.txt"
                     , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"
                     , "-new.src=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1_withoutEvaluate.xlsx"
                     , "-result=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1WithoutEvaluate"
             });
+            this.assertConditionalFormat("/generate/table/result/xlsx/Test1_withoutEvaluate.xlsx", "シート2", 3);
         }
 
         @Test
-        public void testGenerateXlsxStreaming() {
+        public void testGenerateXlsxStreaming() throws IOException {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsxStreaming.txt"});
-            Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/streamxlsx/compareResult.txt"
+            Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/xlsx/compareResult.txt"
                     , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"
                     , "-new.src=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1_Stream.xlsx"
                     , "-result=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1Stream"
             });
+            this.assertConditionalFormat("/generate/table/result/xlsx/Test1_Stream.xlsx", "シート2", 3);
         }
 
         @Test
-        public void testGenerateXls() {
+        public void testGenerateXls() throws IOException {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXls.txt"});
             Compare.main(new String[]{"@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/xls/compareResult.txt"
                     , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"
                     , "-new.src=" + this.getBaseDir() + "/generate/table/result/xls/Test1.xls"
                     , "-result=" + this.getBaseDir() + "/generate/table/result/xls/Test1"
             });
+            this.assertConditionalFormat("/generate/table/result/xls/Test1.xls", "シート2", 3);
         }
 
         @Test
@@ -224,6 +231,15 @@ public class GenerateTest {
         protected String getBaseDir() {
             return GenerateTest.baseDir;
         }
+
+        private void assertConditionalFormat(final String fileName, final String sheetName, final int expectedNumber) throws IOException {
+            try (final Workbook workbook = WorkbookFactory.create(new File(this.getBaseDir() + fileName))) {
+                final Sheet sheet2 = workbook.getSheet(sheetName);
+                final int conditionalFormattingCount = sheet2.getSheetConditionalFormatting().getNumConditionalFormattings();
+                Assertions.assertEquals(expectedNumber, conditionalFormattingCount);
+            }
+        }
+
     }
 
     @Nested
