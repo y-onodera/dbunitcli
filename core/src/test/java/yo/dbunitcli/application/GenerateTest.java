@@ -218,6 +218,30 @@ public class GenerateTest {
             this.assertGenerateFileEquals("Test3.sql", "UTF-8");
         }
 
+        @Test
+        public void testGenerateXlsxTemplate() {
+            Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsxTemplate.txt"});
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
+                    , "-encoding=UTF-8"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/settings.json"
+                    , "-generateType=xlsx"
+                    , "-unit=dataset"
+                    , "-template=" + this.getBaseDir() + "/generate/xlsxTemplate/result/template.xlsx"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/xlsxTemplate/result/generated.xlsx"
+            });
+            Compare.main(new String[]{
+                    "-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
+                    , "-old.srcType=csv"
+                    , "-old.encoding=UTF-8"
+                    , "-new.src=" + this.getBaseDir() + "/generate/xlsxTemplate/result/generated.xlsx"
+                    , "-new.srcType=xlsx"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/settings.json"
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/xlsxTemplate/result/compare"
+            });
+        }
+
         private void assertGenerateFileEquals(final String target, final String encode) throws IOException {
             final String expect = Files.readString(new File(GenerateTest.testResourcesDir + "expect/" + GenerateTest.subDirectory + "/expect/txt", target).toPath(), Charset.forName(encode));
             final String actual = Files.readString(new File(this.getResult(), target).toPath(), Charset.forName(encode));

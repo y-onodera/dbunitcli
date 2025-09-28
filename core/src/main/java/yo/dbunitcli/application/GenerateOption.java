@@ -9,6 +9,7 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.converter.DBConverter;
 import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
@@ -135,6 +136,9 @@ public record GenerateOption(
                 srcComponent.remove("-src.useJdbcMetaData")
                         .remove("-src.loadData");
             }
+            case xlsxTemplate -> {
+                srcComponent.remove("-src.loadData");
+            }
         }
         result.addComponent("srcData", srcComponent.build());
         if (!this.generateType.isFixedTemplate()) {
@@ -142,7 +146,7 @@ public record GenerateOption(
         }
         result.putDir("-result", this.resultDir, BaseDir.RESULT)
                 .put("-resultPath", this.resultPath);
-        if (!this.generateType.isExcel()) {
+        if (this.generateType.isText()) {
             result.put("-outputEncoding", this.outputEncoding);
         }
         return result;
@@ -155,6 +159,8 @@ public record GenerateOption(
             builder.setLoadData(false);
         } else if (this.generateType() == GenerateType.sql) {
             builder.setUseJdbcMetaData(true);
+        } else if (this.generateType() == GenerateType.xlsxTemplate) {
+            builder.setLoadData(false);
         }
         return builder.build();
     }
@@ -271,6 +277,22 @@ public record GenerateOption(
                         .build()
                         .createSTGroup("sql/sqlTemplate.stg");
             }
+        },
+        xlsxTemplate {
+            @Override
+            public boolean isFixedTemplate() {
+                return true;
+            }
+
+            @Override
+            public ParameterUnit getFixedUnit() {
+                return ParameterUnit.dataset;
+            }
+
+            @Override
+            protected void write(final GenerateOption option, final File resultFile, final Map<String, Object> param) throws IOException {
+                JxlsTemplateGenerator.createTemplate(resultFile, param);
+            }
         };
 
         public boolean isAny(final GenerateType... expects) {
@@ -303,6 +325,10 @@ public record GenerateOption(
 
         private boolean isExcel() {
             return this.isAny(xlsx, xls);
+        }
+
+        private boolean isText() {
+            return !this.isAny(xlsx, xls, xlsxTemplate);
         }
     }
 }
