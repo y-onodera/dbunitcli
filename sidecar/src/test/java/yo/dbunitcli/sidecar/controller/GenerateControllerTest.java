@@ -32,10 +32,7 @@ class GenerateControllerTest {
     @Test
     public void testReset() throws IOException {
         final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/generate/reset"));
-        System.out.println(jsonResponse);
-
         final String expectedJson = Files.readString(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/generate-reset-response.json"));
-        // 改行やスペースを無視して比較するために正規化
         final String normalizedExpected = this.normalizeJson(expectedJson);
         final String normalizedActual = this.normalizeJson(jsonResponse);
         Assertions.assertEquals(normalizedExpected, normalizedActual);

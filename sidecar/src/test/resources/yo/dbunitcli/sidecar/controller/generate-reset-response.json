@@ -10,7 +10,8 @@
           "xlsx",
           "xls",
           "settings",
-          "sql"
+          "sql",
+          "xlsxTemplate"
         ],
         "required": false,
         "defaultPath": "WORKSPACE"
