@@ -1,0 +1,36 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: native-trace
+on:
+  push:
+    paths:
+      - '.github/workflows/native-trace.yml'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up graalvm
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'graalvm'
+          cache: 'maven'
+      - name: postgresql setup
+        uses: ikalnytskyi/action-setup-postgres@v4
+        with:
+          username: admin
+          password: admin
+          database: test
+          port: 5433
+        id: postgres
+      - name: Save native-image-config
+        run: |
+          mvn clean test -Pnative-trace "-fcore/pom.xml"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-image-config
+          path: |
+            ./core/src/main/resources/META-INF/native-image/com.github.yonodera/dbunit-cli/*.json
