@@ -87,6 +87,14 @@ jobs:
             ./sidecar/target/*.dll
             ./sidecar/target/*.exe
             ./sidecar/target/lib
+      - name: Save native-image-config
+        run: |
+          mvn clean test -Pnative-trace -fcore/pom.xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-image-config
+          path: |
+            ./core/src/main/resources/META-INF/native-image/com.github.yonodera/dbunit-cli/*.json
 
   report-deploy:
     needs: [ build ]
