@@ -6286,6 +6286,11 @@
   },
   {
     "name": "org.dbunit.dataset.Column",
+    "fields": [
+      {
+        "name": "numeric"
+      }
+    ],
     "methods": [
       {
         "name": "getColumnName",
@@ -6293,6 +6298,18 @@
       },
       {
         "name": "getDataType",
+        "parameterTypes": []
+      },
+      {
+        "name": "getNumeric",
+        "parameterTypes": []
+      },
+      {
+        "name": "hasNumeric",
+        "parameterTypes": []
+      },
+      {
+        "name": "isNumeric",
         "parameterTypes": []
       }
     ]
@@ -6383,6 +6400,74 @@
     "fields": [
       {
         "name": "pos"
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.db.LobStorageMap$BlobMeta$Type",
+    "fields": [
+      {
+        "name": "INSTANCE"
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.db.LobStorageMap$BlobReference$Type",
+    "fields": [
+      {
+        "name": "INSTANCE"
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.db.NullValueDataType",
+    "fields": [
+      {
+        "name": "INSTANCE"
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.db.RowDataType$Factory",
+    "fields": [
+      {
+        "name": "INSTANCE"
+      }
+    ],
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.tx.VersionedValueType$Factory",
+    "fields": [
+      {
+        "name": "INSTANCE"
+      }
+    ],
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.type.ByteArrayDataType",
+    "fields": [
+      {
+        "name": "INSTANCE"
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.type.LongDataType",
+    "fields": [
+      {
+        "name": "INSTANCE"
       }
     ]
   },
