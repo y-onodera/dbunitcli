@@ -33,4 +33,4 @@ jobs:
         with:
           name: native-image-config
           path: |
-            ./core/src/main/resources/META-INF/native-image/com.github.yonodera/dbunit-cli/*.json
+            ./core/target/native/agent-output/**/*.json
