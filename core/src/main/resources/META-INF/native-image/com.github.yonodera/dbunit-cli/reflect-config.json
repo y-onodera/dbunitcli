@@ -9426,6 +9426,17 @@
     ]
   },
   {
+    "name": "org.openxmlformats.schemas.officeDocument.x2006.sharedTypes.STTrueFalse$Enum"
+  },
+  {
+    "name": "org.openxmlformats.schemas.officeDocument.x2006.sharedTypes.STTrueFalseBlank$Enum",
+    "fields": [
+      {
+        "name": "table"
+      }
+    ]
+  },
+  {
     "name": "org.openxmlformats.schemas.officeDocument.x2006.sharedTypes.impl.STColorTypeImpl",
     "methods": [
       {
@@ -10603,6 +10614,17 @@
     ]
   },
   {
+    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTFontsImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
     "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTFunctionGroupsImpl",
     "methods": [
       {
@@ -10659,17 +10681,6 @@
   },
   {
     "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTIgnoredErrorImpl",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "org.apache.xmlbeans.SchemaType"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTIgnoredErrorsImpl",
     "methods": [
       {
         "name": "<init>",
@@ -11307,6 +11318,17 @@
     ]
   },
   {
+    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTSheetsImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
     "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTSingleXmlCellImpl",
     "methods": [
       {
@@ -11659,7 +11681,7 @@
     ]
   },
   {
-    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.STAxisImpl",
+    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CommentsDocumentImpl",
     "methods": [
       {
         "name": "<init>",
@@ -12253,7 +12275,7 @@
     ]
   },
   {
-    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.STXmlDataTypeImpl",
+    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.SstDocumentImpl",
     "methods": [
       {
         "name": "<init>",
