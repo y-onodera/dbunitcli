@@ -9,46 +9,48 @@ public class DataSourceTypeOptionFactory {
         return switch (type) {
             case xls, xlsx -> ComparableDataSetParamOption.join(
                     new FileTraverseOption(prefix, dto)
-                    , new StartRowOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
+                    , new StartRowOption(prefix, dto)
                     , new AddFileInfoOption(prefix, dto)
                     , new ExcelOption(prefix, dto)
             );
             case csv -> ComparableDataSetParamOption.join(
-                    new FileTraverseOption(prefix, dto)
-                    , new EncodingOption(prefix, dto)
-                    , new StartRowOption(prefix, dto)
+                    new EncodingOption(prefix, dto)
+                    , new FileTraverseOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
+                    , new StartRowOption(prefix, dto)
                     , new AddFileInfoOption(prefix, dto)
                     , new CsvOption(prefix, dto)
             );
             case reg -> ComparableDataSetParamOption.join(
-                    new FileTraverseOption(prefix, dto)
-                    , new EncodingOption(prefix, dto)
-                    , new StartRowOption(prefix, dto)
+                    new EncodingOption(prefix, dto)
+                    , new FileTraverseOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
+                    , new StartRowOption(prefix, dto)
                     , new AddFileInfoOption(prefix, dto)
                     , new RegexOption(prefix, dto)
             );
             case fixed -> ComparableDataSetParamOption.join(
-                    new FileTraverseOption(prefix, dto)
-                    , new EncodingOption(prefix, dto)
-                    , new StartRowOption(prefix, dto)
+                    new EncodingOption(prefix, dto)
+                    , new FileTraverseOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
+                    , new StartRowOption(prefix, dto)
                     , new AddFileInfoOption(prefix, dto)
                     , new FixedOption(prefix, dto)
             );
             case csvq -> ComparableDataSetParamOption.join(
-                    new FileTraverseOption(prefix, dto)
-                    , new EncodingOption(prefix, dto)
+                    new EncodingOption(prefix, dto)
+                    , new FileTraverseOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
+                    , new AddFileInfoOption(prefix, dto)
                     , new TemplateRenderOption(prefix, dto.getTemplateRender())
             );
             case table, sql -> ComparableDataSetParamOption.join(
-                    new FileTraverseOption(prefix, dto)
-                    , new EncodingOption(prefix, dto)
-                    , new JdbcLoadOption(prefix, dto)
+                    new EncodingOption(prefix, dto)
+                    , new FileTraverseOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)
+                    , new AddFileInfoOption(prefix, dto)
+                    , new JdbcLoadOption(prefix, dto)
                     , new TemplateRenderOption(prefix, dto.getTemplateRender())
             );
             case dir -> new TraverseOption(prefix, dto);

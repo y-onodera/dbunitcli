@@ -17,12 +17,10 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableQueryDataSetProducer.class);
     private final Parameter parameter;
-    private boolean addFileInfo;
 
     public ComparableQueryDataSetProducer(final ComparableDataSetParam param, final Parameter parameter) {
         super(param);
         this.parameter = parameter;
-        this.addFileInfo = this.addFileInfo;
     }
 
     @Override

@@ -25,10 +25,10 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDBDataSetProducer.class);
     protected final IDatabaseConnection connection;
     protected final File[] src;
-    private final ComparableDataSetParam param;
-    private final String[] headerNames;
-    private final boolean loadData;
-    private final boolean addFileInfo;
+    protected final ComparableDataSetParam param;
+    protected final String[] headerNames;
+    protected final boolean loadData;
+    protected final boolean addFileInfo;
     protected IDataSetConsumer consumer;
     private IDataSet databaseDataSet;
 
@@ -98,12 +98,13 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     protected void executeTable(final ITable table, final Source source) {
         try {
             ComparableDBDataSetProducer.LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
+            final ITableMetaData tableMetaData;
             if (this.headerNames != null) {
                 final ITableMetaData metaData = table.getTableMetaData();
                 final Column[] columns = Arrays.stream(this.headerNames, 0, metaData.getColumns().length)
                         .map(name -> new Column(name.trim(), DataType.UNKNOWN))
                         .toArray(Column[]::new);
-                this.consumer.startTable(source.wrap(new DefaultTableMetaData(table.getTableMetaData().getTableName()
+                tableMetaData = new DefaultTableMetaData(table.getTableMetaData().getTableName()
                         , columns
                         , Arrays.stream(table.getTableMetaData().getPrimaryKeys())
                         .mapToInt(column -> {
@@ -114,10 +115,11 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                             }
                         })
                         .mapToObj(i -> columns[i])
-                        .toArray(Column[]::new))));
+                        .toArray(Column[]::new));
             } else {
-                this.consumer.startTable(table.getTableMetaData());
+                tableMetaData = table.getTableMetaData();
             }
+            this.consumer.startTable(source.wrap(tableMetaData));
             if (this.loadData) {
                 final Column[] columns = table.getTableMetaData().getColumns();
                 int row = 0;

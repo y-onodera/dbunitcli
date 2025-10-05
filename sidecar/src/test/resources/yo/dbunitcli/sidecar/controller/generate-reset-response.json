@@ -103,6 +103,15 @@
         "value": ""
       },
       {
+        "name": "encoding",
+        "attribute": {
+          "type": "TEXT",
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": "UTF-8"
+      },
+      {
         "name": "recursive",
         "attribute": {
           "type": "FLG",
@@ -139,13 +148,13 @@
         "value": ""
       },
       {
-        "name": "encoding",
+        "name": "headerName",
         "attribute": {
           "type": "TEXT",
           "required": false,
           "defaultPath": "WORKSPACE"
         },
-        "value": "UTF-8"
+        "value": ""
       },
       {
         "name": "startRow",
@@ -155,15 +164,6 @@
           "defaultPath": "WORKSPACE"
         },
         "value": "1"
-      },
-      {
-        "name": "headerName",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
       },
       {
         "name":"addFileInfo",
