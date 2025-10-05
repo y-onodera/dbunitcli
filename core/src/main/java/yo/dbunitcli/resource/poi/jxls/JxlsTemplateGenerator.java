@@ -46,7 +46,7 @@ public class JxlsTemplateGenerator {
         IntStream.range(0, columns.length)
                 .forEach(i -> {
                     final Cell cell = dataRow.createCell(i);
-                    cell.setCellValue("${row." + columns[i].getColumnName() + "}");
+                    cell.setCellValue("${row.get('" + columns[i].getColumnName() + "')}");
                 });
     }
 
