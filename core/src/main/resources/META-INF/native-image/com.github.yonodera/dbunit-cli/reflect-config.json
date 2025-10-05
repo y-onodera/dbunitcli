@@ -11354,17 +11354,6 @@
     ]
   },
   {
-    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTSheetsImpl",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "org.apache.xmlbeans.SchemaType"
-        ]
-      }
-    ]
-  },
-  {
     "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTSingleXmlCellImpl",
     "methods": [
       {
