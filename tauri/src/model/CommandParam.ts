@@ -157,7 +157,8 @@ class DatasetSourceImpl implements DatasetSource {
 				caption: "traversal option",
 				display: (name) => name === "recursive",
 			},
-			(param: string) => traversaldetail.includes(param),
+			(param: string) =>
+				["recursive", "regInclude", "regExclude", "extension"].includes(param),
 		);
 	}
 	srcTypeSettings() {
@@ -182,7 +183,13 @@ class DatasetSourceImpl implements DatasetSource {
 				caption: "dataset option",
 				display: (name) => name === "regTableInclude",
 			},
-			(param: string) => datasetdetail.includes(param),
+			(param: string) =>
+				[
+					"regTableInclude",
+					"regTableExclude",
+					"loadData",
+					"includeMetaData",
+				].includes(param),
 		);
 	}
 }
@@ -223,13 +230,6 @@ export type ParameterizeParams = {
 	paramData: DatasetSource;
 	templateOption: CommandParams;
 };
-const traversaldetail = ["recursive", "regInclude", "regExclude", "extension"];
-const datasetdetail = [
-	"regTableInclude",
-	"regTableExclude",
-	"loadData",
-	"includeMetaData",
-];
 const srcTypeDetail = new Map<
 	string,
 	{
@@ -264,7 +264,7 @@ const srcTypeDetail = new Map<
 		{
 			optionCaption: {
 				caption: "csv option",
-				display: (name: string) => name === "startRow",
+				display: (name: string) => name === "headerName",
 			},
 			optional: (name: string) => name !== "encoding",
 		},
@@ -282,15 +282,22 @@ const srcTypeDetail = new Map<
 	[
 		"reg",
 		{
-			optionCaption: { caption: "reg option", display: (_: string) => false },
-			optional: (_: string) => false,
+			optionCaption: {
+				caption: "reg option",
+				display: (name: string) => name === "headerName",
+			},
+			optional: (name: string) =>
+				name !== "regDataSplit" && name !== "regHeaderSplit",
 		},
 	],
 	[
 		"fixed",
 		{
-			optionCaption: { caption: "fixed option", display: (_: string) => false },
-			optional: (_: string) => false,
+			optionCaption: {
+				caption: "fixed option",
+				display: (name: string) => name === "headerName",
+			},
+			optional: (name: string) => name !== "fixedLength",
 		},
 	],
 	[
@@ -298,7 +305,7 @@ const srcTypeDetail = new Map<
 		{
 			optionCaption: {
 				caption: "xls option",
-				display: (name: string) => name === "startRow",
+				display: (name: string) => name === "headerName",
 			},
 			optional: (_: string) => true,
 		},
@@ -308,7 +315,7 @@ const srcTypeDetail = new Map<
 		{
 			optionCaption: {
 				caption: "xlsx option",
-				display: (name: string) => name === "startRow",
+				display: (name: string) => name === "headerName",
 			},
 			optional: (_: string) => true,
 		},
