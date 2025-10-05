@@ -284,6 +284,117 @@
     ]
   },
   {
+    "name": "com.microsoft.schemas.office.office.STConnectType$Enum"
+  },
+  {
+    "name": "com.microsoft.schemas.office.office.STInsetMode$Enum"
+  },
+  {
+    "name": "com.microsoft.schemas.office.office.impl.CTIdMapImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.microsoft.schemas.office.office.impl.CTShapeLayoutImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.microsoft.schemas.office.office.impl.STConnectTypeImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.microsoft.schemas.office.office.impl.STInsetModeImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.microsoft.schemas.office.office.impl.ShapelayoutDocumentImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.microsoft.schemas.vml.STExt$Enum"
+  },
+  {
+    "name": "com.microsoft.schemas.vml.STStrokeJoinStyle$Enum"
+  },
+  {
+    "name": "com.microsoft.schemas.vml.impl.CTFillImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.microsoft.schemas.vml.impl.CTGroupImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.microsoft.schemas.vml.impl.CTPathImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.microsoft.schemas.vml.impl.CTShadowImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
     "name": "com.microsoft.schemas.vml.impl.CTShapeImpl",
     "methods": [
       {
@@ -306,6 +417,50 @@
     ]
   },
   {
+    "name": "com.microsoft.schemas.vml.impl.CTStrokeImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.microsoft.schemas.vml.impl.CTTextboxImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.microsoft.schemas.vml.impl.STExtImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.microsoft.schemas.vml.impl.STStrokeJoinStyleImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
     "name": "com.sun.crypto.provider.HmacCore$HmacSHA256",
     "methods": [
       {
@@ -315,7 +470,43 @@
     ]
   },
   {
+    "name": "com.sun.crypto.provider.PBKDF2Core$HmacSHA1",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "com.sun.crypto.provider.PBKDF2Core$HmacSHA224",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
     "name": "com.sun.crypto.provider.PBKDF2Core$HmacSHA256",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "com.sun.crypto.provider.PBKDF2Core$HmacSHA384",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "com.sun.crypto.provider.PBKDF2Core$HmacSHA512",
     "methods": [
       {
         "name": "<init>",
@@ -389,6 +580,12 @@
         "parameterTypes": []
       }
     ]
+  },
+  {
+    "name": "gnu.classpath.Configuration"
+  },
+  {
+    "name": "gnu.gcj.Core"
   },
   {
     "name": "groovy.lang.Closure"
@@ -1623,6 +1820,24 @@
       {
         "name": "getPackageName",
         "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.ClassLoader",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.tools.ant.Project",
+          "java.lang.String"
+        ]
       }
     ]
   },
@@ -3074,6 +3289,18 @@
     ]
   },
   {
+    "name": "java.lang.Runtime",
+    "methods": [
+      {
+        "name": "version",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Runtime$Version"
+  },
+  {
     "name": "java.lang.RuntimePermission"
   },
   {
@@ -4309,6 +4536,9 @@
     "queryAllPublicMethods": true
   },
   {
+    "name": "java.lang.module.ModuleDescriptor"
+  },
+  {
     "name": "java.math.BigDecimal"
   },
   {
@@ -5216,6 +5446,10 @@
     ]
   },
   {
+    "name": "java.util.function.Consumer",
+    "queryAllPublicMethods": true
+  },
+  {
     "name": "java.util.logging.LogManager",
     "methods": [
       {
@@ -5354,6 +5588,9 @@
   {
     "name": "jdk.management.jfr.SettingDescriptorInfo",
     "queryAllPublicMethods": true
+  },
+  {
+    "name": "kaffe.util.NotImplemented"
   },
   {
     "name": "oracle.as.jmx.framework.PortableMBeanFactory"
@@ -5570,6 +5807,9 @@
     "queryAllPublicConstructors": true
   },
   {
+    "name": "org.apache.harmony.luni.util.Base64"
+  },
+  {
     "name": "org.apache.logging.log4j.util.LazyUtil$ReleaseAcquireLazy",
     "fields": [
       {
@@ -5605,6 +5845,430 @@
         "parameterTypes": [
           "org.apache.xmlbeans.SchemaType"
         ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.Project",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.tools.ant.Project",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.RuntimeConfigurable",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.tools.ant.Project",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.Target",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.tools.ant.Project",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.UnknownElement",
+    "methods": [
+      {
+        "name": "execute",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.helper.ProjectHelper2",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.taskdefs.Antlib",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "org.apache.tools.ant.taskdefs.Componentdef",
+    "queryAllPublicMethods": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.taskdefs.Copy",
+    "queryAllPublicMethods": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      },
+      {
+        "name": "setFile",
+        "parameterTypes": [
+          "java.io.File"
+        ]
+      },
+      {
+        "name": "setTofile",
+        "parameterTypes": [
+          "java.io.File"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.taskdefs.Definer",
+    "methods": [
+      {
+        "name": "setClassname",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "setName",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "setOnError",
+        "parameterTypes": [
+          "org.apache.tools.ant.taskdefs.Definer$OnError"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.taskdefs.Definer$OnError",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.taskdefs.Delete",
+    "queryAllPublicMethods": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      },
+      {
+        "name": "setDir",
+        "parameterTypes": [
+          "java.io.File"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.taskdefs.Replace",
+    "queryAllPublicMethods": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      },
+      {
+        "name": "setFile",
+        "parameterTypes": [
+          "java.io.File"
+        ]
+      },
+      {
+        "name": "setToken",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "setValue",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.FileSet",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.Path",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.tools.ant.Project",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.Reference",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.tools.ant.Project",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.AndSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.ContainsRegexpSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.ContainsSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.DateSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.DependSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.DepthSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.DifferentSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.ExtendSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.FilenameSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.MajoritySelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.NoneSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.NotSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.OrSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.PresentSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.SelectSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.SizeSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.TypeSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.ant.types.selectors.modifiedselector.ModifiedSelector",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.zip.AsiExtraField",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.zip.JarMarker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.zip.UnicodeCommentExtraField",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.zip.UnicodePathExtraField",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.tools.zip.Zip64ExtendedInformationExtraField",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
       }
     ]
   },
@@ -5650,6 +6314,11 @@
   },
   {
     "name": "org.dbunit.dataset.Column",
+    "fields": [
+      {
+        "name": "numeric"
+      }
+    ],
     "methods": [
       {
         "name": "getColumnName",
@@ -5657,6 +6326,18 @@
       },
       {
         "name": "getDataType",
+        "parameterTypes": []
+      },
+      {
+        "name": "getNumeric",
+        "parameterTypes": []
+      },
+      {
+        "name": "hasNumeric",
+        "parameterTypes": []
+      },
+      {
+        "name": "isNumeric",
         "parameterTypes": []
       }
     ]
@@ -5747,6 +6428,74 @@
     "fields": [
       {
         "name": "pos"
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.db.LobStorageMap$BlobMeta$Type",
+    "fields": [
+      {
+        "name": "INSTANCE"
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.db.LobStorageMap$BlobReference$Type",
+    "fields": [
+      {
+        "name": "INSTANCE"
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.db.NullValueDataType",
+    "fields": [
+      {
+        "name": "INSTANCE"
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.db.RowDataType$Factory",
+    "fields": [
+      {
+        "name": "INSTANCE"
+      }
+    ],
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.tx.VersionedValueType$Factory",
+    "fields": [
+      {
+        "name": "INSTANCE"
+      }
+    ],
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.type.ByteArrayDataType",
+    "fields": [
+      {
+        "name": "INSTANCE"
+      }
+    ]
+  },
+  {
+    "name": "org.h2.mvstore.type.LongDataType",
+    "fields": [
+      {
+        "name": "INSTANCE"
       }
     ]
   },
@@ -8705,6 +9454,17 @@
     ]
   },
   {
+    "name": "org.openxmlformats.schemas.officeDocument.x2006.sharedTypes.STTrueFalse$Enum"
+  },
+  {
+    "name": "org.openxmlformats.schemas.officeDocument.x2006.sharedTypes.STTrueFalseBlank$Enum",
+    "fields": [
+      {
+        "name": "table"
+      }
+    ]
+  },
+  {
     "name": "org.openxmlformats.schemas.officeDocument.x2006.sharedTypes.impl.STColorTypeImpl",
     "methods": [
       {
@@ -9872,6 +10632,17 @@
   },
   {
     "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTFontSizeImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTFontsImpl",
     "methods": [
       {
         "name": "<init>",
@@ -11792,7 +12563,34 @@
     ]
   },
   {
+    "name": "sun.security.provider.SHA2$SHA224",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
     "name": "sun.security.provider.SHA2$SHA256",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "sun.security.provider.SHA5$SHA384",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "sun.security.provider.SHA5$SHA512",
     "methods": [
       {
         "name": "<init>",

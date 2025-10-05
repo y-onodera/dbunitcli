@@ -5101,15 +5101,7 @@
   {
     "name": "java.util.LinkedHashMap",
     "allPublicFields": true,
-    "queryAllDeclaredMethods": true,
-    "methods": [
-      {
-        "name": "get",
-        "parameterTypes": [
-          "java.lang.Object"
-        ]
-      }
-    ]
+    "queryAllDeclaredMethods": true
   },
   {
     "name": "java.util.Map",
@@ -10727,6 +10719,17 @@
     ]
   },
   {
+    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTIgnoredErrorsImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.apache.xmlbeans.SchemaType"
+        ]
+      }
+    ]
+  },
+  {
     "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTIndexedColorsImpl",
     "methods": [
       {
@@ -11706,7 +11709,7 @@
     ]
   },
   {
-    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CommentsDocumentImpl",
+    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.STAxisImpl",
     "methods": [
       {
         "name": "<init>",
@@ -12300,7 +12303,7 @@
     ]
   },
   {
-    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.SstDocumentImpl",
+    "name": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.STXmlDataTypeImpl",
     "methods": [
       {
         "name": "<init>",
