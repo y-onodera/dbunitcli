@@ -2,15 +2,15 @@ package yo.dbunitcli.fileprocessor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.dataset.Parameter;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Map;
 import java.util.stream.Stream;
 
-public record CmdRunner(File baseDir, Map<String, Object> parameter) implements Runner {
+public record CmdRunner(File baseDir, Parameter parameter) implements Runner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmdRunner.class);
 

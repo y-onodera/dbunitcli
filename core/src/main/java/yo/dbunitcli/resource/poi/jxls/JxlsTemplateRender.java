@@ -3,6 +3,7 @@ package yo.dbunitcli.resource.poi.jxls;
 import org.jxls.builder.JxlsOutputFile;
 import org.jxls.builder.JxlsStreaming;
 import org.jxls.transform.poi.JxlsPoiTemplateFillerBuilder;
+import yo.dbunitcli.dataset.Parameter;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,10 +29,10 @@ public record JxlsTemplateRender(
         return this.templateParameterAttribute;
     }
 
-    public void render(final File aTemplate, final File aResultFile, final Map<String, Object> param) throws IOException {
+    public void render(final File aTemplate, final File aResultFile, final Parameter param) throws IOException {
         final Map<String, Object> context = new HashMap<>();
         if (Optional.ofNullable(this.getTemplateParameterAttribute()).orElse("").isEmpty()) {
-            context.putAll(param);
+            param.forEach(context::put);
         } else {
             context.put(this.getTemplateParameterAttribute(), param);
         }

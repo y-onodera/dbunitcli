@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dbunit.dataset.Column;
+import yo.dbunitcli.dataset.Parameter;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,7 +15,7 @@ import java.util.stream.IntStream;
 public class JxlsTemplateGenerator {
 
     @SuppressWarnings("unchecked")
-    public static void createTemplate(final File resultFile, final Map<String, Object> param) throws IOException {
+    public static void createTemplate(final File resultFile, final Parameter param) throws IOException {
         final Map<String, Map<String, Object>> dataSet = (Map<String, Map<String, Object>>) param.get("dataSet");
         try (final Workbook workbook = new XSSFWorkbook()) {
             for (final Map.Entry<String, Map<String, Object>> tableEntry : dataSet.entrySet()) {

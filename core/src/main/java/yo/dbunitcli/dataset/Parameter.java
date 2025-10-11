@@ -3,33 +3,55 @@ package yo.dbunitcli.dataset;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
-public class Parameter {
+public record Parameter(Map<String, Object> map) {
 
-    public static final Parameter NONE = new Parameter(0, new HashMap<>());
-
-    private final Map<String, Object> map = new HashMap<>();
+    public static final Parameter NONE = new Parameter(new HashMap<>()).withRowNumber(0);
 
     public static Parameter none() {
         return Parameter.NONE;
     }
 
-    public Parameter(final int rowNumber, final Map<String, Object> map) {
-        this.map.put("inputParam", map);
-        this.map.put("rowNumber", rowNumber);
+    public Map<String, Object> toMap() {
+        return new HashMap<>(this.map);
     }
 
-    public Map<String, Object> getMap() {
-        return this.map;
+    public void forEach(final BiConsumer<String, Object> action) {
+        this.map.forEach(action);
+    }
+
+    public Object get(final String key) {
+        return this.map.get(key);
     }
 
     public Parameter add(final String key, final Object value) {
-        this.map.put(key, value);
-        return this;
+        final Parameter result = new Parameter(new HashMap<>(this.map));
+        result.map.put(key, value);
+        return result;
     }
 
     public Parameter addAll(final Map<String, ? extends Object> other) {
-        this.map.putAll(other);
-        return this;
+        final Parameter result = new Parameter(new HashMap<>(this.map));
+        result.map.putAll(other);
+        return result;
+    }
+
+    public boolean isEmpty() {
+        return this.map.isEmpty();
+    }
+
+    public Iterable<? extends Map.Entry<String, Object>> entrySet() {
+        return this.map.entrySet();
+    }
+
+    public Parameter withRowNumber(final Integer rowNumber) {
+        return new Parameter(new HashMap<>(this.map))
+                .add("rowNumber", rowNumber);
+    }
+
+    public Parameter asInputParam() {
+        return new Parameter(new HashMap<>())
+                .add("inputParam", new HashMap<>(this.map));
     }
 }

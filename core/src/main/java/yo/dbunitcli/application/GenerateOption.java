@@ -8,6 +8,7 @@ import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.converter.DBConverter;
+import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
@@ -15,7 +16,6 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -76,8 +76,6 @@ public record GenerateOption(
     }
 
     public Stream<Parameter> parameterStream() {
-        this.parameter().getMap().put("commit", this.commit);
-        this.parameter().getMap().put("includeAllColumns", this.includeAllColumns);
         return this.unit().loadStream(this.getComparableDataSetLoader(), this.dataSetParam());
     }
 
@@ -90,7 +88,7 @@ public record GenerateOption(
     }
 
     public String resultPath(final Parameter param) {
-        return this.templateOption.getTemplateRender().render(this.resultPath(), param.getMap());
+        return this.templateOption.getTemplateRender().render(this.resultPath(), param);
     }
 
     @Override
@@ -103,12 +101,20 @@ public record GenerateOption(
     }
 
     public void write(final File resultFile, final Parameter param) throws IOException {
-        this.generateType().write(this, resultFile, param.getMap());
+        this.generateType().write(this, resultFile, param);
     }
 
     @Override
     public GenerateDto toDto() {
         return GenerateOption.toDto(this.toArgs(true));
+    }
+
+    @Override
+    public ComparableDataSetLoader getComparableDataSetLoader() {
+        return new ComparableDataSetLoader(this.parameter()
+                .add("commit", this.commit)
+                .add("includeAllColumns", this.includeAllColumns)
+        );
     }
 
     @Override
@@ -136,9 +142,7 @@ public record GenerateOption(
                 srcComponent.remove("-src.useJdbcMetaData")
                         .remove("-src.loadData");
             }
-            case xlsxTemplate -> {
-                srcComponent.remove("-src.loadData");
-            }
+            case xlsxTemplate -> srcComponent.remove("-src.loadData");
         }
         result.addComponent("srcData", srcComponent.build());
         if (!this.generateType.isFixedTemplate()) {
@@ -206,7 +210,7 @@ public record GenerateOption(
         },
         xlsx {
             @Override
-            protected void write(final GenerateOption option, final File resultFile, final Map<String, Object> param) throws IOException {
+            protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
                 JxlsTemplateRender.builder()
                         .setTemplateParameterAttribute(option.templateOption.templateParameterAttribute())
                         .setFormulaProcess(option.templateOption.formulaProcess())
@@ -219,7 +223,7 @@ public record GenerateOption(
         },
         xls {
             @Override
-            protected void write(final GenerateOption option, final File resultFile, final Map<String, Object> param) throws IOException {
+            protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
                 JxlsTemplateRender.builder()
                         .setTemplateParameterAttribute(option.templateOption.templateParameterAttribute())
                         .setFormulaProcess(option.templateOption.formulaProcess())
@@ -290,7 +294,7 @@ public record GenerateOption(
             }
 
             @Override
-            protected void write(final GenerateOption option, final File resultFile, final Map<String, Object> param) throws IOException {
+            protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
                 JxlsTemplateGenerator.createTemplate(resultFile, param);
             }
         };
@@ -303,7 +307,7 @@ public record GenerateOption(
             return null;
         }
 
-        protected void write(final GenerateOption option, final File resultFile, final Map<String, Object> param) throws IOException {
+        protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
             option.templateOption.getTemplateRender().write(this.getStGroup()
                     , option.templateString()
                     , param

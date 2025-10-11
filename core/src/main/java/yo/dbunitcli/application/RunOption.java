@@ -107,14 +107,14 @@ public record RunOption(
             @Override
             public Runner createRunner(final RunOption aOption) {
                 return new SqlRunner(aOption.jdbcOption.getDatabaseConnectionLoader()
-                        , aOption.parameter().getMap()
+                        , aOption.parameter()
                         , aOption.templateOption.getTemplateRender()
                 );
             }
         }, ant {
             @Override
             public Runner createRunner(final RunOption aOption) {
-                return new AntRunner(aOption.getBaseDir(), aOption.antOption().target(), aOption.parameter().getMap());
+                return new AntRunner(aOption.getBaseDir(), aOption.antOption().target(), aOption.parameter());
             }
 
             @Override
@@ -125,7 +125,7 @@ public record RunOption(
 
         public Runner createRunner(final RunOption aOption) {
             return new CmdRunner(aOption.getBaseDir()
-                    , aOption.parameter().getMap()
+                    , aOption.parameter()
             );
         }
 

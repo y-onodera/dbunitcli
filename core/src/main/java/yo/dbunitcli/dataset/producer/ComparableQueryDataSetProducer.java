@@ -11,7 +11,6 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Map;
 
 public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer {
 
@@ -34,8 +33,8 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
         ComparableQueryDataSetProducer.LOGGER.info("produce() - end");
     }
 
-    public Map<String, Object> getParameter() {
-        return this.parameter.getMap();
+    public Parameter getParameter() {
+        return this.parameter;
     }
 
     public TemplateRender getTemplateLoader() {

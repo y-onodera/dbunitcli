@@ -4,6 +4,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 import org.stringtemplate.v4.misc.ErrorManager;
+import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -36,18 +37,18 @@ public record TemplateRender(
         );
     }
 
-    public String render(final File aFile, final Map<String, Object> parameter) {
+    public String render(final File aFile, final Parameter parameter) {
         return this.render(FileResources.read(aFile, this.encoding()), parameter);
     }
 
-    public String render(final String target, final Map<String, Object> parameter) {
+    public String render(final String target, final Parameter parameter) {
         if (!parameter.isEmpty()) {
             return this.createST(target, parameter).render();
         }
         return target;
     }
 
-    public String replaceParameter(final String target, final Map<String, Object> parameter) {
+    public String replaceParameter(final String target, final Parameter parameter) {
         String result = target;
         for (final Map.Entry<String, Object> entry : parameter.entrySet()) {
             result = result.replace(this.getAttributeName(entry.getKey()), entry.getValue().toString());
@@ -59,13 +60,13 @@ public record TemplateRender(
         return new ST(this.createSTGroup(), result);
     }
 
-    public ST createST(final String target, final Map<String, Object> parameter) {
+    public ST createST(final String target, final Parameter parameter) {
         final String template = this.replaceParameter(target, parameter);
         final ST st = this.createST(template);
         if (Optional.ofNullable(this.templateParameterAttribute()).orElse("").isEmpty()) {
             parameter.forEach(st::add);
         } else {
-            st.add(this.templateParameterAttribute(), parameter);
+            st.add(this.templateParameterAttribute(), parameter.toMap());
         }
         return st;
     }
@@ -92,11 +93,11 @@ public record TemplateRender(
         return stGroup;
     }
 
-    public void write(final String templateString, final Map<String, Object> param, final File resultFile, final String outputEncoding) throws IOException {
+    public void write(final String templateString, final Parameter param, final File resultFile, final String outputEncoding) throws IOException {
         this.write(this.createSTGroup(), templateString, param, resultFile, outputEncoding);
     }
 
-    public void write(final STGroup stGroup, final String templateString, final Map<String, Object> param, final File resultFile, final String outputEncoding) throws IOException {
+    public void write(final STGroup stGroup, final String templateString, final Parameter param, final File resultFile, final String outputEncoding) throws IOException {
         final ST result = new ST(stGroup == null ? this.createSTGroup() : stGroup, templateString);
         param.forEach(result::add);
         result.write(resultFile, ErrorManager.DEFAULT_ERROR_LISTENER, outputEncoding);

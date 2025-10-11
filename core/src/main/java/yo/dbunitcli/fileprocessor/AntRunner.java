@@ -3,12 +3,12 @@ package yo.dbunitcli.fileprocessor;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.dataset.Parameter;
 
 import java.io.File;
-import java.util.Map;
 import java.util.stream.Stream;
 
-public record AntRunner(File baseDir, String target, Map<String, Object> parameter) implements Runner {
+public record AntRunner(File baseDir, String target, Parameter parameter) implements Runner {
     @Override
     public void runScript(final Stream<File> targetFiles) {
         targetFiles.forEach(target -> {

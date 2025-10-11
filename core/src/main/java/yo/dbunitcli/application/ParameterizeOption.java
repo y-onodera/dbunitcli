@@ -107,8 +107,8 @@ public record ParameterizeOption(
     public String[] createArgs(final Parameter aParam) {
         final String parameterList = this.parameterize()
                 ? this.templateOption.getTemplateRender()
-                .render(this.getTemplateArgs(aParam.getMap()), aParam.getMap())
-                : this.getTemplateArgs(aParam.getMap());
+                .render(this.getTemplateArgs(aParam), aParam)
+                : this.getTemplateArgs(aParam);
         final String[] result = parameterList.split("\\r?\\n");
         if (this.args.isEmpty()) {
             return result;
@@ -122,7 +122,7 @@ public record ParameterizeOption(
     }
 
     public Command<?, ?> createCommand(final Parameter aParam) {
-        return this.createCommand(this.templateOption.getTemplateRender().render(this.cmd, aParam.getMap()));
+        return this.createCommand(this.templateOption.getTemplateRender().render(this.cmd, aParam));
     }
 
     private Command<?, ?> createCommand(final String cmdType) {
@@ -136,7 +136,7 @@ public record ParameterizeOption(
         };
     }
 
-    private String getTemplateArgs(final Map<String, Object> aParam) {
+    private String getTemplateArgs(final Parameter aParam) {
         final File template;
         if (Strings.isNotEmpty(this.cmdParam)) {
             template = FileResources.searchTemplate(this.templateOption.getTemplateRender().render(this.cmdParam, aParam));

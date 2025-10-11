@@ -15,7 +15,6 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 import java.io.File;
 import java.sql.*;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -45,8 +44,8 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
         return this.param;
     }
 
-    public Map<String, Object> getParameter() {
-        return this.parameter.getMap();
+    public Parameter getParameter() {
+        return this.parameter;
     }
 
     public TemplateRender getTemplateLoader() {

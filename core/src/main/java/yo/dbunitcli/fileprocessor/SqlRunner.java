@@ -2,6 +2,7 @@ package yo.dbunitcli.fileprocessor;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.taskdefs.SQLExec;
+import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
@@ -10,33 +11,14 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public class SqlRunner implements Runner {
+public record SqlRunner(DatabaseConnectionLoader connectionLoader, Parameter parameter,
+                        TemplateRender templateRender) implements Runner {
     private static final Pattern SQLPLUS_SET = Pattern.compile("SET\\s+(DEFINE|ECHO|PAUSE|TIMING|SERVEROUTPUT)\\s+(ON|OFF).*\\n", Pattern.CASE_INSENSITIVE);
     private static final Pattern SQLPLUS_SPOOL_OR_PROMPT = Pattern.compile("(SPOOL|PROMPT)\\s.*\\n", Pattern.CASE_INSENSITIVE);
     private static final Pattern SQLPLUS_EXIT_OR_COMMIT = Pattern.compile("(EXIT|COMMIT)(\\s|\\s*;)", Pattern.CASE_INSENSITIVE);
-    private final DatabaseConnectionLoader connectionLoader;
-    private final Map<String, Object> parameter;
-    private final TemplateRender templateRender;
-
-    public SqlRunner(final DatabaseConnectionLoader connectionLoader
-            , final Map<String, Object> parameter
-            , final TemplateRender templateRender) {
-        this.connectionLoader = connectionLoader;
-        this.parameter = parameter;
-        this.templateRender = templateRender;
-    }
-
-    public Map<String, Object> getParameter() {
-        return this.parameter;
-    }
-
-    public TemplateRender getTemplateRender() {
-        return this.templateRender;
-    }
 
     @Override
     public void runScript(final Stream<File> targetFiles) {
@@ -63,13 +45,8 @@ public class SqlRunner implements Runner {
     private SQLExec createExecInstance(final Connection conn) {
         final SQLExec exec = new SQLExec() {
             @Override
-            protected Connection getConnection() {
-                return conn;
-            }
-
-            @Override
             protected void runStatements(final Reader reader, final PrintStream out) throws SQLException, IOException {
-                String statement = SqlRunner.this.getTemplateRender().render(IOUtils.toString(reader), SqlRunner.this.getParameter());
+                String statement = SqlRunner.this.templateRender().render(IOUtils.toString(reader), SqlRunner.this.parameter());
                 statement = SQLPLUS_SET.matcher(statement).replaceAll("");
                 statement = SQLPLUS_SPOOL_OR_PROMPT.matcher(statement).replaceAll("");
                 statement = SQLPLUS_EXIT_OR_COMMIT.matcher(statement).replaceAll("");
@@ -82,9 +59,14 @@ public class SqlRunner implements Runner {
                     }
                 }
             }
+
+            @Override
+            protected Connection getConnection() {
+                return conn;
+            }
         };
         exec.setExpandProperties(false);
-        exec.setEncoding(this.getTemplateRender().encoding());
+        exec.setEncoding(this.templateRender().encoding());
         return exec;
     }
 
@@ -94,7 +76,7 @@ public class SqlRunner implements Runner {
         return conn;
     }
 
-    private void printDbmsOutputResults(final Connection conn) throws java.sql.SQLException {
+    private void printDbmsOutputResults(final Connection conn) throws SQLException {
         final String getLineSql = "begin dbms_output.get_line(?,?); end;";
         final CallableStatement stmt = conn.prepareCall(getLineSql);
         boolean hasMore = true;

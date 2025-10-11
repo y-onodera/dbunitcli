@@ -22,14 +22,18 @@ public enum ParameterUnit {
                 final Integer[] rowNum = new Integer[]{0};
                 return dataSet.toMap()
                         .flatMap(it -> ((List<Map<String, Object>>) it.get("rows")).stream()
-                                .map(row -> new Parameter(rowNum[0]++, loader.parameter().getMap())
+                                .map(row -> loader.parameter()
+                                        .asInputParam()
+                                        .withRowNumber(rowNum[0]++)
                                         .addAll(it)
                                         .add("row", row)));
             }
             final Integer[] rowNum = new Integer[]{0};
             return dataSet.toMap()
-                    .map(it -> new Parameter(rowNum[0]++
-                            , loader.parameter().getMap()).addAll(it));
+                    .map(it -> loader.parameter()
+                            .asInputParam()
+                            .withRowNumber(rowNum[0]++)
+                            .addAll(it));
         }
     },
 
@@ -40,7 +44,9 @@ public enum ParameterUnit {
             try {
                 final String[] tableNames = dataSet.getTableNames();
                 return IntStream.range(0, tableNames.length)
-                        .mapToObj(it -> new Parameter(it, loader.parameter().getMap())
+                        .mapToObj(it -> loader.parameter()
+                                .asInputParam()
+                                .withRowNumber(it)
                                 .addAll(dataSet.getTable(tableNames[it]).toMap(true).get(0)));
             } catch (final DataSetException e) {
                 throw new AssertionError(e);
@@ -51,7 +57,9 @@ public enum ParameterUnit {
 
     public Stream<Parameter> loadStream(final ComparableDataSetLoader loader, final ComparableDataSetParam param) {
         final ComparableDataSet dataSet = loader.loadDataSet(param);
-        return Stream.of(new Parameter(0, loader.parameter().getMap())
+        return Stream.of(loader.parameter()
+                .asInputParam()
+                .withRowNumber(0)
                 .add("dataSet", dataSet.toMap(true)
                         .collect(Collectors.toMap(it -> it.get("tableName").toString(), it -> it, (old, other) -> other, LinkedHashMap::new))));
     }
