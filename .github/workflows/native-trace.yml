@@ -6,7 +6,8 @@ on:
   push:
     paths:
       - '.github/workflows/native-trace.yml'
-
+  workflow_dispatch:
+  
 jobs:
   build:
     runs-on: windows-latest
