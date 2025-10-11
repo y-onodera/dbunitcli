@@ -2571,6 +2571,23 @@
     "queryAllDeclaredMethods": true,
     "methods": [
       {
+        "name": "add",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.Object"
+        ]
+      },
+      {
+        "name": "addAll",
+        "parameterTypes": [
+          "java.util.Map"
+        ]
+      },
+      {
+        "name": "asInputParam",
+        "parameterTypes": []
+      },
+      {
         "name": "charAt",
         "parameterTypes": [
           "int"
@@ -2929,6 +2946,10 @@
         "parameterTypes": []
       },
       {
+        "name": "map",
+        "parameterTypes": []
+      },
+      {
         "name": "matches",
         "parameterTypes": [
           "java.lang.String"
@@ -2953,6 +2974,10 @@
         "parameterTypes": [
           "int"
         ]
+      },
+      {
+        "name": "none",
+        "parameterTypes": []
       },
       {
         "name": "offsetByCodePoints",
@@ -3199,6 +3224,10 @@
         ]
       },
       {
+        "name": "toMap",
+        "parameterTypes": []
+      },
+      {
         "name": "toString",
         "parameterTypes": []
       },
@@ -3285,6 +3314,87 @@
       {
         "name": "values",
         "parameterTypes": []
+      },
+      {
+        "name": "withRowNumber",
+        "parameterTypes": [
+          "java.lang.Integer"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Record",
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "add",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.Object"
+        ]
+      },
+      {
+        "name": "addAll",
+        "parameterTypes": [
+          "java.util.Map"
+        ]
+      },
+      {
+        "name": "asInputParam",
+        "parameterTypes": []
+      },
+      {
+        "name": "entrySet",
+        "parameterTypes": []
+      },
+      {
+        "name": "equals",
+        "parameterTypes": [
+          "java.lang.Object"
+        ]
+      },
+      {
+        "name": "forEach",
+        "parameterTypes": [
+          "java.util.function.BiConsumer"
+        ]
+      },
+      {
+        "name": "get",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "hashCode",
+        "parameterTypes": []
+      },
+      {
+        "name": "isEmpty",
+        "parameterTypes": []
+      },
+      {
+        "name": "map",
+        "parameterTypes": []
+      },
+      {
+        "name": "none",
+        "parameterTypes": []
+      },
+      {
+        "name": "toMap",
+        "parameterTypes": []
+      },
+      {
+        "name": "toString",
+        "parameterTypes": []
+      },
+      {
+        "name": "withRowNumber",
+        "parameterTypes": [
+          "java.lang.Integer"
+        ]
       }
     ]
   },
@@ -12603,6 +12713,19 @@
       {
         "name": "<init>",
         "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "yo.dbunitcli.dataset.Parameter",
+    "allPublicFields": true,
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "get",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
       }
     ]
   },
