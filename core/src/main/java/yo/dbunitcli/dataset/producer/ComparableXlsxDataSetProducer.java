@@ -76,24 +76,6 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
         ComparableXlsxDataSetProducer.LOGGER.info("produce() - end");
     }
 
-    protected void processSheet(
-            final Styles styles,
-            final SharedStrings strings,
-            final XSSFSheetXMLHandler.SheetContentsHandler sheetHandler,
-            final InputStream sheetInputStream) throws IOException, SAXException {
-        final DataFormatter formatter = new DataFormatter();
-        final InputSource sheetSource = new InputSource(sheetInputStream);
-        try {
-            final XMLReader sheetParser = XMLHelper.newXMLReader();
-            final ContentHandler handler = new XSSFSheetXMLHandler(
-                    styles, null, strings, sheetHandler, formatter, false);
-            sheetParser.setContentHandler(handler);
-            sheetParser.parse(sheetSource);
-        } catch (final ParserConfigurationException e) {
-            throw new RuntimeException("SAX parser appears to be broken - " + e.getMessage());
-        }
-    }
-
     protected void produceFromFile(final File sourceFile) {
         ComparableXlsxDataSetProducer.LOGGER.info("produce - start fileName={}", sourceFile);
         try (final OPCPackage pkg = OPCPackage.open(sourceFile, PackageAccess.READ)) {
@@ -122,5 +104,23 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
             throw new AssertionError(e);
         }
         ComparableXlsxDataSetProducer.LOGGER.info("produce - end   fileName={}", sourceFile);
+    }
+
+    protected void processSheet(
+            final Styles styles,
+            final SharedStrings strings,
+            final XSSFSheetXMLHandler.SheetContentsHandler sheetHandler,
+            final InputStream sheetInputStream) throws IOException, SAXException {
+        final DataFormatter formatter = new DataFormatter();
+        final InputSource sheetSource = new InputSource(sheetInputStream);
+        try {
+            final XMLReader sheetParser = XMLHelper.newXMLReader();
+            final ContentHandler handler = new XSSFSheetXMLHandler(
+                    styles, null, strings, sheetHandler, formatter, false);
+            sheetParser.setContentHandler(handler);
+            sheetParser.parse(sheetSource);
+        } catch (final ParserConfigurationException e) {
+            throw new RuntimeException("SAX parser appears to be broken - " + e.getMessage());
+        }
     }
 }

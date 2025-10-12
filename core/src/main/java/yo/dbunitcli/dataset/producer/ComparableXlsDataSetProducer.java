@@ -78,6 +78,30 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
         ComparableXlsDataSetProducer.LOGGER.info("produce() - end");
     }
 
+    protected void produceFromFile(final File sourceFile) {
+        ComparableXlsDataSetProducer.LOGGER.info("produce - start fileName={}", sourceFile);
+        this.sourceFile = sourceFile;
+        try (final POIFSFileSystem newFs = new POIFSFileSystem(this.sourceFile, true)) {
+            this.rowsTableBuilder = null;
+            this.randomCellRecordBuilder = null;
+            this.sheetIndex = -1;
+            this.boundSheetRecords = new ArrayList<>();
+            this.orderedBSRs = null;
+            final MissingRecordAwareHSSFListener listener = new MissingRecordAwareHSSFListener(this);
+            this.formatListener = new FormatTrackingHSSFListener(listener);
+
+            final HSSFEventFactory factory = new HSSFEventFactory();
+            final HSSFRequest request = new HSSFRequest();
+            request.addListenerForAllRecords(this.formatListener);
+            factory.processWorkbookEvents(request, newFs);
+            this.handleSheetEnd();
+            ComparableXlsDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex].getSheetname(), this.sheetIndex);
+        } catch (final IOException e) {
+            throw new AssertionError(e);
+        }
+        ComparableXlsDataSetProducer.LOGGER.info("produce - end   fileName={}", sourceFile);
+    }
+
     @Override
     public void processRecord(final Record record) {
         int thisRow = -1;
@@ -209,30 +233,6 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
         if (record instanceof LastCellOfRowDummyRecord) {
             this.addNewRowToRowsTable(this.lastRowNumber);
         }
-    }
-
-    protected void produceFromFile(final File sourceFile) {
-        ComparableXlsDataSetProducer.LOGGER.info("produce - start fileName={}", sourceFile);
-        this.sourceFile = sourceFile;
-        try (final POIFSFileSystem newFs = new POIFSFileSystem(this.sourceFile, true)) {
-            this.rowsTableBuilder = null;
-            this.randomCellRecordBuilder = null;
-            this.sheetIndex = -1;
-            this.boundSheetRecords = new ArrayList<>();
-            this.orderedBSRs = null;
-            final MissingRecordAwareHSSFListener listener = new MissingRecordAwareHSSFListener(this);
-            this.formatListener = new FormatTrackingHSSFListener(listener);
-
-            final HSSFEventFactory factory = new HSSFEventFactory();
-            final HSSFRequest request = new HSSFRequest();
-            request.addListenerForAllRecords(this.formatListener);
-            factory.processWorkbookEvents(request, newFs);
-            this.handleSheetEnd();
-            ComparableXlsDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex].getSheetname(), this.sheetIndex);
-        } catch (final IOException e) {
-            throw new AssertionError(e);
-        }
-        ComparableXlsDataSetProducer.LOGGER.info("produce - end   fileName={}", sourceFile);
     }
 
 }
