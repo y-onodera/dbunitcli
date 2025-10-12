@@ -1,4 +1,6 @@
-package yo.dbunitcli.common.filter;
+package yo.dbunitcli.dataset.filter;
+
+import yo.dbunitcli.dataset.SourceFilter;
 
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;

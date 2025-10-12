@@ -5,7 +5,7 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.common.filter.SourceFilter;
+import yo.dbunitcli.dataset.SourceFilter;
 import yo.dbunitcli.resource.poi.XlsxCellsTableDefine;
 import yo.dbunitcli.resource.poi.XlsxRowsTableDefine;
 import yo.dbunitcli.resource.poi.XlsxSchema;

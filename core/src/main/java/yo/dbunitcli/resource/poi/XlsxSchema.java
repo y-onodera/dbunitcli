@@ -1,9 +1,9 @@
 package yo.dbunitcli.resource.poi;
 
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
-import yo.dbunitcli.common.filter.SourceFilter;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.Source;
+import yo.dbunitcli.dataset.SourceFilter;
 
 import java.util.HashMap;
 import java.util.List;

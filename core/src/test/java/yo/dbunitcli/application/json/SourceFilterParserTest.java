@@ -3,7 +3,7 @@ package yo.dbunitcli.application.json;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import org.junit.jupiter.api.Test;
-import yo.dbunitcli.common.filter.SourceFilter;
+import yo.dbunitcli.dataset.SourceFilter;
 
 import static org.junit.jupiter.api.Assertions.*;
 

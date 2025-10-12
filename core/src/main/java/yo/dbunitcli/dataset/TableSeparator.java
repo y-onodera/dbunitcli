@@ -10,7 +10,7 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.filter.IColumnFilter;
-import yo.dbunitcli.common.filter.SourceFilter;
+import yo.dbunitcli.application.json.SourceFilterParser;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -28,8 +28,8 @@ public record TableSeparator(SourceFilter sourceFilter
         , boolean distinct
 ) {
 
-    public static final SourceFilter ACCEPT_ALL = SourceFilter.always(true);
-    public static final SourceFilter REJECT_ALL = SourceFilter.always(false);
+    public static final SourceFilter ACCEPT_ALL = SourceFilterParser.always(true);
+    public static final SourceFilter REJECT_ALL = SourceFilterParser.always(false);
     public static final RowFilter NO_FILTER = new RowFilter(new ArrayList<>());
 
     public static final TableSeparator NONE = TableSeparator.builder().build();

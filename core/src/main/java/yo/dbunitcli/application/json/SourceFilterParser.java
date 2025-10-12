@@ -4,11 +4,13 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
-import yo.dbunitcli.common.filter.SourceFilter;
+import yo.dbunitcli.dataset.SourceFilter;
+import yo.dbunitcli.dataset.filter.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * JSONオブジェクトからTargetFilterインスタンスを生成するパーサー
@@ -16,6 +18,52 @@ import java.util.function.Function;
 public class SourceFilterParser {
     private final JsonObject jsonObject;
     private final String key;
+
+    public static SourceFilter withFilePathMatch(final SourceFilter base, final String filePath) {
+        return new WithFilePathMatchFilter(base, filePath);
+    }
+
+    /**
+     * 正規表現パターンでマッチングするフィルタを作成
+     *
+     * @param regex 正規表現パターン
+     * @return フィルタのインスタンス
+     * @throws PatternSyntaxException 不正な正規表現パターンの場合
+     * @throws NullPointerException   パターンがnullの場合
+     */
+    public static SourceFilter regex(final String regex) {
+        return new RegexFilter(regex);
+    }
+
+    /**
+     * 指定された名前のリストに完全一致するかを判定するフィルタを作成
+     *
+     * @param names 対象とする名前の配列
+     * @return フィルタのインスタンス
+     */
+    public static SourceFilter any(final String... names) {
+        return new AnyFilter(List.of(names));
+    }
+
+    /**
+     * パターン文字列を含むかを判定するフィルタを作成
+     *
+     * @param pattern パターン文字列
+     * @return フィルタのインスタンス
+     */
+    public static SourceFilter contain(final String... pattern) {
+        return new ContainFilter(List.of(pattern));
+    }
+
+    /**
+     * 常に同じ結果を返すフィルタを作成
+     *
+     * @param result 返す結果
+     * @return フィルタのインスタンス
+     */
+    public static SourceFilter always(final boolean result) {
+        return new AlwaysFilter(result);
+    }
 
     /**
      * コンストラクタ
@@ -39,14 +87,14 @@ public class SourceFilterParser {
      */
     public SourceFilter parseEquals() {
         if (this.jsonObject.isEmpty()) {
-            return SourceFilter.always(true);
+            return always(true);
         }
 
         final JsonValue value = this.jsonObject.get(this.key);
         final SourceFilter filter;
         switch (value.getValueType()) {
-            case STRING -> filter = SourceFilter.any(((JsonString) value).getString());
-            case ARRAY -> filter = SourceFilter.any(this.parseArrayValue(value.asJsonArray()));
+            case STRING -> filter = any(((JsonString) value).getString());
+            case ARRAY -> filter = any(this.parseArrayValue(value.asJsonArray()));
             case OBJECT -> filter = this.parseFilePathFilter(value.asJsonObject(), this::any);
             default -> throw new IllegalArgumentException("Unsupported value type: " + value.getValueType());
         }
@@ -62,18 +110,18 @@ public class SourceFilterParser {
      */
     public SourceFilter parsePattern() {
         if (this.jsonObject.isEmpty()) {
-            return SourceFilter.always(true);
+            return always(true);
         }
 
         final JsonValue value = this.jsonObject.get(this.key);
         if (value == null) {
-            return SourceFilter.always(true);
+            return always(true);
         }
 
         final SourceFilter filter;
         switch (value.getValueType()) {
-            case STRING -> filter = SourceFilter.contain(((JsonString) value).getString());
-            case ARRAY -> filter = SourceFilter.contain(this.parseArrayValue(value.asJsonArray()));
+            case STRING -> filter = contain(((JsonString) value).getString());
+            case ARRAY -> filter = contain(this.parseArrayValue(value.asJsonArray()));
             case OBJECT -> filter = this.parseFilePathFilter(value.asJsonObject(), this::contain);
             default -> throw new IllegalArgumentException("Unsupported value type: " + value.getValueType());
         }
@@ -102,7 +150,7 @@ public class SourceFilterParser {
     private SourceFilter parseFilePathFilter(final JsonObject obj, final Function<JsonObject, SourceFilter> baseParse) {
         final SourceFilter result = baseParse.apply(obj);
         if (obj.containsKey("filePath")) {
-            return SourceFilter.withFilePathMatch(result, obj.getString("filePath"));
+            return withFilePathMatch(result, obj.getString("filePath"));
         }
         return result;
     }
@@ -110,8 +158,8 @@ public class SourceFilterParser {
     private SourceFilter any(final JsonObject obj) {
         final JsonValue value = obj.get("any");
         return switch (value.getValueType()) {
-            case STRING -> SourceFilter.any(((JsonString) value).getString());
-            case ARRAY -> SourceFilter.any(this.parseArrayValue(value.asJsonArray()));
+            case STRING -> any(((JsonString) value).getString());
+            case ARRAY -> any(this.parseArrayValue(value.asJsonArray()));
             default -> throw new IllegalArgumentException("Unsupported value type: " + value.getValueType());
 
         };
@@ -134,9 +182,9 @@ public class SourceFilterParser {
 
     private SourceFilter parseContainFilter(final JsonObject obj) {
         if (obj.containsKey("regex")) {
-            return SourceFilter.regex(obj.getString("regex"));
+            return regex(obj.getString("regex"));
         } else if (obj.containsKey("string")) {
-            return SourceFilter.contain(obj.getString("string"));
+            return contain(obj.getString("string"));
         } else {
             throw new IllegalArgumentException("Object must contain either 'regex' or 'string' property");
         }

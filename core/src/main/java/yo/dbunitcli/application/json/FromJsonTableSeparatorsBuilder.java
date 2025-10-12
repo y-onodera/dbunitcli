@@ -1,7 +1,6 @@
 package yo.dbunitcli.application.json;
 
 import jakarta.json.*;
-import yo.dbunitcli.common.filter.SourceFilter;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.resource.FileResources;
 

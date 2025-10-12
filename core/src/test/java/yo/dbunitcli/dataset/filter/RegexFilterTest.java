@@ -1,4 +1,4 @@
-package yo.dbunitcli.common.filter;
+package yo.dbunitcli.dataset.filter;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
