@@ -10,12 +10,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-public record Source(String filePath, String fileName, String sheetName, String tableName, boolean addFileInfo) {
-    public static Source NONE = new Source("", "", "", "", false);
+public record Source(String filePath, String fileName, String sheetName, String tableName, boolean addFileInfo,
+                     boolean join) {
+    public static Source NONE = new Source("", "", "", "", false, false);
+
+    public static Source JOIN = new Source("", "", "", "", false, true);
 
     public Source(final File sourceFile, final boolean addFileInfo) {
         this(sourceFile.getAbsolutePath().replaceAll("\\\\", "/"), sourceFile.getName()
-                , "", "", addFileInfo);
+                , "", "", addFileInfo, false);
     }
 
     public TableMetaDataWithSource wrap(final ITableMetaData tableMetaData) {
@@ -28,15 +31,15 @@ public record Source(String filePath, String fileName, String sheetName, String 
 
 
     public Source addFileInfo(final boolean addFileInfo) {
-        return new Source(this.filePath, this.fileName, this.sheetName, this.tableName, addFileInfo);
+        return new Source(this.filePath, this.fileName, this.sheetName, this.tableName, addFileInfo, this.join);
     }
 
     public Source sheetName(final String sheetName) {
-        return new Source(this.filePath, this.fileName, sheetName, this.tableName, this.addFileInfo);
+        return new Source(this.filePath, this.fileName, sheetName, this.tableName, this.addFileInfo, this.join);
     }
 
     public Source tableName(final String tableName) {
-        return new Source(this.filePath, this.fileName, this.sheetName, tableName, this.addFileInfo);
+        return new Source(this.filePath, this.fileName, this.sheetName, tableName, this.addFileInfo, this.join);
     }
 
     public Column[] getColumns(final ITableMetaData tableMetaData) throws DataSetException {

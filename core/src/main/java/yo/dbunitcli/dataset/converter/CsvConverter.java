@@ -8,6 +8,7 @@ import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.datatype.TypeCastException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
@@ -47,6 +48,36 @@ public class CsvConverter implements IDataSetConverter {
         this.encoding = encoding;
         this.exportEmptyTable = exportEmptyTable;
         this.exportHeader = exportHeader;
+    }
+
+    @Override
+    public boolean isExportEmptyTable() {
+        return this.exportEmptyTable;
+    }
+
+    @Override
+    public void reStartTable(final AddSettingTableMetaData metaData, final Integer writeRows) {
+        try {
+            this.activeMetaData = metaData;
+            this.writeRows = writeRows;
+            final File directory = new File(this.theDirectory);
+            this.file = new File(directory, metaData.getTableName() + ".csv");
+            CsvConverter.LOGGER.info("convert - restart fileName={},rows={}", this.file, this.writeRows);
+            final FileOutputStream fos = new FileOutputStream(this.file, true);
+            this.writer = new OutputStreamWriter(fos, this.encoding);
+        } catch (final IOException var3) {
+            throw new AssertionError(var3);
+        }
+    }
+
+    @Override
+    public File getDir() {
+        return this.resultDir;
+    }
+
+    @Override
+    public IDataSetConverter split() {
+        return new CsvConverter(this.theDirectory, this.resultDir, this.encoding, this.exportEmptyTable, this.exportHeader);
     }
 
     @Override
@@ -120,36 +151,6 @@ public class CsvConverter implements IDataSetConverter {
         });
         this.write(System.lineSeparator());
         this.writeRows++;
-    }
-
-    @Override
-    public boolean isExportEmptyTable() {
-        return this.exportEmptyTable;
-    }
-
-    @Override
-    public void reStartTable(final ITableMetaData metaData, final Integer writeRows) {
-        try {
-            this.activeMetaData = metaData;
-            this.writeRows = writeRows;
-            final File directory = new File(this.theDirectory);
-            this.file = new File(directory, metaData.getTableName() + ".csv");
-            CsvConverter.LOGGER.info("convert - restart fileName={},rows={}", this.file, this.writeRows);
-            final FileOutputStream fos = new FileOutputStream(this.file, true);
-            this.writer = new OutputStreamWriter(fos, this.encoding);
-        } catch (final IOException var3) {
-            throw new AssertionError(var3);
-        }
-    }
-
-    @Override
-    public File getDir() {
-        return this.resultDir;
-    }
-
-    @Override
-    public IDataSetConverter split() {
-        return new CsvConverter(this.theDirectory, this.resultDir, this.encoding, this.exportEmptyTable, this.exportHeader);
     }
 
     protected void writeColumnNames() {

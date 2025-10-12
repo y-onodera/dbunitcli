@@ -4,7 +4,6 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DefaultTableMetaData;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -64,13 +63,13 @@ public class ComparableTableJoin {
         return this.getCondition().hasRelation(tableName);
     }
 
-    public DefaultTableMetaData joinMetaData() {
-        return new DefaultTableMetaData(this.left.getTableMetaData().getTableName() + "_with_" + this.right.getTableMetaData().getTableName()
+    public TableMetaDataWithSource joinMetaData() {
+        return TableMetaDataWithSource.fromJoin(this.left.getTableMetaData().getTableName() + "_with_" + this.right.getTableMetaData().getTableName()
                 , Stream.concat(this.convertColumnName(this.left.getTableMetaData())
-                        , this.convertColumnName(this.right.getTableMetaData()))
-                .toArray(Column[]::new)
+                                , this.convertColumnName(this.right.getTableMetaData()))
+                        .toArray(Column[]::new)
                 , this.convertColumnName(this.left.getTableMetaData(), this.left.getTableMetaData().getPrimaryKeys())
-                .toArray(Column[]::new)
+                        .toArray(Column[]::new)
         );
     }
 

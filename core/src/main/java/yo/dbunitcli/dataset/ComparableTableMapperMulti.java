@@ -17,7 +17,7 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     private List<ComparableTableJoin> joins;
 
     public ComparableTableMapperMulti(final List<ComparableTableMapper> delegates) {
-        this.head = delegates.get(0);
+        this.head = delegates.getFirst();
         this.rests = delegates.subList(1, delegates.size());
         this.rows = new ArrayList<>();
     }
@@ -28,7 +28,7 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
         this.alreadyWrite = alreadyWrite;
         this.joins = joins;
         this.head.startTable(converter, alreadyWrite, joins);
-        if (this.converter != null && this.converter.isSplittable()) {
+        if (this.splitConvert()) {
             this.rests.forEach(it -> it.startTable(converter.split(), alreadyWrite, joins));
         }
     }
@@ -36,7 +36,7 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     @Override
     public void addRow(final Object[] values) {
         this.head.addRow(values);
-        if (this.converter != null && this.converter.isSplittable()) {
+        if (this.splitConvert()) {
             this.rests.forEach(it -> it.addRow(values));
         } else {
             this.rows.add(values);
@@ -46,7 +46,7 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     @Override
     public void endTable(final OrderedTableNameMap orderedTableNameMap) {
         this.head.endTable(orderedTableNameMap);
-        if (this.converter != null && this.converter.isSplittable()) {
+        if (this.splitConvert()) {
             this.rests.forEach(it -> it.endTable(orderedTableNameMap));
         } else {
             this.rests.forEach(it -> {
@@ -55,5 +55,9 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
                 it.endTable(orderedTableNameMap);
             });
         }
+    }
+
+    private boolean splitConvert() {
+        return this.converter != null && this.converter.isSplittable();
     }
 }

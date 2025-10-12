@@ -32,7 +32,7 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
         final List<Integer> targetRows = new ArrayList<>();
         IntStream.range(0, oldRow.length).forEach(columnIndex -> {
             if (!Objects.equals(this.toString(oldRow[columnIndex]), this.toString(newRow[columnIndex]))) {
-                if (targetRows.size() == 0) {
+                if (targetRows.isEmpty()) {
                     targetRows.addAll(this.modifyDiffTable.addRow(key, columnIndex, oldRow, newRow));
                 } else {
                     this.modifyDiffTable.addDiffColumn(targetRows, columnIndex);
@@ -122,7 +122,7 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
     protected String toString(final Object value) {
         if (value == null) {
             return null;
-        } else if (value instanceof BigDecimal num) {
+        } else if (value instanceof final BigDecimal num) {
             return num.toPlainString();
         }
         return value.toString();

@@ -3,17 +3,21 @@ package yo.dbunitcli.dataset;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
-import org.dbunit.dataset.ITableMetaData;
+import org.dbunit.dataset.stream.IDataSetConsumer;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-public interface IDataSetConverter extends org.dbunit.dataset.stream.IDataSetConsumer {
+public interface IDataSetConverter extends IDataSetConsumer {
 
     boolean isExportEmptyTable();
 
-    void reStartTable(ITableMetaData tableMetaData, Integer writeRows);
+    default void startTableFromSource(final TableMetaDataWithSource source) {
+        // nothing default
+    }
+
+    void reStartTable(AddSettingTableMetaData tableMetaData, Integer writeRows);
 
     default void convert(final ITable aTable) {
         if (!this.isExportEmptyTable() && aTable.getRowCount() == 0) {
@@ -63,4 +67,5 @@ public interface IDataSetConverter extends org.dbunit.dataset.stream.IDataSetCon
     }
 
     IDataSetConverter split();
+
 }

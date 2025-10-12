@@ -3,6 +3,7 @@ package yo.dbunitcli.dataset.converter;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
+import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.converter.db.*;
@@ -25,6 +26,27 @@ public class DBConverter implements IDataSetConverter {
         this.operation = operation;
         this.exportEmptyTable = exportEmptyTable;
         this.operator = operation.operator(connection);
+    }
+
+    @Override
+    public boolean isExportEmptyTable() {
+        return this.exportEmptyTable;
+    }
+
+    @Override
+    public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
+        this.operator.reStartTable(tableMetaData);
+    }
+
+    @Override
+    public IDataSetConverter split() {
+        try {
+            final IDataSetConverter result = new DBConverter(this.connection, this.operation, this.exportEmptyTable);
+            result.startDataSet();
+            return result;
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
@@ -52,27 +74,6 @@ public class DBConverter implements IDataSetConverter {
         this.operator.row(objects);
     }
 
-    @Override
-    public boolean isExportEmptyTable() {
-        return this.exportEmptyTable;
-    }
-
-    @Override
-    public void reStartTable(final ITableMetaData tableMetaData, final Integer writeRows) {
-        this.operator.reStartTable(tableMetaData);
-    }
-
-    @Override
-    public IDataSetConverter split() {
-        try {
-            final IDataSetConverter result = new DBConverter(this.connection, this.operation, this.exportEmptyTable);
-            result.startDataSet();
-            return result;
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
-    }
-
     public enum Operation {
         INSERT,
         UPDATE,
@@ -81,17 +82,13 @@ public class DBConverter implements IDataSetConverter {
         CLEAN_INSERT;
 
         DBOperator operator(final IDatabaseConnection connection) {
-            switch (this) {
-                case INSERT:
-                    return new InsertOperator(connection);
-                case UPDATE:
-                    return new UpdateOperator(connection);
-                case DELETE:
-                    return new DeleteOperator(connection);
-                case REFRESH:
-                    return new RefreshOperator(connection);
-            }
-            return new CleanInsertOperator(connection);
+            return switch (this) {
+                case INSERT -> new InsertOperator(connection);
+                case UPDATE -> new UpdateOperator(connection);
+                case DELETE -> new DeleteOperator(connection);
+                case REFRESH -> new RefreshOperator(connection);
+                default -> new CleanInsertOperator(connection);
+            };
         }
     }
 }

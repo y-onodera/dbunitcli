@@ -25,8 +25,16 @@ public class TableMetaDataWithSource extends DefaultTableMetaData {
         return new Source(sourceFile, addFileInfo);
     }
 
+    public static TableMetaDataWithSource fromJoin(final String tableName, final Column[] columns, final Column[] primaryKeys) {
+        return new TableMetaDataWithSource(tableName, columns, primaryKeys, Source.JOIN);
+    }
+
     public TableMetaDataWithSource(final ITableMetaData tableMetaData, final Source source) throws DataSetException {
-        super(tableMetaData.getTableName(), source.getColumns(tableMetaData), tableMetaData.getPrimaryKeys());
+        this(tableMetaData.getTableName(), source.getColumns(tableMetaData), tableMetaData.getPrimaryKeys(), source);
+    }
+
+    public TableMetaDataWithSource(final String tableName, final Column[] columns, final Column[] primaryKeys, final Source source) {
+        super(tableName, columns, primaryKeys);
         this.source = source;
     }
 

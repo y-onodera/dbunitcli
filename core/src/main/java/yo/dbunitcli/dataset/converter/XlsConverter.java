@@ -10,6 +10,7 @@ import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.datatype.TypeCastException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
@@ -73,6 +74,39 @@ public class XlsConverter implements IDataSetConverter {
     }
 
     @Override
+    public boolean isExportEmptyTable() {
+        return this.exportEmptyTable;
+    }
+
+    @Override
+    public void reStartTable(final AddSettingTableMetaData metaData, final Integer writeRows) {
+        XlsConverter.LOGGER.info("convert - reStart sheetName={},rows={}", metaData.getTableName(), writeRows);
+        this.metaData = metaData;
+        if (this.tableExport == TableExportType.BOOK) {
+            this.filename = this.metaData.getTableName();
+            this.workbook = this.createWorkbook(this.writeTo());
+            this.sheetIndex = 0;
+        }
+        this.sheet = this.workbook.getSheet(this.metaData.getTableName());
+        this.rowIndex = writeRows + 1;
+    }
+
+    @Override
+    public File getDir() {
+        return this.resultDir;
+    }
+
+    @Override
+    public boolean isSplittable() {
+        return this.tableExport != TableExportType.SHEET;
+    }
+
+    @Override
+    public IDataSetConverter split() {
+        return new XlsConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable, this.exportHeader);
+    }
+
+    @Override
     public void startDataSet() throws DataSetException {
         if (this.tableExport == TableExportType.SHEET) {
             this.workbook = this.createWorkbook();
@@ -124,53 +158,19 @@ public class XlsConverter implements IDataSetConverter {
             final Object value = objects[k];
             if (value != null) {
                 final Cell cell = row.createCell(k);
-                if (value instanceof final Date date) {
-                    this.setDateCell(cell, date);
-                } else if (value instanceof final BigDecimal numeric) {
-                    this.setNumericCell(cell, numeric, this.workbook);
-                } else if (value instanceof final Long numeric) {
-                    this.setNumericCell(cell, new BigDecimal(numeric), this.workbook);
-                } else {
-                    final String stringValue = this.getString(value);
-                    if (!Optional.ofNullable(stringValue).orElse("").isEmpty()) {
-                        cell.setCellValue(stringValue);
+                switch (value) {
+                    case final Date date -> this.setDateCell(cell, date);
+                    case final BigDecimal numeric -> this.setNumericCell(cell, numeric, this.workbook);
+                    case final Long numeric -> this.setNumericCell(cell, new BigDecimal(numeric), this.workbook);
+                    default -> {
+                        final String stringValue = this.getString(value);
+                        if (!Optional.ofNullable(stringValue).orElse("").isEmpty()) {
+                            cell.setCellValue(stringValue);
+                        }
                     }
                 }
             }
         });
-    }
-
-    @Override
-    public boolean isExportEmptyTable() {
-        return this.exportEmptyTable;
-    }
-
-    @Override
-    public void reStartTable(final ITableMetaData metaData, final Integer writeRows) {
-        XlsConverter.LOGGER.info("convert - reStart sheetName={},rows={}", metaData.getTableName(), writeRows);
-        this.metaData = metaData;
-        if (this.tableExport == TableExportType.BOOK) {
-            this.filename = this.metaData.getTableName();
-            this.workbook = this.createWorkbook(this.writeTo());
-            this.sheetIndex = 0;
-        }
-        this.sheet = this.workbook.getSheet(this.metaData.getTableName());
-        this.rowIndex = writeRows + 1;
-    }
-
-    @Override
-    public File getDir() {
-        return this.resultDir;
-    }
-
-    @Override
-    public boolean isSplittable() {
-        return this.tableExport != TableExportType.SHEET;
-    }
-
-    @Override
-    public IDataSetConverter split() {
-        return new XlsConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable, this.exportHeader);
     }
 
     protected void writeColumnNames() throws DataSetException {
