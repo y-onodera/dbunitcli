@@ -3,9 +3,9 @@ package yo.dbunitcli.dataset.producer;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.datatype.DataType;
-import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.Parameter;
@@ -28,7 +28,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     private final String[] headerNames;
     private final boolean loadData;
     private final boolean addFileInfo;
-    private IDataSetConsumer consumer;
+    private ComparableDataSet consumer;
 
     public ComparableCSVQueryDataSetProducer(final ComparableDataSetParam param, final Parameter parameter) {
         this.param = param;
@@ -37,11 +37,6 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
         this.headerNames = this.param.headerNames();
         this.loadData = this.param.loadData();
         this.addFileInfo = this.param.addFileInfo();
-    }
-
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
     }
 
     public Parameter getParameter() {
@@ -53,7 +48,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     }
 
     @Override
-    public void setConsumer(final IDataSetConsumer iDataSetConsumer) {
+    public void setConsumer(final ComparableDataSet iDataSetConsumer) {
         this.consumer = iDataSetConsumer;
     }
 
@@ -66,6 +61,11 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableCSVQueryDataSetProducer.LOGGER.info("produce() - end");
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
     }
 
     protected void produceFromFile(final File aFile) {

@@ -2,10 +2,10 @@ package yo.dbunitcli.resource.poi;
 
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.common.Source;
+import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.Source;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -17,23 +17,25 @@ public class ExcelMappingDataSetConsumerWrapper {
     private final XlsxSchema schema;
     private final int startRow;
     protected boolean addFileInfo;
-    protected IDataSetConsumer consumer;
+    protected ComparableDataSet consumer;
     protected XlsxCellsToTableBuilder randomCellRecordBuilder;
     protected XlsxRowsToTableBuilder rowsTableBuilder;
     private int rowTableRows = 0;
 
-    public ExcelMappingDataSetConsumerWrapper(final IDataSetConsumer consumer
-            , final XlsxSchema schema
+    public ExcelMappingDataSetConsumerWrapper(final XlsxSchema schema
             , final int startRow
             , final String[] headerNames
             , final boolean loadData
             , final boolean addFileInfo) {
-        this.consumer = consumer;
         this.schema = schema;
         this.startRow = startRow;
         this.headerNames = headerNames;
         this.loadData = loadData;
         this.addFileInfo = addFileInfo;
+    }
+
+    public void setConsumer(final ComparableDataSet aConsumer) {
+        this.consumer = aConsumer;
     }
 
     protected void handleSheetStart(final String[] headerNames, final Source source) {

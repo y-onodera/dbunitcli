@@ -3,10 +3,9 @@ package yo.dbunitcli.resource.poi;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DefaultTableMetaData;
-import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
-import yo.dbunitcli.common.Source;
-import yo.dbunitcli.common.TableMetaDataWithSource;
+import yo.dbunitcli.dataset.Source;
+import yo.dbunitcli.dataset.TableMetaDataWithSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +40,7 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
     }
 
     @Override
-    public ITableMetaData startNewTable() {
+    public TableMetaDataWithSource startNewTable() {
         this.nowProcessing = this.source.wrap(new DefaultTableMetaData(this.tableName, this.getColumns()));
         return this.nowProcessing;
     }

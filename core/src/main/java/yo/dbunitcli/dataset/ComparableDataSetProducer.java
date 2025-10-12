@@ -1,16 +1,18 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.datatype.DataType;
-import org.dbunit.dataset.stream.IDataSetProducer;
-import yo.dbunitcli.common.Source;
-import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.io.File;
 import java.util.Arrays;
 
-public interface ComparableDataSetProducer extends IDataSetProducer {
+public interface ComparableDataSetProducer {
+
+    void setConsumer(ComparableDataSet consumer) throws DataSetException;
+
+    void produce() throws DataSetException;
 
     default String getSrc() {
         return this.getParam().src().getPath();

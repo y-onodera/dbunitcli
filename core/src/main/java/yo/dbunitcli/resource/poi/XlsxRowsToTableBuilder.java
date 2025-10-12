@@ -1,7 +1,7 @@
 package yo.dbunitcli.resource.poi;
 
 import org.apache.poi.ss.util.CellReference;
-import org.dbunit.dataset.ITableMetaData;
+import yo.dbunitcli.dataset.TableMetaDataWithSource;
 
 public interface XlsxRowsToTableBuilder {
 
@@ -9,7 +9,7 @@ public interface XlsxRowsToTableBuilder {
 
     boolean hasRow(int rowNum);
 
-    ITableMetaData startNewTable();
+    TableMetaDataWithSource startNewTable();
 
     void clearRowValue();
 

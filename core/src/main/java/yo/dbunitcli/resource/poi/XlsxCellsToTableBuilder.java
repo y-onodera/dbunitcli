@@ -3,8 +3,8 @@ package yo.dbunitcli.resource.poi;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
-import yo.dbunitcli.common.Source;
-import yo.dbunitcli.common.TableMetaDataWithSource;
+import yo.dbunitcli.dataset.Source;
+import yo.dbunitcli.dataset.TableMetaDataWithSource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,7 +70,7 @@ public class XlsxCellsToTableBuilder {
         return this.tableNames;
     }
 
-    public ITableMetaData getTableMetaData(final String tableName) {
+    public TableMetaDataWithSource getTableMetaData(final String tableName) {
         return this.tableMetaDataMap.get(tableName);
     }
 

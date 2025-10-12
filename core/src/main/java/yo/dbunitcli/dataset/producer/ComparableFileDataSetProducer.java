@@ -1,12 +1,12 @@
 package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.common.TableMetaDataWithSource;
+import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.TableMetaDataWithSource;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -22,7 +22,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     private final ComparableDataSetParam param;
     private final boolean addFileInfo;
     private final boolean loadData;
-    private IDataSetConsumer consumer;
+    private ComparableDataSet consumer;
     private int rows = 0;
 
     public ComparableFileDataSetProducer(final ComparableDataSetParam param) {
@@ -33,12 +33,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    @Override
-    public void setConsumer(final IDataSetConsumer aConsumer) {
+    public void setConsumer(final ComparableDataSet aConsumer) {
         this.consumer = aConsumer;
     }
 
@@ -63,6 +58,11 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
         ComparableFileDataSetProducer.LOGGER.info("produce - end   fileName={}", this.src);
         this.consumer.endDataSet();
         ComparableFileDataSetProducer.LOGGER.info("produce() - end");
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
     }
 
     protected Predicate<Path> fileTypeFilter() {

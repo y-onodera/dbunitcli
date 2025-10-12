@@ -12,19 +12,13 @@ import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.Styles;
 import org.apache.poi.xssf.model.StylesTable;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.stream.DefaultConsumer;
-import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import yo.dbunitcli.common.Source;
-import yo.dbunitcli.common.TableMetaDataWithSource;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.NameFilter;
+import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -43,7 +37,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     private final boolean loadData;
     private final NameFilter sheetNameFilter;
     private final boolean addFileInfo;
-    private IDataSetConsumer consumer = new DefaultConsumer();
+    private ComparableDataSet consumer;
 
     public ComparableXlsxDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
@@ -57,12 +51,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    @Override
-    public void setConsumer(final IDataSetConsumer aConsumer) {
+    public void setConsumer(final ComparableDataSet aConsumer) {
         this.consumer = aConsumer;
     }
 
@@ -74,6 +63,11 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableXlsxDataSetProducer.LOGGER.info("produce() - end");
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
     }
 
     protected void produceFromFile(final File sourceFile) {

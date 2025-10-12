@@ -63,7 +63,7 @@ public class ComparableDataSetImpl extends AbstractDataSet implements Comparable
     }
 
     @Override
-    public void startTable(final ITableMetaData metaData) {
+    public void startTable(final TableMetaDataWithSource metaData) {
         ComparableDataSetImpl.LOGGER.debug("startTable(metaData={}) - start", metaData);
         this.mapper = this.tableSeparators.createMapper(metaData);
         this.mapper.startTable(this.converter, this.alreadyWrite, this.joins);

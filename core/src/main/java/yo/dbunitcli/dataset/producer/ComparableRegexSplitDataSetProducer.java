@@ -1,13 +1,9 @@
 package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.common.Source;
-import yo.dbunitcli.common.TableMetaDataWithSource;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +23,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     private final boolean loadData;
     private final boolean addFileInfo;
     private Pattern headerSplitPattern;
-    private IDataSetConsumer consumer;
+    private ComparableDataSet consumer;
 
     public ComparableRegexSplitDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
@@ -44,12 +40,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     }
 
     @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    @Override
-    public void setConsumer(final IDataSetConsumer iDataSetConsumer) {
+    public void setConsumer(final ComparableDataSet iDataSetConsumer) {
         this.consumer = iDataSetConsumer;
     }
 
@@ -62,6 +53,11 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableRegexSplitDataSetProducer.LOGGER.info("produce() - end");
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
     }
 
     protected void produceFromFile(final File aFile) {

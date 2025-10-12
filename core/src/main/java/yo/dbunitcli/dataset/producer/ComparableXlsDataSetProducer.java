@@ -9,14 +9,12 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.stream.DefaultConsumer;
-import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.NameFilter;
+import yo.dbunitcli.dataset.Source;
 import yo.dbunitcli.resource.poi.ExcelMappingDataSetConsumerWrapper;
 
 import java.io.File;
@@ -52,20 +50,10 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
     private boolean outputNextStringRecord;
 
     public ComparableXlsDataSetProducer(final ComparableDataSetParam param) {
-        super(new DefaultConsumer(), param.xlsxSchema(), param.startRow(), param.headerNames(), param.loadData(), param.addFileInfo());
+        super(param.xlsxSchema(), param.startRow(), param.headerNames(), param.loadData(), param.addFileInfo());
         this.param = param;
         this.src = this.param.getSrcFiles();
         this.sheetNameFilter = param.tableNameFilter();
-    }
-
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    @Override
-    public void setConsumer(final IDataSetConsumer aConsumer) {
-        this.consumer = aConsumer;
     }
 
     @Override
@@ -76,6 +64,11 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
                 .forEach(this::produceFromFile);
         this.consumer.endDataSet();
         ComparableXlsDataSetProducer.LOGGER.info("produce() - end");
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
     }
 
     protected void produceFromFile(final File sourceFile) {

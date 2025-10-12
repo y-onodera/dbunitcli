@@ -1,7 +1,7 @@
 package yo.dbunitcli.common.filter;
 
 import org.dbunit.dataset.ITableMetaData;
-import yo.dbunitcli.common.TableMetaDataWithSource;
+import yo.dbunitcli.dataset.TableMetaDataWithSource;
 
 import java.util.regex.Pattern;
 

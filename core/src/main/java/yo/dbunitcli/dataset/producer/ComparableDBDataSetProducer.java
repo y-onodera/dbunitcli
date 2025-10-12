@@ -5,13 +5,9 @@ import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.database.IResultSetTable;
 import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
-import org.dbunit.dataset.stream.IDataSetConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.common.Source;
-import yo.dbunitcli.common.TableMetaDataWithSource;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +25,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     protected final String[] headerNames;
     protected final boolean loadData;
     protected final boolean addFileInfo;
-    protected IDataSetConsumer consumer;
+    protected ComparableDataSet consumer;
     private IDataSet databaseDataSet;
 
     public ComparableDBDataSetProducer(final ComparableDataSetParam param) {
@@ -46,12 +42,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    @Override
-    public void setConsumer(final IDataSetConsumer iDataSetConsumer) {
+    public void setConsumer(final ComparableDataSet iDataSetConsumer) {
         this.consumer = iDataSetConsumer;
     }
 
@@ -79,6 +70,11 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                 .forEach(this::executeTable);
         this.consumer.endDataSet();
         ComparableDBDataSetProducer.LOGGER.info("produce() - end");
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
     }
 
     protected void loadJdbcMetadata() {

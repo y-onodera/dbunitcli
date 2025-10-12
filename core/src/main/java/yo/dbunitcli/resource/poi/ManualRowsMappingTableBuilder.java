@@ -3,8 +3,8 @@ package yo.dbunitcli.resource.poi;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
-import yo.dbunitcli.common.Source;
-import yo.dbunitcli.common.TableMetaDataWithSource;
+import yo.dbunitcli.dataset.Source;
+import yo.dbunitcli.dataset.TableMetaDataWithSource;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -65,7 +65,7 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
     }
 
     @Override
-    public ITableMetaData startNewTable() {
+    public TableMetaDataWithSource startNewTable() {
         this.nowProcessing = this.tableMetaDataMap.get(this.tableNames[++this.currentTableIndex]);
         return this.nowProcessing;
     }

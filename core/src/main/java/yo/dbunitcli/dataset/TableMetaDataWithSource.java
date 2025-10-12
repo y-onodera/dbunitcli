@@ -1,4 +1,4 @@
-package yo.dbunitcli.common;
+package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
