@@ -71,9 +71,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
         }
 
         final JsonObject patterns = setting.getJsonObject("patterns");
-        patterns.keySet().forEach(key -> {
-            this.sheetPatterns.put(key, new SourceFilterParser(patterns, key).parsePattern());
-        });
+        patterns.keySet().forEach(key -> this.sheetPatterns.put(key, new SourceFilterParser(patterns, key).parsePattern()));
         return this;
     }
 
