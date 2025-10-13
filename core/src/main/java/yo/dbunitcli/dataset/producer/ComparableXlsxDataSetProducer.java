@@ -37,7 +37,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     private final boolean loadData;
     private final NameFilter sheetNameFilter;
     private final boolean addFileInfo;
-    private ComparableDataSet consumer;
+    private ComparableDataSetConsumer consumer;
 
     public ComparableXlsxDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
@@ -51,7 +51,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public void setConsumer(final ComparableDataSet aConsumer) {
+    public void setConsumer(final ComparableDataSetConsumer aConsumer) {
         this.consumer = aConsumer;
     }
 
@@ -60,20 +60,15 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
         ComparableXlsxDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
-                .forEach(this::produceFromFile);
+                .forEach(it -> this.executeTable(this.getSource(it, this.addFileInfo)));
         this.consumer.endDataSet();
         ComparableXlsxDataSetProducer.LOGGER.info("produce() - end");
     }
 
     @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    protected void produceFromFile(final File sourceFile) {
-        ComparableXlsxDataSetProducer.LOGGER.info("produce - start fileName={}", sourceFile);
-        try (final OPCPackage pkg = OPCPackage.open(sourceFile, PackageAccess.READ)) {
-            final Source source = TableMetaDataWithSource.fileInfo(sourceFile, this.addFileInfo);
+    public void executeTable(final Source source) {
+        ComparableXlsxDataSetProducer.LOGGER.info("produce - start filePath={}", source.filePath());
+        try (final OPCPackage pkg = OPCPackage.open(source.filePath(), PackageAccess.READ)) {
             final ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);
             final XSSFReader xssfReader = new XSSFReader(pkg);
             final StylesTable styles = xssfReader.getStylesTable();
@@ -97,7 +92,12 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
         } catch (final IOException | SAXException | OpenXML4JException e) {
             throw new AssertionError(e);
         }
-        ComparableXlsxDataSetProducer.LOGGER.info("produce - end   fileName={}", sourceFile);
+        ComparableXlsxDataSetProducer.LOGGER.info("produce - end   filePath={}", source.filePath());
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
     }
 
     protected void processSheet(

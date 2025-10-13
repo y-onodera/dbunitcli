@@ -3,10 +3,10 @@ package yo.dbunitcli.dataset.producer;
 import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.TableMetaDataWithSource;
+import yo.dbunitcli.dataset.Source;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -22,7 +22,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     private final ComparableDataSetParam param;
     private final boolean addFileInfo;
     private final boolean loadData;
-    private ComparableDataSet consumer;
+    private ComparableDataSetConsumer consumer;
     private int rows = 0;
 
     public ComparableFileDataSetProducer(final ComparableDataSetParam param) {
@@ -33,7 +33,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public void setConsumer(final ComparableDataSet aConsumer) {
+    public void setConsumer(final ComparableDataSetConsumer aConsumer) {
         this.consumer = aConsumer;
     }
 
@@ -41,7 +41,14 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     public void produce() throws DataSetException {
         ComparableFileDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
-        this.consumer.startTable(TableMetaDataWithSource.fileInfo(this.src, this.addFileInfo)
+        this.executeTable(this.getSource(this.src, this.addFileInfo));
+        this.consumer.endDataSet();
+        ComparableFileDataSetProducer.LOGGER.info("produce() - end");
+    }
+
+    @Override
+    public void executeTable(final Source source) {
+        this.consumer.startTable(source
                 .wrap(new ComparableFileTableMetaData(this.src.getName())));
         ComparableFileDataSetProducer.LOGGER.info("produce - start fileName={}", this.src);
         if (this.loadData) {
@@ -50,14 +57,16 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
                         .filter(this.fileTypeFilter())
                         .forEach(path -> this.produceFromFile(path.toFile()));
             } catch (final AssertionError e) {
-                throw new DataSetException("error producing dataSet for '" + this.src + "'", e);
+                throw new AssertionError("error producing dataSet for '" + this.src + "'", e);
             }
         }
-        this.consumer.endTable();
+        try {
+            this.consumer.endTable();
+        } catch (final DataSetException e) {
+            throw new AssertionError("error producing dataSet for '" + this.src + "'", e);
+        }
         ComparableFileDataSetProducer.LOGGER.info("produce - rows={}", this.rows);
         ComparableFileDataSetProducer.LOGGER.info("produce - end   fileName={}", this.src);
-        this.consumer.endDataSet();
-        ComparableFileDataSetProducer.LOGGER.info("produce() - end");
     }
 
     @Override

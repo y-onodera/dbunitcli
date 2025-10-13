@@ -6,7 +6,6 @@ import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -20,10 +19,6 @@ public class TableMetaDataWithSource extends DefaultTableMetaData {
     };
 
     private final Source source;
-
-    public static Source fileInfo(final File sourceFile, final boolean addFileInfo) {
-        return new Source(sourceFile, addFileInfo);
-    }
 
     public static TableMetaDataWithSource fromJoin(final String tableName, final Column[] columns, final Column[] primaryKeys) {
         return new TableMetaDataWithSource(tableName, columns, primaryKeys, Source.JOIN);

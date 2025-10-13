@@ -1,7 +1,7 @@
 package yo.dbunitcli.resource.poi;
 
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
-import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.Source;
 import yo.dbunitcli.dataset.SourceFilter;
 
@@ -22,7 +22,7 @@ public interface XlsxSchema {
         return true;
     }
 
-    default XSSFSheetXMLHandler.SheetContentsHandler createHandler(final ComparableDataSet consumer
+    default XSSFSheetXMLHandler.SheetContentsHandler createHandler(final ComparableDataSetConsumer consumer
             , final int startRow
             , final String[] headerNames
             , final boolean loadData

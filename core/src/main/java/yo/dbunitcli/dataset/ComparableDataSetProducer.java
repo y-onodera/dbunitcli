@@ -10,36 +10,46 @@ import java.util.Arrays;
 
 public interface ComparableDataSetProducer {
 
-    void setConsumer(ComparableDataSet consumer) throws DataSetException;
+    void setConsumer(ComparableDataSetConsumer consumer) throws DataSetException;
 
     void produce() throws DataSetException;
+
+    void executeTable(Source source);
+
+    ComparableDataSetParam getParam();
 
     default String getSrc() {
         return this.getParam().src().getPath();
     }
 
-    ComparableDataSetParam getParam();
-
-    default TableMetaDataWithSource createMetaData(final File aFile, final String[] header, final boolean addFileInfo) {
-        return this.createMetaData(aFile, Arrays.stream(header).map(s -> new Column(s.trim(), DataType.UNKNOWN))
-                .toArray(Column[]::new), addFileInfo);
+    default Source getSource(final File aFile, final boolean addFileInfo) {
+        return new Source(aFile, addFileInfo);
     }
 
-    default TableMetaDataWithSource createMetaData(final File aFile, final Column[] columns, final boolean addFileInfo) {
+    default TableMetaDataWithSource createMetaData(final Source source, final String[] header) {
         try {
-            return this.getSource(aFile, addFileInfo)
-                    .wrap(new DefaultTableMetaData(this.getTableName(aFile), columns));
+            return this.createMetaData(source, Arrays.stream(header).map(s -> new Column(s.trim(), DataType.UNKNOWN))
+                    .toArray(Column[]::new));
         } catch (final Exception e) {
             throw new RuntimeException("Failed to create metadata with file info", e);
         }
     }
 
-    default Source getSource(final File aFile, final boolean addFileInfo) {
-        return TableMetaDataWithSource.fileInfo(aFile, addFileInfo);
+    default TableMetaDataWithSource createMetaData(final Source source, final Column[] columns) {
+        try {
+            return source
+                    .wrap(new DefaultTableMetaData(this.getTableName(source.fileName()), columns));
+        } catch (final Exception e) {
+            throw new RuntimeException("Failed to create metadata with file info", e);
+        }
     }
 
     default String getTableName(final File aFile) {
-        return aFile.getName().substring(0, aFile.getName().lastIndexOf("."));
+        return this.getTableName(aFile.getName());
+    }
+
+    default String getTableName(final String fileName) {
+        return fileName.substring(0, fileName.lastIndexOf("."));
     }
 
 }

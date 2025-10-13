@@ -7,7 +7,10 @@ import org.dbunit.dataset.*;
 import org.dbunit.dataset.datatype.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.dataset.ComparableDataSetConsumer;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.Source;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +28,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     protected final String[] headerNames;
     protected final boolean loadData;
     protected final boolean addFileInfo;
-    protected ComparableDataSet consumer;
+    protected ComparableDataSetConsumer consumer;
     private IDataSet databaseDataSet;
 
     public ComparableDBDataSetProducer(final ComparableDataSetParam param) {
@@ -42,7 +45,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     @Override
-    public void setConsumer(final ComparableDataSet iDataSetConsumer) {
+    public void setConsumer(final ComparableDataSetConsumer iDataSetConsumer) {
         this.consumer = iDataSetConsumer;
     }
 
@@ -55,7 +58,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                 .map(it -> {
                     try {
                         return Pair.of(
-                                TableMetaDataWithSource.fileInfo(it, this.addFileInfo)
+                                this.getSource(it, this.addFileInfo)
                                 , Files.readAllLines(it.toPath(), Charset.forName(this.param.encoding()))
                         );
                     } catch (final IOException e) {
@@ -73,6 +76,11 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     @Override
+    public void executeTable(final Source source) {
+        this.executeTable(this.getTable(source.tableName()), source);
+    }
+
+    @Override
     public ComparableDataSetParam getParam() {
         return this.param;
     }
@@ -85,10 +93,6 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                 throw new AssertionError(e);
             }
         }
-    }
-
-    protected void executeTable(final Source source) {
-        this.executeTable(this.getTable(source.tableName()), source);
     }
 
     protected void executeTable(final ITable table, final Source source) {

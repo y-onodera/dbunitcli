@@ -4,7 +4,7 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import yo.dbunitcli.dataset.ComparableDataSetImpl;
+import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.io.File;
@@ -14,7 +14,7 @@ public class ComparableDirectoryDataSetProducerTest {
     @Test
     public void test() throws DataSetException {
         final File src = new File(".", "src/test/java");
-        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final ComparableDataSet actual = new ComparableDataSet(
                 new ComparableDirectoryDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)

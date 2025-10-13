@@ -3,21 +3,22 @@ package yo.dbunitcli.dataset.producer;
 import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.Source;
 
 public class ComparableNoneDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableNoneDataSetProducer.class);
     private final ComparableDataSetParam param;
-    private ComparableDataSet consumer;
+    private ComparableDataSetConsumer consumer;
 
     public ComparableNoneDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
     }
 
     @Override
-    public void setConsumer(final ComparableDataSet consumer) throws DataSetException {
+    public void setConsumer(final ComparableDataSetConsumer consumer) throws DataSetException {
         this.consumer = consumer;
     }
 
@@ -30,12 +31,17 @@ public class ComparableNoneDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public String getSrc() {
-        return "";
+    public void executeTable(final Source source) {
+
     }
 
     @Override
     public ComparableDataSetParam getParam() {
         return this.param;
+    }
+
+    @Override
+    public String getSrc() {
+        return "";
     }
 }

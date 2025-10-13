@@ -4,13 +4,14 @@ import org.dbunit.dataset.DataSetException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import yo.dbunitcli.dataset.ComparableDataSetImpl;
+import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 public class ComparableXlsDataSetProducerTest {
 
@@ -18,14 +19,14 @@ public class ComparableXlsDataSetProducerTest {
 
     @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
-        this.resource = URLDecoder.decode(this.getClass().getResource(".").getPath(), "UTF-8")
+        this.resource = URLDecoder.decode(this.getClass().getResource(".").getPath(), StandardCharsets.UTF_8)
                 .replace("target/test-classes", "src/test/resources");
     }
 
     @Test
     public void createDataSetFromFileIncludeSheet() throws DataSetException {
         final File src = new File(this.resource, "multifile.xls");
-        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final ComparableDataSet actual = new ComparableDataSet(
                 new ComparableXlsDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
@@ -59,7 +60,7 @@ public class ComparableXlsDataSetProducerTest {
     @Test
     public void createDataSetFromFile() throws DataSetException {
         final File src = new File(this.resource, "multifile.xls");
-        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final ComparableDataSet actual = new ComparableDataSet(
                 new ComparableXlsDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)
@@ -110,7 +111,7 @@ public class ComparableXlsDataSetProducerTest {
     @Test
     public void createDataSetFromFileExcludeSheet() throws DataSetException {
         final File src = new File(this.resource, "multifile.xls");
-        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final ComparableDataSet actual = new ComparableDataSet(
                 new ComparableXlsDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)

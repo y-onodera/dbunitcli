@@ -61,19 +61,15 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
         ComparableXlsDataSetProducer.LOGGER.info("produce() - start");
         this.consumer.startDataSet();
         Arrays.stream(this.src)
-                .forEach(this::produceFromFile);
+                .forEach(it -> this.executeTable(this.getSource(it, this.addFileInfo)));
         this.consumer.endDataSet();
         ComparableXlsDataSetProducer.LOGGER.info("produce() - end");
     }
 
     @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    protected void produceFromFile(final File sourceFile) {
-        ComparableXlsDataSetProducer.LOGGER.info("produce - start fileName={}", sourceFile);
-        this.sourceFile = sourceFile;
+    public void executeTable(final Source source) {
+        this.sourceFile = new File(source.filePath());
+        ComparableXlsDataSetProducer.LOGGER.info("produce - start fileName={}", this.sourceFile);
         try (final POIFSFileSystem newFs = new POIFSFileSystem(this.sourceFile, true)) {
             this.rowsTableBuilder = null;
             this.randomCellRecordBuilder = null;
@@ -92,7 +88,12 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
-        ComparableXlsDataSetProducer.LOGGER.info("produce - end   fileName={}", sourceFile);
+        ComparableXlsDataSetProducer.LOGGER.info("produce - end   fileName={}", this.sourceFile);
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
     }
 
     @Override

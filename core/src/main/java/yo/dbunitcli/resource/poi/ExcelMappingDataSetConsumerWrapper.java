@@ -4,7 +4,7 @@ import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.Source;
 
 import java.util.Optional;
@@ -17,7 +17,7 @@ public class ExcelMappingDataSetConsumerWrapper {
     private final XlsxSchema schema;
     private final int startRow;
     protected boolean addFileInfo;
-    protected ComparableDataSet consumer;
+    protected ComparableDataSetConsumer consumer;
     protected XlsxCellsToTableBuilder randomCellRecordBuilder;
     protected XlsxRowsToTableBuilder rowsTableBuilder;
     private int rowTableRows = 0;
@@ -34,7 +34,7 @@ public class ExcelMappingDataSetConsumerWrapper {
         this.addFileInfo = addFileInfo;
     }
 
-    public void setConsumer(final ComparableDataSet aConsumer) {
+    public void setConsumer(final ComparableDataSetConsumer aConsumer) {
         this.consumer = aConsumer;
     }
 

@@ -81,16 +81,6 @@ public class CsvConverter implements IDataSetConverter {
     }
 
     @Override
-    public void startDataSet() throws DataSetException {
-
-    }
-
-    @Override
-    public void endDataSet() throws DataSetException {
-
-    }
-
-    @Override
     public void startTable(final ITableMetaData metaData) throws DataSetException {
         final String activeTableName = metaData.getTableName();
 

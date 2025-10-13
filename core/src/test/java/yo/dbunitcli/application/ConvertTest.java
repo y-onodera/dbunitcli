@@ -9,7 +9,7 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.junit.jupiter.api.*;
 import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
-import yo.dbunitcli.dataset.ComparableDataSetImpl;
+import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.DataSourceType;
@@ -81,7 +81,7 @@ public class ConvertTest {
         public void testFromRegexToXlsx() throws Exception {
             Convert.main(this.getArgs("/paramConvertRegexToXlsx.txt"));
             final File src = new File(this.getBaseDir() + "/convert/regex2xlsx/result/paramConvertRegexToXlsx.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -94,7 +94,7 @@ public class ConvertTest {
         public void testNoSetting() throws Exception {
             Convert.main(this.getArgs("/paramConvertRegexToXlsxNoSetting.txt"));
             final File src = new File(this.getBaseDir() + "/convert/regex2xlsx/result/paramConvertRegexToXlsxNoSetting.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -107,7 +107,7 @@ public class ConvertTest {
         public void testFromCsvToXlsx() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvToXlsx.txt"));
             final File src = new File(this.getBaseDir() + "/convert/csv2xlsx/result/paramConvertCsvToXlsx.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -121,7 +121,7 @@ public class ConvertTest {
         public void testFromCsvToCsvWithoutHeader() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvToCsvWithoutHeader.txt"));
             final File src = new File(this.getBaseDir() + "/convert/csv2xlsx/result_without_header/multi1.csv");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -138,7 +138,7 @@ public class ConvertTest {
         public void testFromCsvToXlsxWithoutHeader() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvToXlsxWithoutHeader.txt"));
             final File src = new File(this.getBaseDir() + "/convert/csv2xlsx/result_without_header/paramConvertCsvToXlsxWithoutHeader.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -176,7 +176,7 @@ public class ConvertTest {
         public void testFromCsvToXlsWithoutHeader() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvToXlsWithoutHeader.txt"));
             final File src = new File(this.getBaseDir() + "/convert/csv2xlsx/result_without_header/paramConvertCsvToXlsWithoutHeader.xls");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -214,7 +214,7 @@ public class ConvertTest {
         public void testFromCsvIgnoreQuoteToXlsx() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvIgnoreQuotedToXlsx.txt"));
             final File src = new File(this.getBaseDir() + "/convert/csv2xlsx/quoted/result/paramConvertCsvIgnoreQuotedToXlsx.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -232,7 +232,7 @@ public class ConvertTest {
         public void testFromCsvToMultiXlsx() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvToMultiXlsx.txt"));
             final File src = new File(this.getBaseDir() + "/convert/csv2xlsx/resultmultixlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSource(DataSourceType.xlsx)
@@ -247,7 +247,7 @@ public class ConvertTest {
         public void testFromCsvToMultiXls() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvToMultiXls.txt"));
             final File src = new File(this.getBaseDir() + "/convert/csv2xls/resultmultixls");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSource(DataSourceType.xls)
@@ -262,7 +262,7 @@ public class ConvertTest {
         public void testFromFixedFileToCsv() throws Exception {
             Convert.main(this.getArgs("/paramConvertFixedFileToCsv.txt"));
             final File src = new File(this.getBaseDir() + "/convert/fixed2csv/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSource(DataSourceType.csv)
@@ -291,7 +291,7 @@ public class ConvertTest {
         public void testFromCsvqToCsv() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvqToCsv.txt"));
             final File src = new File(this.getBaseDir() + "/convert/csvq2csv/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSource(DataSourceType.csv)
@@ -330,7 +330,7 @@ public class ConvertTest {
         public void testFromCsvqWithHeaderToCsv() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvqWithHeaderToCsv.txt"));
             final File src = new File(this.getBaseDir() + "/convert/csvq-with-header-2csv/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSource(DataSourceType.csv)
@@ -374,7 +374,7 @@ public class ConvertTest {
         public void testFromXlsxWithSchemaToCsv() throws Exception {
             Convert.main(this.getArgs("/paramConvertXlsxWithSchemaToCsv.txt"));
             final File src = new File(this.getBaseDir() + "convert/xlsxwithschema2csv/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSource(DataSourceType.csv)
@@ -392,7 +392,7 @@ public class ConvertTest {
         public void testFromXlsWithSchemaToCsv() throws Exception {
             Convert.main(this.getArgs("/paramConvertXlsWithSchemaToCsv.txt"));
             final File src = new File(this.getBaseDir() + "/convert/xlswithschema2csv/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSource(DataSourceType.csv)
@@ -410,7 +410,7 @@ public class ConvertTest {
         public void testTableNameMap() throws Exception {
             Convert.main(this.getArgs("/paramConvertMultiCsvTableNameMap.txt"));
             final File src = new File(this.getBaseDir() + "/convert/tablenamemap/result/paramConvertMultiCsvTableNameMap.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -434,7 +434,7 @@ public class ConvertTest {
         public void testTableNameMapNoSortToCsv() throws Exception {
             Convert.main(this.getArgs("/paramConvertMultiCsvTableNameMapNoSortToCsv.txt"));
             final File src = new File(this.getBaseDir() + "/convert/tablenamemap/NoSortCsv/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -460,7 +460,7 @@ public class ConvertTest {
         public void testTableNameMapNoSortToXls() throws Exception {
             Convert.main(this.getArgs("/paramConvertMultiCsvTableNameMapNoSortToXls.txt"));
             final File src = new File(this.getBaseDir() + "/convert/tablenamemap/NoSortXls/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -485,7 +485,7 @@ public class ConvertTest {
         public void testTableNameMapNoSortToXlsx() throws Exception {
             Convert.main(this.getArgs("/paramConvertMultiCsvTableNameMapNoSortToXlsx.txt"));
             final File src = new File(this.getBaseDir() + "/convert/tablenamemap/NoSortXlsx/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -510,7 +510,7 @@ public class ConvertTest {
         public void testTableNameMapNoSortToXlsPerTable() throws Exception {
             Convert.main(this.getArgs("/paramConvertMultiCsvTableNameMapNoSortToXlsPerTable.txt"));
             final File src = new File(this.getBaseDir() + "/convert/tablenamemap/NoSortXlsBook/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -535,7 +535,7 @@ public class ConvertTest {
         public void testTableNameMapNoSortToXlsxPerTable() throws Exception {
             Convert.main(this.getArgs("/paramConvertMultiCsvTableNameMapNoSortToXlsxPerTable.txt"));
             final File src = new File(this.getBaseDir() + "/convert/tablenamemap/NoSortXlsxBook/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -560,7 +560,7 @@ public class ConvertTest {
         public void testFromCsvToSplitMultiXlsx() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvSplitMultiXlsx.txt"));
             final File src = new File(this.getBaseDir() + "/convert/split/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -616,7 +616,7 @@ public class ConvertTest {
         public void testFromCsvToSplitByColumnMultiXlsx() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvSplitByColumnMultiXlsx.txt"));
             final File src = new File(this.getBaseDir() + "/convert/split/keysplit_result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -664,7 +664,7 @@ public class ConvertTest {
         public void testFromCsvToSeparateMultiXlsx() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvSeparateMultiXlsx.txt"));
             final File src = new File(this.getBaseDir() + "/convert/separate/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -690,7 +690,7 @@ public class ConvertTest {
                     , "-result=" + this.getBaseDir() + "/convert/file2csv/recursive/result"
                     , "-recursive=true"});
             final File src = new File(this.getBaseDir() + "/convert/file2csv/recursive/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -713,7 +713,7 @@ public class ConvertTest {
                     , "-result=" + this.getBaseDir() + "/convert/file2csv/no-recursive/result"
                     , "-recursive=false"});
             final File src = new File(this.getBaseDir() + "/convert/file2csv/no-recursive/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -734,7 +734,7 @@ public class ConvertTest {
                     , "-result=" + this.getBaseDir() + "/convert/file2csv/no-recursive/only-txt/result"
                     , "-recursive=true", "-extension=txt"});
             final File src = new File(this.getBaseDir() + "/convert/file2csv/no-recursive/only-txt/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -765,7 +765,7 @@ public class ConvertTest {
                     , "-result=" + this.getBaseDir() + "/convert/file2csv/customize/result"
                     , "-setting=" + this.getBaseDir() + "/testConvertFilePathToCsvWithSetting.json"});
             final File src = new File(this.getBaseDir() + "/convert/file2csv/customize/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -781,7 +781,7 @@ public class ConvertTest {
         public void testDistinctColumn() throws Exception {
             Convert.main(this.getArgs("/paramConvertDistinctColumn.txt"));
             final File src = new File(this.getBaseDir() + "/convert/distinct/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -809,7 +809,7 @@ public class ConvertTest {
         public void testDistinctWithTableNameMap() throws Exception {
             Convert.main(this.getArgs("/paramConvertDistinctWithTableNameMap.txt"));
             final File src = new File(this.getBaseDir() + "/convert/distinct/resultrename");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -837,7 +837,7 @@ public class ConvertTest {
         public void testDistinctWithMerge() throws Exception {
             Convert.main(this.getArgs("/paramConvertDistinctWithMerge.txt"));
             final File src = new File(this.getBaseDir() + "/convert/distinct/resultmerge");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -859,7 +859,7 @@ public class ConvertTest {
         public void testOuterJoin() {
             Convert.main(this.getArgs("/paramConvertOuterJoin.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertOuterJoin.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -898,7 +898,7 @@ public class ConvertTest {
         public void testFullJoin() {
             Convert.main(this.getArgs("/paramConvertFullJoin.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertFullJoin.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -945,7 +945,7 @@ public class ConvertTest {
         public void testInnerJoin() {
             Convert.main(this.getArgs("/paramConvertInnerJoin.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertInnerJoin.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -976,7 +976,7 @@ public class ConvertTest {
         public void testInnerJoinByExpression() {
             Convert.main(this.getArgs("/paramConvertInnerJoinByExpression.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertInnerJoinByExpression.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1031,7 +1031,7 @@ public class ConvertTest {
         public void testInnerJoinWithSplit() {
             Convert.main(this.getArgs("/paramConvertInnerJoinWithSplit.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertInnerJoinWithSplit.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1057,7 +1057,7 @@ public class ConvertTest {
         public void testInnerJoinWithSeparate() {
             Convert.main(this.getArgs("/paramConvertInnerJoinWithSeparate.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertInnerJoinWithSeparate.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1102,7 +1102,7 @@ public class ConvertTest {
         public void testInnerJoinWithRename() {
             Convert.main(this.getArgs("/paramConvertInnerJoinWithRename.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertInnerJoinWithRename.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1132,7 +1132,7 @@ public class ConvertTest {
         public void testJoinMultiple() {
             Convert.main(this.getArgs("/paramConvertJoinMultiple.txt"));
             final File src = new File(this.getBaseDir() + "/convert/join/result/paramConvertJoinMultiple.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1195,7 +1195,7 @@ public class ConvertTest {
         public void testAddFileInfo() throws Exception {
             Convert.main(this.getArgs("/paramConvertXlsxWithSchemaAndFileInfoJoin.txt"));
             final File src = new File(this.getBaseDir() + "/convert/xlsxwithschema2xlsx/result/paramConvertXlsxWithSchemaAndFileInfoJoin.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1221,7 +1221,7 @@ public class ConvertTest {
         public void testFromXlsChangeHeaderNameToCsv() throws Exception {
             Convert.main(this.getArgs("/paramConvertXlsChangeHeaderNameToCsv.txt"));
             final File src = new File(this.getBaseDir() + "/convert/xls/with-header/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1248,7 +1248,7 @@ public class ConvertTest {
         public void testFromXlsxChangeHeaderNameToCsv() throws Exception {
             Convert.main(this.getArgs("/paramConvertXlsxChangeHeaderNameToCsv.txt"));
             final File src = new File(this.getBaseDir() + "/convert/xlsx/with-header/result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1275,7 +1275,7 @@ public class ConvertTest {
         public void testFromCsvToXlsxWithSourceFilterSettings() throws Exception {
             Convert.main(this.getArgs("/paramConvertWithSourceFilterSettings.txt"));
             final File src = new File(this.getBaseDir() + "/convert/csv2xlsx/result_with_source_filter/paramConvertWithSourceFilterSettings.xlsx");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableXlsxDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1289,7 +1289,7 @@ public class ConvertTest {
         public void testFromCsvToCsvWithAddFileInfo() throws Exception {
             Convert.main(this.getArgs("/paramConvertCsvToCsvWithAddFileInfo.txt"));
             final File src = new File(this.getBaseDir() + "/convert/csv2csv/add_file_info_result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1311,7 +1311,7 @@ public class ConvertTest {
         public void testFromFixedToCsvWithAddFileInfo() throws Exception {
             Convert.main(this.getArgs("/paramConvertFixedToCsvWithAddFileInfo.txt"));
             final File src = new File(this.getBaseDir() + "/convert/fixed2csv/add_file_info_result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSource(DataSourceType.csv)
@@ -1332,7 +1332,7 @@ public class ConvertTest {
         public void testFromRegexToCsvWithAddFileInfo() throws Exception {
             Convert.main(this.getArgs("/paramConvertRegexToCsvWithAddFileInfo.txt"));
             final File src = new File(this.getBaseDir() + "/convert/regex2csv/add_file_info_result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1353,7 +1353,7 @@ public class ConvertTest {
         public void testFromXlsToCsvWithAddFileInfo() throws Exception {
             Convert.main(this.getArgs("/paramConvertXlsToCsvWithAddFileInfo.txt"));
             final File src = new File(this.getBaseDir() + "/convert/xls2csv/add_file_info_result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1375,7 +1375,7 @@ public class ConvertTest {
         public void testFromXlsxToCsvWithAddFileInfo() throws Exception {
             Convert.main(this.getArgs("/paramConvertXlsxToCsvWithAddFileInfo.txt"));
             final File src = new File(this.getBaseDir() + "/convert/xlsx2csv/add_file_info_result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSrc(src)
@@ -1397,7 +1397,7 @@ public class ConvertTest {
         public void testFromXlsWithSchemaToCsvWithAddFileInfo() throws Exception {
             Convert.main(this.getArgs("/paramConvertXlsWithSchemaToCsvWithAddFileInfo.txt"));
             final File src = new File(this.getBaseDir() + "/convert/xlswithschema2csv/add_file_info_result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSource(DataSourceType.csv)
@@ -1423,7 +1423,7 @@ public class ConvertTest {
         public void testFromXlsxWithSchemaToCsvWithAddFileInfo() throws Exception {
             Convert.main(this.getArgs("/paramConvertXlsxWithSchemaToCsvWithAddFileInfo.txt"));
             final File src = new File(this.getBaseDir() + "/convert/xlsxwithschema2csv/add_file_info_result");
-            final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+            final ComparableDataSet actual = new ComparableDataSet(
                     new ComparableCsvDataSetProducer(
                             ComparableDataSetParam.builder()
                                     .setSource(DataSourceType.csv)

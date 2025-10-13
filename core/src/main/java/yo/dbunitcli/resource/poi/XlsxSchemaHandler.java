@@ -4,14 +4,14 @@ import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.usermodel.XSSFComment;
-import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.Source;
 
 public class XlsxSchemaHandler extends ExcelMappingDataSetConsumerWrapper implements XSSFSheetXMLHandler.SheetContentsHandler {
     private int currentRow = -1;
     private int currentCol = -1;
 
-    public XlsxSchemaHandler(final ComparableDataSet delegate
+    public XlsxSchemaHandler(final ComparableDataSetConsumer delegate
             , final XlsxSchema schema
             , final int startRow
             , final String[] headerNames

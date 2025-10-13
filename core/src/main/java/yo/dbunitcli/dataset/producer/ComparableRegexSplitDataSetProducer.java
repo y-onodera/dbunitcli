@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
@@ -23,7 +24,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     private final boolean loadData;
     private final boolean addFileInfo;
     private Pattern headerSplitPattern;
-    private ComparableDataSet consumer;
+    private ComparableDataSetConsumer consumer;
 
     public ComparableRegexSplitDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
@@ -40,7 +41,7 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     }
 
     @Override
-    public void setConsumer(final ComparableDataSet iDataSetConsumer) {
+    public void setConsumer(final ComparableDataSetConsumer iDataSetConsumer) {
         this.consumer = iDataSetConsumer;
     }
 
@@ -50,31 +51,25 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
         this.consumer.startDataSet();
         Arrays.stream(this.src)
                 .filter(it -> this.param.tableNameFilter().predicate(this.getTableName(it)))
-                .forEach(this::produceFromFile);
+                .forEach(it -> this.executeTable(this.getSource(it, this.addFileInfo)));
         this.consumer.endDataSet();
         ComparableRegexSplitDataSetProducer.LOGGER.info("produce() - end");
     }
 
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    protected void produceFromFile(final File aFile) {
+    public void executeTable(final Source fileInfo) {
         try {
-            ComparableRegexSplitDataSetProducer.LOGGER.info("produce - start fileName={}", aFile);
-            final Source fileInfo = this.getSource(aFile, this.addFileInfo);
+            ComparableRegexSplitDataSetProducer.LOGGER.info("produce - start filePath={}", fileInfo.filePath());
             if (this.headerNames != null) {
-                this.consumer.startTable(this.createMetaData(aFile, this.headerNames, this.addFileInfo));
+                this.consumer.startTable(this.createMetaData(fileInfo, this.headerNames));
                 if (!this.loadData) {
                     this.consumer.endTable();
                     return;
                 }
             }
             int row = 1;
-            for (final String s : Files.readAllLines(aFile.toPath(), Charset.forName(this.getEncoding()))) {
+            for (final String s : Files.readAllLines(Path.of(fileInfo.filePath()), Charset.forName(this.getEncoding()))) {
                 if (row == this.startRow && this.headerNames == null) {
-                    final TableMetaDataWithSource metaData = this.createMetaData(aFile, this.headerSplitPattern.split(s), this.addFileInfo);
+                    final TableMetaDataWithSource metaData = this.createMetaData(fileInfo, this.headerSplitPattern.split(s));
                     this.consumer.startTable(metaData);
                     if (!this.loadData) {
                         break;
@@ -86,10 +81,15 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
             }
             ComparableRegexSplitDataSetProducer.LOGGER.info("produce - rows={}", row);
             this.consumer.endTable();
-            ComparableRegexSplitDataSetProducer.LOGGER.info("produce - end   fileName={}", aFile);
+            ComparableRegexSplitDataSetProducer.LOGGER.info("produce - end   filePath={}", fileInfo.filePath());
         } catch (final IOException | DataSetException e) {
             throw new AssertionError(e);
         }
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
     }
 
     private String getEncoding() {

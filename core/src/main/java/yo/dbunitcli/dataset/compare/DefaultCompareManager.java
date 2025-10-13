@@ -15,15 +15,15 @@ import java.util.stream.Stream;
 public class DefaultCompareManager implements DataSetCompare.Manager {
 
     @Override
-    public CompareResult toCompareResult(final ComparableDataSet oldDataSet, final ComparableDataSet newDataSet, final List<CompareDiff> results) {
-        return new TableCompareResult(oldDataSet.getSrc(), newDataSet.getSrc(), results);
-    }
-
-    @Override
     public List<CompareDiff> compareTable(final TableCompare tableCompare) {
         return this.getTableCompareStrategies().map(it -> it.apply(tableCompare))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public CompareResult toCompareResult(final ComparableDataSet oldDataSet, final ComparableDataSet newDataSet, final List<CompareDiff> results) {
+        return new TableCompareResult(oldDataSet.getSrc(), newDataSet.getSrc(), results);
     }
 
     protected Stream<Function<TableCompare, List<CompareDiff>>> getTableCompareStrategies() {

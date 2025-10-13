@@ -6,7 +6,7 @@ import org.dbunit.dataset.ITable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import yo.dbunitcli.dataset.ComparableDataSetImpl;
+import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.DataSourceType;
@@ -14,6 +14,7 @@ import yo.dbunitcli.dataset.DataSourceType;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 public class ComparableCsvDataSetProducerTest {
 
@@ -21,14 +22,14 @@ public class ComparableCsvDataSetProducerTest {
 
     @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
-        this.resource = URLDecoder.decode(this.getClass().getResource(".").getPath(), "UTF-8")
+        this.resource = URLDecoder.decode(this.getClass().getResource(".").getPath(), StandardCharsets.UTF_8)
                 .replace("target/test-classes", "src/test/resources");
     }
 
     @Test
     public void createEmptyDataSetFromNoFileDirectory() throws DataSetException {
         final File src = new File(this.resource, "nofile");
-        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final ComparableDataSet actual = new ComparableDataSet(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
@@ -36,13 +37,13 @@ public class ComparableCsvDataSetProducerTest {
                                 .setEncoding("windows-31j")
                                 .build()));
         Assertions.assertEquals(src.getPath(), actual.getSrc());
-        Assertions.assertEquals(actual.getTables().length, 0);
+        Assertions.assertEquals(0, actual.getTables().length);
     }
 
     @Test
     public void createDataSetFromDirectoryContainsShiftJisFile() throws DataSetException {
         final File src = new File(this.resource, "singlefile");
-        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final ComparableDataSet actual = new ComparableDataSet(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
@@ -76,7 +77,7 @@ public class ComparableCsvDataSetProducerTest {
     @Test
     public void createDataSetFromDirectoryContainsUTF8File() throws DataSetException {
         final File src = new File(this.resource, "multifile");
-        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final ComparableDataSet actual = new ComparableDataSet(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
@@ -130,7 +131,7 @@ public class ComparableCsvDataSetProducerTest {
     @Test
     public void createDataSetFromDirectoryIncludeFile() throws DataSetException {
         final File src = new File(this.resource, "multifile");
-        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final ComparableDataSet actual = new ComparableDataSet(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
@@ -165,7 +166,7 @@ public class ComparableCsvDataSetProducerTest {
     @Test
     public void createDataSetFromDirectoryExcludeFile() throws DataSetException {
         final File src = new File(this.resource, "multifile");
-        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final ComparableDataSet actual = new ComparableDataSet(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSource(DataSourceType.csv)
@@ -200,7 +201,7 @@ public class ComparableCsvDataSetProducerTest {
     @Test
     public void createDataSetFromFile() throws DataSetException {
         final File src = new File(this.resource, "multifile/multi1.csv");
-        final ComparableDataSetImpl actual = new ComparableDataSetImpl(
+        final ComparableDataSet actual = new ComparableDataSet(
                 new ComparableCsvDataSetProducer(
                         ComparableDataSetParam.builder()
                                 .setSrc(src)

@@ -5,10 +5,7 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.datatype.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
@@ -28,7 +25,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     private final String[] headerNames;
     private final boolean loadData;
     private final boolean addFileInfo;
-    private ComparableDataSet consumer;
+    private ComparableDataSetConsumer consumer;
 
     public ComparableCSVQueryDataSetProducer(final ComparableDataSetParam param, final Parameter parameter) {
         this.param = param;
@@ -48,7 +45,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     }
 
     @Override
-    public void setConsumer(final ComparableDataSet iDataSetConsumer) {
+    public void setConsumer(final ComparableDataSetConsumer iDataSetConsumer) {
         this.consumer = iDataSetConsumer;
     }
 
@@ -58,20 +55,16 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
         this.consumer.startDataSet();
         Arrays.stream(this.src)
                 .filter(it -> this.getParam().tableNameFilter().predicate(this.getTableName(it)))
-                .forEach(this::produceFromFile);
+                .forEach(it -> this.executeTable(this.getSource(it, this.addFileInfo)));
         this.consumer.endDataSet();
         ComparableCSVQueryDataSetProducer.LOGGER.info("produce() - end");
     }
 
     @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    protected void produceFromFile(final File aFile) {
+    public void executeTable(final Source source) {
         try {
-            final String query = this.getTemplateLoader().render(aFile, this.getParameter());
-            ComparableCSVQueryDataSetProducer.LOGGER.info("produce - start fileName={},query={}", aFile, query);
+            final String query = this.getTemplateLoader().render(new File(source.filePath()), this.getParameter());
+            ComparableCSVQueryDataSetProducer.LOGGER.info("produce - start filePath={},query={}", source.filePath(), query);
             try (final Connection conn = DriverManager.getConnection(ComparableCSVQueryDataSetProducer.URL);
                  final Statement stmt = conn.createStatement();
                  final ResultSet rst = stmt.executeQuery(query)
@@ -87,7 +80,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
                         })
                         .map(name -> new Column(name.trim(), DataType.UNKNOWN))
                         .toArray(Column[]::new);
-                this.consumer.startTable(this.createMetaData(aFile, columns, this.addFileInfo));
+                this.consumer.startTable(this.createMetaData(source, columns));
                 if (this.loadData) {
                     int readRows = 0;
                     while (rst.next()) {
@@ -106,10 +99,15 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
                     ComparableCSVQueryDataSetProducer.LOGGER.info("produce - rows={}", readRows);
                 }
                 this.consumer.endTable();
-                ComparableCSVQueryDataSetProducer.LOGGER.info("produce - end   fileName={}", aFile);
+                ComparableCSVQueryDataSetProducer.LOGGER.info("produce - end   filePath={}", source.filePath());
             }
         } catch (final SQLException | DataSetException e) {
             throw new AssertionError(e);
         }
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
     }
 }

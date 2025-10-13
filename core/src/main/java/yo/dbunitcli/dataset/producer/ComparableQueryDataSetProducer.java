@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.Parameter;
-import yo.dbunitcli.dataset.TableMetaDataWithSource;
+import yo.dbunitcli.dataset.Source;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
@@ -28,9 +28,22 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
         this.consumer.startDataSet();
         Arrays.stream(this.src)
                 .filter(it -> this.getParam().tableNameFilter().predicate(this.getTableName(it)))
-                .forEach(this::produceFromFile);
+                .forEach(it -> this.executeTable(this.getSource(it, this.addFileInfo)));
         this.consumer.endDataSet();
         ComparableQueryDataSetProducer.LOGGER.info("produce() - end");
+    }
+
+    @Override
+    public void executeTable(final Source source) {
+        try {
+            final File file = new File(source.filePath());
+            final String query = this.loadQuery(file);
+            ComparableQueryDataSetProducer.LOGGER.info("produce - start fileName={},query={}", file.getName(), query);
+            this.executeTable(this.connection.createQueryTable(this.getTableName(file), query), source);
+            ComparableQueryDataSetProducer.LOGGER.info("produce - end   fileName={}", file.getName());
+        } catch (final SQLException | DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public Parameter getParameter() {
@@ -39,18 +52,6 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
 
     public TemplateRender getTemplateLoader() {
         return this.getParam().templateRender();
-    }
-
-    protected void produceFromFile(final File aFile) {
-        try {
-            final String query = this.loadQuery(aFile);
-            ComparableQueryDataSetProducer.LOGGER.info("produce - start fileName={},query={}", aFile.getName(), query);
-            this.executeTable(this.connection.createQueryTable(this.getTableName(aFile), query)
-                    , TableMetaDataWithSource.fileInfo(aFile, this.addFileInfo));
-            ComparableQueryDataSetProducer.LOGGER.info("produce - end   fileName={}", aFile.getName());
-        } catch (final SQLException | DataSetException e) {
-            throw new AssertionError(e);
-        }
     }
 
     protected String loadQuery(final File aFile) {
