@@ -4,6 +4,7 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.io.File;
 import java.util.Arrays;

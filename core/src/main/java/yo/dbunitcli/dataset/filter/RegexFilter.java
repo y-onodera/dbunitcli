@@ -1,6 +1,6 @@
 package yo.dbunitcli.dataset.filter;
 
-import yo.dbunitcli.dataset.SourceFilter;
+import yo.dbunitcli.common.TableMetaDataFilter;
 
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -8,7 +8,7 @@ import java.util.regex.PatternSyntaxException;
 /**
  * 正規表現パターンによるテーブル名/シート名のフィルタリングを行うクラス
  */
-public record RegexFilter(Pattern pattern) implements SourceFilter {
+public record RegexFilter(Pattern pattern) implements TableMetaDataFilter {
 
     /**
      * 指定された正規表現パターンでフィルタを作成

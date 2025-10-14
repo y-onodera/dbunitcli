@@ -1,9 +1,9 @@
 package yo.dbunitcli.application;
 
 import org.dbunit.dataset.DataSetException;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 
 import java.util.LinkedHashMap;
@@ -47,7 +47,7 @@ public enum ParameterUnit {
                         .mapToObj(it -> loader.parameter()
                                 .asInputParam()
                                 .withRowNumber(it)
-                                .addAll(dataSet.getTable(tableNames[it]).toMap(true).get(0)));
+                                .addAll(dataSet.getTable(tableNames[it]).toMap(true).getFirst()));
             } catch (final DataSetException e) {
                 throw new AssertionError(e);
             }

@@ -5,7 +5,7 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.dataset.SourceFilter;
+import yo.dbunitcli.common.TargetFilter;
 import yo.dbunitcli.resource.poi.XlsxCellsTableDefine;
 import yo.dbunitcli.resource.poi.XlsxRowsTableDefine;
 import yo.dbunitcli.resource.poi.XlsxSchema;
@@ -24,7 +24,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
 
     private final Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap = new HashMap<>();
 
-    private final Map<String, SourceFilter> sheetPatterns = new HashMap<>();
+    private final Map<String, TargetFilter> sheetPatterns = new HashMap<>();
 
     public XlsxSchema build(final File schema) throws FileNotFoundException, UnsupportedEncodingException {
         if (schema == null) {
@@ -61,7 +61,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
     }
 
     @Override
-    public Map<String, SourceFilter> getSheetPatterns() {
+    public Map<String, TargetFilter> getSheetPatterns() {
         return this.sheetPatterns;
     }
 
@@ -71,7 +71,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
         }
 
         final JsonObject patterns = setting.getJsonObject("patterns");
-        patterns.keySet().forEach(key -> this.sheetPatterns.put(key, new SourceFilterParser(patterns, key).parsePattern()));
+        patterns.keySet().forEach(key -> this.sheetPatterns.put(key, new TableMetaDataFilterParser(patterns, key).parsePattern()));
         return this;
     }
 

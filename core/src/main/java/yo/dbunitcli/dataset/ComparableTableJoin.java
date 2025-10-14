@@ -4,6 +4,7 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 import org.dbunit.dataset.Column;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.util.*;
 import java.util.function.BiFunction;

@@ -1,9 +1,7 @@
 package yo.dbunitcli.resource.poi;
 
-import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
-import yo.dbunitcli.dataset.ComparableDataSetConsumer;
-import yo.dbunitcli.dataset.Source;
-import yo.dbunitcli.dataset.SourceFilter;
+import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TargetFilter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,14 +20,6 @@ public interface XlsxSchema {
         return true;
     }
 
-    default XSSFSheetXMLHandler.SheetContentsHandler createHandler(final ComparableDataSetConsumer consumer
-            , final int startRow
-            , final String[] headerNames
-            , final boolean loadData
-            , final Source source) {
-        return new XlsxSchemaHandler(consumer, this, startRow, headerNames, loadData, source);
-    }
-
     default XlsxRowsToTableBuilder getRowsTableBuilder(final int startRow, final String[] headerNames, final Source source) {
         return new StartRowAsColumnTableBuilder(startRow, headerNames, source);
     }
@@ -43,7 +33,7 @@ public interface XlsxSchema {
 
         Map<String, List<XlsxCellsTableDefine>> getCellsTableDefMap();
 
-        Map<String, SourceFilter> getSheetPatterns();
+        Map<String, TargetFilter> getSheetPatterns();
 
         default XlsxSchema build() {
             return new SimpleImpl(this);
@@ -52,7 +42,7 @@ public interface XlsxSchema {
 
     record SimpleImpl(Map<String, List<XlsxRowsTableDefine>> rowsTableDefMap
             , Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap
-            , Map<String, SourceFilter> sheetPatterns
+            , Map<String, TargetFilter> sheetPatterns
             , Source source) implements XlsxSchema {
 
         SimpleImpl(final Builder builder) {

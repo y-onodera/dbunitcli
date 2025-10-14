@@ -3,7 +3,7 @@ package yo.dbunitcli.fileprocessor;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.common.Parameter;
 
 import java.io.File;
 import java.util.stream.Stream;

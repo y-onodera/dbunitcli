@@ -2,10 +2,10 @@ package yo.dbunitcli.dataset.producer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.Parameter;
 
 public record ComparableDataSetLoader(Parameter parameter) {
 

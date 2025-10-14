@@ -3,7 +3,7 @@ package yo.dbunitcli.application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;

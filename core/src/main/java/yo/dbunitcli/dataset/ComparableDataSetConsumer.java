@@ -1,6 +1,7 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.DataSetException;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 
 public interface ComparableDataSetConsumer {
     void startDataSet() throws DataSetException;

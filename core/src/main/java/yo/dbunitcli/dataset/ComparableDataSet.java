@@ -4,6 +4,7 @@ import org.dbunit.database.AmbiguousTableNameException;
 import org.dbunit.dataset.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.util.*;
 import java.util.stream.Collectors;

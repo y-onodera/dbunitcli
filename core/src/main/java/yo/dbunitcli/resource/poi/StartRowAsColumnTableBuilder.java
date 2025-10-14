@@ -4,8 +4,8 @@ import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.datatype.DataType;
-import yo.dbunitcli.dataset.Source;
-import yo.dbunitcli.dataset.TableMetaDataWithSource;
+import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;

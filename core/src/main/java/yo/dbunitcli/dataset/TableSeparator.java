@@ -10,14 +10,15 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.filter.IColumnFilter;
-import yo.dbunitcli.application.json.SourceFilterParser;
+import yo.dbunitcli.application.json.TableMetaDataFilterParser;
+import yo.dbunitcli.common.TableMetaDataFilter;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record TableSeparator(SourceFilter sourceFilter
+public record TableSeparator(TableMetaDataFilter sourceFilter
         , TableSplitter splitter
         , List<String> comparisonKeys
         , ExpressionColumns expressionColumns
@@ -28,8 +29,8 @@ public record TableSeparator(SourceFilter sourceFilter
         , boolean distinct
 ) {
 
-    public static final SourceFilter ACCEPT_ALL = SourceFilterParser.always(true);
-    public static final SourceFilter REJECT_ALL = SourceFilterParser.always(false);
+    public static final TableMetaDataFilter ACCEPT_ALL = TableMetaDataFilterParser.always(true);
+    public static final TableMetaDataFilter REJECT_ALL = TableMetaDataFilterParser.always(false);
     public static final RowFilter NO_FILTER = new RowFilter(new ArrayList<>());
 
     public static final TableSeparator NONE = TableSeparator.builder().build();
@@ -191,7 +192,7 @@ public record TableSeparator(SourceFilter sourceFilter
     }
 
     public static class Builder {
-        private SourceFilter sourceFilter = TableSeparator.ACCEPT_ALL;
+        private TableMetaDataFilter tableMetaDataFilter = TableSeparator.ACCEPT_ALL;
         private TableSplitter splitter = TableSplitter.NONE;
         private List<String> comparisonKeys = new ArrayList<>();
         private ExpressionColumns expressionColumns = ExpressionColumns.NONE;
@@ -206,7 +207,7 @@ public record TableSeparator(SourceFilter sourceFilter
         }
 
         public Builder(final TableSeparator tableSeparator) {
-            this.sourceFilter = tableSeparator.sourceFilter();
+            this.tableMetaDataFilter = tableSeparator.sourceFilter();
             this.splitter = tableSeparator.splitter();
             this.comparisonKeys.addAll(tableSeparator.comparisonKeys());
             this.expressionColumns = tableSeparator.expressionColumns().copy();
@@ -263,8 +264,8 @@ public record TableSeparator(SourceFilter sourceFilter
             return this.setFilter(this.filter.and(otherFilter));
         }
 
-        public SourceFilter getTargetFilter() {
-            return this.sourceFilter;
+        public TableMetaDataFilter getTargetFilter() {
+            return this.tableMetaDataFilter;
         }
 
         public TableSplitter getSplitter() {
@@ -299,8 +300,8 @@ public record TableSeparator(SourceFilter sourceFilter
             return this.expressionColumns;
         }
 
-        public Builder setTargetFilter(final SourceFilter sourceFilter) {
-            this.sourceFilter = sourceFilter;
+        public Builder setTargetFilter(final TableMetaDataFilter tableMetaDataFilter) {
+            this.tableMetaDataFilter = tableMetaDataFilter;
             return this;
         }
 

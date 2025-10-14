@@ -4,7 +4,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dbunit.dataset.Column;
-import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.common.Parameter;
 
 import java.io.File;
 import java.io.FileOutputStream;

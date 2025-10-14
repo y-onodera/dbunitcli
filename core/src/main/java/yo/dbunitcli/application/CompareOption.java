@@ -8,6 +8,7 @@ import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ImageCompareOption;
 import yo.dbunitcli.application.option.ResultOption;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.compare.CompareResult;
 import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;

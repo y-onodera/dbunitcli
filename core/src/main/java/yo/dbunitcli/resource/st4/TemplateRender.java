@@ -4,7 +4,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 import org.stringtemplate.v4.misc.ErrorManager;
-import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;

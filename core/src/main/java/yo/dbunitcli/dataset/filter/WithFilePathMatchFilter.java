@@ -1,13 +1,13 @@
 package yo.dbunitcli.dataset.filter;
 
 import org.dbunit.dataset.ITableMetaData;
-import yo.dbunitcli.dataset.SourceFilter;
-import yo.dbunitcli.dataset.TableMetaDataWithSource;
+import yo.dbunitcli.common.TableMetaDataFilter;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.util.regex.Pattern;
 
-public record WithFilePathMatchFilter(SourceFilter base, Pattern filePath) implements SourceFilter {
-    public WithFilePathMatchFilter(final SourceFilter base, final String filePath) {
+public record WithFilePathMatchFilter(TableMetaDataFilter base, Pattern filePath) implements TableMetaDataFilter {
+    public WithFilePathMatchFilter(final TableMetaDataFilter base, final String filePath) {
         this(base, Pattern.compile(filePath));
     }
 

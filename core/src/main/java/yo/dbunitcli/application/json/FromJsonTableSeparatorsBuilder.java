@@ -1,6 +1,7 @@
 package yo.dbunitcli.application.json;
 
 import jakarta.json.*;
+import yo.dbunitcli.common.TableMetaDataFilter;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.resource.FileResources;
 
@@ -126,42 +127,42 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         other.add(this.build());
     }
 
-    protected void addTableSeparate(final JsonObject json, final SourceFilter sourceFilter) {
+    protected void addTableSeparate(final JsonObject json, final TableMetaDataFilter tableMetaDataFilter) {
         if (json.containsKey("innerJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("innerJoin")
                     , ComparableTableJoin.innerJoin(this.getJoinOn(json.getJsonObject("innerJoin")))
-                    , this.getTableSeparators(json, sourceFilter)));
+                    , this.getTableSeparators(json, tableMetaDataFilter)));
         } else if (json.containsKey("outerJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("outerJoin")
                     , ComparableTableJoin.outerJoin(this.getJoinOn(json.getJsonObject("outerJoin")))
-                    , this.getTableSeparators(json, sourceFilter)));
+                    , this.getTableSeparators(json, tableMetaDataFilter)));
         } else if (json.containsKey("fullJoin")) {
             this.addJoin(this.getJoin(json.getJsonObject("fullJoin")
                     , ComparableTableJoin.fullJoin(this.getJoinOn(json.getJsonObject("fullJoin")))
-                    , this.getTableSeparators(json, sourceFilter)));
+                    , this.getTableSeparators(json, tableMetaDataFilter)));
         } else {
-            this.addSettings(this.getTableSeparators(json, sourceFilter));
+            this.addSettings(this.getTableSeparators(json, tableMetaDataFilter));
         }
     }
 
-    protected List<TableSeparator> getTableSeparators(final JsonObject settingJson, final SourceFilter sourceFilter) {
+    protected List<TableSeparator> getTableSeparators(final JsonObject settingJson, final TableMetaDataFilter tableMetaDataFilter) {
         if (settingJson.containsKey("separate")) {
             final JsonArray expressions = settingJson.getJsonArray("separate");
             return IntStream.range(0, expressions.size())
                     .mapToObj(expressions::getJsonObject)
-                    .map(separate -> this.getTableSeparator(separate, sourceFilter))
+                    .map(separate -> this.getTableSeparator(separate, tableMetaDataFilter))
                     .collect(Collectors.toList());
         }
-        return List.of(this.getTableSeparator(settingJson, sourceFilter));
+        return List.of(this.getTableSeparator(settingJson, tableMetaDataFilter));
     }
 
     protected TableSeparator getTableSeparator(final JsonObject settingJson) {
         return this.getTableSeparator(settingJson, this.getTargetFilter(settingJson));
     }
 
-    protected TableSeparator getTableSeparator(final JsonObject settingJson, final SourceFilter sourceFilter) {
+    protected TableSeparator getTableSeparator(final JsonObject settingJson, final TableMetaDataFilter tableMetaDataFilter) {
         return TableSeparator.builder()
-                .setTargetFilter(sourceFilter)
+                .setTargetFilter(tableMetaDataFilter)
                 .setSplitter(this.getSplitter(settingJson))
                 .setComparisonKeys(this.collectSettings(settingJson, "keys"))
                 .setExpressionColumns(this.collectExpressionColumns(settingJson))
@@ -173,11 +174,11 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
                 .build();
     }
 
-    protected SourceFilter getTargetFilter(final JsonObject settingJson) {
+    protected TableMetaDataFilter getTargetFilter(final JsonObject settingJson) {
         if (settingJson.containsKey("name")) {
-            return new SourceFilterParser(settingJson, "name").parseEquals();
+            return new TableMetaDataFilterParser(settingJson, "name").parseEquals();
         } else if (settingJson.containsKey("pattern")) {
-            return new SourceFilterParser(settingJson, "pattern").parsePattern();
+            return new TableMetaDataFilterParser(settingJson, "pattern").parsePattern();
         } else if (settingJson.containsKey("innerJoin")
                 || settingJson.containsKey("outerJoin")
                 || settingJson.containsKey("fullJoin")) {

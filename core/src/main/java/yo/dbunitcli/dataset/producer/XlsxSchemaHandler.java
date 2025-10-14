@@ -1,11 +1,12 @@
-package yo.dbunitcli.resource.poi;
+package yo.dbunitcli.dataset.producer;
 
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.usermodel.XSSFComment;
+import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetConsumer;
-import yo.dbunitcli.dataset.Source;
+import yo.dbunitcli.resource.poi.XlsxSchema;
 
 public class XlsxSchemaHandler extends ExcelMappingDataSetConsumerWrapper implements XSSFSheetXMLHandler.SheetContentsHandler {
     private int currentRow = -1;

@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset;
+package yo.dbunitcli.common;
 
 import org.dbunit.dataset.ITableMetaData;
 
@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * テーブル名やシート名に対するフィルタリング機能を提供するインターフェース。
  */
-public interface SourceFilter {
+public interface TableMetaDataFilter extends yo.dbunitcli.common.TargetFilter {
 
     /**
      * 指定された名前のリストを除外するフィルタを作成
@@ -15,7 +15,8 @@ public interface SourceFilter {
      * @param names 除外する名前のリスト
      * @return フィルタのインスタンス
      */
-    default SourceFilter exclude(final List<String> names) {
+    @Override
+    default TableMetaDataFilter exclude(final List<String> names) {
         return new ExcludeFilter(this, names);
     }
 
@@ -29,23 +30,16 @@ public interface SourceFilter {
     }
 
     /**
-     * フィルタの判定を実行
-     *
-     * @param tableName テーブル名
-     * @return フィルタ条件に一致する場合true
-     */
-    boolean test(String tableName);
-
-    /**
      * 指定された名前のリストを除外するフィルタ
      *
      * @param base  基本となるフィルタ
      * @param names 除外する名前のリスト
      */
-    record ExcludeFilter(SourceFilter base, List<String> names) implements SourceFilter {
+    record ExcludeFilter(TableMetaDataFilter base, List<String> names) implements TableMetaDataFilter {
         @Override
         public boolean test(final String tableName) {
             return this.base().test(tableName) && !this.names().contains(tableName);
         }
     }
+
 }

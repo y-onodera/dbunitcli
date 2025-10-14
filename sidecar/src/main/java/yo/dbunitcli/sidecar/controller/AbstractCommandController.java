@@ -16,7 +16,7 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.CommandDto;
 import yo.dbunitcli.application.CommandLineOption;
-import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.CommandType;
 import yo.dbunitcli.sidecar.domain.project.Workspace;

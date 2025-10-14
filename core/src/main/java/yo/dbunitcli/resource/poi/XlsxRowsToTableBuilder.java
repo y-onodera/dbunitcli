@@ -1,7 +1,7 @@
 package yo.dbunitcli.resource.poi;
 
 import org.apache.poi.ss.util.CellReference;
-import yo.dbunitcli.dataset.TableMetaDataWithSource;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 
 public interface XlsxRowsToTableBuilder {
 

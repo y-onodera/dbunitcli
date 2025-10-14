@@ -1,6 +1,6 @@
 package yo.dbunitcli.application;
 
-import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.common.Parameter;
 
 import java.util.Arrays;
 

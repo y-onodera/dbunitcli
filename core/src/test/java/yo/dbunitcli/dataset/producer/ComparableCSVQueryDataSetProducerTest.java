@@ -4,10 +4,10 @@ import org.dbunit.dataset.DataSetException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
-import yo.dbunitcli.dataset.Parameter;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;

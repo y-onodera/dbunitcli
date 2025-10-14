@@ -5,8 +5,8 @@ import yo.dbunitcli.application.cli.ArgumentMapper;
 import yo.dbunitcli.application.cli.DefaultArgumentFilter;
 import yo.dbunitcli.application.cli.DefaultArgumentMapper;
 import yo.dbunitcli.application.option.Option;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.Parameter;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 
 public interface CommandLineOption<T extends CommandDto> extends Option {

@@ -4,14 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import yo.dbunitcli.dataset.SourceFilter;
+import yo.dbunitcli.common.TableMetaDataFilter;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * {@link SourceFilter}のテストクラス。
+ * {@link TableMetaDataFilter}のテストクラス。
  * テーブル名やシート名に対するフィルタリング機能のテストを実施します。
  */
 public class SourceFilterTest {

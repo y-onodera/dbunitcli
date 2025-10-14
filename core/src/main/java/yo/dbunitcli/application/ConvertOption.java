@@ -3,7 +3,7 @@ package yo.dbunitcli.application;
 import yo.dbunitcli.application.cli.CommandLineParser;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ResultOption;
-import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.common.Parameter;
 
 public record ConvertOption(Parameter parameter, ResultOption result,
                             DataSetLoadOption srcData) implements CommandLineOption<ConvertDto> {

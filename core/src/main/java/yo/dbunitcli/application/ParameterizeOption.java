@@ -7,7 +7,7 @@ import yo.dbunitcli.application.cli.DefaultArgumentFilter;
 import yo.dbunitcli.application.cli.DefaultArgumentMapper;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
-import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;

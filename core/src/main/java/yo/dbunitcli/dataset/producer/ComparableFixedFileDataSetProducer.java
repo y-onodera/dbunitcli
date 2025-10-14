@@ -3,7 +3,11 @@ package yo.dbunitcli.dataset.producer;
 import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
+import yo.dbunitcli.dataset.ComparableDataSetConsumer;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
 
 import java.io.File;
 import java.io.IOException;

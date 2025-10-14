@@ -2,7 +2,7 @@ package yo.dbunitcli.application;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.common.Parameter;
 
 public class Parameterize implements Command<ParameterizeDto, ParameterizeOption> {
 

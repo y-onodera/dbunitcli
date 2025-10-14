@@ -3,8 +3,8 @@ package yo.dbunitcli.resource.poi;
 import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
-import yo.dbunitcli.dataset.Source;
-import yo.dbunitcli.dataset.TableMetaDataWithSource;
+import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.util.*;
 import java.util.stream.IntStream;

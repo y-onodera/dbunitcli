@@ -3,7 +3,7 @@ package yo.dbunitcli.resource.poi.jxls;
 import org.jxls.builder.JxlsOutputFile;
 import org.jxls.builder.JxlsStreaming;
 import org.jxls.transform.poi.JxlsPoiTemplateFillerBuilder;
-import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.common.Parameter;
 
 import java.io.File;
 import java.io.FileInputStream;

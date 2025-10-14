@@ -2,7 +2,7 @@ package yo.dbunitcli.fileprocessor;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.taskdefs.SQLExec;
-import yo.dbunitcli.dataset.Parameter;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.st4.TemplateRender;
 

@@ -1,6 +1,6 @@
 package yo.dbunitcli.dataset.filter;
 
-import yo.dbunitcli.dataset.SourceFilter;
+import yo.dbunitcli.common.TableMetaDataFilter;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @param names 対象とする名前のリスト
  */
-public record AnyFilter(List<String> names) implements SourceFilter {
+public record AnyFilter(List<String> names) implements TableMetaDataFilter {
     @Override
     public boolean test(final String tableName) {
         return this.names().contains(tableName);

@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import yo.dbunitcli.application.option.Option;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.DataSourceType;
-import yo.dbunitcli.dataset.Parameter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
