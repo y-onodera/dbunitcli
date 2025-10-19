@@ -2,26 +2,10 @@ package yo.dbunitcli.application;
 
 import yo.dbunitcli.common.Parameter;
 
-import java.util.Arrays;
-
 public class Compare implements Command<CompareDto, CompareOption> {
 
     public static void main(final String[] args) {
         new Compare().exec(args);
-    }
-
-    @Override
-    public void exec(final String[] args) {
-        try {
-            this.exec(this.parseOption(args, Parameter.none()));
-        } catch (final CommandFailException ex) {
-            Command.LOGGER.info(ex.getMessage());
-            System.exit(1);
-        } catch (final Throwable th) {
-            Command.LOGGER.error("args:{}", Arrays.toString(args));
-            Command.LOGGER.error("error:", th);
-            throw th;
-        }
     }
 
     @Override

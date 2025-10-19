@@ -18,13 +18,10 @@ public class Parameterize implements Command<ParameterizeDto, ParameterizeOption
                     try {
                         options.createCommand(it).exec(options.createArgs(it), it);
                     } catch (final Command.CommandFailException fail) {
-                        Parameterize.LOGGER.info(fail.getMessage());
-                        return 1;
-                    } catch (final AssertionError ae) {
                         if (!options.ignoreFail()) {
-                            throw ae;
+                            throw fail;
                         } else {
-                            Parameterize.LOGGER.info(ae.getMessage());
+                            Parameterize.LOGGER.info(fail.getMessage());
                             return 1;
                         }
                     }

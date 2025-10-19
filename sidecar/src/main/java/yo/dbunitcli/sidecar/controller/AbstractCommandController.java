@@ -162,7 +162,11 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                     .parseOption(body.getName()
                             , this.requestToArgs(body.getInput())
                             , Parameter.none());
-            this.getCommand().exec(options);
+            try {
+                this.getCommand().exec(options);
+            } catch (final Command.CommandFailException th) {
+                LOGGER.info("cause:", th);
+            }
             return this.resultDir(options);
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
