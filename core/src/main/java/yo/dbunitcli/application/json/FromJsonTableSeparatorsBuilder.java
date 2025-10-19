@@ -197,10 +197,6 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
     protected TableSplitter getSplitter(final JsonObject json) {
         if (json.containsKey("split")) {
             final JsonObject split = json.getJsonObject("split");
-            final int limit = split.getInt("limit");
-            final String newName = split.containsKey("tableName") ? split.getString("tableName") : "";
-            final String prefix = split.containsKey("prefix") ? split.getString("prefix") : "";
-            final String suffix = split.containsKey("suffix") ? split.getString("suffix") : "";
             final List<String> breakKeys = new ArrayList<>();
             if (split.containsKey("breakKey")) {
                 final JsonArray breakKey = split.getJsonArray("breakKey");
@@ -208,14 +204,28 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
                         .mapToObj(breakKey::getString)
                         .toList());
             }
-            return new TableSplitter(newName, prefix, suffix, breakKeys, limit);
+            return new TableSplitter.Builder()
+                    .setRenameFunction(this.getRenameFunctionBuilder(split)
+                            .setSplit(true)
+                            .build())
+                    .setLimit(split.getInt("limit"))
+                    .setBreakKeys(breakKeys)
+                    .build();
         } else if (json.containsKey("tableName") || json.containsKey("prefix") || json.containsKey("suffix")) {
-            final String newName = json.containsKey("tableName") ? json.getString("tableName") : "";
-            final String prefix = json.containsKey("prefix") ? json.getString("prefix") : "";
-            final String suffix = json.containsKey("suffix") ? json.getString("suffix") : "";
-            return new TableSplitter(newName, prefix, suffix, 0);
+            return new TableSplitter.Builder()
+                    .setRenameFunction(this.getRenameFunctionBuilder(json)
+                            .setSplit(false)
+                            .build())
+                    .build();
         }
         return TableSplitter.NONE;
+    }
+
+    protected TableRenameStrategy.ReplaceFunction.Builder getRenameFunctionBuilder(final JsonObject json) {
+        return new TableRenameStrategy.ReplaceFunction.Builder()
+                .setNewName(json.containsKey("tableName") ? json.getString("tableName") : "")
+                .setPrefix(json.containsKey("prefix") ? json.getString("prefix") : "")
+                .setSuffix(json.containsKey("suffix") ? json.getString("suffix") : "");
     }
 
     protected ComparableTableJoinCondition getJoin(final JsonObject json, final ComparableTableJoin.Strategy strategy, final List<TableSeparator> tableSeparator) {

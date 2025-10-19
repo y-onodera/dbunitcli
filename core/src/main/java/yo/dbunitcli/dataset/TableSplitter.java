@@ -5,16 +5,7 @@ import java.util.List;
 
 public record TableSplitter(TableRenameStrategy renameFunction, List<String> breakKeys, int limit) {
 
-    public static TableSplitter NONE = new TableSplitter(new TableRenameStrategy.ReplaceFunction.Builder().build(), new ArrayList<>(), 0);
-
-    public TableSplitter(final String newName, final String prefix, final String suffix, final int limit) {
-        this(new TableRenameStrategy.ReplaceFunction(newName, prefix, suffix, limit > 0), new ArrayList<>(), limit);
-    }
-
-    public TableSplitter(final String newName, final String prefix, final String suffix, final List<String> breakKeys, final int limit) {
-        this(new TableRenameStrategy.ReplaceFunction(newName, prefix, suffix, limit > 0), breakKeys, limit);
-
-    }
+    public static TableSplitter NONE = new TableSplitter(new Builder());
 
     public TableSplitter(final Builder builder) {
         this(builder.getRenameFunction(), builder.getBreakKeys(), builder.getLimit());
@@ -33,15 +24,14 @@ public record TableSplitter(TableRenameStrategy renameFunction, List<String> bre
     }
 
     public Builder builder() {
-        return new Builder().setLimit(this.limit)
+        return new Builder()
+                .setLimit(this.limit)
                 .setRenameFunction(this.renameFunction);
     }
 
     public static class Builder {
-        private TableRenameStrategy renameFunction = NONE.renameFunction;
-
+        private TableRenameStrategy renameFunction = new TableRenameStrategy.ReplaceFunction.Builder().build();
         private List<String> breakKeys = new ArrayList<>();
-
         private int limit;
 
         public TableSplitter build() {
@@ -61,8 +51,9 @@ public record TableSplitter(TableRenameStrategy renameFunction, List<String> bre
             return this.breakKeys;
         }
 
-        public void setBreakKeys(final List<String> breakKeys) {
+        public Builder setBreakKeys(final List<String> breakKeys) {
             this.breakKeys = breakKeys;
+            return this;
         }
 
         public int getLimit() {
