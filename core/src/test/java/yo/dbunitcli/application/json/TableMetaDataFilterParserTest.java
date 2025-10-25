@@ -3,17 +3,17 @@ package yo.dbunitcli.application.json;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import org.junit.jupiter.api.Test;
-import yo.dbunitcli.dataset.SourceFilter;
+import yo.dbunitcli.common.TableMetaDataFilter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SourceFilterParserTest {
+class TableMetaDataFilterParserTest {
 
     @Test
     void パース_空のJSONの場合_常にtrueのフィルタを返す() {
         final JsonObject json = Json.createObjectBuilder().build();
-        final SourceFilterParser parser = new SourceFilterParser(json, "pattern");
-        final SourceFilter filter = parser.parsePattern();
+        final TableMetaDataFilterParser parser = new TableMetaDataFilterParser(json, "pattern");
+        final TableMetaDataFilter filter = parser.parsePattern();
 
         assertTrue(filter.test("any_table"));
     }
@@ -23,8 +23,8 @@ class SourceFilterParserTest {
         final JsonObject json = Json.createObjectBuilder()
                 .add("other", "value")
                 .build();
-        final SourceFilterParser parser = new SourceFilterParser(json, "pattern");
-        final SourceFilter filter = parser.parsePattern();
+        final TableMetaDataFilterParser parser = new TableMetaDataFilterParser(json, "pattern");
+        final TableMetaDataFilter filter = parser.parsePattern();
 
         assertTrue(filter.test("any_table"));
     }
@@ -34,8 +34,8 @@ class SourceFilterParserTest {
         final JsonObject json = Json.createObjectBuilder()
                 .add("pattern", "test")
                 .build();
-        final SourceFilterParser parser = new SourceFilterParser(json, "pattern");
-        final SourceFilter filter = parser.parsePattern();
+        final TableMetaDataFilterParser parser = new TableMetaDataFilterParser(json, "pattern");
+        final TableMetaDataFilter filter = parser.parsePattern();
 
         assertTrue(filter.test("test_table"));
         assertFalse(filter.test("other_table"));
@@ -48,8 +48,8 @@ class SourceFilterParserTest {
                         .add("regex", "test.*")
                         .build())
                 .build();
-        final SourceFilterParser parser = new SourceFilterParser(json, "pattern");
-        final SourceFilter filter = parser.parsePattern();
+        final TableMetaDataFilterParser parser = new TableMetaDataFilterParser(json, "pattern");
+        final TableMetaDataFilter filter = parser.parsePattern();
 
         assertTrue(filter.test("test_table"));
         assertTrue(filter.test("testing"));
@@ -67,8 +67,8 @@ class SourceFilterParserTest {
                         .build())
                 .build();
 
-        final SourceFilterParser parser = new SourceFilterParser(json, "pattern");
-        final SourceFilter filter = parser.parsePattern();
+        final TableMetaDataFilterParser parser = new TableMetaDataFilterParser(json, "pattern");
+        final TableMetaDataFilter filter = parser.parsePattern();
 
         assertTrue(filter.test("test_table"));
         assertFalse(filter.test("test_exclude"));
@@ -77,7 +77,7 @@ class SourceFilterParserTest {
 
     @Test
     void コンストラクタ_nullの場合_例外をスロー() {
-        assertThrows(IllegalArgumentException.class, () -> new SourceFilterParser(null, null));
+        assertThrows(IllegalArgumentException.class, () -> new TableMetaDataFilterParser(null, null));
     }
 
 }

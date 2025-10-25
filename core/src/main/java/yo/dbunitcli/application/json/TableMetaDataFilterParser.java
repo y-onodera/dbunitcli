@@ -4,7 +4,7 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
-import yo.dbunitcli.dataset.SourceFilter;
+import yo.dbunitcli.common.TableMetaDataFilter;
 import yo.dbunitcli.dataset.filter.*;
 
 import java.util.ArrayList;
@@ -15,11 +15,8 @@ import java.util.regex.PatternSyntaxException;
 /**
  * JSONオブジェクトからTargetFilterインスタンスを生成するパーサー
  */
-public class SourceFilterParser {
-    private final JsonObject jsonObject;
-    private final String key;
-
-    public static SourceFilter withFilePathMatch(final SourceFilter base, final String filePath) {
+public record TableMetaDataFilterParser(JsonObject jsonObject, String key) {
+    public static TableMetaDataFilter withFilePathMatch(final TableMetaDataFilter base, final String filePath) {
         return new WithFilePathMatchFilter(base, filePath);
     }
 
@@ -31,7 +28,7 @@ public class SourceFilterParser {
      * @throws PatternSyntaxException 不正な正規表現パターンの場合
      * @throws NullPointerException   パターンがnullの場合
      */
-    public static SourceFilter regex(final String regex) {
+    public static TableMetaDataFilter regex(final String regex) {
         return new RegexFilter(regex);
     }
 
@@ -41,7 +38,7 @@ public class SourceFilterParser {
      * @param names 対象とする名前の配列
      * @return フィルタのインスタンス
      */
-    public static SourceFilter any(final String... names) {
+    public static TableMetaDataFilter any(final String... names) {
         return new AnyFilter(List.of(names));
     }
 
@@ -51,7 +48,7 @@ public class SourceFilterParser {
      * @param pattern パターン文字列
      * @return フィルタのインスタンス
      */
-    public static SourceFilter contain(final String... pattern) {
+    public static TableMetaDataFilter contain(final String... pattern) {
         return new ContainFilter(List.of(pattern));
     }
 
@@ -61,7 +58,7 @@ public class SourceFilterParser {
      * @param result 返す結果
      * @return フィルタのインスタンス
      */
-    public static SourceFilter always(final boolean result) {
+    public static TableMetaDataFilter always(final boolean result) {
         return new AlwaysFilter(result);
     }
 
@@ -71,7 +68,7 @@ public class SourceFilterParser {
      * @param jsonObject パース対象のJSONオブジェクト
      * @throws IllegalArgumentException jsonObjectがnullの場合
      */
-    public SourceFilterParser(final JsonObject jsonObject, final String key) {
+    public TableMetaDataFilterParser(final JsonObject jsonObject, final String key) {
         this.key = key;
         if (jsonObject == null) {
             throw new IllegalArgumentException("jsonObject must not be null");
@@ -85,13 +82,13 @@ public class SourceFilterParser {
      * @return 生成されたTargetFilterインスタンス
      * @throws IllegalArgumentException JSONの構造が不正な場合やキーが存在しない場合
      */
-    public SourceFilter parseEquals() {
+    public TableMetaDataFilter parseEquals() {
         if (this.jsonObject.isEmpty()) {
             return always(true);
         }
 
         final JsonValue value = this.jsonObject.get(this.key);
-        final SourceFilter filter;
+        final TableMetaDataFilter filter;
         switch (value.getValueType()) {
             case STRING -> filter = any(((JsonString) value).getString());
             case ARRAY -> filter = any(this.parseArrayValue(value.asJsonArray()));
@@ -108,7 +105,7 @@ public class SourceFilterParser {
      * @return 生成されたTargetFilterインスタンス
      * @throws IllegalArgumentException JSONの構造が不正な場合やキーが存在しない場合
      */
-    public SourceFilter parsePattern() {
+    public TableMetaDataFilter parsePattern() {
         if (this.jsonObject.isEmpty()) {
             return always(true);
         }
@@ -118,7 +115,7 @@ public class SourceFilterParser {
             return always(true);
         }
 
-        final SourceFilter filter;
+        final TableMetaDataFilter filter;
         switch (value.getValueType()) {
             case STRING -> filter = contain(((JsonString) value).getString());
             case ARRAY -> filter = contain(this.parseArrayValue(value.asJsonArray()));
@@ -147,15 +144,15 @@ public class SourceFilterParser {
         return values.toArray(new String[0]);
     }
 
-    private SourceFilter parseFilePathFilter(final JsonObject obj, final Function<JsonObject, SourceFilter> baseParse) {
-        final SourceFilter result = baseParse.apply(obj);
+    private TableMetaDataFilter parseFilePathFilter(final JsonObject obj, final Function<JsonObject, TableMetaDataFilter> baseParse) {
+        final TableMetaDataFilter result = baseParse.apply(obj);
         if (obj.containsKey("filePath")) {
             return withFilePathMatch(result, obj.getString("filePath"));
         }
         return result;
     }
 
-    private SourceFilter any(final JsonObject obj) {
+    private TableMetaDataFilter any(final JsonObject obj) {
         final JsonValue value = obj.get("any");
         return switch (value.getValueType()) {
             case STRING -> any(((JsonString) value).getString());
@@ -171,8 +168,8 @@ public class SourceFilterParser {
      * @param obj JSONオブジェクト
      * @return TargetFilterインスタンス
      */
-    private SourceFilter contain(final JsonObject obj) {
-        final SourceFilter filter = this.parseContainFilter(obj);
+    private TableMetaDataFilter contain(final JsonObject obj) {
+        final TableMetaDataFilter filter = this.parseContainFilter(obj);
         if (obj.containsKey("exclude")) {
             final JsonArray excludes = obj.getJsonArray("exclude");
             return filter.exclude(this.parseExcludeList(excludes));
@@ -180,7 +177,7 @@ public class SourceFilterParser {
         return filter;
     }
 
-    private SourceFilter parseContainFilter(final JsonObject obj) {
+    private TableMetaDataFilter parseContainFilter(final JsonObject obj) {
         if (obj.containsKey("regex")) {
             return regex(obj.getString("regex"));
         } else if (obj.containsKey("string")) {
