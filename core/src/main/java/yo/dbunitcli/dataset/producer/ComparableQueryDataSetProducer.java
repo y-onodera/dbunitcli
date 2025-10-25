@@ -6,13 +6,12 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.util.stream.Stream;
 
-public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer {
+public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer implements QueryDataSetProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableQueryDataSetProducer.class);
     private final Parameter parameter;
@@ -23,14 +22,13 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     }
 
     @Override
-    public void produce() throws DataSetException {
-        ComparableQueryDataSetProducer.LOGGER.info("produce() - start");
-        this.consumer.startDataSet();
-        Arrays.stream(this.src)
-                .filter(it -> this.getParam().tableNameFilter().predicate(this.getTableName(it)))
-                .forEach(it -> this.executeTable(this.getSource(it, this.addFileInfo)));
-        this.consumer.endDataSet();
-        ComparableQueryDataSetProducer.LOGGER.info("produce() - end");
+    public Parameter getParameter() {
+        return this.parameter;
+    }
+
+    @Override
+    public Stream<Source> getSourceStream() {
+        return QueryDataSetProducer.super.getSourceStream();
     }
 
     @Override
@@ -44,14 +42,6 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
         } catch (final SQLException | DataSetException e) {
             throw new AssertionError(e);
         }
-    }
-
-    public Parameter getParameter() {
-        return this.parameter;
-    }
-
-    public TemplateRender getTemplateLoader() {
-        return this.getParam().templateRender();
     }
 
     protected String loadQuery(final File aFile) {

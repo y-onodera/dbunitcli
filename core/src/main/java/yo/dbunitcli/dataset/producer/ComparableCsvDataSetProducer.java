@@ -14,28 +14,19 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
-import java.util.Arrays;
 import java.util.List;
 
 public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
-    private final File[] src;
     private final ComparableDataSetParam param;
     private final int startRow;
-    private final String[] headerNames;
-    private final boolean loadData;
-    private final boolean addFileInfo;
     private ComparableDataSetConsumer consumer;
     private int processRow;
     private Pipeline pipeline;
 
     public ComparableCsvDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
-        this.src = this.param.getSrcFiles();
         this.startRow = this.param.startRow();
-        this.headerNames = this.param.headerNames();
-        this.loadData = this.param.loadData();
-        this.addFileInfo = this.param.addFileInfo();
         this.resetThePipeline();
     }
 
@@ -45,45 +36,39 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     }
 
     @Override
-    public void produce() throws DataSetException {
-        ComparableCsvDataSetProducer.LOGGER.info("produce() - start");
-        this.consumer.startDataSet();
-        Arrays.stream(this.src)
-                .filter(it -> this.getParam().tableNameFilter().predicate(this.getTableName(it)))
-                .forEach(it -> this.executeTable(this.getSource(it, this.addFileInfo)));
-        this.consumer.endDataSet();
-        ComparableCsvDataSetProducer.LOGGER.info("produce() - end");
+    public ComparableDataSetConsumer getConsumer() {
+        return this.consumer;
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
     }
 
     @Override
     public void executeTable(final Source source) {
         ComparableCsvDataSetProducer.LOGGER.info("produce - start filePath={}", source.filePath());
         try (final FileInputStream fi = new FileInputStream(source.filePath())) {
-            final Reader reader = new BufferedReader(new InputStreamReader(fi, this.param.encoding()));
+            final Reader reader = new BufferedReader(new InputStreamReader(fi, this.getEncoding()));
             final LineNumberReader lineNumberReader = new LineNumberReader(reader);
 
             this.skipToStartRow(lineNumberReader);
-            String[] headerName = this.headerNames;
+            String[] headerName = this.getHeaderNames();
             if (headerName == null) {
                 headerName = this.parseFirstLine(lineNumberReader, source.filePath());
             }
             final TableMetaDataWithSource metaData = this.createMetaData(source, headerName);
-            this.consumer.startTable(metaData);
+            this.getConsumer().startTable(metaData);
             this.processRow = 0;
-            if (this.loadData) {
+            if (this.loadData()) {
                 this.parseTheData(metaData, headerName, lineNumberReader);
             }
-            this.consumer.endTable();
+            this.getConsumer().endTable();
         } catch (final IOException | DataSetException e) {
             throw new AssertionError(e);
         }
         ComparableCsvDataSetProducer.LOGGER.info("produce - rows={}", this.processRow);
         ComparableCsvDataSetProducer.LOGGER.info("produce - end   filePath={}", source.filePath());
-    }
-
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
     }
 
     protected String[] parseFirstLine(final LineNumberReader lineNumberReader, final String source) {

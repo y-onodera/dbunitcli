@@ -9,43 +9,29 @@ import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
-import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.sql.*;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProducer {
+public class ComparableCSVQueryDataSetProducer implements QueryDataSetProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
     private static final String URL = "jdbc:h2:file:" + FileResources.datasetDir().getAbsolutePath() + ";MODE=Oracle";
-    private final File[] src;
-    private final Parameter parameter;
     private final ComparableDataSetParam param;
-    private final String[] headerNames;
-    private final boolean loadData;
-    private final boolean addFileInfo;
+    private final Parameter parameter;
     private ComparableDataSetConsumer consumer;
 
     public ComparableCSVQueryDataSetProducer(final ComparableDataSetParam param, final Parameter parameter) {
         this.param = param;
-        this.src = this.param.getSrcFiles();
         this.parameter = parameter;
-        this.headerNames = this.param.headerNames();
-        this.loadData = this.param.loadData();
-        this.addFileInfo = this.param.addFileInfo();
     }
 
+    @Override
     public Parameter getParameter() {
         return this.parameter;
-    }
-
-    public TemplateRender getTemplateLoader() {
-        return this.getParam().templateRender();
     }
 
     @Override
@@ -54,14 +40,13 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
     }
 
     @Override
-    public void produce() throws DataSetException {
-        ComparableCSVQueryDataSetProducer.LOGGER.info("produce() - start");
-        this.consumer.startDataSet();
-        Arrays.stream(this.src)
-                .filter(it -> this.getParam().tableNameFilter().predicate(this.getTableName(it)))
-                .forEach(it -> this.executeTable(this.getSource(it, this.addFileInfo)));
-        this.consumer.endDataSet();
-        ComparableCSVQueryDataSetProducer.LOGGER.info("produce() - end");
+    public ComparableDataSetConsumer getConsumer() {
+        return this.consumer;
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
     }
 
     @Override
@@ -77,18 +62,18 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
                 final Column[] columns = IntStream.range(0, metaData.getColumnCount())
                         .mapToObj(i -> {
                             try {
-                                return this.headerNames != null ? this.headerNames[i] : metaData.getColumnName(i + 1);
+                                return this.getHeaderNames() != null ? this.getHeaderNames()[i] : metaData.getColumnName(i + 1);
                             } catch (final SQLException e) {
                                 throw new RuntimeException(e);
                             }
                         })
                         .map(name -> new Column(name.trim(), DataType.UNKNOWN))
                         .toArray(Column[]::new);
-                this.consumer.startTable(this.createMetaData(source, columns));
-                if (this.loadData) {
+                this.getConsumer().startTable(this.createMetaData(source, columns));
+                if (this.loadData()) {
                     int readRows = 0;
                     while (rst.next()) {
-                        this.consumer.row(IntStream.rangeClosed(1, metaData.getColumnCount())
+                        this.getConsumer().row(IntStream.rangeClosed(1, metaData.getColumnCount())
                                 .mapToObj(i -> {
                                     try {
                                         return Optional.ofNullable(rst.getString(i))
@@ -102,7 +87,7 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
                     }
                     ComparableCSVQueryDataSetProducer.LOGGER.info("produce - rows={}", readRows);
                 }
-                this.consumer.endTable();
+                this.getConsumer().endTable();
                 ComparableCSVQueryDataSetProducer.LOGGER.info("produce - end   filePath={}", source.filePath());
             }
         } catch (final SQLException | DataSetException e) {
@@ -110,8 +95,4 @@ public class ComparableCSVQueryDataSetProducer implements ComparableDataSetProdu
         }
     }
 
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
 }

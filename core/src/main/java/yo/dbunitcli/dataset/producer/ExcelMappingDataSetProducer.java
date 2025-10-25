@@ -13,8 +13,8 @@ import yo.dbunitcli.resource.poi.XlsxSchema;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class ExcelMappingDataSetConsumerWrapper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExcelMappingDataSetConsumerWrapper.class);
+public class ExcelMappingDataSetProducer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExcelMappingDataSetProducer.class);
     protected final boolean loadData;
     protected final String[] headerNames;
     private final XlsxSchema schema;
@@ -25,7 +25,7 @@ public class ExcelMappingDataSetConsumerWrapper {
     protected XlsxRowsToTableBuilder rowsTableBuilder;
     private int rowTableRows = 0;
 
-    public ExcelMappingDataSetConsumerWrapper(final XlsxSchema schema
+    public ExcelMappingDataSetProducer(final XlsxSchema schema
             , final int startRow
             , final String[] headerNames
             , final boolean loadData
@@ -51,7 +51,7 @@ public class ExcelMappingDataSetConsumerWrapper {
             if (this.rowsTableBuilder != null) {
                 if (this.rowsTableBuilder.isNowProcessing()) {
                     this.consumer.endTable();
-                    ExcelMappingDataSetConsumerWrapper.LOGGER.info("produce - rows={}", this.rowTableRows);
+                    ExcelMappingDataSetProducer.LOGGER.info("produce - rows={}", this.rowTableRows);
                 }
                 this.rowsTableBuilder = null;
             }
@@ -79,7 +79,7 @@ public class ExcelMappingDataSetConsumerWrapper {
                 if (this.rowsTableBuilder.isTableStart(rowNumber)) {
                     if (this.rowsTableBuilder.isNowProcessing()) {
                         this.consumer.endTable();
-                        ExcelMappingDataSetConsumerWrapper.LOGGER.info("produce - rows={}", this.rowTableRows);
+                        ExcelMappingDataSetProducer.LOGGER.info("produce - rows={}", this.rowTableRows);
                     }
                     this.consumer.startTable(this.rowsTableBuilder.startNewTable());
                     this.rowTableRows = 0;
@@ -103,17 +103,17 @@ public class ExcelMappingDataSetConsumerWrapper {
     protected void createRandomCellTable() throws DataSetException {
         for (final String tableName : this.randomCellRecordBuilder.getTableNames()) {
             this.consumer.startTable(this.randomCellRecordBuilder.getTableMetaData(tableName));
-            ExcelMappingDataSetConsumerWrapper.LOGGER.info("produce - start tableName={}", tableName);
+            ExcelMappingDataSetProducer.LOGGER.info("produce - start tableName={}", tableName);
             if (this.loadData) {
                 int i = 0;
                 for (final String[] row : this.randomCellRecordBuilder.getRows(tableName)) {
                     this.addRowToTable(row);
                     i++;
                 }
-                ExcelMappingDataSetConsumerWrapper.LOGGER.info("produce - rows={},tableName={}", i, tableName);
+                ExcelMappingDataSetProducer.LOGGER.info("produce - rows={},tableName={}", i, tableName);
             }
             this.consumer.endTable();
-            ExcelMappingDataSetConsumerWrapper.LOGGER.info("produce - end   tableName={}", tableName);
+            ExcelMappingDataSetProducer.LOGGER.info("produce - end   tableName={}", tableName);
         }
     }
 

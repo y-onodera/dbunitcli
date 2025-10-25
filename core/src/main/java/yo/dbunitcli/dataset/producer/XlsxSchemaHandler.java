@@ -8,7 +8,7 @@ import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
-public class XlsxSchemaHandler extends ExcelMappingDataSetConsumerWrapper implements XSSFSheetXMLHandler.SheetContentsHandler {
+public class XlsxSchemaHandler extends ExcelMappingDataSetProducer implements XSSFSheetXMLHandler.SheetContentsHandler {
     private int currentRow = -1;
     private int currentCol = -1;
 

@@ -11,7 +11,6 @@ import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.Styles;
 import org.apache.poi.xssf.model.StylesTable;
-import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
@@ -26,32 +25,24 @@ import yo.dbunitcli.dataset.NameFilter;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
-    private final File[] src;
     private final int startRow;
-    private final String[] headerNames;
     private final XlsxSchema schema;
     private final ComparableDataSetParam param;
-    private final boolean loadData;
     private final NameFilter sheetNameFilter;
-    private final boolean addFileInfo;
     private ComparableDataSetConsumer consumer;
 
     public ComparableXlsxDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
-        this.src = this.param.getSrcFiles();
         this.sheetNameFilter = this.param.tableNameFilter();
         this.startRow = this.param.startRow();
-        this.headerNames = this.param.headerNames();
         this.schema = this.param.xlsxSchema();
-        this.loadData = this.param.loadData();
-        this.addFileInfo = this.param.addFileInfo();
     }
 
     @Override
@@ -60,13 +51,19 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public void produce() throws DataSetException {
-        ComparableXlsxDataSetProducer.LOGGER.info("produce() - start");
-        this.consumer.startDataSet();
-        Arrays.stream(this.src)
-                .forEach(it -> this.executeTable(this.getSource(it, this.addFileInfo)));
-        this.consumer.endDataSet();
-        ComparableXlsxDataSetProducer.LOGGER.info("produce() - end");
+    public ComparableDataSetConsumer getConsumer() {
+        return this.consumer;
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
+    }
+
+    @Override
+    public Stream<Source> getSourceStream() {
+        return Arrays.stream(this.getSrcFiles())
+                .map(this::getSource);
     }
 
     @Override
@@ -86,8 +83,8 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
                         this.processSheet(styles, strings, new XlsxSchemaHandler(this.consumer
                                         , this.schema
                                         , this.startRow
-                                        , this.headerNames
-                                        , this.loadData
+                                        , this.getHeaderNames()
+                                        , this.loadData()
                                         , source.sheetName(sheetName))
                                 , stream);
                         ComparableXlsxDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", sheetName, index - 1);
@@ -98,11 +95,6 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
             throw new AssertionError(e);
         }
         ComparableXlsxDataSetProducer.LOGGER.info("produce - end   filePath={}", source.filePath());
-    }
-
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
     }
 
     protected void processSheet(

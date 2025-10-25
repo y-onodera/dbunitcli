@@ -12,7 +12,6 @@ import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -23,25 +22,20 @@ import java.util.stream.Stream;
 public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDBDataSetProducer.class);
     protected final IDatabaseConnection connection;
-    protected final File[] src;
     protected final ComparableDataSetParam param;
-    protected final String[] headerNames;
-    protected final boolean loadData;
-    protected final boolean addFileInfo;
     protected ComparableDataSetConsumer consumer;
     private IDataSet databaseDataSet;
 
     public ComparableDBDataSetProducer(final ComparableDataSetParam param) {
-        this.connection = param.databaseConnectionLoader().loadConnection();
         this.param = param;
-        if (this.getParam().src().isDirectory()) {
-            this.src = this.getParam().src().listFiles(File::isFile);
-        } else {
-            this.src = new File[]{this.getParam().src()};
+        this.connection = this.param.databaseConnectionLoader().loadConnection();
+        if (this.param.useJdbcMetaData()) {
+            try {
+                this.databaseDataSet = this.connection.createDataSet();
+            } catch (final SQLException e) {
+                throw new AssertionError(e);
+            }
         }
-        this.headerNames = param.headerNames();
-        this.loadData = this.param.loadData();
-        this.addFileInfo = this.param.addFileInfo();
     }
 
     @Override
@@ -50,16 +44,23 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     @Override
-    public void produce() throws DataSetException {
-        ComparableDBDataSetProducer.LOGGER.info("produce() - start");
-        this.consumer.startDataSet();
-        this.loadJdbcMetadata();
-        Stream.of(this.src)
+    public ComparableDataSetConsumer getConsumer() {
+        return this.consumer;
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
+    }
+
+    @Override
+    public Stream<Source> getSourceStream() {
+        return Stream.of(this.getSrcFiles())
                 .map(it -> {
                     try {
                         return Pair.of(
-                                this.getSource(it, this.addFileInfo)
-                                , Files.readAllLines(it.toPath(), Charset.forName(this.param.encoding()))
+                                this.getSource(it)
+                                , Files.readAllLines(it.toPath(), Charset.forName(this.getEncoding()))
                         );
                     } catch (final IOException e) {
                         throw new AssertionError(e);
@@ -69,10 +70,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                         .stream()
                         .map(tableName -> it.getLeft().tableName(tableName))
                 )
-                .filter(it -> this.getParam().tableNameFilter().predicate(it.tableName()))
-                .forEach(this::executeTable);
-        this.consumer.endDataSet();
-        ComparableDBDataSetProducer.LOGGER.info("produce() - end");
+                .filter(it -> this.getParam().tableNameFilter().predicate(it.tableName()));
     }
 
     @Override
@@ -80,29 +78,14 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         this.executeTable(this.getTable(source.tableName()), source);
     }
 
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    protected void loadJdbcMetadata() {
-        if (this.getParam().useJdbcMetaData()) {
-            try {
-                this.databaseDataSet = this.connection.createDataSet();
-            } catch (final SQLException e) {
-                throw new AssertionError(e);
-            }
-        }
-    }
-
     protected void executeTable(final ITable table, final Source source) {
         try {
             try {
                 ComparableDBDataSetProducer.LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
                 final ITableMetaData tableMetaData;
-                if (this.headerNames != null) {
+                if (this.getHeaderNames() != null) {
                     final ITableMetaData metaData = table.getTableMetaData();
-                    final Column[] columns = Arrays.stream(this.headerNames, 0, metaData.getColumns().length)
+                    final Column[] columns = Arrays.stream(this.getHeaderNames(), 0, metaData.getColumns().length)
                             .map(name -> new Column(name.trim(), DataType.UNKNOWN))
                             .toArray(Column[]::new);
                     tableMetaData = new DefaultTableMetaData(table.getTableMetaData().getTableName()
@@ -120,8 +103,8 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                 } else {
                     tableMetaData = table.getTableMetaData();
                 }
-                this.consumer.startTable(source.wrap(tableMetaData));
-                if (this.loadData) {
+                this.getConsumer().startTable(source.wrap(tableMetaData));
+                if (this.loadData()) {
                     final Column[] columns = table.getTableMetaData().getColumns();
                     int row = 0;
                     for (; true; row++) {
@@ -131,14 +114,14 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                             for (final Column column : columns) {
                                 rows[columnIndex++] = table.getValue(row, column.getColumnName());
                             }
-                            this.consumer.row(rows);
+                            this.getConsumer().row(rows);
                         } catch (final RowOutOfBoundsException e) {
                             break;
                         }
                     }
                     ComparableDBDataSetProducer.LOGGER.info("produce - rows={}", row);
                 }
-                this.consumer.endTable();
+                this.getConsumer().endTable();
                 ComparableDBDataSetProducer.LOGGER.info("produce - end   databaseTable={}", table.getTableMetaData().getTableName());
             } finally {
                 if (table instanceof final IResultSetTable resultSetTable) {

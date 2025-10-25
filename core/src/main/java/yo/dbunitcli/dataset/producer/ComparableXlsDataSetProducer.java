@@ -8,10 +8,10 @@ import org.apache.poi.hssf.record.Record;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
-import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
+import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.NameFilter;
@@ -21,13 +21,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
-public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWrapper implements ComparableDataSetProducer, HSSFListener {
+public class ComparableXlsDataSetProducer extends ExcelMappingDataSetProducer implements ComparableDataSetProducer, HSSFListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableXlsDataSetProducer.class);
     private final ComparableDataSetParam param;
 
-    private final File[] src;
     private final NameFilter sheetNameFilter;
 
     private int lastRowNumber;
@@ -51,18 +51,23 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
     public ComparableXlsDataSetProducer(final ComparableDataSetParam param) {
         super(param.xlsxSchema(), param.startRow(), param.headerNames(), param.loadData(), param.addFileInfo());
         this.param = param;
-        this.src = this.param.getSrcFiles();
         this.sheetNameFilter = param.tableNameFilter();
     }
 
     @Override
-    public void produce() throws DataSetException {
-        ComparableXlsDataSetProducer.LOGGER.info("produce() - start");
-        this.consumer.startDataSet();
-        Arrays.stream(this.src)
-                .forEach(it -> this.executeTable(this.getSource(it, this.addFileInfo)));
-        this.consumer.endDataSet();
-        ComparableXlsDataSetProducer.LOGGER.info("produce() - end");
+    public ComparableDataSetConsumer getConsumer() {
+        return this.consumer;
+    }
+
+    @Override
+    public ComparableDataSetParam getParam() {
+        return this.param;
+    }
+
+    @Override
+    public Stream<Source> getSourceStream() {
+        return Arrays.stream(this.getSrcFiles())
+                .map(this::getSource);
     }
 
     @Override
@@ -88,11 +93,6 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetConsumerWra
             throw new AssertionError(e);
         }
         ComparableXlsDataSetProducer.LOGGER.info("produce - end   fileName={}", this.sourceFile);
-    }
-
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
     }
 
     @Override

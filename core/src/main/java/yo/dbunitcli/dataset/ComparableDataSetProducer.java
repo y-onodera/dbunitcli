@@ -4,19 +4,22 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.datatype.DataType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 public interface ComparableDataSetProducer {
 
+    Logger LOGGER = LoggerFactory.getLogger(ComparableDataSetProducer.class);
+
     void setConsumer(ComparableDataSetConsumer consumer) throws DataSetException;
 
-    void produce() throws DataSetException;
-
-    void executeTable(Source source);
+    ComparableDataSetConsumer getConsumer();
 
     ComparableDataSetParam getParam();
 
@@ -24,8 +27,50 @@ public interface ComparableDataSetProducer {
         return this.getParam().src().getPath();
     }
 
-    default Source getSource(final File aFile, final boolean addFileInfo) {
-        return new Source(aFile, addFileInfo);
+    default boolean addFileInfo() {
+        return this.getParam().addFileInfo();
+    }
+
+    default File[] getSrcFiles() {
+        return this.getParam().getSrcFiles();
+    }
+
+    default String getEncoding() {
+        return this.getParam().encoding();
+    }
+
+    default String[] getHeaderNames() {
+        return this.getParam().headerNames();
+    }
+
+    default boolean loadData() {
+        return this.getParam().loadData();
+    }
+
+    default Source getSource(final File aFile) {
+        return new Source(aFile, this.addFileInfo());
+    }
+
+    default void produce() throws DataSetException {
+        LOGGER.info("produce() - start");
+        this.getConsumer().startDataSet();
+        this.getSourceStream()
+                .map(this::createExecuteTableTask)
+                .forEach(Runnable::run);
+        this.getConsumer().endDataSet();
+        LOGGER.info("produce() - end");
+    }
+
+    default Stream<Source> getSourceStream() {
+        return Arrays.stream(this.getSrcFiles())
+                .filter(it -> this.getParam().tableNameFilter().predicate(this.getTableName(it)))
+                .map(this::getSource);
+    }
+
+    void executeTable(Source source);
+
+    default Runnable createExecuteTableTask(final Source source) {
+        return () -> this.executeTable(source);
     }
 
     default TableMetaDataWithSource createMetaData(final Source source, final String[] header) {

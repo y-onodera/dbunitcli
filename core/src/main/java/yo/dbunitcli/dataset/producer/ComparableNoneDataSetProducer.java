@@ -1,15 +1,14 @@
 package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.dataset.DataSetException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 
+import java.util.stream.Stream;
+
 public class ComparableNoneDataSetProducer implements ComparableDataSetProducer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComparableNoneDataSetProducer.class);
     private final ComparableDataSetParam param;
     private ComparableDataSetConsumer consumer;
 
@@ -23,16 +22,8 @@ public class ComparableNoneDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public void produce() throws DataSetException {
-        ComparableNoneDataSetProducer.LOGGER.info("produce() - start");
-        this.consumer.startDataSet();
-        this.consumer.endDataSet();
-        ComparableNoneDataSetProducer.LOGGER.info("produce() - end");
-    }
-
-    @Override
-    public void executeTable(final Source source) {
-
+    public ComparableDataSetConsumer getConsumer() {
+        return this.consumer;
     }
 
     @Override
@@ -43,5 +34,15 @@ public class ComparableNoneDataSetProducer implements ComparableDataSetProducer 
     @Override
     public String getSrc() {
         return "";
+    }
+
+    @Override
+    public Stream<Source> getSourceStream() {
+        return Stream.empty();
+    }
+
+    @Override
+    public void executeTable(final Source source) {
+
     }
 }
