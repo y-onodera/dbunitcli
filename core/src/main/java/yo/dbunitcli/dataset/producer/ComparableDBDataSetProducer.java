@@ -55,7 +55,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
 
     @Override
     public Stream<Source> getSourceStream() {
-        return Stream.of(this.getSrcFiles())
+        return this.getSrcFiles()
                 .map(it -> {
                     try {
                         return Pair.of(

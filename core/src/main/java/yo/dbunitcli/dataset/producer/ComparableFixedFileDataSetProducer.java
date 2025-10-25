@@ -22,13 +22,11 @@ import java.util.stream.Collectors;
 public class ComparableFixedFileDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableFixedFileDataSetProducer.class);
     private final ComparableDataSetParam param;
-    private final int startRow;
     private final List<Integer> columnLengths;
     private ComparableDataSetConsumer consumer;
 
     public ComparableFixedFileDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
-        this.startRow = this.param.startRow();
         this.columnLengths = Arrays.stream(this.param.fixedLength().split(","))
                 .map(Integer::valueOf)
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -58,7 +56,7 @@ public class ComparableFixedFileDataSetProducer implements ComparableDataSetProd
             if (this.loadData()) {
                 int rows = 1;
                 for (final String s : Files.readAllLines(Path.of(source.filePath()), Charset.forName(this.getEncoding()))) {
-                    if (rows >= this.startRow) {
+                    if (rows >= this.getStartRow()) {
                         this.getConsumer().row(metaData.source().apply(this.split(s)));
                     }
                     rows++;

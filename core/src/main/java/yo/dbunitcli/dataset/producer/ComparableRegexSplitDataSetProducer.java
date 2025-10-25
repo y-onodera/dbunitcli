@@ -19,13 +19,11 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableRegexSplitDataSetProducer.class);
     private final Pattern dataSplitPattern;
     private final ComparableDataSetParam param;
-    private final int startRow;
     private Pattern headerSplitPattern;
     private ComparableDataSetConsumer consumer;
 
     public ComparableRegexSplitDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
-        this.startRow = this.param.startRow();
         if (this.getHeaderNames() == null) {
             this.headerSplitPattern = Pattern.compile(this.param.headerSplitPattern());
         }
@@ -60,13 +58,13 @@ public class ComparableRegexSplitDataSetProducer implements ComparableDataSetPro
             }
             int row = 1;
             for (final String s : Files.readAllLines(Path.of(fileInfo.filePath()), Charset.forName(this.getEncoding()))) {
-                if (row == this.startRow && this.getHeaderNames() == null) {
+                if (row == this.getStartRow() && this.getHeaderNames() == null) {
                     final TableMetaDataWithSource metaData = this.createMetaData(fileInfo, this.headerSplitPattern.split(s));
                     this.getConsumer().startTable(metaData);
                     if (!this.loadData()) {
                         break;
                     }
-                } else if (row >= this.startRow) {
+                } else if (row >= this.getStartRow()) {
                     this.getConsumer().row(fileInfo.apply(this.dataSplitPattern.split(s)));
                 }
                 row++;

@@ -27,12 +27,10 @@ import yo.dbunitcli.resource.poi.XlsxSchema;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableXlsxDataSetProducer.class);
-    private final int startRow;
     private final XlsxSchema schema;
     private final ComparableDataSetParam param;
     private final NameFilter sheetNameFilter;
@@ -41,7 +39,6 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
     public ComparableXlsxDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.sheetNameFilter = this.param.tableNameFilter();
-        this.startRow = this.param.startRow();
         this.schema = this.param.xlsxSchema();
     }
 
@@ -62,7 +59,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
 
     @Override
     public Stream<Source> getSourceStream() {
-        return Arrays.stream(this.getSrcFiles())
+        return this.getSrcFiles()
                 .map(this::getSource);
     }
 
@@ -82,7 +79,7 @@ public class ComparableXlsxDataSetProducer implements ComparableDataSetProducer 
                         ComparableXlsxDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
                         this.processSheet(styles, strings, new XlsxSchemaHandler(this.consumer
                                         , this.schema
-                                        , this.startRow
+                                        , this.getStartRow()
                                         , this.getHeaderNames()
                                         , this.loadData()
                                         , source.sheetName(sheetName))

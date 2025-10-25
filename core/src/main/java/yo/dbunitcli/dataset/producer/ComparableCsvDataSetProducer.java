@@ -19,14 +19,12 @@ import java.util.List;
 public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
     private final ComparableDataSetParam param;
-    private final int startRow;
     private ComparableDataSetConsumer consumer;
     private int processRow;
     private Pipeline pipeline;
 
     public ComparableCsvDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
-        this.startRow = this.param.startRow();
         this.resetThePipeline();
     }
 
@@ -147,12 +145,12 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
     }
 
     protected void skipToStartRow(final LineNumberReader reader) throws IOException {
-        for (int i = 1; i < this.startRow; i++) {
+        for (int i = 1; i < this.getStartRow(); i++) {
             final String line = reader.readLine();
             if (line == null) {
                 throw new IllegalStateException(
                         String.format("File has fewer lines than startRow. Required: %d, Actual: %d",
-                                this.startRow, i));
+                                this.getStartRow(), i));
             }
         }
     }

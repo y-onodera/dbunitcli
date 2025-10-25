@@ -19,7 +19,6 @@ import yo.dbunitcli.dataset.NameFilter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -66,7 +65,7 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetProducer im
 
     @Override
     public Stream<Source> getSourceStream() {
-        return Arrays.stream(this.getSrcFiles())
+        return this.getSrcFiles()
                 .map(this::getSource);
     }
 

@@ -6,10 +6,8 @@ import yo.dbunitcli.resource.poi.XlsxSchema;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -73,25 +71,22 @@ public record ComparableDataSetParam(
         );
     }
 
-    public File[] getSrcFiles() {
-        if (this.src().isDirectory()) {
-            final File[] result = this.getWalk()
-                    .map(Path::toFile)
-                    .filter(it -> it.isFile() && it.length() > 0 && (Strings.isEmpty(this.extension)
-                            || it.getName().toUpperCase().endsWith("." + this.extension().toUpperCase())))
-                    .toArray(File[]::new);
-            Arrays.sort(result);
-            return result;
-        }
-        return new File[]{this.src()};
+    public Stream<File> getSrcFiles() {
+        final Stream<File> result = this.src().isDirectory()
+                ? this.getWalk().map(Path::toFile)
+                : Stream.of(this.src());
+        return result.filter(it -> it.isFile() && it.length() > 0
+                && (Strings.isEmpty(this.extension) || it.getName().toUpperCase().endsWith("." + this.extension().toUpperCase())));
     }
 
-
     public Stream<Path> getWalk() {
+        Stream<Path> walk = Stream.empty();
         try {
-            return Files.walk(this.src.toPath(), this.recursive() ? Integer.MAX_VALUE : 1)
+            walk = Files.walk(this.src.toPath(), this.recursive() ? Integer.MAX_VALUE : 1);
+            return walk
                     .filter(path -> this.srcPathFilter().predicate(path.toString()));
-        } catch (final IOException e) {
+        } catch (final Throwable e) {
+            walk.close();
             throw new AssertionError(e);
         }
     }
@@ -104,6 +99,35 @@ public record ComparableDataSetParam(
 
     public boolean addFileInfo() {
         return this.addFileInfo;
+    }
+
+    public Builder toBuilder() {
+        return new Builder()
+                .setSrc(this.src)
+                .setEncoding(this.encoding)
+                .setSource(this.source)
+                .setTableSeparators(this.tableSeparators)
+                .setHeaderSplitPattern(this.headerSplitPattern)
+                .setDataSplitPattern(this.dataSplitPattern)
+                .setRegInclude(this.srcPathFilter.include())
+                .setRegExclude(this.srcPathFilter.exclude())
+                .setMapIncludeMetaData(this.mapIncludeMetaData)
+                .setXlsxSchema(this.xlsxSchema)
+                .setRegTableInclude(this.tableNameFilter.include())
+                .setRegTableExclude(this.tableNameFilter.exclude())
+                .setUseJdbcMetaData(this.useJdbcMetaData)
+                .setStartRow(this.startRow)
+                .setHeaderName(this.headerName)
+                .setLoadData(this.loadData)
+                .setAddFileInfo(this.addFileInfo)
+                .setFixedLength(this.fixedLength)
+                .setDelimiter(this.delimiter)
+                .setIgnoreQuoted(this.ignoreQuoted)
+                .setExtension(this.extension)
+                .setRecursive(this.recursive)
+                .setSTTemplateLoader(this.templateRender)
+                .setDatabaseConnectionLoader(this.databaseConnectionLoader)
+                .setConverter(this.converter);
     }
 
     public static class Builder {

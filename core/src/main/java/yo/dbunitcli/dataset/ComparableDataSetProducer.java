@@ -31,7 +31,7 @@ public interface ComparableDataSetProducer {
         return this.getParam().addFileInfo();
     }
 
-    default File[] getSrcFiles() {
+    default Stream<File> getSrcFiles() {
         return this.getParam().getSrcFiles();
     }
 
@@ -45,6 +45,10 @@ public interface ComparableDataSetProducer {
 
     default boolean loadData() {
         return this.getParam().loadData();
+    }
+
+    default int getStartRow() {
+        return this.getParam().startRow();
     }
 
     default Source getSource(final File aFile) {
@@ -62,7 +66,7 @@ public interface ComparableDataSetProducer {
     }
 
     default Stream<Source> getSourceStream() {
-        return Arrays.stream(this.getSrcFiles())
+        return this.getSrcFiles()
                 .filter(it -> this.getParam().tableNameFilter().predicate(this.getTableName(it)))
                 .map(this::getSource);
     }
