@@ -16,4 +16,12 @@ public record NameFilter(Pattern regInclude, Pattern regExclude) {
         return (this.regInclude == null || this.regInclude.matcher(tableName).find())
                 && (this.regExclude == null || !this.regExclude.matcher(tableName).find());
     }
+
+    public String include() {
+        return this.regInclude == null ? null : this.regInclude.pattern();
+    }
+
+    public String exclude() {
+        return this.regExclude == null ? null : this.regExclude.pattern();
+    }
 }
