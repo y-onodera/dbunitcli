@@ -4,7 +4,7 @@ import org.dbunit.database.AmbiguousTableNameException;
 import org.dbunit.dataset.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.common.TableMetaDataWithSource;
+import yo.dbunitcli.common.Source;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,7 +19,6 @@ public class ComparableDataSet extends AbstractDataSet implements ComparableData
     private final Map<String, Integer> alreadyWrite;
     private final List<ComparableTableJoin> joins;
     private final String src;
-    private ComparableTableMapper mapper;
 
     public ComparableDataSet(final ComparableDataSetProducer producer) {
         super(false);
@@ -48,26 +47,12 @@ public class ComparableDataSet extends AbstractDataSet implements ComparableData
         }
     }
 
-    public void startTable(final TableMetaDataWithSource metaData) {
-        ComparableDataSet.LOGGER.debug("startTable(metaData={}) - start", metaData);
+    @Override
+    public ComparableTableMappingContext createMappingContext(final Source source) {
         if (this.converter != null) {
-            this.converter.startTableFromSource(metaData);
+            this.converter.startTableFromSource(source);
         }
-        this.mapper = this.tableSeparators.createMapper(metaData);
-        this.mapper.startTable(this.converter, this.alreadyWrite, this.joins);
-    }
-
-    @Override
-    public void row(final Object[] values) {
-        ComparableDataSet.LOGGER.debug("row(values={}) - start", values);
-        this.mapper.addRow(values);
-    }
-
-    @Override
-    public void endTable() {
-        ComparableDataSet.LOGGER.debug("endTable() - start");
-        this.mapper.endTable(this._orderedTableNameMap);
-        this.mapper = null;
+        return new ComparableTableMappingContext(this.tableSeparators, this.converter, this._orderedTableNameMap, this.alreadyWrite, this.joins);
     }
 
     @Override
@@ -133,13 +118,10 @@ public class ComparableDataSet extends AbstractDataSet implements ComparableData
                     .forEach(join -> {
                         ComparableDataSet.LOGGER.debug("startTableJoin(join={}) - start", join);
                         this.joins.remove(join);
-                        if (this.converter != null) {
-                            this.converter.startTableFromSource(join.joinMetaData());
-                        }
-                        this.mapper = this.tableSeparators.createMapper(join);
-                        this.mapper.startTable(this.converter, this.alreadyWrite, this.joins);
-                        join.execute().forEach(this::row);
-                        this.endTable();
+                        final ComparableTableMappingContext context = this.createMappingContext(join.joinMetaData().source());
+                        context.startTable(join);
+                        join.execute().forEach(context::row);
+                        context.endTable();
                     });
         }
     }

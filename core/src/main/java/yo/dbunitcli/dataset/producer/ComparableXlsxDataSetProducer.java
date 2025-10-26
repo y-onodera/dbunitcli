@@ -18,9 +18,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.ComparableTableMappingContext;
 import yo.dbunitcli.dataset.NameFilter;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
@@ -39,11 +39,12 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
     }
 
     @Override
-    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
-        return new XlsxTableExecutor(source, consumer, this.param, this.param.tableNameFilter(), this.param.xlsxSchema());
+    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
+        return new XlsxTableExecutor(source, context, this.param, this.param.tableNameFilter(), this.param.xlsxSchema());
     }
 
-    private record XlsxTableExecutor(Source source, ComparableDataSetConsumer consumer, ComparableDataSetParam param,
+    private record XlsxTableExecutor(Source source, ComparableTableMappingContext context,
+                                     ComparableDataSetParam param,
                                      NameFilter sheetNameFilter, XlsxSchema schema) implements Runnable {
 
         @Override
@@ -60,7 +61,7 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
                         final String sheetName = iterator.getSheetName();
                         if (this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName)) {
                             ComparableXlsxDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
-                            this.processSheet(styles, strings, new XlsxSchemaHandler(this.consumer
+                            this.processSheet(styles, strings, new XlsxSchemaHandler(this.context
                                             , this.schema
                                             , this.param.startRow()
                                             , this.param.headerNames()

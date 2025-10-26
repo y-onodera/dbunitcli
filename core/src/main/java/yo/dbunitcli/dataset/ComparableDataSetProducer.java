@@ -22,7 +22,7 @@ public interface ComparableDataSetProducer {
         LOGGER.info("produce() - start");
         consumer.startDataSet();
         this.getSourceStream()
-                .map(it -> this.createExecuteTableTask(it, consumer))
+                .map(it -> this.createTableMappingTask(it, consumer.createMappingContext(it)))
                 .forEach(Runnable::run);
         consumer.endDataSet();
         LOGGER.info("produce() - end");
@@ -42,6 +42,6 @@ public interface ComparableDataSetProducer {
         return new Source(aFile, this.param().addFileInfo());
     }
 
-    Runnable createExecuteTableTask(final Source source, ComparableDataSetConsumer consumer);
+    Runnable createTableMappingTask(final Source source, ComparableTableMappingContext context);
 
 }

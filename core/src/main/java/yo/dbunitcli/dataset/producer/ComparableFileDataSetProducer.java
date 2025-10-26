@@ -1,12 +1,11 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.ComparableTableMappingContext;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -38,8 +37,8 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
-        return new FileTableExecutor(source, consumer, this.param, this.src, this.fileTypeFilter());
+    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
+        return new FileTableExecutor(source, context, this.param, this.src, this.fileTypeFilter());
     }
 
     protected Predicate<Path> fileTypeFilter() {
@@ -52,17 +51,17 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
 
     private static class FileTableExecutor implements Runnable {
         private final Source source;
-        private final ComparableDataSetConsumer consumer;
+        private final ComparableTableMappingContext context;
         private final ComparableDataSetParam param;
         private final File src;
         private final Predicate<Path> fileTypeFilter;
         private int rows = 0;
 
-        FileTableExecutor(final Source source, final ComparableDataSetConsumer consumer,
+        FileTableExecutor(final Source source, final ComparableTableMappingContext context,
                           final ComparableDataSetParam param, final File src,
                           final Predicate<Path> fileTypeFilter) {
             this.source = source;
-            this.consumer = consumer;
+            this.context = context;
             this.param = param;
             this.src = src;
             this.fileTypeFilter = fileTypeFilter;
@@ -70,7 +69,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
 
         @Override
         public void run() {
-            this.consumer.startTable(this.source
+            this.context.startTable(this.source
                     .wrap(new ComparableFileTableMetaData(this.src.getName())));
             ComparableFileDataSetProducer.LOGGER.info("produce - start fileName={}", this.src);
             if (this.param.loadData()) {
@@ -82,11 +81,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
                     throw new AssertionError("error producing dataSet for '" + this.src + "'", e);
                 }
             }
-            try {
-                this.consumer.endTable();
-            } catch (final DataSetException e) {
-                throw new AssertionError("error producing dataSet for '" + this.src + "'", e);
-            }
+            this.context.endTable();
             ComparableFileDataSetProducer.LOGGER.info("produce - rows={}", this.rows);
             ComparableFileDataSetProducer.LOGGER.info("produce - end   fileName={}", this.src);
         }
@@ -100,12 +95,8 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
             row[3] = this.src.toPath().relativize(file.getAbsoluteFile().toPath()).toString();
             row[4] = file.length() / 1024;
             row[5] = ComparableFileDataSetProducer.DATE_FORMAT.format(file.lastModified());
-            try {
-                this.consumer.row(row);
-                this.rows++;
-            } catch (final DataSetException e) {
-                throw new AssertionError(e);
-            }
+            this.context.row(row);
+            this.rows++;
         }
     }
 }

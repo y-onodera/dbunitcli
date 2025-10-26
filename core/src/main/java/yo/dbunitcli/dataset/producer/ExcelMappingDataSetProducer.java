@@ -5,7 +5,7 @@ import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetConsumer;
+import yo.dbunitcli.dataset.ComparableTableMappingContext;
 import yo.dbunitcli.resource.poi.XlsxCellsToTableBuilder;
 import yo.dbunitcli.resource.poi.XlsxRowsToTableBuilder;
 import yo.dbunitcli.resource.poi.XlsxSchema;
@@ -17,7 +17,7 @@ public class ExcelMappingDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExcelMappingDataSetProducer.class);
     protected final boolean loadData;
     protected final String[] headerNames;
-    protected final ComparableDataSetConsumer consumer;
+    protected final ComparableTableMappingContext context;
     protected final boolean addFileInfo;
     private final XlsxSchema schema;
     private final int startRow;
@@ -30,13 +30,13 @@ public class ExcelMappingDataSetProducer {
             , final String[] headerNames
             , final boolean loadData
             , final boolean addFileInfo
-            , final ComparableDataSetConsumer consumer) {
+            , final ComparableTableMappingContext context) {
         this.schema = schema;
         this.startRow = startRow;
         this.headerNames = headerNames;
         this.loadData = loadData;
         this.addFileInfo = addFileInfo;
-        this.consumer = consumer;
+        this.context = context;
     }
 
     protected void handleSheetStart(final String[] headerNames, final Source source) {
@@ -48,7 +48,7 @@ public class ExcelMappingDataSetProducer {
         try {
             if (this.rowsTableBuilder != null) {
                 if (this.rowsTableBuilder.isNowProcessing()) {
-                    this.consumer.endTable();
+                    this.context.endTable();
                     ExcelMappingDataSetProducer.LOGGER.info("produce - rows={}", this.rowTableRows);
                 }
                 this.rowsTableBuilder = null;
@@ -76,10 +76,10 @@ public class ExcelMappingDataSetProducer {
             if (this.rowsTableBuilder != null) {
                 if (this.rowsTableBuilder.isTableStart(rowNumber)) {
                     if (this.rowsTableBuilder.isNowProcessing()) {
-                        this.consumer.endTable();
+                        this.context.endTable();
                         ExcelMappingDataSetProducer.LOGGER.info("produce - rows={}", this.rowTableRows);
                     }
-                    this.consumer.startTable(this.rowsTableBuilder.startNewTable());
+                    this.context.startTable(this.rowsTableBuilder.startNewTable());
                     this.rowTableRows = 0;
                     if (this.rowsTableBuilder.hasRow(rowNumber)) {
                         this.addRowToTable(this.rowsTableBuilder.currentRow());
@@ -100,7 +100,7 @@ public class ExcelMappingDataSetProducer {
 
     protected void createRandomCellTable() throws DataSetException {
         for (final String tableName : this.randomCellRecordBuilder.getTableNames()) {
-            this.consumer.startTable(this.randomCellRecordBuilder.getTableMetaData(tableName));
+            this.context.startTable(this.randomCellRecordBuilder.getTableMetaData(tableName));
             ExcelMappingDataSetProducer.LOGGER.info("produce - start tableName={}", tableName);
             if (this.loadData) {
                 int i = 0;
@@ -110,14 +110,14 @@ public class ExcelMappingDataSetProducer {
                 }
                 ExcelMappingDataSetProducer.LOGGER.info("produce - rows={},tableName={}", i, tableName);
             }
-            this.consumer.endTable();
+            this.context.endTable();
             ExcelMappingDataSetProducer.LOGGER.info("produce - end   tableName={}", tableName);
         }
     }
 
     protected void addRowToTable(final String[] row) throws DataSetException {
         if (Stream.of(row).anyMatch(it -> !Optional.ofNullable(it).orElse("").isEmpty())) {
-            this.consumer.row(Stream.of(row).map(it -> it == null ? "" : it).toArray());
+            this.context.row(Stream.of(row).map(it -> it == null ? "" : it).toArray());
         }
     }
 }

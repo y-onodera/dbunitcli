@@ -8,9 +8,9 @@ import org.dbunit.dataset.datatype.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.ComparableTableMappingContext;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -63,22 +63,22 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     @Override
-    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
-        return new DBTableExecutor(source, consumer, this.param, this.connection, this.databaseDataSet);
+    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
+        return new DBTableExecutor(source, context, this.param, this.connection, this.databaseDataSet);
     }
 
     static class DBTableExecutor implements Runnable {
         protected final Source source;
-        protected final ComparableDataSetConsumer consumer;
+        protected final ComparableTableMappingContext context;
         protected final ComparableDataSetParam param;
         protected final IDatabaseConnection connection;
         protected final IDataSet databaseDataSet;
 
-        DBTableExecutor(final Source source, final ComparableDataSetConsumer consumer,
+        DBTableExecutor(final Source source, final ComparableTableMappingContext context,
                         final ComparableDataSetParam param, final IDatabaseConnection connection,
                         final IDataSet databaseDataSet) {
             this.source = source;
-            this.consumer = consumer;
+            this.context = context;
             this.param = param;
             this.connection = connection;
             this.databaseDataSet = databaseDataSet;
@@ -125,7 +125,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                     } else {
                         tableMetaData = table.getTableMetaData();
                     }
-                    this.consumer.startTable(source.wrap(tableMetaData));
+                    this.context.startTable(source.wrap(tableMetaData));
                     if (this.param.loadData()) {
                         final Column[] columns = table.getTableMetaData().getColumns();
                         int row = 0;
@@ -136,14 +136,14 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                                 for (final Column column : columns) {
                                     rows[columnIndex++] = table.getValue(row, column.getColumnName());
                                 }
-                                this.consumer.row(rows);
+                                this.context.row(rows);
                             } catch (final RowOutOfBoundsException e) {
                                 break;
                             }
                         }
                         ComparableDBDataSetProducer.LOGGER.info("produce - rows={}", row);
                     }
-                    this.consumer.endTable();
+                    this.context.endTable();
                     ComparableDBDataSetProducer.LOGGER.info("produce - end   databaseTable={}", table.getTableMetaData().getTableName());
                 } finally {
                     if (table instanceof final IResultSetTable resultSetTable) {

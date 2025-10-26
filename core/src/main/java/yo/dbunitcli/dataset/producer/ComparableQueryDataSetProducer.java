@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.ComparableTableMappingContext;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -35,18 +35,18 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
     }
 
     @Override
-    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
-        return new QueryTableExecutor(source, consumer, this.param, this.connection, this.parameter);
+    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
+        return new QueryTableExecutor(source, context, this.param, this.connection, this.parameter);
     }
 
     private static class QueryTableExecutor extends ComparableDBDataSetProducer.DBTableExecutor {
         private final Parameter parameter;
 
-        QueryTableExecutor(final Source source, final ComparableDataSetConsumer consumer,
+        QueryTableExecutor(final Source source, final ComparableTableMappingContext context,
                            final ComparableDataSetParam param,
                            final IDatabaseConnection connection,
                            final Parameter parameter) {
-            super(source, consumer, param, connection, null);
+            super(source, context, param, connection, null);
             this.parameter = parameter;
         }
 

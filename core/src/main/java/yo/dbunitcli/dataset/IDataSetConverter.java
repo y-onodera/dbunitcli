@@ -4,7 +4,7 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.stream.IDataSetConsumer;
-import yo.dbunitcli.common.TableMetaDataWithSource;
+import yo.dbunitcli.common.Source;
 
 import java.io.File;
 import java.util.Arrays;
@@ -22,7 +22,7 @@ public interface IDataSetConverter extends IDataSetConsumer {
         // nothing default
     }
 
-    default void startTableFromSource(final TableMetaDataWithSource source) {
+    default void startTableFromSource(final Source source) {
         // nothing default
     }
 

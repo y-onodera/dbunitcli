@@ -1,14 +1,13 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.common.handlers.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
-import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.ComparableTableMappingContext;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -20,20 +19,20 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
 
     @Override
-    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
-        return new CsvTableExecutor(source, consumer, this.param);
+    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
+        return new CsvTableExecutor(source, context, this.param);
     }
 
     private static class CsvTableExecutor implements Runnable {
         private final Source source;
-        private final ComparableDataSetConsumer consumer;
+        private final ComparableTableMappingContext context;
         private final ComparableDataSetParam param;
         private int processRow;
         private Pipeline pipeline;
 
-        CsvTableExecutor(final Source source, final ComparableDataSetConsumer consumer, final ComparableDataSetParam param) {
+        CsvTableExecutor(final Source source, final ComparableTableMappingContext context, final ComparableDataSetParam param) {
             this.source = source;
-            this.consumer = consumer;
+            this.context = context;
             this.param = param;
             this.resetThePipeline();
         }
@@ -51,13 +50,13 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
                     headerName = this.parseFirstLine(lineNumberReader, this.source.filePath());
                 }
                 final TableMetaDataWithSource metaData = this.source.createMetaData(headerName);
-                this.consumer.startTable(metaData);
+                this.context.startTable(metaData);
                 this.processRow = 0;
                 if (this.param.loadData()) {
                     this.parseTheData(metaData, headerName, lineNumberReader);
                 }
-                this.consumer.endTable();
-            } catch (final IOException | DataSetException e) {
+                this.context.endTable();
+            } catch (final IOException e) {
                 throw new AssertionError(e);
             }
             ComparableCsvDataSetProducer.LOGGER.info("produce - rows={}", this.processRow);
@@ -89,14 +88,10 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
         }
 
         private void parseTheData(final TableMetaDataWithSource metaData, final String[] columnsInFirstLine, final LineNumberReader lineNumberReader) {
-            try {
-                List<Object> columns;
-                while ((columns = this.collectExpectedNumberOfColumns(columnsInFirstLine.length, lineNumberReader)) != null) {
-                    this.consumer.row(metaData.source().apply(columns));
-                    this.processRow++;
-                }
-            } catch (final DataSetException e) {
-                throw new AssertionError(e);
+            List<Object> columns;
+            while ((columns = this.collectExpectedNumberOfColumns(columnsInFirstLine.length, lineNumberReader)) != null) {
+                this.context.row(metaData.source().apply(columns));
+                this.processRow++;
             }
         }
 

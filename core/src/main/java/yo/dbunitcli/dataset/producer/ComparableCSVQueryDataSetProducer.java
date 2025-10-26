@@ -1,14 +1,13 @@
 package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.datatype.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.ComparableTableMappingContext;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -23,11 +22,11 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
     private static final String URL = "jdbc:h2:file:" + FileResources.datasetDir().getAbsolutePath() + ";MODE=Oracle";
 
     @Override
-    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
-        return new CsvQueryTableExecutor(source, consumer, this.param, this.parameter);
+    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
+        return new CsvQueryTableExecutor(source, context, this.param, this.parameter);
     }
 
-    private record CsvQueryTableExecutor(Source source, ComparableDataSetConsumer consumer
+    private record CsvQueryTableExecutor(Source source, ComparableTableMappingContext context
             , ComparableDataSetParam param, Parameter parameter) implements Runnable {
 
         @Override
@@ -52,11 +51,11 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                             })
                             .map(name -> new Column(name.trim(), DataType.UNKNOWN))
                             .toArray(Column[]::new);
-                    this.consumer.startTable(this.source.createMetaData(columns));
+                    this.context.startTable(this.source.createMetaData(columns));
                     if (this.param.loadData()) {
                         int readRows = 0;
                         while (rst.next()) {
-                            this.consumer.row(IntStream.rangeClosed(1, metaData.getColumnCount())
+                            this.context.row(IntStream.rangeClosed(1, metaData.getColumnCount())
                                     .mapToObj(i -> {
                                         try {
                                             return Optional.ofNullable(rst.getString(i))
@@ -70,10 +69,10 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                         }
                         ComparableCSVQueryDataSetProducer.LOGGER.info("produce - rows={}", readRows);
                     }
-                    this.consumer.endTable();
+                    this.context.endTable();
                     ComparableCSVQueryDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());
                 }
-            } catch (final SQLException | DataSetException e) {
+            } catch (final SQLException e) {
                 throw new AssertionError(e);
             }
         }

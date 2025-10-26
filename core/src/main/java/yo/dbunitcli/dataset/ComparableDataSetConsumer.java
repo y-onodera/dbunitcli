@@ -1,16 +1,12 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.DataSetException;
-import yo.dbunitcli.common.TableMetaDataWithSource;
+import yo.dbunitcli.common.Source;
 
 public interface ComparableDataSetConsumer {
     void startDataSet() throws DataSetException;
 
-    void startTable(final TableMetaDataWithSource metaData);
-
-    void row(Object[] values) throws DataSetException;
-
-    void endTable() throws DataSetException;
+    ComparableTableMappingContext createMappingContext(Source source);
 
     void endDataSet() throws DataSetException;
 

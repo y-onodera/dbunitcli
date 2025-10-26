@@ -1,9 +1,9 @@
 package yo.dbunitcli.dataset.producer;
 
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.ComparableTableMappingContext;
 
 import java.util.stream.Stream;
 
@@ -20,7 +20,7 @@ public record ComparableNoneDataSetProducer(ComparableDataSetParam param) implem
     }
 
     @Override
-    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
+    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
         return () -> {
         };
     }

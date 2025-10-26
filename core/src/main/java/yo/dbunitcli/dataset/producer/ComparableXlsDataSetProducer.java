@@ -11,9 +11,9 @@ import org.apache.poi.ss.util.CellReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.ComparableTableMappingContext;
 import yo.dbunitcli.dataset.NameFilter;
 
 import java.io.File;
@@ -33,8 +33,8 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
     }
 
     @Override
-    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
-        return new XlsTableExecutor(source, consumer, this.param, this.param.tableNameFilter());
+    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
+        return new XlsTableExecutor(source, context, this.param, this.param.tableNameFilter());
     }
 
     private static class XlsTableExecutor extends ExcelMappingDataSetProducer implements Runnable, HSSFListener {
@@ -51,7 +51,7 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
         private int nextColumn;
         private boolean outputNextStringRecord;
 
-        XlsTableExecutor(final Source source, final ComparableDataSetConsumer consumer,
+        XlsTableExecutor(final Source source, final ComparableTableMappingContext consumer,
                          final ComparableDataSetParam param, final NameFilter sheetNameFilter) {
             super(param.xlsxSchema(), param.startRow(), param.headerNames(), param.loadData(), param.addFileInfo(), consumer);
             this.source = source;
