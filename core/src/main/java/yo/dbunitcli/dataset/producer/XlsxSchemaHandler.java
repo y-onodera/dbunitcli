@@ -18,8 +18,7 @@ public class XlsxSchemaHandler extends ExcelMappingDataSetProducer implements XS
             , final String[] headerNames
             , final boolean loadData
             , final Source source) {
-        super(schema, startRow, headerNames, loadData, source.addFileInfo());
-        this.setConsumer(delegate);
+        super(schema, startRow, headerNames, loadData, source.addFileInfo(), delegate);
         this.handleSheetStart(headerNames, source);
     }
 

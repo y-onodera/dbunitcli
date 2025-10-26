@@ -22,46 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ComparableXlsDataSetProducer extends ExcelMappingDataSetProducer implements ComparableDataSetProducer, HSSFListener {
+public record ComparableXlsDataSetProducer(ComparableDataSetParam param) implements ComparableDataSetProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableXlsDataSetProducer.class);
-    private final ComparableDataSetParam param;
-
-    private final NameFilter sheetNameFilter;
-
-    private int lastRowNumber;
-
-    // Records we pick up as we process
-    private SSTRecord sstRecord;
-    private FormatTrackingHSSFListener formatListener;
-
-    /**
-     * So we known which sheet we're on
-     */
-    private File sourceFile;
-    private int sheetIndex = -1;
-    private BoundSheetRecord[] orderedBSRs;
-    private List<BoundSheetRecord> boundSheetRecords = new ArrayList<>();
-    // For handling formulas with string results
-    private int nextRow;
-    private int nextColumn;
-    private boolean outputNextStringRecord;
-
-    public ComparableXlsDataSetProducer(final ComparableDataSetParam param) {
-        super(param.xlsxSchema(), param.startRow(), param.headerNames(), param.loadData(), param.addFileInfo());
-        this.param = param;
-        this.sheetNameFilter = param.tableNameFilter();
-    }
-
-    @Override
-    public ComparableDataSetConsumer getConsumer() {
-        return this.consumer;
-    }
-
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
 
     @Override
     public Stream<Source> getSourceStream() {
@@ -70,160 +33,187 @@ public class ComparableXlsDataSetProducer extends ExcelMappingDataSetProducer im
     }
 
     @Override
-    public void executeTable(final Source source) {
-        this.sourceFile = new File(source.filePath());
-        ComparableXlsDataSetProducer.LOGGER.info("produce - start fileName={}", this.sourceFile);
-        try (final POIFSFileSystem newFs = new POIFSFileSystem(this.sourceFile, true)) {
-            this.rowsTableBuilder = null;
-            this.randomCellRecordBuilder = null;
-            this.sheetIndex = -1;
-            this.boundSheetRecords = new ArrayList<>();
-            this.orderedBSRs = null;
-            final MissingRecordAwareHSSFListener listener = new MissingRecordAwareHSSFListener(this);
-            this.formatListener = new FormatTrackingHSSFListener(listener);
-
-            final HSSFEventFactory factory = new HSSFEventFactory();
-            final HSSFRequest request = new HSSFRequest();
-            request.addListenerForAllRecords(this.formatListener);
-            factory.processWorkbookEvents(request, newFs);
-            this.handleSheetEnd();
-            ComparableXlsDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex].getSheetname(), this.sheetIndex);
-        } catch (final IOException e) {
-            throw new AssertionError(e);
-        }
-        ComparableXlsDataSetProducer.LOGGER.info("produce - end   fileName={}", this.sourceFile);
+    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
+        return new XlsTableExecutor(source, consumer, this.param, this.param.tableNameFilter());
     }
 
-    @Override
-    public void processRecord(final Record record) {
-        int thisRow = -1;
-        int thisColumn = -1;
-        String thisStr = null;
+    private static class XlsTableExecutor extends ExcelMappingDataSetProducer implements Runnable, HSSFListener {
+        private final Source source;
+        private final NameFilter sheetNameFilter;
+        private int lastRowNumber;
+        private SSTRecord sstRecord;
+        private FormatTrackingHSSFListener formatListener;
+        private File sourceFile;
+        private int sheetIndex = -1;
+        private BoundSheetRecord[] orderedBSRs;
+        private List<BoundSheetRecord> boundSheetRecords = new ArrayList<>();
+        private int nextRow;
+        private int nextColumn;
+        private boolean outputNextStringRecord;
 
-        switch (record.getSid()) {
-            case BoundSheetRecord.sid:
-                this.boundSheetRecords.add((BoundSheetRecord) record);
-                break;
-            case BOFRecord.sid:
-                final BOFRecord br = (BOFRecord) record;
-                if (br.getType() == BOFRecord.TYPE_WORKSHEET) {
-                    this.handleSheetEnd();
-                    // Output the worksheet name
-                    // Works by ordering the BSRs by the location of
-                    //  their BOFRecords, and then knowing that we
-                    //  process BOFRecords in byte offset order
-                    this.sheetIndex++;
-                    if (this.orderedBSRs == null) {
-                        this.orderedBSRs = BoundSheetRecord.orderByBofPosition(this.boundSheetRecords);
+        XlsTableExecutor(final Source source, final ComparableDataSetConsumer consumer,
+                         final ComparableDataSetParam param, final NameFilter sheetNameFilter) {
+            super(param.xlsxSchema(), param.startRow(), param.headerNames(), param.loadData(), param.addFileInfo(), consumer);
+            this.source = source;
+            this.sheetNameFilter = sheetNameFilter;
+        }
+
+        @Override
+        public void run() {
+            this.sourceFile = new File(this.source.filePath());
+            ComparableXlsDataSetProducer.LOGGER.info("produce - start fileName={}", this.sourceFile);
+            try (final POIFSFileSystem newFs = new POIFSFileSystem(this.sourceFile, true)) {
+                this.rowsTableBuilder = null;
+                this.randomCellRecordBuilder = null;
+                this.sheetIndex = -1;
+                this.boundSheetRecords = new ArrayList<>();
+                this.orderedBSRs = null;
+                final MissingRecordAwareHSSFListener listener = new MissingRecordAwareHSSFListener(this);
+                this.formatListener = new FormatTrackingHSSFListener(listener);
+
+                final HSSFEventFactory factory = new HSSFEventFactory();
+                final HSSFRequest request = new HSSFRequest();
+                request.addListenerForAllRecords(this.formatListener);
+                factory.processWorkbookEvents(request, newFs);
+                this.handleSheetEnd();
+                ComparableXlsDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex].getSheetname(), this.sheetIndex);
+            } catch (final IOException e) {
+                throw new AssertionError(e);
+            }
+            ComparableXlsDataSetProducer.LOGGER.info("produce - end   fileName={}", this.sourceFile);
+        }
+
+        @Override
+        public void processRecord(final Record record) {
+            int thisRow = -1;
+            int thisColumn = -1;
+            String thisStr = null;
+
+            switch (record.getSid()) {
+                case BoundSheetRecord.sid:
+                    this.boundSheetRecords.add((BoundSheetRecord) record);
+                    break;
+                case BOFRecord.sid:
+                    final BOFRecord br = (BOFRecord) record;
+                    if (br.getType() == BOFRecord.TYPE_WORKSHEET) {
+                        this.handleSheetEnd();
+                        // Output the worksheet name
+                        // Works by ordering the BSRs by the location of
+                        //  their BOFRecords, and then knowing that we
+                        //  process BOFRecords in byte offset order
+                        this.sheetIndex++;
+                        if (this.orderedBSRs == null) {
+                            this.orderedBSRs = BoundSheetRecord.orderByBofPosition(this.boundSheetRecords);
+                        } else {
+                            ComparableXlsDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex - 1].getSheetname(), this.sheetIndex - 1);
+                        }
+                        final String tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
+                        if (this.sheetNameFilter.predicate(tableName)) {
+                            this.handleSheetStart(this.headerNames
+                                    , new Source(this.sourceFile, this.addFileInfo).sheetName(tableName));
+                            ComparableXlsDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", tableName, this.sheetIndex);
+                        }
+                    }
+                    break;
+
+                case SSTRecord.sid:
+                    this.sstRecord = (SSTRecord) record;
+                    break;
+
+                case BlankRecord.sid:
+                    final BlankRecord blankRec = (BlankRecord) record;
+
+                    thisRow = blankRec.getRow();
+                    thisColumn = blankRec.getColumn();
+                    thisStr = "";
+                    break;
+                case BoolErrRecord.sid:
+                    final BoolErrRecord boolErrorRec = (BoolErrRecord) record;
+
+                    thisRow = boolErrorRec.getRow();
+                    thisColumn = boolErrorRec.getColumn();
+                    thisStr = "";
+                    break;
+
+                case FormulaRecord.sid:
+                    final FormulaRecord formulaRec = (FormulaRecord) record;
+                    thisRow = formulaRec.getRow();
+                    thisColumn = formulaRec.getColumn();
+                    if (formulaRec.hasCachedResultString()) {
+                        // Formula result is a string
+                        // This is stored in the next record
+                        this.outputNextStringRecord = true;
+                        this.nextRow = thisRow;
+                        this.nextColumn = thisColumn;
                     } else {
-                        ComparableXlsDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex - 1].getSheetname(), this.sheetIndex - 1);
+                        thisStr = this.formatListener.formatNumberDateCell(formulaRec);
                     }
-                    final String tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
-                    if (this.sheetNameFilter.predicate(tableName)) {
-                        this.handleSheetStart(this.headerNames
-                                , new Source(this.sourceFile, this.addFileInfo).sheetName(tableName));
-                        ComparableXlsDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", tableName, this.sheetIndex);
+                    break;
+                case StringRecord.sid:
+                    if (this.outputNextStringRecord) {
+                        // String for formula
+                        final StringRecord srec = (StringRecord) record;
+                        thisStr = srec.getString();
+                        thisRow = this.nextRow;
+                        thisColumn = this.nextColumn;
+                        this.outputNextStringRecord = false;
                     }
-                }
-                break;
+                    break;
+                case LabelRecord.sid:
+                    final LabelRecord labelRec = (LabelRecord) record;
+                    thisRow = labelRec.getRow();
+                    thisColumn = labelRec.getColumn();
+                    thisStr = labelRec.getValue();
+                    break;
+                case LabelSSTRecord.sid:
+                    final LabelSSTRecord labelSSTRec = (LabelSSTRecord) record;
 
-            case SSTRecord.sid:
-                this.sstRecord = (SSTRecord) record;
-                break;
+                    thisRow = labelSSTRec.getRow();
+                    thisColumn = labelSSTRec.getColumn();
+                    if (this.sstRecord == null) {
+                        thisStr = "(No SST Record, can't identify string)";
+                    } else {
+                        thisStr = this.sstRecord.getString(labelSSTRec.getSSTIndex()).toString();
+                    }
+                    break;
+                case NoteRecord.sid:
+                    // note ignore
+                    break;
+                case NumberRecord.sid:
+                    final NumberRecord numRec = (NumberRecord) record;
 
-            case BlankRecord.sid:
-                final BlankRecord blankRec = (BlankRecord) record;
+                    thisRow = numRec.getRow();
+                    thisColumn = numRec.getColumn();
 
-                thisRow = blankRec.getRow();
-                thisColumn = blankRec.getColumn();
+                    // Format
+                    thisStr = this.formatListener.formatNumberDateCell(numRec);
+                    break;
+                case RKRecord.sid:
+                    // rk ignore
+                    break;
+                default:
+                    break;
+            }
+
+            // Handle missing column
+            if (record instanceof final MissingCellDummyRecord mc) {
+                thisRow = mc.getRow();
+                thisColumn = mc.getColumn();
                 thisStr = "";
-                break;
-            case BoolErrRecord.sid:
-                final BoolErrRecord boolErrorRec = (BoolErrRecord) record;
-
-                thisRow = boolErrorRec.getRow();
-                thisColumn = boolErrorRec.getColumn();
-                thisStr = "";
-                break;
-
-            case FormulaRecord.sid:
-                final FormulaRecord formulaRec = (FormulaRecord) record;
-                thisRow = formulaRec.getRow();
-                thisColumn = formulaRec.getColumn();
-                if (formulaRec.hasCachedResultString()) {
-                    // Formula result is a string
-                    // This is stored in the next record
-                    this.outputNextStringRecord = true;
-                    this.nextRow = thisRow;
-                    this.nextColumn = thisColumn;
-                } else {
-                    thisStr = this.formatListener.formatNumberDateCell(formulaRec);
-                }
-                break;
-            case StringRecord.sid:
-                if (this.outputNextStringRecord) {
-                    // String for formula
-                    final StringRecord srec = (StringRecord) record;
-                    thisStr = srec.getString();
-                    thisRow = this.nextRow;
-                    thisColumn = this.nextColumn;
-                    this.outputNextStringRecord = false;
-                }
-                break;
-            case LabelRecord.sid:
-                final LabelRecord labelRec = (LabelRecord) record;
-                thisRow = labelRec.getRow();
-                thisColumn = labelRec.getColumn();
-                thisStr = labelRec.getValue();
-                break;
-            case LabelSSTRecord.sid:
-                final LabelSSTRecord labelSSTRec = (LabelSSTRecord) record;
-
-                thisRow = labelSSTRec.getRow();
-                thisColumn = labelSSTRec.getColumn();
-                if (this.sstRecord == null) {
-                    thisStr = "(No SST Record, can't identify string)";
-                } else {
-                    thisStr = this.sstRecord.getString(labelSSTRec.getSSTIndex()).toString();
-                }
-                break;
-            case NoteRecord.sid:
-                // note ignore
-                break;
-            case NumberRecord.sid:
-                final NumberRecord numRec = (NumberRecord) record;
-
-                thisRow = numRec.getRow();
-                thisColumn = numRec.getColumn();
-
-                // Format
-                thisStr = this.formatListener.formatNumberDateCell(numRec);
-                break;
-            case RKRecord.sid:
-                // rk ignore
-                break;
-            default:
-                break;
-        }
-
-        // Handle missing column
-        if (record instanceof final MissingCellDummyRecord mc) {
-            thisRow = mc.getRow();
-            thisColumn = mc.getColumn();
-            thisStr = "";
-        }
-        if (this.randomCellRecordBuilder != null && thisStr != null) {
-            final String cellReference = new CellAddress(thisRow, thisColumn).formatAsString();
-            final CellReference reference = new CellReference(cellReference);
-            this.handleCellValue(thisColumn, thisStr, reference);
-        }
-        // Update column and row count
-        if (thisRow > -1) {
-            this.lastRowNumber = thisRow;
-        }
-        // Handle end of row
-        if (record instanceof LastCellOfRowDummyRecord) {
-            this.addNewRowToRowsTable(this.lastRowNumber);
+            }
+            if (this.randomCellRecordBuilder != null && thisStr != null) {
+                final String cellReference = new CellAddress(thisRow, thisColumn).formatAsString();
+                final CellReference reference = new CellReference(cellReference);
+                this.handleCellValue(thisColumn, thisStr, reference);
+            }
+            // Update column and row count
+            if (thisRow > -1) {
+                this.lastRowNumber = thisRow;
+            }
+            // Handle end of row
+            if (record instanceof LastCellOfRowDummyRecord) {
+                this.addNewRowToRowsTable(this.lastRowNumber);
+            }
         }
     }
 

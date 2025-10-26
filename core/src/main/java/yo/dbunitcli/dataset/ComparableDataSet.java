@@ -24,7 +24,7 @@ public class ComparableDataSet extends AbstractDataSet implements ComparableData
     public ComparableDataSet(final ComparableDataSetProducer producer) {
         super(false);
         this.src = producer.getSrc();
-        this.param = producer.getParam();
+        this.param = producer.param();
         this.tableSeparators = this.param.tableSeparators();
         this.converter = this.param.converter();
         this.alreadyWrite = new HashMap<>();
@@ -33,8 +33,7 @@ public class ComparableDataSet extends AbstractDataSet implements ComparableData
                 .map(ComparableTableJoin::new)
                 .collect(Collectors.toList());
         try {
-            producer.setConsumer(this);
-            producer.produce();
+            producer.produce(this);
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }

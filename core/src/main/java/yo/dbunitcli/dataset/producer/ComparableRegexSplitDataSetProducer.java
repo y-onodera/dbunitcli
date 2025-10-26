@@ -15,65 +15,58 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 
-public class ComparableRegexSplitDataSetProducer implements ComparableDataSetProducer {
+public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param
+        , Pattern dataSplitPattern
+        , Pattern headerSplitPattern) implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableRegexSplitDataSetProducer.class);
-    private final Pattern dataSplitPattern;
-    private final ComparableDataSetParam param;
-    private Pattern headerSplitPattern;
-    private ComparableDataSetConsumer consumer;
 
     public ComparableRegexSplitDataSetProducer(final ComparableDataSetParam param) {
-        this.param = param;
-        if (this.getHeaderNames() == null) {
-            this.headerSplitPattern = Pattern.compile(this.param.headerSplitPattern());
-        }
-        this.dataSplitPattern = Pattern.compile(this.param.dataSplitPattern());
+        this(param
+                , Pattern.compile(param.dataSplitPattern())
+                , param.headerNames() != null ? null : Pattern.compile(param.headerSplitPattern())
+        );
     }
 
     @Override
-    public void setConsumer(final ComparableDataSetConsumer iDataSetConsumer) {
-        this.consumer = iDataSetConsumer;
+    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
+        return new RegexSplitTableExecutor(source, consumer, this.param,
+                this.headerSplitPattern, this.dataSplitPattern);
     }
 
-    @Override
-    public ComparableDataSetConsumer getConsumer() {
-        return this.consumer;
-    }
+    private record RegexSplitTableExecutor(Source source, ComparableDataSetConsumer consumer,
+                                           ComparableDataSetParam param, Pattern headerSplitPattern,
+                                           Pattern dataSplitPattern) implements Runnable {
 
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    @Override
-    public void executeTable(final Source fileInfo) {
-        try {
-            ComparableRegexSplitDataSetProducer.LOGGER.info("produce - start filePath={}", fileInfo.filePath());
-            if (this.getHeaderNames() != null) {
-                this.getConsumer().startTable(this.createMetaData(fileInfo, this.getHeaderNames()));
-                if (!this.loadData()) {
-                    this.getConsumer().endTable();
-                    return;
-                }
-            }
-            int row = 1;
-            for (final String s : Files.readAllLines(Path.of(fileInfo.filePath()), Charset.forName(this.getEncoding()))) {
-                if (row == this.getStartRow() && this.getHeaderNames() == null) {
-                    final TableMetaDataWithSource metaData = this.createMetaData(fileInfo, this.headerSplitPattern.split(s));
-                    this.getConsumer().startTable(metaData);
-                    if (!this.loadData()) {
-                        break;
+        @Override
+        public void run() {
+            try {
+                ComparableRegexSplitDataSetProducer.LOGGER.info("produce - start filePath={}", this.source.filePath());
+                if (this.param.headerNames() != null) {
+                    this.consumer.startTable(this.source.createMetaData(this.param.headerNames()));
+                    if (!this.param.loadData()) {
+                        this.consumer.endTable();
+                        return;
                     }
-                } else if (row >= this.getStartRow()) {
-                    this.getConsumer().row(fileInfo.apply(this.dataSplitPattern.split(s)));
                 }
-                row++;
+                int row = 1;
+                for (final String s : Files.readAllLines(Path.of(this.source.filePath()), Charset.forName(this.param.encoding()))) {
+                    if (row == this.param.startRow() && this.param.headerNames() == null) {
+                        final TableMetaDataWithSource metaData = this.source.createMetaData(this.headerSplitPattern.split(s));
+                        this.consumer.startTable(metaData);
+                        if (!this.param.loadData()) {
+                            break;
+                        }
+                    } else if (row >= this.param.startRow()) {
+                        this.consumer.row(this.source.apply(this.dataSplitPattern.split(s)));
+                    }
+                    row++;
+                }
+                ComparableRegexSplitDataSetProducer.LOGGER.info("produce - rows={}", row);
+                this.consumer.endTable();
+                ComparableRegexSplitDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());
+            } catch (final IOException | DataSetException e) {
+                throw new AssertionError(e);
             }
-            ComparableRegexSplitDataSetProducer.LOGGER.info("produce - rows={}", row);
-            this.getConsumer().endTable();
-            ComparableRegexSplitDataSetProducer.LOGGER.info("produce - end   filePath={}", fileInfo.filePath());
-        } catch (final IOException | DataSetException e) {
-            throw new AssertionError(e);
         }
     }
 

@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetConsumer;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
@@ -8,28 +7,7 @@ import yo.dbunitcli.dataset.ComparableDataSetProducer;
 
 import java.util.stream.Stream;
 
-public class ComparableNoneDataSetProducer implements ComparableDataSetProducer {
-    private final ComparableDataSetParam param;
-    private ComparableDataSetConsumer consumer;
-
-    public ComparableNoneDataSetProducer(final ComparableDataSetParam param) {
-        this.param = param;
-    }
-
-    @Override
-    public void setConsumer(final ComparableDataSetConsumer consumer) throws DataSetException {
-        this.consumer = consumer;
-    }
-
-    @Override
-    public ComparableDataSetConsumer getConsumer() {
-        return this.consumer;
-    }
-
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
+public record ComparableNoneDataSetProducer(ComparableDataSetParam param) implements ComparableDataSetProducer {
 
     @Override
     public String getSrc() {
@@ -42,7 +20,8 @@ public class ComparableNoneDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public void executeTable(final Source source) {
-
+    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
+        return () -> {
+        };
     }
 }

@@ -16,171 +16,167 @@ import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.List;
 
-public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
+public record ComparableCsvDataSetProducer(ComparableDataSetParam param) implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
-    private final ComparableDataSetParam param;
-    private ComparableDataSetConsumer consumer;
-    private int processRow;
-    private Pipeline pipeline;
-
-    public ComparableCsvDataSetProducer(final ComparableDataSetParam param) {
-        this.param = param;
-        this.resetThePipeline();
-    }
 
     @Override
-    public void setConsumer(final ComparableDataSetConsumer aConsumer) {
-        this.consumer = aConsumer;
+    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
+        return new CsvTableExecutor(source, consumer, this.param);
     }
 
-    @Override
-    public ComparableDataSetConsumer getConsumer() {
-        return this.consumer;
-    }
+    private static class CsvTableExecutor implements Runnable {
+        private final Source source;
+        private final ComparableDataSetConsumer consumer;
+        private final ComparableDataSetParam param;
+        private int processRow;
+        private Pipeline pipeline;
 
-    @Override
-    public ComparableDataSetParam getParam() {
-        return this.param;
-    }
-
-    @Override
-    public void executeTable(final Source source) {
-        ComparableCsvDataSetProducer.LOGGER.info("produce - start filePath={}", source.filePath());
-        try (final FileInputStream fi = new FileInputStream(source.filePath())) {
-            final Reader reader = new BufferedReader(new InputStreamReader(fi, this.getEncoding()));
-            final LineNumberReader lineNumberReader = new LineNumberReader(reader);
-
-            this.skipToStartRow(lineNumberReader);
-            String[] headerName = this.getHeaderNames();
-            if (headerName == null) {
-                headerName = this.parseFirstLine(lineNumberReader, source.filePath());
-            }
-            final TableMetaDataWithSource metaData = this.createMetaData(source, headerName);
-            this.getConsumer().startTable(metaData);
-            this.processRow = 0;
-            if (this.loadData()) {
-                this.parseTheData(metaData, headerName, lineNumberReader);
-            }
-            this.getConsumer().endTable();
-        } catch (final IOException | DataSetException e) {
-            throw new AssertionError(e);
+        CsvTableExecutor(final Source source, final ComparableDataSetConsumer consumer, final ComparableDataSetParam param) {
+            this.source = source;
+            this.consumer = consumer;
+            this.param = param;
+            this.resetThePipeline();
         }
-        ComparableCsvDataSetProducer.LOGGER.info("produce - rows={}", this.processRow);
-        ComparableCsvDataSetProducer.LOGGER.info("produce - end   filePath={}", source.filePath());
-    }
 
-    protected String[] parseFirstLine(final LineNumberReader lineNumberReader, final String source) {
-        try {
-            final String firstLine = lineNumberReader.readLine();
-            if (firstLine == null) {
-                throw new AssertionError("The first line of " + source + " is null");
-            } else {
-                return this.parse(firstLine).stream().map(Object::toString).toArray(String[]::new);
+        @Override
+        public void run() {
+            ComparableCsvDataSetProducer.LOGGER.info("produce - start filePath={}", this.source.filePath());
+            try (final FileInputStream fi = new FileInputStream(this.source.filePath())) {
+                final Reader reader = new BufferedReader(new InputStreamReader(fi, this.param.encoding()));
+                final LineNumberReader lineNumberReader = new LineNumberReader(reader);
+
+                this.skipToStartRow(lineNumberReader);
+                String[] headerName = this.param.headerNames();
+                if (headerName == null) {
+                    headerName = this.parseFirstLine(lineNumberReader, this.source.filePath());
+                }
+                final TableMetaDataWithSource metaData = this.source.createMetaData(headerName);
+                this.consumer.startTable(metaData);
+                this.processRow = 0;
+                if (this.param.loadData()) {
+                    this.parseTheData(metaData, headerName, lineNumberReader);
+                }
+                this.consumer.endTable();
+            } catch (final IOException | DataSetException e) {
+                throw new AssertionError(e);
             }
-        } catch (final IOException e) {
-            throw new AssertionError(e);
+            ComparableCsvDataSetProducer.LOGGER.info("produce - rows={}", this.processRow);
+            ComparableCsvDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());
         }
-    }
 
-    protected List<Object> parse(final String csv) throws PipelineException, IllegalInputCharacterException {
-        this.pipeline.resetProducts();
-        final CharacterIterator iterator = new StringCharacterIterator(csv);
-        for (char c = iterator.first(); c != '\uffff'; c = iterator.next()) {
-            this.pipeline.handle(c);
-        }
-        this.pipeline.noMoreInput();
-        this.pipeline.thePieceIsDone();
-        return this.pipeline.getProducts();
-    }
-
-    protected void parseTheData(final TableMetaDataWithSource metaData, final String[] columnsInFirstLine, final LineNumberReader lineNumberReader) {
-        try {
-            List<Object> columns;
-            while ((columns = this.collectExpectedNumberOfColumns(columnsInFirstLine.length, lineNumberReader)) != null) {
-                this.consumer.row(metaData.source().apply(columns));
-                this.processRow++;
+        private String[] parseFirstLine(final LineNumberReader lineNumberReader, final String source) {
+            try {
+                final String firstLine = lineNumberReader.readLine();
+                if (firstLine == null) {
+                    throw new AssertionError("The first line of " + source + " is null");
+                } else {
+                    return this.parse(firstLine).stream().map(Object::toString).toArray(String[]::new);
+                }
+            } catch (final IOException e) {
+                throw new AssertionError(e);
             }
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
         }
-    }
 
-    protected List<Object> collectExpectedNumberOfColumns(final int expectedNumberOfColumns, final LineNumberReader lineNumberReader) {
-        try {
-            List<Object> columns = null;
-            int columnsCollectedSoFar = 0;
-            final StringBuilder buffer = new StringBuilder();
-            String anotherLine = lineNumberReader.readLine();
-            if (anotherLine == null) {
-                return null;
-            } else {
-                boolean shouldProceed = false;
-                while (columnsCollectedSoFar < expectedNumberOfColumns) {
-                    try {
-                        columns = this.parse(buffer.append(anotherLine.replaceAll("(?!<\\\\)\\\\(?![\\\\\"])", "\\\\\\\\")).toString());
-                        columnsCollectedSoFar = columns.size();
-                    } catch (final IllegalStateException var9) {
-                        this.resetThePipeline();
-                        anotherLine = lineNumberReader.readLine();
-                        if (anotherLine == null) {
+        private List<Object> parse(final String csv) throws PipelineException, IllegalInputCharacterException {
+            this.pipeline.resetProducts();
+            final CharacterIterator iterator = new StringCharacterIterator(csv);
+            for (char c = iterator.first(); c != '\uffff'; c = iterator.next()) {
+                this.pipeline.handle(c);
+            }
+            this.pipeline.noMoreInput();
+            this.pipeline.thePieceIsDone();
+            return this.pipeline.getProducts();
+        }
+
+        private void parseTheData(final TableMetaDataWithSource metaData, final String[] columnsInFirstLine, final LineNumberReader lineNumberReader) {
+            try {
+                List<Object> columns;
+                while ((columns = this.collectExpectedNumberOfColumns(columnsInFirstLine.length, lineNumberReader)) != null) {
+                    this.consumer.row(metaData.source().apply(columns));
+                    this.processRow++;
+                }
+            } catch (final DataSetException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        private List<Object> collectExpectedNumberOfColumns(final int expectedNumberOfColumns, final LineNumberReader lineNumberReader) {
+            try {
+                List<Object> columns = null;
+                int columnsCollectedSoFar = 0;
+                final StringBuilder buffer = new StringBuilder();
+                String anotherLine = lineNumberReader.readLine();
+                if (anotherLine == null) {
+                    return null;
+                } else {
+                    boolean shouldProceed = false;
+                    while (columnsCollectedSoFar < expectedNumberOfColumns) {
+                        try {
+                            columns = this.parse(buffer.append(anotherLine.replaceAll("(?!<\\\\)\\\\(?![\\\\\"])", "\\\\\\\\")).toString());
+                            columnsCollectedSoFar = columns.size();
+                        } catch (final IllegalStateException var9) {
+                            this.resetThePipeline();
+                            anotherLine = lineNumberReader.readLine();
+                            if (anotherLine == null) {
+                                break;
+                            }
+                            buffer.append("\n");
+                            shouldProceed = true;
+                        }
+                        if (!shouldProceed) {
                             break;
                         }
-                        buffer.append("\n");
-                        shouldProceed = true;
                     }
-                    if (!shouldProceed) {
-                        break;
+                    if (columnsCollectedSoFar != expectedNumberOfColumns) {
+                        final String message = "Expected " + expectedNumberOfColumns + " columns on line " + lineNumberReader.getLineNumber() + ", got " + columnsCollectedSoFar + ". Offending line: " + buffer;
+                        throw new AssertionError(message);
+                    } else {
+                        return columns;
                     }
                 }
-                if (columnsCollectedSoFar != expectedNumberOfColumns) {
-                    final String message = "Expected " + expectedNumberOfColumns + " columns on line " + lineNumberReader.getLineNumber() + ", got " + columnsCollectedSoFar + ". Offending line: " + buffer;
-                    throw new AssertionError(message);
-                } else {
-                    return columns;
+            } catch (final IOException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        private void skipToStartRow(final LineNumberReader reader) throws IOException {
+            for (int i = 1; i < this.param.startRow(); i++) {
+                final String line = reader.readLine();
+                if (line == null) {
+                    throw new IllegalStateException(
+                            String.format("File has fewer lines than startRow. Required: %d, Actual: %d",
+                                    this.param.startRow(), i));
                 }
             }
-        } catch (final IOException e) {
-            throw new AssertionError(e);
         }
-    }
 
-    protected void skipToStartRow(final LineNumberReader reader) throws IOException {
-        for (int i = 1; i < this.getStartRow(); i++) {
-            final String line = reader.readLine();
-            if (line == null) {
-                throw new IllegalStateException(
-                        String.format("File has fewer lines than startRow. Required: %d, Actual: %d",
-                                this.getStartRow(), i));
-            }
-        }
-    }
-
-    protected void resetThePipeline() {
-        this.pipeline = new Pipeline() {
-            @Override
-            public void putFront(final PipelineComponent component) {
-                if (component instanceof WhitespacesHandler) {
-                    super.putFront(IgnoreDelimiterWhitespacesHandler.GET(ComparableCsvDataSetProducer.this.param.delimiter(), component));
-                } else if (component instanceof EnforceHandler) {
-                    super.putFront(LightEnforceHandler.ENFORCE((EnforceHandler) component));
-                } else {
-                    super.putFront(component);
+        private void resetThePipeline() {
+            this.pipeline = new Pipeline() {
+                @Override
+                public void putFront(final PipelineComponent component) {
+                    if (component instanceof WhitespacesHandler) {
+                        super.putFront(IgnoreDelimiterWhitespacesHandler.GET(CsvTableExecutor.this.param.delimiter(), component));
+                    } else if (component instanceof EnforceHandler) {
+                        super.putFront(LightEnforceHandler.ENFORCE((EnforceHandler) component));
+                    } else {
+                        super.putFront(component);
+                    }
                 }
+            };
+            this.pipeline.getPipelineConfig().setSeparatorChar(this.param.delimiter());
+            this.pipeline.putFront(SeparatorHandler.ENDPIECE());
+            this.pipeline.putFront(EscapeHandler.ACCEPT());
+            this.pipeline.putFront(IsAlnumHandler.QUOTE());
+            if (!this.param.ignoreQuoted()) {
+                this.pipeline.putFront(QuoteHandler.QUOTE());
             }
-        };
-        this.pipeline.getPipelineConfig().setSeparatorChar(this.param.delimiter());
-        this.pipeline.putFront(SeparatorHandler.ENDPIECE());
-        this.pipeline.putFront(EscapeHandler.ACCEPT());
-        this.pipeline.putFront(IsAlnumHandler.QUOTE());
-        if (!this.param.ignoreQuoted()) {
-            this.pipeline.putFront(QuoteHandler.QUOTE());
+            this.pipeline.putFront(EscapeHandler.ESCAPE());
+            this.pipeline.putFront(WhitespacesHandler.IGNORE());
+            this.pipeline.putFront(TransparentHandler.IGNORE());
         }
-        this.pipeline.putFront(EscapeHandler.ESCAPE());
-        this.pipeline.putFront(WhitespacesHandler.IGNORE());
-        this.pipeline.putFront(TransparentHandler.IGNORE());
     }
 
-    protected static class IgnoreDelimiterWhitespacesHandler extends AbstractPipelineComponent {
+    private static class IgnoreDelimiterWhitespacesHandler extends AbstractPipelineComponent {
 
         static Field HANDLE;
 
@@ -197,19 +193,19 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
 
         public static PipelineComponent IGNORE(final char delimiter) {
             ComparableCsvDataSetProducer.LOGGER.debug("IGNORE() - start");
-            return AbstractPipelineComponent.createPipelineComponent(new IgnoreDelimiterWhitespacesHandler(delimiter), new IgnoreDelimiterWhitespacesHandler.Ignore());
+            return AbstractPipelineComponent.createPipelineComponent(new IgnoreDelimiterWhitespacesHandler(delimiter), new Ignore());
         }
 
         public static PipelineComponent ACCEPT(final char delimiter) {
             ComparableCsvDataSetProducer.LOGGER.debug("ACCEPT() - start");
-            return AbstractPipelineComponent.createPipelineComponent(new IgnoreDelimiterWhitespacesHandler(delimiter), new IgnoreDelimiterWhitespacesHandler.Accept());
+            return AbstractPipelineComponent.createPipelineComponent(new IgnoreDelimiterWhitespacesHandler(delimiter), new Accept());
         }
 
         public static PipelineComponent GET(final char delimiter, final PipelineComponent component) {
             try {
 
                 final Helper helper = (Helper) IgnoreDelimiterWhitespacesHandler.HANDLE.get(component);
-                if (helper instanceof AbstractPipelineComponent.ACCEPT) {
+                if (helper instanceof ACCEPT) {
                     return IgnoreDelimiterWhitespacesHandler.ACCEPT(delimiter);
                 }
                 return IgnoreDelimiterWhitespacesHandler.IGNORE(delimiter);
@@ -239,7 +235,7 @@ public class ComparableCsvDataSetProducer implements ComparableDataSetProducer {
         }
     }
 
-    static class LightEnforceHandler extends AbstractPipelineComponent {
+    private static class LightEnforceHandler extends AbstractPipelineComponent {
         static Field HANDLE;
 
         static {

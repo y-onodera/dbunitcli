@@ -21,8 +21,6 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     private final File src;
     private final ComparableDataSetParam param;
-    private ComparableDataSetConsumer consumer;
-    private int rows = 0;
 
     public ComparableFileDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
@@ -30,17 +28,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public void setConsumer(final ComparableDataSetConsumer aConsumer) {
-        this.consumer = aConsumer;
-    }
-
-    @Override
-    public ComparableDataSetConsumer getConsumer() {
-        return this.consumer;
-    }
-
-    @Override
-    public ComparableDataSetParam getParam() {
+    public ComparableDataSetParam param() {
         return this.param;
     }
 
@@ -50,26 +38,8 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public void executeTable(final Source source) {
-        this.getConsumer().startTable(source
-                .wrap(new ComparableFileTableMetaData(this.src.getName())));
-        ComparableFileDataSetProducer.LOGGER.info("produce - start fileName={}", this.src);
-        if (this.loadData()) {
-            try {
-                this.param.getWalk()
-                        .filter(this.fileTypeFilter())
-                        .forEach(path -> this.produceFromFile(path.toFile()));
-            } catch (final AssertionError e) {
-                throw new AssertionError("error producing dataSet for '" + this.src + "'", e);
-            }
-        }
-        try {
-            this.getConsumer().endTable();
-        } catch (final DataSetException e) {
-            throw new AssertionError("error producing dataSet for '" + this.src + "'", e);
-        }
-        ComparableFileDataSetProducer.LOGGER.info("produce - rows={}", this.rows);
-        ComparableFileDataSetProducer.LOGGER.info("produce - end   fileName={}", this.src);
+    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
+        return new FileTableExecutor(source, consumer, this.param, this.src, this.fileTypeFilter());
     }
 
     protected Predicate<Path> fileTypeFilter() {
@@ -80,20 +50,62 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
                 && path.toString().toUpperCase().endsWith(this.param.extension().toUpperCase());
     }
 
-    protected void produceFromFile(final File file) {
-        final Object[] row = new Object[6];
-        final Path normalize = file.toPath().toAbsolutePath().normalize();
-        row[0] = normalize.toString();
-        row[1] = file.getName();
-        row[2] = normalize.getParent().toString();
-        row[3] = this.src.toPath().relativize(file.getAbsoluteFile().toPath()).toString();
-        row[4] = file.length() / 1024;
-        row[5] = ComparableFileDataSetProducer.DATE_FORMAT.format(file.lastModified());
-        try {
-            this.getConsumer().row(row);
-            this.rows++;
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
+    private static class FileTableExecutor implements Runnable {
+        private final Source source;
+        private final ComparableDataSetConsumer consumer;
+        private final ComparableDataSetParam param;
+        private final File src;
+        private final Predicate<Path> fileTypeFilter;
+        private int rows = 0;
+
+        FileTableExecutor(final Source source, final ComparableDataSetConsumer consumer,
+                          final ComparableDataSetParam param, final File src,
+                          final Predicate<Path> fileTypeFilter) {
+            this.source = source;
+            this.consumer = consumer;
+            this.param = param;
+            this.src = src;
+            this.fileTypeFilter = fileTypeFilter;
+        }
+
+        @Override
+        public void run() {
+            this.consumer.startTable(this.source
+                    .wrap(new ComparableFileTableMetaData(this.src.getName())));
+            ComparableFileDataSetProducer.LOGGER.info("produce - start fileName={}", this.src);
+            if (this.param.loadData()) {
+                try {
+                    this.param.getWalk()
+                            .filter(this.fileTypeFilter)
+                            .forEach(path -> this.produceFromFile(path.toFile()));
+                } catch (final AssertionError e) {
+                    throw new AssertionError("error producing dataSet for '" + this.src + "'", e);
+                }
+            }
+            try {
+                this.consumer.endTable();
+            } catch (final DataSetException e) {
+                throw new AssertionError("error producing dataSet for '" + this.src + "'", e);
+            }
+            ComparableFileDataSetProducer.LOGGER.info("produce - rows={}", this.rows);
+            ComparableFileDataSetProducer.LOGGER.info("produce - end   fileName={}", this.src);
+        }
+
+        private void produceFromFile(final File file) {
+            final Object[] row = new Object[6];
+            final Path normalize = file.toPath().toAbsolutePath().normalize();
+            row[0] = normalize.toString();
+            row[1] = file.getName();
+            row[2] = normalize.getParent().toString();
+            row[3] = this.src.toPath().relativize(file.getAbsoluteFile().toPath()).toString();
+            row[4] = file.length() / 1024;
+            row[5] = ComparableFileDataSetProducer.DATE_FORMAT.format(file.lastModified());
+            try {
+                this.consumer.row(row);
+                this.rows++;
+            } catch (final DataSetException e) {
+                throw new AssertionError(e);
+            }
         }
     }
 }

@@ -23,33 +23,22 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDBDataSetProducer.class);
     protected final IDatabaseConnection connection;
     protected final ComparableDataSetParam param;
-    protected ComparableDataSetConsumer consumer;
-    private IDataSet databaseDataSet;
+    private final IDataSet databaseDataSet;
 
     public ComparableDBDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.connection = this.param.databaseConnectionLoader().loadConnection();
-        if (this.param.useJdbcMetaData()) {
-            try {
-                this.databaseDataSet = this.connection.createDataSet();
-            } catch (final SQLException e) {
-                throw new AssertionError(e);
-            }
+        try {
+            this.databaseDataSet = this.param.useJdbcMetaData()
+                    ? this.connection.createDataSet()
+                    : null;
+        } catch (final SQLException e) {
+            throw new AssertionError(e);
         }
     }
 
     @Override
-    public void setConsumer(final ComparableDataSetConsumer iDataSetConsumer) {
-        this.consumer = iDataSetConsumer;
-    }
-
-    @Override
-    public ComparableDataSetConsumer getConsumer() {
-        return this.consumer;
-    }
-
-    @Override
-    public ComparableDataSetParam getParam() {
+    public ComparableDataSetParam param() {
         return this.param;
     }
 
@@ -60,7 +49,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                     try {
                         return Pair.of(
                                 this.getSource(it)
-                                , Files.readAllLines(it.toPath(), Charset.forName(this.getEncoding()))
+                                , Files.readAllLines(it.toPath(), Charset.forName(this.param.encoding()))
                         );
                     } catch (final IOException e) {
                         throw new AssertionError(e);
@@ -70,77 +59,100 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                         .stream()
                         .map(tableName -> it.getLeft().tableName(tableName))
                 )
-                .filter(it -> this.getParam().tableNameFilter().predicate(it.tableName()));
+                .filter(it -> this.param().tableNameFilter().predicate(it.tableName()));
     }
 
     @Override
-    public void executeTable(final Source source) {
-        this.executeTable(this.getTable(source.tableName()), source);
+    public Runnable createExecuteTableTask(final Source source, final ComparableDataSetConsumer consumer) {
+        return new DBTableExecutor(source, consumer, this.param, this.connection, this.databaseDataSet);
     }
 
-    protected void executeTable(final ITable table, final Source source) {
-        try {
-            try {
-                ComparableDBDataSetProducer.LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
-                final ITableMetaData tableMetaData;
-                if (this.getHeaderNames() != null) {
-                    final ITableMetaData metaData = table.getTableMetaData();
-                    final Column[] columns = Arrays.stream(this.getHeaderNames(), 0, metaData.getColumns().length)
-                            .map(name -> new Column(name.trim(), DataType.UNKNOWN))
-                            .toArray(Column[]::new);
-                    tableMetaData = new DefaultTableMetaData(table.getTableMetaData().getTableName()
-                            , columns
-                            , Arrays.stream(table.getTableMetaData().getPrimaryKeys())
-                            .mapToInt(column -> {
-                                try {
-                                    return metaData.getColumnIndex(column.getColumnName());
-                                } catch (final DataSetException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            })
-                            .mapToObj(i -> columns[i])
-                            .toArray(Column[]::new));
-                } else {
-                    tableMetaData = table.getTableMetaData();
-                }
-                this.getConsumer().startTable(source.wrap(tableMetaData));
-                if (this.loadData()) {
-                    final Column[] columns = table.getTableMetaData().getColumns();
-                    int row = 0;
-                    for (; true; row++) {
-                        try {
-                            final Object[] rows = new Object[columns.length];
-                            int columnIndex = 0;
-                            for (final Column column : columns) {
-                                rows[columnIndex++] = table.getValue(row, column.getColumnName());
-                            }
-                            this.getConsumer().row(rows);
-                        } catch (final RowOutOfBoundsException e) {
-                            break;
-                        }
-                    }
-                    ComparableDBDataSetProducer.LOGGER.info("produce - rows={}", row);
-                }
-                this.getConsumer().endTable();
-                ComparableDBDataSetProducer.LOGGER.info("produce - end   databaseTable={}", table.getTableMetaData().getTableName());
-            } finally {
-                if (table instanceof final IResultSetTable resultSetTable) {
-                    resultSetTable.close();
-                }
-            }
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
+    static class DBTableExecutor implements Runnable {
+        protected final Source source;
+        protected final ComparableDataSetConsumer consumer;
+        protected final ComparableDataSetParam param;
+        protected final IDatabaseConnection connection;
+        protected final IDataSet databaseDataSet;
+
+        DBTableExecutor(final Source source, final ComparableDataSetConsumer consumer,
+                        final ComparableDataSetParam param, final IDatabaseConnection connection,
+                        final IDataSet databaseDataSet) {
+            this.source = source;
+            this.consumer = consumer;
+            this.param = param;
+            this.connection = connection;
+            this.databaseDataSet = databaseDataSet;
         }
-    }
 
-    private ITable getTable(final String tableName) {
-        try {
-            if (this.databaseDataSet != null) {
-                return this.databaseDataSet.getTable(tableName);
+        @Override
+        public void run() {
+            this.executeTable(this.getTable(this.source.tableName()), this.source);
+        }
+
+        protected ITable getTable(final String tableName) {
+            try {
+                if (this.databaseDataSet != null) {
+                    return this.databaseDataSet.getTable(tableName);
+                }
+                return this.connection.createTable(tableName);
+            } catch (final DataSetException | SQLException e) {
+                throw new AssertionError(e);
             }
-            return this.connection.createTable(tableName);
-        } catch (final DataSetException | SQLException e) {
-            throw new AssertionError(e);
+        }
+
+        protected void executeTable(final ITable table, final Source source) {
+            try {
+                try {
+                    ComparableDBDataSetProducer.LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
+                    final ITableMetaData tableMetaData;
+                    if (this.param.headerNames() != null) {
+                        final ITableMetaData metaData = table.getTableMetaData();
+                        final Column[] columns = Arrays.stream(this.param.headerNames(), 0, metaData.getColumns().length)
+                                .map(name -> new Column(name.trim(), DataType.UNKNOWN))
+                                .toArray(Column[]::new);
+                        tableMetaData = new DefaultTableMetaData(table.getTableMetaData().getTableName()
+                                , columns
+                                , Arrays.stream(table.getTableMetaData().getPrimaryKeys())
+                                .mapToInt(column -> {
+                                    try {
+                                        return metaData.getColumnIndex(column.getColumnName());
+                                    } catch (final DataSetException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                })
+                                .mapToObj(i -> columns[i])
+                                .toArray(Column[]::new));
+                    } else {
+                        tableMetaData = table.getTableMetaData();
+                    }
+                    this.consumer.startTable(source.wrap(tableMetaData));
+                    if (this.param.loadData()) {
+                        final Column[] columns = table.getTableMetaData().getColumns();
+                        int row = 0;
+                        for (; true; row++) {
+                            try {
+                                final Object[] rows = new Object[columns.length];
+                                int columnIndex = 0;
+                                for (final Column column : columns) {
+                                    rows[columnIndex++] = table.getValue(row, column.getColumnName());
+                                }
+                                this.consumer.row(rows);
+                            } catch (final RowOutOfBoundsException e) {
+                                break;
+                            }
+                        }
+                        ComparableDBDataSetProducer.LOGGER.info("produce - rows={}", row);
+                    }
+                    this.consumer.endTable();
+                    ComparableDBDataSetProducer.LOGGER.info("produce - end   databaseTable={}", table.getTableMetaData().getTableName());
+                } finally {
+                    if (table instanceof final IResultSetTable resultSetTable) {
+                        resultSetTable.close();
+                    }
+                }
+            } catch (final DataSetException e) {
+                throw new AssertionError(e);
+            }
         }
     }
 }

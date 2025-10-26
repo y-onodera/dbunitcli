@@ -17,10 +17,10 @@ public class ExcelMappingDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExcelMappingDataSetProducer.class);
     protected final boolean loadData;
     protected final String[] headerNames;
+    protected final ComparableDataSetConsumer consumer;
+    protected final boolean addFileInfo;
     private final XlsxSchema schema;
     private final int startRow;
-    protected boolean addFileInfo;
-    protected ComparableDataSetConsumer consumer;
     protected XlsxCellsToTableBuilder randomCellRecordBuilder;
     protected XlsxRowsToTableBuilder rowsTableBuilder;
     private int rowTableRows = 0;
@@ -29,16 +29,14 @@ public class ExcelMappingDataSetProducer {
             , final int startRow
             , final String[] headerNames
             , final boolean loadData
-            , final boolean addFileInfo) {
+            , final boolean addFileInfo
+            , final ComparableDataSetConsumer consumer) {
         this.schema = schema;
         this.startRow = startRow;
         this.headerNames = headerNames;
         this.loadData = loadData;
         this.addFileInfo = addFileInfo;
-    }
-
-    public void setConsumer(final ComparableDataSetConsumer aConsumer) {
-        this.consumer = aConsumer;
+        this.consumer = consumer;
     }
 
     protected void handleSheetStart(final String[] headerNames, final Source source) {

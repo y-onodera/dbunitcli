@@ -2,7 +2,9 @@ package yo.dbunitcli.common;
 
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
+import org.dbunit.dataset.datatype.DataType;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -81,6 +83,31 @@ public record Source(String filePath, String fileName, String sheetName, String 
             values[values.length - 1] = this.sheetName;
         }
         return values;
+    }
+
+    public TableMetaDataWithSource createMetaData(final String[] header) {
+        try {
+            final String tableName = this.getTableName();
+            return this.wrap(new DefaultTableMetaData(tableName,
+                    Arrays.stream(header).map(s -> new Column(s.trim(), DataType.UNKNOWN)).toArray(Column[]::new)));
+        } catch (final Exception e) {
+            throw new RuntimeException("Failed to create metadata with file info", e);
+        }
+    }
+
+    public String getTableName() {
+        return this.tableName.isEmpty()
+                ? this.fileName.substring(0, this.fileName.lastIndexOf("."))
+                : this.tableName;
+    }
+
+    public TableMetaDataWithSource createMetaData(final Column[] columns) {
+        try {
+            final String tableName = this.getTableName();
+            return this.wrap(new DefaultTableMetaData(tableName, columns));
+        } catch (final Exception e) {
+            throw new RuntimeException("Failed to create metadata with file info", e);
+        }
     }
 
 }
