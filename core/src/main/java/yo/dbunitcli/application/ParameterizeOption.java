@@ -101,7 +101,7 @@ public record ParameterizeOption(
     }
 
     public Stream<Parameter> loadParams() {
-        return this.unit.loadStream(this.getComparableDataSetLoader(), this.paramData.getParam().build());
+        return this.unit.dataSetToStream(this.getComparableDataSetLoader(), this.paramData.getParam().build());
     }
 
     public String[] createArgs(final Parameter aParam) {

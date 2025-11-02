@@ -67,7 +67,7 @@ public class ImageCompareManager extends DefaultCompareManager {
 
     @Override
     public CompareResult toCompareResult(final ComparableDataSet oldDataSet, final ComparableDataSet newDataSet, final List<CompareDiff> results) {
-        return new ImageCompareResult(oldDataSet.getSrc(), newDataSet.getSrc(), results);
+        return new ImageCompareResult(oldDataSet.src(), newDataSet.src(), results);
     }
 
     @Override
@@ -167,7 +167,7 @@ public class ImageCompareManager extends DefaultCompareManager {
                     .setDifferenceRectangleFilling(ImageCompareManager.this.fillDifferenceRectangles, ImageCompareManager.this.percentOpacityDifferenceRectangles)
                     .setDifferenceRectangleColor(ImageCompareManager.this.differenceRectangleColor)
                     .setExcludedAreas(ImageCompareManager.this.excludeAreaList)
-                    .setDrawExcludedRectangles(ImageCompareManager.this.drawExcludedRectangles && ImageCompareManager.this.excludeAreaList.size() > 0)
+                    .setDrawExcludedRectangles(ImageCompareManager.this.drawExcludedRectangles && !ImageCompareManager.this.excludeAreaList.isEmpty())
                     .setExcludedRectangleColor(ImageCompareManager.this.excludedRectangleColor)
                     .setExcludedRectangleFilling(ImageCompareManager.this.fillExcludedRectangles, ImageCompareManager.this.percentOpacityExcludedRectangles)
                     .compareImages();

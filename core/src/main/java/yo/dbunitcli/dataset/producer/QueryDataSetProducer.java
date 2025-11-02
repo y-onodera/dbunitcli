@@ -11,7 +11,7 @@ public interface QueryDataSetProducer extends ComparableDataSetProducer {
     Parameter parameter();
 
     @Override
-    default Stream<Source> getSourceStream() {
+    default Stream<? extends Source> getSourceStream() {
         return ComparableDataSetProducer.super.getSourceStream();
     }
 }

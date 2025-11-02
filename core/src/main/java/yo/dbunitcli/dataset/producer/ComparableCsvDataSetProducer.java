@@ -8,6 +8,7 @@ import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTableMappingContext;
+import yo.dbunitcli.dataset.ComparableTableMappingTask;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -19,26 +20,23 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
 
     @Override
-    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
-        return new CsvTableExecutor(source, context, this.param);
+    public ComparableTableMappingTask createTableMappingTask(final Source source) {
+        return new CsvTableExecutor(source, this.param);
     }
 
-    private static class CsvTableExecutor implements Runnable {
+    private static class CsvTableExecutor implements ComparableTableMappingTask {
         private final Source source;
-        private final ComparableTableMappingContext context;
         private final ComparableDataSetParam param;
-        private int processRow;
         private Pipeline pipeline;
 
-        CsvTableExecutor(final Source source, final ComparableTableMappingContext context, final ComparableDataSetParam param) {
+        CsvTableExecutor(final Source source, final ComparableDataSetParam param) {
             this.source = source;
-            this.context = context;
             this.param = param;
             this.resetThePipeline();
         }
 
         @Override
-        public void run() {
+        public void run(final ComparableTableMappingContext context) {
             ComparableCsvDataSetProducer.LOGGER.info("produce - start filePath={}", this.source.filePath());
             try (final FileInputStream fi = new FileInputStream(this.source.filePath())) {
                 final Reader reader = new BufferedReader(new InputStreamReader(fi, this.param.encoding()));
@@ -50,17 +48,26 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
                     headerName = this.parseFirstLine(lineNumberReader, this.source.filePath());
                 }
                 final TableMetaDataWithSource metaData = this.source.createMetaData(headerName);
-                this.context.startTable(metaData);
-                this.processRow = 0;
+                context.startTable(metaData);
                 if (this.param.loadData()) {
-                    this.parseTheData(metaData, headerName, lineNumberReader);
+                    int rows = 0;
+                    List<Object> columns;
+                    while ((columns = this.collectExpectedNumberOfColumns(headerName.length, lineNumberReader)) != null) {
+                        context.row(metaData.source().apply(columns));
+                        rows++;
+                    }
+                    ComparableCsvDataSetProducer.LOGGER.info("produce - rows={}", rows);
                 }
-                this.context.endTable();
+                context.endTable();
             } catch (final IOException e) {
                 throw new AssertionError(e);
             }
-            ComparableCsvDataSetProducer.LOGGER.info("produce - rows={}", this.processRow);
             ComparableCsvDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());
+        }
+
+        @Override
+        public Source source() {
+            return this.source;
         }
 
         private String[] parseFirstLine(final LineNumberReader lineNumberReader, final String source) {
@@ -85,14 +92,6 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
             this.pipeline.noMoreInput();
             this.pipeline.thePieceIsDone();
             return this.pipeline.getProducts();
-        }
-
-        private void parseTheData(final TableMetaDataWithSource metaData, final String[] columnsInFirstLine, final LineNumberReader lineNumberReader) {
-            List<Object> columns;
-            while ((columns = this.collectExpectedNumberOfColumns(columnsInFirstLine.length, lineNumberReader)) != null) {
-                this.context.row(metaData.source().apply(columns));
-                this.processRow++;
-            }
         }
 
         private List<Object> collectExpectedNumberOfColumns(final int expectedNumberOfColumns, final LineNumberReader lineNumberReader) {

@@ -3,7 +3,6 @@ package yo.dbunitcli.dataset;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
-import org.dbunit.dataset.OrderedTableNameMap;
 import org.dbunit.dataset.datatype.DataType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,9 +29,9 @@ public class ComparableTableTest {
         builder.addRow(new Object[]{"1", "a", "あ", 1});
         builder.addRow(new Object[]{"1", "b", "あ", 1});
         builder.addRow(new Object[]{"2", "a", "い", 2});
-        final OrderedTableNameMap map = new OrderedTableNameMap(true);
+        final TreeMap<String, ComparableTable> map = new TreeMap<>();
         builder.endTable(map);
-        this.target = (ComparableTable) map.orderedValues().iterator().next();
+        this.target = map.values().iterator().next();
     }
 
     @Test
@@ -82,7 +81,7 @@ public class ComparableTableTest {
     }
 
     @Test
-    public void getValue_return_argument_row_and_column_value() throws DataSetException {
+    public void getValue_return_argument_row_and_column_value() {
         assertEquals("2", this.target.getValue(2, "COLUMN1"));
         assertEquals("a", this.target.getValue(0, "COLUMN2"));
         assertEquals("b", this.target.getValue(1, "COLUMN2"));

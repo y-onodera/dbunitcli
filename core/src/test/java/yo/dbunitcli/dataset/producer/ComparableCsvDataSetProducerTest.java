@@ -27,30 +27,28 @@ public class ComparableCsvDataSetProducerTest {
     }
 
     @Test
-    public void createEmptyDataSetFromNoFileDirectory() throws DataSetException {
+    public void createEmptyDataSetFromNoFileDirectory() {
         final File src = new File(this.resource, "nofile");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableCsvDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSource(DataSourceType.csv)
-                                .setSrc(src)
-                                .setEncoding("windows-31j")
-                                .build()));
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        final ComparableDataSet actual = new ComparableCsvDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSource(DataSourceType.csv)
+                        .setSrc(src)
+                        .setEncoding("windows-31j")
+                        .build()).loadDataSet();
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(0, actual.getTables().length);
     }
 
     @Test
     public void createDataSetFromDirectoryContainsShiftJisFile() throws DataSetException {
         final File src = new File(this.resource, "singlefile");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableCsvDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSource(DataSourceType.csv)
-                                .setSrc(src)
-                                .setEncoding("windows-31j")
-                                .build()));
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        final ComparableDataSet actual = new ComparableCsvDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSource(DataSourceType.csv)
+                        .setSrc(src)
+                        .setEncoding("windows-31j")
+                        .build()).loadDataSet();
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(1, actual.getTables().length);
         final ITable actualTable = actual.getTables()[0];
         Assertions.assertEquals("single", actualTable.getTableMetaData().getTableName());
@@ -77,14 +75,13 @@ public class ComparableCsvDataSetProducerTest {
     @Test
     public void createDataSetFromDirectoryContainsUTF8File() throws DataSetException {
         final File src = new File(this.resource, "multifile");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableCsvDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSource(DataSourceType.csv)
-                                .setSrc(src)
-                                .setEncoding("UTF8")
-                                .build()));
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        final ComparableDataSet actual = new ComparableCsvDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSource(DataSourceType.csv)
+                        .setSrc(src)
+                        .setEncoding("UTF8")
+                        .build()).loadDataSet();
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(2, actual.getTables().length);
         ComparableTable actualTable = actual.getTable("multi1");
         Assertions.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
@@ -131,15 +128,14 @@ public class ComparableCsvDataSetProducerTest {
     @Test
     public void createDataSetFromDirectoryIncludeFile() throws DataSetException {
         final File src = new File(this.resource, "multifile");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableCsvDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSource(DataSourceType.csv)
-                                .setSrc(src)
-                                .setEncoding("UTF8")
-                                .setRegInclude("multi1")
-                                .build()));
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        final ComparableDataSet actual = new ComparableCsvDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSource(DataSourceType.csv)
+                        .setSrc(src)
+                        .setEncoding("UTF8")
+                        .setRegInclude("multi1")
+                        .build()).loadDataSet();
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(1, actual.getTables().length);
         final ComparableTable actualTable = actual.getTable("multi1");
         Assertions.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
@@ -166,15 +162,14 @@ public class ComparableCsvDataSetProducerTest {
     @Test
     public void createDataSetFromDirectoryExcludeFile() throws DataSetException {
         final File src = new File(this.resource, "multifile");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableCsvDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSource(DataSourceType.csv)
-                                .setSrc(src)
-                                .setEncoding("UTF8")
-                                .setRegExclude("multi2")
-                                .build()));
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        final ComparableDataSet actual = new ComparableCsvDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSource(DataSourceType.csv)
+                        .setSrc(src)
+                        .setEncoding("UTF8")
+                        .setRegExclude("multi2")
+                        .build()).loadDataSet();
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(1, actual.getTables().length);
         final ComparableTable actualTable = actual.getTable("multi1");
         Assertions.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
@@ -201,14 +196,13 @@ public class ComparableCsvDataSetProducerTest {
     @Test
     public void createDataSetFromFile() throws DataSetException {
         final File src = new File(this.resource, "multifile/multi1.csv");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableCsvDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSrc(src)
-                                .setSource(DataSourceType.csv)
-                                .setEncoding("UTF8")
-                                .build()));
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        final ComparableDataSet actual = new ComparableCsvDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(src)
+                        .setSource(DataSourceType.csv)
+                        .setEncoding("UTF8")
+                        .build()).loadDataSet();
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(1, actual.getTables().length);
         final ComparableTable actualTable = actual.getTable("multi1");
         Assertions.assertEquals("multi1", actualTable.getTableMetaData().getTableName());

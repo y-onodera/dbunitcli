@@ -1,11 +1,6 @@
 package yo.dbunitcli.dataset;
 
-import org.dbunit.dataset.OrderedTableNameMap;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ComparableTableMapperMulti implements ComparableTableMapper {
 
@@ -44,7 +39,7 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     }
 
     @Override
-    public void endTable(final OrderedTableNameMap orderedTableNameMap) {
+    public void endTable(final TreeMap<String, ComparableTable> orderedTableNameMap) {
         this.head.endTable(orderedTableNameMap);
         if (this.splitConvert()) {
             this.rests.forEach(it -> it.endTable(orderedTableNameMap));

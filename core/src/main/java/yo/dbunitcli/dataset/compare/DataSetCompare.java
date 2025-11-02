@@ -86,11 +86,7 @@ public class DataSetCompare {
     }
 
     protected String[] getTableNames(final ComparableDataSet dataSet) {
-        try {
-            return dataSet.getTableNames();
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
+        return dataSet.getTableNames();
     }
 
     public interface Manager {

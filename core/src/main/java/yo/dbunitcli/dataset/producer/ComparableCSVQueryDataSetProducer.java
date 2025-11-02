@@ -8,6 +8,7 @@ import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTableMappingContext;
+import yo.dbunitcli.dataset.ComparableTableMappingTask;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -22,15 +23,15 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
     private static final String URL = "jdbc:h2:file:" + FileResources.datasetDir().getAbsolutePath() + ";MODE=Oracle";
 
     @Override
-    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
-        return new CsvQueryTableExecutor(source, context, this.param, this.parameter);
+    public ComparableTableMappingTask createTableMappingTask(final Source source) {
+        return new CsvQueryTableExecutor(source, this.param, this.parameter);
     }
 
-    private record CsvQueryTableExecutor(Source source, ComparableTableMappingContext context
-            , ComparableDataSetParam param, Parameter parameter) implements Runnable {
+    private record CsvQueryTableExecutor(Source source, ComparableDataSetParam param,
+                                         Parameter parameter) implements ComparableTableMappingTask {
 
         @Override
-        public void run() {
+        public void run(final ComparableTableMappingContext context) {
             try {
                 final String query = this.param.templateRender().render(new File(this.source.filePath()), this.parameter);
                 ComparableCSVQueryDataSetProducer.LOGGER.info("produce - start filePath={},query={}", this.source.filePath(), query);
@@ -51,11 +52,11 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                             })
                             .map(name -> new Column(name.trim(), DataType.UNKNOWN))
                             .toArray(Column[]::new);
-                    this.context.startTable(this.source.createMetaData(columns));
+                    context.startTable(this.source.createMetaData(columns));
                     if (this.param.loadData()) {
                         int readRows = 0;
                         while (rst.next()) {
-                            this.context.row(IntStream.rangeClosed(1, metaData.getColumnCount())
+                            context.row(IntStream.rangeClosed(1, metaData.getColumnCount())
                                     .mapToObj(i -> {
                                         try {
                                             return Optional.ofNullable(rst.getString(i))
@@ -69,12 +70,13 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                         }
                         ComparableCSVQueryDataSetProducer.LOGGER.info("produce - rows={}", readRows);
                     }
-                    this.context.endTable();
+                    context.endTable();
                     ComparableCSVQueryDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());
                 }
             } catch (final SQLException e) {
                 throw new AssertionError(e);
             }
         }
+
     }
 }

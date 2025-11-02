@@ -6,6 +6,7 @@ import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTableMappingContext;
+import yo.dbunitcli.dataset.ComparableTableMappingTask;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -37,8 +38,8 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
     }
 
     @Override
-    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
-        return new FileTableExecutor(source, context, this.param, this.src, this.fileTypeFilter());
+    public ComparableTableMappingTask createTableMappingTask(final Source source) {
+        return new FileTableExecutor(source, this.param, this.src, this.fileTypeFilter());
     }
 
     protected Predicate<Path> fileTypeFilter() {
@@ -49,44 +50,35 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
                 && path.toString().toUpperCase().endsWith(this.param.extension().toUpperCase());
     }
 
-    private static class FileTableExecutor implements Runnable {
-        private final Source source;
-        private final ComparableTableMappingContext context;
-        private final ComparableDataSetParam param;
-        private final File src;
-        private final Predicate<Path> fileTypeFilter;
-        private int rows = 0;
-
-        FileTableExecutor(final Source source, final ComparableTableMappingContext context,
-                          final ComparableDataSetParam param, final File src,
-                          final Predicate<Path> fileTypeFilter) {
-            this.source = source;
-            this.context = context;
-            this.param = param;
-            this.src = src;
-            this.fileTypeFilter = fileTypeFilter;
-        }
+    private record FileTableExecutor(Source source, ComparableDataSetParam param,
+                                     File src, Predicate<Path> fileTypeFilter) implements ComparableTableMappingTask {
 
         @Override
-        public void run() {
-            this.context.startTable(this.source
-                    .wrap(new ComparableFileTableMetaData(this.src.getName())));
+        public void run(final ComparableTableMappingContext context) {
+            context.startTable(this.source
+                    .wrap(new ComparableFileTableMetaData(this.getTableName())));
             ComparableFileDataSetProducer.LOGGER.info("produce - start fileName={}", this.src);
             if (this.param.loadData()) {
+                final int[] rows = {0};
                 try {
                     this.param.getWalk()
                             .filter(this.fileTypeFilter)
-                            .forEach(path -> this.produceFromFile(path.toFile()));
+                            .peek(it -> rows[0]++)
+                            .forEach(path -> context.row(this.produceFromFile(path.toFile())));
                 } catch (final AssertionError e) {
                     throw new AssertionError("error producing dataSet for '" + this.src + "'", e);
                 }
+                ComparableFileDataSetProducer.LOGGER.info("produce - rows={}", rows[0]);
             }
-            this.context.endTable();
-            ComparableFileDataSetProducer.LOGGER.info("produce - rows={}", this.rows);
+            context.endTable();
             ComparableFileDataSetProducer.LOGGER.info("produce - end   fileName={}", this.src);
         }
 
-        private void produceFromFile(final File file) {
+        private String getTableName() {
+            return this.src.getName();
+        }
+
+        private Object[] produceFromFile(final File file) {
             final Object[] row = new Object[6];
             final Path normalize = file.toPath().toAbsolutePath().normalize();
             row[0] = normalize.toString();
@@ -95,8 +87,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
             row[3] = this.src.toPath().relativize(file.getAbsoluteFile().toPath()).toString();
             row[4] = file.length() / 1024;
             row[5] = ComparableFileDataSetProducer.DATE_FORMAT.format(file.lastModified());
-            this.context.row(row);
-            this.rows++;
+            return row;
         }
     }
 }

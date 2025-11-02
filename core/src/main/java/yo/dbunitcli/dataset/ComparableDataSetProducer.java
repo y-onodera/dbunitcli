@@ -1,16 +1,20 @@
 package yo.dbunitcli.dataset;
 
-import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
 
 import java.io.File;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 public interface ComparableDataSetProducer {
 
     Logger LOGGER = LoggerFactory.getLogger(ComparableDataSetProducer.class);
+
+    default ComparableDataSet loadDataSet() {
+        return new ComparableDataSet(this.param(), this.produce(), this.getSrc());
+    }
 
     ComparableDataSetParam param();
 
@@ -18,17 +22,17 @@ public interface ComparableDataSetProducer {
         return this.param().src().getPath();
     }
 
-    default void produce(final ComparableDataSetConsumer consumer) throws DataSetException {
+    default TreeMap<String, ComparableTable> produce() {
         LOGGER.info("produce() - start");
-        consumer.startDataSet();
+        final ComparableTableMappingContext context = new ComparableTableMappingContext(this.param().tableSeparators(), this.param().converter());
         this.getSourceStream()
-                .map(it -> this.createTableMappingTask(it, consumer.createMappingContext(it)))
-                .forEach(Runnable::run);
-        consumer.endDataSet();
+                .map(this::createTableMappingTask)
+                .forEach(it -> it.run(context));
         LOGGER.info("produce() - end");
+        return context.close();
     }
 
-    default Stream<Source> getSourceStream() {
+    default Stream<? extends Source> getSourceStream() {
         return this.getSrcFiles()
                 .map(this::getSource)
                 .filter(it -> this.param().tableNameFilter().predicate(it.getTableName()));
@@ -42,6 +46,6 @@ public interface ComparableDataSetProducer {
         return new Source(aFile, this.param().addFileInfo());
     }
 
-    Runnable createTableMappingTask(final Source source, ComparableTableMappingContext context);
+    ComparableTableMappingTask createTableMappingTask(final Source source);
 
 }

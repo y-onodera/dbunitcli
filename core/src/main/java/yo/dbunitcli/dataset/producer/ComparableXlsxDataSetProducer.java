@@ -18,10 +18,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.ComparableTableMappingContext;
-import yo.dbunitcli.dataset.NameFilter;
+import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,16 +36,17 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
     }
 
     @Override
-    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
-        return new XlsxTableExecutor(source, context, this.param, this.param.tableNameFilter(), this.param.xlsxSchema());
+    public ComparableTableMappingTask createTableMappingTask(final Source source) {
+        return new XlsxTableExecutor(source, this.param, this.param.tableNameFilter(), this.param.xlsxSchema());
     }
 
-    private record XlsxTableExecutor(Source source, ComparableTableMappingContext context,
-                                     ComparableDataSetParam param,
-                                     NameFilter sheetNameFilter, XlsxSchema schema) implements Runnable {
+    private record XlsxTableExecutor(Source source
+            , ComparableDataSetParam param
+            , NameFilter sheetNameFilter
+            , XlsxSchema schema) implements ComparableTableMappingTask {
 
         @Override
-        public void run() {
+        public void run(final ComparableTableMappingContext context) {
             ComparableXlsxDataSetProducer.LOGGER.info("produce - start filePath={}", this.source.filePath());
             try (final OPCPackage pkg = OPCPackage.open(this.source.filePath(), PackageAccess.READ)) {
                 final ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg, false);
@@ -61,7 +59,7 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
                         final String sheetName = iterator.getSheetName();
                         if (this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName)) {
                             ComparableXlsxDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
-                            this.processSheet(styles, strings, new XlsxSchemaHandler(this.context
+                            this.processSheet(styles, strings, new XlsxSchemaHandler(context
                                             , this.schema
                                             , this.param.startRow()
                                             , this.param.headerNames()

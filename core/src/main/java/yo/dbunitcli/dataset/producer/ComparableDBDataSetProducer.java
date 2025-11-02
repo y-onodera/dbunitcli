@@ -11,6 +11,7 @@ import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTableMappingContext;
+import yo.dbunitcli.dataset.ComparableTableMappingTask;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -43,7 +44,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     @Override
-    public Stream<Source> getSourceStream() {
+    public Stream<? extends Source> getSourceStream() {
         return this.getSrcFiles()
                 .map(it -> {
                     try {
@@ -63,30 +64,33 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     @Override
-    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
-        return new DBTableExecutor(source, context, this.param, this.connection, this.databaseDataSet);
+    public ComparableTableMappingTask createTableMappingTask(final Source source) {
+        return new DBTableExecutor(source, this.param, this.connection, this.databaseDataSet);
     }
 
-    static class DBTableExecutor implements Runnable {
+    static class DBTableExecutor implements ComparableTableMappingTask {
         protected final Source source;
-        protected final ComparableTableMappingContext context;
         protected final ComparableDataSetParam param;
         protected final IDatabaseConnection connection;
         protected final IDataSet databaseDataSet;
 
-        DBTableExecutor(final Source source, final ComparableTableMappingContext context,
+        DBTableExecutor(final Source source,
                         final ComparableDataSetParam param, final IDatabaseConnection connection,
                         final IDataSet databaseDataSet) {
             this.source = source;
-            this.context = context;
             this.param = param;
             this.connection = connection;
             this.databaseDataSet = databaseDataSet;
         }
 
         @Override
-        public void run() {
-            this.executeTable(this.getTable(this.source.tableName()), this.source);
+        public void run(final ComparableTableMappingContext context) {
+            this.executeTable(this.getTable(this.source.tableName()), this.source, context);
+        }
+
+        @Override
+        public Source source() {
+            return this.source;
         }
 
         protected ITable getTable(final String tableName) {
@@ -100,7 +104,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
             }
         }
 
-        protected void executeTable(final ITable table, final Source source) {
+        protected void executeTable(final ITable table, final Source source, final ComparableTableMappingContext context) {
             try {
                 try {
                     ComparableDBDataSetProducer.LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
@@ -125,7 +129,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                     } else {
                         tableMetaData = table.getTableMetaData();
                     }
-                    this.context.startTable(source.wrap(tableMetaData));
+                    context.startTable(source.wrap(tableMetaData));
                     if (this.param.loadData()) {
                         final Column[] columns = table.getTableMetaData().getColumns();
                         int row = 0;
@@ -136,14 +140,14 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                                 for (final Column column : columns) {
                                     rows[columnIndex++] = table.getValue(row, column.getColumnName());
                                 }
-                                this.context.row(rows);
+                                context.row(rows);
                             } catch (final RowOutOfBoundsException e) {
                                 break;
                             }
                         }
                         ComparableDBDataSetProducer.LOGGER.info("produce - rows={}", row);
                     }
-                    this.context.endTable();
+                    context.endTable();
                     ComparableDBDataSetProducer.LOGGER.info("produce - end   databaseTable={}", table.getTableMetaData().getTableName());
                 } finally {
                     if (table instanceof final IResultSetTable resultSetTable) {

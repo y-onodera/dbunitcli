@@ -2,7 +2,6 @@ package yo.dbunitcli.dataset;
 
 import org.dbunit.database.AmbiguousTableNameException;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.OrderedTableNameMap;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,12 +13,12 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private final List<Integer> filteredRowIndexes;
     private final Collection<Object[]> rows;
     private final TableSplitter splitter;
+    private final List<String> currentKeys = new ArrayList<>();
     private AddSettingTableMetaData metaData;
     private int no;
     private boolean startTable;
     private int addCount = 0;
     private int addRowCount = 0;
-    private final List<String> currentKeys = new ArrayList<>();
     private int breakKeyCount = 0;
     private IDataSetConverter converter;
     private Map<String, Integer> alreadyWrite;
@@ -57,7 +56,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     }
 
     @Override
-    public void endTable(final OrderedTableNameMap orderedTableNameMap) {
+    public void endTable(final TreeMap<String, ComparableTable> orderedTableNameMap) {
         if (this.isEnableRowProcessing() && this.startTable) {
             try {
                 this.converter.endTable();
@@ -66,10 +65,10 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             }
         } else {
             final String resultTableName = this.metaData.getTableName();
-            if (orderedTableNameMap.containsTable(resultTableName)) {
-                final ComparableTable other = (ComparableTable) orderedTableNameMap.get(resultTableName);
+            if (orderedTableNameMap.containsKey(resultTableName)) {
+                final ComparableTable other = orderedTableNameMap.get(resultTableName);
                 final AddSettingTableMetaData.Rows add = other.getRows().add(this.metaData.distinct(this.rows, this.filteredRowIndexes));
-                orderedTableNameMap.update(resultTableName, this.metaData.isNeedDistinct()
+                orderedTableNameMap.put(resultTableName, this.metaData.isNeedDistinct()
                         ? new ComparableTable.Builder(this.metaData).setRows(add.distinct()).build()
                         : new ComparableTable.Builder(this.metaData).setRows(add).build());
             } else {
@@ -77,7 +76,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                     if (this.splitter.isSplit()) {
                         this.addSplitResultTo(orderedTableNameMap);
                     } else {
-                        orderedTableNameMap.add(resultTableName, this.lazyProcess());
+                        orderedTableNameMap.put(resultTableName, this.lazyProcess());
                     }
                 } catch (final AmbiguousTableNameException e) {
                     throw new AssertionError(e);
@@ -85,15 +84,15 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             }
             this.joins.stream()
                     .filter(it -> it.getCondition().right().equals(resultTableName))
-                    .forEach(it -> it.setRight((ComparableTable) orderedTableNameMap.get(resultTableName)));
+                    .forEach(it -> it.setRight(orderedTableNameMap.get(resultTableName)));
             this.joins.stream()
                     .filter(it -> it.getCondition().left().equals(resultTableName))
-                    .forEach(it -> it.setLeft((ComparableTable) orderedTableNameMap.get(resultTableName)));
+                    .forEach(it -> it.setLeft(orderedTableNameMap.get(resultTableName)));
         }
         this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
     }
 
-    protected void addSplitResultTo(final OrderedTableNameMap orderedTableNameMap) throws AmbiguousTableNameException {
+    protected void addSplitResultTo(final TreeMap<String, ComparableTable> orderedTableNameMap) throws AmbiguousTableNameException {
         final AddSettingTableMetaData.Rows distinctRows = this.baseMetaData.distinct(this.rows, this.filteredRowIndexes);
         final ComparableTable sorted = new ComparableTable.Builder(this.baseMetaData).setRows(distinctRows).build();
         AddSettingTableMetaData splitMetaData = this.metaData;
@@ -119,7 +118,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                 keyCount++;
             }
             if (this.splitter.isLimit(keyCount)) {
-                orderedTableNameMap.add(splitMetaData.getTableName()
+                orderedTableNameMap.put(splitMetaData.getTableName()
                         , new ComparableTable.Builder(splitMetaData)
                                 .setRows(new AddSettingTableMetaData.Rows(targetValues, targetRowIndexes))
                                 .build());
@@ -133,7 +132,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                 targetRowIndexes.add(distinctRows.filteredRowIndexes().get(i));
             }
         }
-        orderedTableNameMap.add(splitMetaData.getTableName()
+        orderedTableNameMap.put(splitMetaData.getTableName()
                 , new ComparableTable.Builder(splitMetaData)
                         .setRows(new AddSettingTableMetaData.Rows(targetValues, targetRowIndexes))
                         .build());

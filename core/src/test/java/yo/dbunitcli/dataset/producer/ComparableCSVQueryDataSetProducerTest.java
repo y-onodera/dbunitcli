@@ -27,14 +27,13 @@ public class ComparableCSVQueryDataSetProducerTest {
     @Test
     public void createDataSetFromFile() throws DataSetException {
         final File src = new File(this.resource, "csvquery/singlefile/joinQuery.txt");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableCSVQueryDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSrc(src)
-                                .setEncoding("UTF8")
-                                .build()
-                        , Parameter.none()));
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        final ComparableDataSet actual = new ComparableCSVQueryDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(src)
+                        .setEncoding("UTF8")
+                        .build()
+                , Parameter.none()).loadDataSet();
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(1, actual.getTables().length);
         final ComparableTable actualTable = actual.getTable("joinQuery");
         Assertions.assertEquals("joinQuery", actualTable.getTableMetaData().getTableName());
@@ -57,14 +56,13 @@ public class ComparableCSVQueryDataSetProducerTest {
     @Test
     public void createDataSetFromDirectoryContainsSingleFile() throws DataSetException {
         final File src = new File(this.resource, "csvquery/singlefile");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableCSVQueryDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSrc(src)
-                                .setEncoding("UTF8")
-                                .build()
-                        , Parameter.none()));
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        final ComparableDataSet actual = new ComparableCSVQueryDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(src)
+                        .setEncoding("UTF8")
+                        .build()
+                , Parameter.none()).loadDataSet();
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(1, actual.getTables().length);
         final ComparableTable actualTable = actual.getTable("joinQuery");
         Assertions.assertEquals("joinQuery", actualTable.getTableMetaData().getTableName());
@@ -87,14 +85,13 @@ public class ComparableCSVQueryDataSetProducerTest {
     @Test
     public void createDataSetFromDirectoryContainsMultiFile() throws DataSetException {
         final File src = new File(this.resource, "csvquery/multifile");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableCSVQueryDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSrc(src)
-                                .setEncoding("UTF8")
-                                .build()
-                        , Parameter.none()));
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        final ComparableDataSet actual = new ComparableCSVQueryDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(src)
+                        .setEncoding("UTF8")
+                        .build()
+                , Parameter.none()).loadDataSet();
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(2, actual.getTables().length);
         ComparableTable actualTable = actual.getTable("joinQuery");
         Assertions.assertEquals("joinQuery", actualTable.getTableMetaData().getTableName());
@@ -133,15 +130,14 @@ public class ComparableCSVQueryDataSetProducerTest {
     @Test
     public void createDataSetFromDirectoryOnlyIncludeFile() throws DataSetException {
         final File src = new File(this.resource, "csvquery/multifile");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableCSVQueryDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSrc(src)
-                                .setRegInclude("detailQuery")
-                                .setEncoding("UTF8")
-                                .build()
-                        , Parameter.none()));
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        final ComparableDataSet actual = new ComparableCSVQueryDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(src)
+                        .setRegInclude("detailQuery")
+                        .setEncoding("UTF8")
+                        .build()
+                , Parameter.none()).loadDataSet();
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(1, actual.getTables().length);
         final ComparableTable actualTable = actual.getTable("detailQuery");
         Assertions.assertEquals("detailQuery", actualTable.getTableMetaData().getTableName());
@@ -164,15 +160,14 @@ public class ComparableCSVQueryDataSetProducerTest {
     @Test
     public void createDataSetFromDirectoryFilterExcludeFile() throws DataSetException {
         final File src = new File(this.resource, "csvquery/multifile");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableCSVQueryDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSrc(src)
-                                .setRegExclude("detailQuery")
-                                .setEncoding("UTF8")
-                                .build()
-                        , Parameter.none()));
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        final ComparableDataSet actual = new ComparableCSVQueryDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(src)
+                        .setRegExclude("detailQuery")
+                        .setEncoding("UTF8")
+                        .build()
+                , Parameter.none()).loadDataSet();
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(1, actual.getTables().length);
         final ComparableTable actualTable = actual.getTable("joinQuery");
         Assertions.assertEquals("joinQuery", actualTable.getTableMetaData().getTableName());

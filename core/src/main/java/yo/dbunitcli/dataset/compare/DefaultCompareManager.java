@@ -23,7 +23,7 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
 
     @Override
     public CompareResult toCompareResult(final ComparableDataSet oldDataSet, final ComparableDataSet newDataSet, final List<CompareDiff> results) {
-        return new TableCompareResult(oldDataSet.getSrc(), newDataSet.getSrc(), results);
+        return new TableCompareResult(oldDataSet.src(), newDataSet.src(), results);
     }
 
     protected Stream<Function<TableCompare, List<CompareDiff>>> getTableCompareStrategies() {

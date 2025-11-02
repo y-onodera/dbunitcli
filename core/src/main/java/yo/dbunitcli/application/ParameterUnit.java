@@ -1,6 +1,5 @@
 package yo.dbunitcli.application;
 
-import org.dbunit.dataset.DataSetException;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
@@ -16,7 +15,7 @@ import java.util.stream.Stream;
 public enum ParameterUnit {
     record {
         @Override
-        public Stream<Parameter> loadStream(final ComparableDataSetLoader loader, final ComparableDataSetParam loadParam) {
+        public Stream<Parameter> dataSetToStream(final ComparableDataSetLoader loader, final ComparableDataSetParam loadParam) {
             final ComparableDataSet dataSet = loader.loadDataSet(loadParam);
             if ((loadParam.mapIncludeMetaData())) {
                 final Integer[] rowNum = new Integer[]{0};
@@ -39,23 +38,19 @@ public enum ParameterUnit {
 
     table {
         @Override
-        public Stream<Parameter> loadStream(final ComparableDataSetLoader loader, final ComparableDataSetParam loadParam) {
+        public Stream<Parameter> dataSetToStream(final ComparableDataSetLoader loader, final ComparableDataSetParam loadParam) {
             final ComparableDataSet dataSet = loader.loadDataSet(loadParam);
-            try {
-                final String[] tableNames = dataSet.getTableNames();
-                return IntStream.range(0, tableNames.length)
-                        .mapToObj(it -> loader.parameter()
-                                .asInputParam()
-                                .withRowNumber(it)
-                                .addAll(dataSet.getTable(tableNames[it]).toMap(true).getFirst()));
-            } catch (final DataSetException e) {
-                throw new AssertionError(e);
-            }
+            final String[] tableNames = dataSet.getTableNames();
+            return IntStream.range(0, tableNames.length)
+                    .mapToObj(it -> loader.parameter()
+                            .asInputParam()
+                            .withRowNumber(it)
+                            .addAll(dataSet.getTable(tableNames[it]).toMap(true).getFirst()));
         }
     },
     dataset;
 
-    public Stream<Parameter> loadStream(final ComparableDataSetLoader loader, final ComparableDataSetParam param) {
+    public Stream<Parameter> dataSetToStream(final ComparableDataSetLoader loader, final ComparableDataSetParam param) {
         final ComparableDataSet dataSet = loader.loadDataSet(param);
         return Stream.of(loader.parameter()
                 .asInputParam()

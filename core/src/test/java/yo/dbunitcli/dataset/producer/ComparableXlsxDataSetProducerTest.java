@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.dataset.DataSourceType;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -26,13 +27,13 @@ public class ComparableXlsxDataSetProducerTest {
     @Test
     public void createDataSetFromFile() throws DataSetException {
         final File src = new File(this.resource, "multifile.xlsx");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableXlsxDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSrc(src)
-                                .build()));
+        final ComparableDataSet actual = new ComparableXlsxDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(src)
+                        .setSource(DataSourceType.xlsx)
+                        .build()).loadDataSet();
 
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(2, actual.getTableNames().length);
         ComparableTable actualTable = actual.getTable("multi1");
         Assertions.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
@@ -79,14 +80,13 @@ public class ComparableXlsxDataSetProducerTest {
     @Test
     public void createDataSetFromFileIncludeSheet() throws DataSetException {
         final File src = new File(this.resource, "multifile.xlsx");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableXlsxDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSrc(src)
-                                .setRegTableInclude("multi1")
-                                .build()));
+        final ComparableDataSet actual = new ComparableXlsxDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(src)
+                        .setRegTableInclude("multi1")
+                        .build()).loadDataSet();
 
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(1, actual.getTableNames().length);
         final ComparableTable actualTable = actual.getTable("multi1");
         Assertions.assertEquals("multi1", actualTable.getTableMetaData().getTableName());
@@ -113,14 +113,13 @@ public class ComparableXlsxDataSetProducerTest {
     @Test
     public void createDataSetFromFileExcludeSheet() throws DataSetException {
         final File src = new File(this.resource, "multifile.xlsx");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableXlsxDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSrc(src)
-                                .setRegTableExclude("multi2")
-                                .build()));
+        final ComparableDataSet actual = new ComparableXlsxDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(src)
+                        .setRegTableExclude("multi2")
+                        .build()).loadDataSet();
 
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(1, actual.getTableNames().length);
         final ComparableTable actualTable = actual.getTable("multi1");
         Assertions.assertEquals("multi1", actualTable.getTableMetaData().getTableName());

@@ -7,6 +7,7 @@ import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTableMappingContext;
+import yo.dbunitcli.dataset.ComparableTableMappingTask;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -29,31 +30,30 @@ public record ComparableFixedFileDataSetProducer(ComparableDataSetParam param,
     }
 
     @Override
-    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
-        return new FixedFileTableExecutor(source, context, this.param, this.columnLengths);
+    public ComparableTableMappingTask createTableMappingTask(final Source source) {
+        return new FixedFileTableExecutor(source, this.param, this.columnLengths);
     }
 
-    private record FixedFileTableExecutor(Source source, ComparableTableMappingContext context,
-                                          ComparableDataSetParam param,
-                                          List<Integer> columnLengths) implements Runnable {
+    private record FixedFileTableExecutor(Source source, ComparableDataSetParam param,
+                                          List<Integer> columnLengths) implements ComparableTableMappingTask {
 
         @Override
-        public void run() {
+        public void run(final ComparableTableMappingContext context) {
             try {
                 ComparableFixedFileDataSetProducer.LOGGER.info("produce - start filePath={}", this.source.filePath());
                 final TableMetaDataWithSource metaData = this.source.createMetaData(this.param.headerNames());
-                this.context.startTable(metaData);
+                context.startTable(metaData);
+                int rows = 0;
                 if (this.param.loadData()) {
-                    int rows = 1;
                     for (final String s : Files.readAllLines(Path.of(this.source.filePath()), Charset.forName(this.param.encoding()))) {
-                        if (rows >= this.param.startRow()) {
-                            this.context.row(metaData.source().apply(this.split(s)));
+                        if (rows + 1 >= this.param.startRow()) {
+                            context.row(metaData.source().apply(this.split(s)));
                         }
                         rows++;
                     }
-                    ComparableFixedFileDataSetProducer.LOGGER.info("produce - rows={}", rows);
                 }
-                this.context.endTable();
+                context.endTable();
+                ComparableFixedFileDataSetProducer.LOGGER.info("produce - rows={}", rows);
                 ComparableFixedFileDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());
             } catch (final IOException e) {
                 throw new AssertionError(e);

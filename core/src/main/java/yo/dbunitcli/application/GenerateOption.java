@@ -76,7 +76,7 @@ public record GenerateOption(
     }
 
     public Stream<Parameter> parameterStream() {
-        return this.unit().loadStream(this.getComparableDataSetLoader(), this.dataSetParam());
+        return this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
     }
 
     public File resultFile(final Parameter param) {

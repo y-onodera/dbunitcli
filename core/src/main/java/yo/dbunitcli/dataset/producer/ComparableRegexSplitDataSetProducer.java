@@ -7,6 +7,7 @@ import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTableMappingContext;
+import yo.dbunitcli.dataset.ComparableTableMappingTask;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -27,23 +28,21 @@ public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param
     }
 
     @Override
-    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
-        return new RegexSplitTableExecutor(source, context, this.param,
-                this.headerSplitPattern, this.dataSplitPattern);
+    public ComparableTableMappingTask createTableMappingTask(final Source source) {
+        return new RegexSplitTableExecutor(source, this.param, this.headerSplitPattern, this.dataSplitPattern);
     }
 
-    private record RegexSplitTableExecutor(Source source, ComparableTableMappingContext context,
-                                           ComparableDataSetParam param, Pattern headerSplitPattern,
-                                           Pattern dataSplitPattern) implements Runnable {
+    private record RegexSplitTableExecutor(Source source, ComparableDataSetParam param, Pattern headerSplitPattern,
+                                           Pattern dataSplitPattern) implements ComparableTableMappingTask {
 
         @Override
-        public void run() {
+        public void run(final ComparableTableMappingContext context) {
             try {
                 ComparableRegexSplitDataSetProducer.LOGGER.info("produce - start filePath={}", this.source.filePath());
                 if (this.param.headerNames() != null) {
-                    this.context.startTable(this.source.createMetaData(this.param.headerNames()));
+                    context.startTable(this.source.createMetaData(this.param.headerNames()));
                     if (!this.param.loadData()) {
-                        this.context.endTable();
+                        context.endTable();
                         return;
                     }
                 }
@@ -51,17 +50,19 @@ public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param
                 for (final String s : Files.readAllLines(Path.of(this.source.filePath()), Charset.forName(this.param.encoding()))) {
                     if (row == this.param.startRow() && this.param.headerNames() == null) {
                         final TableMetaDataWithSource metaData = this.source.createMetaData(this.headerSplitPattern.split(s));
-                        this.context.startTable(metaData);
+                        context.startTable(metaData);
                         if (!this.param.loadData()) {
                             break;
                         }
                     } else if (row >= this.param.startRow()) {
-                        this.context.row(this.source.apply(this.dataSplitPattern.split(s)));
+                        context.row(this.source.apply(this.dataSplitPattern.split(s)));
                     }
                     row++;
                 }
-                ComparableRegexSplitDataSetProducer.LOGGER.info("produce - rows={}", row);
-                this.context.endTable();
+                if (this.param.loadData()) {
+                    ComparableRegexSplitDataSetProducer.LOGGER.info("produce - rows={}", row);
+                }
+                context.endTable();
                 ComparableRegexSplitDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());
             } catch (final IOException e) {
                 throw new AssertionError(e);

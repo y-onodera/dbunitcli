@@ -11,10 +11,7 @@ import org.apache.poi.ss.util.CellReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.ComparableTableMappingContext;
-import yo.dbunitcli.dataset.NameFilter;
+import yo.dbunitcli.dataset.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,11 +30,11 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
     }
 
     @Override
-    public Runnable createTableMappingTask(final Source source, final ComparableTableMappingContext context) {
-        return new XlsTableExecutor(source, context, this.param, this.param.tableNameFilter());
+    public ComparableTableMappingTask createTableMappingTask(final Source source) {
+        return new XlsTableExecutor(source, this.param, this.param.tableNameFilter());
     }
 
-    private static class XlsTableExecutor extends ExcelMappingDataSetProducer implements Runnable, HSSFListener {
+    private static class XlsTableExecutor extends ExcelMappingDataSetProducer implements ComparableTableMappingTask, HSSFListener {
         private final Source source;
         private final NameFilter sheetNameFilter;
         private int lastRowNumber;
@@ -51,16 +48,16 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
         private int nextColumn;
         private boolean outputNextStringRecord;
 
-        XlsTableExecutor(final Source source, final ComparableTableMappingContext consumer,
-                         final ComparableDataSetParam param, final NameFilter sheetNameFilter) {
-            super(param.xlsxSchema(), param.startRow(), param.headerNames(), param.loadData(), param.addFileInfo(), consumer);
+        XlsTableExecutor(final Source source, final ComparableDataSetParam param, final NameFilter sheetNameFilter) {
+            super(param.xlsxSchema(), param.startRow(), param.headerNames(), param.loadData(), param.addFileInfo());
             this.source = source;
             this.sheetNameFilter = sheetNameFilter;
         }
 
         @Override
-        public void run() {
+        public void run(final ComparableTableMappingContext context) {
             this.sourceFile = new File(this.source.filePath());
+            this.context = context;
             ComparableXlsDataSetProducer.LOGGER.info("produce - start fileName={}", this.sourceFile);
             try (final POIFSFileSystem newFs = new POIFSFileSystem(this.sourceFile, true)) {
                 this.rowsTableBuilder = null;
@@ -81,6 +78,11 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
                 throw new AssertionError(e);
             }
             ComparableXlsDataSetProducer.LOGGER.info("produce - end   fileName={}", this.sourceFile);
+        }
+
+        @Override
+        public Source source() {
+            return this.source;
         }
 
         @Override

@@ -14,15 +14,14 @@ public class ComparableDirectoryDataSetProducerTest {
     @Test
     public void test() throws DataSetException {
         final File src = new File(".", "src/test/java");
-        final ComparableDataSet actual = new ComparableDataSet(
-                new ComparableDirectoryDataSetProducer(
-                        ComparableDataSetParam.builder()
-                                .setSrc(src)
-                                .setRegInclude("yo[/\\\\]+dbunitcli[/\\\\]+")
-                                .setRegExclude("application")
-                                .setRecursive(true)
-                                .build()));
-        Assertions.assertEquals(src.getPath(), actual.getSrc());
+        final ComparableDataSet actual = new ComparableDirectoryDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(src)
+                        .setRegInclude("yo[/\\\\]+dbunitcli[/\\\\]+")
+                        .setRegExclude("application")
+                        .setRecursive(true)
+                        .build()).loadDataSet();
+        Assertions.assertEquals(src.getPath(), actual.src());
         Assertions.assertEquals(1, actual.getTables().length);
         final ITable table = actual.getTable("java");
         Assertions.assertEquals(5, table.getRowCount());
