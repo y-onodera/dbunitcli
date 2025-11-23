@@ -46,8 +46,13 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
                            final ComparableDataSetParam param,
                            final IDatabaseConnection connection,
                            final Parameter parameter) {
-            super(source, param, connection, null);
+            super(source, param, connection);
             this.parameter = parameter;
+        }
+
+        @Override
+        public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
+            return new QueryTableExecutor(this.source, builder.build(), this.connection, this.parameter);
         }
 
         @Override

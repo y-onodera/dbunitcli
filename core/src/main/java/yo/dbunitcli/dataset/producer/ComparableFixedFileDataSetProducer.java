@@ -60,6 +60,11 @@ public record ComparableFixedFileDataSetProducer(ComparableDataSetParam param,
             }
         }
 
+        @Override
+        public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
+            return new FixedFileTableExecutor(this.source, builder.build(), this.columnLengths);
+        }
+
         private Object[] split(final String s) throws UnsupportedEncodingException {
             final Object[] result = new Object[this.columnLengths.size()];
             final byte[] bytes = s.getBytes(this.param.encoding());

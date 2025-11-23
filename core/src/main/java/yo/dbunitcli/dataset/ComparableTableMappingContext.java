@@ -5,10 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.TableMetaDataWithSource;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,6 +22,8 @@ public class ComparableTableMappingContext {
     private final TreeMap<String, ComparableTable> tableMap;
     private final Map<String, Integer> alreadyWrite;
     private final List<ComparableTableJoin> joins;
+    private final List<ComparableTableMappingTask> chain;
+    private final boolean chainRun;
     private ComparableTableMapper currentMapper;
 
     public ComparableTableMappingContext(final TableSeparators tableSeparators
@@ -37,6 +36,8 @@ public class ComparableTableMappingContext {
                 .stream()
                 .map(ComparableTableJoin::new)
                 .collect(Collectors.toList());
+        this.chain = new ArrayList<>();
+        this.chainRun = false;
         if (this.converter != null) {
             try {
                 this.converter.startDataSet();
@@ -46,10 +47,30 @@ public class ComparableTableMappingContext {
         }
     }
 
+    public ComparableTableMappingContext(final TableSeparators tableSeparators, final IDataSetConverter converter, final TreeMap<String, ComparableTable> tableMap, final Map<String, Integer> alreadyWrite, final List<ComparableTableJoin> joins, final List<ComparableTableMappingTask> chain, final boolean chainRun) {
+        this.tableSeparators = tableSeparators;
+        this.converter = converter;
+        this.tableMap = tableMap;
+        this.alreadyWrite = alreadyWrite;
+        this.joins = joins;
+        this.chain = chain;
+        this.chainRun = chainRun;
+    }
+
+    public ComparableTableMappingContext addChain(final List<ComparableTableMappingTask> chain) {
+        return new ComparableTableMappingContext(this.tableSeparators
+                , this.converter
+                , this.tableMap
+                , this.alreadyWrite
+                , this.joins
+                , chain
+                , false);
+    }
+
     public void startTable(final TableMetaDataWithSource metaData) {
         LOGGER.debug("startTable(metaData={}) - start", metaData);
         this.currentMapper = this.tableSeparators.createMapper(metaData);
-        this.currentMapper.startTable(this.converter, this.alreadyWrite, this.joins);
+        this.currentMapper.startTable(this.converter, this.alreadyWrite, this.joins, this.chain, this.chainRun);
     }
 
     public void row(final Object[] values) {
@@ -89,10 +110,11 @@ public class ComparableTableMappingContext {
                         LOGGER.debug("startTableJoin(join={}) - start", join);
                         this.joins.remove(join);
                         this.currentMapper = this.tableSeparators.createMapper(join);
-                        this.currentMapper.startTable(this.converter, this.alreadyWrite, this.joins);
+                        this.currentMapper.startTable(this.converter, this.alreadyWrite, this.joins, this.chain, this.chainRun);
                         join.execute().forEach(this::row);
                         this.currentMapper.endTable(this.tableMap);
                     });
         }
     }
+
 }

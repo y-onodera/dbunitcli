@@ -36,6 +36,7 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
 
     private static class XlsTableExecutor extends ExcelMappingDataSetProducer implements ComparableTableMappingTask, HSSFListener {
         private final Source source;
+        private final ComparableDataSetParam param;
         private final NameFilter sheetNameFilter;
         private int lastRowNumber;
         private SSTRecord sstRecord;
@@ -51,7 +52,18 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
         XlsTableExecutor(final Source source, final ComparableDataSetParam param, final NameFilter sheetNameFilter) {
             super(param.xlsxSchema(), param.startRow(), param.headerNames(), param.loadData(), param.addFileInfo());
             this.source = source;
+            this.param = param;
             this.sheetNameFilter = sheetNameFilter;
+        }
+
+        @Override
+        public Source source() {
+            return this.source;
+        }
+
+        @Override
+        public ComparableDataSetParam param() {
+            return this.param;
         }
 
         @Override
@@ -81,8 +93,8 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
         }
 
         @Override
-        public Source source() {
-            return this.source;
+        public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
+            return new XlsTableExecutor(this.source, builder.build(), this.sheetNameFilter);
         }
 
         @Override

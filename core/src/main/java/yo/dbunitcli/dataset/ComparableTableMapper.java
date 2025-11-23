@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public interface ComparableTableMapper {
-    void startTable(IDataSetConverter converter, Map<String, Integer> alreadyWrite, List<ComparableTableJoin> joins);
+    void startTable(IDataSetConverter converter, Map<String, Integer> alreadyWrite, List<ComparableTableJoin> joins, List<ComparableTableMappingTask> chain, boolean chainRun);
 
     void addRow(Object[] values);
 

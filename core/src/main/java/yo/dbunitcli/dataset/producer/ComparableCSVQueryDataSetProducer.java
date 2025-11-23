@@ -78,5 +78,10 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
             }
         }
 
+        @Override
+        public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
+            return new CsvQueryTableExecutor(this.source, builder.build(), this.parameter);
+        }
+
     }
 }

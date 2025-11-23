@@ -23,6 +23,8 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private IDataSetConverter converter;
     private Map<String, Integer> alreadyWrite;
     private List<ComparableTableJoin> joins;
+    private List<ComparableTableMappingTask> chain;
+    private boolean chainRun;
 
     public ComparableTableMapperSingle(final AddSettingTableMetaData metaData) {
         this.baseMetaData = metaData;
@@ -33,12 +35,14 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     }
 
     @Override
-    public void startTable(final IDataSetConverter converter, final Map<String, Integer> alreadyWrite, final List<ComparableTableJoin> joins) {
+    public void startTable(final IDataSetConverter converter, final Map<String, Integer> alreadyWrite, final List<ComparableTableJoin> joins, final List<ComparableTableMappingTask> chain, final boolean chainRun) {
         this.converter = converter;
         this.alreadyWrite = alreadyWrite;
         this.joins = joins.stream()
                 .filter(it -> it.hasRelation(this.metaData.getTableName()))
                 .collect(Collectors.toList());
+        this.chain = chain;
+        this.chainRun = chainRun;
         if (this.isEnableRowProcessing() && this.converter.isExportEmptyTable()) {
             this.processingStart();
             this.startTable = true;
@@ -58,10 +62,26 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     @Override
     public void endTable(final TreeMap<String, ComparableTable> orderedTableNameMap) {
         if (this.isEnableRowProcessing() && this.startTable) {
-            try {
-                this.converter.endTable();
-            } catch (final DataSetException e) {
-                throw new AssertionError(e);
+            this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
+            if (!this.chain.isEmpty()) {
+                final ComparableTableMappingTask next = this.chain.getFirst();
+                final List<ComparableTableMappingTask> restChain = this.chain.size() <= 1
+                        ? List.of()
+                        : this.chain.subList(1, this.chain.size());
+                next.run(new ComparableTableMappingContext(next.param().tableSeparators()
+                        , this.converter
+                        , orderedTableNameMap
+                        , this.alreadyWrite
+                        , this.joins
+                        , restChain
+                        , true
+                ));
+            } else {
+                try {
+                    this.converter.endTable();
+                } catch (final DataSetException e) {
+                    throw new AssertionError(e);
+                }
             }
         } else {
             final String resultTableName = this.metaData.getTableName();
@@ -88,8 +108,8 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             this.joins.stream()
                     .filter(it -> it.getCondition().left().equals(resultTableName))
                     .forEach(it -> it.setLeft(orderedTableNameMap.get(resultTableName)));
+            this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
         }
-        this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
     }
 
     protected void addSplitResultTo(final TreeMap<String, ComparableTable> orderedTableNameMap) throws AmbiguousTableNameException {
@@ -139,6 +159,9 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     }
 
     protected void processingStart() {
+        if (this.chainRun) {
+            return;
+        }
         try {
             if (this.alreadyWrite.containsKey(this.metaData.getTableName())) {
                 this.converter.reStartTable(this.metaData, this.alreadyWrite.get(this.metaData.getTableName()));
@@ -155,7 +178,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             if (applySetting != null) {
                 if (this.isEnableRowProcessing()) {
                     if (!this.converter.isExportEmptyTable() && !this.startTable) {
-                        this.converter.startTable(this.metaData);
+                        this.processingStart();
                         this.startTable = true;
                     }
                     this.splitTable(applySetting);
@@ -187,7 +210,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             this.endTable(null);
             this.no++;
             this.metaData = this.splitter.getMetaData(this.baseMetaData, this.no);
-            this.converter.startTable(this.metaData);
+            this.processingStart();
             this.addRowCount = 0;
             this.breakKeyCount = 0;
         }

@@ -1,7 +1,6 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.DatabaseUnitRuntimeException;
-import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.ITableMetaData;
@@ -56,15 +55,9 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
 
     public List<Map<String, Object>> toMap(final boolean includeMetaData) {
         final List<Map<String, Object>> result = new ArrayList<>();
-        final Map<String, Object> withMetaDataMap = new HashMap<>();
         final List<Map<String, Object>> rowMap = new ArrayList<>();
         if (includeMetaData) {
-            withMetaDataMap.put("tableName", this.getTableMetaData().getTableName());
-            withMetaDataMap.put("columns", this.getTableMetaData().getColumns());
-            withMetaDataMap.put("primaryKeys", this.getTableMetaData().getPrimaryKeys());
-            withMetaDataMap.put("columnsExcludeKey", this.getColumnsExcludeKey());
-            withMetaDataMap.put("rows", rowMap);
-            result.add(withMetaDataMap);
+            result.add(new ComparableTableDto(this.getTableMetaData(), rowMap));
         }
         IntStream.range(0, this.getRowCount()).forEach(rowNum -> {
             final Map<String, Object> map = this.getRowToMap(rowNum);
@@ -75,13 +68,6 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
             }
         });
         return result;
-    }
-
-    public Column[] getColumnsExcludeKey() {
-        final List<Column> primaryKey = Arrays.asList(this.getTableMetaData().getPrimaryKeys());
-        return Arrays.stream(this.getTableMetaData().getColumns())
-                .filter(it -> !primaryKey.contains(it))
-                .toArray(Column[]::new);
     }
 
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(final List<String> keys) {

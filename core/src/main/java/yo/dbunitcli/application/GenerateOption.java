@@ -76,6 +76,9 @@ public record GenerateOption(
     }
 
     public Stream<Parameter> parameterStream() {
+        if (this.generateType.isExcel()) {
+            return this.unit().lazyLoadStream(this.getComparableDataSetLoader(), this.dataSetParam());
+        }
         return this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
     }
 

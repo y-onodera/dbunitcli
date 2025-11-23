@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
@@ -30,6 +32,36 @@ public interface ComparableDataSetProducer {
                 .forEach(it -> it.run(context));
         LOGGER.info("produce() - end");
         return context.close();
+    }
+
+    default Map<String, Object> lazyLoad(final boolean includeMetaData) {
+        final Map<String, Object> result = new HashMap<>();
+        LOGGER.info("lazyLoad() - start, includeMetaData={}", includeMetaData);
+        this.getSourceStream()
+                .map(this::createTableMappingTask)
+                .flatMap(task -> task.mappingTaskToTableName().stream())
+                .forEach(it -> {
+                    LOGGER.info("lazyLoad() - processing tableName={}", it.getTableName());
+                    final Object current = result.get(it.getTableName());
+                    if (includeMetaData) {
+                        if (current instanceof final ComparableTableDto dto) {
+                            LOGGER.info("lazyLoad() - chaining to existing DTO for table={}", it.getTableName());
+                            final ComparableTableMappingTask.WithTargetTable task = dto.getTask();
+                            dto.setRows(task.chain(it.getTask()));
+                        } else {
+                            LOGGER.info("lazyLoad() - creating new DTO for table={}", it.getTableName());
+                            result.put(it.getTableName(), it);
+                        }
+                    } else {
+                        if (current instanceof final ComparableTableMappingTask.WithTargetTable task) {
+                            result.put(it.getTableName(), task.chain(it.getTask()));
+                        } else {
+                            result.put(it.getTableName(), it.getTask());
+                        }
+                    }
+                });
+        LOGGER.info("lazyLoad() - end, result size={}", result.size());
+        return result;
     }
 
     default Stream<? extends Source> getSourceStream() {

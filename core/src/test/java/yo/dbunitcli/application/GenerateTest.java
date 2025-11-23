@@ -219,6 +219,30 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateFromMergeTable() {
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table/source/csv"
+                    , "-encoding=MS932"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_table.json"
+                    , "-addFileInfo=true"
+                    , "-generateType=xlsx"
+                    , "-unit=dataset"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_table.xlsx"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/generated_merge_table.xlsx"
+            });
+            Compare.main(new String[]{
+                    "-src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/merge.csv"
+                    , "-old.srcType=csv"
+                    , "-old.encoding=UTF-8"
+                    , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_merge_table.xlsx"
+                    , "-new.srcType=xlsx"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_compare.json"
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare"
+            });
+        }
+
+        @Test
         public void testGenerateXlsxTemplate() {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsxTemplate.txt"});
             Generate.main(new String[]{

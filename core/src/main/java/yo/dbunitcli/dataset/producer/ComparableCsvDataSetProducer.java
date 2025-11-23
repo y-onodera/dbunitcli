@@ -36,6 +36,16 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
         }
 
         @Override
+        public Source source() {
+            return this.source;
+        }
+
+        @Override
+        public ComparableDataSetParam param() {
+            return this.param;
+        }
+
+        @Override
         public void run(final ComparableTableMappingContext context) {
             ComparableCsvDataSetProducer.LOGGER.info("produce - start filePath={}", this.source.filePath());
             try (final FileInputStream fi = new FileInputStream(this.source.filePath())) {
@@ -66,8 +76,8 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
         }
 
         @Override
-        public Source source() {
-            return this.source;
+        public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
+            return new CsvTableExecutor(this.source, builder.build());
         }
 
         private String[] parseFirstLine(final LineNumberReader lineNumberReader, final String source) {

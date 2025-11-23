@@ -22,15 +22,36 @@ public record ComparableNoneDataSetProducer(ComparableDataSetParam param) implem
 
     @Override
     public ComparableTableMappingTask createTableMappingTask(final Source source) {
-        return new ComparableTableMappingTask() {
-            @Override
-            public void run(final ComparableTableMappingContext context) {
-            }
+        return new NoneComparableTableMappingTask(source, ComparableNoneDataSetProducer.this.param);
+    }
 
-            @Override
-            public Source source() {
-                return source;
-            }
-        };
+    private class NoneComparableTableMappingTask implements ComparableTableMappingTask {
+        private final Source source;
+        private final ComparableDataSetParam param;
+
+        public NoneComparableTableMappingTask(final Source source, final ComparableDataSetParam param) {
+            this.source = source;
+            this.param = param;
+        }
+
+        @Override
+        public Source source() {
+            return this.source;
+
+        }
+
+        @Override
+        public ComparableDataSetParam param() {
+            return this.param;
+        }
+
+        @Override
+        public void run(final ComparableTableMappingContext context) {
+        }
+
+        @Override
+        public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
+            return new NoneComparableTableMappingTask(this.source, builder.build());
+        }
     }
 }

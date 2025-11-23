@@ -1,0 +1,8 @@
+{
+  "settings": [
+    {
+      "name": "merge",
+      "keys": ["filename","comment","name","dataType"]
+    }
+  ]
+}

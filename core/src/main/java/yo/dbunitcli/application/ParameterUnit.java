@@ -34,6 +34,11 @@ public enum ParameterUnit {
                             .withRowNumber(rowNum[0]++)
                             .addAll(it));
         }
+
+        @Override
+        public Stream<Parameter> lazyLoadStream(final ComparableDataSetLoader loader, final ComparableDataSetParam param) {
+            return this.dataSetToStream(loader, param);
+        }
     },
 
     table {
@@ -47,6 +52,17 @@ public enum ParameterUnit {
                             .withRowNumber(it)
                             .addAll(dataSet.getTable(tableNames[it]).toMap(true).getFirst()));
         }
+
+        @Override
+        public Stream<Parameter> lazyLoadStream(final ComparableDataSetLoader loader, final ComparableDataSetParam param) {
+            final Map<String, Object> tables = loader.getComparableDataSetProducer(param).lazyLoad(true);
+            final int[] row = new int[]{0};
+            return tables.keySet().stream()
+                    .map(it -> loader.parameter()
+                            .asInputParam()
+                            .withRowNumber(row[0]++)
+                            .addAll((Map<String, ? extends Object>) tables.get(it)));
+        }
     },
     dataset;
 
@@ -57,5 +73,12 @@ public enum ParameterUnit {
                 .withRowNumber(0)
                 .add("dataSet", dataSet.toMap(true)
                         .collect(Collectors.toMap(it -> it.get("tableName").toString(), it -> it, (old, other) -> other, LinkedHashMap::new))));
+    }
+
+    public Stream<Parameter> lazyLoadStream(final ComparableDataSetLoader loader, final ComparableDataSetParam param) {
+        return Stream.of(loader.parameter()
+                .asInputParam()
+                .withRowNumber(0)
+                .add("dataSet", loader.getComparableDataSetProducer(param).lazyLoad(true)));
     }
 }

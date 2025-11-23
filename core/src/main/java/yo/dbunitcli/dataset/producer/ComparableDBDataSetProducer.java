@@ -24,18 +24,10 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDBDataSetProducer.class);
     protected final IDatabaseConnection connection;
     protected final ComparableDataSetParam param;
-    private final IDataSet databaseDataSet;
 
     public ComparableDBDataSetProducer(final ComparableDataSetParam param) {
         this.param = param;
         this.connection = this.param.databaseConnectionLoader().loadConnection();
-        try {
-            this.databaseDataSet = this.param.useJdbcMetaData()
-                    ? this.connection.createDataSet()
-                    : null;
-        } catch (final SQLException e) {
-            throw new AssertionError(e);
-        }
     }
 
     @Override
@@ -65,22 +57,29 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
 
     @Override
     public ComparableTableMappingTask createTableMappingTask(final Source source) {
-        return new DBTableExecutor(source, this.param, this.connection, this.databaseDataSet);
+        return new DBTableExecutor(source, this.param, this.connection);
     }
 
     static class DBTableExecutor implements ComparableTableMappingTask {
         protected final Source source;
         protected final ComparableDataSetParam param;
         protected final IDatabaseConnection connection;
-        protected final IDataSet databaseDataSet;
 
         DBTableExecutor(final Source source,
-                        final ComparableDataSetParam param, final IDatabaseConnection connection,
-                        final IDataSet databaseDataSet) {
+                        final ComparableDataSetParam param, final IDatabaseConnection connection) {
             this.source = source;
             this.param = param;
             this.connection = connection;
-            this.databaseDataSet = databaseDataSet;
+        }
+
+        @Override
+        public Source source() {
+            return this.source;
+        }
+
+        @Override
+        public ComparableDataSetParam param() {
+            return this.param;
         }
 
         @Override
@@ -89,14 +88,14 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         }
 
         @Override
-        public Source source() {
-            return this.source;
+        public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
+            return new DBTableExecutor(this.source, builder.build(), this.connection);
         }
 
         protected ITable getTable(final String tableName) {
             try {
-                if (this.databaseDataSet != null) {
-                    return this.databaseDataSet.getTable(tableName);
+                if (this.param.useJdbcMetaData()) {
+                    return this.connection.createDataSet().getTable(tableName);
                 }
                 return this.connection.createTable(tableName);
             } catch (final DataSetException | SQLException e) {

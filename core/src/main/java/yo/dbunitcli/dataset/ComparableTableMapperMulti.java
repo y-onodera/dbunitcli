@@ -10,6 +10,8 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     private IDataSetConverter converter;
     private Map<String, Integer> alreadyWrite;
     private List<ComparableTableJoin> joins;
+    private List<ComparableTableMappingTask> chain;
+    private boolean chainRun;
 
     public ComparableTableMapperMulti(final List<ComparableTableMapper> delegates) {
         this.head = delegates.getFirst();
@@ -18,13 +20,15 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     }
 
     @Override
-    public void startTable(final IDataSetConverter converter, final Map<String, Integer> alreadyWrite, final List<ComparableTableJoin> joins) {
+    public void startTable(final IDataSetConverter converter, final Map<String, Integer> alreadyWrite, final List<ComparableTableJoin> joins, final List<ComparableTableMappingTask> chain, final boolean chainRun) {
         this.converter = converter;
         this.alreadyWrite = alreadyWrite;
         this.joins = joins;
-        this.head.startTable(converter, alreadyWrite, joins);
+        this.chain = chain;
+        this.chainRun = chainRun;
+        this.head.startTable(converter, alreadyWrite, joins, chain, chainRun);
         if (this.splitConvert()) {
-            this.rests.forEach(it -> it.startTable(converter.split(), alreadyWrite, joins));
+            this.rests.forEach(it -> it.startTable(converter.split(), alreadyWrite, joins, chain, chainRun));
         }
     }
 
@@ -45,7 +49,7 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
             this.rests.forEach(it -> it.endTable(orderedTableNameMap));
         } else {
             this.rests.forEach(it -> {
-                it.startTable(this.converter, this.alreadyWrite, this.joins);
+                it.startTable(this.converter, this.alreadyWrite, this.joins, this.chain, this.chainRun);
                 this.rows.forEach(it::addRow);
                 it.endTable(orderedTableNameMap);
             });

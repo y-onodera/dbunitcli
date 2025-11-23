@@ -15,25 +15,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 
-public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param
-        , Pattern dataSplitPattern
-        , Pattern headerSplitPattern) implements ComparableDataSetProducer {
+public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableRegexSplitDataSetProducer.class);
-
-    public ComparableRegexSplitDataSetProducer(final ComparableDataSetParam param) {
-        this(param
-                , Pattern.compile(param.dataSplitPattern())
-                , param.headerNames() != null ? null : Pattern.compile(param.headerSplitPattern())
-        );
-    }
 
     @Override
     public ComparableTableMappingTask createTableMappingTask(final Source source) {
-        return new RegexSplitTableExecutor(source, this.param, this.headerSplitPattern, this.dataSplitPattern);
+        return new RegexSplitTableExecutor(source, this.param);
     }
 
-    private record RegexSplitTableExecutor(Source source, ComparableDataSetParam param, Pattern headerSplitPattern,
-                                           Pattern dataSplitPattern) implements ComparableTableMappingTask {
+    private record RegexSplitTableExecutor(Source source, ComparableDataSetParam param, Pattern dataSplitPattern,
+                                           Pattern headerSplitPattern) implements ComparableTableMappingTask {
+
+        public RegexSplitTableExecutor(final Source source, final ComparableDataSetParam param) {
+            this(source, param
+                    , Pattern.compile(param.dataSplitPattern())
+                    , param.headerNames() != null ? null : Pattern.compile(param.headerSplitPattern())
+            );
+        }
 
         @Override
         public void run(final ComparableTableMappingContext context) {
@@ -67,6 +65,11 @@ public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param
             } catch (final IOException e) {
                 throw new AssertionError(e);
             }
+        }
+
+        @Override
+        public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
+            return new RegexSplitTableExecutor(this.source, builder.build());
         }
     }
 

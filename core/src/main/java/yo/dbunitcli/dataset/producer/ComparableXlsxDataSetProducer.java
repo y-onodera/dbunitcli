@@ -76,6 +76,11 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
             ComparableXlsxDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());
         }
 
+        @Override
+        public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
+            return new XlsxTableExecutor(this.source, builder.build(), this.sheetNameFilter, this.schema);
+        }
+
         private void processSheet(
                 final Styles styles,
                 final SharedStrings strings,

@@ -2,6 +2,7 @@ package yo.dbunitcli.resource.poi.jxls;
 
 import org.jxls.builder.JxlsOutputFile;
 import org.jxls.builder.JxlsStreaming;
+import org.jxls.builder.xls.XlsCommentAreaBuilder;
 import org.jxls.transform.poi.JxlsPoiTemplateFillerBuilder;
 import yo.dbunitcli.common.Parameter;
 
@@ -37,7 +38,10 @@ public record JxlsTemplateRender(
             context.put(this.getTemplateParameterAttribute(), param);
         }
         try (final InputStream is = new FileInputStream(aTemplate)) {
+            final XlsCommentAreaBuilder areaBuilder = new XlsCommentAreaBuilder();
+            areaBuilder.addCommandMapping(StreamingEachCommand.COMMAND_NAME, StreamingEachCommand.class);
             final JxlsPoiTemplateFillerBuilder builder = JxlsPoiTemplateFillerBuilder.newInstance()
+                    .withAreaBuilder(areaBuilder)
                     .withTemplate(is)
                     .withTransformerFactory(new UserFormulasValueClearPoiTransformerFactory());
             if (this.fastFormulaProcess) {
@@ -113,11 +117,11 @@ public record JxlsTemplateRender(
 
         public JxlsTemplateRender build() {
             return new JxlsTemplateRender(
-                    this.templateParameterAttribute,
-                    this.formulaProcess,
-                    this.evaluateFormulas,
-                    this.forceFormulaRecalc,
-                    this.fastFormulaProcess
+                    this.getTemplateParameterAttribute(),
+                    this.isFormulaProcess(),
+                    this.isEvaluateFormulas(),
+                    this.isForceFormulaRecalc(),
+                    this.isFastFormulaProcess()
             );
         }
     }

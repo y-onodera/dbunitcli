@@ -74,6 +74,11 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
             ComparableFileDataSetProducer.LOGGER.info("produce - end   fileName={}", this.src);
         }
 
+        @Override
+        public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
+            return new FileTableExecutor(this.source, builder.build(), this.src, this.fileTypeFilter);
+        }
+
         private String getTableName() {
             return this.src.getName();
         }

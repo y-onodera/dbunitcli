@@ -109,6 +109,15 @@ public record TableSeparators(List<TableSeparator> settings
                 .reduce(TableSeparator.NONE, TableSeparator::add);
     }
 
+    public boolean hasSpliter() {
+        return this.settings()
+                .stream()
+                .anyMatch(it -> it.splitter().isSplit())
+                || this.commonSettings()
+                .stream()
+                .anyMatch(it -> it.splitter().isSplit());
+    }
+
     public static class Builder {
         private final List<TableSeparator> settings = new ArrayList<>();
         private final List<ComparableTableJoinCondition> joins = new ArrayList<>();
