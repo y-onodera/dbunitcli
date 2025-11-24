@@ -80,10 +80,10 @@ public class FromJsonTableSeparatorsBuilderTest {
                 .configureSetting(jsonObject)
                 .build();
 
-        assertFalse(tableSeparators.joins().isEmpty(), "Should have join conditions");
-        assertEquals("TABLE1", tableSeparators.joins().get(0).left(), "Should have correct left table");
-        assertEquals("TABLE2", tableSeparators.joins().get(0).right(), "Should have correct right table");
-        assertEquals("InnerJoin", tableSeparators.joins().get(0).strategy().getClass().getSimpleName(),
+        assertFalse(tableSeparators.joinConditions().isEmpty(), "Should have join conditions");
+        assertEquals("TABLE1", tableSeparators.joinConditions().get(0).left(), "Should have correct left table");
+        assertEquals("TABLE2", tableSeparators.joinConditions().get(0).right(), "Should have correct right table");
+        assertEquals("InnerJoin", tableSeparators.joinConditions().get(0).strategy().getClass().getSimpleName(),
                 "Should have inner join strategy");
     }
 

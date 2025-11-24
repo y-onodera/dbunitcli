@@ -219,6 +219,31 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateFromJoinTable() {
+            Generate.main(new String[]{
+                    "-srcType=xlsx"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/xlsxwithschema/ComplexLayout.xlsx"
+                    , "-xlsxSchema=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/ComplexSchemaAddFileInfo.json"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/setting_fileInfo_join.json"
+                    , "-settingEncoding=MS932"
+                    , "-addFileInfo=true"
+                    , "-generateType=xlsx"
+                    , "-unit=dataset"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/join_table.xlsx"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/generated_join_table.xlsx"
+            });
+            Compare.main(new String[]{
+                    "-src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/join.xlsx"
+                    , "-old.srcType=xlsx"
+                    , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_join_table.xlsx"
+                    , "-new.srcType=xlsx"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_compare.json"
+                    , "-settingEncoding=UTF-8"
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/join_compare"
+            });
+        }
+
+        @Test
         public void testGenerateFromMergeTable() {
             Generate.main(new String[]{
                     "-srcType=csv"
@@ -238,7 +263,31 @@ public class GenerateTest {
                     , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_merge_table.xlsx"
                     , "-new.srcType=xlsx"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_compare.json"
-                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare"
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/merge_compare"
+            });
+        }
+
+        @Test
+        public void testGenerateFromMergeTableWithUnitTable() {
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table/source/csv"
+                    , "-encoding=MS932"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_table.json"
+                    , "-addFileInfo=true"
+                    , "-generateType=xlsx"
+                    , "-unit=table"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_table_unit_table.xlsx"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/generated_merge_table_unit_table.xlsx"
+            });
+            Compare.main(new String[]{
+                    "-src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/merge.csv"
+                    , "-old.srcType=csv"
+                    , "-old.encoding=UTF-8"
+                    , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_merge_table_unit_table.xlsx"
+                    , "-new.srcType=xlsx"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_compare.json"
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_unit_table"
             });
         }
 

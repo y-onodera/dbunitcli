@@ -7,6 +7,7 @@ import org.dbunit.dataset.stream.IDataSetConsumer;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.IntStream;
 
 public interface IDataSetConverter extends IDataSetConsumer {
@@ -72,4 +73,9 @@ public interface IDataSetConverter extends IDataSetConsumer {
 
     IDataSetConverter split();
 
+    default boolean isEnableRowProcessing(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
+        return metaData.getOrderColumns().length == 0
+                && !metaData.isNeedDistinct()
+                && joins.isEmpty();
+    }
 }

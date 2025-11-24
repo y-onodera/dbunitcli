@@ -9,18 +9,25 @@ import java.util.stream.Stream;
 
 public record TableSeparators(List<TableSeparator> settings
         , List<TableSeparator> commonSettings
-        , List<ComparableTableJoinCondition> joins) {
+        , List<ComparableTableJoinCondition> joinConditions) {
 
     public static final TableSeparators NONE = new Builder().build();
 
     TableSeparators(final Builder builder) {
         this(new ArrayList<>(builder.getSettings())
                 , new ArrayList<>(builder.getCommonSettings())
-                , new ArrayList<>(builder.getJoins()));
+                , new ArrayList<>(builder.getJoinConditions()));
     }
 
     public Builder builder() {
         return new Builder().add(this);
+    }
+
+    public List<ComparableTableJoin> joins() {
+        return this.joinConditions()
+                .stream()
+                .map(ComparableTableJoin::new)
+                .collect(Collectors.toList());
     }
 
     public TableSeparators map(final Consumer<TableSeparators.Builder> editor) {
@@ -109,7 +116,7 @@ public record TableSeparators(List<TableSeparator> settings
                 .reduce(TableSeparator.NONE, TableSeparator::add);
     }
 
-    public boolean hasSpliter() {
+    public boolean hasSplitter() {
         return this.settings()
                 .stream()
                 .anyMatch(it -> it.splitter().isSplit())
@@ -120,13 +127,13 @@ public record TableSeparators(List<TableSeparator> settings
 
     public static class Builder {
         private final List<TableSeparator> settings = new ArrayList<>();
-        private final List<ComparableTableJoinCondition> joins = new ArrayList<>();
+        private final List<ComparableTableJoinCondition> joinConditions = new ArrayList<>();
         private List<TableSeparator> commonSettings = new ArrayList<>();
 
         public Builder add(final TableSeparators tableSeparators) {
             this.settings.addAll(tableSeparators.settings());
             this.commonSettings.addAll(tableSeparators.commonSettings());
-            this.joins.addAll(tableSeparators.joins());
+            this.joinConditions.addAll(tableSeparators.joinConditions());
             return this;
         }
 
@@ -145,8 +152,8 @@ public record TableSeparators(List<TableSeparator> settings
             return this.commonSettings;
         }
 
-        public List<ComparableTableJoinCondition> getJoins() {
-            return this.joins;
+        public List<ComparableTableJoinCondition> getJoinConditions() {
+            return this.joinConditions;
         }
 
         public void addSettings(final List<TableSeparator> settings) {
@@ -162,7 +169,7 @@ public record TableSeparators(List<TableSeparator> settings
         }
 
         public void addJoin(final ComparableTableJoinCondition join) {
-            this.joins.add(join);
+            this.joinConditions.add(join);
         }
 
         public Builder setCommonRenameFunction(final TableRenameStrategy newFunction) {

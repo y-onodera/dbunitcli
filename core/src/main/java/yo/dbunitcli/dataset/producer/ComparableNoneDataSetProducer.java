@@ -25,25 +25,8 @@ public record ComparableNoneDataSetProducer(ComparableDataSetParam param) implem
         return new NoneComparableTableMappingTask(source, ComparableNoneDataSetProducer.this.param);
     }
 
-    private class NoneComparableTableMappingTask implements ComparableTableMappingTask {
-        private final Source source;
-        private final ComparableDataSetParam param;
-
-        public NoneComparableTableMappingTask(final Source source, final ComparableDataSetParam param) {
-            this.source = source;
-            this.param = param;
-        }
-
-        @Override
-        public Source source() {
-            return this.source;
-
-        }
-
-        @Override
-        public ComparableDataSetParam param() {
-            return this.param;
-        }
+    private record NoneComparableTableMappingTask(Source source,
+                                                  ComparableDataSetParam param) implements ComparableTableMappingTask {
 
         @Override
         public void run(final ComparableTableMappingContext context) {

@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -26,16 +25,12 @@ public class ComparableTableMappingContext {
     private final boolean chainRun;
     private ComparableTableMapper currentMapper;
 
-    public ComparableTableMappingContext(final TableSeparators tableSeparators
-            , final IDataSetConverter converter) {
+    public ComparableTableMappingContext(final TableSeparators tableSeparators, final IDataSetConverter converter) {
         this.tableSeparators = tableSeparators;
         this.converter = converter;
         this.tableMap = new TreeMap<>();
         this.alreadyWrite = new HashMap<>();
-        this.joins = this.tableSeparators.joins()
-                .stream()
-                .map(ComparableTableJoin::new)
-                .collect(Collectors.toList());
+        this.joins = this.tableSeparators.joins();
         this.chain = new ArrayList<>();
         this.chainRun = false;
         if (this.converter != null) {

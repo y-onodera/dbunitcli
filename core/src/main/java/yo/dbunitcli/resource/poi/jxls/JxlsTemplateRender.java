@@ -30,7 +30,7 @@ public record JxlsTemplateRender(
         return this.templateParameterAttribute;
     }
 
-    public void render(final File aTemplate, final File aResultFile, final Parameter param) throws IOException {
+    public void render(final File aTemplate, final File aResultFile, final Parameter param, final boolean useStreamingEach) throws IOException {
         final Map<String, Object> context = new HashMap<>();
         if (Optional.ofNullable(this.getTemplateParameterAttribute()).orElse("").isEmpty()) {
             param.forEach(context::put);
@@ -39,7 +39,9 @@ public record JxlsTemplateRender(
         }
         try (final InputStream is = new FileInputStream(aTemplate)) {
             final XlsCommentAreaBuilder areaBuilder = new XlsCommentAreaBuilder();
-            areaBuilder.addCommandMapping(StreamingEachCommand.COMMAND_NAME, StreamingEachCommand.class);
+            if (useStreamingEach) {
+                areaBuilder.addCommandMapping(StreamingEachCommand.COMMAND_NAME, StreamingEachCommand.class);
+            }
             final JxlsPoiTemplateFillerBuilder builder = JxlsPoiTemplateFillerBuilder.newInstance()
                     .withAreaBuilder(areaBuilder)
                     .withTemplate(is)

@@ -14,16 +14,6 @@ public interface ComparableTableMappingTask {
 
     void run(ComparableTableMappingContext context);
 
-    default List<ComparableTableDto> mappingTaskToTableName() {
-        final TableMetaDataCollector collector = new TableMetaDataCollector();
-        this.with(this::accept)
-                .run(new ComparableTableMappingContext(this.param().tableSeparators(), collector));
-        final List<ComparableTableDto> result = new ArrayList<>();
-        collector.items()
-                .forEach(it -> result.add(new ComparableTableDto(it, this)));
-        return result;
-    }
-
     default ComparableTableMappingTask with(final Consumer<ComparableDataSetParam.Builder> consumer) {
         final ComparableDataSetParam.Builder builder = this.param().toBuilder();
         consumer.accept(builder);
@@ -34,10 +24,6 @@ public interface ComparableTableMappingTask {
 
     default WithTargetTable withTargetTable(final String tableName) {
         return new WithTargetTable(tableName, this);
-    }
-
-    private void accept(final ComparableDataSetParam.Builder builder) {
-        builder.setLoadData(this.param().tableSeparators().hasSpliter());
     }
 
     record WithTargetTable(String targetTableName,

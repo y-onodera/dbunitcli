@@ -102,12 +102,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                     throw new AssertionError(e);
                 }
             }
-            this.joins.stream()
-                    .filter(it -> it.getCondition().right().equals(resultTableName))
-                    .forEach(it -> it.setRight(orderedTableNameMap.get(resultTableName)));
-            this.joins.stream()
-                    .filter(it -> it.getCondition().left().equals(resultTableName))
-                    .forEach(it -> it.setLeft(orderedTableNameMap.get(resultTableName)));
+            this.joins.forEach(it -> it.setIfRelated(orderedTableNameMap.get(resultTableName)));
             this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
         }
     }
@@ -230,10 +225,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     }
 
     protected boolean isEnableRowProcessing() {
-        return this.converter != null
-                && this.metaData.getOrderColumns().length == 0
-                && !this.metaData.isNeedDistinct()
-                && this.joins.isEmpty();
+        return this.converter != null && this.converter.isEnableRowProcessing(this.metaData, this.joins);
     }
 
     protected int getAddRowCount() {

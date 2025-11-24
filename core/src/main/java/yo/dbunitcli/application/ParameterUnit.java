@@ -61,7 +61,7 @@ public enum ParameterUnit {
                     .map(it -> loader.parameter()
                             .asInputParam()
                             .withRowNumber(row[0]++)
-                            .addAll((Map<String, ? extends Object>) tables.get(it)));
+                            .addAll((Map<String, Object>) tables.get(it)));
         }
     },
     dataset;

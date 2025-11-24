@@ -82,6 +82,14 @@ public class ComparableTableJoin {
         return Arrays.stream(columns).map(it -> new Column(tableMetaData.getTableName() + "_" + it.getColumnName(), it.getDataType()));
     }
 
+    public void setIfRelated(final ComparableTable table) {
+        if (table.getTableName().equals(this.condition.right())) {
+            this.setRight(table);
+        } else if (table.getTableName().equals(this.condition.left())) {
+            this.setLeft(table);
+        }
+    }
+
     public interface ConditionBuilder {
         BiFunction<Map<String, Object>, Map<String, Object>, Boolean> build(ComparableTable left, ComparableTable right);
 

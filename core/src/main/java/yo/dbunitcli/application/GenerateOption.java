@@ -221,7 +221,7 @@ public record GenerateOption(
                         .setForceFormulaRecalc(option.templateOption.forceFormulaRecalc())
                         .setFastFormulaProcess(option.templateOption.fastFormulaProcess())
                         .build()
-                        .render(option.getTemplatePath(), resultFile, param);
+                        .render(option.getTemplatePath(), resultFile, param, option.unit != ParameterUnit.record);
             }
         },
         xls {
@@ -234,7 +234,7 @@ public record GenerateOption(
                         .setForceFormulaRecalc(option.templateOption.forceFormulaRecalc())
                         .setFastFormulaProcess(option.templateOption.fastFormulaProcess())
                         .build()
-                        .render(option.getTemplatePath(), resultFile, param);
+                        .render(option.getTemplatePath(), resultFile, param, option.unit != ParameterUnit.record);
             }
         },
         settings {
