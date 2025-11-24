@@ -81,9 +81,9 @@ public class FromJsonTableSeparatorsBuilderTest {
                 .build();
 
         assertFalse(tableSeparators.joinConditions().isEmpty(), "Should have join conditions");
-        assertEquals("TABLE1", tableSeparators.joinConditions().get(0).left(), "Should have correct left table");
-        assertEquals("TABLE2", tableSeparators.joinConditions().get(0).right(), "Should have correct right table");
-        assertEquals("InnerJoin", tableSeparators.joinConditions().get(0).strategy().getClass().getSimpleName(),
+        assertEquals("TABLE1", tableSeparators.joinConditions().getFirst().left(), "Should have correct left table");
+        assertEquals("TABLE2", tableSeparators.joinConditions().getFirst().right(), "Should have correct right table");
+        assertEquals("InnerJoin", tableSeparators.joinConditions().getFirst().strategy().getClass().getSimpleName(),
                 "Should have inner join strategy");
     }
 
@@ -110,7 +110,7 @@ public class FromJsonTableSeparatorsBuilderTest {
                 .build();
 
         assertTrue(tableSeparators.hasAdditionalSetting(new DefaultTableMetaData("LARGE_TABLE", new Column[0])), "Should match table name");
-        final var separator = tableSeparators.settings().get(0);
+        final var separator = tableSeparators.settings().getFirst();
         assertNotNull(separator, "Should have separator configuration");
         assertEquals(1000, separator.splitter().limit(), "Should have correct split limit");
         assertTrue(separator.splitter().isSplit(), "Should be split configuration");
@@ -141,11 +141,11 @@ public class FromJsonTableSeparatorsBuilderTest {
                 .configureSetting(jsonObject)
                 .build();
 
-        final var separator = tableSeparators.settings().get(0);
+        final var separator = tableSeparators.settings().getFirst();
         assertNotNull(separator, "Should have table setting");
         assertTrue(separator.includeColumns().contains("col1"), "Should have included column");
         assertTrue(separator.excludeColumns().contains("temp_col"), "Should have excluded column");
-        assertEquals("id", separator.orderColumns().get(0), "Should have correct order column");
+        assertEquals("id", separator.orderColumns().getFirst(), "Should have correct order column");
     }
 
     @Test
@@ -172,7 +172,7 @@ public class FromJsonTableSeparatorsBuilderTest {
                 .configureSetting(jsonObject)
                 .build();
 
-        final var separator = tableSeparators.settings().get(0);
+        final var separator = tableSeparators.settings().getFirst();
         assertNotNull(separator, "Should have table setting");
         assertTrue(separator.distinct(), "Should be distinct");
         assertTrue(separator.expressionColumns().size() > 0, "Should have expression columns");
@@ -201,7 +201,7 @@ public class FromJsonTableSeparatorsBuilderTest {
                 .configureSetting(jsonObject)
                 .build();
 
-        final var separator = tableSeparators.settings().get(0);
+        final var separator = tableSeparators.settings().getFirst();
         assertNotNull(separator, "Should have table setting");
         assertFalse(separator.filter().expressions().isEmpty(), "Should have filter expressions");
         assertEquals(2, separator.filter().expressions().size(), "Should have correct number of filter expressions");
@@ -226,10 +226,10 @@ public class FromJsonTableSeparatorsBuilderTest {
                 .build();
 
         assertFalse(tableSeparators.commonSettings().isEmpty(), "Should have common settings");
-        final var commonSetting = tableSeparators.commonSettings().get(0);
+        final var commonSetting = tableSeparators.commonSettings().getFirst();
         assertTrue(commonSetting.includeColumns().contains("common_col1"), "Should have common included column");
         assertTrue(commonSetting.excludeColumns().contains("temp_*"), "Should have common excluded column");
-        assertEquals("id", commonSetting.orderColumns().get(0), "Should have common order column");
+        assertEquals("id", commonSetting.orderColumns().getFirst(), "Should have common order column");
         assertTrue(commonSetting.sourceFilter().test("ANY_TABLE"), "Should match any table name");
     }
 }

@@ -26,18 +26,16 @@ public class LazyloadTaskMapper {
             collector.feedBackAndReset(this.result, task);
         });
         final Map<String, ComparableTableDto> joinResult = new HashMap<>();
-        joins.forEach(join -> {
-            this.result.forEach((key, value) -> {
-                if (join.hasRelation(key)) {
-                    joinResult.merge(join.joinMetaData().getTableName()
-                            , new ComparableTableDto(join.joinMetaData(), value.getTask())
-                            , (old, newVal) -> {
-                                old.setRows(old.getTask().chain(newVal.getTask()));
-                                return old;
-                            });
-                }
-            });
-        });
+        joins.forEach(join -> this.result.forEach((key, value) -> {
+            if (join.hasRelation(key)) {
+                joinResult.merge(join.joinMetaData().getTableName()
+                        , new ComparableTableDto(join.joinMetaData(), value.getTask())
+                        , (old, newVal) -> {
+                            old.setRows(old.getTask().chain(newVal.getTask()));
+                            return old;
+                        });
+            }
+        }));
         this.result.putAll(joinResult);
     }
 
