@@ -1,0 +1,25 @@
+{
+  "settings": [
+    {
+      "pattern": "Test",
+      "separate": [
+        {
+          "tableName": "merge",
+          "filter": [
+            "true"
+          ]
+        },
+        {
+          "tableName": "dataType",
+          "filter": [
+            "true"
+          ],
+          "include": [
+            "dataType"
+          ],
+          "distinct": true
+        }
+      ]
+    }
+  ]
+}

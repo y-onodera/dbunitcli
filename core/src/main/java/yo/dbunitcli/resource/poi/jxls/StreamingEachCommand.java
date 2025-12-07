@@ -61,31 +61,34 @@ public class StreamingEachCommand extends EachCommand {
 
     @Override
     public Size applyAt(final CellRef cellRef, final Context context) {
-        final ComparableTableMappingTask.WithTargetTable task;
+        final Object evaluated;
         try {
-            task = (ComparableTableMappingTask.WithTargetTable) context.evaluate(this.getItems());
+            evaluated = context.evaluate(this.getItems());
         } catch (final Exception e) {
             this.getLogger().handleEvaluationException(e, cellRef.toString(), this.getItems());
             return new Size(0, 0);
         }
-
-        if (task == null) {
+        if (evaluated == null) {
             return new Size(0, 0);
         }
-        final JxlsDataSetConverter converter = new JxlsDataSetConverter(cellRef, context, task.targetTableName());
-        final ComparableTableMappingContext mappingContext = new ComparableTableMappingContext(
-                task.param().tableSeparators(),
-                converter
-        );
-        task.run(mappingContext);
-        mappingContext.close();
+        if (evaluated instanceof final ComparableTableMappingTask.WithTargetTable task) {
+            final JxlsDataSetConverter converter = new JxlsDataSetConverter(cellRef, context, task.targetTableName());
+            final ComparableTableMappingContext mappingContext = new ComparableTableMappingContext(
+                    task.targetTableSeparators(),
+                    converter
+            );
+            mappingContext.open();
+            task.run(mappingContext);
+            mappingContext.close();
 
-        final Size size = converter.getSize();
+            final Size size = converter.getSize();
 
-        if (this.getDirection() == Direction.DOWN) {
-            this.getTransformer().adjustTableSize(cellRef, size);
+            if (this.getDirection() == Direction.DOWN) {
+                this.getTransformer().adjustTableSize(cellRef, size);
+            }
+            return size;
         }
-        return size;
+        return super.applyAt(cellRef, context);
     }
 
     private static class StreamingState {
@@ -138,6 +141,15 @@ public class StreamingEachCommand extends EachCommand {
             this.context = context;
             this.selectEvaluator = this.getExpressionEvaluator(context, StreamingEachCommand.this.getSelect());
             this.targetTableName = tableName;
+        }
+
+        public JxlsDataSetConverter(final JxlsDataSetConverter copyFrom) {
+            this.state = copyFrom.state;
+            this.context = copyFrom.context;
+            this.selectEvaluator = copyFrom.selectEvaluator;
+            this.targetTableName = copyFrom.targetTableName;
+            this.runVar = copyFrom.runVar;
+            this.currentMetaData = copyFrom.currentMetaData;
         }
 
         @Override
@@ -224,7 +236,7 @@ public class StreamingEachCommand extends EachCommand {
 
         @Override
         public IDataSetConverter split() {
-            return new JxlsDataSetConverter(this.state.currentCell, this.context, this.targetTableName);
+            return new JxlsDataSetConverter(this);
         }
 
         public Size getSize() {

@@ -1,41 +1,36 @@
 package yo.dbunitcli.dataset;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.TreeMap;
 
 public class ComparableTableMapperMulti implements ComparableTableMapper {
 
     private final ComparableTableMapper head;
-    private final List<ComparableTableMapper> rests;
+    private final List<? extends ComparableTableMapper> rests;
     private final Collection<Object[]> rows;
-    private IDataSetConverter converter;
-    private Map<String, Integer> alreadyWrite;
-    private List<ComparableTableJoin> joins;
-    private List<ComparableTableMappingTask> chain;
-    private boolean chainRun;
+    private final boolean isConverterSplit;
 
-    public ComparableTableMapperMulti(final List<ComparableTableMapper> delegates) {
+    public ComparableTableMapperMulti(final List<? extends ComparableTableMapper> delegates, final boolean converterSplittable) {
         this.head = delegates.getFirst();
         this.rests = delegates.subList(1, delegates.size());
         this.rows = new ArrayList<>();
+        this.isConverterSplit = converterSplittable;
     }
 
     @Override
-    public void startTable(final IDataSetConverter converter, final Map<String, Integer> alreadyWrite, final List<ComparableTableJoin> joins, final List<ComparableTableMappingTask> chain, final boolean chainRun) {
-        this.converter = converter;
-        this.alreadyWrite = alreadyWrite;
-        this.joins = joins;
-        this.chain = chain;
-        this.chainRun = chainRun;
-        this.head.startTable(converter, alreadyWrite, joins, chain, chainRun);
-        if (this.splitConvert()) {
-            this.rests.forEach(it -> it.startTable(converter.split(), alreadyWrite, joins, chain, chainRun));
+    public void startTable() {
+        this.head.startTable();
+        if (this.isConverterSplit) {
+            this.rests.forEach(ComparableTableMapper::startTable);
         }
     }
 
     @Override
     public void addRow(final Object[] values) {
         this.head.addRow(values);
-        if (this.splitConvert()) {
+        if (this.isConverterSplit) {
             this.rests.forEach(it -> it.addRow(values));
         } else {
             this.rows.add(values);
@@ -45,18 +40,14 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     @Override
     public void endTable(final TreeMap<String, ComparableTable> orderedTableNameMap) {
         this.head.endTable(orderedTableNameMap);
-        if (this.splitConvert()) {
+        if (this.isConverterSplit) {
             this.rests.forEach(it -> it.endTable(orderedTableNameMap));
         } else {
             this.rests.forEach(it -> {
-                it.startTable(this.converter, this.alreadyWrite, this.joins, this.chain, this.chainRun);
+                it.startTable();
                 this.rows.forEach(it::addRow);
                 it.endTable(orderedTableNameMap);
             });
         }
-    }
-
-    private boolean splitConvert() {
-        return this.converter != null && this.converter.isSplittable();
     }
 }

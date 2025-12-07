@@ -12,10 +12,6 @@ public record ComparableTableJoinCondition(String left, String right
         return new Builder();
     }
 
-    public ComparableTableJoinCondition() {
-        this("", "", ComparableTableJoin.Strategy.NOT_JOIN, List.of(TableSeparator.NONE));
-    }
-
     public ComparableTableJoinCondition(final Builder builder) {
         this(builder.getLeft(), builder.getRight(), builder.getStrategy(), builder.getTableSeparators());
     }
@@ -67,7 +63,7 @@ public record ComparableTableJoinCondition(String left, String right
         }
 
         public List<TableSeparator> getTableSeparators() {
-            if (this.tableSeparators.size() == 0) {
+            if (this.tableSeparators.isEmpty()) {
                 return List.of(TableSeparator.NONE);
             }
             return this.tableSeparators;

@@ -1,7 +1,15 @@
 {
-  "commonSettings": [
+  "settings": [
     {
-      "tableName": "merge"
+      "pattern": "Test",
+      "separate": [
+        {
+          "tableName": "merge",
+          "filter": [
+            "true"
+          ]
+        }
+      ]
     }
   ]
 }

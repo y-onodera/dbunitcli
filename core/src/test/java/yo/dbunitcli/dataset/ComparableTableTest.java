@@ -24,8 +24,9 @@ public class ComparableTableTest {
 
     @BeforeEach
     public void setUp() throws DataSetException {
-        final ComparableTableMapper builder = TableSeparators.NONE.createMapper(this.table);
-        builder.startTable(null, new HashMap<>(), new ArrayList<>(), new ArrayList<>(), false);
+        final ComparableTableMapper builder = new ComparableTableMapperBuilder()
+                .build(TableSeparators.NONE.getAddSettingTableMetaData(this.table));
+        builder.startTable();
         builder.addRow(new Object[]{"1", "a", "あ", 1});
         builder.addRow(new Object[]{"1", "b", "あ", 1});
         builder.addRow(new Object[]{"2", "a", "い", 2});

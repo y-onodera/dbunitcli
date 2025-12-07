@@ -43,33 +43,25 @@ public record TableSeparators(List<TableSeparator> settings
                 .toList().isEmpty();
     }
 
-    public ComparableTableMapper createMapper(final ComparableTableJoin join) {
-        final ITableMetaData joinMetadata = join.joinMetaData();
-        return this.createMapper(this.addNewNameSetting(join.getCondition().tableSeparators()
+    public boolean hasSplitter() {
+        return this.settings()
+                .stream()
+                .anyMatch(it -> it.splitter().isSplit())
+                || this.commonSettings()
+                .stream()
+                .anyMatch(it -> it.splitter().isSplit());
+    }
+
+    public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ComparableTableJoin join) {
+        return this.addNewNameSetting(join.getCondition().tableSeparators()
                         .stream()
-                        .map(it -> this.getCommonSettings(joinMetadata)
+                        .map(it -> this.getCommonSettings(join.joinMetaData())
                                 .add(it)
-                                .addSetting(joinMetadata))
-                , joinMetadata.getTableName()));
+                                .addSetting(join.joinMetaData()))
+                , join.joinMetaData().getTableName());
     }
 
-    public ComparableTableMapper createMapper(final ITableMetaData metaData) {
-        return this.createMapper(this.getAddSettingTableMetaData(metaData));
-    }
-
-    private ComparableTableMapper createMapper(final Stream<AddSettingTableMetaData> metaData) {
-        final List<ComparableTableMapper> results = metaData.map(this::createMapperFrom).collect(Collectors.toList());
-        if (results.size() == 1) {
-            return results.getFirst();
-        }
-        return new ComparableTableMapperMulti(results);
-    }
-
-    private ComparableTableMapper createMapperFrom(final AddSettingTableMetaData results) {
-        return new ComparableTableMapperSingle(results);
-    }
-
-    private Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ITableMetaData metaData) {
+    public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ITableMetaData metaData) {
         return this.addNewNameSetting(this.addSettings(metaData), metaData.getTableName());
     }
 
@@ -114,15 +106,6 @@ public record TableSeparators(List<TableSeparator> settings
         return this.commonSettings.stream()
                 .filter(it -> it.sourceFilter().test(originMetaData))
                 .reduce(TableSeparator.NONE, TableSeparator::add);
-    }
-
-    public boolean hasSplitter() {
-        return this.settings()
-                .stream()
-                .anyMatch(it -> it.splitter().isSplit())
-                || this.commonSettings()
-                .stream()
-                .anyMatch(it -> it.splitter().isSplit());
     }
 
     public static class Builder {
@@ -182,6 +165,5 @@ public record TableSeparators(List<TableSeparator> settings
                     .toList();
             return this;
         }
-
     }
 }

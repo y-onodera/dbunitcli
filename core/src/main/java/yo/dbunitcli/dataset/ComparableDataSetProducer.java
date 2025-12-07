@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
@@ -27,6 +27,7 @@ public interface ComparableDataSetProducer {
     default TreeMap<String, ComparableTable> produce() {
         LOGGER.info("produce() - start");
         final ComparableTableMappingContext context = new ComparableTableMappingContext(this.param().tableSeparators(), this.param().converter());
+        context.open();
         this.getSourceStream()
                 .map(this::createTableMappingTask)
                 .forEach(it -> it.run(context));
@@ -35,7 +36,7 @@ public interface ComparableDataSetProducer {
     }
 
     default Map<String, Object> lazyLoad(final boolean includeMetaData) {
-        final Map<String, Object> result = new HashMap<>();
+        final Map<String, Object> result = new LinkedHashMap<>();
         LOGGER.info("lazyLoad() - start, includeMetaData={}", includeMetaData);
         LazyloadTaskMapper.mappingFrom(this.param(), this.getSourceStream().map(this::createTableMappingTask))
                 .forEach(it -> {

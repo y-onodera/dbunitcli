@@ -20,12 +20,13 @@ public class LazyloadTaskMapper {
         final List<ComparableTableJoin> joins = tableSeparators.joins();
         final MetaDataCollector collector = new MetaDataCollector(joins);
         final ComparableTableMappingContext context = new ComparableTableMappingContext(tableSeparators, collector);
+        context.open();
         tasks.forEach(task -> {
             task.with(builder -> builder.setLoadData(tableSeparators.hasSplitter()))
                     .run(context);
             collector.feedBackAndReset(this.result, task);
         });
-        final Map<String, ComparableTableDto> joinResult = new HashMap<>();
+        final Map<String, ComparableTableDto> joinResult = new LinkedHashMap<>();
         joins.forEach(join -> this.result.forEach((key, value) -> {
             if (join.hasRelation(key)) {
                 joinResult.merge(join.joinMetaData().getTableName()
@@ -44,7 +45,7 @@ public class LazyloadTaskMapper {
                                      List<ComparableTableJoin> joins) implements IDataSetConverter {
 
         private MetaDataCollector(final List<ComparableTableJoin> joins) {
-            this(new HashSet<>(), new HashSet<>(), joins);
+            this(new LinkedHashSet<>(), new LinkedHashSet<>(), joins);
         }
 
         @Override

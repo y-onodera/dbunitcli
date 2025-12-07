@@ -57,6 +57,10 @@ public interface ComparableTableMappingTask {
             return this.head().with(builder);
         }
 
+        public TableSeparators targetTableSeparators() {
+            return this.param().tableSeparators();
+        }
+
         public WithTargetTable chain(final WithTargetTable target) {
             final List<ComparableTableMappingTask> newRest = new ArrayList<>(this.rest);
             newRest.add(target.head());

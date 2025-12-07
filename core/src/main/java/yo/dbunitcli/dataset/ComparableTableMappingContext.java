@@ -8,10 +8,6 @@ import yo.dbunitcli.common.TableMetaDataWithSource;
 import java.util.*;
 import java.util.stream.Stream;
 
-/**
- * タスクごとの独立した状態管理クラス
- * 並列実行時に各タスクが独自のコンテキストを持つことで、スレッドセーフな処理を実現
- */
 public class ComparableTableMappingContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableTableMappingContext.class);
@@ -26,20 +22,7 @@ public class ComparableTableMappingContext {
     private ComparableTableMapper currentMapper;
 
     public ComparableTableMappingContext(final TableSeparators tableSeparators, final IDataSetConverter converter) {
-        this.tableSeparators = tableSeparators;
-        this.converter = converter;
-        this.tableMap = new TreeMap<>();
-        this.alreadyWrite = new HashMap<>();
-        this.joins = this.tableSeparators.joins();
-        this.chain = new ArrayList<>();
-        this.chainRun = false;
-        if (this.converter != null) {
-            try {
-                this.converter.startDataSet();
-            } catch (final DataSetException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        this(tableSeparators, converter, new TreeMap<>(), new HashMap<>(), tableSeparators.joins(), new ArrayList<>(), false);
     }
 
     public ComparableTableMappingContext(final TableSeparators tableSeparators, final IDataSetConverter converter, final TreeMap<String, ComparableTable> tableMap, final Map<String, Integer> alreadyWrite, final List<ComparableTableJoin> joins, final List<ComparableTableMappingTask> chain, final boolean chainRun) {
@@ -62,10 +45,26 @@ public class ComparableTableMappingContext {
                 , false);
     }
 
+    public void open() {
+        if (this.converter != null) {
+            try {
+                this.converter.startDataSet();
+            } catch (final DataSetException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     public void startTable(final TableMetaDataWithSource metaData) {
         LOGGER.debug("startTable(metaData={}) - start", metaData);
-        this.currentMapper = this.tableSeparators.createMapper(metaData);
-        this.currentMapper.startTable(this.converter, this.alreadyWrite, this.joins, this.chain, this.chainRun);
+        this.currentMapper = new ComparableTableMapperBuilder()
+                .setConverter(this.converter)
+                .setAlreadyWrite(this.alreadyWrite)
+                .setJoins(this.joins)
+                .setChain(this.chain)
+                .setChainRun(this.chainRun)
+                .build(this.tableSeparators.getAddSettingTableMetaData(metaData));
+        this.currentMapper.startTable();
     }
 
     public void row(final Object[] values) {
@@ -93,23 +92,35 @@ public class ComparableTableMappingContext {
     }
 
     private void executeJoin() {
-        while (!this.joins.isEmpty()) {
+        if (!this.joins.isEmpty()) {
             this.joins.stream()
                     .filter(ComparableTableJoin::isExecutable)
                     .flatMap(it -> Stream.of(it.getCondition().left(), it.getCondition().right()))
                     .forEach(this.tableMap::remove);
-            this.joins.stream()
-                    .filter(ComparableTableJoin::isExecutable)
-                    .toList()
-                    .forEach(join -> {
-                        LOGGER.debug("startTableJoin(join={}) - start", join);
-                        this.joins.remove(join);
-                        this.currentMapper = this.tableSeparators.createMapper(join);
-                        this.currentMapper.startTable(this.converter, this.alreadyWrite, this.joins, this.chain, this.chainRun);
-                        join.execute().forEach(this::row);
-                        this.currentMapper.endTable(this.tableMap);
-                    });
+            this.processExecutableJoins(new ArrayList<>(this.joins));
         }
     }
 
+    private void processExecutableJoins(final List<ComparableTableJoin> remaining) {
+        remaining.stream()
+                .filter(ComparableTableJoin::isExecutable)
+                .findFirst()
+                .ifPresent(join -> {
+                    LOGGER.debug("startTableJoin(join={}) - start", join);
+                    final List<ComparableTableJoin> newRemaining = remaining.stream()
+                            .filter(it -> !it.equals(join))
+                            .toList();
+                    this.currentMapper = new ComparableTableMapperBuilder()
+                            .setConverter(this.converter)
+                            .setAlreadyWrite(this.alreadyWrite)
+                            .setJoins(newRemaining)
+                            .setChain(this.chain)
+                            .setChainRun(this.chainRun)
+                            .build(this.tableSeparators.getAddSettingTableMetaData(join));
+                    this.currentMapper.startTable();
+                    join.execute().forEach(this::row);
+                    this.currentMapper.endTable(this.tableMap);
+                    this.processExecutableJoins(newRemaining);
+                });
+    }
 }

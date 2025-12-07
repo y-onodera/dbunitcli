@@ -249,7 +249,7 @@ public class GenerateTest {
                     "-srcType=csv"
                     , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table/source/csv"
                     , "-encoding=MS932"
-                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_table.json"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_table_with_separate.json"
                     , "-addFileInfo=true"
                     , "-generateType=xlsx"
                     , "-unit=dataset"
@@ -257,7 +257,7 @@ public class GenerateTest {
                     , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/generated_merge_table.xlsx"
             });
             Compare.main(new String[]{
-                    "-src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/merge.csv"
+                    "-src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/separate"
                     , "-old.srcType=csv"
                     , "-old.encoding=UTF-8"
                     , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_merge_table.xlsx"
@@ -281,7 +281,7 @@ public class GenerateTest {
                     , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/generated_merge_table_unit_table.xlsx"
             });
             Compare.main(new String[]{
-                    "-src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/merge.csv"
+                    "-src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/merge/merge.csv"
                     , "-old.srcType=csv"
                     , "-old.encoding=UTF-8"
                     , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_merge_table_unit_table.xlsx"
