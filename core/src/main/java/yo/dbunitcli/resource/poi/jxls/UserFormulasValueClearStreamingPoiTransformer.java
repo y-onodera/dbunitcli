@@ -54,11 +54,12 @@ public class UserFormulasValueClearStreamingPoiTransformer extends SelectSheetsF
     protected void transformCell(final CellRef srcCellRef, final CellRef targetCellRef, final Context context, final boolean updateRowHeightFlag, final CellData cellData, final Sheet destSheet, final Row destRow) {
         this.transformAndMergeFormat(srcCellRef, targetCellRef, destSheet
                 , () -> {
-                    if (!this.isStreaming() || !isUserFormula(cellData.getCellValue().toString())) {
-                        super.transformCell(srcCellRef, targetCellRef, context, updateRowHeightFlag, cellData, destSheet, destRow);
-                    } else {
-                        super.transformCell(srcCellRef, targetCellRef, context, updateRowHeightFlag, new WriteCellValueClearCellData((PoiCellData) cellData), destSheet, destRow);
+                    PoiCellData wrappedCellData = new SkipNullAndEmptyCellData((PoiCellData) cellData);
+                    if (this.isStreaming() && isUserFormula(cellData.getCellValue().toString())) {
+                        wrappedCellData = new WriteCellValueClearCellData(wrappedCellData);
                     }
+                    super.transformCell(srcCellRef, targetCellRef, context, updateRowHeightFlag, wrappedCellData, destSheet, destRow);
                 });
     }
+
 }
