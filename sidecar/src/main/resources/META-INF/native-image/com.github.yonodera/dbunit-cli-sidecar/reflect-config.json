@@ -594,9 +594,6 @@
     "name": "jakarta.servlet.Servlet"
   },
   {
-    "name": "java.io.FilePermission"
-  },
-  {
     "name": "java.io.Serializable",
     "queryAllDeclaredMethods": true,
     "methods": [
@@ -2817,11 +2814,35 @@
         ]
       },
       {
+        "name": "getColumns",
+        "parameterTypes": []
+      },
+      {
+        "name": "getColumnsExcludeKey",
+        "parameterTypes": []
+      },
+      {
         "name": "getOrDefault",
         "parameterTypes": [
           "java.lang.Object",
           "java.lang.Object"
         ]
+      },
+      {
+        "name": "getPrimaryKeys",
+        "parameterTypes": []
+      },
+      {
+        "name": "getRows",
+        "parameterTypes": []
+      },
+      {
+        "name": "getTableName",
+        "parameterTypes": []
+      },
+      {
+        "name": "getTask",
+        "parameterTypes": []
       },
       {
         "name": "has",
@@ -3137,6 +3158,42 @@
         ]
       },
       {
+        "name": "setColumns",
+        "parameterTypes": [
+          "org.dbunit.dataset.Column[]"
+        ]
+      },
+      {
+        "name": "setColumnsExcludeKey",
+        "parameterTypes": [
+          "org.dbunit.dataset.Column[]"
+        ]
+      },
+      {
+        "name": "setPrimaryKeys",
+        "parameterTypes": [
+          "org.dbunit.dataset.Column[]"
+        ]
+      },
+      {
+        "name": "setRows",
+        "parameterTypes": [
+          "java.util.List"
+        ]
+      },
+      {
+        "name": "setRows",
+        "parameterTypes": [
+          "yo.dbunitcli.dataset.ComparableTableMappingTask$WithTargetTable"
+        ]
+      },
+      {
+        "name": "setTableName",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
         "name": "size",
         "parameterTypes": []
       },
@@ -3409,9 +3466,6 @@
   },
   {
     "name": "java.lang.Runtime$Version"
-  },
-  {
-    "name": "java.lang.RuntimePermission"
   },
   {
     "name": "java.lang.SecurityManager",
@@ -4655,24 +4709,6 @@
     "name": "java.math.BigInteger"
   },
   {
-    "name": "java.net.NetPermission"
-  },
-  {
-    "name": "java.net.SocketPermission"
-  },
-  {
-    "name": "java.net.URLPermission",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.String",
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
     "name": "java.nio.file.Path"
   },
   {
@@ -4699,13 +4735,7 @@
     ]
   },
   {
-    "name": "java.security.AllPermission"
-  },
-  {
     "name": "java.security.SecureRandomParameters"
-  },
-  {
-    "name": "java.security.SecurityPermission"
   },
   {
     "name": "java.sql.Connection"
@@ -4987,11 +5017,35 @@
         ]
       },
       {
+        "name": "getColumns",
+        "parameterTypes": []
+      },
+      {
+        "name": "getColumnsExcludeKey",
+        "parameterTypes": []
+      },
+      {
         "name": "getOrDefault",
         "parameterTypes": [
           "java.lang.Object",
           "java.lang.Object"
         ]
+      },
+      {
+        "name": "getPrimaryKeys",
+        "parameterTypes": []
+      },
+      {
+        "name": "getRows",
+        "parameterTypes": []
+      },
+      {
+        "name": "getTableName",
+        "parameterTypes": []
+      },
+      {
+        "name": "getTask",
+        "parameterTypes": []
       },
       {
         "name": "isEmpty",
@@ -5106,6 +5160,42 @@
         "parameterTypes": []
       },
       {
+        "name": "setColumns",
+        "parameterTypes": [
+          "org.dbunit.dataset.Column[]"
+        ]
+      },
+      {
+        "name": "setColumnsExcludeKey",
+        "parameterTypes": [
+          "org.dbunit.dataset.Column[]"
+        ]
+      },
+      {
+        "name": "setPrimaryKeys",
+        "parameterTypes": [
+          "org.dbunit.dataset.Column[]"
+        ]
+      },
+      {
+        "name": "setRows",
+        "parameterTypes": [
+          "java.util.List"
+        ]
+      },
+      {
+        "name": "setRows",
+        "parameterTypes": [
+          "yo.dbunitcli.dataset.ComparableTableMappingTask$WithTargetTable"
+        ]
+      },
+      {
+        "name": "setTableName",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
         "name": "size",
         "parameterTypes": []
       },
@@ -5150,11 +5240,35 @@
         ]
       },
       {
+        "name": "getColumns",
+        "parameterTypes": []
+      },
+      {
+        "name": "getColumnsExcludeKey",
+        "parameterTypes": []
+      },
+      {
         "name": "getOrDefault",
         "parameterTypes": [
           "java.lang.Object",
           "java.lang.Object"
         ]
+      },
+      {
+        "name": "getPrimaryKeys",
+        "parameterTypes": []
+      },
+      {
+        "name": "getRows",
+        "parameterTypes": []
+      },
+      {
+        "name": "getTableName",
+        "parameterTypes": []
+      },
+      {
+        "name": "getTask",
+        "parameterTypes": []
       },
       {
         "name": "keySet",
@@ -5201,6 +5315,42 @@
       {
         "name": "sequencedValues",
         "parameterTypes": []
+      },
+      {
+        "name": "setColumns",
+        "parameterTypes": [
+          "org.dbunit.dataset.Column[]"
+        ]
+      },
+      {
+        "name": "setColumnsExcludeKey",
+        "parameterTypes": [
+          "org.dbunit.dataset.Column[]"
+        ]
+      },
+      {
+        "name": "setPrimaryKeys",
+        "parameterTypes": [
+          "org.dbunit.dataset.Column[]"
+        ]
+      },
+      {
+        "name": "setRows",
+        "parameterTypes": [
+          "java.util.List"
+        ]
+      },
+      {
+        "name": "setRows",
+        "parameterTypes": [
+          "yo.dbunitcli.dataset.ComparableTableMappingTask$WithTargetTable"
+        ]
+      },
+      {
+        "name": "setTableName",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
       },
       {
         "name": "values",
@@ -5659,9 +5809,6 @@
   },
   {
     "name": "javax.servlet.Servlet"
-  },
-  {
-    "name": "javax.smartcardio.CardPermission"
   },
   {
     "name": "jdk.management.jfr.ConfigurationInfo",
@@ -12717,19 +12864,6 @@
     ]
   },
   {
-    "name": "yo.dbunitcli.dataset.Parameter",
-    "allPublicFields": true,
-    "queryAllDeclaredMethods": true,
-    "methods": [
-      {
-        "name": "get",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
     "name": "yo.dbunitcli.application.CommandDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
@@ -12783,5 +12917,38 @@
     "name": "yo.dbunitcli.application.dto.TemplateRenderDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "yo.dbunitcli.common.Parameter",
+    "allPublicFields": true,
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "get",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "yo.dbunitcli.dataset.ComparableTableDto",
+    "allPublicFields": true,
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "getRows",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "yo.dbunitcli.resource.poi.jxls.StreamingEachCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
   }
 ]
