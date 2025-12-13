@@ -1,0 +1,12 @@
+{
+  "settings": [
+    {
+      "name": {"any":"metadata","filePath": ".*/dataType\\.xlsx"},
+      "tableName": "dataType"
+    },
+    {
+      "name": {"any":"metadata","filePath": ".*/merge\\.xlsx"},
+      "tableName": "merge"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "rows": [],
+  "cells": [
+    {
+      "tableName": "tablename",
+      "sheetName": "metadata",
+      "header": ["tablename"],
+      "rows": [
+        {"cellAddress": ["A1"]}
+      ]
+    }
+  ]
+}

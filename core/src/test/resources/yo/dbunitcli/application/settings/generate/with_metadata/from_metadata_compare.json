@@ -1,0 +1,16 @@
+{
+  "settings": [
+    {
+      "name": "tablename",
+      "keys": ["tablename"]
+    },
+    {
+      "name": "dataType",
+      "keys": ["dataType"]
+    },
+    {
+      "name": "merge",
+      "keys": ["comment"]
+    }
+  ]
+}
