@@ -3,7 +3,6 @@ package yo.dbunitcli.dataset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.TreeMap;
 
 public class ComparableTableMapperMulti implements ComparableTableMapper {
 
@@ -38,15 +37,15 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     }
 
     @Override
-    public void endTable(final TreeMap<String, ComparableTable> orderedTableNameMap) {
-        this.head.endTable(orderedTableNameMap);
+    public void endTable() {
+        this.head.endTable();
         if (this.isConverterSplit) {
-            this.rests.forEach(it -> it.endTable(orderedTableNameMap));
+            this.rests.forEach(it -> it.endTable());
         } else {
             this.rests.forEach(it -> {
                 it.startTable();
                 this.rows.forEach(it::addRow);
-                it.endTable(orderedTableNameMap);
+                it.endTable();
             });
         }
     }

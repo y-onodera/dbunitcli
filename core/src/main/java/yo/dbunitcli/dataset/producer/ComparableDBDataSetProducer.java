@@ -8,10 +8,7 @@ import org.dbunit.dataset.datatype.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.ComparableTableMappingContext;
-import yo.dbunitcli.dataset.ComparableTableMappingTask;
+import yo.dbunitcli.dataset.*;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -128,7 +125,8 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                     } else {
                         tableMetaData = table.getTableMetaData();
                     }
-                    context.startTable(source.wrap(tableMetaData));
+                    final ComparableTableMapper mapper = context.createMapper(source.wrap(tableMetaData));
+                    mapper.startTable();
                     if (this.param.loadData()) {
                         final Column[] columns = table.getTableMetaData().getColumns();
                         int row = 0;
@@ -139,14 +137,14 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                                 for (final Column column : columns) {
                                     rows[columnIndex++] = table.getValue(row, column.getColumnName());
                                 }
-                                context.row(rows);
+                                mapper.addRow(rows);
                             } catch (final RowOutOfBoundsException e) {
                                 break;
                             }
                         }
                         ComparableDBDataSetProducer.LOGGER.info("produce - rows={}", row);
                     }
-                    context.endTable();
+                    mapper.endTable();
                     ComparableDBDataSetProducer.LOGGER.info("produce - end   databaseTable={}", table.getTableMetaData().getTableName());
                 } finally {
                     if (table instanceof final IResultSetTable resultSetTable) {

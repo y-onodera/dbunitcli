@@ -19,25 +19,23 @@ public class LazyloadTaskMapper {
         final TableSeparators tableSeparators = param.tableSeparators();
         final List<ComparableTableJoin> joins = tableSeparators.joins();
         final MetaDataCollector collector = new MetaDataCollector(joins);
-        final ComparableTableMappingContext context = new ComparableTableMappingContext(tableSeparators, collector);
+        final ComparableTableMappingContext context = new ComparableTableMappingContext(tableSeparators, collector, new TreeMap<>(), new HashMap<>(), joins, new ArrayList<>(), false);
         context.open();
         tasks.forEach(task -> {
             task.with(builder -> builder.setLoadData(tableSeparators.hasSplitter()))
                     .run(context);
             collector.feedBackAndReset(this.result, task);
         });
-        final Map<String, ComparableTableDto> joinResult = new LinkedHashMap<>();
+        context.close();
+        final Map<ComparableTableJoin, ComparableTableMappingTask.WithTargetTable> joinResult = new LinkedHashMap<>();
         joins.forEach(join -> this.result.forEach((key, value) -> {
             if (join.hasRelation(key)) {
-                joinResult.merge(join.joinMetaData().getTableName()
-                        , new ComparableTableDto(join.joinMetaData(), value.getTask())
-                        , (old, newVal) -> {
-                            old.setRows(old.getTask().chain(newVal.getTask()));
-                            return old;
-                        });
+                joinResult.merge(join
+                        , value.getTask()
+                        , ComparableTableMappingTask.WithTargetTable::chain);
             }
         }));
-        this.result.putAll(joinResult);
+        joinResult.forEach((k, v) -> collector.feedBackJoin(this.result, context.getAddSettingTableMetaData(k).toList(), v));
     }
 
     private record MetaDataCollector(Set<ITableMetaData> items,
@@ -93,6 +91,12 @@ public class LazyloadTaskMapper {
             }));
             this.items.clear();
             this.chains.clear();
+        }
+
+        public void feedBackJoin(final Map<String, ComparableTableDto> result, final Collection<AddSettingTableMetaData> joinResult, final ComparableTableMappingTask task) {
+            this.items.stream()
+                    .filter(it -> joinResult.stream().map(AddSettingTableMetaData::getTableName).anyMatch(tableName -> tableName.equals(it.getTableName())))
+                    .forEach(it -> result.put(it.getTableName(), new ComparableTableDto(it, task)));
         }
     }
 }

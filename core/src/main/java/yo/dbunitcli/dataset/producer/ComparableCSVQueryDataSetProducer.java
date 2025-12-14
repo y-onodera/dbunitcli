@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.ComparableTableMapper;
 import yo.dbunitcli.dataset.ComparableTableMappingContext;
 import yo.dbunitcli.dataset.ComparableTableMappingTask;
 import yo.dbunitcli.resource.FileResources;
@@ -52,11 +53,12 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                             })
                             .map(name -> new Column(name.trim(), DataType.UNKNOWN))
                             .toArray(Column[]::new);
-                    context.startTable(this.source.createMetaData(columns));
+                    final ComparableTableMapper mapper = context.createMapper(this.source.createMetaData(columns));
+                    mapper.startTable();
                     if (this.param.loadData()) {
                         int readRows = 0;
                         while (rst.next()) {
-                            context.row(IntStream.rangeClosed(1, metaData.getColumnCount())
+                            mapper.addRow(IntStream.rangeClosed(1, metaData.getColumnCount())
                                     .mapToObj(i -> {
                                         try {
                                             return Optional.ofNullable(rst.getString(i))
@@ -70,7 +72,7 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                         }
                         ComparableCSVQueryDataSetProducer.LOGGER.info("produce - rows={}", readRows);
                     }
-                    context.endTable();
+                    mapper.endTable();
                     ComparableCSVQueryDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());
                 }
             } catch (final SQLException e) {

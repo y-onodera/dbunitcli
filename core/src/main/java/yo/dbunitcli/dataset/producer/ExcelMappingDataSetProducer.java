@@ -5,6 +5,7 @@ import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
+import yo.dbunitcli.dataset.ComparableTableMapper;
 import yo.dbunitcli.dataset.ComparableTableMappingContext;
 import yo.dbunitcli.resource.poi.XlsxCellsToTableBuilder;
 import yo.dbunitcli.resource.poi.XlsxRowsToTableBuilder;
@@ -21,6 +22,7 @@ public class ExcelMappingDataSetProducer {
     private final XlsxSchema schema;
     private final int startRow;
     protected ComparableTableMappingContext context;
+    protected ComparableTableMapper mapper;
     protected XlsxCellsToTableBuilder randomCellRecordBuilder;
     protected XlsxRowsToTableBuilder rowsTableBuilder;
     private int rowTableRows = 0;
@@ -46,7 +48,7 @@ public class ExcelMappingDataSetProducer {
         try {
             if (this.rowsTableBuilder != null) {
                 if (this.rowsTableBuilder.isNowProcessing()) {
-                    this.context.endTable();
+                    this.mapper.endTable();
                     ExcelMappingDataSetProducer.LOGGER.info("produce - rows={}", this.rowTableRows);
                 }
                 this.rowsTableBuilder = null;
@@ -74,10 +76,11 @@ public class ExcelMappingDataSetProducer {
             if (this.rowsTableBuilder != null) {
                 if (this.rowsTableBuilder.isTableStart(rowNumber)) {
                     if (this.rowsTableBuilder.isNowProcessing()) {
-                        this.context.endTable();
+                        this.mapper.endTable();
                         ExcelMappingDataSetProducer.LOGGER.info("produce - rows={}", this.rowTableRows);
                     }
-                    this.context.startTable(this.rowsTableBuilder.startNewTable());
+                    this.mapper = this.context.createMapper(this.rowsTableBuilder.startNewTable());
+                    this.mapper.startTable();
                     this.rowTableRows = 0;
                     if (this.rowsTableBuilder.hasRow(rowNumber)) {
                         this.addRowToTable(this.rowsTableBuilder.currentRow());
@@ -98,7 +101,8 @@ public class ExcelMappingDataSetProducer {
 
     protected void createRandomCellTable() throws DataSetException {
         for (final String tableName : this.randomCellRecordBuilder.getTableNames()) {
-            this.context.startTable(this.randomCellRecordBuilder.getTableMetaData(tableName));
+            this.mapper = this.context.createMapper(this.randomCellRecordBuilder.getTableMetaData(tableName));
+            this.mapper.startTable();
             ExcelMappingDataSetProducer.LOGGER.info("produce - start tableName={}", tableName);
             if (this.loadData) {
                 int i = 0;
@@ -108,14 +112,14 @@ public class ExcelMappingDataSetProducer {
                 }
                 ExcelMappingDataSetProducer.LOGGER.info("produce - rows={},tableName={}", i, tableName);
             }
-            this.context.endTable();
+            this.mapper.endTable();
             ExcelMappingDataSetProducer.LOGGER.info("produce - end   tableName={}", tableName);
         }
     }
 
     protected void addRowToTable(final String[] row) throws DataSetException {
         if (Stream.of(row).anyMatch(it -> !Optional.ofNullable(it).orElse("").isEmpty())) {
-            this.context.row(Stream.of(row).map(it -> it == null ? "" : it).toArray());
+            this.mapper.addRow(Stream.of(row).map(it -> it == null ? "" : it).toArray());
         }
     }
 }

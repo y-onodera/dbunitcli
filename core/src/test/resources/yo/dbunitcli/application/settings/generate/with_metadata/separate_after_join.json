@@ -1,0 +1,39 @@
+{
+  "settings": [
+    {
+      "innerJoin": {
+        "left": "ユーザマスタ概要",
+        "right": "ユーザマスタ",
+        "column": [
+          "$FILE_PATH"
+        ]
+      },
+      "tableName": "join",
+      "exclude": [
+        "ユーザマスタ_$FILE_PATH",
+        "ユーザマスタ_$FILE_NAME",
+        "ユーザマスタ_$SHEET_NAME",
+        "ユーザマスタ概要_$FILE_PATH",
+        "ユーザマスタ概要_$FILE_NAME",
+        "ユーザマスタ概要_$SHEET_NAME"
+      ]
+    },
+    {
+      "name": "join",
+      "separate": [
+        {
+          "tableName": "char_column",
+          "filter": [
+            "get('ユーザマスタ_データ型') == 'NVARCHAR'"
+          ]
+        },
+        {
+          "tableName": "number_column",
+          "filter": [
+            "get('ユーザマスタ_データ型') == 'DECIMAL'"
+          ]
+        }
+      ]
+    }
+  ]
+}

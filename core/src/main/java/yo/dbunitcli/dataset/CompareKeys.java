@@ -11,7 +11,7 @@ public record CompareKeys(List<String> keys, int rowNum, int oldRowNum, int newR
 
     public CompareKeys(final ITable table, final int aRowNum, final List<String> compareColumns) {
         this(new ArrayList<>(), aRowNum, aRowNum, aRowNum);
-        if (compareColumns.size() > 0) {
+        if (!compareColumns.isEmpty()) {
             compareColumns.forEach(column -> {
                 try {
                     this.keys.add(table.getValue(aRowNum, column).toString());

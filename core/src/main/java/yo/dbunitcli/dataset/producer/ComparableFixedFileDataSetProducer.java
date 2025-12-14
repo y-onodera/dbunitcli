@@ -4,11 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.ComparableTableMappingContext;
-import yo.dbunitcli.dataset.ComparableTableMappingTask;
+import yo.dbunitcli.dataset.*;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -42,17 +40,24 @@ public record ComparableFixedFileDataSetProducer(ComparableDataSetParam param,
             try {
                 ComparableFixedFileDataSetProducer.LOGGER.info("produce - start filePath={}", this.source.filePath());
                 final TableMetaDataWithSource metaData = this.source.createMetaData(this.param.headerNames());
-                context.startTable(metaData);
+                final ComparableTableMapper mapper = context.createMapper(metaData);
+                mapper.startTable();
                 int rows = 0;
                 if (this.param.loadData()) {
-                    for (final String s : Files.readAllLines(Path.of(this.source.filePath()), Charset.forName(this.param.encoding()))) {
-                        if (rows + 1 >= this.param.startRow()) {
-                            context.row(metaData.source().apply(this.split(s)));
+                    try (final BufferedReader reader = Files.newBufferedReader(Path.of(this.source.filePath()), Charset.forName(this.param.encoding()))) {
+                        for (; ; ) {
+                            final String s = reader.readLine();
+                            if (s == null) {
+                                break;
+                            }
+                            if (rows + 1 >= this.param.startRow()) {
+                                mapper.addRow(metaData.source().apply(this.split(s)));
+                            }
+                            rows++;
                         }
-                        rows++;
                     }
                 }
-                context.endTable();
+                mapper.endTable();
                 ComparableFixedFileDataSetProducer.LOGGER.info("produce - rows={}", rows);
                 ComparableFixedFileDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());
             } catch (final IOException e) {

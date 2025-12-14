@@ -3,10 +3,7 @@ package yo.dbunitcli.dataset.producer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.ComparableTableMappingContext;
-import yo.dbunitcli.dataset.ComparableTableMappingTask;
+import yo.dbunitcli.dataset.*;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -55,8 +52,9 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
 
         @Override
         public void run(final ComparableTableMappingContext context) {
-            context.startTable(this.source
+            final ComparableTableMapper mapper = context.createMapper(this.source
                     .wrap(new ComparableFileTableMetaData(this.getTableName())));
+            mapper.startTable();
             ComparableFileDataSetProducer.LOGGER.info("produce - start fileName={}", this.src);
             if (this.param.loadData()) {
                 final int[] rows = {0};
@@ -64,13 +62,13 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
                     this.param.getWalk()
                             .filter(this.fileTypeFilter)
                             .peek(it -> rows[0]++)
-                            .forEach(path -> context.row(this.produceFromFile(path.toFile())));
+                            .forEach(path -> mapper.addRow(this.produceFromFile(path.toFile())));
                 } catch (final AssertionError e) {
                     throw new AssertionError("error producing dataSet for '" + this.src + "'", e);
                 }
                 ComparableFileDataSetProducer.LOGGER.info("produce - rows={}", rows[0]);
             }
-            context.endTable();
+            mapper.endTable();
             ComparableFileDataSetProducer.LOGGER.info("produce - end   fileName={}", this.src);
         }
 

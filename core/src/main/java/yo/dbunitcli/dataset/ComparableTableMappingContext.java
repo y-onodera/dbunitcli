@@ -55,26 +55,15 @@ public class ComparableTableMappingContext {
         }
     }
 
-    public void startTable(final TableMetaDataWithSource metaData) {
-        LOGGER.debug("startTable(metaData={}) - start", metaData);
-        this.currentMapper = new ComparableTableMapperBuilder()
+    public ComparableTableMapper createMapper(final TableMetaDataWithSource metaData) {
+        return new ComparableTableMapperBuilder()
                 .setConverter(this.converter)
                 .setAlreadyWrite(this.alreadyWrite)
                 .setJoins(this.joins)
                 .setChain(this.chain)
                 .setChainRun(this.chainRun)
+                .setContextShareTableMap(this.tableMap)
                 .build(this.tableSeparators.getAddSettingTableMetaData(metaData));
-        this.currentMapper.startTable();
-    }
-
-    public void row(final Object[] values) {
-        LOGGER.debug("row(values={}) - start", values);
-        this.currentMapper.addRow(values);
-    }
-
-    public void endTable() {
-        LOGGER.debug("endTable() - start");
-        this.currentMapper.endTable(this.tableMap);
     }
 
     public TreeMap<String, ComparableTable> close() {
@@ -89,6 +78,10 @@ public class ComparableTableMappingContext {
             return new TreeMap<>();
         }
         return this.tableMap;
+    }
+
+    public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ComparableTableJoin join) {
+        return this.tableSeparators.getAddSettingTableMetaData(join);
     }
 
     private void executeJoin() {
@@ -110,17 +103,19 @@ public class ComparableTableMappingContext {
                     final List<ComparableTableJoin> newRemaining = remaining.stream()
                             .filter(it -> !it.equals(join))
                             .toList();
-                    this.currentMapper = new ComparableTableMapperBuilder()
+                    final ComparableTableMapper joinMapper = new ComparableTableMapperBuilder()
                             .setConverter(this.converter)
+                            .setContextShareTableMap(this.tableMap)
                             .setAlreadyWrite(this.alreadyWrite)
                             .setJoins(newRemaining)
                             .setChain(this.chain)
                             .setChainRun(this.chainRun)
-                            .build(this.tableSeparators.getAddSettingTableMetaData(join));
-                    this.currentMapper.startTable();
-                    join.execute().forEach(this::row);
-                    this.currentMapper.endTable(this.tableMap);
+                            .build(this.getAddSettingTableMetaData(join));
+                    joinMapper.startTable();
+                    join.execute().forEach(joinMapper::addRow);
+                    joinMapper.endTable();
                     this.processExecutableJoins(newRemaining);
                 });
     }
+
 }

@@ -329,6 +329,30 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateFromSeparateAfterJoin() {
+            Generate.main(new String[]{
+                    "-srcType=xlsx"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/xlsxwithschema/ComplexLayout.xlsx"
+                    , "-xlsxSchema=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/ComplexSchemaAddFileInfo.json"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/separate_after_join.json"
+                    , "-addFileInfo=true"
+                    , "-generateType=xlsx"
+                    , "-unit=dataset"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/separate_after_join.xlsx"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/separate_after_join.xlsx"
+            });
+            Compare.main(new String[]{
+                    "-src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/separate_after_join"
+                    , "-old.srcType=csv"
+                    , "-old.encoding=UTF-8"
+                    , "-new.src=" + this.getBaseDir() + "/generate/with_metadata/result/separate_after_join.xlsx"
+                    , "-new.srcType=xlsx"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/separate_after_join_compare.json"
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/separate_after_join"
+            });
+        }
+
+        @Test
         public void testGenerateXlsxTemplate() {
             Generate.main(new String[]{"@" + GenerateTest.testResourcesDir + "/paramGenerateXlsxTemplate.txt"});
             Generate.main(new String[]{

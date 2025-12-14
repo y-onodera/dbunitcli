@@ -5,10 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.ComparableTableMappingContext;
-import yo.dbunitcli.dataset.ComparableTableMappingTask;
+import yo.dbunitcli.dataset.*;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -58,17 +55,18 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
                     headerName = this.parseFirstLine(lineNumberReader, this.source.filePath());
                 }
                 final TableMetaDataWithSource metaData = this.source.createMetaData(headerName);
-                context.startTable(metaData);
+                final ComparableTableMapper mapper = context.createMapper(metaData);
+                mapper.startTable();
                 if (this.param.loadData()) {
                     int rows = 0;
                     List<Object> columns;
                     while ((columns = this.collectExpectedNumberOfColumns(headerName.length, lineNumberReader)) != null) {
-                        context.row(metaData.source().apply(columns));
+                        mapper.addRow(metaData.source().apply(columns));
                         rows++;
                     }
                     ComparableCsvDataSetProducer.LOGGER.info("produce - rows={}", rows);
                 }
-                context.endTable();
+                mapper.endTable();
             } catch (final IOException e) {
                 throw new AssertionError(e);
             }

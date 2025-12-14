@@ -4,11 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.ComparableTableMappingContext;
-import yo.dbunitcli.dataset.ComparableTableMappingTask;
+import yo.dbunitcli.dataset.*;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -37,30 +35,56 @@ public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) 
         public void run(final ComparableTableMappingContext context) {
             try {
                 ComparableRegexSplitDataSetProducer.LOGGER.info("produce - start filePath={}", this.source.filePath());
-                if (this.param.headerNames() != null) {
-                    context.startTable(this.source.createMetaData(this.param.headerNames()));
-                    if (!this.param.loadData()) {
-                        context.endTable();
+                if (!this.param.loadData()) {
+                    if (this.param.headerNames() != null) {
+                        final ComparableTableMapper mapper = context.createMapper(this.source.createMetaData(this.param.headerNames()));
+                        mapper.startTable();
+                        mapper.endTable();
                         return;
+                    }
+                    int row = 1;
+                    for (final String s : Files.readAllLines(Path.of(this.source.filePath()), Charset.forName(this.param.encoding()))) {
+                        if (row == this.param.startRow() && this.param.headerNames() == null) {
+                            final TableMetaDataWithSource metaData = this.source.createMetaData(this.headerSplitPattern.split(s));
+                            final ComparableTableMapper mapper = context.createMapper(metaData);
+                            mapper.startTable();
+                            mapper.endTable();
+                            return;
+                        }
+                        row++;
                     }
                 }
                 int row = 1;
-                for (final String s : Files.readAllLines(Path.of(this.source.filePath()), Charset.forName(this.param.encoding()))) {
-                    if (row == this.param.startRow() && this.param.headerNames() == null) {
-                        final TableMetaDataWithSource metaData = this.source.createMetaData(this.headerSplitPattern.split(s));
-                        context.startTable(metaData);
-                        if (!this.param.loadData()) {
+                final ComparableTableMapper mapper;
+                try (final BufferedReader reader = Files.newBufferedReader(Path.of(this.source.filePath()), Charset.forName(this.param.encoding()))) {
+                    if (this.param.headerNames() != null) {
+                        mapper = context.createMapper(this.source.createMetaData(this.param.headerNames()));
+                    } else {
+                        int readed = 1;
+                        String header = "";
+                        for (; ; ) {
+                            header = reader.readLine();
+                            if (readed == this.param.startRow()) {
+                                break;
+                            }
+                            readed++;
+                        }
+                        mapper = context.createMapper(this.source.createMetaData(this.headerSplitPattern.split(header)));
+                    }
+                    mapper.startTable();
+                    for (; ; ) {
+                        final String s = reader.readLine();
+                        if (s == null) {
                             break;
                         }
-                    } else if (row >= this.param.startRow()) {
-                        context.row(this.source.apply(this.dataSplitPattern.split(s)));
+                        mapper.addRow(this.source.apply(this.dataSplitPattern.split(s)));
+                        row++;
                     }
-                    row++;
                 }
                 if (this.param.loadData()) {
                     ComparableRegexSplitDataSetProducer.LOGGER.info("produce - rows={}", row);
                 }
-                context.endTable();
+                mapper.endTable();
                 ComparableRegexSplitDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());
             } catch (final IOException e) {
                 throw new AssertionError(e);
