@@ -1,0 +1,4 @@
+テーブル論理名,ユーザマスタ,ユーザマスタ,ユーザマスタ,ユーザマスタ,ユーザマスタ
+テーブル物理名,MST_USER,MST_USER,MST_USER,MST_USER,MST_USER
+カラム論理名,ユーザID,パスワード,名称,電話番号,メールアドレス
+カラム物理名,ID,PASSWORD,NAME,TEL,MAIL

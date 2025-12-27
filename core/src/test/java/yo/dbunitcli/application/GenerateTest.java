@@ -237,9 +237,37 @@ public class GenerateTest {
                     , "-old.srcType=xlsx"
                     , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_join_table.xlsx"
                     , "-new.srcType=xlsx"
-                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_compare.json"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_merge.json"
                     , "-settingEncoding=UTF-8"
                     , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/join_compare"
+            });
+        }
+
+        @Test
+        public void testGenerateFromJoinTableDirectionRight() {
+            Generate.main(new String[]{
+                    "-srcType=xlsx"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/xlsxwithschema/ComplexLayout.xlsx"
+                    , "-xlsxSchema=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/ComplexSchemaAddFileInfo.json"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/setting_fileInfo_join.json"
+                    , "-settingEncoding=MS932"
+                    , "-addFileInfo=true"
+                    , "-generateType=xlsx"
+                    , "-unit=dataset"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/join_table_direction_right.xlsx"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/generated_join_table_direction_right.xlsx"
+            });
+            Compare.main(new String[]{
+                    "-src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/direction_right/join.csv"
+                    , "-headerName=header,row1,row2,row3,row4,row5"
+                    , "-startRow=1"
+                    , "-old.srcType=csv"
+                    , "-old.encoding=UTF-8"
+                    , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_join_table_direction_right.xlsx"
+                    , "-new.srcType=xlsx"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_direction_right.json"
+                    , "-settingEncoding=UTF-8"
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_direction_right"
             });
         }
 
@@ -262,7 +290,7 @@ public class GenerateTest {
                     , "-old.encoding=UTF-8"
                     , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_merge_table.xlsx"
                     , "-new.srcType=xlsx"
-                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_compare.json"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_merge.json"
                     , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/merge_compare"
             });
         }
@@ -286,7 +314,7 @@ public class GenerateTest {
                     , "-old.encoding=UTF-8"
                     , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_merge_table_unit_table.xlsx"
                     , "-new.srcType=xlsx"
-                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_compare.json"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_merge.json"
                     , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_unit_table"
             });
         }
@@ -311,7 +339,7 @@ public class GenerateTest {
                     , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_from_metadata"
                     , "-new.srcType=xlsx"
                     , "-new.xlsxSchema=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/FromMedadataSchema.json"
-                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/from_metadata_compare.json"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_from_metadata.json"
                     , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_generated_from_metadata"
             });
             Compare.main(new String[]{
@@ -322,8 +350,8 @@ public class GenerateTest {
                     , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_from_metadata"
                     , "-new.srcType=xlsx"
                     , "-new.startRow=2"
-                    , "-new.setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/from_metadata_compare_target.json"
-                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/from_metadata_compare.json"
+                    , "-new.setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_from_metadata_target.json"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_from_metadata.json"
                     , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_generated_from_metadata"
             });
         }
@@ -347,7 +375,7 @@ public class GenerateTest {
                     , "-old.encoding=UTF-8"
                     , "-new.src=" + this.getBaseDir() + "/generate/with_metadata/result/separate_after_join.xlsx"
                     , "-new.srcType=xlsx"
-                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/separate_after_join_compare.json"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_separate_after_join.json"
                     , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/separate_after_join"
             });
         }
