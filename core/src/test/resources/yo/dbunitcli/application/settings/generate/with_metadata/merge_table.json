@@ -2,14 +2,7 @@
   "settings": [
     {
       "pattern": "Test",
-      "separate": [
-        {
-          "tableName": "merge",
-          "filter": [
-            "true"
-          ]
-        }
-      ]
+      "tableName": "merge"
     }
   ]
 }
