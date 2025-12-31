@@ -8,31 +8,18 @@ import yo.dbunitcli.common.TableMetaDataWithSource;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class ComparableTableMappingContext {
+public record ComparableTableMappingContext(TableSeparators tableSeparators
+        , IDataSetConverter converter
+        , TreeMap<String, ComparableTable> tableMap
+        , Map<String, Integer> alreadyWrite
+        , List<ComparableTableJoin> joins
+        , List<ComparableTableMappingTask> chain
+        , boolean chainRun) {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableTableMappingContext.class);
 
-    private final TableSeparators tableSeparators;
-    private final IDataSetConverter converter;
-    private final TreeMap<String, ComparableTable> tableMap;
-    private final Map<String, Integer> alreadyWrite;
-    private final List<ComparableTableJoin> joins;
-    private final List<ComparableTableMappingTask> chain;
-    private final boolean chainRun;
-    private ComparableTableMapper currentMapper;
-
     public ComparableTableMappingContext(final TableSeparators tableSeparators, final IDataSetConverter converter) {
         this(tableSeparators, converter, new TreeMap<>(), new HashMap<>(), tableSeparators.joins(), new ArrayList<>(), false);
-    }
-
-    public ComparableTableMappingContext(final TableSeparators tableSeparators, final IDataSetConverter converter, final TreeMap<String, ComparableTable> tableMap, final Map<String, Integer> alreadyWrite, final List<ComparableTableJoin> joins, final List<ComparableTableMappingTask> chain, final boolean chainRun) {
-        this.tableSeparators = tableSeparators;
-        this.converter = converter;
-        this.tableMap = tableMap;
-        this.alreadyWrite = alreadyWrite;
-        this.joins = joins;
-        this.chain = chain;
-        this.chainRun = chainRun;
     }
 
     public ComparableTableMappingContext addChain(final List<ComparableTableMappingTask> chain) {

@@ -1,0 +1,7 @@
+filename,comment,name,dataType,test1
+Test2.csv,数値,bigDecimalValue,BigDecimal,FALSE
+Test2.csv,文字列値,stringValue,String,FALSE
+Test2.csv,真偽値,booleanValue,Boolean,FALSE
+Test3.csv,金額1,gk1,BigDecimal,FALSE
+Test3.csv,金額2,gk2,BigDecimal,FALSE
+Test3.csv,金額3,gk3,BigDecimal,FALSE

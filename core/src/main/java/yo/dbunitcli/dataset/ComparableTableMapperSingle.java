@@ -62,8 +62,8 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
 
     @Override
     public void endTable() {
+        this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
         if (this.enableRowProcessing && this.startTable) {
-            this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
             if (!this.chain.isEmpty()) {
                 final ComparableTableMappingTask next = this.chain.getFirst();
                 final List<ComparableTableMappingTask> restChain = this.chain.size() <= 1
@@ -97,13 +97,26 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                         this.addSplitResult();
                     } else {
                         this.contextShareTableMap.put(this.metaData.getTableName(), this.lazyProcess());
+                        if (!this.chain.isEmpty()) {
+                            final ComparableTableMappingTask next = this.chain.getFirst();
+                            final List<ComparableTableMappingTask> restChain = this.chain.size() <= 1
+                                    ? List.of()
+                                    : this.chain.subList(1, this.chain.size());
+                            next.run(new ComparableTableMappingContext(next.param().tableSeparators()
+                                    , null
+                                    , this.contextShareTableMap
+                                    , this.alreadyWrite
+                                    , new ArrayList<>()
+                                    , restChain
+                                    , true
+                            ));
+                        }
                     }
                 } catch (final AmbiguousTableNameException e) {
                     throw new AssertionError(e);
                 }
             }
             this.joins.forEach(it -> it.setIfRelated(this.contextShareTableMap.get(this.metaData.getTableName())));
-            this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
         }
     }
 

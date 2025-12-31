@@ -52,7 +52,7 @@ public class ComparableTableMapperBuilder {
                             .collect(Collectors.toList());
                     final boolean enableRowProcessing = this.converter != null && this.converter.isEnableRowProcessing(target, this.joins);
                     if (count[0] > 0 && this.isSplittable()) {
-                        return new ComparableTableMapperSingle(target, this.converter.split(), this.contextShareTableMap, this.alreadyWrite, targetJoins, this.chain, this.chainRun, enableRowProcessing);
+                        return new ComparableTableMapperSingle(target, this.converter.split(), this.contextShareTableMap, this.alreadyWrite, targetJoins, new ArrayList<>(), false, enableRowProcessing);
                     }
                     return new ComparableTableMapperSingle(target, this.converter, this.contextShareTableMap, this.alreadyWrite, targetJoins, this.chain, this.chainRun, enableRowProcessing);
                 })

@@ -1,0 +1,6 @@
+filename,comment,name,dataType,test1
+Test1.csv,文字列値,stringValue,String,TRUE
+Test1.csv,真偽値,booleanValue,Boolean,TRUE
+Test1.csv,数値1,longValue,Long,TRUE
+Test1.csv,数値2,intValue,Integer,TRUE
+Test1.csv,数値3,bigDecimalValue,BigDecimal,TRUE

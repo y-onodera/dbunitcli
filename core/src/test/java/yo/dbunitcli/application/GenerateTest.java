@@ -239,7 +239,7 @@ public class GenerateTest {
                     , "-new.srcType=xlsx"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_merge.json"
                     , "-settingEncoding=UTF-8"
-                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/join_compare"
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_join"
             });
         }
 
@@ -316,6 +316,30 @@ public class GenerateTest {
                     , "-new.srcType=xlsx"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_merge.json"
                     , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_unit_table"
+            });
+        }
+
+        @Test
+        public void testGenerateFromMergeAfterJoin() {
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table/source/csv"
+                    , "-encoding=MS932"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_after_join.json"
+                    , "-addFileInfo=true"
+                    , "-generateType=xlsx"
+                    , "-unit=dataset"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_after_join.xlsx"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/generated_merge_after_join.xlsx"
+            });
+            Compare.main(new String[]{
+                    "-src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/merge_after_join"
+                    , "-old.srcType=csv"
+                    , "-old.encoding=UTF-8"
+                    , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_merge_after_join.xlsx"
+                    , "-new.srcType=xlsx"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_merge_after_join.json"
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_merge_after_join"
             });
         }
 

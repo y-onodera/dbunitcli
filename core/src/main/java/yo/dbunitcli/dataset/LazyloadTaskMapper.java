@@ -32,7 +32,12 @@ public class LazyloadTaskMapper {
             if (join.hasRelation(key)) {
                 joinResult.merge(join
                         , value.getTask()
-                        , ComparableTableMappingTask.WithTargetTable::chain);
+                        , (old, v) -> {
+                            if (old.source().equals(v.source())) {
+                                return old;
+                            }
+                            return old.chain(v);
+                        });
             }
         }));
         joinResult.forEach((k, v) -> collector.feedBackJoin(this.result, context.getAddSettingTableMetaData(k).toList(), v));
