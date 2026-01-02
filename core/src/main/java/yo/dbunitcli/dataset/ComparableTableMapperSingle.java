@@ -142,7 +142,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                         keys.addAll(breakKey);
                     }
                 }
-            } else {
+            } else if (i > 0) {
                 keyCount++;
             }
             if (this.splitter.isLimit(keyCount)) {
