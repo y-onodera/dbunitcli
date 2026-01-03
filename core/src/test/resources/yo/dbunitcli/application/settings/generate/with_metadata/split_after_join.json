@@ -1,0 +1,40 @@
+{
+  "settings": [
+    {
+      "pattern": "Test",
+      "separate": [
+        {
+          "tableName": "end_with_1",
+          "include": [
+            "$FILE_PATH",
+            "$FILE_NAME"
+          ],
+          "filter": [
+            "get('$FILE_NAME') == 'Test1.csv'"
+          ],
+          "distinct": true
+        },
+        {
+          "tableName": "all",
+          "filter": [
+            "1==1"
+          ]
+        }
+      ]
+    },
+    {
+      "outerJoin": {
+        "left": "all",
+        "right": "end_with_1",
+        "column": [
+          "$FILE_PATH"
+        ]
+      },
+      "split": {
+        "tableName": "split",
+        "suffix": "_%02d",
+        "limit": 2
+      }
+    }
+  ]
+}

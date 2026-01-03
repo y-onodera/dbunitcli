@@ -34,6 +34,7 @@ public record GenerateOption(
         , DataSetLoadOption srcData
         , TemplateRenderOption templateOption
         , boolean includeAllColumns
+        , boolean lazyLoad
 ) implements CommandLineOption<GenerateDto> {
 
     public static GenerateDto toDto(final String[] args) {
@@ -68,6 +69,7 @@ public record GenerateOption(
                 , new DataSetLoadOption("src", dto.getSrcData())
                 , new TemplateRenderOption("template", dto.getTemplateOption())
                 , Strings.isNotEmpty(dto.getIncludeAllColumns()) && Boolean.parseBoolean(dto.getIncludeAllColumns())
+                , !Strings.isNotEmpty(dto.getLazyLoad()) || Boolean.parseBoolean(dto.getLazyLoad())
         );
     }
 
@@ -76,7 +78,7 @@ public record GenerateOption(
     }
 
     public Stream<Parameter> parameterStream() {
-        if (this.generateType.isExcel()) {
+        if (this.generateType.isExcel() && this.lazyLoad) {
             return this.unit().lazyLoadStream(this.getComparableDataSetLoader(), this.dataSetParam());
         }
         return this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
@@ -146,6 +148,7 @@ public record GenerateOption(
                         .remove("-src.loadData");
             }
             case xlsxTemplate -> srcComponent.remove("-src.loadData");
+            case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
         }
         result.addComponent("srcData", srcComponent.build());
         if (!this.generateType.isFixedTemplate()) {

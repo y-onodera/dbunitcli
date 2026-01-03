@@ -28,6 +28,8 @@ public class GenerateDto extends CommandDto {
     private String template;
     @CommandLine.Option(names = "-includeAllColumns", description = "include all columns in settings generation")
     private String includeAllColumns;
+    @CommandLine.Option(names = "-lazyLoad", description = "use lazy load for excel generation")
+    private String lazyLoad;
     private DataSetLoadDto srcData = new DataSetLoadDto();
 
     private TemplateRenderDto templateOption = new TemplateRenderDto();
@@ -118,6 +120,14 @@ public class GenerateDto extends CommandDto {
 
     public void setIncludeAllColumns(final String includeAllColumns) {
         this.includeAllColumns = includeAllColumns;
+    }
+
+    public String getLazyLoad() {
+        return this.lazyLoad;
+    }
+
+    public void setLazyLoad(final String lazyLoad) {
+        this.lazyLoad = lazyLoad;
     }
 
     public DataSetLoadDto getSrcData() {

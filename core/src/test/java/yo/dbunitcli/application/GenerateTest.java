@@ -344,6 +344,29 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateFromSplitAfterJoin() {
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table/source/csv"
+                    , "-encoding=MS932"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/split_after_join.json"
+                    , "-addFileInfo=true"
+                    , "-generateType=xlsx"
+                    , "-unit=table"
+                    , "-lazyLoad=false"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/split_after_join.xlsx"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/generated_split_after_join/$param.tableName$.xlsx"
+            });
+            Compare.main(new String[]{
+                    "-old.src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/split_after_join"
+                    , "-srcType=xlsx"
+                    , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_split_after_join"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_split_after_join.json"
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_split_after_join"
+            });
+        }
+
+        @Test
         public void testGenerateFromMetaData() {
             Generate.main(new String[]{
                     "-srcType=csv"
