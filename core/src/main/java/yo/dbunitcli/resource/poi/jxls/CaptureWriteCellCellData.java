@@ -16,12 +16,17 @@ import java.util.Map;
 /**
  * null値または空文字列の場合、セル自体を作成しないCellDataデコレータ
  */
-class SkipNullAndEmptyCellData extends PoiCellData {
+class CaptureWriteCellCellData extends PoiCellData {
     private final PoiCellData delegate;
+    private Cell cell;
 
-    public SkipNullAndEmptyCellData(final PoiCellData delegate) {
+    public CaptureWriteCellCellData(final PoiCellData delegate) {
         super(delegate.getCellRef());
         this.delegate = delegate;
+    }
+
+    public Cell getCell() {
+        return cell;
     }
 
     @Override
@@ -41,10 +46,7 @@ class SkipNullAndEmptyCellData extends PoiCellData {
 
     @Override
     public void writeToCell(final Cell cell, final Context context, final PoiTransformer transformer) {
-        final Object evaluationResult = this.delegate.evaluate(context);
-        if (evaluationResult == null || evaluationResult instanceof final String strValue && strValue.isEmpty()) {
-            return;
-        }
+        this.cell = cell;
         this.delegate.writeToCell(cell, context, transformer);
     }
 
@@ -164,6 +166,11 @@ class SkipNullAndEmptyCellData extends PoiCellData {
     }
 
     @Override
+    public void setEvaluatedFormulas(final List<String> evaluatedFormulas) {
+        this.delegate.setEvaluatedFormulas(evaluatedFormulas);
+    }
+
+    @Override
     public boolean isFormulaCell() {
         return this.delegate.isFormulaCell();
     }
@@ -191,11 +198,6 @@ class SkipNullAndEmptyCellData extends PoiCellData {
     @Override
     public List<AreaRef> getTargetParentAreaRef() {
         return this.delegate.getTargetParentAreaRef();
-    }
-
-    @Override
-    public void setEvaluatedFormulas(final List<String> evaluatedFormulas) {
-        this.delegate.setEvaluatedFormulas(evaluatedFormulas);
     }
 
     @Override

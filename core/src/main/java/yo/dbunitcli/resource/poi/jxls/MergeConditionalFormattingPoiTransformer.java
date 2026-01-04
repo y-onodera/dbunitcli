@@ -6,7 +6,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.jxls.common.CellData;
 import org.jxls.common.CellRef;
 import org.jxls.common.Context;
-import org.jxls.transform.poi.PoiCellData;
 import org.jxls.transform.poi.PoiTransformer;
 
 import java.util.HashMap;
@@ -40,8 +39,10 @@ public class MergeConditionalFormattingPoiTransformer extends PoiTransformer imp
 
     @Override
     protected void transformCell(final CellRef srcCellRef, final CellRef targetCellRef, final Context context, final boolean updateRowHeightFlag, final CellData cellData, final Sheet destSheet, final Row destRow) {
-        this.transformAndMergeFormat(srcCellRef, targetCellRef, destSheet
-                , () -> super.transformCell(srcCellRef, targetCellRef, context, updateRowHeightFlag, new SkipNullAndEmptyCellData((PoiCellData) cellData), destSheet, destRow));
+        this.transformAndMergeFormat(srcCellRef, targetCellRef, context, cellData, destSheet, destRow
+                , (writeCellData) -> {
+                    super.transformCell(srcCellRef, targetCellRef, context, updateRowHeightFlag, writeCellData, destSheet, destRow);
+                });
     }
 
 }

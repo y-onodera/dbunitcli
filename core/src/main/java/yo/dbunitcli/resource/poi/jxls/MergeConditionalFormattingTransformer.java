@@ -1,13 +1,19 @@
 package yo.dbunitcli.resource.poi.jxls;
 
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.jxls.common.CellData;
 import org.jxls.common.CellRef;
+import org.jxls.common.Context;
+import org.jxls.transform.poi.PoiCellData;
+import yo.dbunitcli.Strings;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -34,10 +40,17 @@ public interface MergeConditionalFormattingTransformer {
         return result;
     }
 
-    default void transformAndMergeFormat(final CellRef srcCellRef, final CellRef targetCellRef, final Sheet destSheet, final Runnable transformer) {
+    default void transformAndMergeFormat(final CellRef srcCellRef, final CellRef targetCellRef, Context context, CellData cellData, final Sheet destSheet, Row destRow, final Consumer<CaptureWriteCellCellData> transformer) {
         this.prepareConditionalFormat(srcCellRef, destSheet);
         final int originFormatNum = destSheet.getSheetConditionalFormatting().getNumConditionalFormattings();
-        transformer.run();
+        CaptureWriteCellCellData writeCellData = new CaptureWriteCellCellData((PoiCellData) cellData);
+        transformer.accept(writeCellData);
+        if (cellData.getCellValue() != null && Strings.isNotEmpty(cellData.getCellValue().toString())) {
+            final Object evaluationResult = cellData.evaluate(context);
+            if (evaluationResult == null || evaluationResult instanceof final String strValue && strValue.isEmpty()) {
+                destRow.removeCell(writeCellData.getCell());
+            }
+        }
         this.mergeConditionalFormat(srcCellRef, targetCellRef, destSheet, originFormatNum);
     }
 
