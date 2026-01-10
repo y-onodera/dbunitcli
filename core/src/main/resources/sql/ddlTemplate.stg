@@ -1,0 +1,8 @@
+createTable() ::= <<
+create table $tableName$ (
+$rows:{row | $row.columnName$ $row.sqlType$$if(row.precision && row.precision > 0)$($row.precision$$if(row.scale && row.scale > 0)$,$row.scale$$endif$)$else$$if(row.scale && row.scale > 0)$($row.scale)$endif$$endif$$if(row.nullable)$$else$ not null$endif$}; separator=",\n"$
+$rows:{row | comment on column $tableName$.$row.columnName$ is $row.comment$ }; separator="\n"$
+$if(primaryKeys)$,
+primary key ($primaryKeys:{column | $column.columnName$}; separator=", "$)$endif$
+);
+>>
