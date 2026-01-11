@@ -19,7 +19,8 @@ public record JxlsTemplateRender(
         boolean formulaProcess,
         boolean evaluateFormulas,
         boolean forceFormulaRecalc,
-        boolean fastFormulaProcess
+        boolean fastFormulaProcess,
+        boolean deleteBlankCells
 ) {
 
     public static Builder builder() {
@@ -45,7 +46,7 @@ public record JxlsTemplateRender(
             final JxlsPoiTemplateFillerBuilder builder = JxlsPoiTemplateFillerBuilder.newInstance()
                     .withAreaBuilder(areaBuilder)
                     .withTemplate(is)
-                    .withTransformerFactory(new UserFormulasValueClearPoiTransformerFactory());
+                    .withTransformerFactory(new UserFormulasValueClearPoiTransformerFactory(this.deleteBlankCells));
             if (this.fastFormulaProcess) {
                 builder.withFastFormulaProcessor();
             }
@@ -71,6 +72,7 @@ public record JxlsTemplateRender(
         private boolean evaluateFormulas = true;
         private boolean forceFormulaRecalc = false;
         private boolean fastFormulaProcess = false;
+        private boolean deleteBlankCells = false;
 
         public String getTemplateParameterAttribute() {
             return this.templateParameterAttribute;
@@ -90,6 +92,10 @@ public record JxlsTemplateRender(
 
         public boolean isFastFormulaProcess() {
             return this.fastFormulaProcess;
+        }
+
+        public boolean isDeleteBlankCells() {
+            return this.deleteBlankCells;
         }
 
         public Builder setTemplateParameterAttribute(final String templateParameterAttribute) {
@@ -117,13 +123,19 @@ public record JxlsTemplateRender(
             return this;
         }
 
+        public Builder setDeleteBlankCells(final boolean deleteBlankCells) {
+            this.deleteBlankCells = deleteBlankCells;
+            return this;
+        }
+
         public JxlsTemplateRender build() {
             return new JxlsTemplateRender(
                     this.getTemplateParameterAttribute(),
                     this.isFormulaProcess(),
                     this.isEvaluateFormulas(),
                     this.isForceFormulaRecalc(),
-                    this.isFastFormulaProcess()
+                    this.isFastFormulaProcess(),
+                    this.isDeleteBlankCells()
             );
         }
     }

@@ -18,6 +18,7 @@ public record TemplateRenderOption(
         , boolean evaluateFormulas
         , boolean forceFormulaRecalc
         , boolean fastFormulaProcess
+        , boolean deleteBlankCells
         , String templateGroup
 ) implements ComparableDataSetParamOption {
 
@@ -31,6 +32,7 @@ public record TemplateRenderOption(
                 , Strings.isEmpty(dto.getEvaluateFormulas()) || Boolean.parseBoolean(dto.getEvaluateFormulas())
                 , !Strings.isEmpty(dto.getForceFormulaRecalc()) || Boolean.parseBoolean(dto.getForceFormulaRecalc())
                 , !Strings.isEmpty(dto.getFastFormulaProcess()) && Boolean.parseBoolean(dto.getFastFormulaProcess())
+                , !Strings.isEmpty(dto.getDeleteBlankCells()) && Boolean.parseBoolean(dto.getDeleteBlankCells())
                 , dto.getTemplateGroup()
         );
     }

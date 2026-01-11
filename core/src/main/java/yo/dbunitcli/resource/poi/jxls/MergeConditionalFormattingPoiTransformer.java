@@ -16,10 +16,12 @@ public class MergeConditionalFormattingPoiTransformer extends PoiTransformer imp
     private final Map<String, List<ConditionalFormatCellAddress>> originFormatAddress;
     private final Map<String, Map<CellRef, List<DestConditionalFormat>>> transformedFormat = new HashMap<>();
     private final Map<CellRef, List<ConditionalFormatCellAddress>> formatSetCells = new HashMap<>();
+    private final boolean deleteBlankCells;
 
-    public MergeConditionalFormattingPoiTransformer(final Workbook workbook, final boolean streaming) {
+    public MergeConditionalFormattingPoiTransformer(final Workbook workbook, final boolean streaming, final boolean deleteBlankCells) {
         super(workbook, streaming);
         this.originFormatAddress = this.extractOriginFormatAddress(workbook);
+        this.deleteBlankCells = deleteBlankCells;
     }
 
     @Override
@@ -35,6 +37,11 @@ public class MergeConditionalFormattingPoiTransformer extends PoiTransformer imp
     @Override
     public Map<String, Map<CellRef, List<DestConditionalFormat>>> getTransformedFormat() {
         return this.transformedFormat;
+    }
+
+    @Override
+    public boolean isDeleteBlankCells() {
+        return this.deleteBlankCells;
     }
 
     @Override

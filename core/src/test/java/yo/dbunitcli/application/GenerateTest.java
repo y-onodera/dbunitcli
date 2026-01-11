@@ -1,8 +1,10 @@
 package yo.dbunitcli.application;
 
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Copy;
 import org.apache.tools.ant.taskdefs.Delete;
@@ -425,6 +427,48 @@ public class GenerateTest {
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_separate_after_join.json"
                     , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/separate_after_join"
             });
+        }
+
+        @Test
+        public void testGenerateXlsxNotDeleteBlankCell() throws IOException {
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/csv/multi/multi1.csv"
+                    , "-encoding=UTF-8"
+                    , "-generateType=xlsx"
+                    , "-unit=table"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/template.xlsx"
+                    , "-deleteBlankCells=false"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/NotDeleteBlankCell.xlsx"
+            });
+            Sheet resultSheet = new XSSFWorkbook(this.getBaseDir() + "/generate/NotDeleteBlankCell.xlsx").getSheet("multi");
+            Row resultRow3 = resultSheet.getRow(3);
+            Assertions.assertEquals("3", resultRow3.getCell(0).getStringCellValue());
+            Assertions.assertEquals("", resultRow3.getCell(1).getStringCellValue());
+            Assertions.assertEquals("", resultRow3.getCell(2).getStringCellValue());
+            Assertions.assertEquals("", resultRow3.getCell(3).getStringCellValue());
+            Assertions.assertEquals("", resultRow3.getCell(4).getStringCellValue());
+        }
+
+        @Test
+        public void testGenerateXlsxDeleteBlankCell() throws IOException {
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/csv/multi/multi1.csv"
+                    , "-encoding=UTF-8"
+                    , "-generateType=xlsx"
+                    , "-unit=table"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/template.xlsx"
+                    , "-deleteBlankCells=true"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/DeleteBlankCell.xlsx"
+            });
+            Sheet resultSheet = new XSSFWorkbook(this.getBaseDir() + "/generate/DeleteBlankCell.xlsx").getSheet("multi");
+            Row resultRow3 = resultSheet.getRow(3);
+            Assertions.assertEquals("3", resultRow3.getCell(0).getStringCellValue());
+            Assertions.assertNull(resultRow3.getCell(1));
+            Assertions.assertNull(resultRow3.getCell(2));
+            Assertions.assertEquals("", resultRow3.getCell(3).getStringCellValue());
+            Assertions.assertNull(resultRow3.getCell(4));
         }
 
         @Test

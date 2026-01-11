@@ -6,23 +6,29 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformerFactory;
 
 public class UserFormulasValueClearPoiTransformerFactory extends PoiTransformerFactory {
+    private final boolean deleteBlankCells;
+
+    public UserFormulasValueClearPoiTransformerFactory(final boolean deleteBlankCells) {
+        this.deleteBlankCells = deleteBlankCells;
+    }
+
     @Override
     protected Transformer createTransformer(final Workbook workbook, final JxlsStreaming streaming) {
         if (streaming.isAutoDetect()) {
             return new UserFormulasValueClearStreamingPoiTransformer(workbook, getAllSheetsInWhichStreamingIsConfigured(workbook),
-                    streaming.getRowAccessWindowSize(), streaming.isCompressTmpFiles(), streaming.isUseSharedStringsTable());
+                    streaming.getRowAccessWindowSize(), streaming.isCompressTmpFiles(), streaming.isUseSharedStringsTable(), this.deleteBlankCells);
 
         } else if (streaming.getSheetNames() != null) {
             return new UserFormulasValueClearStreamingPoiTransformer(workbook, streaming.getSheetNames(),
-                    streaming.getRowAccessWindowSize(), streaming.isCompressTmpFiles(), streaming.isUseSharedStringsTable());
+                    streaming.getRowAccessWindowSize(), streaming.isCompressTmpFiles(), streaming.isUseSharedStringsTable(), this.deleteBlankCells);
 
         } else if (streaming.isStreaming()) {
             // Don't use PoiTransformer here because SelectSheetsForStreamingPoiTransformer is better.
             return new UserFormulasValueClearStreamingPoiTransformer(workbook, true,
-                    streaming.getRowAccessWindowSize(), streaming.isCompressTmpFiles(), streaming.isUseSharedStringsTable());
+                    streaming.getRowAccessWindowSize(), streaming.isCompressTmpFiles(), streaming.isUseSharedStringsTable(), this.deleteBlankCells);
 
         } else { // no streaming
-            return new MergeConditionalFormattingPoiTransformer(workbook, false);
+            return new MergeConditionalFormattingPoiTransformer(workbook, false, this.deleteBlankCells);
         }
     }
 }

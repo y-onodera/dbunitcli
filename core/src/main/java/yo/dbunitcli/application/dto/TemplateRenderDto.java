@@ -30,6 +30,9 @@ public class TemplateRenderDto {
     @CommandLine.Option(names = "-fastFormulaProcess", description = "default false. if true use fast formula processor")
     private String fastFormulaProcess;
 
+    @CommandLine.Option(names = "-deleteBlankCells", description = "default false. delete blank cells after formula evaluation")
+    private String deleteBlankCells;
+
     public String getEncoding() {
         return this.encoding;
     }
@@ -100,5 +103,13 @@ public class TemplateRenderDto {
 
     public void setFastFormulaProcess(final String fastFormulaProcess) {
         this.fastFormulaProcess = fastFormulaProcess;
+    }
+
+    public String getDeleteBlankCells() {
+        return this.deleteBlankCells;
+    }
+
+    public void setDeleteBlankCells(final String deleteBlankCells) {
+        this.deleteBlankCells = deleteBlankCells;
     }
 }

@@ -188,6 +188,7 @@ public record GenerateOption(
             templateComponent.put("-evaluateFormulas", this.templateOption.evaluateFormulas());
             templateComponent.put("-forceFormulaRecalc", this.templateOption.forceFormulaRecalc());
             templateComponent.put("-fastFormulaProcess", this.templateOption.fastFormulaProcess());
+            templateComponent.put("-deleteBlankCells", this.templateOption.deleteBlankCells());
         }
         return templateComponent.build();
     }
@@ -223,6 +224,7 @@ public record GenerateOption(
                         .setEvaluateFormulas(option.templateOption.evaluateFormulas())
                         .setForceFormulaRecalc(option.templateOption.forceFormulaRecalc())
                         .setFastFormulaProcess(option.templateOption.fastFormulaProcess())
+                        .setDeleteBlankCells(option.templateOption.deleteBlankCells())
                         .build()
                         .render(option.getTemplatePath(), resultFile, param, option.unit != ParameterUnit.record);
             }
@@ -236,6 +238,7 @@ public record GenerateOption(
                         .setEvaluateFormulas(option.templateOption.evaluateFormulas())
                         .setForceFormulaRecalc(option.templateOption.forceFormulaRecalc())
                         .setFastFormulaProcess(option.templateOption.fastFormulaProcess())
+                        .setDeleteBlankCells(option.templateOption.deleteBlankCells())
                         .build()
                         .render(option.getTemplatePath(), resultFile, param, option.unit != ParameterUnit.record);
             }

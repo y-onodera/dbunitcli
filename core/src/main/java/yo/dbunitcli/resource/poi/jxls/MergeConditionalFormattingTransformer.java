@@ -25,6 +25,8 @@ public interface MergeConditionalFormattingTransformer {
 
     Map<String, Map<CellRef, List<DestConditionalFormat>>> getTransformedFormat();
 
+    boolean isDeleteBlankCells();
+
     default Map<String, List<ConditionalFormatCellAddress>> extractOriginFormatAddress(final Workbook workbook) {
         final Map<String, List<ConditionalFormatCellAddress>> result = new HashMap<>();
         final int numberOfSheets = workbook.getNumberOfSheets();
@@ -45,7 +47,7 @@ public interface MergeConditionalFormattingTransformer {
         final int originFormatNum = destSheet.getSheetConditionalFormatting().getNumConditionalFormattings();
         CaptureWriteCellCellData writeCellData = new CaptureWriteCellCellData((PoiCellData) cellData);
         transformer.accept(writeCellData);
-        if (cellData.getCellValue() != null && Strings.isNotEmpty(cellData.getCellValue().toString())) {
+        if (this.isDeleteBlankCells() && cellData.getCellValue() != null && Strings.isNotEmpty(cellData.getCellValue().toString())) {
             final Object evaluationResult = cellData.evaluate(context);
             if (evaluationResult == null || evaluationResult instanceof final String strValue && strValue.isEmpty()) {
                 destRow.removeCell(writeCellData.getCell());

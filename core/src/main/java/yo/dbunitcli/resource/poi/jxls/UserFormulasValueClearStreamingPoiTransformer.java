@@ -19,15 +19,18 @@ public class UserFormulasValueClearStreamingPoiTransformer extends SelectSheetsF
     private final Map<String, List<ConditionalFormatCellAddress>> originFormatAddress;
     private final Map<String, Map<CellRef, List<DestConditionalFormat>>> transformedFormat = new HashMap<>();
     private final Map<CellRef, List<ConditionalFormatCellAddress>> formatSetCells = new HashMap<>();
+    private final boolean deleteBlankCells;
 
-    public UserFormulasValueClearStreamingPoiTransformer(final Workbook workbook, final boolean allSheets, final int rowAccessWindowSize, final boolean compressTmpFiles, final boolean useSharedStringsTable) {
+    public UserFormulasValueClearStreamingPoiTransformer(final Workbook workbook, final boolean allSheets, final int rowAccessWindowSize, final boolean compressTmpFiles, final boolean useSharedStringsTable, final boolean deleteBlankCells) {
         super(workbook, allSheets, rowAccessWindowSize, compressTmpFiles, useSharedStringsTable);
         this.originFormatAddress = this.extractOriginFormatAddress(workbook);
+        this.deleteBlankCells = deleteBlankCells;
     }
 
-    public UserFormulasValueClearStreamingPoiTransformer(final Workbook workbook, final Set<String> sheetNames, final int rowAccessWindowSize, final boolean compressTmpFiles, final boolean useSharedStringsTable) {
+    public UserFormulasValueClearStreamingPoiTransformer(final Workbook workbook, final Set<String> sheetNames, final int rowAccessWindowSize, final boolean compressTmpFiles, final boolean useSharedStringsTable, final boolean deleteBlankCells) {
         super(workbook, sheetNames, rowAccessWindowSize, compressTmpFiles, useSharedStringsTable);
         this.originFormatAddress = this.extractOriginFormatAddress(workbook);
+        this.deleteBlankCells = deleteBlankCells;
     }
 
     private static boolean isUserFormula(final String str) {
@@ -47,6 +50,11 @@ public class UserFormulasValueClearStreamingPoiTransformer extends SelectSheetsF
     @Override
     public Map<String, Map<CellRef, List<DestConditionalFormat>>> getTransformedFormat() {
         return this.transformedFormat;
+    }
+
+    @Override
+    public boolean isDeleteBlankCells() {
+        return this.deleteBlankCells;
     }
 
     @Override
