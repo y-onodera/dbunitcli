@@ -4,4 +4,3 @@
 -template=src/test/resources/yo/dbunitcli/application/settings/generate/table/template.xlsx
 -unit=table
 -generateType=xlsx
--resultPath=target/test-classes/yo/dbunitcli/application/generate/table/result/xlsx/$param.tableName$.xlsx
