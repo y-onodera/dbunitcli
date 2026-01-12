@@ -260,7 +260,7 @@ public class GenerateTest {
         }
 
         @ParameterizedTest
-        @ValueSource(booleans = {true})
+        @ValueSource(booleans = {true, false})
         public void testGenerateFromJoinTableDirectionRight(boolean formulaProcess) {
             String resultSuffix = formulaProcess ? "" : "_withoutFormulaProcess";
             String compareResultSuffix = formulaProcess ? "" : "WithoutFormulaProcess";

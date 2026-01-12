@@ -3,14 +3,12 @@ package yo.dbunitcli.resource.poi.jxls;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.jxls.area.Area;
+import org.jxls.area.XlsArea;
 import org.jxls.command.CellRefGenerator;
 import org.jxls.command.Command;
 import org.jxls.command.EachCommand;
 import org.jxls.command.RunVar;
-import org.jxls.common.CellRef;
-import org.jxls.common.Context;
-import org.jxls.common.JxlsException;
-import org.jxls.common.Size;
+import org.jxls.common.*;
 import org.jxls.expression.ExpressionEvaluator;
 import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.ComparableTableMappingContext;
@@ -61,6 +59,7 @@ public class StreamingEachCommand extends EachCommand {
 
     @Override
     public Size applyAt(final CellRef cellRef, final Context context) {
+        this.ifDirectionRightFillStaticCells(context);
         final Object evaluated;
         try {
             evaluated = context.evaluate(this.getItems());
@@ -72,23 +71,33 @@ public class StreamingEachCommand extends EachCommand {
             return new Size(0, 0);
         }
         if (evaluated instanceof final ComparableTableMappingTask.WithTargetTable task) {
-            final JxlsDataSetConverter converter = new JxlsDataSetConverter(cellRef, context, task.targetTableName());
-            final ComparableTableMappingContext mappingContext = new ComparableTableMappingContext(
-                    task.targetTableSeparators(),
-                    converter
-            );
+            final JxlsDataSetConverter converter = new JxlsDataSetConverter(cellRef, context, task.targetTableName(), this.area, this.getCellRefGenerator());
+            final ComparableTableMappingContext mappingContext = new ComparableTableMappingContext(task.targetTableSeparators(), converter);
             mappingContext.open();
             task.run(mappingContext);
             mappingContext.close();
 
             final Size size = converter.getSize();
-
             if (this.getDirection() == Direction.DOWN) {
                 this.getTransformer().adjustTableSize(cellRef, size);
             }
             return size;
         }
         return super.applyAt(cellRef, context);
+    }
+
+    private void ifDirectionRightFillStaticCells(Context context) {
+        if (getTransformer().isForwardOnly() && getDirection() == Direction.RIGHT) {
+            final CellRef startCellRef = area.getStartCellRef();
+            final CellRef lastCellRef = area.getAreaRef().getLastCellRef();
+            final int startCol = startCellRef.getCol();
+            if (startCol > 0) {
+                final CellRef fixedAreaStart = new CellRef(startCellRef.getSheetName(), startCellRef.getRow(), 0);
+                final CellRef fixedAreaLast = new CellRef(startCellRef.getSheetName(), lastCellRef.getRow(), startCellRef.getCol() - 1);
+                final AreaRef fixedArea = new AreaRef(fixedAreaStart, fixedAreaLast);
+                new XlsArea(fixedArea, getTransformer()).applyAt(fixedAreaStart, context);
+            }
+        }
     }
 
     private static class StreamingState {
@@ -133,23 +142,29 @@ public class StreamingEachCommand extends EachCommand {
         private final Context context;
         private final ExpressionEvaluator selectEvaluator;
         private final String targetTableName;
+        private final Area area;
+        private final CellRefGenerator cellRefGenerator;
         private RunVar runVar;
         private ITableMetaData currentMetaData;
 
-        public JxlsDataSetConverter(final CellRef cellRef, final Context context, final String tableName) {
+        private JxlsDataSetConverter(final CellRef cellRef, final Context context, final String tableName, Area area, CellRefGenerator cellRefGenerator) {
             this.state = new StreamingState(cellRef);
             this.context = context;
             this.selectEvaluator = this.getExpressionEvaluator(context, StreamingEachCommand.this.getSelect());
             this.targetTableName = tableName;
+            this.area = area;
+            this.cellRefGenerator = cellRefGenerator;
         }
 
-        public JxlsDataSetConverter(final JxlsDataSetConverter copyFrom) {
+        private JxlsDataSetConverter(final JxlsDataSetConverter copyFrom) {
             this.state = copyFrom.state;
             this.context = copyFrom.context;
             this.selectEvaluator = copyFrom.selectEvaluator;
             this.targetTableName = copyFrom.targetTableName;
             this.runVar = copyFrom.runVar;
             this.currentMetaData = copyFrom.currentMetaData;
+            this.area = copyFrom.area;
+            this.cellRefGenerator = copyFrom.cellRefGenerator;
         }
 
         @Override
@@ -172,7 +187,21 @@ public class StreamingEachCommand extends EachCommand {
             if (!this.currentMetaData.getTableName().equals(this.targetTableName)) {
                 return;
             }
+            this.runVar.put(this.createRowMap(values), this.state.currentIndex);
+            if (this.selectEvaluator != null && !this.selectEvaluator.isConditionTrue(this.context)) {
+                this.state.incrementCurrentIndex();
+                return;
+            }
+            if (this.cellRefGenerator != null) {
+                this.state.currentCell = this.cellRefGenerator.generateCellRef(this.state.getAndIncrementIndex(), this.context, StreamingEachCommand.this.getLogger());
+            }
+            if (this.state.currentCell == null) {
+                return;
+            }
+            this.transformRow(this.state.currentCell);
+        }
 
+        private Map<String, Object> createRowMap(Object[] values) {
             final Map<String, Object> rowMap = new LinkedHashMap<>();
             try {
                 for (int i = 0; i < values.length && i < this.currentMetaData.getColumns().length; i++) {
@@ -181,32 +210,17 @@ public class StreamingEachCommand extends EachCommand {
             } catch (final DataSetException e) {
                 throw new AssertionError(e);
             }
+            return rowMap;
+        }
 
-            this.runVar.put(rowMap, this.state.currentIndex);
-
-            if (this.selectEvaluator != null && !this.selectEvaluator.isConditionTrue(this.context)) {
-                this.state.incrementCurrentIndex();
-                return;
-            }
-
-            if (StreamingEachCommand.this.getCellRefGenerator() != null) {
-                this.state.currentCell = StreamingEachCommand.this.getCellRefGenerator().generateCellRef(
-                        this.state.getAndIncrementIndex(), this.context, StreamingEachCommand.this.getLogger());
-            }
-
-            if (this.state.currentCell == null) {
-                return;
-            }
-
+        private void transformRow(CellRef currentCell) {
             final Size size;
             try {
-                size = StreamingEachCommand.this.area.applyAt(this.state.currentCell, this.context);
+                size = this.area.applyAt(currentCell, this.context);
             } catch (final NegativeArraySizeException e) {
-                throw new JxlsException("Check jx:each/lastCell parameter in template! Illegal area: "
-                        + StreamingEachCommand.this.area.getAreaRef(), e);
+                throw new JxlsException("Check jx:each/lastCell parameter in template! Illegal area: " + area.getAreaRef(), e);
             }
-
-            if (StreamingEachCommand.this.getCellRefGenerator() != null) {
+            if (this.cellRefGenerator != null) {
                 this.state.updateMaxSize(size);
             } else {
                 this.state.advanceCellAndUpdateSize(size, StreamingEachCommand.this.getDirection());
