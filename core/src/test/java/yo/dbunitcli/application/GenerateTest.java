@@ -216,9 +216,50 @@ public class GenerateTest {
 
         @ParameterizedTest
         @ValueSource(booleans = {true, false})
+        public void testGenerateUserFormulas(boolean formulaProcess) {
+            String resultSuffix = formulaProcess ? "" : "_withoutFormulaProcess";
+            final String resultPath = "generate/table/user_formula" + resultSuffix + ".xlsx";
+            if (formulaProcess) {
+                Generate.main(new String[]{
+                        "-srcType=csv"
+                        , "-src=src/test/resources/yo/dbunitcli/application/src/csv/multi/multi1.csv"
+                        , "-encoding=UTF-8"
+                        , "-generateType=xlsx"
+                        , "-unit=table"
+                        , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata"
+                                + "/user_formula.xlsx"
+                        , "-resultPath=target/test-classes/yo/dbunitcli/application/" + resultPath
+                });
+            } else {
+                Generate.main(new String[]{
+                        "-srcType=csv"
+                        , "-src=src/test/resources/yo/dbunitcli/application/src/csv/multi/multi1.csv"
+                        , "-encoding=UTF-8"
+                        , "-formulaProcess=false"
+                        , "-forceFormulaRecalc=true"
+                        , "-generateType=xlsx"
+                        , "-unit=table"
+                        , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata"
+                                + "/user_formula.xlsx"
+                        , "-resultPath=target/test-classes/yo/dbunitcli/application/" + resultPath
+                });
+            }
+            Compare.main(new String[]{
+                    "-src=src/test/resources/yo/dbunitcli/application/expect/generate/table/user_formula.xlsx"
+                    , "-old.srcType=xlsx"
+                    , "-new.src=" + this.getBaseDir() + resultPath
+                    , "-new.srcType=xlsx"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/table/compare_user_formula.json"
+                    , "-settingEncoding=UTF-8"
+                    ,
+                    "-result=target/test-classes/yo/dbunitcli/application/generate/result/compare_user_formula" + resultSuffix
+            });
+        }
+
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
         public void testGenerateFromJoinTable(boolean formulaProcess) {
             String resultSuffix = formulaProcess ? "" : "_withoutFormulaProcess";
-            String compareResultSuffix = formulaProcess ? "" : "WithoutFormulaProcess";
 
             if (formulaProcess) {
                 Generate.main(new String[]{
@@ -255,7 +296,8 @@ public class GenerateTest {
                     , "-new.srcType=xlsx"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_merge.json"
                     , "-settingEncoding=UTF-8"
-                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_join" + compareResultSuffix
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result" +
+                            "/compare_join" + resultSuffix
             });
         }
 
@@ -263,7 +305,6 @@ public class GenerateTest {
         @ValueSource(booleans = {true, false})
         public void testGenerateFromJoinTableDirectionRight(boolean formulaProcess) {
             String resultSuffix = formulaProcess ? "" : "_withoutFormulaProcess";
-            String compareResultSuffix = formulaProcess ? "" : "WithoutFormulaProcess";
 
             if (formulaProcess) {
                 Generate.main(new String[]{
@@ -303,7 +344,8 @@ public class GenerateTest {
                     , "-new.srcType=xlsx"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_direction_right.json"
                     , "-settingEncoding=UTF-8"
-                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_direction_right" + compareResultSuffix
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result" +
+                            "/compare_direction_right" + resultSuffix
             });
         }
 
@@ -311,7 +353,6 @@ public class GenerateTest {
         @ValueSource(booleans = {true, false})
         public void testGenerateFromMergeTable(boolean formulaProcess) {
             String resultSuffix = formulaProcess ? "" : "_withoutFormulaProcess";
-            String compareResultSuffix = formulaProcess ? "" : "WithoutFormulaProcess";
 
             if (formulaProcess) {
                 Generate.main(new String[]{
@@ -346,7 +387,8 @@ public class GenerateTest {
                     , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_merge_table" + resultSuffix + ".xlsx"
                     , "-new.srcType=xlsx"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_merge.json"
-                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/merge_compare" + compareResultSuffix
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result" +
+                            "/merge_compare" + resultSuffix
             });
         }
 
@@ -354,7 +396,6 @@ public class GenerateTest {
         @ValueSource(booleans = {true, false})
         public void testGenerateFromMergeTableWithUnitTable(boolean formulaProcess) {
             String resultSuffix = formulaProcess ? "" : "_withoutFormulaProcess";
-            String compareResultSuffix = formulaProcess ? "" : "WithoutFormulaProcess";
 
             if (formulaProcess) {
                 Generate.main(new String[]{
@@ -389,7 +430,8 @@ public class GenerateTest {
                     , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_merge_table_unit_table" + resultSuffix + ".xlsx"
                     , "-new.srcType=xlsx"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_merge.json"
-                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_unit_table" + compareResultSuffix
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result" +
+                            "/compare_unit_table" + resultSuffix
             });
         }
 
@@ -397,7 +439,6 @@ public class GenerateTest {
         @ValueSource(booleans = {true, false})
         public void testGenerateFromMergeAfterJoin(boolean formulaProcess) {
             String resultSuffix = formulaProcess ? "" : "_withoutFormulaProcess";
-            String compareResultSuffix = formulaProcess ? "" : "WithoutFormulaProcess";
 
             if (formulaProcess) {
                 Generate.main(new String[]{
@@ -432,7 +473,8 @@ public class GenerateTest {
                     , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_merge_after_join" + resultSuffix + ".xlsx"
                     , "-new.srcType=xlsx"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_merge_after_join.json"
-                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_merge_after_join" + compareResultSuffix
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result" +
+                            "/compare_merge_after_join" + resultSuffix
             });
         }
 
@@ -440,7 +482,6 @@ public class GenerateTest {
         @ValueSource(booleans = {true, false})
         public void testGenerateFromSplitAfterJoin(boolean formulaProcess) {
             String resultSuffix = formulaProcess ? "" : "_withoutFormulaProcess";
-            String compareResultSuffix = formulaProcess ? "" : "WithoutFormulaProcess";
 
             if (formulaProcess) {
                 Generate.main(new String[]{
@@ -475,7 +516,8 @@ public class GenerateTest {
                     , "-srcType=xlsx"
                     , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_split_after_join" + resultSuffix
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_split_after_join.json"
-                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_split_after_join" + compareResultSuffix
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result" +
+                            "/compare_split_after_join" + resultSuffix
             });
         }
 
@@ -483,7 +525,6 @@ public class GenerateTest {
         @ValueSource(booleans = {true, false})
         public void testGenerateFromMetaData(boolean formulaProcess) {
             String resultSuffix = formulaProcess ? "" : "_withoutFormulaProcess";
-            String compareResultSuffix = formulaProcess ? "" : "WithoutFormulaProcess";
 
             if (formulaProcess) {
                 Generate.main(new String[]{
@@ -519,7 +560,8 @@ public class GenerateTest {
                     , "-new.srcType=xlsx"
                     , "-new.xlsxSchema=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/FromMedadataSchema.json"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_from_metadata.json"
-                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_generated_from_metadata" + compareResultSuffix + "_1"
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result" +
+                            "/compare_generated_from_metadata" + resultSuffix + "_1"
             });
             Compare.main(new String[]{
                     "-old.src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/generated_from_metadata"
@@ -531,7 +573,8 @@ public class GenerateTest {
                     , "-new.startRow=2"
                     , "-new.setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_from_metadata_target.json"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_from_metadata.json"
-                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/compare_generated_from_metadata" + compareResultSuffix + "_2"
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result" +
+                            "/compare_generated_from_metadata" + resultSuffix + "_2"
             });
         }
 
@@ -539,7 +582,6 @@ public class GenerateTest {
         @ValueSource(booleans = {true, false})
         public void testGenerateFromSeparateAfterJoin(boolean formulaProcess) {
             String resultSuffix = formulaProcess ? "" : "_withoutFormulaProcess";
-            String compareResultSuffix = formulaProcess ? "" : "WithoutFormulaProcess";
 
             if (formulaProcess) {
                 Generate.main(new String[]{
@@ -574,7 +616,8 @@ public class GenerateTest {
                     , "-new.src=" + this.getBaseDir() + "/generate/with_metadata/result/separate_after_join" + resultSuffix + ".xlsx"
                     , "-new.srcType=xlsx"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_separate_after_join.json"
-                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/separate_after_join" + compareResultSuffix
+                    , "-result=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result" +
+                            "/separate_after_join" + resultSuffix
             });
         }
 
@@ -592,7 +635,9 @@ public class GenerateTest {
                         , "-unit=table"
                         , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/template.xlsx"
                         , "-deleteBlankCells=false"
-                        , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/NotDeleteBlankCell.xlsx"
+                        ,
+                        "-resultPath=target/test-classes/yo/dbunitcli/application/generate/table/NotDeleteBlankCell" +
+                                ".xlsx"
                 });
             } else {
                 Generate.main(new String[]{
@@ -604,22 +649,28 @@ public class GenerateTest {
                         , "-unit=table"
                         , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/template.xlsx"
                         , "-deleteBlankCells=false"
-                        , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/NotDeleteBlankCell_withoutFormulaProcess.xlsx"
+                        ,
+                        "-resultPath=target/test-classes/yo/dbunitcli/application/generate/table" +
+                                "/NotDeleteBlankCell_withoutFormulaProcess.xlsx"
                 });
             }
-            Sheet resultSheet = new XSSFWorkbook(this.getBaseDir() + "/generate/NotDeleteBlankCell" + resultSuffix + ".xlsx").getSheet("multi");
-            Row resultRow3 = resultSheet.getRow(3);
-            Assertions.assertEquals("3", resultRow3.getCell(0).getStringCellValue());
-            Assertions.assertEquals("", resultRow3.getCell(1).getStringCellValue());
-            Assertions.assertEquals("", resultRow3.getCell(2).getStringCellValue());
-            Assertions.assertEquals("", resultRow3.getCell(3).getStringCellValue());
-            Assertions.assertEquals("", resultRow3.getCell(4).getStringCellValue());
+            try (Workbook workbook = new XSSFWorkbook(
+                    this.getBaseDir() + "/generate/table/NotDeleteBlankCell" + resultSuffix + ".xlsx")) {
+                Sheet resultSheet = workbook.getSheet("multi");
+                Row resultRow3 = resultSheet.getRow(3);
+                Assertions.assertEquals("3", resultRow3.getCell(0).getStringCellValue());
+                Assertions.assertEquals("", resultRow3.getCell(1).getStringCellValue());
+                Assertions.assertEquals("", resultRow3.getCell(2).getStringCellValue());
+                Assertions.assertEquals("", resultRow3.getCell(3).getStringCellValue());
+                Assertions.assertEquals("", resultRow3.getCell(4).getStringCellValue());
+            }
         }
 
         @ParameterizedTest
         @ValueSource(booleans = {true, false})
         public void testGenerateXlsxDeleteBlankCell(boolean formulaProcess) throws IOException {
             String resultSuffix = formulaProcess ? "" : "_withoutFormulaProcess";
+            final String resultPath = "generate/table/DeleteBlankCell" + resultSuffix + ".xlsx";
 
             if (formulaProcess) {
                 Generate.main(new String[]{
@@ -628,9 +679,11 @@ public class GenerateTest {
                         , "-encoding=UTF-8"
                         , "-generateType=xlsx"
                         , "-unit=table"
-                        , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/template.xlsx"
+                        ,
+                        "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata" +
+                                "/template.xlsx"
                         , "-deleteBlankCells=true"
-                        , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/DeleteBlankCell.xlsx"
+                        , "-resultPath=target/test-classes/yo/dbunitcli/application/" + resultPath
                 });
             } else {
                 Generate.main(new String[]{
@@ -640,18 +693,21 @@ public class GenerateTest {
                         , "-formulaProcess=false"
                         , "-generateType=xlsx"
                         , "-unit=table"
-                        , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/template.xlsx"
+                        , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata" +
+                                "/template.xlsx"
                         , "-deleteBlankCells=true"
-                        , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/DeleteBlankCell_withoutFormulaProcess.xlsx"
+                        , "-resultPath=target/test-classes/yo/dbunitcli/application/" + resultPath
                 });
             }
-            Sheet resultSheet = new XSSFWorkbook(this.getBaseDir() + "/generate/DeleteBlankCell" + resultSuffix + ".xlsx").getSheet("multi");
-            Row resultRow3 = resultSheet.getRow(3);
-            Assertions.assertEquals("3", resultRow3.getCell(0).getStringCellValue());
-            Assertions.assertNull(resultRow3.getCell(1));
-            Assertions.assertNull(resultRow3.getCell(2));
-            Assertions.assertEquals("", resultRow3.getCell(3).getStringCellValue());
-            Assertions.assertNull(resultRow3.getCell(4));
+            try (Workbook workbook = new XSSFWorkbook(this.getBaseDir() + resultPath)) {
+                Sheet resultSheet = workbook.getSheet("multi");
+                Row resultRow3 = resultSheet.getRow(3);
+                Assertions.assertEquals("3", resultRow3.getCell(0).getStringCellValue());
+                Assertions.assertNull(resultRow3.getCell(1));
+                Assertions.assertNull(resultRow3.getCell(2));
+                Assertions.assertEquals("", resultRow3.getCell(3).getStringCellValue());
+                Assertions.assertNull(resultRow3.getCell(4));
+            }
         }
 
         @ParameterizedTest
