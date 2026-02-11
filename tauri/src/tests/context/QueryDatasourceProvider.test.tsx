@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { type Enviroment, enviromentContext } from "../../context/EnviromentProvider";
 import {
@@ -62,33 +62,27 @@ describe("QueryDatasourceProviderのテスト", () => {
 
 	describe("useLoadDataSource", () => {
 		it("正常なロードが行われることを確認", async () => {
-			const { result, rerender } = renderHook(() => useLoadDataSource()("sql", "test-query"), { wrapper });
-			await waitFor(() => {
-				rerender();
-				result.current.then((res) => {
-					expect(res).toBe(mockLoadedContents);
-				});
-			});
+			const { result, rerender } = renderHook(() => useLoadDataSource(), { wrapper });
+            await act(async () => {rerender()});
+            expect(result.current).toBeTypeOf("function");
+			const res = await result.current("sql", "test-query");
+			expect(res).toBe(mockLoadedContents);
 		});
 
 		it("csvqタイプでも正常にロードできることを確認", async () => {
-			const { result, rerender } = renderHook(() => useLoadDataSource()("table", "test-table"), { wrapper });
-			await waitFor(() => {
-				rerender();
-				result.current.then((res) => {
-					expect(res).toBe(mockLoadedContents);
-				});
-			});
+			const { result, rerender } = renderHook(() => useLoadDataSource(), { wrapper });
+            await act(async () => {rerender()});
+            expect(result.current).toBeTypeOf("function");
+			const res = await result.current("table", "test-table");
+			expect(res).toBe(mockLoadedContents);
 		});
 
 		it("tableタイプでも正常にロードできることを確認", async () => {
-			const { result, rerender } = renderHook(() => useLoadDataSource()("table", "test-table"), { wrapper });
-			await waitFor(() => {
-				rerender();
-				result.current.then((res) => {
-					expect(res).toBe(mockLoadedContents);
-				});
-			});
+			const { result, rerender } = renderHook(() => useLoadDataSource(), { wrapper });
+            await act(async () => {rerender()});
+            expect(result.current).toBeTypeOf("function");
+			const res = await result.current("table", "test-table");
+			expect(res).toBe(mockLoadedContents);
 		});
 	});
 
@@ -100,12 +94,12 @@ describe("QueryDatasourceProviderのテスト", () => {
 				return { resources, saveDataSource }
 			}, { wrapper });
 
-			await waitFor(() => {
-				rerender();
-				expect(result.current.resources.queryFiles).toStrictEqual(mockWorkspaceResources.resources.queryFiles);
-			});
+            await act(async () => {rerender()});
+            expect(result.current.resources.queryFiles).toStrictEqual(mockWorkspaceResources.resources.queryFiles);
 
-			const saveResult = await result.current.saveDataSource(mockQueryDatasource);
+			const saveResult = await act(async () => {
+				return await result.current.saveDataSource(mockQueryDatasource);
+			});
 			expect(saveResult).toBe('success');
 			expect(mockFetchData).toHaveBeenCalledWith({
 				endpoint: `${mockEnviroment.apiUrl}query-datasource/save`,
@@ -132,7 +126,9 @@ describe("QueryDatasourceProviderのテスト", () => {
 				expect(result.current.resources.queryFiles).toStrictEqual(mockWorkspaceResources.resources.queryFiles);
 			});
 
-			const deleteResult = await result.current.deleteDataSource("test-query");
+			const deleteResult = await act(async () => {
+				return await result.current.deleteDataSource("test-query");
+			});
 			expect(deleteResult).toBe('success');
 			expect(mockFetchData).toHaveBeenCalledWith({
 				endpoint: `${mockEnviroment.apiUrl}query-datasource/delete`,

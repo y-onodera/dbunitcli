@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { useDeleteDatasetSettings, useLoadDatasetSettings, useSaveDatasetSettings } from '../../context/DatasetSettingsProvider';
 import { type Enviroment, enviromentContext } from '../../context/EnviromentProvider';
@@ -60,27 +60,19 @@ describe('DatasetSettingsProviderのテスト', () => {
 
     describe('useLoadDatasetSettingsのテスト', () => {
         it('設定ファイル名が空白のときは初期値が返却されることを確認', async () => {
-            const { result, rerender } = renderHook(() => {
-                return useLoadDatasetSettings()('');
-            }, { wrapper });
-            await waitFor(() => {
-                rerender();
-                result.current.then((res) => {
-                    expect(res).toEqual(DatasetSettings.create());
-                });
-            });
+            const { result, rerender } = renderHook(() => useLoadDatasetSettings(), { wrapper });
+            await act(async () => {rerender()});
+            expect(result.current).toBeTypeOf("function");
+            const res = await result.current('');
+            expect(res).toEqual(DatasetSettings.create());
         });
         it('データセット設定を正常に読み込めることを確認', async () => {
-            const { result, rerender } = renderHook(() => {
-                return useLoadDatasetSettings()('test-setting');
-            }, { wrapper });
-            await waitFor(() => {
-                rerender();
-                result.current.then((res) => {
-                    expect(res.settings).toHaveLength(1);
-                    expect(res.settings[0].name).toStrictEqual(mockDatasetSettingsResponse.settings[0].name);
-                });
-            });
+            const { result, rerender } = renderHook(() => useLoadDatasetSettings(), { wrapper });
+            await act(async () => {rerender()});
+            expect(result.current).toBeTypeOf("function");
+            const res = await result.current('test-setting');
+            expect(res.settings).toHaveLength(1);
+            expect(res.settings[0].name).toStrictEqual(mockDatasetSettingsResponse.settings[0].name);
         });
     });
 
@@ -91,14 +83,12 @@ describe('DatasetSettingsProviderのテスト', () => {
                 const resources = useResourcesSettings();
                 return { resources, saveDatasetSettings }
             }, { wrapper });
-            await waitFor(() => {
-                rerender();
-                expect(result.current.resources.metadataSetting).toStrictEqual(mockWorkspaceResources.resources.metadataSetting);
+            await act(async () => {rerender()});
+            expect(result.current.resources.metadataSetting).toStrictEqual(mockWorkspaceResources.resources.metadataSetting);
+            await act(async () => {
+                result.current.saveDatasetSettings('test-setting', DatasetSettings.create());
             });
-            result.current.saveDatasetSettings('test-setting', DatasetSettings.create());
-            await waitFor(() => {
-                expect(result.current.resources.metadataSetting).toStrictEqual(mockUpdatedSettings);
-            });
+            expect(result.current.resources.metadataSetting).toStrictEqual(mockUpdatedSettings);
         });
     });
 
@@ -109,14 +99,12 @@ describe('DatasetSettingsProviderのテスト', () => {
                 const resources = useResourcesSettings();
                 return { resources, deleteDatasetSettings }
             }, { wrapper });
-            await waitFor(() => {
-                rerender();
-                expect(result.current.resources.metadataSetting).toStrictEqual(mockWorkspaceResources.resources.metadataSetting);
+            await act(async () => {rerender()});
+            expect(result.current.resources.metadataSetting).toStrictEqual(mockWorkspaceResources.resources.metadataSetting);
+            await act(async () => {
+                result.current.deleteDatasetSettings('test-setting');
             });
-            result.current.deleteDatasetSettings('test-setting');
-            await waitFor(() => {
-                expect(result.current.resources.metadataSetting).toStrictEqual(mockRemainingSettings);
-            });
+            expect(result.current.resources.metadataSetting).toStrictEqual(mockRemainingSettings);
         });
     });
 });

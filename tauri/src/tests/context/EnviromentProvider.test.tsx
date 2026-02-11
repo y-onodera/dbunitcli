@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -41,32 +41,33 @@ const wrapper = ({ children }: { children: ReactNode }) => (
 
 describe('EnviromentProviderのテスト', () => {
     it('環境設定が正しく読み込まれることを確認', async () => {
-        const { result } = renderHook(() => useEnviroment(), { wrapper });
+        const { result, rerender } = renderHook(() => useEnviroment(), { wrapper });
 
-        waitFor(() => {
-            expect(result.current).toEqual({
-                apiUrl: `http://localhost:${mockArgs.args.port}/dbunit-cli/`,
-                workspace: `${mockArgs.args.workspace}`,
-                dataset_base: `${mockArgs.args['dataset.base']}`,
-                result_base: `${mockArgs.args['result.base']}`,
-            });
+        await act(async () => {rerender()});
+        expect(result.current).toEqual({
+            apiUrl: `http://localhost:${mockArgs.args.port?.value}/dbunit-cli/`,
+            workspace: mockArgs.args.workspace?.value,
+            dataset_base: mockArgs.args['dataset.base']?.value,
+            result_base: mockArgs.args['result.base']?.value,
         });
         expect(mockGetMatches).toHaveBeenCalled();
     });
 
     it('環境設定で指定がない場合にデフォルト値が正しく設定されることを確認', async () => {
-        beforeEach(() => {
-            mockArgs.args = {};
-        });
-        const { result } = renderHook(() => useEnviroment(), { wrapper });
+        mockArgs.args = {
+            port: { value: "" },
+            workspace: { value: "" },
+            "dataset.base": { value: "" },
+            "result.base": { value: "" },
+        };
+        const { result, rerender } = renderHook(() => useEnviroment(), { wrapper });
 
-        waitFor(() => {
-            expect(result.current).toEqual({
-                apiUrl: 'http://localhost:8080/dbunit-cli/',
-                workspace: '.',
-                dataset_base: '.',
-                result_base: '.',
-            });
+        await act(async () => {rerender()});
+        expect(result.current).toEqual({
+            apiUrl: 'http://localhost:8080/dbunit-cli/',
+            workspace: '.',
+            dataset_base: '.',
+            result_base: '.',
         });
     });
 
@@ -75,12 +76,8 @@ describe('EnviromentProviderのテスト', () => {
 
         expect(screen.getByText('Loading...')).toHaveTextContent('Loading...');
 
-        // 非同期処理の完了を待機
-        await waitFor(() => {
-            render(<TestComponent />, { wrapper });
-            expect(screen.getByTestId('test-component')).toBeInTheDocument();
-        });
-
+        await act(async () => {render(<TestComponent />, { wrapper })});
+        expect(screen.getByTestId('test-component')).toBeInTheDocument();
         expect(mockGetMatches).toHaveBeenCalled();
     });
 });

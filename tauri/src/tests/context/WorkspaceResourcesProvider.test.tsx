@@ -1,4 +1,4 @@
-import { render, renderHook, screen, waitFor } from '@testing-library/react';
+import { act, render, renderHook, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { type Enviroment, enviromentContext } from '../../context/EnviromentProvider';
 import WorkspaceResourcesProvider, {
@@ -87,12 +87,10 @@ describe('WorkspaceResourcesProviderのテスト', () => {
                 parameterList: useParameterList(),
                 resourcesSettings: useResourcesSettings(),
             }), { wrapper });
-            await waitFor(() => {
-                rerender();
-                expect(result.current.context).toStrictEqual(WorkspaceContext.from(mockWorkspaceResources.context));
-                expect(result.current.parameterList).toStrictEqual(ParameterList.from(mockWorkspaceResources.parameterList));
-                expect(result.current.resourcesSettings).toStrictEqual(ResourcesSettings.from(mockWorkspaceResources.resources));
-            });
+            await act(async () => {rerender()});
+            expect(result.current.context).toStrictEqual(WorkspaceContext.from(mockWorkspaceResources.context));
+            expect(result.current.parameterList).toStrictEqual(ParameterList.from(mockWorkspaceResources.parameterList));
+            expect(result.current.resourcesSettings).toStrictEqual(ResourcesSettings.from(mockWorkspaceResources.resources));
         });
         it('useWorkspaceUpdateが正常に動作することを確認', async () => {
             const { result, rerender } = renderHook(() => {
@@ -100,18 +98,16 @@ describe('WorkspaceResourcesProviderのテスト', () => {
                 const context = useWorkspaceContext();
                 return { context, workspaceUpdate };
             }, { wrapper });
-            await waitFor(() => {
-                rerender();
-                expect(result.current.context.workspace).toBe('test-workspace');
-                expect(result.current.context.datasetBase).toBe('dataset');
-                expect(result.current.context.resultBase).toBe('result');
+            await act(async () => {rerender()});
+            expect(result.current.context.workspace).toBe('test-workspace');
+            expect(result.current.context.datasetBase).toBe('dataset');
+            expect(result.current.context.resultBase).toBe('result');
+            await act(async () => {
+                result.current.workspaceUpdate('new-workspace', 'new-dataset', 'new-result');
             });
-            result.current.workspaceUpdate('new-workspace', 'new-dataset', 'new-result');
-            await waitFor(() => {
-                expect(result.current.context.workspace).toBe('new-workspace');
-                expect(result.current.context.datasetBase).toBe('new-dataset');
-                expect(result.current.context.resultBase).toBe('new-result');
-            });
+            expect(result.current.context.workspace).toBe('new-workspace');
+            expect(result.current.context.datasetBase).toBe('new-dataset');
+            expect(result.current.context.resultBase).toBe('new-result');
         });
     });
 
@@ -122,14 +118,12 @@ describe('WorkspaceResourcesProviderのテスト', () => {
                 const parameterList = useParameterList();
                 return { parameterList, addConvert };
             }, { wrapper });
-            await waitFor(() => {
-                rerender();
-                expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2']);
+            await act(async () => {rerender()});
+            expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2']);
+            await act(async () => {
+                result.current.addConvert();
             });
-            result.current.addConvert();
-            await waitFor(() => {
-                expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2', 'add']);
-            });
+            expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2', 'add']);
         });
 
         it('useDeleteParameterが正常に動作することを確認', async () => {
@@ -138,14 +132,12 @@ describe('WorkspaceResourcesProviderのテスト', () => {
                 const parameterList = useParameterList();
                 return { parameterList, deleteConvert2 };
             }, { wrapper });
-            await waitFor(() => {
-                rerender();
-                expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2']);
+            await act(async () => {rerender()});
+            expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2']);
+            await act(async () => {
+                result.current.deleteConvert2();
             });
-            result.current.deleteConvert2();
-            await waitFor(() => {
-                expect(result.current.parameterList.convert).toEqual(['convert1']);
-            });
+            expect(result.current.parameterList.convert).toEqual(['convert1']);
         });
 
         it('useCopyParameterが正常に動作することを確認', async () => {
@@ -154,14 +146,12 @@ describe('WorkspaceResourcesProviderのテスト', () => {
                 const parameterList = useParameterList();
                 return { parameterList, copyConvert1 };
             }, { wrapper });
-            await waitFor(() => {
-                rerender();
-                expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2']);
+            await act(async () => {rerender()});
+            expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2']);
+            await act(async () => {
+                result.current.copyConvert1();
             });
-            result.current.copyConvert1();
-            await waitFor(() => {
-                expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2', 'copy']);
-            });
+            expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2', 'copy']);
         });
 
         it('useRenameParameterが正常に動作することを確認', async () => {
@@ -170,14 +160,12 @@ describe('WorkspaceResourcesProviderのテスト', () => {
                 const parameterList = useParameterList();
                 return { parameterList, renameConvert1 };
             }, { wrapper });
-            await waitFor(() => {
-                rerender();
-                expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2']);
+            await act(async () => {rerender()});
+            expect(result.current.parameterList.convert).toEqual(['convert1', 'convert2']);
+            await act(async () => {
+                result.current.renameConvert1("newName");
             });
-            result.current.renameConvert1("newName");
-            await waitFor(() => {
-                expect(result.current.parameterList.convert).toEqual(['newName', 'convert2']);
-            });
+            expect(result.current.parameterList.convert).toEqual(['newName', 'convert2']);
         });
     });
 });

@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { type Enviroment, enviromentContext } from "../../context/EnviromentProvider";
 import WorkspaceResourcesProvider, { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
@@ -79,24 +79,20 @@ describe("XlsxSchemaProviderのテスト", () => {
 
 	describe("useLoadXlsxSchema", () => {
 		it("名前が空文字の場合にデフォルト値を返すことを確認", async () => {
-			const { result, rerender } = renderHook(() => useLoadXlsxSchema()(''), { wrapper });
-			await waitFor(() => {
-				rerender();
-				result.current.then((res) => {
-					expect(res).toEqual(XlsxSchema.create());
-				});
-			})
+			const { result, rerender } = renderHook(() => useLoadXlsxSchema(), { wrapper });
+            await act(async () => {rerender()});
+            expect(result.current).toBeTypeOf("function");
+			const res = await result.current('');
+			expect(res).toEqual(XlsxSchema.create());
 		});
 
 		it("正常なロードが行われることを確認", async () => {
-			const { result, rerender } = renderHook(() => useLoadXlsxSchema()('test-setting'), { wrapper });
-			await waitFor(() => {
-				rerender();
-				result.current.then((res) => {
-					expect(res.rows).toHaveLength(1);
-					expect(res.cells).toHaveLength(1);
-				});
-			})
+			const { result, rerender } = renderHook(() => useLoadXlsxSchema(), { wrapper });
+            await act(async () => {rerender()});
+            expect(result.current).toBeTypeOf("function");
+			const res = await result.current('test-setting');
+			expect(res.rows).toHaveLength(1);
+			expect(res.cells).toHaveLength(1);
 		});
 	});
 
@@ -107,14 +103,12 @@ describe("XlsxSchemaProviderのテスト", () => {
 				const resources = useResourcesSettings();
 				return { resources, saveXlsxSchema }
 			}, { wrapper });
-			await waitFor(() => {
-				rerender();
-				expect(result.current.resources.xlsxSchemas).toStrictEqual(mockWorkspaceResources.resources.xlsxSchemas);
-			})
-			result.current.saveXlsxSchema('test-setting', XlsxSchema.create());
-			await waitFor(() => {
-				expect(result.current.resources.xlsxSchemas).toStrictEqual(mockUpdatedSettings);
+            await act(async () => {rerender()});
+            expect(result.current.resources.xlsxSchemas).toStrictEqual(mockWorkspaceResources.resources.xlsxSchemas);
+			await act(async () => {
+				result.current.saveXlsxSchema('test-setting', XlsxSchema.create());
 			});
+            expect(result.current.resources.xlsxSchemas).toStrictEqual(mockUpdatedSettings);
 		});
 	});
 
@@ -125,14 +119,12 @@ describe("XlsxSchemaProviderのテスト", () => {
 				const resources = useResourcesSettings();
 				return { resources, deleteXlsxSchema }
 			}, { wrapper });
-			await waitFor(() => {
-				rerender();
-				expect(result.current.resources.xlsxSchemas).toStrictEqual(mockWorkspaceResources.resources.xlsxSchemas);
-			})
-			result.current.deleteXlsxSchema('test-setting');
-			await waitFor(() => {
-				expect(result.current.resources.xlsxSchemas).toStrictEqual(mockRemainingSettings);
+            await act(async () => {rerender()});
+            expect(result.current.resources.xlsxSchemas).toStrictEqual(mockWorkspaceResources.resources.xlsxSchemas);
+			await act(async () => {
+				result.current.deleteXlsxSchema('test-setting');
 			});
+            expect(result.current.resources.xlsxSchemas).toStrictEqual(mockRemainingSettings);
 		});
 	});
 });
