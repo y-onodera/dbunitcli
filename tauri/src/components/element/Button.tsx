@@ -42,7 +42,7 @@ export function LinkButton(props: { title: string, handleClick: React.MouseEvent
             buttonstyle="flex items-center justify-start w-full p-1 ms-2"
             bgcolor="hover:bg-gray-100"
             textstyle="text-left text-gray-500 hover:text-blue-600"
-            border="outline-none"
+            border="outline-hidden"
             handleClick={props.handleClick} >
             {props.title}
         </Button>
@@ -65,8 +65,8 @@ export function Button(props: {
                          rounded-lg 
                          ${props.border} 
                          transition duration-100 
-                         ring-indigo-300 
-                         focus-visible:ring`}
+                         ring-indigo-300
+                         focus-visible:ring-3`}
             onClick={props.handleClick}
         >
             {props.children}

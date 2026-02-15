@@ -42,9 +42,9 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
                 </h2>
                 <div className="relative">
                     <textarea id="contents"
-                        className="w-full h-96 p-4 border border-gray-200 rounded-lg shadow-sm
+                        className="w-full h-96 p-4 border border-gray-200 rounded-lg shadow-xs
                          font-mono text-base bg-white
-                         focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                         value={setting.value}
                         onChange={(e) => setSetting({ value: e.target.value })}
                         placeholder={props.type === 'sql' ? 'Enter SQL query...' : 'Enter table definition...'}

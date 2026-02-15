@@ -66,12 +66,11 @@ export function CheckBox(props: { name: string, id: string, hidden?: boolean, de
                 name={props.name}
                 id={props.id}
                 type="checkbox"
-                className="w-4 h-4 
-                           text-indigo-500 
-                           bg-gray-50 
-                           border border-gray-300 
-                           ring-indigo-300 
-                           focus-visible:ring "
+                className="w-4 h-4
+                           text-indigo-500
+                           border border-gray-300
+                           ring-indigo-300
+                           focus-visible:ring-3 "
                 style={props.hidden ? { display: "none" } : {}}
                 checked={checked}
                 value={`${checked}`}
@@ -99,6 +98,6 @@ function inputStyle(wStyle: string) {
                bg-gray-50 
                disabled:bg-gray-300
                border border-gray-300 
-               ring-indigo-300 
-               focus-visible:ring `
+               ring-indigo-300
+               focus-visible:ring-3 `
 }

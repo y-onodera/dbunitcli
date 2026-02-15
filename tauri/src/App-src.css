@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+
 @layer base {
   [type='text']:focus,
   [type='email']:focus,
@@ -18,7 +18,7 @@
   textarea:focus,
   select:focus {
     --tw-ring-color: #a5b4fc;
-    border-color: var(--tw-ring-color); 
+    border-color: #a5b4fc;
   }
   [type="checkbox"]:focus,
   [type="radio"]:focus {

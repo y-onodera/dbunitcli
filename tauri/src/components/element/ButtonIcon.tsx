@@ -105,7 +105,7 @@ export function ButtonIcon(props: {
             buttonstyle="flex items-center group p-1"
             bgcolor=""
             textstyle="text-gray-500 hover:text-blue-600"
-            border="outline-none"
+            border="outline-hidden"
             handleClick={props.handleClick}
         >
             {props.children}

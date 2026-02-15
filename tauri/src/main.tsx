@@ -1,5 +1,5 @@
-import "./App.css";
 import "./styles.css";
+import "./App.css";
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import Layout from "./app/main/Layout";
