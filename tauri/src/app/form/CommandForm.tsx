@@ -48,9 +48,7 @@ export default function CommandForm(prop: {
 					name={select.name}
 					parameterize={select.parameterize}
 				/>
-			) : (
-				<></>
-			)}
+			) : null}
 		</>
 	);
 }

@@ -61,8 +61,7 @@ export function Check(props: {
 
 export function Text(props: { name: string, value: string, handleChange: (text: React.ChangeEvent<HTMLInputElement>) => void, ignoreLabel?: boolean }) {
     return (
-        <>
-            <div className="grid grid-cols-5 justify-center pb-2">
+        <div className="grid grid-cols-5 justify-center pb-2">
                 {!props.ignoreLabel &&
                     <InputLabel id={props.name} text={props.name} required={false} wStyle="p-2.5 w=1/5" />
                 }
@@ -75,7 +74,6 @@ export function Text(props: { name: string, value: string, handleChange: (text: 
                     handleChange={props.handleChange}
                 />
             </div>
-        </>
     );
 }
 

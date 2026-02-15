@@ -8,8 +8,7 @@ export default function Layout() {
 	const [sidebarWidth, setSidebarWidth] = useState(200);
 
 	return (
-		<>
-			<SelectParameterProvider>
+		<SelectParameterProvider>
 				<nav className="fixed top-0 w-full z-50 bg-gray-100 border-b border-gray-200">
 					<Header />
 				</nav>
@@ -25,6 +24,5 @@ export default function Layout() {
 					<Form />
 				</div>
 			</SelectParameterProvider>
-		</>
 	);
 }
