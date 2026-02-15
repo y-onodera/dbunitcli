@@ -17,51 +17,50 @@
 # 依存関係のインストール
 bun install
 
-# CSS コンパイル付き開発サーバー起動
+# Tailwind CSS コンパイル + Vite 開発サーバー起動
 bun run dev
 
-# プロダクション用ビルド
+# Tailwind CSS コンパイル + TypeScript チェック + Vite ビルド + テスト実行
 bun run build
-
-# テスト実行
-bun test
-# または Vitest を直接実行
-npx vitest
 ```
 
 ### Tauri 開発
 ```bash
-# Tauri 開発モード開始（フロントエンドビルド + アプリ起動）
+# Tauri 開発モード開始（bun run dev + Rust ビルド + アプリ起動）
 bun tauri dev
 
-# 配布用 Tauri アプリケーションビルド
+# 配布用 Tauri アプリケーションビルド（bun run build + Rust リリースビルド）
 bun tauri build
-
-# Tauri 設定確認
-bun tauri info
 ```
 
 ### テスト
 ```bash
 # Vitest でフロントエンドテスト実行
-bun test
+bun vitest run
 
 # ウォッチモードでテスト実行
-bun test --watch
+bun vitest
 
 # 特定のテストファイル実行
-bun test src/model/CommandParam.test.ts
+bun vitest run src/tests/model/CommandParam.test.ts
 ```
 
-### コード品質
+### コード品質（Biome v2）
+- **フォーマット**: VSCode 保存時に自動実行（`.vscode/settings.json` で設定済み）
+- **import 整理**: 保存時に自動実行（`source.organizeImports.biome`）
+- **lint**: コード修正後に手動実行（`bunx biome lint --write .`）
+
 ```bash
-# Biome でコードフォーマット
+# 手動でフォーマット実行（全ファイル）
 bunx biome format --write .
 
-# Biome でコードリント
+# 手動でリント実行
 bunx biome lint .
 
-# TypeScript チェック
+# lint 自動修正（safe fix のみ）
+bunx biome lint --write .
+
+# TypeScript 型チェック
 bunx tsc --noEmit
 ```
 
@@ -116,7 +115,9 @@ bunx tsc --noEmit
 - Context プロバイダは専用のテストカバレッジを持つ
 
 ### ビルド設定
-- **CSS**: Tailwind を `App-src.css` から `App.css` にコンパイル
+- **CSS**: `@tailwindcss/cli`（v4）で `App-src.css` → `App.css` にプリコンパイル。Vite/PostCSS 統合は使わない
+- **Tailwind v4**: CSS ベース設定（`tailwind.config.js` 不要）。`@import "tailwindcss"` + `@plugin` 構文
+- **リンター**: Biome v2（フォーマット + lint + import整理）。設定は `biome.json`
 - **TypeScript**: パスマッピング付きの厳密モード有効
 - **バンドル**: フロントエンド用 Vite + React プラグイン、Rust バックエンド用 Cargo
 - **リソース**: Java ランタイムと CLI 実行ファイルをアプリケーションにバンドル
