@@ -40,23 +40,27 @@ public class DBConverter implements IDataSetConverter {
 
     @Override
     public IDataSetConverter split() {
-        try {
             final IDataSetConverter result = new DBConverter(this.connection, this.operation, this.exportEmptyTable);
             result.startDataSet();
             return result;
+    }
+
+    @Override
+    public void startDataSet() {
+        try {
+        this.operator.startDataSet();
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
     }
 
     @Override
-    public void startDataSet() throws DataSetException {
-        this.operator.startDataSet();
-    }
-
-    @Override
-    public void endDataSet() throws DataSetException {
+    public void endDataSet() {
+        try {
         this.operator.endDataSet();
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override

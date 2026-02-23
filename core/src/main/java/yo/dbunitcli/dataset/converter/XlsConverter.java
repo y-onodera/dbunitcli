@@ -107,7 +107,7 @@ public class XlsConverter implements IDataSetConverter {
     }
 
     @Override
-    public void startDataSet() throws DataSetException {
+    public void startDataSet() {
         if (this.tableExport == TableExportType.SHEET) {
             this.workbook = this.createWorkbook();
             this.sheetIndex = 0;
@@ -115,7 +115,7 @@ public class XlsConverter implements IDataSetConverter {
     }
 
     @Override
-    public void endDataSet() throws DataSetException {
+    public void endDataSet() {
         if (this.tableExport == TableExportType.SHEET) {
             this.flush();
         }

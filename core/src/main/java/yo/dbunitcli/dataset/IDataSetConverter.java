@@ -14,11 +14,11 @@ public interface IDataSetConverter extends IDataSetConsumer {
 
     boolean isExportEmptyTable();
 
-    default void startDataSet() throws DataSetException {
+    default void startDataSet() {
         // nothing default
     }
 
-    default void endDataSet() throws DataSetException {
+    default void endDataSet() {
         // nothing default
     }
 

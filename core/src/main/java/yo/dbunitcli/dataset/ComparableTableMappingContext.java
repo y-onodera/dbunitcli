@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import org.dbunit.dataset.DataSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.TableMetaDataWithSource;
@@ -34,11 +33,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
 
     public void open() {
         if (this.converter != null) {
-            try {
-                this.converter.startDataSet();
-            } catch (final DataSetException e) {
-                throw new RuntimeException(e);
-            }
+            this.converter.startDataSet();
         }
     }
 
@@ -57,11 +52,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
         this.executeJoin();
         if (this.converter != null) {
             this.tableMap.values().forEach(this.converter::convert);
-            try {
-                this.converter.endDataSet();
-            } catch (final DataSetException e) {
-                throw new RuntimeException(e);
-            }
+            this.converter.endDataSet();
             return new TreeMap<>();
         }
         return this.tableMap;
