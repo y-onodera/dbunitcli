@@ -25,7 +25,7 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
             Command.LOGGER.info(ex.getMessage());
             System.exit(1);
         } catch (final Throwable th) {
-            Command.LOGGER.error("args:" + Arrays.toString(args));
+            Command.LOGGER.error("args:{}", Arrays.toString(args));
             Command.LOGGER.error("error:", th);
             throw th;
         }

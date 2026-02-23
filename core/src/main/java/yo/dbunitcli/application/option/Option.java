@@ -113,7 +113,7 @@ public interface Option {
         }
 
         public boolean hasValue(final String key) {
-            return !Optional.ofNullable(this.get(key)).orElse("").isEmpty();
+            return !Optional.of(this.get(key)).orElse("").isEmpty();
         }
 
         private Arg getArgFromOptions(final String key) {

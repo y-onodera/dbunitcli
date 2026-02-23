@@ -31,7 +31,7 @@ public record Parameter(Map<String, Object> map) {
         return result;
     }
 
-    public Parameter addAll(final Map<String, ? extends Object> other) {
+    public Parameter addAll(final Map<String, ?> other) {
         final Parameter result = new Parameter(new HashMap<>(this.map));
         result.map.putAll(other);
         return result;
