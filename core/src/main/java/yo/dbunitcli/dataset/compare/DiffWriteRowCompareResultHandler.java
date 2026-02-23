@@ -54,15 +54,11 @@ public class DiffWriteRowCompareResultHandler implements RowCompareResultHandler
     @Override
     public List<CompareDiff> result() {
         if (this.needDetail()) {
-            try {
-                this.tableCompare.getConverter().startDataSet();
-                this.writeModifyRowsTable();
-                this.writeAddRowsTable();
-                this.writeDeleteRowsTable();
-                this.tableCompare.getConverter().endDataSet();
-            } catch (final DataSetException e) {
-                throw new AssertionError(e);
-            }
+            this.tableCompare.getConverter().startDataSet();
+            this.writeModifyRowsTable();
+            this.writeAddRowsTable();
+            this.writeDeleteRowsTable();
+            this.tableCompare.getConverter().endDataSet();
         }
         return new ArrayList<>();
     }
