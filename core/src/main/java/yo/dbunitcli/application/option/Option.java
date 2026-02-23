@@ -4,6 +4,7 @@ import yo.dbunitcli.Strings;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -78,11 +79,25 @@ public interface Option {
             return this.toList(containDefaultValue).toArray(new String[0]);
         }
 
+        public List<String> parameterizeArgs(final boolean containDefaultValue) {
+            return toList(containDefaultValue, key -> key + "$param." + templateEscape(key) + "$");
+        }
+
+        public Map<String, ?> parameterKeyValues(final boolean containDefaultValue) {
+            return toList(containDefaultValue, key -> key)
+                    .stream()
+                    .collect(Collectors.toMap(this::templateEscape, this::get));
+        }
+
         public List<String> toList(final boolean containDefaultValue) {
+            return toList(containDefaultValue, key -> key + "=" + this.get(key));
+        }
+
+        public List<String> toList(final boolean containDefaultValue, Function<String, String> function) {
             final List<String> result = new ArrayList<>();
             for (final String key : this.keySet()) {
                 if (containDefaultValue || this.hasValue(key)) {
-                    result.add(key + "=" + this.get(key));
+                    result.add(function.apply(key));
                 }
             }
             return result;
@@ -141,6 +156,9 @@ public interface Option {
             return key.replace("-", "-" + this.prefix + ".");
         }
 
+        private String templateEscape(final String key) {
+            return key.replace(".", "_");
+        }
     }
 
     class CommandLineArgsBuilder {

@@ -1,9 +1,8 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.DatabaseUnitRuntimeException;
-import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.ITable;
-import org.dbunit.dataset.ITableMetaData;
+import org.dbunit.dataset.*;
+import org.dbunit.dataset.datatype.DataType;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -138,6 +137,12 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
     public static class Builder {
         private final AddSettingTableMetaData addSettingTableMetaData;
         private AddSettingTableMetaData.Rows rows = new AddSettingTableMetaData.Rows();
+
+        public Builder(final String tableName, String... columnNames) {
+            this(new DefaultTableMetaData(tableName, Stream.of(columnNames)
+                                                           .map(names -> new Column(names, DataType.UNKNOWN))
+                                                           .toArray(Column[]::new)));
+        }
 
         public Builder(final ITableMetaData metaData) {
             this(TableSeparator.NONE.addSetting(metaData));

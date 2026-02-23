@@ -42,6 +42,10 @@ public class CsvConverter implements IDataSetConverter {
                 , param.exportHeader());
     }
 
+    public CsvConverter(final File resultDir, final String encoding) {
+        this(resultDir.getAbsolutePath(), resultDir, encoding, true, true);
+    }
+
     public CsvConverter(final String theDirectory, final File resultDir, final String encoding, final boolean exportEmptyTable, final boolean exportHeader) {
         this.theDirectory = theDirectory;
         this.resultDir = resultDir;
