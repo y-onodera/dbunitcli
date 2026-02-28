@@ -1,6 +1,6 @@
 package yo.dbunitcli.application;
 
-import yo.dbunitcli.application.cli.CommandLineParser;
+import yo.dbunitcli.application.cli.ArgumentMapper;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.common.Parameter;
@@ -10,10 +10,10 @@ public record ConvertOption(Parameter parameter, ResultOption result,
 
     public static ConvertDto toDto(final String[] args) {
         final ConvertDto dto = new ConvertDto();
-        new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, CommandLineOption.DEFAULT_COMMANDLINE_FILTER)
-                .parseArgument(args, dto);
-        new CommandLineParser("src").parseArgument(args, dto.getSrcData());
-        new CommandLineParser("result").parseArgument(args, dto.getConvertResult());
+        new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, CommandLineOption.ARGUMENT_FILTER)
+                .populate(args, dto);
+        new ArgumentMapper("src").populate(args, dto.getSrcData());
+        new ArgumentMapper("result").populate(args, dto.getConvertResult());
         return dto;
     }
 
@@ -29,10 +29,10 @@ public record ConvertOption(Parameter parameter, ResultOption result,
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        return new CommandLineArgsBuilder()
-                .addComponent("srcData", this.srcData.toCommandLineArgs())
-                .addComponent("convertResult", this.result().convertResult().toCommandLineArgs());
+    public ParametersBuilder toParametersBuilder() {
+        return new ParametersBuilder()
+                .addComponent("srcData", this.srcData.toParameters())
+                .addComponent("convertResult", this.result().convertResult().toParameters());
     }
 
     public void convertDataset() {

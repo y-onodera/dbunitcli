@@ -47,8 +47,8 @@ public record DataSetConverterOption(
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        final CommandLineArgsBuilder result = new CommandLineArgsBuilder(this.getPrefix());
+    public ParametersBuilder toParametersBuilder() {
+        final ParametersBuilder result = new ParametersBuilder(this.getPrefix());
         result.put("-resultType", this.resultType, ResultType.class);
         if (this.resultType == null) {
             return result;
@@ -57,7 +57,7 @@ public record DataSetConverterOption(
         if (type == DataSourceType.table) {
             result.put("-op", this.operation == null ? DBConverter.Operation.CLEAN_INSERT : this.operation
                             , DBConverter.Operation.class)
-                    .addComponent("jdbc", this.jdbcOption.toCommandLineArgs());
+                    .addComponent("jdbc", this.jdbcOption.toParameters());
         } else {
             result.putDir("-result", this.resultDir, BaseDir.RESULT)
                     .put("-resultPath", this.resultPath)

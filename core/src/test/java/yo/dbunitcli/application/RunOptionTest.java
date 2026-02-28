@@ -42,7 +42,7 @@ class RunOptionTest {
         @Test
         void toCommandLineArgs() {
             final RunOption target = RunOptionTest.this.createTarget();
-            final Option.CommandLineArgs result = target.toCommandLineArgs();
+            final Option.Parameters result = target.toParameters();
             assertEquals(RunOptionTest.this.src.getScriptType().toString(), result.getArg("-scriptType").value());
             assertEquals(RunOptionTest.this.src.getSrcData().getSrc(), result.getArg("-src.src").value());
             assertNull(result.getArg("-src.srcType"));
@@ -67,7 +67,7 @@ class RunOptionTest {
         @Test
         void toCommandLineArgs() {
             final RunOption target = RunOptionTest.this.createTarget();
-            final Option.CommandLineArgs result = target.toCommandLineArgs();
+            final Option.Parameters result = target.toParameters();
             assertEquals(RunOptionTest.this.src.getScriptType().toString(), result.getArg("-scriptType").value());
             assertEquals(RunOptionTest.this.src.getSrcData().getSrc(), result.getArg("-src.src").value());
             assertNull(result.getArg("-src.srcType"));
@@ -92,7 +92,7 @@ class RunOptionTest {
         @Test
         void toCommandLineArgs() {
             final RunOption target = RunOptionTest.this.createTarget();
-            final Option.CommandLineArgs result = target.toCommandLineArgs();
+            final Option.Parameters result = target.toParameters();
             assertEquals(RunOptionTest.this.src.getScriptType().toString(), result.getArg("-scriptType").value());
             assertEquals(RunOptionTest.this.src.getSrcData().getSrc(), result.getArg("-src.src").value());
             assertNull(result.getArg("-src.srcType"));
@@ -117,7 +117,7 @@ class RunOptionTest {
         @Test
         void toCommandLineArgs() {
             final RunOption target = RunOptionTest.this.createTarget();
-            final Option.CommandLineArgs result = target.toCommandLineArgs();
+            final Option.Parameters result = target.toParameters();
             assertEquals(RunOptionTest.this.src.getScriptType().toString(), result.getArg("-scriptType").value());
             assertEquals(RunOptionTest.this.src.getSrcData().getSrc(), result.getArg("-src.src").value());
             assertNull(result.getArg("-src.srcType"));

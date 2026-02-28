@@ -3,13 +3,18 @@ package yo.dbunitcli.sidecar.domain.project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.option.Option;
+import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.dataset.converter.CsvConverter;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ContextDto;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class Workspace {
@@ -20,6 +25,15 @@ public class Workspace {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    private static String[] parameterizeOption(final CommandType type, final Path templatePath,
+                                               final File parameterSource) {
+        return new String[]{"-cmd=" + type.name()
+                , "-template=" + templatePath.getFileName()
+                , "-param.src=" + parameterSource.getName()
+                , "-param.srcType=csv"
+                , "-unit=record"};
     }
 
     private Workspace(final Path path, final Options options, final Resources resources) {
@@ -58,11 +72,11 @@ public class Workspace {
     public WorkspaceDto toDto() {
         final WorkspaceDto result = new WorkspaceDto();
         final ParametersDto parameters = new ParametersDto();
-        parameters.setConvert(this.options().parameterNames(CommandType.convert).toList());
-        parameters.setCompare(this.options().parameterNames(CommandType.compare).toList());
-        parameters.setGenerate(this.options().parameterNames(CommandType.generate).toList());
-        parameters.setRun(this.options().parameterNames(CommandType.run).toList());
-        parameters.setParameterize(this.options().parameterNames(CommandType.parameterize).toList());
+        parameters.setConvert(this.options().names(CommandType.convert).toList());
+        parameters.setCompare(this.options().names(CommandType.compare).toList());
+        parameters.setGenerate(this.options().names(CommandType.generate).toList());
+        parameters.setRun(this.options().names(CommandType.run).toList());
+        parameters.setParameterize(this.options().names(CommandType.parameterize).toList());
         result.setParameterList(parameters);
         result.setResources(this.resources().toDto());
 
@@ -79,11 +93,44 @@ public class Workspace {
     }
 
     public Stream<String> parameterNames(final CommandType type) {
-        return this.options().parameterNames(type);
+        return this.options().names(type);
     }
 
     public Stream<Path> parameterFiles(final CommandType type) {
-        return this.options().parameterFiles(type);
+        return this.options().paths(type);
+    }
+
+    public String parameterize(final CommandType type, final String name) {
+        return this.options().select(type, name)
+                   .map(source -> {
+                       try {
+                           final Option.Parameters target = source.toOptionParameters();
+                           final Path templatePath = this.options()
+                                                         .templates()
+                                                         .add(name + ".txt", new CommandParameters(type, target
+                                                                 .parameterizeArgs(false)
+                                                                 .toArray(String[]::new))
+                                                                 .content());
+                           File parameterSource = this.saveParameterSources(name, target);
+                           return this.options().add(name
+                                   , new CommandParameters(CommandType.parameterize,
+                                                           parameterizeOption(type, templatePath,
+                                                                              parameterSource)));
+                       } catch (IOException e) {
+                           throw new RuntimeException(e);
+                       }
+                   })
+                   .orElse("");
+    }
+
+    private File saveParameterSources(final String name, final Option.Parameters args) {
+        final File resourcesDir = this.path().toFile();
+        Map<String, ?> parameters = args.toMap(false);
+        final CsvConverter converter = new CsvConverter(resourcesDir, "UTF-8");
+        converter.convert(new ComparableTable.Builder(name, parameters.keySet().toArray(new String[0]))
+                                  .addRow(parameters.values().toArray(Object[]::new))
+                                  .build());
+        return new File(resourcesDir, name + ".csv");
     }
 
     public static class Builder {

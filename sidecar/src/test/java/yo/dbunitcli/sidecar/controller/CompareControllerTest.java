@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 @MicronautTest
-@Property(name = FileResources.PROPERTY_WORKSPACE, value = "src/test/resources/workspace/sample")
+@Property(name = FileResources.PROPERTY_WORKSPACE, value = "target/test-temp/workspace/sample")
 class CompareControllerTest {
     @Inject
     EmbeddedServer server;

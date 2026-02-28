@@ -11,8 +11,8 @@ public record FileTraverseOption(TraverseOption traverseOption
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        return this.traverseOption().toCommandLineArgsBuilder()
+    public ParametersBuilder toParametersBuilder() {
+        return this.traverseOption().toParametersBuilder()
                 .put("-extension", this.extension());
     }
 

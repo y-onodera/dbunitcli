@@ -94,7 +94,7 @@ public class MainPresenter {
             this.parser = this.createCommand(this.selectedCommand);
             this.refresh(this.commandTypeSelect, this.commandTypeSelect
                     , () -> this.parser.parseOption(this.parser.getExpandArgs(new String[]{"@" + file.getPath()}))
-                            .toCommandLineArgs());
+                            .toParameters());
         }
     }
 
@@ -161,14 +161,14 @@ public class MainPresenter {
     }
 
     private void refresh(final MFXComboBox<String> selected, final Node form) {
-        this.refresh(selected, form, () -> this.parser.parseOption(this.inputToArg()).toCommandLineArgs());
+        this.refresh(selected, form, () -> this.parser.parseOption(this.inputToArg()).toParameters());
     }
 
-    private void refresh(final MFXComboBox<String> selected, final Node form, final Supplier<Option.CommandLineArgs> loadOption) {
+    private void refresh(final MFXComboBox<String> selected, final Node form, final Supplier<Option.Parameters> loadOption) {
         final Stage loading = new LoadingView().open(this.commandBox.getScene().getWindow());
         this.commandPane.setVisible(false);
         final Thread background = new Thread(() -> {
-            final Option.CommandLineArgs option = loadOption.get();
+            final Option.Parameters option = loadOption.get();
             Platform.runLater(() -> this.clearInputFields(form));
             try {
                 Thread.sleep(50);
@@ -187,7 +187,7 @@ public class MainPresenter {
         background.start();
     }
 
-    private void setInputFields(final MFXComboBox<String> selected, final Option.CommandLineArgs option) {
+    private void setInputFields(final MFXComboBox<String> selected, final Option.Parameters option) {
         int row = 1;
         final MFXValidator validator = new MFXValidator();
         validator.validProperty().addListener((observable, oldVal, newVal) -> this.exec.setDisable(!newVal));
@@ -202,7 +202,7 @@ public class MainPresenter {
         }
     }
 
-    private void setInputFieldsTextValue(final Option.CommandLineArgs option, final int row, final MFXValidator validator, final String key, final Option.Arg entry) {
+    private void setInputFieldsTextValue(final Option.Parameters option, final int row, final MFXValidator validator, final String key, final Option.Arg entry) {
         final MFXTextField text = new MFXTextField();
         text.setPrefWidth(400);
         text.setText(option.get(key));

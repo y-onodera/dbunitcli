@@ -60,15 +60,15 @@ public record DataSetLoadOption(
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        final CommandLineArgsBuilder result = new CommandLineArgsBuilder(this.getPrefix());
+    public ParametersBuilder toParametersBuilder() {
+        final ParametersBuilder result = new ParametersBuilder(this.getPrefix());
         result.put("-srcType", this.srcType, DataSourceType.class
                 , this.enableSrcTypeNone ? Filter.any() : Filter.exclude(DataSourceType.none), false);
         if (this.srcType == null || this.srcType == DataSourceType.none) {
             return result;
         }
         return result.putFileOrDir("-src", this.src, true, BaseDir.DATASET)
-                .putAll(this.dataSetParam.toCommandLineArgs())
+                .putAll(this.dataSetParam.toParameters())
                 .putFile("-setting", this.setting, BaseDir.SETTING)
                 .put("-settingEncoding", this.settingEncoding)
                 .put("-regTableInclude", this.regTableInclude)

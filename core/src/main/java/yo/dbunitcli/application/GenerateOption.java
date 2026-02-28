@@ -2,7 +2,7 @@ package yo.dbunitcli.application;
 
 import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.application.cli.CommandLineParser;
+import yo.dbunitcli.application.cli.ArgumentMapper;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
@@ -39,10 +39,10 @@ public record GenerateOption(
 
     public static GenerateDto toDto(final String[] args) {
         final GenerateDto dto = new GenerateDto();
-        new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, CommandLineOption.DEFAULT_COMMANDLINE_FILTER)
-                .parseArgument(args, dto);
-        new CommandLineParser("src").parseArgument(args, dto.getSrcData());
-        new CommandLineParser("template").parseArgument(args, dto.getTemplateOption());
+        new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, CommandLineOption.ARGUMENT_FILTER)
+                .populate(args, dto);
+        new ArgumentMapper("src").populate(args, dto.getSrcData());
+        new ArgumentMapper("template").populate(args, dto.getTemplateOption());
         return dto;
     }
 
@@ -123,8 +123,8 @@ public record GenerateOption(
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        final CommandLineArgsBuilder result = new CommandLineArgsBuilder();
+    public ParametersBuilder toParametersBuilder() {
+        final ParametersBuilder result = new ParametersBuilder();
         if (this.generateType == null) {
             return result;
         }
@@ -133,7 +133,7 @@ public record GenerateOption(
             result.put("-unit", this.unit, ParameterUnit.class)
                     .putFile("-template", this.template, true, BaseDir.TEMPLATE);
         }
-        final CommandLineArgsBuilder srcComponent = this.srcData.toCommandLineArgsBuilder();
+        final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
         switch (this.generateType) {
             case sql -> {
                 result.put("-commit", Boolean.toString(this.commit))
@@ -179,8 +179,8 @@ public record GenerateOption(
         return FileResources.searchTemplate(this.template());
     }
 
-    private CommandLineArgs templateOptionArgs() {
-        final CommandLineArgsBuilder templateComponent = this.templateOption.toCommandLineArgsBuilder();
+    private Parameters templateOptionArgs() {
+        final ParametersBuilder templateComponent = this.templateOption.toParametersBuilder();
         if (this.generateType.isExcel()) {
             if (this.generateType == GenerateType.xlsx) {
                 templateComponent.put("-formulaProcess", this.templateOption.formulaProcess());

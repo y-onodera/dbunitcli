@@ -28,13 +28,13 @@ public interface ComparableDataSetParamOption extends Option {
         }
 
         @Override
-        public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-            CommandLineArgsBuilder result = null;
+        public ParametersBuilder toParametersBuilder() {
+            ParametersBuilder result = null;
             for (final ComparableDataSetParamOption delegate : this.leaf) {
                 if (result == null) {
-                    result = delegate.toCommandLineArgsBuilder();
+                    result = delegate.toParametersBuilder();
                 } else {
-                    result.putAll(delegate.toCommandLineArgs());
+                    result.putAll(delegate.toParameters());
                 }
             }
             return result;

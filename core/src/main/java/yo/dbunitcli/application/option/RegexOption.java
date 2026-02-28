@@ -16,8 +16,8 @@ public record RegexOption(String prefix, String regHeaderSplit,
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        return new CommandLineArgsBuilder(this.getPrefix())
+    public ParametersBuilder toParametersBuilder() {
+        return new ParametersBuilder(this.getPrefix())
                 .put("-regDataSplit", this.regDataSplit)
                 .put("-regHeaderSplit", this.regHeaderSplit);
     }

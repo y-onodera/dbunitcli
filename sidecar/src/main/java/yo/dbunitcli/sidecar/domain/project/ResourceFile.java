@@ -5,68 +5,117 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class ResourceFile {
-    private final List<Path> files = new ArrayList<>();
-    private final File parentDir;
+public record ResourceFile(File baseDir, Set<String> files) {
 
     public ResourceFile(final File parentDir) {
-        this.parentDir = parentDir;
-        if (this.parentDir.exists() && this.parentDir.isDirectory()) {
-            try (final Stream<Path> pathStream = Files.walk(this.parentDir.toPath(), 1)) {
-                this.files.addAll(pathStream
-                        .filter(it -> it.toFile().isFile())
-                        .toList());
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public List<String> list() {
-        return this.files.stream()
-                .map(it -> it.getFileName().toString())
-                .toList();
+        this(parentDir, new TreeSet<>());
+        this.reload();
     }
 
     public Optional<String> read(final String name) {
-        return this.files.stream()
-                .filter(it -> it.getFileName().toString().equals(name))
-                .findFirst()
-                .map(it -> {
-                    try {
-                        return Files.readString(it, StandardCharsets.UTF_8);
-                    } catch (final IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+        return this.select(name).map(it -> {
+            try {
+                return Files.readString(it, StandardCharsets.UTF_8);
+            } catch (final IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public Optional<Path> select(String target) {
+        return this.files.stream().filter(it -> it.equals(target)).findFirst()
+                         .map(it -> new File(this.baseDir, it).toPath());
+    }
+
+    public List<String> list() {
+        return this.files.stream().toList();
+    }
+
+    public Stream<String> stream() {
+        return this.files.stream();
+    }
+
+    public Stream<Path> pathStream() {
+        return this.files.stream().map(it -> new File(this.baseDir, it).toPath());
+    }
+
+    public Path add(final String name, final String contents) throws IOException {
+        final Path saveTo = this.prepareUpdate(this.getUniqueName(name));
+        Files.writeString(saveTo, contents, StandardCharsets.UTF_8);
+        return saveTo;
     }
 
     public void update(final String name, final String contents) throws IOException {
-        final Path saveTo = this.prepareFileForUpdate(name);
+        final Path saveTo = this.prepareUpdate(name);
         Files.writeString(saveTo, contents, StandardCharsets.UTF_8);
     }
 
     public void delete(final String name) throws IOException {
-        final Path filePath = new File(this.parentDir, name).toPath();
+        final Path filePath = new File(this.baseDir, name).toPath();
         if (!filePath.toFile().exists()) {
             throw new IOException("File not found: " + name);
         }
-        Files.delete(filePath);
-        this.files.removeIf(path -> path.getFileName().toString().equals(name));
+        Files.deleteIfExists(filePath);
+        this.files.removeIf(path -> path.equals(name));
     }
 
-    private Path prepareFileForUpdate(final String name) throws IOException {
-        final File file = new File(name);
-        if (file.isAbsolute()) {
-            return this.create(file);
-        }
+    public void copy(final String source) {
+        this.read(source)
+            .ifPresent(content -> {
+                try {
+                    this.add(source, content);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+    }
 
-        return this.create(new File(this.parentDir, name));
+    public void rename(final String current, final String newName) {
+        this.select(current).ifPresent(path -> {
+            String toUnique = this.getUniqueName(newName);
+            Path newPath = new File(this.baseDir, toUnique).toPath();
+            try {
+                Files.move(path, newPath, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            this.files.remove(current);
+            this.files.add(toUnique);
+        });
+    }
+
+    private String getUniqueName(final String name) {
+        if (!this.files.contains(name)) {
+            return name;
+        }
+        final int dotIndex = name.lastIndexOf('.');
+        final String base = dotIndex >= 0 ? name.substring(0, dotIndex) : name;
+        final String ext = dotIndex >= 0 ? name.substring(dotIndex) : "";
+        return IntStream.iterate(1, i -> i + 1)
+                        .mapToObj(i -> base + "(" + i + ")" + ext)
+                        .filter(candidate -> !this.files.contains(candidate))
+                        .findFirst()
+                        .orElse("");
+    }
+
+    private void reload() {
+        if (this.baseDir.exists() && this.baseDir.isDirectory()) {
+            this.files.clear();
+            try (final Stream<Path> pathStream = Files.walk(this.baseDir.toPath(), 1)) {
+                this.files.addAll(
+                        pathStream.filter(it -> it.toFile().isFile()).map(it -> it.getFileName().toString()).toList());
+            } catch (final IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private Path create(final File file) throws IOException {
@@ -77,9 +126,17 @@ public class ResourceFile {
         final Path saveTo = file.toPath();
         if (!saveTo.toFile().exists()) {
             Files.createFile(saveTo);
-            this.files.add(saveTo);
+            this.files.add(saveTo.getFileName().toString());
         }
         return saveTo;
+    }
+
+    private Path prepareUpdate(final String name) throws IOException {
+        final File file = new File(name);
+        if (file.isAbsolute()) {
+            return this.create(file);
+        }
+        return this.create(new File(this.baseDir, name));
     }
 
 }

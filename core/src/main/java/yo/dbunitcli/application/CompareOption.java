@@ -1,8 +1,8 @@
 package yo.dbunitcli.application;
 
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.application.cli.CommandLineParser;
-import yo.dbunitcli.application.cli.DefaultArgumentMapper;
+import yo.dbunitcli.application.cli.ArgumentMapper;
+import yo.dbunitcli.application.cli.DefaultArgumentFunction;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
@@ -33,9 +33,9 @@ public record CompareOption(
         , DataSetLoadOption expectData
 ) implements CommandLineOption<CompareDto> {
 
-    private static final DefaultArgumentMapper IMAGE_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
+    private static final DefaultArgumentFunction IMAGE_TYPE_PARAM_MAPPER = new DefaultArgumentFunction() {
         @Override
-        public String[] map(final String[] arguments, final String prefix) {
+        public String[] apply(final String[] arguments, final String prefix) {
             final List<String> newArg = Arrays.stream(arguments)
                     .filter(it -> !it.contains("srcType=") && !it.contains("extension="))
                     .collect(Collectors.toList());
@@ -45,9 +45,9 @@ public record CompareOption(
         }
     };
 
-    private static final DefaultArgumentMapper PDF_TYPE_PARAM_MAPPER = new DefaultArgumentMapper() {
+    private static final DefaultArgumentFunction PDF_TYPE_PARAM_MAPPER = new DefaultArgumentFunction() {
         @Override
-        public String[] map(final String[] arguments, final String prefix) {
+        public String[] apply(final String[] arguments, final String prefix) {
             final List<String> newArg = Arrays.stream(arguments)
                     .filter(it -> !it.contains("srcType=") && !it.contains("extension="))
                     .collect(Collectors.toList());
@@ -59,31 +59,31 @@ public record CompareOption(
 
     public static CompareDto toDto(final String[] args) {
         final CompareDto dto = new CompareDto();
-        new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, CommandLineOption.DEFAULT_COMMANDLINE_FILTER)
-                .parseArgument(args, dto);
+        new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, CommandLineOption.ARGUMENT_FILTER)
+                .populate(args, dto);
         if (dto.getTargetType().isAny(Type.image, Type.pdf)) {
-            new CommandLineParser("image").parseArgument(args, dto.getImageOption());
+            new ArgumentMapper("image").populate(args, dto.getImageOption());
         }
         if (dto.getTargetType() == Type.image) {
-            new CommandLineParser("new", CompareOption.IMAGE_TYPE_PARAM_MAPPER)
-                    .parseArgument(args, dto.getNewData());
-            new CommandLineParser("old", CompareOption.IMAGE_TYPE_PARAM_MAPPER)
-                    .parseArgument(args, dto.getOldData());
+            new ArgumentMapper("new", CompareOption.IMAGE_TYPE_PARAM_MAPPER)
+                    .populate(args, dto.getNewData());
+            new ArgumentMapper("old", CompareOption.IMAGE_TYPE_PARAM_MAPPER)
+                    .populate(args, dto.getOldData());
         } else if (dto.getTargetType() == Type.pdf) {
-            new CommandLineParser("new", CompareOption.PDF_TYPE_PARAM_MAPPER)
-                    .parseArgument(args, dto.getNewData());
-            new CommandLineParser("old", CompareOption.PDF_TYPE_PARAM_MAPPER)
-                    .parseArgument(args, dto.getOldData());
+            new ArgumentMapper("new", CompareOption.PDF_TYPE_PARAM_MAPPER)
+                    .populate(args, dto.getNewData());
+            new ArgumentMapper("old", CompareOption.PDF_TYPE_PARAM_MAPPER)
+                    .populate(args, dto.getOldData());
         } else {
-            new CommandLineParser("new").parseArgument(args, dto.getNewData());
-            new CommandLineParser("old").parseArgument(args, dto.getOldData());
+            new ArgumentMapper("new").populate(args, dto.getNewData());
+            new ArgumentMapper("old").populate(args, dto.getOldData());
         }
         if (Arrays.stream(args).anyMatch(it -> it.startsWith("-expect.srcType") || it.startsWith("-expect.src="))) {
-            new CommandLineParser("expect").parseArgument(args, dto.getExpectData());
+            new ArgumentMapper("expect").populate(args, dto.getExpectData());
         } else {
             dto.getExpectData().setSrcType(DataSourceType.none);
         }
-        new CommandLineParser("result").parseArgument(args, dto.getConvertResult());
+        new ArgumentMapper("result").populate(args, dto.getConvertResult());
         return dto;
     }
 
@@ -111,13 +111,13 @@ public record CompareOption(
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        final CommandLineArgsBuilder result = new CommandLineArgsBuilder()
+    public ParametersBuilder toParametersBuilder() {
+        final ParametersBuilder result = new ParametersBuilder()
                 .put("-targetType", this.targetType, this.targetType.getDeclaringClass());
-        final CommandLineArgsBuilder newDataCommandLineArgs = this.newData.toCommandLineArgsBuilder();
-        final CommandLineArgsBuilder oldDataCommandLineArgs = this.oldData.toCommandLineArgsBuilder();
+        final ParametersBuilder newDataCommandLineArgs = this.newData.toParametersBuilder();
+        final ParametersBuilder oldDataCommandLineArgs = this.oldData.toParametersBuilder();
         if (this.targetType.isAny(Type.pdf, Type.image)) {
-            result.addComponent("imageOption", this.imageOption.toCommandLineArgs());
+            result.addComponent("imageOption", this.imageOption.toParameters());
             newDataCommandLineArgs.put("-srcType", DataSourceType.file, DataSourceType.class, Filter.include(DataSourceType.file), true);
             oldDataCommandLineArgs.put("-srcType", DataSourceType.file, DataSourceType.class, Filter.include(DataSourceType.file), true);
         }
@@ -126,11 +126,11 @@ public record CompareOption(
                 .put("-settingEncoding", this.settingEncoding)
                 .addComponent("newData", newDataCommandLineArgs.build())
                 .addComponent("oldData", oldDataCommandLineArgs.build())
-                .addComponent("convertResult", this.result().convertResult().toCommandLineArgsBuilder()
+                .addComponent("convertResult", this.result().convertResult().toParametersBuilder()
                         .put("-resultType", this.result().convertResult().resultType()
                                 , ResultType.class, Filter.exclude(ResultType.table), true)
                         .build())
-                .addComponent("expectData", this.expectData.toCommandLineArgsBuilder()
+                .addComponent("expectData", this.expectData.toParametersBuilder()
                         .put("-srcType", this.expectData.srcType(), DataSourceType.class
                                 , Filter.include(DataSourceType.csv, DataSourceType.csvq, DataSourceType.xls, DataSourceType.xlsx, DataSourceType.sql, DataSourceType.none)
                                 , false)

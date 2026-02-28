@@ -1,10 +1,7 @@
 package yo.dbunitcli.application;
 
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.application.cli.ArgumentFilter;
-import yo.dbunitcli.application.cli.CommandLineParser;
-import yo.dbunitcli.application.cli.DefaultArgumentFilter;
-import yo.dbunitcli.application.cli.DefaultArgumentMapper;
+import yo.dbunitcli.application.cli.*;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
@@ -28,9 +25,9 @@ public record ParameterizeOption(
         , TemplateRenderOption templateOption
 ) implements CommandLineOption<ParameterizeDto> {
 
-    private static final DefaultArgumentMapper NONE_PARAM_MAPPER = new DefaultArgumentMapper() {
+    private static final ArgumentFunction NONE_PARAM_MAPPER = new ArgumentFunction() {
         @Override
-        public String[] map(final String[] arguments, final String prefix) {
+        public String[] apply(final String[] arguments, final String prefix) {
             final List<String> list = Arrays.asList(arguments);
             if (this.paramTypeIsNone(list)) {
                 final List<String> newArg = Arrays.stream(arguments)
@@ -60,11 +57,11 @@ public record ParameterizeOption(
 
     public static ParameterizeDto toDto(final String[] args) {
         final ParameterizeDto dto = new ParameterizeDto();
-        new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, ParameterizeOption.ARGS_IGNORE_FILTER)
-                .parseArgument(args, dto);
-        new CommandLineParser("param", ParameterizeOption.NONE_PARAM_MAPPER)
-                .parseArgument(args, dto.getParamData());
-        new CommandLineParser("template").parseArgument(args, dto.getTemplateOption());
+        new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, ParameterizeOption.ARGS_IGNORE_FILTER)
+                .populate(args, dto);
+        new ArgumentMapper("param", ParameterizeOption.NONE_PARAM_MAPPER)
+                .populate(args, dto.getParamData());
+        new ArgumentMapper("template").populate(args, dto.getTemplateOption());
         return dto;
     }
 
@@ -88,16 +85,16 @@ public record ParameterizeOption(
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        return new CommandLineArgsBuilder()
-                .addComponent("paramData", this.paramData.toCommandLineArgs())
+    public ParametersBuilder toParametersBuilder() {
+        return new ParametersBuilder()
+                .addComponent("paramData", this.paramData.toParameters())
                 .put("-unit", this.unit, ParameterUnit.class)
                 .put("-parameterize", this.parameterize)
                 .put("-ignoreFail", this.ignoreFail)
                 .put("-cmd", this.cmd)
                 .put("-cmdParam", this.cmdParam)
                 .putFile("-template", this.template, true, BaseDir.TEMPLATE)
-                .addComponent("templateOption", this.templateOption.toCommandLineArgs());
+                .addComponent("templateOption", this.templateOption.toParameters());
     }
 
     public Stream<Parameter> loadParams() {

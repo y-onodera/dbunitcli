@@ -1,7 +1,7 @@
 package yo.dbunitcli.application;
 
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.application.cli.CommandLineParser;
+import yo.dbunitcli.application.cli.ArgumentMapper;
 import yo.dbunitcli.application.option.AntOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.JdbcOption;
@@ -30,14 +30,14 @@ public record RunOption(
 
     public static RunDto toDto(final String[] args) {
         final RunDto dto = new RunDto();
-        new CommandLineParser("", CommandLineOption.DEFAULT_COMMANDLINE_MAPPER, CommandLineOption.DEFAULT_COMMANDLINE_FILTER)
-                .parseArgument(args, dto);
+        new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, CommandLineOption.ARGUMENT_FILTER)
+                .populate(args, dto);
         dto.getSrcData().setSrcType(DataSourceType.file);
         dto.getSrcData().setIncludeMetaData("false");
         dto.getSrcData().setLoadData("true");
-        new CommandLineParser("src").parseArgument(args, dto.getSrcData());
-        new CommandLineParser("jdbc").parseArgument(args, dto.getJdbcOption());
-        new CommandLineParser("template").parseArgument(args, dto.getTemplateOption());
+        new ArgumentMapper("src").populate(args, dto.getSrcData());
+        new ArgumentMapper("jdbc").populate(args, dto.getJdbcOption());
+        new ArgumentMapper("template").populate(args, dto.getTemplateOption());
         return dto;
     }
 
@@ -74,9 +74,9 @@ public record RunOption(
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        final CommandLineArgsBuilder result = new CommandLineArgsBuilder()
-                .addComponent("srcData", this.srcData.toCommandLineArgsBuilder()
+    public ParametersBuilder toParametersBuilder() {
+        final ParametersBuilder result = new ParametersBuilder()
+                .addComponent("srcData", this.srcData.toParametersBuilder()
                         .remove("-src.srcType")
                         .remove("-src.extension")
                         .remove("-src.includeMetaData")
@@ -85,10 +85,10 @@ public record RunOption(
                 )
                 .put("-scriptType", this.scriptType, ScriptType.class);
         if (this.scriptType == ScriptType.sql) {
-            result.addComponent("templateOption", this.templateOption.toCommandLineArgs())
-                    .addComponent("jdbcOption", this.jdbcOption.toCommandLineArgs());
+            result.addComponent("templateOption", this.templateOption.toParameters())
+                    .addComponent("jdbcOption", this.jdbcOption.toParameters());
         } else if (this.scriptType == ScriptType.ant) {
-            result.putAll(this.antOption.toCommandLineArgs());
+            result.putAll(this.antOption.toParameters());
         }
         if (this.scriptType != ScriptType.sql) {
             result.put("-baseDir", this.baseDir);

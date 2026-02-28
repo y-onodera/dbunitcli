@@ -31,6 +31,8 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
         }
     }
 
+    void exec(T options);
+
     default void exec(final String[] args, final Parameter param) {
         this.exec(this.parseOption(args, param));
     }
@@ -38,8 +40,6 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
     default void exec(final String resultFile, final String[] args, final Parameter param) {
         this.exec(this.parseOption(resultFile, args, param));
     }
-
-    void exec(T options);
 
     DTO createDto(String[] args);
 
@@ -86,6 +86,10 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
             }
         }
         return result.toArray(new String[0]);
+    }
+
+    default String resultDir(String name, String[] args, Parameter parameter) {
+        return "";
     }
 
     class CommandFailException extends RuntimeException {

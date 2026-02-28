@@ -19,8 +19,8 @@ public record StartRowOption(
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        return new CommandLineArgsBuilder(this.prefix)
+    public ParametersBuilder toParametersBuilder() {
+        return new ParametersBuilder(this.prefix)
                 .put("-startRow", String.valueOf(this.startRow));
     }
 }

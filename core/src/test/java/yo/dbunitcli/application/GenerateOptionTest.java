@@ -47,7 +47,7 @@ class GenerateOptionTest {
         @Test
         void toCommandLineArgs() {
             final GenerateOption target = GenerateOptionTest.this.createTarget();
-            final Option.CommandLineArgs result = target.toCommandLineArgs();
+            final Option.Parameters result = target.toParameters();
             assertEquals(GenerateOptionTest.this.src.getUnit().toString(), result.getArg("-unit").value());
             assertNull(result.getArg("-sqlFilePrefix"));
             assertNull(result.getArg("-sqlFileSuffix"));
@@ -72,7 +72,7 @@ class GenerateOptionTest {
         @Test
         void toCommandLineArgs() {
             final GenerateOption target = GenerateOptionTest.this.createTarget();
-            final Option.CommandLineArgs result = target.toCommandLineArgs();
+            final Option.Parameters result = target.toParameters();
             assertNull(result.getArg("-unit"));
             assertEquals(GenerateOptionTest.this.src.getSqlFilePrefix(), result.getArg("-sqlFilePrefix").value());
             assertEquals(GenerateOptionTest.this.src.getSqlFileSuffix(), result.getArg("-sqlFileSuffix").value());
@@ -97,7 +97,7 @@ class GenerateOptionTest {
         @Test
         void toCommandLineArgsWithoutIncludeAllColumns() {
             final GenerateOption target = GenerateOptionTest.this.createTarget();
-            final Option.CommandLineArgs result = target.toCommandLineArgs();
+            final Option.Parameters result = target.toParameters();
             assertNull(result.getArg("-unit"));
             assertNull(result.getArg("-sqlFilePrefix"));
             assertNull(result.getArg("-sqlFileSuffix"));
@@ -115,7 +115,7 @@ class GenerateOptionTest {
         void toCommandLineArgsWithIncludeAllColumns() {
             GenerateOptionTest.this.src.setIncludeAllColumns("true");
             final GenerateOption target = GenerateOptionTest.this.createTarget();
-            final Option.CommandLineArgs result = target.toCommandLineArgs();
+            final Option.Parameters result = target.toParameters();
 
             assertEquals("true", result.getArg("-includeAllColumns").value());
             assertNull(result.getArg("-unit"));
@@ -142,7 +142,7 @@ class GenerateOptionTest {
         @Test
         void toCommandLineArgs() {
             final GenerateOption target = GenerateOptionTest.this.createTarget();
-            final Option.CommandLineArgs result = target.toCommandLineArgs();
+            final Option.Parameters result = target.toParameters();
             assertEquals(GenerateOptionTest.this.src.getUnit().toString(), result.getArg("-unit").value());
             assertNull(result.getArg("-sqlFilePrefix"));
             assertNull(result.getArg("-sqlFileSuffix"));
@@ -167,7 +167,7 @@ class GenerateOptionTest {
         @Test
         void toCommandLineArgs() {
             final GenerateOption target = GenerateOptionTest.this.createTarget();
-            final Option.CommandLineArgs result = target.toCommandLineArgs();
+            final Option.Parameters result = target.toParameters();
             final Option.Arg generateType = result.getArg("-generateType");
             assertEquals(GenerateOptionTest.this.src.getGenerateType().toString(), generateType.value());
             assertEquals(Arrays.stream(GenerateOption.GenerateType.values())

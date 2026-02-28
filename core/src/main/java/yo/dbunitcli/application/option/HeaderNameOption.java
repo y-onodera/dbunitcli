@@ -16,8 +16,8 @@ public record HeaderNameOption(String prefix, String headerName) implements Comp
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        return new CommandLineArgsBuilder(this.getPrefix())
+    public ParametersBuilder toParametersBuilder() {
+        return new ParametersBuilder(this.getPrefix())
                 .put("-headerName", this.headerName);
     }
 

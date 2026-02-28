@@ -64,8 +64,8 @@ public record ImageCompareOption(
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        return new CommandLineArgsBuilder(this.getPrefix())
+    public ParametersBuilder toParametersBuilder() {
+        return new ParametersBuilder(this.getPrefix())
                 .put("-threshold", this.threshold)
                 .put("-pixelToleranceLevel", this.pixelToleranceLevel)
                 .put("-allowingPercentOfDifferentPixels", this.allowingPercentOfDifferentPixels)

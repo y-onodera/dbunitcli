@@ -19,6 +19,12 @@ public class Compare implements Command<CompareDto, CompareOption> {
     }
 
     @Override
+    public String resultDir(final String name, final String[] args, final Parameter parameter) {
+        return this.parseOption(name, args, parameter).result().convertResult().getResultDir().getAbsoluteFile()
+                   .getPath();
+    }
+
+    @Override
     public CompareDto createDto(final String[] args) {
         return CompareOption.toDto(args);
     }

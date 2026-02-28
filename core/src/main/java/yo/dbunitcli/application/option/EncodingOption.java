@@ -20,8 +20,8 @@ public record EncodingOption(String prefix, String encoding) implements Comparab
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        return new CommandLineArgsBuilder(this.getPrefix())
+    public ParametersBuilder toParametersBuilder() {
+        return new ParametersBuilder(this.getPrefix())
                 .put("-encoding", this.encoding);
     }
 

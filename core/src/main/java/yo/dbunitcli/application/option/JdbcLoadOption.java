@@ -22,9 +22,9 @@ public record JdbcLoadOption(
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        return new CommandLineArgsBuilder(this.getPrefix())
-                .putAll(this.jdbc.toCommandLineArgs())
+    public ParametersBuilder toParametersBuilder() {
+        return new ParametersBuilder(this.getPrefix())
+                .putAll(this.jdbc.toParameters())
                 .put("-useJdbcMetaData", this.useJdbcMetaData);
     }
 

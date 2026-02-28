@@ -161,6 +161,10 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
             return this;
         }
 
+        public Builder addRow(final Object[] array) {
+            this.rows.rows().add(array);
+            return this;
+        }
         public AddSettingTableMetaData getAddSettingTableMetaData() {
             return this.addSettingTableMetaData;
         }
@@ -210,5 +214,6 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
             }
             return null;
         }
+
     }
 }

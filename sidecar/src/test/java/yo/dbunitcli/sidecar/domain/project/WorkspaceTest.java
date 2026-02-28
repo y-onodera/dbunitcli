@@ -7,11 +7,13 @@ import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 class WorkspaceTest {
     @TempDir
@@ -111,5 +113,46 @@ class WorkspaceTest {
         assertEquals(this.tempDir, workspace.path());
         assertNotNull(workspace.options());
         assertNotNull(workspace.resources());
+    }
+
+    @Test
+    void parameterize_convertパラメータからparameterizeコマンドを生成する() throws IOException {
+        // Arrange: convert パラメータを作成
+        this.workspace.options().add("myConvert", new CommandParameters(CommandType.convert, new String[]{}));
+
+        // Act
+        final String parameterizeName = this.workspace.parameterize(CommandType.convert, "myConvert");
+
+        // Assert: 戻り値は parameterize コマンド名
+        assertEquals("myConvert", parameterizeName);
+
+        // Assert: parameterize コマンドファイルが作成される
+        assertTrue(Files.exists(this.tempDir.resolve("option/parameterize/myConvert.txt")),
+                "parameterize パラメータファイルが作成されること");
+
+        // Assert: テンプレートファイルが作成される（name + ".txt" 形式）
+        assertTrue(Files.exists(this.tempDir.resolve("option/parameterize/template/myConvert.txt")),
+                "テンプレートファイルが作成されること");
+
+        // Assert: パラメータソース CSV がワークスペース直下に作成される
+        assertTrue(Files.exists(this.tempDir.resolve("myConvert.csv")),
+                "パラメータソース CSV がワークスペース直下に作成されること");
+
+        // Assert: 生成した parameterize コマンドが -cmd=convert を含む
+        final CommandParameters loaded = this.workspace.options()
+                .select(CommandType.parameterize, parameterizeName)
+                .orElseThrow();
+        final String content = loaded.content();
+        assertTrue(content.contains("-cmd=convert"), "cmd=convert が設定されること");
+        assertTrue(content.contains("-template=myConvert.txt"), "template=myConvert.txt が設定されること");
+        assertTrue(content.contains("-param.src=myConvert.csv"), "param.src=myConvert.csv が設定されること");
+        assertTrue(content.contains("-param.srcType=csv"), "param.srcType=csv が設定されること");
+        assertTrue(content.contains("-unit=record"), "unit=record が設定されること");
+    }
+
+    @Test
+    void parameterize_存在しないパラメータを指定した場合は空文字を返す() {
+        final String result = this.workspace.parameterize(CommandType.convert, "nonexistent");
+        assertEquals("", result);
     }
 }

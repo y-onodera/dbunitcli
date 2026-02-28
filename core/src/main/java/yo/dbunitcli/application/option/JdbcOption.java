@@ -36,8 +36,8 @@ public record JdbcOption(
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        return new CommandLineArgsBuilder(this.getPrefix())
+    public ParametersBuilder toParametersBuilder() {
+        return new ParametersBuilder(this.getPrefix())
                 .putFile("-jdbcProperties", this.jdbcProperties, BaseDir.JDBC)
                 .put("-jdbcUrl", this.jdbcUrl)
                 .put("-jdbcUser", this.jdbcUser)

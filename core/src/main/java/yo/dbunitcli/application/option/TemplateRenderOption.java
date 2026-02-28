@@ -43,8 +43,8 @@ public record TemplateRenderOption(
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        return new CommandLineArgsBuilder(this.getPrefix())
+    public ParametersBuilder toParametersBuilder() {
+        return new ParametersBuilder(this.getPrefix())
                 .put("-encoding", this.encoding)
                 .putFile("-templateGroup", this.templateGroup, BaseDir.TEMPLATE)
                 .put("-templateParameterAttribute", this.templateParameterAttribute)

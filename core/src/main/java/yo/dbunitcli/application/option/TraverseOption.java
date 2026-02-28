@@ -25,8 +25,8 @@ public record TraverseOption(
     }
 
     @Override
-    public CommandLineArgsBuilder toCommandLineArgsBuilder() {
-        return new CommandLineArgsBuilder(this.getPrefix())
+    public ParametersBuilder toParametersBuilder() {
+        return new ParametersBuilder(this.getPrefix())
                 .put("-recursive", this.recursive)
                 .put("-regInclude", this.regInclude)
                 .put("-regExclude", this.regExclude);

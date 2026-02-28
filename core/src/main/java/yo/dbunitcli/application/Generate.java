@@ -31,6 +31,11 @@ public class Generate implements Command<GenerateDto, GenerateOption> {
     }
 
     @Override
+    public String resultDir(final String name, final String[] args, final Parameter parameter) {
+        return this.parseOption(name, args, parameter).getResultDir().getAbsoluteFile().getPath();
+    }
+
+    @Override
     public GenerateDto createDto(final String[] args) {
         return GenerateOption.toDto(args);
     }

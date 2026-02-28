@@ -19,8 +19,8 @@ class DataSetLoadOptionTest {
     }
 
     @Test
-    void toCommandLineArgs() {
-        final Option.CommandLineArgs result = this.target.toCommandLineArgs();
+    void toParameters() {
+        final Option.Parameters result = this.target.toParameters();
         final Option.Arg srcType = result.getArg("-srcType");
         Assertions.assertEquals(Arrays.stream(DataSourceType.values())
                 .filter(it -> it != DataSourceType.none)
