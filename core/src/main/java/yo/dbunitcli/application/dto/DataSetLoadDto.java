@@ -1,6 +1,7 @@
 package yo.dbunitcli.application.dto;
 
 import picocli.CommandLine;
+import yo.dbunitcli.application.CompositeDto;
 import yo.dbunitcli.dataset.DataSourceType;
 
 import java.util.stream.Stream;

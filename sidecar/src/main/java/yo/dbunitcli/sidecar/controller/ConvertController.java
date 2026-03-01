@@ -1,10 +1,10 @@
 package yo.dbunitcli.sidecar.controller;
 
 import io.micronaut.http.annotation.Controller;
-import yo.dbunitcli.application.Convert;
-import yo.dbunitcli.application.ConvertDto;
-import yo.dbunitcli.application.ConvertOption;
-import yo.dbunitcli.sidecar.domain.project.CommandType;
+import yo.dbunitcli.application.command.Convert;
+import yo.dbunitcli.application.command.ConvertDto;
+import yo.dbunitcli.application.command.ConvertOption;
+import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
 @Controller("/convert")
@@ -14,7 +14,7 @@ public class ConvertController extends AbstractCommandController<ConvertDto, Con
     }
 
     @Override
-    protected CommandType getCommandType() {
-        return CommandType.convert;
+    protected Type getCommandType() {
+        return Type.convert;
     }
 }

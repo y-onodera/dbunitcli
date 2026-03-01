@@ -2,6 +2,8 @@ package yo.dbunitcli.sidecar.domain.project;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.application.CommandParameters;
+import yo.dbunitcli.application.command.Type;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,22 +13,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public record Options(File baseDir, Map<CommandType, ResourceFile> parameters, ResourceFile templates) {
+public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, ResourceFile> parameters, ResourceFile templates) {
     private static final Logger LOGGER = LoggerFactory.getLogger(Options.class);
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public Stream<Path> paths(final CommandType type) {
+    public Stream<Path> paths(final Type type) {
         return this.parameters().getOrDefault(type, new ResourceFile(this.getParent(type))).pathStream();
     }
 
-    public Stream<String> names(final CommandType type) {
+    public Stream<String> names(final yo.dbunitcli.application.CommandType type) {
         return this.parameters.get(type).stream().map(it -> it.replaceAll(".txt", ""));
     }
 
-    public Optional<CommandParameters> select(final CommandType type, final String name) {
+    public Optional<CommandParameters> select(final yo.dbunitcli.application.CommandType type, final String name) {
         return this.parameters.get(type)
                               .select(name + ".txt")
                               .map(path -> {
@@ -46,7 +48,7 @@ public record Options(File baseDir, Map<CommandType, ResourceFile> parameters, R
                               .replace(".txt", "");
     }
 
-    public void newItem(final CommandType type) throws IOException {
+    public void newItem(final Type type) throws IOException {
         this.add("new item", new CommandParameters(type));
         this.loggingCurrentFiles(type);
     }
@@ -56,33 +58,33 @@ public record Options(File baseDir, Map<CommandType, ResourceFile> parameters, R
                        .update(name + ".txt", commandParameters.content());
     }
 
-    public void delete(final CommandType type, final String name) throws IOException {
+    public void delete(final Type type, final String name) throws IOException {
         this.parameters.get(type).delete(name + ".txt");
         this.loggingCurrentFiles(type);
     }
 
-    public void rename(final CommandType type, final String oldName, final String newName) {
+    public void rename(final Type type, final String oldName, final String newName) {
         this.parameters.get(type).rename(oldName + ".txt", newName + ".txt");
         this.loggingCurrentFiles(type);
     }
 
-    public void copy(final CommandType type, final String target) {
+    public void copy(final Type type, final String target) {
         this.parameters.get(type).copy(target + ".txt");
         this.loggingCurrentFiles(type);
     }
 
-    private File getParent(final CommandType type) {
+    private File getParent(final Type type) {
         return new File(this.baseDir, type.name());
     }
 
-    private void loggingCurrentFiles(final CommandType type) {
+    private void loggingCurrentFiles(final Type type) {
         Options.LOGGER.info("type:{} include:{}", type, this.paths(type).toList());
     }
 
     public static class Builder {
 
         private File baseDir;
-        private final Map<CommandType, ResourceFile> parameters = new HashMap<>();
+        private final Map<yo.dbunitcli.application.CommandType, ResourceFile> parameters = new HashMap<>();
         private ResourceFile templates;
 
         public Options build() {
@@ -92,18 +94,18 @@ public record Options(File baseDir, Map<CommandType, ResourceFile> parameters, R
         public void workspace(final File workspace) {
             this.baseDir = new File(workspace, "option");
             if (this.baseDir.exists() || this.baseDir.mkdirs()) {
-                this.addParameterFiles(CommandType.compare)
-                        .addParameterFiles(CommandType.convert)
-                        .addParameterFiles(CommandType.generate)
-                        .addParameterFiles(CommandType.run)
-                        .addParameterFiles(CommandType.parameterize)
+                this.addParameterFiles(Type.compare)
+                        .addParameterFiles(Type.convert)
+                        .addParameterFiles(Type.generate)
+                        .addParameterFiles(Type.run)
+                        .addParameterFiles(Type.parameterize)
                 ;
                 this.templates = new ResourceFile(
-                        new File(this.parameters.get(CommandType.parameterize).baseDir(), "template"));
+                        new File(this.parameters.get(Type.parameterize).baseDir(), "template"));
             }
         }
 
-        private Builder addParameterFiles(final CommandType command) {
+        private Builder addParameterFiles(final Type command) {
             this.parameters.put(command, new ResourceFile(new File(this.baseDir, command.name())));
             return this;
         }

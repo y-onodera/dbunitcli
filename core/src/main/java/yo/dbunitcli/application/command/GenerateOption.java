@@ -1,0 +1,349 @@
+package yo.dbunitcli.application.command;
+
+import org.stringtemplate.v4.STGroup;
+import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.CommandLineOption;
+import yo.dbunitcli.application.ParameterUnit;
+import yo.dbunitcli.application.ArgumentMapper;
+import yo.dbunitcli.application.option.DataSetLoadOption;
+import yo.dbunitcli.application.option.TemplateRenderOption;
+import yo.dbunitcli.common.Parameter;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.converter.DBConverter;
+import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
+import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
+import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
+import yo.dbunitcli.resource.st4.TemplateRender;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+public record GenerateOption(
+        Parameter parameter
+        , String resultDir
+        , String resultPath
+        , GenerateType generateType
+        , ParameterUnit unit
+        , DBConverter.Operation operation
+        , String sqlFilePrefix
+        , String sqlFileSuffix
+        , boolean commit
+        , String template
+        , String outputEncoding
+        , DataSetLoadOption srcData
+        , TemplateRenderOption templateOption
+        , boolean includeAllColumns
+        , boolean lazyLoad
+) implements CommandLineOption<GenerateDto> {
+
+    public static GenerateDto toDto(final String[] args) {
+        final GenerateDto dto = new GenerateDto();
+        new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, CommandLineOption.ARGUMENT_FILTER)
+                .populate(args, dto);
+        new ArgumentMapper("src").populate(args, dto.getSrcData());
+        new ArgumentMapper("template").populate(args, dto.getTemplateOption());
+        return dto;
+    }
+
+    private static GenerateType getGenerateType(final GenerateDto dto) {
+        return dto.getGenerateType() != null ? dto.getGenerateType() : GenerateType.txt;
+    }
+
+    public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
+        this(param
+                , dto.getResultDir()
+                , Optional.ofNullable(dto.getResultPath())
+                        .filter(it -> !it.isEmpty())
+                        .orElse(resultFile)
+                , GenerateOption.getGenerateType(dto)
+                , GenerateOption.getGenerateType(dto).isFixedTemplate()
+                        ? GenerateOption.getGenerateType(dto).getFixedUnit()
+                        : dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record
+                , dto.getOperation()
+                , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
+                , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
+                , !Strings.isNotEmpty(dto.getCommit()) || Boolean.parseBoolean(dto.getCommit())
+                , dto.getTemplate()
+                , Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8"
+                , new DataSetLoadOption("src", dto.getSrcData())
+                , new TemplateRenderOption("template", dto.getTemplateOption())
+                , Strings.isNotEmpty(dto.getIncludeAllColumns()) && Boolean.parseBoolean(dto.getIncludeAllColumns())
+                , !Strings.isNotEmpty(dto.getLazyLoad()) || Boolean.parseBoolean(dto.getLazyLoad())
+        );
+    }
+
+    public String templateString() {
+        return this.generateType.getTemplateString(this);
+    }
+
+    public Stream<Parameter> parameterStream() {
+        if (this.generateType.isExcel() && this.lazyLoad) {
+            return this.unit().lazyLoadStream(this.getComparableDataSetLoader(), this.dataSetParam());
+        }
+        return this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
+    }
+
+    public File resultFile(final Parameter param) {
+        return new File(this.getResultDir(), this.resultPath(param));
+    }
+
+    public File getResultDir() {
+        return FileResources.resultDir(this.resultDir());
+    }
+
+    public String resultPath(final Parameter param) {
+        return this.templateOption.getTemplateRender().render(this.resultPath(), param);
+    }
+
+    @Override
+    public String resultPath() {
+        if (this.generateType() == GenerateType.sql) {
+            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
+            return this.resultPath + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
+        }
+        return this.resultPath;
+    }
+
+    public void write(final File resultFile, final Parameter param) throws IOException {
+        this.generateType().write(this, resultFile, param);
+    }
+
+    @Override
+    public GenerateDto toDto() {
+        return GenerateOption.toDto(this.toArgs(true));
+    }
+
+    @Override
+    public ComparableDataSetLoader getComparableDataSetLoader() {
+        return new ComparableDataSetLoader(this.parameter()
+                .add("commit", this.commit)
+                .add("includeAllColumns", this.includeAllColumns)
+        );
+    }
+
+    @Override
+    public ParametersBuilder toParametersBuilder() {
+        final ParametersBuilder result = new ParametersBuilder();
+        if (this.generateType == null) {
+            return result;
+        }
+        result.put("-generateType", this.generateType, GenerateType.class);
+        if (!this.generateType.isFixedTemplate()) {
+            result.put("-unit", this.unit, ParameterUnit.class)
+                    .putFile("-template", this.template, true, BaseDir.TEMPLATE);
+        }
+        final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
+        switch (this.generateType) {
+            case sql -> {
+                result.put("-commit", Boolean.toString(this.commit))
+                        .put("-op", this.operation, DBConverter.Operation.class)
+                        .put("-sqlFilePrefix", this.sqlFilePrefix)
+                        .put("-sqlFileSuffix", this.sqlFileSuffix);
+                srcComponent.remove("-src.useJdbcMetaData");
+            }
+            case settings -> {
+                result.put("-includeAllColumns", Boolean.toString(this.includeAllColumns));
+                srcComponent.remove("-src.useJdbcMetaData")
+                        .remove("-src.loadData");
+            }
+            case xlsxTemplate -> srcComponent.remove("-src.loadData");
+            case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
+        }
+        result.addComponent("srcData", srcComponent.build());
+        if (!this.generateType.isFixedTemplate()) {
+            result.addComponent("templateOption", this.templateOptionArgs());
+        }
+        result.putDir("-result", this.resultDir, BaseDir.RESULT)
+                .put("-resultPath", this.resultPath);
+        if (this.generateType.isText()) {
+            result.put("-outputEncoding", this.outputEncoding);
+        }
+        return result;
+    }
+
+    public ComparableDataSetParam dataSetParam() {
+        final ComparableDataSetParam.Builder builder = this.srcData.getParam();
+        if (this.generateType() == GenerateType.settings) {
+            builder.setUseJdbcMetaData(true);
+            builder.setLoadData(false);
+        } else if (this.generateType() == GenerateType.sql) {
+            builder.setUseJdbcMetaData(true);
+        } else if (this.generateType() == GenerateType.xlsxTemplate) {
+            builder.setLoadData(false);
+        }
+        return builder.build();
+    }
+
+    public File getTemplatePath() {
+        return FileResources.searchTemplate(this.template());
+    }
+
+    private Parameters templateOptionArgs() {
+        final ParametersBuilder templateComponent = this.templateOption.toParametersBuilder();
+        if (this.generateType.isExcel()) {
+            if (this.generateType == GenerateType.xlsx) {
+                templateComponent.put("-formulaProcess", this.templateOption.formulaProcess());
+            }
+            templateComponent.put("-evaluateFormulas", this.templateOption.evaluateFormulas());
+            templateComponent.put("-forceFormulaRecalc", this.templateOption.forceFormulaRecalc());
+            templateComponent.put("-fastFormulaProcess", this.templateOption.fastFormulaProcess());
+            templateComponent.put("-deleteBlankCells", this.templateOption.deleteBlankCells());
+        }
+        return templateComponent.build();
+    }
+
+    private String getSqlTemplate() {
+        return switch (this.operation) {
+            case INSERT -> "sql/insertTemplate.txt";
+            case DELETE -> "sql/deleteTemplate.txt";
+            case UPDATE -> "sql/updateTemplate.txt";
+            case CLEAN_INSERT -> "sql/cleanInsertTemplate.txt";
+            default -> "sql/deleteInsertTemplate.txt";
+        };
+    }
+
+    public enum GenerateType {
+        txt {
+            @Override
+            public String getTemplateString(final GenerateOption option) {
+                final File templatePath = option.getTemplatePath();
+                if (templatePath == null || !templatePath.exists() || !templatePath.isFile()) {
+                    throw new AssertionError(option.template + " is not exist file"
+                            , new IllegalArgumentException(String.valueOf(option.template)));
+                }
+                return FileResources.read(templatePath, option.templateOption.encoding());
+            }
+        },
+        xlsx {
+            @Override
+            protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
+                JxlsTemplateRender.builder()
+                        .setTemplateParameterAttribute(option.templateOption.templateParameterAttribute())
+                        .setFormulaProcess(option.templateOption.formulaProcess())
+                        .setEvaluateFormulas(option.templateOption.evaluateFormulas())
+                        .setForceFormulaRecalc(option.templateOption.forceFormulaRecalc())
+                        .setFastFormulaProcess(option.templateOption.fastFormulaProcess())
+                        .setDeleteBlankCells(option.templateOption.deleteBlankCells())
+                        .build()
+                        .render(option.getTemplatePath(), resultFile, param, option.unit != ParameterUnit.record);
+            }
+        },
+        xls {
+            @Override
+            protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
+                JxlsTemplateRender.builder()
+                        .setTemplateParameterAttribute(option.templateOption.templateParameterAttribute())
+                        .setFormulaProcess(option.templateOption.formulaProcess())
+                        .setEvaluateFormulas(option.templateOption.evaluateFormulas())
+                        .setForceFormulaRecalc(option.templateOption.forceFormulaRecalc())
+                        .setFastFormulaProcess(option.templateOption.fastFormulaProcess())
+                        .setDeleteBlankCells(option.templateOption.deleteBlankCells())
+                        .build()
+                        .render(option.getTemplatePath(), resultFile, param, option.unit != ParameterUnit.record);
+            }
+        },
+        settings {
+            @Override
+            public boolean isFixedTemplate() {
+                return true;
+            }
+
+            @Override
+            public ParameterUnit getFixedUnit() {
+                return ParameterUnit.dataset;
+            }
+
+            @Override
+            public String getTemplateString(final GenerateOption option) {
+                return FileResources.readClasspathResource("settings/settingTemplate.txt");
+            }
+
+            @Override
+            protected STGroup getStGroup() {
+                return new TemplateRender.Builder()
+                        .setTemplateParameterAttribute(null)
+                        .build()
+                        .createSTGroup("settings/settingTemplate.stg");
+            }
+        },
+        sql {
+            @Override
+            public boolean isFixedTemplate() {
+                return true;
+            }
+
+            @Override
+            public ParameterUnit getFixedUnit() {
+                return ParameterUnit.table;
+            }
+
+            @Override
+            public String getTemplateString(final GenerateOption option) {
+                return FileResources.readClasspathResource(option.getSqlTemplate());
+            }
+
+            @Override
+            protected STGroup getStGroup() {
+                return new TemplateRender.Builder()
+                        .setTemplateParameterAttribute(null)
+                        .build()
+                        .createSTGroup("sql/sqlTemplate.stg");
+            }
+        },
+        xlsxTemplate {
+            @Override
+            public boolean isFixedTemplate() {
+                return true;
+            }
+
+            @Override
+            public ParameterUnit getFixedUnit() {
+                return ParameterUnit.dataset;
+            }
+
+            @Override
+            protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
+                JxlsTemplateGenerator.createTemplate(resultFile, param);
+            }
+        };
+
+        public boolean isAny(final GenerateType... expects) {
+            return Stream.of(expects).anyMatch(it -> it == this);
+        }
+
+        protected STGroup getStGroup() {
+            return null;
+        }
+
+        protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
+            option.templateOption.getTemplateRender().write(this.getStGroup()
+                    , option.templateString()
+                    , param
+                    , resultFile
+                    , option.outputEncoding);
+        }
+
+        protected boolean isFixedTemplate() {
+            return false;
+        }
+
+        protected ParameterUnit getFixedUnit() {
+            return null;
+        }
+
+        protected String getTemplateString(final GenerateOption option) {
+            return null;
+        }
+
+        private boolean isExcel() {
+            return this.isAny(xlsx, xls);
+        }
+
+        private boolean isText() {
+            return !this.isAny(xlsx, xls, xlsxTemplate);
+        }
+    }
+}

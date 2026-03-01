@@ -1,6 +1,7 @@
 package yo.dbunitcli.application.option;
 
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.DataSetConverterDto;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DataSourceType;

@@ -1,0 +1,8 @@
+-targetType=pdf
+-old.src=src/test/resources/yo/dbunitcli/application/src/compare/pdf/old
+-new.src=src/test/resources/yo/dbunitcli/application/src/compare/pdf/new
+-expect.src=src/test/resources/yo/dbunitcli/application/expect/compare/pdf/expect_differ
+-result=target/test-classes/yo/dbunitcli/application/command/compare/pdf/result2
+-image.excludedAreas=[51.0,53.0,265.0,54.0][51.0,95.0,360.0,96.0]
+-image.pixelToleranceLevel=0.5
+-image.allowingPercentOfDifferentPixels=0.005

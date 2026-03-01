@@ -1,6 +1,7 @@
 package yo.dbunitcli.application.option;
 
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.dataset.ComparableDataSetParam;

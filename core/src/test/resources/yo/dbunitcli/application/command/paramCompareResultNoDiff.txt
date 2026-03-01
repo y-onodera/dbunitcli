@@ -1,0 +1,4 @@
+-old.src=src/test/resources/yo/dbunitcli/application/src/compare/nodiff/old
+-new.src=src/test/resources/yo/dbunitcli/application/src/compare/nodiff/new
+-setting=src/test/resources/yo/dbunitcli/application/settings/nodiff/setting.json
+-result=target/test-classes/yo/dbunitcli/application/command/nodiff/result

@@ -115,10 +115,10 @@ java -jar dbunit-cli-jar-with-dependencies.jar [コマンド] [オプション]
 
 ### 個別コマンド実行
 
-- `java -cp dbunit-cli.jar yo.dbunitcli.application.Compare [オプション]`
-- `java -cp dbunit-cli.jar yo.dbunitcli.application.Convert [オプション]`
-- `java -cp dbunit-cli.jar yo.dbunitcli.application.Generate [オプション]`
-- `java -cp dbunit-cli.jar yo.dbunitcli.application.Run [オプション]`
+- `java -cp dbunit-cli.jar yo.dbunitcli.application.command.Compare [オプション]`
+- `java -cp dbunit-cli.jar yo.dbunitcli.application.command.Convert [オプション]`
+- `java -cp dbunit-cli.jar yo.dbunitcli.application.command.Generate [オプション]`
+- `java -cp dbunit-cli.jar yo.dbunitcli.application.command.Run [オプション]`
 
 ### GraalVM ネイティブイメージ
 

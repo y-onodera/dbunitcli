@@ -5,8 +5,8 @@ import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.runtime.Micronaut;
 import io.micronaut.serde.annotation.SerdeImport;
-import yo.dbunitcli.application.Parameterize;
-import yo.dbunitcli.application.option.Option;
+import yo.dbunitcli.application.command.Parameterize;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 

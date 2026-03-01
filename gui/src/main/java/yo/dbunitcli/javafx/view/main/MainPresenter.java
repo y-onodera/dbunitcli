@@ -29,7 +29,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.tbee.javafx.scene.layout.MigPane;
 import yo.dbunitcli.application.*;
-import yo.dbunitcli.application.option.Option;
+import yo.dbunitcli.application.command.*;
+import yo.dbunitcli.application.Option;
 
 import java.awt.*;
 import java.io.File;

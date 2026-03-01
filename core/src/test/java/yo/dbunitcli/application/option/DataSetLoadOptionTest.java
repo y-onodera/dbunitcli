@@ -3,6 +3,7 @@ package yo.dbunitcli.application.option;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.DataSourceType;
 

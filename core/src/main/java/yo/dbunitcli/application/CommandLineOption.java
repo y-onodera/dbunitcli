@@ -1,10 +1,5 @@
 package yo.dbunitcli.application;
 
-import yo.dbunitcli.application.cli.ArgumentFilter;
-import yo.dbunitcli.application.cli.ArgumentFunction;
-import yo.dbunitcli.application.cli.DefaultArgumentFilter;
-import yo.dbunitcli.application.cli.DefaultArgumentFunction;
-import yo.dbunitcli.application.option.Option;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;

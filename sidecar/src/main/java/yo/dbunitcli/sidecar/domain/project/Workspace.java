@@ -3,7 +3,9 @@ package yo.dbunitcli.sidecar.domain.project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.application.option.Option;
+import yo.dbunitcli.application.CommandParameters;
+import yo.dbunitcli.application.Option;
+import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.converter.CsvConverter;
 import yo.dbunitcli.resource.FileResources;
@@ -27,7 +29,7 @@ public class Workspace {
         return new Builder();
     }
 
-    private static String[] parameterizeOption(final CommandType type, final Path templatePath,
+    private static String[] parameterizeOption(final Type type, final Path templatePath,
                                                final File parameterSource) {
         return new String[]{"-cmd=" + type.name()
                 , "-template=" + templatePath.getFileName()
@@ -72,11 +74,11 @@ public class Workspace {
     public WorkspaceDto toDto() {
         final WorkspaceDto result = new WorkspaceDto();
         final ParametersDto parameters = new ParametersDto();
-        parameters.setConvert(this.options().names(CommandType.convert).toList());
-        parameters.setCompare(this.options().names(CommandType.compare).toList());
-        parameters.setGenerate(this.options().names(CommandType.generate).toList());
-        parameters.setRun(this.options().names(CommandType.run).toList());
-        parameters.setParameterize(this.options().names(CommandType.parameterize).toList());
+        parameters.setConvert(this.options().names(Type.convert).toList());
+        parameters.setCompare(this.options().names(Type.compare).toList());
+        parameters.setGenerate(this.options().names(Type.generate).toList());
+        parameters.setRun(this.options().names(Type.run).toList());
+        parameters.setParameterize(this.options().names(Type.parameterize).toList());
         result.setParameterList(parameters);
         result.setResources(this.resources().toDto());
 
@@ -92,15 +94,15 @@ public class Workspace {
         return result;
     }
 
-    public Stream<String> parameterNames(final CommandType type) {
+    public Stream<String> parameterNames(final yo.dbunitcli.application.CommandType type) {
         return this.options().names(type);
     }
 
-    public Stream<Path> parameterFiles(final CommandType type) {
+    public Stream<Path> parameterFiles(final Type type) {
         return this.options().paths(type);
     }
 
-    public String parameterize(final CommandType type, final String name) {
+    public String parameterize(final Type type, final String name) {
         return this.options().select(type, name)
                    .map(source -> {
                        try {
@@ -113,7 +115,7 @@ public class Workspace {
                                                                  .content());
                            File parameterSource = this.saveParameterSources(name, target);
                            return this.options().add(name
-                                   , new CommandParameters(CommandType.parameterize,
+                                   , new CommandParameters(Type.parameterize,
                                                            parameterizeOption(type, templatePath,
                                                                               parameterSource)));
                        } catch (IOException e) {

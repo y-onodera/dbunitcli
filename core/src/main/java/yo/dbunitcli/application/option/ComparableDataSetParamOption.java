@@ -1,5 +1,6 @@
 package yo.dbunitcli.application.option;
 
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Arrays;

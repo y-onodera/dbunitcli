@@ -16,8 +16,8 @@ import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.CommandDto;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.resource.FileResources;
-import yo.dbunitcli.sidecar.domain.project.CommandParameters;
-import yo.dbunitcli.sidecar.domain.project.CommandType;
+import yo.dbunitcli.application.CommandParameters;
+import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.CommandRequestDto;
 
@@ -137,7 +137,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     @Post(uri = "parameterize", produces = MediaType.APPLICATION_JSON)
     public String parameterize(@Body final CommandRequestDto input) {
         String parameterizeName = this.workspace.parameterize(this.getCommandType(), input.getName());
-        return this.load(CommandType.parameterize, parameterizeName);
+        return this.load(Type.parameterize, parameterizeName);
     }
 
     @Error
@@ -146,7 +146,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                            .body(new JsonError("Execution failed. cause: " + ex.getMessage()));
     }
 
-    protected String load(final CommandType commandType, final String name) {
+    protected String load(final yo.dbunitcli.application.CommandType commandType, final String name) {
         return this.workspace.options().select(commandType, name)
                              .map(target -> {
                                  try {
@@ -159,7 +159,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                              .orElse("{}");
     }
 
-    abstract protected CommandType getCommandType();
+    abstract protected Type getCommandType();
 
     protected String parameterNames() throws IOException {
         return this.toJson(this.workspace.parameterNames(this.getCommandType()).toList());

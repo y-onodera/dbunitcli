@@ -3,6 +3,8 @@ package yo.dbunitcli.sidecar.domain.project;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import yo.dbunitcli.application.CommandParameters;
+import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
@@ -74,8 +76,8 @@ class WorkspaceTest {
     @Test
     void parameterNames_タイプに応じたパラメータ名が取得できる() {
         // Act
-        final List<String> convertParams = this.workspace.parameterNames(CommandType.convert).toList();
-        final List<String> compareParams = this.workspace.parameterNames(CommandType.compare).toList();
+        final List<String> convertParams = this.workspace.parameterNames(Type.convert).toList();
+        final List<String> compareParams = this.workspace.parameterNames(Type.compare).toList();
 
         // Assert
         assertNotNull(convertParams);
@@ -85,8 +87,8 @@ class WorkspaceTest {
     @Test
     void parameterFiles_タイプに応じたファイルが取得できる() {
         // Act
-        final List<Path> convertFiles = this.workspace.parameterFiles(CommandType.convert).toList();
-        final List<Path> compareFiles = this.workspace.parameterFiles(CommandType.compare).toList();
+        final List<Path> convertFiles = this.workspace.parameterFiles(Type.convert).toList();
+        final List<Path> compareFiles = this.workspace.parameterFiles(Type.compare).toList();
 
         // Assert
         assertNotNull(convertFiles);
@@ -118,10 +120,10 @@ class WorkspaceTest {
     @Test
     void parameterize_convertパラメータからparameterizeコマンドを生成する() throws IOException {
         // Arrange: convert パラメータを作成
-        this.workspace.options().add("myConvert", new CommandParameters(CommandType.convert, new String[]{}));
+        this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{}));
 
         // Act
-        final String parameterizeName = this.workspace.parameterize(CommandType.convert, "myConvert");
+        final String parameterizeName = this.workspace.parameterize(Type.convert, "myConvert");
 
         // Assert: 戻り値は parameterize コマンド名
         assertEquals("myConvert", parameterizeName);
@@ -140,7 +142,7 @@ class WorkspaceTest {
 
         // Assert: 生成した parameterize コマンドが -cmd=convert を含む
         final CommandParameters loaded = this.workspace.options()
-                .select(CommandType.parameterize, parameterizeName)
+                .select(Type.parameterize, parameterizeName)
                 .orElseThrow();
         final String content = loaded.content();
         assertTrue(content.contains("-cmd=convert"), "cmd=convert が設定されること");
@@ -152,7 +154,7 @@ class WorkspaceTest {
 
     @Test
     void parameterize_存在しないパラメータを指定した場合は空文字を返す() {
-        final String result = this.workspace.parameterize(CommandType.convert, "nonexistent");
+        final String result = this.workspace.parameterize(Type.convert, "nonexistent");
         assertEquals("", result);
     }
 }

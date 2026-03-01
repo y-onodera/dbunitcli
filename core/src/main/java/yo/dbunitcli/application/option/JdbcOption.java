@@ -1,6 +1,7 @@
 package yo.dbunitcli.application.option;
 
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.JdbcDto;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;

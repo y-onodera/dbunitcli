@@ -1,5 +1,7 @@
 package yo.dbunitcli.application.option;
 
+import yo.dbunitcli.application.Option;
+
 public record AntOption(
         String prefix
         , String target
