@@ -1,0 +1,2 @@
+-scriptType=sql
+-src.src=resources/sql/sample.sql

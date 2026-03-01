@@ -1,0 +1,6 @@
+-new.src=resources/src/csv/multi1.csv
+-new.srcType=csv
+-old.src=resources/src/csv/multi2.csv
+-old.srcType=csv
+-result.result=target/compare/result
+-result.resultType=csv

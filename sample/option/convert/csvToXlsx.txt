@@ -1,0 +1,4 @@
+-src=src/test/resources/workspace/sample/resources/src/csv
+-srcType=csv
+-result=target/convert/result
+-resultType=xlsx
