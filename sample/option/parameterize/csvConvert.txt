@@ -1,0 +1,5 @@
+-cmd=convert
+-template=csvToXlsx.txt
+-param.src=csvToXlsx.csv
+-param.srcType=csv
+-unit=record

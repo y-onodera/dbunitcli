@@ -1,0 +1,14 @@
+{
+    "rows" : [
+        {
+            "sheetName" : "Sheet1",
+            "tableName" : "TABLE_A",
+            "header" : ["id","name"],
+            "dataStart" : 2,
+            "columnIndex" : [1,2],
+            "breakKey" : [],
+            "addFileInfo" : false
+        }
+    ],
+    "cells" : []
+}

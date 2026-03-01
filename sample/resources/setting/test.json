@@ -1,0 +1,9 @@
+{
+    "settings" : [
+        {
+            "name" : ["TABLE_A"],
+            "keys" : ["id"]
+        }
+    ],
+    "commonSettings" : []
+}
