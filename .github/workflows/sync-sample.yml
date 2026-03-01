@@ -1,0 +1,32 @@
+name: Sync sample workspace
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'sidecar/src/test/resources/workspace/sample/**'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync sample directory
+        run: |
+          rsync -av --delete \
+            sidecar/src/test/resources/workspace/sample/ \
+            sample/
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add sample/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: sync sample from sidecar test workspace [skip ci]"
+            git push
+          fi
