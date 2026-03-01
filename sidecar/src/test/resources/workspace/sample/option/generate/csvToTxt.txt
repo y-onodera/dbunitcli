@@ -1,0 +1,5 @@
+-src.src=resources/src/csv
+-src.srcType=csv
+-template=sample.stg
+-result=target/generate/result
+-generateType=txt
