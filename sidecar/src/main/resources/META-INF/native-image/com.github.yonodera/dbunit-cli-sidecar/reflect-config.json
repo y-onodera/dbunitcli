@@ -12927,27 +12927,27 @@
     ]
   },
   {
-    "name": "yo.dbunitcli.application.dto.CompareDto",
+    "name": "yo.dbunitcli.application.command.CompareDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.dto.ConvertDto",
+    "name": "yo.dbunitcli.application.command.ConvertDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.dto.GenerateDto",
+    "name": "yo.dbunitcli.application.command.GenerateDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.dto.ParameterizeDto",
+    "name": "yo.dbunitcli.application.command.ParameterizeDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.dto.RunDto",
+    "name": "yo.dbunitcli.application.command.RunDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
   }
