@@ -159,13 +159,7 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
                              .orElse("{}");
     }
 
-    abstract protected T getCommand();
-
     abstract protected CommandType getCommandType();
-
-    protected String resultDir(final OPTION options) {
-        return "";
-    }
 
     protected String parameterNames() throws IOException {
         return this.toJson(this.workspace.parameterNames(this.getCommandType()).toList());

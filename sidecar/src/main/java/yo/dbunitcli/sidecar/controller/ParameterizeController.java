@@ -15,11 +15,6 @@ public class ParameterizeController extends AbstractCommandController<Parameteri
     }
 
     @Override
-    protected Parameterize getCommand() {
-        return new Parameterize();
-    }
-
-    @Override
     protected CommandType getCommandType() {
         return CommandType.parameterize;
     }

@@ -16,7 +16,6 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.regex.Pattern;
 
 @MicronautTest
 @Property(name = FileResources.PROPERTY_WORKSPACE, value = "target/test-temp/workspace/sample")
@@ -34,9 +33,45 @@ class ConvertControllerTest {
 
     @AfterEach
     public void tearDown() throws IOException {
-        Files.deleteIfExists(Paths.get(WORKSPACE, "option/parameterize/csvToXlsx.txt"));
+        // parameterize コマンドの in-memory state も含めてクリーンアップ
+        this.tryDeleteCommand("parameterize", "csvToXlsx");
         Files.deleteIfExists(Paths.get(WORKSPACE, "option/parameterize/template/csvToXlsx.txt"));
         Files.deleteIfExists(Paths.get(WORKSPACE, "csvToXlsx.csv"));
+
+        // convert コマンドのファイルをクリーンアップ
+        this.tryDelete("savedConvert");
+        this.tryDelete("new item");
+        this.tryDelete("csvToXlsx(1)");
+        this.tryDelete("renamed");
+    }
+
+    @Test
+    public void testAdd_パラメータを追加する() {
+        final String response = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/convert/add"));
+        Assertions.assertEquals("[\"csvToXlsx\",\"new item\"]", response);
+    }
+
+    @Test
+    public void testCopy_パラメータをコピーする() {
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/convert/copy", "{\"name\":\"csvToXlsx\"}"));
+        Assertions.assertEquals("[\"csvToXlsx(1)\",\"csvToXlsx\"]", response);
+    }
+
+    @Test
+    public void testDelete_パラメータを削除する() {
+        this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/convert/add"));
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/convert/delete", "{\"name\":\"new item\"}"));
+        Assertions.assertEquals("[\"csvToXlsx\"]", response);
+    }
+
+    @Test
+    public void testRename_パラメータをリネームする() {
+        this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/convert/add"));
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/convert/rename", "{\"oldName\":\"new item\",\"newName\":\"renamed\"}"));
+        Assertions.assertEquals("[\"csvToXlsx\",\"renamed\"]", response);
     }
 
     @Test
@@ -45,8 +80,7 @@ class ConvertControllerTest {
                 HttpRequest.POST("dbunit-cli/convert/parameterize", "{\"name\":\"csvToXlsx\"}"));
         System.out.println(jsonResponse);
 
-        final String expectedJson = Files.readString(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/convert-parameterize-response.json"));
-        Assertions.assertEquals(this.normalizeJson(expectedJson), this.normalizeJson(jsonResponse));
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/convert-parameterize-response.json"), jsonResponse);
         Assertions.assertTrue(
                 Files.exists(Paths.get(WORKSPACE, "csvToXlsx.csv")),
                 "param.src に指定する csvToXlsx.csv がワークスペース直下に作成されること");
@@ -59,16 +93,26 @@ class ConvertControllerTest {
     }
 
     @Test
+    public void testSave_パラメータを保存して再ロードで確認する() throws IOException {
+        final String saveResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/convert/save",
+                        "{\"name\":\"savedConvert\",\"input\":{\"-src\":\"resources/src/csv\",\"-srcType\":\"csv\",\"-result\":\"target/convert/result\",\"-resultType\":\"xlsx\"}}"));
+        Assertions.assertEquals("success", saveResponse);
+
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/convert/load", "{\"name\":\"savedConvert\"}"));
+        System.out.println(jsonResponse);
+
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/convert-save-load-response.json"), jsonResponse);
+    }
+
+    @Test
     public void testLoad() throws IOException {
         final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/convert/load"
                 , "{\"name\":\"csvToXlsx\"}"));
         System.out.println(jsonResponse);
 
-        final String expectedJson = Files.readString(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/convert-load-response.json"));
-        // 改行やスペースを無視して比較するために正規化
-        final String normalizedExpected = this.normalizeJson(expectedJson);
-        final String normalizedActual = this.normalizeJson(jsonResponse);
-        Assertions.assertEquals(normalizedExpected, normalizedActual);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/convert-load-response.json"), jsonResponse);
     }
 
     @Test
@@ -76,18 +120,18 @@ class ConvertControllerTest {
         final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/convert/reset"));
         System.out.println(jsonResponse);
 
-        final String expectedJson = Files.readString(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/convert-reset-response.json"));
-        // 改行やスペースを無視して比較するために正規化
-        final String normalizedExpected = this.normalizeJson(expectedJson);
-        final String normalizedActual = this.normalizeJson(jsonResponse);
-        Assertions.assertEquals(normalizedExpected, normalizedActual);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/convert-reset-response.json"), jsonResponse);
     }
 
-    /**
-     * JSONの空白や改行を取り除いて正規化するヘルパーメソッド
-     */
-    private String normalizeJson(final String json) {
-        // 空白、タブ、改行を削除
-        return Pattern.compile("\\s+").matcher(json).replaceAll("");
+    private void tryDelete(final String name) {
+        this.tryDeleteCommand("convert", name);
+    }
+
+    private void tryDeleteCommand(final String command, final String name) {
+        try {
+            this.client.toBlocking().retrieve(
+                    HttpRequest.POST("dbunit-cli/" + command + "/delete", "{\"name\":\"" + name + "\"}"));
+        } catch (final Exception ignored) {
+        }
     }
 }
