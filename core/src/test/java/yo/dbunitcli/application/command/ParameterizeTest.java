@@ -89,7 +89,7 @@ public class ParameterizeTest {
                     "-cmd=compare"
                     , "-template=" + PARAMETER_DIR + "/paramCompareXlsAndXlsx.txt"
                     , "-arg=-setting=" + RESOURCES_DIR + "/settings/csv2xlsx/setting_replacelineseparator.json"
-                    , "-arg=-new.src=target/test-classes/yo/dbunitcli/application/param/csv2xlsx/result"
+                    , "-arg=-new.src=target/test-classes/yo/dbunitcli/application/command/param/csv2xlsx/result"
                     , "-arg=-result=target/test-classes/yo/dbunitcli/application/command/param/csv2xlsx/compare/result"
             });
         }
