@@ -12869,31 +12869,6 @@
     "queryAllDeclaredMethods": true
   },
   {
-    "name": "yo.dbunitcli.application.CompareDto",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.ConvertDto",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.GenerateDto",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.ParameterizeDto",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "yo.dbunitcli.application.RunDto",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
     "name": "yo.dbunitcli.application.dto.DataSetConverterDto",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true
@@ -12950,5 +12925,30 @@
         "parameterTypes": []
       }
     ]
+  },
+  {
+    "name": "yo.dbunitcli.application.dto.CompareDto",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "yo.dbunitcli.application.dto.ConvertDto",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "yo.dbunitcli.application.dto.GenerateDto",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "yo.dbunitcli.application.dto.ParameterizeDto",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "yo.dbunitcli.application.dto.RunDto",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true
   }
 ]
