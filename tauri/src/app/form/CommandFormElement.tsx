@@ -502,6 +502,9 @@ function getPath(
 	if (attribute.defaultPath === "TEMPLATE") {
 		return context.templateBase;
 	}
+	if (attribute.defaultPath === "PARAMETERIZE_TEMPLATE") {
+		return context.parameterizeTemplateBase;
+	}
 	if (attribute.defaultPath === "JDBC") {
 		return context.jdbcBase;
 	}
