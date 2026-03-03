@@ -32,12 +32,13 @@ class WorkspaceControllerTest {
     public void testList() {
         final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/workspace/resources"));
         System.out.println(jsonResponse);
-        Assertions.assertEquals(String.format("{\"parameterList\":{\"convert\":[\"csvToXlsx\"],\"compare\":[\"csvCsv\"],\"generate\":[\"csvToTxt\"],\"run\":[\"runSql\"],\"parameterize\":[\"csvConvert\"]},\"resources\":{\"datasetSettings\":[\"test.json\"],\"xlsxSchemas\":[\"schema.json\"],\"jdbcFiles\":[\"sample.json\"],\"templateFiles\":[\"sample.json\"],\"queryFiles\":{\"csvq\":[],\"sql\":[],\"table\":[]}},\"context\":{\"workspace\":\"%s\",\"datasetBase\":\"%s\",\"resultBase\":\"%s\",\"settingBase\":\"%s\",\"templateBase\":\"%s\",\"jdbcBase\":\"%s\",\"xlsxSchemaBase\":\"%s\"}}"
+        Assertions.assertEquals(String.format("{\"parameterList\":{\"convert\":[\"csvToXlsx\"],\"compare\":[\"csvCsv\"],\"generate\":[\"csvToTxt\"],\"run\":[\"runSql\"],\"parameterize\":[\"csvConvert\"]},\"resources\":{\"datasetSettings\":[\"test.json\"],\"xlsxSchemas\":[\"schema.json\"],\"jdbcFiles\":[\"sample.json\"],\"templateFiles\":[\"sample.json\"],\"queryFiles\":{\"csvq\":[],\"sql\":[],\"table\":[]}},\"context\":{\"workspace\":\"%s\",\"datasetBase\":\"%s\",\"resultBase\":\"%s\",\"settingBase\":\"%s\",\"templateBase\":\"%s\",\"parameterizeTemplateBase\":\"%s\",\"jdbcBase\":\"%s\",\"xlsxSchemaBase\":\"%s\"}}"
                 , new File("target/test-temp/workspace/sample").getAbsolutePath().replace("\\", "\\\\")
                 , new File("dataset").getAbsolutePath().replace("\\", "\\\\")
                 , new File("target/resources").getAbsolutePath().replace("\\", "\\\\")
                 , new File("target/test-temp/workspace/sample/resources/setting").getAbsolutePath().replace("\\", "\\\\")
                 , new File("target/test-temp/workspace/sample/resources/template").getAbsolutePath().replace("\\", "\\\\")
+                , new File("target/test-temp/workspace/sample/option/parameterize/template").getAbsolutePath().replace("\\", "\\\\")
                 , new File("target/test-temp/workspace/sample/resources/jdbc").getAbsolutePath().replace("\\", "\\\\")
                 , new File("target/test-temp/workspace/sample/resources/xlsxSchema").getAbsolutePath().replace("\\", "\\\\")
         ), jsonResponse);
