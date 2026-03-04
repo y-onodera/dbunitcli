@@ -11,6 +11,7 @@ export const workspaceResourcesFixture: WorkspaceResources = {
 		resultBase: 'result',
 		settingBase: 'setting',
 		templateBase: 'template',
+		parameterizeTemplateBase: 'option/parameterize/template',
 		jdbcBase: 'jdbc',
 		xlsxSchemaBase: 'xlsx',
 	},
