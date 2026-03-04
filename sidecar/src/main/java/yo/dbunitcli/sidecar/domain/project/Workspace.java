@@ -106,23 +106,30 @@ public class Workspace {
     }
 
     public String saveShell(final Type commandType, final String name) throws IOException {
+        final Path launchDir = Path.of(System.getProperty("user.dir")).toAbsolutePath().normalize();
         final Path backendDir = this.installDir().resolve("backend");
-        final String workspacePath = FileResources.baseDir().toPath().toAbsolutePath().normalize().toString();
-        final String datasetBasePath = FileResources.datasetDir().toPath().toAbsolutePath().normalize().toString();
-        final String resultBasePath = FileResources.resultDir().toPath().toAbsolutePath().normalize().toString();
         final String content = "@echo off\r\n"
-                + backendDir.resolve("dbunit-cli-sidecar.exe") + " ^\r\n"
-                + "  -Djava.home=" + backendDir + " ^\r\n"
-                + "  -D" + FileResources.PROPERTY_WORKSPACE + "=" + workspacePath + " ^\r\n"
-                + "  -D" + FileResources.PROPERTY_DATASET_BASE + "=" + datasetBasePath + " ^\r\n"
-                + "  -D" + FileResources.PROPERTY_RESULT_BASE + "=" + resultBasePath + " ^\r\n"
+                + "cd /d %~dp0\r\n"
+                + toRelative(launchDir, backendDir.resolve("dbunit-cli-sidecar.exe")) + " ^\r\n"
+                + "  -Djava.home=" + toRelative(launchDir, backendDir) + " ^\r\n"
+                + "  -D" + FileResources.PROPERTY_WORKSPACE + "=" + toRelative(launchDir, FileResources.baseDir().toPath().toAbsolutePath().normalize()) + " ^\r\n"
+                + "  -D" + FileResources.PROPERTY_DATASET_BASE + "=" + toRelative(launchDir, FileResources.datasetDir().toPath().toAbsolutePath().normalize()) + " ^\r\n"
+                + "  -D" + FileResources.PROPERTY_RESULT_BASE + "=" + toRelative(launchDir, FileResources.resultDir().toPath().toAbsolutePath().normalize()) + " ^\r\n"
                 + "  -cli ^\r\n"
                 + "  -cmd=" + commandType.name() + " ^\r\n"
                 + "  -template=option/" + commandType.name() + "/" + name + ".txt ^\r\n"
                 + "  -srcType=none\r\n";
-        final File scriptFile = new File(System.getProperty("user.dir"), commandType.name() + "_" + name + ".bat");
+        final File scriptFile = new File(launchDir.toFile(), commandType.name() + "_" + name + ".bat");
         Files.writeString(scriptFile.toPath(), content, StandardCharsets.UTF_8);
         return scriptFile.getAbsolutePath();
+    }
+
+    private static String toRelative(final Path base, final Path target) {
+        try {
+            return base.relativize(target).toString();
+        } catch (final IllegalArgumentException e) {
+            return target.toString();
+        }
     }
 
     private Path installDir() {
