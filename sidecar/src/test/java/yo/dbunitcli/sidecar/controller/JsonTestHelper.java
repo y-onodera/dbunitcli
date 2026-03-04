@@ -22,4 +22,8 @@ class JsonTestHelper {
     static void assertJsonEquals(final Path expectedFile, final String actual) throws IOException {
         assertJsonEquals(Files.readString(expectedFile), actual);
     }
+
+    static void assertJsonEquals(final Path expectedFile, final String actual, final String... args) throws IOException {
+        assertJsonEquals(String.format(Files.readString(expectedFile), (Object[]) args), actual);
+    }
 }
