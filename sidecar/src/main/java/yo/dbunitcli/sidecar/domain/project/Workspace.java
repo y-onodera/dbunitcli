@@ -89,6 +89,7 @@ public class Workspace {
         context.setResultBase(FileResources.resultDir().toPath().toAbsolutePath().normalize().toString());
         context.setSettingBase(FileResources.settingDir().toPath().toAbsolutePath().normalize().toString());
         context.setTemplateBase(FileResources.templateFileDir().toPath().toAbsolutePath().normalize().toString());
+        context.setParameterizeTemplateBase(FileResources.parameterizeTemplateDir().toPath().toAbsolutePath().normalize().toString());
         context.setJdbcBase(FileResources.jdbcPropDir().toPath().toAbsolutePath().normalize().toString());
         context.setXlsxSchemaBase(FileResources.xlsxSchemaDir().toPath().toAbsolutePath().normalize().toString());
         return result;

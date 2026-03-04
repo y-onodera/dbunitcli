@@ -9,12 +9,13 @@ export type WorkspaceContextBuilder = {
 	resultBase: string;
 	settingBase: string;
 	templateBase: string;
+	parameterizeTemplateBase: string;
 	jdbcBase: string;
 	xlsxSchemaBase: string;
 };
 export class WorkspaceContext {
 	static create(): WorkspaceContext {
-		return new WorkspaceContext("", "", "", "", "", "", "");
+		return new WorkspaceContext("", "", "", "", "", "", "", "");
 	}
 	static from(builder: WorkspaceContextBuilder): WorkspaceContext {
 		return new WorkspaceContext(
@@ -23,6 +24,7 @@ export class WorkspaceContext {
 			builder.resultBase,
 			builder.settingBase,
 			builder.templateBase,
+			builder.parameterizeTemplateBase,
 			builder.jdbcBase,
 			builder.xlsxSchemaBase,
 		);
@@ -32,6 +34,7 @@ export class WorkspaceContext {
 	readonly resultBase: string;
 	readonly settingBase: string;
 	readonly templateBase: string;
+	readonly parameterizeTemplateBase: string;
 	readonly jdbcBase: string;
 	readonly xlsxSchemaBase: string;
 	constructor(
@@ -40,6 +43,7 @@ export class WorkspaceContext {
 		resultBase: string,
 		settingBase: string,
 		templateBase: string,
+		parameterizeTemplateBase: string,
 		jdbcBase: string,
 		xlsxSchemaBase: string,
 	) {
@@ -48,6 +52,7 @@ export class WorkspaceContext {
 		this.resultBase = resultBase;
 		this.settingBase = settingBase;
 		this.templateBase = templateBase;
+		this.parameterizeTemplateBase = parameterizeTemplateBase;
 		this.jdbcBase = jdbcBase;
 		this.xlsxSchemaBase = xlsxSchemaBase;
 	}

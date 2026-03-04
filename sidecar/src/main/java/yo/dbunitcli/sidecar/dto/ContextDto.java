@@ -9,6 +9,7 @@ public class ContextDto {
     private String resultBase;
     private String settingBase;
     private String templateBase;
+    private String parameterizeTemplateBase;
     private String jdbcBase;
     private String xlsxSchemaBase;
 
@@ -50,6 +51,14 @@ public class ContextDto {
 
     public void setTemplateBase(final String templateBase) {
         this.templateBase = templateBase;
+    }
+
+    public String getParameterizeTemplateBase() {
+        return this.parameterizeTemplateBase;
+    }
+
+    public void setParameterizeTemplateBase(final String parameterizeTemplateBase) {
+        this.parameterizeTemplateBase = parameterizeTemplateBase;
     }
 
     public String getJdbcBase() {

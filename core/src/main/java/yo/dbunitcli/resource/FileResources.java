@@ -144,4 +144,8 @@ public record FileResources() {
         return new File(baseDir(), "resources/xlsxSchema");
     }
 
+    public static File parameterizeTemplateDir() {
+        return new File(baseDir(), "option/parameterize/template");
+    }
+
 }

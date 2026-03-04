@@ -83,6 +83,7 @@ export type DefaultPath =
 	| "RESULT"
 	| "SETTING"
 	| "TEMPLATE"
+	| "PARAMETERIZE_TEMPLATE"
 	| "JDBC"
 	| "XLSX_SCHEMA";
 export type Attribute = {
