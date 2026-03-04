@@ -106,13 +106,13 @@ public class Workspace {
     }
 
     public String saveShell(final Type commandType, final String name) throws IOException {
+        final Path backendDir = this.installDir().resolve("backend");
         final String workspacePath = FileResources.baseDir().toPath().toAbsolutePath().normalize().toString();
         final String datasetBasePath = FileResources.datasetDir().toPath().toAbsolutePath().normalize().toString();
         final String resultBasePath = FileResources.resultDir().toPath().toAbsolutePath().normalize().toString();
         final String content = "@echo off\r\n"
-                + "cd /d %~dp0\r\n"
-                + "backend\\dbunit-cli-sidecar.exe ^\r\n"
-                + "  -Djava.home=backend ^\r\n"
+                + backendDir.resolve("dbunit-cli-sidecar.exe") + " ^\r\n"
+                + "  -Djava.home=" + backendDir + " ^\r\n"
                 + "  -D" + FileResources.PROPERTY_WORKSPACE + "=" + workspacePath + " ^\r\n"
                 + "  -D" + FileResources.PROPERTY_DATASET_BASE + "=" + datasetBasePath + " ^\r\n"
                 + "  -D" + FileResources.PROPERTY_RESULT_BASE + "=" + resultBasePath + " ^\r\n"
@@ -120,7 +120,7 @@ public class Workspace {
                 + "  -cmd=" + commandType.name() + " ^\r\n"
                 + "  -template=option/" + commandType.name() + "/" + name + ".txt ^\r\n"
                 + "  -srcType=none\r\n";
-        final File scriptFile = new File(this.installDir().toFile(), commandType.name() + "_" + name + ".bat");
+        final File scriptFile = new File(System.getProperty("user.dir"), commandType.name() + "_" + name + ".bat");
         Files.writeString(scriptFile.toPath(), content, StandardCharsets.UTF_8);
         return scriptFile.getAbsolutePath();
     }
