@@ -15,6 +15,8 @@ import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -101,6 +103,26 @@ public class Workspace {
 
     public Stream<Path> parameterFiles(final Type type) {
         return this.options().paths(type);
+    }
+
+    public String saveShell(final Type commandType, final String name) throws IOException {
+        final String workspacePath = FileResources.baseDir().toPath().toAbsolutePath().normalize().toString();
+        final String datasetBasePath = FileResources.datasetDir().toPath().toAbsolutePath().normalize().toString();
+        final String resultBasePath = FileResources.resultDir().toPath().toAbsolutePath().normalize().toString();
+        final String content = "@echo off\r\n"
+                + "cd /d %~dp0\r\n"
+                + "backend\\dbunit-cli-sidecar.exe ^\r\n"
+                + "  -Djava.home=backend ^\r\n"
+                + "  -D" + FileResources.PROPERTY_WORKSPACE + "=" + workspacePath + " ^\r\n"
+                + "  -D" + FileResources.PROPERTY_DATASET_BASE + "=" + datasetBasePath + " ^\r\n"
+                + "  -D" + FileResources.PROPERTY_RESULT_BASE + "=" + resultBasePath + " ^\r\n"
+                + "  -cli ^\r\n"
+                + "  -cmd=" + commandType.name() + " ^\r\n"
+                + "  -template=option/" + commandType.name() + "/" + name + ".txt ^\r\n"
+                + "  -srcType=none\r\n";
+        final File scriptFile = new File(System.getProperty("user.dir"), commandType.name() + "_" + name + ".bat");
+        Files.writeString(scriptFile.toPath(), content, StandardCharsets.UTF_8);
+        return scriptFile.getAbsolutePath();
     }
 
     public String parameterize(final Type type, final String name) {

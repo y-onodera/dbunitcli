@@ -134,6 +134,16 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
         }
     }
 
+    @Post(uri = "shell", produces = MediaType.TEXT_PLAIN)
+    public String shell(@Body final CommandRequestDto body) {
+        try {
+            return this.workspace.saveShell(this.getCommandType(), body.getName());
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
+    }
+
     @Post(uri = "parameterize", produces = MediaType.APPLICATION_JSON)
     public String parameterize(@Body final CommandRequestDto input) {
         String parameterizeName = this.workspace.parameterize(this.getCommandType(), input.getName());
