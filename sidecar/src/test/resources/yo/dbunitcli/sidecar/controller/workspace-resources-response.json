@@ -1,0 +1,30 @@
+{
+  "parameterList": {
+    "convert": ["csvToXlsx"],
+    "compare": ["csvCsv"],
+    "generate": ["csvToTxt"],
+    "run": ["runSql"],
+    "parameterize": ["csvConvert"]
+  },
+  "resources": {
+    "datasetSettings": ["test.json"],
+    "xlsxSchemas": ["schema.json"],
+    "jdbcFiles": ["sample.json"],
+    "templateFiles": ["sample.json"],
+    "queryFiles": {
+      "csvq": [],
+      "sql": [],
+      "table": []
+    }
+  },
+  "context": {
+    "workspace": "%s",
+    "datasetBase": "%s",
+    "resultBase": "%s",
+    "settingBase": "%s",
+    "templateBase": "%s",
+    "parameterizeTemplateBase": "%s",
+    "jdbcBase": "%s",
+    "xlsxSchemaBase": "%s"
+  }
+}
