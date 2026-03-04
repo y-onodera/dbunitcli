@@ -120,9 +120,22 @@ public class Workspace {
                 + "  -cmd=" + commandType.name() + " ^\r\n"
                 + "  -template=option/" + commandType.name() + "/" + name + ".txt ^\r\n"
                 + "  -srcType=none\r\n";
-        final File scriptFile = new File(System.getProperty("user.dir"), commandType.name() + "_" + name + ".bat");
+        final File scriptFile = new File(this.installDir().toFile(), commandType.name() + "_" + name + ".bat");
         Files.writeString(scriptFile.toPath(), content, StandardCharsets.UTF_8);
         return scriptFile.getAbsolutePath();
+    }
+
+    private Path installDir() {
+        // sidecarはbackend/dbunit-cli-sidecar.exeとして配置されるため
+        // 自身のexeパスから2階層上(backend/の親)がインストールディレクトリ
+        return ProcessHandle.current().info().command()
+                .map(cmd -> {
+                    final Path exe = Path.of(cmd).toAbsolutePath().normalize();
+                    final Path backendDir = exe.getParent();
+                    final Path dir = backendDir != null ? backendDir.getParent() : null;
+                    return dir != null ? dir : Path.of(System.getProperty("user.dir"));
+                })
+                .orElseGet(() -> Path.of(System.getProperty("user.dir")));
     }
 
     public String parameterize(final Type type, final String name) {
