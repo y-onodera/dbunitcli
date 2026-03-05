@@ -38,6 +38,7 @@ import type { WorkspaceContext } from "../../model/WorkspaceResources";
 import DatasetSettingEditButton, {
 	RemoveDatasetSettingButton,
 } from "../settings/DatasetSettingEditButton";
+import JdbcUrlBuilderDialog from "../settings/JdbcUrlBuilderDialog";
 import SqlEditorButton, {
 	RemoveSqlEditorButton,
 } from "../settings/SqlEditorButton";
@@ -141,6 +142,7 @@ export default function CommandFormElements(
 }
 function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
+	const [showJdbcUrlBuilder, setShowJdbcUrlBuilder] = useState(false);
 	const { element, srcType } = prop;
 	function resources(): string[] {
 		const settings = useResourcesSettings();
@@ -165,6 +167,7 @@ function Text(prop: Prop) {
 		(element.name === "src" && isSqlRelatedType(srcType ?? "")) ||
 		element.name === "jdbcProperties" ||
 		element.name === "templateGroup";
+	const isJdbcUrl = element.name === "jdbcUrl";
 	const showDopDownMenu =
 		element.attribute.type.includes("FILE") ||
 		element.attribute.type.includes("DIR") ||
@@ -180,7 +183,7 @@ function Text(prop: Prop) {
 			/>
 			<div className="flex">
 				<div
-					className={`flex-1${!showDopDownMenu && !isValueInDatalist ? " mr-36" : ""}`}
+					className={`flex-1${!showDopDownMenu && !isValueInDatalist && !isJdbcUrl ? " mr-36" : ""}`}
 				>
 					<ControllTextBox
 						name={getName(prop.prefix, prop.element.name)}
@@ -227,9 +230,50 @@ function Text(prop: Prop) {
 							srcType={srcType}
 						/>
 					)}
+					{isJdbcUrl && !prop.hidden && (
+						<JdbcUrlBuilderButton
+							path={path}
+							setPath={setPath}
+							showDialog={showJdbcUrlBuilder}
+							setShowDialog={setShowJdbcUrlBuilder}
+						/>
+					)}
 				</div>
 			</div>
 		</div>
+	);
+}
+
+function JdbcUrlBuilderButton({
+	path,
+	setPath,
+	showDialog,
+	setShowDialog,
+}: {
+	path: string;
+	setPath: Dispatch<SetStateAction<string>>;
+	showDialog: boolean;
+	setShowDialog: Dispatch<SetStateAction<boolean>>;
+}) {
+	return (
+		<>
+			<ButtonWithIcon
+				handleClick={() => setShowDialog(true)}
+				id="jdbcUrlBuilderButton"
+			>
+				<SettingIcon title="JDBC URL ビルダー" fill="white" />
+			</ButtonWithIcon>
+			{showDialog && (
+				<JdbcUrlBuilderDialog
+					currentUrl={path}
+					handleDialogClose={() => setShowDialog(false)}
+					handleSave={(url) => {
+						setPath(url);
+						setShowDialog(false);
+					}}
+				/>
+			)}
+		</>
 	);
 }
 function DropDownMenu({
