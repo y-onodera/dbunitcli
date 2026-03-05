@@ -13,6 +13,10 @@ import yo.dbunitcli.sidecar.dto.ContextDto;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -108,17 +112,19 @@ public class Workspace {
     public String saveShell(final Type commandType, final String name) throws IOException {
         final Path launchDir = Path.of(System.getProperty("user.dir")).toAbsolutePath().normalize();
         final Path backendDir = this.installDir().resolve("backend");
-        final String content = "@echo off\r\n"
-                + "cd /d %~dp0\r\n"
-                + toRelative(launchDir, backendDir.resolve("dbunit-cli-sidecar.exe")) + " ^\r\n"
-                + "  -Djava.home=" + toRelative(launchDir, backendDir) + " ^\r\n"
-                + "  -D" + FileResources.PROPERTY_WORKSPACE + "=" + toRelative(launchDir, FileResources.baseDir().toPath().toAbsolutePath().normalize()) + " ^\r\n"
-                + "  -D" + FileResources.PROPERTY_DATASET_BASE + "=" + toRelative(launchDir, FileResources.datasetDir().toPath().toAbsolutePath().normalize()) + " ^\r\n"
-                + "  -D" + FileResources.PROPERTY_RESULT_BASE + "=" + toRelative(launchDir, FileResources.resultDir().toPath().toAbsolutePath().normalize()) + " ^\r\n"
-                + "  -cli ^\r\n"
-                + "  -cmd=" + commandType.name() + " ^\r\n"
-                + "  -template=option/" + commandType.name() + "/" + name + ".txt ^\r\n"
-                + "  -srcType=none\r\n";
+        final STGroup group = new STGroupFile("shell/saveShell.stg", '$', '$');
+        final ST template = group.getInstanceOf("saveShell");
+        template.add("sidecarExe", toRelative(launchDir, backendDir.resolve("dbunit-cli-sidecar.exe")));
+        template.add("backendDir", toRelative(launchDir, backendDir));
+        template.add("workspaceProperty", FileResources.PROPERTY_WORKSPACE);
+        template.add("workspace", toRelative(launchDir, FileResources.baseDir().toPath().toAbsolutePath().normalize()));
+        template.add("datasetBaseProperty", FileResources.PROPERTY_DATASET_BASE);
+        template.add("datasetBase", toRelative(launchDir, FileResources.datasetDir().toPath().toAbsolutePath().normalize()));
+        template.add("resultBaseProperty", FileResources.PROPERTY_RESULT_BASE);
+        template.add("resultBase", toRelative(launchDir, FileResources.resultDir().toPath().toAbsolutePath().normalize()));
+        template.add("commandType", commandType.name());
+        template.add("name", name);
+        final String content = template.render().replace("\r\n", "\n").replace("\n", "\r\n");
         final File scriptFile = new File(launchDir.toFile(), commandType.name() + "_" + name + ".bat");
         Files.writeString(scriptFile.toPath(), content, StandardCharsets.UTF_8);
         return scriptFile.getAbsolutePath();

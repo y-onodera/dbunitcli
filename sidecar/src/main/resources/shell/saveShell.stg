@@ -1,0 +1,13 @@
+saveShell(sidecarExe, backendDir, workspaceProperty, workspace, datasetBaseProperty, datasetBase, resultBaseProperty, resultBase, commandType, name) ::= <<
+@echo off
+cd /d %~dp0
+$sidecarExe$ ^
+  -Djava.home=$backendDir$ ^
+  -D$workspaceProperty$=$workspace$ ^
+  -D$datasetBaseProperty$=$datasetBase$ ^
+  -D$resultBaseProperty$=$resultBase$ ^
+  -cli ^
+  -cmd=$commandType$ ^
+  -template=option/$commandType$/$name$.txt ^
+  -srcType=none
+>>

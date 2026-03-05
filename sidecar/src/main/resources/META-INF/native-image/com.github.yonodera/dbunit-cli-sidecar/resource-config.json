@@ -80,6 +80,9 @@
         "pattern": "\\Qapplication.properties\\E"
       },
       {
+        "pattern": "\\Qshell/saveShell.stg\\E"
+      },
+      {
         "pattern": "\\Qlogback.scmo\\E"
       },
       {
