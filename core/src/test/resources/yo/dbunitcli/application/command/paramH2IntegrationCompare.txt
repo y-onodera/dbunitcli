@@ -1,0 +1,9 @@
+-old.srcType=xlsx
+-old.src=src/test/resources/yo/dbunitcli/application/src/db/file
+-new.srcType=table
+-new.src=src/test/resources/yo/dbunitcli/application/src/db/table
+-jdbcUser=admin
+-jdbcPass=admin
+-jdbcUrl=jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
+-result=target/test-classes/yo/dbunitcli/application/command/db/h2/compare/result
+-resultType=xlsx
