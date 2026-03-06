@@ -1,0 +1,9 @@
+-srcType=table
+-src=src/test/resources/yo/dbunitcli/application/src/db/table
+-headerName=col1,col2,col3,col4,col5
+-jdbcUser=admin
+-jdbcPass=admin
+-jdbcUrl=jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
+-result=target/test-classes/yo/dbunitcli/application/command/db/h2/result
+-resultType=xlsx
+-exportEmptyTable=true

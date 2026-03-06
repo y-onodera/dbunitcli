@@ -1,0 +1,7 @@
+-srcType=xlsx
+-src=src/test/resources/yo/dbunitcli/application/src/db/file
+-jdbcUser=admin
+-jdbcPass=admin
+-jdbcUrl=jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
+-resultType=table
+-op=INSERT

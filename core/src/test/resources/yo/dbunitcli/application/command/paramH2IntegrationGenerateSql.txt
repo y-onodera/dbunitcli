@@ -1,0 +1,9 @@
+-generateType=sql
+-srcType=table
+-src=src/test/resources/yo/dbunitcli/application/src/db/table
+-op=REFRESH
+-jdbcUser=admin
+-jdbcPass=admin
+-jdbcUrl=jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
+-result=target/test-classes/yo/dbunitcli/application/command/db/h2/result
+-resultPath=dml.sql
