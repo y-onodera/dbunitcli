@@ -5,6 +5,7 @@ import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.ForwardOnlyResultSetTableFactory;
 import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.ext.h2.H2DataTypeFactory;
 import org.dbunit.ext.mssql.MsSqlDataTypeFactory;
 import org.dbunit.ext.oracle.Oracle10DataTypeFactory;
 import org.dbunit.ext.postgresql.PostgresqlDataTypeFactory;
@@ -47,6 +48,16 @@ public record DatabaseConnectionLoader(Properties jdbcProp) {
                 result = new DatabaseConnection(conn);
                 final DatabaseConfig config = result.getConfig();
                 config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new PostgresqlDataTypeFactory());
+                config.setProperty(DatabaseConfig.FEATURE_ALLOW_EMPTY_FIELDS, Boolean.TRUE);
+                config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, Boolean.TRUE);
+                config.setProperty(DatabaseConfig.FEATURE_QUALIFIED_TABLE_NAMES, Boolean.FALSE);
+                config.setProperty(DatabaseConfig.PROPERTY_RESULTSET_TABLE_FACTORY, new ForwardOnlyResultSetTableFactory());
+            } else if (url.contains("jdbc:h2")) {
+                Class.forName("org.h2.Driver");
+                final Connection conn = DriverManager.getConnection(url, user, pass);
+                result = new DatabaseConnection(conn);
+                final DatabaseConfig config = result.getConfig();
+                config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new H2DataTypeFactory());
                 config.setProperty(DatabaseConfig.FEATURE_ALLOW_EMPTY_FIELDS, Boolean.TRUE);
                 config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, Boolean.TRUE);
                 config.setProperty(DatabaseConfig.FEATURE_QUALIFIED_TABLE_NAMES, Boolean.FALSE);
