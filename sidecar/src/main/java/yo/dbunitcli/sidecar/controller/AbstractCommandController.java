@@ -1,23 +1,16 @@
 package yo.dbunitcli.sidecar.controller;
 
-import io.micronaut.http.HttpRequest;
-import io.micronaut.http.HttpResponse;
-import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
-import io.micronaut.http.annotation.Error;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
-import io.micronaut.http.hateoas.JsonError;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.Command;
-import yo.dbunitcli.application.CommandDto;
-import yo.dbunitcli.application.CommandLineOption;
-import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.command.Type;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.CommandRequestDto;
 
@@ -25,7 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractCommandController<DTO extends CommandDto, OPTION extends CommandLineOption<DTO>, T extends Command<DTO, OPTION>> {
+public abstract class AbstractCommandController implements ControllerExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCommandController.class);
 
@@ -33,51 +26,6 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
 
     public AbstractCommandController(final Workspace workspace) {
         this.workspace = workspace;
-    }
-
-    @Get(uri = "add", produces = MediaType.APPLICATION_JSON)
-    public String add() {
-        try {
-            this.workspace.options().newItem(this.getCommandType());
-            return this.parameterNames();
-        } catch (final Throwable th) {
-            LOGGER.error("cause:", th);
-            throw new ApplicationException(th);
-        }
-    }
-
-    @Post(uri = "copy", produces = MediaType.APPLICATION_JSON)
-    public String copy(@Body final CommandRequestDto input) {
-        try {
-            this.workspace.options().copy(this.getCommandType(), input.getName());
-            return this.parameterNames();
-        } catch (final Throwable th) {
-            LOGGER.error("cause:", th);
-            throw new ApplicationException(th);
-        }
-    }
-
-    @Post(uri = "delete", produces = MediaType.APPLICATION_JSON)
-    public String delete(@Body final CommandRequestDto input) {
-        try {
-            this.workspace.options().delete(this.getCommandType(), input.getName());
-            return this.parameterNames();
-        } catch (final Throwable th) {
-            LOGGER.error("cause:", th);
-            throw new ApplicationException(th);
-        }
-    }
-
-    @Post(uri = "rename", produces = MediaType.APPLICATION_JSON)
-    public String rename(@Body final CommandRequestDto input) {
-        try {
-            this.workspace.options()
-                    .rename(this.getCommandType(), input.getOldName(), input.getNewName());
-            return this.parameterNames();
-        } catch (final Throwable th) {
-            LOGGER.error("cause:", th);
-            throw new ApplicationException(th);
-        }
     }
 
     @Post(uri = "load", produces = MediaType.APPLICATION_JSON)
@@ -105,16 +53,94 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
         }
     }
 
-    @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
-    public String save(@Body final CommandRequestDto body) {
+    @Get(uri = "add", produces = MediaType.APPLICATION_JSON)
+    public String add() throws IOException {
         try {
-            this.workspace.options().update(body.getName()
-                    , new CommandParameters(this.getCommandType(), body.getInput()).shrink());
+            this.workspace.options().newItem(this.getCommandType());
+        } catch (IOException e) {
+            throw e;
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
+        return this.parameterNames();
+    }
+
+    @Post(uri = "copy", produces = MediaType.APPLICATION_JSON)
+    public String copy(@Body final CommandRequestDto input) throws IOException {
+        try {
+            this.workspace.options().copy(this.getCommandType(), input.getName());
+        } catch (IOException e) {
+            throw e;
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
+        return this.parameterNames();
+    }
+
+    @Post(uri = "delete", produces = MediaType.APPLICATION_JSON)
+    public String delete(@Body final CommandRequestDto input) throws IOException {
+        try {
+            this.workspace.options().delete(this.getCommandType(), input.getName());
+        } catch (IOException e) {
+            throw e;
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
+        return this.parameterNames();
+    }
+
+    @Post(uri = "rename", produces = MediaType.APPLICATION_JSON)
+    public String rename(@Body final CommandRequestDto input) throws IOException {
+        try {
+            this.workspace.options().rename(this.getCommandType(), input.getOldName(), input.getNewName());
+        } catch (IOException e) {
+            throw e;
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
+        return this.parameterNames();
+    }
+
+    @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
+    public String save(@Body final CommandRequestDto body) throws IOException {
+        try {
+            this.workspace.options().update(body.getName(), new CommandParameters(this.getCommandType(), body.getInput()).shrink());
+        } catch (IOException e) {
+            throw e;
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
         }
         return "success";
+    }
+
+    @Post(uri = "shell", produces = MediaType.TEXT_PLAIN)
+    public String shell(@Body final CommandRequestDto body) throws IOException {
+        try {
+            return this.workspace.saveShell(this.getCommandType(), body.getName());
+        } catch (IOException e) {
+            throw e;
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
+    }
+
+    @Post(uri = "parameterize", produces = MediaType.APPLICATION_JSON)
+    public String parameterize(@Body final CommandRequestDto input) throws IOException {
+        try {
+            String parameterizeName = this.workspace.parameterize(this.getCommandType(), input.getName());
+            return this.load(Type.parameterize, parameterizeName);
+        } catch (IOException e) {
+            throw e;
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
     }
 
     @Post(uri = "exec", produces = MediaType.TEXT_PLAIN)
@@ -134,42 +160,18 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
         }
     }
 
-    @Post(uri = "shell", produces = MediaType.TEXT_PLAIN)
-    public String shell(@Body final CommandRequestDto body) {
-        try {
-            return this.workspace.saveShell(this.getCommandType(), body.getName());
-        } catch (final Throwable th) {
-            LOGGER.error("cause:", th);
-            throw new ApplicationException(th);
-        }
-    }
-
-    @Post(uri = "parameterize", produces = MediaType.APPLICATION_JSON)
-    public String parameterize(@Body final CommandRequestDto input) {
-        String parameterizeName = this.workspace.parameterize(this.getCommandType(), input.getName());
-        return this.load(Type.parameterize, parameterizeName);
-    }
-
-    @Error
-    public HttpResponse<JsonError> handleException(final HttpRequest<?> request, final ApplicationException ex) {
-        return HttpResponse.<JsonError>status(HttpStatus.BAD_REQUEST, "Fix Input Parameter")
-                           .body(new JsonError("Execution failed. cause: " + ex.getMessage()));
-    }
+    abstract protected Type getCommandType();
 
     protected String load(final yo.dbunitcli.application.CommandType commandType, final String name) {
-        return this.workspace.options().select(commandType, name)
-                             .map(target -> {
-                                 try {
-                                     return this.toJson(this.toResponse(target));
-                                 } catch (final IOException th) {
-                                     AbstractCommandController.LOGGER.error("cause:", th);
-                                     throw new ApplicationException(th);
-                                 }
-                             })
-                             .orElse("{}");
+        return this.workspace.options().select(commandType, name).map(target -> {
+            try {
+                return this.toJson(this.toResponse(target));
+            } catch (final IOException th) {
+                AbstractCommandController.LOGGER.error("cause:", th);
+                throw new ApplicationException(th);
+            }
+        }).orElse("{}");
     }
-
-    abstract protected Type getCommandType();
 
     protected String parameterNames() throws IOException {
         return this.toJson(this.workspace.parameterNames(this.getCommandType()).toList());
@@ -184,15 +186,11 @@ public abstract class AbstractCommandController<DTO extends CommandDto, OPTION e
     }
 
     protected String toJson(final Map<String, Object> object) throws IOException {
-        return ObjectMapper
-                .getDefault()
-                .writeValueAsString(object);
+        return ObjectMapper.getDefault().writeValueAsString(object);
     }
 
     protected String toJson(final List<String> object) throws IOException {
-        return ObjectMapper
-                .getDefault()
-                .writeValueAsString(object);
+        return ObjectMapper.getDefault().writeValueAsString(object);
     }
 
 }

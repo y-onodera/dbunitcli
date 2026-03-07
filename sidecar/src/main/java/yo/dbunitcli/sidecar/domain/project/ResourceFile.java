@@ -32,7 +32,7 @@ public record ResourceFile(File baseDir, Set<String> files) {
 
     public Optional<Path> select(String target) {
         return this.files.stream().filter(it -> it.equals(target)).findFirst()
-                         .map(it -> new File(this.baseDir, it).toPath());
+                .map(it -> new File(this.baseDir, it).toPath());
     }
 
     public List<String> list() {
@@ -67,29 +67,22 @@ public record ResourceFile(File baseDir, Set<String> files) {
         this.files.removeIf(path -> path.equals(name));
     }
 
-    public void copy(final String source) {
-        this.read(source)
-            .ifPresent(content -> {
-                try {
-                    this.add(source, content);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+    public void copy(final String source) throws IOException {
+        Optional<String> content = this.read(source);
+        if (content.isPresent()) {
+            this.add(source, content.get());
+        }
     }
 
-    public void rename(final String current, final String newName) {
-        this.select(current).ifPresent(path -> {
+    public void rename(final String current, final String newName) throws IOException {
+        Optional<Path> path = this.select(current);
+        if (path.isPresent()) {
             String toUnique = this.getUniqueName(newName);
             Path newPath = new File(this.baseDir, toUnique).toPath();
-            try {
-                Files.move(path, newPath, StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            Files.move(path.get(), newPath, StandardCopyOption.REPLACE_EXISTING);
             this.files.remove(current);
             this.files.add(toUnique);
-        });
+        }
     }
 
     private String getUniqueName(final String name) {
@@ -97,13 +90,13 @@ public record ResourceFile(File baseDir, Set<String> files) {
             return name;
         }
         final int dotIndex = name.lastIndexOf('.');
-        final String base = dotIndex >= 0 ? name.substring(0, dotIndex) : name;
-        final String ext = dotIndex >= 0 ? name.substring(dotIndex) : "";
+        final String base = dotIndex >= 0 ? name.substring(0, dotIndex):name;
+        final String ext = dotIndex >= 0 ? name.substring(dotIndex):"";
         return IntStream.iterate(1, i -> i + 1)
-                        .mapToObj(i -> base + "(" + i + ")" + ext)
-                        .filter(candidate -> !this.files.contains(candidate))
-                        .findFirst()
-                        .orElse("");
+                .mapToObj(i -> base + "(" + i + ")" + ext)
+                .filter(candidate -> !this.files.contains(candidate))
+                .findFirst()
+                .orElse("");
     }
 
     private void reload() {

@@ -2,6 +2,9 @@ package yo.dbunitcli.sidecar.domain.project;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.Option;
@@ -13,23 +16,17 @@ import yo.dbunitcli.sidecar.dto.ContextDto;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
-import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
-import org.stringtemplate.v4.STGroupFile;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class Workspace {
     private static final Logger LOGGER = LoggerFactory.getLogger(Workspace.class);
-    private Options options;
-    private Resources resources;
-    private Path path;
 
     public static Builder builder() {
         return new Builder();
@@ -43,6 +40,17 @@ public class Workspace {
                 , "-param.srcType=csv"
                 , "-unit=record"};
     }
+
+    private static String toRelative(final Path base, final Path target) {
+        try {
+            return base.relativize(target).toString();
+        } catch (final IllegalArgumentException e) {
+            return target.toString();
+        }
+    }
+    private Options options;
+    private Resources resources;
+    private Path path;
 
     private Workspace(final Path path, final Options options, final Resources resources) {
         this.path = path;
@@ -124,54 +132,38 @@ public class Workspace {
         template.add("resultBase", toRelative(launchDir, FileResources.resultDir().toPath().toAbsolutePath().normalize()));
         template.add("commandType", commandType.name());
         template.add("name", name);
-        final String content = template.render().replace("\r\n", "\n").replace("\n", "\r\n");
+        final String content = template.render();
         final File scriptFile = new File(launchDir.toFile(), commandType.name() + "_" + name + ".bat");
         Files.writeString(scriptFile.toPath(), content, StandardCharsets.UTF_8);
         return scriptFile.getAbsolutePath();
     }
 
-    private static String toRelative(final Path base, final Path target) {
-        try {
-            return base.relativize(target).toString();
-        } catch (final IllegalArgumentException e) {
-            return target.toString();
+    public String parameterize(final Type type, final String name) throws IOException {
+        Optional<CommandParameters> source = this.options().select(type, name);
+        if (source.isPresent()) {
+            final Option.Parameters target = source.get().toOptionParameters();
+            final Path templatePath = this.options()
+                    .templates()
+                    .add(name + ".txt", new CommandParameters(type, target
+                            .parameterizeArgs(false)
+                            .toArray(String[]::new))
+                            .content());
+            File parameterSource = this.saveParameterSources(name, target);
+            return this.options().add(name
+                    , new CommandParameters(Type.parameterize,
+                            parameterizeOption(type, templatePath,
+                                    parameterSource)));
         }
+        return "";
     }
 
     private Path installDir() {
         // sidecarはbackend/dbunit-cli-sidecar.exeとして配置されるため
         // 自身のexeパスから2階層上(backend/の親)がインストールディレクトリ
         return ProcessHandle.current().info().command()
-                .map(cmd -> {
-                    final Path exe = Path.of(cmd).toAbsolutePath().normalize();
-                    final Path backendDir = exe.getParent();
-                    final Path dir = backendDir != null ? backendDir.getParent() : null;
-                    return dir != null ? dir : Path.of(System.getProperty("user.dir"));
-                })
+                .map(cmd -> Path.of(cmd).toAbsolutePath().normalize().getParent())
+                .map(Path::getParent)
                 .orElseGet(() -> Path.of(System.getProperty("user.dir")));
-    }
-
-    public String parameterize(final Type type, final String name) {
-        return this.options().select(type, name)
-                   .map(source -> {
-                       try {
-                           final Option.Parameters target = source.toOptionParameters();
-                           final Path templatePath = this.options()
-                                                         .templates()
-                                                         .add(name + ".txt", new CommandParameters(type, target
-                                                                 .parameterizeArgs(false)
-                                                                 .toArray(String[]::new))
-                                                                 .content());
-                           File parameterSource = this.saveParameterSources(name, target);
-                           return this.options().add(name
-                                   , new CommandParameters(Type.parameterize,
-                                                           parameterizeOption(type, templatePath,
-                                                                              parameterSource)));
-                       } catch (IOException e) {
-                           throw new RuntimeException(e);
-                       }
-                   })
-                   .orElse("");
     }
 
     private File saveParameterSources(final String name, final Option.Parameters args) {
@@ -179,8 +171,8 @@ public class Workspace {
         Map<String, ?> parameters = args.toMap(false);
         final CsvConverter converter = new CsvConverter(resourcesDir, "UTF-8");
         converter.convert(new ComparableTable.Builder(name, parameters.keySet().toArray(new String[0]))
-                                  .addRow(parameters.values().toArray(Object[]::new))
-                                  .build());
+                .addRow(parameters.values().toArray(Object[]::new))
+                .build());
         return new File(resourcesDir, name + ".csv");
     }
 
@@ -189,7 +181,7 @@ public class Workspace {
         private String path;
 
         public String getPath() {
-            return Strings.isEmpty(this.path) ? "." : this.path;
+            return Strings.isEmpty(this.path) ? ".":this.path;
         }
 
         public Builder setPath(final String path) {

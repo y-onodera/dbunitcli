@@ -33,7 +33,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<R
                     body.getUser(),
                     body.getPass());
             option.getDatabaseConnectionLoader().loadConnection().getConnection().close();
-            return "{\"success\":true,\"message\":\"接続成功\"}";
+            return "{\"success\":true,\"message\":\"connection opened\"}";
         } catch (final Throwable e) {
             final Throwable cause = e.getCause() != null ? e.getCause() : e;
             return "{\"success\":false,\"message\":" + toJsonString(cause.getMessage()) + "}";

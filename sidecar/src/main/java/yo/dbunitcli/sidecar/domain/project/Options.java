@@ -13,7 +13,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, ResourceFile> parameters, ResourceFile templates) {
+public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, ResourceFile> parameters,
+                      ResourceFile templates) {
     private static final Logger LOGGER = LoggerFactory.getLogger(Options.class);
 
     public static Builder builder() {
@@ -30,22 +31,22 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
 
     public Optional<CommandParameters> select(final yo.dbunitcli.application.CommandType type, final String name) {
         return this.parameters.get(type)
-                              .select(name + ".txt")
-                              .map(path -> {
-                                  try {
-                                      return new CommandParameters(type, path);
-                                  } catch (IOException e) {
-                                      throw new RuntimeException(e);
-                                  }
-                              });
+                .select(name + ".txt")
+                .map(path -> {
+                    try {
+                        return new CommandParameters(type, path);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
     public String add(final String name, final CommandParameters commandParameters) throws IOException {
         return this.parameters.get(commandParameters.type())
-                              .add(name + ".txt", commandParameters.content())
-                              .getFileName()
-                              .toString()
-                              .replace(".txt", "");
+                .add(name + ".txt", commandParameters.content())
+                .getFileName()
+                .toString()
+                .replace(".txt", "");
     }
 
     public void newItem(final Type type) throws IOException {
@@ -55,7 +56,7 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
 
     public void update(final String name, final CommandParameters commandParameters) throws IOException {
         this.parameters.get(commandParameters.type())
-                       .update(name + ".txt", commandParameters.content());
+                .update(name + ".txt", commandParameters.content());
     }
 
     public void delete(final Type type, final String name) throws IOException {
@@ -63,12 +64,12 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
         this.loggingCurrentFiles(type);
     }
 
-    public void rename(final Type type, final String oldName, final String newName) {
+    public void rename(final Type type, final String oldName, final String newName) throws IOException {
         this.parameters.get(type).rename(oldName + ".txt", newName + ".txt");
         this.loggingCurrentFiles(type);
     }
 
-    public void copy(final Type type, final String target) {
+    public void copy(final Type type, final String target) throws IOException {
         this.parameters.get(type).copy(target + ".txt");
         this.loggingCurrentFiles(type);
     }

@@ -4,9 +4,13 @@ import io.micronaut.serde.annotation.Serdeable;
 
 @Serdeable
 public class JdbcTestRequestDto {
+
     private String url;
+
     private String user;
+
     private String pass;
+
     private String properties;
 
     public String getUrl() {

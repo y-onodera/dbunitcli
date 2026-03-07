@@ -153,7 +153,7 @@ class WorkspaceTest {
     }
 
     @Test
-    void parameterize_存在しないパラメータを指定した場合は空文字を返す() {
+    void parameterize_存在しないパラメータを指定した場合は空文字を返す() throws IOException {
         final String result = this.workspace.parameterize(Type.convert, "nonexistent");
         assertEquals("", result);
     }
