@@ -180,26 +180,22 @@ function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
 	const [showJdbcUrlBuilder, setShowJdbcUrlBuilder] = useState(false);
 	const { element, srcType } = prop;
+	const settings = useResourcesSettings();
 	useEffect(() => {
 		prop.onValueChange?.(element.name, path);
-	}, [path]);
-	function resources(): string[] {
-		const settings = useResourcesSettings();
-		let resources: string[] = [];
-		if (element.name === "src" && isSqlRelatedType(srcType ?? "")) {
-			resources = settings.querys(srcType);
-		} else if (element.name === "setting") {
-			resources = settings.metadataSetting;
-		} else if (element.name === "xlsxSchema") {
-			resources = settings.xlsxSchemas;
-		} else if (element.name === "jdbcProperties") {
-			resources = settings.jdbcFiles;
-		} else if (element.name === "templateGroup") {
-			resources = settings.templateFiles;
-		}
-		return resources;
+	}, [path, element.name, prop.onValueChange]);
+	let resourceFiles: string[] = [];
+	if (element.name === "src" && isSqlRelatedType(srcType ?? "")) {
+		resourceFiles = settings.querys(srcType);
+	} else if (element.name === "setting") {
+		resourceFiles = settings.metadataSetting;
+	} else if (element.name === "xlsxSchema") {
+		resourceFiles = settings.xlsxSchemas;
+	} else if (element.name === "jdbcProperties") {
+		resourceFiles = settings.jdbcFiles;
+	} else if (element.name === "templateGroup") {
+		resourceFiles = settings.templateFiles;
 	}
-	const resourceFiles = resources();
 	const showDatalist =
 		element.name === "setting" ||
 		element.name === "xlsxSchema" ||

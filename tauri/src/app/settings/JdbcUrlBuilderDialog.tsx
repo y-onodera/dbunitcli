@@ -6,7 +6,7 @@ import {
 	SelectBox,
 } from "../../components/element/Input";
 
-type RdbType = "oracle" | "postgres" | "mysql" | "h2";
+type RdbType = "oracle" | "postgres" | "h2";
 
 type JdbcUrlBuilderState = {
 	rdbType: RdbType;
@@ -18,14 +18,12 @@ type JdbcUrlBuilderState = {
 const DEFAULT_PORTS: Record<RdbType, string> = {
 	oracle: "1521",
 	postgres: "5432",
-	mysql: "3306",
 	h2: "9092",
 };
 
 const SERVICE_NAME_LABEL: Record<RdbType, string> = {
 	oracle: "サービス名",
 	postgres: "データベース名",
-	mysql: "データベース名",
 	h2: "データベース名",
 };
 
@@ -37,8 +35,6 @@ function buildJdbcUrl(state: JdbcUrlBuilderState): string {
 			return `jdbc:oracle:thin:@${host}:${port}:${serviceName}`;
 		case "postgres":
 			return `jdbc:postgresql://${host}:${port}/${serviceName}`;
-		case "mysql":
-			return `jdbc:mysql://${host}:${port}/${serviceName}`;
 		case "h2":
 			return `jdbc:h2:tcp://${host}:${port}/${serviceName}`;
 	}
@@ -67,20 +63,8 @@ function parseJdbcUrl(url: string): Partial<JdbcUrlBuilderState> {
 		return {
 			rdbType: "postgres",
 			host: colonIdx >= 0 ? hostPort.slice(0, colonIdx) : hostPort,
-			port: colonIdx >= 0 ? hostPort.slice(colonIdx + 1) : DEFAULT_PORTS.postgres,
-			serviceName: db,
-		};
-	}
-	if (url.startsWith("jdbc:mysql://")) {
-		const rest = url.slice("jdbc:mysql://".length);
-		const slashIdx = rest.indexOf("/");
-		const hostPort = slashIdx >= 0 ? rest.slice(0, slashIdx) : rest;
-		const db = slashIdx >= 0 ? rest.slice(slashIdx + 1) : "";
-		const colonIdx = hostPort.lastIndexOf(":");
-		return {
-			rdbType: "mysql",
-			host: colonIdx >= 0 ? hostPort.slice(0, colonIdx) : hostPort,
-			port: colonIdx >= 0 ? hostPort.slice(colonIdx + 1) : DEFAULT_PORTS.mysql,
+			port:
+				colonIdx >= 0 ? hostPort.slice(colonIdx + 1) : DEFAULT_PORTS.postgres,
 			serviceName: db,
 		};
 	}
@@ -160,17 +144,12 @@ export default function JdbcUrlBuilderDialog({
 					>
 						<option value="oracle">Oracle</option>
 						<option value="postgres">PostgreSQL</option>
-						<option value="mysql">MySQL</option>
 						<option value="h2">H2</option>
 					</SelectBox>
 				</div>
 
 				<div className="mb-3">
-					<InputLabel
-						text="ホスト"
-						id="jdbcUrlBuilder_host"
-						required={true}
-					/>
+					<InputLabel text="ホスト" id="jdbcUrlBuilder_host" required={true} />
 					<ControllTextBox
 						name="jdbcUrlBuilder_host"
 						id="jdbcUrlBuilder_host"
@@ -183,11 +162,7 @@ export default function JdbcUrlBuilderDialog({
 				</div>
 
 				<div className="mb-3">
-					<InputLabel
-						text="ポート"
-						id="jdbcUrlBuilder_port"
-						required={true}
-					/>
+					<InputLabel text="ポート" id="jdbcUrlBuilder_port" required={true} />
 					<ControllTextBox
 						name="jdbcUrlBuilder_port"
 						id="jdbcUrlBuilder_port"
@@ -226,7 +201,11 @@ export default function JdbcUrlBuilderDialog({
 						id="jdbcUrlBuilder_preview"
 						className="block p-2.5 w-full text-sm text-gray-700 rounded-lg bg-gray-100 border border-gray-300 font-mono break-all"
 					>
-						{builtUrl || <span className="text-gray-400">（ホスト・サービス名を入力してください）</span>}
+						{builtUrl || (
+							<span className="text-gray-400">
+								（ホスト・サービス名を入力してください）
+							</span>
+						)}
 					</div>
 				</div>
 			</div>

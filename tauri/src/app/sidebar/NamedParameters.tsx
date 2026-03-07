@@ -56,14 +56,9 @@ function Category(props: NamedParameterProp) {
 	const toggleMenu = () => setClose(!close);
 	return (
 		<li>
-			<ButtonIcon title="" handleClick={toggleMenu} >
+			<ButtonIcon title="" handleClick={toggleMenu}>
 				<ExpandIcon close={close} />
-				<span
-					className="ms-2  
-                           text-left 
-                           rtl:text-right 
-                           whitespace-nowrap"
-				>
+				<span className="ms-2 text-left rtl:text-right whitespace-nowrap">
 					{props.command}
 				</span>
 			</ButtonIcon>
@@ -79,26 +74,30 @@ function Category(props: NamedParameterProp) {
 	);
 }
 function Parameters(props: NamedParameterProp) {
-	const handleAddNewName = useAddParameter(props.command)
+	const handleAddNewName = useAddParameter(props.command);
 	return (
 		<>
 			{props.namedParameters?.map((menu) => {
 				return (
 					<li key={menu} className="flex">
-						<LinkButton title={menu}
+						<LinkButton
+							title={menu}
 							handleClick={() =>
 								props.handleParameterSelect(props.command.toLowerCase(), menu)
 							}
 						/>
-						<SettingButton title="" handleClick={(target) =>
-							props.handleEditNamed({
-								command: props.command.toLowerCase(),
-								name: menu,
-								x: target.clientX,
-								y: target.clientY,
-								afterEdge: target.clientY > 300
-							})
-						} />
+						<SettingButton
+							title=""
+							handleClick={(target) =>
+								props.handleEditNamed({
+									command: props.command.toLowerCase(),
+									name: menu,
+									x: target.clientX,
+									y: target.clientY,
+									afterEdge: target.clientY > 300,
+								})
+							}
+						/>
 					</li>
 				);
 			})}

@@ -1,5 +1,5 @@
 import { type Dispatch, type ReactNode, type SetStateAction, createContext, use, useState } from "react";
-import { type Parameter, SelectParameter } from "../model/CommandParam";
+import { type Parameter, type ParameterizeParams, SelectParameter } from "../model/CommandParam";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
 import { useEnviroment } from "./EnviromentProvider";
 
@@ -117,4 +117,24 @@ export const useExecParameter = () => {
                 handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
             });
     }
+}
+export const useParameterizeFrom = () => {
+    const setParameter = use(setSelectParameterContext);
+    const environment = useEnviroment();
+    return async (sourceCommand: string, name: string) => {
+        const fetchParams = {
+            endpoint: `${environment.apiUrl + sourceCommand.toLowerCase()}/parameterize`,
+            options: {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name }),
+            },
+        };
+        await fetchData(fetchParams)
+            .then((response) => response.json())
+            .then((parameter: ParameterizeParams) => {
+                setParameter(new SelectParameter(parameter, "parameterize", name));
+            })
+            .catch((ex) => handleFetchError(ex, fetchParams));
+    };
 }

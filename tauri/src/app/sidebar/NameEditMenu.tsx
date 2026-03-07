@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { CopyButton, DeleteButton, EditButton, FixButton } from '../../components/element/ButtonIcon';
+import { CopyButton, DeleteButton, EditButton, FixButton, ParameterizeButton } from '../../components/element/ButtonIcon';
 import { ControllTextBox } from '../../components/element/Input';
+import { useParameterizeFrom } from '../../context/SelectParameterProvider';
 import { useCopyParameter, useDeleteParameter, useRenameParameter } from '../../context/WorkspaceResourcesProvider';
 import type { EditName } from '../main/Sidebar';
 
@@ -9,6 +10,7 @@ type MenuEditProp = {
 	handleMenuDelete: () => void;
 	handleMenuRename: (newName: string) => void;
 	handleMenuCopy: () => void;
+	handleMenuParameterize?: () => void;
 };
 
 export default function NameEditMenu({ editName, setEditName }: { editName: EditName; setEditName: (editName: EditName) => void }) {
@@ -25,6 +27,8 @@ export default function NameEditMenu({ editName, setEditName }: { editName: Edit
 	const handleMenuDelete = useDeleteParameter(editName.command, editName.name)
 	const handleMenuCopy = useCopyParameter(editName.command, editName.name)
 	const handleMenuRename = useRenameParameter(editName.command, editName.name)
+	const parameterizeFrom = useParameterizeFrom()
+	const canParameterize = editName.command && editName.command !== "parameterize"
 	return (
 		<>
 			{editName.name && (
@@ -51,6 +55,10 @@ export default function NameEditMenu({ editName, setEditName }: { editName: Edit
 							handleMenuCopy();
 							setEditName({} as EditName);
 						}}
+						handleMenuParameterize={canParameterize ? () => {
+							parameterizeFrom(editName.command, editName.name);
+							setEditName({} as EditName);
+						} : undefined}
 					/>
 				</div>
 			)}
@@ -84,6 +92,11 @@ function MenuEdit(prop: MenuEditProp) {
 			<li>
 				<CopyButton handleClick={prop.handleMenuCopy} />
 			</li>
+			{prop.handleMenuParameterize && (
+				<li>
+					<ParameterizeButton title="Parameterize" handleClick={prop.handleMenuParameterize} />
+				</li>
+			)}
 		</ul>
 	);
 }
