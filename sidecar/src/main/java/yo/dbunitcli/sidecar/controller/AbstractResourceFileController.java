@@ -35,18 +35,37 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
 
     @Post(uri = "load", consumes = MediaType.TEXT_PLAIN, produces = MediaType.APPLICATION_JSON)
     public String load(@Body final String name) {
-        return this.getResourceFile().read(name).orElse("{}");
+        try {
+            return this.getResourceFile().read(name).orElse("{}");
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
     }
 
     @Post(uri = "save", produces = MediaType.APPLICATION_JSON)
     public String save(@Body final DTO body) throws IOException {
-        this.saveJson(body.getName(), JsonMapper.createDefault().writeValueAsString(body.getInput()));
+        try {
+            this.saveJson(body.getName(), JsonMapper.createDefault().writeValueAsString(body.getInput()));
+        } catch (IOException e) {
+            throw e;
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
         return this.currentFileList();
     }
 
     @Post(uri = "delete", consumes = MediaType.TEXT_PLAIN, produces = MediaType.APPLICATION_JSON)
     public String delete(@Body final String name) throws IOException {
-        this.getResourceFile().delete(name);
+        try {
+            this.getResourceFile().delete(name);
+        } catch (IOException e) {
+            throw e;
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
         return this.currentFileList();
     }
 
