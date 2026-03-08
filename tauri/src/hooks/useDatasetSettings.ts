@@ -1,42 +1,41 @@
 import type { Dispatch, SetStateAction } from "react";
+import { DatasetSettings, type DatasetSettingsBuilder } from "../model/DatasetSettings";
 import type { ResourcesSettings } from "../model/WorkspaceResources";
-import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
-import { useEnviroment } from "./EnviromentProvider";
-import { useSetResourcesSettings } from "./WorkspaceResourcesProvider";
+import { useEnviroment } from "../context/EnviromentProvider";
+import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 
 type OperationResult = 'success' | 'failed';
 
-// コンポーネントでの使用のためのラップ関数
-export function useDeleteXlsxSchema() {
+export function useDeleteDatasetSettings() {
     const environment = useEnviroment();
     const setResourcesSettings = useSetResourcesSettings();
     return async (name: string) => {
-        return deleteXlsxSchema(environment.apiUrl, name, setResourcesSettings);
+        return deleteDatasetSettings(environment.apiUrl, name, setResourcesSettings);
     };
 }
 
-export function useSaveXlsxSchema() {
+export function useSaveDatasetSettings() {
     const environment = useEnviroment();
     const setResourcesSettings = useSetResourcesSettings();
-    return async (name: string, input: XlsxSchema) => {
-        return saveXlsxSchema(environment.apiUrl, name, input, setResourcesSettings);
+    return async (name: string, input: DatasetSettings) => {
+        return saveDatasetSettings(environment.apiUrl, name, input, setResourcesSettings);
     };
 }
 
-export function useLoadXlsxSchema() {
+export function useLoadDatasetSettings() {
     const environment = useEnviroment();
     return async (name: string) => {
-        return loadXlsxSchema(environment.apiUrl, name);
+        return loadDatasetSettings(environment.apiUrl, name);
     };
 }
 
-async function loadXlsxSchema(apiUrl: string, name: string): Promise<XlsxSchema> {
+async function loadDatasetSettings(apiUrl: string, name: string): Promise<DatasetSettings> {
     if (name === "") {
-        return XlsxSchema.create();
+        return DatasetSettings.create();
     }
     const fetchParams = {
-        endpoint: `${apiUrl}xlsx-schema/load`,
+        endpoint: `${apiUrl}dataset-setting/load`,
         options: {
             method: "POST",
             headers: { "Content-Type": "text/plain" },
@@ -45,21 +44,21 @@ async function loadXlsxSchema(apiUrl: string, name: string): Promise<XlsxSchema>
     };
     return await fetchData(fetchParams)
         .then((response) => response.json())
-        .then((schema: XlsxSchemaBuilder) => XlsxSchema.build(schema))
+        .then((setting: DatasetSettingsBuilder) => DatasetSettings.build(setting))
         .catch((ex) => {
             handleFetchError(ex, fetchParams);
-            return XlsxSchema.create();
+            return DatasetSettings.create();
         });
 }
 
-async function saveXlsxSchema(
+async function saveDatasetSettings(
     apiUrl: string,
     name: string,
-    input: XlsxSchema,
+    input: DatasetSettings,
     setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>
 ): Promise<OperationResult> {
     const fetchParams = {
-        endpoint: `${apiUrl}xlsx-schema/save`,
+        endpoint: `${apiUrl}dataset-setting/save`,
         options: {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -69,8 +68,8 @@ async function saveXlsxSchema(
 
     return await fetchData(fetchParams)
         .then((response) => response.json())
-        .then((schemas: string[]) => {
-            setResourcesSettings(current => current.with({ xlsxSchemas: schemas }));
+        .then((settings: string[]) => {
+            setResourcesSettings(current => current.with({ metadataSetting: settings }));
             return 'success' as OperationResult;
         })
         .catch((ex) => {
@@ -79,13 +78,13 @@ async function saveXlsxSchema(
         });
 }
 
-async function deleteXlsxSchema(
+async function deleteDatasetSettings(
     apiUrl: string,
     name: string,
     setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>
 ): Promise<OperationResult> {
     const fetchParams = {
-        endpoint: `${apiUrl}xlsx-schema/delete`,
+        endpoint: `${apiUrl}dataset-setting/delete`,
         options: {
             method: "POST",
             headers: { "Content-Type": "text/plain" },
@@ -95,8 +94,8 @@ async function deleteXlsxSchema(
 
     return await fetchData(fetchParams)
         .then((response) => response.json())
-        .then((schemas: string[]) => {
-            setResourcesSettings(current => current.with({ xlsxSchemas: schemas }));
+        .then((settings: string[]) => {
+            setResourcesSettings(current => current.with({ metadataSetting: settings }));
             return 'success' as OperationResult;
         })
         .catch((ex) => {

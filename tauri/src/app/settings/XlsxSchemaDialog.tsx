@@ -1,7 +1,7 @@
 import { Suspense, use, useState } from "react";
 import ResourceFileDialog from "../../components/dialog/ResourceFileDialog";
 import SettingTable from "../../components/dialog/SettingTable";
-import { useLoadXlsxSchema, useSaveXlsxSchema } from "../../context/XlsxSchemaProvider";
+import { useLoadXlsxSchema, useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
 import { type CellSetting, type RowSetting, XlsxSchema, createCellSetting, createRowSetting } from "../../model/XlsxSchema";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";

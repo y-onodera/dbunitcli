@@ -10,10 +10,8 @@ import {
 import { BlueButton, ButtonWithIcon } from "../../components/element/Button";
 import { DirIcon } from "../../components/element/Icon";
 import { ControllTextBox, InputLabel } from "../../components/element/Input";
-import {
-	useWorkspaceContext,
-	useWorkspaceUpdate,
-} from "../../context/WorkspaceResourcesProvider";
+import { useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
+import { useWorkspaceUpdate } from "../../hooks/useWorkspaceResources";
 
 const StartupForm: React.FC<{ onSelect: () => void }> = ({ onSelect }) => {
 	const context = useWorkspaceContext();

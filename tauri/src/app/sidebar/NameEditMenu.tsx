@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { CopyButton, DeleteButton, EditButton, FixButton, ParameterizeButton } from '../../components/element/ButtonIcon';
 import { ControllTextBox } from '../../components/element/Input';
-import { useParameterizeFrom } from '../../context/SelectParameterProvider';
-import { useCopyParameter, useDeleteParameter, useRenameParameter } from '../../context/WorkspaceResourcesProvider';
+import { useParameterizeFrom } from '../../hooks/useSelectParameter';
+import { useCopyParameter, useDeleteParameter, useRenameParameter } from '../../hooks/useWorkspaceResources';
 import type { EditName } from '../main/Sidebar';
 
 type MenuEditProp = {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { EditButton } from '../../components/element/ButtonIcon';
-import { useDeleteDataSource, useLoadDataSource } from '../../context/QueryDatasourceProvider';
+import { useDeleteDataSource, useLoadDataSource } from '../../hooks/useQueryDatasource';
 import type { QueryDatasourceType } from '../../model/QueryDatasource';
 import { RemoveResource, type ResourceEditButtonProp } from './ResourceEditButton';
 import SqlEditorDialog from './SqlEditorDialog';

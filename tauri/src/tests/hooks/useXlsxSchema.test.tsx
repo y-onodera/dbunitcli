@@ -6,7 +6,7 @@ import {
 	useDeleteXlsxSchema,
 	useLoadXlsxSchema,
 	useSaveXlsxSchema,
-} from "../../context/XlsxSchemaProvider";
+} from "../../hooks/useXlsxSchema";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
 import { XlsxSchema } from "../../model/XlsxSchema";
 import type { XlsxSchemaBuilder } from "../../model/XlsxSchema";

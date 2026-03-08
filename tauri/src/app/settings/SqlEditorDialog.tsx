@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import ResourceFileDialog from '../../components/dialog/ResourceFileDialog';
-import { useSaveDataSource } from '../../context/QueryDatasourceProvider';
+import { useSaveDataSource } from '../../hooks/useQueryDatasource';
 import type { QueryDatasourceType } from '../../model/QueryDatasource';
 
 type SqlEditorSetting = {

@@ -2,15 +2,17 @@ import { act, render, renderHook, screen, waitFor } from '@testing-library/react
 import { describe, expect, it, vi } from 'vitest';
 import { type Enviroment, enviromentContext } from '../../context/EnviromentProvider';
 import WorkspaceResourcesProvider, {
+    useParameterList,
+    useResourcesSettings,
+    useWorkspaceContext,
+} from '../../context/WorkspaceResourcesProvider';
+import {
     useAddParameter,
     useCopyParameter,
     useDeleteParameter,
-    useParameterList,
     useRenameParameter,
-    useResourcesSettings,
-    useWorkspaceContext,
     useWorkspaceUpdate,
-} from '../../context/WorkspaceResourcesProvider';
+} from '../../hooks/useWorkspaceResources';
 import type { WorkspaceResources } from '../../model/WorkspaceResources';
 import { ParameterList, ResourcesSettings, WorkspaceContext } from '../../model/WorkspaceResources';
 import type { FetchParams } from '../../utils/fetchUtils';

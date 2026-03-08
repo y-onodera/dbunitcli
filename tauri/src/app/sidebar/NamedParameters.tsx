@@ -2,8 +2,9 @@ import { useState } from "react";
 import { LinkButton } from "../../components/element/Button";
 import { AddButton, ButtonIcon, SettingButton } from "../../components/element/ButtonIcon";
 import { ExpandIcon } from "../../components/element/Icon";
-import { useLoadSelectParameter } from "../../context/SelectParameterProvider";
-import { useAddParameter, useParameterList } from "../../context/WorkspaceResourcesProvider";
+import { useParameterList } from "../../context/WorkspaceResourcesProvider";
+import { useLoadSelectParameter } from "../../hooks/useSelectParameter";
+import { useAddParameter } from "../../hooks/useWorkspaceResources";
 import type { EditName } from "../main/Sidebar";
 
 type NamedParameterProp = {

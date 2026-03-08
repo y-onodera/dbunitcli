@@ -2,8 +2,8 @@ import type { Dispatch, SetStateAction } from "react";
 import type { QueryDatasource, QueryDatasourceType } from "../model/QueryDatasource";
 import type { ResourcesSettings } from "../model/WorkspaceResources";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
-import { useEnviroment } from "./EnviromentProvider";
-import { useSetResourcesSettings } from "./WorkspaceResourcesProvider";
+import { useEnviroment } from "../context/EnviromentProvider";
+import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 
 type QueryDatasourceResult = 'success' | 'failed';
 

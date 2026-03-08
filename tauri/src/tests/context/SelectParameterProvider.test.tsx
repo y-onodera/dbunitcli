@@ -5,11 +5,13 @@ import { type Enviroment, enviromentContext } from '../../context/EnviromentProv
 import SelectParameterProvider, {
     useSelectParameter,
     useSetSelectParameter,
+} from '../../context/SelectParameterProvider';
+import {
+    useExecParameter,
     useLoadSelectParameter,
     useRefreshSelectParameter,
     useSaveParameter,
-    useExecParameter
-} from '../../context/SelectParameterProvider';
+} from '../../hooks/useSelectParameter';
 import { type CommandParams, type ConvertParams, type GenerateParams, SelectParameter } from '../../model/CommandParam';
 import type { FetchParams } from '../../utils/fetchUtils';
 import { enviromentFixture } from '../setup';

@@ -1,5 +1,6 @@
 import "../../App.css";
-import { useRefreshSelectParameter, useSelectParameter } from "../../context/SelectParameterProvider";
+import { useSelectParameter } from "../../context/SelectParameterProvider";
+import { useRefreshSelectParameter } from "../../hooks/useSelectParameter";
 import { CompareForm } from "./CompareForm";
 import { ConvertForm } from "./ConvertForm";
 import { GenerateForm } from "./GenerateForm";

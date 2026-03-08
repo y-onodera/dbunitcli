@@ -11,13 +11,12 @@ import { Button, ButtonWithIcon } from "../../components/element/Button";
 import { FileButton } from "../../components/element/ButtonIcon";
 import { SettingIcon } from "../../components/element/Icon";
 import { ControllTextBox, InputLabel } from "../../components/element/Input";
-import { useEnviroment } from "../../context/EnviromentProvider";
 import {
 	useResourcesSettings,
 	useWorkspaceContext,
 } from "../../context/WorkspaceResourcesProvider";
+import { useJdbcConnectionTest } from "../../hooks/useJdbcConnectionTest";
 import type { CommandParam } from "../../model/CommandParam";
-import { fetchData, handleFetchError } from "../../utils/fetchUtils";
 import JdbcUrlBuilderDialog from "../settings/JdbcUrlBuilderDialog";
 
 export const JDBC_FIELD_NAMES = [
@@ -184,7 +183,7 @@ function JdbcConnectionTestButton({
 	prefix: string;
 	jdbcValues: Record<string, string>;
 }) {
-	const { apiUrl } = useEnviroment();
+	const jdbcConnectionTest = useJdbcConnectionTest();
 	const [result, setResult] = useState<{
 		success: boolean;
 		message: string;
@@ -199,28 +198,8 @@ function JdbcConnectionTestButton({
 	const handleTest = async () => {
 		setTesting(true);
 		setResult(null);
-		const params = {
-			endpoint: `${apiUrl}jdbc/test`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					url: jdbcValues.jdbcUrl ?? "",
-					user: jdbcValues.jdbcUser ?? "",
-					pass: jdbcValues.jdbcPass ?? "",
-					properties: jdbcValues.jdbcProperties ?? "",
-				}),
-			},
-		};
 		try {
-			const response = await fetchData(params);
-			const json = (await response.json()) as {
-				success: boolean;
-				message: string;
-			};
-			setResult(json);
-		} catch (e) {
-			handleFetchError((e as Error).message, params);
+			setResult(await jdbcConnectionTest(jdbcValues));
 		} finally {
 			setTesting(false);
 		}

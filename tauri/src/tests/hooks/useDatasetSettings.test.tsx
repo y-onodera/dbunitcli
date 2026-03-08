@@ -1,8 +1,8 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { useDeleteDatasetSettings, useLoadDatasetSettings, useSaveDatasetSettings } from '../../context/DatasetSettingsProvider';
 import { type Enviroment, enviromentContext } from '../../context/EnviromentProvider';
 import WorkspaceResourcesProvider, { useResourcesSettings } from '../../context/WorkspaceResourcesProvider';
+import { useDeleteDatasetSettings, useLoadDatasetSettings, useSaveDatasetSettings } from '../../hooks/useDatasetSettings';
 import { DatasetSettings } from '../../model/DatasetSettings';
 import type { WorkspaceResources } from '../../model/WorkspaceResources';
 import type { FetchParams } from '../../utils/fetchUtils';

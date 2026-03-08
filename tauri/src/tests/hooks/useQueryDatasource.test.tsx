@@ -1,12 +1,12 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { type Enviroment, enviromentContext } from "../../context/EnviromentProvider";
+import WorkspaceResourcesProvider, { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import {
 	useDeleteDataSource,
 	useLoadDataSource,
 	useSaveDataSource,
-} from "../../context/QueryDatasourceProvider";
-import WorkspaceResourcesProvider, { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
+} from "../../hooks/useQueryDatasource";
 import type { QueryDatasource } from "../../model/QueryDatasource";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
 import type { FetchParams } from "../../utils/fetchUtils";

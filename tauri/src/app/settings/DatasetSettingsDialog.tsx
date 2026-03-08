@@ -1,7 +1,7 @@
 import { Suspense, use, useState } from 'react';
 import ResourceFileDialog from '../../components/dialog/ResourceFileDialog';
 import SettingTable from '../../components/dialog/SettingTable';
-import { useLoadDatasetSettings, useSaveDatasetSettings } from '../../context/DatasetSettingsProvider';
+import { useLoadDatasetSettings, useSaveDatasetSettings } from '../../hooks/useDatasetSettings';
 import type { DatasetSetting } from "../../model/DatasetSettings";
 import { DatasetSettings, newDatasetSetting } from "../../model/DatasetSettings";
 import DatasetSettingDaialog from "./DatasetSettingDialog";
