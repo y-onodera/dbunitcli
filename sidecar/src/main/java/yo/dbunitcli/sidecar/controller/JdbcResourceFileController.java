@@ -29,16 +29,24 @@ public class JdbcResourceFileController extends AbstractResourceFileController<R
 
     @Post(uri = "save-properties", produces = MediaType.APPLICATION_JSON)
     public String saveProperties(@Body final JdbcSavePropertiesRequestDto body) throws IOException {
-        final StringBuilder sb = new StringBuilder();
+        final java.util.Properties props = new java.util.Properties();
+        if (body.getProperties() != null && !body.getProperties().isEmpty()) {
+            final java.util.Optional<String> existing = this.getResourceFile().read(body.getProperties());
+            if (existing.isPresent()) {
+                props.load(new java.io.StringReader(existing.get()));
+            }
+        }
         if (body.getUrl() != null && !body.getUrl().isEmpty()) {
-            sb.append("url=").append(body.getUrl()).append("\n");
+            props.setProperty("url", body.getUrl());
         }
         if (body.getUser() != null && !body.getUser().isEmpty()) {
-            sb.append("user=").append(body.getUser()).append("\n");
+            props.setProperty("user", body.getUser());
         }
         if (body.getPass() != null && !body.getPass().isEmpty()) {
-            sb.append("pass=").append(body.getPass()).append("\n");
+            props.setProperty("pass", body.getPass());
         }
+        final StringBuilder sb = new StringBuilder();
+        props.forEach((k, v) -> sb.append(k).append("=").append(v).append("\n"));
         this.getResourceFile().update(body.getName(), sb.toString());
         return this.currentFileList();
     }

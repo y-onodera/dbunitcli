@@ -33,6 +33,7 @@ async function saveJdbcProperties(
 				url: jdbcValues.jdbcUrl ?? "",
 				user: jdbcValues.jdbcUser ?? "",
 				pass: jdbcValues.jdbcPass ?? "",
+				properties: jdbcValues.jdbcProperties ?? "",
 			}),
 		},
 	};

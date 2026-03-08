@@ -46,6 +46,17 @@ export default function JdbcSavePropertiesDialog({
 					/>
 				</div>
 
+				{jdbcValues.jdbcProperties && (
+					<div className="mb-3">
+						<PreviewField
+							id="jdbcSaveProperties_baseFile"
+							label="Base Properties File"
+							value={jdbcValues.jdbcProperties}
+							placeholder="(not set)"
+						/>
+					</div>
+				)}
+
 				<div className="mb-3">
 					<PreviewField
 						id="jdbcSaveProperties_url"

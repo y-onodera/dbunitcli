@@ -13,6 +13,8 @@ public class JdbcSavePropertiesRequestDto {
 
     private String pass;
 
+    private String properties;
+
     public String getName() {
         return this.name;
     }
@@ -43,5 +45,13 @@ public class JdbcSavePropertiesRequestDto {
 
     public void setPass(final String pass) {
         this.pass = pass;
+    }
+
+    public String getProperties() {
+        return this.properties;
+    }
+
+    public void setProperties(final String properties) {
+        this.properties = properties;
     }
 }
