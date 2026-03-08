@@ -1,19 +1,6 @@
-import { isAbsolute, sep } from "@tauri-apps/api/path";
-import { open } from "@tauri-apps/plugin-dialog";
-import {
-	type Dispatch,
-	Fragment,
-	type SetStateAction,
-	useEffect,
-	useRef,
-	useState,
-} from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { ButtonWithIcon } from "../../components/element/Button";
-import {
-	DirectoryButton,
-	ExpandButton,
-	FileButton,
-} from "../../components/element/ButtonIcon";
+import { ExpandButton } from "../../components/element/ButtonIcon";
 import { SettingIcon } from "../../components/element/Icon";
 import {
 	CheckBox,
@@ -22,20 +9,12 @@ import {
 	ResourceDatalist,
 	SelectBox,
 } from "../../components/element/Input";
-import {
-	useResourcesSettings,
-	useWorkspaceContext,
-} from "../../context/WorkspaceResourcesProvider";
-import type {
-	Attribute,
-	CommandParam,
-	CommandParams,
-} from "../../model/CommandParam";
+import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
+import type { CommandParams } from "../../model/CommandParam";
 import {
 	isSqlRelatedType,
 	type QueryDatasourceType,
 } from "../../model/QueryDatasource";
-import type { WorkspaceContext } from "../../model/WorkspaceResources";
 import DatasetSettingEditButton, {
 	RemoveDatasetSettingButton,
 } from "../settings/DatasetSettingEditButton";
@@ -45,23 +24,10 @@ import SqlEditorButton, {
 import XlsxSchemaEditButton, {
 	RemoveXlsxSchemaButton,
 } from "../settings/XlsxSchemaEditButton";
+import { DirectoryChooser, FileChooser } from "./Chooser";
+import type { FileProp, Prop, SelectProp } from "./FormElementProp";
 import JdbcFormSection, { JDBC_FIELD_NAMES } from "./JdbcFormSection";
 
-type Prop = {
-	prefix: string;
-	element: CommandParam;
-	hidden?: boolean;
-	srcType?: string;
-};
-type FileProp = Prop & {
-	path: string;
-	setPath: Dispatch<SetStateAction<string>>;
-	onSelect?: () => void;
-	srcType?: string;
-};
-type SelectProp = Prop & {
-	handleTypeSelect: (selected: string) => Promise<void>;
-};
 export default function CommandFormElements(
 	prop: {
 		handleTypeSelect: (selected: string) => Promise<void>;
@@ -232,7 +198,7 @@ function Text(prop: Prop) {
 							srcType={srcType}
 						/>
 					)}
-					</div>
+				</div>
 			</div>
 		</div>
 	);
@@ -350,62 +316,6 @@ function DropDownMenu({
 		</div>
 	);
 }
-function FileChooser(prop: FileProp) {
-	const context = useWorkspaceContext();
-	const handleFileChooserClick = () => {
-		const getDefaultPath = async (): Promise<string> => {
-			return (await isAbsolute(prop.path))
-				? prop.path
-				: prop.path
-					? getPath(context, prop.element.attribute, prop.srcType) +
-						sep() +
-						prop.path
-					: getPath(context, prop.element.attribute, prop.srcType);
-		};
-		getDefaultPath().then((defaultPath) =>
-			open({ defaultPath }).then((files) => {
-				if (files) {
-					prop.setPath(
-						(files as string).replace(
-							getPath(context, prop.element.attribute, prop.srcType) + sep(),
-							"",
-						),
-					);
-					prop.onSelect?.();
-				}
-			}),
-		);
-	};
-	return <FileButton handleClick={handleFileChooserClick} />;
-}
-function DirectoryChooser(prop: FileProp) {
-	const context = useWorkspaceContext();
-	const handleDirectoryChooserClick = () => {
-		const getDefaultPath = async (): Promise<string> => {
-			return (await isAbsolute(prop.path))
-				? prop.path
-				: prop.path
-					? getPath(context, prop.element.attribute, prop.srcType) +
-						sep() +
-						prop.path
-					: getPath(context, prop.element.attribute, prop.srcType);
-		};
-		getDefaultPath().then((defaultPath) =>
-			open({ defaultPath, directory: true }).then((files) => {
-				if (files) {
-					prop.setPath(
-						(files as string).replace(
-							getPath(context, prop.element.attribute, prop.srcType) + sep(),
-							"",
-						),
-					);
-					prop.onSelect?.();
-				}
-			}),
-		);
-	};
-	return <DirectoryButton handleClick={handleDirectoryChooserClick} />;
-}
 function Check(prop: Prop) {
 	return (
 		<div>
@@ -473,35 +383,4 @@ function getId(prefix: string, name: string): string {
 }
 function getName(prefix: string, name: string): string {
 	return prefix ? `-${prefix}.${name}` : `-${name}`;
-}
-function getPath(
-	context: WorkspaceContext,
-	attribute: Attribute,
-	srcType: string | undefined,
-): string {
-	if (attribute.defaultPath === "DATASET") {
-		if (isSqlRelatedType(srcType ?? "")) {
-			return context.datasetBase + sep() + srcType;
-		}
-		return context.datasetBase;
-	}
-	if (attribute.defaultPath === "RESULT") {
-		return context.resultBase;
-	}
-	if (attribute.defaultPath === "SETTING") {
-		return context.settingBase;
-	}
-	if (attribute.defaultPath === "TEMPLATE") {
-		return context.templateBase;
-	}
-	if (attribute.defaultPath === "PARAMETERIZE_TEMPLATE") {
-		return context.parameterizeTemplateBase;
-	}
-	if (attribute.defaultPath === "JDBC") {
-		return context.jdbcBase;
-	}
-	if (attribute.defaultPath === "XLSX_SCHEMA") {
-		return context.xlsxSchemaBase;
-	}
-	return context.workspace;
 }

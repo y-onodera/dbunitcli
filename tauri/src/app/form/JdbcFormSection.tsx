@@ -1,5 +1,3 @@
-import { isAbsolute, sep } from "@tauri-apps/api/path";
-import { open } from "@tauri-apps/plugin-dialog";
 import {
 	type Dispatch,
 	type SetStateAction,
@@ -8,16 +6,17 @@ import {
 	useState,
 } from "react";
 import { BlueButton, ButtonWithIcon } from "../../components/element/Button";
-import { FileButton } from "../../components/element/ButtonIcon";
 import { SettingIcon } from "../../components/element/Icon";
-import { ControllTextBox, InputLabel, ResourceDatalist } from "../../components/element/Input";
 import {
-	useResourcesSettings,
-	useWorkspaceContext,
-} from "../../context/WorkspaceResourcesProvider";
+	ControllTextBox,
+	InputLabel,
+	ResourceDatalist,
+} from "../../components/element/Input";
+import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import { useJdbcConnectionTest } from "../../hooks/useJdbcConnectionTest";
 import type { CommandParam } from "../../model/CommandParam";
 import JdbcUrlBuilderDialog from "../settings/JdbcUrlBuilderDialog";
+import { FileChooser } from "./Chooser";
 
 export const JDBC_FIELD_NAMES = [
 	"jdbcUrl",
@@ -71,7 +70,6 @@ function JdbcTextField({
 	const [path, setPath] = useState(element.value);
 	const [showJdbcUrlBuilder, setShowJdbcUrlBuilder] = useState(false);
 	const settings = useResourcesSettings();
-	const context = useWorkspaceContext();
 	const labelText = prefix ? `-${prefix}.${element.name}` : `-${element.name}`;
 	const id = prefix ? `${prefix}_${element.name}` : element.name;
 	const isJdbcUrl = element.name === "jdbcUrl";
@@ -82,23 +80,6 @@ function JdbcTextField({
 	useEffect(() => {
 		onValueChange(element.name, path);
 	}, [path, element.name, onValueChange]);
-
-	const handleFileChooserClick = () => {
-		const getDefaultPath = async (): Promise<string> => {
-			return (await isAbsolute(path))
-				? path
-				: path
-					? context.jdbcBase + sep() + path
-					: context.jdbcBase;
-		};
-		getDefaultPath().then((defaultPath) =>
-			open({ defaultPath }).then((files) => {
-				if (files) {
-					setPath((files as string).replace(context.jdbcBase + sep(), ""));
-				}
-			}),
-		);
-	};
 
 	return (
 		<div>
@@ -117,11 +98,18 @@ function JdbcTextField({
 						list={isJdbcProperties ? `${id}_list` : undefined}
 						handleChange={(ev) => setPath(ev.target.value)}
 					/>
-					{isJdbcProperties && <ResourceDatalist id={id} resources={resourceFiles} />}
+					{isJdbcProperties && (
+						<ResourceDatalist id={id} resources={resourceFiles} />
+					)}
 				</div>
 				<div className="flex">
 					{isJdbcProperties && (
-						<FileButton handleClick={handleFileChooserClick} />
+						<FileChooser
+							prefix={prefix}
+							element={element}
+							path={path}
+							setPath={setPath}
+						/>
 					)}
 					{isJdbcUrl && (
 						<JdbcUrlBuilderButton
