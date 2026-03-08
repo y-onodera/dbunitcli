@@ -30,7 +30,7 @@ export const useLoadSelectParameter = () => {
 			.then((parameter: Parameter) => {
 				setParameter(new SelectParameter(parameter, command, name));
 			})
-			.catch((ex) => handleFetchError(ex, fetchParams));
+			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
 	};
 };
 
@@ -54,7 +54,7 @@ export const useRefreshSelectParameter = (command: string) => {
 						new SelectParameter(parameter, current.command, current.name),
 				);
 			})
-			.catch((ex) => handleFetchError(ex, fetchParams));
+			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
 	};
 };
 
@@ -82,7 +82,7 @@ export const useSaveParameter = () => {
 				});
 			})
 			.catch((ex) => {
-				handleFetchError(ex, fetchParams);
+				handleFetchError((ex as Error).message, fetchParams);
 				handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
 			});
 	};
@@ -113,7 +113,7 @@ export const useExecParameter = () => {
 				}),
 			)
 			.catch((ex) => {
-				handleFetchError(ex, fetchParams);
+				handleFetchError((ex as Error).message, fetchParams);
 				handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
 			});
 	};
@@ -136,6 +136,6 @@ export const useParameterizeFrom = () => {
 			.then((parameter: ParameterizeParams) => {
 				setParameter(new SelectParameter(parameter, "parameterize", name));
 			})
-			.catch((ex) => handleFetchError(ex, fetchParams));
+			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
 	};
 };

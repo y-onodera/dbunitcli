@@ -29,7 +29,7 @@ export const useWorkspaceUpdate = () => {
 				setParameterList(ParameterList.from(resources.parameterList));
 				setResourcesSettings(new ResourcesSettings(resources.resources));
 			})
-			.catch((ex) => handleFetchError(ex, fetchParams));
+			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
 	};
 };
 
@@ -49,7 +49,7 @@ export const useAddParameter = (command: string) => {
 			.then((parameters: string[]) => {
 				setParameter(current => current.replace(command.toLowerCase(), parameters));
 			})
-			.catch((ex) => handleFetchError(ex, fetchParams));
+			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
 	};
 };
 
@@ -70,7 +70,7 @@ export const useDeleteParameter = (command: string, name: string) => {
 			.then((parameters: string[]) => {
 				setParameter(current => current.replace(command.toLowerCase(), parameters));
 			})
-			.catch((ex) => handleFetchError(ex, fetchParams));
+			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
 	};
 };
 
@@ -91,7 +91,7 @@ export const useCopyParameter = (command: string, name: string) => {
 			.then((parameters: string[]) => {
 				setParameter(current => current.replace(command.toLowerCase(), parameters));
 			})
-			.catch((ex) => handleFetchError(ex, fetchParams));
+			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
 	};
 };
 
@@ -117,6 +117,6 @@ export const useRenameParameter = (command: string, name: string) => {
 					setParameter(parameter.currentParameter(), parameter.command, newName);
 				}
 			})
-			.catch((ex) => handleFetchError(ex, fetchParams));
+			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
 	};
 };
