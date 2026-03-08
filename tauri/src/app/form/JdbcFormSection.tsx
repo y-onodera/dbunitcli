@@ -14,12 +14,14 @@ import {
 } from "../../components/element/Input";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import {
+	useDeleteJdbcProperties,
 	useJdbcConnectionTest,
 	useJdbcSaveProperties,
 } from "../../hooks/useJdbc";
 import type { CommandParam } from "../../model/CommandParam";
 import JdbcSavePropertiesDialog from "../settings/JdbcSavePropertiesDialog";
 import JdbcUrlBuilderDialog from "../settings/JdbcUrlBuilderDialog";
+import { RemoveResource } from "../settings/ResourceEditButton";
 import { FileChooser } from "./Chooser";
 
 export const JDBC_FIELD_NAMES = [
@@ -117,6 +119,9 @@ function JdbcTextField({
 							path={path}
 							setPath={setPath}
 						/>
+					)}
+					{isJdbcProperties && path && (
+						<RemoveJdbcPropertiesButton path={path} setPath={setPath} />
 					)}
 					{isJdbcUrl && (
 						<JdbcUrlBuilderButton
@@ -248,5 +253,22 @@ function JdbcSavePropertiesButton({
 				/>
 			)}
 		</>
+	);
+}
+
+function RemoveJdbcPropertiesButton({
+	path,
+	setPath,
+}: {
+	path: string;
+	setPath: (value: string) => void;
+}) {
+	const deleteJdbcProperties = useDeleteJdbcProperties();
+	return (
+		<RemoveResource
+			path={path}
+			setPath={setPath}
+			deleteResource={deleteJdbcProperties}
+		/>
 	);
 }

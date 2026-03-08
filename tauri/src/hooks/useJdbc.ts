@@ -6,6 +6,39 @@ import { fetchData, handleFetchError } from "../utils/fetchUtils";
 
 type OperationResult = "success" | "failed";
 
+export const useDeleteJdbcProperties = () => {
+	const { apiUrl } = useEnviroment();
+	const setResourcesSettings = useSetResourcesSettings();
+	return async (name: string): Promise<OperationResult> => {
+		return deleteJdbcProperties(apiUrl, name, setResourcesSettings);
+	};
+};
+
+async function deleteJdbcProperties(
+	apiUrl: string,
+	name: string,
+	setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>,
+): Promise<OperationResult> {
+	const fetchParams = {
+		endpoint: `${apiUrl}jdbc/delete`,
+		options: {
+			method: "POST",
+			headers: { "Content-Type": "text/plain" },
+			body: name,
+		},
+	};
+	return await fetchData(fetchParams)
+		.then((response) => response.json())
+		.then((files: string[]) => {
+			setResourcesSettings((current) => current.with({ jdbcFiles: files }));
+			return "success" as OperationResult;
+		})
+		.catch((ex) => {
+			handleFetchError((ex as Error).message, fetchParams);
+			return "failed" as OperationResult;
+		});
+}
+
 function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 	return {
 		url: jdbcValues.jdbcUrl ?? "",
