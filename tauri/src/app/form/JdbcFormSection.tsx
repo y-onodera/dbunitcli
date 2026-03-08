@@ -13,8 +13,10 @@ import {
 	ResourceDatalist,
 } from "../../components/element/Input";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
-import { useJdbcConnectionTest } from "../../hooks/useJdbcConnectionTest";
-import { useJdbcSaveProperties } from "../../hooks/useJdbcSaveProperties";
+import {
+	useJdbcConnectionTest,
+	useJdbcSaveProperties,
+} from "../../hooks/useJdbc";
 import type { CommandParam } from "../../model/CommandParam";
 import JdbcSavePropertiesDialog from "../settings/JdbcSavePropertiesDialog";
 import JdbcUrlBuilderDialog from "../settings/JdbcUrlBuilderDialog";
