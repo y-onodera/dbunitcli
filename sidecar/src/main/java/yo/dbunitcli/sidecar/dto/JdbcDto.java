@@ -3,7 +3,7 @@ package yo.dbunitcli.sidecar.dto;
 import io.micronaut.serde.annotation.Serdeable;
 
 @Serdeable
-public class JdbcTestRequestDto {
+public class JdbcDto {
 
     private String url;
 
