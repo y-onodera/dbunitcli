@@ -1,9 +1,24 @@
 package yo.dbunitcli.sidecar.dto;
 
-public interface ResourceSaveRequest<DTO> {
+public abstract class ResourceSaveRequest<DTO> {
 
-    String getName();
+    private String name;
 
-    DTO getInput();
+    private DTO input;
 
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public DTO getInput() {
+        return this.input;
+    }
+
+    public void setInput(final DTO input) {
+        this.input = input;
+    }
 }
