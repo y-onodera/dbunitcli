@@ -17,7 +17,7 @@
         <profile>
             <id>IntegrationTest</id>
             <properties>
-                <exclude.testcase></exclude.testcase>
+                <exclude.testcase/>
             </properties>
         </profile>
         <profile>
@@ -27,7 +27,6 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>0.10.0</version>
                         <extensions>true</extensions>
                         <executions>
                             <execution>
