@@ -54,17 +54,21 @@ export function Button(props: {
     , textstyle: string
     , border: string
     , children: ReactNode
+    , disabled?: boolean
+    , id?: string
     , handleClick: React.MouseEventHandler<HTMLButtonElement>
 }) {
     return (
         <button
             type="button"
-            className={`${props.buttonstyle} 
-                         ${props.textstyle} 
-                         ${props.bgcolor} 
-                         rounded-lg 
-                         ${props.border} 
-                         transition duration-100 
+            id={props.id}
+            disabled={props.disabled}
+            className={`${props.buttonstyle}
+                         ${props.textstyle}
+                         ${props.bgcolor}
+                         rounded-lg
+                         ${props.border}
+                         transition duration-100
                          ring-indigo-300
                          focus-visible:ring-3`}
             onClick={props.handleClick}

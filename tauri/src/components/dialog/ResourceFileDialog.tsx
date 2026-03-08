@@ -3,38 +3,48 @@ import { BlueButton, WhiteButton } from "../element/Button";
 import { ControllTextBox, InputLabel } from "../element/Input";
 
 interface DialogProps {
-    children: React.ReactNode;
-    handleDialogClose: () => void;
-    fileName: string;
-    handleSave: (path: string) => void;
+	children: React.ReactNode;
+	handleDialogClose: () => void;
+	fileName: string;
+	handleSave: (path: string) => void;
 }
 
-export default function ResourceFileDialog({ children, handleDialogClose, fileName, handleSave }: DialogProps) {
-    const [value, setValue] = useState(fileName);
-    return (
-        <dialog
-            open
-            onClose={handleDialogClose}
-            className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 bg-white border border-gray-200"
-        >
-            <div className="relative overflow-x-auto">{children}</div>
-            <div className="right-1 w-full flex items-center justify-end">
-                <div className="grid grid-cols-5 pb-2">
-                    <InputLabel id="fileNameLabel" text="name" required={false} wStyle="p-2.5 w=1/5" />
-                    <ControllTextBox
-                        name="fileName"
-                        id="fileName"
-                        required={true}
-                        wStyle="col-start-2 col-span-4 mr-2"
-                        value={value}
-                        handleChange={(ev) => setValue(ev.target.value)}
-                    />
-                </div>
-                <div className="pb-2">
-                    <BlueButton title="Save" handleClick={() => handleSave(value)} />
-                    <WhiteButton title="Close" handleClick={handleDialogClose} />
-                </div>
-            </div>
-        </dialog>
-    );
+export default function ResourceFileDialog({
+	children,
+	handleDialogClose,
+	fileName,
+	handleSave,
+}: DialogProps) {
+	const [value, setValue] = useState(fileName);
+	return (
+		<dialog
+			open
+			onClose={handleDialogClose}
+			className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 bg-white border border-gray-200"
+		>
+			<div className="relative overflow-x-auto">{children}</div>
+			<div className="right-1 w-full flex items-center justify-end">
+				<div className="grid grid-cols-5 pb-2">
+					<InputLabel
+						id="fileNameLabel"
+						text="name"
+						required={false}
+						wStyle="p-2.5 w=1/5"
+					/>
+					<ControllTextBox
+						name="fileName"
+						id="fileName"
+						required={true}
+						wStyle="col-start-2 col-span-4 mr-2"
+						value={value}
+						handleChange={(ev) => setValue(ev.target.value)}
+					/>
+				</div>
+				<div className="flex items-center justify-end p-4 gap-2">
+					<BlueButton title="Save" handleClick={() => handleSave(value)} />
+					<WhiteButton title="Close" handleClick={handleDialogClose} />
+				</div>
+			</div>
+		</dialog>
+	);
 }

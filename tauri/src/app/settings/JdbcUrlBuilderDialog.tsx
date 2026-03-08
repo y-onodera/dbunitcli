@@ -22,9 +22,9 @@ const DEFAULT_PORTS: Record<RdbType, string> = {
 };
 
 const SERVICE_NAME_LABEL: Record<RdbType, string> = {
-	oracle: "サービス名",
-	postgres: "データベース名",
-	h2: "データベース名",
+	oracle: "Service Name",
+	postgres: "Database Name",
+	h2: "Database Name",
 };
 
 function buildJdbcUrl(state: JdbcUrlBuilderState): string {
@@ -127,11 +127,11 @@ export default function JdbcUrlBuilderDialog({
 			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-white border border-gray-200"
 		>
 			<div className="p-4 rounded-lg mt-2 w-[480px]">
-				<h2 className="text-lg font-bold mb-4">JDBC URL ビルダー</h2>
+				<h2 className="text-lg font-bold mb-4">JDBC URL Builder</h2>
 
 				<div className="mb-3">
 					<InputLabel
-						text="データベース種別"
+						text="Database"
 						id="jdbcUrlBuilder_rdbType"
 						required={true}
 					/>
@@ -149,7 +149,7 @@ export default function JdbcUrlBuilderDialog({
 				</div>
 
 				<div className="mb-3">
-					<InputLabel text="ホスト" id="jdbcUrlBuilder_host" required={true} />
+					<InputLabel text="Host" id="jdbcUrlBuilder_host" required={true} />
 					<ControllTextBox
 						name="jdbcUrlBuilder_host"
 						id="jdbcUrlBuilder_host"
@@ -162,7 +162,7 @@ export default function JdbcUrlBuilderDialog({
 				</div>
 
 				<div className="mb-3">
-					<InputLabel text="ポート" id="jdbcUrlBuilder_port" required={true} />
+					<InputLabel text="Port" id="jdbcUrlBuilder_port" required={true} />
 					<ControllTextBox
 						name="jdbcUrlBuilder_port"
 						id="jdbcUrlBuilder_port"
@@ -193,7 +193,7 @@ export default function JdbcUrlBuilderDialog({
 
 				<div className="mb-4">
 					<InputLabel
-						text="生成されるJDBC URL"
+						text="Preview"
 						id="jdbcUrlBuilder_preview"
 						required={false}
 					/>
@@ -203,7 +203,7 @@ export default function JdbcUrlBuilderDialog({
 					>
 						{builtUrl || (
 							<span className="text-gray-400">
-								（ホスト・サービス名を入力してください）
+								(Enter host and service name)
 							</span>
 						)}
 					</div>
@@ -212,14 +212,14 @@ export default function JdbcUrlBuilderDialog({
 
 			<div className="flex items-center justify-end p-4 gap-2">
 				<BlueButton
-					title="適用"
+					title="Apply"
 					handleClick={() => {
 						if (builtUrl) {
 							handleSave(builtUrl);
 						}
 					}}
 				/>
-				<WhiteButton title="閉じる" handleClick={handleDialogClose} />
+				<WhiteButton title="Close" handleClick={handleDialogClose} />
 			</div>
 		</dialog>
 	);
