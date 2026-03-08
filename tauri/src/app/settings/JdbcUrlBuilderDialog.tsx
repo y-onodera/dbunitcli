@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { BlueButton, WhiteButton } from "../../components/element/Button";
+import { useState } from "react";
+import { SettingDialog } from "../../components/dialog/SettingDialog";
 import {
 	ControllTextBox,
 	InputLabel,
+	PreviewField,
 	SelectBox,
 } from "../../components/element/Input";
 
@@ -95,7 +96,6 @@ export default function JdbcUrlBuilderDialog({
 	handleDialogClose,
 	handleSave,
 }: JdbcUrlBuilderDialogProps) {
-	const dialogRef = useRef<HTMLDialogElement>(null);
 	const parsed = parseJdbcUrl(currentUrl);
 	const initialRdbType: RdbType = parsed.rdbType ?? "postgres";
 	const [state, setState] = useState<JdbcUrlBuilderState>({
@@ -104,10 +104,6 @@ export default function JdbcUrlBuilderDialog({
 		port: parsed.port ?? DEFAULT_PORTS[initialRdbType],
 		serviceName: parsed.serviceName ?? "",
 	});
-
-	useEffect(() => {
-		dialogRef.current?.showModal();
-	}, []);
 
 	const handleRdbTypeChange = async (selected: string) => {
 		const rdbType = selected as RdbType;
@@ -121,12 +117,13 @@ export default function JdbcUrlBuilderDialog({
 	const builtUrl = buildJdbcUrl(state);
 
 	return (
-		<dialog
-			ref={dialogRef}
-			onClose={handleDialogClose}
-			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-white border border-gray-200"
+		<SettingDialog
+			setting={builtUrl}
+			handleDialogClose={handleDialogClose}
+			handleCommit={(url) => { if (url) handleSave(url); }}
+			commitLabel="Apply"
 		>
-			<div className="p-4 rounded-lg mt-2 w-[480px]">
+			<div className="w-[480px]">
 				<h2 className="text-lg font-bold mb-4">JDBC URL Builder</h2>
 
 				<div className="mb-3">
@@ -192,35 +189,14 @@ export default function JdbcUrlBuilderDialog({
 				</div>
 
 				<div className="mb-4">
-					<InputLabel
-						text="Preview"
+					<PreviewField
 						id="jdbcUrlBuilder_preview"
-						required={false}
+						label="Preview"
+						value={builtUrl}
+						placeholder="(Enter host and service name)"
 					/>
-					<div
-						id="jdbcUrlBuilder_preview"
-						className="block p-2.5 w-full text-sm text-gray-700 rounded-lg bg-gray-100 border border-gray-300 font-mono break-all"
-					>
-						{builtUrl || (
-							<span className="text-gray-400">
-								(Enter host and service name)
-							</span>
-						)}
-					</div>
 				</div>
 			</div>
-
-			<div className="flex items-center justify-end p-4 gap-2">
-				<BlueButton
-					title="Apply"
-					handleClick={() => {
-						if (builtUrl) {
-							handleSave(builtUrl);
-						}
-					}}
-				/>
-				<WhiteButton title="Close" handleClick={handleDialogClose} />
-			</div>
-		</dialog>
+		</SettingDialog>
 	);
 }

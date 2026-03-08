@@ -13,6 +13,7 @@ export type SettingDialogProps<T> = {
 	handleDialogClose: () => void;
 	handleCommit: (newSettings: T) => void;
 	children: ReactNode;
+	commitLabel?: string;
 };
 
 export function SettingDialog<T>(props: SettingDialogProps<T>) {
@@ -33,7 +34,7 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 			<div className="p-4 rounded-lg mt-2">{props.children}</div>
 			<div className="flex items-center justify-end p-4 gap-2">
 				<BlueButton
-					title="Save"
+					title={props.commitLabel ?? "Save"}
 					handleClick={() => props.handleCommit(props.setting)}
 				/>
 				<WhiteButton title="Close" handleClick={props.handleDialogClose} />

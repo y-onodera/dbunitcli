@@ -7,10 +7,10 @@ import {
 	useEffect,
 	useState,
 } from "react";
-import { Button, ButtonWithIcon } from "../../components/element/Button";
+import { BlueButton, ButtonWithIcon } from "../../components/element/Button";
 import { FileButton } from "../../components/element/ButtonIcon";
 import { SettingIcon } from "../../components/element/Icon";
-import { ControllTextBox, InputLabel } from "../../components/element/Input";
+import { ControllTextBox, InputLabel, ResourceDatalist } from "../../components/element/Input";
 import {
 	useResourcesSettings,
 	useWorkspaceContext,
@@ -117,13 +117,7 @@ function JdbcTextField({
 						list={isJdbcProperties ? `${id}_list` : undefined}
 						handleChange={(ev) => setPath(ev.target.value)}
 					/>
-					{isJdbcProperties && (
-						<datalist id={`${id}_list`}>
-							{resourceFiles.map((r) => (
-								<option key={r} value={r} />
-							))}
-						</datalist>
-					)}
+					{isJdbcProperties && <ResourceDatalist id={id} resources={resourceFiles} />}
 				</div>
 				<div className="flex">
 					{isJdbcProperties && (
@@ -207,23 +201,12 @@ function JdbcConnectionTestButton({
 
 	return (
 		<div className="mt-2 flex items-center gap-3">
-			<Button
-				buttonstyle="px-3 py-2"
-				bgcolor={
-					isEnabled
-						? "bg-indigo-500 hover:bg-indigo-600"
-						: "bg-gray-200 cursor-not-allowed"
-				}
-				textstyle={`text-sm font-semibold ${isEnabled ? "text-white" : "text-gray-400"}`}
-				border={
-					isEnabled ? "border border-gray-300" : "border border-gray-200"
-				}
+			<BlueButton
+				title={testing ? "Connecting..." : "Connection Test"}
 				disabled={!isEnabled}
 				id={`${prefix}_jdbcConnectionTest`}
 				handleClick={handleTest}
-			>
-				{testing ? "Connecting..." : "Connection Test"}
-			</Button>
+			/>
 			{result && (
 				<span
 					className={`text-sm font-medium ${result.success ? "text-green-600" : "text-red-600"}`}

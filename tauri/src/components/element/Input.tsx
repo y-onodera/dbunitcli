@@ -88,6 +88,44 @@ export function CheckBox(props: { name: string, id: string, hidden?: boolean, de
         </>
     )
 }
+export function ResourceDatalist({
+	id,
+	resources,
+}: {
+	id: string;
+	resources: string[];
+}) {
+	return (
+		<datalist id={`${id}_list`}>
+			{resources.map((resource) => (
+				<option key={resource} value={resource} />
+			))}
+		</datalist>
+	);
+}
+export function PreviewField({
+	id,
+	label,
+	value,
+	placeholder,
+}: {
+	id: string;
+	label: string;
+	value: string;
+	placeholder?: string;
+}) {
+	return (
+		<div>
+			<InputLabel text={label} id={id} required={false} />
+			<div
+				id={id}
+				className="block p-2.5 w-full text-sm text-gray-700 rounded-lg bg-gray-100 border border-gray-300 font-mono break-all"
+			>
+				{value || <span className="text-gray-400">{placeholder}</span>}
+			</div>
+		</div>
+	);
+}
 function inputStyle(wStyle: string) {
     return `block 
                p-2.5 

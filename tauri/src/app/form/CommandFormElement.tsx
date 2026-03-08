@@ -19,6 +19,7 @@ import {
 	CheckBox,
 	ControllTextBox,
 	InputLabel,
+	ResourceDatalist,
 	SelectBox,
 } from "../../components/element/Input";
 import {
@@ -202,8 +203,7 @@ function Text(prop: Prop) {
 					/>
 					{showDatalist && !prop.hidden && (
 						<ResourceDatalist
-							prefix={prop.prefix}
-							element={prop.element}
+							id={getId(prop.prefix, prop.element.name)}
 							resources={resourceFiles}
 						/>
 					)}
@@ -348,20 +348,6 @@ function DropDownMenu({
 				</div>
 			)}
 		</div>
-	);
-}
-function ResourceDatalist(prop: {
-	prefix: string;
-	element: CommandParam;
-	resources: string[];
-}) {
-	const { element, resources } = prop;
-	return (
-		<datalist id={`${getId(prop.prefix, element.name)}_list`}>
-			{resources?.map((resource) => (
-				<option key={resource} value={resource} />
-			))}
-		</datalist>
 	);
 }
 function FileChooser(prop: FileProp) {

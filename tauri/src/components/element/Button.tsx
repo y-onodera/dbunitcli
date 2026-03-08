@@ -12,13 +12,15 @@ export function ButtonWithIcon(props: { id: string, handleClick: React.MouseEven
         </Button>
     );
 }
-export function BlueButton(props: { title: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
+export function BlueButton(props: { title: string, handleClick: React.MouseEventHandler<HTMLButtonElement>, disabled?: boolean, id?: string }) {
     return (
         <Button
             buttonstyle=""
             bgcolor="bg-indigo-500 hover:bg-indigo-600"
             textstyle="text-center text-sm font-semibold text-white"
             border="border border-gray-300"
+            disabled={props.disabled}
+            id={props.id}
             handleClick={props.handleClick} >
             {props.title}
         </Button>
@@ -70,7 +72,8 @@ export function Button(props: {
                          ${props.border}
                          transition duration-100
                          ring-indigo-300
-                         focus-visible:ring-3`}
+                         focus-visible:ring-3
+                         disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed disabled:hover:bg-gray-200`}
             onClick={props.handleClick}
         >
             {props.children}
