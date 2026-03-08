@@ -30,11 +30,12 @@ public class JdbcResourceFileController extends AbstractResourceFileController<R
 
     @Post(uri = "save-properties", produces = MediaType.APPLICATION_JSON)
     public String saveProperties(@Body final JdbcSavePropertiesRequestDto body) throws IOException {
+        final JdbcTestRequestDto jdbc = body.getInput();
         final JdbcOption option = new JdbcOption("jdbc",
-                body.getProperties(),
-                body.getUrl(),
-                body.getUser(),
-                body.getPass());
+                jdbc.getProperties(),
+                jdbc.getUrl(),
+                jdbc.getUser(),
+                jdbc.getPass());
         final StringWriter sw = new StringWriter();
         option.loadJdbcTemplate().store(sw, null);
         this.getResourceFile().update(body.getName(), sw.toString());
