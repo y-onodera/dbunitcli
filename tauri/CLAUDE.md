@@ -19,7 +19,8 @@ src/
 │   ├── footer/     — Footer, ResultDialog
 │   └── startup/    — StartupForm（初期ワークスペース選択）
 ├── components/     — 再利用可能 UI（dialog/, element/）
-├── context/        — React Context プロバイダ（6個）
+├── context/        — React Context プロバイダ（Provider コンポーネントを持つもののみ）
+├── hooks/          — カスタムフック（APIコール・状態操作。JSXなし → .ts）
 ├── model/          — TypeScript 型定義（CommandParam, DatasetSettings 等）
 ├── utils/          — fetchUtils.ts（HTTP API 呼び出し）
 └── tests/          — ソース構造をミラーしたテスト

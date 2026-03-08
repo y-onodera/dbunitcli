@@ -1,3 +1,9 @@
+---
+paths:
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
+---
+
 # このコードベースでの作業方法
 
 ## 新しいコマンドの追加
@@ -18,3 +24,23 @@
 - モデルとユーティリティの単体テストを追加
 - Context プロバイダの統合テストを追加
 - コンポーネントインタラクションテストには Testing Library を使用
+
+## ファイル拡張子の使い分け
+
+### context/ と hooks/ の役割分担
+| ディレクトリ | 内容 | 拡張子 |
+|---|---|---|
+| `context/` | createContext + Provider コンポーネント + context 読み取りフック | `.tsx` |
+| `hooks/` | APIコール・状態更新フック（fetchData を使うもの） | `.ts` |
+| `utils/` | 汎用ユーティリティ | `.ts` |
+
+### .ts / .tsx の判断フロー
+- JSX を返す Provider / Component を定義する → `.tsx`
+- `createContext` で context を定義する（context 読み取りフックを同居させる）→ `.tsx`
+- テストファイルで JSX（wrapper など）を使う → `.test.tsx`
+- APIコール・状態更新のカスタムフック（hooks/ 配置）→ `.ts`
+- モデル・ユーティリティ → `.ts`
+
+### hooks/ への追加判断
+- `fetchData` を呼ぶカスタムフック → `hooks/*.ts`（APIコールをコンポーネントから分離）
+- 複数の context を組み合わせる操作フック → `hooks/*.ts`
