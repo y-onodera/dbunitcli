@@ -50,7 +50,7 @@
     {
       "name": "template",
       "attribute": {
-        "type": "DIR",
+        "type": "FILE",
         "required": false,
         "defaultPath": "PARAMETERIZE_TEMPLATE"
       },
