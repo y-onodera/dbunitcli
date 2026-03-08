@@ -9,7 +9,7 @@ import yo.dbunitcli.application.option.JdbcOption;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.JdbcSavePropertiesRequestDto;
-import yo.dbunitcli.sidecar.dto.JdbcTestRequestDto;
+import yo.dbunitcli.sidecar.dto.JdbcDto;
 import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<R
 
     @Post(uri = "save-properties", produces = MediaType.APPLICATION_JSON)
     public String saveProperties(@Body final JdbcSavePropertiesRequestDto body) throws IOException {
-        final JdbcTestRequestDto jdbc = body.getInput();
+        final JdbcDto jdbc = body.getInput();
         final JdbcOption option = new JdbcOption("jdbc",
                 jdbc.getProperties(),
                 jdbc.getUrl(),
@@ -43,7 +43,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<R
     }
 
     @Post(uri = "test", produces = MediaType.APPLICATION_JSON)
-    public String test(@Body final JdbcTestRequestDto body) {
+    public String test(@Body final JdbcDto body) {
         try {
             final JdbcOption option = new JdbcOption("jdbc",
                     body.getProperties(),
