@@ -14,7 +14,9 @@ import {
 } from "../../components/element/Input";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import { useJdbcConnectionTest } from "../../hooks/useJdbcConnectionTest";
+import { useJdbcSaveProperties } from "../../hooks/useJdbcSaveProperties";
 import type { CommandParam } from "../../model/CommandParam";
+import JdbcSavePropertiesDialog from "../settings/JdbcSavePropertiesDialog";
 import JdbcUrlBuilderDialog from "../settings/JdbcUrlBuilderDialog";
 import { FileChooser } from "./Chooser";
 
@@ -53,7 +55,10 @@ export default function JdbcFormSection({
 					onValueChange={handleJdbcValueChange}
 				/>
 			))}
-			<JdbcConnectionTestButton prefix={prefix} jdbcValues={jdbcValues} />
+			<div className="mt-2 flex items-center gap-3">
+				<JdbcConnectionTestButton prefix={prefix} jdbcValues={jdbcValues} />
+				<JdbcSavePropertiesButton prefix={prefix} jdbcValues={jdbcValues} />
+			</div>
 		</>
 	);
 }
@@ -188,7 +193,7 @@ function JdbcConnectionTestButton({
 	};
 
 	return (
-		<div className="mt-2 flex items-center gap-3">
+		<>
 			<BlueButton
 				title={testing ? "Connecting..." : "Connection Test"}
 				disabled={!isEnabled}
@@ -203,6 +208,43 @@ function JdbcConnectionTestButton({
 					{result.message}
 				</span>
 			)}
-		</div>
+		</>
+	);
+}
+
+function JdbcSavePropertiesButton({
+	prefix,
+	jdbcValues,
+}: {
+	prefix: string;
+	jdbcValues: Record<string, string>;
+}) {
+	const jdbcSaveProperties = useJdbcSaveProperties();
+	const [showDialog, setShowDialog] = useState(false);
+
+	const hasAnyValue =
+		!!jdbcValues.jdbcUrl ||
+		!!jdbcValues.jdbcUser ||
+		!!jdbcValues.jdbcPass;
+
+	return (
+		<>
+			<BlueButton
+				title="Save as Properties"
+				disabled={!hasAnyValue}
+				id={`${prefix}_jdbcSaveProperties`}
+				handleClick={() => setShowDialog(true)}
+			/>
+			{showDialog && (
+				<JdbcSavePropertiesDialog
+					jdbcValues={jdbcValues}
+					handleDialogClose={() => setShowDialog(false)}
+					handleSave={async (name) => {
+						await jdbcSaveProperties(name, jdbcValues);
+						setShowDialog(false);
+					}}
+				/>
+			)}
+		</>
 	);
 }

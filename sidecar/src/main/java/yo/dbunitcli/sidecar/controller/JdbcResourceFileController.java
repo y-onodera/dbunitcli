@@ -8,8 +8,11 @@ import jakarta.inject.Inject;
 import yo.dbunitcli.application.option.JdbcOption;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
+import yo.dbunitcli.sidecar.dto.JdbcSavePropertiesRequestDto;
 import yo.dbunitcli.sidecar.dto.JdbcTestRequestDto;
 import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
+
+import java.io.IOException;
 
 @Controller("jdbc")
 public class JdbcResourceFileController extends AbstractResourceFileController<ResourceSaveRequest<?>> {
@@ -22,6 +25,22 @@ public class JdbcResourceFileController extends AbstractResourceFileController<R
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().jdbc();
+    }
+
+    @Post(uri = "save-properties", produces = MediaType.APPLICATION_JSON)
+    public String saveProperties(@Body final JdbcSavePropertiesRequestDto body) throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        if (body.getUrl() != null && !body.getUrl().isEmpty()) {
+            sb.append("url=").append(body.getUrl()).append("\n");
+        }
+        if (body.getUser() != null && !body.getUser().isEmpty()) {
+            sb.append("user=").append(body.getUser()).append("\n");
+        }
+        if (body.getPass() != null && !body.getPass().isEmpty()) {
+            sb.append("pass=").append(body.getPass()).append("\n");
+        }
+        this.getResourceFile().update(body.getName(), sb.toString());
+        return this.currentFileList();
     }
 
     @Post(uri = "test", produces = MediaType.APPLICATION_JSON)
