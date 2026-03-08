@@ -53,7 +53,7 @@ public record JdbcOption(
         }
     }
 
-    private Properties loadJdbcTemplate() throws IOException {
+    public Properties loadJdbcTemplate() throws IOException {
         final Properties jdbcProp = new Properties();
         if (Strings.isNotEmpty(this.jdbcProperties)) {
             jdbcProp.load(new FileInputStream(FileResources.searchJdbc(this.jdbcProperties)));
