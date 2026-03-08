@@ -5,6 +5,7 @@ import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import jakarta.inject.Inject;
+import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.option.JdbcOption;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
@@ -13,6 +14,10 @@ import yo.dbunitcli.sidecar.dto.JdbcTestRequestDto;
 import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.Optional;
+import java.util.Properties;
 
 @Controller("jdbc")
 public class JdbcResourceFileController extends AbstractResourceFileController<ResourceSaveRequest<?>> {
@@ -29,25 +34,25 @@ public class JdbcResourceFileController extends AbstractResourceFileController<R
 
     @Post(uri = "save-properties", produces = MediaType.APPLICATION_JSON)
     public String saveProperties(@Body final JdbcSavePropertiesRequestDto body) throws IOException {
-        final java.util.Properties props = new java.util.Properties();
-        if (body.getProperties() != null && !body.getProperties().isEmpty()) {
-            final java.util.Optional<String> existing = this.getResourceFile().read(body.getProperties());
+        final Properties props = new Properties();
+        if (Strings.isNotEmpty(body.getProperties())) {
+            final Optional<String> existing = this.getResourceFile().read(body.getProperties());
             if (existing.isPresent()) {
-                props.load(new java.io.StringReader(existing.get()));
+                props.load(new StringReader(existing.get()));
             }
         }
-        if (body.getUrl() != null && !body.getUrl().isEmpty()) {
+        if (Strings.isNotEmpty(body.getUrl())) {
             props.setProperty("url", body.getUrl());
         }
-        if (body.getUser() != null && !body.getUser().isEmpty()) {
+        if (Strings.isNotEmpty(body.getUser())) {
             props.setProperty("user", body.getUser());
         }
-        if (body.getPass() != null && !body.getPass().isEmpty()) {
+        if (Strings.isNotEmpty(body.getPass())) {
             props.setProperty("pass", body.getPass());
         }
-        final StringBuilder sb = new StringBuilder();
-        props.forEach((k, v) -> sb.append(k).append("=").append(v).append("\n"));
-        this.getResourceFile().update(body.getName(), sb.toString());
+        final StringWriter sw = new StringWriter();
+        props.store(sw, null);
+        this.getResourceFile().update(body.getName(), sw.toString());
         return this.currentFileList();
     }
 

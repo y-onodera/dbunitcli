@@ -6,6 +6,15 @@ import { fetchData, handleFetchError } from "../utils/fetchUtils";
 
 type OperationResult = "success" | "failed";
 
+function toJdbcRequestBody(jdbcValues: Record<string, string>) {
+	return {
+		url: jdbcValues.jdbcUrl ?? "",
+		user: jdbcValues.jdbcUser ?? "",
+		pass: jdbcValues.jdbcPass ?? "",
+		properties: jdbcValues.jdbcProperties ?? "",
+	};
+}
+
 export const useJdbcConnectionTest = () => {
 	const { apiUrl } = useEnviroment();
 	return async (
@@ -16,12 +25,7 @@ export const useJdbcConnectionTest = () => {
 			options: {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					url: jdbcValues.jdbcUrl ?? "",
-					user: jdbcValues.jdbcUser ?? "",
-					pass: jdbcValues.jdbcPass ?? "",
-					properties: jdbcValues.jdbcProperties ?? "",
-				}),
+				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
 			},
 		};
 		try {
@@ -56,13 +60,7 @@ async function saveJdbcProperties(
 		options: {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				name,
-				url: jdbcValues.jdbcUrl ?? "",
-				user: jdbcValues.jdbcUser ?? "",
-				pass: jdbcValues.jdbcPass ?? "",
-				properties: jdbcValues.jdbcProperties ?? "",
-			}),
+			body: JSON.stringify({ name, ...toJdbcRequestBody(jdbcValues) }),
 		},
 	};
 
