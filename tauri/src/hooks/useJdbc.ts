@@ -50,7 +50,7 @@ function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 
 export const useJdbcReadContent = () => {
 	const { apiUrl } = useEnviroment();
-	return async (path: string): Promise<string> => {
+	return async (path: string): Promise<Record<string, string>> => {
 		const params = {
 			endpoint: `${apiUrl}jdbc/read-content`,
 			options: {
@@ -61,10 +61,10 @@ export const useJdbcReadContent = () => {
 		};
 		try {
 			const response = await fetchData(params);
-			return await response.text();
+			return (await response.json()) as Record<string, string>;
 		} catch (e) {
 			handleFetchError((e as Error).message, params);
-			return "";
+			return {};
 		}
 	};
 };

@@ -46,10 +46,12 @@ class JdbcResourceFileControllerTest {
     }
 
     @Test
-    void testReadContent() {
+    void testReadContent() throws IOException {
         final String response = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/jdbc/read-content", "sample.json")
+                .retrieve(HttpRequest.POST("dbunit-cli/jdbc/read-content", "sample.properties")
                         .contentType(MediaType.TEXT_PLAIN_TYPE));
-        assert response.contains("jdbc:postgresql://localhost:5433/test");
+        JsonTestHelper.assertJsonEquals(
+                Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/jdbc-read-content-response.json"),
+                response);
     }
 }
