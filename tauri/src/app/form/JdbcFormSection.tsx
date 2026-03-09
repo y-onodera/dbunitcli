@@ -52,7 +52,14 @@ export default function JdbcFormSection({
 
 	const handleApplyValues = useCallback(
 		(newValues: Partial<Record<string, string>>) => {
-			setJdbcValues((prev) => ({ ...prev, ...newValues }));
+			setJdbcValues((prev) => {
+				const defined = Object.fromEntries(
+					Object.entries(newValues).filter(
+						(entry): entry is [string, string] => entry[1] !== undefined,
+					),
+				);
+				return { ...prev, ...defined };
+			});
 		},
 		[],
 	);
