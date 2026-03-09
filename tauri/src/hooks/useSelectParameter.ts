@@ -1,5 +1,6 @@
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSelectParameter, useSetSelectParameterState } from "../context/SelectParameterProvider";
+import { useSetParameterList } from "../context/WorkspaceResourcesProvider";
 import {
 	type Parameter,
 	type ParameterizeParams,
@@ -121,6 +122,7 @@ export const useExecParameter = () => {
 
 export const useParameterizeFrom = () => {
 	const setParameter = useSetSelectParameterState();
+	const setParameterList = useSetParameterList();
 	const environment = useEnviroment();
 	return async (sourceCommand: string, name: string) => {
 		const fetchParams = {
@@ -135,6 +137,12 @@ export const useParameterizeFrom = () => {
 			.then((response) => response.json())
 			.then((parameter: ParameterizeParams) => {
 				setParameter(new SelectParameter(parameter, "parameterize", name));
+				setParameterList((current) => {
+					if (current.parameterize.includes(name)) {
+						return current;
+					}
+					return current.replace("parameterize", [...current.parameterize, name]);
+				});
 			})
 			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
 	};
