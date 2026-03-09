@@ -6,6 +6,7 @@ import {
 	type Running,
 	useExecParameter,
 	useSaveParameter,
+	useSaveShell,
 } from "../../hooks/useSelectParameter";
 import ResultDialog from "./ResultDialog";
 
@@ -23,6 +24,7 @@ export default function Footer(prop: {
 	const parameter = useSelectParameter();
 	const saveParameter = useSaveParameter();
 	const execParameter = useExecParameter();
+	const saveShell = useSaveShell();
 	const openDirectory = async (path: string) => {
 		await core.invoke("open_directory", { path });
 	};
@@ -35,6 +37,9 @@ export default function Footer(prop: {
 		throw new Promise(() =>
 			saveParameter(prop.formData(false).values, setRunning),
 		);
+	}
+	if (running.command === "saveShell") {
+		throw new Promise(() => saveShell(setRunning));
 	}
 	return (
 		<>
@@ -59,9 +64,9 @@ export default function Footer(prop: {
 			</ResultDialog>
 			{parameter.command && (
 				<div
-					className="fixed bottom-0 right-1 
+					className="fixed bottom-0 right-1
                                 w-full z-50
-								bg-gray-100 
+								bg-gray-100
                                 flex items-center justify-end p-4 gap-2"
 				>
 					<BlueButton
@@ -82,6 +87,16 @@ export default function Footer(prop: {
 						handleClick={() => {
 							setRunning({
 								command: "save",
+								resultMessage: "",
+								resultDir: "",
+							});
+						}}
+					/>
+					<BlueButton
+						title="Save Shell"
+						handleClick={() => {
+							setRunning({
+								command: "saveShell",
 								resultMessage: "",
 								resultDir: "",
 							});
