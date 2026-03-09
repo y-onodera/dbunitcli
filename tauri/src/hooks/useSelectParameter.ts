@@ -138,7 +138,9 @@ export const useParameterizeFrom = () => {
 			.then((parameter: ParameterizeParams) => {
 				setParameter(new SelectParameter(parameter, "parameterize", name));
 				setParameterList((current) => {
-					if (current.parameterize.includes(name)) return current;
+					if (current.parameterize.includes(name)) {
+						return current;
+					}
 					return current.replace("parameterize", [...current.parameterize, name]);
 				});
 			})
