@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import yo.dbunitcli.dataset.converter.DBConverter;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.File;
@@ -8,7 +7,7 @@ import java.io.File;
 public record DataSetConverterParam(
         DatabaseConnectionLoader databaseConnectionLoader
         , ResultType resultType
-        , DBConverter.Operation operation
+        , DbOperation operation
         , File resultDir
         , String fileName
         , String outputEncoding
@@ -36,7 +35,7 @@ public record DataSetConverterParam(
     public static class Builder {
         private DatabaseConnectionLoader databaseConnectionLoader;
         private ResultType resultType;
-        private DBConverter.Operation operation;
+        private DbOperation operation;
         private File resultDir;
         private String outputEncoding;
         private String excelTable;
@@ -66,11 +65,11 @@ public record DataSetConverterParam(
             return this;
         }
 
-        public DBConverter.Operation getOperation() {
+        public DbOperation getOperation() {
             return this.operation;
         }
 
-        public Builder setOperation(final DBConverter.Operation operation) {
+        public Builder setOperation(final DbOperation operation) {
             this.operation = operation;
             return this;
         }

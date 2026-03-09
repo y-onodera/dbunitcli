@@ -2,8 +2,8 @@ package yo.dbunitcli.application.dto;
 
 import picocli.CommandLine;
 import yo.dbunitcli.application.CompositeDto;
+import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.ResultType;
-import yo.dbunitcli.dataset.converter.DBConverter;
 
 import java.util.stream.Stream;
 
@@ -17,7 +17,7 @@ public class DataSetConverterDto implements CompositeDto {
     @CommandLine.Option(names = "-resultPath", description = "result file relative path from -result=dir.")
     private String resultPath;
     @CommandLine.Option(names = "-op", description = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
-    private DBConverter.Operation operation;
+    private DbOperation operation;
     @CommandLine.Option(names = "-exportHeader", description = "if true then export file has no header row ")
     private String exportHeader;
     @CommandLine.Option(names = "-outputEncoding", description = "output csv file encoding")
@@ -64,11 +64,11 @@ public class DataSetConverterDto implements CompositeDto {
         this.resultPath = resultPath;
     }
 
-    public DBConverter.Operation getOperation() {
+    public DbOperation getOperation() {
         return this.operation;
     }
 
-    public void setOperation(final DBConverter.Operation operation) {
+    public void setOperation(final DbOperation operation) {
         this.operation = operation;
     }
 
