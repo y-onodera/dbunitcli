@@ -48,6 +48,27 @@ function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 	};
 }
 
+export const useJdbcReadContent = () => {
+	const { apiUrl } = useEnviroment();
+	return async (path: string): Promise<string> => {
+		const params = {
+			endpoint: `${apiUrl}jdbc/read-content`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "text/plain" },
+				body: path,
+			},
+		};
+		try {
+			const response = await fetchData(params);
+			return await response.text();
+		} catch (e) {
+			handleFetchError((e as Error).message, params);
+			return "";
+		}
+	};
+};
+
 export const useJdbcConnectionTest = () => {
 	const { apiUrl } = useEnviroment();
 	return async (

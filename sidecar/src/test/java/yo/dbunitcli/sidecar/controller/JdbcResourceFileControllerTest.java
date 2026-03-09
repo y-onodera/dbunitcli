@@ -44,4 +44,12 @@ class JdbcResourceFileControllerTest {
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/jdbc-load-response.json"),
                 response);
     }
+
+    @Test
+    void testReadContent() {
+        final String response = this.client.toBlocking()
+                .retrieve(HttpRequest.POST("dbunit-cli/jdbc/read-content", "sample.json")
+                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+        assert response.contains("jdbc:postgresql://localhost:5433/test");
+    }
 }

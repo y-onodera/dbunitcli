@@ -12,8 +12,11 @@ import yo.dbunitcli.sidecar.dto.JdbcSavePropertiesRequestDto;
 import yo.dbunitcli.sidecar.dto.JdbcDto;
 import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 @Controller("jdbc")
 public class JdbcResourceFileController extends AbstractResourceFileController<ResourceSaveRequest<?>> {
@@ -40,6 +43,18 @@ public class JdbcResourceFileController extends AbstractResourceFileController<R
         option.loadJdbcTemplate().store(sw, null);
         this.getResourceFile().update(body.getName(), sw.toString());
         return this.currentFileList();
+    }
+
+    @Post(uri = "read-content", consumes = MediaType.TEXT_PLAIN, produces = MediaType.TEXT_PLAIN)
+    public String readContent(@Body final String path) throws IOException {
+        final File file = new File(path);
+        if (file.isAbsolute()) {
+            if (!file.exists()) {
+                return "";
+            }
+            return Files.readString(file.toPath(), StandardCharsets.UTF_8);
+        }
+        return this.getResourceFile().read(path).orElse("");
     }
 
     @Post(uri = "test", produces = MediaType.APPLICATION_JSON)
