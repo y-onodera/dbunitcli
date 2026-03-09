@@ -19,6 +19,7 @@ import {
 import DatasetSettingEditButton, {
 	RemoveDatasetSettingButton,
 } from "../settings/DatasetSettingEditButton";
+import JdbcTableSelectorButton from "../settings/JdbcTableSelectorButton";
 import SqlEditorButton, {
 	RemoveSqlEditorButton,
 } from "../settings/SqlEditorButton";
@@ -27,6 +28,7 @@ import XlsxSchemaEditButton, {
 } from "../settings/XlsxSchemaEditButton";
 import { DirectoryChooser, FileChooser } from "./Chooser";
 import type { FileProp, Prop, SelectProp } from "./FormElementProp";
+import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import JdbcFormSection, { JDBC_FIELD_NAMES } from "./JdbcFormSection";
 
 export default function CommandFormElements(
@@ -204,6 +206,7 @@ function DropDownMenu({
 	srcType,
 }: FileProp & { srcType?: string; datasources?: string[] }) {
 	const [showMenu, setShowMenu] = useState(false);
+	const { connectionOk } = useJdbcConnectionState();
 	const buttonRef = useRef<HTMLDivElement>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
 	const [menuPosition, setMenuPosition] = useState<"right" | "left">("right");
@@ -275,6 +278,14 @@ function DropDownMenu({
 										path={path}
 										setPath={setPath}
 									/>
+								</li>
+							)}
+						{element.name === "src" &&
+							!hidden &&
+							srcType === "table" &&
+							connectionOk && (
+								<li>
+									<JdbcTableSelectorButton path={path} setPath={setPath} />
 								</li>
 							)}
 						{element.attribute.type.includes("FILE") && (

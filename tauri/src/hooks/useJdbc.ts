@@ -69,6 +69,27 @@ export const useJdbcReadContent = () => {
 	};
 };
 
+export const useJdbcTables = () => {
+	const { apiUrl } = useEnviroment();
+	return async (jdbcValues: Record<string, string>): Promise<string[]> => {
+		const params = {
+			endpoint: `${apiUrl}jdbc/tables`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
+			},
+		};
+		try {
+			const response = await fetchData(params);
+			return (await response.json()) as string[];
+		} catch (e) {
+			handleFetchError((e as Error).message, params);
+			return [];
+		}
+	};
+};
+
 export const useJdbcConnectionTest = () => {
 	const { apiUrl } = useEnviroment();
 	return async (

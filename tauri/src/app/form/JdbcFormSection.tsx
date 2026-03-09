@@ -11,6 +11,7 @@ import {
 	InputLabel,
 	ResourceDatalist,
 } from "../../components/element/Input";
+import { useSetJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import {
 	useDeleteJdbcProperties,
@@ -38,6 +39,7 @@ export default function JdbcFormSection({
 	prefix: string;
 	elements: CommandParam[];
 }) {
+	const setJdbcConnection = useSetJdbcConnectionState();
 	const [jdbcValues, setJdbcValues] = useState<Record<string, string>>(() => {
 		const initial: Record<string, string> = {};
 		for (const el of elements) {
@@ -46,9 +48,13 @@ export default function JdbcFormSection({
 		return initial;
 	});
 
-	const handleJdbcValueChange = useCallback((name: string, value: string) => {
-		setJdbcValues((prev) => ({ ...prev, [name]: value }));
-	}, []);
+	const handleJdbcValueChange = useCallback(
+		(name: string, value: string) => {
+			setJdbcValues((prev) => ({ ...prev, [name]: value }));
+			setJdbcConnection({ jdbcValues: {}, connectionOk: false });
+		},
+		[setJdbcConnection],
+	);
 
 	const handleApplyValues = useCallback(
 		(newValues: Partial<Record<string, string>>) => {
@@ -60,9 +66,21 @@ export default function JdbcFormSection({
 				);
 				return { ...prev, ...defined };
 			});
+			setJdbcConnection({ jdbcValues: {}, connectionOk: false });
 		},
-		[],
+		[setJdbcConnection],
 	);
+
+	const handleConnectionOk = useCallback(
+		(values: Record<string, string>) => {
+			setJdbcConnection({ jdbcValues: values, connectionOk: true });
+		},
+		[setJdbcConnection],
+	);
+
+	const handleConnectionFail = useCallback(() => {
+		setJdbcConnection({ jdbcValues: {}, connectionOk: false });
+	}, [setJdbcConnection]);
 
 	return (
 		<>
@@ -79,7 +97,12 @@ export default function JdbcFormSection({
 				/>
 			))}
 			<div className="mt-2 flex items-center gap-3">
-				<JdbcConnectionTestButton prefix={prefix} jdbcValues={jdbcValues} />
+				<JdbcConnectionTestButton
+					prefix={prefix}
+					jdbcValues={jdbcValues}
+					onConnectionOk={handleConnectionOk}
+					onConnectionFail={handleConnectionFail}
+				/>
 				<JdbcSavePropertiesButton prefix={prefix} jdbcValues={jdbcValues} />
 			</div>
 		</>
@@ -242,9 +265,13 @@ function JdbcUrlBuilderButton({
 function JdbcConnectionTestButton({
 	prefix,
 	jdbcValues,
+	onConnectionOk,
+	onConnectionFail,
 }: {
 	prefix: string;
 	jdbcValues: Record<string, string>;
+	onConnectionOk: (values: Record<string, string>) => void;
+	onConnectionFail: () => void;
 }) {
 	const jdbcConnectionTest = useJdbcConnectionTest();
 	const [result, setResult] = useState<{
@@ -262,7 +289,13 @@ function JdbcConnectionTestButton({
 		setTesting(true);
 		setResult(null);
 		try {
-			setResult(await jdbcConnectionTest(jdbcValues));
+			const testResult = await jdbcConnectionTest(jdbcValues);
+			setResult(testResult);
+			if (testResult?.success) {
+				onConnectionOk(jdbcValues);
+			} else {
+				onConnectionFail();
+			}
 		} finally {
 			setTesting(false);
 		}
