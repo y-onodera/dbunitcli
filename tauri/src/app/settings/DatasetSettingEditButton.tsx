@@ -17,7 +17,7 @@ export default function DatasetSettingEditButton({
      * @param closeDialog ダイアログを閉じるためのコールバック
      */
     const renderDialog = (open: boolean, closeDialog: () => void) => {
-        if (!open) return null;
+        if (!open) { return null; }
         return (
             <DatasetSettingsDialog
                 fileName={path}

@@ -48,7 +48,7 @@ export function RemoveResource({ deleteResource, path, setPath }: RemoveResource
 
     const handleRemove = async () => {
         const confirmed = await window.confirm(`${path}を削除してもよろしいですか？`);
-        if (!confirmed) return;
+        if (!confirmed) { return; }
 
         try {
             const result = await deleteResource(path);

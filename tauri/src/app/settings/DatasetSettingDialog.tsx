@@ -1,3 +1,4 @@
+import type React from "react";
 import { useState } from "react";
 import { Arrays, Check, Fieldset, KeyValues, Select, SettingDialog, Text } from "../../components/dialog/SettingDialog";
 import { ExpandButton } from "../../components/element/ButtonIcon";
@@ -23,50 +24,7 @@ export default function DatasetSettingDaialog(props: {
                     <option value="innerJoin">innerJoin</option>
                     <option value="fullJoin">fullJoin</option>
                 </Select>
-                {target.join()
-                    ?
-                    <>
-                        <Text name="left" value={target.join()?.left ?? ""}
-                            handleChange={newVal => setTarget(cur => cur.replaceJoin({ left: newVal.target.value }))}
-                        />
-                        <Text name="right" value={target.join()?.right ?? ""}
-                            handleChange={newVal => setTarget(cur => cur.replaceJoin({ right: newVal.target.value }))}
-                        />
-                        <Select name="condition" defaultValue={target.join()?.on ? "on" : "column"}
-                            handleOnChange={async (select) => setTarget(cur => cur.replaceJoin({ [select]: select === "on" ? "" : [] }))}
-                        >
-                            <option value="on">on</option>
-                            <option value="column">column</option>
-                        </Select>
-                        {target.join()?.on
-                            ?
-                            <Text name="on" ignoreLabel={true} value={target.join()?.on ?? ""}
-                                handleChange={newVal => setTarget(cur => cur.replaceJoin({ on: newVal.target.value }))}
-                            />
-                            :
-                            <Arrays name="column" ignoreLabel={true} values={target.join()?.column ?? []}
-                                handleChange={(text, index) => setTarget(cur => cur.replaceJoinColumn(text, index))}
-                                handleRemove={(index) => setTarget(cur => cur.removeJoinColumn(index))}
-                            />
-                        }
-                    </>
-                    : target.pattern
-                        ?
-                        <>
-                            <Text name="pattern" ignoreLabel={true} value={target.pattern?.string ?? ""}
-                                handleChange={(text) => setTarget(cur => cur.replacePattern({ string: text.target.value }))}
-                            />
-                            <Arrays name="patternExclue" values={target.pattern?.exclude ?? []}
-                                handleChange={(text, index) => setTarget(cur => cur.replacePatternExclude(text, index))}
-                                handleRemove={(index) => setTarget(cur => cur.removePatternExclude(index))}
-                            />
-                        </>
-                        :
-                        <Arrays name="name" values={target.name ?? []}
-                            handleChange={(text, index) => setTarget(cur => cur.replaceName(text, index))}
-                            handleRemove={(index) => setTarget(cur => cur.removeName(index))}
-                        />
-                }
+                {renderTargetContent(target, setTarget)}
             </Fieldset>
             <Fieldset>
                 <Check name="split"
@@ -157,5 +115,58 @@ export default function DatasetSettingDaialog(props: {
                 />
             </Fieldset>
         </SettingDialog>
+    );
+}
+
+function renderTargetContent(
+    target: DatasetSetting,
+    setTarget: React.Dispatch<React.SetStateAction<DatasetSetting>>,
+): React.ReactElement {
+    if (target.join()) {
+        return (
+            <>
+                <Text name="left" value={target.join()?.left ?? ""}
+                    handleChange={newVal => setTarget(cur => cur.replaceJoin({ left: newVal.target.value }))}
+                />
+                <Text name="right" value={target.join()?.right ?? ""}
+                    handleChange={newVal => setTarget(cur => cur.replaceJoin({ right: newVal.target.value }))}
+                />
+                <Select name="condition" defaultValue={target.join()?.on ? "on" : "column"}
+                    handleOnChange={async (select) => setTarget(cur => cur.replaceJoin({ [select]: select === "on" ? "" : [] }))}
+                >
+                    <option value="on">on</option>
+                    <option value="column">column</option>
+                </Select>
+                {target.join()?.on ? (
+                    <Text name="on" ignoreLabel={true} value={target.join()?.on ?? ""}
+                        handleChange={newVal => setTarget(cur => cur.replaceJoin({ on: newVal.target.value }))}
+                    />
+                ) : (
+                    <Arrays name="column" ignoreLabel={true} values={target.join()?.column ?? []}
+                        handleChange={(text, index) => setTarget(cur => cur.replaceJoinColumn(text, index))}
+                        handleRemove={(index) => setTarget(cur => cur.removeJoinColumn(index))}
+                    />
+                )}
+            </>
+        );
+    }
+    if (target.pattern) {
+        return (
+            <>
+                <Text name="pattern" ignoreLabel={true} value={target.pattern?.string ?? ""}
+                    handleChange={(text) => setTarget(cur => cur.replacePattern({ string: text.target.value }))}
+                />
+                <Arrays name="patternExclue" values={target.pattern?.exclude ?? []}
+                    handleChange={(text, index) => setTarget(cur => cur.replacePatternExclude(text, index))}
+                    handleRemove={(index) => setTarget(cur => cur.removePatternExclude(index))}
+                />
+            </>
+        );
+    }
+    return (
+        <Arrays name="name" values={target.name ?? []}
+            handleChange={(text, index) => setTarget(cur => cur.replaceName(text, index))}
+            handleRemove={(index) => setTarget(cur => cur.removeName(index))}
+        />
     );
 }

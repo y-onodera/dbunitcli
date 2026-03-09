@@ -18,7 +18,7 @@ export default function XlsxSchemaEditButton({
      * @returns JSX.Element | null
      */
     const renderDialog = (open: boolean, closeDialog: () => void) => {
-        if (!open) return null;
+        if (!open) { return null; }
         return (
             <XlsxSchemaDialog
                 fileName={path}

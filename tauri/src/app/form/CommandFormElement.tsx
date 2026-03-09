@@ -1,3 +1,4 @@
+import type React from "react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { ButtonWithIcon } from "../../components/element/Button";
 import { ExpandButton } from "../../components/element/ButtonIcon";
@@ -50,7 +51,7 @@ export default function CommandFormElements(
 				const isJdbcField = JDBC_FIELD_NAMES.includes(
 					element.name as (typeof JDBC_FIELD_NAMES)[number],
 				);
-				if (isJdbcField) return null;
+				if (isJdbcField) { return null; }
 				if (element.attribute.type === "FLG") {
 					return (
 						<Fragment key={prop.name + prop.prefix + element.name}>
@@ -177,17 +178,7 @@ function Text(prop: Prop) {
 				<div className="flex">
 					{isValueInDatalist &&
 						!prop.hidden &&
-						(prop.element.name === "setting" ? (
-							<RemoveDatasetSettingButton path={path} setPath={setPath} />
-						) : prop.element.name === "xlsxSchema" ? (
-							<RemoveXlsxSchemaButton path={path} setPath={setPath} />
-						) : srcType === "sql" || srcType === "table" ? (
-							<RemoveSqlEditorButton
-								path={path}
-								setPath={setPath}
-								type={srcType as QueryDatasourceType}
-							/>
-						) : null)}
+						renderRemoveButton(prop.element.name, path, setPath, srcType)}
 					{showDopDownMenu && !prop.hidden && (
 						<DropDownMenu
 							prefix={prop.prefix}
@@ -383,4 +374,27 @@ function getId(prefix: string, name: string): string {
 }
 function getName(prefix: string, name: string): string {
 	return prefix ? `-${prefix}.${name}` : `-${name}`;
+}
+function renderRemoveButton(
+	elementName: string,
+	path: string,
+	setPath: (path: string) => void,
+	srcType?: string,
+): React.ReactElement | null {
+	if (elementName === "setting") {
+		return <RemoveDatasetSettingButton path={path} setPath={setPath} />;
+	}
+	if (elementName === "xlsxSchema") {
+		return <RemoveXlsxSchemaButton path={path} setPath={setPath} />;
+	}
+	if (srcType === "sql" || srcType === "table") {
+		return (
+			<RemoveSqlEditorButton
+				path={path}
+				setPath={setPath}
+				type={srcType as QueryDatasourceType}
+			/>
+		);
+	}
+	return null;
 }
