@@ -9,7 +9,7 @@
   "resources": {
     "datasetSettings": ["test.json"],
     "xlsxSchemas": ["schema.json"],
-    "jdbcFiles": ["sample.json"],
+    "jdbcFiles": ["sample.properties"],
     "templateFiles": ["sample.json"],
     "queryFiles": {
       "csvq": [],
