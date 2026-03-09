@@ -6,6 +6,8 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.option.JdbcOption;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
@@ -19,6 +21,8 @@ import java.util.LinkedHashMap;
 
 @Controller("jdbc")
 public class JdbcResourceFileController extends AbstractResourceFileController<ResourceSaveRequest<?>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcResourceFileController.class);
 
     @Inject
     public JdbcResourceFileController(final Workspace workspace) {
