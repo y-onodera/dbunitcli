@@ -15,6 +15,8 @@ import yo.dbunitcli.sidecar.dto.JdbcSavePropertiesRequestDto;
 import yo.dbunitcli.sidecar.dto.JdbcDto;
 import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
 
+import org.dbunit.database.IDatabaseConnection;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.LinkedHashMap;
@@ -60,6 +62,32 @@ public class JdbcResourceFileController extends AbstractResourceFileController<R
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             return "{}";
+        }
+    }
+
+    @Post(uri = "tables", produces = MediaType.APPLICATION_JSON)
+    public String tables(@Body final JdbcDto body) {
+        IDatabaseConnection conn = null;
+        try {
+            final JdbcOption option = new JdbcOption("jdbc",
+                    body.getProperties(),
+                    body.getUrl(),
+                    body.getUser(),
+                    body.getPass());
+            conn = option.getDatabaseConnectionLoader().loadConnection();
+            final String[] tableNames = conn.createDataSet().getTableNames();
+            return ObjectMapper.getDefault().writeValueAsString(tableNames);
+        } catch (final Throwable e) {
+            LOGGER.error("Failed to get table list", e);
+            return "[]";
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.getConnection().close();
+                } catch (final Exception ex) {
+                    LOGGER.error("Failed to close connection", ex);
+                }
+            }
         }
     }
 
