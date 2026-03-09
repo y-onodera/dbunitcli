@@ -120,6 +120,34 @@ export const useExecParameter = () => {
 	};
 };
 
+export const useSaveShell = () => {
+	const parameter = useSelectParameter();
+	const environment = useEnviroment();
+	return async (handleResult: (result: Running) => void) => {
+		const fetchParams = {
+			endpoint: `${environment.apiUrl + parameter.command}/shell`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name: parameter.name }),
+			},
+		};
+		await fetchData(fetchParams)
+			.then((response) => response.text())
+			.then((resultDir: string) =>
+				handleResult({
+					command: "",
+					resultMessage: "Save Shell Success",
+					resultDir,
+				}),
+			)
+			.catch((ex) => {
+				handleFetchError((ex as Error).message, fetchParams);
+				handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
+			});
+	};
+};
+
 export const useParameterizeFrom = () => {
 	const setParameter = useSetSelectParameterState();
 	const setParameterList = useSetParameterList();
