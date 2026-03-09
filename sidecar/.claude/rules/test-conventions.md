@@ -18,3 +18,21 @@
 - 期待値 JSON を `src/test/resources/yo/dbunitcli/sidecar/controller/` に格納
 - `normalizeJson`（空白・改行除去）で正規化してから `assertEquals` で全フィールドを比較
 - ファイル作成を伴うテストは `Files.exists()` で副作用も検証
+
+## コード変更時のcontrollerテスト更新ルール
+
+### 基底クラスを変更したとき
+`AbstractCommandController` または `AbstractResourceFileController` を変更したら、
+それを継承する全コントローラーのテストが影響を受ける前提で確認する。
+
+### レスポンス構造を変更したとき
+コントローラーのレスポンスJSON構造が変わったら（フィールド追加・削除・型変更を含む）、
+`src/test/resources/yo/dbunitcli/sidecar/controller/` 配下の対応する期待値JSONファイルを更新する。
+
+### DTOのフィールドを変更したとき
+リクエスト/レスポンス用DTOのフィールドを変更したら、そのDTOを使うコントローラーテストを確認する。
+リクエストボディの形式が変わるとデシリアライズが失敗するため、テスト内のリクエストJSONも合わせて更新する。
+
+### `@Controller` のパスを変更したとき
+コントローラークラスの `@Controller` アノテーションのパスを変更したら、
+テスト内のHTTPリクエストURLを合わせて更新する。
