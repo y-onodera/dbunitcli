@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset.filter;
+package yo.dbunitcli.common.filter;
 
 import yo.dbunitcli.common.TableMetaDataFilter;
 

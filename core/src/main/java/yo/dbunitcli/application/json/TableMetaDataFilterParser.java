@@ -5,7 +5,7 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import yo.dbunitcli.common.TableMetaDataFilter;
-import yo.dbunitcli.dataset.filter.*;
+import yo.dbunitcli.common.filter.*;
 
 import java.util.ArrayList;
 import java.util.List;
