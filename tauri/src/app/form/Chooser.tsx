@@ -13,13 +13,17 @@ export function FileChooser(prop: FileProp) {
 	const context = useWorkspaceContext();
 	const handleFileChooserClick = () => {
 		const getDefaultPath = async (): Promise<string> => {
-			return (await isAbsolute(prop.path))
-				? prop.path
-				: prop.path
-					? getPath(context, prop.element.attribute, prop.srcType) +
-						sep() +
-						prop.path
-					: getPath(context, prop.element.attribute, prop.srcType);
+			if (await isAbsolute(prop.path)) {
+				return prop.path;
+			}
+			if (prop.path) {
+				return (
+					getPath(context, prop.element.attribute, prop.srcType) +
+					sep() +
+					prop.path
+				);
+			}
+			return getPath(context, prop.element.attribute, prop.srcType);
 		};
 		getDefaultPath().then((defaultPath) =>
 			open({ defaultPath }).then((files) => {
@@ -41,13 +45,17 @@ export function DirectoryChooser(prop: FileProp) {
 	const context = useWorkspaceContext();
 	const handleDirectoryChooserClick = () => {
 		const getDefaultPath = async (): Promise<string> => {
-			return (await isAbsolute(prop.path))
-				? prop.path
-				: prop.path
-					? getPath(context, prop.element.attribute, prop.srcType) +
-						sep() +
-						prop.path
-					: getPath(context, prop.element.attribute, prop.srcType);
+			if (await isAbsolute(prop.path)) {
+				return prop.path;
+			}
+			if (prop.path) {
+				return (
+					getPath(context, prop.element.attribute, prop.srcType) +
+					sep() +
+					prop.path
+				);
+			}
+			return getPath(context, prop.element.attribute, prop.srcType);
 		};
 		getDefaultPath().then((defaultPath) =>
 			open({ defaultPath, directory: true }).then((files) => {

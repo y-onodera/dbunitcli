@@ -154,16 +154,8 @@ export class DatasetSetting {
 		this.number = builder.number ?? {};
 		this.boolean = builder.boolean ?? {};
 		this.function = builder.function ?? {};
-		this.name = builder.name
-			? typeof builder.name === "string"
-				? [builder.name]
-				: builder.name
-			: undefined;
-		this.pattern = builder.pattern
-			? typeof builder.pattern === "string"
-				? ({ string: builder.pattern } as Pattern)
-				: builder.pattern
-			: undefined;
+		this.name = toNameArray(builder.name);
+		this.pattern = toPattern(builder.pattern);
 		this.innerJoin = builder.innerJoin;
 		this.outerJoin = builder.outerJoin;
 		this.fullJoin = builder.fullJoin;
@@ -184,20 +176,22 @@ export class DatasetSetting {
 					: this.join();
 			return this.replaceTarget({ [newTarget]: value });
 		}
-		const value =
-			newTarget === "name"
-				? (this.pattern?.string ?? [""])
-				: newTarget === "pattern"
-					? this.name
-						? this.name[0]
-						: ""
-					: {
-							left: this.name
-								? this.name[0]
-								: this.pattern
-									? this.pattern.string
-									: "",
-						};
+		let value: string | string[] | { left: string };
+		if (newTarget === "name") {
+			value = this.pattern?.string ?? [""];
+		} else if (newTarget === "pattern") {
+			value = this.name ? this.name[0] : "";
+		} else {
+			let left: string;
+			if (this.name) {
+				left = this.name[0];
+			} else if (this.pattern) {
+				left = this.pattern.string;
+			} else {
+				left = "";
+			}
+			value = { left };
+		}
 		return this.replaceTarget({ [newTarget]: value });
 	}
 
@@ -253,16 +247,8 @@ export class DatasetSetting {
 
 	replaceTarget(builder: DatasetSettingBuilder): DatasetSetting {
 		return this.with({
-			name: builder.name
-				? typeof builder.name === "string"
-					? [builder.name]
-					: builder.name
-				: undefined,
-			pattern: builder.pattern
-				? typeof builder.pattern === "string"
-					? ({ string: builder.pattern } as Pattern)
-					: builder.pattern
-				: undefined,
+			name: toNameArray(builder.name),
+			pattern: toPattern(builder.pattern),
 			innerJoin: builder.innerJoin,
 			outerJoin: builder.outerJoin,
 			fullJoin: builder.fullJoin,
@@ -270,14 +256,9 @@ export class DatasetSetting {
 	}
 
 	withSplit(isSplit: boolean): DatasetSetting {
-		return this.with({
-			tableName: isSplit ? undefined : this.split ? this.split.tableName : "",
-			split: isSplit
-				? this.tableName
-					? { tableName: this.tableName }
-					: { tableName: "" }
-				: undefined,
-		});
+		const tableName = isSplit ? undefined : (this.split?.tableName ?? "");
+		const split = isSplit ? { tableName: this.tableName ?? "" } : undefined;
+		return this.with({ tableName, split });
 	}
 
 	replaceSplit(newVal: Split): DatasetSetting {
@@ -428,17 +409,12 @@ export class DatasetSetting {
 	}
 
 	handler(): string {
-		return this.pattern
-			? "pattern"
-			: this.innerJoin
-				? "innerJoin"
-				: this.outerJoin
-					? "outerJoin"
-					: this.fullJoin
-						? "fullJoin"
-						: this.name
-							? "name"
-							: "";
+		if (this.pattern) { return "pattern"; }
+		if (this.innerJoin) { return "innerJoin"; }
+		if (this.outerJoin) { return "outerJoin"; }
+		if (this.fullJoin) { return "fullJoin"; }
+		if (this.name) { return "name"; }
+		return "";
 	}
 
 	join(): TableJoin | undefined {
@@ -516,4 +492,12 @@ function removeObject(src: object, index: number): object {
 }
 export function newDatasetSetting(): DatasetSetting {
 	return new DatasetSetting({} as DatasetSettingBuilder);
+}
+function toNameArray(name: string | string[] | undefined): string[] | undefined {
+	if (!name) { return undefined; }
+	return typeof name === "string" ? [name] : name;
+}
+function toPattern(pattern: string | Pattern | undefined): Pattern | undefined {
+	if (!pattern) { return undefined; }
+	return typeof pattern === "string" ? ({ string: pattern } as Pattern) : pattern;
 }

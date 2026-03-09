@@ -49,7 +49,7 @@ export default function JdbcUrlBuilderDialog({
 		<SettingDialog
 			setting={builtUrl}
 			handleDialogClose={handleDialogClose}
-			handleCommit={(url) => { if (url) handleSave(url); }}
+			handleCommit={(url) => { if (url) { handleSave(url);  }}}
 			commitLabel="Apply"
 		>
 			<div className="w-[480px]">

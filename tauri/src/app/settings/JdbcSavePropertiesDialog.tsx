@@ -24,7 +24,7 @@ export default function JdbcSavePropertiesDialog({
 			setting={name}
 			handleDialogClose={handleDialogClose}
 			handleCommit={(fileName) => {
-				if (fileName) handleSave(fileName);
+				if (fileName) { handleSave(fileName); }
 			}}
 			commitLabel="Save"
 		>
