@@ -4,6 +4,7 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.serde.ObjectMapper;
 import jakarta.inject.Inject;
 import yo.dbunitcli.application.option.JdbcOption;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
@@ -14,6 +15,7 @@ import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.LinkedHashMap;
 
 @Controller("jdbc")
 public class JdbcResourceFileController extends AbstractResourceFileController<ResourceSaveRequest<?>> {
@@ -40,6 +42,21 @@ public class JdbcResourceFileController extends AbstractResourceFileController<R
         option.loadJdbcTemplate().store(sw, null);
         this.getResourceFile().update(body.getName(), sw.toString());
         return this.currentFileList();
+    }
+
+    @Post(uri = "read-content", consumes = MediaType.TEXT_PLAIN, produces = MediaType.APPLICATION_JSON)
+    public String readContent(@Body final String path) {
+        try {
+            final java.util.Properties props = new JdbcOption("jdbc", path, null, null, null).loadJdbcTemplate();
+            final LinkedHashMap<String, String> map = new LinkedHashMap<>();
+            for (final String key : props.stringPropertyNames()) {
+                map.put(key, props.getProperty(key));
+            }
+            return ObjectMapper.getDefault().writeValueAsString(map);
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            return "{}";
+        }
     }
 
     @Post(uri = "test", produces = MediaType.APPLICATION_JSON)

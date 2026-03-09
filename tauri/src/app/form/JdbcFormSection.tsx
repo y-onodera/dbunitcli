@@ -2,11 +2,10 @@ import {
 	type Dispatch,
 	type SetStateAction,
 	useCallback,
-	useEffect,
 	useState,
 } from "react";
 import { BlueButton, ButtonWithIcon } from "../../components/element/Button";
-import { SettingIcon } from "../../components/element/Icon";
+import { FileIcon, SettingIcon } from "../../components/element/Icon";
 import {
 	ControllTextBox,
 	InputLabel,
@@ -19,6 +18,7 @@ import {
 	useJdbcSaveProperties,
 } from "../../hooks/useJdbc";
 import type { CommandParam } from "../../model/CommandParam";
+import JdbcPropertiesPreviewDialog from "../settings/JdbcPropertiesPreviewDialog";
 import JdbcSavePropertiesDialog from "../settings/JdbcSavePropertiesDialog";
 import JdbcUrlBuilderDialog from "../settings/JdbcUrlBuilderDialog";
 import { RemoveResource } from "../settings/ResourceEditButton";
@@ -45,9 +45,17 @@ export default function JdbcFormSection({
 		}
 		return initial;
 	});
+
 	const handleJdbcValueChange = useCallback((name: string, value: string) => {
 		setJdbcValues((prev) => ({ ...prev, [name]: value }));
 	}, []);
+
+	const handleApplyValues = useCallback(
+		(newValues: Partial<Record<string, string>>) => {
+			setJdbcValues((prev) => ({ ...prev, ...newValues }));
+		},
+		[],
+	);
 
 	return (
 		<>
@@ -56,7 +64,11 @@ export default function JdbcFormSection({
 					key={prefix + element.name}
 					prefix={prefix}
 					element={element}
+					value={jdbcValues[element.name] ?? element.value}
 					onValueChange={handleJdbcValueChange}
+					onApplyValues={
+						element.name === "jdbcProperties" ? handleApplyValues : undefined
+					}
 				/>
 			))}
 			<div className="mt-2 flex items-center gap-3">
@@ -70,14 +82,18 @@ export default function JdbcFormSection({
 function JdbcTextField({
 	prefix,
 	element,
+	value,
 	onValueChange,
+	onApplyValues,
 }: {
 	prefix: string;
 	element: CommandParam;
+	value: string;
 	onValueChange: (name: string, value: string) => void;
+	onApplyValues?: (values: Partial<Record<string, string>>) => void;
 }) {
-	const [path, setPath] = useState(element.value);
 	const [showJdbcUrlBuilder, setShowJdbcUrlBuilder] = useState(false);
+	const [showPreview, setShowPreview] = useState(false);
 	const settings = useResourcesSettings();
 	const labelText = prefix ? `-${prefix}.${element.name}` : `-${element.name}`;
 	const id = prefix ? `${prefix}_${element.name}` : element.name;
@@ -86,9 +102,11 @@ function JdbcTextField({
 	const resourceFiles = isJdbcProperties ? settings.jdbcFiles : [];
 	const hasButton = isJdbcUrl || isJdbcProperties;
 
-	useEffect(() => {
-		onValueChange(element.name, path);
-	}, [path, element.name, onValueChange]);
+	const setPath: Dispatch<SetStateAction<string>> = (action) => {
+		const newPath =
+			typeof action === "function" ? action(value) : action;
+		onValueChange(element.name, newPath);
+	};
 
 	return (
 		<div>
@@ -103,9 +121,9 @@ function JdbcTextField({
 						name={labelText}
 						id={id}
 						required={element.attribute.required}
-						value={path}
+						value={value}
 						list={isJdbcProperties ? `${id}_list` : undefined}
-						handleChange={(ev) => setPath(ev.target.value)}
+						handleChange={(ev) => onValueChange(element.name, ev.target.value)}
 					/>
 					{isJdbcProperties && (
 						<ResourceDatalist id={id} resources={resourceFiles} />
@@ -116,16 +134,27 @@ function JdbcTextField({
 						<FileChooser
 							prefix={prefix}
 							element={element}
-							path={path}
+							path={value}
 							setPath={setPath}
 						/>
 					)}
-					{isJdbcProperties && path && (
-						<RemoveJdbcPropertiesButton path={path} setPath={setPath} />
+					{isJdbcProperties && value && (
+						<RemoveJdbcPropertiesButton
+							path={value}
+							setPath={(v) => onValueChange(element.name, v)}
+						/>
+					)}
+					{isJdbcProperties && value && onApplyValues && (
+						<JdbcPropertiesPreviewButton
+							path={value}
+							showDialog={showPreview}
+							setShowDialog={setShowPreview}
+							onApplyValues={onApplyValues}
+						/>
 					)}
 					{isJdbcUrl && (
 						<JdbcUrlBuilderButton
-							path={path}
+							path={value}
 							setPath={setPath}
 							showDialog={showJdbcUrlBuilder}
 							setShowDialog={setShowJdbcUrlBuilder}
@@ -134,6 +163,39 @@ function JdbcTextField({
 				</div>
 			</div>
 		</div>
+	);
+}
+
+function JdbcPropertiesPreviewButton({
+	path,
+	showDialog,
+	setShowDialog,
+	onApplyValues,
+}: {
+	path: string;
+	showDialog: boolean;
+	setShowDialog: (show: boolean) => void;
+	onApplyValues: (values: Partial<Record<string, string>>) => void;
+}) {
+	return (
+		<>
+			<ButtonWithIcon
+				handleClick={() => setShowDialog(true)}
+				id="jdbcPropertiesPreviewButton"
+			>
+				<FileIcon title="Preview Properties" fill="white" />
+			</ButtonWithIcon>
+			{showDialog && (
+				<JdbcPropertiesPreviewDialog
+					path={path}
+					handleDialogClose={() => setShowDialog(false)}
+					handleApply={(values) => {
+						onApplyValues(values);
+						setShowDialog(false);
+					}}
+				/>
+			)}
+		</>
 	);
 }
 
