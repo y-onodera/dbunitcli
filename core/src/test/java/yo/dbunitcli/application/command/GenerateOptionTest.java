@@ -7,7 +7,7 @@ import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.DataSourceType;
-import yo.dbunitcli.dataset.converter.DBConverter;
+import yo.dbunitcli.dataset.DbOperation;
 
 import java.util.Arrays;
 
@@ -22,7 +22,7 @@ class GenerateOptionTest {
         this.src.setUnit(ParameterUnit.record);
         this.src.setTemplate("template.st");
         this.src.setOutputEncoding("MS932");
-        this.src.setOperation(DBConverter.Operation.INSERT);
+        this.src.setOperation(DbOperation.INSERT);
         this.src.setSqlFilePrefix("prefix");
         this.src.setSqlFileSuffix("suffix");
         this.src.setCommit("false");

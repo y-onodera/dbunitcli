@@ -5,7 +5,7 @@ import yo.dbunitcli.application.CommandDto;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.dto.TemplateRenderDto;
-import yo.dbunitcli.dataset.converter.DBConverter;
+import yo.dbunitcli.dataset.DbOperation;
 
 public class GenerateDto extends CommandDto {
     @CommandLine.Option(names = "-generateType")
@@ -23,7 +23,7 @@ public class GenerateDto extends CommandDto {
     @CommandLine.Option(names = "-sqlFilePrefix", description = "generate sqlFile fileName prefix")
     private String sqlFilePrefix;
     @CommandLine.Option(names = "-op")
-    private DBConverter.Operation operation;
+    private DbOperation operation;
     @CommandLine.Option(names = "-outputEncoding", description = "output file encoding")
     private String outputEncoding;
     @CommandLine.Option(names = "-template", description = "template file")
@@ -92,11 +92,11 @@ public class GenerateDto extends CommandDto {
         this.sqlFilePrefix = sqlFilePrefix;
     }
 
-    public DBConverter.Operation getOperation() {
+    public DbOperation getOperation() {
         return this.operation;
     }
 
-    public void setOperation(final DBConverter.Operation operation) {
+    public void setOperation(final DbOperation operation) {
         this.operation = operation;
     }
 

@@ -5,13 +5,14 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.DataSetConverterParam;
+import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.converter.db.*;
 
 public class DBConverter implements IDataSetConverter {
 
     private final IDatabaseConnection connection;
-    private final Operation operation;
+    private final DbOperation operation;
     private final boolean exportEmptyTable;
     private final DBOperator operator;
 
@@ -21,11 +22,21 @@ public class DBConverter implements IDataSetConverter {
                 , param.exportEmptyTable());
     }
 
-    public DBConverter(final IDatabaseConnection connection, final Operation operation, final boolean exportEmptyTable) {
+    public DBConverter(final IDatabaseConnection connection, final DbOperation operation, final boolean exportEmptyTable) {
         this.connection = connection;
         this.operation = operation;
         this.exportEmptyTable = exportEmptyTable;
-        this.operator = operation.operator(connection);
+        this.operator = this.createOperator(operation, connection);
+    }
+
+    private DBOperator createOperator(final DbOperation operation, final IDatabaseConnection connection) {
+        return switch (operation) {
+            case INSERT -> new InsertOperator(connection);
+            case UPDATE -> new UpdateOperator(connection);
+            case DELETE -> new DeleteOperator(connection);
+            case REFRESH -> new RefreshOperator(connection);
+            default -> new CleanInsertOperator(connection);
+        };
     }
 
     @Override
@@ -78,21 +89,4 @@ public class DBConverter implements IDataSetConverter {
         this.operator.row(objects);
     }
 
-    public enum Operation {
-        INSERT,
-        UPDATE,
-        DELETE,
-        REFRESH,
-        CLEAN_INSERT;
-
-        DBOperator operator(final IDatabaseConnection connection) {
-            return switch (this) {
-                case INSERT -> new InsertOperator(connection);
-                case UPDATE -> new UpdateOperator(connection);
-                case DELETE -> new DeleteOperator(connection);
-                case REFRESH -> new RefreshOperator(connection);
-                default -> new CleanInsertOperator(connection);
-            };
-        }
-    }
 }

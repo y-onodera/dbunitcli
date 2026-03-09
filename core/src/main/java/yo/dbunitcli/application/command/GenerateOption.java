@@ -9,7 +9,7 @@ import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.converter.DBConverter;
+import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
@@ -27,7 +27,7 @@ public record GenerateOption(
         , String resultPath
         , GenerateType generateType
         , ParameterUnit unit
-        , DBConverter.Operation operation
+        , DbOperation operation
         , String sqlFilePrefix
         , String sqlFileSuffix
         , boolean commit
@@ -139,7 +139,7 @@ public record GenerateOption(
         switch (this.generateType) {
             case sql -> {
                 result.put("-commit", Boolean.toString(this.commit))
-                        .put("-op", this.operation, DBConverter.Operation.class)
+                        .put("-op", this.operation, DbOperation.class)
                         .put("-sqlFilePrefix", this.sqlFilePrefix)
                         .put("-sqlFileSuffix", this.sqlFileSuffix);
                 srcComponent.remove("-src.useJdbcMetaData");

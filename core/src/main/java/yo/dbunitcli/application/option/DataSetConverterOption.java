@@ -5,8 +5,8 @@ import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.DataSetConverterDto;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DataSourceType;
+import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.ResultType;
-import yo.dbunitcli.dataset.converter.DBConverter;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -15,7 +15,7 @@ public record DataSetConverterOption(
         String prefix
         , ResultType resultType
         , JdbcOption jdbcOption
-        , DBConverter.Operation operation
+        , DbOperation operation
         , String resultDir
         , String resultPath
         , boolean exportEmptyTable
@@ -56,8 +56,8 @@ public record DataSetConverterOption(
         }
         final DataSourceType type = DataSourceType.valueOf(this.resultType.name());
         if (type == DataSourceType.table) {
-            result.put("-op", this.operation == null ? DBConverter.Operation.CLEAN_INSERT : this.operation
-                            , DBConverter.Operation.class)
+            result.put("-op", this.operation == null ? DbOperation.CLEAN_INSERT : this.operation
+                            , DbOperation.class)
                     .addComponent("jdbc", this.jdbcOption.toParameters());
         } else {
             result.putDir("-result", this.resultDir, BaseDir.RESULT)
