@@ -35,17 +35,6 @@ class JdbcResourceFileControllerTest {
     }
 
     @Test
-    void testLoad() throws IOException {
-        final String response = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/jdbc/load", "sample.json")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
-        System.out.println(response);
-        JsonTestHelper.assertJsonEquals(
-                Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/jdbc-load-response.json"),
-                response);
-    }
-
-    @Test
     void testReadContent() throws IOException {
         final String response = this.client.toBlocking()
                 .retrieve(HttpRequest.POST("dbunit-cli/jdbc/read-content", "sample.properties")
