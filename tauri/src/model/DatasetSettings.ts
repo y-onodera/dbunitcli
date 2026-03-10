@@ -16,12 +16,17 @@ export type Split = {
 	filter?: string[];
 	limit?: string;
 };
+export type NameFilter = {
+	any: string | string[];
+	filePath?: string;
+};
 export type DatasetSettingsBuilder = {
 	settings: DatasetSettingBuilder[];
 	commonSettings: DatasetSettingBuilder[];
 };
 export type DatasetSettingBuilder = {
-	name?: string | string[];
+	name?: string | string[] | NameFilter;
+	filePath?: string;
 	pattern?: string | Pattern;
 	innerJoin?: TableJoin;
 	outerJoin?: TableJoin;
@@ -131,6 +136,7 @@ export class DatasetSetting {
 	readonly boolean: object;
 	readonly function: object;
 	readonly name?: string[];
+	readonly filePath?: string;
 	readonly pattern?: Pattern;
 	readonly innerJoin?: TableJoin;
 	readonly outerJoin?: TableJoin;
@@ -154,7 +160,15 @@ export class DatasetSetting {
 		this.number = builder.number ?? {};
 		this.boolean = builder.boolean ?? {};
 		this.function = builder.function ?? {};
-		this.name = toNameArray(builder.name);
+		const nameVal = builder.name;
+		if (isNameFilter(nameVal)) {
+			const anyVal = nameVal.any;
+			this.name = Array.isArray(anyVal) ? anyVal : [anyVal];
+			this.filePath = nameVal.filePath;
+		} else {
+			this.name = toNameArray(nameVal as string | string[] | undefined);
+			this.filePath = builder.filePath;
+		}
 		this.pattern = toPattern(builder.pattern);
 		this.innerJoin = builder.innerJoin;
 		this.outerJoin = builder.outerJoin;
@@ -207,6 +221,10 @@ export class DatasetSetting {
 		});
 	}
 
+	replaceFilePath(filePath: string): DatasetSetting {
+		return this.with({ filePath: filePath || undefined });
+	}
+
 	replacePattern(newVal: Pattern): DatasetSetting {
 		return this.with({
 			pattern: { ...this.pattern, ...newVal },
@@ -247,7 +265,8 @@ export class DatasetSetting {
 
 	replaceTarget(builder: DatasetSettingBuilder): DatasetSetting {
 		return this.with({
-			name: toNameArray(builder.name),
+			name: toNameArray(builder.name as string | string[] | undefined),
+			filePath: undefined,
 			pattern: toPattern(builder.pattern),
 			innerJoin: builder.innerJoin,
 			outerJoin: builder.outerJoin,
@@ -404,6 +423,18 @@ export class DatasetSetting {
 		});
 	}
 
+	toJSON() {
+		const { filePath, name, ...rest } = this;
+		return {
+			...rest,
+			name: name?.length
+				? filePath
+					? { any: name, filePath }
+					: { any: name }
+				: undefined,
+		};
+	}
+
 	displayName(): string {
 		return target(this);
 	}
@@ -423,11 +454,8 @@ export class DatasetSetting {
 }
 function target(setting: DatasetSetting): string {
 	if (setting.name) {
-		if (typeof setting.name === "string") {
-			return `name :${setting.name}`;
-		}
-		const names = setting.name as string[];
-		return `name :[${names.join(",")}]`;
+		const nameStr = `name :[${setting.name.join(",")}]`;
+		return setting.filePath ? `${nameStr} filePath:${setting.filePath}` : nameStr;
 	}
 	if (setting.pattern) {
 		if (typeof setting.pattern === "string") {
@@ -500,4 +528,12 @@ function toNameArray(name: string | string[] | undefined): string[] | undefined 
 function toPattern(pattern: string | Pattern | undefined): Pattern | undefined {
 	if (!pattern) { return undefined; }
 	return typeof pattern === "string" ? ({ string: pattern } as Pattern) : pattern;
+}
+function isNameFilter(name: unknown): name is NameFilter {
+	return (
+		!!name &&
+		typeof name === "object" &&
+		!Array.isArray(name) &&
+		"any" in name
+	);
 }

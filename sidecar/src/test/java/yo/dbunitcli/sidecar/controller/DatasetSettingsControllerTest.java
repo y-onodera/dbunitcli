@@ -73,7 +73,7 @@ class DatasetSettingsControllerTest {
     void testSave_保存して再ロードで確認する() throws IOException {
         final String saveResponse = this.client.toBlocking()
                 .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/save",
-                        "{\"name\":\"savedSetting.json\",\"input\":{\"settings\":[{\"name\":[\"TABLE_B\"],\"keys\":[\"id\"]}],\"commonSettings\":[]}}"));
+                        "{\"name\":\"savedSetting.json\",\"input\":{\"settings\":[{\"name\":{\"any\":[\"TABLE_B\"]},\"keys\":[\"id\"]}],\"commonSettings\":[]}}"));
         System.out.println(saveResponse);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/setting-save-list-response.json"),
