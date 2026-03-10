@@ -43,9 +43,14 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 	);
 }
 
-export function Fieldset(props: { children: ReactNode }) {
+export function Fieldset(props: { children: ReactNode; legend?: string }) {
 	return (
 		<fieldset className="border border-gray-200 p-2.5 m-2">
+			{props.legend && (
+				<legend className="text-xs font-semibold text-gray-500 px-1">
+					{props.legend}
+				</legend>
+			)}
 			{props.children}
 		</fieldset>
 	);

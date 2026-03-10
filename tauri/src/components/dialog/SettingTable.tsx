@@ -50,14 +50,14 @@ export default function SettingTable<T>({
                     }}
                 />
             )}
-            <table className="table-fixed">
-                <caption className="caption-top">{caption}</caption>
+            <table className="table-fixed w-full">
+                <caption className="caption-top text-sm font-semibold text-gray-700 text-left px-2 py-1">{caption}</caption>
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
-                        <th scope="col" className="px-6 py-3 border-4">
+                        <th scope="col" className="px-6 py-3 border">
                             Target
                         </th>
-                        <th scope="col" className="px-6 py-3 border-4">
+                        <th scope="col" className="px-6 py-3 border">
                             Action
                         </th>
                     </tr>
@@ -65,10 +65,10 @@ export default function SettingTable<T>({
                 <tbody>
                     {settings?.map((setting) => (
                         <tr key={getKey(setting)}>
-                            <th scope="row" className="px-6 min-w-80 max-w-80 text-left text-sm text-gray-900 border-4">
+                            <th scope="row" className="px-6 min-w-80 max-w-80 text-left text-sm text-gray-900 border">
                                 {renderSetting(setting)}
                             </th>
-                            <td className="px-6 border-4">
+                            <td className="px-6 border">
                                 <div className="flex">
                                     <EditButton handleClick={() => setSelectSettings({ setting, action: "update" })} />
                                     <DeleteButton handleClick={() => setSettings((current) => deleteSettings(current, setting))} />

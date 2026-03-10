@@ -23,7 +23,7 @@ export default function ResourceFileDialog({
 			className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 bg-white border border-gray-200"
 		>
 			<div className="relative overflow-x-auto">{children}</div>
-			<div className="right-1 w-full flex items-center justify-end">
+			<div className="p-4">
 				<div className="grid grid-cols-5 pb-2">
 					<InputLabel
 						id="fileNameLabel"
@@ -35,12 +35,12 @@ export default function ResourceFileDialog({
 						name="fileName"
 						id="fileName"
 						required={true}
-						wStyle="col-start-2 col-span-4 mr-2"
+						wStyle="col-start-2 col-span-4"
 						value={value}
 						handleChange={(ev) => setValue(ev.target.value)}
 					/>
 				</div>
-				<div className="flex items-center justify-end p-4 gap-2">
+				<div className="flex items-center justify-end gap-2">
 					<BlueButton title="Save" handleClick={() => handleSave(value)} />
 					<WhiteButton title="Close" handleClick={handleDialogClose} />
 				</div>

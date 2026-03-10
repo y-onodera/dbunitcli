@@ -16,7 +16,7 @@ export default function DatasetSettingDaialog(props: {
 
     return (
         <SettingDialog setting={target} handleDialogClose={props.handleDialogClose} handleCommit={props.handleCommit}>
-            <Fieldset>
+            <Fieldset legend="Target">
                 <Select name="target" defaultValue={target.handler()} handleOnChange={handleTargetChange}>
                     <option value="name">name</option>
                     <option value="pattern">pattern</option>
@@ -26,7 +26,7 @@ export default function DatasetSettingDaialog(props: {
                 </Select>
                 {renderTargetContent(target, setTarget)}
             </Fieldset>
-            <Fieldset>
+            <Fieldset legend="Split / Rename">
                 <Check name="split"
                     value={target.split ? "true" : "false"}
                     handleOnChange={checked => setTarget(cur => cur.withSplit(checked))}
@@ -65,11 +65,11 @@ export default function DatasetSettingDaialog(props: {
                     </>
                 }
             </Fieldset>
-            <Fieldset>
+            <Fieldset legend="Additional Columns">
                 <ExpandButton
                     toggleOptional={toggleOptional}
                     showOptional={showOptional}
-                    caption="Additinaol Columns"
+                    caption="additional columns"
                 />
                 {showOptional && (
                     <>
@@ -92,7 +92,7 @@ export default function DatasetSettingDaialog(props: {
                     </>
                 )}
             </Fieldset>
-            <Fieldset>
+            <Fieldset legend="Filter / Order">
                 <Arrays name="exclude" values={target.exclude}
                     handleChange={(text, index) => setTarget(cur => cur.replaceExclude(text, index))}
                     handleRemove={(index) => setTarget(cur => cur.removeExclude(index))}
