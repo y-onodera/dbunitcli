@@ -44,8 +44,8 @@ public record ParameterizeOption(
         }
 
         private boolean isNotSrcArg(final String prefix, final String it) {
-            return !it.startsWith("-" + prefix + ".src=") || !it.startsWith("-" + prefix + ".srcType=")
-                    || !it.startsWith("-src=") || !it.startsWith("-srcType=");
+            return !it.startsWith("-" + prefix + ".src=") && !it.startsWith("-" + prefix + ".srcType=")
+                    && !it.startsWith("-src=") && !it.startsWith("-srcType=");
         }
 
         private boolean paramTypeIsNone(final List<String> list) {
