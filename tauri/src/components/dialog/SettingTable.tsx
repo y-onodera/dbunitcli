@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AddButton, CopyButton, DeleteButton, EditButton } from "../element/ButtonIcon";
 
-interface SttingTableProps<T> {
+interface SettingTableProps<T> {
     caption: string;
     settings: T[];
     setSettings: (convertFunction: (currentSettings: T[]) => T[]) => void;
@@ -29,7 +29,7 @@ export default function SettingTable<T>({
     SettingDialogComponent,
     newSetting,
     getKey,
-}: SttingTableProps<T>) {
+}: SettingTableProps<T>) {
     const defaultState = { setting: newSetting(), action: "" };
     const [selectSettings, setSelectSettings] = useState(defaultState);
 
@@ -50,25 +50,25 @@ export default function SettingTable<T>({
                     }}
                 />
             )}
-            <table className="table-fixed">
-                <caption className="caption-top">{caption}</caption>
+            <table className="table-fixed w-full">
+                <caption className="caption-top text-sm font-semibold text-gray-700 text-left px-2 py-1">{caption}</caption>
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
-                        <th scope="col" className="px-6 py-3 border-4">
+                        <th scope="col" className="px-6 py-3 border">
                             Target
                         </th>
-                        <th scope="col" className="px-6 py-3 border-4">
+                        <th scope="col" className="px-6 py-3 border">
                             Action
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    {settings?.map((setting) => (
+                    {settings.map((setting) => (
                         <tr key={getKey(setting)}>
-                            <th scope="row" className="px-6 min-w-80 max-w-80 text-left text-sm text-gray-900 border-4">
+                            <th scope="row" className="px-6 min-w-80 max-w-80 text-left text-sm text-gray-900 border">
                                 {renderSetting(setting)}
                             </th>
-                            <td className="px-6 border-4">
+                            <td className="px-6 border">
                                 <div className="flex">
                                     <EditButton handleClick={() => setSelectSettings({ setting, action: "update" })} />
                                     <DeleteButton handleClick={() => setSettings((current) => deleteSettings(current, setting))} />
