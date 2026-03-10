@@ -35,7 +35,7 @@ public class DBConverter implements IDataSetConverter {
             case UPDATE -> new UpdateOperator(connection);
             case DELETE -> new DeleteOperator(connection);
             case REFRESH -> new RefreshOperator(connection);
-            default -> new CleanInsertOperator(connection);
+            case CLEAN_INSERT -> new CleanInsertOperator(connection);
         };
     }
 
