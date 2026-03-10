@@ -58,23 +58,21 @@ function Dialog(props: {
 				newSetting={newDatasetSetting}
 				getKey={(setting) => setting.displayName()}
 			/>
-			<div className="mt-4">
-				<SettingTable<DatasetSetting>
-					caption="Common Settings"
-					settings={dataSettings.commonSettings}
-					setSettings={(convertCommon) => setDataSettings((cur) => {
-						const updatedCommonSettings = convertCommon(cur.commonSettings);
-						return new DatasetSettings(cur.settings, updatedCommonSettings);
-					})}
-					addSettings={(current, settings) => [...current, settings]}
-					updateSettings={(current, before, after) => current.map((setting) => (setting === before ? after : setting))}
-					deleteSettings={(current, settings) => current.filter((setting) => setting !== settings)}
-					renderSetting={(setting) => setting.displayName()}
-					SettingDialogComponent={DatasetSettingDaialog}
-					newSetting={newDatasetSetting}
-					getKey={(setting) => setting.displayName()}
-				/>
-			</div>
+			<SettingTable<DatasetSetting>
+				caption="Common Settings"
+				settings={dataSettings.commonSettings}
+				setSettings={(convertCommon) => setDataSettings((cur) => {
+					const updatedCommonSettings = convertCommon(cur.commonSettings);
+					return new DatasetSettings(cur.settings, updatedCommonSettings);
+				})}
+				addSettings={(current, settings) => [...current, settings]}
+				updateSettings={(current, before, after) => current.map((setting) => (setting === before ? after : setting))}
+				deleteSettings={(current, settings) => current.filter((setting) => setting !== settings)}
+				renderSetting={(setting) => setting.displayName()}
+				SettingDialogComponent={DatasetSettingDaialog}
+				newSetting={newDatasetSetting}
+				getKey={(setting) => setting.displayName()}
+			/>
 		</ResourceFileDialog>
 	);
 }

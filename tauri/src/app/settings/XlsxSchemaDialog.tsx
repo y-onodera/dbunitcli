@@ -59,23 +59,21 @@ function Dialog(props: {
                 newSetting={createRowSetting}
                 getKey={(setting) => setting.displayName()}
             />
-            <div className="mt-4">
-                <SettingTable<CellSetting>
-                    caption="Random Cell Mapping Tables"
-                    settings={xlsxSchema.cells}
-                    setSettings={(convertCells) => setXlsxSchema((cur) => {
-                        const updatedCells = convertCells(cur.cells);
-                        return new XlsxSchema(cur.rows, updatedCells);
-                    })}
-                    addSettings={(current, settings) => [...current, settings]}
-                    updateSettings={(current, before, after) => current.map((cell) => (cell === before ? after : cell))}
-                    deleteSettings={(current, settings) => current.filter((cell) => cell !== settings)}
-                    renderSetting={(setting) => setting.displayName()}
-                    SettingDialogComponent={XlsxCellSettingDialog}
-                    newSetting={createCellSetting}
-                    getKey={(setting) => setting.displayName()}
-                />
-            </div>
+            <SettingTable<CellSetting>
+                caption="Random Cell Mapping Tables"
+                settings={xlsxSchema.cells}
+                setSettings={(convertCells) => setXlsxSchema((cur) => {
+                    const updatedCells = convertCells(cur.cells);
+                    return new XlsxSchema(cur.rows, updatedCells);
+                })}
+                addSettings={(current, settings) => [...current, settings]}
+                updateSettings={(current, before, after) => current.map((cell) => (cell === before ? after : cell))}
+                deleteSettings={(current, settings) => current.filter((cell) => cell !== settings)}
+                renderSetting={(setting) => setting.displayName()}
+                SettingDialogComponent={XlsxCellSettingDialog}
+                newSetting={createCellSetting}
+                getKey={(setting) => setting.displayName()}
+            />
         </ResourceFileDialog>
     );
 }
