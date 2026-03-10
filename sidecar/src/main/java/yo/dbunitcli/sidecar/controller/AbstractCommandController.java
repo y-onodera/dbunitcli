@@ -121,7 +121,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     @Post(uri = "shell", produces = MediaType.TEXT_PLAIN)
     public String shell(@Body final CommandRequestDto body) throws IOException {
         try {
-            return this.workspace.saveShell(this.getCommandType(), body.getName());
+            return java.nio.file.Path.of(this.workspace.saveShell(this.getCommandType(), body.getName())).getParent().toString();
         } catch (IOException e) {
             throw e;
         } catch (final Throwable th) {
