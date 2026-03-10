@@ -1,1 +1,1 @@
-{"settings":[{"name":{"any":["TABLE_B"]},"keys":["id"]}]}
+{"settings":[{"name":{"any":["TABLE_B"]},"distinct":false,"keys":["id"]}]}
