@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Serdeable
 public class DatasetSettingDto {
-    private List<String> name;
+    private NameDto name;
     private PatternDto pattern;
     private TableJoinDto innerJoin;
     private TableJoinDto outerJoin;
@@ -35,11 +35,11 @@ public class DatasetSettingDto {
     private List<String> filter;
     private List<String> order;
 
-    public List<String> getName() {
+    public NameDto getName() {
         return this.name;
     }
 
-    public void setName(final List<String> name) {
+    public void setName(final NameDto name) {
         this.name = name;
     }
 

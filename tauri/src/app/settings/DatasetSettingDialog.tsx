@@ -164,9 +164,14 @@ function renderTargetContent(
         );
     }
     return (
-        <Arrays name="name" values={target.name ?? []}
-            handleChange={(text, index) => setTarget(cur => cur.replaceName(text, index))}
-            handleRemove={(index) => setTarget(cur => cur.removeName(index))}
-        />
+        <>
+            <Arrays name="name" values={target.name ?? []}
+                handleChange={(text, index) => setTarget(cur => cur.replaceName(text, index))}
+                handleRemove={(index) => setTarget(cur => cur.removeName(index))}
+            />
+            <Text name="filePath" value={target.filePath ?? ""}
+                handleChange={newVal => setTarget(cur => cur.replaceFilePath(newVal.target.value))}
+            />
+        </>
     );
 }

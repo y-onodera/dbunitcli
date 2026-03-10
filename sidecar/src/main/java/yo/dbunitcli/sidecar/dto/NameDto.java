@@ -1,29 +1,22 @@
 package yo.dbunitcli.sidecar.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.micronaut.serde.annotation.Serdeable;
 
 import java.util.List;
 
 @Serdeable
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NameDto {
-    private String any;
-    private List<String> anyList;
+    private List<String> any;
     private String filePath;
 
-    public String getAny() {
+    public List<String> getAny() {
         return this.any;
     }
 
-    public void setAny(final String any) {
+    public void setAny(final List<String> any) {
         this.any = any;
-    }
-
-    public List<String> getAnyList() {
-        return this.anyList;
-    }
-
-    public void setAnyList(final List<String> anyList) {
-        this.anyList = anyList;
     }
 
     public String getFilePath() {
