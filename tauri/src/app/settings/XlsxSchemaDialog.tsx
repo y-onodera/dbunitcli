@@ -3,11 +3,13 @@ import ResourceFileDialog from "../../components/dialog/ResourceFileDialog";
 import SettingTable from "../../components/dialog/SettingTable";
 import { useLoadXlsxSchema, useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
 import { type CellSetting, type RowSetting, XlsxSchema, createCellSetting, createRowSetting } from "../../model/XlsxSchema";
+import type { SrcInfo } from "../form/FormElementProp";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 
 export default function XlsxSchemaDialog(props: {
     fileName: string;
+    srcInfo?: SrcInfo;
     handleDialogClose: () => void;
     handleSave: (path: string) => void;
 }) {
@@ -17,6 +19,7 @@ export default function XlsxSchemaDialog(props: {
             <Dialog
                 promise={loadXlsxSchema(props.fileName)}
                 fileName={props.fileName}
+                srcInfo={props.srcInfo}
                 handleDialogClose={props.handleDialogClose}
                 handleSave={props.handleSave}
             />
@@ -26,6 +29,7 @@ export default function XlsxSchemaDialog(props: {
 function Dialog(props: {
     promise: Promise<XlsxSchema>;
     fileName: string;
+    srcInfo?: SrcInfo;
     handleDialogClose: () => void;
     handleSave: (path: string) => void;
 }) {
@@ -55,7 +59,14 @@ function Dialog(props: {
                 updateSettings={(current, before, after) => current.map((row) => (row === before ? after : row))}
                 deleteSettings={(current, settings) => current.filter((row) => row !== settings)}
                 renderSetting={(setting) => setting.displayName()}
-                SettingDialogComponent={XlsxRowSettingDialog}
+                SettingDialogComponent={({ setting, handleDialogClose, handleCommit }) => (
+                    <XlsxRowSettingDialog
+                        setting={setting}
+                        handleDialogClose={handleDialogClose}
+                        handleCommit={handleCommit}
+                        srcInfo={props.srcInfo}
+                    />
+                )}
                 newSetting={createRowSetting}
                 getKey={(setting) => setting.displayName()}
             />
@@ -70,7 +81,14 @@ function Dialog(props: {
                 updateSettings={(current, before, after) => current.map((cell) => (cell === before ? after : cell))}
                 deleteSettings={(current, settings) => current.filter((cell) => cell !== settings)}
                 renderSetting={(setting) => setting.displayName()}
-                SettingDialogComponent={XlsxCellSettingDialog}
+                SettingDialogComponent={({ setting, handleDialogClose, handleCommit }) => (
+                    <XlsxCellSettingDialog
+                        setting={setting}
+                        handleDialogClose={handleDialogClose}
+                        handleCommit={handleCommit}
+                        srcInfo={props.srcInfo}
+                    />
+                )}
                 newSetting={createCellSetting}
                 getKey={(setting) => setting.displayName()}
             />

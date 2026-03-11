@@ -27,7 +27,7 @@ import XlsxSchemaEditButton, {
 	RemoveXlsxSchemaButton,
 } from "../settings/XlsxSchemaEditButton";
 import { DirectoryChooser, FileChooser } from "./Chooser";
-import type { FileProp, Prop, SelectProp } from "./FormElementProp";
+import type { FileProp, Prop, SelectProp, SrcInfo } from "./FormElementProp";
 import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import JdbcFormSection, { JDBC_FIELD_NAMES } from "./JdbcFormSection";
 
@@ -41,6 +41,14 @@ export default function CommandFormElements(
 		(element) => element.name === "srcType",
 	);
 	const srcType = srcTypeElement ? srcTypeElement.value : "";
+	const srcElement = prop.elements.find((element) => element.name === "src");
+	const regTableIncludeElement = prop.elements.find((element) => element.name === "regTableInclude");
+	const regTableExcludeElement = prop.elements.find((element) => element.name === "regTableExclude");
+	const srcInfo: SrcInfo = {
+		srcPath: srcElement?.value ?? "",
+		regTableInclude: regTableIncludeElement?.value ?? "",
+		regTableExclude: regTableExcludeElement?.value ?? "",
+	};
 	const toggleOptional = () => setShowOptional(!showOptional);
 
 	const jdbcElements = prop.elements.filter((e) =>
@@ -111,6 +119,7 @@ export default function CommandFormElements(
 							element={element}
 							hidden={prop.optional?.(element.name) && !showOptional}
 							srcType={element.name === "src" ? srcType : undefined}
+							srcInfo={element.name === "xlsxSchema" ? srcInfo : undefined}
 						/>
 					</Fragment>
 				);
@@ -123,7 +132,7 @@ export default function CommandFormElements(
 }
 function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
-	const { element, srcType } = prop;
+	const { element, srcType, srcInfo } = prop;
 	const settings = useResourcesSettings();
 	let resourceFiles: string[] = [];
 	if (element.name === "src" && isSqlRelatedType(srcType ?? "")) {
@@ -189,6 +198,7 @@ function Text(prop: Prop) {
 							setPath={setPath}
 							hidden={prop.hidden}
 							srcType={srcType}
+							srcInfo={srcInfo}
 						/>
 					)}
 				</div>
@@ -204,6 +214,7 @@ function DropDownMenu({
 	setPath,
 	hidden,
 	srcType,
+	srcInfo,
 }: FileProp & { srcType?: string; datasources?: string[] }) {
 	const [showMenu, setShowMenu] = useState(false);
 	const { connectionOk } = useJdbcConnectionState();
@@ -266,7 +277,7 @@ function DropDownMenu({
 						)}
 						{element.name === "xlsxSchema" && !hidden && (
 							<li>
-								<XlsxSchemaEditButton path={path} setPath={setPath} />
+								<XlsxSchemaEditButton path={path} setPath={setPath} srcInfo={srcInfo} />
 							</li>
 						)}
 						{element.name === "src" &&

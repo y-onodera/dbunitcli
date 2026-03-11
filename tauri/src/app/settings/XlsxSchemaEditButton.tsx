@@ -1,6 +1,11 @@
 import { useDeleteXlsxSchema } from '../../hooks/useXlsxSchema';
 import ResourceEditButton, { RemoveResource, type ResourceEditButtonProp } from './ResourceEditButton';
 import XlsxSchemaDialog from './XlsxSchemaDialog';
+import type { SrcInfo } from '../form/FormElementProp';
+
+type XlsxSchemaEditButtonProp = ResourceEditButtonProp & {
+    srcInfo?: SrcInfo;
+};
 
 /**
  * XLSXスキーマの編集ダイアログを表示するためのボタンコンポーネント
@@ -8,7 +13,8 @@ import XlsxSchemaDialog from './XlsxSchemaDialog';
 export default function XlsxSchemaEditButton({
     path,
     setPath,
-}: ResourceEditButtonProp) {
+    srcInfo,
+}: XlsxSchemaEditButtonProp) {
 
     /**
      * ダイアログを描画するときに呼び出す関数
@@ -22,6 +28,7 @@ export default function XlsxSchemaEditButton({
         return (
             <XlsxSchemaDialog
                 fileName={path}
+                srcInfo={srcInfo}
                 handleDialogClose={closeDialog}
                 handleSave={(newPath: string) => {
                     setPath(newPath);

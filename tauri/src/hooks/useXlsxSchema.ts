@@ -111,3 +111,23 @@ async function deleteXlsxSchema(
 			return "failed" as OperationResult;
 		});
 }
+
+export const useXlsxSheets = () => {
+	const environment = useEnviroment();
+	return async (src: string, regTableInclude: string, regTableExclude: string): Promise<string[]> => {
+		if (!src) {
+			return [];
+		}
+		const fetchParams = {
+			endpoint: `${environment.apiUrl}xlsx-schema/sheets`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ src, regTableInclude, regTableExclude }),
+			},
+		};
+		return fetchData(fetchParams)
+			.then((r) => r.json())
+			.catch(() => []);
+	};
+};
