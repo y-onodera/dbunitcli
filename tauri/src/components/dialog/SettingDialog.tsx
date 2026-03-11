@@ -293,39 +293,47 @@ export function KeyValueText(props: {
 		props.handleChange(props.index, { [key]: newVal.target.value });
 	const handleRemove = () => props.handleRemove(props.index);
 	return (
-		<div className="grid grid-cols-5 pb-2">
+		<>
 			{props.index === 0 && (
-				<InputLabel
-					id={props.name}
-					text={props.name}
-					required={false}
-					wStyle="p-2.5 w=1/5"
-				/>
-			)}
-			<ControllTextBox
-				name={props.name}
-				id={props.name}
-				required={true}
-				wStyle="col-start-2 p-2.5 w=1/5"
-				value={key}
-				handleChange={(ev) => setKey(ev.target.value)}
-				handleBlur={handleKeyBlur}
-			/>
-			<ControllTextBox
-				name={props.name}
-				id={props.name}
-				required={true}
-				wStyle="col-start-3 col-span-2 ml-1 "
-				value={value}
-				disabled={!key || key === ""}
-				handleChange={(ev) => setValue(ev.target.value)}
-				handleBlur={handleValueBlur}
-			/>
-			{props.index > 0 && (
-				<div className="col-start-5">
-					<RemoveButton handleClick={handleRemove} />
+				<div className="grid grid-cols-5 pb-1">
+					<span className="col-start-2 text-xs text-gray-500">name</span>
+					<span className="col-start-3 col-span-2 ml-1 text-xs text-gray-500">expression</span>
 				</div>
 			)}
-		</div>
+			<div className="grid grid-cols-5 pb-2">
+				{props.index === 0 && (
+					<InputLabel
+						id={props.name}
+						text={props.name}
+						required={false}
+						wStyle="p-2.5 w=1/5"
+					/>
+				)}
+				<ControllTextBox
+					name={props.name}
+					id={props.name}
+					required={true}
+					wStyle="col-start-2 p-2.5 w=1/5"
+					value={key}
+					handleChange={(ev) => setKey(ev.target.value)}
+					handleBlur={handleKeyBlur}
+				/>
+				<ControllTextBox
+					name={props.name}
+					id={props.name}
+					required={true}
+					wStyle="col-start-3 col-span-2 ml-1 "
+					value={value}
+					disabled={!key || key === ""}
+					handleChange={(ev) => setValue(ev.target.value)}
+					handleBlur={handleValueBlur}
+				/>
+				{props.index > 0 && (
+					<div className="col-start-5">
+						<RemoveButton handleClick={handleRemove} />
+					</div>
+				)}
+			</div>
+		</>
 	);
 }
