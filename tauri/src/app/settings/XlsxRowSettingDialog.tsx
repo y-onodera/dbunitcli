@@ -19,15 +19,7 @@ export default function XlsxRowSettingDialog(props: {
         if (!props.srcInfo?.srcPath) {
             return;
         }
-        loadSheets(
-            props.srcInfo.srcPath,
-            props.srcInfo.regTableInclude,
-            props.srcInfo.regTableExclude,
-            props.srcInfo.recursive,
-            props.srcInfo.regInclude,
-            props.srcInfo.regExclude,
-            props.srcInfo.extension,
-        ).then(setSheetNames);
+        loadSheets(props.srcInfo).then(setSheetNames);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.srcInfo?.srcPath, props.srcInfo?.regTableInclude, props.srcInfo?.regTableExclude, props.srcInfo?.recursive, props.srcInfo?.regInclude, props.srcInfo?.regExclude, props.srcInfo?.extension]);
 
