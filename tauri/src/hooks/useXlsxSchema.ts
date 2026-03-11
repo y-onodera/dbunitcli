@@ -114,7 +114,7 @@ async function deleteXlsxSchema(
 
 export const useXlsxSheets = () => {
 	const environment = useEnviroment();
-	return async (src: string, regTableInclude: string, regTableExclude: string): Promise<string[]> => {
+	return async (src: string, regTableInclude: string, regTableExclude: string, recursive: string, regInclude: string, regExclude: string, extension: string): Promise<string[]> => {
 		if (!src) {
 			return [];
 		}
@@ -123,7 +123,7 @@ export const useXlsxSheets = () => {
 			options: {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ src, regTableInclude, regTableExclude }),
+				body: JSON.stringify({ src, regTableInclude, regTableExclude, recursive: recursive === "true", regInclude, regExclude, extension }),
 			},
 		};
 		return fetchData(fetchParams)

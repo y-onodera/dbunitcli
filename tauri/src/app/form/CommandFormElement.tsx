@@ -44,10 +44,18 @@ export default function CommandFormElements(
 	const srcElement = prop.elements.find((element) => element.name === "src");
 	const regTableIncludeElement = prop.elements.find((element) => element.name === "regTableInclude");
 	const regTableExcludeElement = prop.elements.find((element) => element.name === "regTableExclude");
+	const recursiveElement = prop.elements.find((element) => element.name === "recursive");
+	const regIncludeElement = prop.elements.find((element) => element.name === "regInclude");
+	const regExcludeElement = prop.elements.find((element) => element.name === "regExclude");
+	const extensionElement = prop.elements.find((element) => element.name === "extension");
 	const srcInfo: SrcInfo = {
 		srcPath: srcElement?.value ?? "",
 		regTableInclude: regTableIncludeElement?.value ?? "",
 		regTableExclude: regTableExcludeElement?.value ?? "",
+		recursive: recursiveElement?.value ?? "",
+		regInclude: regIncludeElement?.value ?? "",
+		regExclude: regExcludeElement?.value ?? "",
+		extension: extensionElement?.value ?? "",
 	};
 	const toggleOptional = () => setShowOptional(!showOptional);
 

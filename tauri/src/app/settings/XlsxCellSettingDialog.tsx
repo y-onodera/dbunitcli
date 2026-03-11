@@ -23,9 +23,13 @@ export default function XlsxCellSettingDialog(props: {
             props.srcInfo.srcPath,
             props.srcInfo.regTableInclude,
             props.srcInfo.regTableExclude,
+            props.srcInfo.recursive,
+            props.srcInfo.regInclude,
+            props.srcInfo.regExclude,
+            props.srcInfo.extension,
         ).then(setSheetNames);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.srcInfo?.srcPath, props.srcInfo?.regTableInclude, props.srcInfo?.regTableExclude]);
+    }, [props.srcInfo?.srcPath, props.srcInfo?.regTableInclude, props.srcInfo?.regTableExclude, props.srcInfo?.recursive, props.srcInfo?.regInclude, props.srcInfo?.regExclude, props.srcInfo?.extension]);
 
     return (
         <SettingDialog setting={target} handleDialogClose={props.handleDialogClose} handleCommit={props.handleCommit}>
