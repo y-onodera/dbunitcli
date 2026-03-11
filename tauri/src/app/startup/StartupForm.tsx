@@ -7,13 +7,13 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { BlueButton, ButtonWithIcon } from "../../components/element/Button";
+import { BlueButton, ButtonWithIcon, WhiteButton } from "../../components/element/Button";
 import { DirIcon } from "../../components/element/Icon";
 import { ControllTextBox, InputLabel } from "../../components/element/Input";
 import { useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
 import { useWorkspaceUpdate } from "../../hooks/useWorkspaceResources";
 
-const StartupForm: React.FC<{ onSelect: () => void }> = ({ onSelect }) => {
+const StartupForm: React.FC<{ onSelect: () => void; onClose?: () => void }> = ({ onSelect, onClose }) => {
 	const context = useWorkspaceContext();
 	const workspaceUpdate = useWorkspaceUpdate();
 	const [workspace, setWorkspace] = useState(context.workspace);
@@ -88,10 +88,9 @@ const StartupForm: React.FC<{ onSelect: () => void }> = ({ onSelect }) => {
 					error={errors.resultBase}
 				/>
 			</div>
-			<div className="grid grid-cols-6">
-				<div className="col-start-5 flex items-center justify-end">
-					<BlueButton title="confirm" handleClick={() => handleSelect()} />
-				</div>
+			<div className="flex items-center justify-end gap-2">
+				<BlueButton title="confirm" handleClick={() => handleSelect()} />
+				{onClose && <WhiteButton title="Close" handleClick={onClose} />}
 			</div>
 		</>
 	);

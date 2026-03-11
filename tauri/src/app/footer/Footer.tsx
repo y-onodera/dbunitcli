@@ -44,22 +44,24 @@ export default function Footer(prop: {
 	return (
 		<>
 			<ResultDialog hidden={running.resultMessage === ""}>
-				<div className="p-4 md:p-5 text-center">
+				<div className="p-4 md:p-5">
 					<h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
 						{running.resultMessage}
 					</h3>
-					{running.resultDir && (
-						<BlueButton
-							title="Open Directory"
-							handleClick={() => openDirectory(running.resultDir)}
+					<div className="flex items-center justify-end gap-2">
+						{running.resultDir && (
+							<BlueButton
+								title="Open Directory"
+								handleClick={() => openDirectory(running.resultDir)}
+							/>
+						)}
+						<WhiteButton
+							title="Close"
+							handleClick={() => {
+								setRunning({ command: "", resultMessage: "", resultDir: "" });
+							}}
 						/>
-					)}
-					<WhiteButton
-						title="Close"
-						handleClick={() => {
-							setRunning({ command: "", resultMessage: "", resultDir: "" });
-						}}
-					/>
+					</div>
 				</div>
 			</ResultDialog>
 			{parameter.command && (
