@@ -37,6 +37,10 @@ public class XlsxSchemaController extends AbstractResourceFileController<JsonXls
                     .setSrc(new File(request.getSrc()))
                     .setRegTableInclude(request.getRegTableInclude())
                     .setRegTableExclude(request.getRegTableExclude())
+                    .setRecursive(request.isRecursive())
+                    .setRegInclude(request.getRegInclude())
+                    .setRegExclude(request.getRegExclude())
+                    .setExtension(request.getExtension())
                     .setHeaderName("header")
                     .setLoadData(false)
                     .build();

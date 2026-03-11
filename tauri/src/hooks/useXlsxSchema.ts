@@ -1,5 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
+import type { SrcInfo } from "../app/form/FormElementProp";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { ResourcesSettings } from "../model/WorkspaceResources";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
@@ -114,8 +115,8 @@ async function deleteXlsxSchema(
 
 export const useXlsxSheets = () => {
 	const environment = useEnviroment();
-	return async (src: string, regTableInclude: string, regTableExclude: string): Promise<string[]> => {
-		if (!src) {
+	return async (srcInfo: SrcInfo): Promise<string[]> => {
+		if (!srcInfo.srcPath) {
 			return [];
 		}
 		const fetchParams = {
@@ -123,7 +124,7 @@ export const useXlsxSheets = () => {
 			options: {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ src, regTableInclude, regTableExclude }),
+				body: JSON.stringify({ src: srcInfo.srcPath, regTableInclude: srcInfo.regTableInclude, regTableExclude: srcInfo.regTableExclude, recursive: srcInfo.recursive === "true", regInclude: srcInfo.regInclude, regExclude: srcInfo.regExclude, extension: srcInfo.extension }),
 			},
 		};
 		return fetchData(fetchParams)
