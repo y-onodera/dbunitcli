@@ -24,6 +24,9 @@ import yo.dbunitcli.resource.poi.XlsxSchema;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implements ComparableDataSetProducer {
@@ -38,6 +41,30 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
     @Override
     public ComparableTableMappingTask createTableMappingTask(final Source source) {
         return new XlsxTableExecutor(source, this.param, this.param.tableNameFilter(), this.param.xlsxSchema());
+    }
+
+    public List<String> getSheetNames() {
+        return this.getSrcFiles()
+                .flatMap(file -> {
+                    try (final OPCPackage pkg = OPCPackage.open(file.getPath(), PackageAccess.READ)) {
+                        final XSSFReader xssfReader = new XSSFReader(pkg);
+                        final XSSFReader.SheetIterator iterator = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
+                        final List<String> names = new ArrayList<>();
+                        while (iterator.hasNext()) {
+                            try (final InputStream stream = iterator.next()) {
+                                final String sheetName = iterator.getSheetName();
+                                if (this.param.tableNameFilter().predicate(sheetName) && this.param.xlsxSchema().contains(sheetName)) {
+                                    names.add(sheetName);
+                                }
+                            }
+                        }
+                        return names.stream();
+                    } catch (final IOException | OpenXML4JException e) {
+                        LOGGER.warn("Could not read sheet names from: {}", file.getPath(), e);
+                        return Stream.empty();
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     private record XlsxTableExecutor(Source source

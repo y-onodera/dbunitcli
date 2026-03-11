@@ -86,6 +86,7 @@ export function Text(props: {
 	value: string;
 	handleChange: (text: React.ChangeEvent<HTMLInputElement>) => void;
 	ignoreLabel?: boolean;
+	list?: string;
 }) {
 	return (
 		<div className="grid grid-cols-5 justify-center pb-2">
@@ -104,6 +105,7 @@ export function Text(props: {
 				wStyle="col-start-2 col-span-3"
 				value={props.value}
 				handleChange={props.handleChange}
+				list={props.list}
 			/>
 		</div>
 	);

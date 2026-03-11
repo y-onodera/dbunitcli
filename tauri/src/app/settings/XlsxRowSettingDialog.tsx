@@ -1,20 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Fieldset, SettingDialog, Text } from "../../components/dialog/SettingDialog";
+import { ResourceDatalist } from "../../components/element/Input";
+import { useXlsxSheets } from "../../hooks/useXlsxSchema";
 import type { RowSetting } from "../../model/XlsxSchema";
+import type { SrcInfo } from "../form/FormElementProp";
 
 export default function XlsxRowSettingDialog(props: {
-    setting: RowSetting
+    setting: RowSetting;
+    srcInfo?: SrcInfo;
     handleDialogClose: () => void;
     handleCommit: (newSettings: RowSetting) => void;
 }) {
-    const [target, setTarget] = useState(props.setting)
+    const [target, setTarget] = useState(props.setting);
+    const [sheetNames, setSheetNames] = useState<string[]>([]);
+    const loadSheets = useXlsxSheets();
+
+    useEffect(() => {
+        if (!props.srcInfo?.srcPath) {
+            return;
+        }
+        loadSheets(
+            props.srcInfo.srcPath,
+            props.srcInfo.regTableInclude,
+            props.srcInfo.regTableExclude,
+        ).then(setSheetNames);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.srcInfo?.srcPath, props.srcInfo?.regTableInclude, props.srcInfo?.regTableExclude]);
 
     return (
         <SettingDialog setting={target} handleDialogClose={props.handleDialogClose} handleCommit={props.handleCommit}>
             <Fieldset>
                 <Text name="sheetName" value={target.sheetName}
+                    list={sheetNames.length > 0 ? "sheetName_list" : undefined}
                     handleChange={ev => setTarget(cur => cur.with({ sheetName: ev.target.value }))}
                 />
+                {sheetNames.length > 0 && (
+                    <ResourceDatalist id="sheetName" resources={sheetNames} />
+                )}
                 <Text name="tableName" value={target.tableName}
                     handleChange={ev => setTarget(cur => cur.with({ tableName: ev.target.value }))}
                 />
