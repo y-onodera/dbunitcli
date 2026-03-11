@@ -15,6 +15,7 @@ import yo.dbunitcli.sidecar.dto.JsonXlsxSchemaRequestDto;
 import yo.dbunitcli.sidecar.dto.XlsxSheetsRequestDto;
 
 import java.io.File;
+import java.util.Arrays;
 
 @Controller("xlsx-schema")
 public class XlsxSchemaController extends AbstractResourceFileController<JsonXlsxSchemaRequestDto> {
@@ -40,7 +41,7 @@ public class XlsxSchemaController extends AbstractResourceFileController<JsonXls
                     .setLoadData(false)
                     .build();
             return ObjectMapper.getDefault().writeValueAsString(
-                    new ComparableXlsxDataSetProducer(param).getSheetNames()
+                    Arrays.asList(new ComparableXlsxDataSetProducer(param).loadDataSet().getTableNames())
             );
         } catch (final Throwable th) {
             LOGGER.warn("Could not read sheet names from: {}", request.getSrc(), th);
