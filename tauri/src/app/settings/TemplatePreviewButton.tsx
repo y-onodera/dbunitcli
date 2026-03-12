@@ -20,7 +20,7 @@ function TemplatePreviewDialog({
 
 	useEffect(() => {
 		loadContent(name).then(setContent);
-	}, [name, loadContent]);
+	}, [name]);
 
 	return (
 		<dialog
