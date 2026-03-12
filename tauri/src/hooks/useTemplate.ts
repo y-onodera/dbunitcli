@@ -22,3 +22,22 @@ export const useTemplateLoadContent = () => {
 		}
 	};
 };
+
+export const useTemplateSaveContent = () => {
+	const { apiUrl } = useEnviroment();
+	return async (name: string, content: string): Promise<void> => {
+		const params = {
+			endpoint: `${apiUrl}template/save`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name, input: { content } }),
+			},
+		};
+		try {
+			await fetchData(params);
+		} catch (e) {
+			handleFetchError((e as Error).message, params);
+		}
+	};
+};

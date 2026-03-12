@@ -28,7 +28,7 @@ export default function JdbcPropertiesPreviewDialog({
 
 	useEffect(() => {
 		readContent(path).then(setContent);
-	}, [path, readContent]);
+	}, [path]);
 
 	const jdbcFormValues = content !== null ? toJdbcFormValues(content) : {};
 
