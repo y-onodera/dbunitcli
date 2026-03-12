@@ -30,6 +30,7 @@ import { DirectoryChooser, FileChooser } from "./Chooser";
 import type { FileProp, Prop, SelectProp, SrcInfo } from "./FormElementProp";
 import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import JdbcFormSection, { JDBC_FIELD_NAMES } from "./JdbcFormSection";
+import TemplatePreviewButton from "../settings/TemplatePreviewButton";
 
 export default function CommandFormElements(
 	prop: {
@@ -307,6 +308,11 @@ function DropDownMenu({
 									<JdbcTableSelectorButton path={path} setPath={setPath} />
 								</li>
 							)}
+						{element.name === "templateGroup" && !hidden && path && (
+							<li>
+								<TemplatePreviewButton path={path} />
+							</li>
+						)}
 						{element.attribute.type.includes("FILE") && (
 							<li>
 								<FileChooser
