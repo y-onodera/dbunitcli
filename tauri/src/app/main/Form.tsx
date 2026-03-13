@@ -24,7 +24,7 @@ export default function Form() {
 		<div className="p-2 rounded-lg mt-10">
 				<form
 					id={formid}
-					className="grid gap-6 mb-6 grid-cols-1"
+					className="grid gap-6 mb-6 pb-20 grid-cols-1"
 					noValidate
 					onSubmit={(e) => {
 						e.preventDefault();
