@@ -88,7 +88,7 @@ const StartupForm: React.FC<{ onSelect: () => void; onClose?: () => void }> = ({
 					error={errors.resultBase}
 				/>
 			</div>
-			<div className="flex items-center justify-end gap-2">
+			<div className={`flex items-center gap-2 ${onClose ? "justify-end" : "justify-center"}`}>
 				<BlueButton title="confirm" handleClick={() => handleSelect()} />
 				{onClose && <WhiteButton title="Close" handleClick={onClose} />}
 			</div>
@@ -110,7 +110,7 @@ const InputField: React.FC<{
 				id={`${id}_label`}
 				text={label}
 				required={required}
-				wStyle="col-start-1 p-2.5 w=1/6"
+				wStyle="col-start-1 p-2.5 w-1/6"
 			/>
 			<div className="flex col-start-2 col-span-4 p-2">
 				<ControllTextBox
