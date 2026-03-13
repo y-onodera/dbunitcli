@@ -16,10 +16,10 @@ export default function ResourceFileDialog({
 	handleSave,
 }: DialogProps) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
+	const [value, setValue] = useState(fileName);
 	useEffect(() => {
 		dialogRef.current?.showModal();
 	}, []);
-	const [value, setValue] = useState(fileName);
 	return (
 		<dialog
 			ref={dialogRef}
