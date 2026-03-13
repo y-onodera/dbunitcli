@@ -5,7 +5,7 @@ import {
 	useState,
 } from "react";
 import { BlueButton, ButtonWithIcon } from "../../components/element/Button";
-import { FileIcon, SettingIcon } from "../../components/element/Icon";
+import { EditIcon, PreviewIcon } from "../../components/element/Icon";
 import {
 	ControllTextBox,
 	InputLabel,
@@ -213,7 +213,7 @@ function JdbcPropertiesPreviewButton({
 				handleClick={() => setShowDialog(true)}
 				id="jdbcPropertiesPreviewButton"
 			>
-				<FileIcon title="Preview Properties" fill="white" />
+				<PreviewIcon title="Preview Properties" fill="white" />
 			</ButtonWithIcon>
 			{showDialog && (
 				<JdbcPropertiesPreviewDialog
@@ -246,7 +246,7 @@ function JdbcUrlBuilderButton({
 				handleClick={() => setShowDialog(true)}
 				id="jdbcUrlBuilderButton"
 			>
-				<SettingIcon title="JDBC URL Builder" fill="white" />
+				<EditIcon title="JDBC URL Builder" fill="white" />
 			</ButtonWithIcon>
 			{showDialog && (
 				<JdbcUrlBuilderDialog
