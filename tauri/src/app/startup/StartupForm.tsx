@@ -88,7 +88,7 @@ const StartupForm: React.FC<{ onSelect: () => void; onClose?: () => void }> = ({
 					error={errors.resultBase}
 				/>
 			</div>
-			<div className="flex items-center justify-center gap-2">
+			<div className={`flex items-center gap-2 ${onClose ? "justify-end" : "justify-center"}`}>
 				<BlueButton title="confirm" handleClick={() => handleSelect()} />
 				{onClose && <WhiteButton title="Close" handleClick={onClose} />}
 			</div>
