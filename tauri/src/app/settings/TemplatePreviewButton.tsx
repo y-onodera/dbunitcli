@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ButtonWithIcon } from "../../components/element/Button";
-import { FileIcon } from "../../components/element/Icon";
+import { PreviewIcon } from "../../components/element/Icon";
 import { SettingDialog } from "../../components/dialog/SettingDialog";
 import { useTemplateLoadContent, useTemplateSaveContent } from "../../hooks/useTemplate";
 
@@ -56,7 +56,7 @@ export default function TemplatePreviewButton({ path }: { path: string }) {
 				handleClick={() => setShowDialog(true)}
 				id="templatePreviewButton"
 			>
-				<FileIcon title="Edit Template" fill="white" />
+				<PreviewIcon title="Edit Template" fill="white" />
 			</ButtonWithIcon>
 			{showDialog && (
 				<TemplatePreviewDialog
