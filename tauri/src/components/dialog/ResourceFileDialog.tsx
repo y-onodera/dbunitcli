@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BlueButton, WhiteButton } from "../element/Button";
 import { ControllTextBox, InputLabel } from "../element/Input";
 
@@ -15,10 +15,14 @@ export default function ResourceFileDialog({
 	fileName,
 	handleSave,
 }: DialogProps) {
+	const dialogRef = useRef<HTMLDialogElement>(null);
 	const [value, setValue] = useState(fileName);
+	useEffect(() => {
+		dialogRef.current?.showModal();
+	}, []);
 	return (
 		<dialog
-			open
+			ref={dialogRef}
 			onClose={handleDialogClose}
 			className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 bg-white border border-gray-200"
 		>
