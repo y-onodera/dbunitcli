@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { DirIcon } from "../../components/element/Icon";
+import { DirectoryButton } from "../../components/element/ButtonIcon";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import StartupForm from "../startup/StartupForm";
 
@@ -11,14 +11,7 @@ export default function Header() {
 			<div className="flex items-center justify-between">
 				<div className="flex items-center justify-start rtl:justify-end gap-2">
 					<h1>DBunit CLI</h1>
-					<button
-						type="button"
-						className="p-1 rounded-lg hover:bg-gray-200 transition duration-100"
-						onClick={() => setShowWorkspaceDialog(true)}
-						title="ChangeWorkspace"
-					>
-						<DirIcon title="ChangeWorkspace" />
-					</button>
+					<DirectoryButton title="ChangeWorkspace" handleClick={() => setShowWorkspaceDialog(true)} />
 				</div>
 				{selected.name && <h1>{`${selected.command}: ${selected.name}`}</h1>}
 			</div>
