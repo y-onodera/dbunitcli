@@ -110,7 +110,7 @@ const InputField: React.FC<{
 				id={`${id}_label`}
 				text={label}
 				required={required}
-				wStyle="col-start-1 p-2.5 w=1/6"
+				wStyle="col-start-1 p-2.5 w-1/6"
 			/>
 			<div className="flex col-start-2 col-span-4 p-2">
 				<ControllTextBox
