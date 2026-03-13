@@ -26,6 +26,18 @@ paths:
 - disabled ボタン: `bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed`（`Button` の props で渡す）
 - コンポーネントが提供するスタイルに手を加えない。カスタムが必要なら `Button` の props を使う
 
+## ButtonWithIcon のアイコン選択ルール
+
+テキストボックス横の `ButtonWithIcon` に渡すアイコンは用途に応じて以下を使い分ける：
+
+| 用途 | アイコン | 例 |
+|------|---------|-----|
+| 複数の選択肢を持つドロップダウンメニュー | `SettingIcon`（縦三点リーダー） | CommandFormElement の DropDownMenu |
+| ダイアログを起動（編集・ビルダー系） | `EditIcon`（鉛筆） | JdbcUrlBuilderButton |
+| ダイアログを起動（プレビュー・参照系） | `PreviewIcon`（目のアイコン） | JdbcPropertiesPreviewButton, TemplatePreviewButton |
+| ファイル選択ダイアログ | `FileIcon` | FileChooser の FileButton |
+| ディレクトリ選択ダイアログ | `DirIcon` | DirectoryChooser の DirectoryButton |
+
 ## ExpandButton の caption
 - パターン: `"<type> option"`（英語小文字）
 - 例: `"traversal option"`, `"table option"`, `"csv option"`
