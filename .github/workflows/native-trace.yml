@@ -7,7 +7,7 @@ on:
     paths:
       - '.github/workflows/native-trace.yml'
   workflow_dispatch:
-  
+
 jobs:
   build:
     runs-on: windows-latest
@@ -16,7 +16,7 @@ jobs:
       - name: Set up graalvm
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'graalvm'
           cache: 'maven'
       - name: postgresql setup

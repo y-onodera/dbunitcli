@@ -118,25 +118,25 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
-            <version>21.0.1</version>
+            <version>25.0.2</version>
             <scope>${javafx.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>21.0.1</version>
+            <version>25.0.2</version>
             <scope>${javafx.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>21.0.1</version>
+            <version>25.0.2</version>
             <scope>${javafx.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
-            <version>21.0.1</version>
+            <version>25.0.2</version>
             <scope>${javafx.scope}</scope>
         </dependency>
     </dependencies>
@@ -158,8 +158,9 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
+                    <source>25</source>
+                    <target>25</target>
+                    <release>25</release>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
