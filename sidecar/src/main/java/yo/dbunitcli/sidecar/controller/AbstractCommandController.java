@@ -15,6 +15,7 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.CommandRequestDto;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     @Get(uri = "reset", produces = MediaType.APPLICATION_JSON)
     public String reset() {
         try {
-            return this.toJson(this.toResponse(new CommandParameters(this.getCommandType(), new String[]{})));
+            return this.toJson(new CommandParameters(this.getCommandType(), new String[]{}).serialize());
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -121,7 +122,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     @Post(uri = "shell", produces = MediaType.TEXT_PLAIN)
     public String shell(@Body final CommandRequestDto body) throws IOException {
         try {
-            return java.nio.file.Path.of(this.workspace.saveShell(this.getCommandType(), body.getName())).getParent().toString();
+            return Path.of(this.workspace.saveShell(this.getCommandType(), body.getName())).getParent().toString();
         } catch (IOException e) {
             throw e;
         } catch (final Throwable th) {
@@ -133,8 +134,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     @Post(uri = "parameterize", produces = MediaType.APPLICATION_JSON)
     public String parameterize(@Body final CommandRequestDto input) throws IOException {
         try {
-            String parameterizeName = this.workspace.parameterize(this.getCommandType(), input.getName());
-            return this.load(Type.parameterize, parameterizeName);
+            return this.load(Type.parameterize, this.workspace.parameterize(this.getCommandType(), input.getName()));
         } catch (IOException e) {
             throw e;
         } catch (final Throwable th) {
@@ -165,7 +165,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     protected String load(final yo.dbunitcli.application.CommandType commandType, final String name) {
         return this.workspace.options().select(commandType, name).map(target -> {
             try {
-                return this.toJson(this.toResponse(target));
+                return this.toJson(target.serialize());
             } catch (final IOException th) {
                 AbstractCommandController.LOGGER.error("cause:", th);
                 throw new ApplicationException(th);
@@ -178,11 +178,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     }
 
     protected Map<String, Object> requestToResponse(final Map<String, String> input) {
-        return this.toResponse(new CommandParameters(this.getCommandType(), input));
-    }
-
-    protected Map<String, Object> toResponse(final CommandParameters commandParameters) {
-        return commandParameters.toOptionParameters().serialize();
+        return new CommandParameters(this.getCommandType(), input).serialize();
     }
 
     protected String toJson(final Map<String, Object> object) throws IOException {

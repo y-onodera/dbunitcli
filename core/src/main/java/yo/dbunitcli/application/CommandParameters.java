@@ -39,6 +39,10 @@ public record CommandParameters(CommandType type, String[] args) {
                                                     .toArgs(false));
     }
 
+    public Map<String,Object> serialize() {
+        return this.toOptionParameters().serialize();
+    }
+
     public void exec(final String name) {
         this.type.getCommand().exec(name, this.args(), Parameter.none());
     }

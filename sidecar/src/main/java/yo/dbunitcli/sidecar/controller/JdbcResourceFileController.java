@@ -72,8 +72,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<R
         final JdbcOption option = new JdbcOption("jdbc", body.getProperties(), body.getUrl(), body.getUser(), body.getPass());
         try {
             conn = option.getDatabaseConnectionLoader().loadConnection();
-            final String[] tableNames = conn.createDataSet().getTableNames();
-            return ObjectMapper.getDefault().writeValueAsString(tableNames);
+            return ObjectMapper.getDefault().writeValueAsString(conn.createDataSet().getTableNames());
         } catch (final Throwable e) {
             LOGGER.error("Failed to get table list", e);
             return "[]";
