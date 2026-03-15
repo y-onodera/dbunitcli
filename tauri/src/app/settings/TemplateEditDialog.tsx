@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ResourceFileDialog } from "../../components/dialog";
+import { SettingDialog } from "../../components/dialog";
 import { useTemplateLoadContent, useTemplateSaveContent } from "../../hooks/useTemplate";
 
 export default function TemplateEditDialog({
@@ -39,7 +39,7 @@ export default function TemplateEditDialog({
 	};
 
 	return (
-		<ResourceFileDialog
+		<SettingDialog
 			fileName={name}
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
@@ -56,6 +56,6 @@ export default function TemplateEditDialog({
 					/>
 				)}
 			</div>
-		</ResourceFileDialog>
+		</SettingDialog>
 	);
 }

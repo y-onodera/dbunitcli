@@ -8,34 +8,85 @@ import {
 	SelectBox,
 } from "../element/Input";
 
-export type SettingDialogProps<T> = {
-	setting: T;
+type CommonProps = {
 	handleDialogClose: () => void;
-	handleCommit: (newSettings: T) => void;
 	children: ReactNode;
 	commitLabel?: string;
 };
 
+type SettingMode<T> = {
+	setting: T;
+	handleCommit: (newSettings: T) => void;
+	fileName?: never;
+	handleSave?: never;
+};
+
+type FileMode = {
+	setting?: never;
+	handleCommit?: never;
+	fileName: string;
+	handleSave: (path: string) => void;
+};
+
+export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
+
 export function SettingDialog<T>(props: SettingDialogProps<T>) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
+	const [fileNameValue, setFileNameValue] = useState(props.fileName ?? "");
 	useEffect(() => {
 		dialogRef.current?.showModal();
 	}, []);
+
+	const isFileMode = props.fileName !== undefined;
 
 	return (
 		<dialog
 			ref={dialogRef}
 			onClose={props.handleDialogClose}
-			className="overflow-y-auto fixed 
+			className="overflow-y-auto fixed
                     top-0 right-0 left-0 z-50
                     bg-white
                     border border-gray-200"
 		>
-			<div className="p-4 rounded-lg mt-2">{props.children}</div>
+			<div
+				className={
+					isFileMode
+						? "relative overflow-x-auto flex flex-col gap-4"
+						: "p-4 rounded-lg mt-2"
+				}
+			>
+				{props.children}
+			</div>
+			{isFileMode && (
+				<div className="px-4 pt-4">
+					<div className="grid grid-cols-5 pb-2">
+						<InputLabel
+							id="fileNameLabel"
+							text="name"
+							required={false}
+							wStyle="p-2.5 w-1/5"
+						/>
+						<ControllTextBox
+							name="fileName"
+							id="fileName"
+							required={true}
+							wStyle="col-start-2 col-span-4"
+							value={fileNameValue}
+							handleChange={(ev) => setFileNameValue(ev.target.value)}
+						/>
+					</div>
+				</div>
+			)}
 			<div className="flex items-center justify-end p-4 gap-2">
 				<BlueButton
 					title={props.commitLabel ?? "Save"}
-					handleClick={() => props.handleCommit(props.setting)}
+					handleClick={() => {
+						if (isFileMode) {
+							props.handleSave(fileNameValue);
+						} else {
+							props.handleCommit(props.setting as T);
+						}
+					}}
 				/>
 				<WhiteButton title="Close" handleClick={props.handleDialogClose} />
 			</div>

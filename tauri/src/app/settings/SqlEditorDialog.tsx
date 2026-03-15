@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ResourceFileDialog } from '../../components/dialog';
+import { SettingDialog } from '../../components/dialog';
 import { useSaveDataSource } from '../../hooks/useQueryDatasource';
 import type { QueryDatasourceType } from '../../model/QueryDatasource';
 
@@ -27,7 +27,7 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
     };
 
     return (
-        <ResourceFileDialog
+        <SettingDialog
             handleDialogClose={props.handleDialogClose}
             fileName={props.fileName}
             handleSave={handleCommit}
@@ -48,6 +48,6 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
                     />
                 </div>
             </div>
-        </ResourceFileDialog>
+        </SettingDialog>
     );
 }

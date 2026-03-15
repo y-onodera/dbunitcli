@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ResourceFileDialog } from "../../components/dialog";
+import { SettingDialog } from "../../components/dialog";
 import { useJdbcTables } from "../../hooks/useJdbc";
 import { useSaveDataSource } from "../../hooks/useQueryDatasource";
 
@@ -157,7 +157,7 @@ export default function JdbcTableSelectorDialog({
 	};
 
 	return (
-		<ResourceFileDialog
+		<SettingDialog
 			fileName={fileName}
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSaveWithPath}
@@ -172,6 +172,6 @@ export default function JdbcTableSelectorDialog({
 					onToggle={toggleTable}
 				/>
 			</div>
-		</ResourceFileDialog>
+		</SettingDialog>
 	);
 }

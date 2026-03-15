@@ -1,5 +1,5 @@
 import { Suspense, use, useState } from "react";
-import { ResourceFileDialog, SettingTable } from "../../components/dialog";
+import { SettingDialog, SettingTable } from "../../components/dialog";
 import { useLoadXlsxSchema, useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
 import { type CellSetting, type RowSetting, XlsxSchema, createCellSetting, createRowSetting } from "../../model/XlsxSchema";
 import type { SrcInfo } from "../form/FormElementProp";
@@ -37,7 +37,7 @@ function Dialog(props: {
     const [xlsxSchema, setXlsxSchema] = useState(xlsxSchemaData);
 
     return (
-        <ResourceFileDialog
+        <SettingDialog
             handleDialogClose={props.handleDialogClose}
             fileName={props.fileName}
             handleSave={async (fileName) => {
@@ -91,6 +91,6 @@ function Dialog(props: {
                 newSetting={createCellSetting}
                 getKey={(setting) => setting.displayName()}
             />
-        </ResourceFileDialog>
+        </SettingDialog>
     );
 }

@@ -1,4 +1,4 @@
-import { ResourceFileDialog } from "../../components/dialog";
+import { SettingDialog } from "../../components/dialog";
 import { PreviewField } from "../../components/element/Input";
 
 type JdbcSavePropertiesDialogProps = {
@@ -13,7 +13,7 @@ export default function JdbcSavePropertiesDialog({
 	handleSave,
 }: JdbcSavePropertiesDialogProps) {
 	return (
-		<ResourceFileDialog fileName="" handleDialogClose={handleDialogClose} handleSave={handleSave}>
+		<SettingDialog fileName="" handleDialogClose={handleDialogClose} handleSave={handleSave}>
 			<div className="w-[480px] p-4">
 				<h2 className="text-lg font-bold mb-4">Save JDBC Properties</h2>
 
@@ -55,6 +55,6 @@ export default function JdbcSavePropertiesDialog({
 					/>
 				</div>
 			</div>
-		</ResourceFileDialog>
+		</SettingDialog>
 	);
 }

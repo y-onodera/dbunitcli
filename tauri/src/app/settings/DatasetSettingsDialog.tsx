@@ -1,5 +1,5 @@
 import { Suspense, use, useState } from 'react';
-import { ResourceFileDialog, SettingTable } from '../../components/dialog';
+import { SettingDialog, SettingTable } from '../../components/dialog';
 import { useLoadDatasetSettings, useSaveDatasetSettings } from '../../hooks/useDatasetSettings';
 import type { DatasetSetting } from "../../model/DatasetSettings";
 import { DatasetSettings, newDatasetSetting } from "../../model/DatasetSettings";
@@ -32,7 +32,7 @@ function Dialog(props: {
 	const dataSettingsData = use(props.promise);
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(dataSettingsData);
 	return (
-		<ResourceFileDialog
+		<SettingDialog
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
 			handleSave={async (fileName) => {
@@ -72,6 +72,6 @@ function Dialog(props: {
 				newSetting={newDatasetSetting}
 				getKey={(setting) => setting.displayName()}
 			/>
-		</ResourceFileDialog>
+		</SettingDialog>
 	);
 }
