@@ -16,3 +16,4 @@
 tauri/src-tauri/Cargo.lock
 tauri/src/App.css
 tauri/bun.lock
+node_modules/
