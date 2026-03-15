@@ -1,8 +1,6 @@
-import { Fragment, useEffect, useRef, useState } from "react";
-import {
-	BlueSettingButton,
-	ExpandButton,
-} from "../../components/element/ButtonIcon";
+import { Fragment, useState } from "react";
+import { ExpandButton } from "../../components/element/ButtonIcon";
+import DropDownMenu from "../../components/element/DropDownMenu";
 import {
 	CheckBox,
 	ControllTextBox,
@@ -213,7 +211,7 @@ function Text(prop: Prop) {
 				</div>
 				<div className="flex">
 					{showDopDownMenu && !prop.hidden && (
-						<DropDownMenu
+						<TextDropDownMenu
 							prefix={prop.prefix}
 							element={prop.element}
 							path={path}
@@ -230,7 +228,7 @@ function Text(prop: Prop) {
 	);
 }
 
-function DropDownMenu({
+function TextDropDownMenu({
 	prefix,
 	element,
 	path,
@@ -241,150 +239,105 @@ function DropDownMenu({
 	isValueInDatalist,
 }: FileProp & {
 	srcType?: string;
-	datasources?: string[];
 	isValueInDatalist?: boolean;
 }) {
-	const [showMenu, setShowMenu] = useState(false);
 	const { connectionOk } = useJdbcConnectionState();
-	const buttonRef = useRef<HTMLDivElement>(null);
-	const menuRef = useRef<HTMLDivElement>(null);
-	const [menuPosition, setMenuPosition] = useState<"right" | "left">("right");
-	useEffect(() => {
-		if (showMenu && buttonRef.current) {
-			const rect = buttonRef.current.getBoundingClientRect();
-			const viewportWidth = window.innerWidth;
-			const menuWidth = 96;
-
-			if (rect.right + menuWidth > viewportWidth) {
-				setMenuPosition("left");
-			} else {
-				setMenuPosition("right");
-			}
-		}
-		function handleClickOutside(event: MouseEvent) {
-			if (
-				menuRef.current &&
-				!menuRef.current.contains(event.target as Node) &&
-				buttonRef.current &&
-				!buttonRef.current.contains(event.target as Node)
-			) {
-				setShowMenu(false);
-			}
-		}
-		if (showMenu) {
-			document.addEventListener("mousedown", handleClickOutside);
-			return () => {
-				document.removeEventListener("mousedown", handleClickOutside);
-			};
-		}
-	}, [showMenu]);
 
 	return (
-		<div className="relative" ref={buttonRef}>
-			<BlueSettingButton handleClick={() => setShowMenu(!showMenu)} />
-			{showMenu && (
-				<div
-					ref={menuRef}
-					className="absolute z-50 p-4 text-gray-900 bg-white border border-gray-100 rounded-lg shadow-md"
-					style={{
-						...(menuPosition === "right"
-							? { left: "100%", top: 0 }
-							: { right: "100%", top: 0 }),
-					}}
-				>
-					<ul className="space-y-4">
-						{element.name === "setting" && !hidden && (
+		<DropDownMenu>
+			{(closeMenu) => (
+				<>
+					{element.name === "setting" && !hidden && (
+						<li>
+							<DatasetSettingEditButton path={path} setPath={setPath} />
+						</li>
+					)}
+					{element.name === "xlsxSchema" && !hidden && (
+						<li>
+							<XlsxSchemaEditButton
+								path={path}
+								setPath={setPath}
+								srcInfo={srcInfo}
+							/>
+						</li>
+					)}
+					{element.name === "src" &&
+						!hidden &&
+						isSqlRelatedType(srcType ?? "") && (
 							<li>
-								<DatasetSettingEditButton path={path} setPath={setPath} />
-							</li>
-						)}
-						{element.name === "xlsxSchema" && !hidden && (
-							<li>
-								<XlsxSchemaEditButton
+								<SqlEditorButton
+									type={srcType as QueryDatasourceType}
 									path={path}
 									setPath={setPath}
-									srcInfo={srcInfo}
 								/>
 							</li>
 						)}
-						{element.name === "src" &&
-							!hidden &&
-							isSqlRelatedType(srcType ?? "") && (
-								<li>
-									<SqlEditorButton
-										type={srcType as QueryDatasourceType}
-										path={path}
-										setPath={setPath}
-									/>
-								</li>
-							)}
-						{element.name === "src" &&
-							!hidden &&
-							srcType === "table" &&
-							connectionOk && (
-								<li>
-									<JdbcTableSelectorButton path={path} setPath={setPath} />
-								</li>
-							)}
-						{element.name === "templateGroup" && !hidden && (
+					{element.name === "src" &&
+						!hidden &&
+						srcType === "table" &&
+						connectionOk && (
 							<li>
-								<TemplateEditButton path={path} setPath={setPath} />
+								<JdbcTableSelectorButton path={path} setPath={setPath} />
 							</li>
 						)}
-						{element.name === "templateGroup" && !hidden && isValueInDatalist && (
+					{element.name === "templateGroup" && !hidden && (
+						<li>
+							<TemplateEditButton path={path} setPath={setPath} />
+						</li>
+					)}
+					{element.name === "templateGroup" && !hidden && isValueInDatalist && (
+						<li>
+							<RemoveTemplateButton path={path} setPath={setPath} />
+						</li>
+					)}
+					{element.name === "setting" && !hidden && isValueInDatalist && (
+						<li>
+							<RemoveDatasetSettingButton path={path} setPath={setPath} />
+						</li>
+					)}
+					{element.name === "xlsxSchema" && !hidden && isValueInDatalist && (
+						<li>
+							<RemoveXlsxSchemaButton path={path} setPath={setPath} />
+						</li>
+					)}
+					{(srcType === "sql" || srcType === "table") &&
+						!hidden &&
+						isValueInDatalist && (
 							<li>
-								<RemoveTemplateButton path={path} setPath={setPath} />
-							</li>
-						)}
-						{element.name === "setting" && !hidden && isValueInDatalist && (
-							<li>
-								<RemoveDatasetSettingButton path={path} setPath={setPath} />
-							</li>
-						)}
-						{element.name === "xlsxSchema" && !hidden && isValueInDatalist && (
-							<li>
-								<RemoveXlsxSchemaButton path={path} setPath={setPath} />
-							</li>
-						)}
-						{(srcType === "sql" || srcType === "table") &&
-							!hidden &&
-							isValueInDatalist && (
-								<li>
-									<RemoveSqlEditorButton
-										path={path}
-										setPath={setPath}
-										type={srcType as QueryDatasourceType}
-									/>
-								</li>
-							)}
-						{element.attribute.type.includes("FILE") && (
-							<li>
-								<FileChooser
-									prefix={prefix}
-									element={element}
-									srcType={srcType}
+								<RemoveSqlEditorButton
 									path={path}
 									setPath={setPath}
-									onSelect={() => setShowMenu(false)}
+									type={srcType as QueryDatasourceType}
 								/>
 							</li>
 						)}
-						{element.attribute.type.includes("DIR") && (
-							<li>
-								<DirectoryChooser
-									prefix={prefix}
-									element={element}
-									srcType={srcType}
-									path={path}
-									setPath={setPath}
-									onSelect={() => setShowMenu(false)}
-								/>
-							</li>
-						)}
-					</ul>
-				</div>
+					{element.attribute.type.includes("FILE") && (
+						<li>
+							<FileChooser
+								prefix={prefix}
+								element={element}
+								srcType={srcType}
+								path={path}
+								setPath={setPath}
+								onSelect={closeMenu}
+							/>
+						</li>
+					)}
+					{element.attribute.type.includes("DIR") && (
+						<li>
+							<DirectoryChooser
+								prefix={prefix}
+								element={element}
+								srcType={srcType}
+								path={path}
+								setPath={setPath}
+								onSelect={closeMenu}
+							/>
+						</li>
+					)}
+				</>
 			)}
-		</div>
+		</DropDownMenu>
 	);
 }
 function Check(prop: Prop) {

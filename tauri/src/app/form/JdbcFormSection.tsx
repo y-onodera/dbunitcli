@@ -2,12 +2,14 @@ import {
 	type Dispatch,
 	type SetStateAction,
 	useCallback,
-	useEffect,
-	useRef,
 	useState,
 } from "react";
 import { BlueButton } from "../../components/element/Button";
-import { BlueEditButton, BlueSettingButton, PreviewButton } from "../../components/element/ButtonIcon";
+import {
+	BlueEditButton,
+	PreviewButton,
+} from "../../components/element/ButtonIcon";
+import DropDownMenu from "../../components/element/DropDownMenu";
 import {
 	ControllTextBox,
 	InputLabel,
@@ -133,8 +135,7 @@ function JdbcTextField({
 	const hasButton = isJdbcUrl || isJdbcProperties;
 
 	const setPath: Dispatch<SetStateAction<string>> = (action) => {
-		const newPath =
-			typeof action === "function" ? action(value) : action;
+		const newPath = typeof action === "function" ? action(value) : action;
 		onValueChange(element.name, newPath);
 	};
 
@@ -169,12 +170,7 @@ function JdbcTextField({
 							onApplyValues={onApplyValues}
 						/>
 					)}
-					{isJdbcUrl && (
-						<JdbcUrlBuilderButton
-							path={value}
-							setPath={setPath}
-						/>
-					)}
+					{isJdbcUrl && <JdbcUrlBuilderButton path={value} setPath={setPath} />}
 				</div>
 			</div>
 		</div>
@@ -246,85 +242,42 @@ function JdbcPropertiesDropDownMenu({
 }) {
 	const settings = useResourcesSettings();
 	const isValueInDatalist = settings.jdbcFiles.includes(path);
-	const [showMenu, setShowMenu] = useState(false);
-	const buttonRef = useRef<HTMLDivElement>(null);
-	const menuRef = useRef<HTMLDivElement>(null);
-	const [menuPosition, setMenuPosition] = useState<"right" | "left">("right");
-
-	useEffect(() => {
-		if (showMenu && buttonRef.current) {
-			const rect = buttonRef.current.getBoundingClientRect();
-			const menuWidth = 96;
-			if (rect.right + menuWidth > window.innerWidth) {
-				setMenuPosition("left");
-			} else {
-				setMenuPosition("right");
-			}
-		}
-		function handleClickOutside(event: MouseEvent) {
-			if (
-				menuRef.current &&
-				!menuRef.current.contains(event.target as Node) &&
-				buttonRef.current &&
-				!buttonRef.current.contains(event.target as Node)
-			) {
-				setShowMenu(false);
-			}
-		}
-		if (showMenu) {
-			document.addEventListener("mousedown", handleClickOutside);
-			return () => {
-				document.removeEventListener("mousedown", handleClickOutside);
-			};
-		}
-	}, [showMenu]);
 
 	return (
-		<div className="relative mr-24" ref={buttonRef}>
-			<BlueSettingButton handleClick={() => setShowMenu(!showMenu)} />
-			{showMenu && (
-				<div
-					ref={menuRef}
-					className="absolute z-50 p-4 text-gray-900 bg-white border border-gray-100 rounded-lg shadow-md"
-					style={{
-						...(menuPosition === "right"
-							? { left: "100%", top: 0 }
-							: { right: "100%", top: 0 }),
-					}}
-				>
-					<ul className="space-y-4">
-						{path && onApplyValues && (
-							<li>
-								<JdbcPropertiesPreviewButton
-									path={path}
-									onApplyValues={onApplyValues}
-								/>
-							</li>
-						)}
-						{path && isValueInDatalist && (
-							<li>
-								<RemoveJdbcPropertiesButton
-									path={path}
-									setPath={(value) => {
-										setPath(value);
-										setShowMenu(false);
-									}}
-								/>
-							</li>
-						)}
+		<DropDownMenu className="mr-24">
+			{(closeMenu) => (
+				<>
+					{path && onApplyValues && (
 						<li>
-							<FileChooser
-								prefix={prefix}
-								element={element}
+							<JdbcPropertiesPreviewButton
 								path={path}
-								setPath={setPath}
-								onSelect={() => setShowMenu(false)}
+								onApplyValues={onApplyValues}
 							/>
 						</li>
-					</ul>
-				</div>
+					)}
+					{path && isValueInDatalist && (
+						<li>
+							<RemoveJdbcPropertiesButton
+								path={path}
+								setPath={(value) => {
+									setPath(value);
+									closeMenu();
+								}}
+							/>
+						</li>
+					)}
+					<li>
+						<FileChooser
+							prefix={prefix}
+							element={element}
+							path={path}
+							setPath={setPath}
+							onSelect={closeMenu}
+						/>
+					</li>
+				</>
 			)}
-		</div>
+		</DropDownMenu>
 	);
 }
 
@@ -398,9 +351,7 @@ function JdbcSavePropertiesButton({
 	const [showDialog, setShowDialog] = useState(false);
 
 	const hasAnyValue =
-		!!jdbcValues.jdbcUrl ||
-		!!jdbcValues.jdbcUser ||
-		!!jdbcValues.jdbcPass;
+		!!jdbcValues.jdbcUrl || !!jdbcValues.jdbcUser || !!jdbcValues.jdbcPass;
 
 	return (
 		<>
