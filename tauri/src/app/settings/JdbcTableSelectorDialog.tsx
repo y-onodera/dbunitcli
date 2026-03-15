@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SettingDialog } from "../../components/dialog";
 import { useJdbcTables } from "../../hooks/useJdbc";
 import { useSaveDataSource } from "../../hooks/useQueryDatasource";
@@ -107,16 +107,17 @@ export default function JdbcTableSelectorDialog({
 	const [loading, setLoading] = useState(true);
 	const getJdbcTables = useJdbcTables();
 	const saveDataSource = useSaveDataSource();
+	const jdbcValuesRef = useRef(jdbcValues);
+	const currentContentRef = useRef(currentContent);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: load tables once on mount with props captured at open time
 	useEffect(() => {
 		const load = async () => {
 			setLoading(true);
 			try {
-				const result = await getJdbcTables(jdbcValues);
+				const result = await getJdbcTables(jdbcValuesRef.current);
 				setTables(result);
 				const existing = new Set(
-					currentContent
+					currentContentRef.current
 						.split("\n")
 						.map((t) => t.trim())
 						.filter((t) => t.length > 0),
@@ -127,7 +128,7 @@ export default function JdbcTableSelectorDialog({
 			}
 		};
 		void load();
-	}, []);
+	}, [getJdbcTables]);
 
 	const toggleTable = (table: string) => {
 		setSelected((prev) => {

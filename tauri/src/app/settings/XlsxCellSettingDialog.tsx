@@ -14,14 +14,20 @@ export default function XlsxCellSettingDialog(props: {
     const [target, setTarget] = useState(props.setting);
     const [sheetNames, setSheetNames] = useState<string[]>([]);
     const loadSheets = useXlsxSheets();
+    const srcPath = props.srcInfo?.srcPath ?? "";
+    const regTableInclude = props.srcInfo?.regTableInclude ?? "";
+    const regTableExclude = props.srcInfo?.regTableExclude ?? "";
+    const recursive = props.srcInfo?.recursive ?? "";
+    const regInclude = props.srcInfo?.regInclude ?? "";
+    const regExclude = props.srcInfo?.regExclude ?? "";
+    const extension = props.srcInfo?.extension ?? "";
 
     useEffect(() => {
-        if (!props.srcInfo?.srcPath) {
+        if (!srcPath) {
             return;
         }
-        loadSheets(props.srcInfo).then(setSheetNames);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.srcInfo?.srcPath, props.srcInfo?.regTableInclude, props.srcInfo?.regTableExclude, props.srcInfo?.recursive, props.srcInfo?.regInclude, props.srcInfo?.regExclude, props.srcInfo?.extension]);
+        loadSheets({ srcPath, regTableInclude, regTableExclude, recursive, regInclude, regExclude, extension }).then(setSheetNames);
+    }, [srcPath, regTableInclude, regTableExclude, recursive, regInclude, regExclude, extension, loadSheets]);
 
     return (
         <SettingDialog setting={target} handleDialogClose={props.handleDialogClose} handleCommit={props.handleCommit}>

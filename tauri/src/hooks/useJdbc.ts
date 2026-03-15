@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
@@ -50,7 +51,7 @@ function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 
 export const useJdbcReadContent = () => {
 	const { apiUrl } = useEnviroment();
-	return async (path: string): Promise<Record<string, string>> => {
+	return useCallback(async (path: string): Promise<Record<string, string>> => {
 		const params = {
 			endpoint: `${apiUrl}jdbc/read-content`,
 			options: {
@@ -66,12 +67,12 @@ export const useJdbcReadContent = () => {
 			handleFetchError((e as Error).message, params);
 			return {};
 		}
-	};
+	}, [apiUrl]);
 };
 
 export const useJdbcTables = () => {
 	const { apiUrl } = useEnviroment();
-	return async (jdbcValues: Record<string, string>): Promise<string[]> => {
+	return useCallback(async (jdbcValues: Record<string, string>): Promise<string[]> => {
 		const params = {
 			endpoint: `${apiUrl}jdbc/tables`,
 			options: {
@@ -87,7 +88,7 @@ export const useJdbcTables = () => {
 			handleFetchError((e as Error).message, params);
 			return [];
 		}
-	};
+	}, [apiUrl]);
 };
 
 export const useJdbcConnectionTest = () => {

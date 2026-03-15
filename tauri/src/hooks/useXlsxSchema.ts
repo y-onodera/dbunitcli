@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import type { SrcInfo } from "../app/form/FormElementProp";
@@ -114,13 +115,13 @@ async function deleteXlsxSchema(
 }
 
 export const useXlsxSheets = () => {
-	const environment = useEnviroment();
-	return async (srcInfo: SrcInfo): Promise<string[]> => {
+	const { apiUrl } = useEnviroment();
+	return useCallback(async (srcInfo: SrcInfo): Promise<string[]> => {
 		if (!srcInfo.srcPath) {
 			return [];
 		}
 		const fetchParams = {
-			endpoint: `${environment.apiUrl}xlsx-schema/sheets`,
+			endpoint: `${apiUrl}xlsx-schema/sheets`,
 			options: {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -130,5 +131,5 @@ export const useXlsxSheets = () => {
 		return fetchData(fetchParams)
 			.then((r) => r.json())
 			.catch(() => []);
-	};
+	}, [apiUrl]);
 };
