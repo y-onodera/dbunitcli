@@ -44,7 +44,7 @@ export default function TemplateEditDialog({
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
 		>
-			<div className="w-[800px]">
+			<div className="w-[800px] p-4">
 				<h2 className="text-lg font-bold mb-2">Template File Edit</h2>
 				{content === null ? (
 					<p className="text-sm text-gray-400 p-3">Loading...</p>
