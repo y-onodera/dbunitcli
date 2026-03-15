@@ -42,7 +42,7 @@ export function IconButton({ iconType, title, handleClick }: IconButtonProps & {
     const IconComponent = IconComponents[iconType];
 
     return (
-        <ButtonIcon title={finalTitle} handleClick={handleClick}>
+        <ButtonIcon title="" handleClick={handleClick}>
             <IconComponent title={finalTitle} />
         </ButtonIcon>
     );
