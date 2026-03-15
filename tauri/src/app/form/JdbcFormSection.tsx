@@ -4,8 +4,8 @@ import {
 	useCallback,
 	useState,
 } from "react";
-import { BlueButton, ButtonWithIcon } from "../../components/element/Button";
-import { EditIcon, PreviewIcon } from "../../components/element/Icon";
+import { BlueButton } from "../../components/element/Button";
+import { EditButton, PreviewButton } from "../../components/element/ButtonIcon";
 import {
 	ControllTextBox,
 	InputLabel,
@@ -160,12 +160,12 @@ function JdbcTextField({
 					)}
 				</div>
 				<div className="flex">
-					{isJdbcProperties && (
-						<FileChooser
-							prefix={prefix}
-							element={element}
+					{isJdbcProperties && value && onApplyValues && (
+						<JdbcPropertiesPreviewButton
 							path={value}
-							setPath={setPath}
+							showDialog={showPreview}
+							setShowDialog={setShowPreview}
+							onApplyValues={onApplyValues}
 						/>
 					)}
 					{isJdbcProperties && value && (
@@ -174,12 +174,12 @@ function JdbcTextField({
 							setPath={(v) => onValueChange(element.name, v)}
 						/>
 					)}
-					{isJdbcProperties && value && onApplyValues && (
-						<JdbcPropertiesPreviewButton
+					{isJdbcProperties && (
+						<FileChooser
+							prefix={prefix}
+							element={element}
 							path={value}
-							showDialog={showPreview}
-							setShowDialog={setShowPreview}
-							onApplyValues={onApplyValues}
+							setPath={setPath}
 						/>
 					)}
 					{isJdbcUrl && (
@@ -209,12 +209,7 @@ function JdbcPropertiesPreviewButton({
 }) {
 	return (
 		<>
-			<ButtonWithIcon
-				handleClick={() => setShowDialog(true)}
-				id="jdbcPropertiesPreviewButton"
-			>
-				<PreviewIcon title="Preview Properties" fill="white" />
-			</ButtonWithIcon>
+			<PreviewButton handleClick={() => setShowDialog(true)} />
 			{showDialog && (
 				<JdbcPropertiesPreviewDialog
 					path={path}
@@ -242,12 +237,7 @@ function JdbcUrlBuilderButton({
 }) {
 	return (
 		<>
-			<ButtonWithIcon
-				handleClick={() => setShowDialog(true)}
-				id="jdbcUrlBuilderButton"
-			>
-				<EditIcon title="JDBC URL Builder" fill="white" />
-			</ButtonWithIcon>
+			<EditButton handleClick={() => setShowDialog(true)} />
 			{showDialog && (
 				<JdbcUrlBuilderDialog
 					currentUrl={path}
