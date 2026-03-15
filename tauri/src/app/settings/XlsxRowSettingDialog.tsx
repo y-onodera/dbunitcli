@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, Fieldset, SettingDialog, Text } from "../../components/dialog";
 import { ResourceDatalist } from "../../components/element/Input";
-import { useXlsxSheets } from "../../hooks/useXlsxSchema";
+import { useSrcInfoSheets } from "../../hooks/useXlsxSchema";
 import type { RowSetting } from "../../model/XlsxSchema";
 import type { SrcInfo } from "../form/FormElementProp";
 
@@ -12,16 +12,7 @@ export default function XlsxRowSettingDialog(props: {
     handleCommit: (newSettings: RowSetting) => void;
 }) {
     const [target, setTarget] = useState(props.setting);
-    const [sheetNames, setSheetNames] = useState<string[]>([]);
-    const loadSheets = useXlsxSheets();
-
-    useEffect(() => {
-        if (!props.srcInfo?.srcPath) {
-            return;
-        }
-        loadSheets(props.srcInfo).then(setSheetNames);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.srcInfo?.srcPath, props.srcInfo?.regTableInclude, props.srcInfo?.regTableExclude, props.srcInfo?.recursive, props.srcInfo?.regInclude, props.srcInfo?.regExclude, props.srcInfo?.extension]);
+    const sheetNames = useSrcInfoSheets(props.srcInfo);
 
     return (
         <SettingDialog setting={target} handleDialogClose={props.handleDialogClose} handleCommit={props.handleCommit}>

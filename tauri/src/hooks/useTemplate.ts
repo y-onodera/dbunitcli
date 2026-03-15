@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
@@ -6,7 +7,7 @@ type OperationResult = "success" | "failed";
 
 export const useTemplateLoadContent = () => {
 	const { apiUrl } = useEnviroment();
-	return async (name: string): Promise<string> => {
+	return useCallback(async (name: string): Promise<string> => {
 		const params = {
 			endpoint: `${apiUrl}template/load`,
 			options: {
@@ -23,7 +24,7 @@ export const useTemplateLoadContent = () => {
 			handleFetchError((e as Error).message, params);
 			return "";
 		}
-	};
+	}, [apiUrl]);
 };
 
 export const useDeleteTemplate = () => {

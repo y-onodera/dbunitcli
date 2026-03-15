@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import type { SrcInfo } from "../app/form/FormElementProp";
@@ -114,13 +115,13 @@ async function deleteXlsxSchema(
 }
 
 export const useXlsxSheets = () => {
-	const environment = useEnviroment();
-	return async (srcInfo: SrcInfo): Promise<string[]> => {
+	const { apiUrl } = useEnviroment();
+	return useCallback(async (srcInfo: SrcInfo): Promise<string[]> => {
 		if (!srcInfo.srcPath) {
 			return [];
 		}
 		const fetchParams = {
-			endpoint: `${environment.apiUrl}xlsx-schema/sheets`,
+			endpoint: `${apiUrl}xlsx-schema/sheets`,
 			options: {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -130,5 +131,26 @@ export const useXlsxSheets = () => {
 		return fetchData(fetchParams)
 			.then((r) => r.json())
 			.catch(() => []);
-	};
+	}, [apiUrl]);
+};
+
+export const useSrcInfoSheets = (srcInfo: SrcInfo | undefined): string[] => {
+	const [sheetNames, setSheetNames] = useState<string[]>([]);
+	const loadSheets = useXlsxSheets();
+	const srcPath = srcInfo?.srcPath ?? "";
+	const regTableInclude = srcInfo?.regTableInclude ?? "";
+	const regTableExclude = srcInfo?.regTableExclude ?? "";
+	const recursive = srcInfo?.recursive ?? "";
+	const regInclude = srcInfo?.regInclude ?? "";
+	const regExclude = srcInfo?.regExclude ?? "";
+	const extension = srcInfo?.extension ?? "";
+
+	useEffect(() => {
+		if (!srcPath) {
+			return;
+		}
+		loadSheets({ srcPath, regTableInclude, regTableExclude, recursive, regInclude, regExclude, extension }).then(setSheetNames);
+	}, [srcPath, regTableInclude, regTableExclude, recursive, regInclude, regExclude, extension, loadSheets]);
+
+	return sheetNames;
 };

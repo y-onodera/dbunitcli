@@ -16,7 +16,6 @@ export default function TemplateEditDialog({
 	const loadContent = useTemplateLoadContent();
 	const saveContent = useTemplateSaveContent();
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: loadContent is recreated each render but functionally stable
 	useEffect(() => {
 		if (!name) {
 			setContent("");
@@ -31,7 +30,7 @@ export default function TemplateEditDialog({
 		return () => {
 			cancelled = true;
 		};
-	}, [name]);
+	}, [name, loadContent]);
 
 	const handleSave = (path: string) =>
 		saveOnSuccess(
