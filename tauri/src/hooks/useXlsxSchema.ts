@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { useEnviroment } from "../context/EnviromentProvider";
+import { useCallback, useEffect, useState } from "react";
 import type { SrcInfo } from "../app/form/FormElementProp";
+import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { ResourcesSettings } from "../model/WorkspaceResources";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
@@ -116,22 +116,33 @@ async function deleteXlsxSchema(
 
 export const useXlsxSheets = () => {
 	const { apiUrl } = useEnviroment();
-	return useCallback(async (srcInfo: SrcInfo): Promise<string[]> => {
-		if (!srcInfo.srcPath) {
-			return [];
-		}
-		const fetchParams = {
-			endpoint: `${apiUrl}xlsx-schema/sheets`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ src: srcInfo.srcPath, regTableInclude: srcInfo.regTableInclude, regTableExclude: srcInfo.regTableExclude, recursive: srcInfo.recursive === "true", regInclude: srcInfo.regInclude, regExclude: srcInfo.regExclude, extension: srcInfo.extension }),
-			},
-		};
-		return fetchData(fetchParams)
-			.then((r) => r.json())
-			.catch(() => []);
-	}, [apiUrl]);
+	return useCallback(
+		async (srcInfo: SrcInfo): Promise<string[]> => {
+			if (!srcInfo.srcPath) {
+				return [];
+			}
+			const fetchParams = {
+				endpoint: `${apiUrl}xlsx-schema/sheets`,
+				options: {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						src: srcInfo.srcPath,
+						regTableInclude: srcInfo.regTableInclude,
+						regTableExclude: srcInfo.regTableExclude,
+						recursive: srcInfo.recursive === "true",
+						regInclude: srcInfo.regInclude,
+						regExclude: srcInfo.regExclude,
+						extension: srcInfo.extension,
+					}),
+				},
+			};
+			return fetchData(fetchParams)
+				.then((r) => r.json())
+				.catch(() => []);
+		},
+		[apiUrl],
+	);
 };
 
 export const useSrcInfoSheets = (srcInfo: SrcInfo | undefined): string[] => {
@@ -149,8 +160,25 @@ export const useSrcInfoSheets = (srcInfo: SrcInfo | undefined): string[] => {
 		if (!srcPath) {
 			return;
 		}
-		loadSheets({ srcPath, regTableInclude, regTableExclude, recursive, regInclude, regExclude, extension }).then(setSheetNames);
-	}, [srcPath, regTableInclude, regTableExclude, recursive, regInclude, regExclude, extension, loadSheets]);
+		loadSheets({
+			srcPath,
+			regTableInclude,
+			regTableExclude,
+			recursive,
+			regInclude,
+			regExclude,
+			extension,
+		}).then(setSheetNames);
+	}, [
+		srcPath,
+		regTableInclude,
+		regTableExclude,
+		recursive,
+		regInclude,
+		regExclude,
+		extension,
+		loadSheets,
+	]);
 
 	return sheetNames;
 };
