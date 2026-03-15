@@ -244,6 +244,8 @@ function JdbcPropertiesDropDownMenu({
 	setPath: Dispatch<SetStateAction<string>>;
 	onApplyValues?: (values: Partial<Record<string, string>>) => void;
 }) {
+	const settings = useResourcesSettings();
+	const isValueInDatalist = settings.jdbcFiles.includes(path);
 	const [showMenu, setShowMenu] = useState(false);
 	const buttonRef = useRef<HTMLDivElement>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
@@ -299,11 +301,14 @@ function JdbcPropertiesDropDownMenu({
 								/>
 							</li>
 						)}
-						{path && (
+						{path && isValueInDatalist && (
 							<li>
 								<RemoveJdbcPropertiesButton
 									path={path}
-									setPath={setPath}
+									setPath={(value) => {
+										setPath(value);
+										setShowMenu(false);
+									}}
 								/>
 							</li>
 						)}
