@@ -52,6 +52,7 @@ export const useDeleteTemplate = () => {
 
 export const useTemplateSaveContent = () => {
 	const { apiUrl } = useEnviroment();
+	const setResourcesSettings = useSetResourcesSettings();
 	return async (name: string, content: string): Promise<void> => {
 		const params = {
 			endpoint: `${apiUrl}template/save`,
@@ -62,7 +63,9 @@ export const useTemplateSaveContent = () => {
 			},
 		};
 		try {
-			await fetchData(params);
+			const response = await fetchData(params);
+			const settings = (await response.json()) as string[];
+			setResourcesSettings((current) => current.with({ templateFiles: settings }));
 		} catch (e) {
 			handleFetchError((e as Error).message, params);
 		}
