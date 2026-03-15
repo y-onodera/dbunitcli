@@ -160,14 +160,6 @@ function JdbcTextField({
 					)}
 				</div>
 				<div className="flex">
-					{isJdbcProperties && (
-						<FileChooser
-							prefix={prefix}
-							element={element}
-							path={value}
-							setPath={setPath}
-						/>
-					)}
 					{isJdbcProperties && value && onApplyValues && (
 						<JdbcPropertiesPreviewButton
 							path={value}
@@ -180,6 +172,14 @@ function JdbcTextField({
 						<RemoveJdbcPropertiesButton
 							path={value}
 							setPath={(v) => onValueChange(element.name, v)}
+						/>
+					)}
+					{isJdbcProperties && (
+						<FileChooser
+							prefix={prefix}
+							element={element}
+							path={value}
+							setPath={setPath}
 						/>
 					)}
 					{isJdbcUrl && (

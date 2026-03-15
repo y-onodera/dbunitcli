@@ -30,7 +30,7 @@ paths:
 
 - 配色は**グレーの IconButton 系**（`EditButton`, `PreviewButton`, `FileButton`, `SettingButton` 等）で統一
 - `ButtonWithIcon`（青背景）はテキストボックス横には使わない
-- ボタン並び順: [ファイル/プレビュー/編集系] → [削除系（`RemoveButton`）]（削除は常に末尾）
+- ボタン並び順: [プレビュー/編集系] → [削除系（`RemoveButton`）] → [それ以外（ファイル/ディレクトリ選択系）]
 
 ### アイコンボタンの用途別コンポーネント
 
