@@ -336,3 +336,13 @@ function toCommandParams(
 		optional: optional,
 	};
 }
+
+export type SrcInfo = {
+	srcPath: string;
+	regTableInclude: string;
+	regTableExclude: string;
+	recursive: string;
+	regInclude: string;
+	regExclude: string;
+	extension: string;
+};

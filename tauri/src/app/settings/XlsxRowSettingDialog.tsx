@@ -3,7 +3,7 @@ import { Check, Fieldset, SettingDialog, Text } from "../../components/dialog";
 import { ResourceDatalist } from "../../components/element/Input";
 import { useSrcInfoSheets } from "../../hooks/useXlsxSchema";
 import type { RowSetting } from "../../model/XlsxSchema";
-import type { SrcInfo } from "../form/FormElementProp";
+import type { SrcInfo } from "../../model/CommandParam";
 
 export default function XlsxRowSettingDialog(props: {
     setting: RowSetting;

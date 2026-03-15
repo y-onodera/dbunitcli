@@ -12,7 +12,7 @@ import {
 	XlsxSchema,
 } from "../../model/XlsxSchema";
 import { saveOnSuccess } from "../../utils/fetchUtils";
-import type { SrcInfo } from "../form/FormElementProp";
+import type { SrcInfo } from "../../model/CommandParam";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 
