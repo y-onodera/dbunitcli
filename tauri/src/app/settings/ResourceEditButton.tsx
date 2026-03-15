@@ -1,5 +1,5 @@
 import { type ReactElement, useState } from 'react';
-import { EditButton, RemoveButton } from '../../components/element/ButtonIcon';
+import { DeleteButton, EditButton } from '../../components/element/ButtonIcon';
 
 /**
  * ResourcesEditButton と RemoveResource が共通で受け取るプロパティ
@@ -62,7 +62,7 @@ export function RemoveResource({ deleteResource, path, setPath }: RemoveResource
         }
     };
 
-    return <RemoveButton title="" handleClick={handleRemove} />;
+    return <DeleteButton title="" handleClick={handleRemove} />;
 }
 
 /**

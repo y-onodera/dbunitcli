@@ -1,4 +1,3 @@
-import type React from "react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { BlueSettingButton, ExpandButton } from "../../components/element/ButtonIcon";
 import {
@@ -203,11 +202,9 @@ function Text(prop: Prop) {
 							hidden={prop.hidden}
 							srcType={srcType}
 							srcInfo={srcInfo}
+							isValueInDatalist={isValueInDatalist}
 						/>
 					)}
-					{isValueInDatalist &&
-						!prop.hidden &&
-						renderRemoveButton(prop.element.name, path, setPath, srcType)}
 				</div>
 			</div>
 		</div>
@@ -222,7 +219,8 @@ function DropDownMenu({
 	hidden,
 	srcType,
 	srcInfo,
-}: FileProp & { srcType?: string; datasources?: string[] }) {
+	isValueInDatalist,
+}: FileProp & { srcType?: string; datasources?: string[]; isValueInDatalist?: boolean }) {
 	const [showMenu, setShowMenu] = useState(false);
 	const { connectionOk } = useJdbcConnectionState();
 	const buttonRef = useRef<HTMLDivElement>(null);
@@ -259,7 +257,7 @@ function DropDownMenu({
 	}, [showMenu]);
 
 	return (
-		<div className="relative mr-24" ref={buttonRef}>
+		<div className="relative" ref={buttonRef}>
 			<BlueSettingButton handleClick={() => setShowMenu(!showMenu)} />
 			{showMenu && (
 				<div
@@ -328,6 +326,21 @@ function DropDownMenu({
 									setPath={setPath}
 									onSelect={() => setShowMenu(false)}
 								/>
+							</li>
+						)}
+						{element.name === "setting" && !hidden && isValueInDatalist && (
+							<li>
+								<RemoveDatasetSettingButton path={path} setPath={setPath} />
+							</li>
+						)}
+						{element.name === "xlsxSchema" && !hidden && isValueInDatalist && (
+							<li>
+								<RemoveXlsxSchemaButton path={path} setPath={setPath} />
+							</li>
+						)}
+						{(srcType === "sql" || srcType === "table") && !hidden && isValueInDatalist && (
+							<li>
+								<RemoveSqlEditorButton path={path} setPath={setPath} type={srcType as QueryDatasourceType} />
 							</li>
 						)}
 					</ul>
@@ -403,27 +416,4 @@ function getId(prefix: string, name: string): string {
 }
 function getName(prefix: string, name: string): string {
 	return prefix ? `-${prefix}.${name}` : `-${name}`;
-}
-function renderRemoveButton(
-	elementName: string,
-	path: string,
-	setPath: (path: string) => void,
-	srcType?: string,
-): React.ReactElement | null {
-	if (elementName === "setting") {
-		return <RemoveDatasetSettingButton path={path} setPath={setPath} />;
-	}
-	if (elementName === "xlsxSchema") {
-		return <RemoveXlsxSchemaButton path={path} setPath={setPath} />;
-	}
-	if (srcType === "sql" || srcType === "table") {
-		return (
-			<RemoveSqlEditorButton
-				path={path}
-				setPath={setPath}
-				type={srcType as QueryDatasourceType}
-			/>
-		);
-	}
-	return null;
 }
