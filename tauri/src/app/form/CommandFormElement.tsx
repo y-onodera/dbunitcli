@@ -72,23 +72,29 @@ export default function CommandFormElements(
 	};
 	const toggleOptional = () => setShowOptional(!showOptional);
 
-	const jdbcElements = prop.elements.filter((e) =>
-		JDBC_FIELD_NAMES.includes(e.name as (typeof JDBC_FIELD_NAMES)[number]),
-	);
+	const isJdbcFieldName = (name: string) =>
+		JDBC_FIELD_NAMES.includes(name as (typeof JDBC_FIELD_NAMES)[number]);
+
+	const jdbcElements = prop.elements.filter((e) => isJdbcFieldName(e.name));
+
+	const firstOptionalNonJdbcElementName = prop.optionCaption
+		? prop.elements.find(
+				(e) => !isJdbcFieldName(e.name) && prop.optional?.(e.name),
+			)?.name
+		: undefined;
 
 	return (
 		<>
 			{prop.elements.map((element) => {
-				const isJdbcField = JDBC_FIELD_NAMES.includes(
-					element.name as (typeof JDBC_FIELD_NAMES)[number],
-				);
-				if (isJdbcField) {
+				if (isJdbcFieldName(element.name)) {
 					return null;
 				}
+				const showExpandButton =
+					element.name === firstOptionalNonJdbcElementName;
 				if (element.attribute.type === "FLG") {
 					return (
 						<Fragment key={prop.name + prop.prefix + element.name}>
-							{prop.optionCaption?.display(element.name) && (
+							{showExpandButton && (
 								<div className="pt-2.5">
 									<ExpandButton
 										toggleOptional={toggleOptional}
@@ -108,7 +114,7 @@ export default function CommandFormElements(
 				if (element.attribute.type === "ENUM") {
 					return (
 						<Fragment key={prop.name + prop.prefix + element.name}>
-							{prop.optionCaption?.display(element.name) && (
+							{showExpandButton && (
 								<div className="pt-2.5">
 									<ExpandButton
 										toggleOptional={toggleOptional}
@@ -128,7 +134,7 @@ export default function CommandFormElements(
 				}
 				return (
 					<Fragment key={prop.name + prop.prefix + element.name}>
-						{prop.optionCaption?.display(element.name) && (
+						{showExpandButton && (
 							<div className="pt-2.5">
 								<ExpandButton
 									toggleOptional={toggleOptional}
