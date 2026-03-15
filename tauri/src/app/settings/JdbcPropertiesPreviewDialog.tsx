@@ -26,8 +26,17 @@ export default function JdbcPropertiesPreviewDialog({
 	const [content, setContent] = useState<Record<string, string> | null>(null);
 	const readContent = useJdbcReadContent();
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: readContent is recreated each render but functionally stable
 	useEffect(() => {
-		readContent(path).then(setContent);
+		let cancelled = false;
+		readContent(path).then((result) => {
+			if (!cancelled) {
+				setContent(result);
+			}
+		});
+		return () => {
+			cancelled = true;
+		};
 	}, [path]);
 
 	const jdbcFormValues = content !== null ? toJdbcFormValues(content) : {};
