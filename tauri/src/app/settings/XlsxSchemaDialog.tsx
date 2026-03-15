@@ -1,6 +1,6 @@
 import { Suspense, use, useState } from "react";
-import ResourceFileDialog from "../../components/dialog/ResourceFileDialog";
-import SettingTable from "../../components/dialog/SettingTable";
+import { SettingDialog, SettingTable } from "../../components/dialog";
+import { saveOnSuccess } from "../../utils/fetchUtils";
 import { useLoadXlsxSchema, useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
 import { type CellSetting, type RowSetting, XlsxSchema, createCellSetting, createRowSetting } from "../../model/XlsxSchema";
 import type { SrcInfo } from "../form/FormElementProp";
@@ -38,15 +38,15 @@ function Dialog(props: {
     const [xlsxSchema, setXlsxSchema] = useState(xlsxSchemaData);
 
     return (
-        <ResourceFileDialog
+        <SettingDialog
             handleDialogClose={props.handleDialogClose}
             fileName={props.fileName}
-            handleSave={async (fileName) => {
-                const result = await saveSchema(fileName, xlsxSchema);
-                if (result === 'success') {
-                    props.handleSave(fileName);
-                }
-            }}
+            handleSave={(fileName) =>
+                saveOnSuccess(
+                    () => saveSchema(fileName, xlsxSchema),
+                    () => props.handleSave(fileName),
+                )
+            }
         >
             <SettingTable<RowSetting>
                 caption="Rows Mapping Tables"
@@ -55,9 +55,6 @@ function Dialog(props: {
                     const updatedRows = convertRows(cur.rows);
                     return new XlsxSchema(updatedRows, cur.cells);
                 })}
-                addSettings={(current, settings) => [...current, settings]}
-                updateSettings={(current, before, after) => current.map((row) => (row === before ? after : row))}
-                deleteSettings={(current, settings) => current.filter((row) => row !== settings)}
                 renderSetting={(setting) => setting.displayName()}
                 SettingDialogComponent={({ setting, handleDialogClose, handleCommit }) => (
                     <XlsxRowSettingDialog
@@ -77,9 +74,6 @@ function Dialog(props: {
                     const updatedCells = convertCells(cur.cells);
                     return new XlsxSchema(cur.rows, updatedCells);
                 })}
-                addSettings={(current, settings) => [...current, settings]}
-                updateSettings={(current, before, after) => current.map((cell) => (cell === before ? after : cell))}
-                deleteSettings={(current, settings) => current.filter((cell) => cell !== settings)}
                 renderSetting={(setting) => setting.displayName()}
                 SettingDialogComponent={({ setting, handleDialogClose, handleCommit }) => (
                     <XlsxCellSettingDialog
@@ -92,6 +86,6 @@ function Dialog(props: {
                 newSetting={createCellSetting}
                 getKey={(setting) => setting.displayName()}
             />
-        </ResourceFileDialog>
+        </SettingDialog>
     );
 }

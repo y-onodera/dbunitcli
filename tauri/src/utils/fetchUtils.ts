@@ -43,6 +43,18 @@ export const handleFetchError = (
 	console.error("Fetch Error:", errorInfo);
 };
 
+export type OperationResult = "success" | "failed";
+
+export async function saveOnSuccess(
+	saveFn: () => Promise<OperationResult>,
+	onSuccess: () => void,
+): Promise<void> {
+	const result = await saveFn();
+	if (result === "success") {
+		onSuccess();
+	}
+}
+
 export const fetchData = async ({ endpoint, options }: FetchParams) => {
 	const response = await fetch(endpoint, options);
 	if (!response.ok) {

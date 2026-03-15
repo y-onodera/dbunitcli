@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
-import { BlueButton, WhiteButton } from "../../components/element/Button";
-import {
-	ControllTextBox,
-	InputLabel,
-} from "../../components/element/Input";
+import { SettingDialog } from "../../components/dialog";
 import { useJdbcTables } from "../../hooks/useJdbc";
 import { useSaveDataSource } from "../../hooks/useQueryDatasource";
+import { saveOnSuccess } from "../../utils/fetchUtils";
 
 interface JdbcTableSelectorDialogProps {
 	jdbcValues: Record<string, string>;
@@ -108,7 +105,6 @@ export default function JdbcTableSelectorDialog({
 	const [tables, setTables] = useState<string[]>([]);
 	const [selected, setSelected] = useState<Set<string>>(new Set());
 	const [loading, setLoading] = useState(true);
-	const [name, setName] = useState(fileName);
 	const getJdbcTables = useJdbcTables();
 	const saveDataSource = useSaveDataSource();
 
@@ -153,19 +149,19 @@ export default function JdbcTableSelectorDialog({
 		}
 	};
 
-	const handleSaveClick = async () => {
+	const handleSaveWithPath = (path: string) => {
 		const contents = tables.filter((t) => selected.has(t)).join("\n");
-		const result = await saveDataSource({ type: "table", name, contents });
-		if (result === "success") {
-			handleSave(name);
-		}
+		return saveOnSuccess(
+			() => saveDataSource({ type: "table", name: path, contents }),
+			() => handleSave(path),
+		);
 	};
 
 	return (
-		<dialog
-			open
-			onClose={handleDialogClose}
-			className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 bg-white border border-gray-200"
+		<SettingDialog
+			fileName={fileName}
+			handleDialogClose={handleDialogClose}
+			handleSave={handleSaveWithPath}
 		>
 			<div className="p-4">
 				<h2 className="text-lg font-semibold mb-4">Select Tables</h2>
@@ -177,28 +173,6 @@ export default function JdbcTableSelectorDialog({
 					onToggle={toggleTable}
 				/>
 			</div>
-			<div className="w-full flex items-center justify-end">
-				<div className="grid grid-cols-5 pb-2">
-					<InputLabel
-						id="tableFileNameLabel"
-						text="name"
-						required={false}
-						wStyle="p-2.5 w=1/5"
-					/>
-					<ControllTextBox
-						name="fileName"
-						id="tableFileName"
-						required={true}
-						wStyle="col-start-2 col-span-4 mr-2"
-						value={name}
-						handleChange={(ev) => setName(ev.target.value)}
-					/>
-				</div>
-				<div className="flex items-center justify-end p-4 gap-2">
-					<BlueButton title="Save" handleClick={handleSaveClick} />
-					<WhiteButton title="Close" handleClick={handleDialogClose} />
-				</div>
-			</div>
-		</dialog>
+		</SettingDialog>
 	);
 }

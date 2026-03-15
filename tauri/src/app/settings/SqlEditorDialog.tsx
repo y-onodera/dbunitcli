@@ -1,11 +1,8 @@
 import { useState } from 'react';
-import ResourceFileDialog from '../../components/dialog/ResourceFileDialog';
+import { SettingDialog } from '../../components/dialog';
 import { useSaveDataSource } from '../../hooks/useQueryDatasource';
+import { saveOnSuccess } from '../../utils/fetchUtils';
 import type { QueryDatasourceType } from '../../model/QueryDatasource';
-
-type SqlEditorSetting = {
-    value: string;
-};
 
 type SqlEditorDialogProps = {
     type: QueryDatasourceType;
@@ -16,22 +13,17 @@ type SqlEditorDialogProps = {
 };
 
 export default function SqlEditorDialog(props: SqlEditorDialogProps) {
-    const [setting, setSetting] = useState<SqlEditorSetting>({ value: props.value });
+    const [content, setContent] = useState<string>(props.value);
     const saveDataSource = useSaveDataSource();
 
-    const handleCommit = async (path: string) => {
-        const result = await saveDataSource({
-            type: props.type,
-            name: path,
-            contents: setting.value
-        });
-        if (result === 'success') {
-            props.handleSave(path);
-        }
-    };
+    const handleCommit = (path: string) =>
+        saveOnSuccess(
+            () => saveDataSource({ type: props.type, name: path, contents: content }),
+            () => props.handleSave(path),
+        );
 
     return (
-        <ResourceFileDialog
+        <SettingDialog
             handleDialogClose={props.handleDialogClose}
             fileName={props.fileName}
             handleSave={handleCommit}
@@ -42,16 +34,16 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
                 </h2>
                 <div className="relative">
                     <textarea id="contents"
-                        className="w-full h-96 p-4 border border-gray-200 rounded-lg shadow-xs
-                         font-mono text-base bg-white
-                         focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-                        value={setting.value}
-                        onChange={(e) => setSetting({ value: e.target.value })}
+                        className="w-full h-96 p-4 border border-gray-300 rounded-lg
+                         font-mono text-base bg-gray-50
+                         focus-visible:ring-3 ring-indigo-300"
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
                         placeholder={props.type === 'sql' ? 'Enter SQL query...' : 'Enter table definition...'}
                         spellCheck={false}
                     />
                 </div>
             </div>
-        </ResourceFileDialog>
+        </SettingDialog>
     );
 }
