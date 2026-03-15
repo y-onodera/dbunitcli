@@ -24,7 +24,9 @@ import JdbcTableSelectorButton from "../settings/JdbcTableSelectorButton";
 import SqlEditorButton, {
 	RemoveSqlEditorButton,
 } from "../settings/SqlEditorButton";
-import TemplatePreviewButton from "../settings/TemplatePreviewButton";
+import TemplatePreviewButton, {
+	RemoveTemplateButton,
+} from "../settings/TemplatePreviewButton";
 import XlsxSchemaEditButton, {
 	RemoveXlsxSchemaButton,
 } from "../settings/XlsxSchemaEditButton";
@@ -324,9 +326,14 @@ function DropDownMenu({
 									<JdbcTableSelectorButton path={path} setPath={setPath} />
 								</li>
 							)}
-						{element.name === "templateGroup" && !hidden && path && (
+						{element.name === "templateGroup" && !hidden && (
 							<li>
-								<TemplatePreviewButton path={path} />
+								<TemplatePreviewButton path={path} setPath={setPath} />
+							</li>
+						)}
+						{element.name === "templateGroup" && !hidden && isValueInDatalist && (
+							<li>
+								<RemoveTemplateButton path={path} setPath={setPath} />
 							</li>
 						)}
 						{element.name === "setting" && !hidden && isValueInDatalist && (
