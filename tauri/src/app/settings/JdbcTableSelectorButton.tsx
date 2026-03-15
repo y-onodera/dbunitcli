@@ -2,8 +2,8 @@ import { useState } from "react";
 import { EditButton } from "../../components/element/ButtonIcon";
 import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import { useLoadDataSource } from "../../hooks/useQueryDatasource";
-import type { ResourceEditButtonProp } from "./ResourceEditButton";
 import JdbcTableSelectorDialog from "./JdbcTableSelectorDialog";
+import type { ResourceEditButtonProp } from "./ResourceEditButton";
 
 export default function JdbcTableSelectorButton({
 	path,

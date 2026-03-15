@@ -1,9 +1,15 @@
-import { Suspense, use, useState } from 'react';
-import { SettingDialog, SettingTable } from '../../components/dialog';
-import { saveOnSuccess } from '../../utils/fetchUtils';
-import { useLoadDatasetSettings, useSaveDatasetSettings } from '../../hooks/useDatasetSettings';
+import { Suspense, use, useState } from "react";
+import { SettingDialog, SettingTable } from "../../components/dialog";
+import {
+	useLoadDatasetSettings,
+	useSaveDatasetSettings,
+} from "../../hooks/useDatasetSettings";
 import type { DatasetSetting } from "../../model/DatasetSettings";
-import { DatasetSettings, newDatasetSetting } from "../../model/DatasetSettings";
+import {
+	DatasetSettings,
+	newDatasetSetting,
+} from "../../model/DatasetSettings";
+import { saveOnSuccess } from "../../utils/fetchUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
 
 export default function DatasetSettingsDialog(props: {
@@ -31,7 +37,8 @@ function Dialog(props: {
 }) {
 	const saveSettings = useSaveDatasetSettings();
 	const dataSettingsData = use(props.promise);
-	const [dataSettings, setDataSettings] = useState<DatasetSettings>(dataSettingsData);
+	const [dataSettings, setDataSettings] =
+		useState<DatasetSettings>(dataSettingsData);
 	return (
 		<SettingDialog
 			handleDialogClose={props.handleDialogClose}
@@ -46,10 +53,12 @@ function Dialog(props: {
 			<SettingTable<DatasetSetting>
 				caption="Add Metadata Settings"
 				settings={dataSettings.settings}
-				setSettings={convertSettings => setDataSettings((cur) => {
-					const updatedSettings = convertSettings(cur.settings);
-					return new DatasetSettings(updatedSettings, cur.commonSettings);
-				})}
+				setSettings={(convertSettings) =>
+					setDataSettings((cur) => {
+						const updatedSettings = convertSettings(cur.settings);
+						return new DatasetSettings(updatedSettings, cur.commonSettings);
+					})
+				}
 				renderSetting={(setting) => setting.displayName()}
 				SettingDialogComponent={DatasetSettingDialog}
 				newSetting={newDatasetSetting}
@@ -58,10 +67,12 @@ function Dialog(props: {
 			<SettingTable<DatasetSetting>
 				caption="Common Settings"
 				settings={dataSettings.commonSettings}
-				setSettings={(convertCommon) => setDataSettings((cur) => {
-					const updatedCommonSettings = convertCommon(cur.commonSettings);
-					return new DatasetSettings(cur.settings, updatedCommonSettings);
-				})}
+				setSettings={(convertCommon) =>
+					setDataSettings((cur) => {
+						const updatedCommonSettings = convertCommon(cur.commonSettings);
+						return new DatasetSettings(cur.settings, updatedCommonSettings);
+					})
+				}
 				renderSetting={(setting) => setting.displayName()}
 				SettingDialogComponent={DatasetSettingDialog}
 				newSetting={newDatasetSetting}

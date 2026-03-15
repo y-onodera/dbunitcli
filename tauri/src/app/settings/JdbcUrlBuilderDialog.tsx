@@ -6,13 +6,13 @@ import {
 	PreviewField,
 	SelectBox,
 } from "../../components/element/Input";
-import {
-	DEFAULT_PORTS,
-	SERVICE_NAME_LABEL,
-	buildJdbcUrl,
-	parseJdbcUrl,
-} from "../../model/JdbcUrlBuilder";
 import type { JdbcUrlBuilderState, RdbType } from "../../model/JdbcUrlBuilder";
+import {
+	buildJdbcUrl,
+	DEFAULT_PORTS,
+	parseJdbcUrl,
+	SERVICE_NAME_LABEL,
+} from "../../model/JdbcUrlBuilder";
 
 type JdbcUrlBuilderDialogProps = {
 	currentUrl: string;
@@ -49,7 +49,11 @@ export default function JdbcUrlBuilderDialog({
 		<SettingDialog
 			setting={builtUrl}
 			handleDialogClose={handleDialogClose}
-			handleCommit={(url) => { if (url) { handleSave(url);  }}}
+			handleCommit={(url) => {
+				if (url) {
+					handleSave(url);
+				}
+			}}
 			commitLabel="Apply"
 		>
 			<div className="w-[480px]">

@@ -1,58 +1,50 @@
-import { useDeleteXlsxSchema } from '../../hooks/useXlsxSchema';
-import ResourceEditButton, { RemoveResource, type ResourceEditButtonProp } from './ResourceEditButton';
-import XlsxSchemaDialog from './XlsxSchemaDialog';
-import type { SrcInfo } from '../form/FormElementProp';
+import { useDeleteXlsxSchema } from "../../hooks/useXlsxSchema";
+import type { SrcInfo } from "../form/FormElementProp";
+import ResourceEditButton, {
+	RemoveResource,
+	type ResourceEditButtonProp,
+} from "./ResourceEditButton";
+import XlsxSchemaDialog from "./XlsxSchemaDialog";
 
 type XlsxSchemaEditButtonProp = ResourceEditButtonProp & {
-    srcInfo?: SrcInfo;
+	srcInfo?: SrcInfo;
 };
 
-/**
- * XLSXスキーマの編集ダイアログを表示するためのボタンコンポーネント
- */
 export default function XlsxSchemaEditButton({
-    path,
-    setPath,
-    srcInfo,
+	path,
+	setPath,
+	srcInfo,
 }: XlsxSchemaEditButtonProp) {
+	const renderDialog = (open: boolean, closeDialog: () => void) => {
+		if (!open) {
+			return null;
+		}
+		return (
+			<XlsxSchemaDialog
+				fileName={path}
+				srcInfo={srcInfo}
+				handleDialogClose={closeDialog}
+				handleSave={(newPath: string) => {
+					setPath(newPath);
+					closeDialog();
+				}}
+			/>
+		);
+	};
 
-    /**
-     * ダイアログを描画するときに呼び出す関数
-     *
-     * @param open ダイアログの開閉状態
-     * @param closeDialog ダイアログを閉じるための関数
-     * @returns JSX.Element | null
-     */
-    const renderDialog = (open: boolean, closeDialog: () => void) => {
-        if (!open) { return null; }
-        return (
-            <XlsxSchemaDialog
-                fileName={path}
-                srcInfo={srcInfo}
-                handleDialogClose={closeDialog}
-                handleSave={(newPath: string) => {
-                    setPath(newPath);
-                    closeDialog();
-                }}
-            />
-        );
-    };
-
-    return (
-        <ResourceEditButton renderDialog={renderDialog} />
-    );
+	return <ResourceEditButton renderDialog={renderDialog} />;
 }
 export function RemoveXlsxSchemaButton({
-    path,
-    setPath,
+	path,
+	setPath,
 }: ResourceEditButtonProp) {
-    const deleteSchema = useDeleteXlsxSchema();
+	const deleteSchema = useDeleteXlsxSchema();
 
-    return (
-        <RemoveResource
-            path={path}
-            setPath={setPath}
-            deleteResource={deleteSchema}
-        />
-    );
+	return (
+		<RemoveResource
+			path={path}
+			setPath={setPath}
+			deleteResource={deleteSchema}
+		/>
+	);
 }
