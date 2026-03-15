@@ -167,7 +167,6 @@ function JdbcTextField({
 							path={value}
 							setPath={setPath}
 							onApplyValues={onApplyValues}
-							isValueInDatalist={resourceFiles.includes(value)}
 						/>
 					)}
 					{isJdbcUrl && (
@@ -238,15 +237,15 @@ function JdbcPropertiesDropDownMenu({
 	path,
 	setPath,
 	onApplyValues,
-	isValueInDatalist,
 }: {
 	prefix: string;
 	element: CommandParam;
 	path: string;
 	setPath: Dispatch<SetStateAction<string>>;
 	onApplyValues?: (values: Partial<Record<string, string>>) => void;
-	isValueInDatalist: boolean;
 }) {
+	const settings = useResourcesSettings();
+	const isValueInDatalist = settings.jdbcFiles.includes(path);
 	const [showMenu, setShowMenu] = useState(false);
 	const buttonRef = useRef<HTMLDivElement>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
