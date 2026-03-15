@@ -16,6 +16,7 @@ export default function TemplateEditDialog({
 	const loadContent = useTemplateLoadContent();
 	const saveContent = useTemplateSaveContent();
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: loadContent is recreated each render but functionally stable
 	useEffect(() => {
 		if (!name) {
 			setContent("");
@@ -30,7 +31,7 @@ export default function TemplateEditDialog({
 		return () => {
 			cancelled = true;
 		};
-	}, [name, loadContent]);
+	}, [name]);
 
 	const handleCommit = async (newContent: string) => {
 		const effectiveName = name || fileNameInput;
@@ -62,7 +63,7 @@ export default function TemplateEditDialog({
 					<p className="text-sm text-gray-400 p-3">Loading...</p>
 				) : (
 					<textarea
-						className="text-sm bg-gray-50 border border-gray-300 rounded-lg p-3 w-full h-96 font-mono"
+						className="text-sm bg-gray-50 border border-gray-300 rounded-lg p-3 w-full h-96 font-mono focus-visible:ring-3 ring-indigo-300"
 						value={content}
 						onChange={(e) => setContent(e.target.value)}
 					/>
