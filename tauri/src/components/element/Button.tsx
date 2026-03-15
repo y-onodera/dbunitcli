@@ -58,12 +58,14 @@ export function Button(props: {
     , children: ReactNode
     , disabled?: boolean
     , id?: string
+    , ariaLabel?: string
     , handleClick: React.MouseEventHandler<HTMLButtonElement>
 }) {
     return (
         <button
             type="button"
             id={props.id}
+            aria-label={props.ariaLabel}
             disabled={props.disabled}
             className={`${props.buttonstyle}
                          ${props.textstyle}

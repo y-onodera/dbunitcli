@@ -42,7 +42,7 @@ export function IconButton({ iconType, title, handleClick }: IconButtonProps & {
     const IconComponent = IconComponents[iconType];
 
     return (
-        <ButtonIcon title="" handleClick={handleClick}>
+        <ButtonIcon title={finalTitle} handleClick={handleClick}>
             <IconComponent title={finalTitle} />
         </ButtonIcon>
     );
@@ -118,6 +118,7 @@ export function ButtonIcon(props: {
             bgcolor=""
             textstyle="text-gray-500 hover:text-blue-600"
             border="outline-hidden"
+            ariaLabel={props.title || undefined}
             handleClick={props.handleClick}
         >
             {props.children}
