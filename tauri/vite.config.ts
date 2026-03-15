@@ -1,6 +1,30 @@
 /// <reference types="vitest" />
+import { existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+
+// テスト実行時に存在しない CSS ファイル（App.css など生成ファイル）を空モジュールとして扱うプラグイン
+const missingCssFallback = {
+	name: "missing-css-fallback",
+	enforce: "pre" as const,
+	resolveId(id: string, importer?: string) {
+		if (!id.endsWith(".css") || !importer) {
+			return null;
+		}
+		const resolved = resolve(dirname(importer), id);
+		if (!existsSync(resolved)) {
+			return "\0virtual:empty-css";
+		}
+		return null;
+	},
+	load(id: string) {
+		if (id === "\0virtual:empty-css") {
+			return "";
+		}
+		return null;
+	},
+};
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
@@ -10,6 +34,7 @@ export default defineConfig(async () => ({
 				plugins: [["babel-plugin-react-compiler"]],
 			},
 		}),
+		missingCssFallback,
 	],
 	build: {
 		target: "esnext",
