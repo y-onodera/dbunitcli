@@ -102,7 +102,7 @@ export type CommandParams = {
 	name: string;
 	prefix: string;
 	elements: CommandParam[];
-	optionCaption?: { caption: string; display: (_: string) => boolean };
+	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
 };
 export type DatasetSource = CommandParams & {
@@ -154,10 +154,7 @@ class DatasetSourceImpl implements DatasetSource {
 					? this.indexRegExclude + 1
 					: this.indexExtension + 1,
 			),
-			{
-				caption: "traversal option",
-				display: (name) => name === "recursive",
-			},
+			{ caption: "traversal option" },
 			(param: string) =>
 				["recursive", "regInclude", "regExclude", "extension"].includes(param),
 		);
@@ -180,10 +177,7 @@ class DatasetSourceImpl implements DatasetSource {
 		return toCommandParams(
 			this,
 			this.elements.slice(this.indexOfSetting),
-			{
-				caption: "dataset option",
-				display: (name) => name === "regTableInclude",
-			},
+			{ caption: "dataset option" },
 			(param: string) =>
 				[
 					"regTableInclude",
@@ -234,17 +228,14 @@ export type ParameterizeParams = {
 const srcTypeDetail = new Map<
 	string,
 	{
-		optionCaption: { caption: string; display: (_: string) => boolean };
+		optionCaption: { caption: string };
 		optional: (_: string) => boolean;
 	}
 >([
 	[
 		"table",
 		{
-			optionCaption: {
-				caption: "table option",
-				display: (name: string) => name === "useJdbcMetaData",
-			},
+			optionCaption: { caption: "table option" },
 			optional: (name: string) =>
 				name !== "encoding" && !name.startsWith("jdbc"),
 		},
@@ -252,10 +243,7 @@ const srcTypeDetail = new Map<
 	[
 		"sql",
 		{
-			optionCaption: {
-				caption: "sql option",
-				display: (name: string) => name === "useJdbcMetaData",
-			},
+			optionCaption: { caption: "sql option" },
 			optional: (name: string) =>
 				name !== "encoding" && !name.startsWith("jdbc"),
 		},
@@ -263,30 +251,21 @@ const srcTypeDetail = new Map<
 	[
 		"csv",
 		{
-			optionCaption: {
-				caption: "csv option",
-				display: (name: string) => name === "headerName",
-			},
+			optionCaption: { caption: "csv option" },
 			optional: (name: string) => name !== "encoding",
 		},
 	],
 	[
 		"csvq",
 		{
-			optionCaption: {
-				caption: "csvq option",
-				display: (name: string) => name === "headerName",
-			},
+			optionCaption: { caption: "csvq option" },
 			optional: (name: string) => name !== "encoding",
 		},
 	],
 	[
 		"reg",
 		{
-			optionCaption: {
-				caption: "reg option",
-				display: (name: string) => name === "headerName",
-			},
+			optionCaption: { caption: "reg option" },
 			optional: (name: string) =>
 				name !== "regDataSplit" && name !== "regHeaderSplit",
 		},
@@ -294,30 +273,21 @@ const srcTypeDetail = new Map<
 	[
 		"fixed",
 		{
-			optionCaption: {
-				caption: "fixed option",
-				display: (name: string) => name === "headerName",
-			},
+			optionCaption: { caption: "fixed option" },
 			optional: (name: string) => name !== "fixedLength",
 		},
 	],
 	[
 		"xls",
 		{
-			optionCaption: {
-				caption: "xls option",
-				display: (name: string) => name === "headerName",
-			},
+			optionCaption: { caption: "xls option" },
 			optional: (_: string) => true,
 		},
 	],
 	[
 		"xlsx",
 		{
-			optionCaption: {
-				caption: "xlsx option",
-				display: (name: string) => name === "headerName",
-			},
+			optionCaption: { caption: "xlsx option" },
 			optional: (_: string) => true,
 		},
 	],
@@ -325,7 +295,7 @@ const srcTypeDetail = new Map<
 function toCommandParams(
 	srcData: CommandParams,
 	elements: CommandParam[],
-	optionCaption?: { caption: string; display: (_: string) => boolean },
+	optionCaption?: { caption: string },
 	optional?: (_: string) => boolean,
 ): CommandParams {
 	return {
