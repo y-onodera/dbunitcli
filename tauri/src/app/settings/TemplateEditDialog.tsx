@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { SettingDialog } from "../../components/dialog";
+import { ResourceFileDialog } from "../../components/dialog";
 import { useTemplateLoadContent, useTemplateSaveContent } from "../../hooks/useTemplate";
 
 export default function TemplateEditDialog({
@@ -11,7 +11,6 @@ export default function TemplateEditDialog({
 	setPath?: (path: string) => void;
 	handleDialogClose: () => void;
 }) {
-	const [fileNameInput, setFileNameInput] = useState("");
 	const [content, setContent] = useState<string | null>(null);
 	const loadContent = useTemplateLoadContent();
 	const saveContent = useTemplateSaveContent();
@@ -33,32 +32,20 @@ export default function TemplateEditDialog({
 		};
 	}, [name]);
 
-	const handleCommit = async (newContent: string) => {
-		const effectiveName = name || fileNameInput;
-		await saveContent(effectiveName, newContent);
-		setPath?.(effectiveName);
+	const handleSave = async (path: string) => {
+		await saveContent(path, content ?? "");
+		setPath?.(path);
 		handleDialogClose();
 	};
 
 	return (
-		<SettingDialog
-			setting={content ?? ""}
+		<ResourceFileDialog
+			fileName={name}
 			handleDialogClose={handleDialogClose}
-			handleCommit={handleCommit}
-			commitLabel="Save"
+			handleSave={handleSave}
 		>
 			<div className="w-[800px]">
 				<h2 className="text-lg font-bold mb-2">Template File Edit</h2>
-				{name ? (
-					<p className="text-sm text-gray-500 mb-3 break-all">{name}</p>
-				) : (
-					<input
-						className="text-sm bg-gray-50 border border-gray-300 rounded-lg p-2 w-full mb-3 focus-visible:ring-3 ring-indigo-300"
-						placeholder="File name"
-						value={fileNameInput}
-						onChange={(e) => setFileNameInput(e.target.value)}
-					/>
-				)}
 				{content === null ? (
 					<p className="text-sm text-gray-400 p-3">Loading...</p>
 				) : (
@@ -69,6 +56,6 @@ export default function TemplateEditDialog({
 					/>
 				)}
 			</div>
-		</SettingDialog>
+		</ResourceFileDialog>
 	);
 }
