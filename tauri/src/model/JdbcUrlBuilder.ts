@@ -21,10 +21,12 @@ export const SERVICE_NAME_LABEL: Record<RdbType, string> = {
 
 export function buildJdbcUrl(state: JdbcUrlBuilderState): string {
 	const { rdbType, host, port, serviceName } = state;
-	if (!host && !serviceName) { return ""; }
+	if (!host && !serviceName) {
+		return "";
+	}
 	switch (rdbType) {
 		case "oracle":
-			return `jdbc:oracle:thin:@${host}:${port}:${serviceName}`;
+			return `jdbc:oracle:thin:@//${host}:${port}/${serviceName}`;
 		case "postgres":
 			return `jdbc:postgresql://${host}:${port}/${serviceName}`;
 		case "h2":
@@ -33,7 +35,9 @@ export function buildJdbcUrl(state: JdbcUrlBuilderState): string {
 }
 
 export function parseJdbcUrl(url: string): Partial<JdbcUrlBuilderState> {
-	if (!url) { return {}; }
+	if (!url) {
+		return {};
+	}
 	if (url.startsWith("jdbc:oracle:thin:@")) {
 		const rest = url.slice("jdbc:oracle:thin:@".length);
 		const parts = rest.split(":");

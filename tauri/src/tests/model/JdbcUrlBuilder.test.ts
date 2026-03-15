@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import {
-	DEFAULT_PORTS,
-	SERVICE_NAME_LABEL,
-	buildJdbcUrl,
-	parseJdbcUrl,
-} from "../../model/JdbcUrlBuilder";
 import type { JdbcUrlBuilderState } from "../../model/JdbcUrlBuilder";
+import {
+	buildJdbcUrl,
+	DEFAULT_PORTS,
+	parseJdbcUrl,
+	SERVICE_NAME_LABEL,
+} from "../../model/JdbcUrlBuilder";
 
 describe("DEFAULT_PORTS", () => {
 	it("各DBのデフォルトポートが正しいこと", () => {
@@ -43,7 +43,7 @@ describe("buildJdbcUrl", () => {
 			port: "1521",
 			serviceName: "ORCL",
 		};
-		expect(buildJdbcUrl(state)).toBe("jdbc:oracle:thin:@localhost:1521:ORCL");
+		expect(buildJdbcUrl(state)).toBe("jdbc:oracle:thin:@//localhost:1521/ORCL");
 	});
 
 	it("PostgreSQL の JDBC URL を生成できること", () => {
