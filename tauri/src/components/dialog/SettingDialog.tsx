@@ -12,6 +12,7 @@ type CommonProps = {
 	handleDialogClose: () => void;
 	children: ReactNode;
 	commitLabel?: string;
+	commitDisabled?: boolean;
 };
 
 type SettingMode<T> = {
@@ -80,6 +81,7 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 			<div className="flex items-center justify-end p-4 gap-2">
 				<BlueButton
 					title={props.commitLabel ?? "Save"}
+					disabled={props.commitDisabled}
 					handleClick={() => {
 						if (isFileMode) {
 							props.handleSave(fileNameValue);

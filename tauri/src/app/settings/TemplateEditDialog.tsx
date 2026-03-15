@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { SettingDialog } from "../../components/dialog";
 import { useTemplateLoadContent, useTemplateSaveContent } from "../../hooks/useTemplate";
+import { saveOnSuccess } from "../../utils/fetchUtils";
 
 export default function TemplateEditDialog({
 	name,
@@ -32,17 +33,21 @@ export default function TemplateEditDialog({
 		};
 	}, [name]);
 
-	const handleSave = async (path: string) => {
-		await saveContent(path, content ?? "");
-		setPath?.(path);
-		handleDialogClose();
-	};
+	const handleSave = (path: string) =>
+		saveOnSuccess(
+			() => saveContent(path, content ?? ""),
+			() => {
+				setPath?.(path);
+				handleDialogClose();
+			},
+		);
 
 	return (
 		<SettingDialog
 			fileName={name}
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
+			commitDisabled={content === null}
 		>
 			<div className="w-[800px] p-4">
 				<h2 className="text-lg font-bold mb-2">Template File Edit</h2>
