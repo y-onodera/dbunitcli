@@ -10,7 +10,7 @@ import {
 } from "../../components/element/Input";
 import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
-import type { CommandParams } from "../../model/CommandParam";
+import type { CommandParams, SrcInfo } from "../../model/CommandParam";
 import {
 	isSqlRelatedType,
 	type QueryDatasourceType,
@@ -29,7 +29,6 @@ import XlsxSchemaEditButton, {
 	RemoveXlsxSchemaButton,
 } from "../settings/XlsxSchemaEditButton";
 import { DirectoryChooser, FileChooser } from "./Chooser";
-import type { SrcInfo } from "../../model/CommandParam";
 import type { FileProp, Prop, SelectProp } from "./FormElementProp";
 import JdbcFormSection, { JDBC_FIELD_NAMES } from "./JdbcFormSection";
 
