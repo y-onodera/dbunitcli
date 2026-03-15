@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, Fieldset, SettingDialog, Text } from "../../components/dialog";
 import { ResourceDatalist } from "../../components/element/Input";
-import { useXlsxSheets } from "../../hooks/useXlsxSchema";
+import { useSrcInfoSheets } from "../../hooks/useXlsxSchema";
 import type { RowSetting } from "../../model/XlsxSchema";
 import type { SrcInfo } from "../form/FormElementProp";
 
@@ -12,22 +12,7 @@ export default function XlsxRowSettingDialog(props: {
     handleCommit: (newSettings: RowSetting) => void;
 }) {
     const [target, setTarget] = useState(props.setting);
-    const [sheetNames, setSheetNames] = useState<string[]>([]);
-    const loadSheets = useXlsxSheets();
-    const srcPath = props.srcInfo?.srcPath ?? "";
-    const regTableInclude = props.srcInfo?.regTableInclude ?? "";
-    const regTableExclude = props.srcInfo?.regTableExclude ?? "";
-    const recursive = props.srcInfo?.recursive ?? "";
-    const regInclude = props.srcInfo?.regInclude ?? "";
-    const regExclude = props.srcInfo?.regExclude ?? "";
-    const extension = props.srcInfo?.extension ?? "";
-
-    useEffect(() => {
-        if (!srcPath) {
-            return;
-        }
-        loadSheets({ srcPath, regTableInclude, regTableExclude, recursive, regInclude, regExclude, extension }).then(setSheetNames);
-    }, [srcPath, regTableInclude, regTableExclude, recursive, regInclude, regExclude, extension, loadSheets]);
+    const sheetNames = useSrcInfoSheets(props.srcInfo);
 
     return (
         <SettingDialog setting={target} handleDialogClose={props.handleDialogClose} handleCommit={props.handleCommit}>
