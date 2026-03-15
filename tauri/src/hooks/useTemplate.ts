@@ -1,9 +1,7 @@
 import { useCallback } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
-import { fetchData, handleFetchError } from "../utils/fetchUtils";
-
-type OperationResult = "success" | "failed";
+import { type OperationResult, fetchData, handleFetchError } from "../utils/fetchUtils";
 
 export const useTemplateLoadContent = () => {
 	const { apiUrl } = useEnviroment();
@@ -30,7 +28,7 @@ export const useTemplateLoadContent = () => {
 export const useDeleteTemplate = () => {
 	const { apiUrl } = useEnviroment();
 	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string): Promise<OperationResult> => {
+	return useCallback(async (name: string): Promise<OperationResult> => {
 		const params = {
 			endpoint: `${apiUrl}template/delete`,
 			options: {
@@ -48,13 +46,13 @@ export const useDeleteTemplate = () => {
 			handleFetchError((e as Error).message, params);
 			return "failed";
 		}
-	};
+	}, [apiUrl, setResourcesSettings]);
 };
 
 export const useTemplateSaveContent = () => {
 	const { apiUrl } = useEnviroment();
 	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string, content: string): Promise<void> => {
+	return useCallback(async (name: string, content: string): Promise<OperationResult> => {
 		const params = {
 			endpoint: `${apiUrl}template/save`,
 			options: {
@@ -67,8 +65,10 @@ export const useTemplateSaveContent = () => {
 			const response = await fetchData(params);
 			const settings = (await response.json()) as string[];
 			setResourcesSettings((current) => current.with({ templateFiles: settings }));
+			return "success";
 		} catch (e) {
 			handleFetchError((e as Error).message, params);
+			return "failed";
 		}
-	};
+	}, [apiUrl, setResourcesSettings]);
 };
