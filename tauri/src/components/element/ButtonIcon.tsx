@@ -126,3 +126,40 @@ export function ButtonIcon(props: {
         </Button>
     );
 }
+
+export function BlueButtonIcon(props: {
+    title?: string;
+    handleClick: React.MouseEventHandler<HTMLButtonElement>;
+    children: ReactNode;
+}) {
+    return (
+        <Button
+            buttonstyle="flex items-center p-2 ms-2"
+            bgcolor="bg-indigo-500 hover:bg-indigo-600"
+            textstyle=""
+            border="border border-gray-300"
+            ariaLabel={props.title || undefined}
+            handleClick={props.handleClick}
+        >
+            {props.children}
+        </Button>
+    );
+}
+
+export function BlueSettingButton(props: IconButtonProps) {
+    const title = props.title ?? 'setting';
+    return (
+        <BlueButtonIcon title={title} handleClick={props.handleClick}>
+            <SettingIcon title={title} fill="white" />
+        </BlueButtonIcon>
+    );
+}
+
+export function BlueEditButton(props: IconButtonProps) {
+    const title = props.title ?? 'edit';
+    return (
+        <BlueButtonIcon title={title} handleClick={props.handleClick}>
+            <EditIcon title={title} fill="white" />
+        </BlueButtonIcon>
+    );
+}
