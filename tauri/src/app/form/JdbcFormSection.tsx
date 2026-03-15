@@ -2,10 +2,12 @@ import {
 	type Dispatch,
 	type SetStateAction,
 	useCallback,
+	useEffect,
+	useRef,
 	useState,
 } from "react";
 import { BlueButton } from "../../components/element/Button";
-import { EditButton, PreviewButton } from "../../components/element/ButtonIcon";
+import { BlueEditButton, BlueSettingButton, PreviewButton } from "../../components/element/ButtonIcon";
 import {
 	ControllTextBox,
 	InputLabel,
@@ -122,8 +124,6 @@ function JdbcTextField({
 	onValueChange: (name: string, value: string) => void;
 	onApplyValues?: (values: Partial<Record<string, string>>) => void;
 }) {
-	const [showJdbcUrlBuilder, setShowJdbcUrlBuilder] = useState(false);
-	const [showPreview, setShowPreview] = useState(false);
 	const settings = useResourcesSettings();
 	const labelText = prefix ? `-${prefix}.${element.name}` : `-${element.name}`;
 	const id = prefix ? `${prefix}_${element.name}` : element.name;
@@ -160,34 +160,19 @@ function JdbcTextField({
 					)}
 				</div>
 				<div className="flex">
-					{isJdbcProperties && value && onApplyValues && (
-						<JdbcPropertiesPreviewButton
-							path={value}
-							showDialog={showPreview}
-							setShowDialog={setShowPreview}
-							onApplyValues={onApplyValues}
-						/>
-					)}
-					{isJdbcProperties && value && (
-						<RemoveJdbcPropertiesButton
-							path={value}
-							setPath={(v) => onValueChange(element.name, v)}
-						/>
-					)}
 					{isJdbcProperties && (
-						<FileChooser
+						<JdbcPropertiesDropDownMenu
 							prefix={prefix}
 							element={element}
 							path={value}
 							setPath={setPath}
+							onApplyValues={onApplyValues}
 						/>
 					)}
 					{isJdbcUrl && (
 						<JdbcUrlBuilderButton
 							path={value}
 							setPath={setPath}
-							showDialog={showJdbcUrlBuilder}
-							setShowDialog={setShowJdbcUrlBuilder}
 						/>
 					)}
 				</div>
@@ -198,15 +183,12 @@ function JdbcTextField({
 
 function JdbcPropertiesPreviewButton({
 	path,
-	showDialog,
-	setShowDialog,
 	onApplyValues,
 }: {
 	path: string;
-	showDialog: boolean;
-	setShowDialog: (show: boolean) => void;
 	onApplyValues: (values: Partial<Record<string, string>>) => void;
 }) {
+	const [showDialog, setShowDialog] = useState(false);
 	return (
 		<>
 			<PreviewButton handleClick={() => setShowDialog(true)} />
@@ -227,17 +209,14 @@ function JdbcPropertiesPreviewButton({
 function JdbcUrlBuilderButton({
 	path,
 	setPath,
-	showDialog,
-	setShowDialog,
 }: {
 	path: string;
 	setPath: Dispatch<SetStateAction<string>>;
-	showDialog: boolean;
-	setShowDialog: Dispatch<SetStateAction<boolean>>;
 }) {
+	const [showDialog, setShowDialog] = useState(false);
 	return (
 		<>
-			<EditButton handleClick={() => setShowDialog(true)} />
+			<BlueEditButton handleClick={() => setShowDialog(true)} />
 			{showDialog && (
 				<JdbcUrlBuilderDialog
 					currentUrl={path}
@@ -249,6 +228,98 @@ function JdbcUrlBuilderButton({
 				/>
 			)}
 		</>
+	);
+}
+
+function JdbcPropertiesDropDownMenu({
+	prefix,
+	element,
+	path,
+	setPath,
+	onApplyValues,
+}: {
+	prefix: string;
+	element: CommandParam;
+	path: string;
+	setPath: Dispatch<SetStateAction<string>>;
+	onApplyValues?: (values: Partial<Record<string, string>>) => void;
+}) {
+	const [showMenu, setShowMenu] = useState(false);
+	const buttonRef = useRef<HTMLDivElement>(null);
+	const menuRef = useRef<HTMLDivElement>(null);
+	const [menuPosition, setMenuPosition] = useState<"right" | "left">("right");
+
+	useEffect(() => {
+		if (showMenu && buttonRef.current) {
+			const rect = buttonRef.current.getBoundingClientRect();
+			const menuWidth = 96;
+			if (rect.right + menuWidth > window.innerWidth) {
+				setMenuPosition("left");
+			} else {
+				setMenuPosition("right");
+			}
+		}
+		function handleClickOutside(event: MouseEvent) {
+			if (
+				menuRef.current &&
+				!menuRef.current.contains(event.target as Node) &&
+				buttonRef.current &&
+				!buttonRef.current.contains(event.target as Node)
+			) {
+				setShowMenu(false);
+			}
+		}
+		if (showMenu) {
+			document.addEventListener("mousedown", handleClickOutside);
+			return () => {
+				document.removeEventListener("mousedown", handleClickOutside);
+			};
+		}
+	}, [showMenu]);
+
+	return (
+		<div className="relative mr-24" ref={buttonRef}>
+			<BlueSettingButton handleClick={() => setShowMenu(!showMenu)} />
+			{showMenu && (
+				<div
+					ref={menuRef}
+					className="absolute z-50 p-4 text-gray-900 bg-white border border-gray-100 rounded-lg shadow-md"
+					style={{
+						...(menuPosition === "right"
+							? { left: "100%", top: 0 }
+							: { right: "100%", top: 0 }),
+					}}
+				>
+					<ul className="space-y-4">
+						{path && onApplyValues && (
+							<li>
+								<JdbcPropertiesPreviewButton
+									path={path}
+									onApplyValues={onApplyValues}
+								/>
+							</li>
+						)}
+						{path && (
+							<li>
+								<RemoveJdbcPropertiesButton
+									path={path}
+									setPath={setPath}
+								/>
+							</li>
+						)}
+						<li>
+							<FileChooser
+								prefix={prefix}
+								element={element}
+								path={path}
+								setPath={setPath}
+								onSelect={() => setShowMenu(false)}
+							/>
+						</li>
+					</ul>
+				</div>
+			)}
+		</div>
 	);
 }
 

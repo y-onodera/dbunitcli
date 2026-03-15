@@ -28,16 +28,23 @@ paths:
 
 ## テキストボックス横のアイコンボタン
 
-- 配色は**グレーの IconButton 系**（`EditButton`, `PreviewButton`, `FileButton`, `SettingButton` 等）で統一
-- `ButtonWithIcon`（青背景）はテキストボックス横には使わない
-- ボタン並び順: [プレビュー/編集系] → [削除系（`RemoveButton`）] → [それ以外（ファイル/ディレクトリ選択系）]
+- **配色はブルー（`BlueButtonIcon` 系）でラベルなし**に統一
+- グレーの `IconButton` 系（`EditButton`, `FileButton` 等）はテキストボックス横に直接使わない
+- **アイコンが2つ以上必要な場合**は `BlueSettingButton` のドロップダウンメニューにまとめる
+- ドロップダウン内のアイテムはグレーの `IconButton` 系（テキストラベル付き）でよい
 
-### アイコンボタンの用途別コンポーネント
+### テキストボックス横ボタンの用途別コンポーネント
+
+| 状況 | コンポーネント | 例 |
+|------|--------------|-----|
+| アイコン1つ（単一操作） | `BlueEditButton` 等 `BlueButtonIcon` 系 | JdbcUrlBuilderButton |
+| アイコン2つ以上（複数操作） | `BlueSettingButton`（ドロップダウン） | CommandFormElement の DropDownMenu, JdbcPropertiesDropDownMenu |
+
+### ドロップダウン内のアイコンボタン
 
 | 用途 | コンポーネント | 例 |
 |------|--------------|-----|
-| 複数の選択肢を持つドロップダウンメニュー | `SettingButton` | CommandFormElement の DropDownMenu |
-| ダイアログを起動（編集・ビルダー系） | `EditButton` | JdbcUrlBuilderButton, TemplatePreviewButton |
+| ダイアログを起動（編集・ビルダー系） | `EditButton` | DatasetSettingEditButton, TemplatePreviewButton |
 | ダイアログを起動（プレビュー・参照系） | `PreviewButton` | JdbcPropertiesPreviewButton |
 | ファイル選択ダイアログ | `FileButton` | FileChooser の FileButton |
 | ディレクトリ選択ダイアログ | `DirectoryButton` | DirectoryChooser の DirectoryButton |

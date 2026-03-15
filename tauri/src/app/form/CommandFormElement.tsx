@@ -1,6 +1,6 @@
 import type React from "react";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { ExpandButton, SettingButton } from "../../components/element/ButtonIcon";
+import { BlueSettingButton, ExpandButton } from "../../components/element/ButtonIcon";
 import {
 	CheckBox,
 	ControllTextBox,
@@ -260,7 +260,7 @@ function DropDownMenu({
 
 	return (
 		<div className="relative mr-24" ref={buttonRef}>
-			<SettingButton handleClick={() => setShowMenu(!showMenu)} />
+			<BlueSettingButton handleClick={() => setShowMenu(!showMenu)} />
 			{showMenu && (
 				<div
 					ref={menuRef}
