@@ -23,7 +23,7 @@ export const workspaceResourcesFixture: WorkspaceResources = {
 		parameterize: ['param1'],
 	},
 	resources: ResourcesSettings.from({
-		metadataSetting: ['setting1'],
+		datasetSettings: ['setting1'],
 		xlsxSchemas: ['schema1'],
 		jdbcFiles: ['jdbc1'],
 		templateFiles: ['template1'],

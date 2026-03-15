@@ -84,11 +84,11 @@ describe('DatasetSettingsProviderのテスト', () => {
                 return { resources, saveDatasetSettings }
             }, { wrapper });
             await act(async () => {rerender()});
-            expect(result.current.resources.metadataSetting).toStrictEqual(mockWorkspaceResources.resources.metadataSetting);
+            expect(result.current.resources.datasetSettings).toStrictEqual(mockWorkspaceResources.resources.datasetSettings);
             await act(async () => {
                 result.current.saveDatasetSettings('test-setting', DatasetSettings.create());
             });
-            expect(result.current.resources.metadataSetting).toStrictEqual(mockUpdatedSettings);
+            expect(result.current.resources.datasetSettings).toStrictEqual(mockUpdatedSettings);
         });
     });
 
@@ -100,11 +100,11 @@ describe('DatasetSettingsProviderのテスト', () => {
                 return { resources, deleteDatasetSettings }
             }, { wrapper });
             await act(async () => {rerender()});
-            expect(result.current.resources.metadataSetting).toStrictEqual(mockWorkspaceResources.resources.metadataSetting);
+            expect(result.current.resources.datasetSettings).toStrictEqual(mockWorkspaceResources.resources.datasetSettings);
             await act(async () => {
                 result.current.deleteDatasetSettings('test-setting');
             });
-            expect(result.current.resources.metadataSetting).toStrictEqual(mockRemainingSettings);
+            expect(result.current.resources.datasetSettings).toStrictEqual(mockRemainingSettings);
         });
     });
 });
