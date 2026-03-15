@@ -26,7 +26,7 @@ export default function JdbcUrlBuilderDialog({
 	handleSave,
 }: JdbcUrlBuilderDialogProps) {
 	const parsed = parseJdbcUrl(currentUrl);
-	const initialRdbType: RdbType = parsed.rdbType ?? "postgres";
+	const initialRdbType: RdbType = parsed.rdbType ?? "oracle";
 	const [state, setState] = useState<JdbcUrlBuilderState>({
 		rdbType: initialRdbType,
 		host: parsed.host ?? "localhost",
