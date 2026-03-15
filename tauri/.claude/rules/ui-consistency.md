@@ -26,17 +26,22 @@ paths:
 - disabled ボタン: `bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed`（`Button` の props で渡す）
 - コンポーネントが提供するスタイルに手を加えない。カスタムが必要なら `Button` の props を使う
 
-## ButtonWithIcon のアイコン選択ルール
+## テキストボックス横のアイコンボタン
 
-テキストボックス横の `ButtonWithIcon` に渡すアイコンは用途に応じて以下を使い分ける：
+- 配色は**グレーの IconButton 系**（`EditButton`, `PreviewButton`, `FileButton`, `SettingButton` 等）で統一
+- `ButtonWithIcon`（青背景）はテキストボックス横には使わない
+- ボタン並び順: [ファイル/プレビュー/編集系] → [削除系（`RemoveButton`）]（削除は常に末尾）
 
-| 用途 | アイコン | 例 |
-|------|---------|-----|
-| 複数の選択肢を持つドロップダウンメニュー | `SettingIcon`（縦三点リーダー） | CommandFormElement の DropDownMenu |
-| ダイアログを起動（編集・ビルダー系） | `EditIcon`（鉛筆） | JdbcUrlBuilderButton |
-| ダイアログを起動（プレビュー・参照系） | `PreviewIcon`（目のアイコン） | JdbcPropertiesPreviewButton, TemplatePreviewButton |
-| ファイル選択ダイアログ | `FileIcon` | FileChooser の FileButton |
-| ディレクトリ選択ダイアログ | `DirIcon` | DirectoryChooser の DirectoryButton |
+### アイコンボタンの用途別コンポーネント
+
+| 用途 | コンポーネント | 例 |
+|------|--------------|-----|
+| 複数の選択肢を持つドロップダウンメニュー | `SettingButton` | CommandFormElement の DropDownMenu |
+| ダイアログを起動（編集・ビルダー系） | `EditButton` | JdbcUrlBuilderButton, TemplatePreviewButton |
+| ダイアログを起動（プレビュー・参照系） | `PreviewButton` | JdbcPropertiesPreviewButton |
+| ファイル選択ダイアログ | `FileButton` | FileChooser の FileButton |
+| ディレクトリ選択ダイアログ | `DirectoryButton` | DirectoryChooser の DirectoryButton |
+| リソース削除 | `RemoveButton` 系 | RemoveDatasetSettingButton 等 |
 
 ## ExpandButton の caption
 - パターン: `"<type> option"`（英語小文字）

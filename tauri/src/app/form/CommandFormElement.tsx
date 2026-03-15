@@ -1,8 +1,6 @@
 import type React from "react";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { ButtonWithIcon } from "../../components/element/Button";
-import { ExpandButton } from "../../components/element/ButtonIcon";
-import { SettingIcon } from "../../components/element/Icon";
+import { ExpandButton, SettingButton } from "../../components/element/ButtonIcon";
 import {
 	CheckBox,
 	ControllTextBox,
@@ -196,9 +194,6 @@ function Text(prop: Prop) {
 					)}
 				</div>
 				<div className="flex">
-					{isValueInDatalist &&
-						!prop.hidden &&
-						renderRemoveButton(prop.element.name, path, setPath, srcType)}
 					{showDopDownMenu && !prop.hidden && (
 						<DropDownMenu
 							prefix={prop.prefix}
@@ -210,6 +205,9 @@ function Text(prop: Prop) {
 							srcInfo={srcInfo}
 						/>
 					)}
+					{isValueInDatalist &&
+						!prop.hidden &&
+						renderRemoveButton(prop.element.name, path, setPath, srcType)}
 				</div>
 			</div>
 		</div>
@@ -262,12 +260,7 @@ function DropDownMenu({
 
 	return (
 		<div className="relative mr-24" ref={buttonRef}>
-			<ButtonWithIcon
-				handleClick={() => setShowMenu(!showMenu)}
-				id={`${prefix}_${element.name}DropDown`}
-			>
-				<SettingIcon title="" fill="white" />
-			</ButtonWithIcon>
+			<SettingButton handleClick={() => setShowMenu(!showMenu)} />
 			{showMenu && (
 				<div
 					ref={menuRef}

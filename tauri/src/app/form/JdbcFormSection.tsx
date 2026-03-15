@@ -4,8 +4,8 @@ import {
 	useCallback,
 	useState,
 } from "react";
-import { BlueButton, ButtonWithIcon } from "../../components/element/Button";
-import { EditIcon, PreviewIcon } from "../../components/element/Icon";
+import { BlueButton } from "../../components/element/Button";
+import { EditButton, PreviewButton } from "../../components/element/ButtonIcon";
 import {
 	ControllTextBox,
 	InputLabel,
@@ -168,18 +168,18 @@ function JdbcTextField({
 							setPath={setPath}
 						/>
 					)}
-					{isJdbcProperties && value && (
-						<RemoveJdbcPropertiesButton
-							path={value}
-							setPath={(v) => onValueChange(element.name, v)}
-						/>
-					)}
 					{isJdbcProperties && value && onApplyValues && (
 						<JdbcPropertiesPreviewButton
 							path={value}
 							showDialog={showPreview}
 							setShowDialog={setShowPreview}
 							onApplyValues={onApplyValues}
+						/>
+					)}
+					{isJdbcProperties && value && (
+						<RemoveJdbcPropertiesButton
+							path={value}
+							setPath={(v) => onValueChange(element.name, v)}
 						/>
 					)}
 					{isJdbcUrl && (
@@ -209,12 +209,7 @@ function JdbcPropertiesPreviewButton({
 }) {
 	return (
 		<>
-			<ButtonWithIcon
-				handleClick={() => setShowDialog(true)}
-				id="jdbcPropertiesPreviewButton"
-			>
-				<PreviewIcon title="Preview Properties" fill="white" />
-			</ButtonWithIcon>
+			<PreviewButton handleClick={() => setShowDialog(true)} />
 			{showDialog && (
 				<JdbcPropertiesPreviewDialog
 					path={path}
@@ -242,12 +237,7 @@ function JdbcUrlBuilderButton({
 }) {
 	return (
 		<>
-			<ButtonWithIcon
-				handleClick={() => setShowDialog(true)}
-				id="jdbcUrlBuilderButton"
-			>
-				<EditIcon title="JDBC URL Builder" fill="white" />
-			</ButtonWithIcon>
+			<EditButton handleClick={() => setShowDialog(true)} />
 			{showDialog && (
 				<JdbcUrlBuilderDialog
 					currentUrl={path}
