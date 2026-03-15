@@ -44,7 +44,7 @@ paths:
 
 | 用途 | コンポーネント | 例 |
 |------|--------------|-----|
-| ダイアログを起動（編集・ビルダー系） | `EditButton` | DatasetSettingEditButton, TemplatePreviewButton |
+| ダイアログを起動（編集・ビルダー系） | `EditButton` | DatasetSettingEditButton, TemplateEditButton |
 | ダイアログを起動（プレビュー・参照系） | `PreviewButton` | JdbcPropertiesPreviewButton |
 | リソース削除 | `DeleteButton` | RemoveDatasetSettingButton 等 |
 | ファイル選択ダイアログ | `FileButton` | FileChooser の FileButton |

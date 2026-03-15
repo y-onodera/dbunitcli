@@ -4,7 +4,7 @@ import { SettingDialog } from "../../components/dialog/SettingDialog";
 import { useTemplateLoadContent, useTemplateSaveContent, useDeleteTemplate } from "../../hooks/useTemplate";
 import { RemoveResource, type ResourceEditButtonProp } from "./ResourceEditButton";
 
-function TemplatePreviewDialog({
+function TemplateEditDialog({
 	name,
 	setPath,
 	handleDialogClose,
@@ -74,7 +74,7 @@ function TemplatePreviewDialog({
 	);
 }
 
-export default function TemplatePreviewButton({
+export default function TemplateEditButton({
 	path,
 	setPath,
 }: {
@@ -86,7 +86,7 @@ export default function TemplatePreviewButton({
 		<>
 			<EditButton handleClick={() => setShowDialog(true)} />
 			{showDialog && (
-				<TemplatePreviewDialog
+				<TemplateEditDialog
 					name={path}
 					setPath={setPath}
 					handleDialogClose={() => setShowDialog(false)}
