@@ -5,9 +5,9 @@ interface SettingTableProps<T> {
     caption: string;
     settings: T[];
     setSettings: (convertFunction: (currentSettings: T[]) => T[]) => void;
-    addSettings: (current: T[], newSettings: T) => T[];
-    updateSettings: (current: T[], beforeSettings: T, newSettings: T) => T[];
-    deleteSettings: (current: T[], targetSettings: T) => T[];
+    addSettings?: (current: T[], newSettings: T) => T[];
+    updateSettings?: (current: T[], beforeSettings: T, newSettings: T) => T[];
+    deleteSettings?: (current: T[], targetSettings: T) => T[];
     renderSetting: (setting: T) => React.ReactNode;
     SettingDialogComponent: React.ComponentType<{
         setting: T;
@@ -22,9 +22,9 @@ export default function SettingTable<T>({
     caption,
     settings,
     setSettings,
-    addSettings,
-    updateSettings,
-    deleteSettings,
+    addSettings = (current, item) => [...current, item],
+    updateSettings = (current, before, after) => current.map((s) => (s === before ? after : s)),
+    deleteSettings = (current, item) => current.filter((s) => s !== item),
     renderSetting,
     SettingDialogComponent,
     newSetting,

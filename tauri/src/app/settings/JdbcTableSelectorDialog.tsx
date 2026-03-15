@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { SettingDialog } from "../../components/dialog";
 import { useJdbcTables } from "../../hooks/useJdbc";
 import { useSaveDataSource } from "../../hooks/useQueryDatasource";
+import { saveOnSuccess } from "../../utils/fetchUtils";
 
 interface JdbcTableSelectorDialogProps {
 	jdbcValues: Record<string, string>;
@@ -148,12 +149,12 @@ export default function JdbcTableSelectorDialog({
 		}
 	};
 
-	const handleSaveWithPath = async (path: string) => {
+	const handleSaveWithPath = (path: string) => {
 		const contents = tables.filter((t) => selected.has(t)).join("\n");
-		const result = await saveDataSource({ type: "table", name: path, contents });
-		if (result === "success") {
-			handleSave(path);
-		}
+		return saveOnSuccess(
+			() => saveDataSource({ type: "table", name: path, contents }),
+			() => handleSave(path),
+		);
 	};
 
 	return (

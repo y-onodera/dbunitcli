@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { SettingDialog } from '../../components/dialog';
 import { useSaveDataSource } from '../../hooks/useQueryDatasource';
+import { saveOnSuccess } from '../../utils/fetchUtils';
 import type { QueryDatasourceType } from '../../model/QueryDatasource';
 
 type SqlEditorDialogProps = {
@@ -15,16 +16,11 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
     const [content, setContent] = useState<string>(props.value);
     const saveDataSource = useSaveDataSource();
 
-    const handleCommit = async (path: string) => {
-        const result = await saveDataSource({
-            type: props.type,
-            name: path,
-            contents: content
-        });
-        if (result === 'success') {
-            props.handleSave(path);
-        }
-    };
+    const handleCommit = (path: string) =>
+        saveOnSuccess(
+            () => saveDataSource({ type: props.type, name: path, contents: content }),
+            () => props.handleSave(path),
+        );
 
     return (
         <SettingDialog
