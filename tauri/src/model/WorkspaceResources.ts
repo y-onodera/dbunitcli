@@ -106,7 +106,7 @@ export class ParameterList {
 	}
 }
 export type ResourcesSettingsBuilder = {
-	metadataSetting?: string[];
+	datasetSettings?: string[];
 	xlsxSchemas?: string[];
 	jdbcFiles?: string[];
 	templateFiles?: string[];
@@ -119,13 +119,13 @@ export class ResourcesSettings {
 	static from(builder: ResourcesSettingsBuilder): ResourcesSettings {
 		return new ResourcesSettings(builder);
 	}
-	readonly metadataSetting: string[];
+	readonly datasetSettings: string[];
 	readonly xlsxSchemas: string[];
 	readonly jdbcFiles: string[];
 	readonly templateFiles: string[];
 	readonly queryFiles: QueryFiles;
 	constructor(builder: ResourcesSettingsBuilder) {
-		this.metadataSetting = builder.metadataSetting ?? [];
+		this.datasetSettings = builder.datasetSettings ?? [];
 		this.xlsxSchemas = builder.xlsxSchemas ?? [];
 		this.jdbcFiles = builder.jdbcFiles ?? [];
 		this.templateFiles = builder.templateFiles ?? [];

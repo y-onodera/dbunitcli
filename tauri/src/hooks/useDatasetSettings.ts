@@ -85,7 +85,7 @@ async function saveDatasetSettings(
 		.then((response) => response.json())
 		.then((settings: string[]) => {
 			setResourcesSettings((current) =>
-				current.with({ metadataSetting: settings }),
+				current.with({ datasetSettings: settings }),
 			);
 			return "success" as OperationResult;
 		})
@@ -113,7 +113,7 @@ async function deleteDatasetSettings(
 		.then((response) => response.json())
 		.then((settings: string[]) => {
 			setResourcesSettings((current) =>
-				current.with({ metadataSetting: settings }),
+				current.with({ datasetSettings: settings }),
 			);
 			return "success" as OperationResult;
 		})

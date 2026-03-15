@@ -163,7 +163,7 @@ function Text(prop: Prop) {
 	if (element.name === "src" && isSqlRelatedType(srcType ?? "")) {
 		resourceFiles = settings.querys(srcType);
 	} else if (element.name === "setting") {
-		resourceFiles = settings.metadataSetting;
+		resourceFiles = settings.datasetSettings;
 	} else if (element.name === "xlsxSchema") {
 		resourceFiles = settings.xlsxSchemas;
 	} else if (element.name === "templateGroup") {
