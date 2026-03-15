@@ -1,5 +1,8 @@
 import { Fragment, useEffect, useRef, useState } from "react";
-import { BlueSettingButton, ExpandButton } from "../../components/element/ButtonIcon";
+import {
+	BlueSettingButton,
+	ExpandButton,
+} from "../../components/element/ButtonIcon";
 import {
 	CheckBox,
 	ControllTextBox,
@@ -7,6 +10,7 @@ import {
 	ResourceDatalist,
 	SelectBox,
 } from "../../components/element/Input";
+import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import type { CommandParams } from "../../model/CommandParam";
 import {
@@ -20,14 +24,13 @@ import JdbcTableSelectorButton from "../settings/JdbcTableSelectorButton";
 import SqlEditorButton, {
 	RemoveSqlEditorButton,
 } from "../settings/SqlEditorButton";
+import TemplatePreviewButton from "../settings/TemplatePreviewButton";
 import XlsxSchemaEditButton, {
 	RemoveXlsxSchemaButton,
 } from "../settings/XlsxSchemaEditButton";
 import { DirectoryChooser, FileChooser } from "./Chooser";
 import type { FileProp, Prop, SelectProp, SrcInfo } from "./FormElementProp";
-import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import JdbcFormSection, { JDBC_FIELD_NAMES } from "./JdbcFormSection";
-import TemplatePreviewButton from "../settings/TemplatePreviewButton";
 
 export default function CommandFormElements(
 	prop: {
@@ -40,12 +43,24 @@ export default function CommandFormElements(
 	);
 	const srcType = srcTypeElement ? srcTypeElement.value : "";
 	const srcElement = prop.elements.find((element) => element.name === "src");
-	const regTableIncludeElement = prop.elements.find((element) => element.name === "regTableInclude");
-	const regTableExcludeElement = prop.elements.find((element) => element.name === "regTableExclude");
-	const recursiveElement = prop.elements.find((element) => element.name === "recursive");
-	const regIncludeElement = prop.elements.find((element) => element.name === "regInclude");
-	const regExcludeElement = prop.elements.find((element) => element.name === "regExclude");
-	const extensionElement = prop.elements.find((element) => element.name === "extension");
+	const regTableIncludeElement = prop.elements.find(
+		(element) => element.name === "regTableInclude",
+	);
+	const regTableExcludeElement = prop.elements.find(
+		(element) => element.name === "regTableExclude",
+	);
+	const recursiveElement = prop.elements.find(
+		(element) => element.name === "recursive",
+	);
+	const regIncludeElement = prop.elements.find(
+		(element) => element.name === "regInclude",
+	);
+	const regExcludeElement = prop.elements.find(
+		(element) => element.name === "regExclude",
+	);
+	const extensionElement = prop.elements.find(
+		(element) => element.name === "extension",
+	);
 	const srcInfo: SrcInfo = {
 		srcPath: srcElement?.value ?? "",
 		regTableInclude: regTableIncludeElement?.value ?? "",
@@ -67,7 +82,9 @@ export default function CommandFormElements(
 				const isJdbcField = JDBC_FIELD_NAMES.includes(
 					element.name as (typeof JDBC_FIELD_NAMES)[number],
 				);
-				if (isJdbcField) { return null; }
+				if (isJdbcField) {
+					return null;
+				}
 				if (element.attribute.type === "FLG") {
 					return (
 						<Fragment key={prop.name + prop.prefix + element.name}>
@@ -220,7 +237,11 @@ function DropDownMenu({
 	srcType,
 	srcInfo,
 	isValueInDatalist,
-}: FileProp & { srcType?: string; datasources?: string[]; isValueInDatalist?: boolean }) {
+}: FileProp & {
+	srcType?: string;
+	datasources?: string[];
+	isValueInDatalist?: boolean;
+}) {
 	const [showMenu, setShowMenu] = useState(false);
 	const { connectionOk } = useJdbcConnectionState();
 	const buttonRef = useRef<HTMLDivElement>(null);
@@ -277,7 +298,11 @@ function DropDownMenu({
 						)}
 						{element.name === "xlsxSchema" && !hidden && (
 							<li>
-								<XlsxSchemaEditButton path={path} setPath={setPath} srcInfo={srcInfo} />
+								<XlsxSchemaEditButton
+									path={path}
+									setPath={setPath}
+									srcInfo={srcInfo}
+								/>
 							</li>
 						)}
 						{element.name === "src" &&
@@ -304,6 +329,27 @@ function DropDownMenu({
 								<TemplatePreviewButton path={path} />
 							</li>
 						)}
+						{element.name === "setting" && !hidden && isValueInDatalist && (
+							<li>
+								<RemoveDatasetSettingButton path={path} setPath={setPath} />
+							</li>
+						)}
+						{element.name === "xlsxSchema" && !hidden && isValueInDatalist && (
+							<li>
+								<RemoveXlsxSchemaButton path={path} setPath={setPath} />
+							</li>
+						)}
+						{(srcType === "sql" || srcType === "table") &&
+							!hidden &&
+							isValueInDatalist && (
+								<li>
+									<RemoveSqlEditorButton
+										path={path}
+										setPath={setPath}
+										type={srcType as QueryDatasourceType}
+									/>
+								</li>
+							)}
 						{element.attribute.type.includes("FILE") && (
 							<li>
 								<FileChooser
@@ -326,21 +372,6 @@ function DropDownMenu({
 									setPath={setPath}
 									onSelect={() => setShowMenu(false)}
 								/>
-							</li>
-						)}
-						{element.name === "setting" && !hidden && isValueInDatalist && (
-							<li>
-								<RemoveDatasetSettingButton path={path} setPath={setPath} />
-							</li>
-						)}
-						{element.name === "xlsxSchema" && !hidden && isValueInDatalist && (
-							<li>
-								<RemoveXlsxSchemaButton path={path} setPath={setPath} />
-							</li>
-						)}
-						{(srcType === "sql" || srcType === "table") && !hidden && isValueInDatalist && (
-							<li>
-								<RemoveSqlEditorButton path={path} setPath={setPath} type={srcType as QueryDatasourceType} />
 							</li>
 						)}
 					</ul>

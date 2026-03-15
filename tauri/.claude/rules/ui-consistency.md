@@ -46,9 +46,9 @@ paths:
 |------|--------------|-----|
 | ダイアログを起動（編集・ビルダー系） | `EditButton` | DatasetSettingEditButton, TemplatePreviewButton |
 | ダイアログを起動（プレビュー・参照系） | `PreviewButton` | JdbcPropertiesPreviewButton |
+| リソース削除 | `DeleteButton` | RemoveDatasetSettingButton 等 |
 | ファイル選択ダイアログ | `FileButton` | FileChooser の FileButton |
 | ディレクトリ選択ダイアログ | `DirectoryButton` | DirectoryChooser の DirectoryButton |
-| リソース削除 | `DeleteButton` | RemoveDatasetSettingButton 等 |
 
 ## ExpandButton の caption
 - パターン: `"<type> option"`（英語小文字）
