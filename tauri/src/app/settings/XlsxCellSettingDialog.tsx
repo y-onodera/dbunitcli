@@ -3,7 +3,7 @@ import { Arrays, Check, Fieldset, SettingDialog, Text } from "../../components/d
 import { ResourceDatalist } from "../../components/element/Input";
 import { useSrcInfoSheets } from "../../hooks/useXlsxSchema";
 import type { CellSetting } from "../../model/XlsxSchema";
-import type { SrcInfo } from "../form/FormElementProp";
+import type { SrcInfo } from "../../model/CommandParam";
 
 export default function XlsxCellSettingDialog(props: {
     setting: CellSetting;

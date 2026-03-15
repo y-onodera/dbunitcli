@@ -1,5 +1,5 @@
 import { useDeleteXlsxSchema } from "../../hooks/useXlsxSchema";
-import type { SrcInfo } from "../form/FormElementProp";
+import type { SrcInfo } from "../../model/CommandParam";
 import ResourceEditButton, {
 	RemoveResource,
 	type ResourceEditButtonProp,

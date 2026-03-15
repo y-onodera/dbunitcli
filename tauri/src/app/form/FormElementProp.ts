@@ -1,15 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { CommandParam } from "../../model/CommandParam";
-
-export type SrcInfo = {
-	srcPath: string;
-	regTableInclude: string;
-	regTableExclude: string;
-	recursive: string;
-	regInclude: string;
-	regExclude: string;
-	extension: string;
-};
+import type { CommandParam, SrcInfo } from "../../model/CommandParam";
 
 export type Prop = {
 	prefix: string;

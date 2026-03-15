@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useState } from "react";
-import type { SrcInfo } from "../app/form/FormElementProp";
+import type { SrcInfo } from "../model/CommandParam";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { ResourcesSettings } from "../model/WorkspaceResources";

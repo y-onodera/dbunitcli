@@ -29,7 +29,8 @@ import XlsxSchemaEditButton, {
 	RemoveXlsxSchemaButton,
 } from "../settings/XlsxSchemaEditButton";
 import { DirectoryChooser, FileChooser } from "./Chooser";
-import type { FileProp, Prop, SelectProp, SrcInfo } from "./FormElementProp";
+import type { SrcInfo } from "../../model/CommandParam";
+import type { FileProp, Prop, SelectProp } from "./FormElementProp";
 import JdbcFormSection, { JDBC_FIELD_NAMES } from "./JdbcFormSection";
 
 export default function CommandFormElements(
