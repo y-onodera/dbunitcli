@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Arrays, Check, Fieldset, SettingDialog, Text } from "../../components/dialog/SettingDialog";
+import { Arrays, Check, Fieldset, SettingDialog, Text } from "../../components/dialog";
 import { ResourceDatalist } from "../../components/element/Input";
 import { useXlsxSheets } from "../../hooks/useXlsxSchema";
 import type { CellSetting } from "../../model/XlsxSchema";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { SettingDialog } from "../../components/dialog/SettingDialog";
+import { SettingDialog } from "../../components/dialog";
 import { useJdbcReadContent } from "../../hooks/useJdbc";
 
 type JdbcPropertiesPreviewDialogProps = {

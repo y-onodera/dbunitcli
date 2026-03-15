@@ -1,10 +1,9 @@
 import { Suspense, use, useState } from 'react';
-import ResourceFileDialog from '../../components/dialog/ResourceFileDialog';
-import SettingTable from '../../components/dialog/SettingTable';
+import { ResourceFileDialog, SettingTable } from '../../components/dialog';
 import { useLoadDatasetSettings, useSaveDatasetSettings } from '../../hooks/useDatasetSettings';
 import type { DatasetSetting } from "../../model/DatasetSettings";
 import { DatasetSettings, newDatasetSetting } from "../../model/DatasetSettings";
-import DatasetSettingDaialog from "./DatasetSettingDialog";
+import DatasetSettingDialog from "./DatasetSettingDialog";
 
 export default function DatasetSettingsDialog(props: {
 	fileName: string;
@@ -54,7 +53,7 @@ function Dialog(props: {
 				updateSettings={(current, before, after) => current.map((setting) => (setting === before ? after : setting))}
 				deleteSettings={(current, settings) => current.filter((setting) => setting !== settings)}
 				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={DatasetSettingDaialog}
+				SettingDialogComponent={DatasetSettingDialog}
 				newSetting={newDatasetSetting}
 				getKey={(setting) => setting.displayName()}
 			/>
@@ -69,7 +68,7 @@ function Dialog(props: {
 				updateSettings={(current, before, after) => current.map((setting) => (setting === before ? after : setting))}
 				deleteSettings={(current, settings) => current.filter((setting) => setting !== settings)}
 				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={DatasetSettingDaialog}
+				SettingDialogComponent={DatasetSettingDialog}
 				newSetting={newDatasetSetting}
 				getKey={(setting) => setting.displayName()}
 			/>

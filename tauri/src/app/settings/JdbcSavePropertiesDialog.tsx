@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SettingDialog } from "../../components/dialog/SettingDialog";
+import { SettingDialog } from "../../components/dialog";
 import {
 	ControllTextBox,
 	InputLabel,

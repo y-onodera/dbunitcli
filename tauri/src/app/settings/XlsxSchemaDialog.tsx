@@ -1,6 +1,5 @@
 import { Suspense, use, useState } from "react";
-import ResourceFileDialog from "../../components/dialog/ResourceFileDialog";
-import SettingTable from "../../components/dialog/SettingTable";
+import { ResourceFileDialog, SettingTable } from "../../components/dialog";
 import { useLoadXlsxSchema, useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
 import { type CellSetting, type RowSetting, XlsxSchema, createCellSetting, createRowSetting } from "../../model/XlsxSchema";
 import type { SrcInfo } from "../form/FormElementProp";

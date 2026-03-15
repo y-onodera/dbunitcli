@@ -1,10 +1,10 @@
 import type React from "react";
 import { useState } from "react";
-import { Arrays, Check, Fieldset, KeyValues, Select, SettingDialog, Text } from "../../components/dialog/SettingDialog";
+import { Arrays, Check, Fieldset, KeyValues, Select, SettingDialog, Text } from "../../components/dialog";
 import { ExpandButton } from "../../components/element/ButtonIcon";
 import type { DatasetSetting } from "../../model/DatasetSettings";
 
-export default function DatasetSettingDaialog(props: {
+export default function DatasetSettingDialog(props: {
     setting: DatasetSetting
     handleDialogClose: () => void;
     handleCommit: (newSettings: DatasetSetting) => void;

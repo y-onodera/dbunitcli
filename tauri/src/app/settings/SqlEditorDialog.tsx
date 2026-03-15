@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ResourceFileDialog from '../../components/dialog/ResourceFileDialog';
+import { ResourceFileDialog } from '../../components/dialog';
 import { useSaveDataSource } from '../../hooks/useQueryDatasource';
 import type { QueryDatasourceType } from '../../model/QueryDatasource';
 
