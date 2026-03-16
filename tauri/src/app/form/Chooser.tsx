@@ -6,18 +6,52 @@ import {
 	FileButton,
 	OpenButton,
 } from "../../components/element/ButtonIcon";
+import { useEnviroment } from "../../context/EnviromentProvider";
 import { useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
 import type { Attribute } from "../../model/CommandParam";
 import { isSqlRelatedType } from "../../model/QueryDatasource";
 import type { WorkspaceContext } from "../../model/WorkspaceResources";
+import { fetchData } from "../../utils/fetchUtils";
 import type { FileProp } from "./FormElementProp";
+
+async function resolvePathViaSidecar(
+	path: string,
+	defaultPath: string,
+	srcType: string | undefined,
+	apiUrl: string,
+): Promise<string> {
+	try {
+		const fetchParams = {
+			endpoint: `${apiUrl}workspace/resolve-path`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ path, defaultPath, srcType }),
+			},
+		};
+		const response = await fetchData(fetchParams);
+		return await response.text();
+	} catch {
+		return "";
+	}
+}
 
 async function resolveAbsolutePath(
 	path: string,
 	context: WorkspaceContext,
 	attribute: Attribute,
 	srcType: string | undefined,
+	apiUrl: string,
 ): Promise<string> {
+	const sidecarResult = await resolvePathViaSidecar(
+		path,
+		attribute.defaultPath,
+		srcType,
+		apiUrl,
+	);
+	if (sidecarResult) {
+		return sidecarResult;
+	}
 	if (await isAbsolute(path)) {
 		return path;
 	}
@@ -30,36 +64,48 @@ async function resolveAbsolutePath(
 
 export function FileChooser(prop: FileProp) {
 	const context = useWorkspaceContext();
+	const environment = useEnviroment();
 	const handleFileChooserClick = () => {
 		const basePath = getPath(context, prop.element.attribute, prop.srcType);
-		resolveAbsolutePath(prop.path, context, prop.element.attribute, prop.srcType).then(
-			(defaultPath) =>
-				open({ defaultPath }).then((files) => {
-					if (files) {
-						prop.setPath(
-							(files as string).replace(basePath + sep(), ""),
-						);
-						prop.onSelect?.();
-					}
-				}),
+		resolveAbsolutePath(
+			prop.path,
+			context,
+			prop.element.attribute,
+			prop.srcType,
+			environment.apiUrl,
+		).then((defaultPath) =>
+			open({ defaultPath }).then((files) => {
+				if (files) {
+					prop.setPath(
+						(files as string).replace(basePath + sep(), ""),
+					);
+					prop.onSelect?.();
+				}
+			}),
 		);
 	};
 	return <FileButton handleClick={handleFileChooserClick} />;
 }
 export function DirectoryChooser(prop: FileProp) {
 	const context = useWorkspaceContext();
+	const environment = useEnviroment();
 	const handleDirectoryChooserClick = () => {
 		const basePath = getPath(context, prop.element.attribute, prop.srcType);
-		resolveAbsolutePath(prop.path, context, prop.element.attribute, prop.srcType).then(
-			(defaultPath) =>
-				open({ defaultPath, directory: true }).then((files) => {
-					if (files) {
-						prop.setPath(
-							(files as string).replace(basePath + sep(), ""),
-						);
-						prop.onSelect?.();
-					}
-				}),
+		resolveAbsolutePath(
+			prop.path,
+			context,
+			prop.element.attribute,
+			prop.srcType,
+			environment.apiUrl,
+		).then((defaultPath) =>
+			open({ defaultPath, directory: true }).then((files) => {
+				if (files) {
+					prop.setPath(
+						(files as string).replace(basePath + sep(), ""),
+					);
+					prop.onSelect?.();
+				}
+			}),
 		);
 	};
 	return <DirectoryButton handleClick={handleDirectoryChooserClick} />;
@@ -67,6 +113,7 @@ export function DirectoryChooser(prop: FileProp) {
 
 export function OpenInOS(prop: FileProp) {
 	const context = useWorkspaceContext();
+	const environment = useEnviroment();
 	const handleOpen = async () => {
 		if (!prop.path) {
 			return;
@@ -76,6 +123,7 @@ export function OpenInOS(prop: FileProp) {
 			context,
 			prop.element.attribute,
 			prop.srcType,
+			environment.apiUrl,
 		);
 		await core.invoke("open_directory", { path: absolutePath });
 	};
