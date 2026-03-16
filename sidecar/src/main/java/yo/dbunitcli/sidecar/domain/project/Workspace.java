@@ -144,6 +144,7 @@ public class Workspace {
         template.add("name", name);
         final String content = template.render();
         final File scriptFile = new File(launchDir.toFile(), commandType.name() + "_" + name + ".bat");
+        // BATファイルはWindowsのOSデフォルト文字コードで保存する必要がある
         Files.writeString(scriptFile.toPath(), content, Charset.defaultCharset());
         return scriptFile.getAbsolutePath();
     }
