@@ -25,17 +25,9 @@ export const useWorkspaceUpdate = () => {
 		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((resources: WorkspaceResources) => {
-				const ctx = WorkspaceContext.from(resources.context);
-				setContext(new WorkspaceContext(
-					workspace,
-					datasetBase,
-					resultBase,
-					ctx.settingBase,
-					ctx.templateBase,
-					ctx.parameterizeTemplateBase,
-					ctx.jdbcBase,
-					ctx.xlsxSchemaBase,
-				));
+				setContext(
+					WorkspaceContext.from(resources.context).with({ workspace, datasetBase, resultBase }),
+				);
 				setParameterList(ParameterList.from(resources.parameterList));
 				setResourcesSettings(new ResourcesSettings(resources.resources));
 			})

@@ -56,6 +56,18 @@ export class WorkspaceContext {
 		this.jdbcBase = jdbcBase;
 		this.xlsxSchemaBase = xlsxSchemaBase;
 	}
+	with(overrides: Partial<WorkspaceContextBuilder>): WorkspaceContext {
+		return new WorkspaceContext(
+			overrides.workspace ?? this.workspace,
+			overrides.datasetBase ?? this.datasetBase,
+			overrides.resultBase ?? this.resultBase,
+			overrides.settingBase ?? this.settingBase,
+			overrides.templateBase ?? this.templateBase,
+			overrides.parameterizeTemplateBase ?? this.parameterizeTemplateBase,
+			overrides.jdbcBase ?? this.jdbcBase,
+			overrides.xlsxSchemaBase ?? this.xlsxSchemaBase,
+		);
+	}
 }
 export type ParameterListBuilder = {
 	convert: string[];
