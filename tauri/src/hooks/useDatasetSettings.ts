@@ -79,7 +79,7 @@ export const useDatasetTableNames = (
 			return;
 		}
 		loadTableNames(srcInfo as DatasetSrcInfo, jdbcValues).then(setTableNames);
-	}, [srcPath, srcType, connectionOk, loadTableNames]);
+	}, [srcPath, srcType, connectionOk, jdbcValues, loadTableNames]);
 
 	return tableNames;
 };

@@ -17,8 +17,6 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 
-import java.util.Arrays;
-
 @Controller("dataset-setting")
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetSettingsController.class);
@@ -63,8 +61,8 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             final DataSetLoadOption option = new DataSetLoadOption("", dto);
             final ComparableDataSetParam param = option.getParam().build();
             return ObjectMapper.getDefault().writeValueAsString(
-                    Arrays.asList(new ComparableDataSetLoader(Parameter.none())
-                            .loadDataSet(param).getTableNames())
+                    new ComparableDataSetLoader(Parameter.none())
+                            .loadDataSet(param).getTableNames()
             );
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
