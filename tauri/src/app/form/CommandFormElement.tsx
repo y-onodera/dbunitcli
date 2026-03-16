@@ -18,6 +18,7 @@ import {
 import DatasetSettingEditButton, {
 	RemoveDatasetSettingButton,
 } from "../settings/DatasetSettingEditButton";
+import DatasetTableNamesPreviewButton from "../settings/DatasetTableNamesPreviewButton";
 import JdbcTableSelectorButton from "../settings/JdbcTableSelectorButton";
 import SqlEditorButton, {
 	RemoveSqlEditorButton,
@@ -280,6 +281,11 @@ function TextDropDownMenu({
 		<DropDownMenu>
 			{(closeMenu) => (
 				<>
+					{element.name === "setting" && !hidden && datasetSrcInfo && (
+						<li>
+							<DatasetTableNamesPreviewButton datasetSrcInfo={datasetSrcInfo} />
+						</li>
+					)}
 					{element.name === "setting" && !hidden && (
 						<li>
 							<DatasetSettingEditButton path={path} setPath={setPath} datasetSrcInfo={datasetSrcInfo} />
