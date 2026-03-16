@@ -29,7 +29,7 @@ import TemplateEditButton, {
 import XlsxSchemaEditButton, {
 	RemoveXlsxSchemaButton,
 } from "../settings/XlsxSchemaEditButton";
-import { DirectoryChooser, FileChooser } from "./Chooser";
+import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
 import type { FileProp, Prop, SelectProp } from "./FormElementProp";
 import JdbcFormSection, { JDBC_FIELD_NAMES } from "./JdbcFormSection";
 
@@ -326,6 +326,20 @@ function TextDropDownMenu({
 							<TemplateEditButton path={path} setPath={setPath} />
 						</li>
 					)}
+					{(element.attribute.type.includes("FILE") ||
+						element.attribute.type.includes("DIR")) &&
+						path &&
+						!hidden && (
+							<li>
+								<OpenInOS
+									prefix={prefix}
+									element={element}
+									srcType={srcType}
+									path={path}
+									setPath={setPath}
+								/>
+							</li>
+						)}
 					{element.name === "templateGroup" && !hidden && isValueInDatalist && (
 						<li>
 							<RemoveTemplateButton path={path} setPath={setPath} />

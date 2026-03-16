@@ -95,6 +95,20 @@ export function FileIcon(props: { title?: string, fill?: string }) {
             fill={props.fill ?? "#5f6368"}
         >
             <title>{props.title ?? "file"}</title>
+            <path d="M180-820v293-3 390-680 186-186Zm0 740q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h361l219 219v154q-14-7-29-12t-31-8v-107H511v-186H180v680h315q20 21 44.5 36T593-80H180Zm558.5-141.5Q770-253 770-300t-31.5-78.5Q707-410 660-410t-78.5 31.5Q550-347 550-300t31.5 78.5Q613-190 660-190t78.5-31.5ZM864-54 756.84-161Q736-147 711.5-138.5 687-130 660-130q-70.83 0-120.42-49.62Q490-229.24 490-300.12t49.62-120.38q49.62-49.5 120.5-49.5t120.38 49.58Q830-370.83 830-300q0 27-8.5 51.5T799-203.16L906-96l-42 42Z" />
+        </svg>
+    )
+}
+export function OpenIcon(props: { title?: string, fill?: string }) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill={props.fill ?? "#5f6368"}
+        >
+            <title>{props.title ?? "open"}</title>
             <path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v240h-80v-200H520v-200H240v640h360v80H240Zm638 15L760-183v89h-80v-226h226v80h-90l118 118-56 57Zm-638-95v-640 640Z" />
         </svg>
     )
