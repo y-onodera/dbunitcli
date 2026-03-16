@@ -19,9 +19,7 @@ mvn clean package -Pnative
 mvn clean package
 ```
 
-## テスト実行方法
-
-### テストの実行例
+## テストの実行例
 
 ネストしたクラスは `$` で区切り、メソッドは `#` で指定します。
 
