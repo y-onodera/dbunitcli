@@ -64,8 +64,9 @@ export const useDatasetTableNamesApi = () => {
 
 export const useDatasetTableNames = (
 	srcInfo: DatasetSrcInfo | undefined,
-): string[] => {
+): { tableNames: string[]; loading: boolean } => {
 	const [tableNames, setTableNames] = useState<string[]>([]);
+	const [loading, setLoading] = useState(false);
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const loadTableNames = useDatasetTableNamesApi();
 
@@ -76,12 +77,17 @@ export const useDatasetTableNames = (
 	useEffect(() => {
 		if (!srcPath || !srcType || srcType === "none" || sqlNotReady) {
 			setTableNames([]);
+			setLoading(false);
 			return;
 		}
-		loadTableNames(srcInfo as DatasetSrcInfo, jdbcValues).then(setTableNames);
+		setLoading(true);
+		loadTableNames(srcInfo as DatasetSrcInfo, jdbcValues).then((names) => {
+			setTableNames(names);
+			setLoading(false);
+		});
 	}, [srcPath, srcType, connectionOk, jdbcValues, loadTableNames]);
 
-	return tableNames;
+	return { tableNames, loading };
 };
 
 export const useDeleteDatasetSettings = () => {

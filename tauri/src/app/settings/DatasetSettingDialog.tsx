@@ -17,7 +17,7 @@ export default function DatasetSettingDialog(props: {
     const handleTargetChange = async (select: string) => setTarget(current => current.replace(select))
     const [showOptional, setShowOptional] = useState(false);
     const toggleOptional = () => setShowOptional(!showOptional)
-    const tableNames = useDatasetTableNames(props.datasetSrcInfo);
+    const { tableNames } = useDatasetTableNames(props.datasetSrcInfo);
     const tableList = tableNames.length > 0 ? "tableName_list" : undefined;
 
     return (
