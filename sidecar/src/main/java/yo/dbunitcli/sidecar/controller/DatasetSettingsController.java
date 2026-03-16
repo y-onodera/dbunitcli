@@ -1,5 +1,7 @@
 package yo.dbunitcli.sidecar.controller;
 
+import java.util.Objects;
+
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
@@ -58,7 +60,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             dto.getJdbc().setJdbcPass(request.getJdbcPass());
             dto.getJdbc().setJdbcProperties(request.getJdbcProperties());
 
-            final DataSetLoadOption option = new DataSetLoadOption(request.getSetting() != null ? request.getSetting() : "", dto);
+            final DataSetLoadOption option = new DataSetLoadOption(Objects.toString(request.getSetting(), ""), dto);
             final ComparableDataSetParam param = option.getParam().build();
             return ObjectMapper.getDefault().writeValueAsString(
                     new ComparableDataSetLoader(Parameter.none())
