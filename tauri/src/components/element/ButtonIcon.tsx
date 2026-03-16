@@ -9,6 +9,7 @@ import {
     ExpandIcon,
     FileIcon,
     FixIcon,
+    OpenIcon,
     PreviewIcon,
     RemoveIcon,
     SettingIcon,
@@ -20,7 +21,7 @@ export type IconButtonProps = {
     handleClick: React.MouseEventHandler<HTMLButtonElement>;
 };
 
-export type IconType = 'edit' | 'delete' | 'copy' | 'add' | 'remove' | 'setting' | 'fix' | 'file' | 'dir' | 'settingsApplication' | 'preview';
+export type IconType = 'edit' | 'delete' | 'copy' | 'add' | 'remove' | 'setting' | 'fix' | 'file' | 'dir' | 'settingsApplication' | 'preview' | 'open';
 
 const IconComponents: Record<IconType, React.FC<{ title: string }>> = {
     edit: EditIcon,
@@ -34,6 +35,7 @@ const IconComponents: Record<IconType, React.FC<{ title: string }>> = {
     dir: DirIcon,
     settingsApplication: SettingsApplicationIcon,
     preview: PreviewIcon,
+    open: OpenIcon,
 };
 
 export function IconButton({ iconType, title, handleClick }: IconButtonProps & { iconType: IconType }) {
@@ -90,6 +92,10 @@ export function ParameterizeButton(props: IconButtonProps) {
 
 export function PreviewButton(props: IconButtonProps) {
     return <IconButton iconType="preview" {...props} />;
+}
+
+export function OpenButton(props: IconButtonProps) {
+    return <IconButton iconType="open" {...props} />;
 }
 
 export function ExpandButton(prop: {

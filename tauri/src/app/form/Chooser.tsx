@@ -1,8 +1,10 @@
+import { core } from "@tauri-apps/api";
 import { isAbsolute, sep } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import {
 	DirectoryButton,
 	FileButton,
+	OpenButton,
 } from "../../components/element/ButtonIcon";
 import { useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
 import type { Attribute } from "../../model/CommandParam";
@@ -72,6 +74,26 @@ export function DirectoryChooser(prop: FileProp) {
 		);
 	};
 	return <DirectoryButton handleClick={handleDirectoryChooserClick} />;
+}
+
+export function OpenInOS(prop: FileProp) {
+	const context = useWorkspaceContext();
+	const handleOpen = async () => {
+		if (!prop.path) {
+			return;
+		}
+		let absolutePath: string;
+		if (await isAbsolute(prop.path)) {
+			absolutePath = prop.path;
+		} else {
+			absolutePath =
+				getPath(context, prop.element.attribute, prop.srcType) +
+				sep() +
+				prop.path;
+		}
+		await core.invoke("open_directory", { path: absolutePath });
+	};
+	return <OpenButton handleClick={handleOpen} title="Open in Explorer" />;
 }
 
 function getPath(
