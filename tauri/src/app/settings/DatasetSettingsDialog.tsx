@@ -4,6 +4,7 @@ import {
 	useLoadDatasetSettings,
 	useSaveDatasetSettings,
 } from "../../hooks/useDatasetSettings";
+import type { DatasetSrcInfo } from "../../model/CommandParam";
 import type { DatasetSetting } from "../../model/DatasetSettings";
 import {
 	DatasetSettings,
@@ -16,6 +17,7 @@ export default function DatasetSettingsDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
+	datasetSrcInfo?: DatasetSrcInfo;
 }) {
 	const loadSettings = useLoadDatasetSettings();
 	return (
@@ -25,6 +27,7 @@ export default function DatasetSettingsDialog(props: {
 				fileName={props.fileName}
 				handleDialogClose={props.handleDialogClose}
 				handleSave={props.handleSave}
+				datasetSrcInfo={props.datasetSrcInfo}
 			/>
 		</Suspense>
 	);
@@ -34,6 +37,7 @@ function Dialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
+	datasetSrcInfo?: DatasetSrcInfo;
 }) {
 	const saveSettings = useSaveDatasetSettings();
 	const dataSettingsData = use(props.promise);
@@ -60,7 +64,14 @@ function Dialog(props: {
 					})
 				}
 				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={DatasetSettingDialog}
+				SettingDialogComponent={({ setting, handleDialogClose, handleCommit }) => (
+					<DatasetSettingDialog
+						setting={setting}
+						handleDialogClose={handleDialogClose}
+						handleCommit={handleCommit}
+						datasetSrcInfo={props.datasetSrcInfo}
+					/>
+				)}
 				newSetting={newDatasetSetting}
 				getKey={(setting) => setting.displayName()}
 			/>
@@ -74,7 +85,14 @@ function Dialog(props: {
 					})
 				}
 				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={DatasetSettingDialog}
+				SettingDialogComponent={({ setting, handleDialogClose, handleCommit }) => (
+					<DatasetSettingDialog
+						setting={setting}
+						handleDialogClose={handleDialogClose}
+						handleCommit={handleCommit}
+						datasetSrcInfo={props.datasetSrcInfo}
+					/>
+				)}
 				newSetting={newDatasetSetting}
 				getKey={(setting) => setting.displayName()}
 			/>

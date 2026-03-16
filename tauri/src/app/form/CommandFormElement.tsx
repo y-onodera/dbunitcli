@@ -10,7 +10,7 @@ import {
 } from "../../components/element/Input";
 import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
-import type { CommandParams, SrcInfo } from "../../model/CommandParam";
+import type { CommandParams, DatasetSrcInfo, SrcInfo } from "../../model/CommandParam";
 import {
 	isSqlRelatedType,
 	type QueryDatasourceType,
@@ -69,6 +69,30 @@ export default function CommandFormElements(
 		regInclude: regIncludeElement?.value ?? "",
 		regExclude: regExcludeElement?.value ?? "",
 		extension: extensionElement?.value ?? "",
+	};
+	const xlsxSchemaElement = prop.elements.find((e) => e.name === "xlsxSchema");
+	const fixedLengthElement = prop.elements.find((e) => e.name === "fixedLength");
+	const regHeaderSplitElement = prop.elements.find((e) => e.name === "regHeaderSplit");
+	const regDataSplitElement = prop.elements.find((e) => e.name === "regDataSplit");
+	const encodingElement = prop.elements.find((e) => e.name === "encoding");
+	const delimiterElement = prop.elements.find((e) => e.name === "delimiter");
+	const ignoreQuotedElement = prop.elements.find((e) => e.name === "ignoreQuoted");
+	const headerNameElement = prop.elements.find((e) => e.name === "headerName");
+	const startRowElement = prop.elements.find((e) => e.name === "startRow");
+	const addFileInfoElement = prop.elements.find((e) => e.name === "addFileInfo");
+	const datasetSrcInfo: DatasetSrcInfo = {
+		...srcInfo,
+		srcType,
+		xlsxSchema: xlsxSchemaElement?.value ?? "",
+		fixedLength: fixedLengthElement?.value ?? "",
+		regHeaderSplit: regHeaderSplitElement?.value ?? "",
+		regDataSplit: regDataSplitElement?.value ?? "",
+		encoding: encodingElement?.value ?? "",
+		delimiter: delimiterElement?.value ?? "",
+		ignoreQuoted: ignoreQuotedElement?.value === "true",
+		headerName: headerNameElement?.value ?? "",
+		startRow: startRowElement?.value ?? "",
+		addFileInfo: addFileInfoElement?.value === "true",
 	};
 	const toggleOptional = () => setShowOptional(!showOptional);
 
@@ -149,6 +173,7 @@ export default function CommandFormElements(
 							hidden={prop.optional?.(element.name) && !showOptional}
 							srcType={element.name === "src" ? srcType : undefined}
 							srcInfo={element.name === "xlsxSchema" ? srcInfo : undefined}
+							datasetSrcInfo={element.name === "setting" ? datasetSrcInfo : undefined}
 						/>
 					</Fragment>
 				);
@@ -161,7 +186,7 @@ export default function CommandFormElements(
 }
 function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
-	const { element, srcType, srcInfo } = prop;
+	const { element, srcType, srcInfo, datasetSrcInfo } = prop;
 	const settings = useResourcesSettings();
 	let resourceFiles: string[] = [];
 	if (element.name === "src" && isSqlRelatedType(srcType ?? "")) {
@@ -225,6 +250,7 @@ function Text(prop: Prop) {
 							hidden={prop.hidden}
 							srcType={srcType}
 							srcInfo={srcInfo}
+							datasetSrcInfo={datasetSrcInfo}
 							isValueInDatalist={isValueInDatalist}
 						/>
 					)}
@@ -242,6 +268,7 @@ function TextDropDownMenu({
 	hidden,
 	srcType,
 	srcInfo,
+	datasetSrcInfo,
 	isValueInDatalist,
 }: FileProp & {
 	srcType?: string;
@@ -255,7 +282,7 @@ function TextDropDownMenu({
 				<>
 					{element.name === "setting" && !hidden && (
 						<li>
-							<DatasetSettingEditButton path={path} setPath={setPath} />
+							<DatasetSettingEditButton path={path} setPath={setPath} datasetSrcInfo={datasetSrcInfo} />
 						</li>
 					)}
 					{element.name === "xlsxSchema" && !hidden && (

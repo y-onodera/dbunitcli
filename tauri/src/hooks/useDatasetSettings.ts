@@ -1,6 +1,9 @@
 import type { Dispatch, SetStateAction } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
+import type { DatasetSrcInfo } from "../model/CommandParam";
 import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
@@ -9,6 +12,77 @@ import type { ResourcesSettings } from "../model/WorkspaceResources";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
 
 type OperationResult = "success" | "failed";
+
+export const useDatasetTableNamesApi = () => {
+	const { apiUrl } = useEnviroment();
+	return useCallback(
+		async (
+			info: DatasetSrcInfo,
+			jdbcValues: Record<string, string>,
+		): Promise<string[]> => {
+			if (!info.srcPath) {
+				return [];
+			}
+			const fetchParams = {
+				endpoint: `${apiUrl}dataset-setting/table-names`,
+				options: {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						srcType: info.srcType,
+						src: info.srcPath,
+						regTableInclude: info.regTableInclude,
+						regTableExclude: info.regTableExclude,
+						recursive: info.recursive === "true",
+						regInclude: info.regInclude,
+						regExclude: info.regExclude,
+						extension: info.extension,
+						xlsxSchema: info.xlsxSchema,
+						fixedLength: info.fixedLength,
+						regHeaderSplit: info.regHeaderSplit,
+						regDataSplit: info.regDataSplit,
+						encoding: info.encoding,
+						delimiter: info.delimiter,
+						ignoreQuoted: info.ignoreQuoted,
+						headerName: info.headerName,
+						startRow: info.startRow,
+						addFileInfo: info.addFileInfo,
+						jdbcUrl: jdbcValues.jdbcUrl ?? "",
+						jdbcUser: jdbcValues.jdbcUser ?? "",
+						jdbcPass: jdbcValues.jdbcPass ?? "",
+						jdbcProperties: jdbcValues.jdbcProperties ?? "",
+					}),
+				},
+			};
+			return fetchData(fetchParams)
+				.then((r) => r.json())
+				.catch(() => []);
+		},
+		[apiUrl],
+	);
+};
+
+export const useDatasetTableNames = (
+	srcInfo: DatasetSrcInfo | undefined,
+): string[] => {
+	const [tableNames, setTableNames] = useState<string[]>([]);
+	const { jdbcValues, connectionOk } = useJdbcConnectionState();
+	const loadTableNames = useDatasetTableNamesApi();
+
+	const srcPath = srcInfo?.srcPath ?? "";
+	const srcType = srcInfo?.srcType ?? "";
+	const sqlNotReady = srcType === "sql" && !connectionOk;
+
+	useEffect(() => {
+		if (!srcPath || !srcType || srcType === "none" || sqlNotReady) {
+			setTableNames([]);
+			return;
+		}
+		loadTableNames(srcInfo as DatasetSrcInfo, jdbcValues).then(setTableNames);
+	}, [srcPath, srcType, connectionOk, loadTableNames]);
+
+	return tableNames;
+};
 
 export const useDeleteDatasetSettings = () => {
 	const environment = useEnviroment();

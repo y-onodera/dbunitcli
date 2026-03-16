@@ -198,6 +198,7 @@ export function Arrays(props: {
 	handleChange: (text: string, index: number) => void;
 	handleRemove: (index: number) => void;
 	ignoreLabel?: boolean;
+	list?: string;
 }) {
 	return (
 		<>
@@ -210,6 +211,7 @@ export function Arrays(props: {
 					handleChange={props.handleChange}
 					handleRemove={props.handleRemove}
 					ignoreLabel={props.ignoreLabel}
+					list={props.list}
 				/>
 			) : (
 				props.values.map((val, index) => {
@@ -222,6 +224,7 @@ export function Arrays(props: {
 							handleChange={props.handleChange}
 							handleRemove={props.handleRemove}
 							ignoreLabel={props.ignoreLabel}
+							list={props.list}
 						/>
 					);
 				})
@@ -248,6 +251,7 @@ export function ArraysText(props: {
 	handleChange: (text: string, index: number) => void;
 	handleRemove: (index: number) => void;
 	ignoreLabel?: boolean;
+	list?: string;
 }) {
 	const [text, setText] = useState(props.val);
 	const handleBlur = (newVal: React.FocusEvent<HTMLInputElement>) =>
@@ -271,6 +275,7 @@ export function ArraysText(props: {
 				value={text}
 				handleChange={(ev) => setText(ev.target.value)}
 				handleBlur={handleBlur}
+				list={props.list}
 			/>
 			{props.index > 0 && (
 				<div className="col-start-3">

@@ -2,17 +2,23 @@ import type React from "react";
 import { useState } from "react";
 import { Arrays, Check, Fieldset, KeyValues, Select, SettingDialog, Text } from "../../components/dialog";
 import { ExpandButton } from "../../components/element/ButtonIcon";
+import { ResourceDatalist } from "../../components/element/Input";
+import { useDatasetTableNames } from "../../hooks/useDatasetSettings";
+import type { DatasetSrcInfo } from "../../model/CommandParam";
 import type { DatasetSetting } from "../../model/DatasetSettings";
 
 export default function DatasetSettingDialog(props: {
     setting: DatasetSetting
     handleDialogClose: () => void;
     handleCommit: (newSettings: DatasetSetting) => void;
+    datasetSrcInfo?: DatasetSrcInfo;
 }) {
     const [target, setTarget] = useState(props.setting)
     const handleTargetChange = async (select: string) => setTarget(current => current.replace(select))
     const [showOptional, setShowOptional] = useState(false);
     const toggleOptional = () => setShowOptional(!showOptional)
+    const tableNames = useDatasetTableNames(props.datasetSrcInfo);
+    const tableList = tableNames.length > 0 ? "tableName_list" : undefined;
 
     return (
         <SettingDialog setting={target} handleDialogClose={props.handleDialogClose} handleCommit={props.handleCommit}>
@@ -24,7 +30,10 @@ export default function DatasetSettingDialog(props: {
                     <option value="innerJoin">innerJoin</option>
                     <option value="fullJoin">fullJoin</option>
                 </Select>
-                {renderTargetContent(target, setTarget)}
+                {renderTargetContent(target, setTarget, tableList)}
+                {tableNames.length > 0 && (
+                    <ResourceDatalist id="tableName" resources={tableNames} />
+                )}
             </Fieldset>
             <Fieldset legend="Split / Rename">
                 <Check name="split"
@@ -121,14 +130,17 @@ export default function DatasetSettingDialog(props: {
 function renderTargetContent(
     target: DatasetSetting,
     setTarget: React.Dispatch<React.SetStateAction<DatasetSetting>>,
+    tableList: string | undefined,
 ): React.ReactElement {
     if (target.join()) {
         return (
             <>
                 <Text name="left" value={target.join()?.left ?? ""}
+                    list={tableList}
                     handleChange={newVal => setTarget(cur => cur.replaceJoin({ left: newVal.target.value }))}
                 />
                 <Text name="right" value={target.join()?.right ?? ""}
+                    list={tableList}
                     handleChange={newVal => setTarget(cur => cur.replaceJoin({ right: newVal.target.value }))}
                 />
                 <Select name="condition" defaultValue={target.join()?.on ? "on" : "column"}
@@ -157,6 +169,7 @@ function renderTargetContent(
                     handleChange={(text) => setTarget(cur => cur.replacePattern({ string: text.target.value }))}
                 />
                 <Arrays name="patternExclue" values={target.pattern?.exclude ?? []}
+                    list={tableList}
                     handleChange={(text, index) => setTarget(cur => cur.replacePatternExclude(text, index))}
                     handleRemove={(index) => setTarget(cur => cur.removePatternExclude(index))}
                 />
@@ -166,6 +179,7 @@ function renderTargetContent(
     return (
         <>
             <Arrays name="name" values={target.name ?? []}
+                list={tableList}
                 handleChange={(text, index) => setTarget(cur => cur.replaceName(text, index))}
                 handleRemove={(index) => setTarget(cur => cur.removeName(index))}
             />
