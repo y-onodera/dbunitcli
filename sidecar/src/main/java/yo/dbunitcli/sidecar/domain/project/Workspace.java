@@ -18,7 +18,7 @@ import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -144,7 +144,8 @@ public class Workspace {
         template.add("name", name);
         final String content = template.render();
         final File scriptFile = new File(launchDir.toFile(), commandType.name() + "_" + name + ".bat");
-        Files.writeString(scriptFile.toPath(), content, StandardCharsets.UTF_8);
+        // BATファイルはWindowsのOSデフォルト文字コードで保存する必要がある
+        Files.writeString(scriptFile.toPath(), content, Charset.defaultCharset());
         return scriptFile.getAbsolutePath();
     }
 
