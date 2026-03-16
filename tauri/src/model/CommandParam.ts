@@ -316,3 +316,17 @@ export type SrcInfo = {
 	regExclude: string;
 	extension: string;
 };
+
+export type DatasetSrcInfo = SrcInfo & {
+	srcType: string;
+	xlsxSchema: string;
+	fixedLength: string;
+	regHeaderSplit: string;
+	regDataSplit: string;
+	encoding: string;
+	delimiter: string;
+	ignoreQuoted: boolean;
+	headerName: string;
+	startRow: string;
+	addFileInfo: boolean;
+};
