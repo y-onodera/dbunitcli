@@ -58,7 +58,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             dto.getJdbc().setJdbcPass(request.getJdbcPass());
             dto.getJdbc().setJdbcProperties(request.getJdbcProperties());
 
-            final DataSetLoadOption option = new DataSetLoadOption("", dto);
+            final DataSetLoadOption option = new DataSetLoadOption(request.getSetting() != null ? request.getSetting() : "", dto);
             final ComparableDataSetParam param = option.getParam().build();
             return ObjectMapper.getDefault().writeValueAsString(
                     new ComparableDataSetLoader(Parameter.none())

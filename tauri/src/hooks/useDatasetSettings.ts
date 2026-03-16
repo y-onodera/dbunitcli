@@ -29,6 +29,7 @@ export const useDatasetTableNamesApi = () => {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
+						setting: info.setting ?? "",
 						srcType: info.srcType,
 						src: info.srcPath,
 						regTableInclude: info.regTableInclude,

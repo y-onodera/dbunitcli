@@ -257,6 +257,9 @@ function Text(prop: Prop) {
 					)}
 				</div>
 			</div>
+			{element.name === "setting" && !prop.hidden && datasetSrcInfo && path && (
+				<DatasetTableNamesPreviewButton datasetSrcInfo={{ ...datasetSrcInfo, setting: path }} />
+			)}
 		</div>
 	);
 }
