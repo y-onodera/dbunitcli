@@ -319,6 +319,7 @@ export type SrcInfo = {
 
 export type DatasetSrcInfo = SrcInfo & {
 	srcType: string;
+	setting?: string;
 	xlsxSchema: string;
 	fixedLength: string;
 	regHeaderSplit: string;

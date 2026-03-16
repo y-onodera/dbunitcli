@@ -37,11 +37,22 @@ public class DatasetTableNamesRequestDto {
     private String startRow;
     private boolean addFileInfo;
 
+    // dataset setting ファイル名
+    private String setting;
+
     // sql / table タイプ向け JDBC 情報
     private String jdbcUrl;
     private String jdbcUser;
     private String jdbcPass;
     private String jdbcProperties;
+
+    public String getSetting() {
+        return this.setting;
+    }
+
+    public void setSetting(final String setting) {
+        this.setting = setting;
+    }
 
     public String getSrcType() {
         return this.srcType;

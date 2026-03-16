@@ -163,3 +163,12 @@ export function BlueEditButton(props: IconButtonProps) {
         </BlueButtonIcon>
     );
 }
+
+export function BluePreviewButton(props: IconButtonProps) {
+    const title = props.title ?? 'preview';
+    return (
+        <BlueButtonIcon title={title} handleClick={props.handleClick}>
+            <PreviewIcon title={title} fill="white" />
+        </BlueButtonIcon>
+    );
+}

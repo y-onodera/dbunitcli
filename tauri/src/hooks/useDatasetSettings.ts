@@ -29,6 +29,7 @@ export const useDatasetTableNamesApi = () => {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
+						setting: info.setting ?? "",
 						srcType: info.srcType,
 						src: info.srcPath,
 						regTableInclude: info.regTableInclude,
@@ -72,6 +73,7 @@ export const useDatasetTableNames = (
 
 	const srcPath = srcInfo?.srcPath ?? "";
 	const srcType = srcInfo?.srcType ?? "";
+	const setting = srcInfo?.setting ?? "";
 	const sqlNotReady = srcType === "sql" && !connectionOk;
 
 	useEffect(() => {
@@ -85,7 +87,7 @@ export const useDatasetTableNames = (
 			setTableNames(names);
 			setLoading(false);
 		});
-	}, [srcPath, srcType, connectionOk, jdbcValues, loadTableNames]);
+	}, [srcPath, srcType, setting, connectionOk, jdbcValues, loadTableNames]);
 
 	return { tableNames, loading };
 };
