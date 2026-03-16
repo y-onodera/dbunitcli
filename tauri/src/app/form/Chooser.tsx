@@ -11,34 +11,37 @@ import type { Attribute } from "../../model/CommandParam";
 import { isSqlRelatedType } from "../../model/QueryDatasource";
 import type { WorkspaceContext } from "../../model/WorkspaceResources";
 import type { FileProp } from "./FormElementProp";
+
+async function resolveAbsolutePath(
+	path: string,
+	context: WorkspaceContext,
+	attribute: Attribute,
+	srcType: string | undefined,
+): Promise<string> {
+	if (await isAbsolute(path)) {
+		return path;
+	}
+	const basePath = getPath(context, attribute, srcType);
+	if (path) {
+		return basePath + sep() + path;
+	}
+	return basePath;
+}
+
 export function FileChooser(prop: FileProp) {
 	const context = useWorkspaceContext();
 	const handleFileChooserClick = () => {
-		const getDefaultPath = async (): Promise<string> => {
-			if (await isAbsolute(prop.path)) {
-				return prop.path;
-			}
-			if (prop.path) {
-				return (
-					getPath(context, prop.element.attribute, prop.srcType) +
-					sep() +
-					prop.path
-				);
-			}
-			return getPath(context, prop.element.attribute, prop.srcType);
-		};
-		getDefaultPath().then((defaultPath) =>
-			open({ defaultPath }).then((files) => {
-				if (files) {
-					prop.setPath(
-						(files as string).replace(
-							getPath(context, prop.element.attribute, prop.srcType) + sep(),
-							"",
-						),
-					);
-					prop.onSelect?.();
-				}
-			}),
+		const basePath = getPath(context, prop.element.attribute, prop.srcType);
+		resolveAbsolutePath(prop.path, context, prop.element.attribute, prop.srcType).then(
+			(defaultPath) =>
+				open({ defaultPath }).then((files) => {
+					if (files) {
+						prop.setPath(
+							(files as string).replace(basePath + sep(), ""),
+						);
+						prop.onSelect?.();
+					}
+				}),
 		);
 	};
 	return <FileButton handleClick={handleFileChooserClick} />;
@@ -46,31 +49,17 @@ export function FileChooser(prop: FileProp) {
 export function DirectoryChooser(prop: FileProp) {
 	const context = useWorkspaceContext();
 	const handleDirectoryChooserClick = () => {
-		const getDefaultPath = async (): Promise<string> => {
-			if (await isAbsolute(prop.path)) {
-				return prop.path;
-			}
-			if (prop.path) {
-				return (
-					getPath(context, prop.element.attribute, prop.srcType) +
-					sep() +
-					prop.path
-				);
-			}
-			return getPath(context, prop.element.attribute, prop.srcType);
-		};
-		getDefaultPath().then((defaultPath) =>
-			open({ defaultPath, directory: true }).then((files) => {
-				if (files) {
-					prop.setPath(
-						(files as string).replace(
-							getPath(context, prop.element.attribute, prop.srcType) + sep(),
-							"",
-						),
-					);
-					prop.onSelect?.();
-				}
-			}),
+		const basePath = getPath(context, prop.element.attribute, prop.srcType);
+		resolveAbsolutePath(prop.path, context, prop.element.attribute, prop.srcType).then(
+			(defaultPath) =>
+				open({ defaultPath, directory: true }).then((files) => {
+					if (files) {
+						prop.setPath(
+							(files as string).replace(basePath + sep(), ""),
+						);
+						prop.onSelect?.();
+					}
+				}),
 		);
 	};
 	return <DirectoryButton handleClick={handleDirectoryChooserClick} />;
@@ -82,15 +71,12 @@ export function OpenInOS(prop: FileProp) {
 		if (!prop.path) {
 			return;
 		}
-		let absolutePath: string;
-		if (await isAbsolute(prop.path)) {
-			absolutePath = prop.path;
-		} else {
-			absolutePath =
-				getPath(context, prop.element.attribute, prop.srcType) +
-				sep() +
-				prop.path;
-		}
+		const absolutePath = await resolveAbsolutePath(
+			prop.path,
+			context,
+			prop.element.attribute,
+			prop.srcType,
+		);
 		await core.invoke("open_directory", { path: absolutePath });
 	};
 	return <OpenButton handleClick={handleOpen} title="Open in Explorer" />;
