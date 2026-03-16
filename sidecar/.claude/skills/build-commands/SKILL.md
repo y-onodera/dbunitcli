@@ -1,3 +1,8 @@
+---
+name: build-commands
+description: sidecar モジュールのビルド・テストコマンドリファレンス。
+---
+
 # ビルドコマンド
 
 ## sidecar ビルドコマンド

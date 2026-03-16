@@ -1,3 +1,8 @@
+---
+name: build-commands
+description: tauri フロントエンドのビルド・テストコマンドリファレンス。
+---
+
 # ビルドコマンド
 
 ## フロントエンド
