@@ -25,7 +25,9 @@ export const useWorkspaceUpdate = () => {
 		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((resources: WorkspaceResources) => {
-				setContext(WorkspaceContext.from(resources.context));
+				setContext(
+					WorkspaceContext.from(resources.context).with({ workspace, datasetBase, resultBase }),
+				);
 				setParameterList(ParameterList.from(resources.parameterList));
 				setResourcesSettings(new ResourcesSettings(resources.resources));
 			})

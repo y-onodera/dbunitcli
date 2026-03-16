@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class Workspace {
@@ -48,6 +49,15 @@ public class Workspace {
             return target.toString();
         }
     }
+
+    private static String rawOrRelative(final Path launchDir, final String propertyName, final Supplier<Path> expandedPath) {
+        final String raw = System.getProperty(propertyName);
+        if (raw != null && raw.contains("%")) {
+            return raw;
+        }
+        return toRelative(launchDir, expandedPath.get());
+    }
+
     private Options options;
     private Resources resources;
     private Path path;
@@ -125,11 +135,11 @@ public class Workspace {
         template.add("sidecarExe", toRelative(launchDir, backendDir.resolve("dbunit-cli-sidecar.exe")));
         template.add("backendDir", toRelative(launchDir, backendDir));
         template.add("workspaceProperty", FileResources.PROPERTY_WORKSPACE);
-        template.add("workspace", toRelative(launchDir, FileResources.baseDir().toPath().toAbsolutePath().normalize()));
+        template.add("workspace", rawOrRelative(launchDir, FileResources.PROPERTY_WORKSPACE, () -> FileResources.baseDir().toPath().toAbsolutePath().normalize()));
         template.add("datasetBaseProperty", FileResources.PROPERTY_DATASET_BASE);
-        template.add("datasetBase", toRelative(launchDir, FileResources.datasetDir().toPath().toAbsolutePath().normalize()));
+        template.add("datasetBase", rawOrRelative(launchDir, FileResources.PROPERTY_DATASET_BASE, () -> FileResources.datasetDir().toPath().toAbsolutePath().normalize()));
         template.add("resultBaseProperty", FileResources.PROPERTY_RESULT_BASE);
-        template.add("resultBase", toRelative(launchDir, FileResources.resultDir().toPath().toAbsolutePath().normalize()));
+        template.add("resultBase", rawOrRelative(launchDir, FileResources.PROPERTY_RESULT_BASE, () -> FileResources.resultDir().toPath().toAbsolutePath().normalize()));
         template.add("commandType", commandType.name());
         template.add("name", name);
         final String content = template.render();
