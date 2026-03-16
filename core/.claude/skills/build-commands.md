@@ -21,30 +21,18 @@ mvn clean package
 
 ## テスト実行方法
 
-### テストクラスの構造について
-
-`GenerateTest` など各コマンドのテストクラスは複数のネストしたテストクラスを含んでいます：
-
-- `GenerateTest$NoSystemPropertyTest`: システムプロパティなしでのテスト
-- `GenerateTest$AllSystemPropertyTest`: すべてのシステムプロパティを設定してのテスト
-- `GenerateTest$ChangeDataSetBaseTest`: データセットベースディレクトリを変更してのテスト
-- など
-
-特定のネストしたクラスのテストメソッドを実行する場合は `$` でクラスを区切り、`#` でメソッドを指定します。
-
 ### テストの実行例
 
-```powershell
-# coreディレクトリに移動
-cd core
+ネストしたクラスは `$` で区切り、メソッドは `#` で指定します。
 
+```powershell
 # 全テストを実行
 mvn test
 
 # 特定のテストクラスを実行
 mvn test -Dtest=GenerateTest
 
-# 特定のテストクラスの特定のメソッドを実行（ネストしたクラスの場合）
+# ネストしたクラスの特定メソッドを実行
 mvn test -Dtest='GenerateTest$NoSystemPropertyTest#testGenerateXlsx'
 ```
 
