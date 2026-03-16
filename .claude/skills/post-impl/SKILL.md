@@ -1,5 +1,4 @@
 ---
-name: post-impl
 description: 実装後の品質確認。変更・追加・修正されたすべてのコードファイルに /simplify を適用する。
 ---
 

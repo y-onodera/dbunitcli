@@ -1,5 +1,4 @@
 ---
-name: build-commands
 description: core モジュールのビルド・テストコマンドリファレンス。
 ---
 
