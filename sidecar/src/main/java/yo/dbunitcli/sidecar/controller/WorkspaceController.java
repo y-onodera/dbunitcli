@@ -75,31 +75,18 @@ public class WorkspaceController implements ControllerExceptionHandler {
     }
 
     private static File getFieldBaseDir(final String defaultPath, final String srcType) {
-        if ("DATASET".equals(defaultPath)) {
-            if (srcType != null && !srcType.isEmpty()) {
-                return new File(FileResources.datasetDir(), srcType);
-            }
-            return FileResources.datasetDir();
-        }
-        if ("RESULT".equals(defaultPath)) {
-            return FileResources.resultDir();
-        }
-        if ("SETTING".equals(defaultPath)) {
-            return FileResources.settingDir();
-        }
-        if ("TEMPLATE".equals(defaultPath)) {
-            return FileResources.templateFileDir();
-        }
-        if ("PARAMETERIZE_TEMPLATE".equals(defaultPath)) {
-            return FileResources.parameterizeTemplateDir();
-        }
-        if ("JDBC".equals(defaultPath)) {
-            return FileResources.jdbcPropDir();
-        }
-        if ("XLSX_SCHEMA".equals(defaultPath)) {
-            return FileResources.xlsxSchemaDir();
-        }
-        return FileResources.baseDir();
+        return switch (defaultPath) {
+            case "DATASET" -> srcType != null && !srcType.isEmpty()
+                    ? new File(FileResources.datasetDir(), srcType)
+                    : FileResources.datasetDir();
+            case "RESULT" -> FileResources.resultDir();
+            case "SETTING" -> FileResources.settingDir();
+            case "TEMPLATE" -> FileResources.templateFileDir();
+            case "PARAMETERIZE_TEMPLATE" -> FileResources.parameterizeTemplateDir();
+            case "JDBC" -> FileResources.jdbcPropDir();
+            case "XLSX_SCHEMA" -> FileResources.xlsxSchemaDir();
+            default -> FileResources.baseDir();
+        };
     }
 
     private String currentResources() throws IOException {

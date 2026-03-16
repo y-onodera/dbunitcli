@@ -31,7 +31,8 @@ async function resolvePathViaSidecar(
 		};
 		const response = await fetchData(fetchParams);
 		return await response.text();
-	} catch {
+	} catch (e) {
+		console.error("resolvePathViaSidecar failed, falling back to frontend:", e);
 		return "";
 	}
 }
