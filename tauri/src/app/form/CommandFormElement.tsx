@@ -278,14 +278,13 @@ function TextDropDownMenu({
 	const { connectionOk } = useJdbcConnectionState();
 
 	return (
-		<DropDownMenu>
+		<>
+			{element.name === "setting" && !hidden && datasetSrcInfo && (
+				<DatasetTableNamesPreviewButton datasetSrcInfo={datasetSrcInfo} />
+			)}
+			<DropDownMenu>
 			{(closeMenu) => (
 				<>
-					{element.name === "setting" && !hidden && datasetSrcInfo && (
-						<li>
-							<DatasetTableNamesPreviewButton datasetSrcInfo={datasetSrcInfo} />
-						</li>
-					)}
 					{element.name === "setting" && !hidden && (
 						<li>
 							<DatasetSettingEditButton path={path} setPath={setPath} datasetSrcInfo={datasetSrcInfo} />
@@ -377,6 +376,7 @@ function TextDropDownMenu({
 				</>
 			)}
 		</DropDownMenu>
+		</>
 	);
 }
 function Check(prop: Prop) {
