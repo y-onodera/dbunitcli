@@ -2,10 +2,10 @@ import { cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { afterEach, vi } from "vitest";
 import type { Enviroment } from "../context/EnviromentProvider";
-import { QueryFiles, ResourcesSettings, type WorkspaceResources } from "../model/WorkspaceResources";
+import { ParameterList, QueryFiles, ResourcesSettings, WorkspaceContext, type WorkspaceResources } from "../model/WorkspaceResources";
 
 export const workspaceResourcesFixture: WorkspaceResources = {
-	context: {
+	context: WorkspaceContext.from({
 		workspace: 'test-workspace',
 		datasetBase: 'dataset',
 		resultBase: 'result',
@@ -14,14 +14,14 @@ export const workspaceResourcesFixture: WorkspaceResources = {
 		parameterizeTemplateBase: 'option/parameterize/template',
 		jdbcBase: 'jdbc',
 		xlsxSchemaBase: 'xlsx',
-	},
-	parameterList: {
+	}),
+	parameterList: ParameterList.from({
 		convert: ['convert1', 'convert2'],
 		compare: ['compare1'],
 		generate: ['generate1'],
 		run: ['run1'],
 		parameterize: ['param1'],
-	},
+	}),
 	resources: ResourcesSettings.from({
 		datasetSettings: ['setting1'],
 		xlsxSchemas: ['schema1'],
