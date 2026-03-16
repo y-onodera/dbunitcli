@@ -1,8 +1,13 @@
+---
+name: build-commands
+description: sidecar モジュールのビルド・テストコマンドリファレンス。
+---
+
 # ビルドコマンド
 
 ## sidecar ビルドコマンド
 
-```bash
+```powershell
 # 通常のビルド
 mvn clean compile
 
@@ -22,6 +27,6 @@ mvn clean package
 ## 注意事項
 
 - sidecar のテスト実行前に core を先にビルドしておく必要がある
-  ```bash
+  ```powershell
   mvn install -pl core -Dmaven.test.skip=true
   ```
