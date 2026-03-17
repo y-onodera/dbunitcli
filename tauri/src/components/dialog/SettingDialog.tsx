@@ -258,7 +258,13 @@ export function ArraysText(props: {
 		props.handleChange(newVal.target.value, props.index);
 	const handleRemove = () => props.handleRemove(props.index);
 	return (
-		<div className="grid grid-cols-5 pb-2">
+		<>
+			{!props.ignoreLabel && props.index === 0 && (
+				<div className="grid grid-cols-5 pb-1">
+					<span className="col-start-2 text-xs text-gray-500">column</span>
+				</div>
+			)}
+			<div className="grid grid-cols-5 pb-2">
 			{!props.ignoreLabel && props.index === 0 && (
 				<InputLabel
 					id={props.name}
@@ -283,6 +289,7 @@ export function ArraysText(props: {
 				</div>
 			)}
 		</div>
+		</>
 	);
 }
 
