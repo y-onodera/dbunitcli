@@ -149,6 +149,16 @@ class CompareControllerTest {
         assertRefresh("{\"-expect.srcType\":\"xlsx\"}", "compare-refresh-expectSrcType-xlsx-response.json");
     }
 
+    @Test
+    public void testRefresh_targetTypeImage_imageOptionが追加されsrcTypeがfileに制限される() throws IOException {
+        assertRefresh("{\"-targetType\":\"image\"}", "compare-refresh-targetType-image-response.json");
+    }
+
+    @Test
+    public void testRefresh_targetTypePdf_imageOptionが追加されsrcTypeがfileに制限される() throws IOException {
+        assertRefresh("{\"-targetType\":\"pdf\"}", "compare-refresh-targetType-pdf-response.json");
+    }
+
     private void assertRefresh(final String requestJson, final String expectedFile) throws IOException {
         final String jsonResponse = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/compare/refresh", requestJson));
