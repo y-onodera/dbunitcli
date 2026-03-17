@@ -73,7 +73,6 @@ export const useDatasetTableNames = (
 
 	const srcPath = srcInfo?.srcPath ?? "";
 	const srcType = srcInfo?.srcType ?? "";
-	const setting = srcInfo?.setting ?? "";
 	const sqlNotReady = srcType === "sql" && !connectionOk;
 
 	useEffect(() => {
@@ -87,7 +86,7 @@ export const useDatasetTableNames = (
 			setTableNames(names);
 			setLoading(false);
 		});
-	}, [srcPath, srcType, setting, connectionOk, jdbcValues, loadTableNames]);
+	}, [srcPath, srcType, srcInfo, sqlNotReady, jdbcValues, loadTableNames]);
 
 	return { tableNames, loading };
 };

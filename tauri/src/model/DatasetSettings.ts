@@ -425,13 +425,13 @@ export class DatasetSetting {
 
 	toJSON() {
 		const { filePath, name, ...rest } = this;
+		let nameValue: { any: string; filePath?: string } | undefined;
+		if (name?.length) {
+			nameValue = filePath ? { any: name, filePath } : { any: name };
+		}
 		return {
 			...rest,
-			name: name?.length
-				? filePath
-					? { any: name, filePath }
-					: { any: name }
-				: undefined,
+			name: nameValue,
 		};
 	}
 
