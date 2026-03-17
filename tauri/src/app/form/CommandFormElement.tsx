@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { ExpandButton } from "../../components/element/ButtonIcon";
 import DropDownMenu from "../../components/element/DropDownMenu";
 import {
@@ -204,6 +204,10 @@ export default function CommandFormElements(
 function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
 	const { element, srcType, srcInfo, datasetSrcInfo } = prop;
+	const datasetSrcInfoWithSetting = useMemo(
+		() => (datasetSrcInfo ? { ...datasetSrcInfo, setting: path } : undefined),
+		[datasetSrcInfo, path],
+	);
 	const settings = useResourcesSettings();
 	let resourceFiles: string[] = [];
 	if (element.name === "src" && isSqlRelatedType(srcType ?? "")) {
@@ -273,11 +277,14 @@ function Text(prop: Prop) {
 					)}
 				</div>
 			</div>
-			{element.name === "setting" && !prop.hidden && datasetSrcInfo && path && (
-				<DatasetTableNamesPreviewButton
-					datasetSrcInfo={{ ...datasetSrcInfo, setting: path }}
-				/>
-			)}
+			{element.name === "setting" &&
+				!prop.hidden &&
+				datasetSrcInfoWithSetting &&
+				path && (
+					<DatasetTableNamesPreviewButton
+						datasetSrcInfo={datasetSrcInfoWithSetting}
+					/>
+				)}
 		</div>
 	);
 }

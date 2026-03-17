@@ -76,13 +76,13 @@ export const useDatasetTableNames = (
 	const sqlNotReady = srcType === "sql" && !connectionOk;
 
 	useEffect(() => {
-		if (!srcPath || !srcType || srcType === "none" || sqlNotReady) {
+		if (!srcInfo || !srcPath || !srcType || srcType === "none" || sqlNotReady) {
 			setTableNames([]);
 			setLoading(false);
 			return;
 		}
 		setLoading(true);
-		loadTableNames(srcInfo as DatasetSrcInfo, jdbcValues).then((names) => {
+		loadTableNames(srcInfo, jdbcValues).then((names) => {
 			setTableNames(names);
 			setLoading(false);
 		});
