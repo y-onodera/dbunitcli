@@ -124,6 +124,46 @@ class CompareControllerTest {
         JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/compare-reset-response.json"), jsonResponse);
     }
 
+    @Test
+    public void testRefresh_newSrcTypeXlsx_newDataにxlsxSchema要素が追加される() throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/compare/refresh", "{\"-new.srcType\":\"xlsx\"}"));
+        System.out.println(jsonResponse);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/compare-refresh-newSrcType-xlsx-response.json"), jsonResponse);
+    }
+
+    @Test
+    public void testRefresh_newSrcTypeTable_newDataにJDBC要素が追加される() throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/compare/refresh", "{\"-new.srcType\":\"table\"}"));
+        System.out.println(jsonResponse);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/compare-refresh-newSrcType-table-response.json"), jsonResponse);
+    }
+
+    @Test
+    public void testRefresh_oldSrcTypeXlsx_oldDataにxlsxSchema要素が追加される() throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/compare/refresh", "{\"-old.srcType\":\"xlsx\"}"));
+        System.out.println(jsonResponse);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/compare-refresh-oldSrcType-xlsx-response.json"), jsonResponse);
+    }
+
+    @Test
+    public void testRefresh_expectSrcTypeCsv_expectDataにCSV要素が追加される() throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/compare/refresh", "{\"-expect.srcType\":\"csv\"}"));
+        System.out.println(jsonResponse);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/compare-refresh-expectSrcType-csv-response.json"), jsonResponse);
+    }
+
+    @Test
+    public void testRefresh_expectSrcTypeXlsx_expectDataにxlsxSchema要素が追加される() throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/compare/refresh", "{\"-expect.srcType\":\"xlsx\"}"));
+        System.out.println(jsonResponse);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/compare-refresh-expectSrcType-xlsx-response.json"), jsonResponse);
+    }
+
     private void tryDelete(final String name) {
         this.tryDeleteCommand("compare", name);
     }

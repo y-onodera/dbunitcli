@@ -122,6 +122,38 @@ class GenerateControllerTest {
         JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/generate-reset-response.json"), jsonResponse);
     }
 
+    @Test
+    public void testRefresh_srcTypeXlsx_xlsxSchema要素が追加されdelimiterIgnoreQuotedが削除される() throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/generate/refresh", "{\"-src.srcType\":\"xlsx\"}"));
+        System.out.println(jsonResponse);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/generate-refresh-srcType-xlsx-response.json"), jsonResponse);
+    }
+
+    @Test
+    public void testRefresh_srcTypeReg_regDataSplitとregHeaderSplitが追加される() throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/generate/refresh", "{\"-src.srcType\":\"reg\"}"));
+        System.out.println(jsonResponse);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/generate-refresh-srcType-reg-response.json"), jsonResponse);
+    }
+
+    @Test
+    public void testRefresh_srcTypeTable_JDBC要素が追加されファイルトラバース要素が削除される() throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/generate/refresh", "{\"-src.srcType\":\"table\"}"));
+        System.out.println(jsonResponse);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/generate-refresh-srcType-table-response.json"), jsonResponse);
+    }
+
+    @Test
+    public void testRefresh_srcTypeFile_最小限の要素のみになる() throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/generate/refresh", "{\"-src.srcType\":\"file\"}"));
+        System.out.println(jsonResponse);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/generate-refresh-srcType-file-response.json"), jsonResponse);
+    }
+
     private void tryDelete(final String name) {
         this.tryDeleteCommand("generate", name);
     }
