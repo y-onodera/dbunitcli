@@ -1,73 +1,92 @@
 import type { ReactNode } from "react";
 
-export function ButtonWithIcon(props: { id: string, handleClick: React.MouseEventHandler<HTMLButtonElement>, children: ReactNode }) {
-    return (
-        <Button
-            buttonstyle="p-2.5 ms-2"
-            bgcolor="bg-indigo-500 hover:bg-indigo-600"
-            textstyle="font-medium text-sm text-white"
-            border="border border-gray-300"
-            handleClick={props.handleClick} >
-            {props.children}
-        </Button>
-    );
+export function ButtonWithIcon(props: {
+	id: string;
+	handleClick: React.MouseEventHandler<HTMLButtonElement>;
+	children: ReactNode;
+}) {
+	return (
+		<Button
+			buttonstyle="p-2.5 ms-2"
+			bgcolor="bg-indigo-500 hover:bg-indigo-600"
+			textstyle="font-medium text-sm text-white"
+			border="border border-gray-300"
+			handleClick={props.handleClick}
+		>
+			{props.children}
+		</Button>
+	);
 }
-export function BlueButton(props: { title: string, handleClick: React.MouseEventHandler<HTMLButtonElement>, disabled?: boolean, id?: string }) {
-    return (
-        <Button
-            buttonstyle=""
-            bgcolor="bg-indigo-500 hover:bg-indigo-600"
-            textstyle="text-center text-sm font-semibold text-white"
-            border="border border-gray-300"
-            disabled={props.disabled}
-            id={props.id}
-            handleClick={props.handleClick} >
-            {props.title}
-        </Button>
-    );
+export function BlueButton(props: {
+	title: string;
+	handleClick: React.MouseEventHandler<HTMLButtonElement>;
+	disabled?: boolean;
+	id?: string;
+}) {
+	return (
+		<Button
+			buttonstyle=""
+			bgcolor="bg-indigo-500 hover:bg-indigo-600"
+			textstyle="text-center text-sm font-semibold text-white"
+			border="border border-gray-300"
+			disabled={props.disabled}
+			id={props.id}
+			handleClick={props.handleClick}
+		>
+			{props.title}
+		</Button>
+	);
 }
-export function WhiteButton(props: { title: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
-    return (
-        <Button
-            buttonstyle=""
-            bgcolor="bg-white hover:bg-gray-300"
-            textstyle="text-center text-sm font-semibold text-gray-500"
-            border="border border-gray-300"
-            handleClick={props.handleClick} >
-            {props.title}
-        </Button>
-    );
+export function WhiteButton(props: {
+	title: string;
+	handleClick: React.MouseEventHandler<HTMLButtonElement>;
+}) {
+	return (
+		<Button
+			buttonstyle=""
+			bgcolor="bg-white hover:bg-gray-300"
+			textstyle="text-center text-sm font-semibold text-gray-500"
+			border="border border-gray-300"
+			handleClick={props.handleClick}
+		>
+			{props.title}
+		</Button>
+	);
 }
-export function LinkButton(props: { title: string, handleClick: React.MouseEventHandler<HTMLButtonElement> }) {
-    return (
-        <Button
-            buttonstyle="flex items-center justify-start w-full p-1 ms-2"
-            bgcolor="hover:bg-gray-100"
-            textstyle="text-left text-gray-500 hover:text-blue-600"
-            border="outline-hidden"
-            handleClick={props.handleClick} >
-            {props.title}
-        </Button>
-    );
+export function LinkButton(props: {
+	title: string;
+	handleClick: React.MouseEventHandler<HTMLButtonElement>;
+}) {
+	return (
+		<Button
+			buttonstyle="flex items-center justify-start w-full p-1 ms-2"
+			bgcolor="hover:bg-gray-100"
+			textstyle="text-left text-gray-500 hover:text-blue-600"
+			border="outline-hidden"
+			handleClick={props.handleClick}
+		>
+			{props.title}
+		</Button>
+	);
 }
 export function Button(props: {
-    buttonstyle: string
-    , bgcolor: string
-    , textstyle: string
-    , border: string
-    , children: ReactNode
-    , disabled?: boolean
-    , id?: string
-    , ariaLabel?: string
-    , handleClick: React.MouseEventHandler<HTMLButtonElement>
+	buttonstyle: string;
+	bgcolor: string;
+	textstyle: string;
+	border: string;
+	children: ReactNode;
+	disabled?: boolean;
+	id?: string;
+	ariaLabel?: string;
+	handleClick: React.MouseEventHandler<HTMLButtonElement>;
 }) {
-    return (
-        <button
-            type="button"
-            id={props.id}
-            aria-label={props.ariaLabel}
-            disabled={props.disabled}
-            className={`${props.buttonstyle}
+	return (
+		<button
+			type="button"
+			id={props.id}
+			aria-label={props.ariaLabel}
+			disabled={props.disabled}
+			className={`${props.buttonstyle}
                          ${props.textstyle}
                          ${props.bgcolor}
                          rounded-lg
@@ -76,9 +95,9 @@ export function Button(props: {
                          ring-indigo-300
                          focus-visible:ring-3
                          disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed disabled:hover:bg-gray-200`}
-            onClick={props.handleClick}
-        >
-            {props.children}
-        </button>
-    );
+			onClick={props.handleClick}
+		>
+			{props.children}
+		</button>
+	);
 }

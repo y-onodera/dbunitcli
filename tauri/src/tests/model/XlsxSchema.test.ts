@@ -6,10 +6,10 @@ import type {
 } from "../../model/XlsxSchema";
 import {
 	CellSetting,
-	RowSetting,
-	XlsxSchema,
 	createCellSetting,
 	createRowSetting,
+	RowSetting,
+	XlsxSchema,
 } from "../../model/XlsxSchema";
 
 describe("RowSettingクラス", () => {

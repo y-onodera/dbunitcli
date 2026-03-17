@@ -1,180 +1,196 @@
-import type { ReactNode } from 'react';
-import { Button } from './Button';
+import type { ReactNode } from "react";
+import { Button } from "./Button";
 import {
-    AddIcon,
-    CopyIcon,
-    DeleteIcon,
-    DirIcon,
-    EditIcon,
-    ExpandIcon,
-    FileIcon,
-    FixIcon,
-    OpenIcon,
-    PreviewIcon,
-    RemoveIcon,
-    SettingIcon,
-    SettingsApplicationIcon,
-} from './Icon';
+	AddIcon,
+	CopyIcon,
+	DeleteIcon,
+	DirIcon,
+	EditIcon,
+	ExpandIcon,
+	FileIcon,
+	FixIcon,
+	OpenIcon,
+	PreviewIcon,
+	RemoveIcon,
+	SettingIcon,
+	SettingsApplicationIcon,
+} from "./Icon";
 
 export type IconButtonProps = {
-    title?: string;
-    handleClick: React.MouseEventHandler<HTMLButtonElement>;
+	title?: string;
+	handleClick: React.MouseEventHandler<HTMLButtonElement>;
 };
 
-export type IconType = 'edit' | 'delete' | 'copy' | 'add' | 'remove' | 'setting' | 'fix' | 'file' | 'dir' | 'settingsApplication' | 'preview' | 'open';
+export type IconType =
+	| "edit"
+	| "delete"
+	| "copy"
+	| "add"
+	| "remove"
+	| "setting"
+	| "fix"
+	| "file"
+	| "dir"
+	| "settingsApplication"
+	| "preview"
+	| "open";
 
 const IconComponents: Record<IconType, React.FC<{ title: string }>> = {
-    edit: EditIcon,
-    delete: DeleteIcon,
-    copy: CopyIcon,
-    add: AddIcon,
-    remove: RemoveIcon,
-    setting: SettingIcon,
-    fix: FixIcon,
-    file: FileIcon,
-    dir: DirIcon,
-    settingsApplication: SettingsApplicationIcon,
-    preview: PreviewIcon,
-    open: OpenIcon,
+	edit: EditIcon,
+	delete: DeleteIcon,
+	copy: CopyIcon,
+	add: AddIcon,
+	remove: RemoveIcon,
+	setting: SettingIcon,
+	fix: FixIcon,
+	file: FileIcon,
+	dir: DirIcon,
+	settingsApplication: SettingsApplicationIcon,
+	preview: PreviewIcon,
+	open: OpenIcon,
 };
 
-export function IconButton({ iconType, title, handleClick }: IconButtonProps & { iconType: IconType }) {
-    const defaultTitle = iconType;
-    const finalTitle = title === undefined ? defaultTitle : title;
-    const IconComponent = IconComponents[iconType];
+export function IconButton({
+	iconType,
+	title,
+	handleClick,
+}: IconButtonProps & { iconType: IconType }) {
+	const defaultTitle = iconType;
+	const finalTitle = title === undefined ? defaultTitle : title;
+	const IconComponent = IconComponents[iconType];
 
-    return (
-        <ButtonIcon title={finalTitle} handleClick={handleClick}>
-            <IconComponent title={finalTitle} />
-        </ButtonIcon>
-    );
+	return (
+		<ButtonIcon title={finalTitle} handleClick={handleClick}>
+			<IconComponent title={finalTitle} />
+		</ButtonIcon>
+	);
 }
 
 export function DirectoryButton(props: IconButtonProps) {
-    return <IconButton iconType="dir" {...props} />;
+	return <IconButton iconType="dir" {...props} />;
 }
 
 export function FileButton(props: IconButtonProps) {
-    return <IconButton iconType="file" {...props} />;
+	return <IconButton iconType="file" {...props} />;
 }
 
 export function EditButton(props: IconButtonProps) {
-    return <IconButton iconType="edit" {...props} />;
+	return <IconButton iconType="edit" {...props} />;
 }
 
 export function DeleteButton(props: IconButtonProps) {
-    return <IconButton iconType="delete" {...props} />;
+	return <IconButton iconType="delete" {...props} />;
 }
 
 export function CopyButton(props: IconButtonProps) {
-    return <IconButton iconType="copy" {...props} />;
+	return <IconButton iconType="copy" {...props} />;
 }
 
 export function AddButton(props: IconButtonProps) {
-    return <IconButton iconType="add" {...props} />;
+	return <IconButton iconType="add" {...props} />;
 }
 
 export function RemoveButton(props: IconButtonProps) {
-    return <IconButton iconType="remove" {...props} />;
+	return <IconButton iconType="remove" {...props} />;
 }
 
 export function SettingButton(props: IconButtonProps) {
-    return <IconButton iconType="setting" {...props} />;
+	return <IconButton iconType="setting" {...props} />;
 }
 
 export function FixButton(props: IconButtonProps) {
-    return <IconButton iconType="fix" {...props} />;
+	return <IconButton iconType="fix" {...props} />;
 }
 
 export function ParameterizeButton(props: IconButtonProps) {
-    return <IconButton iconType="settingsApplication" {...props} />;
+	return <IconButton iconType="settingsApplication" {...props} />;
 }
 
 export function PreviewButton(props: IconButtonProps) {
-    return <IconButton iconType="preview" {...props} />;
+	return <IconButton iconType="preview" {...props} />;
 }
 
 export function OpenButton(props: IconButtonProps) {
-    return <IconButton iconType="open" {...props} />;
+	return <IconButton iconType="open" {...props} />;
 }
 
 export function ExpandButton(prop: {
-    toggleOptional: () => void;
-    showOptional: boolean;
-    caption: string | undefined;
+	toggleOptional: () => void;
+	showOptional: boolean;
+	caption: string | undefined;
 }) {
-    return (
-        <ButtonIcon key={prop.caption} title="" handleClick={prop.toggleOptional}>
-            <ExpandIcon close={!prop.showOptional} />
-            <span className="ms-2 text-left rtl:text-right whitespace-nowrap">
-                {prop.showOptional ? `Hide ${prop.caption}` : `Show ${prop.caption}`}
-            </span>
-        </ButtonIcon>
-    );
+	return (
+		<ButtonIcon key={prop.caption} title="" handleClick={prop.toggleOptional}>
+			<ExpandIcon close={!prop.showOptional} />
+			<span className="ms-2 text-left rtl:text-right whitespace-nowrap">
+				{prop.showOptional ? `Hide ${prop.caption}` : `Show ${prop.caption}`}
+			</span>
+		</ButtonIcon>
+	);
 }
 
 export function ButtonIcon(props: {
-    title?: string;
-    handleClick: React.MouseEventHandler<HTMLButtonElement>;
-    children: ReactNode;
+	title?: string;
+	handleClick: React.MouseEventHandler<HTMLButtonElement>;
+	children: ReactNode;
 }) {
-    return (
-        <Button
-            buttonstyle="flex items-center group p-1"
-            bgcolor=""
-            textstyle="text-gray-500 hover:text-blue-600"
-            border="outline-hidden"
-            ariaLabel={props.title || undefined}
-            handleClick={props.handleClick}
-        >
-            {props.children}
-            {props.title}
-        </Button>
-    );
+	return (
+		<Button
+			buttonstyle="flex items-center group p-1"
+			bgcolor=""
+			textstyle="text-gray-500 hover:text-blue-600"
+			border="outline-hidden"
+			ariaLabel={props.title || undefined}
+			handleClick={props.handleClick}
+		>
+			{props.children}
+			{props.title}
+		</Button>
+	);
 }
 
 export function BlueButtonIcon(props: {
-    title?: string;
-    handleClick: React.MouseEventHandler<HTMLButtonElement>;
-    children: ReactNode;
+	title?: string;
+	handleClick: React.MouseEventHandler<HTMLButtonElement>;
+	children: ReactNode;
 }) {
-    return (
-        <Button
-            buttonstyle="flex items-center p-2 ms-2"
-            bgcolor="bg-indigo-500 hover:bg-indigo-600"
-            textstyle=""
-            border="border border-gray-300"
-            ariaLabel={props.title || undefined}
-            handleClick={props.handleClick}
-        >
-            {props.children}
-        </Button>
-    );
+	return (
+		<Button
+			buttonstyle="flex items-center p-2 ms-2"
+			bgcolor="bg-indigo-500 hover:bg-indigo-600"
+			textstyle=""
+			border="border border-gray-300"
+			ariaLabel={props.title || undefined}
+			handleClick={props.handleClick}
+		>
+			{props.children}
+		</Button>
+	);
 }
 
 export function BlueSettingButton(props: IconButtonProps) {
-    const title = props.title ?? 'setting';
-    return (
-        <BlueButtonIcon title={title} handleClick={props.handleClick}>
-            <SettingIcon title={title} fill="white" />
-        </BlueButtonIcon>
-    );
+	const title = props.title ?? "setting";
+	return (
+		<BlueButtonIcon title={title} handleClick={props.handleClick}>
+			<SettingIcon title={title} fill="white" />
+		</BlueButtonIcon>
+	);
 }
 
 export function BlueEditButton(props: IconButtonProps) {
-    const title = props.title ?? 'edit';
-    return (
-        <BlueButtonIcon title={title} handleClick={props.handleClick}>
-            <EditIcon title={title} fill="white" />
-        </BlueButtonIcon>
-    );
+	const title = props.title ?? "edit";
+	return (
+		<BlueButtonIcon title={title} handleClick={props.handleClick}>
+			<EditIcon title={title} fill="white" />
+		</BlueButtonIcon>
+	);
 }
 
 export function BluePreviewButton(props: IconButtonProps) {
-    const title = props.title ?? 'preview';
-    return (
-        <BlueButtonIcon title={title} handleClick={props.handleClick}>
-            <PreviewIcon title={title} fill="white" />
-        </BlueButtonIcon>
-    );
+	const title = props.title ?? "preview";
+	return (
+		<BlueButtonIcon title={title} handleClick={props.handleClick}>
+			<PreviewIcon title={title} fill="white" />
+		</BlueButtonIcon>
+	);
 }

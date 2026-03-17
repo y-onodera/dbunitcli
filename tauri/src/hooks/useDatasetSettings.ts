@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useEnviroment } from "../context/EnviromentProvider";
+import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { DatasetSrcInfo } from "../model/CommandParam";
 import {
@@ -73,21 +73,20 @@ export const useDatasetTableNames = (
 
 	const srcPath = srcInfo?.srcPath ?? "";
 	const srcType = srcInfo?.srcType ?? "";
-	const setting = srcInfo?.setting ?? "";
 	const sqlNotReady = srcType === "sql" && !connectionOk;
 
 	useEffect(() => {
-		if (!srcPath || !srcType || srcType === "none" || sqlNotReady) {
+		if (!srcInfo || !srcPath || !srcType || srcType === "none" || sqlNotReady) {
 			setTableNames([]);
 			setLoading(false);
 			return;
 		}
 		setLoading(true);
-		loadTableNames(srcInfo as DatasetSrcInfo, jdbcValues).then((names) => {
+		loadTableNames(srcInfo, jdbcValues).then((names) => {
 			setTableNames(names);
 			setLoading(false);
 		});
-	}, [srcPath, srcType, setting, connectionOk, jdbcValues, loadTableNames]);
+	}, [srcPath, srcType, srcInfo, sqlNotReady, jdbcValues, loadTableNames]);
 
 	return { tableNames, loading };
 };

@@ -4,6 +4,7 @@ import {
 	useLoadXlsxSchema,
 	useSaveXlsxSchema,
 } from "../../hooks/useXlsxSchema";
+import type { SrcInfo } from "../../model/CommandParam";
 import {
 	type CellSetting,
 	createCellSetting,
@@ -12,7 +13,6 @@ import {
 	XlsxSchema,
 } from "../../model/XlsxSchema";
 import { saveOnSuccess } from "../../utils/fetchUtils";
-import type { SrcInfo } from "../../model/CommandParam";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 

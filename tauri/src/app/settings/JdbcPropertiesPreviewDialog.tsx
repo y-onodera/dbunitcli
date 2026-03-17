@@ -12,9 +12,15 @@ function toJdbcFormValues(
 	props: Record<string, string>,
 ): Partial<Record<string, string>> {
 	const result: Partial<Record<string, string>> = {};
-	if (props.url) { result.jdbcUrl = props.url; }
-	if (props.user) { result.jdbcUser = props.user; }
-	if (props.pass) { result.jdbcPass = props.pass; }
+	if (props.url) {
+		result.jdbcUrl = props.url;
+	}
+	if (props.user) {
+		result.jdbcUser = props.user;
+	}
+	if (props.pass) {
+		result.jdbcPass = props.pass;
+	}
 	return result;
 }
 

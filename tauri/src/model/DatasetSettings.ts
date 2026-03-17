@@ -425,13 +425,13 @@ export class DatasetSetting {
 
 	toJSON() {
 		const { filePath, name, ...rest } = this;
+		let nameValue: NameFilter | undefined;
+		if (name?.length) {
+			nameValue = filePath ? { any: name, filePath } : { any: name };
+		}
 		return {
 			...rest,
-			name: name?.length
-				? filePath
-					? { any: name, filePath }
-					: { any: name }
-				: undefined,
+			name: nameValue,
 		};
 	}
 
@@ -440,11 +440,21 @@ export class DatasetSetting {
 	}
 
 	handler(): string {
-		if (this.pattern) { return "pattern"; }
-		if (this.innerJoin) { return "innerJoin"; }
-		if (this.outerJoin) { return "outerJoin"; }
-		if (this.fullJoin) { return "fullJoin"; }
-		if (this.name) { return "name"; }
+		if (this.pattern) {
+			return "pattern";
+		}
+		if (this.innerJoin) {
+			return "innerJoin";
+		}
+		if (this.outerJoin) {
+			return "outerJoin";
+		}
+		if (this.fullJoin) {
+			return "fullJoin";
+		}
+		if (this.name) {
+			return "name";
+		}
 		return "";
 	}
 
@@ -455,7 +465,9 @@ export class DatasetSetting {
 function target(setting: DatasetSetting): string {
 	if (setting.name) {
 		const nameStr = `name :[${setting.name.join(",")}]`;
-		return setting.filePath ? `${nameStr} filePath:${setting.filePath}` : nameStr;
+		return setting.filePath
+			? `${nameStr} filePath:${setting.filePath}`
+			: nameStr;
 	}
 	if (setting.pattern) {
 		if (typeof setting.pattern === "string") {
@@ -521,19 +533,24 @@ function removeObject(src: object, index: number): object {
 export function newDatasetSetting(): DatasetSetting {
 	return new DatasetSetting({} as DatasetSettingBuilder);
 }
-function toNameArray(name: string | string[] | undefined): string[] | undefined {
-	if (!name) { return undefined; }
+function toNameArray(
+	name: string | string[] | undefined,
+): string[] | undefined {
+	if (!name) {
+		return undefined;
+	}
 	return typeof name === "string" ? [name] : name;
 }
 function toPattern(pattern: string | Pattern | undefined): Pattern | undefined {
-	if (!pattern) { return undefined; }
-	return typeof pattern === "string" ? ({ string: pattern } as Pattern) : pattern;
+	if (!pattern) {
+		return undefined;
+	}
+	return typeof pattern === "string"
+		? ({ string: pattern } as Pattern)
+		: pattern;
 }
 function isNameFilter(name: unknown): name is NameFilter {
 	return (
-		!!name &&
-		typeof name === "object" &&
-		!Array.isArray(name) &&
-		"any" in name
+		!!name && typeof name === "object" && !Array.isArray(name) && "any" in name
 	);
 }

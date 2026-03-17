@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { ExpandButton } from "../../components/element/ButtonIcon";
 import DropDownMenu from "../../components/element/DropDownMenu";
 import {
@@ -10,7 +10,11 @@ import {
 } from "../../components/element/Input";
 import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
-import type { CommandParams, DatasetSrcInfo, SrcInfo } from "../../model/CommandParam";
+import type {
+	CommandParams,
+	DatasetSrcInfo,
+	SrcInfo,
+} from "../../model/CommandParam";
 import {
 	isSqlRelatedType,
 	type QueryDatasourceType,
@@ -72,15 +76,25 @@ export default function CommandFormElements(
 		extension: extensionElement?.value ?? "",
 	};
 	const xlsxSchemaElement = prop.elements.find((e) => e.name === "xlsxSchema");
-	const fixedLengthElement = prop.elements.find((e) => e.name === "fixedLength");
-	const regHeaderSplitElement = prop.elements.find((e) => e.name === "regHeaderSplit");
-	const regDataSplitElement = prop.elements.find((e) => e.name === "regDataSplit");
+	const fixedLengthElement = prop.elements.find(
+		(e) => e.name === "fixedLength",
+	);
+	const regHeaderSplitElement = prop.elements.find(
+		(e) => e.name === "regHeaderSplit",
+	);
+	const regDataSplitElement = prop.elements.find(
+		(e) => e.name === "regDataSplit",
+	);
 	const encodingElement = prop.elements.find((e) => e.name === "encoding");
 	const delimiterElement = prop.elements.find((e) => e.name === "delimiter");
-	const ignoreQuotedElement = prop.elements.find((e) => e.name === "ignoreQuoted");
+	const ignoreQuotedElement = prop.elements.find(
+		(e) => e.name === "ignoreQuoted",
+	);
 	const headerNameElement = prop.elements.find((e) => e.name === "headerName");
 	const startRowElement = prop.elements.find((e) => e.name === "startRow");
-	const addFileInfoElement = prop.elements.find((e) => e.name === "addFileInfo");
+	const addFileInfoElement = prop.elements.find(
+		(e) => e.name === "addFileInfo",
+	);
 	const datasetSrcInfo: DatasetSrcInfo = {
 		...srcInfo,
 		srcType,
@@ -174,7 +188,9 @@ export default function CommandFormElements(
 							hidden={prop.optional?.(element.name) && !showOptional}
 							srcType={element.name === "src" ? srcType : undefined}
 							srcInfo={element.name === "xlsxSchema" ? srcInfo : undefined}
-							datasetSrcInfo={element.name === "setting" ? datasetSrcInfo : undefined}
+							datasetSrcInfo={
+								element.name === "setting" ? datasetSrcInfo : undefined
+							}
 						/>
 					</Fragment>
 				);
@@ -188,6 +204,10 @@ export default function CommandFormElements(
 function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
 	const { element, srcType, srcInfo, datasetSrcInfo } = prop;
+	const datasetSrcInfoWithSetting = useMemo(
+		() => (datasetSrcInfo ? { ...datasetSrcInfo, setting: path } : undefined),
+		[datasetSrcInfo, path],
+	);
 	const settings = useResourcesSettings();
 	let resourceFiles: string[] = [];
 	if (element.name === "src" && isSqlRelatedType(srcType ?? "")) {
@@ -257,9 +277,14 @@ function Text(prop: Prop) {
 					)}
 				</div>
 			</div>
-			{element.name === "setting" && !prop.hidden && datasetSrcInfo && path && (
-				<DatasetTableNamesPreviewButton datasetSrcInfo={{ ...datasetSrcInfo, setting: path }} />
-			)}
+			{element.name === "setting" &&
+				!prop.hidden &&
+				datasetSrcInfoWithSetting &&
+				path && (
+					<DatasetTableNamesPreviewButton
+						datasetSrcInfo={datasetSrcInfoWithSetting}
+					/>
+				)}
 		</div>
 	);
 }
@@ -286,113 +311,119 @@ function TextDropDownMenu({
 				<DatasetTableNamesPreviewButton datasetSrcInfo={datasetSrcInfo} />
 			)}
 			<DropDownMenu>
-			{(closeMenu) => (
-				<>
-					{element.name === "setting" && !hidden && (
-						<li>
-							<DatasetSettingEditButton path={path} setPath={setPath} datasetSrcInfo={datasetSrcInfo} />
-						</li>
-					)}
-					{element.name === "xlsxSchema" && !hidden && (
-						<li>
-							<XlsxSchemaEditButton
-								path={path}
-								setPath={setPath}
-								srcInfo={srcInfo}
-							/>
-						</li>
-					)}
-					{element.name === "src" &&
-						!hidden &&
-						isSqlRelatedType(srcType ?? "") && (
+				{(closeMenu) => (
+					<>
+						{element.name === "setting" && !hidden && (
 							<li>
-								<SqlEditorButton
-									type={srcType as QueryDatasourceType}
+								<DatasetSettingEditButton
 									path={path}
 									setPath={setPath}
+									datasetSrcInfo={datasetSrcInfo}
 								/>
 							</li>
 						)}
-					{element.name === "src" &&
-						!hidden &&
-						srcType === "table" &&
-						connectionOk && (
+						{element.name === "xlsxSchema" && !hidden && (
 							<li>
-								<JdbcTableSelectorButton path={path} setPath={setPath} />
+								<XlsxSchemaEditButton
+									path={path}
+									setPath={setPath}
+									srcInfo={srcInfo}
+								/>
 							</li>
 						)}
-					{element.name === "templateGroup" && !hidden && (
-						<li>
-							<TemplateEditButton path={path} setPath={setPath} />
-						</li>
-					)}
-					{(element.attribute.type.includes("FILE") ||
-						element.attribute.type.includes("DIR")) &&
-						path &&
-						!hidden && (
+						{element.name === "src" &&
+							!hidden &&
+							isSqlRelatedType(srcType ?? "") && (
+								<li>
+									<SqlEditorButton
+										type={srcType as QueryDatasourceType}
+										path={path}
+										setPath={setPath}
+									/>
+								</li>
+							)}
+						{element.name === "src" &&
+							!hidden &&
+							srcType === "table" &&
+							connectionOk && (
+								<li>
+									<JdbcTableSelectorButton path={path} setPath={setPath} />
+								</li>
+							)}
+						{element.name === "templateGroup" && !hidden && (
 							<li>
-								<OpenInOS
+								<TemplateEditButton path={path} setPath={setPath} />
+							</li>
+						)}
+						{(element.attribute.type.includes("FILE") ||
+							element.attribute.type.includes("DIR")) &&
+							path &&
+							!hidden && (
+								<li>
+									<OpenInOS
+										prefix={prefix}
+										element={element}
+										srcType={srcType}
+										path={path}
+										setPath={setPath}
+									/>
+								</li>
+							)}
+						{element.name === "templateGroup" &&
+							!hidden &&
+							isValueInDatalist && (
+								<li>
+									<RemoveTemplateButton path={path} setPath={setPath} />
+								</li>
+							)}
+						{element.name === "setting" && !hidden && isValueInDatalist && (
+							<li>
+								<RemoveDatasetSettingButton path={path} setPath={setPath} />
+							</li>
+						)}
+						{element.name === "xlsxSchema" && !hidden && isValueInDatalist && (
+							<li>
+								<RemoveXlsxSchemaButton path={path} setPath={setPath} />
+							</li>
+						)}
+						{(srcType === "sql" || srcType === "table") &&
+							!hidden &&
+							isValueInDatalist && (
+								<li>
+									<RemoveSqlEditorButton
+										path={path}
+										setPath={setPath}
+										type={srcType as QueryDatasourceType}
+									/>
+								</li>
+							)}
+						{element.attribute.type.includes("FILE") && (
+							<li>
+								<FileChooser
 									prefix={prefix}
 									element={element}
 									srcType={srcType}
 									path={path}
 									setPath={setPath}
+									onSelect={closeMenu}
 								/>
 							</li>
 						)}
-					{element.name === "templateGroup" && !hidden && isValueInDatalist && (
-						<li>
-							<RemoveTemplateButton path={path} setPath={setPath} />
-						</li>
-					)}
-					{element.name === "setting" && !hidden && isValueInDatalist && (
-						<li>
-							<RemoveDatasetSettingButton path={path} setPath={setPath} />
-						</li>
-					)}
-					{element.name === "xlsxSchema" && !hidden && isValueInDatalist && (
-						<li>
-							<RemoveXlsxSchemaButton path={path} setPath={setPath} />
-						</li>
-					)}
-					{(srcType === "sql" || srcType === "table") &&
-						!hidden &&
-						isValueInDatalist && (
+						{element.attribute.type.includes("DIR") && (
 							<li>
-								<RemoveSqlEditorButton
+								<DirectoryChooser
+									prefix={prefix}
+									element={element}
+									srcType={srcType}
 									path={path}
 									setPath={setPath}
-									type={srcType as QueryDatasourceType}
+									onSelect={closeMenu}
 								/>
 							</li>
 						)}
-					{element.attribute.type.includes("FILE") && (
-						<li>
-							<FileChooser
-								prefix={prefix}
-								element={element}
-								srcType={srcType}
-								path={path}
-								setPath={setPath}
-								onSelect={closeMenu}
-							/>
-						</li>
-					)}
-					{element.attribute.type.includes("DIR") && (
-						<li>
-							<DirectoryChooser
-								prefix={prefix}
-								element={element}
-								srcType={srcType}
-								path={path}
-								setPath={setPath}
-								onSelect={closeMenu}
-							/>
-						</li>
-					)}
-				</>
-			)}
-		</DropDownMenu>
+					</>
+				)}
+			</DropDownMenu>
 		</>
 	);
 }

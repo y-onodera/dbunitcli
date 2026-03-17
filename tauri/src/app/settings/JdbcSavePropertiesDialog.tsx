@@ -13,7 +13,11 @@ export default function JdbcSavePropertiesDialog({
 	handleSave,
 }: JdbcSavePropertiesDialogProps) {
 	return (
-		<SettingDialog fileName="" handleDialogClose={handleDialogClose} handleSave={handleSave}>
+		<SettingDialog
+			fileName=""
+			handleDialogClose={handleDialogClose}
+			handleSave={handleSave}
+		>
 			<div className="w-[480px] p-4">
 				<h2 className="text-lg font-bold mb-4">Save JDBC Properties</h2>
 

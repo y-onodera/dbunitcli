@@ -77,9 +77,7 @@ export function FileChooser(prop: FileProp) {
 		).then((defaultPath) =>
 			open({ defaultPath }).then((files) => {
 				if (files) {
-					prop.setPath(
-						(files as string).replace(basePath + sep(), ""),
-					);
+					prop.setPath((files as string).replace(basePath + sep(), ""));
 					prop.onSelect?.();
 				}
 			}),
@@ -101,9 +99,7 @@ export function DirectoryChooser(prop: FileProp) {
 		).then((defaultPath) =>
 			open({ defaultPath, directory: true }).then((files) => {
 				if (files) {
-					prop.setPath(
-						(files as string).replace(basePath + sep(), ""),
-					);
+					prop.setPath((files as string).replace(basePath + sep(), ""));
 					prop.onSelect?.();
 				}
 			}),

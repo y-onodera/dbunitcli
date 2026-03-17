@@ -23,8 +23,7 @@ function TableList({
 	onToggleAll: (checked: boolean) => void;
 	onToggle: (table: string) => void;
 }) {
-	const allSelected =
-		tables.length > 0 && tables.every((t) => selected.has(t));
+	const allSelected = tables.length > 0 && tables.every((t) => selected.has(t));
 	return (
 		<div className="relative overflow-x-auto max-h-96 overflow-y-auto border border-gray-200 rounded">
 			<table className="w-full text-sm text-left">

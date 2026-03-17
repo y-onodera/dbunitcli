@@ -1,5 +1,8 @@
 import { useEnviroment } from "../context/EnviromentProvider";
-import { useSelectParameter, useSetSelectParameterState } from "../context/SelectParameterProvider";
+import {
+	useSelectParameter,
+	useSetSelectParameterState,
+} from "../context/SelectParameterProvider";
 import { useSetParameterList } from "../context/WorkspaceResourcesProvider";
 import {
 	type Parameter,
@@ -169,7 +172,10 @@ export const useParameterizeFrom = () => {
 					if (current.parameterize.includes(name)) {
 						return current;
 					}
-					return current.replace("parameterize", [...current.parameterize, name]);
+					return current.replace("parameterize", [
+						...current.parameterize,
+						name,
+					]);
 				});
 			})
 			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));

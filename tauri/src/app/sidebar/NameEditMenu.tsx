@@ -1,9 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
-import { CopyButton, DeleteButton, EditButton, FixButton, ParameterizeButton } from '../../components/element/ButtonIcon';
-import { ControllTextBox } from '../../components/element/Input';
-import { useParameterizeFrom } from '../../hooks/useSelectParameter';
-import { useCopyParameter, useDeleteParameter, useRenameParameter } from '../../hooks/useWorkspaceResources';
-import type { EditName } from '../main/Sidebar';
+import { useEffect, useRef, useState } from "react";
+import {
+	CopyButton,
+	DeleteButton,
+	EditButton,
+	FixButton,
+	ParameterizeButton,
+} from "../../components/element/ButtonIcon";
+import { ControllTextBox } from "../../components/element/Input";
+import { useParameterizeFrom } from "../../hooks/useSelectParameter";
+import {
+	useCopyParameter,
+	useDeleteParameter,
+	useRenameParameter,
+} from "../../hooks/useWorkspaceResources";
+import type { EditName } from "../main/Sidebar";
 
 type MenuEditProp = {
 	name: string;
@@ -13,22 +23,32 @@ type MenuEditProp = {
 	handleMenuParameterize?: () => void;
 };
 
-export default function NameEditMenu({ editName, setEditName }: { editName: EditName; setEditName: (editName: EditName) => void }) {
+export default function NameEditMenu({
+	editName,
+	setEditName,
+}: {
+	editName: EditName;
+	setEditName: (editName: EditName) => void;
+}) {
 	const wrapperRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		function handleClickOutside(event: Event) {
-			if (wrapperRef.current && !wrapperRef.current.contains(event.target as HTMLElement)) {
+			if (
+				wrapperRef.current &&
+				!wrapperRef.current.contains(event.target as HTMLElement)
+			) {
 				setEditName({} as EditName);
 			}
 		}
 		document.addEventListener("mousedown", handleClickOutside);
 		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, [setEditName]);
-	const handleMenuDelete = useDeleteParameter(editName.command, editName.name)
-	const handleMenuCopy = useCopyParameter(editName.command, editName.name)
-	const handleMenuRename = useRenameParameter(editName.command, editName.name)
-	const parameterizeFrom = useParameterizeFrom()
-	const canParameterize = editName.command && editName.command !== "parameterize"
+	const handleMenuDelete = useDeleteParameter(editName.command, editName.name);
+	const handleMenuCopy = useCopyParameter(editName.command, editName.name);
+	const handleMenuRename = useRenameParameter(editName.command, editName.name);
+	const parameterizeFrom = useParameterizeFrom();
+	const canParameterize =
+		editName.command && editName.command !== "parameterize";
 	return (
 		<>
 			{editName.name && (
@@ -55,10 +75,14 @@ export default function NameEditMenu({ editName, setEditName }: { editName: Edit
 							handleMenuCopy();
 							setEditName({} as EditName);
 						}}
-						handleMenuParameterize={canParameterize ? () => {
-							parameterizeFrom(editName.command, editName.name);
-							setEditName({} as EditName);
-						} : undefined}
+						handleMenuParameterize={
+							canParameterize
+								? () => {
+										parameterizeFrom(editName.command, editName.name);
+										setEditName({} as EditName);
+									}
+								: undefined
+						}
 					/>
 				</div>
 			)}
@@ -76,17 +100,31 @@ function MenuEdit(prop: MenuEditProp) {
 			</li>
 			<li>
 				<div className="flex gap-x-0.5">
-					<EditButton title="rename" handleClick={() => setHidden((current) => !current)} />
-					{!hidden && <>
-						<ControllTextBox name="menuRename" id="menuRename" required={false} wStyle="w-50"
-							value={newName} handleChange={(text) => handleRenameTextOnChange(text.target.value)} />
-						<FixButton title="" handleClick={() => {
-							setHidden((current) => !current);
-							prop.handleMenuRename(newName);
-						}}
-						/>
-					</>
-					}
+					<EditButton
+						title="rename"
+						handleClick={() => setHidden((current) => !current)}
+					/>
+					{!hidden && (
+						<>
+							<ControllTextBox
+								name="menuRename"
+								id="menuRename"
+								required={false}
+								wStyle="w-50"
+								value={newName}
+								handleChange={(text) =>
+									handleRenameTextOnChange(text.target.value)
+								}
+							/>
+							<FixButton
+								title=""
+								handleClick={() => {
+									setHidden((current) => !current);
+									prop.handleMenuRename(newName);
+								}}
+							/>
+						</>
+					)}
 				</div>
 			</li>
 			<li>
@@ -94,7 +132,10 @@ function MenuEdit(prop: MenuEditProp) {
 			</li>
 			{prop.handleMenuParameterize && (
 				<li>
-					<ParameterizeButton title="Parameterize" handleClick={prop.handleMenuParameterize} />
+					<ParameterizeButton
+						title="Parameterize"
+						handleClick={prop.handleMenuParameterize}
+					/>
 				</li>
 			)}
 		</ul>

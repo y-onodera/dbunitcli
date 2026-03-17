@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { EditButton } from "../../components/element/ButtonIcon";
 import { useDeleteTemplate } from "../../hooks/useTemplate";
-import { RemoveResource, type ResourceEditButtonProp } from "./ResourceEditButton";
+import {
+	RemoveResource,
+	type ResourceEditButtonProp,
+} from "./ResourceEditButton";
 import TemplateEditDialog from "./TemplateEditDialog";
 
 export default function TemplateEditButton({
@@ -26,7 +29,16 @@ export default function TemplateEditButton({
 	);
 }
 
-export function RemoveTemplateButton({ path, setPath }: ResourceEditButtonProp) {
+export function RemoveTemplateButton({
+	path,
+	setPath,
+}: ResourceEditButtonProp) {
 	const deleteTemplate = useDeleteTemplate();
-	return <RemoveResource path={path} setPath={setPath} deleteResource={deleteTemplate} />;
+	return (
+		<RemoveResource
+			path={path}
+			setPath={setPath}
+			deleteResource={deleteTemplate}
+		/>
+	);
 }
