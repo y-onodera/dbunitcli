@@ -33,21 +33,44 @@ def handle(client):
             resp += upstream.recv(4096)
         if b'200' in resp.split(b'\r\n')[0]:
             client.send(b'HTTP/1.1 200 Connection Established\r\n\r\n')
-            for s in [client, upstream]:
-                s.setblocking(False)
+            peer = {client: upstream, upstream: client}
+            # Keep sockets BLOCKING for sendall - non-blocking sendall loses data
+            # Use select only to detect readability
+            half_closed = set()
             while True:
-                r, _, _ = select.select([client, upstream], [], [], 30)
+                active = [s for s in [client, upstream] if s not in half_closed]
+                if not active:
+                    break
+                r, _, _ = select.select(active, [], [], 60)
                 if not r:
                     break
                 for s in r:
-                    data = s.recv(8192)
+                    try:
+                        data = s.recv(65536)
+                    except OSError:
+                        half_closed.add(s)
+                        half_closed.add(peer[s])
+                        continue
                     if not data:
-                        return
-                    (upstream if s is client else client).sendall(data)
+                        half_closed.add(s)
+                        try:
+                            peer[s].shutdown(socket.SHUT_WR)
+                        except OSError:
+                            half_closed.add(peer[s])
+                    else:
+                        try:
+                            peer[s].sendall(data)
+                        except OSError:
+                            half_closed.add(s)
+                            half_closed.add(peer[s])
     except:
         pass
     finally:
-        client.close()
+        for s in [client]:
+            try:
+                s.close()
+            except OSError:
+                pass
 
 if __name__ == '__main__':
     srv = socket.socket()

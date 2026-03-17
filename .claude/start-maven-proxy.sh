@@ -3,6 +3,16 @@ if [ -z "$https_proxy" ] && [ -z "$HTTPS_PROXY" ]; then
   exit 0
 fi
 
+nohup python3 /home/user/dbunitcli/.claude/maven-proxy.py >> /tmp/maven-proxy.log 2>&1 &
+echo "Maven proxy setup complete (PID: $!)"
+
+# Create ~/.mavenrc to override JAVA_TOOL_OPTIONS proxy settings
+# MAVEN_OPTS flags are appended to JVM command line, overriding JAVA_TOOL_OPTIONS
+cat > "$HOME/.mavenrc" << 'EOF'
+MAVEN_OPTS="-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=3128 -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=3128 -Dhttp.nonProxyHosts= $MAVEN_OPTS"
+EOF
+echo "~/.mavenrc created"
+
 mkdir -p "$HOME/.m2"
 cat > "$HOME/.m2/settings.xml" << 'EOF'
 <settings>
@@ -17,6 +27,3 @@ cat > "$HOME/.m2/settings.xml" << 'EOF'
  </proxies>
 </settings>
 EOF
-
-nohup python3 /home/user/dbunitcli/.claude/maven-proxy.py >> /tmp/maven-proxy.log 2>&1 &
-echo "Maven proxy setup complete (PID: $!)"
