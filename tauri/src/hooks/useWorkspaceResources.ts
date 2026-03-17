@@ -1,11 +1,19 @@
 import { useEnviroment } from "../context/EnviromentProvider";
-import { useSelectParameter, useSetSelectParameter } from "../context/SelectParameterProvider";
+import {
+	useSelectParameter,
+	useSetSelectParameter,
+} from "../context/SelectParameterProvider";
 import {
 	useSetParameterList,
 	useSetResourcesSettings,
 	useSetWorkspaceContext,
 } from "../context/WorkspaceResourcesProvider";
-import { ParameterList, ResourcesSettings, WorkspaceContext, type WorkspaceResources } from "../model/WorkspaceResources";
+import {
+	ParameterList,
+	ResourcesSettings,
+	WorkspaceContext,
+	type WorkspaceResources,
+} from "../model/WorkspaceResources";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
 
 export const useWorkspaceUpdate = () => {
@@ -26,7 +34,11 @@ export const useWorkspaceUpdate = () => {
 			.then((response) => response.json())
 			.then((resources: WorkspaceResources) => {
 				setContext(
-					WorkspaceContext.from(resources.context).with({ workspace, datasetBase, resultBase }),
+					WorkspaceContext.from(resources.context).with({
+						workspace,
+						datasetBase,
+						resultBase,
+					}),
 				);
 				setParameterList(ParameterList.from(resources.parameterList));
 				setResourcesSettings(new ResourcesSettings(resources.resources));
@@ -49,7 +61,9 @@ export const useAddParameter = (command: string) => {
 		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((parameters: string[]) => {
-				setParameter(current => current.replace(command.toLowerCase(), parameters));
+				setParameter((current) =>
+					current.replace(command.toLowerCase(), parameters),
+				);
 			})
 			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
 	};
@@ -70,7 +84,9 @@ export const useDeleteParameter = (command: string, name: string) => {
 		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((parameters: string[]) => {
-				setParameter(current => current.replace(command.toLowerCase(), parameters));
+				setParameter((current) =>
+					current.replace(command.toLowerCase(), parameters),
+				);
 			})
 			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
 	};
@@ -91,7 +107,9 @@ export const useCopyParameter = (command: string, name: string) => {
 		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((parameters: string[]) => {
-				setParameter(current => current.replace(command.toLowerCase(), parameters));
+				setParameter((current) =>
+					current.replace(command.toLowerCase(), parameters),
+				);
 			})
 			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
 	};
@@ -114,9 +132,18 @@ export const useRenameParameter = (command: string, name: string) => {
 		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((parameters: string[]) => {
-				setParameterList(current => current.replace(command.toLowerCase(), parameters));
-				if (parameter.command === command.toLowerCase() && parameter.name === name) {
-					setParameter(parameter.currentParameter(), parameter.command, newName);
+				setParameterList((current) =>
+					current.replace(command.toLowerCase(), parameters),
+				);
+				if (
+					parameter.command === command.toLowerCase() &&
+					parameter.name === name
+				) {
+					setParameter(
+						parameter.currentParameter(),
+						parameter.command,
+						newName,
+					);
 				}
 			})
 			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));

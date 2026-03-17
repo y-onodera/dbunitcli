@@ -16,13 +16,9 @@ export default function CommandForm(prop: {
 }) {
 	const select = useSelectParameter();
 	const command = select.command;
-	const refreshSelect = useRefreshSelectParameter(command)
-	const handleTypeSelect = () => refreshSelect(prop.formData(false).values)
-	return (
-		<>
-			{renderForm(command, handleTypeSelect, select)}
-		</>
-	);
+	const refreshSelect = useRefreshSelectParameter(command);
+	const handleTypeSelect = () => refreshSelect(prop.formData(false).values);
+	return <>{renderForm(command, handleTypeSelect, select)}</>;
 }
 
 function renderForm(

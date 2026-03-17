@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { SettingDialog } from "../../components/dialog";
-import { useTemplateLoadContent, useTemplateSaveContent } from "../../hooks/useTemplate";
+import {
+	useTemplateLoadContent,
+	useTemplateSaveContent,
+} from "../../hooks/useTemplate";
 import { saveOnSuccess } from "../../utils/fetchUtils";
 
 export default function TemplateEditDialog({

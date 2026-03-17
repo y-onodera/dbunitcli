@@ -357,7 +357,9 @@ export function KeyValueText(props: {
 			{props.index === 0 && (
 				<div className="grid grid-cols-5 pb-1">
 					<span className="col-start-2 text-xs text-gray-500">name</span>
-					<span className="col-start-3 col-span-2 ml-1 text-xs text-gray-500">expression</span>
+					<span className="col-start-3 col-span-2 ml-1 text-xs text-gray-500">
+						expression
+					</span>
 				</div>
 			)}
 			<div className="grid grid-cols-5 pb-2">

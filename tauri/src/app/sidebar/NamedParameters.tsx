@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { LinkButton } from "../../components/element/Button";
-import { AddButton, ButtonIcon, SettingButton } from "../../components/element/ButtonIcon";
+import {
+	AddButton,
+	ButtonIcon,
+	SettingButton,
+} from "../../components/element/ButtonIcon";
 import { ExpandIcon } from "../../components/element/Icon";
 import { useParameterList } from "../../context/WorkspaceResourcesProvider";
 import { useLoadSelectParameter } from "../../hooks/useSelectParameter";
@@ -13,7 +17,11 @@ type NamedParameterProp = {
 	handleParameterSelect: (command: string, name: string) => Promise<void>;
 	handleEditNamed: (selected: EditName) => void;
 };
-export default function NamedParameters({ setEditName }: { setEditName: (editName: EditName) => void }) {
+export default function NamedParameters({
+	setEditName,
+}: {
+	setEditName: (editName: EditName) => void;
+}) {
 	const parameters = useParameterList();
 	const handleParameterSelect = useLoadSelectParameter();
 	const handleEditNamed = (selected: EditName) => setEditName(selected);
@@ -63,7 +71,11 @@ function Category(props: NamedParameterProp) {
 					{props.command}
 				</span>
 			</ButtonIcon>
-			<ul id={`${props.command}-list`} className="py-1 space-y-1" hidden={close}>
+			<ul
+				id={`${props.command}-list`}
+				className="py-1 space-y-1"
+				hidden={close}
+			>
 				<Parameters
 					command={props.command}
 					namedParameters={props.namedParameters}

@@ -28,7 +28,11 @@ const {
 vi.mock("../../../app/form/ConvertForm", () => ({
 	ConvertForm: ({ handleTypeSelect }: { handleTypeSelect: () => void }) => (
 		<div data-testid="mock-convert-form">
-			<button type="button" data-testid="type-select-btn" onClick={handleTypeSelect}>
+			<button
+				type="button"
+				data-testid="type-select-btn"
+				onClick={handleTypeSelect}
+			>
 				select
 			</button>
 		</div>
@@ -59,7 +63,10 @@ vi.mock("../../../hooks/useSelectParameter", () => ({
 
 beforeEach(() => {
 	mockUseRefreshSelectParameter.mockReturnValue(mockRefreshSelectFn);
-	mockFormData.mockReturnValue({ values: mockFormValues, validationError: false });
+	mockFormData.mockReturnValue({
+		values: mockFormValues,
+		validationError: false,
+	});
 });
 
 // 全コマンドの共通モック SelectParameter 値を生成
@@ -85,16 +92,16 @@ describe("CommandFormのテスト", () => {
 		{ command: "generate", testId: "mock-generate-form" },
 		{ command: "run", testId: "mock-run-form" },
 		{ command: "parameterize", testId: "mock-parameterize-form" },
-	])(
-		"command=$commandのとき、対応するフォームが表示される",
-		({ command, testId }) => {
-			mockUseSelectParameter.mockReturnValue(makeSelectParameter(command));
+	])("command=$commandのとき、対応するフォームが表示される", ({
+		command,
+		testId,
+	}) => {
+		mockUseSelectParameter.mockReturnValue(makeSelectParameter(command));
 
-			render(<CommandForm formData={mockFormData} />);
+		render(<CommandForm formData={mockFormData} />);
 
-			expect(screen.getByTestId(testId)).toBeInTheDocument();
-		},
-	);
+		expect(screen.getByTestId(testId)).toBeInTheDocument();
+	});
 
 	it("commandが未知のとき、何も表示されない", () => {
 		mockUseSelectParameter.mockReturnValue(makeSelectParameter("unknown"));

@@ -21,7 +21,13 @@ function makeElement(
 const templateOptionElements: CommandParam[] = [
 	makeElement("encoding", "TEXT", "UTF-8", "WORKSPACE", false),
 	makeElement("templateGroup", "FILE", "", "TEMPLATE", false),
-	makeElement("templateParameterAttribute", "TEXT", "param", "WORKSPACE", false),
+	makeElement(
+		"templateParameterAttribute",
+		"TEXT",
+		"param",
+		"WORKSPACE",
+		false,
+	),
 	makeElement("templateVarStart", "TEXT", "$", "WORKSPACE", false),
 	makeElement("templateVarStop", "TEXT", "$", "WORKSPACE", false),
 ];

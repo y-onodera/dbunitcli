@@ -1,5 +1,9 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { CommandParam, DatasetSrcInfo, SrcInfo } from "../../model/CommandParam";
+import type {
+	CommandParam,
+	DatasetSrcInfo,
+	SrcInfo,
+} from "../../model/CommandParam";
 
 export type Prop = {
 	prefix: string;

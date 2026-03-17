@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
-import NameEditMenu from '../sidebar/NameEditMenu';
-import NamedParameters from '../sidebar/NamedParameters';
+import { useRef, useState } from "react";
+import NamedParameters from "../sidebar/NamedParameters";
+import NameEditMenu from "../sidebar/NameEditMenu";
 
 interface SidebarProps {
 	setSidebarWidth: (width: number) => void;
@@ -19,11 +19,11 @@ export default function Sidebar({ setSidebarWidth }: SidebarProps) {
 	const minWidth = 200;
 	const maxWidth = 600;
 
-	const handleMouseDown = (e: { clientX: number; }) => {
+	const handleMouseDown = (e: { clientX: number }) => {
 		const startX = e.clientX;
 		const startWidth = width;
 
-		const handleMouseMove = (e: { clientX: number; }) => {
+		const handleMouseMove = (e: { clientX: number }) => {
 			const newWidth = startWidth + (e.clientX - startX);
 			if (newWidth >= minWidth && newWidth <= maxWidth) {
 				setWidth(newWidth);

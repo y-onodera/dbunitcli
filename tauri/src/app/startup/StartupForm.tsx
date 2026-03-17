@@ -7,13 +7,20 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { BlueButton, ButtonWithIcon, WhiteButton } from "../../components/element/Button";
+import {
+	BlueButton,
+	ButtonWithIcon,
+	WhiteButton,
+} from "../../components/element/Button";
 import { DirIcon } from "../../components/element/Icon";
 import { ControllTextBox, InputLabel } from "../../components/element/Input";
 import { useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
 import { useWorkspaceUpdate } from "../../hooks/useWorkspaceResources";
 
-const StartupForm: React.FC<{ onSelect: () => void; onClose?: () => void }> = ({ onSelect, onClose }) => {
+const StartupForm: React.FC<{ onSelect: () => void; onClose?: () => void }> = ({
+	onSelect,
+	onClose,
+}) => {
 	const context = useWorkspaceContext();
 	const workspaceUpdate = useWorkspaceUpdate();
 	const [workspace, setWorkspace] = useState(context.workspace);
@@ -88,7 +95,9 @@ const StartupForm: React.FC<{ onSelect: () => void; onClose?: () => void }> = ({
 					error={errors.resultBase}
 				/>
 			</div>
-			<div className={`flex items-center gap-2 ${onClose ? "justify-end" : "justify-center"}`}>
+			<div
+				className={`flex items-center gap-2 ${onClose ? "justify-end" : "justify-center"}`}
+			>
 				<BlueButton title="confirm" handleClick={() => handleSelect()} />
 				{onClose && <WhiteButton title="Close" handleClick={onClose} />}
 			</div>

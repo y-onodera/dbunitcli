@@ -11,7 +11,10 @@ export default function Header() {
 			<div className="flex items-center justify-between">
 				<div className="flex items-center justify-start rtl:justify-end gap-2">
 					<h1>DBunit CLI</h1>
-					<DirectoryButton title="ChangeWorkspace" handleClick={() => setShowWorkspaceDialog(true)} />
+					<DirectoryButton
+						title="ChangeWorkspace"
+						handleClick={() => setShowWorkspaceDialog(true)}
+					/>
 				</div>
 				{selected.name && <h1>{`${selected.command}: ${selected.name}`}</h1>}
 			</div>

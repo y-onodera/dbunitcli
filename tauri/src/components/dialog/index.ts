@@ -1,13 +1,13 @@
+export type { SettingDialogProps } from "./SettingDialog";
 export {
-	SettingDialog,
-	Fieldset,
-	Check,
-	Text,
-	Select,
 	Arrays,
 	ArraysText,
+	Check,
+	Fieldset,
 	KeyValues,
 	KeyValueText,
+	Select,
+	SettingDialog,
+	Text,
 } from "./SettingDialog";
-export type { SettingDialogProps } from "./SettingDialog";
 export { default as SettingTable } from "./SettingTable";

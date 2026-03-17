@@ -1,15 +1,20 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { type Enviroment, enviromentContext } from "../../context/EnviromentProvider";
-import WorkspaceResourcesProvider, { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
+import {
+	type Enviroment,
+	enviromentContext,
+} from "../../context/EnviromentProvider";
+import WorkspaceResourcesProvider, {
+	useResourcesSettings,
+} from "../../context/WorkspaceResourcesProvider";
 import {
 	useDeleteXlsxSchema,
 	useLoadXlsxSchema,
 	useSaveXlsxSchema,
 } from "../../hooks/useXlsxSchema";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
-import { XlsxSchema } from "../../model/XlsxSchema";
 import type { XlsxSchemaBuilder } from "../../model/XlsxSchema";
+import { XlsxSchema } from "../../model/XlsxSchema";
 import type { FetchParams } from "../../utils/fetchUtils";
 import { enviromentFixture, workspaceResourcesFixture } from "../setup";
 
@@ -36,37 +41,49 @@ const mockXlsxSchema: XlsxSchemaBuilder = {
 		},
 	],
 };
-const mockWorkspaceResources: WorkspaceResources = { ...workspaceResourcesFixture };
+const mockWorkspaceResources: WorkspaceResources = {
+	...workspaceResourcesFixture,
+};
 const mockEnviroment: Enviroment = { ...enviromentFixture };
 
 function MockProvider({ children }: { children: React.ReactNode }) {
-	return <enviromentContext.Provider value={mockEnviroment}><WorkspaceResourcesProvider>{children}</WorkspaceResourcesProvider></enviromentContext.Provider>;
+	return (
+		<enviromentContext.Provider value={mockEnviroment}>
+			<WorkspaceResourcesProvider>{children}</WorkspaceResourcesProvider>
+		</enviromentContext.Provider>
+	);
 }
 const wrapper = ({ children }: { children: React.ReactNode }) => (
 	<MockProvider>{children}</MockProvider>
 );
 
-const mockUpdatedSettings = ['test-setting', 'other-setting'];
+const mockUpdatedSettings = ["test-setting", "other-setting"];
 const mockRemainingSettings = [] as string[];
 
 // API呼び出しのモック
 const { mockFetchData } = vi.hoisted(() => {
 	return {
 		mockFetchData: vi.fn((params: FetchParams) => {
-			if (params.endpoint.includes('/workspace/resources')) {
-				return Promise.resolve(new Response(JSON.stringify(mockWorkspaceResources)));
+			if (params.endpoint.includes("/workspace/resources")) {
+				return Promise.resolve(
+					new Response(JSON.stringify(mockWorkspaceResources)),
+				);
 			}
-			if (params.endpoint.includes('/xlsx-schema/load')) {
+			if (params.endpoint.includes("/xlsx-schema/load")) {
 				return Promise.resolve(new Response(JSON.stringify(mockXlsxSchema)));
 			}
-			if (params.endpoint.includes('/xlsx-schema/save')) {
-				return Promise.resolve(new Response(JSON.stringify(mockUpdatedSettings)));
+			if (params.endpoint.includes("/xlsx-schema/save")) {
+				return Promise.resolve(
+					new Response(JSON.stringify(mockUpdatedSettings)),
+				);
 			}
-			if (params.endpoint.includes('/xlsx-schema/delete')) {
-				return Promise.resolve(new Response(JSON.stringify(mockRemainingSettings)));
+			if (params.endpoint.includes("/xlsx-schema/delete")) {
+				return Promise.resolve(
+					new Response(JSON.stringify(mockRemainingSettings)),
+				);
 			}
 			return Promise.resolve(new Response());
-		})
+		}),
 	};
 });
 
@@ -74,23 +91,29 @@ vi.mock("../../utils/fetchUtils", () => ({
 	fetchData: mockFetchData,
 }));
 
-
 describe("XlsxSchemaProviderのテスト", () => {
-
 	describe("useLoadXlsxSchema", () => {
 		it("名前が空文字の場合にデフォルト値を返すことを確認", async () => {
-			const { result, rerender } = renderHook(() => useLoadXlsxSchema(), { wrapper });
-            await act(async () => {rerender()});
-            expect(result.current).toBeTypeOf("function");
-			const res = await result.current('');
+			const { result, rerender } = renderHook(() => useLoadXlsxSchema(), {
+				wrapper,
+			});
+			await act(async () => {
+				rerender();
+			});
+			expect(result.current).toBeTypeOf("function");
+			const res = await result.current("");
 			expect(res).toEqual(XlsxSchema.create());
 		});
 
 		it("正常なロードが行われることを確認", async () => {
-			const { result, rerender } = renderHook(() => useLoadXlsxSchema(), { wrapper });
-            await act(async () => {rerender()});
-            expect(result.current).toBeTypeOf("function");
-			const res = await result.current('test-setting');
+			const { result, rerender } = renderHook(() => useLoadXlsxSchema(), {
+				wrapper,
+			});
+			await act(async () => {
+				rerender();
+			});
+			expect(result.current).toBeTypeOf("function");
+			const res = await result.current("test-setting");
 			expect(res.rows).toHaveLength(1);
 			expect(res.cells).toHaveLength(1);
 		});
@@ -98,33 +121,51 @@ describe("XlsxSchemaProviderのテスト", () => {
 
 	describe("useSaveXlsxSchema", () => {
 		it("正常な保存が行われることを確認", async () => {
-			const { result, rerender } = renderHook(() => {
-				const saveXlsxSchema = useSaveXlsxSchema();
-				const resources = useResourcesSettings();
-				return { resources, saveXlsxSchema }
-			}, { wrapper });
-            await act(async () => {rerender()});
-            expect(result.current.resources.xlsxSchemas).toStrictEqual(mockWorkspaceResources.resources.xlsxSchemas);
+			const { result, rerender } = renderHook(
+				() => {
+					const saveXlsxSchema = useSaveXlsxSchema();
+					const resources = useResourcesSettings();
+					return { resources, saveXlsxSchema };
+				},
+				{ wrapper },
+			);
 			await act(async () => {
-				result.current.saveXlsxSchema('test-setting', XlsxSchema.create());
+				rerender();
 			});
-            expect(result.current.resources.xlsxSchemas).toStrictEqual(mockUpdatedSettings);
+			expect(result.current.resources.xlsxSchemas).toStrictEqual(
+				mockWorkspaceResources.resources.xlsxSchemas,
+			);
+			await act(async () => {
+				result.current.saveXlsxSchema("test-setting", XlsxSchema.create());
+			});
+			expect(result.current.resources.xlsxSchemas).toStrictEqual(
+				mockUpdatedSettings,
+			);
 		});
 	});
 
 	describe("useDeleteXlsxSchema", () => {
 		it("正常な削除が行われることを確認", async () => {
-			const { result, rerender } = renderHook(() => {
-				const deleteXlsxSchema = useDeleteXlsxSchema();
-				const resources = useResourcesSettings();
-				return { resources, deleteXlsxSchema }
-			}, { wrapper });
-            await act(async () => {rerender()});
-            expect(result.current.resources.xlsxSchemas).toStrictEqual(mockWorkspaceResources.resources.xlsxSchemas);
+			const { result, rerender } = renderHook(
+				() => {
+					const deleteXlsxSchema = useDeleteXlsxSchema();
+					const resources = useResourcesSettings();
+					return { resources, deleteXlsxSchema };
+				},
+				{ wrapper },
+			);
 			await act(async () => {
-				result.current.deleteXlsxSchema('test-setting');
+				rerender();
 			});
-            expect(result.current.resources.xlsxSchemas).toStrictEqual(mockRemainingSettings);
+			expect(result.current.resources.xlsxSchemas).toStrictEqual(
+				mockWorkspaceResources.resources.xlsxSchemas,
+			);
+			await act(async () => {
+				result.current.deleteXlsxSchema("test-setting");
+			});
+			expect(result.current.resources.xlsxSchemas).toStrictEqual(
+				mockRemainingSettings,
+			);
 		});
 	});
 });

@@ -64,7 +64,11 @@ function Dialog(props: {
 					})
 				}
 				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={({ setting, handleDialogClose, handleCommit }) => (
+				SettingDialogComponent={({
+					setting,
+					handleDialogClose,
+					handleCommit,
+				}) => (
 					<DatasetSettingDialog
 						setting={setting}
 						handleDialogClose={handleDialogClose}
@@ -85,7 +89,11 @@ function Dialog(props: {
 					})
 				}
 				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={({ setting, handleDialogClose, handleCommit }) => (
+				SettingDialogComponent={({
+					setting,
+					handleDialogClose,
+					handleCommit,
+				}) => (
 					<DatasetSettingDialog
 						setting={setting}
 						handleDialogClose={handleDialogClose}
