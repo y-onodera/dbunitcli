@@ -257,38 +257,39 @@ export function ArraysText(props: {
 	const handleBlur = (newVal: React.FocusEvent<HTMLInputElement>) =>
 		props.handleChange(newVal.target.value, props.index);
 	const handleRemove = () => props.handleRemove(props.index);
+	const showLabel = !props.ignoreLabel && props.index === 0;
 	return (
 		<>
-			{!props.ignoreLabel && props.index === 0 && (
+			{showLabel && (
 				<div className="grid grid-cols-5 pb-1">
 					<span className="col-start-2 text-xs text-gray-500">column</span>
 				</div>
 			)}
 			<div className="grid grid-cols-5 pb-2">
-			{!props.ignoreLabel && props.index === 0 && (
-				<InputLabel
+				{showLabel && (
+					<InputLabel
+						id={props.name}
+						text={props.name}
+						required={false}
+						wStyle="p-2.5 w=1/5"
+					/>
+				)}
+				<ControllTextBox
+					name={props.name}
 					id={props.name}
-					text={props.name}
-					required={false}
-					wStyle="p-2.5 w=1/5"
+					required={true}
+					wStyle="col-start-2"
+					value={text}
+					handleChange={(ev) => setText(ev.target.value)}
+					handleBlur={handleBlur}
+					list={props.list}
 				/>
-			)}
-			<ControllTextBox
-				name={props.name}
-				id={props.name}
-				required={true}
-				wStyle="col-start-2"
-				value={text}
-				handleChange={(ev) => setText(ev.target.value)}
-				handleBlur={handleBlur}
-				list={props.list}
-			/>
-			{props.index > 0 && (
-				<div className="col-start-3">
-					<RemoveButton handleClick={handleRemove} />
-				</div>
-			)}
-		</div>
+				{props.index > 0 && (
+					<div className="col-start-3">
+						<RemoveButton handleClick={handleRemove} />
+					</div>
+				)}
+			</div>
 		</>
 	);
 }
