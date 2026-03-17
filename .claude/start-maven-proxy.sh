@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-if [ -z "$https_proxy" ] && [ -z "$HTTPS_PROXY" ]; then
+# Claude on the web 環境のみ実行（JAVA_TOOL_OPTIONS に JWT プロキシが設定されている場合）
+if ! echo "${JAVA_TOOL_OPTIONS:-}" | grep -q "jwt_"; then
   exit 0
 fi
 
