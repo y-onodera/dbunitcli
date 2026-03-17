@@ -124,6 +124,23 @@ class RunControllerTest {
         JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/run-reset-response.json"), jsonResponse);
     }
 
+    @Test
+    public void testRefresh_scriptTypeSql_デフォルト構造が返る() throws IOException {
+        assertRefresh("{\"-scriptType\":\"sql\"}", "run-refresh-scriptType-sql-response.json");
+    }
+
+    @Test
+    public void testRefresh_scriptTypeCmd_構造が返る() throws IOException {
+        assertRefresh("{\"-scriptType\":\"cmd\"}", "run-refresh-scriptType-cmd-response.json");
+    }
+
+    private void assertRefresh(final String requestJson, final String expectedFile) throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/run/refresh", requestJson));
+        System.out.println(jsonResponse);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/" + expectedFile), jsonResponse);
+    }
+
     private void tryDelete(final String name) {
         this.tryDeleteCommand("run", name);
     }

@@ -1,0 +1,106 @@
+{
+  "prefix": "",
+  "elements": [
+    {
+      "name": "scriptType",
+      "attribute": {
+        "type": "ENUM",
+        "selectOption": [
+          "cmd",
+          "bat",
+          "sql",
+          "ant"
+        ],
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "cmd"
+    },
+    {
+      "name": "baseDir",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    }
+  ],
+  "srcData": {
+    "prefix": "src",
+    "elements": [
+      {
+        "name": "src",
+        "attribute": {
+          "type": "FILE_OR_DIR",
+          "required": true,
+          "defaultPath": "DATASET"
+        },
+        "value": ""
+      },
+      {
+        "name": "recursive",
+        "attribute": {
+          "type": "FLG",
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": "false"
+      },
+      {
+        "name": "regInclude",
+        "attribute": {
+          "type": "TEXT",
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": ""
+      },
+      {
+        "name": "regExclude",
+        "attribute": {
+          "type": "TEXT",
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": ""
+      },
+      {
+        "name": "setting",
+        "attribute": {
+          "type": "FILE",
+          "required": false,
+          "defaultPath": "SETTING"
+        },
+        "value": ""
+      },
+      {
+        "name": "settingEncoding",
+        "attribute": {
+          "type": "TEXT",
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": "UTF-8"
+      },
+      {
+        "name": "regTableInclude",
+        "attribute": {
+          "type": "TEXT",
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": ""
+      },
+      {
+        "name": "regTableExclude",
+        "attribute": {
+          "type": "TEXT",
+          "required": false,
+          "defaultPath": "WORKSPACE"
+        },
+        "value": ""
+      }
+    ]
+  }
+}

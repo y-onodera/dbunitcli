@@ -122,6 +122,33 @@ class GenerateControllerTest {
         JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/generate-reset-response.json"), jsonResponse);
     }
 
+    @Test
+    public void testRefresh_srcTypeXlsx_xlsxSchema要素が追加されdelimiterIgnoreQuotedが削除される() throws IOException {
+        assertRefresh("{\"-src.srcType\":\"xlsx\"}", "generate-refresh-srcType-xlsx-response.json");
+    }
+
+    @Test
+    public void testRefresh_srcTypeReg_regDataSplitとregHeaderSplitが追加される() throws IOException {
+        assertRefresh("{\"-src.srcType\":\"reg\"}", "generate-refresh-srcType-reg-response.json");
+    }
+
+    @Test
+    public void testRefresh_srcTypeTable_JDBC要素が追加されファイルトラバース要素が削除される() throws IOException {
+        assertRefresh("{\"-src.srcType\":\"table\"}", "generate-refresh-srcType-table-response.json");
+    }
+
+    @Test
+    public void testRefresh_srcTypeFile_最小限の要素のみになる() throws IOException {
+        assertRefresh("{\"-src.srcType\":\"file\"}", "generate-refresh-srcType-file-response.json");
+    }
+
+    private void assertRefresh(final String requestJson, final String expectedFile) throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/generate/refresh", requestJson));
+        System.out.println(jsonResponse);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/" + expectedFile), jsonResponse);
+    }
+
     private void tryDelete(final String name) {
         this.tryDeleteCommand("generate", name);
     }

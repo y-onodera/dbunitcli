@@ -123,6 +123,63 @@ class ConvertControllerTest {
         JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/convert-reset-response.json"), jsonResponse);
     }
 
+    @Test
+    public void testRefresh_srcTypeXlsx_xlsxSchema要素が追加されdelimiterIgnoreQuotedが削除される() throws IOException {
+        assertRefresh("{\"-srcType\":\"xlsx\"}", "convert-refresh-srcType-xlsx-response.json");
+    }
+
+    @Test
+    public void testRefresh_srcTypeXls_xlsxSchema要素が追加されdelimiterIgnoreQuotedが削除される() throws IOException {
+        assertRefresh("{\"-srcType\":\"xls\"}", "convert-refresh-srcType-xls-response.json");
+    }
+
+    @Test
+    public void testRefresh_srcTypeReg_regDataSplitとregHeaderSplitが追加される() throws IOException {
+        assertRefresh("{\"-srcType\":\"reg\"}", "convert-refresh-srcType-reg-response.json");
+    }
+
+    @Test
+    public void testRefresh_srcTypeFixed_fixedLength要素が追加される() throws IOException {
+        assertRefresh("{\"-srcType\":\"fixed\"}", "convert-refresh-srcType-fixed-response.json");
+    }
+
+    @Test
+    public void testRefresh_srcTypeTable_JDBC要素が追加されファイルトラバース要素が削除される() throws IOException {
+        assertRefresh("{\"-srcType\":\"table\"}", "convert-refresh-srcType-table-response.json");
+    }
+
+    @Test
+    public void testRefresh_srcTypeSql_JDBC要素が追加されファイルトラバース要素が削除される() throws IOException {
+        assertRefresh("{\"-srcType\":\"sql\"}", "convert-refresh-srcType-sql-response.json");
+    }
+
+    @Test
+    public void testRefresh_srcTypeFile_最小限の要素のみになる() throws IOException {
+        assertRefresh("{\"-srcType\":\"file\"}", "convert-refresh-srcType-file-response.json");
+    }
+
+    @Test
+    public void testRefresh_srcTypeDir_トラバース要素のみになる() throws IOException {
+        assertRefresh("{\"-srcType\":\"dir\"}", "convert-refresh-srcType-dir-response.json");
+    }
+
+    @Test
+    public void testRefresh_resultTypeXlsx_excelTable要素が追加されoutputEncodingが削除される() throws IOException {
+        assertRefresh("{\"-resultType\":\"xlsx\"}", "convert-refresh-resultType-xlsx-response.json");
+    }
+
+    @Test
+    public void testRefresh_resultTypeXls_excelTable要素が追加されoutputEncodingが削除される() throws IOException {
+        assertRefresh("{\"-resultType\":\"xls\"}", "convert-refresh-resultType-xls-response.json");
+    }
+
+    private void assertRefresh(final String requestJson, final String expectedFile) throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/convert/refresh", requestJson));
+        System.out.println(jsonResponse);
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/" + expectedFile), jsonResponse);
+    }
+
     private void tryDelete(final String name) {
         this.tryDeleteCommand("convert", name);
     }
