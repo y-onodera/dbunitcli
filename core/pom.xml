@@ -88,6 +88,9 @@
                                     <accessFilterFiles>
                                         <filterFile>${project.basedir}/access-filter.json</filterFile>
                                     </accessFilterFiles>
+                                    <callerFilterFiles>
+                                        <filterFile>${project.basedir}/caller-filter.json</filterFile>
+                                    </callerFilterFiles>
                                 </options>
                                 <metadataCopy>
                                     <disabledStages>
