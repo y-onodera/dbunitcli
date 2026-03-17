@@ -28,6 +28,42 @@
             </properties>
         </profile>
         <profile>
+            <id>native-trace</id>
+            <properties>
+                <exclude.testcase>jvmTest</exclude.testcase>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>0.10.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <agent>
+                                <enabled>true</enabled>
+                                <options>
+                                    <accessFilterFiles>
+                                        <filterFile>${project.basedir}/access-filter.json</filterFile>
+                                    </accessFilterFiles>
+                                    <callerFilterFiles>
+                                        <filterFile>${project.basedir}/caller-filter.json</filterFile>
+                                    </callerFilterFiles>
+                                </options>
+                                <metadataCopy>
+                                    <disabledStages>
+                                        <stage>main</stage>
+                                    </disabledStages>
+                                    <merge>true</merge>
+                                    <outputDirectory>${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}</outputDirectory>
+                                </metadataCopy>
+                            </agent>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>native</id>
             <build>
                 <plugins>
