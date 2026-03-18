@@ -7,27 +7,33 @@ fi
 # JDK 25 のインストール（現在のバージョンが 25 未満の場合）
 REQUIRED_JAVA_VERSION=25
 JDK25_DIR="$HOME/jdk-25"
+JDK25_READY=false
+
 CURRENT_JAVA_MAJOR=$(java -version 2>&1 | grep -oP '(?<=version ")[0-9]+' | head -1)
 echo "Current Java major version: ${CURRENT_JAVA_MAJOR:-unknown}"
 
 if [ -z "$CURRENT_JAVA_MAJOR" ] || [ "$CURRENT_JAVA_MAJOR" -lt "$REQUIRED_JAVA_VERSION" ]; then
   if [ -d "$JDK25_DIR/bin" ]; then
     echo "JDK 25 already installed at $JDK25_DIR"
+    JDK25_READY=true
   else
     echo "Installing JDK 25..."
-    mkdir -p "$JDK25_DIR"
     ADOPTIUM_URL="https://api.adoptium.net/v3/binary/latest/25/ga/linux/x64/jdk/hotspot/normal/eclipse"
-    if curl -sL "$ADOPTIUM_URL" | tar -xz -C "$JDK25_DIR" --strip-components=1; then
+    TMP_JDK=$(mktemp /tmp/jdk25-XXXXXX.tar.gz)
+    rm -rf "$JDK25_DIR" && mkdir -p "$JDK25_DIR"
+    if curl -sL "$ADOPTIUM_URL" -o "$TMP_JDK" && tar -xz -C "$JDK25_DIR" --strip-components=1 -f "$TMP_JDK"; then
       echo "JDK 25 installed at $JDK25_DIR"
+      JDK25_READY=true
     else
       echo "Failed to install JDK 25, falling back to current JDK"
       rm -rf "$JDK25_DIR"
     fi
+    rm -f "$TMP_JDK"
   fi
 
-  if [ -d "$JDK25_DIR/bin" ]; then
+  if [ "$JDK25_READY" = true ]; then
     # 以降のシェルセッションでも有効になるよう .bashrc に追記
-    if ! grep -q "jdk-25" "$HOME/.bashrc" 2>/dev/null; then
+    if ! grep -q "JAVA_HOME.*jdk-25" "$HOME/.bashrc" 2>/dev/null; then
       cat >> "$HOME/.bashrc" << EOF
 
 # JDK 25 (installed by Claude setup)
@@ -48,10 +54,10 @@ echo "Maven proxy setup complete (PID: $!)"
 
 # Create ~/.mavenrc to override JAVA_TOOL_OPTIONS proxy settings
 # MAVEN_OPTS flags are appended to JVM command line, overriding JAVA_TOOL_OPTIONS
-cat > "$HOME/.mavenrc" << EOF
-$([ -d "$JDK25_DIR/bin" ] && echo "JAVA_HOME=\"$JDK25_DIR\"")
-MAVEN_OPTS="-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=3128 -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=3128 -Dhttp.nonProxyHosts= \$MAVEN_OPTS"
-EOF
+{
+  [ "$JDK25_READY" = true ] && echo "JAVA_HOME=\"$JDK25_DIR\""
+  printf 'MAVEN_OPTS="-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=3128 -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=3128 -Dhttp.nonProxyHosts= $MAVEN_OPTS"\n'
+} > "$HOME/.mavenrc"
 echo "~/.mavenrc created"
 
 mkdir -p "$HOME/.m2"
