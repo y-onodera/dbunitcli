@@ -71,10 +71,9 @@ export default function SqlTableInsertDialog({
 	onInsert,
 	onClose,
 }: SqlTableInsertDialogProps) {
-	const [tables, setTables] = useState<string[]>([]);
+	const [tables, setTables] = useState<string[] | null>(null);
 	const [selected, setSelected] = useState<Set<string>>(new Set());
 	const [loading, setLoading] = useState(false);
-	const [loaded, setLoaded] = useState(false);
 	const getJdbcTables = useJdbcTables();
 
 	const handleLoad = useCallback(async () => {
@@ -82,7 +81,6 @@ export default function SqlTableInsertDialog({
 		try {
 			const result = await getJdbcTables(jdbcValues);
 			setTables(result);
-			setLoaded(true);
 		} finally {
 			setLoading(false);
 		}
@@ -102,14 +100,14 @@ export default function SqlTableInsertDialog({
 
 	const toggleAll = (checked: boolean) => {
 		if (checked) {
-			setSelected(new Set(tables));
+			setSelected(new Set(tables ?? []));
 		} else {
 			setSelected(new Set());
 		}
 	};
 
 	const handleInsert = () => {
-		const selectedTables = tables.filter((t) => selected.has(t));
+		const selectedTables = (tables ?? []).filter((t) => selected.has(t));
 		onInsert(selectedTables);
 	};
 
@@ -124,10 +122,10 @@ export default function SqlTableInsertDialog({
 					{loading && (
 						<p className="text-sm text-gray-500">Loading...</p>
 					)}
-					{!loading && loaded && tables.length === 0 && (
+					{!loading && tables !== null && tables.length === 0 && (
 						<p className="text-sm text-gray-500">No tables found</p>
 					)}
-					{!loading && tables.length > 0 && (
+					{!loading && tables !== null && tables.length > 0 && (
 						<TableList
 							tables={tables}
 							selected={selected}
