@@ -14,12 +14,6 @@
     },
     {
       "excludeClasses": "mockit.**"
-    },
-    {
-      "excludeClasses": "yo.dbunitcli.**Test"
-    },
-    {
-      "excludeClasses": "yo.dbunitcli.**Test$*"
     }
   ]
 }
