@@ -5,10 +5,14 @@ import CommandForm from "../../../app/form/CommandForm";
 import type { SelectParameter } from "../../../model/CommandParam";
 import {
 	compareLoadResponseFixture,
+	compareRefreshTargetTypeImageResponseFixture,
 	convertLoadResponseFixture,
+	convertRefreshSrcTypeXlsxResponseFixture,
 	generateLoadResponseFixture,
+	generateRefreshSrcTypeTableResponseFixture,
 	parameterizeLoadResponseFixture,
 	runLoadResponseFixture,
+	runRefreshScriptTypeSqlResponseFixture,
 } from "./fixtures";
 
 // モック関数をホイスト（mockReset: true により各テスト前にリセットされるため beforeEach で再設定する）
@@ -69,21 +73,39 @@ beforeEach(() => {
 	});
 });
 
-// 全コマンドの共通モック SelectParameter 値を生成
-function makeSelectParameter(command: string): SelectParameter {
+// 全コマンドの共通モック SelectParameter 値を生成（refreshOverrides で各フィクスチャを上書き可能）
+function makeSelectParameter(
+	command: string,
+	refreshOverrides?: {
+		convert?: typeof convertLoadResponseFixture;
+		compare?: typeof compareLoadResponseFixture;
+		generate?: typeof generateLoadResponseFixture;
+		run?: typeof runLoadResponseFixture;
+	},
+): SelectParameter {
 	return {
 		command,
 		name: "test-param",
-		convert: convertLoadResponseFixture,
-		compare: compareLoadResponseFixture,
-		generate: generateLoadResponseFixture,
-		run: runLoadResponseFixture,
+		convert: refreshOverrides?.convert ?? convertLoadResponseFixture,
+		compare: refreshOverrides?.compare ?? compareLoadResponseFixture,
+		generate: refreshOverrides?.generate ?? generateLoadResponseFixture,
+		run: refreshOverrides?.run ?? runLoadResponseFixture,
 		parameterize: parameterizeLoadResponseFixture,
 		currentParameter: () => undefined,
 	} as unknown as SelectParameter;
 }
 
 const mockFormValues = { key: "val" as FormDataEntryValue };
+
+// refreshレスポンスフィクスチャを使った SelectParameter を生成
+function makeSelectParameterWithRefresh(command: string): SelectParameter {
+	return makeSelectParameter(command, {
+		convert: convertRefreshSrcTypeXlsxResponseFixture,
+		compare: compareRefreshTargetTypeImageResponseFixture,
+		generate: generateRefreshSrcTypeTableResponseFixture,
+		run: runRefreshScriptTypeSqlResponseFixture,
+	});
+}
 
 describe("CommandFormのテスト", () => {
 	it.each([
@@ -121,4 +143,40 @@ describe("CommandFormのテスト", () => {
 		expect(mockFormData).toHaveBeenCalledWith(false);
 		expect(mockRefreshSelectFn).toHaveBeenCalledWith(mockFormValues);
 	});
+
+	it.each([
+		{ command: "convert" },
+		{ command: "compare" },
+		{ command: "generate" },
+		{ command: "run" },
+		{ command: "parameterize" },
+	])(
+		"command=$commandのとき、useRefreshSelectParameterが$commandで呼ばれる",
+		({ command }) => {
+			mockUseSelectParameter.mockReturnValue(makeSelectParameter(command));
+
+			render(<CommandForm formData={mockFormData} />);
+
+			expect(mockUseRefreshSelectParameter).toHaveBeenCalledWith(command);
+		},
+	);
+
+	it.each([
+		{ command: "convert", testId: "mock-convert-form" },
+		{ command: "compare", testId: "mock-compare-form" },
+		{ command: "generate", testId: "mock-generate-form" },
+		{ command: "run", testId: "mock-run-form" },
+		{ command: "parameterize", testId: "mock-parameterize-form" },
+	])(
+		"refreshレスポンスのパラメータでcommand=$commandのとき、対応するフォームが表示される",
+		({ command, testId }) => {
+			mockUseSelectParameter.mockReturnValue(
+				makeSelectParameterWithRefresh(command),
+			);
+
+			render(<CommandForm formData={mockFormData} />);
+
+			expect(screen.getByTestId(testId)).toBeInTheDocument();
+		},
+	);
 });
