@@ -38,6 +38,7 @@ vi.mock("../../../hooks/useJdbc", () => ({
 // フィクスチャから ConvertForm の props を生成する
 // SelectParameter コンストラクタで srcData を DatasetSourceImpl にラップし、
 // srcElements() / srcTypeSettings() / settingElements() メソッドを有効化する
+// ※ JSON.parse/JSON.stringify はコンストラクタがフィクスチャの srcData を直接書き換えるための深いコピー
 function makeConvertProps(fixture = convertLoadResponseFixture) {
 	const sp = new SelectParameter(
 		JSON.parse(JSON.stringify(fixture)),
@@ -49,6 +50,14 @@ function makeConvertProps(fixture = convertLoadResponseFixture) {
 		name: "test",
 		convert: sp.convert,
 	};
+}
+
+// DOM順序の検証: precedingEl が followingEl より前にあることを確認する
+function expectPrecedesInDom(precedingEl: Element, followingEl: Element) {
+	expect(
+		precedingEl.compareDocumentPosition(followingEl) &
+			Node.DOCUMENT_POSITION_FOLLOWING,
+	).toBeTruthy();
 }
 
 describe("ConvertFormの描画テスト", () => {
@@ -94,14 +103,12 @@ describe("ConvertFormの描画テスト", () => {
 		it("Show traversal optionはrecursiveの前のDOM位置に配置される", () => {
 			render(<ConvertForm {...makeConvertProps()} />);
 
-			const captionEl = screen.getByText(/Show traversal option/);
-			const recursiveEl = document.querySelector(
-				'input[type="checkbox"][name="-src.recursive"]',
-			)!;
-			expect(
-				captionEl.compareDocumentPosition(recursiveEl) &
-					Node.DOCUMENT_POSITION_FOLLOWING,
-			).toBeTruthy();
+			expectPrecedesInDom(
+				screen.getByText(/Show traversal option/),
+				document.querySelector(
+					'input[type="checkbox"][name="-src.recursive"]',
+				)!,
+			);
 		});
 
 		it("Show traversal optionをクリックするとtraversal option要素が表示される", async () => {
@@ -146,14 +153,12 @@ describe("ConvertFormの描画テスト", () => {
 		it("Show csv optionはheaderNameの前のDOM位置に配置される", () => {
 			render(<ConvertForm {...makeConvertProps()} />);
 
-			const captionEl = screen.getByText(/Show csv option/);
-			const headerNameEl = document.querySelector(
-				'input[type="text"][name="-src.headerName"]',
-			)!;
-			expect(
-				captionEl.compareDocumentPosition(headerNameEl) &
-					Node.DOCUMENT_POSITION_FOLLOWING,
-			).toBeTruthy();
+			expectPrecedesInDom(
+				screen.getByText(/Show csv option/),
+				document.querySelector(
+					'input[type="text"][name="-src.headerName"]',
+				)!,
+			);
 		});
 
 		it("resultセクションにexcelTableが含まれる", () => {
