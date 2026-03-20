@@ -32,3 +32,10 @@ jobs:
           copy -path "$env:GRAALVM_HOME/lib/font*" ./sidecar/target/lib
       - name: Run native-test
         run: mvn test -Pnative --projects core,sidecar
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-test-results
+          path: |
+            ./core/target/surefire-reports/*.xml
+            ./sidecar/target/surefire-reports/*.xml
