@@ -4,7 +4,6 @@ import {
 	useLoadXlsxSchema,
 	useSaveXlsxSchema,
 } from "../../hooks/useXlsxSchema";
-import type { SrcInfo } from "../../model/CommandParam";
 import {
 	type CellSetting,
 	createCellSetting,
@@ -18,7 +17,6 @@ import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 
 export default function XlsxSchemaDialog(props: {
 	fileName: string;
-	srcInfo?: SrcInfo;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
@@ -28,7 +26,6 @@ export default function XlsxSchemaDialog(props: {
 			<Dialog
 				promise={loadXlsxSchema(props.fileName)}
 				fileName={props.fileName}
-				srcInfo={props.srcInfo}
 				handleDialogClose={props.handleDialogClose}
 				handleSave={props.handleSave}
 			/>
@@ -38,7 +35,6 @@ export default function XlsxSchemaDialog(props: {
 function Dialog(props: {
 	promise: Promise<XlsxSchema>;
 	fileName: string;
-	srcInfo?: SrcInfo;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
@@ -76,7 +72,6 @@ function Dialog(props: {
 						setting={setting}
 						handleDialogClose={handleDialogClose}
 						handleCommit={handleCommit}
-						srcInfo={props.srcInfo}
 					/>
 				)}
 				newSetting={createRowSetting}
@@ -101,7 +96,6 @@ function Dialog(props: {
 						setting={setting}
 						handleDialogClose={handleDialogClose}
 						handleCommit={handleCommit}
-						srcInfo={props.srcInfo}
 					/>
 				)}
 				newSetting={createCellSetting}
