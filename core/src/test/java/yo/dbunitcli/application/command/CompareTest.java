@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
+@Tag("jvmTest")
 public class CompareTest {
 
     private static final Project PROJECT = new Project();
