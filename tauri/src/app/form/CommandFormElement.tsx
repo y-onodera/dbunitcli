@@ -8,6 +8,11 @@ import {
 	ResourceDatalist,
 	SelectBox,
 } from "../../components/element/Input";
+import {
+	DatasetSrcInfoProvider,
+	useDatasetSrcInfo,
+	useSetDatasetSrcInfo,
+} from "../../context/DatasetSrcInfoProvider";
 import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import type {
@@ -123,7 +128,10 @@ export default function CommandFormElements(
 		: undefined;
 
 	return (
-		<>
+		<DatasetSrcInfoProvider
+			key={prop.name + prop.prefix}
+			initialValue={datasetSrcInfo}
+		>
 			{prop.elements.map((element) => {
 				if (isJdbcFieldName(element.name)) {
 					return null;
@@ -188,9 +196,6 @@ export default function CommandFormElements(
 							hidden={prop.optional?.(element.name) && !showOptional}
 							srcType={element.name === "src" ? srcType : undefined}
 							srcInfo={element.name === "xlsxSchema" ? srcInfo : undefined}
-							datasetSrcInfo={
-								element.name === "setting" ? datasetSrcInfo : undefined
-							}
 						/>
 					</Fragment>
 				);
@@ -198,12 +203,14 @@ export default function CommandFormElements(
 			{jdbcElements.length > 0 && (
 				<JdbcFormSection prefix={prop.prefix} elements={jdbcElements} />
 			)}
-		</>
+		</DatasetSrcInfoProvider>
 	);
 }
 function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
-	const { element, srcType, srcInfo, datasetSrcInfo } = prop;
+	const { element, srcType, srcInfo } = prop;
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const setDatasetSrcInfo = useSetDatasetSrcInfo();
 	const datasetSrcInfoWithSetting = useMemo(
 		() => (datasetSrcInfo ? { ...datasetSrcInfo, setting: path } : undefined),
 		[datasetSrcInfo, path],
@@ -229,6 +236,22 @@ function Text(prop: Prop) {
 		element.attribute.type.includes("DIR") ||
 		showDatalist;
 	const isValueInDatalist = resourceFiles?.includes(path) || false;
+
+	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+		const newValue = ev.target.value;
+		setPath(newValue);
+		if (datasetSrcInfo) {
+			const fieldName =
+				element.name === "src" ? "srcPath" : element.name;
+			if (fieldName in datasetSrcInfo) {
+				setDatasetSrcInfo({
+					...datasetSrcInfo,
+					[fieldName]: newValue,
+				} as DatasetSrcInfo);
+			}
+		}
+	};
+
 	return (
 		<>
 			<div>
@@ -253,7 +276,7 @@ function Text(prop: Prop) {
 							hidden={prop.hidden}
 							required={prop.element.attribute.required}
 							value={path}
-							handleChange={(ev) => setPath(ev.target.value)}
+							handleChange={handleChange}
 						/>
 						{showDatalist && !prop.hidden && (
 							<ResourceDatalist
@@ -272,7 +295,6 @@ function Text(prop: Prop) {
 								hidden={prop.hidden}
 								srcType={srcType}
 								srcInfo={srcInfo}
-								datasetSrcInfo={datasetSrcInfo}
 								isValueInDatalist={isValueInDatalist}
 							/>
 						)}
@@ -305,13 +327,13 @@ function TextDropDownMenu({
 	hidden,
 	srcType,
 	srcInfo,
-	datasetSrcInfo,
 	isValueInDatalist,
 }: FileProp & {
 	srcType?: string;
 	isValueInDatalist?: boolean;
 }) {
 	const { connectionOk } = useJdbcConnectionState();
+	const datasetSrcInfo = useDatasetSrcInfo();
 
 	return (
 		<DropDownMenu>
@@ -429,6 +451,18 @@ function TextDropDownMenu({
 	);
 }
 function Check(prop: Prop) {
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const setDatasetSrcInfo = useSetDatasetSrcInfo();
+
+	const handleOnChange = (checked: boolean) => {
+		if (datasetSrcInfo && prop.element.name in datasetSrcInfo) {
+			setDatasetSrcInfo({
+				...datasetSrcInfo,
+				[prop.element.name]: checked,
+			} as DatasetSrcInfo);
+		}
+	};
+
 	return (
 		<div>
 			<InputLabel
@@ -450,11 +484,22 @@ function Check(prop: Prop) {
 				id={`${prop.prefix}_${prop.element.name}`}
 				hidden={prop.hidden}
 				defaultValue={prop.element.value}
+				handleOnChange={handleOnChange}
 			/>
 		</div>
 	);
 }
 function Select(prop: SelectProp) {
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const setDatasetSrcInfo = useSetDatasetSrcInfo();
+
+	const handleTypeSelect = async (selected: string) => {
+		await prop.handleTypeSelect(selected);
+		if (prop.element.name === "srcType" && datasetSrcInfo) {
+			setDatasetSrcInfo({ ...datasetSrcInfo, srcType: selected });
+		}
+	};
+
 	return (
 		<div>
 			<InputLabel
@@ -476,7 +521,7 @@ function Select(prop: SelectProp) {
 				id={`${prop.prefix}_${prop.element.name}`}
 				required={true}
 				hidden={prop.hidden}
-				handleOnChange={prop.handleTypeSelect}
+				handleOnChange={handleTypeSelect}
 				defaultValue={prop.element.value}
 			>
 				{prop.element.attribute.selectOption.map((value) => {

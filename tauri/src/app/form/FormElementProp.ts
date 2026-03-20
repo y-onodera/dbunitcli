@@ -1,9 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type {
-	CommandParam,
-	DatasetSrcInfo,
-	SrcInfo,
-} from "../../model/CommandParam";
+import type { CommandParam, SrcInfo } from "../../model/CommandParam";
 
 export type Prop = {
 	prefix: string;
@@ -11,7 +7,6 @@ export type Prop = {
 	hidden?: boolean;
 	srcType?: string;
 	srcInfo?: SrcInfo;
-	datasetSrcInfo?: DatasetSrcInfo;
 };
 export type FileProp = Prop & {
 	path: string;
@@ -19,7 +14,6 @@ export type FileProp = Prop & {
 	onSelect?: () => void;
 	srcType?: string;
 	srcInfo?: SrcInfo;
-	datasetSrcInfo?: DatasetSrcInfo;
 };
 export type SelectProp = Prop & {
 	handleTypeSelect: (selected: string) => Promise<void>;
