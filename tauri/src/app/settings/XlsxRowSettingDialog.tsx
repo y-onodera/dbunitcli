@@ -11,7 +11,8 @@ export default function XlsxRowSettingDialog(props: {
 	handleCommit: (newSettings: RowSetting) => void;
 }) {
 	const [target, setTarget] = useState(props.setting);
-	const sheetNames = useSrcInfoSheets(useDatasetSrcInfo());
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const sheetNames = useSrcInfoSheets(datasetSrcInfo);
 
 	return (
 		<SettingDialog

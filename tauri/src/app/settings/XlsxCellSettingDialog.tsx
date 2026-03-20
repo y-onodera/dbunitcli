@@ -17,7 +17,8 @@ export default function XlsxCellSettingDialog(props: {
 	handleCommit: (newSettings: CellSetting) => void;
 }) {
 	const [target, setTarget] = useState(props.setting);
-	const sheetNames = useSrcInfoSheets(useDatasetSrcInfo());
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const sheetNames = useSrcInfoSheets(datasetSrcInfo);
 
 	return (
 		<SettingDialog
