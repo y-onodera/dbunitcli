@@ -1,12 +1,14 @@
 package yo.dbunitcli.application.command;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 @Tag("IntegrationTest")
+@DisabledInNativeImage
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class H2IntegrationTest {
 

@@ -35,9 +35,6 @@
                                     <goal>test</goal>
                                 </goals>
                                 <phase>test</phase>
-                                <configuration>
-                                    <excludedGroups>IntegrationTest,jvmTest</excludedGroups>
-                                </configuration>
                             </execution>
                             <execution>
                                 <id>build-native</id>
@@ -73,7 +70,7 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>0.10.0</version>
+                        <version>0.11.1</version>
                         <extensions>true</extensions>
                         <configuration>
                             <agent>
@@ -195,10 +192,7 @@
                                     </manifestEntries>
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                                    <resource>META-INF/native-image/reflect-config.json</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                                    <resource>META-INF/native-image/resource-config.json</resource>
+                                    <resource>META-INF/native-image/reachability-metadata.json</resource>
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>

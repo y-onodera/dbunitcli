@@ -9,6 +9,7 @@ import org.apache.tools.ant.taskdefs.Delete;
 import org.apache.tools.ant.taskdefs.Replace;
 import org.apache.tools.ant.types.FileSet;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.junit.jupiter.api.extension.ExtendWith;
 import yo.dbunitcli.resource.FileResources;
 
@@ -17,6 +18,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 @Tag("jvmTest")
+@DisabledInNativeImage
 public class CompareTest {
 
     private static final Project PROJECT = new Project();
