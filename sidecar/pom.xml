@@ -104,6 +104,9 @@
                                 --initialize-at-build-time=oracle.i18n.text.converter.CharacterConverterJAEUC
                                 --initialize-at-build-time=oracle.i18n.text.converter.CharacterConverterShift
                                 --initialize-at-build-time=oracle.i18n.text.converter.CharacterConverterZHTEUC
+                                --initialize-at-run-time=sun.font.SunFontManager
+                                --initialize-at-run-time=sun.font.FontManagerFactory
+                                --initialize-at-run-time=sun.font.PlatformFontInfo
                                 --strict-image-heap
                             </buildArgs>
                         </configuration>
