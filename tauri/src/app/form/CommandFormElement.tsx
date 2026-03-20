@@ -76,6 +76,7 @@ export function buildDatasetSrcInfo(elements: CommandParam[]): DatasetSrcInfo {
 export default function CommandFormElements(
 	prop: {
 		handleTypeSelect: (selected: string) => Promise<void>;
+		hideDatasetSettingEdit?: boolean;
 	} & CommandParams,
 ) {
 	const [showOptional, setShowOptional] = useState(false);
@@ -161,6 +162,7 @@ export default function CommandFormElements(
 							element={element}
 							hidden={prop.optional?.(element.name) && !showOptional}
 							srcType={element.name === "src" ? srcType : undefined}
+							hideDatasetSettingEdit={prop.hideDatasetSettingEdit}
 						/>
 					</Fragment>
 				);
@@ -256,12 +258,13 @@ function Text(prop: Prop) {
 								hidden={prop.hidden}
 								srcType={srcType}
 								isValueInDatalist={isValueInDatalist}
+								hideDatasetSettingEdit={prop.hideDatasetSettingEdit}
 							/>
 						)}
 					</div>
 				</div>
 			</div>
-			{element.name === "setting" && datasetSrcInfo?.srcType && (
+			{element.name === "setting" && datasetSrcInfo?.srcType && !prop.hideDatasetSettingEdit && (
 				<div className="mt-2 flex items-center gap-3">
 					<DatasetTableNamesPreviewButton title="Preview Before Settings" />
 					{path && (
@@ -284,9 +287,11 @@ function TextDropDownMenu({
 	hidden,
 	srcType,
 	isValueInDatalist,
+	hideDatasetSettingEdit,
 }: FileProp & {
 	srcType?: string;
 	isValueInDatalist?: boolean;
+	hideDatasetSettingEdit?: boolean;
 }) {
 	const { connectionOk } = useJdbcConnectionState();
 
@@ -294,7 +299,7 @@ function TextDropDownMenu({
 		<DropDownMenu>
 			{(closeMenu) => (
 				<>
-					{element.name === "setting" && !hidden && (
+					{element.name === "setting" && !hidden && !hideDatasetSettingEdit && (
 						<li>
 							<DatasetSettingEditButton
 								path={path}
