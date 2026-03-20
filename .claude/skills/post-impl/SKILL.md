@@ -1,6 +1,6 @@
 ---
 description: 実装後の品質確認。変更・追加・修正されたすべてのコードファイルに /simplify を適用する。
-TRIGGER when: コードファイル（.ts, .tsx, .js, .jsx, .java, .rs など）またはMavenビルドファイル（pom.xml）の変更・追加・修正を伴う実装タスクが完了したとき。
+TRIGGER when: コードファイル（.ts, .tsx, .js, .jsx, .java, .rs 等）またはpom.xmlの変更・追加・修正を伴う実装タスクが完了したとき。
 DO NOT TRIGGER when: ファイルの読み取りのみ、質問への回答のみ、計画の作成のみ、コードを一切変更しなかった場合。
 ---
 
