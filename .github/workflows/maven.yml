@@ -84,6 +84,8 @@ jobs:
           copy -path "$env:GRAALVM_HOME/lib/font*" ./sidecar/target/lib
       - name: Run native-test
         run: mvn test -Pnative -fcore/pom.xml
+      - name: Run sidecar native-test
+        run: mvn test -Pnative -fsidecar/pom.xml
       - uses: actions/upload-artifact@v4
         with:
           name: native-image

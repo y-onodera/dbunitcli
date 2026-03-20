@@ -73,6 +73,13 @@
                         <extensions>true</extensions>
                         <executions>
                             <execution>
+                                <id>test-native</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>test</phase>
+                            </execution>
+                            <execution>
                                 <id>build-native</id>
                                 <goals>
                                     <goal>compile-no-fork</goal>
@@ -84,6 +91,13 @@
                             <mainClass>${exec.mainClass}</mainClass>
                             <imageName>dbunit-cli-sidecar</imageName>
                             <buildArgs combine.children="append"/>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
                         </configuration>
                     </plugin>
                     <plugin>
