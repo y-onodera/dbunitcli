@@ -1,5 +1,7 @@
+import { useMemo } from "react";
+import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import type { CompareParams } from "../../model/CommandParam";
-import CommandFormElements from "./CommandFormElement";
+import CommandFormElements, { buildDatasetSrcInfo } from "./CommandFormElement";
 import { DatasetLoadForm } from "./DatasetLoadForm";
 
 export function CompareForm(prop: {
@@ -12,6 +14,26 @@ export function CompareForm(prop: {
 	const oldData = prop.compare.oldData;
 	const expectData = prop.compare.expectData;
 	const convertResult = prop.compare.convertResult;
+
+	const targetType =
+		prop.compare.elements.find((e) => e.name === "targetType")?.value ?? "data";
+	const settingIndex = prop.compare.elements.findIndex(
+		(e) => e.name === "setting",
+	);
+	const settingElement =
+		settingIndex >= 0 ? prop.compare.elements[settingIndex] : null;
+	const elementsBeforeSetting =
+		settingIndex >= 0
+			? prop.compare.elements.slice(0, settingIndex)
+			: prop.compare.elements;
+	const elementsAfterSetting =
+		settingIndex >= 0 ? prop.compare.elements.slice(settingIndex + 1) : [];
+
+	const oldDataInitialInfo = useMemo(
+		() => buildDatasetSrcInfo(oldData.elements),
+		[oldData.elements],
+	);
+
 	return (
 		<>
 			<fieldset className="border border-gray-200 p-3">
@@ -20,7 +42,35 @@ export function CompareForm(prop: {
 					handleTypeSelect={prop.handleTypeSelect}
 					name={prop.name}
 					prefix=""
-					elements={prop.compare.elements}
+					elements={elementsBeforeSetting}
+				/>
+				{settingElement &&
+					(targetType === "data" ? (
+						<DatasetSrcInfoProvider
+							key={prop.name + "compare-setting"}
+							initialValue={oldDataInitialInfo}
+						>
+							<CommandFormElements
+								handleTypeSelect={prop.handleTypeSelect}
+								name={prop.name}
+								prefix=""
+								elements={[settingElement]}
+							/>
+						</DatasetSrcInfoProvider>
+					) : (
+						<CommandFormElements
+							handleTypeSelect={prop.handleTypeSelect}
+							name={prop.name}
+							prefix=""
+							elements={[settingElement]}
+							hideDatasetSettingEdit={true}
+						/>
+					))}
+				<CommandFormElements
+					handleTypeSelect={prop.handleTypeSelect}
+					name={prop.name}
+					prefix=""
+					elements={elementsAfterSetting}
 				/>
 				{prop.compare.imageOption && (
 					<CommandFormElements
