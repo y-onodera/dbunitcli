@@ -1,18 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { WhiteButton } from "../../components/element/Button";
-import { BluePreviewButton } from "../../components/element/ButtonIcon";
+import { BlueButton, WhiteButton } from "../../components/element/Button";
 import { useDatasetTableNames } from "../../hooks/useDatasetSettings";
 import type { DatasetSrcInfo } from "../../model/CommandParam";
 
 export default function DatasetTableNamesPreviewButton({
+	title,
 	datasetSrcInfo,
 }: {
+	title: string;
 	datasetSrcInfo: DatasetSrcInfo;
 }) {
 	const [showDialog, setShowDialog] = useState(false);
 	return (
 		<>
-			<BluePreviewButton handleClick={() => setShowDialog(true)} />
+			<BlueButton title={title} handleClick={() => setShowDialog(true)} />
 			{showDialog && (
 				<DatasetTableNamesPreviewDialog
 					datasetSrcInfo={datasetSrcInfo}

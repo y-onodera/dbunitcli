@@ -124,7 +124,7 @@ export function OpenInOS(prop: FileProp) {
 		);
 		await core.invoke("open_directory", { path: absolutePath });
 	};
-	return <OpenButton handleClick={handleOpen} title="Open in Explorer" />;
+	return <OpenButton handleClick={handleOpen} />;
 }
 
 function getPath(

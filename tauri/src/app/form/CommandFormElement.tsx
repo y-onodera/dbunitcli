@@ -230,62 +230,70 @@ function Text(prop: Prop) {
 		showDatalist;
 	const isValueInDatalist = resourceFiles?.includes(path) || false;
 	return (
-		<div>
-			<InputLabel
-				text={getName(prop.prefix, prop.element.name)}
-				id={getId(prop.prefix, prop.element.name)}
-				required={prop.element.attribute.required}
-				hidden={prop.hidden}
-			/>
-			<div className="flex">
-				<div
-					className={`flex-1${!showDopDownMenu && !isValueInDatalist ? " mr-36" : ""}`}
-				>
-					<ControllTextBox
-						name={getName(prop.prefix, prop.element.name)}
-						id={getId(prop.prefix, prop.element.name)}
-						list={
-							showDatalist
-								? `${getId(prop.prefix, prop.element.name)}_list`
-								: undefined
-						}
-						hidden={prop.hidden}
-						required={prop.element.attribute.required}
-						value={path}
-						handleChange={(ev) => setPath(ev.target.value)}
-					/>
-					{showDatalist && !prop.hidden && (
-						<ResourceDatalist
-							id={getId(prop.prefix, prop.element.name)}
-							resources={resourceFiles}
-						/>
-					)}
-				</div>
+		<>
+			<div>
+				<InputLabel
+					text={getName(prop.prefix, prop.element.name)}
+					id={getId(prop.prefix, prop.element.name)}
+					required={prop.element.attribute.required}
+					hidden={prop.hidden}
+				/>
 				<div className="flex">
-					{showDopDownMenu && !prop.hidden && (
-						<TextDropDownMenu
-							prefix={prop.prefix}
-							element={prop.element}
-							path={path}
-							setPath={setPath}
+					<div
+						className={`flex-1${!showDopDownMenu && !isValueInDatalist ? " mr-36" : ""}`}
+					>
+						<ControllTextBox
+							name={getName(prop.prefix, prop.element.name)}
+							id={getId(prop.prefix, prop.element.name)}
+							list={
+								showDatalist
+									? `${getId(prop.prefix, prop.element.name)}_list`
+									: undefined
+							}
 							hidden={prop.hidden}
-							srcType={srcType}
-							srcInfo={srcInfo}
-							datasetSrcInfo={datasetSrcInfo}
-							isValueInDatalist={isValueInDatalist}
+							required={prop.element.attribute.required}
+							value={path}
+							handleChange={(ev) => setPath(ev.target.value)}
 						/>
-					)}
+						{showDatalist && !prop.hidden && (
+							<ResourceDatalist
+								id={getId(prop.prefix, prop.element.name)}
+								resources={resourceFiles}
+							/>
+						)}
+					</div>
+					<div className="flex">
+						{showDopDownMenu && !prop.hidden && (
+							<TextDropDownMenu
+								prefix={prop.prefix}
+								element={prop.element}
+								path={path}
+								setPath={setPath}
+								hidden={prop.hidden}
+								srcType={srcType}
+								srcInfo={srcInfo}
+								datasetSrcInfo={datasetSrcInfo}
+								isValueInDatalist={isValueInDatalist}
+							/>
+						)}
+					</div>
 				</div>
 			</div>
-			{element.name === "setting" &&
-				!prop.hidden &&
-				datasetSrcInfoWithSetting &&
-				path && (
+			{element.name === "setting" && srcInfo && datasetSrcInfo && (
+				<div className="mt-2 flex items-center gap-3">
 					<DatasetTableNamesPreviewButton
-						datasetSrcInfo={datasetSrcInfoWithSetting}
+						title="Preview Before Settings"
+						datasetSrcInfo={datasetSrcInfo}
 					/>
-				)}
-		</div>
+					{datasetSrcInfoWithSetting && path && (
+						<DatasetTableNamesPreviewButton
+							title="Preview Aply Settings"
+							datasetSrcInfo={datasetSrcInfoWithSetting}
+						/>
+					)}
+				</div>
+			)}
+		</>
 	);
 }
 
@@ -306,125 +314,118 @@ function TextDropDownMenu({
 	const { connectionOk } = useJdbcConnectionState();
 
 	return (
-		<>
-			{element.name === "setting" && !hidden && datasetSrcInfo && (
-				<DatasetTableNamesPreviewButton datasetSrcInfo={datasetSrcInfo} />
+		<DropDownMenu>
+			{(closeMenu) => (
+				<>
+					{element.name === "setting" && !hidden && (
+						<li>
+							<DatasetSettingEditButton
+								path={path}
+								setPath={setPath}
+								datasetSrcInfo={datasetSrcInfo}
+							/>
+						</li>
+					)}
+					{element.name === "xlsxSchema" && !hidden && (
+						<li>
+							<XlsxSchemaEditButton
+								path={path}
+								setPath={setPath}
+								srcInfo={srcInfo}
+							/>
+						</li>
+					)}
+					{element.name === "src" &&
+						!hidden &&
+						isSqlRelatedType(srcType ?? "") && (
+							<li>
+								<SqlEditorButton
+									type={srcType as QueryDatasourceType}
+									path={path}
+									setPath={setPath}
+								/>
+							</li>
+						)}
+					{element.name === "src" &&
+						!hidden &&
+						srcType === "table" &&
+						connectionOk && (
+							<li>
+								<JdbcTableSelectorButton path={path} setPath={setPath} />
+							</li>
+						)}
+					{element.name === "templateGroup" && !hidden && (
+						<li>
+							<TemplateEditButton path={path} setPath={setPath} />
+						</li>
+					)}
+					{(element.attribute.type.includes("FILE") ||
+						element.attribute.type.includes("DIR")) &&
+						path &&
+						!hidden && (
+							<li>
+								<OpenInOS
+									prefix={prefix}
+									element={element}
+									srcType={srcType}
+									path={path}
+									setPath={setPath}
+								/>
+							</li>
+						)}
+					{element.name === "templateGroup" && !hidden && isValueInDatalist && (
+						<li>
+							<RemoveTemplateButton path={path} setPath={setPath} />
+						</li>
+					)}
+					{element.name === "setting" && !hidden && isValueInDatalist && (
+						<li>
+							<RemoveDatasetSettingButton path={path} setPath={setPath} />
+						</li>
+					)}
+					{element.name === "xlsxSchema" && !hidden && isValueInDatalist && (
+						<li>
+							<RemoveXlsxSchemaButton path={path} setPath={setPath} />
+						</li>
+					)}
+					{(srcType === "sql" || srcType === "table") &&
+						!hidden &&
+						isValueInDatalist && (
+							<li>
+								<RemoveSqlEditorButton
+									path={path}
+									setPath={setPath}
+									type={srcType as QueryDatasourceType}
+								/>
+							</li>
+						)}
+					{element.attribute.type.includes("FILE") && (
+						<li>
+							<FileChooser
+								prefix={prefix}
+								element={element}
+								srcType={srcType}
+								path={path}
+								setPath={setPath}
+								onSelect={closeMenu}
+							/>
+						</li>
+					)}
+					{element.attribute.type.includes("DIR") && (
+						<li>
+							<DirectoryChooser
+								prefix={prefix}
+								element={element}
+								srcType={srcType}
+								path={path}
+								setPath={setPath}
+								onSelect={closeMenu}
+							/>
+						</li>
+					)}
+				</>
 			)}
-			<DropDownMenu>
-				{(closeMenu) => (
-					<>
-						{element.name === "setting" && !hidden && (
-							<li>
-								<DatasetSettingEditButton
-									path={path}
-									setPath={setPath}
-									datasetSrcInfo={datasetSrcInfo}
-								/>
-							</li>
-						)}
-						{element.name === "xlsxSchema" && !hidden && (
-							<li>
-								<XlsxSchemaEditButton
-									path={path}
-									setPath={setPath}
-									srcInfo={srcInfo}
-								/>
-							</li>
-						)}
-						{element.name === "src" &&
-							!hidden &&
-							isSqlRelatedType(srcType ?? "") && (
-								<li>
-									<SqlEditorButton
-										type={srcType as QueryDatasourceType}
-										path={path}
-										setPath={setPath}
-									/>
-								</li>
-							)}
-						{element.name === "src" &&
-							!hidden &&
-							srcType === "table" &&
-							connectionOk && (
-								<li>
-									<JdbcTableSelectorButton path={path} setPath={setPath} />
-								</li>
-							)}
-						{element.name === "templateGroup" && !hidden && (
-							<li>
-								<TemplateEditButton path={path} setPath={setPath} />
-							</li>
-						)}
-						{(element.attribute.type.includes("FILE") ||
-							element.attribute.type.includes("DIR")) &&
-							path &&
-							!hidden && (
-								<li>
-									<OpenInOS
-										prefix={prefix}
-										element={element}
-										srcType={srcType}
-										path={path}
-										setPath={setPath}
-									/>
-								</li>
-							)}
-						{element.name === "templateGroup" &&
-							!hidden &&
-							isValueInDatalist && (
-								<li>
-									<RemoveTemplateButton path={path} setPath={setPath} />
-								</li>
-							)}
-						{element.name === "setting" && !hidden && isValueInDatalist && (
-							<li>
-								<RemoveDatasetSettingButton path={path} setPath={setPath} />
-							</li>
-						)}
-						{element.name === "xlsxSchema" && !hidden && isValueInDatalist && (
-							<li>
-								<RemoveXlsxSchemaButton path={path} setPath={setPath} />
-							</li>
-						)}
-						{(srcType === "sql" || srcType === "table") &&
-							!hidden &&
-							isValueInDatalist && (
-								<li>
-									<RemoveSqlEditorButton
-										path={path}
-										setPath={setPath}
-										type={srcType as QueryDatasourceType}
-									/>
-								</li>
-							)}
-						{element.attribute.type.includes("FILE") && (
-							<li>
-								<FileChooser
-									prefix={prefix}
-									element={element}
-									srcType={srcType}
-									path={path}
-									setPath={setPath}
-									onSelect={closeMenu}
-								/>
-							</li>
-						)}
-						{element.attribute.type.includes("DIR") && (
-							<li>
-								<DirectoryChooser
-									prefix={prefix}
-									element={element}
-									srcType={srcType}
-									path={path}
-									setPath={setPath}
-									onSelect={closeMenu}
-								/>
-							</li>
-						)}
-					</>
-				)}
-			</DropDownMenu>
-		</>
+		</DropDownMenu>
 	);
 }
 function Check(prop: Prop) {
