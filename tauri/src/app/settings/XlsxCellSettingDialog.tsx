@@ -7,18 +7,17 @@ import {
 	Text,
 } from "../../components/dialog";
 import { ResourceDatalist } from "../../components/element/Input";
+import { useDatasetSrcInfo } from "../../context/DatasetSrcInfoProvider";
 import { useSrcInfoSheets } from "../../hooks/useXlsxSchema";
-import type { SrcInfo } from "../../model/CommandParam";
 import type { CellSetting } from "../../model/XlsxSchema";
 
 export default function XlsxCellSettingDialog(props: {
 	setting: CellSetting;
-	srcInfo?: SrcInfo;
 	handleDialogClose: () => void;
 	handleCommit: (newSettings: CellSetting) => void;
 }) {
 	const [target, setTarget] = useState(props.setting);
-	const sheetNames = useSrcInfoSheets(props.srcInfo);
+	const sheetNames = useSrcInfoSheets(useDatasetSrcInfo());
 
 	return (
 		<SettingDialog

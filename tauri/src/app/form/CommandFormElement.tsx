@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useState } from "react";
 import { ExpandButton } from "../../components/element/ButtonIcon";
 import DropDownMenu from "../../components/element/DropDownMenu";
 import {
@@ -83,7 +83,6 @@ export default function CommandFormElements(
 		(element) => element.name === "srcType",
 	);
 	const srcType = srcTypeElement ? srcTypeElement.value : "";
-	const srcInfo = buildSrcInfo(prop.elements);
 	const toggleOptional = () => setShowOptional(!showOptional);
 
 	const isJdbcFieldName = (name: string) =>
@@ -162,7 +161,6 @@ export default function CommandFormElements(
 							element={element}
 							hidden={prop.optional?.(element.name) && !showOptional}
 							srcType={element.name === "src" ? srcType : undefined}
-							srcInfo={element.name === "xlsxSchema" ? srcInfo : undefined}
 						/>
 					</Fragment>
 				);
@@ -175,13 +173,9 @@ export default function CommandFormElements(
 }
 function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
-	const { element, srcType, srcInfo } = prop;
+	const { element, srcType } = prop;
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const setDatasetSrcInfo = useSetDatasetSrcInfo();
-	const datasetSrcInfoWithSetting = useMemo(
-		() => (datasetSrcInfo ? { ...datasetSrcInfo, setting: path } : undefined),
-		[datasetSrcInfo, path],
-	);
 	const settings = useResourcesSettings();
 	let resourceFiles: string[] = [];
 	if (element.name === "src" && isSqlRelatedType(srcType ?? "")) {
@@ -261,7 +255,6 @@ function Text(prop: Prop) {
 								setPath={setPath}
 								hidden={prop.hidden}
 								srcType={srcType}
-								srcInfo={srcInfo}
 								isValueInDatalist={isValueInDatalist}
 							/>
 						)}
@@ -270,14 +263,11 @@ function Text(prop: Prop) {
 			</div>
 			{element.name === "setting" && datasetSrcInfo?.srcType && (
 				<div className="mt-2 flex items-center gap-3">
-					<DatasetTableNamesPreviewButton
-						title="Preview Before Settings"
-						datasetSrcInfo={datasetSrcInfo}
-					/>
-					{datasetSrcInfoWithSetting && path && (
+					<DatasetTableNamesPreviewButton title="Preview Before Settings" />
+					{path && (
 						<DatasetTableNamesPreviewButton
 							title="Preview Aply Settings"
-							datasetSrcInfo={datasetSrcInfoWithSetting}
+							setting={path}
 						/>
 					)}
 				</div>
@@ -293,14 +283,12 @@ function TextDropDownMenu({
 	setPath,
 	hidden,
 	srcType,
-	srcInfo,
 	isValueInDatalist,
 }: FileProp & {
 	srcType?: string;
 	isValueInDatalist?: boolean;
 }) {
 	const { connectionOk } = useJdbcConnectionState();
-	const datasetSrcInfo = useDatasetSrcInfo();
 
 	return (
 		<DropDownMenu>
@@ -311,7 +299,6 @@ function TextDropDownMenu({
 							<DatasetSettingEditButton
 								path={path}
 								setPath={setPath}
-								datasetSrcInfo={datasetSrcInfo}
 							/>
 						</li>
 					)}
@@ -320,7 +307,6 @@ function TextDropDownMenu({
 							<XlsxSchemaEditButton
 								path={path}
 								setPath={setPath}
-								srcInfo={srcInfo}
 							/>
 						</li>
 					)}

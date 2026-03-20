@@ -1,18 +1,17 @@
 import { useState } from "react";
 import { Check, Fieldset, SettingDialog, Text } from "../../components/dialog";
 import { ResourceDatalist } from "../../components/element/Input";
+import { useDatasetSrcInfo } from "../../context/DatasetSrcInfoProvider";
 import { useSrcInfoSheets } from "../../hooks/useXlsxSchema";
-import type { SrcInfo } from "../../model/CommandParam";
 import type { RowSetting } from "../../model/XlsxSchema";
 
 export default function XlsxRowSettingDialog(props: {
 	setting: RowSetting;
-	srcInfo?: SrcInfo;
 	handleDialogClose: () => void;
 	handleCommit: (newSettings: RowSetting) => void;
 }) {
 	const [target, setTarget] = useState(props.setting);
-	const sheetNames = useSrcInfoSheets(props.srcInfo);
+	const sheetNames = useSrcInfoSheets(useDatasetSrcInfo());
 
 	return (
 		<SettingDialog

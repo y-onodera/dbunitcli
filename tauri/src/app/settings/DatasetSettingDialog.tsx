@@ -11,22 +11,22 @@ import {
 } from "../../components/dialog";
 import { ExpandButton } from "../../components/element/ButtonIcon";
 import { ResourceDatalist } from "../../components/element/Input";
+import { useDatasetSrcInfo } from "../../context/DatasetSrcInfoProvider";
 import { useDatasetTableNames } from "../../hooks/useDatasetSettings";
-import type { DatasetSrcInfo } from "../../model/CommandParam";
 import type { DatasetSetting } from "../../model/DatasetSettings";
 
 export default function DatasetSettingDialog(props: {
 	setting: DatasetSetting;
 	handleDialogClose: () => void;
 	handleCommit: (newSettings: DatasetSetting) => void;
-	datasetSrcInfo?: DatasetSrcInfo;
 }) {
 	const [target, setTarget] = useState(props.setting);
 	const handleTargetChange = async (select: string) =>
 		setTarget((current) => current.replace(select));
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
-	const { tableNames } = useDatasetTableNames(props.datasetSrcInfo);
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const { tableNames } = useDatasetTableNames(datasetSrcInfo);
 	const tableList = tableNames.length > 0 ? "tableName_list" : undefined;
 
 	return (
