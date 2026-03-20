@@ -40,32 +40,7 @@
                         <configuration>
                             <mainClass>yo.dbunitcli.application.command.Parameterize</mainClass>
                             <imageName>dbunit-cli</imageName>
-                            <fallback>false</fallback>
-                            <buildArgs>
-                                -J-Dfile.encoding=MS932
-                                -H:+AddAllCharsets
-                                -H:+UnlockExperimentalVMOptions
-                                -H:ReflectionConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/reflect-config.json
-                                -H:ResourceConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/resource-config.json
-                                -H:JNIConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/jni-config.json
-                                -H:SerializationConfigurationFiles=${project.resources[0].directory}/META-INF/native-image/${project.groupId}/${project.artifactId}/serialization-config.json
-                                --initialize-at-build-time=oracle.sql.converter.I18CharacterConvertersWrapper
-                                --initialize-at-build-time=oracle.i18n.text.OraCharsetWithConverter
-                                --initialize-at-build-time=oracle.i18n.text.converter.CharacterConverter1Byte
-                                --initialize-at-build-time=oracle.i18n.text.OraCharsetAL16UTF16
-                                --initialize-at-build-time=oracle.i18n.text.OraCharsetAL32UTF8
-                                --initialize-at-build-time=oracle.i18n.text.OraCharsetUTF
-                                --initialize-at-build-time=oracle.i18n.text.OraCharsetUTFE
-                                --initialize-at-build-time=oracle.i18n.text.converter.CharacterConverterGB18030
-                                --initialize-at-build-time=oracle.i18n.text.converter.CharacterConverterGBK
-                                --initialize-at-build-time=oracle.i18n.text.converter.CharacterConverterJAEUC
-                                --initialize-at-build-time=oracle.i18n.text.converter.CharacterConverterShift
-                                --initialize-at-build-time=oracle.i18n.text.converter.CharacterConverterZHTEUC
-                                --initialize-at-run-time=sun.font.SunFontManager
-                                --initialize-at-run-time=sun.font.FontManagerFactory
-                                --initialize-at-run-time=sun.font.PlatformFontInfo
-                                --strict-image-heap
-                            </buildArgs>
+                            <buildArgs combine.children="append"/>
                         </configuration>
                     </plugin>
                 </plugins>
