@@ -279,7 +279,7 @@ function Text(prop: Prop) {
 					</div>
 				</div>
 			</div>
-			{element.name === "setting" && srcInfo && datasetSrcInfo && (
+			{element.name === "setting" && datasetSrcInfo?.srcType && (
 				<div className="mt-2 flex items-center gap-3">
 					<DatasetTableNamesPreviewButton
 						title="Preview Before Settings"
