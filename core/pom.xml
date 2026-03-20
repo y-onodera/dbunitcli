@@ -22,9 +22,6 @@
         </profile>
         <profile>
             <id>native</id>
-            <properties>
-                <exclude.testcase>IntegrationTest,jvmTest</exclude.testcase>
-            </properties>
             <build>
                 <plugins>
                     <plugin>
