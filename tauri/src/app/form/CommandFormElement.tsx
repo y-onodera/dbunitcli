@@ -9,13 +9,13 @@ import {
 	SelectBox,
 } from "../../components/element/Input";
 import {
-	DatasetSrcInfoProvider,
 	useDatasetSrcInfo,
 	useSetDatasetSrcInfo,
 } from "../../context/DatasetSrcInfoProvider";
 import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import type {
+	CommandParam,
 	CommandParams,
 	DatasetSrcInfo,
 	SrcInfo,
@@ -41,6 +41,33 @@ import XlsxSchemaEditButton, {
 import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
 import type { FileProp, Prop, SelectProp } from "./FormElementProp";
 import JdbcFormSection, { JDBC_FIELD_NAMES } from "./JdbcFormSection";
+
+export function buildDatasetSrcInfo(elements: CommandParam[]): DatasetSrcInfo {
+	const find = (name: string) => elements.find((e) => e.name === name);
+	const srcInfo: SrcInfo = {
+		srcPath: find("src")?.value ?? "",
+		regTableInclude: find("regTableInclude")?.value ?? "",
+		regTableExclude: find("regTableExclude")?.value ?? "",
+		recursive: find("recursive")?.value ?? "",
+		regInclude: find("regInclude")?.value ?? "",
+		regExclude: find("regExclude")?.value ?? "",
+		extension: find("extension")?.value ?? "",
+	};
+	return {
+		...srcInfo,
+		srcType: find("srcType")?.value ?? "",
+		xlsxSchema: find("xlsxSchema")?.value ?? "",
+		fixedLength: find("fixedLength")?.value ?? "",
+		regHeaderSplit: find("regHeaderSplit")?.value ?? "",
+		regDataSplit: find("regDataSplit")?.value ?? "",
+		encoding: find("encoding")?.value ?? "",
+		delimiter: find("delimiter")?.value ?? "",
+		ignoreQuoted: find("ignoreQuoted")?.value === "true",
+		headerName: find("headerName")?.value ?? "",
+		startRow: find("startRow")?.value ?? "",
+		addFileInfo: find("addFileInfo")?.value === "true",
+	};
+}
 
 export default function CommandFormElements(
 	prop: {
@@ -80,40 +107,6 @@ export default function CommandFormElements(
 		regExclude: regExcludeElement?.value ?? "",
 		extension: extensionElement?.value ?? "",
 	};
-	const xlsxSchemaElement = prop.elements.find((e) => e.name === "xlsxSchema");
-	const fixedLengthElement = prop.elements.find(
-		(e) => e.name === "fixedLength",
-	);
-	const regHeaderSplitElement = prop.elements.find(
-		(e) => e.name === "regHeaderSplit",
-	);
-	const regDataSplitElement = prop.elements.find(
-		(e) => e.name === "regDataSplit",
-	);
-	const encodingElement = prop.elements.find((e) => e.name === "encoding");
-	const delimiterElement = prop.elements.find((e) => e.name === "delimiter");
-	const ignoreQuotedElement = prop.elements.find(
-		(e) => e.name === "ignoreQuoted",
-	);
-	const headerNameElement = prop.elements.find((e) => e.name === "headerName");
-	const startRowElement = prop.elements.find((e) => e.name === "startRow");
-	const addFileInfoElement = prop.elements.find(
-		(e) => e.name === "addFileInfo",
-	);
-	const datasetSrcInfo: DatasetSrcInfo = {
-		...srcInfo,
-		srcType,
-		xlsxSchema: xlsxSchemaElement?.value ?? "",
-		fixedLength: fixedLengthElement?.value ?? "",
-		regHeaderSplit: regHeaderSplitElement?.value ?? "",
-		regDataSplit: regDataSplitElement?.value ?? "",
-		encoding: encodingElement?.value ?? "",
-		delimiter: delimiterElement?.value ?? "",
-		ignoreQuoted: ignoreQuotedElement?.value === "true",
-		headerName: headerNameElement?.value ?? "",
-		startRow: startRowElement?.value ?? "",
-		addFileInfo: addFileInfoElement?.value === "true",
-	};
 	const toggleOptional = () => setShowOptional(!showOptional);
 
 	const isJdbcFieldName = (name: string) =>
@@ -128,10 +121,7 @@ export default function CommandFormElements(
 		: undefined;
 
 	return (
-		<DatasetSrcInfoProvider
-			key={prop.name + prop.prefix}
-			initialValue={datasetSrcInfo}
-		>
+		<>
 			{prop.elements.map((element) => {
 				if (isJdbcFieldName(element.name)) {
 					return null;
@@ -203,7 +193,7 @@ export default function CommandFormElements(
 			{jdbcElements.length > 0 && (
 				<JdbcFormSection prefix={prop.prefix} elements={jdbcElements} />
 			)}
-		</DatasetSrcInfoProvider>
+		</>
 	);
 }
 function Text(prop: Prop) {
