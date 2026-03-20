@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
 import type { DatasetSource } from "../../model/CommandParam";
@@ -11,11 +12,15 @@ export function DatasetLoadForm(prop: {
 	const src = prop.srcData.srcElements();
 	const srcTypeSettings = prop.srcData.srcTypeSettings();
 	const settingElements = prop.srcData.settingElements();
+	const initialDatasetSrcInfo = useMemo(
+		() => buildDatasetSrcInfo(prop.srcData.elements),
+		[prop.srcData.elements],
+	);
 	return (
 		<JdbcConnectionProvider>
 			<DatasetSrcInfoProvider
 				key={prop.name + prop.srcData.prefix}
-				initialValue={buildDatasetSrcInfo(prop.srcData.elements)}
+				initialValue={initialDatasetSrcInfo}
 			>
 				<fieldset className="border border-gray-200 p-3">
 					<legend>{prop.srcData.prefix}</legend>
