@@ -16,6 +16,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdbc.dependencies.scope>test</jdbc.dependencies.scope>
+        <allure.scope>test</allure.scope>
         <aspectj.version>1.9.4</aspectj.version>
         <allure.version>2.25.0</allure.version>
         <junit-jupiter.version>5.10.1</junit-jupiter.version>
@@ -25,6 +26,7 @@
             <id>native</id>
             <properties>
                 <jdbc.dependencies.scope>compile</jdbc.dependencies.scope>
+                <allure.scope>provided</allure.scope>
             </properties>
             <build>
                 <pluginManagement>
@@ -325,7 +327,7 @@
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-junit5</artifactId>
             <version>${allure.version}</version>
-            <scope>test</scope>
+            <scope>${allure.scope}</scope>
         </dependency>
     </dependencies>
     <build>
