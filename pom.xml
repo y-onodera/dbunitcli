@@ -53,7 +53,6 @@
                                     --initialize-at-run-time=sun.font.SunFontManager
                                     --initialize-at-run-time=sun.font.FontManagerFactory
                                     --initialize-at-run-time=sun.font.PlatformFontInfo
-                                    --strict-image-heap
                                 </buildArgs>
                             </configuration>
                         </plugin>
