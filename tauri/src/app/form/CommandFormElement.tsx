@@ -40,7 +40,7 @@ import XlsxSchemaEditButton, {
 } from "../settings/XlsxSchemaEditButton";
 import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
 import type { FileProp, Prop, SelectProp } from "./FormElementProp";
-import JdbcFormSection, { JDBC_FIELD_NAMES } from "./JdbcFormSection";
+import { isJdbcField } from "./JdbcFormSection";
 
 export function buildSrcInfo(elements: CommandParam[]): SrcInfo {
 	const find = (name: string) => elements.find((e) => e.name === name);
@@ -86,21 +86,16 @@ export default function CommandFormElements(
 	const srcType = srcTypeElement ? srcTypeElement.value : "";
 	const toggleOptional = () => setShowOptional(!showOptional);
 
-	const isJdbcFieldName = (name: string) =>
-		JDBC_FIELD_NAMES.includes(name as (typeof JDBC_FIELD_NAMES)[number]);
-
-	const jdbcElements = prop.elements.filter((e) => isJdbcFieldName(e.name));
-
 	const firstOptionalNonJdbcElementName = prop.optionCaption
 		? prop.elements.find(
-				(e) => !isJdbcFieldName(e.name) && prop.optional?.(e.name),
+				(e) => !isJdbcField(e.name) && prop.optional?.(e.name),
 			)?.name
 		: undefined;
 
 	return (
 		<>
 			{prop.elements.map((element) => {
-				if (isJdbcFieldName(element.name)) {
+				if (isJdbcField(element.name)) {
 					return null;
 				}
 				const showExpandButton =
@@ -167,9 +162,6 @@ export default function CommandFormElements(
 					</Fragment>
 				);
 			})}
-			{jdbcElements.length > 0 && (
-				<JdbcFormSection prefix={prop.prefix} elements={jdbcElements} />
-			)}
 		</>
 	);
 }
