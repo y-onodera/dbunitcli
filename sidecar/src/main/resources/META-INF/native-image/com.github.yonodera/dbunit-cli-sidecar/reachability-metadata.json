@@ -4774,7 +4774,13 @@
       "glob": "log4j2.system.properties"
     },
     {
-      "pattern": "\\Qlogback.xml\\E"
+      "glob": "application.properties"
+    },
+    {
+      "glob": "logback.xml"
+    },
+    {
+      "glob": "shell/saveShell.stg"
     },
     {
       "glob": "logback.scmo"
@@ -4810,10 +4816,10 @@
       "glob": "org/apache/pdfbox/resources/glyphlist/zapfdingbats.txt"
     },
     {
-      "pattern": "org/apache/poi/schemas/ooxml/element/.*/.*\\.xsb$"
+      "glob": "org/apache/poi/schemas/ooxml/element/*/*.xsb"
     },
     {
-      "pattern": "org/apache/poi/schemas/ooxml/system/ooxml/.*\\.xsb$"
+      "glob": "org/apache/poi/schemas/ooxml/system/ooxml/*.xsb"
     },
     {
       "glob": "org/apache/poi/ss/formula/function/functionMetadata.txt"
