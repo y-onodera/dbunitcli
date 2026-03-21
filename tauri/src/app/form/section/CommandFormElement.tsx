@@ -1,43 +1,43 @@
 import { Fragment, useState } from "react";
-import { ExpandButton } from "../../components/element/ButtonIcon";
-import DropDownMenu from "../../components/element/DropDownMenu";
+import { ExpandButton } from "../../../components/element/ButtonIcon";
+import DropDownMenu from "../../../components/element/DropDownMenu";
 import {
 	CheckBox,
 	ControllTextBox,
 	InputLabel,
 	ResourceDatalist,
 	SelectBox,
-} from "../../components/element/Input";
+} from "../../../components/element/Input";
 import {
 	useDatasetSrcInfo,
 	useSetDatasetSrcInfo,
-} from "../../context/DatasetSrcInfoProvider";
-import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
-import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
+} from "../../../context/DatasetSrcInfoProvider";
+import { useJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
+import { useResourcesSettings } from "../../../context/WorkspaceResourcesProvider";
 import type {
 	CommandParam,
 	CommandParams,
 	DatasetSrcInfo,
 	SrcInfo,
-} from "../../model/CommandParam";
+} from "../../../model/CommandParam";
 import {
 	isSqlRelatedType,
 	type QueryDatasourceType,
-} from "../../model/QueryDatasource";
+} from "../../../model/QueryDatasource";
 import DatasetSettingEditButton, {
 	RemoveDatasetSettingButton,
-} from "../settings/DatasetSettingEditButton";
-import DatasetTableNamesPreviewButton from "../settings/DatasetTableNamesPreviewButton";
-import JdbcTableSelectorButton from "../settings/JdbcTableSelectorButton";
+} from "../../settings/DatasetSettingEditButton";
+import DatasetTableNamesPreviewButton from "../../settings/DatasetTableNamesPreviewButton";
+import JdbcTableSelectorButton from "../../settings/JdbcTableSelectorButton";
 import SqlEditorButton, {
 	RemoveSqlEditorButton,
-} from "../settings/SqlEditorButton";
+} from "../../settings/SqlEditorButton";
 import TemplateEditButton, {
 	RemoveTemplateButton,
-} from "../settings/TemplateEditButton";
+} from "../../settings/TemplateEditButton";
 import XlsxSchemaEditButton, {
 	RemoveXlsxSchemaButton,
-} from "../settings/XlsxSchemaEditButton";
+} from "../../settings/XlsxSchemaEditButton";
 import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
 import type { FileProp, Prop, SelectProp } from "./FormElementProp";
 import { isJdbcField } from "./JdbcFormSection";
@@ -87,17 +87,13 @@ export default function CommandFormElements(
 	const toggleOptional = () => setShowOptional(!showOptional);
 
 	const firstOptionalNonJdbcElementName = prop.optionCaption
-		? prop.elements.find(
-				(e) => !isJdbcField(e.name) && prop.optional?.(e.name),
-			)?.name
+		? prop.elements.find((e) => !isJdbcField(e.name) && prop.optional?.(e.name))
+				?.name
 		: undefined;
 
 	return (
 		<>
 			{prop.elements.map((element) => {
-				if (isJdbcField(element.name)) {
-					return null;
-				}
 				const showExpandButton =
 					element.name === firstOptionalNonJdbcElementName;
 				if (element.attribute.type === "FLG") {
@@ -196,8 +192,7 @@ function Text(prop: Prop) {
 		const newValue = ev.target.value;
 		setPath(newValue);
 		if (datasetSrcInfo) {
-			const fieldName =
-				element.name === "src" ? "srcPath" : element.name;
+			const fieldName = element.name === "src" ? "srcPath" : element.name;
 			if (fieldName in datasetSrcInfo) {
 				setDatasetSrcInfo({
 					...datasetSrcInfo,
@@ -256,17 +251,19 @@ function Text(prop: Prop) {
 					</div>
 				</div>
 			</div>
-			{element.name === "setting" && datasetSrcInfo?.srcType && !prop.hideDatasetSettingEdit && (
-				<div className="mt-2 flex items-center gap-3">
-					<DatasetTableNamesPreviewButton title="Preview Before Settings" />
-					{path && (
-						<DatasetTableNamesPreviewButton
-							title="Preview Aply Settings"
-							setting={path}
-						/>
-					)}
-				</div>
-			)}
+			{element.name === "setting" &&
+				datasetSrcInfo?.srcType &&
+				!prop.hideDatasetSettingEdit && (
+					<div className="mt-2 flex items-center gap-3">
+						<DatasetTableNamesPreviewButton title="Preview Before Settings" />
+						{path && (
+							<DatasetTableNamesPreviewButton
+								title="Preview Aply Settings"
+								setting={path}
+							/>
+						)}
+					</div>
+				)}
 		</>
 	);
 }
@@ -293,18 +290,12 @@ function TextDropDownMenu({
 				<>
 					{element.name === "setting" && !hidden && !hideDatasetSettingEdit && (
 						<li>
-							<DatasetSettingEditButton
-								path={path}
-								setPath={setPath}
-							/>
+							<DatasetSettingEditButton path={path} setPath={setPath} />
 						</li>
 					)}
 					{element.name === "xlsxSchema" && !hidden && (
 						<li>
-							<XlsxSchemaEditButton
-								path={path}
-								setPath={setPath}
-							/>
+							<XlsxSchemaEditButton path={path} setPath={setPath} />
 						</li>
 					)}
 					{element.name === "src" &&

@@ -5,13 +5,13 @@ import {
 	DirectoryButton,
 	FileButton,
 	OpenButton,
-} from "../../components/element/ButtonIcon";
-import { useEnviroment } from "../../context/EnviromentProvider";
-import { useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
-import type { Attribute } from "../../model/CommandParam";
-import { isSqlRelatedType } from "../../model/QueryDatasource";
-import type { WorkspaceContext } from "../../model/WorkspaceResources";
-import { fetchData } from "../../utils/fetchUtils";
+} from "../../../components/element/ButtonIcon";
+import { useEnviroment } from "../../../context/EnviromentProvider";
+import { useWorkspaceContext } from "../../../context/WorkspaceResourcesProvider";
+import type { Attribute, DefaultPath } from "../../../model/CommandParam";
+import { isSqlRelatedType } from "../../../model/QueryDatasource";
+import type { WorkspaceContext } from "../../../model/WorkspaceResources";
+import { fetchData } from "../../../utils/fetchUtils";
 import type { FileProp } from "./FormElementProp";
 
 async function resolvePathViaSidecar(
@@ -56,7 +56,7 @@ async function resolveAbsolutePath(
 	if (await isAbsolute(path)) {
 		return path;
 	}
-	const basePath = getPath(context, attribute, srcType);
+	const basePath = getPath(context, attribute.defaultPath, srcType);
 	if (path) {
 		return basePath + sep() + path;
 	}
@@ -67,7 +67,11 @@ export function FileChooser(prop: FileProp) {
 	const context = useWorkspaceContext();
 	const environment = useEnviroment();
 	const handleFileChooserClick = () => {
-		const basePath = getPath(context, prop.element.attribute, prop.srcType);
+		const basePath = getPath(
+			context,
+			prop.element.attribute.defaultPath,
+			prop.srcType,
+		);
 		resolveAbsolutePath(
 			prop.path,
 			context,
@@ -89,7 +93,11 @@ export function DirectoryChooser(prop: FileProp) {
 	const context = useWorkspaceContext();
 	const environment = useEnviroment();
 	const handleDirectoryChooserClick = () => {
-		const basePath = getPath(context, prop.element.attribute, prop.srcType);
+		const basePath = getPath(
+			context,
+			prop.element.attribute.defaultPath,
+			prop.srcType,
+		);
 		resolveAbsolutePath(
 			prop.path,
 			context,
@@ -129,31 +137,31 @@ export function OpenInOS(prop: FileProp) {
 
 function getPath(
 	context: WorkspaceContext,
-	attribute: Attribute,
+	defaultPath: DefaultPath,
 	srcType: string | undefined,
 ): string {
-	if (attribute.defaultPath === "DATASET") {
+	if (defaultPath === "DATASET") {
 		if (isSqlRelatedType(srcType ?? "")) {
 			return context.datasetBase + sep() + srcType;
 		}
 		return context.datasetBase;
 	}
-	if (attribute.defaultPath === "RESULT") {
+	if (defaultPath === "RESULT") {
 		return context.resultBase;
 	}
-	if (attribute.defaultPath === "SETTING") {
+	if (defaultPath === "SETTING") {
 		return context.settingBase;
 	}
-	if (attribute.defaultPath === "TEMPLATE") {
+	if (defaultPath === "TEMPLATE") {
 		return context.templateBase;
 	}
-	if (attribute.defaultPath === "PARAMETERIZE_TEMPLATE") {
+	if (defaultPath === "PARAMETERIZE_TEMPLATE") {
 		return context.parameterizeTemplateBase;
 	}
-	if (attribute.defaultPath === "JDBC") {
+	if (defaultPath === "JDBC") {
 		return context.jdbcBase;
 	}
-	if (attribute.defaultPath === "XLSX_SCHEMA") {
+	if (defaultPath === "XLSX_SCHEMA") {
 		return context.xlsxSchemaBase;
 	}
 	return context.workspace;

@@ -1,12 +1,11 @@
-import { describe, expect, it } from "vitest";
 import type {
 	CompareParams,
 	ConvertParams,
 	GenerateParams,
 	ParameterizeParams,
 	RunParams,
-} from "../../model/CommandParam";
-import { SelectParameter } from "../../model/CommandParam";
+} from "../../model/SelectParameter";
+import { SelectParameter } from "../../model/SelectParameter";
 
 describe("SelectParameterクラス", () => {
 	const mockConvertParams: ConvertParams = {

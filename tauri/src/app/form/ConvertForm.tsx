@@ -1,6 +1,6 @@
-import type { ConvertParams } from "../../model/CommandParam";
-import CommandFormElements from "./CommandFormElement";
-import { DatasetLoadForm } from "./DatasetLoadForm";
+import type { ConvertParams } from "../../model/SelectParameter";
+import CommandFormElements from "./section/CommandFormElement";
+import { DatasetLoadForm } from "./section/DatasetLoadForm";
 
 export function ConvertForm(prop: {
 	handleTypeSelect: () => Promise<void>;

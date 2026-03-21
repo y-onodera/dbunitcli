@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
-import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
-import type { DatasetSource } from "../../model/CommandParam";
+import { DatasetSrcInfoProvider } from "../../../context/DatasetSrcInfoProvider";
+import { JdbcConnectionProvider } from "../../../context/JdbcConnectionProvider";
+import type { DatasetSource } from "../../../model/CommandParam";
 import CommandFormElements, { buildDatasetSrcInfo } from "./CommandFormElement";
 import JdbcFormSection, { isJdbcField } from "./JdbcFormSection";
 
@@ -17,11 +17,7 @@ export function DatasetLoadForm(prop: {
 		() => buildDatasetSrcInfo(prop.srcData.elements),
 		[prop.srcData.elements],
 	);
-	const srcJdbc = src.elements.filter((e) => isJdbcField(e.name));
 	const srcTypeSettingsJdbc = srcTypeSettings.elements.filter((e) =>
-		isJdbcField(e.name),
-	);
-	const settingElementsJdbc = settingElements.elements.filter((e) =>
 		isJdbcField(e.name),
 	);
 	return (
@@ -40,8 +36,11 @@ export function DatasetLoadForm(prop: {
 						optionCaption={src.optionCaption}
 						optional={src.optional}
 					/>
-					{srcJdbc.length > 0 && (
-						<JdbcFormSection prefix={src.prefix} elements={srcJdbc} />
+					{srcTypeSettingsJdbc.length > 0 && (
+						<JdbcFormSection
+							prefix={srcTypeSettings.prefix}
+							elements={srcTypeSettingsJdbc}
+						/>
 					)}
 					<CommandFormElements
 						handleTypeSelect={prop.handleTypeSelect}
@@ -51,12 +50,6 @@ export function DatasetLoadForm(prop: {
 						optionCaption={srcTypeSettings.optionCaption}
 						optional={srcTypeSettings.optional}
 					/>
-					{srcTypeSettingsJdbc.length > 0 && (
-						<JdbcFormSection
-							prefix={srcTypeSettings.prefix}
-							elements={srcTypeSettingsJdbc}
-						/>
-					)}
 					<CommandFormElements
 						handleTypeSelect={prop.handleTypeSelect}
 						prefix={settingElements.prefix}
@@ -65,12 +58,6 @@ export function DatasetLoadForm(prop: {
 						optionCaption={settingElements.optionCaption}
 						optional={settingElements.optional}
 					/>
-					{settingElementsJdbc.length > 0 && (
-						<JdbcFormSection
-							prefix={settingElements.prefix}
-							elements={settingElementsJdbc}
-						/>
-					)}
 				</fieldset>
 			</DatasetSrcInfoProvider>
 		</JdbcConnectionProvider>

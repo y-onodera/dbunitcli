@@ -1,32 +1,28 @@
-import {
-	type Dispatch,
-	type SetStateAction,
-	useCallback,
-	useState,
-} from "react";
-import { BlueButton } from "../../components/element/Button";
+import type { Dispatch, SetStateAction } from "react";
+import { useCallback, useState } from "react";
+import { BlueButton } from "../../../components/element/Button";
 import {
 	BlueEditButton,
 	PreviewButton,
-} from "../../components/element/ButtonIcon";
-import DropDownMenu from "../../components/element/DropDownMenu";
+} from "../../../components/element/ButtonIcon";
+import DropDownMenu from "../../../components/element/DropDownMenu";
 import {
 	ControllTextBox,
 	InputLabel,
 	ResourceDatalist,
-} from "../../components/element/Input";
-import { useSetJdbcConnectionState } from "../../context/JdbcConnectionProvider";
-import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
+} from "../../../components/element/Input";
+import { useSetJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
+import { useResourcesSettings } from "../../../context/WorkspaceResourcesProvider";
 import {
 	useDeleteJdbcProperties,
 	useJdbcConnectionTest,
 	useJdbcSaveProperties,
-} from "../../hooks/useJdbc";
-import type { CommandParam } from "../../model/CommandParam";
-import JdbcPropertiesPreviewDialog from "../settings/JdbcPropertiesPreviewDialog";
-import JdbcSavePropertiesDialog from "../settings/JdbcSavePropertiesDialog";
-import JdbcUrlBuilderDialog from "../settings/JdbcUrlBuilderDialog";
-import { RemoveResource } from "../settings/ResourceEditButton";
+} from "../../../hooks/useJdbc";
+import type { CommandParam } from "../../../model/CommandParam";
+import JdbcPropertiesPreviewDialog from "../../settings/JdbcPropertiesPreviewDialog";
+import JdbcSavePropertiesDialog from "../../settings/JdbcSavePropertiesDialog";
+import JdbcUrlBuilderDialog from "../../settings/JdbcUrlBuilderDialog";
+import { RemoveResource } from "../../settings/ResourceEditButton";
 import { FileChooser } from "./Chooser";
 
 export const JDBC_FIELD_NAMES = [

@@ -1,6 +1,6 @@
-import type { ParameterizeParams } from "../../model/CommandParam";
-import CommandFormElements from "./CommandFormElement";
-import { DatasetLoadForm } from "./DatasetLoadForm";
+import type { ParameterizeParams } from "../../model/SelectParameter";
+import CommandFormElements from "./section/CommandFormElement";
+import { DatasetLoadForm } from "./section/DatasetLoadForm";
 
 export function ParameterizeForm(prop: {
 	handleTypeSelect: () => Promise<void>;

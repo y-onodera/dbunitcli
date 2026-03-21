@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ConvertForm } from "../../../app/form/ConvertForm";
-import { SelectParameter } from "../../../model/CommandParam";
+import { SelectParameter } from "../../../model/SelectParameter";
 import { enviromentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	convertLoadResponseFixture,
@@ -88,9 +88,7 @@ describe("ConvertFormの描画テスト", () => {
 			render(<ConvertForm {...makeConvertProps()} />);
 
 			expect(
-				document.querySelector(
-					'input[type="checkbox"][name="-src.recursive"]',
-				),
+				document.querySelector('input[type="checkbox"][name="-src.recursive"]'),
 			).not.toBeVisible();
 			expect(
 				document.querySelector('input[type="text"][name="-src.regInclude"]'),
@@ -117,9 +115,7 @@ describe("ConvertFormの描画テスト", () => {
 			await userEvent.click(screen.getByText(/Show traversal option/));
 
 			expect(
-				document.querySelector(
-					'input[type="checkbox"][name="-src.recursive"]',
-				),
+				document.querySelector('input[type="checkbox"][name="-src.recursive"]'),
 			).toBeVisible();
 			expect(
 				document.querySelector('input[type="text"][name="-src.regInclude"]'),
@@ -155,9 +151,7 @@ describe("ConvertFormの描画テスト", () => {
 
 			expectPrecedesInDom(
 				screen.getByText(/Show csv option/),
-				document.querySelector(
-					'input[type="text"][name="-src.headerName"]',
-				)!,
+				document.querySelector('input[type="text"][name="-src.headerName"]')!,
 			);
 		});
 
@@ -165,9 +159,7 @@ describe("ConvertFormの描画テスト", () => {
 			render(<ConvertForm {...makeConvertProps()} />);
 
 			expect(
-				document.querySelector(
-					'input[type="text"][name="-result.excelTable"]',
-				),
+				document.querySelector('input[type="text"][name="-result.excelTable"]'),
 			).toBeInTheDocument();
 		});
 	});
@@ -261,9 +253,7 @@ describe("ConvertFormの描画テスト", () => {
 			);
 
 			expect(
-				document.querySelector(
-					'input[type="text"][name="-result.excelTable"]',
-				),
+				document.querySelector('input[type="text"][name="-result.excelTable"]'),
 			).toBeInTheDocument();
 		});
 

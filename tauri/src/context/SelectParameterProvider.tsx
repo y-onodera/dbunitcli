@@ -1,7 +1,7 @@
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { createContext, use, useState } from "react";
-import type { Parameter } from "../model/CommandParam";
-import { SelectParameter } from "../model/CommandParam";
+import type { Parameter } from "../model/SelectParameter";
+import { SelectParameter } from "../model/SelectParameter";
 
 const selectParameterContext = createContext<SelectParameter>(
 	{} as SelectParameter,

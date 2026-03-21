@@ -4,11 +4,8 @@ import {
 	useSetSelectParameterState,
 } from "../context/SelectParameterProvider";
 import { useSetParameterList } from "../context/WorkspaceResourcesProvider";
-import {
-	type Parameter,
-	type ParameterizeParams,
-	SelectParameter,
-} from "../model/CommandParam";
+import type { Parameter, ParameterizeParams } from "../model/SelectParameter";
+import { SelectParameter } from "../model/SelectParameter";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
 
 export type Running = {

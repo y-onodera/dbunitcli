@@ -1,6 +1,6 @@
-import type { GenerateParams } from "../../model/CommandParam";
-import CommandFormElements from "./CommandFormElement";
-import { DatasetLoadForm } from "./DatasetLoadForm";
+import type { GenerateParams } from "../../model/SelectParameter";
+import CommandFormElements from "./section/CommandFormElement";
+import { DatasetLoadForm } from "./section/DatasetLoadForm";
 
 export function GenerateForm(prop: {
 	handleTypeSelect: () => Promise<void>;

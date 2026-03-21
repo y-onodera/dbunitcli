@@ -15,12 +15,12 @@ import {
 	useRefreshSelectParameter,
 	useSaveParameter,
 } from "../../hooks/useSelectParameter";
-import {
-	type CommandParams,
-	type ConvertParams,
-	type GenerateParams,
-	SelectParameter,
-} from "../../model/CommandParam";
+import type { CommandParams } from "../../model/CommandParam";
+import type {
+	ConvertParams,
+	GenerateParams,
+} from "../../model/SelectParameter";
+import { SelectParameter } from "../../model/SelectParameter";
 import type { FetchParams } from "../../utils/fetchUtils";
 import { enviromentFixture } from "../setup";
 

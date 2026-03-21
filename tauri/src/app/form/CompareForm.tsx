@@ -1,8 +1,10 @@
 import { useMemo } from "react";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
-import type { CompareParams } from "../../model/CommandParam";
-import CommandFormElements, { buildDatasetSrcInfo } from "./CommandFormElement";
-import { DatasetLoadForm } from "./DatasetLoadForm";
+import type { CompareParams } from "../../model/SelectParameter";
+import CommandFormElements, {
+	buildDatasetSrcInfo,
+} from "./section/CommandFormElement";
+import { DatasetLoadForm } from "./section/DatasetLoadForm";
 
 export function CompareForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -47,7 +49,7 @@ export function CompareForm(prop: {
 				{settingElement &&
 					(targetType === "data" ? (
 						<DatasetSrcInfoProvider
-							key={prop.name + "compare-setting"}
+							key={`${prop.name}compare-setting`}
 							initialValue={oldDataInitialInfo}
 						>
 							<CommandFormElements
@@ -72,15 +74,18 @@ export function CompareForm(prop: {
 					prefix=""
 					elements={elementsAfterSetting}
 				/>
-				{prop.compare.imageOption && (
+			</fieldset>
+			{prop.compare.imageOption && (
+				<fieldset className="border border-gray-200 p-3">
+					<legend>image</legend>
 					<CommandFormElements
 						handleTypeSelect={prop.handleTypeSelect}
 						name={prop.name}
 						prefix={imageOption.prefix}
 						elements={imageOption.elements}
 					/>
-				)}
-			</fieldset>
+				</fieldset>
+			)}
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}

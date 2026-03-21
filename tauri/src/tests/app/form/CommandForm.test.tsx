@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import CommandForm from "../../../app/form/CommandForm";
-import type { SelectParameter } from "../../../model/CommandParam";
+import type { SelectParameter } from "../../../model/SelectParameter";
 import {
 	compareLoadResponseFixture,
 	compareRefreshTargetTypeImageResponseFixture,
@@ -150,16 +150,15 @@ describe("CommandFormのテスト", () => {
 		{ command: "generate" },
 		{ command: "run" },
 		{ command: "parameterize" },
-	])(
-		"command=$commandのとき、useRefreshSelectParameterが$commandで呼ばれる",
-		({ command }) => {
-			mockUseSelectParameter.mockReturnValue(makeSelectParameter(command));
+	])("command=$commandのとき、useRefreshSelectParameterが$commandで呼ばれる", ({
+		command,
+	}) => {
+		mockUseSelectParameter.mockReturnValue(makeSelectParameter(command));
 
-			render(<CommandForm formData={mockFormData} />);
+		render(<CommandForm formData={mockFormData} />);
 
-			expect(mockUseRefreshSelectParameter).toHaveBeenCalledWith(command);
-		},
-	);
+		expect(mockUseRefreshSelectParameter).toHaveBeenCalledWith(command);
+	});
 
 	it.each([
 		{ command: "convert", testId: "mock-convert-form" },
@@ -167,16 +166,16 @@ describe("CommandFormのテスト", () => {
 		{ command: "generate", testId: "mock-generate-form" },
 		{ command: "run", testId: "mock-run-form" },
 		{ command: "parameterize", testId: "mock-parameterize-form" },
-	])(
-		"refreshレスポンスのパラメータでcommand=$commandのとき、対応するフォームが表示される",
-		({ command, testId }) => {
-			mockUseSelectParameter.mockReturnValue(
-				makeSelectParameterWithRefresh(command),
-			);
+	])("refreshレスポンスのパラメータでcommand=$commandのとき、対応するフォームが表示される", ({
+		command,
+		testId,
+	}) => {
+		mockUseSelectParameter.mockReturnValue(
+			makeSelectParameterWithRefresh(command),
+		);
 
-			render(<CommandForm formData={mockFormData} />);
+		render(<CommandForm formData={mockFormData} />);
 
-			expect(screen.getByTestId(testId)).toBeInTheDocument();
-		},
-	);
+		expect(screen.getByTestId(testId)).toBeInTheDocument();
+	});
 });
