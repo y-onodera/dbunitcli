@@ -4810,10 +4810,10 @@
       "glob": "org/apache/pdfbox/resources/glyphlist/zapfdingbats.txt"
     },
     {
-      "pattern": "org/apache/poi/schemas/ooxml/element/*/.*\\.xsb"
+      "pattern": "org/apache/poi/schemas/ooxml/element/.*/.*\\.xsb$"
     },
     {
-      "pattern": "org/apache/poi/schemas/ooxml/system/ooxml/.*\\.xsb"
+      "pattern": "org/apache/poi/schemas/ooxml/system/ooxml/.*\\.xsb$"
     },
     {
       "glob": "org/apache/poi/ss/formula/function/functionMetadata.txt"
