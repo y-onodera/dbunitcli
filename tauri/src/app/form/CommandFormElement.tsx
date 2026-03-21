@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useState } from "react";
 import { ExpandButton } from "../../components/element/ButtonIcon";
 import DropDownMenu from "../../components/element/DropDownMenu";
 import {
@@ -8,9 +8,14 @@ import {
 	ResourceDatalist,
 	SelectBox,
 } from "../../components/element/Input";
+import {
+	useDatasetSrcInfo,
+	useSetDatasetSrcInfo,
+} from "../../context/DatasetSrcInfoProvider";
 import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import type {
+	CommandParam,
 	CommandParams,
 	DatasetSrcInfo,
 	SrcInfo,
@@ -35,11 +40,43 @@ import XlsxSchemaEditButton, {
 } from "../settings/XlsxSchemaEditButton";
 import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
 import type { FileProp, Prop, SelectProp } from "./FormElementProp";
-import JdbcFormSection, { JDBC_FIELD_NAMES } from "./JdbcFormSection";
+import { isJdbcField } from "./JdbcFormSection";
+
+export function buildSrcInfo(elements: CommandParam[]): SrcInfo {
+	const find = (name: string) => elements.find((e) => e.name === name);
+	return {
+		srcPath: find("src")?.value ?? "",
+		regTableInclude: find("regTableInclude")?.value ?? "",
+		regTableExclude: find("regTableExclude")?.value ?? "",
+		recursive: find("recursive")?.value ?? "",
+		regInclude: find("regInclude")?.value ?? "",
+		regExclude: find("regExclude")?.value ?? "",
+		extension: find("extension")?.value ?? "",
+	};
+}
+
+export function buildDatasetSrcInfo(elements: CommandParam[]): DatasetSrcInfo {
+	const find = (name: string) => elements.find((e) => e.name === name);
+	return {
+		...buildSrcInfo(elements),
+		srcType: find("srcType")?.value ?? "",
+		xlsxSchema: find("xlsxSchema")?.value ?? "",
+		fixedLength: find("fixedLength")?.value ?? "",
+		regHeaderSplit: find("regHeaderSplit")?.value ?? "",
+		regDataSplit: find("regDataSplit")?.value ?? "",
+		encoding: find("encoding")?.value ?? "",
+		delimiter: find("delimiter")?.value ?? "",
+		ignoreQuoted: find("ignoreQuoted")?.value === "true",
+		headerName: find("headerName")?.value ?? "",
+		startRow: find("startRow")?.value ?? "",
+		addFileInfo: find("addFileInfo")?.value === "true",
+	};
+}
 
 export default function CommandFormElements(
 	prop: {
 		handleTypeSelect: (selected: string) => Promise<void>;
+		hideDatasetSettingEdit?: boolean;
 	} & CommandParams,
 ) {
 	const [showOptional, setShowOptional] = useState(false);
@@ -47,85 +84,18 @@ export default function CommandFormElements(
 		(element) => element.name === "srcType",
 	);
 	const srcType = srcTypeElement ? srcTypeElement.value : "";
-	const srcElement = prop.elements.find((element) => element.name === "src");
-	const regTableIncludeElement = prop.elements.find(
-		(element) => element.name === "regTableInclude",
-	);
-	const regTableExcludeElement = prop.elements.find(
-		(element) => element.name === "regTableExclude",
-	);
-	const recursiveElement = prop.elements.find(
-		(element) => element.name === "recursive",
-	);
-	const regIncludeElement = prop.elements.find(
-		(element) => element.name === "regInclude",
-	);
-	const regExcludeElement = prop.elements.find(
-		(element) => element.name === "regExclude",
-	);
-	const extensionElement = prop.elements.find(
-		(element) => element.name === "extension",
-	);
-	const srcInfo: SrcInfo = {
-		srcPath: srcElement?.value ?? "",
-		regTableInclude: regTableIncludeElement?.value ?? "",
-		regTableExclude: regTableExcludeElement?.value ?? "",
-		recursive: recursiveElement?.value ?? "",
-		regInclude: regIncludeElement?.value ?? "",
-		regExclude: regExcludeElement?.value ?? "",
-		extension: extensionElement?.value ?? "",
-	};
-	const xlsxSchemaElement = prop.elements.find((e) => e.name === "xlsxSchema");
-	const fixedLengthElement = prop.elements.find(
-		(e) => e.name === "fixedLength",
-	);
-	const regHeaderSplitElement = prop.elements.find(
-		(e) => e.name === "regHeaderSplit",
-	);
-	const regDataSplitElement = prop.elements.find(
-		(e) => e.name === "regDataSplit",
-	);
-	const encodingElement = prop.elements.find((e) => e.name === "encoding");
-	const delimiterElement = prop.elements.find((e) => e.name === "delimiter");
-	const ignoreQuotedElement = prop.elements.find(
-		(e) => e.name === "ignoreQuoted",
-	);
-	const headerNameElement = prop.elements.find((e) => e.name === "headerName");
-	const startRowElement = prop.elements.find((e) => e.name === "startRow");
-	const addFileInfoElement = prop.elements.find(
-		(e) => e.name === "addFileInfo",
-	);
-	const datasetSrcInfo: DatasetSrcInfo = {
-		...srcInfo,
-		srcType,
-		xlsxSchema: xlsxSchemaElement?.value ?? "",
-		fixedLength: fixedLengthElement?.value ?? "",
-		regHeaderSplit: regHeaderSplitElement?.value ?? "",
-		regDataSplit: regDataSplitElement?.value ?? "",
-		encoding: encodingElement?.value ?? "",
-		delimiter: delimiterElement?.value ?? "",
-		ignoreQuoted: ignoreQuotedElement?.value === "true",
-		headerName: headerNameElement?.value ?? "",
-		startRow: startRowElement?.value ?? "",
-		addFileInfo: addFileInfoElement?.value === "true",
-	};
 	const toggleOptional = () => setShowOptional(!showOptional);
-
-	const isJdbcFieldName = (name: string) =>
-		JDBC_FIELD_NAMES.includes(name as (typeof JDBC_FIELD_NAMES)[number]);
-
-	const jdbcElements = prop.elements.filter((e) => isJdbcFieldName(e.name));
 
 	const firstOptionalNonJdbcElementName = prop.optionCaption
 		? prop.elements.find(
-				(e) => !isJdbcFieldName(e.name) && prop.optional?.(e.name),
+				(e) => !isJdbcField(e.name) && prop.optional?.(e.name),
 			)?.name
 		: undefined;
 
 	return (
 		<>
 			{prop.elements.map((element) => {
-				if (isJdbcFieldName(element.name)) {
+				if (isJdbcField(element.name)) {
 					return null;
 				}
 				const showExpandButton =
@@ -187,27 +157,19 @@ export default function CommandFormElements(
 							element={element}
 							hidden={prop.optional?.(element.name) && !showOptional}
 							srcType={element.name === "src" ? srcType : undefined}
-							srcInfo={element.name === "xlsxSchema" ? srcInfo : undefined}
-							datasetSrcInfo={
-								element.name === "setting" ? datasetSrcInfo : undefined
-							}
+							hideDatasetSettingEdit={prop.hideDatasetSettingEdit}
 						/>
 					</Fragment>
 				);
 			})}
-			{jdbcElements.length > 0 && (
-				<JdbcFormSection prefix={prop.prefix} elements={jdbcElements} />
-			)}
 		</>
 	);
 }
 function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
-	const { element, srcType, srcInfo, datasetSrcInfo } = prop;
-	const datasetSrcInfoWithSetting = useMemo(
-		() => (datasetSrcInfo ? { ...datasetSrcInfo, setting: path } : undefined),
-		[datasetSrcInfo, path],
-	);
+	const { element, srcType } = prop;
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const setDatasetSrcInfo = useSetDatasetSrcInfo();
 	const settings = useResourcesSettings();
 	let resourceFiles: string[] = [];
 	if (element.name === "src" && isSqlRelatedType(srcType ?? "")) {
@@ -229,6 +191,22 @@ function Text(prop: Prop) {
 		element.attribute.type.includes("DIR") ||
 		showDatalist;
 	const isValueInDatalist = resourceFiles?.includes(path) || false;
+
+	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+		const newValue = ev.target.value;
+		setPath(newValue);
+		if (datasetSrcInfo) {
+			const fieldName =
+				element.name === "src" ? "srcPath" : element.name;
+			if (fieldName in datasetSrcInfo) {
+				setDatasetSrcInfo({
+					...datasetSrcInfo,
+					[fieldName]: newValue,
+				} as DatasetSrcInfo);
+			}
+		}
+	};
+
 	return (
 		<>
 			<div>
@@ -253,7 +231,7 @@ function Text(prop: Prop) {
 							hidden={prop.hidden}
 							required={prop.element.attribute.required}
 							value={path}
-							handleChange={(ev) => setPath(ev.target.value)}
+							handleChange={handleChange}
 						/>
 						{showDatalist && !prop.hidden && (
 							<ResourceDatalist
@@ -271,24 +249,20 @@ function Text(prop: Prop) {
 								setPath={setPath}
 								hidden={prop.hidden}
 								srcType={srcType}
-								srcInfo={srcInfo}
-								datasetSrcInfo={datasetSrcInfo}
 								isValueInDatalist={isValueInDatalist}
+								hideDatasetSettingEdit={prop.hideDatasetSettingEdit}
 							/>
 						)}
 					</div>
 				</div>
 			</div>
-			{element.name === "setting" && datasetSrcInfo?.srcType && (
+			{element.name === "setting" && datasetSrcInfo?.srcType && !prop.hideDatasetSettingEdit && (
 				<div className="mt-2 flex items-center gap-3">
-					<DatasetTableNamesPreviewButton
-						title="Preview Before Settings"
-						datasetSrcInfo={datasetSrcInfo}
-					/>
-					{datasetSrcInfoWithSetting && path && (
+					<DatasetTableNamesPreviewButton title="Preview Before Settings" />
+					{path && (
 						<DatasetTableNamesPreviewButton
 							title="Preview Aply Settings"
-							datasetSrcInfo={datasetSrcInfoWithSetting}
+							setting={path}
 						/>
 					)}
 				</div>
@@ -304,12 +278,12 @@ function TextDropDownMenu({
 	setPath,
 	hidden,
 	srcType,
-	srcInfo,
-	datasetSrcInfo,
 	isValueInDatalist,
+	hideDatasetSettingEdit,
 }: FileProp & {
 	srcType?: string;
 	isValueInDatalist?: boolean;
+	hideDatasetSettingEdit?: boolean;
 }) {
 	const { connectionOk } = useJdbcConnectionState();
 
@@ -317,12 +291,11 @@ function TextDropDownMenu({
 		<DropDownMenu>
 			{(closeMenu) => (
 				<>
-					{element.name === "setting" && !hidden && (
+					{element.name === "setting" && !hidden && !hideDatasetSettingEdit && (
 						<li>
 							<DatasetSettingEditButton
 								path={path}
 								setPath={setPath}
-								datasetSrcInfo={datasetSrcInfo}
 							/>
 						</li>
 					)}
@@ -331,7 +304,6 @@ function TextDropDownMenu({
 							<XlsxSchemaEditButton
 								path={path}
 								setPath={setPath}
-								srcInfo={srcInfo}
 							/>
 						</li>
 					)}
@@ -429,6 +401,18 @@ function TextDropDownMenu({
 	);
 }
 function Check(prop: Prop) {
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const setDatasetSrcInfo = useSetDatasetSrcInfo();
+
+	const handleOnChange = (checked: boolean) => {
+		if (datasetSrcInfo && prop.element.name in datasetSrcInfo) {
+			setDatasetSrcInfo({
+				...datasetSrcInfo,
+				[prop.element.name]: checked,
+			} as DatasetSrcInfo);
+		}
+	};
+
 	return (
 		<div>
 			<InputLabel
@@ -450,11 +434,22 @@ function Check(prop: Prop) {
 				id={`${prop.prefix}_${prop.element.name}`}
 				hidden={prop.hidden}
 				defaultValue={prop.element.value}
+				handleOnChange={handleOnChange}
 			/>
 		</div>
 	);
 }
 function Select(prop: SelectProp) {
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const setDatasetSrcInfo = useSetDatasetSrcInfo();
+
+	const handleTypeSelect = async (selected: string) => {
+		await prop.handleTypeSelect(selected);
+		if (prop.element.name === "srcType" && datasetSrcInfo) {
+			setDatasetSrcInfo({ ...datasetSrcInfo, srcType: selected });
+		}
+	};
+
 	return (
 		<div>
 			<InputLabel
@@ -476,7 +471,7 @@ function Select(prop: SelectProp) {
 				id={`${prop.prefix}_${prop.element.name}`}
 				required={true}
 				hidden={prop.hidden}
-				handleOnChange={prop.handleTypeSelect}
+				handleOnChange={handleTypeSelect}
 				defaultValue={prop.element.value}
 			>
 				{prop.element.attribute.selectOption.map((value) => {

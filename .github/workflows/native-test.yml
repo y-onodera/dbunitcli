@@ -1,0 +1,41 @@
+name: Native-Test
+on:
+  workflow_dispatch:
+
+jobs:
+  native-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up graalvm
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '25'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: 'true'
+          cache: 'maven'
+      - name: postgresql setup
+        uses: ikalnytskyi/action-setup-postgres@v4
+        with:
+          username: admin
+          password: admin
+          database: test
+          port: 5433
+        id: postgres
+      - name: Build native-image
+        run: |
+          mvn clean package -Pnative "-Dmaven.test.skip=true"
+          mkdir core/target/lib
+          mkdir sidecar/target/lib
+          copy -path "$env:GRAALVM_HOME/lib/font*" ./core/target/lib
+          copy -path "$env:GRAALVM_HOME/lib/font*" ./sidecar/target/lib
+      - name: Run native-test
+        run: mvn test -Pnative --projects core,sidecar
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-test-results
+          path: |
+            ./core/target/surefire-reports/*.xml
+            ./sidecar/target/surefire-reports/*.xml

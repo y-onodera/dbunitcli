@@ -53,9 +53,6 @@
                                     --initialize-at-run-time=sun.font.SunFontManager
                                     --initialize-at-run-time=sun.font.FontManagerFactory
                                     --initialize-at-run-time=sun.font.PlatformFontInfo
-                                    --initialize-at-run-time=org.apache.poi
-                                    --initialize-at-run-time=org.openxmlformats
-                                    --initialize-at-run-time=org.apache.xmlbeans
                                     --strict-image-heap
                                 </buildArgs>
                             </configuration>

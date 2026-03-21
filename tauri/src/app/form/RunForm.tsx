@@ -1,6 +1,8 @@
+import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
 import type { RunParams } from "../../model/CommandParam";
 import CommandFormElements from "./CommandFormElement";
 import { DatasetLoadForm } from "./DatasetLoadForm";
+import JdbcFormSection, { isJdbcField } from "./JdbcFormSection";
 
 export function RunForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -10,6 +12,8 @@ export function RunForm(prop: {
 	const srcData = prop.run.srcData;
 	const templateOption = prop.run.templateOption;
 	const jdbcOption = prop.run.jdbcOption;
+	const jdbcOptionElements =
+		jdbcOption?.elements.filter((e) => isJdbcField(e.name)) ?? [];
 	return (
 		<>
 			<fieldset className="border border-gray-200 p-3">
@@ -29,12 +33,20 @@ export function RunForm(prop: {
 					/>
 				)}
 				{prop.run.jdbcOption && (
-					<CommandFormElements
-						handleTypeSelect={prop.handleTypeSelect}
-						name={prop.name}
-						prefix={jdbcOption.prefix}
-						elements={jdbcOption.elements}
-					/>
+					<JdbcConnectionProvider>
+						<CommandFormElements
+							handleTypeSelect={prop.handleTypeSelect}
+							name={prop.name}
+							prefix={jdbcOption.prefix}
+							elements={jdbcOption.elements}
+						/>
+						{jdbcOptionElements.length > 0 && (
+							<JdbcFormSection
+								prefix={jdbcOption.prefix}
+								elements={jdbcOptionElements}
+							/>
+						)}
+					</JdbcConnectionProvider>
 				)}
 			</fieldset>
 			<DatasetLoadForm

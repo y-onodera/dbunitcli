@@ -1,20 +1,14 @@
 import { useDeleteDatasetSettings } from "../../hooks/useDatasetSettings";
-import type { DatasetSrcInfo } from "../../model/CommandParam";
 import DatasetSettingsDialog from "./DatasetSettingsDialog";
 import ResourceEditButton, {
 	RemoveResource,
 	type ResourceEditButtonProp,
 } from "./ResourceEditButton";
 
-type DatasetSettingEditButtonProp = ResourceEditButtonProp & {
-	datasetSrcInfo?: DatasetSrcInfo;
-};
-
 export default function DatasetSettingEditButton({
 	path,
 	setPath,
-	datasetSrcInfo,
-}: DatasetSettingEditButtonProp) {
+}: ResourceEditButtonProp) {
 	const renderDialog = (open: boolean, closeDialog: () => void) => {
 		if (!open) {
 			return null;
@@ -27,7 +21,6 @@ export default function DatasetSettingEditButton({
 					setPath(newPath);
 					closeDialog();
 				}}
-				datasetSrcInfo={datasetSrcInfo}
 			/>
 		);
 	};

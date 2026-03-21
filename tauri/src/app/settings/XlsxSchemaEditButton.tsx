@@ -1,20 +1,14 @@
 import { useDeleteXlsxSchema } from "../../hooks/useXlsxSchema";
-import type { SrcInfo } from "../../model/CommandParam";
 import ResourceEditButton, {
 	RemoveResource,
 	type ResourceEditButtonProp,
 } from "./ResourceEditButton";
 import XlsxSchemaDialog from "./XlsxSchemaDialog";
 
-type XlsxSchemaEditButtonProp = ResourceEditButtonProp & {
-	srcInfo?: SrcInfo;
-};
-
 export default function XlsxSchemaEditButton({
 	path,
 	setPath,
-	srcInfo,
-}: XlsxSchemaEditButtonProp) {
+}: ResourceEditButtonProp) {
 	const renderDialog = (open: boolean, closeDialog: () => void) => {
 		if (!open) {
 			return null;
@@ -22,7 +16,6 @@ export default function XlsxSchemaEditButton({
 		return (
 			<XlsxSchemaDialog
 				fileName={path}
-				srcInfo={srcInfo}
 				handleDialogClose={closeDialog}
 				handleSave={(newPath: string) => {
 					setPath(newPath);
