@@ -3,6 +3,7 @@ import type { RunParams } from "../../model/SelectParameter";
 import CommandFormElements from "./section/CommandFormElement";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import JdbcFormSection from "./section/JdbcFormSection";
+import TemplateFormSection from "./section/TemplateFormSection";
 
 export function RunForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -26,7 +27,7 @@ export function RunForm(prop: {
 			{prop.run.templateOption && (
 				<fieldset className="border border-gray-200 p-3">
 					<legend>template</legend>
-					<CommandFormElements
+					<TemplateFormSection
 						handleTypeSelect={prop.handleTypeSelect}
 						name={prop.name}
 						prefix={templateOption.prefix}
