@@ -25,10 +25,10 @@ export default function DatasetSettingDropDownMenu({
 			element={element}
 			srcType={srcType}
 			isValueInDatalist={isValueInDatalist}
-			editButton={
-				!hideDatasetSettingEdit ? (
-					<DatasetSettingEditButton path={path} setPath={setPath} />
-				) : undefined
+			editButtons={
+				!hideDatasetSettingEdit
+					? [<DatasetSettingEditButton path={path} setPath={setPath} />]
+					: undefined
 			}
 			removeButton={() => (
 				<RemoveDatasetSettingButton path={path} setPath={setPath} />

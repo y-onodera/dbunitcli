@@ -24,7 +24,7 @@ export default function TemplateDropDownMenu({
 			element={element}
 			srcType={srcType}
 			isValueInDatalist={isValueInDatalist}
-			editButton={<TemplateEditButton path={path} setPath={setPath} />}
+			editButtons={[<TemplateEditButton path={path} setPath={setPath} />]}
 			removeButton={() => <RemoveTemplateButton path={path} setPath={setPath} />}
 		/>
 	);

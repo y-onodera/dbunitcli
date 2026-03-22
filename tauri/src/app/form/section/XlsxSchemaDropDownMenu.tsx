@@ -24,7 +24,7 @@ export default function XlsxSchemaDropDownMenu({
 			element={element}
 			srcType={srcType}
 			isValueInDatalist={isValueInDatalist}
-			editButton={<XlsxSchemaEditButton path={path} setPath={setPath} />}
+			editButtons={[<XlsxSchemaEditButton path={path} setPath={setPath} />]}
 			removeButton={() => (
 				<RemoveXlsxSchemaButton path={path} setPath={setPath} />
 			)}

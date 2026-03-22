@@ -1,4 +1,4 @@
-import DropDownMenu from "../../../components/element/DropDownMenu";
+import type { ReactNode } from "react";
 import { useJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
 import {
 	isSqlRelatedType,
@@ -8,8 +8,8 @@ import JdbcTableSelectorButton from "../../settings/JdbcTableSelectorButton";
 import SqlEditorButton, {
 	RemoveSqlEditorButton,
 } from "../../settings/SqlEditorButton";
-import { FileChooser, OpenInOS } from "./Chooser";
 import type { FileProp } from "./FormElementProp";
+import ResourceDropDownMenu from "./ResourceDropDownMenu";
 
 type Props = Omit<FileProp, "onSelect" | "hidden"> & {
 	isValueInDatalist: boolean;
@@ -24,63 +24,44 @@ export default function SqlSrcDropDownMenu({
 	isValueInDatalist,
 }: Props) {
 	const { connectionOk } = useJdbcConnectionState();
-	const isFileType = element.attribute.type.includes("FILE");
-	const isDirType = element.attribute.type.includes("DIR");
-	const isFileOrDir = isFileType || isDirType;
-	const isSqlSrc = isSqlRelatedType(srcType ?? "");
 	const isSqlOrTable = srcType === "sql" || srcType === "table";
+
+	const editButtons: ReactNode[] = [];
+	if (isSqlRelatedType(srcType ?? "")) {
+		editButtons.push(
+			<SqlEditorButton
+				type={srcType as QueryDatasourceType}
+				path={path}
+				setPath={setPath}
+			/>,
+		);
+	}
+	if (srcType === "table" && connectionOk) {
+		editButtons.push(
+			<JdbcTableSelectorButton path={path} setPath={setPath} />,
+		);
+	}
+
 	return (
-		<DropDownMenu>
-			{(closeMenu) => (
-				<>
-					{isSqlSrc && (
-						<li>
-							<SqlEditorButton
-								type={srcType as QueryDatasourceType}
-								path={path}
-								setPath={setPath}
-							/>
-						</li>
-					)}
-					{srcType === "table" && connectionOk && (
-						<li>
-							<JdbcTableSelectorButton path={path} setPath={setPath} />
-						</li>
-					)}
-					{isFileOrDir && path && (
-						<li>
-							<OpenInOS
-								prefix={prefix}
-								element={element}
-								srcType={srcType}
-								path={path}
-								setPath={setPath}
-							/>
-						</li>
-					)}
-					{isSqlOrTable && isValueInDatalist && (
-						<li>
+		<ResourceDropDownMenu
+			path={path}
+			setPath={setPath}
+			prefix={prefix}
+			element={element}
+			srcType={srcType}
+			isValueInDatalist={isValueInDatalist}
+			editButtons={editButtons}
+			removeButton={
+				isSqlOrTable
+					? () => (
 							<RemoveSqlEditorButton
 								path={path}
 								setPath={setPath}
 								type={srcType as QueryDatasourceType}
 							/>
-						</li>
-					)}
-					{isFileType && (
-						<li>
-							<FileChooser
-								prefix={prefix}
-								element={element}
-								srcType={srcType}
-								path={path}
-								setPath={setPath}
-								onSelect={closeMenu}
-							/>
-						</li>
-					)}
-				</>
-			)}
-		</DropDownMenu>
+						)
+					: undefined
+			}
+		/>
 	);
 }
