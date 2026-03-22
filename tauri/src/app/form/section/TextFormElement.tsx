@@ -1,10 +1,8 @@
-import { useState } from "react";
-import { ControllTextBox, InputLabel } from "../../../components/element/Input";
 import { isSqlRelatedType } from "../../../model/QueryDatasource";
 import DatasetSettingText from "./DatasetSettingText";
 import FileText from "./FileText";
 import type { Prop } from "./FormElementProp";
-import { getId, getName } from "./FormElementProp";
+import PlainText from "./PlainText";
 import SqlSrcText from "./SqlSrcText";
 import TemplateText from "./TemplateText";
 import XlsxSchemaText from "./XlsxSchemaText";
@@ -29,37 +27,4 @@ export default function Text(prop: Prop) {
 		return <FileText {...prop} />;
 	}
 	return <PlainText {...prop} />;
-}
-
-function PlainText({ prefix, element, hidden }: Prop) {
-	const [path, setPath] = useState(element.value);
-	const id = getId(prefix, element.name);
-	const fieldName = getName(prefix, element.name);
-
-	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
-		setPath(ev.target.value);
-	};
-
-	return (
-		<div>
-			<InputLabel
-				text={fieldName}
-				id={id}
-				required={element.attribute.required}
-				hidden={hidden}
-			/>
-			<div className="flex">
-				<div className="flex-1 mr-36">
-					<ControllTextBox
-						name={fieldName}
-						id={id}
-						hidden={hidden}
-						required={element.attribute.required}
-						value={path}
-						handleChange={handleChange}
-					/>
-				</div>
-			</div>
-		</div>
-	);
 }
