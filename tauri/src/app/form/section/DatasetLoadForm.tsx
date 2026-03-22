@@ -2,9 +2,11 @@ import { useMemo } from "react";
 import { DatasetSrcInfoProvider } from "../../../context/DatasetSrcInfoProvider";
 import { JdbcConnectionProvider } from "../../../context/JdbcConnectionProvider";
 import type { DatasetSource } from "../../../model/CommandParam";
-import CommandFormElements, { buildDatasetSrcInfo } from "./CommandFormElement";
-import DatasetText from "./DatasetTextFormElement";
+import { buildDatasetSrcInfo } from "./CommandFormElement";
+import DatasetCommandFormSection from "./DatasetCommandFormSection";
+import DatasetSettingSection from "./DatasetSettingSection";
 import JdbcFormSection from "./JdbcFormSection";
+import SrcFormSection from "./SrcFormSection";
 
 export function DatasetLoadForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -27,14 +29,11 @@ export function DatasetLoadForm(prop: {
 			>
 				<fieldset className="border border-gray-200 p-3">
 					<legend>{prop.srcData.prefix}</legend>
-					<CommandFormElements
-						handleTypeSelect={prop.handleTypeSelect}
+					<SrcFormSection
 						prefix={src.prefix}
 						name={prop.name}
 						elements={src.elements}
-						optionCaption={src.optionCaption}
-						optional={src.optional}
-						textComponent={DatasetText}
+						handleTypeSelect={prop.handleTypeSelect}
 					/>
 					{srcTypeSettingsJdbc.elements.length > 0 && (
 						<JdbcFormSection
@@ -42,23 +41,15 @@ export function DatasetLoadForm(prop: {
 							elements={srcTypeSettingsJdbc.elements}
 						/>
 					)}
-					<CommandFormElements
+					<DatasetCommandFormSection
+						commandParams={srcTypeSettings}
 						handleTypeSelect={prop.handleTypeSelect}
-						prefix={srcTypeSettings.prefix}
 						name={prop.name}
-						elements={srcTypeSettings.elements}
-						optionCaption={srcTypeSettings.optionCaption}
-						optional={srcTypeSettings.optional}
-						textComponent={DatasetText}
 					/>
-					<CommandFormElements
-						handleTypeSelect={prop.handleTypeSelect}
+					<DatasetSettingSection
 						prefix={settingElements.prefix}
 						name={prop.name}
 						elements={settingElements.elements}
-						optionCaption={settingElements.optionCaption}
-						optional={settingElements.optional}
-						textComponent={DatasetText}
 					/>
 				</fieldset>
 			</DatasetSrcInfoProvider>
