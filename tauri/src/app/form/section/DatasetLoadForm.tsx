@@ -3,6 +3,7 @@ import { DatasetSrcInfoProvider } from "../../../context/DatasetSrcInfoProvider"
 import { JdbcConnectionProvider } from "../../../context/JdbcConnectionProvider";
 import type { DatasetSource } from "../../../model/CommandParam";
 import CommandFormElements, { buildDatasetSrcInfo } from "./CommandFormElement";
+import DatasetText from "./DatasetTextFormElement";
 import JdbcFormSection from "./JdbcFormSection";
 
 export function DatasetLoadForm(prop: {
@@ -33,6 +34,7 @@ export function DatasetLoadForm(prop: {
 						elements={src.elements}
 						optionCaption={src.optionCaption}
 						optional={src.optional}
+						textComponent={DatasetText}
 					/>
 					{srcTypeSettingsJdbc.elements.length > 0 && (
 						<JdbcFormSection
@@ -47,6 +49,7 @@ export function DatasetLoadForm(prop: {
 						elements={srcTypeSettings.elements}
 						optionCaption={srcTypeSettings.optionCaption}
 						optional={srcTypeSettings.optional}
+						textComponent={DatasetText}
 					/>
 					<CommandFormElements
 						handleTypeSelect={prop.handleTypeSelect}
@@ -55,6 +58,7 @@ export function DatasetLoadForm(prop: {
 						elements={settingElements.elements}
 						optionCaption={settingElements.optionCaption}
 						optional={settingElements.optional}
+						textComponent={DatasetText}
 					/>
 				</fieldset>
 			</DatasetSrcInfoProvider>

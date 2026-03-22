@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { ControllTextBox, InputLabel } from "../../../components/element/Input";
+import {
+	useDatasetSrcInfo,
+	useSetDatasetSrcInfo,
+} from "../../../context/DatasetSrcInfoProvider";
+import type { DatasetSrcInfo } from "../../../model/CommandParam";
+import DatasetFileText from "./DatasetFileText";
 import DatasetSettingText from "./DatasetSettingText";
-import FileText from "./FileText";
 import type { Prop } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
 import SqlSrcText from "./SqlSrcText";
 import TemplateText from "./TemplateText";
 import XlsxSchemaText from "./XlsxSchemaText";
 
-export default function Text(prop: Prop) {
+export default function DatasetText(prop: Prop) {
 	if (prop.element.name === "setting") {
 		return <DatasetSettingText {...prop} />;
 	}
@@ -25,18 +30,27 @@ export default function Text(prop: Prop) {
 		prop.element.attribute.type.includes("FILE") ||
 		prop.element.attribute.type.includes("DIR")
 	) {
-		return <FileText {...prop} />;
+		return <DatasetFileText {...prop} />;
 	}
-	return <PlainText {...prop} />;
+	return <DatasetPlainText {...prop} />;
 }
 
-function PlainText({ prefix, element, hidden }: Prop) {
+function DatasetPlainText({ prefix, element, hidden }: Prop) {
 	const [path, setPath] = useState(element.value);
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const setDatasetSrcInfo = useSetDatasetSrcInfo();
 	const id = getId(prefix, element.name);
 	const fieldName = getName(prefix, element.name);
 
 	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
-		setPath(ev.target.value);
+		const newValue = ev.target.value;
+		setPath(newValue);
+		if (datasetSrcInfo && element.name in datasetSrcInfo) {
+			setDatasetSrcInfo({
+				...datasetSrcInfo,
+				[element.name]: newValue,
+			} as DatasetSrcInfo);
+		}
 	};
 
 	return (

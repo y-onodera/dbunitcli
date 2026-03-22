@@ -1,4 +1,5 @@
 import { Fragment, useState } from "react";
+import type { ComponentType } from "react";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
 import type {
 	CommandParam,
@@ -8,6 +9,7 @@ import type {
 } from "../../../model/CommandParam";
 import { isJdbcField } from "./JdbcFormSection";
 import Check from "./CheckFormElement";
+import type { Prop } from "./FormElementProp";
 import Select from "./SelectFormElement";
 import Text from "./TextFormElement";
 
@@ -46,8 +48,10 @@ export default function CommandFormElements(
 	prop: {
 		handleTypeSelect: (selected: string) => Promise<void>;
 		hideDatasetSettingEdit?: boolean;
+		textComponent?: ComponentType<Prop>;
 	} & CommandParams,
 ) {
+	const TextComponent = prop.textComponent ?? Text;
 	const [showOptional, setShowOptional] = useState(false);
 	const srcTypeElement = prop.elements.find(
 		(element) => element.name === "srcType",
@@ -117,7 +121,7 @@ export default function CommandFormElements(
 								/>
 							</div>
 						)}
-						<Text
+						<TextComponent
 							prefix={prop.prefix}
 							element={element}
 							hidden={prop.optional?.(element.name) && !showOptional}
