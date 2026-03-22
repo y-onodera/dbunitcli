@@ -16,16 +16,6 @@ import { RemoveResource } from "../../settings/ResourceEditButton";
 import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import ResourceText from "./ResourceText";
 
-export const JDBC_FIELD_NAMES = [
-	"jdbcUrl",
-	"jdbcUser",
-	"jdbcPass",
-	"jdbcProperties",
-] as const;
-
-export const isJdbcField = (name: string): boolean =>
-	JDBC_FIELD_NAMES.includes(name as (typeof JDBC_FIELD_NAMES)[number]);
-
 export default function JdbcFormSection({
 	jdbcOption,
 }: {
