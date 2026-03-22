@@ -4,6 +4,19 @@ if ! echo "${JAVA_TOOL_OPTIONS:-}" | grep -q "jwt_"; then
   exit 0
 fi
 
+# ローカルプロキシを先に起動（JDK ダウンロードで使用するため）
+nohup python3 /home/user/dbunitcli/.claude/maven-proxy.py >> /tmp/maven-proxy.log 2>&1 &
+PROXY_PID=$!
+echo "Maven proxy setup complete (PID: $PROXY_PID)"
+
+# ポートが利用可能になるまで待機（最大5秒）
+for i in $(seq 1 10); do
+  if nc -z 127.0.0.1 3128 2>/dev/null; then
+    break
+  fi
+  sleep 0.5
+done
+
 # JDK 25 のインストール（現在のバージョンが 25 未満の場合）
 REQUIRED_JAVA_VERSION=25
 JDK25_DIR="$HOME/jdk-25"
@@ -18,10 +31,10 @@ if [ -z "$CURRENT_JAVA_MAJOR" ] || [ "$CURRENT_JAVA_MAJOR" -lt "$REQUIRED_JAVA_V
     JDK25_READY=true
   else
     echo "Installing JDK 25..."
-    ADOPTIUM_URL="https://api.adoptium.net/v3/binary/latest/25/ga/linux/x64/jdk/hotspot/normal/eclipse"
+    ORACLE_URL="https://download.oracle.com/java/25/latest/jdk-25_linux-x64_bin.tar.gz"
     TMP_JDK=$(mktemp /tmp/jdk25-XXXXXX.tar.gz)
     rm -rf "$JDK25_DIR" && mkdir -p "$JDK25_DIR"
-    if curl -sL "$ADOPTIUM_URL" -o "$TMP_JDK" && tar -xz -C "$JDK25_DIR" --strip-components=1 -f "$TMP_JDK"; then
+    if curl -sL --proxy http://127.0.0.1:3128 "$ORACLE_URL" -o "$TMP_JDK" && tar -xz -C "$JDK25_DIR" --strip-components=1 -f "$TMP_JDK"; then
       echo "JDK 25 installed at $JDK25_DIR"
       JDK25_READY=true
     else
@@ -48,9 +61,6 @@ EOF
 else
   echo "Java $CURRENT_JAVA_MAJOR >= $REQUIRED_JAVA_VERSION, no installation needed"
 fi
-
-nohup python3 /home/user/dbunitcli/.claude/maven-proxy.py >> /tmp/maven-proxy.log 2>&1 &
-echo "Maven proxy setup complete (PID: $!)"
 
 # Create ~/.mavenrc to override JAVA_TOOL_OPTIONS proxy settings
 # MAVEN_OPTS flags are appended to JVM command line, overriding JAVA_TOOL_OPTIONS
