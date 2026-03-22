@@ -74,7 +74,7 @@ public class WorkspaceController implements ControllerExceptionHandler {
         }
     }
 
-    private static File getFieldBaseDir(final String defaultPath, final String srcType) {
+    static File getFieldBaseDir(final String defaultPath, final String srcType) {
         return switch (defaultPath) {
             case "DATASET" -> srcType != null && !srcType.isEmpty()
                     ? new File(FileResources.datasetDir(), srcType)
