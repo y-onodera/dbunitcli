@@ -31,7 +31,7 @@ public class Workspace {
 
     public static File resolveBaseDir(final String defaultPath, final String srcType) {
         return switch (defaultPath) {
-            case "DATASET" -> srcType != null && !srcType.isEmpty()
+            case "DATASET" -> Strings.isNotEmpty(srcType)
                     ? new File(FileResources.datasetDir(), srcType)
                     : FileResources.datasetDir();
             case "RESULT" -> FileResources.resultDir();

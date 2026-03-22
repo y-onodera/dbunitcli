@@ -58,7 +58,7 @@ public class WorkspaceController implements ControllerExceptionHandler {
                 return absolute.getAbsolutePath();
             }
             for (final File root : new File[]{
-                    getFieldBaseDir(request.getDefaultPath(), request.getSrcType()),
+                    Workspace.resolveBaseDir(request.getDefaultPath(), request.getSrcType()),
                     FileResources.baseDir(),
                     new File(System.getProperty("user.dir"))
             }) {
@@ -72,10 +72,6 @@ public class WorkspaceController implements ControllerExceptionHandler {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
         }
-    }
-
-    private static File getFieldBaseDir(final String defaultPath, final String srcType) {
-        return Workspace.resolveBaseDir(defaultPath, srcType);
     }
 
     private String currentResources() throws IOException {
