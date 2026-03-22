@@ -9,7 +9,7 @@ import {
 	useJdbcConnectionTest,
 	useJdbcSaveProperties,
 } from "../../../hooks/useJdbc";
-import type { CommandParam } from "../../../model/CommandParam";
+import type { CommandParam, JdbcOption } from "../../../model/CommandParam";
 import JdbcSavePropertiesDialog from "../../settings/JdbcSavePropertiesDialog";
 import JdbcUrlBuilderDialog from "../../settings/JdbcUrlBuilderDialog";
 import { RemoveResource } from "../../settings/ResourceEditButton";
@@ -27,20 +27,17 @@ export const isJdbcField = (name: string): boolean =>
 	JDBC_FIELD_NAMES.includes(name as (typeof JDBC_FIELD_NAMES)[number]);
 
 export default function JdbcFormSection({
-	prefix,
-	elements,
+	jdbcOption,
 }: {
-	prefix: string;
-	elements: CommandParam[];
+	jdbcOption: JdbcOption;
 }) {
 	const setJdbcConnection = useSetJdbcConnectionState();
-	const [jdbcValues, setJdbcValues] = useState<Record<string, string>>(() => {
-		const initial: Record<string, string> = {};
-		for (const el of elements) {
-			initial[el.name] = el.value;
-		}
-		return initial;
-	});
+	const [jdbcValues, setJdbcValues] = useState<Record<string, string>>(() => ({
+		jdbcUrl: jdbcOption.jdbcUrl.value,
+		jdbcUser: jdbcOption.jdbcUser.value,
+		jdbcPass: jdbcOption.jdbcPass.value,
+		jdbcProperties: jdbcOption.jdbcProperties.value,
+	}));
 
 	const handleJdbcValueChange = useCallback(
 		(name: string, value: string) => {
@@ -63,22 +60,34 @@ export default function JdbcFormSection({
 
 	return (
 		<>
-			{elements.map((element) => (
-				<JdbcTextField
-					key={prefix + element.name}
-					prefix={prefix}
-					element={element}
-					onValueChange={handleJdbcValueChange}
-				/>
-			))}
+			<JdbcTextField
+				prefix={jdbcOption.prefix}
+				element={jdbcOption.jdbcUrl}
+				onValueChange={handleJdbcValueChange}
+			/>
+			<JdbcTextField
+				prefix={jdbcOption.prefix}
+				element={jdbcOption.jdbcUser}
+				onValueChange={handleJdbcValueChange}
+			/>
+			<JdbcTextField
+				prefix={jdbcOption.prefix}
+				element={jdbcOption.jdbcPass}
+				onValueChange={handleJdbcValueChange}
+			/>
+			<JdbcTextField
+				prefix={jdbcOption.prefix}
+				element={jdbcOption.jdbcProperties}
+				onValueChange={handleJdbcValueChange}
+			/>
 			<div className="mt-2 flex items-center gap-3">
 				<JdbcConnectionTestButton
-					prefix={prefix}
+					prefix={jdbcOption.prefix}
 					jdbcValues={jdbcValues}
 					onConnectionOk={handleConnectionOk}
 					onConnectionFail={handleConnectionFail}
 				/>
-				<JdbcSavePropertiesButton prefix={prefix} jdbcValues={jdbcValues} />
+				<JdbcSavePropertiesButton prefix={jdbcOption.prefix} jdbcValues={jdbcValues} />
 			</div>
 		</>
 	);

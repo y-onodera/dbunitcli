@@ -38,10 +38,7 @@ export function RunForm(prop: {
 				<JdbcConnectionProvider>
 					<fieldset className="border border-gray-200 p-3">
 						<legend>jdbc</legend>
-						<JdbcFormSection
-							prefix={jdbcOption.prefix}
-							elements={jdbcOption.elements}
-						/>
+						<JdbcFormSection jdbcOption={jdbcOption} />
 					</fieldset>
 				</JdbcConnectionProvider>
 			)}
