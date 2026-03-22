@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ControllTextBox, InputLabel } from "../../../components/element/Input";
+import { isSqlRelatedType } from "../../../model/QueryDatasource";
 import DatasetSettingText from "./DatasetSettingText";
 import FileText from "./FileText";
 import type { Prop } from "./FormElementProp";
@@ -15,7 +16,7 @@ export default function Text(prop: Prop) {
 	if (prop.element.name === "xlsxSchema") {
 		return <XlsxSchemaText {...prop} />;
 	}
-	if (prop.element.name === "src") {
+	if (prop.element.name === "src" && isSqlRelatedType(prop.srcType ?? "")) {
 		return <SqlSrcText {...prop} />;
 	}
 	if (prop.element.name === "templateGroup") {
