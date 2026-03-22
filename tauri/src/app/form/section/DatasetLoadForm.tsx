@@ -2,7 +2,8 @@ import { useMemo } from "react";
 import { DatasetSrcInfoProvider } from "../../../context/DatasetSrcInfoProvider";
 import { JdbcConnectionProvider } from "../../../context/JdbcConnectionProvider";
 import type { DatasetSource } from "../../../model/CommandParam";
-import CommandFormElements, { buildDatasetSrcInfo } from "./CommandFormElement";
+import { buildDatasetSrcInfo } from "./CommandFormElement";
+import DatasetCommandFormElements from "./DatasetCommandFormElement";
 import JdbcFormSection from "./JdbcFormSection";
 
 export function DatasetLoadForm(prop: {
@@ -26,7 +27,7 @@ export function DatasetLoadForm(prop: {
 			>
 				<fieldset className="border border-gray-200 p-3">
 					<legend>{prop.srcData.prefix}</legend>
-					<CommandFormElements
+					<DatasetCommandFormElements
 						handleTypeSelect={prop.handleTypeSelect}
 						prefix={src.prefix}
 						name={prop.name}
@@ -40,7 +41,7 @@ export function DatasetLoadForm(prop: {
 							elements={srcTypeSettingsJdbc.elements}
 						/>
 					)}
-					<CommandFormElements
+					<DatasetCommandFormElements
 						handleTypeSelect={prop.handleTypeSelect}
 						prefix={srcTypeSettings.prefix}
 						name={prop.name}
@@ -48,7 +49,7 @@ export function DatasetLoadForm(prop: {
 						optionCaption={srcTypeSettings.optionCaption}
 						optional={srcTypeSettings.optional}
 					/>
-					<CommandFormElements
+					<DatasetCommandFormElements
 						handleTypeSelect={prop.handleTypeSelect}
 						prefix={settingElements.prefix}
 						name={prop.name}
