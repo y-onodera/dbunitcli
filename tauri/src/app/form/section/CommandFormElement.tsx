@@ -58,7 +58,7 @@ export default function CommandFormElements(
 	const srcType = srcTypeElement ? srcTypeElement.value : "";
 	const toggleOptional = () => setShowOptional(!showOptional);
 
-	const firstOptionalNonJdbcElementName = prop.optionCaption
+	const firstOptionalName = prop.optionCaption
 		? prop.elements.find((e) => prop.optional?.(e.name))?.name
 		: undefined;
 
@@ -66,7 +66,7 @@ export default function CommandFormElements(
 		<>
 			{prop.elements.map((element) => {
 				const showExpandButton =
-					element.name === firstOptionalNonJdbcElementName;
+					element.name === firstOptionalName;
 				if (element.attribute.type === "FLG") {
 					return (
 						<Fragment key={prop.name + prop.prefix + element.name}>
