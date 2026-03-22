@@ -20,7 +20,10 @@ export function DatasetLoadForm(prop: {
 		() => buildDatasetSrcInfo(prop.srcData.elements),
 		[prop.srcData.elements],
 	);
-	const jdbcOption = prop.srcData.jdbcOption();
+	const jdbcOption = useMemo(
+		() => prop.srcData.jdbcOption(),
+		[prop.srcData.elements],
+	);
 	return (
 		<JdbcConnectionProvider>
 			<DatasetSrcInfoProvider

@@ -31,6 +31,7 @@ export default function JdbcFormSection({
 }: {
 	jdbcOption: JdbcOption;
 }) {
+	const { prefix } = jdbcOption;
 	const setJdbcConnection = useSetJdbcConnectionState();
 	const [jdbcValues, setJdbcValues] = useState<Record<string, string>>(() => ({
 		jdbcUrl: jdbcOption.jdbcUrl.value,
@@ -61,33 +62,33 @@ export default function JdbcFormSection({
 	return (
 		<>
 			<JdbcTextField
-				prefix={jdbcOption.prefix}
+				prefix={prefix}
 				element={jdbcOption.jdbcUrl}
 				onValueChange={handleJdbcValueChange}
 			/>
 			<JdbcTextField
-				prefix={jdbcOption.prefix}
+				prefix={prefix}
 				element={jdbcOption.jdbcUser}
 				onValueChange={handleJdbcValueChange}
 			/>
 			<JdbcTextField
-				prefix={jdbcOption.prefix}
+				prefix={prefix}
 				element={jdbcOption.jdbcPass}
 				onValueChange={handleJdbcValueChange}
 			/>
 			<JdbcTextField
-				prefix={jdbcOption.prefix}
+				prefix={prefix}
 				element={jdbcOption.jdbcProperties}
 				onValueChange={handleJdbcValueChange}
 			/>
 			<div className="mt-2 flex items-center gap-3">
 				<JdbcConnectionTestButton
-					prefix={jdbcOption.prefix}
+					prefix={prefix}
 					jdbcValues={jdbcValues}
 					onConnectionOk={handleConnectionOk}
 					onConnectionFail={handleConnectionFail}
 				/>
-				<JdbcSavePropertiesButton prefix={jdbcOption.prefix} jdbcValues={jdbcValues} />
+				<JdbcSavePropertiesButton prefix={prefix} jdbcValues={jdbcValues} />
 			</div>
 		</>
 	);
