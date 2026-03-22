@@ -31,10 +31,10 @@ if [ -z "$CURRENT_JAVA_MAJOR" ] || [ "$CURRENT_JAVA_MAJOR" -lt "$REQUIRED_JAVA_V
     JDK25_READY=true
   else
     echo "Installing JDK 25..."
-    ADOPTIUM_URL="https://api.adoptium.net/v3/binary/latest/25/ga/linux/x64/jdk/hotspot/normal/eclipse"
+    ORACLE_URL="https://download.oracle.com/java/25/latest/jdk-25_linux-x64_bin.tar.gz"
     TMP_JDK=$(mktemp /tmp/jdk25-XXXXXX.tar.gz)
     rm -rf "$JDK25_DIR" && mkdir -p "$JDK25_DIR"
-    if curl -sL --proxy http://127.0.0.1:3128 "$ADOPTIUM_URL" -o "$TMP_JDK" && tar -xz -C "$JDK25_DIR" --strip-components=1 -f "$TMP_JDK"; then
+    if curl -sL --proxy http://127.0.0.1:3128 "$ORACLE_URL" -o "$TMP_JDK" && tar -xz -C "$JDK25_DIR" --strip-components=1 -f "$TMP_JDK"; then
       echo "JDK 25 installed at $JDK25_DIR"
       JDK25_READY=true
     else
