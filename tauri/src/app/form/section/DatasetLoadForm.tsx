@@ -3,7 +3,7 @@ import { DatasetSrcInfoProvider } from "../../../context/DatasetSrcInfoProvider"
 import { JdbcConnectionProvider } from "../../../context/JdbcConnectionProvider";
 import type { DatasetSource } from "../../../model/CommandParam";
 import CommandFormElements, { buildDatasetSrcInfo } from "./CommandFormElement";
-import JdbcFormSection, { isJdbcField } from "./JdbcFormSection";
+import JdbcFormSection from "./JdbcFormSection";
 
 export function DatasetLoadForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -17,9 +17,7 @@ export function DatasetLoadForm(prop: {
 		() => buildDatasetSrcInfo(prop.srcData.elements),
 		[prop.srcData.elements],
 	);
-	const srcTypeSettingsJdbc = srcTypeSettings.elements.filter((e) =>
-		isJdbcField(e.name),
-	);
+	const srcTypeSettingsJdbc = prop.srcData.jdbcElements();
 	return (
 		<JdbcConnectionProvider>
 			<DatasetSrcInfoProvider
@@ -36,10 +34,10 @@ export function DatasetLoadForm(prop: {
 						optionCaption={src.optionCaption}
 						optional={src.optional}
 					/>
-					{srcTypeSettingsJdbc.length > 0 && (
+					{srcTypeSettingsJdbc.elements.length > 0 && (
 						<JdbcFormSection
 							prefix={srcTypeSettings.prefix}
-							elements={srcTypeSettingsJdbc}
+							elements={srcTypeSettingsJdbc.elements}
 						/>
 					)}
 					<CommandFormElements

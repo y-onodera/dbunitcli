@@ -53,6 +53,7 @@ export type DatasetSource = CommandParams & {
 	srcType: () => string;
 	srcElements: () => CommandParams;
 	srcTypeSettings: () => CommandParams;
+	jdbcElements: () => CommandParams;
 	settingElements: () => CommandParams;
 };
 export class DatasetSourceImpl implements DatasetSource {
@@ -107,14 +108,31 @@ export class DatasetSourceImpl implements DatasetSource {
 		const srcTypeSettings = srcTypeDetail.get(this.src);
 		return toCommandParams(
 			this,
-			this.elements.slice(
-				this.indexExtension === -1
-					? this.indexRegExclude + 1
-					: this.indexExtension + 1,
-				this.indexOfSetting,
-			),
+			this.elements
+				.slice(
+					this.indexExtension === -1
+						? this.indexRegExclude + 1
+						: this.indexExtension + 1,
+					this.indexOfSetting,
+				)
+				.filter((it) => !it.name.startsWith("jdbc")),
 			srcTypeSettings?.optionCaption,
 			srcTypeSettings?.optional,
+		);
+	}
+	jdbcElements() {
+		return toCommandParams(
+			this,
+			this.elements
+				.slice(
+					this.indexExtension === -1
+						? this.indexRegExclude + 1
+						: this.indexExtension + 1,
+					this.indexOfSetting,
+				)
+				.filter((it) => it.name.startsWith("jdbc")),
+			undefined,
+			undefined,
 		);
 	}
 	settingElements() {
