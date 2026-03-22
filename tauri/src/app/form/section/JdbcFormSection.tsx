@@ -1,20 +1,13 @@
-import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useState } from "react";
 import { BlueButton } from "../../../components/element/Button";
-import { BlueEditButton } from "../../../components/element/ButtonIcon";
 import { useSetJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
-import { useResourcesSettings } from "../../../context/WorkspaceResourcesProvider";
 import {
-	useDeleteJdbcProperties,
 	useJdbcConnectionTest,
 	useJdbcSaveProperties,
 } from "../../../hooks/useJdbc";
-import type { CommandParam, JdbcOption } from "../../../model/CommandParam";
+import type { JdbcOption } from "../../../model/CommandParam";
 import JdbcSavePropertiesDialog from "../../settings/JdbcSavePropertiesDialog";
-import JdbcUrlBuilderDialog from "../../settings/JdbcUrlBuilderDialog";
-import { RemoveResource } from "../../settings/ResourceEditButton";
-import ResourceDropDownMenu from "./ResourceDropDownMenu";
-import ResourceText from "./ResourceText";
+import JdbcTextField from "./JdbcTextField";
 
 export default function JdbcFormSection({
 	jdbcOption,
@@ -80,99 +73,6 @@ export default function JdbcFormSection({
 				/>
 				<JdbcSavePropertiesButton prefix={prefix} jdbcValues={jdbcValues} />
 			</div>
-		</>
-	);
-}
-
-function JdbcTextField({
-	prefix,
-	element,
-	onValueChange,
-}: {
-	prefix: string;
-	element: CommandParam;
-	onValueChange: (name: string, value: string) => void;
-}) {
-	const settings = useResourcesSettings();
-	const isJdbcUrl = element.name === "jdbcUrl";
-	const isJdbcProperties = element.name === "jdbcProperties";
-	const resourceFiles = isJdbcProperties ? settings.jdbcFiles : [];
-
-	const renderMenu = ({
-		path,
-		setPath,
-		isValueInDatalist,
-	}: {
-		path: string;
-		setPath: Dispatch<SetStateAction<string>>;
-		isValueInDatalist: boolean;
-	}) => {
-		const wrappedSetPath: Dispatch<SetStateAction<string>> = (action) => {
-			const newPath = typeof action === "function" ? action(path) : action;
-			setPath(newPath);
-			onValueChange(element.name, newPath);
-		};
-
-		if (isJdbcProperties) {
-			return (
-				<ResourceDropDownMenu
-					prefix={prefix}
-					element={element}
-					path={path}
-					setPath={wrappedSetPath}
-					isValueInDatalist={isValueInDatalist}
-					removeButton={(closeMenu) => (
-						<RemoveJdbcPropertiesButton
-							path={path}
-							setPath={(value) => {
-								wrappedSetPath(value);
-								closeMenu();
-							}}
-						/>
-					)}
-					className="mr-24"
-				/>
-			);
-		}
-		if (isJdbcUrl) {
-			return <JdbcUrlBuilderButton path={path} setPath={wrappedSetPath} />;
-		}
-		return <div className="w-36" />;
-	};
-
-	return (
-		<ResourceText
-			prefix={prefix}
-			element={element}
-			resourceFiles={resourceFiles}
-			onValueChange={(value) => onValueChange(element.name, value)}
-		>
-			{renderMenu}
-		</ResourceText>
-	);
-}
-
-function JdbcUrlBuilderButton({
-	path,
-	setPath,
-}: {
-	path: string;
-	setPath: Dispatch<SetStateAction<string>>;
-}) {
-	const [showDialog, setShowDialog] = useState(false);
-	return (
-		<>
-			<BlueEditButton handleClick={() => setShowDialog(true)} />
-			{showDialog && (
-				<JdbcUrlBuilderDialog
-					currentUrl={path}
-					handleDialogClose={() => setShowDialog(false)}
-					handleSave={(url) => {
-						setPath(url);
-						setShowDialog(false);
-					}}
-				/>
-			)}
 		</>
 	);
 }
@@ -268,22 +168,5 @@ function JdbcSavePropertiesButton({
 				/>
 			)}
 		</>
-	);
-}
-
-function RemoveJdbcPropertiesButton({
-	path,
-	setPath,
-}: {
-	path: string;
-	setPath: (value: string) => void;
-}) {
-	const deleteJdbcProperties = useDeleteJdbcProperties();
-	return (
-		<RemoveResource
-			path={path}
-			setPath={setPath}
-			deleteResource={deleteJdbcProperties}
-		/>
 	);
 }
