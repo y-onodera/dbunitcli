@@ -3,18 +3,20 @@ import type { SelectProp } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
 
 export default function PlainSelect(prop: SelectProp) {
+	const id = getId(prop.prefix, prop.element.name);
+	const name = getName(prop.prefix, prop.element.name);
 	return (
 		<div>
 			<InputLabel
-				text={getName(prop.prefix, prop.element.name)}
-				id={getId(prop.prefix, prop.element.name)}
+				text={name}
+				id={id}
 				required={prop.element.attribute.required}
 				hidden={prop.hidden}
 			/>
 			<SelectBox
-				name={getName(prop.prefix, prop.element.name)}
-				id={getId(prop.prefix, prop.element.name)}
-				required={true}
+				name={name}
+				id={id}
+				required={prop.element.attribute.required}
 				hidden={prop.hidden}
 				handleOnChange={prop.handleTypeSelect}
 				defaultValue={prop.element.value}
