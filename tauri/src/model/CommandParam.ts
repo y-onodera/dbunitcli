@@ -150,6 +150,73 @@ export class DatasetSourceImpl implements DatasetSource {
 		);
 	}
 }
+function findByName(elements: CommandParam[], name: string): CommandParam {
+	return elements.find((e) => e.name === name)!;
+}
+export type JdbcOption = CommandParams & {
+	jdbcProperties: CommandParam;
+	jdbcUrl: CommandParam;
+	jdbcUser: CommandParam;
+	jdbcPass: CommandParam;
+};
+export class JdbcOptionImpl implements JdbcOption {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	optionCaption?: { caption: string };
+	optional?: (_: string) => boolean;
+	constructor(name: string, prefix: string, elements: CommandParam[]) {
+		this.name = name;
+		this.prefix = prefix;
+		this.elements = elements;
+	}
+	get jdbcProperties(): CommandParam {
+		return findByName(this.elements, "jdbcProperties");
+	}
+	get jdbcUrl(): CommandParam {
+		return findByName(this.elements, "jdbcUrl");
+	}
+	get jdbcUser(): CommandParam {
+		return findByName(this.elements, "jdbcUser");
+	}
+	get jdbcPass(): CommandParam {
+		return findByName(this.elements, "jdbcPass");
+	}
+}
+export type TemplateOption = CommandParams & {
+	encoding: CommandParam;
+	templateGroup: CommandParam;
+	templateParameterAttribute: CommandParam;
+	templateVarStart: CommandParam;
+	templateVarStop: CommandParam;
+};
+export class TemplateOptionImpl implements TemplateOption {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	optionCaption?: { caption: string };
+	optional?: (_: string) => boolean;
+	constructor(name: string, prefix: string, elements: CommandParam[]) {
+		this.name = name;
+		this.prefix = prefix;
+		this.elements = elements;
+	}
+	get encoding(): CommandParam {
+		return findByName(this.elements, "encoding");
+	}
+	get templateGroup(): CommandParam {
+		return findByName(this.elements, "templateGroup");
+	}
+	get templateParameterAttribute(): CommandParam {
+		return findByName(this.elements, "templateParameterAttribute");
+	}
+	get templateVarStart(): CommandParam {
+		return findByName(this.elements, "templateVarStart");
+	}
+	get templateVarStop(): CommandParam {
+		return findByName(this.elements, "templateVarStop");
+	}
+}
 const srcTypeDetail = new Map<
 	string,
 	{
