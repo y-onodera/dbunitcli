@@ -55,6 +55,8 @@ export type DatasetSource = CommandParams & {
 	srcTypeSettings: () => CommandParams;
 	jdbcElements: () => CommandParams;
 	settingElements: () => CommandParams;
+	jdbcOption: () => JdbcOption;
+	templateOption: () => TemplateOption;
 };
 export class DatasetSourceImpl implements DatasetSource {
 	name: string;
@@ -148,6 +150,21 @@ export class DatasetSourceImpl implements DatasetSource {
 					"includeMetaData",
 				].includes(param),
 		);
+	}
+	jdbcOption(): JdbcOption {
+		const jdbc = this.jdbcElements();
+		return new JdbcOptionImpl(jdbc.name, jdbc.prefix, jdbc.elements);
+	}
+	templateOption(): TemplateOption {
+		const elements = this.elements
+			.slice(
+				this.indexExtension === -1
+					? this.indexRegExclude + 1
+					: this.indexExtension + 1,
+				this.indexOfSetting,
+			)
+			.filter((it) => it.name.startsWith("template"));
+		return new TemplateOptionImpl(this.name, this.prefix, elements);
 	}
 }
 function findByName(elements: CommandParam[], name: string): CommandParam {
