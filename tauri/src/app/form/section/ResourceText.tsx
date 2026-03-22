@@ -13,7 +13,7 @@ import { getPath } from "./Chooser";
 interface Props extends Prop {
 	resourceFiles: string[];
 	onValueChange?: (value: string) => void;
-	children: (args: {
+	children?: (args: {
 		path: string;
 		setPath: Dispatch<SetStateAction<string>>;
 		isValueInDatalist: boolean;
@@ -52,7 +52,7 @@ export default function ResourceText({
 				hidden={hidden}
 			/>
 			<div className="flex">
-				<div className="flex-1">
+				<div className={children ? "flex-1" : "flex-1 mr-36"}>
 					<ControllTextBox
 						name={fieldName}
 						id={id}
@@ -72,7 +72,7 @@ export default function ResourceText({
 						<p className="text-xs text-gray-400 truncate">{defaultPath}</p>
 					)}
 				</div>
-				{!hidden && children({ path, setPath, isValueInDatalist })}
+				{!hidden && children && children({ path, setPath, isValueInDatalist })}
 			</div>
 		</div>
 	);
