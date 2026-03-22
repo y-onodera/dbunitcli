@@ -1,6 +1,4 @@
-import { Fragment, useState } from "react";
-import { ExpandButton } from "../../../components/element/ButtonIcon";
-import type { CommandParam, CommandParams } from "../../../model/CommandParam";
+import type { CommandParam, TemplateOption } from "../../../model/CommandParam";
 import Check from "./CheckFormElement";
 import type { SelectProp } from "./FormElementProp";
 import Select from "./SelectFormElement";
@@ -9,11 +7,10 @@ import TemplateText from "./TemplateText";
 function renderElement(
 	element: CommandParam,
 	prefix: string,
-	hidden: boolean,
 	handleTypeSelect: SelectProp["handleTypeSelect"],
 ): React.ReactNode {
 	if (element.attribute.type === "FLG") {
-		return <Check prefix={prefix} element={element} hidden={hidden} />;
+		return <Check prefix={prefix} element={element} hidden={false} />;
 	}
 	if (element.attribute.type === "ENUM") {
 		return (
@@ -21,53 +18,28 @@ function renderElement(
 				handleTypeSelect={handleTypeSelect}
 				prefix={prefix}
 				element={element}
-				hidden={hidden}
+				hidden={false}
 			/>
 		);
 	}
-	return <TemplateText prefix={prefix} element={element} hidden={hidden} />;
+	return <TemplateText prefix={prefix} element={element} hidden={false} />;
 }
 
 export default function TemplateFormSection({
 	commandParams,
 	handleTypeSelect,
-	name,
 }: {
-	commandParams: CommandParams;
+	commandParams: TemplateOption;
 	handleTypeSelect: SelectProp["handleTypeSelect"];
 	name: string;
 }) {
-	const [showOptional, setShowOptional] = useState(false);
-	const firstOptionalName = commandParams.optionCaption
-		? commandParams.elements.find((e) => commandParams.optional?.(e.name))?.name
-		: undefined;
-	const toggleOptional = () => setShowOptional(!showOptional);
-
 	return (
 		<>
-			{commandParams.elements.map((element) => {
-				const isOptional = commandParams.optional?.(element.name) ?? false;
-				const showExpandButton = element.name === firstOptionalName;
-				return (
-					<Fragment key={name + commandParams.prefix + element.name}>
-						{showExpandButton && (
-							<div className="pt-2.5">
-								<ExpandButton
-									toggleOptional={toggleOptional}
-									showOptional={showOptional}
-									caption={commandParams.optionCaption?.caption}
-								/>
-							</div>
-						)}
-						{renderElement(
-							element,
-							commandParams.prefix,
-							isOptional && !showOptional,
-							handleTypeSelect,
-						)}
-					</Fragment>
-				);
-			})}
+			{renderElement(commandParams.encoding, commandParams.prefix, handleTypeSelect)}
+			{renderElement(commandParams.templateGroup, commandParams.prefix, handleTypeSelect)}
+			{renderElement(commandParams.templateParameterAttribute, commandParams.prefix, handleTypeSelect)}
+			{renderElement(commandParams.templateVarStart, commandParams.prefix, handleTypeSelect)}
+			{renderElement(commandParams.templateVarStop, commandParams.prefix, handleTypeSelect)}
 		</>
 	);
 }
