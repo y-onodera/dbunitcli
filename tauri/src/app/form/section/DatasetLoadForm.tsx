@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import { DatasetSrcInfoProvider } from "../../../context/DatasetSrcInfoProvider";
 import { JdbcConnectionProvider } from "../../../context/JdbcConnectionProvider";
 import type { DatasetSource } from "../../../model/CommandParam";
-import { buildDatasetSrcInfo } from "./CommandFormElement";
-import DatasetCommandFormElements from "./DatasetCommandFormElement";
+import CommandFormElements, { buildDatasetSrcInfo } from "./CommandFormElement";
+import DatasetText from "./DatasetTextFormElement";
 import JdbcFormSection from "./JdbcFormSection";
 
 export function DatasetLoadForm(prop: {
@@ -27,13 +27,14 @@ export function DatasetLoadForm(prop: {
 			>
 				<fieldset className="border border-gray-200 p-3">
 					<legend>{prop.srcData.prefix}</legend>
-					<DatasetCommandFormElements
+					<CommandFormElements
 						handleTypeSelect={prop.handleTypeSelect}
 						prefix={src.prefix}
 						name={prop.name}
 						elements={src.elements}
 						optionCaption={src.optionCaption}
 						optional={src.optional}
+						textComponent={DatasetText}
 					/>
 					{srcTypeSettingsJdbc.elements.length > 0 && (
 						<JdbcFormSection
@@ -41,21 +42,23 @@ export function DatasetLoadForm(prop: {
 							elements={srcTypeSettingsJdbc.elements}
 						/>
 					)}
-					<DatasetCommandFormElements
+					<CommandFormElements
 						handleTypeSelect={prop.handleTypeSelect}
 						prefix={srcTypeSettings.prefix}
 						name={prop.name}
 						elements={srcTypeSettings.elements}
 						optionCaption={srcTypeSettings.optionCaption}
 						optional={srcTypeSettings.optional}
+						textComponent={DatasetText}
 					/>
-					<DatasetCommandFormElements
+					<CommandFormElements
 						handleTypeSelect={prop.handleTypeSelect}
 						prefix={settingElements.prefix}
 						name={prop.name}
 						elements={settingElements.elements}
 						optionCaption={settingElements.optionCaption}
 						optional={settingElements.optional}
+						textComponent={DatasetText}
 					/>
 				</fieldset>
 			</DatasetSrcInfoProvider>
