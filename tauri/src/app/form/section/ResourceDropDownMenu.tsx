@@ -5,7 +5,7 @@ import type { FileProp } from "./FormElementProp";
 
 type Props = Omit<FileProp, "onSelect" | "hidden"> & {
 	isValueInDatalist?: boolean;
-	editButton?: ReactNode;
+	editButtons?: ReactNode[];
 	removeButton?: (closeMenu: () => void) => ReactNode;
 	className?: string;
 };
@@ -17,7 +17,7 @@ export default function ResourceDropDownMenu({
 	element,
 	srcType,
 	isValueInDatalist,
-	editButton,
+	editButtons,
 	removeButton,
 	className,
 }: Props) {
@@ -28,7 +28,7 @@ export default function ResourceDropDownMenu({
 		<DropDownMenu className={className}>
 			{(closeMenu) => (
 				<>
-					{editButton && <li>{editButton}</li>}
+					{editButtons?.map((btn, i) => <li key={i}>{btn}</li>)}
 					{isValueInDatalist && removeButton && (
 						<li>{removeButton(closeMenu)}</li>
 					)}
