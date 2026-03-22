@@ -13,6 +13,7 @@ import {
 } from "../../../components/element/Input";
 import { useSetJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
 import { useResourcesSettings } from "../../../context/WorkspaceResourcesProvider";
+import { getId, getName } from "./FormElementProp";
 import {
 	useDeleteJdbcProperties,
 	useJdbcConnectionTest,
@@ -126,8 +127,8 @@ function JdbcTextField({
 	onApplyValues?: (values: Partial<Record<string, string>>) => void;
 }) {
 	const settings = useResourcesSettings();
-	const labelText = prefix ? `-${prefix}.${element.name}` : `-${element.name}`;
-	const id = prefix ? `${prefix}_${element.name}` : element.name;
+	const labelText = getName(prefix, element.name);
+	const id = getId(prefix, element.name);
 	const isJdbcUrl = element.name === "jdbcUrl";
 	const isJdbcProperties = element.name === "jdbcProperties";
 	const resourceFiles = isJdbcProperties ? settings.jdbcFiles : [];

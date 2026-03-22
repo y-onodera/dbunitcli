@@ -17,3 +17,11 @@ export type FileProp = Prop & {
 export type SelectProp = Prop & {
 	handleTypeSelect: (selected: string) => Promise<void>;
 };
+
+export function getId(prefix: string, name: string): string {
+	return prefix ? `${prefix}_${name}` : `${name}`;
+}
+
+export function getName(prefix: string, name: string): string {
+	return prefix ? `-${prefix}.${name}` : `-${name}`;
+}
