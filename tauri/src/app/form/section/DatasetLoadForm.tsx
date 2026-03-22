@@ -4,7 +4,9 @@ import { JdbcConnectionProvider } from "../../../context/JdbcConnectionProvider"
 import type { DatasetSource } from "../../../model/CommandParam";
 import { buildDatasetSrcInfo } from "./CommandFormElement";
 import DatasetCommandFormSection from "./DatasetCommandFormSection";
+import DatasetSettingSection from "./DatasetSettingSection";
 import JdbcFormSection from "./JdbcFormSection";
+import SrcFormSection from "./SrcFormSection";
 
 export function DatasetLoadForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -27,10 +29,11 @@ export function DatasetLoadForm(prop: {
 			>
 				<fieldset className="border border-gray-200 p-3">
 					<legend>{prop.srcData.prefix}</legend>
-					<DatasetCommandFormSection
-						commandParams={src}
-						handleTypeSelect={prop.handleTypeSelect}
+					<SrcFormSection
+						prefix={src.prefix}
 						name={prop.name}
+						elements={src.elements}
+						handleTypeSelect={prop.handleTypeSelect}
 					/>
 					{srcTypeSettingsJdbc.elements.length > 0 && (
 						<JdbcFormSection
@@ -43,10 +46,10 @@ export function DatasetLoadForm(prop: {
 						handleTypeSelect={prop.handleTypeSelect}
 						name={prop.name}
 					/>
-					<DatasetCommandFormSection
-						commandParams={settingElements}
-						handleTypeSelect={prop.handleTypeSelect}
+					<DatasetSettingSection
+						prefix={settingElements.prefix}
 						name={prop.name}
+						elements={settingElements.elements}
 					/>
 				</fieldset>
 			</DatasetSrcInfoProvider>
