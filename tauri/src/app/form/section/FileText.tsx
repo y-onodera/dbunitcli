@@ -5,37 +5,11 @@ import {
 	useSetDatasetSrcInfo,
 } from "../../../context/DatasetSrcInfoProvider";
 import type { DatasetSrcInfo } from "../../../model/CommandParam";
-import DatasetSettingText from "./DatasetSettingText";
-import FileText from "./FileText";
+import FileDropDownMenu from "./FileDropDownMenu";
 import type { Prop } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
-import SqlSrcText from "./SqlSrcText";
-import TemplateText from "./TemplateText";
-import XlsxSchemaText from "./XlsxSchemaText";
 
-export default function Text(prop: Prop) {
-	if (prop.element.name === "setting") {
-		return <DatasetSettingText {...prop} />;
-	}
-	if (prop.element.name === "xlsxSchema") {
-		return <XlsxSchemaText {...prop} />;
-	}
-	if (prop.element.name === "src") {
-		return <SqlSrcText {...prop} />;
-	}
-	if (prop.element.name === "templateGroup") {
-		return <TemplateText {...prop} />;
-	}
-	if (
-		prop.element.attribute.type.includes("FILE") ||
-		prop.element.attribute.type.includes("DIR")
-	) {
-		return <FileText {...prop} />;
-	}
-	return <PlainText {...prop} />;
-}
-
-function PlainText({ prefix, element, hidden }: Prop) {
+export default function FileText({ prefix, element, hidden, srcType }: Prop) {
 	const [path, setPath] = useState(element.value);
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const setDatasetSrcInfo = useSetDatasetSrcInfo();
@@ -62,7 +36,7 @@ function PlainText({ prefix, element, hidden }: Prop) {
 				hidden={hidden}
 			/>
 			<div className="flex">
-				<div className="flex-1 mr-36">
+				<div className="flex-1">
 					<ControllTextBox
 						name={fieldName}
 						id={id}
@@ -72,6 +46,15 @@ function PlainText({ prefix, element, hidden }: Prop) {
 						handleChange={handleChange}
 					/>
 				</div>
+				{!hidden && (
+					<FileDropDownMenu
+						path={path}
+						setPath={setPath}
+						prefix={prefix}
+						element={element}
+						srcType={srcType}
+					/>
+				)}
 			</div>
 		</div>
 	);
