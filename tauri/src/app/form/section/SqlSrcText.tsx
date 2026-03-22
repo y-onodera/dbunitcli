@@ -4,7 +4,6 @@ import {
 } from "../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../context/WorkspaceResourcesProvider";
 import type { DatasetSrcInfo } from "../../../model/CommandParam";
-import { isSqlRelatedType } from "../../../model/QueryDatasource";
 import type { Prop } from "./FormElementProp";
 import ResourceText from "./ResourceText";
 import SqlSrcDropDownMenu from "./SqlSrcDropDownMenu";
@@ -13,8 +12,7 @@ export default function SqlSrcText({ prefix, element, hidden, srcType }: Prop) {
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const setDatasetSrcInfo = useSetDatasetSrcInfo();
 	const settings = useResourcesSettings();
-	const isSqlSrc = isSqlRelatedType(srcType ?? "");
-	const resourceFiles = isSqlSrc ? settings.querys(srcType) : [];
+	const resourceFiles = settings.querys(srcType);
 
 	const handleValueChange = (newValue: string) => {
 		if (datasetSrcInfo) {
