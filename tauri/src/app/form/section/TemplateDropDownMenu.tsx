@@ -1,9 +1,8 @@
-import DropDownMenu from "../../../components/element/DropDownMenu";
 import TemplateEditButton, {
 	RemoveTemplateButton,
 } from "../../settings/TemplateEditButton";
-import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
 import type { FileProp } from "./FormElementProp";
+import ResourceDropDownMenu from "./ResourceDropDownMenu";
 
 type Props = Omit<FileProp, "onSelect" | "hidden"> & {
 	isValueInDatalist: boolean;
@@ -17,58 +16,16 @@ export default function TemplateDropDownMenu({
 	srcType,
 	isValueInDatalist,
 }: Props) {
-	const isFileType = element.attribute.type.includes("FILE");
-	const isDirType = element.attribute.type.includes("DIR");
-	const isFileOrDir = isFileType || isDirType;
 	return (
-		<DropDownMenu>
-			{(closeMenu) => (
-				<>
-					<li>
-						<TemplateEditButton path={path} setPath={setPath} />
-					</li>
-					{isFileOrDir && path && (
-						<li>
-							<OpenInOS
-								prefix={prefix}
-								element={element}
-								srcType={srcType}
-								path={path}
-								setPath={setPath}
-							/>
-						</li>
-					)}
-					{isValueInDatalist && (
-						<li>
-							<RemoveTemplateButton path={path} setPath={setPath} />
-						</li>
-					)}
-					{isFileType && (
-						<li>
-							<FileChooser
-								prefix={prefix}
-								element={element}
-								srcType={srcType}
-								path={path}
-								setPath={setPath}
-								onSelect={closeMenu}
-							/>
-						</li>
-					)}
-					{isDirType && (
-						<li>
-							<DirectoryChooser
-								prefix={prefix}
-								element={element}
-								srcType={srcType}
-								path={path}
-								setPath={setPath}
-								onSelect={closeMenu}
-							/>
-						</li>
-					)}
-				</>
-			)}
-		</DropDownMenu>
+		<ResourceDropDownMenu
+			path={path}
+			setPath={setPath}
+			prefix={prefix}
+			element={element}
+			srcType={srcType}
+			isValueInDatalist={isValueInDatalist}
+			editButton={<TemplateEditButton path={path} setPath={setPath} />}
+			removeButton={() => <RemoveTemplateButton path={path} setPath={setPath} />}
+		/>
 	);
 }

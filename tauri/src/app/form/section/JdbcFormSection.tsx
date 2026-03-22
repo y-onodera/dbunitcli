@@ -1,11 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useState } from "react";
 import { BlueButton } from "../../../components/element/Button";
-import {
-	BlueEditButton,
-	PreviewButton,
-} from "../../../components/element/ButtonIcon";
-import DropDownMenu from "../../../components/element/DropDownMenu";
+import { BlueEditButton } from "../../../components/element/ButtonIcon";
 import {
 	ControllTextBox,
 	InputLabel,
@@ -20,11 +16,10 @@ import {
 	useJdbcSaveProperties,
 } from "../../../hooks/useJdbc";
 import type { CommandParam } from "../../../model/CommandParam";
-import JdbcPropertiesPreviewDialog from "../../settings/JdbcPropertiesPreviewDialog";
 import JdbcSavePropertiesDialog from "../../settings/JdbcSavePropertiesDialog";
 import JdbcUrlBuilderDialog from "../../settings/JdbcUrlBuilderDialog";
 import { RemoveResource } from "../../settings/ResourceEditButton";
-import { FileChooser } from "./Chooser";
+import ResourceDropDownMenu from "./ResourceDropDownMenu";
 
 export const JDBC_FIELD_NAMES = [
 	"jdbcUrl",
@@ -60,21 +55,6 @@ export default function JdbcFormSection({
 		[setJdbcConnection],
 	);
 
-	const handleApplyValues = useCallback(
-		(newValues: Partial<Record<string, string>>) => {
-			setJdbcValues((prev) => {
-				const defined = Object.fromEntries(
-					Object.entries(newValues).filter(
-						(entry): entry is [string, string] => entry[1] !== undefined,
-					),
-				);
-				return { ...prev, ...defined };
-			});
-			setJdbcConnection({ jdbcValues: {}, connectionOk: false });
-		},
-		[setJdbcConnection],
-	);
-
 	const handleConnectionOk = useCallback(
 		(values: Record<string, string>) => {
 			setJdbcConnection({ jdbcValues: values, connectionOk: true });
@@ -95,9 +75,6 @@ export default function JdbcFormSection({
 					element={element}
 					value={jdbcValues[element.name] ?? element.value}
 					onValueChange={handleJdbcValueChange}
-					onApplyValues={
-						element.name === "jdbcProperties" ? handleApplyValues : undefined
-					}
 				/>
 			))}
 			<div className="mt-2 flex items-center gap-3">
@@ -118,13 +95,11 @@ function JdbcTextField({
 	element,
 	value,
 	onValueChange,
-	onApplyValues,
 }: {
 	prefix: string;
 	element: CommandParam;
 	value: string;
 	onValueChange: (name: string, value: string) => void;
-	onApplyValues?: (values: Partial<Record<string, string>>) => void;
 }) {
 	const settings = useResourcesSettings();
 	const labelText = getName(prefix, element.name);
@@ -167,38 +142,12 @@ function JdbcTextField({
 							element={element}
 							path={value}
 							setPath={setPath}
-							onApplyValues={onApplyValues}
 						/>
 					)}
 					{isJdbcUrl && <JdbcUrlBuilderButton path={value} setPath={setPath} />}
 				</div>
 			</div>
 		</div>
-	);
-}
-
-function JdbcPropertiesPreviewButton({
-	path,
-	onApplyValues,
-}: {
-	path: string;
-	onApplyValues: (values: Partial<Record<string, string>>) => void;
-}) {
-	const [showDialog, setShowDialog] = useState(false);
-	return (
-		<>
-			<PreviewButton handleClick={() => setShowDialog(true)} />
-			{showDialog && (
-				<JdbcPropertiesPreviewDialog
-					path={path}
-					handleDialogClose={() => setShowDialog(false)}
-					handleApply={(values) => {
-						onApplyValues(values);
-						setShowDialog(false);
-					}}
-				/>
-			)}
-		</>
 	);
 }
 
@@ -232,52 +181,33 @@ function JdbcPropertiesDropDownMenu({
 	element,
 	path,
 	setPath,
-	onApplyValues,
 }: {
 	prefix: string;
 	element: CommandParam;
 	path: string;
 	setPath: Dispatch<SetStateAction<string>>;
-	onApplyValues?: (values: Partial<Record<string, string>>) => void;
 }) {
 	const settings = useResourcesSettings();
 	const isValueInDatalist = settings.jdbcFiles.includes(path);
 
 	return (
-		<DropDownMenu className="mr-24">
-			{(closeMenu) => (
-				<>
-					{path && onApplyValues && (
-						<li>
-							<JdbcPropertiesPreviewButton
-								path={path}
-								onApplyValues={onApplyValues}
-							/>
-						</li>
-					)}
-					{path && isValueInDatalist && (
-						<li>
-							<RemoveJdbcPropertiesButton
-								path={path}
-								setPath={(value) => {
-									setPath(value);
-									closeMenu();
-								}}
-							/>
-						</li>
-					)}
-					<li>
-						<FileChooser
-							prefix={prefix}
-							element={element}
-							path={path}
-							setPath={setPath}
-							onSelect={closeMenu}
-						/>
-					</li>
-				</>
+		<ResourceDropDownMenu
+			prefix={prefix}
+			element={element}
+			path={path}
+			setPath={setPath}
+			isValueInDatalist={isValueInDatalist}
+			removeButton={(closeMenu) => (
+				<RemoveJdbcPropertiesButton
+					path={path}
+					setPath={(value) => {
+						setPath(value);
+						closeMenu();
+					}}
+				/>
 			)}
-		</DropDownMenu>
+			className="mr-24"
+		/>
 	);
 }
 
