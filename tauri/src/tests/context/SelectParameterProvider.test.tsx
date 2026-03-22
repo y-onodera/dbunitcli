@@ -38,6 +38,7 @@ const mockConvertParams: ConvertParams = {
 		srcType: () => "table",
 		srcElements: () => createCommandParams(),
 		srcTypeSettings: () => createCommandParams(),
+		jdbcElements: () => createCommandParams(),
 		settingElements: () => createCommandParams(),
 	},
 	convertResult: {
@@ -63,6 +64,7 @@ const mockGenerateParams: GenerateParams = {
 		srcType: () => "csv",
 		srcElements: () => createCommandParams(),
 		srcTypeSettings: () => createCommandParams(),
+		jdbcElements: () => createCommandParams(),
 		settingElements: () => createCommandParams(),
 	},
 	templateOption: {
