@@ -106,18 +106,19 @@ export class DatasetSourceImpl implements DatasetSource {
 				["recursive", "regInclude", "regExclude", "extension"].includes(param),
 		);
 	}
+	private srcTypeRange(): CommandParam[] {
+		return this.elements.slice(
+			this.indexExtension === -1
+				? this.indexRegExclude + 1
+				: this.indexExtension + 1,
+			this.indexOfSetting,
+		);
+	}
 	srcTypeSettings() {
 		const srcTypeSettings = srcTypeDetail.get(this.src);
 		return toCommandParams(
 			this,
-			this.elements
-				.slice(
-					this.indexExtension === -1
-						? this.indexRegExclude + 1
-						: this.indexExtension + 1,
-					this.indexOfSetting,
-				)
-				.filter((it) => !it.name.startsWith("jdbc")),
+			this.srcTypeRange().filter((it) => !it.name.startsWith("jdbc")),
 			srcTypeSettings?.optionCaption,
 			srcTypeSettings?.optional,
 		);
@@ -125,14 +126,7 @@ export class DatasetSourceImpl implements DatasetSource {
 	jdbcElements() {
 		return toCommandParams(
 			this,
-			this.elements
-				.slice(
-					this.indexExtension === -1
-						? this.indexRegExclude + 1
-						: this.indexExtension + 1,
-					this.indexOfSetting,
-				)
-				.filter((it) => it.name.startsWith("jdbc")),
+			this.srcTypeRange().filter((it) => it.name.startsWith("jdbc")),
 			undefined,
 			undefined,
 		);
@@ -156,14 +150,9 @@ export class DatasetSourceImpl implements DatasetSource {
 		return new JdbcOptionImpl(jdbc.name, jdbc.prefix, jdbc.elements);
 	}
 	templateOption(): TemplateOption {
-		const elements = this.elements
-			.slice(
-				this.indexExtension === -1
-					? this.indexRegExclude + 1
-					: this.indexExtension + 1,
-				this.indexOfSetting,
-			)
-			.filter((it) => it.name.startsWith("template"));
+		const elements = this.srcTypeRange().filter((it) =>
+			it.name.startsWith("template"),
+		);
 		return new TemplateOptionImpl(this.name, this.prefix, elements);
 	}
 }
