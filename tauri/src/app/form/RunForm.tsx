@@ -28,10 +28,9 @@ export function RunForm(prop: {
 				<fieldset className="border border-gray-200 p-3">
 					<legend>template</legend>
 					<TemplateFormSection
+						commandParams={templateOption}
 						handleTypeSelect={prop.handleTypeSelect}
 						name={prop.name}
-						prefix={templateOption.prefix}
-						elements={templateOption.elements}
 					/>
 				</fieldset>
 			)}

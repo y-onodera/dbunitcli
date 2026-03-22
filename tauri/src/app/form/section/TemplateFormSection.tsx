@@ -1,23 +1,23 @@
-import type { CommandParam } from "../../../model/CommandParam";
+import type { CommandParams } from "../../../model/CommandParam";
 import CommandFormElements from "./CommandFormElement";
 
 export default function TemplateFormSection({
+	commandParams,
 	handleTypeSelect,
 	name,
-	prefix,
-	elements,
 }: {
+	commandParams: CommandParams;
 	handleTypeSelect: (selected: string) => Promise<void>;
 	name: string;
-	prefix: string;
-	elements: CommandParam[];
 }) {
 	return (
 		<CommandFormElements
 			handleTypeSelect={handleTypeSelect}
 			name={name}
-			prefix={prefix}
-			elements={elements}
+			prefix={commandParams.prefix}
+			elements={commandParams.elements}
+			optionCaption={commandParams.optionCaption}
+			optional={commandParams.optional}
 		/>
 	);
 }
