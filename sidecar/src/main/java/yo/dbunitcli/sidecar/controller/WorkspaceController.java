@@ -74,19 +74,8 @@ public class WorkspaceController implements ControllerExceptionHandler {
         }
     }
 
-    static File getFieldBaseDir(final String defaultPath, final String srcType) {
-        return switch (defaultPath) {
-            case "DATASET" -> srcType != null && !srcType.isEmpty()
-                    ? new File(FileResources.datasetDir(), srcType)
-                    : FileResources.datasetDir();
-            case "RESULT" -> FileResources.resultDir();
-            case "SETTING" -> FileResources.settingDir();
-            case "TEMPLATE" -> FileResources.templateFileDir();
-            case "PARAMETERIZE_TEMPLATE" -> FileResources.parameterizeTemplateDir();
-            case "JDBC" -> FileResources.jdbcPropDir();
-            case "XLSX_SCHEMA" -> FileResources.xlsxSchemaDir();
-            default -> FileResources.baseDir();
-        };
+    private static File getFieldBaseDir(final String defaultPath, final String srcType) {
+        return Workspace.resolveBaseDir(defaultPath, srcType);
     }
 
     private String currentResources() throws IOException {

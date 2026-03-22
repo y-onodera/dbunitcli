@@ -221,7 +221,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
                     continue;
                 }
                 final String key = Strings.isNotEmpty(prefix) ? "-" + prefix + "." + name : "-" + name;
-                resolved.put(key, new File(WorkspaceController.getFieldBaseDir(defaultPath, null), value).getAbsolutePath());
+                resolved.put(key, new File(Workspace.resolveBaseDir(defaultPath, null), value).getAbsolutePath());
             }
         }
         for (final Map.Entry<String, Object> entry : serialized.entrySet()) {

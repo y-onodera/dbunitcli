@@ -29,6 +29,21 @@ import java.util.stream.Stream;
 public class Workspace {
     private static final Logger LOGGER = LoggerFactory.getLogger(Workspace.class);
 
+    public static File resolveBaseDir(final String defaultPath, final String srcType) {
+        return switch (defaultPath) {
+            case "DATASET" -> srcType != null && !srcType.isEmpty()
+                    ? new File(FileResources.datasetDir(), srcType)
+                    : FileResources.datasetDir();
+            case "RESULT" -> FileResources.resultDir();
+            case "SETTING" -> FileResources.settingDir();
+            case "TEMPLATE" -> FileResources.templateFileDir();
+            case "PARAMETERIZE_TEMPLATE" -> FileResources.parameterizeTemplateDir();
+            case "JDBC" -> FileResources.jdbcPropDir();
+            case "XLSX_SCHEMA" -> FileResources.xlsxSchemaDir();
+            default -> FileResources.baseDir();
+        };
+    }
+
     public static Builder builder() {
         return new Builder();
     }
