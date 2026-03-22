@@ -51,13 +51,13 @@ export default function ResourceText({
 					<ControllTextBox
 						name={fieldName}
 						id={id}
-						list={`${id}_list`}
+						list={resourceFiles.length > 0 ? `${id}_list` : undefined}
 						hidden={hidden}
 						required={element.attribute.required}
 						value={path}
 						handleChange={handleChange}
 					/>
-					{!hidden && (
+					{!hidden && resourceFiles.length > 0 && (
 						<ResourceDatalist
 							id={id}
 							resources={resourceFiles}
