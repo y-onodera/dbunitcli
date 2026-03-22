@@ -156,8 +156,8 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
             LOGGER.info(System.getProperty(FileResources.PROPERTY_WORKSPACE));
             final CommandParameters parameters = new CommandParameters(this.getCommandType(), body.getInput())
                     .resolveFilePaths((baseDir, value) ->
-                            SIDECAR_RESOLVE_BASEDIRS.contains(baseDir) && !value.isEmpty() && !new File(value).isAbsolute()
-                                    ? new File(Workspace.resolveBaseDir(baseDir.name(), null), value).getAbsolutePath()
+                            SIDECAR_RESOLVE_BASEDIRS.contains(baseDir) && !new File(value).isAbsolute()
+                                    ? new File(Workspace.resolveBaseDir(baseDir, null), value).getAbsolutePath()
                                     : value);
             try {
                 parameters.exec(body.getName());

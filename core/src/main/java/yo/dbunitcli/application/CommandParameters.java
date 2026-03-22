@@ -42,10 +42,10 @@ public record CommandParameters(CommandType type, String[] args) {
         boolean changed = false;
         final List<String> newArgs = new ArrayList<>();
         for (final String key : params.keySet()) {
-            if (!params.hasValue(key)) {
+            final Option.Arg arg = params.getArg(key);
+            if (arg == null || arg.value().isEmpty()) {
                 continue;
             }
-            final Option.Arg arg = params.getArg(key);
             final String value = arg.value();
             final String resolved = resolver.apply(arg.attribute().defaultPath(), value);
             if (!resolved.equals(value)) {
