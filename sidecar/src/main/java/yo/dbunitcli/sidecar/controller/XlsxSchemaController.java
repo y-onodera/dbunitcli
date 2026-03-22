@@ -16,6 +16,7 @@ import yo.dbunitcli.sidecar.dto.XlsxSheetsRequestDto;
 
 import java.io.File;
 import java.util.Arrays;
+import yo.dbunitcli.resource.FileResources;
 
 @Controller("xlsx-schema")
 public class XlsxSchemaController extends AbstractResourceFileController<JsonXlsxSchemaRequestDto> {
@@ -33,8 +34,11 @@ public class XlsxSchemaController extends AbstractResourceFileController<JsonXls
     @Post(uri = "sheets", produces = MediaType.APPLICATION_JSON)
     public String sheets(@Body final XlsxSheetsRequestDto request) {
         try {
+            final File src = request.getSrc() != null && !new File(request.getSrc()).isAbsolute()
+                    ? FileResources.searchDatasetBase(request.getSrc())
+                    : new File(request.getSrc());
             final ComparableDataSetParam param = ComparableDataSetParam.builder()
-                    .setSrc(new File(request.getSrc()))
+                    .setSrc(src)
                     .setRegTableInclude(request.getRegTableInclude())
                     .setRegTableExclude(request.getRegTableExclude())
                     .setRecursive(request.isRecursive())
