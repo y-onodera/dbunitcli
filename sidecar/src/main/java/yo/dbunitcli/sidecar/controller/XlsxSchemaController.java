@@ -7,8 +7,10 @@ import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.Strings;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.JsonXlsxSchemaRequestDto;
@@ -33,8 +35,11 @@ public class XlsxSchemaController extends AbstractResourceFileController<JsonXls
     @Post(uri = "sheets", produces = MediaType.APPLICATION_JSON)
     public String sheets(@Body final XlsxSheetsRequestDto request) {
         try {
+            final File src = Strings.isNotEmpty(request.getSrc())
+                    ? FileResources.searchDatasetBase(request.getSrc())
+                    : new File(".");
             final ComparableDataSetParam param = ComparableDataSetParam.builder()
-                    .setSrc(new File(request.getSrc()))
+                    .setSrc(src)
                     .setRegTableInclude(request.getRegTableInclude())
                     .setRegTableExclude(request.getRegTableExclude())
                     .setRecursive(request.isRecursive())

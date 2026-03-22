@@ -9,19 +9,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.CommandParameters;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.CommandRequestDto;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractCommandController implements ControllerExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCommandController.class);
+
+    private static final EnumSet<Option.BaseDir> SIDECAR_RESOLVE_BASEDIRS = EnumSet.of(
+            Option.BaseDir.SETTING, Option.BaseDir.TEMPLATE, Option.BaseDir.JDBC,
+            Option.BaseDir.XLSX_SCHEMA, Option.BaseDir.PARAMETERIZE_TEMPLATE);
 
     private final Workspace workspace;
 
@@ -147,7 +154,11 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     public String exec(@Body final CommandRequestDto body) {
         try {
             LOGGER.info(System.getProperty(FileResources.PROPERTY_WORKSPACE));
-            final CommandParameters parameters = new CommandParameters(this.getCommandType(), body.getInput());
+            final CommandParameters parameters = new CommandParameters(this.getCommandType(), body.getInput())
+                    .resolveFilePaths((baseDir, value) ->
+                            SIDECAR_RESOLVE_BASEDIRS.contains(baseDir) && !new File(value).isAbsolute()
+                                    ? new File(Workspace.resolveBaseDir(baseDir, null), value).getAbsolutePath()
+                                    : value);
             try {
                 parameters.exec(body.getName());
             } catch (final Command.CommandFailException th) {

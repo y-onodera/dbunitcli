@@ -58,7 +58,7 @@ public class WorkspaceController implements ControllerExceptionHandler {
                 return absolute.getAbsolutePath();
             }
             for (final File root : new File[]{
-                    getFieldBaseDir(request.getDefaultPath(), request.getSrcType()),
+                    Workspace.resolveBaseDir(request.getDefaultPath(), request.getSrcType()),
                     FileResources.baseDir(),
                     new File(System.getProperty("user.dir"))
             }) {
@@ -72,21 +72,6 @@ public class WorkspaceController implements ControllerExceptionHandler {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
         }
-    }
-
-    private static File getFieldBaseDir(final String defaultPath, final String srcType) {
-        return switch (defaultPath) {
-            case "DATASET" -> srcType != null && !srcType.isEmpty()
-                    ? new File(FileResources.datasetDir(), srcType)
-                    : FileResources.datasetDir();
-            case "RESULT" -> FileResources.resultDir();
-            case "SETTING" -> FileResources.settingDir();
-            case "TEMPLATE" -> FileResources.templateFileDir();
-            case "PARAMETERIZE_TEMPLATE" -> FileResources.parameterizeTemplateDir();
-            case "JDBC" -> FileResources.jdbcPropDir();
-            case "XLSX_SCHEMA" -> FileResources.xlsxSchemaDir();
-            default -> FileResources.baseDir();
-        };
     }
 
     private String currentResources() throws IOException {

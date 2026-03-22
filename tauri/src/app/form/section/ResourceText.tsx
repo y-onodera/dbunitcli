@@ -5,8 +5,10 @@ import {
 	InputLabel,
 	ResourceDatalist,
 } from "../../../components/element/Input";
+import { useWorkspaceContext } from "../../../context/WorkspaceResourcesProvider";
 import type { Prop } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
+import { getPath } from "./Chooser";
 
 interface Props extends Prop {
 	resourceFiles: string[];
@@ -22,7 +24,7 @@ export default function ResourceText({
 	prefix,
 	element,
 	hidden,
-	srcType: _srcType,
+	srcType,
 	resourceFiles,
 	onValueChange,
 	children,
@@ -30,6 +32,8 @@ export default function ResourceText({
 	const [path, setPath] = useState(element.value);
 	const hasResources = resourceFiles.length > 0;
 	const isValueInDatalist = resourceFiles.includes(path);
+	const context = useWorkspaceContext();
+	const defaultPath = getPath(context, element.attribute.defaultPath, srcType);
 	const id = getId(prefix, element.name);
 	const fieldName = getName(prefix, element.name);
 
@@ -63,6 +67,9 @@ export default function ResourceText({
 							id={id}
 							resources={resourceFiles}
 						/>
+					)}
+					{!hidden && defaultPath && (
+						<p className="text-xs text-gray-400 truncate">{defaultPath}</p>
 					)}
 				</div>
 				{!hidden && children({ path, setPath, isValueInDatalist })}
