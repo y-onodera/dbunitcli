@@ -1,3 +1,4 @@
+import type { CommandParams } from "../../model/CommandParam";
 import type {
 	CompareParams,
 	ConvertParams,
@@ -7,6 +8,12 @@ import type {
 } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
 
+const createCommandParams = (): CommandParams => ({
+	name: "",
+	prefix: "",
+	elements: [],
+});
+
 describe("SelectParameterクラス", () => {
 	const mockConvertParams: ConvertParams = {
 		srcData: {
@@ -14,21 +21,10 @@ describe("SelectParameterクラス", () => {
 			prefix: "convert",
 			elements: [],
 			srcType: () => "csv",
-			srcElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			srcTypeSettings: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			settingElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
+			srcElements: () => createCommandParams(),
+			srcTypeSettings: () => createCommandParams(),
+			jdbcElements: () => createCommandParams(),
+			settingElements: () => createCommandParams(),
 		},
 		convertResult: {
 			name: "convertResult",
@@ -49,42 +45,20 @@ describe("SelectParameterクラス", () => {
 			prefix: "compare",
 			elements: [],
 			srcType: () => "csv",
-			srcElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			srcTypeSettings: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			settingElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
+			srcElements: () => createCommandParams(),
+			srcTypeSettings: () => createCommandParams(),
+			jdbcElements: () => createCommandParams(),
+			settingElements: () => createCommandParams(),
 		},
 		oldData: {
 			name: "compareOldData",
 			prefix: "compare",
 			elements: [],
 			srcType: () => "csv",
-			srcElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			srcTypeSettings: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			settingElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
+			srcElements: () => createCommandParams(),
+			srcTypeSettings: () => createCommandParams(),
+			jdbcElements: () => createCommandParams(),
+			settingElements: () => createCommandParams(),
 		},
 		imageOption: {
 			name: "",
@@ -106,21 +80,10 @@ describe("SelectParameterクラス", () => {
 			prefix: "compare",
 			elements: [],
 			srcType: () => "csv",
-			srcElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			srcTypeSettings: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			settingElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
+			srcElements: () => createCommandParams(),
+			srcTypeSettings: () => createCommandParams(),
+			jdbcElements: () => createCommandParams(),
+			settingElements: () => createCommandParams(),
 		},
 	};
 
@@ -131,21 +94,10 @@ describe("SelectParameterクラス", () => {
 			prefix: "generate",
 			elements: [],
 			srcType: () => "csv",
-			srcElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			srcTypeSettings: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			settingElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
+			srcElements: () => createCommandParams(),
+			srcTypeSettings: () => createCommandParams(),
+			jdbcElements: () => createCommandParams(),
+			settingElements: () => createCommandParams(),
 		},
 		templateOption: {
 			name: "",
@@ -161,21 +113,10 @@ describe("SelectParameterクラス", () => {
 			prefix: "run",
 			elements: [],
 			srcType: () => "csv",
-			srcElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			srcTypeSettings: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			settingElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
+			srcElements: () => createCommandParams(),
+			srcTypeSettings: () => createCommandParams(),
+			jdbcElements: () => createCommandParams(),
+			settingElements: () => createCommandParams(),
 		},
 		templateOption: {
 			name: "",
@@ -196,21 +137,10 @@ describe("SelectParameterクラス", () => {
 			prefix: "parameterize",
 			elements: [],
 			srcType: () => "csv",
-			srcElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			srcTypeSettings: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
-			settingElements: () => ({
-				name: "",
-				prefix: "",
-				elements: [],
-			}),
+			srcElements: () => createCommandParams(),
+			srcTypeSettings: () => createCommandParams(),
+			jdbcElements: () => createCommandParams(),
+			settingElements: () => createCommandParams(),
 		},
 		templateOption: {
 			name: "",
