@@ -28,6 +28,7 @@ export default function ResourceText({
 	children,
 }: Props) {
 	const [path, setPath] = useState(element.value);
+	const hasResources = resourceFiles.length > 0;
 	const isValueInDatalist = resourceFiles.includes(path);
 	const id = getId(prefix, element.name);
 	const fieldName = getName(prefix, element.name);
@@ -51,13 +52,13 @@ export default function ResourceText({
 					<ControllTextBox
 						name={fieldName}
 						id={id}
-						list={resourceFiles.length > 0 ? `${id}_list` : undefined}
+						list={hasResources ? `${id}_list` : undefined}
 						hidden={hidden}
 						required={element.attribute.required}
 						value={path}
 						handleChange={handleChange}
 					/>
-					{!hidden && resourceFiles.length > 0 && (
+					{!hidden && hasResources && (
 						<ResourceDatalist
 							id={id}
 							resources={resourceFiles}
