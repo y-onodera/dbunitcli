@@ -7,7 +7,6 @@ import type {
 	DatasetSrcInfo,
 	SrcInfo,
 } from "../../../model/CommandParam";
-import { isJdbcField } from "./JdbcFormSection";
 import Check from "./CheckFormElement";
 import type { Prop } from "./FormElementProp";
 import Select from "./SelectFormElement";
@@ -59,16 +58,15 @@ export default function CommandFormElements(
 	const srcType = srcTypeElement ? srcTypeElement.value : "";
 	const toggleOptional = () => setShowOptional(!showOptional);
 
-	const firstOptionalNonJdbcElementName = prop.optionCaption
-		? prop.elements.find((e) => !isJdbcField(e.name) && prop.optional?.(e.name))
-				?.name
+	const firstOptionalName = prop.optionCaption
+		? prop.elements.find((e) => prop.optional?.(e.name))?.name
 		: undefined;
 
 	return (
 		<>
 			{prop.elements.map((element) => {
 				const showExpandButton =
-					element.name === firstOptionalNonJdbcElementName;
+					element.name === firstOptionalName;
 				if (element.attribute.type === "FLG") {
 					return (
 						<Fragment key={prop.name + prop.prefix + element.name}>

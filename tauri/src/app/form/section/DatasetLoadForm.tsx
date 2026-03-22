@@ -20,7 +20,10 @@ export function DatasetLoadForm(prop: {
 		() => buildDatasetSrcInfo(prop.srcData.elements),
 		[prop.srcData.elements],
 	);
-	const srcTypeSettingsJdbc = prop.srcData.jdbcElements();
+	const jdbcOption = useMemo(
+		() => prop.srcData.jdbcOption(),
+		[prop.srcData.elements],
+	);
 	return (
 		<JdbcConnectionProvider>
 			<DatasetSrcInfoProvider
@@ -35,11 +38,8 @@ export function DatasetLoadForm(prop: {
 						elements={src.elements}
 						handleTypeSelect={prop.handleTypeSelect}
 					/>
-					{srcTypeSettingsJdbc.elements.length > 0 && (
-						<JdbcFormSection
-							prefix={srcTypeSettings.prefix}
-							elements={srcTypeSettingsJdbc.elements}
-						/>
+					{jdbcOption.elements.length > 0 && (
+						<JdbcFormSection jdbcOption={jdbcOption} />
 					)}
 					<DatasetCommandFormSection
 						commandParams={srcTypeSettings}
