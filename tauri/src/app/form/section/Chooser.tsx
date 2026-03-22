@@ -135,7 +135,7 @@ export function OpenInOS(prop: FileProp) {
 	return <OpenButton handleClick={handleOpen} />;
 }
 
-function getPath(
+export function getPath(
 	context: WorkspaceContext,
 	defaultPath: DefaultPath,
 	srcType: string | undefined,

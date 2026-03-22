@@ -4,7 +4,9 @@ import {
 	useDatasetSrcInfo,
 	useSetDatasetSrcInfo,
 } from "../../../context/DatasetSrcInfoProvider";
+import { useWorkspaceContext } from "../../../context/WorkspaceResourcesProvider";
 import type { DatasetSrcInfo } from "../../../model/CommandParam";
+import { getPath } from "./Chooser";
 import FileDropDownMenu from "./FileDropDownMenu";
 import type { Prop } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
@@ -13,6 +15,8 @@ export default function FileText({ prefix, element, hidden, srcType }: Prop) {
 	const [path, setPath] = useState(element.value);
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const setDatasetSrcInfo = useSetDatasetSrcInfo();
+	const context = useWorkspaceContext();
+	const defaultPath = getPath(context, element.attribute.defaultPath, srcType);
 	const id = getId(prefix, element.name);
 	const fieldName = getName(prefix, element.name);
 
@@ -45,6 +49,9 @@ export default function FileText({ prefix, element, hidden, srcType }: Prop) {
 						value={path}
 						handleChange={handleChange}
 					/>
+					{!hidden && defaultPath && (
+						<p className="text-xs text-gray-400 truncate">{defaultPath}</p>
+					)}
 				</div>
 				{!hidden && (
 					<FileDropDownMenu
