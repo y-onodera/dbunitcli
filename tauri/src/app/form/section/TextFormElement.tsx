@@ -1,5 +1,4 @@
-import { useState } from "react";
-import DropDownMenu from "../../../components/element/DropDownMenu";
+import { type ReactNode, useState } from "react";
 import {
 	ControllTextBox,
 	InputLabel,
@@ -9,30 +8,17 @@ import {
 	useDatasetSrcInfo,
 	useSetDatasetSrcInfo,
 } from "../../../context/DatasetSrcInfoProvider";
-import { useJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
 import { useResourcesSettings } from "../../../context/WorkspaceResourcesProvider";
 import type { DatasetSrcInfo } from "../../../model/CommandParam";
-import {
-	isSqlRelatedType,
-	type QueryDatasourceType,
-} from "../../../model/QueryDatasource";
-import DatasetSettingEditButton, {
-	RemoveDatasetSettingButton,
-} from "../../settings/DatasetSettingEditButton";
+import { isSqlRelatedType } from "../../../model/QueryDatasource";
 import DatasetTableNamesPreviewButton from "../../settings/DatasetTableNamesPreviewButton";
-import JdbcTableSelectorButton from "../../settings/JdbcTableSelectorButton";
-import SqlEditorButton, {
-	RemoveSqlEditorButton,
-} from "../../settings/SqlEditorButton";
-import TemplateEditButton, {
-	RemoveTemplateButton,
-} from "../../settings/TemplateEditButton";
-import XlsxSchemaEditButton, {
-	RemoveXlsxSchemaButton,
-} from "../../settings/XlsxSchemaEditButton";
-import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
-import type { FileProp, Prop } from "./FormElementProp";
+import DatasetSettingDropDownMenu from "./DatasetSettingDropDownMenu";
+import FileDropDownMenu from "./FileDropDownMenu";
+import type { Prop } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
+import SqlSrcDropDownMenu from "./SqlSrcDropDownMenu";
+import TemplateDropDownMenu from "./TemplateDropDownMenu";
+import XlsxSchemaDropDownMenu from "./XlsxSchemaDropDownMenu";
 
 export default function Text(prop: Prop) {
 	const [path, setPath] = useState(prop.element.value);
@@ -40,8 +26,7 @@ export default function Text(prop: Prop) {
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const setDatasetSrcInfo = useSetDatasetSrcInfo();
 	const settings = useResourcesSettings();
-	const isSqlSrc =
-		element.name === "src" && isSqlRelatedType(srcType ?? "");
+	const isSqlSrc = element.name === "src" && isSqlRelatedType(srcType ?? "");
 	let resourceFiles: string[] = [];
 	if (isSqlSrc) {
 		resourceFiles = settings.querys(srcType);
@@ -57,10 +42,10 @@ export default function Text(prop: Prop) {
 		element.name === "xlsxSchema" ||
 		isSqlSrc ||
 		element.name === "templateGroup";
-	const showDropDownMenu =
+	const isFileOrDir =
 		element.attribute.type.includes("FILE") ||
-		element.attribute.type.includes("DIR") ||
-		showDatalist;
+		element.attribute.type.includes("DIR");
+	const showDropDownMenu = isFileOrDir || showDatalist;
 	const isValueInDatalist = resourceFiles.includes(path);
 
 	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,6 +62,64 @@ export default function Text(prop: Prop) {
 		}
 	};
 
+	let dropDownMenu: ReactNode = null;
+	if (element.name === "setting") {
+		dropDownMenu = (
+			<DatasetSettingDropDownMenu
+				path={path}
+				setPath={setPath}
+				prefix={prop.prefix}
+				element={element}
+				srcType={srcType}
+				isValueInDatalist={isValueInDatalist}
+				hideDatasetSettingEdit={prop.hideDatasetSettingEdit}
+			/>
+		);
+	} else if (element.name === "xlsxSchema") {
+		dropDownMenu = (
+			<XlsxSchemaDropDownMenu
+				path={path}
+				setPath={setPath}
+				prefix={prop.prefix}
+				element={element}
+				srcType={srcType}
+				isValueInDatalist={isValueInDatalist}
+			/>
+		);
+	} else if (element.name === "src") {
+		dropDownMenu = (
+			<SqlSrcDropDownMenu
+				path={path}
+				setPath={setPath}
+				prefix={prop.prefix}
+				element={element}
+				srcType={srcType}
+				isValueInDatalist={isValueInDatalist}
+			/>
+		);
+	} else if (element.name === "templateGroup") {
+		dropDownMenu = (
+			<TemplateDropDownMenu
+				path={path}
+				setPath={setPath}
+				prefix={prop.prefix}
+				element={element}
+				srcType={srcType}
+				isValueInDatalist={isValueInDatalist}
+			/>
+		);
+	} else if (isFileOrDir) {
+		dropDownMenu = (
+			<FileDropDownMenu
+				path={path}
+				setPath={setPath}
+				prefix={prop.prefix}
+				element={element}
+				srcType={srcType}
+			/>
+		);
+	}
+
 	return (
 		<>
 			<div>
@@ -88,7 +131,7 @@ export default function Text(prop: Prop) {
 				/>
 				<div className="flex">
 					<div
-						className={`flex-1${!showDropDownMenu && !isValueInDatalist ? " mr-36" : ""}`}
+						className={`flex-1${!showDropDownMenu ? " mr-36" : ""}`}
 					>
 						<ControllTextBox
 							name={getName(prop.prefix, prop.element.name)}
@@ -110,18 +153,7 @@ export default function Text(prop: Prop) {
 							/>
 						)}
 					</div>
-					{showDropDownMenu && !prop.hidden && (
-						<TextDropDownMenu
-							prefix={prop.prefix}
-							element={prop.element}
-							path={path}
-							setPath={setPath}
-							hidden={prop.hidden}
-							srcType={srcType}
-							isValueInDatalist={isValueInDatalist}
-							hideDatasetSettingEdit={prop.hideDatasetSettingEdit}
-						/>
-					)}
+					{!prop.hidden && dropDownMenu}
 				</div>
 			</div>
 			{element.name === "setting" &&
@@ -138,129 +170,5 @@ export default function Text(prop: Prop) {
 					</div>
 				)}
 		</>
-	);
-}
-
-function TextDropDownMenu({
-	prefix,
-	element,
-	path,
-	setPath,
-	hidden,
-	srcType,
-	isValueInDatalist,
-	hideDatasetSettingEdit,
-}: FileProp & {
-	srcType?: string;
-	isValueInDatalist?: boolean;
-	hideDatasetSettingEdit?: boolean;
-}) {
-	const { connectionOk } = useJdbcConnectionState();
-
-	return (
-		<DropDownMenu>
-			{(closeMenu) => (
-				<>
-					{element.name === "setting" && !hidden && !hideDatasetSettingEdit && (
-						<li>
-							<DatasetSettingEditButton path={path} setPath={setPath} />
-						</li>
-					)}
-					{element.name === "xlsxSchema" && !hidden && (
-						<li>
-							<XlsxSchemaEditButton path={path} setPath={setPath} />
-						</li>
-					)}
-					{element.name === "src" &&
-						!hidden &&
-						isSqlRelatedType(srcType ?? "") && (
-							<li>
-								<SqlEditorButton
-									type={srcType as QueryDatasourceType}
-									path={path}
-									setPath={setPath}
-								/>
-							</li>
-						)}
-					{element.name === "src" &&
-						!hidden &&
-						srcType === "table" &&
-						connectionOk && (
-							<li>
-								<JdbcTableSelectorButton path={path} setPath={setPath} />
-							</li>
-						)}
-					{element.name === "templateGroup" && !hidden && (
-						<li>
-							<TemplateEditButton path={path} setPath={setPath} />
-						</li>
-					)}
-					{(element.attribute.type.includes("FILE") ||
-						element.attribute.type.includes("DIR")) &&
-						path &&
-						!hidden && (
-							<li>
-								<OpenInOS
-									prefix={prefix}
-									element={element}
-									srcType={srcType}
-									path={path}
-									setPath={setPath}
-								/>
-							</li>
-						)}
-					{element.name === "templateGroup" && !hidden && isValueInDatalist && (
-						<li>
-							<RemoveTemplateButton path={path} setPath={setPath} />
-						</li>
-					)}
-					{element.name === "setting" && !hidden && isValueInDatalist && (
-						<li>
-							<RemoveDatasetSettingButton path={path} setPath={setPath} />
-						</li>
-					)}
-					{element.name === "xlsxSchema" && !hidden && isValueInDatalist && (
-						<li>
-							<RemoveXlsxSchemaButton path={path} setPath={setPath} />
-						</li>
-					)}
-					{(srcType === "sql" || srcType === "table") &&
-						!hidden &&
-						isValueInDatalist && (
-							<li>
-								<RemoveSqlEditorButton
-									path={path}
-									setPath={setPath}
-									type={srcType as QueryDatasourceType}
-								/>
-							</li>
-						)}
-					{element.attribute.type.includes("FILE") && (
-						<li>
-							<FileChooser
-								prefix={prefix}
-								element={element}
-								srcType={srcType}
-								path={path}
-								setPath={setPath}
-								onSelect={closeMenu}
-							/>
-						</li>
-					)}
-					{element.attribute.type.includes("DIR") && (
-						<li>
-							<DirectoryChooser
-								prefix={prefix}
-								element={element}
-								srcType={srcType}
-								path={path}
-								setPath={setPath}
-								onSelect={closeMenu}
-							/>
-						</li>
-					)}
-				</>
-			)}
-		</DropDownMenu>
 	);
 }
