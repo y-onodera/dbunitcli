@@ -6,7 +6,10 @@ import yo.dbunitcli.common.Parameter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 public record CommandParameters(CommandType type, String[] args) {
 
@@ -32,6 +35,25 @@ public record CommandParameters(CommandType type, String[] args) {
 
     public Option.Parameters toOptionParameters() {
         return this.type().getCommand().parseOption(this.args).toParameters();
+    }
+
+    public CommandParameters resolveFilePaths(final BiFunction<Option.BaseDir, String, String> resolver) {
+        final Option.Parameters params = this.toOptionParameters();
+        boolean changed = false;
+        final List<String> newArgs = new ArrayList<>();
+        for (final String key : params.keySet()) {
+            if (!params.hasValue(key)) {
+                continue;
+            }
+            final Option.Arg arg = params.getArg(key);
+            final String value = arg.value();
+            final String resolved = resolver.apply(arg.attribute().defaultPath(), value);
+            if (!resolved.equals(value)) {
+                changed = true;
+            }
+            newArgs.add(key + "=" + resolved);
+        }
+        return changed ? new CommandParameters(this.type, newArgs.toArray(new String[0])) : this;
     }
 
     public CommandParameters shrink() {

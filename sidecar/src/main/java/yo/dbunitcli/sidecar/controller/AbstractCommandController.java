@@ -7,9 +7,9 @@ import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.CommandParameters;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
@@ -18,17 +18,17 @@ import yo.dbunitcli.sidecar.dto.CommandRequestDto;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public abstract class AbstractCommandController implements ControllerExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCommandController.class);
 
-    private static final Set<String> SIDECAR_RESOLVE_PATHS = Set.of(
-            "SETTING", "TEMPLATE", "JDBC", "XLSX_SCHEMA", "PARAMETERIZE_TEMPLATE");
+    private static final EnumSet<Option.BaseDir> SIDECAR_RESOLVE_BASEDIRS = EnumSet.of(
+            Option.BaseDir.SETTING, Option.BaseDir.TEMPLATE, Option.BaseDir.JDBC,
+            Option.BaseDir.XLSX_SCHEMA, Option.BaseDir.PARAMETERIZE_TEMPLATE);
 
     private final Workspace workspace;
 
@@ -154,8 +154,11 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     public String exec(@Body final CommandRequestDto body) {
         try {
             LOGGER.info(System.getProperty(FileResources.PROPERTY_WORKSPACE));
-            final Map<String, String> resolvedInput = this.resolveDefaultPaths(body.getInput());
-            final CommandParameters parameters = new CommandParameters(this.getCommandType(), resolvedInput);
+            final CommandParameters parameters = new CommandParameters(this.getCommandType(), body.getInput())
+                    .resolveFilePaths((baseDir, value) ->
+                            SIDECAR_RESOLVE_BASEDIRS.contains(baseDir) && !value.isEmpty() && !new File(value).isAbsolute()
+                                    ? new File(Workspace.resolveBaseDir(baseDir.name(), null), value).getAbsolutePath()
+                                    : value);
             try {
                 parameters.exec(body.getName());
             } catch (final Command.CommandFailException th) {
@@ -195,40 +198,6 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
 
     protected String toJson(final List<String> object) throws IOException {
         return ObjectMapper.getDefault().writeValueAsString(object);
-    }
-
-    private Map<String, String> resolveDefaultPaths(final Map<String, String> input) {
-        final Map<String, Object> serialized = new CommandParameters(this.getCommandType(), input).serialize();
-        final Map<String, String> resolved = new LinkedHashMap<>(input);
-        applyResolvedPaths(serialized, resolved);
-        return resolved;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static void applyResolvedPaths(final Map<String, Object> serialized, final Map<String, String> resolved) {
-        final String prefix = (String) serialized.get("prefix");
-        final List<Map<String, Object>> elements = (List<Map<String, Object>>) serialized.get("elements");
-        if (elements != null) {
-            for (final Map<String, Object> element : elements) {
-                final String name = (String) element.get("name");
-                final String value = (String) element.get("value");
-                final Map<String, Object> attribute = (Map<String, Object>) element.get("attribute");
-                if (attribute == null || value == null || value.isEmpty()) {
-                    continue;
-                }
-                final String defaultPath = String.valueOf(attribute.get("defaultPath"));
-                if (!SIDECAR_RESOLVE_PATHS.contains(defaultPath) || new File(value).isAbsolute()) {
-                    continue;
-                }
-                final String key = Strings.isNotEmpty(prefix) ? "-" + prefix + "." + name : "-" + name;
-                resolved.put(key, new File(Workspace.resolveBaseDir(defaultPath, null), value).getAbsolutePath());
-            }
-        }
-        for (final Map.Entry<String, Object> entry : serialized.entrySet()) {
-            if (!Set.of("prefix", "elements").contains(entry.getKey()) && entry.getValue() instanceof Map<?, ?> sub) {
-                applyResolvedPaths((Map<String, Object>) sub, resolved);
-            }
-        }
     }
 
 }
