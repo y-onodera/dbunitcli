@@ -1,66 +1,67 @@
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
-import type { CommandParam } from "../../../model/CommandParam";
+import type { SettingElements } from "../../../model/CommandParam";
 import Check from "./CheckFormElement";
 import DatasetText from "./DatasetTextFormElement";
 
-const DATASET_OPTIONAL = [
-	"regTableInclude",
-	"regTableExclude",
-	"loadData",
-	"includeMetaData",
-] as const;
-
-function isDatasetOptional(name: string): boolean {
-	return (DATASET_OPTIONAL as readonly string[]).includes(name);
-}
-
-function renderSettingElement(
-	element: CommandParam,
-	prefix: string,
-	hidden: boolean,
-): React.ReactNode {
-	if (element.attribute.type === "FLG") {
-		return <Check prefix={prefix} element={element} hidden={hidden} />;
-	}
-	return <DatasetText prefix={prefix} element={element} hidden={hidden} />;
-}
-
 export default function DatasetSettingSection({
-	prefix,
-	name,
-	elements,
+	settingElements,
 }: {
-	prefix: string;
-	name: string;
-	elements: CommandParam[];
+	settingElements: SettingElements;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
-	const firstOptionalName = elements.find((e) =>
-		isDatasetOptional(e.name),
-	)?.name;
 	const toggleOptional = () => setShowOptional(!showOptional);
+	const prefix = settingElements.prefix;
 
 	return (
 		<>
-			{elements.map((element) => {
-				const isOptional = isDatasetOptional(element.name);
-				const showExpandButton = element.name === firstOptionalName;
-				return (
-					<Fragment key={name + prefix + element.name}>
-						{showExpandButton && (
-							<div className="pt-2.5">
-								<ExpandButton
-									toggleOptional={toggleOptional}
-									showOptional={showOptional}
-									caption="dataset option"
-								/>
-							</div>
-						)}
-						{renderSettingElement(element, prefix, isOptional && !showOptional)}
-					</Fragment>
-				);
-			})}
+			<DatasetText
+				prefix={prefix}
+				element={settingElements.setting}
+				hidden={false}
+			/>
+			<DatasetText
+				prefix={prefix}
+				element={settingElements.settingEncoding}
+				hidden={false}
+			/>
+			{settingElements.regTableInclude && (
+				<>
+					<div className="pt-2.5">
+						<ExpandButton
+							toggleOptional={toggleOptional}
+							showOptional={showOptional}
+							caption="dataset option"
+						/>
+					</div>
+					<DatasetText
+						prefix={prefix}
+						element={settingElements.regTableInclude}
+						hidden={!showOptional}
+					/>
+					{settingElements.regTableExclude && (
+						<DatasetText
+							prefix={prefix}
+							element={settingElements.regTableExclude}
+							hidden={!showOptional}
+						/>
+					)}
+					{settingElements.loadData && (
+						<Check
+							prefix={prefix}
+							element={settingElements.loadData}
+							hidden={!showOptional}
+						/>
+					)}
+					{settingElements.includeMetaData && (
+						<Check
+							prefix={prefix}
+							element={settingElements.includeMetaData}
+							hidden={!showOptional}
+						/>
+					)}
+				</>
+			)}
 		</>
 	);
 }

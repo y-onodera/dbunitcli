@@ -12,9 +12,15 @@ export function DatasetLoadForm(prop: {
 	name: string;
 	srcData: DatasetSource;
 }) {
-	const src = prop.srcData.srcElements();
+	const srcElements = useMemo(
+		() => prop.srcData.srcElements(),
+		[prop.srcData.elements],
+	);
 	const srcTypeSettings = prop.srcData.srcTypeSettings();
-	const settingElements = prop.srcData.settingElements();
+	const settingElements = useMemo(
+		() => prop.srcData.settingElements(),
+		[prop.srcData.elements],
+	);
 	const initialDatasetSrcInfo = useMemo(
 		() => buildDatasetSrcInfo(prop.srcData.elements),
 		[prop.srcData.elements],
@@ -31,9 +37,7 @@ export function DatasetLoadForm(prop: {
 			<fieldset className="border border-gray-200 p-3">
 				<legend>{prop.srcData.prefix}</legend>
 				<SrcFormSection
-					prefix={src.prefix}
-					name={prop.name}
-					elements={src.elements}
+					srcElements={srcElements}
 					handleTypeSelect={prop.handleTypeSelect}
 				/>
 				{jdbcOption.elements.length > 0 && (
@@ -44,11 +48,7 @@ export function DatasetLoadForm(prop: {
 					handleTypeSelect={prop.handleTypeSelect}
 					name={prop.name}
 				/>
-				<DatasetSettingSection
-					prefix={settingElements.prefix}
-					name={prop.name}
-					elements={settingElements.elements}
-				/>
+				<DatasetSettingSection settingElements={settingElements} />
 			</fieldset>
 		</DatasetSrcInfoProvider>
 	);
