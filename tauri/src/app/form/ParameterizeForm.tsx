@@ -23,7 +23,6 @@ export function ParameterizeForm(prop: {
 				{templateOption && (
 					<TemplateFormSection
 						commandParams={templateOption}
-						handleTypeSelect={prop.handleTypeSelect}
 						name={prop.name}
 					/>
 				)}

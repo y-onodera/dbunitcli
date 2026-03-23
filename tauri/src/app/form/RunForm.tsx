@@ -29,7 +29,6 @@ export function RunForm(prop: {
 					<legend>template</legend>
 					<TemplateFormSection
 						commandParams={templateOption}
-						handleTypeSelect={prop.handleTypeSelect}
 						name={prop.name}
 					/>
 				</fieldset>

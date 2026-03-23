@@ -25,7 +25,6 @@ export function GenerateForm(prop: {
 					<legend>{prop.generate.templateOption.prefix}</legend>
 					<TemplateFormSection
 						commandParams={prop.generate.templateOption}
-						handleTypeSelect={prop.handleTypeSelect}
 						name={prop.name}
 					/>
 				</fieldset>
