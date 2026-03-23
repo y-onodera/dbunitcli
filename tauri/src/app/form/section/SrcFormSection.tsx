@@ -17,36 +17,6 @@ function isTraversalOptional(name: string): boolean {
 	return (TRAVERSAL_OPTIONAL as readonly string[]).includes(name);
 }
 
-function renderSrcElement(
-	element: CommandParam,
-	prefix: string,
-	srcType: string,
-	hidden: boolean,
-	handleTypeSelect: SelectProp["handleTypeSelect"],
-): React.ReactNode {
-	if (element.attribute.type === "ENUM") {
-		return (
-			<SrcTypeSelect
-				handleTypeSelect={handleTypeSelect}
-				prefix={prefix}
-				element={element}
-				hidden={hidden}
-			/>
-		);
-	}
-	if (element.attribute.type === "FLG") {
-		return <Check prefix={prefix} element={element} hidden={hidden} />;
-	}
-	return (
-		<DatasetText
-			prefix={prefix}
-			element={element}
-			hidden={hidden}
-			srcType={element.name === "src" ? srcType : undefined}
-		/>
-	);
-}
-
 export default function SrcFormSection({
 	prefix,
 	name,
@@ -70,6 +40,29 @@ export default function SrcFormSection({
 			{elements.map((element) => {
 				const isOptional = isTraversalOptional(element.name);
 				const showExpandButton = element.name === firstOptionalName;
+				const hidden = isOptional && !showOptional;
+				let elementNode: React.ReactNode;
+				if (element.attribute.type === "ENUM") {
+					elementNode = (
+						<SrcTypeSelect
+							handleTypeSelect={handleTypeSelect}
+							prefix={prefix}
+							element={element}
+							hidden={hidden}
+						/>
+					);
+				} else if (element.attribute.type === "FLG") {
+					elementNode = <Check prefix={prefix} element={element} hidden={hidden} />;
+				} else {
+					elementNode = (
+						<DatasetText
+							prefix={prefix}
+							element={element}
+							hidden={hidden}
+							srcType={element.name === "src" ? srcType : undefined}
+						/>
+					);
+				}
 				return (
 					<Fragment key={name + prefix + element.name}>
 						{showExpandButton && (
@@ -81,13 +74,7 @@ export default function SrcFormSection({
 								/>
 							</div>
 						)}
-						{renderSrcElement(
-							element,
-							prefix,
-							srcType,
-							isOptional && !showOptional,
-							handleTypeSelect,
-						)}
+						{elementNode}
 					</Fragment>
 				);
 			})}

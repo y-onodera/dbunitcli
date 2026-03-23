@@ -15,17 +15,6 @@ function isDatasetOptional(name: string): boolean {
 	return (DATASET_OPTIONAL as readonly string[]).includes(name);
 }
 
-function renderSettingElement(
-	element: CommandParam,
-	prefix: string,
-	hidden: boolean,
-): React.ReactNode {
-	if (element.attribute.type === "FLG") {
-		return <Check prefix={prefix} element={element} hidden={hidden} />;
-	}
-	return <DatasetText prefix={prefix} element={element} hidden={hidden} />;
-}
-
 export default function DatasetSettingSection({
 	prefix,
 	name,
@@ -46,6 +35,7 @@ export default function DatasetSettingSection({
 			{elements.map((element) => {
 				const isOptional = isDatasetOptional(element.name);
 				const showExpandButton = element.name === firstOptionalName;
+				const hidden = isOptional && !showOptional;
 				return (
 					<Fragment key={name + prefix + element.name}>
 						{showExpandButton && (
@@ -57,7 +47,10 @@ export default function DatasetSettingSection({
 								/>
 							</div>
 						)}
-						{renderSettingElement(element, prefix, isOptional && !showOptional)}
+						{element.attribute.type === "FLG"
+							? <Check prefix={prefix} element={element} hidden={hidden} />
+							: <DatasetText prefix={prefix} element={element} hidden={hidden} />
+						}
 					</Fragment>
 				);
 			})}
