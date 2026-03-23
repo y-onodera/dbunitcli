@@ -49,12 +49,29 @@ export type DatasetSrcInfo = SrcInfo & {
 	startRow: string;
 	addFileInfo: boolean;
 };
+export type SrcElements = CommandParams & {
+	srcType?: CommandParam;
+	src: CommandParam;
+	encoding?: CommandParam;
+	recursive?: CommandParam;
+	regInclude?: CommandParam;
+	regExclude?: CommandParam;
+	extension?: CommandParam;
+};
+export type SettingElements = CommandParams & {
+	setting: CommandParam;
+	settingEncoding: CommandParam;
+	regTableInclude?: CommandParam;
+	regTableExclude?: CommandParam;
+	loadData?: CommandParam;
+	includeMetaData?: CommandParam;
+};
 export type DatasetSource = CommandParams & {
 	srcType: () => string;
-	srcElements: () => CommandParams;
+	srcElements: () => SrcElements;
 	srcTypeSettings: () => CommandParams;
 	jdbcElements: () => CommandParams;
-	settingElements: () => CommandParams;
+	settingElements: () => SettingElements;
 	jdbcOption: () => JdbcOption;
 	templateOption: () => TemplateOption;
 };
@@ -92,19 +109,14 @@ export class DatasetSourceImpl implements DatasetSource {
 	srcType() {
 		return this.src;
 	}
-	srcElements() {
-		return toCommandParams(
-			this,
-			this.elements.slice(
-				0,
-				this.indexExtension === -1
-					? this.indexRegExclude + 1
-					: this.indexExtension + 1,
-			),
-			{ caption: "traversal option" },
-			(param: string) =>
-				["recursive", "regInclude", "regExclude", "extension"].includes(param),
+	srcElements(): SrcElements {
+		const elements = this.elements.slice(
+			0,
+			this.indexExtension === -1
+				? this.indexRegExclude + 1
+				: this.indexExtension + 1,
 		);
+		return new SrcElementsImpl(this.name, this.prefix, elements);
 	}
 	private srcTypeRange(): CommandParam[] {
 		return this.elements.slice(
@@ -131,19 +143,9 @@ export class DatasetSourceImpl implements DatasetSource {
 			undefined,
 		);
 	}
-	settingElements() {
-		return toCommandParams(
-			this,
-			this.elements.slice(this.indexOfSetting),
-			{ caption: "dataset option" },
-			(param: string) =>
-				[
-					"regTableInclude",
-					"regTableExclude",
-					"loadData",
-					"includeMetaData",
-				].includes(param),
-		);
+	settingElements(): SettingElements {
+		const elements = this.elements.slice(this.indexOfSetting);
+		return new SettingElementsImpl(this.name, this.prefix, elements);
 	}
 	jdbcOption(): JdbcOption {
 		const jdbc = this.jdbcElements();
@@ -156,8 +158,70 @@ export class DatasetSourceImpl implements DatasetSource {
 		return new TemplateOptionImpl(this.name, this.prefix, elements);
 	}
 }
+class SrcElementsImpl implements SrcElements {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	constructor(name: string, prefix: string, elements: CommandParam[]) {
+		this.name = name;
+		this.prefix = prefix;
+		this.elements = elements;
+	}
+	get srcType(): CommandParam | undefined {
+		return findByNameOptional(this.elements, "srcType");
+	}
+	get src(): CommandParam {
+		return findByName(this.elements, "src");
+	}
+	get encoding(): CommandParam | undefined {
+		return findByNameOptional(this.elements, "encoding");
+	}
+	get recursive(): CommandParam | undefined {
+		return findByNameOptional(this.elements, "recursive");
+	}
+	get regInclude(): CommandParam | undefined {
+		return findByNameOptional(this.elements, "regInclude");
+	}
+	get regExclude(): CommandParam | undefined {
+		return findByNameOptional(this.elements, "regExclude");
+	}
+	get extension(): CommandParam | undefined {
+		return findByNameOptional(this.elements, "extension");
+	}
+}
+class SettingElementsImpl implements SettingElements {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	constructor(name: string, prefix: string, elements: CommandParam[]) {
+		this.name = name;
+		this.prefix = prefix;
+		this.elements = elements;
+	}
+	get setting(): CommandParam {
+		return findByName(this.elements, "setting");
+	}
+	get settingEncoding(): CommandParam {
+		return findByName(this.elements, "settingEncoding");
+	}
+	get regTableInclude(): CommandParam | undefined {
+		return findByNameOptional(this.elements, "regTableInclude");
+	}
+	get regTableExclude(): CommandParam | undefined {
+		return findByNameOptional(this.elements, "regTableExclude");
+	}
+	get loadData(): CommandParam | undefined {
+		return findByNameOptional(this.elements, "loadData");
+	}
+	get includeMetaData(): CommandParam | undefined {
+		return findByNameOptional(this.elements, "includeMetaData");
+	}
+}
 function findByName(elements: CommandParam[], name: string): CommandParam {
 	return elements.find((e) => e.name === name)!;
+}
+function findByNameOptional(elements: CommandParam[], name: string): CommandParam | undefined {
+	return elements.find((e) => e.name === name);
 }
 export type JdbcOption = CommandParams & {
 	jdbcProperties: CommandParam;
