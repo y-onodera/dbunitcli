@@ -11,7 +11,7 @@ import { getId, getName } from "./FormElementProp";
 import { getPath } from "./Chooser";
 
 interface Props extends Prop {
-	resourceFiles: string[];
+	resourceFiles?: string[];
 	onValueChange?: (value: string) => void;
 	children?: (args: {
 		path: string;
@@ -25,7 +25,7 @@ export default function ResourceText({
 	element,
 	hidden,
 	srcType,
-	resourceFiles,
+	resourceFiles = [],
 	onValueChange,
 	children,
 }: Props) {
