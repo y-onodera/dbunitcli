@@ -48,6 +48,10 @@ export type DatasetSrcInfo = SrcInfo & {
 	headerName: string;
 	startRow: string;
 	addFileInfo: boolean;
+	jdbcUrl: string;
+	jdbcUser: string;
+	jdbcPass: string;
+	jdbcProperties: string;
 };
 export type DatasetSource = CommandParams & {
 	srcType: () => string;

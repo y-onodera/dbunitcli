@@ -1,9 +1,10 @@
 import { createContext, useContext, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import type { DatasetSrcInfo } from "../model/CommandParam";
 
 type DatasetSrcInfoContextValue = {
 	state: DatasetSrcInfo | undefined;
-	setState: (state: DatasetSrcInfo) => void;
+	setState: Dispatch<SetStateAction<DatasetSrcInfo>>;
 };
 
 const DatasetSrcInfoContext = createContext<DatasetSrcInfoContextValue>({
@@ -31,6 +32,6 @@ export function useDatasetSrcInfo(): DatasetSrcInfo | undefined {
 	return useContext(DatasetSrcInfoContext).state;
 }
 
-export function useSetDatasetSrcInfo(): (state: DatasetSrcInfo) => void {
+export function useSetDatasetSrcInfo(): Dispatch<SetStateAction<DatasetSrcInfo>> {
 	return useContext(DatasetSrcInfoContext).setState;
 }
