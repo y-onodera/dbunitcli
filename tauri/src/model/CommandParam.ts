@@ -50,21 +50,21 @@ export type DatasetSrcInfo = SrcInfo & {
 	addFileInfo: boolean;
 };
 export type SrcElements = CommandParams & {
-	srcType?: CommandParam;
+	srcType: CommandParam;
 	src: CommandParam;
-	encoding?: CommandParam;
-	recursive?: CommandParam;
-	regInclude?: CommandParam;
-	regExclude?: CommandParam;
-	extension?: CommandParam;
+	encoding: CommandParam;
+	recursive: CommandParam;
+	regInclude: CommandParam;
+	regExclude: CommandParam;
+	extension: CommandParam;
 };
 export type SettingElements = CommandParams & {
 	setting: CommandParam;
 	settingEncoding: CommandParam;
-	regTableInclude?: CommandParam;
-	regTableExclude?: CommandParam;
-	loadData?: CommandParam;
-	includeMetaData?: CommandParam;
+	regTableInclude: CommandParam;
+	regTableExclude: CommandParam;
+	loadData: CommandParam;
+	includeMetaData: CommandParam;
 };
 export type DatasetSource = CommandParams & {
 	srcType: () => string;
@@ -167,26 +167,26 @@ class SrcElementsImpl implements SrcElements {
 		this.prefix = prefix;
 		this.elements = elements;
 	}
-	get srcType(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "srcType");
+	get srcType(): CommandParam {
+		return findByName(this.elements, "srcType");
 	}
 	get src(): CommandParam {
 		return findByName(this.elements, "src");
 	}
-	get encoding(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "encoding");
+	get encoding(): CommandParam {
+		return findByName(this.elements, "encoding");
 	}
-	get recursive(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "recursive");
+	get recursive(): CommandParam {
+		return findByName(this.elements, "recursive");
 	}
-	get regInclude(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "regInclude");
+	get regInclude(): CommandParam {
+		return findByName(this.elements, "regInclude");
 	}
-	get regExclude(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "regExclude");
+	get regExclude(): CommandParam {
+		return findByName(this.elements, "regExclude");
 	}
-	get extension(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "extension");
+	get extension(): CommandParam {
+		return findByName(this.elements, "extension");
 	}
 }
 class SettingElementsImpl implements SettingElements {
@@ -204,25 +204,27 @@ class SettingElementsImpl implements SettingElements {
 	get settingEncoding(): CommandParam {
 		return findByName(this.elements, "settingEncoding");
 	}
-	get regTableInclude(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "regTableInclude");
+	get regTableInclude(): CommandParam {
+		return findByName(this.elements, "regTableInclude");
 	}
-	get regTableExclude(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "regTableExclude");
+	get regTableExclude(): CommandParam {
+		return findByName(this.elements, "regTableExclude");
 	}
-	get loadData(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "loadData");
+	get loadData(): CommandParam {
+		return findByName(this.elements, "loadData");
 	}
-	get includeMetaData(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "includeMetaData");
+	get includeMetaData(): CommandParam {
+		return findByName(this.elements, "includeMetaData");
 	}
 }
 function findByName(elements: CommandParam[], name: string): CommandParam {
-	return elements.find((e) => e.name === name)!;
+	const found = elements.find((e) => e.name === name);
+	if (found === undefined) {
+		throw new Error(`CommandParam '${name}' not found`);
+	}
+	return found;
 }
-function findByNameOptional(elements: CommandParam[], name: string): CommandParam | undefined {
-	return elements.find((e) => e.name === name);
-}
+
 export type JdbcOption = CommandParams & {
 	jdbcProperties: CommandParam;
 	jdbcUrl: CommandParam;

@@ -15,7 +15,13 @@ import {
 	useRefreshSelectParameter,
 	useSaveParameter,
 } from "../../hooks/useSelectParameter";
-import type { CommandParams } from "../../model/CommandParam";
+import type {
+	CommandParams,
+	DatasetSource,
+	SettingElements,
+	SrcElements,
+	TemplateOption,
+} from "../../model/CommandParam";
 import type {
 	ConvertParams,
 	GenerateParams,
@@ -30,17 +36,26 @@ const createCommandParams = (): CommandParams => ({
 	prefix: "",
 	elements: [],
 });
+const createSrcElements = () => createCommandParams() as unknown as SrcElements;
+const createSettingElements = () =>
+	createCommandParams() as unknown as SettingElements;
+const createTemplateOption = () =>
+	createCommandParams() as unknown as TemplateOption;
+const createDatasetSource = (name: string, prefix: string): DatasetSource => ({
+	name,
+	prefix,
+	elements: [],
+	srcType: () => "csv",
+	srcElements: createSrcElements,
+	srcTypeSettings: () => createCommandParams(),
+	jdbcElements: () => createCommandParams(),
+	settingElements: createSettingElements,
+	jdbcOption: () =>
+		createCommandParams() as unknown as ReturnType<DatasetSource["jdbcOption"]>,
+	templateOption: createTemplateOption,
+});
 const mockConvertParams: ConvertParams = {
-	srcData: {
-		name: "test-param",
-		prefix: "",
-		elements: [],
-		srcType: () => "table",
-		srcElements: () => createCommandParams(),
-		srcTypeSettings: () => createCommandParams(),
-		jdbcElements: () => createCommandParams(),
-		settingElements: () => createCommandParams(),
-	},
+	srcData: createDatasetSource("test-param", ""),
 	convertResult: {
 		name: "test-param",
 		prefix: "",
@@ -57,21 +72,8 @@ const mockRefreshConvertParams: ConvertParams = {
 };
 const mockGenerateParams: GenerateParams = {
 	elements: [],
-	srcData: {
-		name: "test-param",
-		prefix: "",
-		elements: [],
-		srcType: () => "csv",
-		srcElements: () => createCommandParams(),
-		srcTypeSettings: () => createCommandParams(),
-		jdbcElements: () => createCommandParams(),
-		settingElements: () => createCommandParams(),
-	},
-	templateOption: {
-		name: "test-param",
-		prefix: "",
-		elements: [],
-	},
+	srcData: createDatasetSource("test-param", ""),
+	templateOption: createTemplateOption(),
 };
 const mockRefreshGenerateParams: GenerateParams = {
 	elements: [],

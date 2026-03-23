@@ -1,4 +1,11 @@
-import type { CommandParams } from "../../model/CommandParam";
+import type {
+	CommandParams,
+	DatasetSource,
+	JdbcOption,
+	SettingElements,
+	SrcElements,
+	TemplateOption,
+} from "../../model/CommandParam";
 import type {
 	CompareParams,
 	ConvertParams,
@@ -13,19 +20,28 @@ const createCommandParams = (): CommandParams => ({
 	prefix: "",
 	elements: [],
 });
+const createSrcElements = () => createCommandParams() as unknown as SrcElements;
+const createSettingElements = () =>
+	createCommandParams() as unknown as SettingElements;
+const createTemplateOption = () =>
+	createCommandParams() as unknown as TemplateOption;
+const createJdbcOption = () => createCommandParams() as unknown as JdbcOption;
+const createDatasetSource = (name: string, prefix: string): DatasetSource => ({
+	name,
+	prefix,
+	elements: [],
+	srcType: () => "csv",
+	srcElements: createSrcElements,
+	srcTypeSettings: () => createCommandParams(),
+	jdbcElements: () => createCommandParams(),
+	settingElements: createSettingElements,
+	jdbcOption: createJdbcOption,
+	templateOption: createTemplateOption,
+});
 
 describe("SelectParameterクラス", () => {
 	const mockConvertParams: ConvertParams = {
-		srcData: {
-			name: "convertSrcData",
-			prefix: "convert",
-			elements: [],
-			srcType: () => "csv",
-			srcElements: () => createCommandParams(),
-			srcTypeSettings: () => createCommandParams(),
-			jdbcElements: () => createCommandParams(),
-			settingElements: () => createCommandParams(),
-		},
+		srcData: createDatasetSource("convertSrcData", "convert"),
 		convertResult: {
 			name: "convertResult",
 			prefix: "convert",
@@ -40,26 +56,8 @@ describe("SelectParameterクラス", () => {
 
 	const mockCompareParams: CompareParams = {
 		elements: [],
-		newData: {
-			name: "compareNewData",
-			prefix: "compare",
-			elements: [],
-			srcType: () => "csv",
-			srcElements: () => createCommandParams(),
-			srcTypeSettings: () => createCommandParams(),
-			jdbcElements: () => createCommandParams(),
-			settingElements: () => createCommandParams(),
-		},
-		oldData: {
-			name: "compareOldData",
-			prefix: "compare",
-			elements: [],
-			srcType: () => "csv",
-			srcElements: () => createCommandParams(),
-			srcTypeSettings: () => createCommandParams(),
-			jdbcElements: () => createCommandParams(),
-			settingElements: () => createCommandParams(),
-		},
+		newData: createDatasetSource("compareNewData", "compare"),
+		oldData: createDatasetSource("compareOldData", "compare"),
 		imageOption: {
 			name: "",
 			prefix: "",
@@ -75,78 +73,26 @@ describe("SelectParameterクラス", () => {
 				elements: [],
 			},
 		},
-		expectData: {
-			name: "compareExpectData",
-			prefix: "compare",
-			elements: [],
-			srcType: () => "csv",
-			srcElements: () => createCommandParams(),
-			srcTypeSettings: () => createCommandParams(),
-			jdbcElements: () => createCommandParams(),
-			settingElements: () => createCommandParams(),
-		},
+		expectData: createDatasetSource("compareExpectData", "compare"),
 	};
 
 	const mockGenerateParams: GenerateParams = {
 		elements: [],
-		srcData: {
-			name: "generateSrcData",
-			prefix: "generate",
-			elements: [],
-			srcType: () => "csv",
-			srcElements: () => createCommandParams(),
-			srcTypeSettings: () => createCommandParams(),
-			jdbcElements: () => createCommandParams(),
-			settingElements: () => createCommandParams(),
-		},
-		templateOption: {
-			name: "",
-			prefix: "",
-			elements: [],
-		},
+		srcData: createDatasetSource("generateSrcData", "generate"),
+		templateOption: createTemplateOption(),
 	};
 
 	const mockRunParams: RunParams = {
 		elements: [],
-		srcData: {
-			name: "runSrcData",
-			prefix: "run",
-			elements: [],
-			srcType: () => "csv",
-			srcElements: () => createCommandParams(),
-			srcTypeSettings: () => createCommandParams(),
-			jdbcElements: () => createCommandParams(),
-			settingElements: () => createCommandParams(),
-		},
-		templateOption: {
-			name: "",
-			prefix: "",
-			elements: [],
-		},
-		jdbcOption: {
-			name: "",
-			prefix: "",
-			elements: [],
-		},
+		srcData: createDatasetSource("runSrcData", "run"),
+		templateOption: createTemplateOption(),
+		jdbcOption: createJdbcOption(),
 	};
 
 	const mockParameterizeParams: ParameterizeParams = {
 		elements: [],
-		paramData: {
-			name: "parameterizeParamData",
-			prefix: "parameterize",
-			elements: [],
-			srcType: () => "csv",
-			srcElements: () => createCommandParams(),
-			srcTypeSettings: () => createCommandParams(),
-			jdbcElements: () => createCommandParams(),
-			settingElements: () => createCommandParams(),
-		},
-		templateOption: {
-			name: "",
-			prefix: "",
-			elements: [],
-		},
+		paramData: createDatasetSource("parameterizeParamData", "parameterize"),
+		templateOption: createTemplateOption(),
 	};
 
 	it("convertコマンドで初期化できること", () => {
