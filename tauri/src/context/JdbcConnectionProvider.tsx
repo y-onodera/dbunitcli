@@ -36,8 +36,6 @@ export function useJdbcConnectionState(): JdbcConnectionState {
 	return useContext(JdbcConnectionContext).state;
 }
 
-export function useSetJdbcConnectionState(): (
-	state: JdbcConnectionState,
-) => void {
+export function useSetJdbcConnectionState(): (state: JdbcConnectionState) => void {
 	return useContext(JdbcConnectionContext).setState;
 }

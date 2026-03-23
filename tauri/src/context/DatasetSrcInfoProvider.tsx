@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import type { DatasetSrcInfo } from "../model/CommandParam";
+import { JdbcConnectionProvider } from "./JdbcConnectionProvider";
 
 type DatasetSrcInfoContextValue = {
 	state: DatasetSrcInfo | undefined;
@@ -21,9 +22,11 @@ export function DatasetSrcInfoProvider({
 	const [state, setState] = useState<DatasetSrcInfo>(initialValue);
 
 	return (
-		<DatasetSrcInfoContext.Provider value={{ state, setState }}>
-			{children}
-		</DatasetSrcInfoContext.Provider>
+		<JdbcConnectionProvider>
+			<DatasetSrcInfoContext.Provider value={{ state, setState }}>
+				{children}
+			</DatasetSrcInfoContext.Provider>
+		</JdbcConnectionProvider>
 	);
 }
 
