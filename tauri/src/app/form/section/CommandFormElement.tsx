@@ -40,10 +40,6 @@ export function buildDatasetSrcInfo(elements: CommandParam[]): DatasetSrcInfo {
 		headerName: find("headerName")?.value ?? "",
 		startRow: find("startRow")?.value ?? "",
 		addFileInfo: find("addFileInfo")?.value === "true",
-		jdbcUrl: find("jdbcUrl")?.value ?? "",
-		jdbcUser: find("jdbcUser")?.value ?? "",
-		jdbcPass: find("jdbcPass")?.value ?? "",
-		jdbcProperties: find("jdbcProperties")?.value ?? "",
 	};
 }
 

@@ -1,5 +1,4 @@
 import { createContext, useContext, useState } from "react";
-import type { Dispatch, SetStateAction } from "react";
 
 type JdbcConnectionState = {
 	jdbcValues: Record<string, string>;
@@ -8,7 +7,7 @@ type JdbcConnectionState = {
 
 type JdbcConnectionContextValue = {
 	state: JdbcConnectionState;
-	setState: Dispatch<SetStateAction<JdbcConnectionState>>;
+	setState: (state: JdbcConnectionState) => void;
 };
 
 const JdbcConnectionContext = createContext<JdbcConnectionContextValue>({
@@ -37,6 +36,6 @@ export function useJdbcConnectionState(): JdbcConnectionState {
 	return useContext(JdbcConnectionContext).state;
 }
 
-export function useSetJdbcConnectionState(): Dispatch<SetStateAction<JdbcConnectionState>> {
+export function useSetJdbcConnectionState(): (state: JdbcConnectionState) => void {
 	return useContext(JdbcConnectionContext).setState;
 }

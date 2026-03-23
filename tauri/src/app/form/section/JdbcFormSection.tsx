@@ -1,12 +1,11 @@
 import { useCallback, useState } from "react";
 import { BlueButton } from "../../../components/element/Button";
-import { useSetDatasetSrcInfo } from "../../../context/DatasetSrcInfoProvider";
 import { useSetJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
 import {
 	useJdbcConnectionTest,
 	useJdbcSaveProperties,
 } from "../../../hooks/useJdbc";
-import type { DatasetSrcInfo, JdbcOption } from "../../../model/CommandParam";
+import type { JdbcOption } from "../../../model/CommandParam";
 import JdbcSavePropertiesDialog from "../../settings/JdbcSavePropertiesDialog";
 import JdbcPropertiesTextField from "./JdbcPropertiesTextField";
 import JdbcUrlTextField from "./JdbcUrlTextField";
@@ -19,7 +18,6 @@ export default function JdbcFormSection({
 }) {
 	const { prefix } = jdbcOption;
 	const setJdbcConnection = useSetJdbcConnectionState();
-	const setDatasetSrcInfo = useSetDatasetSrcInfo();
 	const [jdbcValues, setJdbcValues] = useState<Record<string, string>>(() => ({
 		jdbcUrl: jdbcOption.jdbcUrl.value,
 		jdbcUser: jdbcOption.jdbcUser.value,
@@ -31,9 +29,8 @@ export default function JdbcFormSection({
 		(name: string, value: string) => {
 			setJdbcValues((prev) => ({ ...prev, [name]: value }));
 			setJdbcConnection({ jdbcValues: {}, connectionOk: false });
-			setDatasetSrcInfo((prev) => ({ ...prev, [name]: value } as DatasetSrcInfo));
 		},
-		[setJdbcConnection, setDatasetSrcInfo],
+		[setJdbcConnection],
 	);
 
 	const handleConnectionOk = useCallback(
