@@ -2,7 +2,7 @@ import { isSqlRelatedType } from "../../../model/QueryDatasource";
 import DatasetSettingText from "./DatasetSettingText";
 import FileText from "./FileText";
 import type { Prop } from "./FormElementProp";
-import PlainText from "./PlainText";
+import ResourceText from "./ResourceText";
 import SqlSrcText from "./SqlSrcText";
 import TemplateText from "./TemplateText";
 import XlsxSchemaText from "./XlsxSchemaText";
@@ -26,5 +26,5 @@ export default function Text(prop: Prop) {
 	) {
 		return <FileText {...prop} />;
 	}
-	return <PlainText {...prop} />;
+	return <ResourceText {...prop} resourceFiles={[]} />;
 }

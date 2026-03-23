@@ -7,7 +7,7 @@ import { isSqlRelatedType } from "../../../model/QueryDatasource";
 import DatasetFileText from "./DatasetFileText";
 import DatasetSettingText from "./DatasetSettingText";
 import type { Prop } from "./FormElementProp";
-import PlainText from "./PlainText";
+import ResourceText from "./ResourceText";
 import SqlSrcText from "./SqlSrcText";
 import TemplateText from "./TemplateText";
 import XlsxSchemaText from "./XlsxSchemaText";
@@ -48,10 +48,11 @@ function DatasetPlainText({ prefix, element, hidden }: Prop) {
 	};
 
 	return (
-		<PlainText
+		<ResourceText
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
+			resourceFiles={[]}
 			onValueChange={handleValueChange}
 		/>
 	);
