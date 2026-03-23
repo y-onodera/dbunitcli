@@ -25,43 +25,33 @@ export default function DatasetSettingSection({
 				element={settingElements.settingEncoding}
 				hidden={false}
 			/>
-			{settingElements.regTableInclude && (
-				<>
-					<div className="pt-2.5">
-						<ExpandButton
-							toggleOptional={toggleOptional}
-							showOptional={showOptional}
-							caption="dataset option"
-						/>
-					</div>
-					<DatasetText
-						prefix={prefix}
-						element={settingElements.regTableInclude}
-						hidden={!showOptional}
-					/>
-					{settingElements.regTableExclude && (
-						<DatasetText
-							prefix={prefix}
-							element={settingElements.regTableExclude}
-							hidden={!showOptional}
-						/>
-					)}
-					{settingElements.loadData && (
-						<Check
-							prefix={prefix}
-							element={settingElements.loadData}
-							hidden={!showOptional}
-						/>
-					)}
-					{settingElements.includeMetaData && (
-						<Check
-							prefix={prefix}
-							element={settingElements.includeMetaData}
-							hidden={!showOptional}
-						/>
-					)}
-				</>
-			)}
+			<div className="pt-2.5">
+				<ExpandButton
+					toggleOptional={toggleOptional}
+					showOptional={showOptional}
+					caption="dataset option"
+				/>
+			</div>
+			<DatasetText
+				prefix={prefix}
+				element={settingElements.regTableInclude}
+				hidden={!showOptional}
+			/>
+			<DatasetText
+				prefix={prefix}
+				element={settingElements.regTableExclude}
+				hidden={!showOptional}
+			/>
+			<Check
+				prefix={prefix}
+				element={settingElements.loadData}
+				hidden={!showOptional}
+			/>
+			<Check
+				prefix={prefix}
+				element={settingElements.includeMetaData}
+				hidden={!showOptional}
+			/>
 		</>
 	);
 }

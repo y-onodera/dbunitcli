@@ -61,10 +61,10 @@ export type SrcElements = CommandParams & {
 export type SettingElements = CommandParams & {
 	setting: CommandParam;
 	settingEncoding: CommandParam;
-	regTableInclude?: CommandParam;
-	regTableExclude?: CommandParam;
-	loadData?: CommandParam;
-	includeMetaData?: CommandParam;
+	regTableInclude: CommandParam;
+	regTableExclude: CommandParam;
+	loadData: CommandParam;
+	includeMetaData: CommandParam;
 };
 export type DatasetSource = CommandParams & {
 	srcType: () => string;
@@ -204,17 +204,17 @@ class SettingElementsImpl implements SettingElements {
 	get settingEncoding(): CommandParam {
 		return findByName(this.elements, "settingEncoding");
 	}
-	get regTableInclude(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "regTableInclude");
+	get regTableInclude(): CommandParam {
+		return findByName(this.elements, "regTableInclude");
 	}
-	get regTableExclude(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "regTableExclude");
+	get regTableExclude(): CommandParam {
+		return findByName(this.elements, "regTableExclude");
 	}
-	get loadData(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "loadData");
+	get loadData(): CommandParam {
+		return findByName(this.elements, "loadData");
 	}
-	get includeMetaData(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "includeMetaData");
+	get includeMetaData(): CommandParam {
+		return findByName(this.elements, "includeMetaData");
 	}
 }
 function findByName(elements: CommandParam[], name: string): CommandParam {
@@ -224,12 +224,7 @@ function findByName(elements: CommandParam[], name: string): CommandParam {
 	}
 	return found;
 }
-function findByNameOptional(
-	elements: CommandParam[],
-	name: string,
-): CommandParam | undefined {
-	return elements.find((e) => e.name === name);
-}
+
 export type JdbcOption = CommandParams & {
 	jdbcProperties: CommandParam;
 	jdbcUrl: CommandParam;
