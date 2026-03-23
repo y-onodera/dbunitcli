@@ -218,7 +218,11 @@ class SettingElementsImpl implements SettingElements {
 	}
 }
 function findByName(elements: CommandParam[], name: string): CommandParam {
-	return elements.find((e) => e.name === name)!;
+	const found = elements.find((e) => e.name === name);
+	if (found === undefined) {
+		throw new Error(`CommandParam '${name}' not found`);
+	}
+	return found;
 }
 function findByNameOptional(
 	elements: CommandParam[],
