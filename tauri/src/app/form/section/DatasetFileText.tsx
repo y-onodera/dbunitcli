@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/correctness/noInvalidUseBeforeDeclaration: <explanation> */
 import {
 	useDatasetSrcInfo,
 	useSetDatasetSrcInfo,
