@@ -50,13 +50,13 @@ export type DatasetSrcInfo = SrcInfo & {
 	addFileInfo: boolean;
 };
 export type SrcElements = CommandParams & {
-	srcType?: CommandParam;
+	srcType: CommandParam;
 	src: CommandParam;
-	encoding?: CommandParam;
-	recursive?: CommandParam;
-	regInclude?: CommandParam;
-	regExclude?: CommandParam;
-	extension?: CommandParam;
+	encoding: CommandParam;
+	recursive: CommandParam;
+	regInclude: CommandParam;
+	regExclude: CommandParam;
+	extension: CommandParam;
 };
 export type SettingElements = CommandParams & {
 	setting: CommandParam;
@@ -167,26 +167,26 @@ class SrcElementsImpl implements SrcElements {
 		this.prefix = prefix;
 		this.elements = elements;
 	}
-	get srcType(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "srcType");
+	get srcType(): CommandParam {
+		return findByName(this.elements, "srcType");
 	}
 	get src(): CommandParam {
 		return findByName(this.elements, "src");
 	}
-	get encoding(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "encoding");
+	get encoding(): CommandParam {
+		return findByName(this.elements, "encoding");
 	}
-	get recursive(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "recursive");
+	get recursive(): CommandParam {
+		return findByName(this.elements, "recursive");
 	}
-	get regInclude(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "regInclude");
+	get regInclude(): CommandParam {
+		return findByName(this.elements, "regInclude");
 	}
-	get regExclude(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "regExclude");
+	get regExclude(): CommandParam {
+		return findByName(this.elements, "regExclude");
 	}
-	get extension(): CommandParam | undefined {
-		return findByNameOptional(this.elements, "extension");
+	get extension(): CommandParam {
+		return findByName(this.elements, "extension");
 	}
 }
 class SettingElementsImpl implements SettingElements {
@@ -220,7 +220,10 @@ class SettingElementsImpl implements SettingElements {
 function findByName(elements: CommandParam[], name: string): CommandParam {
 	return elements.find((e) => e.name === name)!;
 }
-function findByNameOptional(elements: CommandParam[], name: string): CommandParam | undefined {
+function findByNameOptional(
+	elements: CommandParam[],
+	name: string,
+): CommandParam | undefined {
 	return elements.find((e) => e.name === name);
 }
 export type JdbcOption = CommandParams & {
