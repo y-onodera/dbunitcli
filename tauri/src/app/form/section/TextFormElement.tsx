@@ -26,5 +26,5 @@ export default function Text(prop: Prop) {
 	) {
 		return <FileText {...prop} />;
 	}
-	return <ResourceText {...prop} resourceFiles={[]} />;
+	return <ResourceText {...prop} />;
 }

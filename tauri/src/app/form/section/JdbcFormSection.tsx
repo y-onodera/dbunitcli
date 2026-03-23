@@ -54,13 +54,11 @@ export default function JdbcFormSection({
 			<ResourceText
 				prefix={prefix}
 				element={jdbcOption.jdbcUser}
-				resourceFiles={[]}
 				onValueChange={(value) => handleJdbcValueChange(jdbcOption.jdbcUser.name, value)}
 			/>
 			<ResourceText
 				prefix={prefix}
 				element={jdbcOption.jdbcPass}
-				resourceFiles={[]}
 				onValueChange={(value) => handleJdbcValueChange(jdbcOption.jdbcPass.name, value)}
 			/>
 			<JdbcPropertiesTextField

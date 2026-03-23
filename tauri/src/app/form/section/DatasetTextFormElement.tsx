@@ -52,7 +52,6 @@ function DatasetPlainText({ prefix, element, hidden }: Prop) {
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
-			resourceFiles={[]}
 			onValueChange={handleValueChange}
 		/>
 	);
