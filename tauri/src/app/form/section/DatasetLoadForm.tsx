@@ -14,12 +14,12 @@ export function DatasetLoadForm(prop: {
 }) {
 	const srcElements = useMemo(
 		() => prop.srcData.srcElements(),
-		[prop.srcData.elements],
+		[prop.srcData.srcElements],
 	);
 	const srcTypeSettings = prop.srcData.srcTypeSettings();
 	const settingElements = useMemo(
 		() => prop.srcData.settingElements(),
-		[prop.srcData.elements],
+		[prop.srcData.settingElements],
 	);
 	const initialDatasetSrcInfo = useMemo(
 		() => buildDatasetSrcInfo(prop.srcData.elements),
@@ -27,7 +27,7 @@ export function DatasetLoadForm(prop: {
 	);
 	const jdbcOption = useMemo(
 		() => prop.srcData.jdbcOption(),
-		[prop.srcData.elements],
+		[prop.srcData.jdbcOption],
 	);
 	return (
 		<DatasetSrcInfoProvider

@@ -1,18 +1,14 @@
+/** biome-ignore-all lint/correctness/noInvalidUseBeforeDeclaration: <explanation> */
 import {
 	useDatasetSrcInfo,
 	useSetDatasetSrcInfo,
 } from "../../../context/DatasetSrcInfoProvider";
 import type { DatasetSrcInfo } from "../../../model/CommandParam";
-import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import type { Prop } from "./FormElementProp";
+import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import ResourceText from "./ResourceText";
 
-export default function DatasetFileText({
-	prefix,
-	element,
-	hidden,
-	srcType,
-}: Prop) {
+export default function DatasetFileText({ prefix, element, hidden }: Prop) {
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const setDatasetSrcInfo = useSetDatasetSrcInfo();
 
@@ -30,7 +26,6 @@ export default function DatasetFileText({
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
-			srcType={srcType}
 			resourceFiles={[]}
 			onValueChange={handleValueChange}
 		>
@@ -40,7 +35,6 @@ export default function DatasetFileText({
 					setPath={setPath}
 					prefix={prefix}
 					element={element}
-					srcType={srcType}
 				/>
 			)}
 		</ResourceText>

@@ -16,7 +16,10 @@ export default function SqlSrcText({ prefix, element, hidden, srcType }: Prop) {
 
 	const handleValueChange = (newValue: string) => {
 		if (datasetSrcInfo) {
-			setDatasetSrcInfo({ ...datasetSrcInfo, srcPath: newValue } as DatasetSrcInfo);
+			setDatasetSrcInfo({
+				...datasetSrcInfo,
+				srcPath: newValue,
+			} as DatasetSrcInfo);
 		}
 	};
 

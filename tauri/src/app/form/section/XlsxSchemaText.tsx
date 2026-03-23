@@ -4,23 +4,24 @@ import {
 } from "../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../context/WorkspaceResourcesProvider";
 import type { DatasetSrcInfo } from "../../../model/CommandParam";
+import XlsxSchemaEditButton, {
+	RemoveXlsxSchemaButton,
+} from "../../settings/XlsxSchemaEditButton";
 import type { Prop } from "./FormElementProp";
+import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import ResourceText from "./ResourceText";
-import XlsxSchemaDropDownMenu from "./XlsxSchemaDropDownMenu";
 
-export default function XlsxSchemaText({
-	prefix,
-	element,
-	hidden,
-	srcType,
-}: Prop) {
+export default function XlsxSchemaText({ prefix, element, hidden }: Prop) {
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const setDatasetSrcInfo = useSetDatasetSrcInfo();
 	const settings = useResourcesSettings();
 
 	const handleValueChange = (newValue: string) => {
 		if (datasetSrcInfo) {
-			setDatasetSrcInfo({ ...datasetSrcInfo, xlsxSchema: newValue } as DatasetSrcInfo);
+			setDatasetSrcInfo({
+				...datasetSrcInfo,
+				xlsxSchema: newValue,
+			} as DatasetSrcInfo);
 		}
 	};
 
@@ -29,18 +30,22 @@ export default function XlsxSchemaText({
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
-			srcType={srcType}
 			resourceFiles={settings.xlsxSchemas}
 			onValueChange={handleValueChange}
 		>
 			{({ path, setPath, isValueInDatalist }) => (
-				<XlsxSchemaDropDownMenu
+				<ResourceDropDownMenu
 					path={path}
 					setPath={setPath}
 					prefix={prefix}
 					element={element}
-					srcType={srcType}
 					isValueInDatalist={isValueInDatalist}
+					editButtons={[
+						<XlsxSchemaEditButton key="edit" path={path} setPath={setPath} />,
+					]}
+					removeButton={() => (
+						<RemoveXlsxSchemaButton path={path} setPath={setPath} />
+					)}
 				/>
 			)}
 		</ResourceText>

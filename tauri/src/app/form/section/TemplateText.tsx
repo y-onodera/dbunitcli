@@ -1,14 +1,12 @@
 import { useResourcesSettings } from "../../../context/WorkspaceResourcesProvider";
+import TemplateEditButton, {
+	RemoveTemplateButton,
+} from "../../settings/TemplateEditButton";
 import type { Prop } from "./FormElementProp";
+import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import ResourceText from "./ResourceText";
-import TemplateDropDownMenu from "./TemplateDropDownMenu";
 
-export default function TemplateText({
-	prefix,
-	element,
-	hidden,
-	srcType,
-}: Prop) {
+export default function TemplateText({ prefix, element, hidden }: Prop) {
 	const settings = useResourcesSettings();
 
 	return (
@@ -16,17 +14,21 @@ export default function TemplateText({
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
-			srcType={srcType}
 			resourceFiles={settings.templateFiles}
 		>
 			{({ path, setPath, isValueInDatalist }) => (
-				<TemplateDropDownMenu
+				<ResourceDropDownMenu
 					path={path}
 					setPath={setPath}
 					prefix={prefix}
 					element={element}
-					srcType={srcType}
 					isValueInDatalist={isValueInDatalist}
+					editButtons={[
+						<TemplateEditButton key="edit" path={path} setPath={setPath} />,
+					]}
+					removeButton={() => (
+						<RemoveTemplateButton path={path} setPath={setPath} />
+					)}
 				/>
 			)}
 		</ResourceText>

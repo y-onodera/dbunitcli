@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
 import type { SettingElements } from "../../../model/CommandParam";
-import Check from "./CheckFormElement";
-import DatasetText from "./DatasetTextFormElement";
+import Check from "./Check";
+import DatasetSettingText from "./DatasetSettingText";
+import { DatasetPlainText } from "./DatasetTextFormElement";
 
 export default function DatasetSettingSection({
 	settingElements,
@@ -15,12 +16,12 @@ export default function DatasetSettingSection({
 
 	return (
 		<>
-			<DatasetText
+			<DatasetSettingText
 				prefix={prefix}
 				element={settingElements.setting}
 				hidden={false}
 			/>
-			<DatasetText
+			<DatasetPlainText
 				prefix={prefix}
 				element={settingElements.settingEncoding}
 				hidden={false}
@@ -32,12 +33,12 @@ export default function DatasetSettingSection({
 					caption="dataset option"
 				/>
 			</div>
-			<DatasetText
+			<DatasetPlainText
 				prefix={prefix}
 				element={settingElements.regTableInclude}
 				hidden={!showOptional}
 			/>
-			<DatasetText
+			<DatasetPlainText
 				prefix={prefix}
 				element={settingElements.regTableExclude}
 				hidden={!showOptional}

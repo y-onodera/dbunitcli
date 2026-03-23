@@ -6,16 +6,18 @@ import {
 } from "../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../context/WorkspaceResourcesProvider";
+import DatasetSettingEditButton, {
+	RemoveDatasetSettingButton,
+} from "../../settings/DatasetSettingEditButton";
 import DatasetTableNamesPreviewButton from "../../settings/DatasetTableNamesPreviewButton";
-import DatasetSettingDropDownMenu from "./DatasetSettingDropDownMenu";
 import type { Prop } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
+import ResourceDropDownMenu from "./ResourceDropDownMenu";
 
 export default function DatasetSettingText({
 	prefix,
 	element,
 	hidden,
-	srcType,
 	hideDatasetSettingEdit,
 }: Prop) {
 	const [path, setPath] = useState(element.value);
@@ -50,22 +52,29 @@ export default function DatasetSettingText({
 							value={path}
 							handleChange={handleChange}
 						/>
-						{!hidden && (
-							<ResourceDatalist
-								id={id}
-								resources={resourceFiles}
-							/>
-						)}
+						{!hidden && <ResourceDatalist id={id} resources={resourceFiles} />}
 					</div>
 					{!hidden && (
-						<DatasetSettingDropDownMenu
+						<ResourceDropDownMenu
 							path={path}
 							setPath={setPath}
 							prefix={prefix}
 							element={element}
-							srcType={srcType}
 							isValueInDatalist={isValueInDatalist}
-							hideDatasetSettingEdit={hideDatasetSettingEdit}
+							editButtons={
+								!hideDatasetSettingEdit
+									? [
+											<DatasetSettingEditButton
+												key="edit"
+												path={path}
+												setPath={setPath}
+											/>,
+										]
+									: undefined
+							}
+							removeButton={() => (
+								<RemoveDatasetSettingButton path={path} setPath={setPath} />
+							)}
 						/>
 					)}
 				</div>

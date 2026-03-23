@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
 import type { SrcElements } from "../../../model/CommandParam";
-import Check from "./CheckFormElement";
-import DatasetText from "./DatasetTextFormElement";
+import Check from "./Check";
+import { DatasetPlainText } from "./DatasetTextFormElement";
 import type { SelectProp } from "./FormElementProp";
+import SqlSrcText from "./SqlSrcText";
 import SrcTypeSelect from "./SrcTypeSelect";
 
 export default function SrcFormSection({
@@ -26,17 +27,19 @@ export default function SrcFormSection({
 				element={srcElements.srcType}
 				hidden={false}
 			/>
-			<DatasetText
+			<SqlSrcText
 				prefix={prefix}
 				element={srcElements.src}
 				hidden={false}
 				srcType={srcType}
 			/>
-			<DatasetText
-				prefix={prefix}
-				element={srcElements.encoding}
-				hidden={false}
-			/>
+			{srcElements.encoding && (
+				<DatasetPlainText
+					prefix={prefix}
+					element={srcElements.encoding}
+					hidden={false}
+				/>
+			)}
 			<div className="pt-2.5">
 				<ExpandButton
 					toggleOptional={toggleOptional}
@@ -49,17 +52,17 @@ export default function SrcFormSection({
 				element={srcElements.recursive}
 				hidden={!showOptional}
 			/>
-			<DatasetText
+			<DatasetPlainText
 				prefix={prefix}
 				element={srcElements.regInclude}
 				hidden={!showOptional}
 			/>
-			<DatasetText
+			<DatasetPlainText
 				prefix={prefix}
 				element={srcElements.regExclude}
 				hidden={!showOptional}
 			/>
-			<DatasetText
+			<DatasetPlainText
 				prefix={prefix}
 				element={srcElements.extension}
 				hidden={!showOptional}

@@ -4,7 +4,7 @@ import {
 	useSetDatasetSrcInfo,
 } from "../../../context/DatasetSrcInfoProvider";
 import type { SelectProp } from "./FormElementProp";
-import PlainSelect from "./PlainSelect";
+import Select from "./Select";
 
 export default function SrcTypeSelect(prop: SelectProp) {
 	const datasetSrcInfo = useDatasetSrcInfo();
@@ -20,5 +20,5 @@ export default function SrcTypeSelect(prop: SelectProp) {
 		[datasetSrcInfo, setDatasetSrcInfo, prop.handleTypeSelect],
 	);
 
-	return <PlainSelect {...prop} handleTypeSelect={handleTypeSelect} />;
+	return <Select {...prop} handleTypeSelect={handleTypeSelect} />;
 }

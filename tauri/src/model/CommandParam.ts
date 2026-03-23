@@ -28,6 +28,7 @@ export type CommandParams = {
 };
 export type SrcInfo = {
 	srcPath: string;
+	encoding?: string;
 	regTableInclude: string;
 	regTableExclude: string;
 	recursive: string;
@@ -52,7 +53,7 @@ export type DatasetSrcInfo = SrcInfo & {
 export type SrcElements = CommandParams & {
 	srcType: CommandParam;
 	src: CommandParam;
-	encoding: CommandParam;
+	encoding?: CommandParam;
 	recursive: CommandParam;
 	regInclude: CommandParam;
 	regExclude: CommandParam;
@@ -173,8 +174,8 @@ class SrcElementsImpl implements SrcElements {
 	get src(): CommandParam {
 		return findByName(this.elements, "src");
 	}
-	get encoding(): CommandParam {
-		return findByName(this.elements, "encoding");
+	get encoding(): CommandParam | undefined {
+		return this.elements.find((e) => e.name === "encoding");
 	}
 	get recursive(): CommandParam {
 		return findByName(this.elements, "recursive");

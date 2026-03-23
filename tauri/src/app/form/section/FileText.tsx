@@ -1,5 +1,5 @@
-import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import type { Prop } from "./FormElementProp";
+import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import ResourceText from "./ResourceText";
 
 export default function FileText({ prefix, element, hidden, srcType }: Prop) {
@@ -8,7 +8,6 @@ export default function FileText({ prefix, element, hidden, srcType }: Prop) {
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
-			srcType={srcType}
 			resourceFiles={[]}
 		>
 			{({ path, setPath }) => (

@@ -2,7 +2,7 @@ import { InputLabel, SelectBox } from "../../../components/element/Input";
 import type { SelectProp } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
 
-export default function PlainSelect(prop: SelectProp) {
+export default function Select(prop: SelectProp) {
 	const id = getId(prop.prefix, prop.element.name);
 	const name = getName(prop.prefix, prop.element.name);
 	return (

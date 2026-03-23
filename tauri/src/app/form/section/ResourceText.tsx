@@ -6,9 +6,9 @@ import {
 	ResourceDatalist,
 } from "../../../components/element/Input";
 import { useWorkspaceContext } from "../../../context/WorkspaceResourcesProvider";
+import { getPath } from "./Chooser";
 import type { Prop } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
-import { getPath } from "./Chooser";
 
 interface Props extends Prop {
 	resourceFiles?: string[];
@@ -63,10 +63,7 @@ export default function ResourceText({
 						handleChange={handleChange}
 					/>
 					{!hidden && hasResources && (
-						<ResourceDatalist
-							id={id}
-							resources={resourceFiles}
-						/>
+						<ResourceDatalist id={id} resources={resourceFiles} />
 					)}
 					{!hidden && defaultPath && (
 						<p className="text-xs text-gray-400 truncate">{defaultPath}</p>
