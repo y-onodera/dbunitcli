@@ -3,7 +3,7 @@ import {
 	useSetDatasetSrcInfo,
 } from "../../../context/DatasetSrcInfoProvider";
 import type { DatasetSrcInfo } from "../../../model/CommandParam";
-import FileDropDownMenu from "./FileDropDownMenu";
+import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import type { Prop } from "./FormElementProp";
 import ResourceText from "./ResourceText";
 
@@ -35,7 +35,7 @@ export default function DatasetFileText({
 			onValueChange={handleValueChange}
 		>
 			{({ path, setPath }) => (
-				<FileDropDownMenu
+				<ResourceDropDownMenu
 					path={path}
 					setPath={setPath}
 					prefix={prefix}
