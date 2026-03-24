@@ -31,14 +31,7 @@ export default function DatasetCommandFormSection({
 			<CsvqFormSection settings={new CsvqTypeSettingsImpl(commandParams)} />
 		);
 	}
-	if (srcType === "table") {
-		return (
-			<TableSqlFormSection
-				settings={new TableSqlTypeSettingsImpl(commandParams)}
-			/>
-		);
-	}
-	if (srcType === "sql") {
+	if (srcType === "table" || srcType === "sql") {
 		return (
 			<TableSqlFormSection
 				settings={new TableSqlTypeSettingsImpl(commandParams)}
@@ -53,10 +46,7 @@ export default function DatasetCommandFormSection({
 			<FixedFormSection settings={new FixedTypeSettingsImpl(commandParams)} />
 		);
 	}
-	if (srcType === "xls") {
-		return <XlsFormSection settings={new XlsTypeSettingsImpl(commandParams)} />;
-	}
-	if (srcType === "xlsx") {
+	if (srcType === "xls" || srcType === "xlsx") {
 		return <XlsFormSection settings={new XlsTypeSettingsImpl(commandParams)} />;
 	}
 	return null;
