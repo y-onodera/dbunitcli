@@ -365,7 +365,7 @@ export class ConvertResultImpl implements ConvertResult {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
-	private readonly _jdbc?: JdbcOption;
+	readonly jdbc?: JdbcOption;
 	constructor(
 		name: string,
 		prefix: string,
@@ -375,7 +375,7 @@ export class ConvertResultImpl implements ConvertResult {
 		this.name = name;
 		this.prefix = prefix;
 		this.elements = elements;
-		this._jdbc = rawJdbc
+		this.jdbc = rawJdbc
 			? new JdbcOptionImpl(rawJdbc.prefix, rawJdbc.prefix, rawJdbc.elements)
 			: undefined;
 	}
@@ -396,9 +396,6 @@ export class ConvertResultImpl implements ConvertResult {
 	}
 	get outputEncoding(): CommandParam {
 		return findByName(this.elements, "outputEncoding");
-	}
-	get jdbc(): JdbcOption | undefined {
-		return this._jdbc;
 	}
 }
 export type TemplateOption = CommandParams & {
