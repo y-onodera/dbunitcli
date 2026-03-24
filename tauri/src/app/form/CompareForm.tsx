@@ -4,6 +4,7 @@ import type { CompareParams } from "../../model/SelectParameter";
 import CommandFormElements, {
 	buildDatasetSrcInfo,
 } from "./section/CommandFormElement";
+import ConvertResultFormSection from "./section/ConvertResultFormSection";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 
 export function CompareForm(prop: {
@@ -98,11 +99,9 @@ export function CompareForm(prop: {
 			/>
 			<fieldset className="border border-gray-200 p-3">
 				<legend>{convertResult.prefix}</legend>
-				<CommandFormElements
+				<ConvertResultFormSection
+					convertResult={convertResult}
 					handleTypeSelect={prop.handleTypeSelect}
-					name={prop.name}
-					prefix={convertResult.prefix}
-					elements={convertResult.elements}
 				/>
 			</fieldset>
 			<DatasetLoadForm

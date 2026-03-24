@@ -350,6 +350,57 @@ export class ParameterizeElementsImpl implements ParameterizeElements {
 		return findByName(this.elements, "template");
 	}
 }
+export type ConvertResult = CommandParams & {
+	resultType: CommandParam;
+	result: CommandParam;
+	resultPath: CommandParam;
+	exportEmptyTable: CommandParam;
+	exportHeader: CommandParam;
+	outputEncoding: CommandParam;
+	jdbc?: JdbcOption;
+};
+export class ConvertResultImpl implements ConvertResult {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	optionCaption?: { caption: string };
+	optional?: (_: string) => boolean;
+	private readonly _jdbc?: JdbcOption;
+	constructor(
+		name: string,
+		prefix: string,
+		elements: CommandParam[],
+		rawJdbc?: { prefix: string; elements: CommandParam[] },
+	) {
+		this.name = name;
+		this.prefix = prefix;
+		this.elements = elements;
+		this._jdbc = rawJdbc
+			? new JdbcOptionImpl(rawJdbc.prefix, rawJdbc.prefix, rawJdbc.elements)
+			: undefined;
+	}
+	get resultType(): CommandParam {
+		return findByName(this.elements, "resultType");
+	}
+	get result(): CommandParam {
+		return findByName(this.elements, "result");
+	}
+	get resultPath(): CommandParam {
+		return findByName(this.elements, "resultPath");
+	}
+	get exportEmptyTable(): CommandParam {
+		return findByName(this.elements, "exportEmptyTable");
+	}
+	get exportHeader(): CommandParam {
+		return findByName(this.elements, "exportHeader");
+	}
+	get outputEncoding(): CommandParam {
+		return findByName(this.elements, "outputEncoding");
+	}
+	get jdbc(): JdbcOption | undefined {
+		return this._jdbc;
+	}
+}
 export type TemplateOption = CommandParams & {
 	encoding: CommandParam;
 	templateGroup: CommandParam;

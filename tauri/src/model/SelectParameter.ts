@@ -1,6 +1,7 @@
 import type {
 	CommandParam,
 	CommandParams,
+	ConvertResult,
 	DatasetSource,
 	GenerateElements,
 	JdbcOption,
@@ -9,6 +10,7 @@ import type {
 	TemplateOption,
 } from "./CommandParam";
 import {
+	ConvertResultImpl,
 	DatasetSourceImpl,
 	GenerateElementsImpl,
 	JdbcOptionImpl,
@@ -30,30 +32,62 @@ export class SelectParameter {
 		this.name = name;
 		this.command = command;
 		if (command === "convert") {
-			this.convert = response as ConvertParams;
-			this.convert.srcData = new DatasetSourceImpl(
-				this.convert.srcData.name,
-				this.convert.srcData.prefix,
-				this.convert.srcData.elements,
-			);
+			const rawConvert = response as {
+				srcData: DatasetSource;
+				convertResult: {
+					prefix: string;
+					elements: CommandParam[];
+					jdbc?: { prefix: string; elements: CommandParam[] };
+				};
+			};
+			this.convert = {
+				srcData: new DatasetSourceImpl(
+					rawConvert.srcData.name,
+					rawConvert.srcData.prefix,
+					rawConvert.srcData.elements,
+				),
+				convertResult: new ConvertResultImpl(
+					rawConvert.convertResult.prefix,
+					rawConvert.convertResult.prefix,
+					rawConvert.convertResult.elements,
+					rawConvert.convertResult.jdbc,
+				),
+			};
 		}
 		if (command === "compare") {
-			this.compare = response as CompareParams;
-			this.compare.newData = new DatasetSourceImpl(
-				this.compare.newData.name,
-				this.compare.newData.prefix,
-				this.compare.newData.elements,
-			);
-			this.compare.oldData = new DatasetSourceImpl(
-				this.compare.oldData.name,
-				this.compare.oldData.prefix,
-				this.compare.oldData.elements,
-			);
-			this.compare.expectData = new DatasetSourceImpl(
-				this.compare.expectData.name,
-				this.compare.expectData.prefix,
-				this.compare.expectData.elements,
-			);
+			const rawCompare = response as {
+				elements: CommandParam[];
+				newData: DatasetSource;
+				oldData: DatasetSource;
+				imageOption: CommandParams;
+				convertResult: { prefix: string; elements: CommandParam[] };
+				expectData: DatasetSource;
+			};
+			this.compare = {
+				elements: rawCompare.elements,
+				newData: new DatasetSourceImpl(
+					rawCompare.newData.name,
+					rawCompare.newData.prefix,
+					rawCompare.newData.elements,
+				),
+				oldData: new DatasetSourceImpl(
+					rawCompare.oldData.name,
+					rawCompare.oldData.prefix,
+					rawCompare.oldData.elements,
+				),
+				imageOption: rawCompare.imageOption,
+				convertResult: new ConvertResultImpl(
+					rawCompare.convertResult.prefix,
+					rawCompare.convertResult.prefix,
+					rawCompare.convertResult.elements,
+					undefined,
+				),
+				expectData: new DatasetSourceImpl(
+					rawCompare.expectData.name,
+					rawCompare.expectData.prefix,
+					rawCompare.expectData.elements,
+				),
+			};
 		}
 		if (command === "generate") {
 			const rawGenerate = response as {
@@ -154,9 +188,6 @@ export class SelectParameter {
 		return this.parameterize;
 	}
 }
-export type ConvertResult = CommandParams & {
-	jdbc: CommandParams;
-};
 export type Parameter =
 	| ConvertParams
 	| CompareParams

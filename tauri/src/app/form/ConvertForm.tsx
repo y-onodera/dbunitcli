@@ -1,5 +1,5 @@
 import type { ConvertParams } from "../../model/SelectParameter";
-import CommandFormElements from "./section/CommandFormElement";
+import ConvertResultFormSection from "./section/ConvertResultFormSection";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 
 export function ConvertForm(prop: {
@@ -18,17 +18,9 @@ export function ConvertForm(prop: {
 			/>
 			<fieldset className="border border-gray-200 p-3">
 				<legend>{convertResult.prefix}</legend>
-				<CommandFormElements
+				<ConvertResultFormSection
+					convertResult={convertResult}
 					handleTypeSelect={prop.handleTypeSelect}
-					name={prop.name}
-					prefix={convertResult.prefix}
-					elements={convertResult.elements}
-				/>
-				<CommandFormElements
-					handleTypeSelect={prop.handleTypeSelect}
-					name={prop.name}
-					prefix={convertResult.prefix}
-					elements={convertResult.jdbc ? convertResult.jdbc.elements : []}
 				/>
 			</fieldset>
 		</>
