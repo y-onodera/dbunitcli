@@ -33,10 +33,7 @@ export function GenerateForm(prop: {
 			{prop.generate.templateOption && (
 				<fieldset className="border border-gray-200 p-3">
 					<legend>{prop.generate.templateOption.prefix}</legend>
-					<TemplateFormSection
-						commandParams={prop.generate.templateOption}
-						name={prop.name}
-					/>
+					<TemplateFormSection templateOption={prop.generate.templateOption} />
 				</fieldset>
 			)}
 			<DatasetLoadForm

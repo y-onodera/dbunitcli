@@ -28,7 +28,9 @@ export default function ResourceDropDownMenu({
 		<DropDownMenu className={className}>
 			{(closeMenu) => (
 				<>
-					{editButtons?.map((btn, i) => <li key={i}>{btn}</li>)}
+					{editButtons?.map((btn) => (
+						<li key={btn?.toString()}>{btn}</li>
+					))}
 					{isValueInDatalist && removeButton && (
 						<li>{removeButton(closeMenu)}</li>
 					)}

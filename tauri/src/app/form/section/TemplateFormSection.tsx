@@ -3,18 +3,37 @@ import ResourceText from "./ResourceText";
 import TemplateText from "./TemplateText";
 
 export default function TemplateFormSection({
-	commandParams,
+	templateOption,
 }: {
-	commandParams: TemplateOption;
-	name: string;
+	templateOption: TemplateOption;
 }) {
 	return (
 		<>
-			<ResourceText prefix={commandParams.prefix} element={commandParams.encoding} hidden={false} />
-			<TemplateText prefix={commandParams.prefix} element={commandParams.templateGroup} hidden={false} />
-			<ResourceText prefix={commandParams.prefix} element={commandParams.templateParameterAttribute} hidden={false} />
-			<ResourceText prefix={commandParams.prefix} element={commandParams.templateVarStart} hidden={false} />
-			<ResourceText prefix={commandParams.prefix} element={commandParams.templateVarStop} hidden={false} />
+			<ResourceText
+				prefix={templateOption.prefix}
+				element={templateOption.encoding}
+				hidden={false}
+			/>
+			<TemplateText
+				prefix={templateOption.prefix}
+				element={templateOption.templateGroup}
+				hidden={false}
+			/>
+			<ResourceText
+				prefix={templateOption.prefix}
+				element={templateOption.templateParameterAttribute}
+				hidden={false}
+			/>
+			<ResourceText
+				prefix={templateOption.prefix}
+				element={templateOption.templateVarStart}
+				hidden={false}
+			/>
+			<ResourceText
+				prefix={templateOption.prefix}
+				element={templateOption.templateVarStop}
+				hidden={false}
+			/>
 		</>
 	);
 }

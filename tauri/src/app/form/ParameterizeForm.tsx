@@ -28,10 +28,7 @@ export function ParameterizeForm(prop: {
 				<Text prefix="" element={ce.cmdParam} />
 				<Text prefix="" element={ce.template} />
 				{templateOption && (
-					<TemplateFormSection
-						commandParams={templateOption}
-						name={prop.name}
-					/>
+					<TemplateFormSection templateOption={templateOption} />
 				)}
 			</fieldset>
 			<DatasetLoadForm

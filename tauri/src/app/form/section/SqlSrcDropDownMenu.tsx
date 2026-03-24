@@ -1,9 +1,6 @@
 import type { ReactNode } from "react";
 import { useJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
-import {
-	isSqlRelatedType,
-	type QueryDatasourceType,
-} from "../../../model/QueryDatasource";
+import type { QueryDatasourceType } from "../../../model/QueryDatasource";
 import JdbcTableSelectorButton from "../../settings/JdbcTableSelectorButton";
 import SqlEditorButton, {
 	RemoveSqlEditorButton,
@@ -27,19 +24,15 @@ export default function SqlSrcDropDownMenu({
 	const isSqlOrTable = srcType === "sql" || srcType === "table";
 
 	const editButtons: ReactNode[] = [];
-	if (isSqlRelatedType(srcType ?? "")) {
-		editButtons.push(
-			<SqlEditorButton
-				type={srcType as QueryDatasourceType}
-				path={path}
-				setPath={setPath}
-			/>,
-		);
-	}
+	editButtons.push(
+		<SqlEditorButton
+			type={srcType as QueryDatasourceType}
+			path={path}
+			setPath={setPath}
+		/>,
+	);
 	if (srcType === "table" && connectionOk) {
-		editButtons.push(
-			<JdbcTableSelectorButton path={path} setPath={setPath} />,
-		);
+		editButtons.push(<JdbcTableSelectorButton path={path} setPath={setPath} />);
 	}
 
 	return (

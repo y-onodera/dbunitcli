@@ -24,16 +24,13 @@ export function RunForm(prop: {
 					element={ce.scriptType}
 				/>
 			</fieldset>
-			{prop.run.templateOption && (
+			{templateOption && (
 				<fieldset className="border border-gray-200 p-3">
 					<legend>template</legend>
-					<TemplateFormSection
-						commandParams={templateOption}
-						name={prop.name}
-					/>
+					<TemplateFormSection templateOption={templateOption} />
 				</fieldset>
 			)}
-			{prop.run.jdbcOption && (
+			{jdbcOption && (
 				<JdbcConnectionProvider>
 					<fieldset className="border border-gray-200 p-3">
 						<legend>jdbc</legend>
