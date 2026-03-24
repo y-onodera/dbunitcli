@@ -256,6 +256,100 @@ export class JdbcOptionImpl implements JdbcOption {
 		return findByName(this.elements, "jdbcPass");
 	}
 }
+export type GenerateElements = CommandParams & {
+	generateType: CommandParam;
+	unit: CommandParam;
+	template: CommandParam;
+	result: CommandParam;
+	resultPath: CommandParam;
+	outputEncoding: CommandParam;
+};
+export class GenerateElementsImpl implements GenerateElements {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	optionCaption?: { caption: string };
+	optional?: (_: string) => boolean;
+	constructor(name: string, prefix: string, elements: CommandParam[]) {
+		this.name = name;
+		this.prefix = prefix;
+		this.elements = elements;
+	}
+	get generateType(): CommandParam {
+		return findByName(this.elements, "generateType");
+	}
+	get unit(): CommandParam {
+		return findByName(this.elements, "unit");
+	}
+	get template(): CommandParam {
+		return findByName(this.elements, "template");
+	}
+	get result(): CommandParam {
+		return findByName(this.elements, "result");
+	}
+	get resultPath(): CommandParam {
+		return findByName(this.elements, "resultPath");
+	}
+	get outputEncoding(): CommandParam {
+		return findByName(this.elements, "outputEncoding");
+	}
+}
+export type RunElements = CommandParams & {
+	scriptType: CommandParam;
+};
+export class RunElementsImpl implements RunElements {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	optionCaption?: { caption: string };
+	optional?: (_: string) => boolean;
+	constructor(name: string, prefix: string, elements: CommandParam[]) {
+		this.name = name;
+		this.prefix = prefix;
+		this.elements = elements;
+	}
+	get scriptType(): CommandParam {
+		return findByName(this.elements, "scriptType");
+	}
+}
+export type ParameterizeElements = CommandParams & {
+	unit: CommandParam;
+	parameterize: CommandParam;
+	ignoreFail: CommandParam;
+	cmd: CommandParam;
+	cmdParam: CommandParam;
+	template: CommandParam;
+};
+export class ParameterizeElementsImpl implements ParameterizeElements {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	optionCaption?: { caption: string };
+	optional?: (_: string) => boolean;
+	constructor(name: string, prefix: string, elements: CommandParam[]) {
+		this.name = name;
+		this.prefix = prefix;
+		this.elements = elements;
+	}
+	get unit(): CommandParam {
+		return findByName(this.elements, "unit");
+	}
+	get parameterize(): CommandParam {
+		return findByName(this.elements, "parameterize");
+	}
+	get ignoreFail(): CommandParam {
+		return findByName(this.elements, "ignoreFail");
+	}
+	get cmd(): CommandParam {
+		return findByName(this.elements, "cmd");
+	}
+	get cmdParam(): CommandParam {
+		return findByName(this.elements, "cmdParam");
+	}
+	get template(): CommandParam {
+		return findByName(this.elements, "template");
+	}
+}
 export type TemplateOption = CommandParams & {
 	encoding: CommandParam;
 	templateGroup: CommandParam;

@@ -1,8 +1,8 @@
 import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
 import type { RunParams } from "../../model/SelectParameter";
-import CommandFormElements from "./section/CommandFormElement";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import JdbcFormSection from "./section/JdbcFormSection";
+import Select from "./section/Select";
 import TemplateFormSection from "./section/TemplateFormSection";
 
 export function RunForm(prop: {
@@ -13,15 +13,15 @@ export function RunForm(prop: {
 	const srcData = prop.run.srcData;
 	const templateOption = prop.run.templateOption;
 	const jdbcOption = prop.run.jdbcOption;
+	const ce = prop.run.commandElements;
 	return (
 		<>
 			<fieldset className="border border-gray-200 p-3">
 				<legend>run</legend>
-				<CommandFormElements
+				<Select
 					handleTypeSelect={prop.handleTypeSelect}
-					name={prop.name}
 					prefix=""
-					elements={prop.run.elements}
+					element={ce.scriptType}
 				/>
 			</fieldset>
 			{prop.run.templateOption && (

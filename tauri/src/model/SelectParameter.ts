@@ -2,12 +2,18 @@ import type {
 	CommandParam,
 	CommandParams,
 	DatasetSource,
+	GenerateElements,
 	JdbcOption,
+	ParameterizeElements,
+	RunElements,
 	TemplateOption,
 } from "./CommandParam";
 import {
 	DatasetSourceImpl,
+	GenerateElementsImpl,
 	JdbcOptionImpl,
+	ParameterizeElementsImpl,
+	RunElementsImpl,
 	TemplateOptionImpl,
 } from "./CommandParam";
 
@@ -50,56 +56,86 @@ export class SelectParameter {
 			);
 		}
 		if (command === "generate") {
-			this.generate = response as GenerateParams;
-			this.generate.srcData = new DatasetSourceImpl(
-				this.generate.srcData.name,
-				this.generate.srcData.prefix,
-				this.generate.srcData.elements,
-			);
-			if (this.generate.templateOption) {
-				this.generate.templateOption = new TemplateOptionImpl(
-					this.generate.templateOption.prefix,
-					this.generate.templateOption.prefix,
-					this.generate.templateOption.elements,
-				);
-			}
+			const rawGenerate = response as {
+				elements: CommandParam[];
+				srcData: DatasetSource;
+				templateOption?: TemplateOption;
+			};
+			this.generate = {
+				commandElements: new GenerateElementsImpl(
+					"generate",
+					"",
+					rawGenerate.elements,
+				),
+				srcData: new DatasetSourceImpl(
+					rawGenerate.srcData.name,
+					rawGenerate.srcData.prefix,
+					rawGenerate.srcData.elements,
+				),
+				templateOption: rawGenerate.templateOption
+					? new TemplateOptionImpl(
+							rawGenerate.templateOption.prefix,
+							rawGenerate.templateOption.prefix,
+							rawGenerate.templateOption.elements,
+						)
+					: undefined,
+			};
 		}
 		if (command === "run") {
-			this.run = response as RunParams;
-			this.run.srcData = new DatasetSourceImpl(
-				this.run.srcData.name,
-				this.run.srcData.prefix,
-				this.run.srcData.elements,
-			);
-			if (this.run.templateOption) {
-				this.run.templateOption = new TemplateOptionImpl(
-					this.run.templateOption.prefix,
-					this.run.templateOption.prefix,
-					this.run.templateOption.elements,
-				);
-			}
-			if (this.run.jdbcOption) {
-				this.run.jdbcOption = new JdbcOptionImpl(
-					this.run.jdbcOption.prefix,
-					this.run.jdbcOption.prefix,
-					this.run.jdbcOption.elements,
-				);
-			}
+			const rawRun = response as {
+				elements: CommandParam[];
+				srcData: DatasetSource;
+				templateOption?: TemplateOption;
+				jdbcOption?: JdbcOption;
+			};
+			this.run = {
+				commandElements: new RunElementsImpl("run", "", rawRun.elements),
+				srcData: new DatasetSourceImpl(
+					rawRun.srcData.name,
+					rawRun.srcData.prefix,
+					rawRun.srcData.elements,
+				),
+				templateOption: rawRun.templateOption
+					? new TemplateOptionImpl(
+							rawRun.templateOption.prefix,
+							rawRun.templateOption.prefix,
+							rawRun.templateOption.elements,
+						)
+					: undefined,
+				jdbcOption: rawRun.jdbcOption
+					? new JdbcOptionImpl(
+							rawRun.jdbcOption.prefix,
+							rawRun.jdbcOption.prefix,
+							rawRun.jdbcOption.elements,
+						)
+					: undefined,
+			};
 		}
 		if (command === "parameterize") {
-			this.parameterize = response as ParameterizeParams;
-			this.parameterize.paramData = new DatasetSourceImpl(
-				this.parameterize.paramData.name,
-				this.parameterize.paramData.prefix,
-				this.parameterize.paramData.elements,
-			);
-			if (this.parameterize.templateOption) {
-				this.parameterize.templateOption = new TemplateOptionImpl(
-					this.parameterize.templateOption.prefix,
-					this.parameterize.templateOption.prefix,
-					this.parameterize.templateOption.elements,
-				);
-			}
+			const rawParameterize = response as {
+				elements: CommandParam[];
+				paramData: DatasetSource;
+				templateOption?: TemplateOption;
+			};
+			this.parameterize = {
+				commandElements: new ParameterizeElementsImpl(
+					"parameterize",
+					"",
+					rawParameterize.elements,
+				),
+				paramData: new DatasetSourceImpl(
+					rawParameterize.paramData.name,
+					rawParameterize.paramData.prefix,
+					rawParameterize.paramData.elements,
+				),
+				templateOption: rawParameterize.templateOption
+					? new TemplateOptionImpl(
+							rawParameterize.templateOption.prefix,
+							rawParameterize.templateOption.prefix,
+							rawParameterize.templateOption.elements,
+						)
+					: undefined,
+			};
 		}
 	}
 	currentParameter() {
@@ -140,18 +176,18 @@ export type CompareParams = {
 	expectData: DatasetSource;
 };
 export type GenerateParams = {
-	elements: CommandParam[];
+	commandElements: GenerateElements;
 	srcData: DatasetSource;
-	templateOption: TemplateOption;
+	templateOption?: TemplateOption;
 };
 export type RunParams = {
-	elements: CommandParam[];
+	commandElements: RunElements;
 	srcData: DatasetSource;
-	templateOption: TemplateOption;
-	jdbcOption: JdbcOption;
+	templateOption?: TemplateOption;
+	jdbcOption?: JdbcOption;
 };
 export type ParameterizeParams = {
-	elements: CommandParam[];
+	commandElements: ParameterizeElements;
 	paramData: DatasetSource;
-	templateOption: TemplateOption;
+	templateOption?: TemplateOption;
 };
