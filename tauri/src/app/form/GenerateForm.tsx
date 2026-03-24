@@ -1,7 +1,8 @@
 import type { GenerateParams } from "../../model/SelectParameter";
-import CommandFormElements from "./section/CommandFormElement";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import Select from "./section/Select";
 import TemplateFormSection from "./section/TemplateFormSection";
+import Text from "./section/TextFormElement";
 
 export function GenerateForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -9,16 +10,25 @@ export function GenerateForm(prop: {
 	generate: GenerateParams;
 }) {
 	const srcData = prop.generate.srcData;
+	const ce = prop.generate.commandElements;
 	return (
 		<>
 			<fieldset className="border border-gray-200 p-3">
 				<legend>generate</legend>
-				<CommandFormElements
+				<Select
 					handleTypeSelect={prop.handleTypeSelect}
-					name={prop.name}
 					prefix=""
-					elements={prop.generate.elements}
+					element={ce.generateType}
 				/>
+				<Select
+					handleTypeSelect={prop.handleTypeSelect}
+					prefix=""
+					element={ce.unit}
+				/>
+				<Text prefix="" element={ce.template} />
+				<Text prefix="" element={ce.result} />
+				<Text prefix="" element={ce.resultPath} />
+				<Text prefix="" element={ce.outputEncoding} />
 			</fieldset>
 			{prop.generate.templateOption && (
 				<fieldset className="border border-gray-200 p-3">
