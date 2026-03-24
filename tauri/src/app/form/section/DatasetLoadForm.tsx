@@ -43,11 +43,7 @@ export function DatasetLoadForm(prop: {
 				{jdbcOption.elements.length > 0 && (
 					<JdbcFormSection jdbcOption={jdbcOption} />
 				)}
-				<DatasetCommandFormSection
-					commandParams={srcTypeSettings}
-					handleTypeSelect={prop.handleTypeSelect}
-					name={prop.name}
-				/>
+				<DatasetCommandFormSection commandParams={srcTypeSettings} />
 				<DatasetSettingSection settingElements={settingElements} />
 			</fieldset>
 		</DatasetSrcInfoProvider>
