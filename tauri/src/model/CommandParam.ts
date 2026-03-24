@@ -513,3 +513,237 @@ function toCommandParams(
 		optional: optional,
 	};
 }
+
+export type CsvTypeSettings = CommandParams & {
+	headerName: CommandParam;
+	startRow: CommandParam;
+	addFileInfo: CommandParam;
+	delimiter: CommandParam;
+	ignoreQuoted: CommandParam;
+};
+export class CsvTypeSettingsImpl implements CsvTypeSettings {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	optionCaption?: { caption: string };
+	optional?: (_: string) => boolean;
+	constructor(params: CommandParams) {
+		this.name = params.name;
+		this.prefix = params.prefix;
+		this.elements = params.elements;
+		this.optionCaption = params.optionCaption;
+		this.optional = params.optional;
+	}
+	get headerName(): CommandParam {
+		return findByName(this.elements, "headerName");
+	}
+	get startRow(): CommandParam {
+		return findByName(this.elements, "startRow");
+	}
+	get addFileInfo(): CommandParam {
+		return findByName(this.elements, "addFileInfo");
+	}
+	get delimiter(): CommandParam {
+		return findByName(this.elements, "delimiter");
+	}
+	get ignoreQuoted(): CommandParam {
+		return findByName(this.elements, "ignoreQuoted");
+	}
+}
+
+export type CsvqTypeSettings = CommandParams & {
+	headerName: CommandParam;
+	addFileInfo: CommandParam;
+	encoding: CommandParam;
+	templateGroup: CommandParam;
+	templateParameterAttribute: CommandParam;
+	templateVarStart: CommandParam;
+	templateVarStop: CommandParam;
+};
+export class CsvqTypeSettingsImpl implements CsvqTypeSettings {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	optionCaption?: { caption: string };
+	optional?: (_: string) => boolean;
+	constructor(params: CommandParams) {
+		this.name = params.name;
+		this.prefix = params.prefix;
+		this.elements = params.elements;
+		this.optionCaption = params.optionCaption;
+		this.optional = params.optional;
+	}
+	get headerName(): CommandParam {
+		return findByName(this.elements, "headerName");
+	}
+	get addFileInfo(): CommandParam {
+		return findByName(this.elements, "addFileInfo");
+	}
+	get encoding(): CommandParam {
+		return findByName(this.elements, "encoding");
+	}
+	get templateGroup(): CommandParam {
+		return findByName(this.elements, "templateGroup");
+	}
+	get templateParameterAttribute(): CommandParam {
+		return findByName(this.elements, "templateParameterAttribute");
+	}
+	get templateVarStart(): CommandParam {
+		return findByName(this.elements, "templateVarStart");
+	}
+	get templateVarStop(): CommandParam {
+		return findByName(this.elements, "templateVarStop");
+	}
+}
+
+export type TableSqlTypeSettings = CommandParams & {
+	headerName: CommandParam;
+	addFileInfo: CommandParam;
+	useJdbcMetaData: CommandParam;
+	encoding: CommandParam;
+	templateGroup: CommandParam;
+	templateParameterAttribute: CommandParam;
+	templateVarStart: CommandParam;
+	templateVarStop: CommandParam;
+};
+export class TableSqlTypeSettingsImpl implements TableSqlTypeSettings {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	optionCaption?: { caption: string };
+	optional?: (_: string) => boolean;
+	constructor(params: CommandParams) {
+		this.name = params.name;
+		this.prefix = params.prefix;
+		this.elements = params.elements;
+		this.optionCaption = params.optionCaption;
+		this.optional = params.optional;
+	}
+	get headerName(): CommandParam {
+		return findByName(this.elements, "headerName");
+	}
+	get addFileInfo(): CommandParam {
+		return findByName(this.elements, "addFileInfo");
+	}
+	get useJdbcMetaData(): CommandParam {
+		return findByName(this.elements, "useJdbcMetaData");
+	}
+	get encoding(): CommandParam {
+		return findByName(this.elements, "encoding");
+	}
+	get templateGroup(): CommandParam {
+		return findByName(this.elements, "templateGroup");
+	}
+	get templateParameterAttribute(): CommandParam {
+		return findByName(this.elements, "templateParameterAttribute");
+	}
+	get templateVarStart(): CommandParam {
+		return findByName(this.elements, "templateVarStart");
+	}
+	get templateVarStop(): CommandParam {
+		return findByName(this.elements, "templateVarStop");
+	}
+}
+
+export type RegTypeSettings = CommandParams & {
+	headerName: CommandParam;
+	startRow: CommandParam;
+	addFileInfo: CommandParam;
+	regDataSplit: CommandParam;
+	regHeaderSplit: CommandParam;
+};
+export class RegTypeSettingsImpl implements RegTypeSettings {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	optionCaption?: { caption: string };
+	optional?: (_: string) => boolean;
+	constructor(params: CommandParams) {
+		this.name = params.name;
+		this.prefix = params.prefix;
+		this.elements = params.elements;
+		this.optionCaption = params.optionCaption;
+		this.optional = params.optional;
+	}
+	get headerName(): CommandParam {
+		return findByName(this.elements, "headerName");
+	}
+	get startRow(): CommandParam {
+		return findByName(this.elements, "startRow");
+	}
+	get addFileInfo(): CommandParam {
+		return findByName(this.elements, "addFileInfo");
+	}
+	get regDataSplit(): CommandParam {
+		return findByName(this.elements, "regDataSplit");
+	}
+	get regHeaderSplit(): CommandParam {
+		return findByName(this.elements, "regHeaderSplit");
+	}
+}
+
+export type FixedTypeSettings = CommandParams & {
+	headerName: CommandParam;
+	startRow: CommandParam;
+	addFileInfo: CommandParam;
+	fixedLength: CommandParam;
+};
+export class FixedTypeSettingsImpl implements FixedTypeSettings {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	optionCaption?: { caption: string };
+	optional?: (_: string) => boolean;
+	constructor(params: CommandParams) {
+		this.name = params.name;
+		this.prefix = params.prefix;
+		this.elements = params.elements;
+		this.optionCaption = params.optionCaption;
+		this.optional = params.optional;
+	}
+	get headerName(): CommandParam {
+		return findByName(this.elements, "headerName");
+	}
+	get startRow(): CommandParam {
+		return findByName(this.elements, "startRow");
+	}
+	get addFileInfo(): CommandParam {
+		return findByName(this.elements, "addFileInfo");
+	}
+	get fixedLength(): CommandParam {
+		return findByName(this.elements, "fixedLength");
+	}
+}
+
+export type XlsTypeSettings = CommandParams & {
+	headerName: CommandParam;
+	startRow: CommandParam;
+	addFileInfo: CommandParam;
+	xlsxSchema: CommandParam;
+};
+export class XlsTypeSettingsImpl implements XlsTypeSettings {
+	name: string;
+	prefix: string;
+	elements: CommandParam[];
+	optionCaption?: { caption: string };
+	optional?: (_: string) => boolean;
+	constructor(params: CommandParams) {
+		this.name = params.name;
+		this.prefix = params.prefix;
+		this.elements = params.elements;
+		this.optionCaption = params.optionCaption;
+		this.optional = params.optional;
+	}
+	get headerName(): CommandParam {
+		return findByName(this.elements, "headerName");
+	}
+	get startRow(): CommandParam {
+		return findByName(this.elements, "startRow");
+	}
+	get addFileInfo(): CommandParam {
+		return findByName(this.elements, "addFileInfo");
+	}
+	get xlsxSchema(): CommandParam {
+		return findByName(this.elements, "xlsxSchema");
+	}
+}
