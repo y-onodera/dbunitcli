@@ -62,7 +62,6 @@ const mockConvertParams = {
 	},
 } as unknown as ConvertParams;
 const mockRefreshConvertParams = {
-	...mockConvertParams,
 	srcData: { ...mockConvertParams.srcData, name: "refresh-test-param" },
 	convertResult: {
 		...mockConvertParams.convertResult,
