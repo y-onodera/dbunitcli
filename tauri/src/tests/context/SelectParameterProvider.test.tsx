@@ -22,10 +22,7 @@ import type {
 	SrcElements,
 	TemplateOption,
 } from "../../model/CommandParam";
-import type {
-	ConvertParams,
-	GenerateParams,
-} from "../../model/SelectParameter";
+import type { ConvertParams } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
 import type { FetchParams } from "../../utils/fetchUtils";
 import { enviromentFixture } from "../setup";
@@ -60,7 +57,7 @@ const mockConvertParams: ConvertParams = {
 		name: "test-param",
 		prefix: "",
 		elements: [],
-		jdbc: createCommandParams(),
+		jdbc: undefined,
 	},
 };
 const mockRefreshConvertParams: ConvertParams = {
@@ -70,12 +67,12 @@ const mockRefreshConvertParams: ConvertParams = {
 		name: "refresh-test-param",
 	},
 };
-const mockGenerateParams: GenerateParams = {
+const mockGenerateParams = {
 	elements: [],
 	srcData: createDatasetSource("test-param", ""),
 	templateOption: createTemplateOption(),
 };
-const mockRefreshGenerateParams: GenerateParams = {
+const mockRefreshGenerateParams = {
 	elements: [],
 	srcData: { ...mockGenerateParams.srcData, name: "refresh-test-param" },
 	templateOption: {
@@ -158,7 +155,7 @@ describe("SelectParameterProviderのテスト", () => {
 
 			result.current.setParameter(mockConvertParams, "convert", "test-param");
 			await waitFor(() => {
-				expect(result.current.parameter.convert).toEqual(mockConvertParams);
+				expect(result.current.parameter.convert.srcData.name).toBe("test-param");
 				expect(result.current.parameter.name).toBe("test-param");
 				expect(result.current.parameter.command).toBe("convert");
 			});

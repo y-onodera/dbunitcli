@@ -38,11 +38,6 @@ export default function TableSqlFormSection({
 				element={settings.useJdbcMetaData}
 				hidden={!showOptional}
 			/>
-			<DatasetPlainText
-				prefix={prefix}
-				element={settings.encoding}
-				hidden={false}
-			/>
 			<TemplateText
 				prefix={prefix}
 				element={settings.templateGroup}
