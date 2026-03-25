@@ -90,7 +90,7 @@ export class SelectParameter {
 			};
 		}
 		if (command === "generate") {
-			const rawGenerate = response as {
+			const rawGenerate = response as unknown as {
 				elements: CommandParam[];
 				srcData: DatasetSource;
 				templateOption?: TemplateOption;
@@ -116,7 +116,7 @@ export class SelectParameter {
 			};
 		}
 		if (command === "run") {
-			const rawRun = response as {
+			const rawRun = response as unknown as {
 				elements: CommandParam[];
 				srcData: DatasetSource;
 				templateOption?: TemplateOption;
@@ -146,7 +146,7 @@ export class SelectParameter {
 			};
 		}
 		if (command === "parameterize") {
-			const rawParameterize = response as {
+			const rawParameterize = response as unknown as {
 				elements: CommandParam[];
 				paramData: DatasetSource;
 				templateOption?: TemplateOption;
