@@ -19,15 +19,12 @@ export function CompareForm(prop: {
 	const expectData = prop.compare.expectData;
 	const convertResult = prop.compare.convertResult;
 
-	const targetTypeElement = prop.compare.elements.find(
-		(e) => e.name === "targetType",
-	);
+	const find = (name: string) =>
+		prop.compare.elements.find((e) => e.name === name);
+	const targetTypeElement = find("targetType");
 	const targetType = targetTypeElement?.value ?? "data";
-	const settingElement =
-		prop.compare.elements.find((e) => e.name === "setting") ?? null;
-	const settingEncodingElement = prop.compare.elements.find(
-		(e) => e.name === "settingEncoding",
-	);
+	const settingElement = find("setting") ?? null;
+	const settingEncodingElement = find("settingEncoding");
 
 	const oldDataInitialInfo = useMemo(
 		() => buildDatasetSrcInfo(oldData.elements),
