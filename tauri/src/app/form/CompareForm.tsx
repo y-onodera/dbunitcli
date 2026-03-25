@@ -1,11 +1,12 @@
 import { useMemo } from "react";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
+import { buildDatasetSrcInfo } from "../../model/CommandParam";
 import type { CompareParams } from "../../model/SelectParameter";
-import CommandFormElements, {
-	buildDatasetSrcInfo,
-} from "./section/CommandFormElement";
 import ConvertResultFormSection from "./section/ConvertResultFormSection";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import ImageOptionFormSection from "./section/ImageOptionFormSection";
+import Select from "./section/Select";
+import Text from "./section/TextFormElement";
 
 export function CompareForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -18,19 +19,15 @@ export function CompareForm(prop: {
 	const expectData = prop.compare.expectData;
 	const convertResult = prop.compare.convertResult;
 
-	const targetType =
-		prop.compare.elements.find((e) => e.name === "targetType")?.value ?? "data";
-	const settingIndex = prop.compare.elements.findIndex(
-		(e) => e.name === "setting",
+	const targetTypeElement = prop.compare.elements.find(
+		(e) => e.name === "targetType",
 	);
+	const targetType = targetTypeElement?.value ?? "data";
 	const settingElement =
-		settingIndex >= 0 ? prop.compare.elements[settingIndex] : null;
-	const elementsBeforeSetting =
-		settingIndex >= 0
-			? prop.compare.elements.slice(0, settingIndex)
-			: prop.compare.elements;
-	const elementsAfterSetting =
-		settingIndex >= 0 ? prop.compare.elements.slice(settingIndex + 1) : [];
+		prop.compare.elements.find((e) => e.name === "setting") ?? null;
+	const settingEncodingElement = prop.compare.elements.find(
+		(e) => e.name === "settingEncoding",
+	);
 
 	const oldDataInitialInfo = useMemo(
 		() => buildDatasetSrcInfo(oldData.elements),
@@ -41,50 +38,36 @@ export function CompareForm(prop: {
 		<>
 			<fieldset className="border border-gray-200 p-3">
 				<legend>compare</legend>
-				<CommandFormElements
-					handleTypeSelect={prop.handleTypeSelect}
-					name={prop.name}
-					prefix=""
-					elements={elementsBeforeSetting}
-				/>
+				{targetTypeElement && (
+					<Select
+						handleTypeSelect={prop.handleTypeSelect}
+						prefix=""
+						element={targetTypeElement}
+					/>
+				)}
 				{settingElement &&
 					(targetType === "data" ? (
 						<DatasetSrcInfoProvider
 							key={`${prop.name}compare-setting`}
 							initialValue={oldDataInitialInfo}
 						>
-							<CommandFormElements
-								handleTypeSelect={prop.handleTypeSelect}
-								name={prop.name}
-								prefix=""
-								elements={[settingElement]}
-							/>
+							<Text prefix="" element={settingElement} />
 						</DatasetSrcInfoProvider>
 					) : (
-						<CommandFormElements
-							handleTypeSelect={prop.handleTypeSelect}
-							name={prop.name}
+						<Text
 							prefix=""
-							elements={[settingElement]}
+							element={settingElement}
 							hideDatasetSettingEdit={true}
 						/>
 					))}
-				<CommandFormElements
-					handleTypeSelect={prop.handleTypeSelect}
-					name={prop.name}
-					prefix=""
-					elements={elementsAfterSetting}
-				/>
+				{settingEncodingElement && (
+					<Text prefix="" element={settingEncodingElement} />
+				)}
 			</fieldset>
 			{prop.compare.imageOption && (
 				<fieldset className="border border-gray-200 p-3">
 					<legend>image</legend>
-					<CommandFormElements
-						handleTypeSelect={prop.handleTypeSelect}
-						name={prop.name}
-						prefix={imageOption.prefix}
-						elements={imageOption.elements}
-					/>
+					<ImageOptionFormSection imageOption={imageOption} />
 				</fieldset>
 			)}
 			<DatasetLoadForm

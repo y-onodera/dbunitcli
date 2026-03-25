@@ -514,6 +514,38 @@ function toCommandParams(
 	};
 }
 
+export function buildSrcInfo(elements: CommandParam[]): SrcInfo {
+	const find = (name: string) => elements.find((e) => e.name === name);
+	return {
+		srcPath: find("src")?.value ?? "",
+		encoding: find("encoding")?.value,
+		regTableInclude: find("regTableInclude")?.value ?? "",
+		regTableExclude: find("regTableExclude")?.value ?? "",
+		recursive: find("recursive")?.value ?? "",
+		regInclude: find("regInclude")?.value ?? "",
+		regExclude: find("regExclude")?.value ?? "",
+		extension: find("extension")?.value ?? "",
+	};
+}
+
+export function buildDatasetSrcInfo(elements: CommandParam[]): DatasetSrcInfo {
+	const find = (name: string) => elements.find((e) => e.name === name);
+	return {
+		...buildSrcInfo(elements),
+		srcType: find("srcType")?.value ?? "",
+		xlsxSchema: find("xlsxSchema")?.value ?? "",
+		fixedLength: find("fixedLength")?.value ?? "",
+		regHeaderSplit: find("regHeaderSplit")?.value ?? "",
+		regDataSplit: find("regDataSplit")?.value ?? "",
+		encoding: find("encoding")?.value ?? "",
+		delimiter: find("delimiter")?.value ?? "",
+		ignoreQuoted: find("ignoreQuoted")?.value === "true",
+		headerName: find("headerName")?.value ?? "",
+		startRow: find("startRow")?.value ?? "",
+		addFileInfo: find("addFileInfo")?.value === "true",
+	};
+}
+
 export type CsvTypeSettings = CommandParams & {
 	headerName: CommandParam;
 	startRow: CommandParam;
