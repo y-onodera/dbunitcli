@@ -52,22 +52,23 @@ const createDatasetSource = (name: string, prefix: string): DatasetSource => ({
 		createCommandParams() as unknown as ReturnType<DatasetSource["jdbcOption"]>,
 	templateOption: createTemplateOption,
 });
-const mockConvertParams: ConvertParams = {
+const mockConvertParams = {
 	srcData: createDatasetSource("test-param", ""),
 	convertResult: {
 		name: "test-param",
 		prefix: "",
-		elements: [],
+		elements: [] as CommandParam[],
 		jdbc: undefined,
 	},
-};
-const mockRefreshConvertParams: ConvertParams = {
+} as unknown as ConvertParams;
+const mockRefreshConvertParams = {
+	...mockConvertParams,
 	srcData: { ...mockConvertParams.srcData, name: "refresh-test-param" },
 	convertResult: {
 		...mockConvertParams.convertResult,
 		name: "refresh-test-param",
 	},
-};
+} as unknown as ConvertParams;
 const mockGenerateParams = {
 	elements: [] as CommandParam[],
 	srcData: createDatasetSource("test-param", ""),
