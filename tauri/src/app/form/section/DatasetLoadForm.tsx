@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { DatasetSrcInfoProvider } from "../../../context/DatasetSrcInfoProvider";
 import type { DatasetSource } from "../../../model/CommandParam";
-import { buildDatasetSrcInfo } from "./CommandFormElement";
+import { buildDatasetSrcInfo } from "../../../model/CommandParam";
 import DatasetCommandFormSection from "./DatasetCommandFormSection";
 import DatasetSettingSection from "./DatasetSettingSection";
 import JdbcFormSection from "./JdbcFormSection";
