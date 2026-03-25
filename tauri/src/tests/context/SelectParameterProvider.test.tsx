@@ -16,13 +16,14 @@ import {
 	useSaveParameter,
 } from "../../hooks/useSelectParameter";
 import type {
+	CommandParam,
 	CommandParams,
 	DatasetSource,
 	SettingElements,
 	SrcElements,
 	TemplateOption,
 } from "../../model/CommandParam";
-import type { ConvertParams } from "../../model/SelectParameter";
+import type { ConvertParams, GenerateParams } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
 import type { FetchParams } from "../../utils/fetchUtils";
 import { enviromentFixture } from "../setup";
@@ -68,18 +69,18 @@ const mockRefreshConvertParams: ConvertParams = {
 	},
 };
 const mockGenerateParams = {
-	elements: [],
+	elements: [] as CommandParam[],
 	srcData: createDatasetSource("test-param", ""),
 	templateOption: createTemplateOption(),
-};
+} as unknown as GenerateParams;
 const mockRefreshGenerateParams = {
-	elements: [],
+	...mockGenerateParams,
 	srcData: { ...mockGenerateParams.srcData, name: "refresh-test-param" },
 	templateOption: {
 		...mockGenerateParams.templateOption,
 		name: "refresh-test-param",
 	},
-};
+} as unknown as GenerateParams;
 const { mockFetchData } = vi.hoisted(() => {
 	return {
 		mockFetchData: vi.fn((params: FetchParams) => {
