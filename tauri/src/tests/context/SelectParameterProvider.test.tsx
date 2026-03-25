@@ -18,11 +18,12 @@ import {
 import type {
 	CommandParams,
 	DatasetSource,
+	GenerateElements,
 	SettingElements,
 	SrcElements,
 	TemplateOption,
 } from "../../model/CommandParam";
-import type { ConvertParams } from "../../model/SelectParameter";
+import type { ConvertParams, GenerateParams } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
 import type { FetchParams } from "../../utils/fetchUtils";
 import { enviromentFixture } from "../setup";
@@ -67,13 +68,13 @@ const mockRefreshConvertParams: ConvertParams = {
 		name: "refresh-test-param",
 	},
 };
-const mockGenerateParams = {
-	elements: [],
+const mockGenerateParams: GenerateParams = {
+	commandElements: createCommandParams() as unknown as GenerateElements,
 	srcData: createDatasetSource("test-param", ""),
 	templateOption: createTemplateOption(),
 };
-const mockRefreshGenerateParams = {
-	elements: [],
+const mockRefreshGenerateParams: GenerateParams = {
+	commandElements: createCommandParams() as unknown as GenerateElements,
 	srcData: { ...mockGenerateParams.srcData, name: "refresh-test-param" },
 	templateOption: {
 		...mockGenerateParams.templateOption,
