@@ -74,7 +74,7 @@ const mockGenerateParams = {
 	templateOption: createTemplateOption(),
 } as unknown as GenerateParams;
 const mockRefreshGenerateParams = {
-	elements: [] as CommandParam[],
+	...mockGenerateParams,
 	srcData: { ...mockGenerateParams.srcData, name: "refresh-test-param" },
 	templateOption: {
 		...mockGenerateParams.templateOption,
