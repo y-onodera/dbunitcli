@@ -600,7 +600,6 @@ export type TableSqlTypeSettings = CommandParams & {
 	headerName: CommandParam;
 	addFileInfo: CommandParam;
 	useJdbcMetaData: CommandParam;
-	encoding: CommandParam;
 	templateGroup: CommandParam;
 	templateParameterAttribute: CommandParam;
 	templateVarStart: CommandParam;
@@ -627,9 +626,6 @@ export class TableSqlTypeSettingsImpl implements TableSqlTypeSettings {
 	}
 	get useJdbcMetaData(): CommandParam {
 		return findByName(this.elements, "useJdbcMetaData");
-	}
-	get encoding(): CommandParam {
-		return findByName(this.elements, "encoding");
 	}
 	get templateGroup(): CommandParam {
 		return findByName(this.elements, "templateGroup");

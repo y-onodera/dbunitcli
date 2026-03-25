@@ -1,181 +1,101 @@
-import type {
-	CommandParams,
-	DatasetSource,
-	JdbcOption,
-	SettingElements,
-	SrcElements,
-	TemplateOption,
-} from "../../model/CommandParam";
-import type {
-	CompareParams,
-	ConvertParams,
-	GenerateParams,
-	ParameterizeParams,
-	RunParams,
-} from "../../model/SelectParameter";
+import type { CommandParam } from "../../model/CommandParam";
+import type { Parameter } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
 
-const createCommandParams = (): CommandParams => ({
-	name: "",
-	prefix: "",
-	elements: [],
-});
-const createSrcElements = () => createCommandParams() as unknown as SrcElements;
-const createSettingElements = () =>
-	createCommandParams() as unknown as SettingElements;
-const createTemplateOption = () =>
-	createCommandParams() as unknown as TemplateOption;
-const createJdbcOption = () => createCommandParams() as unknown as JdbcOption;
-const createDatasetSource = (name: string, prefix: string): DatasetSource => ({
-	name,
-	prefix,
-	elements: [],
-	srcType: () => "csv",
-	srcElements: createSrcElements,
-	srcTypeSettings: () => createCommandParams(),
-	jdbcElements: () => createCommandParams(),
-	settingElements: createSettingElements,
-	jdbcOption: createJdbcOption,
-	templateOption: createTemplateOption,
-});
+const rawConvert = {
+	srcData: {
+		name: "convertSrcData",
+		prefix: "convert",
+		elements: [] as CommandParam[],
+	},
+	convertResult: {
+		prefix: "convertResult",
+		elements: [] as CommandParam[],
+	},
+} as unknown as Parameter;
+
+const rawCompare = {
+	elements: [] as CommandParam[],
+	newData: { name: "compareNewData", prefix: "compare", elements: [] as CommandParam[] },
+	oldData: { name: "compareOldData", prefix: "compare", elements: [] as CommandParam[] },
+	imageOption: { name: "", prefix: "", elements: [] as CommandParam[] },
+	convertResult: { prefix: "compare", elements: [] as CommandParam[] },
+	expectData: { name: "compareExpectData", prefix: "compare", elements: [] as CommandParam[] },
+} as unknown as Parameter;
+
+const rawGenerate = {
+	elements: [] as CommandParam[],
+	srcData: { name: "generateSrcData", prefix: "generate", elements: [] as CommandParam[] },
+} as unknown as Parameter;
+
+const rawRun = {
+	elements: [] as CommandParam[],
+	srcData: { name: "runSrcData", prefix: "run", elements: [] as CommandParam[] },
+} as unknown as Parameter;
+
+const rawParameterize = {
+	elements: [] as CommandParam[],
+	paramData: { name: "parameterizeParamData", prefix: "parameterize", elements: [] as CommandParam[] },
+} as unknown as Parameter;
 
 describe("SelectParameterクラス", () => {
-	const mockConvertParams: ConvertParams = {
-		srcData: createDatasetSource("convertSrcData", "convert"),
-		convertResult: {
-			name: "convertResult",
-			prefix: "convert",
-			elements: [],
-			jdbc: {
-				name: "",
-				prefix: "",
-				elements: [],
-			},
-		},
-	};
-
-	const mockCompareParams: CompareParams = {
-		elements: [],
-		newData: createDatasetSource("compareNewData", "compare"),
-		oldData: createDatasetSource("compareOldData", "compare"),
-		imageOption: {
-			name: "",
-			prefix: "",
-			elements: [],
-		},
-		convertResult: {
-			name: "compareConvertResult",
-			prefix: "compare",
-			elements: [],
-			jdbc: {
-				name: "",
-				prefix: "",
-				elements: [],
-			},
-		},
-		expectData: createDatasetSource("compareExpectData", "compare"),
-	};
-
-	const mockGenerateParams: GenerateParams = {
-		elements: [],
-		srcData: createDatasetSource("generateSrcData", "generate"),
-		templateOption: createTemplateOption(),
-	};
-
-	const mockRunParams: RunParams = {
-		elements: [],
-		srcData: createDatasetSource("runSrcData", "run"),
-		templateOption: createTemplateOption(),
-		jdbcOption: createJdbcOption(),
-	};
-
-	const mockParameterizeParams: ParameterizeParams = {
-		elements: [],
-		paramData: createDatasetSource("parameterizeParamData", "parameterize"),
-		templateOption: createTemplateOption(),
-	};
-
 	it("convertコマンドで初期化できること", () => {
-		const param = new SelectParameter(
-			mockConvertParams,
-			"convert",
-			"testConvert",
-		);
+		const param = new SelectParameter(rawConvert, "convert", "testConvert");
 		expect(param.name).toBe("testConvert");
 		expect(param.command).toBe("convert");
-		expect(param.convert).toBe(mockConvertParams);
+		expect(param.convert.srcData.name).toBe("convertSrcData");
 	});
 
 	it("compareコマンドで初期化できること", () => {
-		const param = new SelectParameter(
-			mockCompareParams,
-			"compare",
-			"testCompare",
-		);
+		const param = new SelectParameter(rawCompare, "compare", "testCompare");
 		expect(param.name).toBe("testCompare");
 		expect(param.command).toBe("compare");
-		expect(param.compare).toBe(mockCompareParams);
+		expect(param.compare.newData.name).toBe("compareNewData");
 	});
 
 	it("generateコマンドで初期化できること", () => {
-		const param = new SelectParameter(
-			mockGenerateParams,
-			"generate",
-			"testGenerate",
-		);
+		const param = new SelectParameter(rawGenerate, "generate", "testGenerate");
 		expect(param.name).toBe("testGenerate");
 		expect(param.command).toBe("generate");
-		expect(param.generate).toBe(mockGenerateParams);
+		expect(param.generate.commandElements.name).toBe("generate");
 	});
 
 	it("runコマンドで初期化できること", () => {
-		const param = new SelectParameter(mockRunParams, "run", "testRun");
+		const param = new SelectParameter(rawRun, "run", "testRun");
 		expect(param.name).toBe("testRun");
 		expect(param.command).toBe("run");
-		expect(param.run).toBe(mockRunParams);
+		expect(param.run.commandElements.name).toBe("run");
 	});
 
 	it("parameterizeコマンドで初期化できること", () => {
 		const param = new SelectParameter(
-			mockParameterizeParams,
+			rawParameterize,
 			"parameterize",
 			"testParameterize",
 		);
 		expect(param.name).toBe("testParameterize");
 		expect(param.command).toBe("parameterize");
-		expect(param.parameterize).toBe(mockParameterizeParams);
+		expect(param.parameterize.commandElements.name).toBe("parameterize");
 	});
 
 	it("現在のパラメータを正しく返却すること", () => {
-		const param = new SelectParameter(
-			mockConvertParams,
-			"convert",
-			"testConvert",
-		);
-		expect(param.currentParameter()).toBe(mockConvertParams);
+		const param = new SelectParameter(rawConvert, "convert", "testConvert");
+		expect(param.currentParameter()).toBe(param.convert);
 
-		const param2 = new SelectParameter(
-			mockCompareParams,
-			"compare",
-			"testCompare",
-		);
-		expect(param2.currentParameter()).toBe(mockCompareParams);
+		const param2 = new SelectParameter(rawCompare, "compare", "testCompare");
+		expect(param2.currentParameter()).toBe(param2.compare);
 
-		const param3 = new SelectParameter(
-			mockGenerateParams,
-			"generate",
-			"testGenerate",
-		);
-		expect(param3.currentParameter()).toBe(mockGenerateParams);
+		const param3 = new SelectParameter(rawGenerate, "generate", "testGenerate");
+		expect(param3.currentParameter()).toBe(param3.generate);
 
-		const param4 = new SelectParameter(mockRunParams, "run", "testRun");
-		expect(param4.currentParameter()).toBe(mockRunParams);
+		const param4 = new SelectParameter(rawRun, "run", "testRun");
+		expect(param4.currentParameter()).toBe(param4.run);
 
 		const param5 = new SelectParameter(
-			mockParameterizeParams,
+			rawParameterize,
 			"parameterize",
 			"testParameterize",
 		);
-		expect(param5.currentParameter()).toBe(mockParameterizeParams);
+		expect(param5.currentParameter()).toBe(param5.parameterize);
 	});
 });
