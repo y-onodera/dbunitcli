@@ -16,9 +16,9 @@ import {
 	useSaveParameter,
 } from "../../hooks/useSelectParameter";
 import type {
+	CommandParam,
 	CommandParams,
 	DatasetSource,
-	GenerateElements,
 	SettingElements,
 	SrcElements,
 	TemplateOption,
@@ -68,19 +68,19 @@ const mockRefreshConvertParams: ConvertParams = {
 		name: "refresh-test-param",
 	},
 };
-const mockGenerateParams: GenerateParams = {
-	commandElements: createCommandParams() as unknown as GenerateElements,
+const mockGenerateParams = {
+	elements: [] as CommandParam[],
 	srcData: createDatasetSource("test-param", ""),
 	templateOption: createTemplateOption(),
-};
-const mockRefreshGenerateParams: GenerateParams = {
-	commandElements: mockGenerateParams.commandElements,
+} as unknown as GenerateParams;
+const mockRefreshGenerateParams = {
+	elements: [] as CommandParam[],
 	srcData: { ...mockGenerateParams.srcData, name: "refresh-test-param" },
 	templateOption: {
 		...mockGenerateParams.templateOption,
 		name: "refresh-test-param",
 	},
-};
+} as unknown as GenerateParams;
 const { mockFetchData } = vi.hoisted(() => {
 	return {
 		mockFetchData: vi.fn((params: FetchParams) => {
