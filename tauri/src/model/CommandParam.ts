@@ -20,11 +20,9 @@ export type CommandParam = {
 	optional: boolean;
 };
 export type CommandParams = {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find: (name: string) => CommandParam;
 };
 export type SrcInfo = {
@@ -78,7 +76,6 @@ export type DatasetSource = CommandParams & {
 	templateOption: () => TemplateOption;
 };
 export class DatasetSourceImpl implements DatasetSource {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	find(name: string): CommandParam {
@@ -88,8 +85,7 @@ export class DatasetSourceImpl implements DatasetSource {
 	private indexExtension: number;
 	private indexRegExclude: number;
 	private src: string;
-	constructor(name: string, prefix: string, elements: CommandParam[]) {
-		this.name = name;
+	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
 		this.indexOfSetting = -1;
@@ -121,7 +117,7 @@ export class DatasetSourceImpl implements DatasetSource {
 				? this.indexRegExclude + 1
 				: this.indexExtension + 1,
 		);
-		return new SrcElementsImpl(this.name, this.prefix, elements);
+		return new SrcElementsImpl(this.prefix, elements);
 	}
 	private srcTypeRange(): CommandParam[] {
 		return this.elements.slice(
@@ -137,7 +133,6 @@ export class DatasetSourceImpl implements DatasetSource {
 			this,
 			this.srcTypeRange().filter((it) => !it.name.startsWith("jdbc")),
 			srcTypeSettings?.optionCaption,
-			srcTypeSettings?.optional,
 		);
 	}
 	jdbcElements() {
@@ -145,33 +140,30 @@ export class DatasetSourceImpl implements DatasetSource {
 			this,
 			this.srcTypeRange().filter((it) => it.name.startsWith("jdbc")),
 			undefined,
-			undefined,
 		);
 	}
 	settingElements(): SettingElements {
 		const elements = this.elements.slice(this.indexOfSetting);
-		return new SettingElementsImpl(this.name, this.prefix, elements);
+		return new SettingElementsImpl(this.prefix, elements);
 	}
 	jdbcOption(): JdbcOption {
 		const jdbc = this.jdbcElements();
-		return new JdbcOptionImpl(jdbc.name, jdbc.prefix, jdbc.elements);
+		return new JdbcOptionImpl(jdbc.prefix, jdbc.elements);
 	}
 	templateOption(): TemplateOption {
 		const elements = this.srcTypeRange().filter((it) =>
 			it.name.startsWith("template"),
 		);
-		return new TemplateOptionImpl(this.name, this.prefix, elements);
+		return new TemplateOptionImpl(this.prefix, elements);
 	}
 }
 class SrcElementsImpl implements SrcElements {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
-	constructor(name: string, prefix: string, elements: CommandParam[]) {
-		this.name = name;
+	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
 	}
@@ -198,14 +190,12 @@ class SrcElementsImpl implements SrcElements {
 	}
 }
 class SettingElementsImpl implements SettingElements {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
-	constructor(name: string, prefix: string, elements: CommandParam[]) {
-		this.name = name;
+	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
 	}
@@ -243,16 +233,13 @@ export type JdbcOption = CommandParams & {
 	jdbcPass: CommandParam;
 };
 export class JdbcOptionImpl implements JdbcOption {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
-	constructor(name: string, prefix: string, elements: CommandParam[]) {
-		this.name = name;
+	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
 	}
@@ -278,16 +265,13 @@ export type GenerateElements = CommandParams & {
 	outputEncoding: CommandParam;
 };
 export class GenerateElementsImpl implements GenerateElements {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
-	constructor(name: string, prefix: string, elements: CommandParam[]) {
-		this.name = name;
+	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
 	}
@@ -314,16 +298,13 @@ export type RunElements = CommandParams & {
 	scriptType: CommandParam;
 };
 export class RunElementsImpl implements RunElements {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
-	constructor(name: string, prefix: string, elements: CommandParam[]) {
-		this.name = name;
+	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
 	}
@@ -340,16 +321,13 @@ export type ParameterizeElements = CommandParams & {
 	template: CommandParam;
 };
 export class ParameterizeElementsImpl implements ParameterizeElements {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
-	constructor(name: string, prefix: string, elements: CommandParam[]) {
-		this.name = name;
+	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
 	}
@@ -382,26 +360,22 @@ export type ConvertResult = CommandParams & {
 	jdbc?: JdbcOption;
 };
 export class ConvertResultImpl implements ConvertResult {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
 	readonly jdbc?: JdbcOption;
 	constructor(
-		name: string,
 		prefix: string,
 		elements: CommandParam[],
 		rawJdbc?: { prefix: string; elements: CommandParam[] },
 	) {
-		this.name = name;
 		this.prefix = prefix;
 		this.elements = elements;
 		this.jdbc = rawJdbc
-			? new JdbcOptionImpl(rawJdbc.prefix, rawJdbc.prefix, rawJdbc.elements)
+			? new JdbcOptionImpl(rawJdbc.prefix, rawJdbc.elements)
 			: undefined;
 	}
 	get resultType(): CommandParam {
@@ -431,16 +405,13 @@ export type TemplateOption = CommandParams & {
 	templateVarStop: CommandParam;
 };
 export class TemplateOptionImpl implements TemplateOption {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
-	constructor(name: string, prefix: string, elements: CommandParam[]) {
-		this.name = name;
+	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
 	}
@@ -464,66 +435,54 @@ const srcTypeDetail = new Map<
 	string,
 	{
 		optionCaption: { caption: string };
-		optional: (_: string) => boolean;
 	}
 >([
 	[
 		"table",
 		{
 			optionCaption: { caption: "table option" },
-			optional: (name: string) =>
-				name !== "encoding" && !name.startsWith("jdbc"),
 		},
 	],
 	[
 		"sql",
 		{
 			optionCaption: { caption: "sql option" },
-			optional: (name: string) =>
-				name !== "encoding" && !name.startsWith("jdbc"),
 		},
 	],
 	[
 		"csv",
 		{
 			optionCaption: { caption: "csv option" },
-			optional: (name: string) => name !== "encoding",
 		},
 	],
 	[
 		"csvq",
 		{
 			optionCaption: { caption: "csvq option" },
-			optional: (name: string) => name !== "encoding",
 		},
 	],
 	[
 		"reg",
 		{
 			optionCaption: { caption: "reg option" },
-			optional: (name: string) =>
-				name !== "regDataSplit" && name !== "regHeaderSplit",
 		},
 	],
 	[
 		"fixed",
 		{
 			optionCaption: { caption: "fixed option" },
-			optional: (name: string) => name !== "fixedLength",
 		},
 	],
 	[
 		"xls",
 		{
 			optionCaption: { caption: "xls option" },
-			optional: (_: string) => true,
 		},
 	],
 	[
 		"xlsx",
 		{
 			optionCaption: { caption: "xlsx option" },
-			optional: (_: string) => true,
 		},
 	],
 ]);
@@ -531,14 +490,11 @@ function toCommandParams(
 	srcData: CommandParams,
 	elements: CommandParam[],
 	optionCaption?: { caption: string },
-	optional?: (_: string) => boolean,
 ): CommandParams {
 	return {
-		name: srcData.name,
 		prefix: srcData.prefix,
 		elements: elements,
 		optionCaption: optionCaption,
-		optional: optional,
 		find: (name: string) => findByName(elements, name),
 	};
 }
@@ -583,20 +539,16 @@ export type CsvTypeSettings = CommandParams & {
 	ignoreQuoted: CommandParam;
 };
 export class CsvTypeSettingsImpl implements CsvTypeSettings {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
 	constructor(params: CommandParams) {
-		this.name = params.name;
 		this.prefix = params.prefix;
 		this.elements = params.elements;
 		this.optionCaption = params.optionCaption;
-		this.optional = params.optional;
 	}
 	get headerName(): CommandParam {
 		return findByName(this.elements, "headerName");
@@ -625,20 +577,16 @@ export type CsvqTypeSettings = CommandParams & {
 	templateVarStop: CommandParam;
 };
 export class CsvqTypeSettingsImpl implements CsvqTypeSettings {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
 	constructor(params: CommandParams) {
-		this.name = params.name;
 		this.prefix = params.prefix;
 		this.elements = params.elements;
 		this.optionCaption = params.optionCaption;
-		this.optional = params.optional;
 	}
 	get headerName(): CommandParam {
 		return findByName(this.elements, "headerName");
@@ -673,20 +621,16 @@ export type TableSqlTypeSettings = CommandParams & {
 	templateVarStop: CommandParam;
 };
 export class TableSqlTypeSettingsImpl implements TableSqlTypeSettings {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
 	constructor(params: CommandParams) {
-		this.name = params.name;
 		this.prefix = params.prefix;
 		this.elements = params.elements;
 		this.optionCaption = params.optionCaption;
-		this.optional = params.optional;
 	}
 	get headerName(): CommandParam {
 		return findByName(this.elements, "headerName");
@@ -719,20 +663,16 @@ export type RegTypeSettings = CommandParams & {
 	regHeaderSplit: CommandParam;
 };
 export class RegTypeSettingsImpl implements RegTypeSettings {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
 	constructor(params: CommandParams) {
-		this.name = params.name;
 		this.prefix = params.prefix;
 		this.elements = params.elements;
 		this.optionCaption = params.optionCaption;
-		this.optional = params.optional;
 	}
 	get headerName(): CommandParam {
 		return findByName(this.elements, "headerName");
@@ -758,20 +698,16 @@ export type FixedTypeSettings = CommandParams & {
 	fixedLength: CommandParam;
 };
 export class FixedTypeSettingsImpl implements FixedTypeSettings {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
 	constructor(params: CommandParams) {
-		this.name = params.name;
 		this.prefix = params.prefix;
 		this.elements = params.elements;
 		this.optionCaption = params.optionCaption;
-		this.optional = params.optional;
 	}
 	get headerName(): CommandParam {
 		return findByName(this.elements, "headerName");
@@ -794,20 +730,16 @@ export type XlsTypeSettings = CommandParams & {
 	xlsxSchema: CommandParam;
 };
 export class XlsTypeSettingsImpl implements XlsTypeSettings {
-	name: string;
 	prefix: string;
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
-	optional?: (_: string) => boolean;
 	find(name: string): CommandParam {
 		return findByName(this.elements, name);
 	}
 	constructor(params: CommandParams) {
-		this.name = params.name;
 		this.prefix = params.prefix;
 		this.elements = params.elements;
 		this.optionCaption = params.optionCaption;
-		this.optional = params.optional;
 	}
 	get headerName(): CommandParam {
 		return findByName(this.elements, "headerName");

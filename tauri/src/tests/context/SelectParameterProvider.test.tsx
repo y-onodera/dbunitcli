@@ -23,24 +23,33 @@ import type {
 	SrcElements,
 	TemplateOption,
 } from "../../model/CommandParam";
-import type { ConvertParams, GenerateParams } from "../../model/SelectParameter";
+import type {
+	ConvertParams,
+	GenerateParams,
+} from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
 import type { FetchParams } from "../../utils/fetchUtils";
 import { enviromentFixture } from "../setup";
 
 // モックデータ
 const createCommandParams = (): CommandParams => ({
-	name: "test-param",
 	prefix: "",
 	elements: [],
+	find: (_: string) => {
+		return {
+			name: "name",
+			value: "value",
+			attribute: {},
+			optional: false,
+		} as CommandParam;
+	},
 });
 const createSrcElements = () => createCommandParams() as unknown as SrcElements;
 const createSettingElements = () =>
 	createCommandParams() as unknown as SettingElements;
 const createTemplateOption = () =>
 	createCommandParams() as unknown as TemplateOption;
-const createDatasetSource = (name: string, prefix: string): DatasetSource => ({
-	name,
+const createDatasetSource = (prefix: string): DatasetSource => ({
 	prefix,
 	elements: [],
 	srcType: () => "csv",
@@ -51,11 +60,18 @@ const createDatasetSource = (name: string, prefix: string): DatasetSource => ({
 	jdbcOption: () =>
 		createCommandParams() as unknown as ReturnType<DatasetSource["jdbcOption"]>,
 	templateOption: createTemplateOption,
+	find: (_: string) => {
+		return {
+			name: "name",
+			value: "value",
+			attribute: {},
+			optional: false,
+		} as CommandParam;
+	},
 });
 const mockConvertParams = {
-	srcData: createDatasetSource("test-param", ""),
+	srcData: createDatasetSource(""),
 	convertResult: {
-		name: "test-param",
 		prefix: "",
 		elements: [] as CommandParam[],
 		jdbc: undefined,
@@ -70,7 +86,7 @@ const mockRefreshConvertParams = {
 } as unknown as ConvertParams;
 const mockGenerateParams = {
 	elements: [] as CommandParam[],
-	srcData: createDatasetSource("test-param", ""),
+	srcData: createDatasetSource(""),
 	templateOption: createTemplateOption(),
 } as unknown as GenerateParams;
 const mockRefreshGenerateParams = {
@@ -156,7 +172,6 @@ describe("SelectParameterProviderのテスト", () => {
 
 			result.current.setParameter(mockConvertParams, "convert", "test-param");
 			await waitFor(() => {
-				expect(result.current.parameter.convert.srcData.name).toBe("test-param");
 				expect(result.current.parameter.name).toBe("test-param");
 				expect(result.current.parameter.command).toBe("convert");
 			});

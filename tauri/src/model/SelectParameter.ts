@@ -42,12 +42,10 @@ export class SelectParameter {
 			};
 			this.convert = {
 				srcData: new DatasetSourceImpl(
-					rawConvert.srcData.name,
 					rawConvert.srcData.prefix,
 					rawConvert.srcData.elements,
 				),
 				convertResult: new ConvertResultImpl(
-					rawConvert.convertResult.prefix,
 					rawConvert.convertResult.prefix,
 					rawConvert.convertResult.elements,
 					rawConvert.convertResult.jdbc,
@@ -66,24 +64,20 @@ export class SelectParameter {
 			this.compare = {
 				elements: rawCompare.elements,
 				newData: new DatasetSourceImpl(
-					rawCompare.newData.name,
 					rawCompare.newData.prefix,
 					rawCompare.newData.elements,
 				),
 				oldData: new DatasetSourceImpl(
-					rawCompare.oldData.name,
 					rawCompare.oldData.prefix,
 					rawCompare.oldData.elements,
 				),
 				imageOption: rawCompare.imageOption,
 				convertResult: new ConvertResultImpl(
 					rawCompare.convertResult.prefix,
-					rawCompare.convertResult.prefix,
 					rawCompare.convertResult.elements,
 					undefined,
 				),
 				expectData: new DatasetSourceImpl(
-					rawCompare.expectData.name,
 					rawCompare.expectData.prefix,
 					rawCompare.expectData.elements,
 				),
@@ -96,19 +90,13 @@ export class SelectParameter {
 				templateOption?: TemplateOption;
 			};
 			this.generate = {
-				commandElements: new GenerateElementsImpl(
-					"generate",
-					"",
-					rawGenerate.elements,
-				),
+				commandElements: new GenerateElementsImpl("", rawGenerate.elements),
 				srcData: new DatasetSourceImpl(
-					rawGenerate.srcData.name,
 					rawGenerate.srcData.prefix,
 					rawGenerate.srcData.elements,
 				),
 				templateOption: rawGenerate.templateOption
 					? new TemplateOptionImpl(
-							rawGenerate.templateOption.prefix,
 							rawGenerate.templateOption.prefix,
 							rawGenerate.templateOption.elements,
 						)
@@ -123,22 +111,19 @@ export class SelectParameter {
 				jdbcOption?: JdbcOption;
 			};
 			this.run = {
-				commandElements: new RunElementsImpl("run", "", rawRun.elements),
+				commandElements: new RunElementsImpl("", rawRun.elements),
 				srcData: new DatasetSourceImpl(
-					rawRun.srcData.name,
 					rawRun.srcData.prefix,
 					rawRun.srcData.elements,
 				),
 				templateOption: rawRun.templateOption
 					? new TemplateOptionImpl(
 							rawRun.templateOption.prefix,
-							rawRun.templateOption.prefix,
 							rawRun.templateOption.elements,
 						)
 					: undefined,
 				jdbcOption: rawRun.jdbcOption
 					? new JdbcOptionImpl(
-							rawRun.jdbcOption.prefix,
 							rawRun.jdbcOption.prefix,
 							rawRun.jdbcOption.elements,
 						)
@@ -153,18 +138,15 @@ export class SelectParameter {
 			};
 			this.parameterize = {
 				commandElements: new ParameterizeElementsImpl(
-					"parameterize",
 					"",
 					rawParameterize.elements,
 				),
 				paramData: new DatasetSourceImpl(
-					rawParameterize.paramData.name,
 					rawParameterize.paramData.prefix,
 					rawParameterize.paramData.elements,
 				),
 				templateOption: rawParameterize.templateOption
 					? new TemplateOptionImpl(
-							rawParameterize.templateOption.prefix,
 							rawParameterize.templateOption.prefix,
 							rawParameterize.templateOption.elements,
 						)
