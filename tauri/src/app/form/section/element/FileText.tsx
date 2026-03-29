@@ -1,4 +1,4 @@
-import type { Prop, TextProp } from "./FormElementProp";
+import type { TextProp } from "./FormElementProp";
 import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import ResourceText from "./ResourceText";
 
