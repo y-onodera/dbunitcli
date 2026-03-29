@@ -9,10 +9,12 @@ import ResourceText from "../element/ResourceText";
 import XlsxSchemaText from "./XlsxSchemaText";
 
 export default function XlsFormSection({
+	srcType,
 	settings,
 	handleValueChange,
 	handleToggleChecked,
 }: {
+	srcType: string;
 	settings: XlsTypeSettings;
 	handleValueChange: (param: CommandParam) => (newValue: string) => void;
 	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
@@ -27,7 +29,7 @@ export default function XlsFormSection({
 				<ExpandButton
 					toggleOptional={toggleOptional}
 					showOptional={showOptional}
-					caption={settings.optionCaption?.caption}
+					caption={`${srcType} option`}
 				/>
 			</div>
 			<ResourceText

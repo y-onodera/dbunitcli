@@ -9,10 +9,12 @@ import ResourceText from "../element/ResourceText";
 import TemplateText from "../element/TemplateText";
 
 export default function TableSqlFormSection({
+	srcType,
 	settings,
 	handleValueChange,
 	handleToggleChecked,
 }: {
+	srcType: string;
 	settings: TableSqlTypeSettings;
 	handleValueChange: (param: CommandParam) => (newValue: string) => void;
 	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
@@ -27,7 +29,7 @@ export default function TableSqlFormSection({
 				<ExpandButton
 					toggleOptional={toggleOptional}
 					showOptional={showOptional}
-					caption={settings.optionCaption?.caption}
+					caption={`${srcType} option`}
 				/>
 			</div>
 			<ResourceText

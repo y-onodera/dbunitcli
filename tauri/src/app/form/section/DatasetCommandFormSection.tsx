@@ -48,6 +48,7 @@ export default function DatasetCommandFormSection({
 	if (srcType === "table" || srcType === "sql") {
 		return (
 			<TableSqlFormSection
+				srcType={srcType}
 				settings={new TableSqlTypeSettingsImpl(commandParams)}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
@@ -75,6 +76,7 @@ export default function DatasetCommandFormSection({
 	if (srcType === "xls" || srcType === "xlsx") {
 		return (
 			<XlsFormSection
+				srcType={srcType}
 				settings={new XlsTypeSettingsImpl(commandParams)}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
