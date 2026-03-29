@@ -1,14 +1,21 @@
-import type { Prop } from "./FormElementProp";
+import type { Prop, TextProp } from "./FormElementProp";
 import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import ResourceText from "./ResourceText";
 
-export default function FileText({ prefix, element, hidden, srcType }: Prop) {
+export default function FileText({
+	prefix,
+	element,
+	hidden,
+	srcType,
+	handleValueChange: onValueChange,
+}: TextProp) {
 	return (
 		<ResourceText
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
 			resourceFiles={[]}
+			handleValueChange={onValueChange}
 		>
 			{({ path, setPath }) => (
 				<ResourceDropDownMenu

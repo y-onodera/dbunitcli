@@ -1,7 +1,7 @@
 import type { ConvertResult } from "../../../model/CommandParam";
-import Check from "./Check";
-import Select from "./Select";
-import Text from "./TextFormElement";
+import Check from "./element/Check";
+import Select from "./element/Select";
+import Text from "./element/TextFormElement";
 
 export default function ConvertResultFormSection({
 	convertResult,
@@ -11,7 +11,9 @@ export default function ConvertResultFormSection({
 	handleTypeSelect: (selected: string) => Promise<void>;
 }) {
 	const prefix = convertResult.prefix;
-	const excelTable = convertResult.elements.find((e) => e.name === "excelTable");
+	const excelTable = convertResult.elements.find(
+		(e) => e.name === "excelTable",
+	);
 	const outputEncoding = convertResult.elements.find(
 		(e) => e.name === "outputEncoding",
 	);

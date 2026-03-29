@@ -1,4 +1,4 @@
-import { InputLabel, SelectBox } from "../../../components/element/Input";
+import { InputLabel, SelectBox } from "../../../../components/element/Input";
 import type { SelectProp } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
 

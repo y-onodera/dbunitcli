@@ -1,8 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
-import { BlueEditButton } from "../../../components/element/ButtonIcon";
-import type { CommandParam } from "../../../model/CommandParam";
-import JdbcUrlBuilderDialog from "../../settings/JdbcUrlBuilderDialog";
+import { BlueEditButton } from "../../../../components/element/ButtonIcon";
+import type { CommandParam } from "../../../../model/CommandParam";
+import JdbcUrlBuilderDialog from "../../../settings/JdbcUrlBuilderDialog";
 import ResourceText from "./ResourceText";
 
 export default function JdbcUrlTextField({
@@ -19,7 +19,7 @@ export default function JdbcUrlTextField({
 			prefix={prefix}
 			element={element}
 			resourceFiles={[]}
-			onValueChange={(value) => onValueChange(element.name, value)}
+			handleValueChange={(value) => onValueChange(element.name, value)}
 		>
 			{({ path, setPath }) => {
 				const wrappedSetPath: Dispatch<SetStateAction<string>> = (action) => {

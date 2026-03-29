@@ -1,18 +1,24 @@
-import { useResourcesSettings } from "../../../context/WorkspaceResourcesProvider";
+import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import TemplateEditButton, {
 	RemoveTemplateButton,
-} from "../../settings/TemplateEditButton";
-import type { Prop } from "./FormElementProp";
+} from "../../../settings/TemplateEditButton";
+import type { TextProp } from "./FormElementProp";
 import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import ResourceText from "./ResourceText";
 
-export default function TemplateText({ prefix, element, hidden }: Prop) {
+export default function TemplateText({
+	prefix,
+	element,
+	hidden,
+	handleValueChange,
+}: TextProp) {
 	const settings = useResourcesSettings();
 
 	return (
 		<ResourceText
 			prefix={prefix}
 			element={element}
+			handleValueChange={handleValueChange}
 			hidden={hidden}
 			resourceFiles={settings.templateFiles}
 		>

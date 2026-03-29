@@ -1,13 +1,20 @@
 import { useState } from "react";
-import { ExpandButton } from "../../../components/element/ButtonIcon";
-import type { CsvTypeSettings } from "../../../model/CommandParam";
-import Check from "./Check";
-import { DatasetPlainText } from "./DatasetTextFormElement";
+import { ExpandButton } from "../../../../components/element/ButtonIcon";
+import type {
+	CommandParam,
+	CsvTypeSettings,
+} from "../../../../model/CommandParam";
+import Check from "../element/Check";
+import ResourceText from "../element/ResourceText";
 
 export default function CsvFormSection({
 	settings,
+	handleValueChange,
+	handleToggleChecked,
 }: {
 	settings: CsvTypeSettings;
+	handleValueChange: (param: CommandParam) => (newValue: string) => void;
+	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
@@ -22,29 +29,34 @@ export default function CsvFormSection({
 					caption="csv option"
 				/>
 			</div>
-			<DatasetPlainText
+			<ResourceText
 				prefix={prefix}
 				element={settings.headerName}
+				handleValueChange={handleValueChange(settings.headerName)}
 				hidden={!showOptional}
 			/>
-			<DatasetPlainText
+			<ResourceText
 				prefix={prefix}
 				element={settings.startRow}
+				handleValueChange={handleValueChange(settings.startRow)}
 				hidden={!showOptional}
 			/>
 			<Check
 				prefix={prefix}
 				element={settings.addFileInfo}
+				handleOnChange={handleToggleChecked(settings.addFileInfo)}
 				hidden={!showOptional}
 			/>
-			<DatasetPlainText
+			<ResourceText
 				prefix={prefix}
 				element={settings.delimiter}
+				handleValueChange={handleValueChange(settings.delimiter)}
 				hidden={!showOptional}
 			/>
 			<Check
 				prefix={prefix}
 				element={settings.ignoreQuoted}
+				handleOnChange={handleToggleChecked(settings.ignoreQuoted)}
 				hidden={!showOptional}
 			/>
 		</>

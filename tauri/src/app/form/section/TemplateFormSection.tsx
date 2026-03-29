@@ -1,6 +1,6 @@
 import type { TemplateOption } from "../../../model/CommandParam";
-import ResourceText from "./ResourceText";
-import TemplateText from "./TemplateText";
+import ResourceText from "./element/ResourceText";
+import TemplateText from "./element/TemplateText";
 
 export default function TemplateFormSection({
 	templateOption,

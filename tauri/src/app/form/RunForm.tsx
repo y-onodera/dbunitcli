@@ -1,8 +1,8 @@
 import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
 import type { RunParams } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import Select from "./section/element/Select";
 import JdbcFormSection from "./section/JdbcFormSection";
-import Select from "./section/Select";
 import TemplateFormSection from "./section/TemplateFormSection";
 
 export function RunForm(prop: {

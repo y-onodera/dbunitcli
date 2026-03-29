@@ -25,6 +25,7 @@ export type CommandParams = {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find: (name: string) => CommandParam;
 };
 export type SrcInfo = {
 	srcPath: string;
@@ -80,6 +81,9 @@ export class DatasetSourceImpl implements DatasetSource {
 	name: string;
 	prefix: string;
 	elements: CommandParam[];
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	private indexOfSetting: number;
 	private indexExtension: number;
 	private indexRegExclude: number;
@@ -163,6 +167,9 @@ class SrcElementsImpl implements SrcElements {
 	name: string;
 	prefix: string;
 	elements: CommandParam[];
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(name: string, prefix: string, elements: CommandParam[]) {
 		this.name = name;
 		this.prefix = prefix;
@@ -194,6 +201,9 @@ class SettingElementsImpl implements SettingElements {
 	name: string;
 	prefix: string;
 	elements: CommandParam[];
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(name: string, prefix: string, elements: CommandParam[]) {
 		this.name = name;
 		this.prefix = prefix;
@@ -238,6 +248,9 @@ export class JdbcOptionImpl implements JdbcOption {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(name: string, prefix: string, elements: CommandParam[]) {
 		this.name = name;
 		this.prefix = prefix;
@@ -270,6 +283,9 @@ export class GenerateElementsImpl implements GenerateElements {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(name: string, prefix: string, elements: CommandParam[]) {
 		this.name = name;
 		this.prefix = prefix;
@@ -303,6 +319,9 @@ export class RunElementsImpl implements RunElements {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(name: string, prefix: string, elements: CommandParam[]) {
 		this.name = name;
 		this.prefix = prefix;
@@ -326,6 +345,9 @@ export class ParameterizeElementsImpl implements ParameterizeElements {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(name: string, prefix: string, elements: CommandParam[]) {
 		this.name = name;
 		this.prefix = prefix;
@@ -365,6 +387,9 @@ export class ConvertResultImpl implements ConvertResult {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	readonly jdbc?: JdbcOption;
 	constructor(
 		name: string,
@@ -411,6 +436,9 @@ export class TemplateOptionImpl implements TemplateOption {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(name: string, prefix: string, elements: CommandParam[]) {
 		this.name = name;
 		this.prefix = prefix;
@@ -511,6 +539,7 @@ function toCommandParams(
 		elements: elements,
 		optionCaption: optionCaption,
 		optional: optional,
+		find: (name: string) => findByName(elements, name),
 	};
 }
 
@@ -559,6 +588,9 @@ export class CsvTypeSettingsImpl implements CsvTypeSettings {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(params: CommandParams) {
 		this.name = params.name;
 		this.prefix = params.prefix;
@@ -598,6 +630,9 @@ export class CsvqTypeSettingsImpl implements CsvqTypeSettings {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(params: CommandParams) {
 		this.name = params.name;
 		this.prefix = params.prefix;
@@ -643,6 +678,9 @@ export class TableSqlTypeSettingsImpl implements TableSqlTypeSettings {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(params: CommandParams) {
 		this.name = params.name;
 		this.prefix = params.prefix;
@@ -686,6 +724,9 @@ export class RegTypeSettingsImpl implements RegTypeSettings {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(params: CommandParams) {
 		this.name = params.name;
 		this.prefix = params.prefix;
@@ -722,6 +763,9 @@ export class FixedTypeSettingsImpl implements FixedTypeSettings {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(params: CommandParams) {
 		this.name = params.name;
 		this.prefix = params.prefix;
@@ -755,6 +799,9 @@ export class XlsTypeSettingsImpl implements XlsTypeSettings {
 	elements: CommandParam[];
 	optionCaption?: { caption: string };
 	optional?: (_: string) => boolean;
+	find(name: string): CommandParam {
+		return findByName(this.elements, name);
+	}
 	constructor(params: CommandParams) {
 		this.name = params.name;
 		this.prefix = params.prefix;

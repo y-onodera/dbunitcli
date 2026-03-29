@@ -1,77 +1,51 @@
 import type { CommandParams } from "../../../model/CommandParam";
-import Check from "./Check";
-import Text from "./TextFormElement";
+import Check from "./element/Check";
+import Text from "./element/TextFormElement";
 
 export default function ImageOptionFormSection({
 	imageOption,
 }: {
 	imageOption: CommandParams;
 }) {
-	const find = (name: string) =>
-		imageOption.elements.find((e) => e.name === name);
 	const prefix = imageOption.prefix;
 
-	const threshold = find("threshold");
-	const pixelToleranceLevel = find("pixelToleranceLevel");
-	const allowingPercentOfDifferentPixels = find(
+	const threshold = imageOption.find("threshold");
+	const pixelToleranceLevel = imageOption.find("pixelToleranceLevel");
+	const allowingPercentOfDifferentPixels = imageOption.find(
 		"allowingPercentOfDifferentPixels",
 	);
-	const rectangleLineWidth = find("rectangleLineWidth");
-	const minimalRectangleSize = find("minimalRectangleSize");
-	const maximalRectangleCount = find("maximalRectangleCount");
-	const excludedAreas = find("excludedAreas");
-	const drawExcludedRectangles = find("drawExcludedRectangles");
-	const fillExcludedRectangles = find("fillExcludedRectangles");
-	const percentOpacityExcludedRectangles = find(
+	const rectangleLineWidth = imageOption.find("rectangleLineWidth");
+	const minimalRectangleSize = imageOption.find("minimalRectangleSize");
+	const maximalRectangleCount = imageOption.find("maximalRectangleCount");
+	const excludedAreas = imageOption.find("excludedAreas");
+	const drawExcludedRectangles = imageOption.find("drawExcludedRectangles");
+	const fillExcludedRectangles = imageOption.find("fillExcludedRectangles");
+	const percentOpacityExcludedRectangles = imageOption.find(
 		"percentOpacityExcludedRectangles",
 	);
-	const excludedRectangleColor = find("excludedRectangleColor");
-	const fillDifferenceRectangles = find("fillDifferenceRectangles");
-	const percentOpacityDifferenceRectangles = find(
+	const excludedRectangleColor = imageOption.find("excludedRectangleColor");
+	const fillDifferenceRectangles = imageOption.find("fillDifferenceRectangles");
+	const percentOpacityDifferenceRectangles = imageOption.find(
 		"percentOpacityDifferenceRectangles",
 	);
-	const differenceRectangleColor = find("differenceRectangleColor");
+	const differenceRectangleColor = imageOption.find("differenceRectangleColor");
 
 	return (
 		<>
-			{threshold && <Text prefix={prefix} element={threshold} />}
-			{pixelToleranceLevel && (
-				<Text prefix={prefix} element={pixelToleranceLevel} />
-			)}
-			{allowingPercentOfDifferentPixels && (
-				<Text prefix={prefix} element={allowingPercentOfDifferentPixels} />
-			)}
-			{rectangleLineWidth && (
-				<Text prefix={prefix} element={rectangleLineWidth} />
-			)}
-			{minimalRectangleSize && (
-				<Text prefix={prefix} element={minimalRectangleSize} />
-			)}
-			{maximalRectangleCount && (
-				<Text prefix={prefix} element={maximalRectangleCount} />
-			)}
-			{excludedAreas && <Text prefix={prefix} element={excludedAreas} />}
-			{drawExcludedRectangles && (
-				<Check prefix={prefix} element={drawExcludedRectangles} />
-			)}
-			{fillExcludedRectangles && (
-				<Check prefix={prefix} element={fillExcludedRectangles} />
-			)}
-			{percentOpacityExcludedRectangles && (
-				<Text prefix={prefix} element={percentOpacityExcludedRectangles} />
-			)}
-			{excludedRectangleColor && (
-				<Text prefix={prefix} element={excludedRectangleColor} />
-			)}
-			{fillDifferenceRectangles && (
-				<Check prefix={prefix} element={fillDifferenceRectangles} />
-			)}
-			{percentOpacityDifferenceRectangles && (
-				<Text prefix={prefix} element={percentOpacityDifferenceRectangles} />
-			)}
-			{differenceRectangleColor && (
-				<Text prefix={prefix} element={differenceRectangleColor} />
-			)}
+			<Text prefix={prefix} element={threshold} />
+			<Text prefix={prefix} element={pixelToleranceLevel} />
+			<Text prefix={prefix} element={allowingPercentOfDifferentPixels} />
+			<Text prefix={prefix} element={rectangleLineWidth} />
+			<Text prefix={prefix} element={minimalRectangleSize} />
+			<Text prefix={prefix} element={maximalRectangleCount} />
+			<Text prefix={prefix} element={excludedAreas} />
+			<Check prefix={prefix} element={drawExcludedRectangles} />
+			<Check prefix={prefix} element={fillExcludedRectangles} />
+			<Text prefix={prefix} element={percentOpacityExcludedRectangles} />
+			<Text prefix={prefix} element={excludedRectangleColor} />
+			<Check prefix={prefix} element={fillDifferenceRectangles} />
+			<Text prefix={prefix} element={percentOpacityDifferenceRectangles} />
+			<Text prefix={prefix} element={differenceRectangleColor} />
 		</>
 	);
 }

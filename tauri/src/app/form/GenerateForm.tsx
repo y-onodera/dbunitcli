@@ -1,8 +1,8 @@
 import type { GenerateParams } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
-import Select from "./section/Select";
+import Select from "./section/element/Select";
+import Text from "./section/element/TextFormElement";
 import TemplateFormSection from "./section/TemplateFormSection";
-import Text from "./section/TextFormElement";
 
 export function GenerateForm(prop: {
 	handleTypeSelect: () => Promise<void>;

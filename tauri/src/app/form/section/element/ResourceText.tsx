@@ -4,15 +4,13 @@ import {
 	ControllTextBox,
 	InputLabel,
 	ResourceDatalist,
-} from "../../../components/element/Input";
-import { useWorkspaceContext } from "../../../context/WorkspaceResourcesProvider";
+} from "../../../../components/element/Input";
+import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
 import { getPath } from "./Chooser";
-import type { Prop } from "./FormElementProp";
+import type { TextProp } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
 
-interface Props extends Prop {
-	resourceFiles?: string[];
-	onValueChange?: (value: string) => void;
+interface Props extends TextProp {
 	children?: (args: {
 		path: string;
 		setPath: Dispatch<SetStateAction<string>>;
@@ -26,7 +24,7 @@ export default function ResourceText({
 	hidden,
 	srcType,
 	resourceFiles = [],
-	onValueChange,
+	handleValueChange: onValueChange,
 	children,
 }: Props) {
 	const [path, setPath] = useState(element.value);

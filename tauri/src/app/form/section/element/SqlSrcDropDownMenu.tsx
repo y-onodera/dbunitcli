@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import { useJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
-import type { QueryDatasourceType } from "../../../model/QueryDatasource";
-import JdbcTableSelectorButton from "../../settings/JdbcTableSelectorButton";
+import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
+import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
+import JdbcTableSelectorButton from "../../../settings/JdbcTableSelectorButton";
 import SqlEditorButton, {
 	RemoveSqlEditorButton,
-} from "../../settings/SqlEditorButton";
+} from "../../../settings/SqlEditorButton";
 import type { FileProp } from "./FormElementProp";
 import ResourceDropDownMenu from "./ResourceDropDownMenu";
 

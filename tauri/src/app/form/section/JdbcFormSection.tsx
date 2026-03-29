@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { BlueButton } from "../../../components/element/Button";
 import { useSetJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
 import {
@@ -7,9 +7,9 @@ import {
 } from "../../../hooks/useJdbc";
 import type { JdbcOption } from "../../../model/CommandParam";
 import JdbcSavePropertiesDialog from "../../settings/JdbcSavePropertiesDialog";
-import JdbcPropertiesTextField from "./JdbcPropertiesTextField";
-import JdbcUrlTextField from "./JdbcUrlTextField";
-import ResourceText from "./ResourceText";
+import JdbcPropertiesTextField from "./element/JdbcPropertiesTextField";
+import JdbcUrlTextField from "./element/JdbcUrlTextField";
+import ResourceText from "./element/ResourceText";
 
 export default function JdbcFormSection({
 	jdbcOption,
@@ -25,24 +25,18 @@ export default function JdbcFormSection({
 		jdbcProperties: jdbcOption.jdbcProperties.value,
 	}));
 
-	const handleJdbcValueChange = useCallback(
-		(name: string, value: string) => {
-			setJdbcValues((prev) => ({ ...prev, [name]: value }));
-			setJdbcConnection({ jdbcValues: {}, connectionOk: false });
-		},
-		[setJdbcConnection],
-	);
-
-	const handleConnectionOk = useCallback(
-		(values: Record<string, string>) => {
-			setJdbcConnection({ jdbcValues: values, connectionOk: true });
-		},
-		[setJdbcConnection],
-	);
-
-	const handleConnectionFail = useCallback(() => {
+	const handleJdbcValueChange = (name: string, value: string) => {
+		setJdbcValues((prev) => ({ ...prev, [name]: value }));
 		setJdbcConnection({ jdbcValues: {}, connectionOk: false });
-	}, [setJdbcConnection]);
+	};
+
+	const handleConnectionOk = (values: Record<string, string>) => {
+		setJdbcConnection({ jdbcValues: values, connectionOk: true });
+	};
+
+	const handleConnectionFail = () => {
+		setJdbcConnection({ jdbcValues: {}, connectionOk: false });
+	};
 
 	return (
 		<>
@@ -54,12 +48,16 @@ export default function JdbcFormSection({
 			<ResourceText
 				prefix={prefix}
 				element={jdbcOption.jdbcUser}
-				onValueChange={(value) => handleJdbcValueChange(jdbcOption.jdbcUser.name, value)}
+				handleValueChange={(value) =>
+					handleJdbcValueChange(jdbcOption.jdbcUser.name, value)
+				}
 			/>
 			<ResourceText
 				prefix={prefix}
 				element={jdbcOption.jdbcPass}
-				onValueChange={(value) => handleJdbcValueChange(jdbcOption.jdbcPass.name, value)}
+				handleValueChange={(value) =>
+					handleJdbcValueChange(jdbcOption.jdbcPass.name, value)
+				}
 			/>
 			<JdbcPropertiesTextField
 				prefix={prefix}

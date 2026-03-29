@@ -5,13 +5,13 @@ import {
 	DirectoryButton,
 	FileButton,
 	OpenButton,
-} from "../../../components/element/ButtonIcon";
-import { useEnviroment } from "../../../context/EnviromentProvider";
-import { useWorkspaceContext } from "../../../context/WorkspaceResourcesProvider";
-import type { Attribute, DefaultPath } from "../../../model/CommandParam";
-import { isSqlRelatedType } from "../../../model/QueryDatasource";
-import type { WorkspaceContext } from "../../../model/WorkspaceResources";
-import { fetchData } from "../../../utils/fetchUtils";
+} from "../../../../components/element/ButtonIcon";
+import { useEnviroment } from "../../../../context/EnviromentProvider";
+import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
+import type { Attribute, DefaultPath } from "../../../../model/CommandParam";
+import { isSqlRelatedType } from "../../../../model/QueryDatasource";
+import type { WorkspaceContext } from "../../../../model/WorkspaceResources";
+import { fetchData } from "../../../../utils/fetchUtils";
 import type { FileProp } from "./FormElementProp";
 
 async function resolvePathViaSidecar(

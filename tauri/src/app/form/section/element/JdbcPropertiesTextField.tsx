@@ -1,8 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useResourcesSettings } from "../../../context/WorkspaceResourcesProvider";
-import { useDeleteJdbcProperties } from "../../../hooks/useJdbc";
-import type { CommandParam } from "../../../model/CommandParam";
-import { RemoveResource } from "../../settings/ResourceEditButton";
+import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
+import { useDeleteJdbcProperties } from "../../../../hooks/useJdbc";
+import type { CommandParam } from "../../../../model/CommandParam";
+import { RemoveResource } from "../../../settings/ResourceEditButton";
 import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import ResourceText from "./ResourceText";
 
@@ -21,7 +21,7 @@ export default function JdbcPropertiesTextField({
 			prefix={prefix}
 			element={element}
 			resourceFiles={settings.jdbcFiles}
-			onValueChange={(value) => onValueChange(element.name, value)}
+			handleValueChange={(value) => onValueChange(element.name, value)}
 		>
 			{({ path, setPath, isValueInDatalist }) => {
 				const wrappedSetPath: Dispatch<SetStateAction<string>> = (action) => {

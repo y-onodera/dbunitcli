@@ -1,13 +1,20 @@
 import { useState } from "react";
-import { ExpandButton } from "../../../components/element/ButtonIcon";
-import type { FixedTypeSettings } from "../../../model/CommandParam";
-import Check from "./Check";
-import { DatasetPlainText } from "./DatasetTextFormElement";
+import { ExpandButton } from "../../../../components/element/ButtonIcon";
+import type {
+	CommandParam,
+	FixedTypeSettings,
+} from "../../../../model/CommandParam";
+import Check from "../element/Check";
+import ResourceText from "../element/ResourceText";
 
 export default function FixedFormSection({
 	settings,
+	handleValueChange,
+	handleToggleChecked,
 }: {
 	settings: FixedTypeSettings;
+	handleValueChange: (param: CommandParam) => (newValue: string) => void;
+	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
@@ -22,24 +29,28 @@ export default function FixedFormSection({
 					caption="fixed option"
 				/>
 			</div>
-			<DatasetPlainText
+			<ResourceText
 				prefix={prefix}
 				element={settings.headerName}
+				handleValueChange={handleValueChange(settings.headerName)}
 				hidden={!showOptional}
 			/>
-			<DatasetPlainText
+			<ResourceText
 				prefix={prefix}
 				element={settings.startRow}
+				handleValueChange={handleValueChange(settings.startRow)}
 				hidden={!showOptional}
 			/>
 			<Check
 				prefix={prefix}
 				element={settings.addFileInfo}
+				handleOnChange={handleToggleChecked(settings.addFileInfo)}
 				hidden={!showOptional}
 			/>
-			<DatasetPlainText
+			<ResourceText
 				prefix={prefix}
 				element={settings.fixedLength}
+				handleValueChange={handleValueChange(settings.fixedLength)}
 				hidden={false}
 			/>
 		</>

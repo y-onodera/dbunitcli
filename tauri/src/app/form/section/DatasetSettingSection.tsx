@@ -1,14 +1,21 @@
 import { useState } from "react";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
-import type { SettingElements } from "../../../model/CommandParam";
-import Check from "./Check";
-import DatasetSettingText from "./DatasetSettingText";
-import { DatasetPlainText } from "./DatasetTextFormElement";
+import type {
+	CommandParam,
+	SettingElements,
+} from "../../../model/CommandParam";
+import Check from "./element/Check";
+import DatasetSettingText from "./element/DatasetSettingText";
+import ResourceText from "./element/ResourceText";
 
 export default function DatasetSettingSection({
 	settingElements,
+	handleValueChange,
+	handleToggleChecked,
 }: {
 	settingElements: SettingElements;
+	handleValueChange: (param: CommandParam) => (newValue: string) => void;
+	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
@@ -21,9 +28,10 @@ export default function DatasetSettingSection({
 				element={settingElements.setting}
 				hidden={false}
 			/>
-			<DatasetPlainText
+			<ResourceText
 				prefix={prefix}
 				element={settingElements.settingEncoding}
+				handleValueChange={handleValueChange(settingElements.settingEncoding)}
 				hidden={false}
 			/>
 			<div className="pt-2.5">
@@ -33,24 +41,28 @@ export default function DatasetSettingSection({
 					caption="dataset option"
 				/>
 			</div>
-			<DatasetPlainText
+			<ResourceText
 				prefix={prefix}
 				element={settingElements.regTableInclude}
+				handleValueChange={handleValueChange(settingElements.regTableInclude)}
 				hidden={!showOptional}
 			/>
-			<DatasetPlainText
+			<ResourceText
 				prefix={prefix}
 				element={settingElements.regTableExclude}
+				handleValueChange={handleValueChange(settingElements.regTableExclude)}
 				hidden={!showOptional}
 			/>
 			<Check
 				prefix={prefix}
 				element={settingElements.loadData}
+				handleOnChange={handleToggleChecked(settingElements.loadData)}
 				hidden={!showOptional}
 			/>
 			<Check
 				prefix={prefix}
 				element={settingElements.includeMetaData}
+				handleOnChange={handleToggleChecked(settingElements.includeMetaData)}
 				hidden={!showOptional}
 			/>
 		</>

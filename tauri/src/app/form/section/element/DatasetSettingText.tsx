@@ -3,14 +3,14 @@ import {
 	ControllTextBox,
 	InputLabel,
 	ResourceDatalist,
-} from "../../../components/element/Input";
-import { useDatasetSrcInfo } from "../../../context/DatasetSrcInfoProvider";
-import { useResourcesSettings } from "../../../context/WorkspaceResourcesProvider";
+} from "../../../../components/element/Input";
+import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
+import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import DatasetSettingEditButton, {
 	RemoveDatasetSettingButton,
-} from "../../settings/DatasetSettingEditButton";
-import DatasetTableNamesPreviewButton from "../../settings/DatasetTableNamesPreviewButton";
-import type { Prop } from "./FormElementProp";
+} from "../../../settings/DatasetSettingEditButton";
+import DatasetTableNamesPreviewButton from "../../../settings/DatasetTableNamesPreviewButton";
+import type { TextProp } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
 import ResourceDropDownMenu from "./ResourceDropDownMenu";
 
@@ -19,7 +19,7 @@ export default function DatasetSettingText({
 	element,
 	hidden,
 	hideDatasetSettingEdit,
-}: Prop) {
+}: TextProp) {
 	const [path, setPath] = useState(element.value);
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const settings = useResourcesSettings();

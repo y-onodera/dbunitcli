@@ -1,9 +1,9 @@
 import type { ParameterizeParams } from "../../model/SelectParameter";
-import Check from "./section/Check";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
-import Select from "./section/Select";
+import Check from "./section/element/Check";
+import Select from "./section/element/Select";
+import Text from "./section/element/TextFormElement";
 import TemplateFormSection from "./section/TemplateFormSection";
-import Text from "./section/TextFormElement";
 
 export function ParameterizeForm(prop: {
 	handleTypeSelect: () => Promise<void>;

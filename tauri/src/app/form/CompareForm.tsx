@@ -4,9 +4,9 @@ import { buildDatasetSrcInfo } from "../../model/CommandParam";
 import type { CompareParams } from "../../model/SelectParameter";
 import ConvertResultFormSection from "./section/ConvertResultFormSection";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import Select from "./section/element/Select";
+import Text from "./section/element/TextFormElement";
 import ImageOptionFormSection from "./section/ImageOptionFormSection";
-import Select from "./section/Select";
-import Text from "./section/TextFormElement";
 
 export function CompareForm(prop: {
 	handleTypeSelect: () => Promise<void>;

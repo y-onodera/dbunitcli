@@ -1,6 +1,14 @@
 import { useMemo } from "react";
-import { DatasetSrcInfoProvider } from "../../../context/DatasetSrcInfoProvider";
-import type { DatasetSource } from "../../../model/CommandParam";
+import {
+	DatasetSrcInfoProvider,
+	useDatasetSrcInfo,
+	useSetDatasetSrcInfo,
+} from "../../../context/DatasetSrcInfoProvider";
+import type {
+	CommandParam,
+	DatasetSource,
+	DatasetSrcInfo,
+} from "../../../model/CommandParam";
 import { buildDatasetSrcInfo } from "../../../model/CommandParam";
 import DatasetCommandFormSection from "./DatasetCommandFormSection";
 import DatasetSettingSection from "./DatasetSettingSection";
@@ -12,6 +20,22 @@ export function DatasetLoadForm(prop: {
 	name: string;
 	srcData: DatasetSource;
 }) {
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const setDatasetSrcInfo = useSetDatasetSrcInfo();
+	const handleToggleChecked = (element: CommandParam) => (checked: boolean) => {
+		setDatasetSrcInfo({
+			...datasetSrcInfo,
+			[element.name]: checked,
+		} as DatasetSrcInfo);
+	};
+	const handleValueChange = (element: CommandParam) => (newValue: string) => {
+		if (datasetSrcInfo && element.name in datasetSrcInfo) {
+			setDatasetSrcInfo({
+				...datasetSrcInfo,
+				[element.name]: newValue,
+			} as DatasetSrcInfo);
+		}
+	};
 	const srcElements = useMemo(
 		() => prop.srcData.srcElements(),
 		[prop.srcData.srcElements],
@@ -39,12 +63,22 @@ export function DatasetLoadForm(prop: {
 				<SrcFormSection
 					srcElements={srcElements}
 					handleTypeSelect={prop.handleTypeSelect}
+					handleValueChange={handleValueChange}
+					handleToggleChecked={handleToggleChecked}
 				/>
 				{jdbcOption.elements.length > 0 && (
 					<JdbcFormSection jdbcOption={jdbcOption} />
 				)}
-				<DatasetCommandFormSection commandParams={srcTypeSettings} />
-				<DatasetSettingSection settingElements={settingElements} />
+				<DatasetCommandFormSection
+					commandParams={srcTypeSettings}
+					handleValueChange={handleValueChange}
+					handleToggleChecked={handleToggleChecked}
+				/>
+				<DatasetSettingSection
+					settingElements={settingElements}
+					handleValueChange={handleValueChange}
+					handleToggleChecked={handleToggleChecked}
+				/>
 			</fieldset>
 		</DatasetSrcInfoProvider>
 	);
