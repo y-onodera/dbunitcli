@@ -25,7 +25,7 @@ export default function DatasetCommandFormSection({
 	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
 }) {
 	const datasetSrcInfo = useDatasetSrcInfo();
-	const srcType = datasetSrcInfo?.srcType ?? "";
+	const srcType = datasetSrcInfo.srcType;
 	const { prefix, elements } = commandParams;
 
 	if (srcType === "csv") {

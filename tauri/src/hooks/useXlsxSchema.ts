@@ -145,16 +145,16 @@ export const useXlsxSheets = () => {
 	);
 };
 
-export const useSrcInfoSheets = (srcInfo: SrcInfo | undefined): string[] => {
+export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 	const [sheetNames, setSheetNames] = useState<string[]>([]);
 	const loadSheets = useXlsxSheets();
-	const srcPath = srcInfo?.srcPath ?? "";
-	const regTableInclude = srcInfo?.regTableInclude ?? "";
-	const regTableExclude = srcInfo?.regTableExclude ?? "";
-	const recursive = srcInfo?.recursive ?? "";
-	const regInclude = srcInfo?.regInclude ?? "";
-	const regExclude = srcInfo?.regExclude ?? "";
-	const extension = srcInfo?.extension ?? "";
+	const srcPath = srcInfo.srcPath;
+	const regTableInclude = srcInfo.regTableInclude;
+	const regTableExclude = srcInfo.regTableExclude;
+	const recursive = srcInfo.recursive;
+	const regInclude = srcInfo.regInclude;
+	const regExclude = srcInfo.regExclude;
+	const extension = srcInfo.extension;
 
 	useEffect(() => {
 		if (!srcPath) {

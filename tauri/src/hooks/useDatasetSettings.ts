@@ -64,19 +64,19 @@ export const useDatasetTableNamesApi = () => {
 };
 
 export const useDatasetTableNames = (
-	srcInfo: DatasetSrcInfo | undefined,
+	srcInfo: DatasetSrcInfo,
 ): { tableNames: string[]; loading: boolean } => {
 	const [tableNames, setTableNames] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const loadTableNames = useDatasetTableNamesApi();
 
-	const srcPath = srcInfo?.srcPath ?? "";
-	const srcType = srcInfo?.srcType ?? "";
+	const srcPath = srcInfo.srcPath;
+	const srcType = srcInfo.srcType;
 	const sqlNotReady = srcType === "sql" && !connectionOk;
 
 	useEffect(() => {
-		if (!srcInfo || !srcPath || !srcType || srcType === "none" || sqlNotReady) {
+		if (!srcPath || !srcType || srcType === "none" || sqlNotReady) {
 			setTableNames([]);
 			setLoading(false);
 			return;

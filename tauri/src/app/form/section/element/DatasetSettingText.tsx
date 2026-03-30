@@ -79,7 +79,7 @@ export default function DatasetSettingText({
 					)}
 				</div>
 			</div>
-			{datasetSrcInfo?.srcType && !hideDatasetSettingEdit && (
+			{datasetSrcInfo.srcType && !hideDatasetSettingEdit && (
 				<div className="mt-2 flex items-center gap-3">
 					<DatasetTableNamesPreviewButton title="Preview Before Settings" />
 					{path && (

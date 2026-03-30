@@ -3,12 +3,12 @@ import type { DatasetSrcInfo } from "../model/CommandParam";
 import { JdbcConnectionProvider } from "./JdbcConnectionProvider";
 
 type DatasetSrcInfoContextValue = {
-	state: DatasetSrcInfo | undefined;
+	state: DatasetSrcInfo;
 	setState: (state: DatasetSrcInfo) => void;
 };
 
 const DatasetSrcInfoContext = createContext<DatasetSrcInfoContextValue>({
-	state: undefined,
+	state: {} as DatasetSrcInfo,
 	setState: () => {},
 });
 
@@ -30,7 +30,7 @@ export function DatasetSrcInfoProvider({
 	);
 }
 
-export function useDatasetSrcInfo(): DatasetSrcInfo | undefined {
+export function useDatasetSrcInfo(): DatasetSrcInfo {
 	return useContext(DatasetSrcInfoContext).state;
 }
 

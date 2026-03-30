@@ -28,7 +28,7 @@ export function DatasetLoadForm(prop: {
 		} as DatasetSrcInfo);
 	};
 	const handleValueChange = (element: CommandParam) => (newValue: string) => {
-		if (datasetSrcInfo && element.name in datasetSrcInfo) {
+		if (element.name in datasetSrcInfo) {
 			setDatasetSrcInfo({
 				...datasetSrcInfo,
 				[element.name]: newValue,

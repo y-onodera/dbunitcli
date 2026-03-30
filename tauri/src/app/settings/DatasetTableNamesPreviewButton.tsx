@@ -16,7 +16,7 @@ export default function DatasetTableNamesPreviewButton({
 	return (
 		<>
 			<BlueButton title={title} handleClick={() => setShowDialog(true)} />
-			{showDialog && datasetSrcInfo && (
+			{showDialog && (
 				<DatasetTableNamesPreviewDialog
 					datasetSrcInfo={
 						setting !== undefined
