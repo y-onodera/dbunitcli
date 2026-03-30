@@ -26,11 +26,12 @@ export default function DatasetCommandFormSection({
 }) {
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const srcType = datasetSrcInfo?.srcType ?? "";
+	const { prefix, elements } = commandParams;
 
 	if (srcType === "csv") {
 		return (
 			<CsvFormSection
-				settings={new CsvTypeSettingsImpl(commandParams)}
+				settings={new CsvTypeSettingsImpl(prefix, elements)}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
@@ -39,7 +40,7 @@ export default function DatasetCommandFormSection({
 	if (srcType === "csvq") {
 		return (
 			<CsvqFormSection
-				settings={new CsvqTypeSettingsImpl(commandParams)}
+				settings={new CsvqTypeSettingsImpl(prefix, elements)}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
@@ -49,7 +50,7 @@ export default function DatasetCommandFormSection({
 		return (
 			<TableSqlFormSection
 				srcType={srcType}
-				settings={new TableSqlTypeSettingsImpl(commandParams)}
+				settings={new TableSqlTypeSettingsImpl(prefix, elements)}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
@@ -58,7 +59,7 @@ export default function DatasetCommandFormSection({
 	if (srcType === "reg") {
 		return (
 			<RegFormSection
-				settings={new RegTypeSettingsImpl(commandParams)}
+				settings={new RegTypeSettingsImpl(prefix, elements)}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
@@ -67,7 +68,7 @@ export default function DatasetCommandFormSection({
 	if (srcType === "fixed") {
 		return (
 			<FixedFormSection
-				settings={new FixedTypeSettingsImpl(commandParams)}
+				settings={new FixedTypeSettingsImpl(prefix, elements)}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
@@ -77,7 +78,7 @@ export default function DatasetCommandFormSection({
 		return (
 			<XlsFormSection
 				srcType={srcType}
-				settings={new XlsTypeSettingsImpl(commandParams)}
+				settings={new XlsTypeSettingsImpl(prefix, elements)}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>

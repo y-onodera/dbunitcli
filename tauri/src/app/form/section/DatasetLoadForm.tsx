@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
 	DatasetSrcInfoProvider,
 	useDatasetSrcInfo,
@@ -36,23 +35,11 @@ export function DatasetLoadForm(prop: {
 			} as DatasetSrcInfo);
 		}
 	};
-	const srcElements = useMemo(
-		() => prop.srcData.srcElements(),
-		[prop.srcData.srcElements],
-	);
+	const srcElements = prop.srcData.srcElements();
 	const srcTypeSettings = prop.srcData.srcTypeSettings();
-	const settingElements = useMemo(
-		() => prop.srcData.settingElements(),
-		[prop.srcData.settingElements],
-	);
-	const initialDatasetSrcInfo = useMemo(
-		() => buildDatasetSrcInfo(prop.srcData.elements),
-		[prop.srcData.elements],
-	);
-	const jdbcOption = useMemo(
-		() => prop.srcData.jdbcOption(),
-		[prop.srcData.jdbcOption],
-	);
+	const settingElements = prop.srcData.settingElements();
+	const initialDatasetSrcInfo = buildDatasetSrcInfo(prop.srcData.elements);
+	const jdbcOption = prop.srcData.jdbcOption();
 	return (
 		<DatasetSrcInfoProvider
 			key={prop.name + prop.srcData.prefix}

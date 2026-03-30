@@ -35,14 +35,6 @@ import { enviromentFixture } from "../setup";
 const createCommandParams = (): CommandParams => ({
 	prefix: "",
 	elements: [],
-	find: (_: string) => {
-		return {
-			name: "name",
-			value: "value",
-			attribute: {},
-			optional: false,
-		} as CommandParam;
-	},
 });
 const createSrcElements = () => createCommandParams() as unknown as SrcElements;
 const createSettingElements = () =>
@@ -60,14 +52,6 @@ const createDatasetSource = (prefix: string): DatasetSource => ({
 	jdbcOption: () =>
 		createCommandParams() as unknown as ReturnType<DatasetSource["jdbcOption"]>,
 	templateOption: createTemplateOption,
-	find: (_: string) => {
-		return {
-			name: "name",
-			value: "value",
-			attribute: {},
-			optional: false,
-		} as CommandParam;
-	},
 });
 const mockConvertParams = {
 	srcData: createDatasetSource(""),

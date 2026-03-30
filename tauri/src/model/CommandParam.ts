@@ -22,7 +22,6 @@ export type CommandParam = {
 export type CommandParams = {
 	prefix: string;
 	elements: CommandParam[];
-	find: (name: string) => CommandParam;
 };
 export type SrcInfo = {
 	srcPath: string;
@@ -77,9 +76,6 @@ export type DatasetSource = CommandParams & {
 export class DatasetSourceImpl implements DatasetSource {
 	prefix: string;
 	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
 	private indexOfSetting: number;
 	private indexExtension: number;
 	private indexRegExclude: number;
@@ -156,9 +152,6 @@ export class DatasetSourceImpl implements DatasetSource {
 class SrcElementsImpl implements SrcElements {
 	prefix: string;
 	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
@@ -188,9 +181,6 @@ class SrcElementsImpl implements SrcElements {
 class SettingElementsImpl implements SettingElements {
 	prefix: string;
 	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
@@ -231,9 +221,6 @@ export type JdbcOption = CommandParams & {
 export class JdbcOptionImpl implements JdbcOption {
 	prefix: string;
 	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
@@ -262,9 +249,6 @@ export type GenerateElements = CommandParams & {
 export class GenerateElementsImpl implements GenerateElements {
 	prefix: string;
 	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
@@ -294,9 +278,6 @@ export type RunElements = CommandParams & {
 export class RunElementsImpl implements RunElements {
 	prefix: string;
 	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
@@ -316,9 +297,6 @@ export type ParameterizeElements = CommandParams & {
 export class ParameterizeElementsImpl implements ParameterizeElements {
 	prefix: string;
 	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
@@ -354,9 +332,6 @@ export type ConvertResult = CommandParams & {
 export class ConvertResultImpl implements ConvertResult {
 	prefix: string;
 	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
 	readonly jdbc?: JdbcOption;
 	constructor(
 		prefix: string,
@@ -398,9 +373,6 @@ export type TemplateOption = CommandParams & {
 export class TemplateOptionImpl implements TemplateOption {
 	prefix: string;
 	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
@@ -428,7 +400,6 @@ function toCommandParams(
 	return {
 		prefix: srcData.prefix,
 		elements: elements,
-		find: (name: string) => findByName(elements, name),
 	};
 }
 
@@ -472,15 +443,10 @@ export type CsvTypeSettings = CommandParams & {
 	ignoreQuoted: CommandParam;
 };
 export class CsvTypeSettingsImpl implements CsvTypeSettings {
-	prefix: string;
-	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
-	constructor(params: CommandParams) {
-		this.prefix = params.prefix;
-		this.elements = params.elements;
-	}
+	constructor(
+		public prefix: string,
+		public elements: CommandParam[],
+	) {}
 	get headerName(): CommandParam {
 		return findByName(this.elements, "headerName");
 	}
@@ -508,15 +474,10 @@ export type CsvqTypeSettings = CommandParams & {
 	templateVarStop: CommandParam;
 };
 export class CsvqTypeSettingsImpl implements CsvqTypeSettings {
-	prefix: string;
-	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
-	constructor(params: CommandParams) {
-		this.prefix = params.prefix;
-		this.elements = params.elements;
-	}
+	constructor(
+		public prefix: string,
+		public elements: CommandParam[],
+	) {}
 	get headerName(): CommandParam {
 		return findByName(this.elements, "headerName");
 	}
@@ -550,15 +511,10 @@ export type TableSqlTypeSettings = CommandParams & {
 	templateVarStop: CommandParam;
 };
 export class TableSqlTypeSettingsImpl implements TableSqlTypeSettings {
-	prefix: string;
-	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
-	constructor(params: CommandParams) {
-		this.prefix = params.prefix;
-		this.elements = params.elements;
-	}
+	constructor(
+		public prefix: string,
+		public elements: CommandParam[],
+	) {}
 	get headerName(): CommandParam {
 		return findByName(this.elements, "headerName");
 	}
@@ -590,15 +546,10 @@ export type RegTypeSettings = CommandParams & {
 	regHeaderSplit: CommandParam;
 };
 export class RegTypeSettingsImpl implements RegTypeSettings {
-	prefix: string;
-	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
-	constructor(params: CommandParams) {
-		this.prefix = params.prefix;
-		this.elements = params.elements;
-	}
+	constructor(
+		public prefix: string,
+		public elements: CommandParam[],
+	) {}
 	get headerName(): CommandParam {
 		return findByName(this.elements, "headerName");
 	}
@@ -623,15 +574,10 @@ export type FixedTypeSettings = CommandParams & {
 	fixedLength: CommandParam;
 };
 export class FixedTypeSettingsImpl implements FixedTypeSettings {
-	prefix: string;
-	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
-	constructor(params: CommandParams) {
-		this.prefix = params.prefix;
-		this.elements = params.elements;
-	}
+	constructor(
+		public prefix: string,
+		public elements: CommandParam[],
+	) {}
 	get headerName(): CommandParam {
 		return findByName(this.elements, "headerName");
 	}
@@ -653,15 +599,10 @@ export type XlsTypeSettings = CommandParams & {
 	xlsxSchema: CommandParam;
 };
 export class XlsTypeSettingsImpl implements XlsTypeSettings {
-	prefix: string;
-	elements: CommandParam[];
-	find(name: string): CommandParam {
-		return findByName(this.elements, name);
-	}
-	constructor(params: CommandParams) {
-		this.prefix = params.prefix;
-		this.elements = params.elements;
-	}
+	constructor(
+		public prefix: string,
+		public elements: CommandParam[],
+	) {}
 	get headerName(): CommandParam {
 		return findByName(this.elements, "headerName");
 	}
