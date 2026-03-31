@@ -1,5 +1,5 @@
 import { useDatasetSrcInfo } from "../../../context/DatasetSrcInfoProvider";
-import type { CommandParam, CommandParams } from "../../../model/CommandParam";
+import type { CommandParam, SrcTypeSettings } from "../../../model/CommandParam";
 import {
 	CsvqTypeSettingsImpl,
 	CsvTypeSettingsImpl,
@@ -20,65 +20,63 @@ export default function DatasetCommandFormSection({
 	handleValueChange,
 	handleToggleChecked,
 }: {
-	commandParams: CommandParams;
+	commandParams: SrcTypeSettings | null;
 	handleValueChange: (param: CommandParam) => (newValue: string) => void;
 	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
 }) {
-	const datasetSrcInfo = useDatasetSrcInfo();
-	const srcType = datasetSrcInfo.srcType;
-	const { prefix, elements } = commandParams;
+	const { srcType } = useDatasetSrcInfo();
 
-	if (srcType === "csv") {
+	if (commandParams instanceof CsvTypeSettingsImpl) {
 		return (
 			<CsvFormSection
-				settings={new CsvTypeSettingsImpl(prefix, elements)}
+				settings={commandParams}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}
-	if (srcType === "csvq") {
+	if (commandParams instanceof CsvqTypeSettingsImpl) {
 		return (
 			<CsvqFormSection
-				settings={new CsvqTypeSettingsImpl(prefix, elements)}
+				settings={commandParams}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}
-	if (srcType === "table" || srcType === "sql") {
+	if (commandParams instanceof TableSqlTypeSettingsImpl) {
 		return (
 			<TableSqlFormSection
 				srcType={srcType}
-				settings={new TableSqlTypeSettingsImpl(prefix, elements)}
+				settings={commandParams}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}
-	if (srcType === "reg") {
+	if (commandParams instanceof RegTypeSettingsImpl) {
 		return (
 			<RegFormSection
-				settings={new RegTypeSettingsImpl(prefix, elements)}
+				settings={commandParams}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}
-	if (srcType === "fixed") {
+	if (commandParams instanceof FixedTypeSettingsImpl) {
 		return (
 			<FixedFormSection
-				settings={new FixedTypeSettingsImpl(prefix, elements)}
+				settings={commandParams}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}
-	if (srcType === "xls" || srcType === "xlsx") {
+	if (commandParams instanceof XlsTypeSettingsImpl) {
 		return (
 			<XlsFormSection
 				srcType={srcType}
-				settings={new XlsTypeSettingsImpl(prefix, elements)}
+				settings={commandParams}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>

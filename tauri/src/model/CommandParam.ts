@@ -21,8 +21,14 @@ export type CommandParam = {
 };
 export type CommandParams = {
 	prefix: string;
-	elements: CommandParam[];
 };
+export type SrcTypeSettings =
+	| CsvTypeSettings
+	| CsvqTypeSettings
+	| TableSqlTypeSettings
+	| RegTypeSettings
+	| FixedTypeSettings
+	| XlsTypeSettings;
 export type SrcInfo = {
 	srcPath: string;
 	encoding?: string;
@@ -67,15 +73,15 @@ export type SettingElements = CommandParams & {
 export type DatasetSource = CommandParams & {
 	srcType: () => string;
 	srcElements: () => SrcElements;
-	srcTypeSettings: () => CommandParams;
-	jdbcElements: () => CommandParams;
+	srcTypeSettings: () => SrcTypeSettings | null;
 	settingElements: () => SettingElements;
-	jdbcOption: () => JdbcOption;
+	jdbcOption: () => JdbcOption | undefined;
 	templateOption: () => TemplateOption;
+	buildDatasetSrcInfo: () => DatasetSrcInfo;
 };
 export class DatasetSourceImpl implements DatasetSource {
 	prefix: string;
-	elements: CommandParam[];
+	private elements: CommandParam[];
 	private indexOfSetting: number;
 	private indexExtension: number;
 	private indexRegExclude: number;
@@ -122,28 +128,42 @@ export class DatasetSourceImpl implements DatasetSource {
 			this.indexOfSetting,
 		);
 	}
-	srcTypeSettings() {
-		return toCommandParams(
-			this,
-			this.srcTypeRange().filter((it) => !it.name.startsWith("jdbc")),
+	srcTypeSettings(): SrcTypeSettings | null {
+		const prefix = this.prefix;
+		const elements = this.srcTypeRange().filter(
+			(it) => !it.name.startsWith("jdbc"),
 		);
-	}
-	jdbcElements() {
-		return toCommandParams(
-			this,
-			this.srcTypeRange().filter((it) => it.name.startsWith("jdbc")),
-		);
+		switch (this.src) {
+			case "csv":
+				return new CsvTypeSettingsImpl(prefix, elements);
+			case "csvq":
+				return new CsvqTypeSettingsImpl(prefix, elements);
+			case "table":
+			case "sql":
+				return new TableSqlTypeSettingsImpl(prefix, elements);
+			case "reg":
+				return new RegTypeSettingsImpl(prefix, elements);
+			case "fixed":
+				return new FixedTypeSettingsImpl(prefix, elements);
+			case "xls":
+			case "xlsx":
+				return new XlsTypeSettingsImpl(prefix, elements);
+			default:
+				return null;
+		}
 	}
 	settingElements(): SettingElements {
 		const elements = this.elements.slice(this.indexOfSetting);
 		return new SettingElementsImpl(this.prefix, elements);
 	}
-	jdbcOption(): JdbcOption {
-		const jdbc = this.jdbcElements();
-		if (jdbc.elements.length === 0) {
-			return jdbc as unknown as JdbcOption;
+	jdbcOption(): JdbcOption | undefined {
+		const jdbcElements = this.srcTypeRange().filter((it) =>
+			it.name.startsWith("jdbc"),
+		);
+		if (jdbcElements.length === 0) {
+			return undefined;
 		}
-		return new JdbcOptionImpl(jdbc.prefix, jdbc.elements);
+		return new JdbcOptionImpl(this.prefix, jdbcElements);
 	}
 	templateOption(): TemplateOption {
 		const elements = this.srcTypeRange().filter((it) =>
@@ -151,10 +171,13 @@ export class DatasetSourceImpl implements DatasetSource {
 		);
 		return new TemplateOptionImpl(this.prefix, elements);
 	}
+	buildDatasetSrcInfo(): DatasetSrcInfo {
+		return buildDatasetSrcInfo(this.elements);
+	}
 }
 class SrcElementsImpl implements SrcElements {
 	prefix: string;
-	elements: CommandParam[];
+	private elements: CommandParam[];
 	readonly srcType: CommandParam;
 	readonly src: CommandParam;
 	readonly encoding: CommandParam | undefined;
@@ -176,7 +199,7 @@ class SrcElementsImpl implements SrcElements {
 }
 class SettingElementsImpl implements SettingElements {
 	prefix: string;
-	elements: CommandParam[];
+	private elements: CommandParam[];
 	readonly setting: CommandParam;
 	readonly settingEncoding: CommandParam;
 	readonly regTableInclude: CommandParam;
@@ -216,7 +239,7 @@ export type JdbcOption = CommandParams & {
 };
 export class JdbcOptionImpl implements JdbcOption {
 	prefix: string;
-	elements: CommandParam[];
+	private elements: CommandParam[];
 	readonly jdbcProperties: CommandParam;
 	readonly jdbcUrl: CommandParam;
 	readonly jdbcUser: CommandParam;
@@ -240,7 +263,7 @@ export type GenerateElements = CommandParams & {
 };
 export class GenerateElementsImpl implements GenerateElements {
 	prefix: string;
-	elements: CommandParam[];
+	private elements: CommandParam[];
 	readonly generateType: CommandParam;
 	readonly unit: CommandParam;
 	readonly template: CommandParam;
@@ -263,7 +286,7 @@ export type RunElements = CommandParams & {
 };
 export class RunElementsImpl implements RunElements {
 	prefix: string;
-	elements: CommandParam[];
+	private elements: CommandParam[];
 	readonly scriptType: CommandParam;
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
@@ -281,7 +304,7 @@ export type ParameterizeElements = CommandParams & {
 };
 export class ParameterizeElementsImpl implements ParameterizeElements {
 	prefix: string;
-	elements: CommandParam[];
+	private elements: CommandParam[];
 	readonly unit: CommandParam;
 	readonly parameterize: CommandParam;
 	readonly ignoreFail: CommandParam;
@@ -306,11 +329,12 @@ export type ConvertResult = CommandParams & {
 	exportEmptyTable: CommandParam;
 	exportHeader: CommandParam;
 	outputEncoding?: CommandParam;
+	excelTable?: CommandParam;
 	jdbc?: JdbcOption;
 };
 export class ConvertResultImpl implements ConvertResult {
 	prefix: string;
-	elements: CommandParam[];
+	private elements: CommandParam[];
 	readonly jdbc?: JdbcOption;
 	readonly resultType: CommandParam;
 	readonly result: CommandParam;
@@ -318,6 +342,7 @@ export class ConvertResultImpl implements ConvertResult {
 	readonly exportEmptyTable: CommandParam;
 	readonly exportHeader: CommandParam;
 	readonly outputEncoding: CommandParam | undefined;
+	readonly excelTable: CommandParam | undefined;
 	constructor(
 		prefix: string,
 		elements: CommandParam[],
@@ -334,6 +359,7 @@ export class ConvertResultImpl implements ConvertResult {
 		this.exportEmptyTable = findByName(elements, "exportEmptyTable");
 		this.exportHeader = findByName(elements, "exportHeader");
 		this.outputEncoding = findByNameOptional(elements, "outputEncoding");
+		this.excelTable = findByNameOptional(elements, "excelTable");
 	}
 }
 export type TemplateOption = CommandParams & {
@@ -345,7 +371,7 @@ export type TemplateOption = CommandParams & {
 };
 export class TemplateOptionImpl implements TemplateOption {
 	prefix: string;
-	elements: CommandParam[];
+	private elements: CommandParam[];
 	readonly encoding: CommandParam;
 	readonly templateGroup: CommandParam;
 	readonly templateParameterAttribute: CommandParam;
@@ -363,15 +389,6 @@ export class TemplateOptionImpl implements TemplateOption {
 		this.templateVarStart = findByName(elements, "templateVarStart");
 		this.templateVarStop = findByName(elements, "templateVarStop");
 	}
-}
-function toCommandParams(
-	srcData: CommandParams,
-	elements: CommandParam[],
-): CommandParams {
-	return {
-		prefix: srcData.prefix,
-		elements: elements,
-	};
 }
 
 export function buildSrcInfo(elements: CommandParam[]): SrcInfo {
@@ -421,7 +438,7 @@ export class CsvTypeSettingsImpl implements CsvTypeSettings {
 	readonly ignoreQuoted: CommandParam;
 	constructor(
 		public prefix: string,
-		public elements: CommandParam[],
+		private elements: CommandParam[],
 	) {
 		this.headerName = findByName(elements, "headerName");
 		this.startRow = findByName(elements, "startRow");
@@ -450,7 +467,7 @@ export class CsvqTypeSettingsImpl implements CsvqTypeSettings {
 	readonly templateVarStop: CommandParam;
 	constructor(
 		public prefix: string,
-		public elements: CommandParam[],
+		private elements: CommandParam[],
 	) {
 		this.headerName = findByName(elements, "headerName");
 		this.addFileInfo = findByName(elements, "addFileInfo");
@@ -484,7 +501,7 @@ export class TableSqlTypeSettingsImpl implements TableSqlTypeSettings {
 	readonly templateVarStop: CommandParam;
 	constructor(
 		public prefix: string,
-		public elements: CommandParam[],
+		private elements: CommandParam[],
 	) {
 		this.headerName = findByName(elements, "headerName");
 		this.addFileInfo = findByName(elements, "addFileInfo");
@@ -514,7 +531,7 @@ export class RegTypeSettingsImpl implements RegTypeSettings {
 	readonly regHeaderSplit: CommandParam;
 	constructor(
 		public prefix: string,
-		public elements: CommandParam[],
+		private elements: CommandParam[],
 	) {
 		this.headerName = findByName(elements, "headerName");
 		this.startRow = findByName(elements, "startRow");
@@ -537,7 +554,7 @@ export class FixedTypeSettingsImpl implements FixedTypeSettings {
 	readonly fixedLength: CommandParam;
 	constructor(
 		public prefix: string,
-		public elements: CommandParam[],
+		private elements: CommandParam[],
 	) {
 		this.headerName = findByName(elements, "headerName");
 		this.startRow = findByName(elements, "startRow");
@@ -559,7 +576,7 @@ export class XlsTypeSettingsImpl implements XlsTypeSettings {
 	readonly xlsxSchema: CommandParam;
 	constructor(
 		public prefix: string,
-		public elements: CommandParam[],
+		private elements: CommandParam[],
 	) {
 		this.headerName = findByName(elements, "headerName");
 		this.startRow = findByName(elements, "startRow");
@@ -600,7 +617,7 @@ export class ImageOptionImpl implements ImageOption {
 	readonly differenceRectangleColor: CommandParam;
 	constructor(
 		public prefix: string,
-		public elements: CommandParam[],
+		private elements: CommandParam[],
 	) {
 		this.threshold = findByName(elements, "threshold");
 		this.pixelToleranceLevel = findByName(elements, "pixelToleranceLevel");

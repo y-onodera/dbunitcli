@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
-import { buildDatasetSrcInfo } from "../../model/CommandParam";
 import type { CompareParams } from "../../model/SelectParameter";
 import ConvertResultFormSection from "./section/ConvertResultFormSection";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
@@ -19,16 +18,14 @@ export function CompareForm(prop: {
 	const expectData = prop.compare.expectData;
 	const convertResult = prop.compare.convertResult;
 
-	const find = (name: string) =>
-		prop.compare.elements.find((e) => e.name === name);
-	const targetTypeElement = find("targetType");
+	const targetTypeElement = prop.compare.targetType;
 	const targetType = targetTypeElement?.value ?? "data";
-	const settingElement = find("setting") ?? null;
-	const settingEncodingElement = find("settingEncoding");
+	const settingElement = prop.compare.setting ?? null;
+	const settingEncodingElement = prop.compare.settingEncoding;
 
 	const oldDataInitialInfo = useMemo(
-		() => buildDatasetSrcInfo(oldData.elements),
-		[oldData.elements],
+		() => oldData.buildDatasetSrcInfo(),
+		[oldData],
 	);
 
 	return (

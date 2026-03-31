@@ -8,7 +8,6 @@ import type {
 	DatasetSource,
 	DatasetSrcInfo,
 } from "../../../model/CommandParam";
-import { buildDatasetSrcInfo } from "../../../model/CommandParam";
 import DatasetCommandFormSection from "./DatasetCommandFormSection";
 import DatasetSettingSection from "./DatasetSettingSection";
 import JdbcFormSection from "./JdbcFormSection";
@@ -38,7 +37,7 @@ export function DatasetLoadForm(prop: {
 	const srcElements = prop.srcData.srcElements();
 	const srcTypeSettings = prop.srcData.srcTypeSettings();
 	const settingElements = prop.srcData.settingElements();
-	const initialDatasetSrcInfo = buildDatasetSrcInfo(prop.srcData.elements);
+	const initialDatasetSrcInfo = prop.srcData.buildDatasetSrcInfo();
 	const jdbcOption = prop.srcData.jdbcOption();
 	return (
 		<DatasetSrcInfoProvider
@@ -53,7 +52,7 @@ export function DatasetLoadForm(prop: {
 					handleValueChange={handleValueChange}
 					handleToggleChecked={handleToggleChecked}
 				/>
-				{jdbcOption.elements.length > 0 && (
+				{jdbcOption !== undefined && (
 					<JdbcFormSection jdbcOption={jdbcOption} />
 				)}
 				<DatasetCommandFormSection
