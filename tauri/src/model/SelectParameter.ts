@@ -1,6 +1,5 @@
 import type {
 	CommandParam,
-	CommandParams,
 	ConvertResult,
 	DatasetSource,
 	GenerateElements,
@@ -10,6 +9,8 @@ import type {
 	RunElements,
 	TemplateOption,
 } from "./CommandParam";
+
+type RawParams = { prefix: string; elements: CommandParam[] };
 import {
 	ConvertResultImpl,
 	DatasetSourceImpl,
@@ -35,11 +36,9 @@ export class SelectParameter {
 		this.command = command;
 		if (command === "convert") {
 			const rawConvert = response as {
-				srcData: DatasetSource;
-				convertResult: {
-					prefix: string;
-					elements: CommandParam[];
-					jdbc?: { prefix: string; elements: CommandParam[] };
+				srcData: RawParams;
+				convertResult: RawParams & {
+					jdbc?: RawParams;
 				};
 			};
 			this.convert = {
@@ -57,14 +56,18 @@ export class SelectParameter {
 		if (command === "compare") {
 			const rawCompare = response as {
 				elements: CommandParam[];
-				newData: DatasetSource;
-				oldData: DatasetSource;
-				imageOption: CommandParams;
-				convertResult: { prefix: string; elements: CommandParam[] };
-				expectData: DatasetSource;
+				newData: RawParams;
+				oldData: RawParams;
+				imageOption: RawParams;
+				convertResult: RawParams;
+				expectData: RawParams;
 			};
+			const findIn = (name: string) =>
+				rawCompare.elements.find((e) => e.name === name);
 			this.compare = {
-				elements: rawCompare.elements,
+				targetType: findIn("targetType"),
+				setting: findIn("setting"),
+				settingEncoding: findIn("settingEncoding"),
 				newData: new DatasetSourceImpl(
 					rawCompare.newData.prefix,
 					rawCompare.newData.elements,
@@ -91,8 +94,8 @@ export class SelectParameter {
 		if (command === "generate") {
 			const rawGenerate = response as unknown as {
 				elements: CommandParam[];
-				srcData: DatasetSource;
-				templateOption?: TemplateOption;
+				srcData: RawParams;
+				templateOption?: RawParams;
 			};
 			this.generate = {
 				commandElements: new GenerateElementsImpl("", rawGenerate.elements),
@@ -111,9 +114,9 @@ export class SelectParameter {
 		if (command === "run") {
 			const rawRun = response as unknown as {
 				elements: CommandParam[];
-				srcData: DatasetSource;
-				templateOption?: TemplateOption;
-				jdbcOption?: JdbcOption;
+				srcData: RawParams;
+				templateOption?: RawParams;
+				jdbcOption?: RawParams;
 			};
 			this.run = {
 				commandElements: new RunElementsImpl("", rawRun.elements),
@@ -138,8 +141,8 @@ export class SelectParameter {
 		if (command === "parameterize") {
 			const rawParameterize = response as unknown as {
 				elements: CommandParam[];
-				paramData: DatasetSource;
-				templateOption?: TemplateOption;
+				paramData: RawParams;
+				templateOption?: RawParams;
 			};
 			this.parameterize = {
 				commandElements: new ParameterizeElementsImpl(
@@ -186,7 +189,9 @@ export type ConvertParams = {
 	convertResult: ConvertResult;
 };
 export type CompareParams = {
-	elements: CommandParam[];
+	targetType?: CommandParam;
+	setting?: CommandParam;
+	settingEncoding?: CommandParam;
 	newData: DatasetSource;
 	oldData: DatasetSource;
 	imageOption: ImageOption;

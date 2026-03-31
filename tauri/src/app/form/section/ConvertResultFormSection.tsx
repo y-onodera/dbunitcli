@@ -11,12 +11,8 @@ export default function ConvertResultFormSection({
 	handleTypeSelect: (selected: string) => Promise<void>;
 }) {
 	const prefix = convertResult.prefix;
-	const excelTable = convertResult.elements.find(
-		(e) => e.name === "excelTable",
-	);
-	const outputEncoding = convertResult.elements.find(
-		(e) => e.name === "outputEncoding",
-	);
+	const excelTable = convertResult.excelTable;
+	const outputEncoding = convertResult.outputEncoding;
 	return (
 		<>
 			<Select
