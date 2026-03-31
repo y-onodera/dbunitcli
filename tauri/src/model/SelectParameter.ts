@@ -4,6 +4,7 @@ import type {
 	ConvertResult,
 	DatasetSource,
 	GenerateElements,
+	ImageOption,
 	JdbcOption,
 	ParameterizeElements,
 	RunElements,
@@ -13,6 +14,7 @@ import {
 	ConvertResultImpl,
 	DatasetSourceImpl,
 	GenerateElementsImpl,
+	ImageOptionImpl,
 	JdbcOptionImpl,
 	ParameterizeElementsImpl,
 	RunElementsImpl,
@@ -71,7 +73,10 @@ export class SelectParameter {
 					rawCompare.oldData.prefix,
 					rawCompare.oldData.elements,
 				),
-				imageOption: rawCompare.imageOption,
+				imageOption: new ImageOptionImpl(
+					rawCompare.imageOption.prefix,
+					rawCompare.imageOption.elements,
+				),
 				convertResult: new ConvertResultImpl(
 					rawCompare.convertResult.prefix,
 					rawCompare.convertResult.elements,
@@ -184,7 +189,7 @@ export type CompareParams = {
 	elements: CommandParam[];
 	newData: DatasetSource;
 	oldData: DatasetSource;
-	imageOption: CommandParams;
+	imageOption: ImageOption;
 	convertResult: ConvertResult;
 	expectData: DatasetSource;
 };
