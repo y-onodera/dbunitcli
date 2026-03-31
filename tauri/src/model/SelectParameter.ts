@@ -9,8 +9,6 @@ import type {
 	RunElements,
 	TemplateOption,
 } from "./CommandParam";
-
-type RawParams = { prefix: string; elements: CommandParam[] };
 import {
 	ConvertResultImpl,
 	DatasetSourceImpl,
@@ -21,6 +19,8 @@ import {
 	RunElementsImpl,
 	TemplateOptionImpl,
 } from "./CommandParam";
+
+type RawParams = { prefix: string; elements: CommandParam[] };
 
 export class SelectParameter {
 	readonly name: string;
