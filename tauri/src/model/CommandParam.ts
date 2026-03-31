@@ -616,3 +616,67 @@ export class XlsTypeSettingsImpl implements XlsTypeSettings {
 		return findByName(this.elements, "xlsxSchema");
 	}
 }
+export type ImageOption = CommandParams & {
+	threshold: CommandParam;
+	pixelToleranceLevel: CommandParam;
+	allowingPercentOfDifferentPixels: CommandParam;
+	rectangleLineWidth: CommandParam;
+	minimalRectangleSize: CommandParam;
+	maximalRectangleCount: CommandParam;
+	excludedAreas: CommandParam;
+	drawExcludedRectangles: CommandParam;
+	fillExcludedRectangles: CommandParam;
+	percentOpacityExcludedRectangles: CommandParam;
+	excludedRectangleColor: CommandParam;
+	fillDifferenceRectangles: CommandParam;
+	percentOpacityDifferenceRectangles: CommandParam;
+	differenceRectangleColor: CommandParam;
+};
+export class ImageOptionImpl implements ImageOption {
+	constructor(
+		public prefix: string,
+		public elements: CommandParam[],
+	) {}
+	get threshold(): CommandParam {
+		return findByName(this.elements, "threshold");
+	}
+	get pixelToleranceLevel(): CommandParam {
+		return findByName(this.elements, "pixelToleranceLevel");
+	}
+	get allowingPercentOfDifferentPixels(): CommandParam {
+		return findByName(this.elements, "allowingPercentOfDifferentPixels");
+	}
+	get rectangleLineWidth(): CommandParam {
+		return findByName(this.elements, "rectangleLineWidth");
+	}
+	get minimalRectangleSize(): CommandParam {
+		return findByName(this.elements, "minimalRectangleSize");
+	}
+	get maximalRectangleCount(): CommandParam {
+		return findByName(this.elements, "maximalRectangleCount");
+	}
+	get excludedAreas(): CommandParam {
+		return findByName(this.elements, "excludedAreas");
+	}
+	get drawExcludedRectangles(): CommandParam {
+		return findByName(this.elements, "drawExcludedRectangles");
+	}
+	get fillExcludedRectangles(): CommandParam {
+		return findByName(this.elements, "fillExcludedRectangles");
+	}
+	get percentOpacityExcludedRectangles(): CommandParam {
+		return findByName(this.elements, "percentOpacityExcludedRectangles");
+	}
+	get excludedRectangleColor(): CommandParam {
+		return findByName(this.elements, "excludedRectangleColor");
+	}
+	get fillDifferenceRectangles(): CommandParam {
+		return findByName(this.elements, "fillDifferenceRectangles");
+	}
+	get percentOpacityDifferenceRectangles(): CommandParam {
+		return findByName(this.elements, "percentOpacityDifferenceRectangles");
+	}
+	get differenceRectangleColor(): CommandParam {
+		return findByName(this.elements, "differenceRectangleColor");
+	}
+}
