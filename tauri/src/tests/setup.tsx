@@ -2,6 +2,7 @@ import { cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { afterEach, vi } from "vitest";
 import type { Enviroment } from "../context/EnviromentProvider";
+import type { CommandParam } from "../model/CommandParam";
 import {
 	ParameterList,
 	QueryFiles,
@@ -9,6 +10,20 @@ import {
 	WorkspaceContext,
 	type WorkspaceResources,
 } from "../model/WorkspaceResources";
+
+export function makeMinimalParam(name: string): CommandParam {
+	return {
+		name,
+		value: "",
+		attribute: {
+			type: "TEXT",
+			required: false,
+			selectOption: [],
+			defaultPath: "WORKSPACE",
+		},
+		optional: false,
+	};
+}
 
 export const workspaceResourcesFixture: WorkspaceResources = {
 	context: WorkspaceContext.from({

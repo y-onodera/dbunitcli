@@ -1,20 +1,7 @@
 import type { CommandParam } from "../../model/CommandParam";
 import type { Parameter } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
-
-function makeMinimalParam(name: string): CommandParam {
-	return {
-		name,
-		value: "",
-		attribute: {
-			type: "TEXT",
-			required: false,
-			selectOption: [],
-			defaultPath: "WORKSPACE",
-		},
-		optional: false,
-	};
-}
+import { makeMinimalParam } from "../setup";
 
 const convertResultElements = [
 	"resultType",

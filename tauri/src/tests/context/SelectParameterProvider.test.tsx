@@ -29,23 +29,9 @@ import type {
 } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
 import type { FetchParams } from "../../utils/fetchUtils";
-import { enviromentFixture } from "../setup";
+import { enviromentFixture, makeMinimalParam } from "../setup";
 
 // モックデータ
-function makeMinimalParam(name: string): CommandParam {
-	return {
-		name,
-		value: "",
-		attribute: {
-			type: "TEXT",
-			required: false,
-			selectOption: [],
-			defaultPath: "WORKSPACE",
-		},
-		optional: false,
-	};
-}
-
 const createCommandParams = (): CommandParams => ({
 	prefix: "",
 	elements: [],
