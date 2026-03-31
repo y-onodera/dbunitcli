@@ -1,6 +1,32 @@
 import type { CommandParam } from "../../model/CommandParam";
 import type { Parameter } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
+import { makeMinimalParam } from "../setup";
+
+const convertResultElements = [
+	"resultType",
+	"result",
+	"resultPath",
+	"exportEmptyTable",
+	"exportHeader",
+].map(makeMinimalParam);
+
+const imageOptionElements = [
+	"threshold",
+	"pixelToleranceLevel",
+	"allowingPercentOfDifferentPixels",
+	"rectangleLineWidth",
+	"minimalRectangleSize",
+	"maximalRectangleCount",
+	"excludedAreas",
+	"drawExcludedRectangles",
+	"fillExcludedRectangles",
+	"percentOpacityExcludedRectangles",
+	"excludedRectangleColor",
+	"fillDifferenceRectangles",
+	"percentOpacityDifferenceRectangles",
+	"differenceRectangleColor",
+].map(makeMinimalParam);
 
 const rawConvert = {
 	srcData: {
@@ -10,7 +36,7 @@ const rawConvert = {
 	},
 	convertResult: {
 		prefix: "convertResult",
-		elements: [] as CommandParam[],
+		elements: convertResultElements,
 	},
 } as unknown as Parameter;
 
@@ -26,8 +52,8 @@ const rawCompare = {
 		prefix: "compare",
 		elements: [] as CommandParam[],
 	},
-	imageOption: { name: "", prefix: "", elements: [] as CommandParam[] },
-	convertResult: { prefix: "compare", elements: [] as CommandParam[] },
+	imageOption: { name: "", prefix: "", elements: imageOptionElements },
+	convertResult: { prefix: "compare", elements: convertResultElements },
 	expectData: {
 		name: "compareExpectData",
 		prefix: "compare",
@@ -36,7 +62,14 @@ const rawCompare = {
 } as unknown as Parameter;
 
 const rawGenerate = {
-	elements: [] as CommandParam[],
+	elements: [
+		"generateType",
+		"unit",
+		"template",
+		"result",
+		"resultPath",
+		"outputEncoding",
+	].map(makeMinimalParam),
 	srcData: {
 		name: "generateSrcData",
 		prefix: "generate",
@@ -45,7 +78,7 @@ const rawGenerate = {
 } as unknown as Parameter;
 
 const rawRun = {
-	elements: [] as CommandParam[],
+	elements: ["scriptType"].map(makeMinimalParam),
 	srcData: {
 		name: "runSrcData",
 		prefix: "run",
@@ -54,7 +87,14 @@ const rawRun = {
 } as unknown as Parameter;
 
 const rawParameterize = {
-	elements: [] as CommandParam[],
+	elements: [
+		"unit",
+		"parameterize",
+		"ignoreFail",
+		"cmd",
+		"cmdParam",
+		"template",
+	].map(makeMinimalParam),
 	paramData: {
 		name: "parameterizeParamData",
 		prefix: "parameterize",

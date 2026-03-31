@@ -140,6 +140,9 @@ export class DatasetSourceImpl implements DatasetSource {
 	}
 	jdbcOption(): JdbcOption {
 		const jdbc = this.jdbcElements();
+		if (jdbc.elements.length === 0) {
+			return jdbc as unknown as JdbcOption;
+		}
 		return new JdbcOptionImpl(jdbc.prefix, jdbc.elements);
 	}
 	templateOption(): TemplateOption {
@@ -152,56 +155,43 @@ export class DatasetSourceImpl implements DatasetSource {
 class SrcElementsImpl implements SrcElements {
 	prefix: string;
 	elements: CommandParam[];
+	readonly srcType: CommandParam;
+	readonly src: CommandParam;
+	readonly encoding: CommandParam | undefined;
+	readonly recursive: CommandParam;
+	readonly regInclude: CommandParam;
+	readonly regExclude: CommandParam;
+	readonly extension: CommandParam;
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
-	}
-	get srcType(): CommandParam {
-		return findByName(this.elements, "srcType");
-	}
-	get src(): CommandParam {
-		return findByName(this.elements, "src");
-	}
-	get encoding(): CommandParam | undefined {
-		return this.elements.find((e) => e.name === "encoding");
-	}
-	get recursive(): CommandParam {
-		return findByName(this.elements, "recursive");
-	}
-	get regInclude(): CommandParam {
-		return findByName(this.elements, "regInclude");
-	}
-	get regExclude(): CommandParam {
-		return findByName(this.elements, "regExclude");
-	}
-	get extension(): CommandParam {
-		return findByName(this.elements, "extension");
+		this.srcType = findByName(elements, "srcType");
+		this.src = findByName(elements, "src");
+		this.encoding = findByNameOptional(elements, "encoding");
+		this.recursive = findByName(elements, "recursive");
+		this.regInclude = findByName(elements, "regInclude");
+		this.regExclude = findByName(elements, "regExclude");
+		this.extension = findByName(elements, "extension");
 	}
 }
 class SettingElementsImpl implements SettingElements {
 	prefix: string;
 	elements: CommandParam[];
+	readonly setting: CommandParam;
+	readonly settingEncoding: CommandParam;
+	readonly regTableInclude: CommandParam;
+	readonly regTableExclude: CommandParam;
+	readonly loadData: CommandParam;
+	readonly includeMetaData: CommandParam;
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
-	}
-	get setting(): CommandParam {
-		return findByName(this.elements, "setting");
-	}
-	get settingEncoding(): CommandParam {
-		return findByName(this.elements, "settingEncoding");
-	}
-	get regTableInclude(): CommandParam {
-		return findByName(this.elements, "regTableInclude");
-	}
-	get regTableExclude(): CommandParam {
-		return findByName(this.elements, "regTableExclude");
-	}
-	get loadData(): CommandParam {
-		return findByName(this.elements, "loadData");
-	}
-	get includeMetaData(): CommandParam {
-		return findByName(this.elements, "includeMetaData");
+		this.setting = findByName(elements, "setting");
+		this.settingEncoding = findByName(elements, "settingEncoding");
+		this.regTableInclude = findByName(elements, "regTableInclude");
+		this.regTableExclude = findByName(elements, "regTableExclude");
+		this.loadData = findByName(elements, "loadData");
+		this.includeMetaData = findByName(elements, "includeMetaData");
 	}
 }
 function findByName(elements: CommandParam[], name: string): CommandParam {
@@ -210,6 +200,12 @@ function findByName(elements: CommandParam[], name: string): CommandParam {
 		throw new Error(`CommandParam '${name}' not found`);
 	}
 	return found;
+}
+function findByNameOptional(
+	elements: CommandParam[],
+	name: string,
+): CommandParam | undefined {
+	return elements.find((e) => e.name === name);
 }
 
 export type JdbcOption = CommandParams & {
@@ -221,21 +217,17 @@ export type JdbcOption = CommandParams & {
 export class JdbcOptionImpl implements JdbcOption {
 	prefix: string;
 	elements: CommandParam[];
+	readonly jdbcProperties: CommandParam;
+	readonly jdbcUrl: CommandParam;
+	readonly jdbcUser: CommandParam;
+	readonly jdbcPass: CommandParam;
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
-	}
-	get jdbcProperties(): CommandParam {
-		return findByName(this.elements, "jdbcProperties");
-	}
-	get jdbcUrl(): CommandParam {
-		return findByName(this.elements, "jdbcUrl");
-	}
-	get jdbcUser(): CommandParam {
-		return findByName(this.elements, "jdbcUser");
-	}
-	get jdbcPass(): CommandParam {
-		return findByName(this.elements, "jdbcPass");
+		this.jdbcProperties = findByName(elements, "jdbcProperties");
+		this.jdbcUrl = findByName(elements, "jdbcUrl");
+		this.jdbcUser = findByName(elements, "jdbcUser");
+		this.jdbcPass = findByName(elements, "jdbcPass");
 	}
 }
 export type GenerateElements = CommandParams & {
@@ -249,27 +241,21 @@ export type GenerateElements = CommandParams & {
 export class GenerateElementsImpl implements GenerateElements {
 	prefix: string;
 	elements: CommandParam[];
+	readonly generateType: CommandParam;
+	readonly unit: CommandParam;
+	readonly template: CommandParam;
+	readonly result: CommandParam;
+	readonly resultPath: CommandParam;
+	readonly outputEncoding: CommandParam;
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
-	}
-	get generateType(): CommandParam {
-		return findByName(this.elements, "generateType");
-	}
-	get unit(): CommandParam {
-		return findByName(this.elements, "unit");
-	}
-	get template(): CommandParam {
-		return findByName(this.elements, "template");
-	}
-	get result(): CommandParam {
-		return findByName(this.elements, "result");
-	}
-	get resultPath(): CommandParam {
-		return findByName(this.elements, "resultPath");
-	}
-	get outputEncoding(): CommandParam {
-		return findByName(this.elements, "outputEncoding");
+		this.generateType = findByName(elements, "generateType");
+		this.unit = findByName(elements, "unit");
+		this.template = findByName(elements, "template");
+		this.result = findByName(elements, "result");
+		this.resultPath = findByName(elements, "resultPath");
+		this.outputEncoding = findByName(elements, "outputEncoding");
 	}
 }
 export type RunElements = CommandParams & {
@@ -278,12 +264,11 @@ export type RunElements = CommandParams & {
 export class RunElementsImpl implements RunElements {
 	prefix: string;
 	elements: CommandParam[];
+	readonly scriptType: CommandParam;
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
-	}
-	get scriptType(): CommandParam {
-		return findByName(this.elements, "scriptType");
+		this.scriptType = findByName(elements, "scriptType");
 	}
 }
 export type ParameterizeElements = CommandParams & {
@@ -297,27 +282,21 @@ export type ParameterizeElements = CommandParams & {
 export class ParameterizeElementsImpl implements ParameterizeElements {
 	prefix: string;
 	elements: CommandParam[];
+	readonly unit: CommandParam;
+	readonly parameterize: CommandParam;
+	readonly ignoreFail: CommandParam;
+	readonly cmd: CommandParam;
+	readonly cmdParam: CommandParam;
+	readonly template: CommandParam;
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
-	}
-	get unit(): CommandParam {
-		return findByName(this.elements, "unit");
-	}
-	get parameterize(): CommandParam {
-		return findByName(this.elements, "parameterize");
-	}
-	get ignoreFail(): CommandParam {
-		return findByName(this.elements, "ignoreFail");
-	}
-	get cmd(): CommandParam {
-		return findByName(this.elements, "cmd");
-	}
-	get cmdParam(): CommandParam {
-		return findByName(this.elements, "cmdParam");
-	}
-	get template(): CommandParam {
-		return findByName(this.elements, "template");
+		this.unit = findByName(elements, "unit");
+		this.parameterize = findByName(elements, "parameterize");
+		this.ignoreFail = findByName(elements, "ignoreFail");
+		this.cmd = findByName(elements, "cmd");
+		this.cmdParam = findByName(elements, "cmdParam");
+		this.template = findByName(elements, "template");
 	}
 }
 export type ConvertResult = CommandParams & {
@@ -326,13 +305,19 @@ export type ConvertResult = CommandParams & {
 	resultPath: CommandParam;
 	exportEmptyTable: CommandParam;
 	exportHeader: CommandParam;
-	outputEncoding: CommandParam;
+	outputEncoding?: CommandParam;
 	jdbc?: JdbcOption;
 };
 export class ConvertResultImpl implements ConvertResult {
 	prefix: string;
 	elements: CommandParam[];
 	readonly jdbc?: JdbcOption;
+	readonly resultType: CommandParam;
+	readonly result: CommandParam;
+	readonly resultPath: CommandParam;
+	readonly exportEmptyTable: CommandParam;
+	readonly exportHeader: CommandParam;
+	readonly outputEncoding: CommandParam | undefined;
 	constructor(
 		prefix: string,
 		elements: CommandParam[],
@@ -343,24 +328,12 @@ export class ConvertResultImpl implements ConvertResult {
 		this.jdbc = rawJdbc
 			? new JdbcOptionImpl(rawJdbc.prefix, rawJdbc.elements)
 			: undefined;
-	}
-	get resultType(): CommandParam {
-		return findByName(this.elements, "resultType");
-	}
-	get result(): CommandParam {
-		return findByName(this.elements, "result");
-	}
-	get resultPath(): CommandParam {
-		return findByName(this.elements, "resultPath");
-	}
-	get exportEmptyTable(): CommandParam {
-		return findByName(this.elements, "exportEmptyTable");
-	}
-	get exportHeader(): CommandParam {
-		return findByName(this.elements, "exportHeader");
-	}
-	get outputEncoding(): CommandParam {
-		return findByName(this.elements, "outputEncoding");
+		this.resultType = findByName(elements, "resultType");
+		this.result = findByName(elements, "result");
+		this.resultPath = findByName(elements, "resultPath");
+		this.exportEmptyTable = findByName(elements, "exportEmptyTable");
+		this.exportHeader = findByName(elements, "exportHeader");
+		this.outputEncoding = findByNameOptional(elements, "outputEncoding");
 	}
 }
 export type TemplateOption = CommandParams & {
@@ -373,24 +346,22 @@ export type TemplateOption = CommandParams & {
 export class TemplateOptionImpl implements TemplateOption {
 	prefix: string;
 	elements: CommandParam[];
+	readonly encoding: CommandParam;
+	readonly templateGroup: CommandParam;
+	readonly templateParameterAttribute: CommandParam;
+	readonly templateVarStart: CommandParam;
+	readonly templateVarStop: CommandParam;
 	constructor(prefix: string, elements: CommandParam[]) {
 		this.prefix = prefix;
 		this.elements = elements;
-	}
-	get encoding(): CommandParam {
-		return findByName(this.elements, "encoding");
-	}
-	get templateGroup(): CommandParam {
-		return findByName(this.elements, "templateGroup");
-	}
-	get templateParameterAttribute(): CommandParam {
-		return findByName(this.elements, "templateParameterAttribute");
-	}
-	get templateVarStart(): CommandParam {
-		return findByName(this.elements, "templateVarStart");
-	}
-	get templateVarStop(): CommandParam {
-		return findByName(this.elements, "templateVarStop");
+		this.encoding = findByName(elements, "encoding");
+		this.templateGroup = findByName(elements, "templateGroup");
+		this.templateParameterAttribute = findByName(
+			elements,
+			"templateParameterAttribute",
+		);
+		this.templateVarStart = findByName(elements, "templateVarStart");
+		this.templateVarStop = findByName(elements, "templateVarStop");
 	}
 }
 function toCommandParams(
@@ -443,24 +414,20 @@ export type CsvTypeSettings = CommandParams & {
 	ignoreQuoted: CommandParam;
 };
 export class CsvTypeSettingsImpl implements CsvTypeSettings {
+	readonly headerName: CommandParam;
+	readonly startRow: CommandParam;
+	readonly addFileInfo: CommandParam;
+	readonly delimiter: CommandParam;
+	readonly ignoreQuoted: CommandParam;
 	constructor(
 		public prefix: string,
 		public elements: CommandParam[],
-	) {}
-	get headerName(): CommandParam {
-		return findByName(this.elements, "headerName");
-	}
-	get startRow(): CommandParam {
-		return findByName(this.elements, "startRow");
-	}
-	get addFileInfo(): CommandParam {
-		return findByName(this.elements, "addFileInfo");
-	}
-	get delimiter(): CommandParam {
-		return findByName(this.elements, "delimiter");
-	}
-	get ignoreQuoted(): CommandParam {
-		return findByName(this.elements, "ignoreQuoted");
+	) {
+		this.headerName = findByName(elements, "headerName");
+		this.startRow = findByName(elements, "startRow");
+		this.addFileInfo = findByName(elements, "addFileInfo");
+		this.delimiter = findByName(elements, "delimiter");
+		this.ignoreQuoted = findByName(elements, "ignoreQuoted");
 	}
 }
 
@@ -474,30 +441,27 @@ export type CsvqTypeSettings = CommandParams & {
 	templateVarStop: CommandParam;
 };
 export class CsvqTypeSettingsImpl implements CsvqTypeSettings {
+	readonly headerName: CommandParam;
+	readonly addFileInfo: CommandParam;
+	readonly encoding: CommandParam;
+	readonly templateGroup: CommandParam;
+	readonly templateParameterAttribute: CommandParam;
+	readonly templateVarStart: CommandParam;
+	readonly templateVarStop: CommandParam;
 	constructor(
 		public prefix: string,
 		public elements: CommandParam[],
-	) {}
-	get headerName(): CommandParam {
-		return findByName(this.elements, "headerName");
-	}
-	get addFileInfo(): CommandParam {
-		return findByName(this.elements, "addFileInfo");
-	}
-	get encoding(): CommandParam {
-		return findByName(this.elements, "encoding");
-	}
-	get templateGroup(): CommandParam {
-		return findByName(this.elements, "templateGroup");
-	}
-	get templateParameterAttribute(): CommandParam {
-		return findByName(this.elements, "templateParameterAttribute");
-	}
-	get templateVarStart(): CommandParam {
-		return findByName(this.elements, "templateVarStart");
-	}
-	get templateVarStop(): CommandParam {
-		return findByName(this.elements, "templateVarStop");
+	) {
+		this.headerName = findByName(elements, "headerName");
+		this.addFileInfo = findByName(elements, "addFileInfo");
+		this.encoding = findByName(elements, "encoding");
+		this.templateGroup = findByName(elements, "templateGroup");
+		this.templateParameterAttribute = findByName(
+			elements,
+			"templateParameterAttribute",
+		);
+		this.templateVarStart = findByName(elements, "templateVarStart");
+		this.templateVarStop = findByName(elements, "templateVarStop");
 	}
 }
 
@@ -511,30 +475,27 @@ export type TableSqlTypeSettings = CommandParams & {
 	templateVarStop: CommandParam;
 };
 export class TableSqlTypeSettingsImpl implements TableSqlTypeSettings {
+	readonly headerName: CommandParam;
+	readonly addFileInfo: CommandParam;
+	readonly useJdbcMetaData: CommandParam;
+	readonly templateGroup: CommandParam;
+	readonly templateParameterAttribute: CommandParam;
+	readonly templateVarStart: CommandParam;
+	readonly templateVarStop: CommandParam;
 	constructor(
 		public prefix: string,
 		public elements: CommandParam[],
-	) {}
-	get headerName(): CommandParam {
-		return findByName(this.elements, "headerName");
-	}
-	get addFileInfo(): CommandParam {
-		return findByName(this.elements, "addFileInfo");
-	}
-	get useJdbcMetaData(): CommandParam {
-		return findByName(this.elements, "useJdbcMetaData");
-	}
-	get templateGroup(): CommandParam {
-		return findByName(this.elements, "templateGroup");
-	}
-	get templateParameterAttribute(): CommandParam {
-		return findByName(this.elements, "templateParameterAttribute");
-	}
-	get templateVarStart(): CommandParam {
-		return findByName(this.elements, "templateVarStart");
-	}
-	get templateVarStop(): CommandParam {
-		return findByName(this.elements, "templateVarStop");
+	) {
+		this.headerName = findByName(elements, "headerName");
+		this.addFileInfo = findByName(elements, "addFileInfo");
+		this.useJdbcMetaData = findByName(elements, "useJdbcMetaData");
+		this.templateGroup = findByName(elements, "templateGroup");
+		this.templateParameterAttribute = findByName(
+			elements,
+			"templateParameterAttribute",
+		);
+		this.templateVarStart = findByName(elements, "templateVarStart");
+		this.templateVarStop = findByName(elements, "templateVarStop");
 	}
 }
 
@@ -546,24 +507,20 @@ export type RegTypeSettings = CommandParams & {
 	regHeaderSplit: CommandParam;
 };
 export class RegTypeSettingsImpl implements RegTypeSettings {
+	readonly headerName: CommandParam;
+	readonly startRow: CommandParam;
+	readonly addFileInfo: CommandParam;
+	readonly regDataSplit: CommandParam;
+	readonly regHeaderSplit: CommandParam;
 	constructor(
 		public prefix: string,
 		public elements: CommandParam[],
-	) {}
-	get headerName(): CommandParam {
-		return findByName(this.elements, "headerName");
-	}
-	get startRow(): CommandParam {
-		return findByName(this.elements, "startRow");
-	}
-	get addFileInfo(): CommandParam {
-		return findByName(this.elements, "addFileInfo");
-	}
-	get regDataSplit(): CommandParam {
-		return findByName(this.elements, "regDataSplit");
-	}
-	get regHeaderSplit(): CommandParam {
-		return findByName(this.elements, "regHeaderSplit");
+	) {
+		this.headerName = findByName(elements, "headerName");
+		this.startRow = findByName(elements, "startRow");
+		this.addFileInfo = findByName(elements, "addFileInfo");
+		this.regDataSplit = findByName(elements, "regDataSplit");
+		this.regHeaderSplit = findByName(elements, "regHeaderSplit");
 	}
 }
 
@@ -574,21 +531,18 @@ export type FixedTypeSettings = CommandParams & {
 	fixedLength: CommandParam;
 };
 export class FixedTypeSettingsImpl implements FixedTypeSettings {
+	readonly headerName: CommandParam;
+	readonly startRow: CommandParam;
+	readonly addFileInfo: CommandParam;
+	readonly fixedLength: CommandParam;
 	constructor(
 		public prefix: string,
 		public elements: CommandParam[],
-	) {}
-	get headerName(): CommandParam {
-		return findByName(this.elements, "headerName");
-	}
-	get startRow(): CommandParam {
-		return findByName(this.elements, "startRow");
-	}
-	get addFileInfo(): CommandParam {
-		return findByName(this.elements, "addFileInfo");
-	}
-	get fixedLength(): CommandParam {
-		return findByName(this.elements, "fixedLength");
+	) {
+		this.headerName = findByName(elements, "headerName");
+		this.startRow = findByName(elements, "startRow");
+		this.addFileInfo = findByName(elements, "addFileInfo");
+		this.fixedLength = findByName(elements, "fixedLength");
 	}
 }
 
@@ -599,21 +553,18 @@ export type XlsTypeSettings = CommandParams & {
 	xlsxSchema: CommandParam;
 };
 export class XlsTypeSettingsImpl implements XlsTypeSettings {
+	readonly headerName: CommandParam;
+	readonly startRow: CommandParam;
+	readonly addFileInfo: CommandParam;
+	readonly xlsxSchema: CommandParam;
 	constructor(
 		public prefix: string,
 		public elements: CommandParam[],
-	) {}
-	get headerName(): CommandParam {
-		return findByName(this.elements, "headerName");
-	}
-	get startRow(): CommandParam {
-		return findByName(this.elements, "startRow");
-	}
-	get addFileInfo(): CommandParam {
-		return findByName(this.elements, "addFileInfo");
-	}
-	get xlsxSchema(): CommandParam {
-		return findByName(this.elements, "xlsxSchema");
+	) {
+		this.headerName = findByName(elements, "headerName");
+		this.startRow = findByName(elements, "startRow");
+		this.addFileInfo = findByName(elements, "addFileInfo");
+		this.xlsxSchema = findByName(elements, "xlsxSchema");
 	}
 }
 export type ImageOption = CommandParams & {
@@ -633,50 +584,61 @@ export type ImageOption = CommandParams & {
 	differenceRectangleColor: CommandParam;
 };
 export class ImageOptionImpl implements ImageOption {
+	readonly threshold: CommandParam;
+	readonly pixelToleranceLevel: CommandParam;
+	readonly allowingPercentOfDifferentPixels: CommandParam;
+	readonly rectangleLineWidth: CommandParam;
+	readonly minimalRectangleSize: CommandParam;
+	readonly maximalRectangleCount: CommandParam;
+	readonly excludedAreas: CommandParam;
+	readonly drawExcludedRectangles: CommandParam;
+	readonly fillExcludedRectangles: CommandParam;
+	readonly percentOpacityExcludedRectangles: CommandParam;
+	readonly excludedRectangleColor: CommandParam;
+	readonly fillDifferenceRectangles: CommandParam;
+	readonly percentOpacityDifferenceRectangles: CommandParam;
+	readonly differenceRectangleColor: CommandParam;
 	constructor(
 		public prefix: string,
 		public elements: CommandParam[],
-	) {}
-	get threshold(): CommandParam {
-		return findByName(this.elements, "threshold");
-	}
-	get pixelToleranceLevel(): CommandParam {
-		return findByName(this.elements, "pixelToleranceLevel");
-	}
-	get allowingPercentOfDifferentPixels(): CommandParam {
-		return findByName(this.elements, "allowingPercentOfDifferentPixels");
-	}
-	get rectangleLineWidth(): CommandParam {
-		return findByName(this.elements, "rectangleLineWidth");
-	}
-	get minimalRectangleSize(): CommandParam {
-		return findByName(this.elements, "minimalRectangleSize");
-	}
-	get maximalRectangleCount(): CommandParam {
-		return findByName(this.elements, "maximalRectangleCount");
-	}
-	get excludedAreas(): CommandParam {
-		return findByName(this.elements, "excludedAreas");
-	}
-	get drawExcludedRectangles(): CommandParam {
-		return findByName(this.elements, "drawExcludedRectangles");
-	}
-	get fillExcludedRectangles(): CommandParam {
-		return findByName(this.elements, "fillExcludedRectangles");
-	}
-	get percentOpacityExcludedRectangles(): CommandParam {
-		return findByName(this.elements, "percentOpacityExcludedRectangles");
-	}
-	get excludedRectangleColor(): CommandParam {
-		return findByName(this.elements, "excludedRectangleColor");
-	}
-	get fillDifferenceRectangles(): CommandParam {
-		return findByName(this.elements, "fillDifferenceRectangles");
-	}
-	get percentOpacityDifferenceRectangles(): CommandParam {
-		return findByName(this.elements, "percentOpacityDifferenceRectangles");
-	}
-	get differenceRectangleColor(): CommandParam {
-		return findByName(this.elements, "differenceRectangleColor");
+	) {
+		this.threshold = findByName(elements, "threshold");
+		this.pixelToleranceLevel = findByName(elements, "pixelToleranceLevel");
+		this.allowingPercentOfDifferentPixels = findByName(
+			elements,
+			"allowingPercentOfDifferentPixels",
+		);
+		this.rectangleLineWidth = findByName(elements, "rectangleLineWidth");
+		this.minimalRectangleSize = findByName(elements, "minimalRectangleSize");
+		this.maximalRectangleCount = findByName(elements, "maximalRectangleCount");
+		this.excludedAreas = findByName(elements, "excludedAreas");
+		this.drawExcludedRectangles = findByName(
+			elements,
+			"drawExcludedRectangles",
+		);
+		this.fillExcludedRectangles = findByName(
+			elements,
+			"fillExcludedRectangles",
+		);
+		this.percentOpacityExcludedRectangles = findByName(
+			elements,
+			"percentOpacityExcludedRectangles",
+		);
+		this.excludedRectangleColor = findByName(
+			elements,
+			"excludedRectangleColor",
+		);
+		this.fillDifferenceRectangles = findByName(
+			elements,
+			"fillDifferenceRectangles",
+		);
+		this.percentOpacityDifferenceRectangles = findByName(
+			elements,
+			"percentOpacityDifferenceRectangles",
+		);
+		this.differenceRectangleColor = findByName(
+			elements,
+			"differenceRectangleColor",
+		);
 	}
 }
