@@ -32,6 +32,20 @@ import type { FetchParams } from "../../utils/fetchUtils";
 import { enviromentFixture } from "../setup";
 
 // モックデータ
+function makeMinimalParam(name: string): CommandParam {
+	return {
+		name,
+		value: "",
+		attribute: {
+			type: "TEXT",
+			required: false,
+			selectOption: [],
+			defaultPath: "WORKSPACE",
+		},
+		optional: false,
+	};
+}
+
 const createCommandParams = (): CommandParams => ({
 	prefix: "",
 	elements: [],
@@ -57,7 +71,13 @@ const mockConvertParams = {
 	srcData: createDatasetSource(""),
 	convertResult: {
 		prefix: "",
-		elements: [] as CommandParam[],
+		elements: [
+			"resultType",
+			"result",
+			"resultPath",
+			"exportEmptyTable",
+			"exportHeader",
+		].map(makeMinimalParam),
 		jdbc: undefined,
 	},
 } as unknown as ConvertParams;
@@ -69,9 +89,25 @@ const mockRefreshConvertParams = {
 	},
 } as unknown as ConvertParams;
 const mockGenerateParams = {
-	elements: [] as CommandParam[],
+	elements: [
+		"generateType",
+		"unit",
+		"template",
+		"result",
+		"resultPath",
+		"outputEncoding",
+	].map(makeMinimalParam),
 	srcData: createDatasetSource(""),
-	templateOption: createTemplateOption(),
+	templateOption: {
+		prefix: "",
+		elements: [
+			"encoding",
+			"templateGroup",
+			"templateParameterAttribute",
+			"templateVarStart",
+			"templateVarStop",
+		].map(makeMinimalParam),
+	},
 } as unknown as GenerateParams;
 const mockRefreshGenerateParams = {
 	...mockGenerateParams,
