@@ -62,7 +62,7 @@ type CompareElements = CommandParams & {
 	setting: CommandParam;
 	settingEncoding: CommandParam;
 };
-type ImageOption = CommandParams & {
+export type ImageOption = CommandParams & {
 	threshold: CommandParam;
 	pixelToleranceLevel: CommandParam;
 	allowingPercentOfDifferentPixels: CommandParam;
