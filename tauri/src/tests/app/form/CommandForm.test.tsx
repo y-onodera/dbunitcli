@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import CommandForm from "../../../app/form/CommandForm";
-import type { SelectParameter } from "../../../model/SelectParameter";
+import type { ConvertParams, SelectParameter } from "../../../model/SelectParameter";
 import {
 	compareLoadResponseFixture,
 	compareRefreshTargetTypeImageResponseFixture,
@@ -77,7 +77,7 @@ beforeEach(() => {
 function makeSelectParameter(
 	command: string,
 	refreshOverrides?: {
-		convert?: typeof convertLoadResponseFixture;
+		convert?: ConvertParams;
 		compare?: typeof compareLoadResponseFixture;
 		generate?: typeof generateLoadResponseFixture;
 		run?: typeof runLoadResponseFixture;
