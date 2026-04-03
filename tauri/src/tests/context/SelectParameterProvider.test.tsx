@@ -16,11 +16,12 @@ import {
 	useSaveParameter,
 } from "../../hooks/useSelectParameter";
 import type {
-	CommandParam,
 	CommandParams,
 	DatasetSource,
+	JdbcOption,
 	SettingElements,
 	SrcElements,
+	SrcTypeSettings,
 	TemplateOption,
 } from "../../model/CommandParam";
 import type {
@@ -34,24 +35,22 @@ import { enviromentFixture, makeMinimalParam } from "../setup";
 // モックデータ
 const createCommandParams = (): CommandParams => ({
 	prefix: "",
-	elements: [],
 });
 const createSrcElements = () => createCommandParams() as unknown as SrcElements;
+const createSrcTypeSettings = () =>
+	createCommandParams() as unknown as SrcTypeSettings;
 const createSettingElements = () =>
 	createCommandParams() as unknown as SettingElements;
+const createJdbcOption = () => createCommandParams() as unknown as JdbcOption;
 const createTemplateOption = () =>
 	createCommandParams() as unknown as TemplateOption;
 const createDatasetSource = (prefix: string): DatasetSource => ({
 	prefix,
-	elements: [],
-	srcType: () => "csv",
-	srcElements: createSrcElements,
-	srcTypeSettings: () => createCommandParams(),
-	jdbcElements: () => createCommandParams(),
-	settingElements: createSettingElements,
-	jdbcOption: () =>
-		createCommandParams() as unknown as ReturnType<DatasetSource["jdbcOption"]>,
-	templateOption: createTemplateOption,
+	srcElements: createSrcElements(),
+	srcTypeSettings: createSrcTypeSettings(),
+	settingElements: createSettingElements(),
+	jdbcOption: createJdbcOption(),
+	templateOption: createTemplateOption(),
 });
 const mockConvertParams = {
 	srcData: createDatasetSource(""),

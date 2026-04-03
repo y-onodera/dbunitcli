@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ConvertForm } from "../../../app/form/ConvertForm";
-import { SelectParameter } from "../../../model/SelectParameter";
+import type { ConvertParams } from "../../../model/SelectParameter";
 import { enviromentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	convertLoadResponseFixture,
@@ -35,20 +35,17 @@ vi.mock("../../../hooks/useJdbc", () => ({
 	useDeleteJdbcProperties: () => vi.fn(),
 }));
 
-// フィクスチャから ConvertForm の props を生成する
-// SelectParameter コンストラクタで srcData を DatasetSourceImpl にラップし、
-// srcElements() / srcTypeSettings() / settingElements() メソッドを有効化する
-// ※ JSON.parse/JSON.stringify はコンストラクタがフィクスチャの srcData を直接書き換えるための深いコピー
-function makeConvertProps(fixture = convertLoadResponseFixture) {
-	const sp = new SelectParameter(
-		JSON.parse(JSON.stringify(fixture)),
-		"convert",
-		"test",
-	);
+function makeConvertProps(
+	fixture:
+		| typeof convertLoadResponseFixture
+		| typeof convertRefreshSrcTypeXlsxResponseFixture
+		| typeof convertRefreshSrcTypeTableResponseFixture
+		| typeof convertRefreshResultTypeXlsxResponseFixture = convertLoadResponseFixture,
+): { handleTypeSelect: () => Promise<void>; name: string; convert: ConvertParams } {
 	return {
 		handleTypeSelect: vi.fn().mockResolvedValue(undefined),
 		name: "test",
-		convert: sp.convert,
+		convert: fixture as unknown as ConvertParams,
 	};
 }
 

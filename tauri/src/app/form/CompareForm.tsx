@@ -1,5 +1,5 @@
-import { useMemo } from "react";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
+import { buildDatasetSrcInfo } from "../../model/CommandParam";
 import type { CompareParams } from "../../model/SelectParameter";
 import ConvertResultFormSection from "./section/ConvertResultFormSection";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
@@ -18,45 +18,37 @@ export function CompareForm(prop: {
 	const expectData = prop.compare.expectData;
 	const convertResult = prop.compare.convertResult;
 
-	const targetTypeElement = prop.compare.targetType;
-	const targetType = targetTypeElement?.value ?? "data";
-	const settingElement = prop.compare.setting ?? null;
-	const settingEncodingElement = prop.compare.settingEncoding;
+	const targetTypeElement = prop.compare.commandElements.targetType;
+	const targetType = prop.compare.commandElements.targetType.value;
+	const settingElement = prop.compare.commandElements.setting;
+	const settingEncodingElement = prop.compare.commandElements.settingEncoding;
 
-	const oldDataInitialInfo = useMemo(
-		() => oldData.buildDatasetSrcInfo(),
-		[oldData],
-	);
+	const oldDataInitialInfo = buildDatasetSrcInfo(oldData);
 
 	return (
 		<>
 			<fieldset className="border border-gray-200 p-3">
 				<legend>compare</legend>
-				{targetTypeElement && (
-					<Select
-						handleTypeSelect={prop.handleTypeSelect}
+				<Select
+					handleTypeSelect={prop.handleTypeSelect}
+					prefix=""
+					element={targetTypeElement}
+				/>
+				{targetType === "data" ? (
+					<DatasetSrcInfoProvider
+						key={`${prop.name}compare-setting`}
+						initialValue={oldDataInitialInfo}
+					>
+						<Text prefix="" element={settingElement} />
+					</DatasetSrcInfoProvider>
+				) : (
+					<Text
 						prefix=""
-						element={targetTypeElement}
+						element={settingElement}
+						hideDatasetSettingEdit={true}
 					/>
 				)}
-				{settingElement &&
-					(targetType === "data" ? (
-						<DatasetSrcInfoProvider
-							key={`${prop.name}compare-setting`}
-							initialValue={oldDataInitialInfo}
-						>
-							<Text prefix="" element={settingElement} />
-						</DatasetSrcInfoProvider>
-					) : (
-						<Text
-							prefix=""
-							element={settingElement}
-							hideDatasetSettingEdit={true}
-						/>
-					))}
-				{settingEncodingElement && (
-					<Text prefix="" element={settingEncodingElement} />
-				)}
+				<Text prefix="" element={settingEncodingElement} />
 			</fieldset>
 			{prop.compare.imageOption && (
 				<fieldset className="border border-gray-200 p-3">

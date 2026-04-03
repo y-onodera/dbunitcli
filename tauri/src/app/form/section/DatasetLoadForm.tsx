@@ -3,10 +3,11 @@ import {
 	useDatasetSrcInfo,
 	useSetDatasetSrcInfo,
 } from "../../../context/DatasetSrcInfoProvider";
-import type {
-	CommandParam,
-	DatasetSource,
-	DatasetSrcInfo,
+import {
+	buildDatasetSrcInfo,
+	type CommandParam,
+	type DatasetSource,
+	type DatasetSrcInfo,
 } from "../../../model/CommandParam";
 import DatasetCommandFormSection from "./DatasetCommandFormSection";
 import DatasetSettingSection from "./DatasetSettingSection";
@@ -34,11 +35,11 @@ export function DatasetLoadForm(prop: {
 			} as DatasetSrcInfo);
 		}
 	};
-	const srcElements = prop.srcData.srcElements();
-	const srcTypeSettings = prop.srcData.srcTypeSettings();
-	const settingElements = prop.srcData.settingElements();
-	const initialDatasetSrcInfo = prop.srcData.buildDatasetSrcInfo();
-	const jdbcOption = prop.srcData.jdbcOption();
+	const srcElements = prop.srcData.srcElements;
+	const srcTypeSettings = prop.srcData.srcTypeSettings;
+	const settingElements = prop.srcData.settingElements;
+	const jdbcOption = prop.srcData.jdbcOption;
+	const initialDatasetSrcInfo = buildDatasetSrcInfo(prop.srcData);
 	return (
 		<DatasetSrcInfoProvider
 			key={prop.name + prop.srcData.prefix}

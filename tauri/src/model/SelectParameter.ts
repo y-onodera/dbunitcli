@@ -1,26 +1,11 @@
 import type {
 	CommandParam,
+	CommandParams,
 	ConvertResult,
 	DatasetSource,
-	GenerateElements,
-	ImageOption,
 	JdbcOption,
-	ParameterizeElements,
-	RunElements,
 	TemplateOption,
 } from "./CommandParam";
-import {
-	ConvertResultImpl,
-	DatasetSourceImpl,
-	GenerateElementsImpl,
-	ImageOptionImpl,
-	JdbcOptionImpl,
-	ParameterizeElementsImpl,
-	RunElementsImpl,
-	TemplateOptionImpl,
-} from "./CommandParam";
-
-type RawParams = { prefix: string; elements: CommandParam[] };
 
 export class SelectParameter {
 	readonly name: string;
@@ -35,134 +20,22 @@ export class SelectParameter {
 		this.name = name;
 		this.command = command;
 		if (command === "convert") {
-			const rawConvert = response as {
-				srcData: RawParams;
-				convertResult: RawParams & {
-					jdbc?: RawParams;
-				};
-			};
-			this.convert = {
-				srcData: new DatasetSourceImpl(
-					rawConvert.srcData.prefix,
-					rawConvert.srcData.elements,
-				),
-				convertResult: new ConvertResultImpl(
-					rawConvert.convertResult.prefix,
-					rawConvert.convertResult.elements,
-					rawConvert.convertResult.jdbc,
-				),
-			};
+			this.convert = response as ConvertParams;
 		}
 		if (command === "compare") {
-			const rawCompare = response as {
-				elements: CommandParam[];
-				newData: RawParams;
-				oldData: RawParams;
-				imageOption: RawParams;
-				convertResult: RawParams;
-				expectData: RawParams;
-			};
-			const findIn = (name: string) =>
-				rawCompare.elements.find((e) => e.name === name);
-			this.compare = {
-				targetType: findIn("targetType"),
-				setting: findIn("setting"),
-				settingEncoding: findIn("settingEncoding"),
-				newData: new DatasetSourceImpl(
-					rawCompare.newData.prefix,
-					rawCompare.newData.elements,
-				),
-				oldData: new DatasetSourceImpl(
-					rawCompare.oldData.prefix,
-					rawCompare.oldData.elements,
-				),
-				imageOption: new ImageOptionImpl(
-					rawCompare.imageOption.prefix,
-					rawCompare.imageOption.elements,
-				),
-				convertResult: new ConvertResultImpl(
-					rawCompare.convertResult.prefix,
-					rawCompare.convertResult.elements,
-					undefined,
-				),
-				expectData: new DatasetSourceImpl(
-					rawCompare.expectData.prefix,
-					rawCompare.expectData.elements,
-				),
-			};
+			this.compare = response as CompareParams;
 		}
 		if (command === "generate") {
-			const rawGenerate = response as unknown as {
-				elements: CommandParam[];
-				srcData: RawParams;
-				templateOption?: RawParams;
-			};
-			this.generate = {
-				commandElements: new GenerateElementsImpl("", rawGenerate.elements),
-				srcData: new DatasetSourceImpl(
-					rawGenerate.srcData.prefix,
-					rawGenerate.srcData.elements,
-				),
-				templateOption: rawGenerate.templateOption
-					? new TemplateOptionImpl(
-							rawGenerate.templateOption.prefix,
-							rawGenerate.templateOption.elements,
-						)
-					: undefined,
-			};
+			this.generate = response as GenerateParams;
 		}
 		if (command === "run") {
-			const rawRun = response as unknown as {
-				elements: CommandParam[];
-				srcData: RawParams;
-				templateOption?: RawParams;
-				jdbcOption?: RawParams;
-			};
-			this.run = {
-				commandElements: new RunElementsImpl("", rawRun.elements),
-				srcData: new DatasetSourceImpl(
-					rawRun.srcData.prefix,
-					rawRun.srcData.elements,
-				),
-				templateOption: rawRun.templateOption
-					? new TemplateOptionImpl(
-							rawRun.templateOption.prefix,
-							rawRun.templateOption.elements,
-						)
-					: undefined,
-				jdbcOption: rawRun.jdbcOption
-					? new JdbcOptionImpl(
-							rawRun.jdbcOption.prefix,
-							rawRun.jdbcOption.elements,
-						)
-					: undefined,
-			};
+			this.run = response as RunParams;
 		}
 		if (command === "parameterize") {
-			const rawParameterize = response as unknown as {
-				elements: CommandParam[];
-				paramData: RawParams;
-				templateOption?: RawParams;
-			};
-			this.parameterize = {
-				commandElements: new ParameterizeElementsImpl(
-					"",
-					rawParameterize.elements,
-				),
-				paramData: new DatasetSourceImpl(
-					rawParameterize.paramData.prefix,
-					rawParameterize.paramData.elements,
-				),
-				templateOption: rawParameterize.templateOption
-					? new TemplateOptionImpl(
-							rawParameterize.templateOption.prefix,
-							rawParameterize.templateOption.elements,
-						)
-					: undefined,
-			};
+			this.parameterize = response as ParameterizeParams;
 		}
 	}
-	currentParameter() {
+	currentParameter(): Parameter {
 		if (this.command === "convert") {
 			return this.convert;
 		}
@@ -184,14 +57,52 @@ export type Parameter =
 	| GenerateParams
 	| RunParams
 	| ParameterizeParams;
+type CompareElements = CommandParams & {
+	targetType: CommandParam;
+	setting: CommandParam;
+	settingEncoding: CommandParam;
+};
+type ImageOption = CommandParams & {
+	threshold: CommandParam;
+	pixelToleranceLevel: CommandParam;
+	allowingPercentOfDifferentPixels: CommandParam;
+	rectangleLineWidth: CommandParam;
+	minimalRectangleSize: CommandParam;
+	maximalRectangleCount: CommandParam;
+	excludedAreas: CommandParam;
+	drawExcludedRectangles: CommandParam;
+	fillExcludedRectangles: CommandParam;
+	percentOpacityExcludedRectangles: CommandParam;
+	excludedRectangleColor: CommandParam;
+	fillDifferenceRectangles: CommandParam;
+	percentOpacityDifferenceRectangles: CommandParam;
+	differenceRectangleColor: CommandParam;
+};
+type GenerateElements = CommandParams & {
+	generateType: CommandParam;
+	unit: CommandParam;
+	template: CommandParam;
+	result: CommandParam;
+	resultPath: CommandParam;
+	outputEncoding: CommandParam;
+};
+type RunElements = CommandParams & {
+	scriptType: CommandParam;
+};
+type ParameterizeElements = CommandParams & {
+	unit: CommandParam;
+	parameterize: CommandParam;
+	ignoreFail: CommandParam;
+	cmd: CommandParam;
+	cmdParam: CommandParam;
+	template: CommandParam;
+};
 export type ConvertParams = {
 	srcData: DatasetSource;
 	convertResult: ConvertResult;
 };
 export type CompareParams = {
-	targetType?: CommandParam;
-	setting?: CommandParam;
-	settingEncoding?: CommandParam;
+	commandElements: CompareElements;
 	newData: DatasetSource;
 	oldData: DatasetSource;
 	imageOption: ImageOption;

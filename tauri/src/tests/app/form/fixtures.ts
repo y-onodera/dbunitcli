@@ -32,54 +32,23 @@ const templateOptionElements: CommandParam[] = [
 	makeElement("templateVarStop", "TEXT", "$", "WORKSPACE", false),
 ];
 
-// xlsx/xls型のsrcData要素（xlsxSchemaあり、CSV系フィールドなし）
-function makeXlsxSrcDataElements(): CommandParam[] {
-	return [
-		makeElement("srcType", "ENUM", "xlsx", "WORKSPACE", false, [
-			"table",
-			"sql",
-			"file",
-			"dir",
-			"csv",
-			"csvq",
-			"reg",
-			"fixed",
-			"xls",
-			"xlsx",
-		]),
-		makeElement("src", "FILE_OR_DIR", "", "DATASET", true),
-		makeElement("recursive", "FLG", "false", "WORKSPACE", false),
-		makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
-		makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
-		makeElement("extension", "TEXT", "", "WORKSPACE", false),
-		makeElement("headerName", "TEXT", "", "WORKSPACE", false),
-		makeElement("startRow", "TEXT", "1", "WORKSPACE", false),
-		makeElement("addFileInfo", "FLG", "false", "WORKSPACE", false),
-		makeElement("xlsxSchema", "FILE", "", "XLSX_SCHEMA", false),
-		makeElement("setting", "FILE", "", "SETTING", false),
-		makeElement("settingEncoding", "TEXT", "UTF-8", "WORKSPACE", false),
-		makeElement("regTableInclude", "TEXT", "", "WORKSPACE", false),
-		makeElement("regTableExclude", "TEXT", "", "WORKSPACE", false),
-		makeElement("loadData", "FLG", "true", "WORKSPACE", false),
-		makeElement("includeMetaData", "FLG", "false", "WORKSPACE", false),
-	];
-}
+const SRC_TYPE_OPTIONS = [
+	"table",
+	"sql",
+	"file",
+	"dir",
+	"csv",
+	"csvq",
+	"reg",
+	"fixed",
+	"xls",
+	"xlsx",
+];
 
-// table型のsrcData要素（JDBCフィールド・テンプレートフィールドあり、CSV系フィールドなし）
+// table型のsrcData要素（compare/generate 等の element-array 形式フィクスチャ用）
 function makeTableSrcDataElements(): CommandParam[] {
 	return [
-		makeElement("srcType", "ENUM", "table", "WORKSPACE", false, [
-			"table",
-			"sql",
-			"file",
-			"dir",
-			"csv",
-			"csvq",
-			"reg",
-			"fixed",
-			"xls",
-			"xlsx",
-		]),
+		makeElement("srcType", "ENUM", "table", "WORKSPACE", false, SRC_TYPE_OPTIONS),
 		makeElement("src", "FILE_OR_DIR", "", "DATASET", true),
 		makeElement("encoding", "TEXT", "UTF-8", "WORKSPACE", false),
 		makeElement("recursive", "FLG", "false", "WORKSPACE", false),
@@ -109,23 +78,6 @@ function makeTableSrcDataElements(): CommandParam[] {
 		makeElement("regTableExclude", "TEXT", "", "WORKSPACE", false),
 		makeElement("loadData", "FLG", "true", "WORKSPACE", false),
 		makeElement("includeMetaData", "FLG", "false", "WORKSPACE", false),
-	];
-}
-
-// xlsx resultType のresult要素（excelTableあり）
-function makeXlsxResultElements(): CommandParam[] {
-	return [
-		makeElement("resultType", "ENUM", "xlsx", "WORKSPACE", false, [
-			"csv",
-			"xls",
-			"xlsx",
-			"table",
-		]),
-		makeElement("result", "DIR", "", "RESULT", false),
-		makeElement("resultPath", "TEXT", "", "WORKSPACE", false),
-		makeElement("exportEmptyTable", "FLG", "true", "WORKSPACE", false),
-		makeElement("exportHeader", "FLG", "true", "WORKSPACE", false),
-		makeElement("excelTable", "TEXT", "SHEET", "WORKSPACE", false),
 	];
 }
 
@@ -183,32 +135,235 @@ function makeCsvSrcDataElements(src: string): CommandParam[] {
 	];
 }
 
+function makeSettingElements() {
+	return {
+		prefix: "src",
+		setting: makeElement("setting", "FILE", "", "SETTING", false),
+		settingEncoding: makeElement(
+			"settingEncoding",
+			"TEXT",
+			"UTF-8",
+			"WORKSPACE",
+			false,
+		),
+		regTableInclude: makeElement(
+			"regTableInclude",
+			"TEXT",
+			"",
+			"WORKSPACE",
+			false,
+		),
+		regTableExclude: makeElement(
+			"regTableExclude",
+			"TEXT",
+			"",
+			"WORKSPACE",
+			false,
+		),
+		loadData: makeElement("loadData", "FLG", "true", "WORKSPACE", false),
+		includeMetaData: makeElement(
+			"includeMetaData",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
+	};
+}
+
+function makeCsvSrcData(src: string) {
+	return {
+		prefix: "src",
+		srcElements: {
+			prefix: "src",
+			srcType: makeElement(
+				"srcType",
+				"ENUM",
+				"csv",
+				"WORKSPACE",
+				false,
+				SRC_TYPE_OPTIONS,
+			),
+			src: makeElement("src", "FILE_OR_DIR", src, "DATASET", true),
+			encoding: makeElement("encoding", "TEXT", "UTF-8", "WORKSPACE", false),
+			recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
+			regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
+			regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
+			extension: makeElement("extension", "TEXT", "", "WORKSPACE", false),
+		},
+		srcTypeSettings: {
+			prefix: "src",
+			headerName: makeElement("headerName", "TEXT", "", "WORKSPACE", false),
+			startRow: makeElement("startRow", "TEXT", "1", "WORKSPACE", false),
+			addFileInfo: makeElement("addFileInfo", "FLG", "false", "WORKSPACE", false),
+			delimiter: makeElement("delimiter", "TEXT", ",", "WORKSPACE", false),
+			ignoreQuoted: makeElement("ignoreQuoted", "FLG", "false", "WORKSPACE", false),
+		},
+		settingElements: makeSettingElements(),
+		jdbcOption: undefined,
+		templateOption: undefined,
+	};
+}
+
+function makeXlsxSrcData() {
+	return {
+		prefix: "src",
+		srcElements: {
+			prefix: "src",
+			srcType: makeElement(
+				"srcType",
+				"ENUM",
+				"xlsx",
+				"WORKSPACE",
+				false,
+				SRC_TYPE_OPTIONS,
+			),
+			src: makeElement("src", "FILE_OR_DIR", "", "DATASET", true),
+			recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
+			regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
+			regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
+			extension: makeElement("extension", "TEXT", "", "WORKSPACE", false),
+		},
+		srcTypeSettings: {
+			prefix: "src",
+			headerName: makeElement("headerName", "TEXT", "", "WORKSPACE", false),
+			startRow: makeElement("startRow", "TEXT", "1", "WORKSPACE", false),
+			addFileInfo: makeElement("addFileInfo", "FLG", "false", "WORKSPACE", false),
+			xlsxSchema: makeElement("xlsxSchema", "FILE", "", "XLSX_SCHEMA", false),
+		},
+		settingElements: makeSettingElements(),
+		jdbcOption: undefined,
+		templateOption: undefined,
+	};
+}
+
+function makeTableSrcData() {
+	return {
+		prefix: "src",
+		srcElements: {
+			prefix: "src",
+			srcType: makeElement(
+				"srcType",
+				"ENUM",
+				"table",
+				"WORKSPACE",
+				false,
+				SRC_TYPE_OPTIONS,
+			),
+			src: makeElement("src", "FILE_OR_DIR", "", "DATASET", true),
+			encoding: makeElement("encoding", "TEXT", "UTF-8", "WORKSPACE", false),
+			recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
+			regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
+			regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
+			extension: makeElement("extension", "TEXT", "", "WORKSPACE", false),
+		},
+		srcTypeSettings: {
+			prefix: "src",
+			headerName: makeElement("headerName", "TEXT", "", "WORKSPACE", false),
+			startRow: undefined,
+			addFileInfo: makeElement("addFileInfo", "FLG", "false", "WORKSPACE", false),
+			useJdbcMetaData: makeElement(
+				"useJdbcMetaData",
+				"FLG",
+				"false",
+				"WORKSPACE",
+				false,
+			),
+			templateGroup: makeElement("templateGroup", "FILE", "", "TEMPLATE", false),
+			templateParameterAttribute: makeElement(
+				"templateParameterAttribute",
+				"TEXT",
+				"param",
+				"WORKSPACE",
+				false,
+			),
+			templateVarStart: makeElement(
+				"templateVarStart",
+				"TEXT",
+				"$",
+				"WORKSPACE",
+				false,
+			),
+			templateVarStop: makeElement(
+				"templateVarStop",
+				"TEXT",
+				"$",
+				"WORKSPACE",
+				false,
+			),
+		},
+		settingElements: makeSettingElements(),
+		jdbcOption: {
+			prefix: "src",
+			jdbcProperties: makeElement("jdbcProperties", "FILE", "", "JDBC", false),
+			jdbcUrl: makeElement("jdbcUrl", "TEXT", "", "WORKSPACE", false),
+			jdbcUser: makeElement("jdbcUser", "TEXT", "", "WORKSPACE", false),
+			jdbcPass: makeElement("jdbcPass", "TEXT", "", "WORKSPACE", false),
+		},
+		templateOption: undefined,
+	};
+}
+
+function makeXlsxConvertResult(resultValue: string) {
+	return {
+		prefix: "result",
+		resultType: makeElement("resultType", "ENUM", "xlsx", "WORKSPACE", false, [
+			"csv",
+			"xls",
+			"xlsx",
+			"table",
+		]),
+		result: makeElement("result", "DIR", resultValue, "RESULT", false),
+		resultPath: makeElement("resultPath", "TEXT", "", "WORKSPACE", false),
+		exportEmptyTable: makeElement(
+			"exportEmptyTable",
+			"FLG",
+			"true",
+			"WORKSPACE",
+			false,
+		),
+		exportHeader: makeElement("exportHeader", "FLG", "true", "WORKSPACE", false),
+		excelTable: makeElement("excelTable", "TEXT", "SHEET", "WORKSPACE", false),
+	};
+}
+
+function makeCsvConvertResult(required = false) {
+	return {
+		prefix: "result",
+		resultType: makeElement(
+			"resultType",
+			"ENUM",
+			"csv",
+			"WORKSPACE",
+			required,
+			required ? ["csv", "xls", "xlsx"] : ["csv", "xls", "xlsx", "table"],
+		),
+		result: makeElement("result", "DIR", "", "RESULT", false),
+		resultPath: makeElement("resultPath", "TEXT", "", "WORKSPACE", false),
+		exportEmptyTable: makeElement(
+			"exportEmptyTable",
+			"FLG",
+			"true",
+			"WORKSPACE",
+			false,
+		),
+		exportHeader: makeElement("exportHeader", "FLG", "true", "WORKSPACE", false),
+		outputEncoding: makeElement(
+			"outputEncoding",
+			"TEXT",
+			"UTF-8",
+			"WORKSPACE",
+			false,
+		),
+	};
+}
+
 // convert-load-response.json をもとにしたフィクスチャ
 export const convertLoadResponseFixture = {
-	prefix: "",
-	elements: [] as CommandParam[],
-	srcData: {
-		prefix: "src",
-		elements: makeCsvSrcDataElements(
-			"src/test/resources/workspace/sample/resources/src/csv",
-		),
-	},
-	convertResult: {
-		prefix: "result",
-		elements: [
-			makeElement("resultType", "ENUM", "xlsx", "WORKSPACE", false, [
-				"csv",
-				"xls",
-				"xlsx",
-				"table",
-			]),
-			makeElement("result", "DIR", "target/convert/result", "RESULT", false),
-			makeElement("resultPath", "TEXT", "", "WORKSPACE", false),
-			makeElement("exportEmptyTable", "FLG", "true", "WORKSPACE", false),
-			makeElement("exportHeader", "FLG", "true", "WORKSPACE", false),
-			makeElement("excelTable", "TEXT", "SHEET", "WORKSPACE", false),
-		],
-	},
+	srcData: makeCsvSrcData(
+		"src/test/resources/workspace/sample/resources/src/csv",
+	),
+	convertResult: makeXlsxConvertResult("target/convert/result"),
 };
 
 // compare-load-response.json をもとにしたフィクスチャ
@@ -373,44 +528,20 @@ export const parameterizeLoadResponseFixture = {
 
 // convert-refresh-srcType-xlsx-response.json をもとにしたフィクスチャ
 export const convertRefreshSrcTypeXlsxResponseFixture = {
-	prefix: "",
-	elements: [] as CommandParam[],
-	srcData: {
-		prefix: "src",
-		elements: makeXlsxSrcDataElements(),
-	},
-	convertResult: {
-		prefix: "result",
-		elements: makeCsvResultElements(),
-	},
+	srcData: makeXlsxSrcData(),
+	convertResult: makeCsvConvertResult(),
 };
 
 // convert-refresh-srcType-table-response.json をもとにしたフィクスチャ
 export const convertRefreshSrcTypeTableResponseFixture = {
-	prefix: "",
-	elements: [] as CommandParam[],
-	srcData: {
-		prefix: "src",
-		elements: makeTableSrcDataElements(),
-	},
-	convertResult: {
-		prefix: "result",
-		elements: makeCsvResultElements(),
-	},
+	srcData: makeTableSrcData(),
+	convertResult: makeCsvConvertResult(),
 };
 
 // convert-refresh-resultType-xlsx-response.json をもとにしたフィクスチャ
 export const convertRefreshResultTypeXlsxResponseFixture = {
-	prefix: "",
-	elements: [] as CommandParam[],
-	srcData: {
-		prefix: "src",
-		elements: makeCsvSrcDataElements(""),
-	},
-	convertResult: {
-		prefix: "result",
-		elements: makeXlsxResultElements(),
-	},
+	srcData: makeCsvSrcData(""),
+	convertResult: makeXlsxConvertResult(""),
 };
 
 // image/pdf targetType 時の file 型 srcData 要素（新旧データ共通）
