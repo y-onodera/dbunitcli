@@ -63,15 +63,13 @@ public interface Option {
         public Map<String, Object> serialize() {
             final Map<String, Object> result = new LinkedHashMap<>();
             result.put("prefix", this.prefix);
-            final List<Map<String, Object>> elements = new ArrayList<>();
             this.options.forEach((key, value) -> {
-                final Map<String, Object> element = new LinkedHashMap<>();
+                final Map<String, Object> element = new HashMap<>();
                 element.put("name", key.replace(Strings.isNotEmpty(this.prefix) ? "-" + this.prefix + "." : "-", ""));
                 element.put("attribute", value.attribute());
                 element.put("value", value.value());
-                elements.add(element);
+                result.put(element.get("name").toString(), element);
             });
-            result.put("elements", elements);
             this.subComponents.forEach((key, value) -> result.put(key, value.serialize()));
             return result;
         }
@@ -105,7 +103,7 @@ public interface Option {
 
         public List<String> keySet() {
             final List<String> results = new ArrayList<>(this.options.keySet());
-            this.subComponents.forEach((key, value) -> results.addAll(value.keySet()));
+            this.subComponents.forEach((_, value) -> results.addAll(value.keySet()));
             return results;
         }
 

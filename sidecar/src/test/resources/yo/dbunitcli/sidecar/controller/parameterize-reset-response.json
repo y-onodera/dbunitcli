@@ -1,141 +1,135 @@
 {
   "prefix": "",
-  "elements": [
-    {
-      "name": "unit",
+  "unit": {
+    "name": "unit",
+    "attribute": {
+      "type": "ENUM",
+      "selectOption": [
+        "record",
+        "table",
+        "dataset"
+      ],
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": "record"
+  },
+  "parameterize": {
+    "name": "parameterize",
+    "attribute": {
+      "type": "FLG",
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": "true"
+  },
+  "ignoreFail": {
+    "name": "ignoreFail",
+    "attribute": {
+      "type": "FLG",
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": "false"
+  },
+  "cmd": {
+    "name": "cmd",
+    "attribute": {
+      "type": "TEXT",
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": ""
+  },
+  "cmdParam": {
+    "name": "cmdParam",
+    "attribute": {
+      "type": "TEXT",
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": ""
+  },
+  "template": {
+    "name": "template",
+    "attribute": {
+      "type": "FILE",
+      "required": false,
+      "defaultPath": "PARAMETERIZE_TEMPLATE"
+    },
+    "value": ""
+  },
+  "paramData": {
+    "prefix": "param",
+    "srcType": {
+      "name": "srcType",
       "attribute": {
         "type": "ENUM",
         "selectOption": [
-          "record",
+          "none",
           "table",
-          "dataset"
+          "sql",
+          "file",
+          "dir",
+          "csv",
+          "csvq",
+          "reg",
+          "fixed",
+          "xls",
+          "xlsx"
         ],
         "required": false,
         "defaultPath": "WORKSPACE"
       },
-      "value": "record"
-    },
-    {
-      "name": "parameterize",
-      "attribute": {
-        "type": "FLG",
-        "required": false,
-        "defaultPath": "WORKSPACE"
-      },
-      "value": "true"
-    },
-    {
-      "name": "ignoreFail",
-      "attribute": {
-        "type": "FLG",
-        "required": false,
-        "defaultPath": "WORKSPACE"
-      },
-      "value": "false"
-    },
-    {
-      "name": "cmd",
-      "attribute": {
-        "type": "TEXT",
-        "required": false,
-        "defaultPath": "WORKSPACE"
-      },
-      "value": ""
-    },
-    {
-      "name": "cmdParam",
-      "attribute": {
-        "type": "TEXT",
-        "required": false,
-        "defaultPath": "WORKSPACE"
-      },
-      "value": ""
-    },
-    {
-      "name": "template",
-      "attribute": {
-        "type": "FILE",
-        "required": false,
-        "defaultPath": "PARAMETERIZE_TEMPLATE"
-      },
-      "value": ""
+      "value": "none"
     }
-  ],
-  "paramData": {
-    "prefix": "param",
-    "elements": [
-      {
-        "name": "srcType",
-        "attribute": {
-          "type": "ENUM",
-          "selectOption": [
-            "none",
-            "table",
-            "sql",
-            "file",
-            "dir",
-            "csv",
-            "csvq",
-            "reg",
-            "fixed",
-            "xls",
-            "xlsx"
-          ],
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "none"
-      }
-    ]
   },
   "templateOption": {
     "prefix": "template",
-    "elements": [
-      {
-        "name": "encoding",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "UTF-8"
+    "encoding": {
+      "name": "encoding",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "templateGroup",
-        "attribute": {
-          "type": "FILE",
-          "required": false,
-          "defaultPath": "TEMPLATE"
-        },
-        "value": ""
+      "value": "UTF-8"
+    },
+    "templateGroup": {
+      "name": "templateGroup",
+      "attribute": {
+        "type": "FILE",
+        "required": false,
+        "defaultPath": "TEMPLATE"
       },
-      {
-        "name": "templateParameterAttribute",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "param"
+      "value": ""
+    },
+    "templateParameterAttribute": {
+      "name": "templateParameterAttribute",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "templateVarStart",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "$"
+      "value": "param"
+    },
+    "templateVarStart": {
+      "name": "templateVarStart",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "templateVarStop",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "$"
-      }
-    ]
+      "value": "$"
+    },
+    "templateVarStop": {
+      "name": "templateVarStop",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "$"
+    }
   }
 }

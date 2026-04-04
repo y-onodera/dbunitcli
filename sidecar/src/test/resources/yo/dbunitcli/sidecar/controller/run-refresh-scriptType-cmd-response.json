@@ -1,23 +1,96 @@
 {
   "prefix": "",
-  "elements": [
-    {
-      "name": "scriptType",
+  "scriptType": {
+    "name": "scriptType",
+    "attribute": {
+      "type": "ENUM",
+      "selectOption": [
+        "cmd",
+        "bat",
+        "sql",
+        "ant"
+      ],
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": "cmd"
+  },
+  "baseDir": {
+    "name": "baseDir",
+    "attribute": {
+      "type": "TEXT",
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": ""
+  },
+  "srcData": {
+    "prefix": "src",
+    "src": {
+      "name": "src",
       "attribute": {
-        "type": "ENUM",
-        "selectOption": [
-          "cmd",
-          "bat",
-          "sql",
-          "ant"
-        ],
+        "type": "FILE_OR_DIR",
+        "required": true,
+        "defaultPath": "DATASET"
+      },
+      "value": ""
+    },
+    "recursive": {
+      "name": "recursive",
+      "attribute": {
+        "type": "FLG",
         "required": false,
         "defaultPath": "WORKSPACE"
       },
-      "value": "cmd"
+      "value": "false"
     },
-    {
-      "name": "baseDir",
+    "regInclude": {
+      "name": "regInclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "regExclude": {
+      "name": "regExclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "setting": {
+      "name": "setting",
+      "attribute": {
+        "type": "FILE",
+        "required": false,
+        "defaultPath": "SETTING"
+      },
+      "value": ""
+    },
+    "settingEncoding": {
+      "name": "settingEncoding",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "UTF-8"
+    },
+    "regTableInclude": {
+      "name": "regTableInclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "regTableExclude": {
+      "name": "regTableExclude",
       "attribute": {
         "type": "TEXT",
         "required": false,
@@ -25,82 +98,5 @@
       },
       "value": ""
     }
-  ],
-  "srcData": {
-    "prefix": "src",
-    "elements": [
-      {
-        "name": "src",
-        "attribute": {
-          "type": "FILE_OR_DIR",
-          "required": true,
-          "defaultPath": "DATASET"
-        },
-        "value": ""
-      },
-      {
-        "name": "recursive",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "false"
-      },
-      {
-        "name": "regInclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      },
-      {
-        "name": "regExclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      },
-      {
-        "name": "setting",
-        "attribute": {
-          "type": "FILE",
-          "required": false,
-          "defaultPath": "SETTING"
-        },
-        "value": ""
-      },
-      {
-        "name": "settingEncoding",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "UTF-8"
-      },
-      {
-        "name": "regTableInclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      },
-      {
-        "name": "regTableExclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      }
-    ]
   }
 }

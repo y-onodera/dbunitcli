@@ -1,188 +1,180 @@
 {
   "prefix": "",
-  "elements": [
-    {
-      "name": "scriptType",
+  "scriptType": {
+    "name": "scriptType",
+    "attribute": {
+      "type": "ENUM",
+      "selectOption": [
+        "cmd",
+        "bat",
+        "sql",
+        "ant"
+      ],
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": "sql"
+  },
+  "srcData": {
+    "prefix": "src",
+    "src": {
+      "name": "src",
       "attribute": {
-        "type": "ENUM",
-        "selectOption": [
-          "cmd",
-          "bat",
-          "sql",
-          "ant"
-        ],
+        "type": "FILE_OR_DIR",
+        "required": true,
+        "defaultPath": "DATASET"
+      },
+      "value": ""
+    },
+    "recursive": {
+      "name": "recursive",
+      "attribute": {
+        "type": "FLG",
         "required": false,
         "defaultPath": "WORKSPACE"
       },
-      "value": "sql"
+      "value": "false"
+    },
+    "regInclude": {
+      "name": "regInclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "regExclude": {
+      "name": "regExclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "setting": {
+      "name": "setting",
+      "attribute": {
+        "type": "FILE",
+        "required": false,
+        "defaultPath": "SETTING"
+      },
+      "value": ""
+    },
+    "settingEncoding": {
+      "name": "settingEncoding",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "UTF-8"
+    },
+    "regTableInclude": {
+      "name": "regTableInclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "regTableExclude": {
+      "name": "regTableExclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
     }
-  ],
-  "srcData": {
-    "prefix": "src",
-    "elements": [
-      {
-        "name": "src",
-        "attribute": {
-          "type": "FILE_OR_DIR",
-          "required": true,
-          "defaultPath": "DATASET"
-        },
-        "value": ""
-      },
-      {
-        "name": "recursive",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "false"
-      },
-      {
-        "name": "regInclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      },
-      {
-        "name": "regExclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      },
-      {
-        "name": "setting",
-        "attribute": {
-          "type": "FILE",
-          "required": false,
-          "defaultPath": "SETTING"
-        },
-        "value": ""
-      },
-      {
-        "name": "settingEncoding",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "UTF-8"
-      },
-      {
-        "name": "regTableInclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      },
-      {
-        "name": "regTableExclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      }
-    ]
   },
   "templateOption": {
     "prefix": "template",
-    "elements": [
-      {
-        "name": "encoding",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "UTF-8"
+    "encoding": {
+      "name": "encoding",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "templateGroup",
-        "attribute": {
-          "type": "FILE",
-          "required": false,
-          "defaultPath": "TEMPLATE"
-        },
-        "value": ""
+      "value": "UTF-8"
+    },
+    "templateGroup": {
+      "name": "templateGroup",
+      "attribute": {
+        "type": "FILE",
+        "required": false,
+        "defaultPath": "TEMPLATE"
       },
-      {
-        "name": "templateParameterAttribute",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "param"
+      "value": ""
+    },
+    "templateParameterAttribute": {
+      "name": "templateParameterAttribute",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "templateVarStart",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "$"
+      "value": "param"
+    },
+    "templateVarStart": {
+      "name": "templateVarStart",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "templateVarStop",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "$"
-      }
-    ]
+      "value": "$"
+    },
+    "templateVarStop": {
+      "name": "templateVarStop",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "$"
+    }
   },
   "jdbcOption": {
     "prefix": "jdbc",
-    "elements": [
-      {
-        "name": "jdbcProperties",
-        "attribute": {
-          "type": "FILE",
-          "required": false,
-          "defaultPath": "JDBC"
-        },
-        "value": ""
+    "jdbcProperties": {
+      "name": "jdbcProperties",
+      "attribute": {
+        "type": "FILE",
+        "required": false,
+        "defaultPath": "JDBC"
       },
-      {
-        "name": "jdbcUrl",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
+      "value": ""
+    },
+    "jdbcUrl": {
+      "name": "jdbcUrl",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "jdbcUser",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
+      "value": ""
+    },
+    "jdbcUser": {
+      "name": "jdbcUser",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "jdbcPass",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      }
-    ]
+      "value": ""
+    },
+    "jdbcPass": {
+      "name": "jdbcPass",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    }
   }
 }

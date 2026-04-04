@@ -1,17 +1,160 @@
 {
   "prefix": "",
-  "elements": [
-    {
-      "name": "targetType",
+  "targetType": {
+    "name": "targetType",
+    "attribute": {
+      "type": "ENUM",
+      "selectOption": [
+        "data",
+        "image",
+        "pdf"
+      ],
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": "data"
+  },
+  "setting": {
+    "name": "setting",
+    "attribute": {
+      "type": "FILE",
+      "required": false,
+      "defaultPath": "SETTING"
+    },
+    "value": ""
+  },
+  "settingEncoding": {
+    "name": "settingEncoding",
+    "attribute": {
+      "type": "TEXT",
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": "UTF-8"
+  },
+  "newData": {
+    "prefix": "new",
+    "srcType": {
+      "name": "srcType",
       "attribute": {
         "type": "ENUM",
-        "selectOption": ["data", "image", "pdf"],
+        "selectOption": [
+          "table",
+          "sql",
+          "file",
+          "dir",
+          "csv",
+          "csvq",
+          "reg",
+          "fixed",
+          "xls",
+          "xlsx"
+        ],
         "required": false,
         "defaultPath": "WORKSPACE"
       },
-      "value": "data"
+      "value": "csv"
     },
-    {
+    "src": {
+      "name": "src",
+      "attribute": {
+        "type": "FILE_OR_DIR",
+        "required": true,
+        "defaultPath": "DATASET"
+      },
+      "value": "resources/src/csv/multi1.csv"
+    },
+    "encoding": {
+      "name": "encoding",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "UTF-8"
+    },
+    "recursive": {
+      "name": "recursive",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "false"
+    },
+    "regInclude": {
+      "name": "regInclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "regExclude": {
+      "name": "regExclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "extension": {
+      "name": "extension",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "headerName": {
+      "name": "headerName",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "startRow": {
+      "name": "startRow",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "1"
+    },
+    "addFileInfo": {
+      "name": "addFileInfo",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "false"
+    },
+    "delimiter": {
+      "name": "delimiter",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ","
+    },
+    "ignoreQuoted": {
+      "name": "ignoreQuoted",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "false"
+    },
+    "setting": {
       "name": "setting",
       "attribute": {
         "type": "FILE",
@@ -20,7 +163,7 @@
       },
       "value": ""
     },
-    {
+    "settingEncoding": {
       "name": "settingEncoding",
       "attribute": {
         "type": "TEXT",
@@ -28,417 +171,301 @@
         "defaultPath": "WORKSPACE"
       },
       "value": "UTF-8"
+    },
+    "regTableInclude": {
+      "name": "regTableInclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "regTableExclude": {
+      "name": "regTableExclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "loadData": {
+      "name": "loadData",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "true"
+    },
+    "includeMetaData": {
+      "name": "includeMetaData",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "false"
     }
-  ],
-  "newData": {
-    "prefix": "new",
-    "elements": [
-      {
-        "name": "srcType",
-        "attribute": {
-          "type": "ENUM",
-          "selectOption": ["table", "sql", "file", "dir", "csv", "csvq", "reg", "fixed", "xls", "xlsx"],
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "csv"
-      },
-      {
-        "name": "src",
-        "attribute": {
-          "type": "FILE_OR_DIR",
-          "required": true,
-          "defaultPath": "DATASET"
-        },
-        "value": "resources/src/csv/multi1.csv"
-      },
-      {
-        "name": "encoding",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "UTF-8"
-      },
-      {
-        "name": "recursive",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "false"
-      },
-      {
-        "name": "regInclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      },
-      {
-        "name": "regExclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      },
-      {
-        "name": "extension",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      },
-      {
-        "name": "headerName",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      },
-      {
-        "name": "startRow",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "1"
-      },
-      {
-        "name": "addFileInfo",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "false"
-      },
-      {
-        "name": "delimiter",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ","
-      },
-      {
-        "name": "ignoreQuoted",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "false"
-      },
-      {
-        "name": "setting",
-        "attribute": {
-          "type": "FILE",
-          "required": false,
-          "defaultPath": "SETTING"
-        },
-        "value": ""
-      },
-      {
-        "name": "settingEncoding",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "UTF-8"
-      },
-      {
-        "name": "regTableInclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      },
-      {
-        "name": "regTableExclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
-      },
-      {
-        "name": "loadData",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "true"
-      },
-      {
-        "name": "includeMetaData",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "false"
-      }
-    ]
   },
   "oldData": {
     "prefix": "old",
-    "elements": [
-      {
-        "name": "srcType",
-        "attribute": {
-          "type": "ENUM",
-          "selectOption": ["table", "sql", "file", "dir", "csv", "csvq", "reg", "fixed", "xls", "xlsx"],
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "csv"
+    "srcType": {
+      "name": "srcType",
+      "attribute": {
+        "type": "ENUM",
+        "selectOption": [
+          "table",
+          "sql",
+          "file",
+          "dir",
+          "csv",
+          "csvq",
+          "reg",
+          "fixed",
+          "xls",
+          "xlsx"
+        ],
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "src",
-        "attribute": {
-          "type": "FILE_OR_DIR",
-          "required": true,
-          "defaultPath": "DATASET"
-        },
-        "value": "resources/src/csv/multi2.csv"
+      "value": "csv"
+    },
+    "src": {
+      "name": "src",
+      "attribute": {
+        "type": "FILE_OR_DIR",
+        "required": true,
+        "defaultPath": "DATASET"
       },
-      {
-        "name": "encoding",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "UTF-8"
+      "value": "resources/src/csv/multi2.csv"
+    },
+    "encoding": {
+      "name": "encoding",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "recursive",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "false"
+      "value": "UTF-8"
+    },
+    "recursive": {
+      "name": "recursive",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "regInclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
+      "value": "false"
+    },
+    "regInclude": {
+      "name": "regInclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "regExclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
+      "value": ""
+    },
+    "regExclude": {
+      "name": "regExclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "extension",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
+      "value": ""
+    },
+    "extension": {
+      "name": "extension",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "headerName",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
+      "value": ""
+    },
+    "headerName": {
+      "name": "headerName",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "startRow",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "1"
+      "value": ""
+    },
+    "startRow": {
+      "name": "startRow",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "addFileInfo",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "false"
+      "value": "1"
+    },
+    "addFileInfo": {
+      "name": "addFileInfo",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "delimiter",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ","
+      "value": "false"
+    },
+    "delimiter": {
+      "name": "delimiter",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "ignoreQuoted",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "false"
+      "value": ","
+    },
+    "ignoreQuoted": {
+      "name": "ignoreQuoted",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "setting",
-        "attribute": {
-          "type": "FILE",
-          "required": false,
-          "defaultPath": "SETTING"
-        },
-        "value": ""
+      "value": "false"
+    },
+    "setting": {
+      "name": "setting",
+      "attribute": {
+        "type": "FILE",
+        "required": false,
+        "defaultPath": "SETTING"
       },
-      {
-        "name": "settingEncoding",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "UTF-8"
+      "value": ""
+    },
+    "settingEncoding": {
+      "name": "settingEncoding",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "regTableInclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
+      "value": "UTF-8"
+    },
+    "regTableInclude": {
+      "name": "regTableInclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "regTableExclude",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
+      "value": ""
+    },
+    "regTableExclude": {
+      "name": "regTableExclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "loadData",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "true"
+      "value": ""
+    },
+    "loadData": {
+      "name": "loadData",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "includeMetaData",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "false"
-      }
-    ]
+      "value": "true"
+    },
+    "includeMetaData": {
+      "name": "includeMetaData",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "false"
+    }
   },
   "convertResult": {
     "prefix": "result",
-    "elements": [
-      {
-        "name": "resultType",
-        "attribute": {
-          "type": "ENUM",
-          "selectOption": ["csv", "xls", "xlsx"],
-          "required": true,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "csv"
+    "resultType": {
+      "name": "resultType",
+      "attribute": {
+        "type": "ENUM",
+        "selectOption": [
+          "csv",
+          "xls",
+          "xlsx"
+        ],
+        "required": true,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "result",
-        "attribute": {
-          "type": "DIR",
-          "required": false,
-          "defaultPath": "RESULT"
-        },
-        "value": "target/compare/result"
+      "value": "csv"
+    },
+    "result": {
+      "name": "result",
+      "attribute": {
+        "type": "DIR",
+        "required": false,
+        "defaultPath": "RESULT"
       },
-      {
-        "name": "resultPath",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": ""
+      "value": "target/compare/result"
+    },
+    "resultPath": {
+      "name": "resultPath",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "exportEmptyTable",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "true"
+      "value": ""
+    },
+    "exportEmptyTable": {
+      "name": "exportEmptyTable",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "exportHeader",
-        "attribute": {
-          "type": "FLG",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "true"
+      "value": "true"
+    },
+    "exportHeader": {
+      "name": "exportHeader",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
       },
-      {
-        "name": "outputEncoding",
-        "attribute": {
-          "type": "TEXT",
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "UTF-8"
-      }
-    ]
+      "value": "true"
+    },
+    "outputEncoding": {
+      "name": "outputEncoding",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "UTF-8"
+    }
   },
   "expectData": {
     "prefix": "expect",
-    "elements": [
-      {
-        "name": "srcType",
-        "attribute": {
-          "type": "ENUM",
-          "selectOption": ["none", "sql", "csv", "csvq", "xls", "xlsx"],
-          "required": false,
-          "defaultPath": "WORKSPACE"
-        },
-        "value": "none"
-      }
-    ]
+    "srcType": {
+      "name": "srcType",
+      "attribute": {
+        "type": "ENUM",
+        "selectOption": [
+          "none",
+          "sql",
+          "csv",
+          "csvq",
+          "xls",
+          "xlsx"
+        ],
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "none"
+    }
   }
 }
