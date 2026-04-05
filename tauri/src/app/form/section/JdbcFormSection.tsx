@@ -9,7 +9,7 @@ import type { JdbcOption } from "../../../model/CommandParam";
 import JdbcSavePropertiesDialog from "../../settings/JdbcSavePropertiesDialog";
 import JdbcPropertiesTextField from "./element/JdbcPropertiesTextField";
 import JdbcUrlTextField from "./element/JdbcUrlTextField";
-import ResourceText from "./element/ResourceText";
+import PlainText from "./element/PlainText";
 
 export default function JdbcFormSection({
 	jdbcOption,
@@ -45,14 +45,14 @@ export default function JdbcFormSection({
 				element={jdbcOption.jdbcUrl}
 				onValueChange={handleJdbcValueChange}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={jdbcOption.jdbcUser}
 				handleValueChange={(value) =>
 					handleJdbcValueChange(jdbcOption.jdbcUser.name, value)
 				}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={jdbcOption.jdbcPass}
 				handleValueChange={(value) =>

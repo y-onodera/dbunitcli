@@ -8,7 +8,7 @@ import type {
 import { isSqlRelatedType } from "../../../model/QueryDatasource";
 import Check from "./element/Check";
 import FileText from "./element/FileText";
-import ResourceText from "./element/ResourceText";
+import PlainText from "./element/PlainText";
 import SqlSrcText from "./element/SqlSrcText";
 
 export default function SrcFormSection({
@@ -45,7 +45,7 @@ export default function SrcFormSection({
 				/>
 			)}
 			{srcElements.encoding && (
-				<ResourceText
+				<PlainText
 					prefix={prefix}
 					element={srcElements.encoding}
 					handleValueChange={handleValueChange(srcElements.encoding)}
@@ -65,20 +65,20 @@ export default function SrcFormSection({
 				handleOnChange={handleToggleChecked(srcElements.recursive)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={srcElements.regInclude}
 				handleValueChange={handleValueChange(srcElements.regInclude)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={srcElements.regExclude}
 				handleValueChange={handleValueChange(srcElements.regExclude)}
 				hidden={!showOptional}
 			/>
 			{srcElements.extension && (
-				<ResourceText
+				<PlainText
 					prefix={prefix}
 					element={srcElements.extension}
 					handleValueChange={handleValueChange(srcElements.extension)}

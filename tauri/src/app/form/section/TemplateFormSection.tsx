@@ -1,4 +1,5 @@
 import type { TemplateOption } from "../../../model/CommandParam";
+import PlainText from "./element/PlainText";
 import ResourceText from "./element/ResourceText";
 import TemplateText from "./element/TemplateText";
 
@@ -9,7 +10,7 @@ export default function TemplateFormSection({
 }) {
 	return (
 		<>
-			<ResourceText
+			<PlainText
 				prefix={templateOption.prefix}
 				element={templateOption.encoding}
 				hidden={false}
@@ -19,17 +20,17 @@ export default function TemplateFormSection({
 				element={templateOption.templateGroup}
 				hidden={false}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={templateOption.prefix}
 				element={templateOption.templateParameterAttribute}
 				hidden={false}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={templateOption.prefix}
 				element={templateOption.templateVarStart}
 				hidden={false}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={templateOption.prefix}
 				element={templateOption.templateVarStop}
 				hidden={false}

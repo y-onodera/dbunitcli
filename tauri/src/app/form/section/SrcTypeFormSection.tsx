@@ -17,7 +17,7 @@ import ExcelFormSection from "./srctype/ExcelFormSection";
 import FixedFormSection from "./srctype/FixedFormSection";
 import RegFormSection from "./srctype/RegFormSection";
 
-export default function DatasetCommandFormSection({
+export default function SrcTypeFormSection({
 	commandParams,
 	handleValueChange,
 	handleToggleChecked,

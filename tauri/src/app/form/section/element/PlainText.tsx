@@ -3,41 +3,31 @@ import { useState } from "react";
 import {
 	ControllTextBox,
 	InputLabel,
-	ResourceDatalist,
 } from "../../../../components/element/Input";
-import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
-import { getPath } from "./Chooser";
 import type { TextProp } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
 
 interface Props extends TextProp {
 	children?: (args: {
-		path: string;
-		setPath: Dispatch<SetStateAction<string>>;
-		isValueInDatalist: boolean;
+		value: string;
+		setValue: Dispatch<SetStateAction<string>>;
 	}) => ReactNode;
 }
 
-export default function ResourceText({
+export default function PlainText({
 	prefix,
 	element,
 	hidden,
-	srcType,
-	resourceFiles = [],
 	handleValueChange: onValueChange,
 	children,
 }: Props) {
-	const [path, setPath] = useState(element.value);
-	const hasResources = resourceFiles.length > 0;
-	const isValueInDatalist = resourceFiles.includes(path);
-	const context = useWorkspaceContext();
-	const defaultPath = getPath(context, element.attribute.defaultPath, srcType);
+	const [value, setValue] = useState(element.value);
 	const id = getId(prefix, element.name);
 	const fieldName = getName(prefix, element.name);
 
 	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
 		const newValue = ev.target.value;
-		setPath(newValue);
+		setValue(newValue);
 		onValueChange?.(newValue);
 	};
 
@@ -54,18 +44,13 @@ export default function ResourceText({
 					<ControllTextBox
 						name={fieldName}
 						id={id}
-						list={hasResources ? `${id}_list` : undefined}
 						hidden={hidden}
 						required={element.attribute.required}
-						value={path}
+						value={value}
 						handleChange={handleChange}
 					/>
-					<ResourceDatalist id={id} resources={resourceFiles} />
-					{!hidden && (
-						<p className="text-xs text-gray-400 truncate">{defaultPath}</p>
-					)}
 				</div>
-				{!hidden && children && children({ path, setPath, isValueInDatalist })}
+				{!hidden && children && children({ value: value, setValue: setValue })}
 			</div>
 		</div>
 	);

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { BlueEditButton } from "../../../../components/element/ButtonIcon";
 import type { CommandParam } from "../../../../model/CommandParam";
 import JdbcUrlBuilderDialog from "../../../settings/JdbcUrlBuilderDialog";
-import ResourceText from "./ResourceText";
+import PlainText from "./PlainText";
 
 export default function JdbcUrlTextField({
 	prefix,
@@ -15,30 +15,29 @@ export default function JdbcUrlTextField({
 	onValueChange: (name: string, value: string) => void;
 }) {
 	return (
-		<ResourceText
+		<PlainText
 			prefix={prefix}
 			element={element}
-			resourceFiles={[]}
-			handleValueChange={(value) => onValueChange(element.name, value)}
+			handleValueChange={(value: string) => onValueChange(element.name, value)}
 		>
-			{({ path, setPath }) => {
+			{({ value, setValue }) => {
 				const wrappedSetPath: Dispatch<SetStateAction<string>> = (action) => {
-					const newPath = typeof action === "function" ? action(path) : action;
-					setPath(newPath);
+					const newPath = typeof action === "function" ? action(value) : action;
+					setValue(newPath);
 					onValueChange(element.name, newPath);
 				};
-				return <JdbcUrlBuilderButton path={path} setPath={wrappedSetPath} />;
+				return <JdbcUrlBuilderButton value={value} setValue={wrappedSetPath} />;
 			}}
-		</ResourceText>
+		</PlainText>
 	);
 }
 
 function JdbcUrlBuilderButton({
-	path,
-	setPath,
+	value,
+	setValue,
 }: {
-	path: string;
-	setPath: Dispatch<SetStateAction<string>>;
+	value: string;
+	setValue: Dispatch<SetStateAction<string>>;
 }) {
 	const [showDialog, setShowDialog] = useState(false);
 	return (
@@ -46,10 +45,10 @@ function JdbcUrlBuilderButton({
 			<BlueEditButton handleClick={() => setShowDialog(true)} />
 			{showDialog && (
 				<JdbcUrlBuilderDialog
-					currentUrl={path}
+					currentUrl={value}
 					handleDialogClose={() => setShowDialog(false)}
 					handleSave={(url) => {
-						setPath(url);
+						setValue(url);
 						setShowDialog(false);
 					}}
 				/>

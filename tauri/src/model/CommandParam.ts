@@ -236,6 +236,7 @@ export type ConvertResult = CommandParams & {
 	exportHeader: CommandParam;
 	outputEncoding?: CommandParam;
 	excelTable?: CommandParam;
+	op?: CommandParam;
 	jdbc?: JdbcOption;
 };
 export type TemplateOption = CommandParams & {

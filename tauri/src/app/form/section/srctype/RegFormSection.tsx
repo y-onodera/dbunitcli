@@ -5,6 +5,7 @@ import type {
 	RegTypeSettings,
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
+import PlainText from "../element/PlainText";
 import ResourceText from "../element/ResourceText";
 
 export default function RegFormSection({
@@ -29,13 +30,13 @@ export default function RegFormSection({
 					caption="reg option"
 				/>
 			</div>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.headerName}
 				handleValueChange={handleValueChange(settings.headerName)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.startRow}
 				handleValueChange={handleValueChange(settings.startRow)}
@@ -47,13 +48,13 @@ export default function RegFormSection({
 				handleOnChange={handleToggleChecked(settings.addFileInfo)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.regDataSplit}
 				handleValueChange={handleValueChange(settings.regDataSplit)}
 				hidden={false}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.regHeaderSplit}
 				handleValueChange={handleValueChange(settings.regHeaderSplit)}

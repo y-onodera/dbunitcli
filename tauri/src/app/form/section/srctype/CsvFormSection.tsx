@@ -5,7 +5,7 @@ import type {
 	CsvTypeSettings,
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
-import ResourceText from "../element/ResourceText";
+import PlainText from "../element/PlainText";
 
 export default function CsvFormSection({
 	settings,
@@ -29,13 +29,13 @@ export default function CsvFormSection({
 					caption="csv option"
 				/>
 			</div>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.headerName}
 				handleValueChange={handleValueChange(settings.headerName)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.startRow}
 				handleValueChange={handleValueChange(settings.startRow)}
@@ -47,7 +47,7 @@ export default function CsvFormSection({
 				handleOnChange={handleToggleChecked(settings.addFileInfo)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.delimiter}
 				handleValueChange={handleValueChange(settings.delimiter)}

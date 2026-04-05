@@ -6,7 +6,7 @@ import type {
 	XlsxTypeSettings,
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
-import ResourceText from "../element/ResourceText";
+import PlainText from "../element/PlainText";
 import XlsxSchemaText from "./XlsxSchemaText";
 
 export default function ExcelFormSection({
@@ -31,13 +31,13 @@ export default function ExcelFormSection({
 					caption={`${settings.srcType.value} option`}
 				/>
 			</div>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.headerName}
 				handleValueChange={handleValueChange(settings.headerName)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.startRow}
 				handleValueChange={handleValueChange(settings.startRow)}

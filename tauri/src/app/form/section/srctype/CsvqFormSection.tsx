@@ -5,7 +5,7 @@ import type {
 	CsvqTypeSettings,
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
-import ResourceText from "../element/ResourceText";
+import PlainText from "../element/PlainText";
 import TemplateText from "../element/TemplateText";
 
 export default function CsvqFormSection({
@@ -30,7 +30,7 @@ export default function CsvqFormSection({
 					caption="csvq option"
 				/>
 			</div>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.headerName}
 				handleValueChange={handleValueChange(settings.headerName)}
@@ -47,7 +47,7 @@ export default function CsvqFormSection({
 				element={settings.templateGroup}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.templateParameterAttribute}
 				handleValueChange={handleValueChange(
@@ -55,13 +55,13 @@ export default function CsvqFormSection({
 				)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.templateVarStart}
 				handleValueChange={handleValueChange(settings.templateVarStart)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.templateVarStop}
 				handleValueChange={handleValueChange(settings.templateVarStop)}

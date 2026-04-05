@@ -1,7 +1,9 @@
 import type { ConvertResult } from "../../../model/CommandParam";
 import Check from "./element/Check";
+import PlainText from "./element/PlainText";
 import Select from "./element/Select";
 import Text from "./element/TextFormElement";
+import JdbcFormSection from "./JdbcFormSection";
 
 export default function ConvertResultFormSection({
 	convertResult,
@@ -20,19 +22,31 @@ export default function ConvertResultFormSection({
 				prefix={prefix}
 				element={convertResult.resultType}
 			/>
-			<Text prefix={prefix} element={convertResult.result} />
-			<Text prefix={prefix} element={convertResult.resultPath} />
-			<Check prefix={prefix} element={convertResult.exportEmptyTable} />
-			<Check prefix={prefix} element={convertResult.exportHeader} />
-			{excelTable && <Text prefix={prefix} element={excelTable} />}
-			{outputEncoding && <Text prefix={prefix} element={outputEncoding} />}
+			{convertResult.result && (
+				<Text prefix={prefix} element={convertResult.result} />
+			)}
+			{convertResult.resultPath && (
+				<PlainText prefix={prefix} element={convertResult.resultPath} />
+			)}
+			{convertResult.exportEmptyTable && (
+				<Check prefix={prefix} element={convertResult.exportEmptyTable} />
+			)}
+			{convertResult.exportHeader && (
+				<Check prefix={prefix} element={convertResult.exportHeader} />
+			)}
+			{excelTable && <PlainText prefix={prefix} element={excelTable} />}
+			{outputEncoding && <PlainText prefix={prefix} element={outputEncoding} />}
+			{convertResult.op && (
+				<Select
+					prefix={prefix}
+					element={convertResult.op}
+					handleTypeSelect={(_: string) => {
+						return new Promise((_) => {});
+					}}
+				/>
+			)}
 			{convertResult.jdbc && (
-				<>
-					<Text prefix={prefix} element={convertResult.jdbc.jdbcProperties} />
-					<Text prefix={prefix} element={convertResult.jdbc.jdbcUrl} />
-					<Text prefix={prefix} element={convertResult.jdbc.jdbcUser} />
-					<Text prefix={prefix} element={convertResult.jdbc.jdbcPass} />
-				</>
+				<JdbcFormSection jdbcOption={convertResult.jdbc} />
 			)}
 		</>
 	);

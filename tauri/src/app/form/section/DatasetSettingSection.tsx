@@ -6,6 +6,7 @@ import type {
 } from "../../../model/CommandParam";
 import Check from "./element/Check";
 import DatasetSettingText from "./element/DatasetSettingText";
+import PlainText from "./element/PlainText";
 import ResourceText from "./element/ResourceText";
 
 export default function DatasetSettingSection({
@@ -28,7 +29,7 @@ export default function DatasetSettingSection({
 				element={settingElements.setting}
 				hidden={false}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settingElements.settingEncoding}
 				handleValueChange={handleValueChange(settingElements.settingEncoding)}
@@ -41,13 +42,13 @@ export default function DatasetSettingSection({
 					caption="dataset option"
 				/>
 			</div>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settingElements.regTableInclude}
 				handleValueChange={handleValueChange(settingElements.regTableInclude)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settingElements.regTableExclude}
 				handleValueChange={handleValueChange(settingElements.regTableExclude)}

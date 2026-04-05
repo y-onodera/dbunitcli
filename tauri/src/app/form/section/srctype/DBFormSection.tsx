@@ -6,6 +6,7 @@ import type {
 	TableTypeSettings,
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
+import PlainText from "../element/PlainText";
 import ResourceText from "../element/ResourceText";
 import TemplateText from "../element/TemplateText";
 
@@ -31,7 +32,7 @@ export default function DBFormSection({
 					caption={`${settings.srcType.value} option`}
 				/>
 			</div>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.headerName}
 				handleValueChange={handleValueChange(settings.headerName)}
@@ -49,13 +50,13 @@ export default function DBFormSection({
 				handleOnChange={handleToggleChecked(settings.useJdbcMetaData)}
 				hidden={!showOptional}
 			/>
-			<TemplateText
+			<PlainText
 				prefix={prefix}
 				element={settings.templateGroup}
 				handleValueChange={handleValueChange(settings.templateGroup)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.templateParameterAttribute}
 				handleValueChange={handleValueChange(
@@ -63,13 +64,13 @@ export default function DBFormSection({
 				)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.templateVarStart}
 				handleValueChange={handleValueChange(settings.templateVarStart)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.templateVarStop}
 				handleValueChange={handleValueChange(settings.templateVarStop)}

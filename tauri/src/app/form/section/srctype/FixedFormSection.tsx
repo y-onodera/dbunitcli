@@ -5,7 +5,7 @@ import type {
 	FixedTypeSettings,
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
-import ResourceText from "../element/ResourceText";
+import PlainText from "../element/PlainText";
 
 export default function FixedFormSection({
 	settings,
@@ -29,13 +29,13 @@ export default function FixedFormSection({
 					caption="fixed option"
 				/>
 			</div>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.headerName}
 				handleValueChange={handleValueChange(settings.headerName)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.startRow}
 				handleValueChange={handleValueChange(settings.startRow)}
@@ -47,7 +47,7 @@ export default function FixedFormSection({
 				handleOnChange={handleToggleChecked(settings.addFileInfo)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
+			<PlainText
 				prefix={prefix}
 				element={settings.fixedLength}
 				handleValueChange={handleValueChange(settings.fixedLength)}
