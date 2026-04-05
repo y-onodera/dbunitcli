@@ -1,8 +1,8 @@
 import type { ConvertResult } from "../../../model/CommandParam";
 import Check from "./element/Check";
+import FileText from "./element/FileText";
 import PlainText from "./element/PlainText";
 import Select from "./element/Select";
-import Text from "./element/TextFormElement";
 import JdbcFormSection from "./JdbcFormSection";
 
 export default function ConvertResultFormSection({
@@ -23,7 +23,7 @@ export default function ConvertResultFormSection({
 				element={convertResult.resultType}
 			/>
 			{convertResult.result && (
-				<Text prefix={prefix} element={convertResult.result} />
+				<FileText prefix={prefix} element={convertResult.result} />
 			)}
 			{convertResult.resultPath && (
 				<PlainText prefix={prefix} element={convertResult.resultPath} />

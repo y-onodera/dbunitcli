@@ -3,8 +3,9 @@ import { buildDatasetSrcInfo } from "../../model/CommandParam";
 import type { CompareParams } from "../../model/SelectParameter";
 import ConvertResultFormSection from "./section/ConvertResultFormSection";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import FileText from "./section/element/FileText";
+import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
-import Text from "./section/element/TextFormElement";
 import ImageOptionFormSection from "./section/ImageOptionFormSection";
 
 export function CompareForm(prop: {
@@ -38,16 +39,16 @@ export function CompareForm(prop: {
 						key={`${prop.name}compare-setting`}
 						initialValue={oldDataInitialInfo}
 					>
-						<Text prefix="" element={settingElement} />
+						<FileText prefix="" element={settingElement} />
 					</DatasetSrcInfoProvider>
 				) : (
-					<Text
+					<FileText
 						prefix=""
 						element={settingElement}
 						hideDatasetSettingEdit={true}
 					/>
 				)}
-				<Text prefix="" element={settingEncodingElement} />
+				<PlainText prefix="" element={settingEncodingElement} />
 			</fieldset>
 			{prop.compare.imageOption && (
 				<fieldset className="border border-gray-200 p-3">

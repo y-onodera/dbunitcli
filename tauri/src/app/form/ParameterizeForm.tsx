@@ -1,8 +1,9 @@
 import type { ParameterizeParams } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import Check from "./section/element/Check";
+import FileText from "./section/element/FileText";
+import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
-import Text from "./section/element/TextFormElement";
 import TemplateFormSection from "./section/TemplateFormSection";
 
 export function ParameterizeForm(prop: {
@@ -24,9 +25,9 @@ export function ParameterizeForm(prop: {
 				/>
 				<Check prefix="" element={ce.parameterize} />
 				<Check prefix="" element={ce.ignoreFail} />
-				<Text prefix="" element={ce.cmd} />
-				<Text prefix="" element={ce.cmdParam} />
-				<Text prefix="" element={ce.template} />
+				<PlainText prefix="" element={ce.cmd} />
+				<PlainText prefix="" element={ce.cmdParam} />
+				<FileText prefix="" element={ce.template} />
 				{templateOption && (
 					<TemplateFormSection templateOption={templateOption} />
 				)}

@@ -7,7 +7,6 @@ import type {
 import Check from "./element/Check";
 import DatasetSettingText from "./element/DatasetSettingText";
 import PlainText from "./element/PlainText";
-import ResourceText from "./element/ResourceText";
 
 export default function DatasetSettingSection({
 	settingElements,

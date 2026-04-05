@@ -6,7 +6,6 @@ import type {
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
 import PlainText from "../element/PlainText";
-import ResourceText from "../element/ResourceText";
 
 export default function RegFormSection({
 	settings,

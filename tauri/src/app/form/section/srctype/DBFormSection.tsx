@@ -7,7 +7,6 @@ import type {
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
 import PlainText from "../element/PlainText";
-import ResourceText from "../element/ResourceText";
 import TemplateText from "../element/TemplateText";
 
 export default function DBFormSection({
@@ -50,7 +49,7 @@ export default function DBFormSection({
 				handleOnChange={handleToggleChecked(settings.useJdbcMetaData)}
 				hidden={!showOptional}
 			/>
-			<PlainText
+			<TemplateText
 				prefix={prefix}
 				element={settings.templateGroup}
 				handleValueChange={handleValueChange(settings.templateGroup)}
