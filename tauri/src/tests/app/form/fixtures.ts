@@ -1,6 +1,5 @@
 import type { CommandParam, DefaultPath } from "../../../model/CommandParam";
 
-// CommandParam 要素を生成するヘルパー
 function makeElement(
 	name: string,
 	type: string,
@@ -35,18 +34,7 @@ const EXPECT_SRC_TYPE_OPTIONS = ["none", "sql", "csv", "csvq", "xls", "xlsx"];
 const PARAMETERIZE_SRC_TYPE_OPTIONS = ["none", ...SRC_TYPE_OPTIONS];
 
 const TARGET_TYPE_OPTIONS = ["data", "image", "pdf"];
-const UNIT_OPTIONS = ["record", "table", "dataset"];
-const SCRIPT_TYPE_OPTIONS = ["cmd", "bat", "sql", "ant"];
-const GENERATE_TYPE_OPTIONS = [
-	"txt",
-	"xlsx",
-	"xls",
-	"settings",
-	"sql",
-	"xlsxTemplate",
-];
 
-// templateOption フラット形式
 function makeTemplateOption() {
 	return {
 		prefix: "template",
@@ -76,7 +64,6 @@ function makeTemplateOption() {
 	};
 }
 
-// CSV srcData フラット形式
 function makeCsvSrcData(
 	prefix: string,
 	src: string,
@@ -142,7 +129,6 @@ function makeCsvSrcData(
 	};
 }
 
-// xlsx srcData フラット形式
 function makeXlsxSrcData() {
 	return {
 		prefix: "src",
@@ -196,7 +182,6 @@ function makeXlsxSrcData() {
 	};
 }
 
-// table srcData フラット形式
 function makeTableSrcData(prefix: string) {
 	return {
 		prefix,
@@ -282,7 +267,6 @@ function makeTableSrcData(prefix: string) {
 	};
 }
 
-// image/pdf targetType 時の file 型 srcData フラット形式
 function makeImageFileSrcData(prefix: string) {
 	return {
 		prefix,
@@ -327,7 +311,6 @@ function makeImageFileSrcData(prefix: string) {
 	};
 }
 
-// csv result フラット形式
 function makeCsvConvertResult(required = false) {
 	return {
 		prefix: "result",
@@ -348,7 +331,13 @@ function makeCsvConvertResult(required = false) {
 			"WORKSPACE",
 			false,
 		),
-		exportHeader: makeElement("exportHeader", "FLG", "true", "WORKSPACE", false),
+		exportHeader: makeElement(
+			"exportHeader",
+			"FLG",
+			"true",
+			"WORKSPACE",
+			false,
+		),
 		outputEncoding: makeElement(
 			"outputEncoding",
 			"TEXT",
@@ -362,14 +351,12 @@ function makeCsvConvertResult(required = false) {
 function makeXlsxConvertResult(resultValue: string) {
 	return {
 		prefix: "result",
-		resultType: makeElement(
-			"resultType",
-			"ENUM",
+		resultType: makeElement("resultType", "ENUM", "xlsx", "WORKSPACE", false, [
+			"csv",
+			"xls",
 			"xlsx",
-			"WORKSPACE",
-			false,
-			["csv", "xls", "xlsx", "table"],
-		),
+			"table",
+		]),
 		result: makeElement("result", "DIR", resultValue, "RESULT", false),
 		resultPath: makeElement("resultPath", "TEXT", "", "WORKSPACE", false),
 		exportEmptyTable: makeElement(
@@ -379,7 +366,13 @@ function makeXlsxConvertResult(resultValue: string) {
 			"WORKSPACE",
 			false,
 		),
-		exportHeader: makeElement("exportHeader", "FLG", "true", "WORKSPACE", false),
+		exportHeader: makeElement(
+			"exportHeader",
+			"FLG",
+			"true",
+			"WORKSPACE",
+			false,
+		),
 		excelTable: makeElement("excelTable", "TEXT", "SHEET", "WORKSPACE", false),
 	};
 }
@@ -396,7 +389,14 @@ export const convertLoadResponseFixture = {
 // compare-load-response.json をもとにしたフィクスチャ
 export const compareLoadResponseFixture = {
 	prefix: "",
-	targetType: makeElement("targetType", "ENUM", "data", "WORKSPACE", false, TARGET_TYPE_OPTIONS),
+	targetType: makeElement(
+		"targetType",
+		"ENUM",
+		"data",
+		"WORKSPACE",
+		false,
+		TARGET_TYPE_OPTIONS,
+	),
 	setting: makeElement("setting", "FILE", "", "SETTING", false),
 	settingEncoding: makeElement(
 		"settingEncoding",
@@ -409,14 +409,11 @@ export const compareLoadResponseFixture = {
 	oldData: makeCsvSrcData("old", "resources/src/csv/multi2.csv"),
 	convertResult: {
 		prefix: "result",
-		resultType: makeElement(
-			"resultType",
-			"ENUM",
+		resultType: makeElement("resultType", "ENUM", "csv", "WORKSPACE", true, [
 			"csv",
-			"WORKSPACE",
-			true,
-			["csv", "xls", "xlsx"],
-		),
+			"xls",
+			"xlsx",
+		]),
 		result: makeElement(
 			"result",
 			"DIR",
@@ -463,14 +460,14 @@ export const compareLoadResponseFixture = {
 // generate-load-response.json をもとにしたフィクスチャ
 export const generateLoadResponseFixture = {
 	prefix: "",
-	generateType: makeElement(
-		"generateType",
-		"ENUM",
+	generateType: makeElement("generateType", "ENUM", "txt", "WORKSPACE", false, [
 		"txt",
-		"WORKSPACE",
-		false,
-		["txt", "xlsx", "xls", "settings", "sql", "xlsxTemplate"],
-	),
+		"xlsx",
+		"xls",
+		"settings",
+		"sql",
+		"xlsxTemplate",
+	]),
 	unit: makeElement("unit", "ENUM", "record", "WORKSPACE", false, [
 		"record",
 		"table",
@@ -499,14 +496,12 @@ export const generateLoadResponseFixture = {
 // run-load-response.json をもとにしたフィクスチャ
 export const runLoadResponseFixture = {
 	prefix: "",
-	scriptType: makeElement(
-		"scriptType",
-		"ENUM",
+	scriptType: makeElement("scriptType", "ENUM", "sql", "WORKSPACE", false, [
+		"cmd",
+		"bat",
 		"sql",
-		"WORKSPACE",
-		false,
-		["cmd", "bat", "sql", "ant"],
-	),
+		"ant",
+	]),
 	srcData: {
 		prefix: "src",
 		src: makeElement(
@@ -571,7 +566,11 @@ export const parameterizeLoadResponseFixture = {
 		"PARAMETERIZE_TEMPLATE",
 		false,
 	),
-	paramData: makeCsvSrcData("param", "csvToXlsx.csv", PARAMETERIZE_SRC_TYPE_OPTIONS),
+	paramData: makeCsvSrcData(
+		"param",
+		"csvToXlsx.csv",
+		PARAMETERIZE_SRC_TYPE_OPTIONS,
+	),
 	templateOption: makeTemplateOption(),
 };
 
@@ -598,7 +597,14 @@ export const convertRefreshResultTypeXlsxResponseFixture = {
 // compare-refresh-targetType-image-response.json をもとにしたフィクスチャ
 export const compareRefreshTargetTypeImageResponseFixture = {
 	prefix: "",
-	targetType: makeElement("targetType", "ENUM", "image", "WORKSPACE", false, TARGET_TYPE_OPTIONS),
+	targetType: makeElement(
+		"targetType",
+		"ENUM",
+		"image",
+		"WORKSPACE",
+		false,
+		TARGET_TYPE_OPTIONS,
+	),
 	setting: makeElement("setting", "FILE", "", "SETTING", false),
 	settingEncoding: makeElement(
 		"settingEncoding",
@@ -715,7 +721,14 @@ export const compareRefreshTargetTypeImageResponseFixture = {
 // compare-refresh-newSrcType-table-response.json をもとにしたフィクスチャ
 export const compareRefreshNewSrcTypeTableResponseFixture = {
 	prefix: "",
-	targetType: makeElement("targetType", "ENUM", "data", "WORKSPACE", false, TARGET_TYPE_OPTIONS),
+	targetType: makeElement(
+		"targetType",
+		"ENUM",
+		"data",
+		"WORKSPACE",
+		false,
+		TARGET_TYPE_OPTIONS,
+	),
 	setting: makeElement("setting", "FILE", "", "SETTING", false),
 	settingEncoding: makeElement(
 		"settingEncoding",
@@ -743,7 +756,14 @@ export const compareRefreshNewSrcTypeTableResponseFixture = {
 // compare-refresh-expectSrcType-csv-response.json をもとにしたフィクスチャ
 export const compareRefreshExpectSrcTypeCsvResponseFixture = {
 	prefix: "",
-	targetType: makeElement("targetType", "ENUM", "data", "WORKSPACE", false, TARGET_TYPE_OPTIONS),
+	targetType: makeElement(
+		"targetType",
+		"ENUM",
+		"data",
+		"WORKSPACE",
+		false,
+		TARGET_TYPE_OPTIONS,
+	),
 	setting: makeElement("setting", "FILE", "", "SETTING", false),
 	settingEncoding: makeElement(
 		"settingEncoding",
@@ -761,14 +781,14 @@ export const compareRefreshExpectSrcTypeCsvResponseFixture = {
 // generate-refresh-srcType-table-response.json をもとにしたフィクスチャ
 export const generateRefreshSrcTypeTableResponseFixture = {
 	prefix: "",
-	generateType: makeElement(
-		"generateType",
-		"ENUM",
+	generateType: makeElement("generateType", "ENUM", "txt", "WORKSPACE", false, [
 		"txt",
-		"WORKSPACE",
-		false,
-		["txt", "xlsx", "xls", "settings", "sql", "xlsxTemplate"],
-	),
+		"xlsx",
+		"xls",
+		"settings",
+		"sql",
+		"xlsxTemplate",
+	]),
 	unit: makeElement("unit", "ENUM", "record", "WORKSPACE", false, [
 		"record",
 		"table",
@@ -791,14 +811,12 @@ export const generateRefreshSrcTypeTableResponseFixture = {
 // run-refresh-scriptType-cmd-response.json をもとにしたフィクスチャ
 export const runRefreshScriptTypeCmdResponseFixture = {
 	prefix: "",
-	scriptType: makeElement(
-		"scriptType",
-		"ENUM",
+	scriptType: makeElement("scriptType", "ENUM", "cmd", "WORKSPACE", false, [
 		"cmd",
-		"WORKSPACE",
-		false,
-		["cmd", "bat", "sql", "ant"],
-	),
+		"bat",
+		"sql",
+		"ant",
+	]),
 	baseDir: makeElement("baseDir", "TEXT", "", "WORKSPACE", false),
 	srcData: {
 		prefix: "src",
@@ -834,14 +852,12 @@ export const runRefreshScriptTypeCmdResponseFixture = {
 // run-refresh-scriptType-sql-response.json をもとにしたフィクスチャ
 export const runRefreshScriptTypeSqlResponseFixture = {
 	prefix: "",
-	scriptType: makeElement(
-		"scriptType",
-		"ENUM",
+	scriptType: makeElement("scriptType", "ENUM", "sql", "WORKSPACE", false, [
+		"cmd",
+		"bat",
 		"sql",
-		"WORKSPACE",
-		false,
-		["cmd", "bat", "sql", "ant"],
-	),
+		"ant",
+	]),
 	srcData: {
 		prefix: "src",
 		src: makeElement("src", "FILE_OR_DIR", "", "DATASET", true),
