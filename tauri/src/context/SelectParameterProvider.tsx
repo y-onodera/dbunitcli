@@ -1,6 +1,6 @@
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { createContext, use, useState } from "react";
-import type { Parameter } from "../model/SelectParameter";
+import type { Command, Parameter } from "../model/SelectParameter";
 import { SelectParameter } from "../model/SelectParameter";
 
 const selectParameterContext = createContext<SelectParameter>(
@@ -27,7 +27,7 @@ export const useSelectParameter = () => use(selectParameterContext);
 export const useSetSelectParameterState = () => use(setSelectParameterContext);
 export const useSetSelectParameter = () => {
 	const setParameter = use(setSelectParameterContext);
-	return (response: Parameter, command: string, name: string) => {
+	return (response: Parameter, command: Command, name: string) => {
 		setParameter(new SelectParameter(response, command, name));
 	};
 };

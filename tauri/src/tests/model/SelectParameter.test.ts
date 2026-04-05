@@ -136,25 +136,4 @@ describe("SelectParameterクラス", () => {
 		expect(param.name).toBe("testParameterize");
 		expect(param.command).toBe("parameterize");
 	});
-
-	it("現在のパラメータを正しく返却すること", () => {
-		const param = new SelectParameter(rawConvert, "convert", "testConvert");
-		expect(param.currentParameter()).toBe(param.convert);
-
-		const param2 = new SelectParameter(rawCompare, "compare", "testCompare");
-		expect(param2.currentParameter()).toBe(param2.compare);
-
-		const param3 = new SelectParameter(rawGenerate, "generate", "testGenerate");
-		expect(param3.currentParameter()).toBe(param3.generate);
-
-		const param4 = new SelectParameter(rawRun, "run", "testRun");
-		expect(param4.currentParameter()).toBe(param4.run);
-
-		const param5 = new SelectParameter(
-			rawParameterize,
-			"parameterize",
-			"testParameterize",
-		);
-		expect(param5.currentParameter()).toBe(param5.parameterize);
-	});
 });

@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
-import type { CommandParam, SrcElements } from "../../../model/CommandParam";
+import type {
+	CommandParam,
+	SrcElements,
+	SrcType,
+} from "../../../model/CommandParam";
 import { isSqlRelatedType } from "../../../model/QueryDatasource";
 import Check from "./element/Check";
 import FileText from "./element/FileText";
@@ -14,7 +18,7 @@ export default function SrcFormSection({
 	handleToggleChecked,
 }: {
 	srcElements: SrcElements;
-	srcType: string;
+	srcType?: SrcType;
 	handleValueChange: (param: CommandParam) => (newValue: string) => void;
 	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
 }) {
@@ -24,7 +28,7 @@ export default function SrcFormSection({
 
 	return (
 		<>
-			{(isSqlRelatedType(srcType) && (
+			{(srcType && isSqlRelatedType(srcType) && (
 				<SqlSrcText
 					prefix={prefix}
 					element={srcElements.src}

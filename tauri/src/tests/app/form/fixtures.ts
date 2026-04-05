@@ -1,4 +1,11 @@
 import type { CommandParam, DefaultPath } from "../../../model/CommandParam";
+import type {
+	CompareParams,
+	ConvertParams,
+	GenerateParams,
+	ParameterizeParams,
+	RunParams,
+} from "../../../model/SelectParameter";
 
 function makeElement(
 	name: string,
@@ -384,7 +391,7 @@ export const convertLoadResponseFixture = {
 		"src/test/resources/workspace/sample/resources/src/csv",
 	),
 	convertResult: makeXlsxConvertResult("target/convert/result"),
-};
+} as ConvertParams;
 
 // compare-load-response.json をもとにしたフィクスチャ
 export const compareLoadResponseFixture = {
@@ -455,7 +462,7 @@ export const compareLoadResponseFixture = {
 			EXPECT_SRC_TYPE_OPTIONS,
 		),
 	},
-};
+} as CompareParams;
 
 // generate-load-response.json をもとにしたフィクスチャ
 export const generateLoadResponseFixture = {
@@ -491,7 +498,7 @@ export const generateLoadResponseFixture = {
 	),
 	srcData: makeCsvSrcData("src", "resources/src/csv"),
 	templateOption: makeTemplateOption(),
-};
+} as GenerateParams;
 
 // run-load-response.json をもとにしたフィクスチャ
 export const runLoadResponseFixture = {
@@ -545,7 +552,7 @@ export const runLoadResponseFixture = {
 		jdbcUser: makeElement("jdbcUser", "TEXT", "", "WORKSPACE", false),
 		jdbcPass: makeElement("jdbcPass", "TEXT", "", "WORKSPACE", false),
 	},
-};
+} as RunParams;
 
 // parameterize-load-response.json をもとにしたフィクスチャ
 export const parameterizeLoadResponseFixture = {
@@ -572,7 +579,7 @@ export const parameterizeLoadResponseFixture = {
 		PARAMETERIZE_SRC_TYPE_OPTIONS,
 	),
 	templateOption: makeTemplateOption(),
-};
+} as ParameterizeParams;
 
 // --- refresh レスポンスフィクスチャ ---
 
@@ -580,19 +587,19 @@ export const parameterizeLoadResponseFixture = {
 export const convertRefreshSrcTypeXlsxResponseFixture = {
 	srcData: makeXlsxSrcData(),
 	convertResult: makeCsvConvertResult(),
-};
+} as ConvertParams;
 
 // convert-refresh-srcType-table-response.json をもとにしたフィクスチャ
 export const convertRefreshSrcTypeTableResponseFixture = {
 	srcData: makeTableSrcData("src"),
 	convertResult: makeCsvConvertResult(),
-};
+} as ConvertParams;
 
 // convert-refresh-resultType-xlsx-response.json をもとにしたフィクスチャ
 export const convertRefreshResultTypeXlsxResponseFixture = {
 	srcData: makeCsvSrcData("src", ""),
 	convertResult: makeXlsxConvertResult(""),
-};
+} as ConvertParams;
 
 // compare-refresh-targetType-image-response.json をもとにしたフィクスチャ
 export const compareRefreshTargetTypeImageResponseFixture = {
@@ -716,7 +723,7 @@ export const compareRefreshTargetTypeImageResponseFixture = {
 			EXPECT_SRC_TYPE_OPTIONS,
 		),
 	},
-};
+} as CompareParams;
 
 // compare-refresh-newSrcType-table-response.json をもとにしたフィクスチャ
 export const compareRefreshNewSrcTypeTableResponseFixture = {
@@ -751,7 +758,7 @@ export const compareRefreshNewSrcTypeTableResponseFixture = {
 			EXPECT_SRC_TYPE_OPTIONS,
 		),
 	},
-};
+} as CompareParams;
 
 // compare-refresh-expectSrcType-csv-response.json をもとにしたフィクスチャ
 export const compareRefreshExpectSrcTypeCsvResponseFixture = {
@@ -776,7 +783,7 @@ export const compareRefreshExpectSrcTypeCsvResponseFixture = {
 	oldData: makeCsvSrcData("old", ""),
 	convertResult: makeCsvConvertResult(true),
 	expectData: makeCsvSrcData("expect", "", EXPECT_SRC_TYPE_OPTIONS),
-};
+} as CompareParams;
 
 // generate-refresh-srcType-table-response.json をもとにしたフィクスチャ
 export const generateRefreshSrcTypeTableResponseFixture = {
@@ -806,7 +813,7 @@ export const generateRefreshSrcTypeTableResponseFixture = {
 	),
 	srcData: makeTableSrcData("src"),
 	templateOption: makeTemplateOption(),
-};
+} as GenerateParams;
 
 // run-refresh-scriptType-cmd-response.json をもとにしたフィクスチャ
 export const runRefreshScriptTypeCmdResponseFixture = {
@@ -847,7 +854,7 @@ export const runRefreshScriptTypeCmdResponseFixture = {
 			false,
 		),
 	},
-};
+} as unknown as RunParams;
 
 // run-refresh-scriptType-sql-response.json をもとにしたフィクスチャ
 export const runRefreshScriptTypeSqlResponseFixture = {
@@ -895,4 +902,4 @@ export const runRefreshScriptTypeSqlResponseFixture = {
 		jdbcUser: makeElement("jdbcUser", "TEXT", "", "WORKSPACE", false),
 		jdbcPass: makeElement("jdbcPass", "TEXT", "", "WORKSPACE", false),
 	},
-};
+} as RunParams;

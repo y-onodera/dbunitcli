@@ -1,5 +1,4 @@
 import "../../App.css";
-import type React from "react";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import { useRefreshSelectParameter } from "../../hooks/useSelectParameter";
 import { CompareForm } from "./CompareForm";
@@ -15,61 +14,50 @@ export default function CommandForm(prop: {
 	};
 }) {
 	const select = useSelectParameter();
-	const command = select.command;
-	const refreshSelect = useRefreshSelectParameter(command);
+	const refreshSelect = useRefreshSelectParameter(select.parameter?.command);
 	const handleTypeSelect = () => refreshSelect(prop.formData(false).values);
-	return <>{renderForm(command, handleTypeSelect, select)}</>;
-}
-
-function renderForm(
-	command: string,
-	handleTypeSelect: () => Promise<void>,
-	select: ReturnType<typeof useSelectParameter>,
-): React.ReactElement | null {
-	if (command === "convert") {
-		return (
-			<ConvertForm
-				handleTypeSelect={handleTypeSelect}
-				name={select.name}
-				convert={select.convert}
-			/>
-		);
+	switch (select.parameter?.command) {
+		case "convert":
+			return (
+				<ConvertForm
+					handleTypeSelect={handleTypeSelect}
+					name={select.name}
+					convert={select.parameter}
+				/>
+			);
+		case "compare":
+			return (
+				<CompareForm
+					handleTypeSelect={handleTypeSelect}
+					name={select.name}
+					compare={select.parameter}
+				/>
+			);
+		case "generate":
+			return (
+				<GenerateForm
+					handleTypeSelect={handleTypeSelect}
+					name={select.name}
+					generate={select.parameter}
+				/>
+			);
+		case "run":
+			return (
+				<RunForm
+					handleTypeSelect={handleTypeSelect}
+					name={select.name}
+					run={select.parameter}
+				/>
+			);
+		case "parameterize":
+			return (
+				<ParameterizeForm
+					handleTypeSelect={handleTypeSelect}
+					name={select.name}
+					parameterize={select.parameter}
+				/>
+			);
+		default:
+			return null;
 	}
-	if (command === "compare") {
-		return (
-			<CompareForm
-				handleTypeSelect={handleTypeSelect}
-				name={select.name}
-				compare={select.compare}
-			/>
-		);
-	}
-	if (command === "generate") {
-		return (
-			<GenerateForm
-				handleTypeSelect={handleTypeSelect}
-				name={select.name}
-				generate={select.generate}
-			/>
-		);
-	}
-	if (command === "run") {
-		return (
-			<RunForm
-				handleTypeSelect={handleTypeSelect}
-				name={select.name}
-				run={select.run}
-			/>
-		);
-	}
-	if (command === "parameterize") {
-		return (
-			<ParameterizeForm
-				handleTypeSelect={handleTypeSelect}
-				name={select.name}
-				parameterize={select.parameterize}
-			/>
-		);
-	}
-	return null;
 }

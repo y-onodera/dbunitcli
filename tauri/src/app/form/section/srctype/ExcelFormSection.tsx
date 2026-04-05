@@ -2,20 +2,19 @@ import { useState } from "react";
 import { ExpandButton } from "../../../../components/element/ButtonIcon";
 import type {
 	CommandParam,
-	TableSqlTypeSettings,
+	XlsTypeSettings,
+	XlsxTypeSettings,
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
 import ResourceText from "../element/ResourceText";
-import TemplateText from "../element/TemplateText";
+import XlsxSchemaText from "./XlsxSchemaText";
 
-export default function TableSqlFormSection({
-	srcType,
+export default function ExcelFormSection({
 	settings,
 	handleValueChange,
 	handleToggleChecked,
 }: {
-	srcType: string;
-	settings: TableSqlTypeSettings;
+	settings: XlsTypeSettings | XlsxTypeSettings;
 	handleValueChange: (param: CommandParam) => (newValue: string) => void;
 	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
 }) {
@@ -29,7 +28,7 @@ export default function TableSqlFormSection({
 				<ExpandButton
 					toggleOptional={toggleOptional}
 					showOptional={showOptional}
-					caption={`${srcType} option`}
+					caption={`${settings.srcType.value} option`}
 				/>
 			</div>
 			<ResourceText
@@ -38,42 +37,22 @@ export default function TableSqlFormSection({
 				handleValueChange={handleValueChange(settings.headerName)}
 				hidden={!showOptional}
 			/>
+			<ResourceText
+				prefix={prefix}
+				element={settings.startRow}
+				handleValueChange={handleValueChange(settings.startRow)}
+				hidden={!showOptional}
+			/>
 			<Check
 				prefix={prefix}
 				element={settings.addFileInfo}
 				handleOnChange={handleToggleChecked(settings.addFileInfo)}
 				hidden={!showOptional}
 			/>
-			<Check
+			<XlsxSchemaText
 				prefix={prefix}
-				element={settings.useJdbcMetaData}
-				handleOnChange={handleToggleChecked(settings.useJdbcMetaData)}
-				hidden={!showOptional}
-			/>
-			<TemplateText
-				prefix={prefix}
-				element={settings.templateGroup}
-				handleValueChange={handleValueChange(settings.templateGroup)}
-				hidden={!showOptional}
-			/>
-			<ResourceText
-				prefix={prefix}
-				element={settings.templateParameterAttribute}
-				handleValueChange={handleValueChange(
-					settings.templateParameterAttribute,
-				)}
-				hidden={!showOptional}
-			/>
-			<ResourceText
-				prefix={prefix}
-				element={settings.templateVarStart}
-				handleValueChange={handleValueChange(settings.templateVarStart)}
-				hidden={!showOptional}
-			/>
-			<ResourceText
-				prefix={prefix}
-				element={settings.templateVarStop}
-				handleValueChange={handleValueChange(settings.templateVarStop)}
+				element={settings.xlsxSchema}
+				handleValueChange={handleValueChange(settings.xlsxSchema)}
 				hidden={!showOptional}
 			/>
 		</>

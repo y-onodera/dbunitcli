@@ -6,49 +6,25 @@ import type {
 	JdbcOption,
 	TemplateOption,
 } from "./CommandParam";
-
+export type Command =
+	| "convert"
+	| "compare"
+	| "generate"
+	| "run"
+	| "parameterize";
 export class SelectParameter {
 	readonly name: string;
-	readonly command: string;
-	readonly convert: ConvertParams = {} as ConvertParams;
-	readonly compare: CompareParams = {} as CompareParams;
-	readonly generate: GenerateParams = {} as GenerateParams;
-	readonly run: RunParams = {} as RunParams;
-	readonly parameterize: ParameterizeParams = {} as ParameterizeParams;
+	readonly command: Command;
+	readonly parameter: Parameter;
 
-	constructor(response: Parameter, command: string, name: string) {
+	constructor(response: Parameter, command: Command, name: string) {
 		this.name = name;
 		this.command = command;
-		if (command === "convert") {
-			this.convert = response as ConvertParams;
-		}
-		if (command === "compare") {
-			this.compare = response as CompareParams;
-		}
-		if (command === "generate") {
-			this.generate = response as GenerateParams;
-		}
-		if (command === "run") {
-			this.run = response as RunParams;
-		}
-		if (command === "parameterize") {
-			this.parameterize = response as ParameterizeParams;
-		}
+		this.parameter = response;
+		this.parameter.command = this.command;
 	}
 	currentParameter(): Parameter {
-		if (this.command === "convert") {
-			return this.convert;
-		}
-		if (this.command === "compare") {
-			return this.compare;
-		}
-		if (this.command === "generate") {
-			return this.generate;
-		}
-		if (this.command === "run") {
-			return this.run;
-		}
-		return this.parameterize;
+		return this.parameter;
 	}
 }
 export type Parameter =
@@ -98,10 +74,12 @@ type ParameterizeElements = CommandParams & {
 	template: CommandParam;
 };
 export type ConvertParams = {
+	command: "convert";
 	srcData: DatasetSource;
 	convertResult: ConvertResult;
 };
 export type CompareParams = CompareElements & {
+	command: "compare";
 	newData: DatasetSource;
 	oldData: DatasetSource;
 	imageOption: ImageOption;
@@ -109,15 +87,18 @@ export type CompareParams = CompareElements & {
 	expectData: DatasetSource;
 };
 export type GenerateParams = GenerateElements & {
+	command: "generate";
 	srcData: DatasetSource;
 	templateOption?: TemplateOption;
 };
 export type RunParams = RunElements & {
+	command: "run";
 	srcData: DatasetSource;
 	templateOption?: TemplateOption;
 	jdbcOption?: JdbcOption;
 };
 export type ParameterizeParams = ParameterizeElements & {
+	command: "parameterize";
 	paramData: DatasetSource;
 	templateOption?: TemplateOption;
 };

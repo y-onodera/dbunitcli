@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { RunForm } from "../../../app/form/RunForm";
 import type { RunParams } from "../../../model/SelectParameter";
@@ -9,7 +9,6 @@ import {
 	runRefreshScriptTypeSqlResponseFixture,
 } from "./fixtures";
 
-// Tauri API モック
 vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
 vi.mock("@tauri-apps/api", () => ({ core: { invoke: vi.fn() } }));
 vi.mock("@tauri-apps/api/path", () => ({
@@ -17,7 +16,6 @@ vi.mock("@tauri-apps/api/path", () => ({
 	sep: vi.fn().mockReturnValue("/"),
 }));
 
-// コンテキストフックのモック
 vi.mock("../../../context/WorkspaceResourcesProvider", () => ({
 	useWorkspaceContext: () => workspaceResourcesFixture.context,
 	useResourcesSettings: () => workspaceResourcesFixture.resources,
@@ -26,7 +24,6 @@ vi.mock("../../../context/EnviromentProvider", () => ({
 	useEnviroment: () => enviromentFixture,
 }));
 
-// JDBC API フックのモック
 vi.mock("../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
 	useJdbcSaveProperties: () => vi.fn(),

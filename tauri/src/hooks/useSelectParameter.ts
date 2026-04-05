@@ -4,7 +4,11 @@ import {
 	useSetSelectParameterState,
 } from "../context/SelectParameterProvider";
 import { useSetParameterList } from "../context/WorkspaceResourcesProvider";
-import type { Parameter, ParameterizeParams } from "../model/SelectParameter";
+import type {
+	Command,
+	Parameter,
+	ParameterizeParams,
+} from "../model/SelectParameter";
 import { SelectParameter } from "../model/SelectParameter";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
 
@@ -17,7 +21,7 @@ export type Running = {
 export const useLoadSelectParameter = () => {
 	const setParameter = useSetSelectParameterState();
 	const environment = useEnviroment();
-	return async (command: string, name: string) => {
+	return async (command: Command, name: string) => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl + command.toLowerCase()}/load`,
 			options: {

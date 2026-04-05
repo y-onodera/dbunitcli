@@ -9,12 +9,13 @@ import { ExpandIcon } from "../../components/element/Icon";
 import { useParameterList } from "../../context/WorkspaceResourcesProvider";
 import { useLoadSelectParameter } from "../../hooks/useSelectParameter";
 import { useAddParameter } from "../../hooks/useWorkspaceResources";
+import type { Command } from "../../model/SelectParameter";
 import type { EditName } from "../main/Sidebar";
 
 type NamedParameterProp = {
-	command: string;
+	command: Command;
 	namedParameters?: string[];
-	handleParameterSelect: (command: string, name: string) => Promise<void>;
+	handleParameterSelect: (command: Command, name: string) => Promise<void>;
 	handleEditNamed: (selected: EditName) => void;
 };
 export default function NamedParameters({
@@ -28,31 +29,31 @@ export default function NamedParameters({
 	return (
 		<ul className="space-y-2 font-medium">
 			<Category
-				command="Convert"
+				command="convert"
 				namedParameters={parameters.convert}
 				handleParameterSelect={handleParameterSelect}
 				handleEditNamed={handleEditNamed}
 			/>
 			<Category
-				command="Compare"
+				command="compare"
 				namedParameters={parameters.compare}
 				handleParameterSelect={handleParameterSelect}
 				handleEditNamed={handleEditNamed}
 			/>
 			<Category
-				command="Generate"
+				command="generate"
 				namedParameters={parameters.generate}
 				handleParameterSelect={handleParameterSelect}
 				handleEditNamed={handleEditNamed}
 			/>
 			<Category
-				command="Run"
+				command="run"
 				namedParameters={parameters.run}
 				handleParameterSelect={handleParameterSelect}
 				handleEditNamed={handleEditNamed}
 			/>
 			<Category
-				command="Parameterize"
+				command="parameterize"
 				namedParameters={parameters.parameterize}
 				handleParameterSelect={handleParameterSelect}
 				handleEditNamed={handleEditNamed}
@@ -68,7 +69,7 @@ function Category(props: NamedParameterProp) {
 			<ButtonIcon title="" handleClick={toggleMenu}>
 				<ExpandIcon close={close} />
 				<span className="ms-2 text-left rtl:text-right whitespace-nowrap">
-					{props.command}
+					{props.command.charAt(0).toUpperCase() + props.command.slice(1)}
 				</span>
 			</ButtonIcon>
 			<ul
@@ -96,7 +97,7 @@ function Parameters(props: NamedParameterProp) {
 						<LinkButton
 							title={menu}
 							handleClick={() =>
-								props.handleParameterSelect(props.command.toLowerCase(), menu)
+								props.handleParameterSelect(props.command, menu)
 							}
 						/>
 						<SettingButton

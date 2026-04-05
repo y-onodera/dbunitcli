@@ -17,6 +17,7 @@ import {
 } from "../../hooks/useSelectParameter";
 import type { DatasetSource } from "../../model/CommandParam";
 import type {
+	Command,
 	ConvertParams,
 	GenerateParams,
 } from "../../model/SelectParameter";
@@ -155,7 +156,7 @@ describe("SelectParameterProviderのテスト", () => {
 			result.current.setParameter(mockConvertParams, "convert", "test-param");
 			await waitFor(() => {
 				expect(result.current.parameter.name).toBe("test-param");
-				expect(result.current.parameter.command).toBe("convert");
+				expect(result.current.parameter.parameter.command).toBe("convert");
 			});
 		});
 	});
@@ -179,12 +180,12 @@ describe("SelectParameterProviderのテスト", () => {
 				expect(result.current.parameter).toEqual({} as SelectParameter);
 			});
 
-			result.current.loadParameter(command, "test-param");
+			result.current.loadParameter(command as Command, "test-param");
 			await waitFor(() => {
 				expect(result.current.parameter.name).toBe("test-param");
-				expect(result.current.parameter.command).toBe(command);
+				expect(result.current.parameter.parameter.command).toBe(command);
 				expect(result.current.parameter).toEqual(
-					new SelectParameter(response, command, "test-param"),
+					new SelectParameter(response, command as Command, "test-param"),
 				);
 			});
 		});
@@ -218,19 +219,23 @@ describe("SelectParameterProviderのテスト", () => {
 			await waitFor(() => {
 				expect(result.current.parameter).toEqual({} as SelectParameter);
 			});
-			result.current.loadParameter(command, "test-param");
+			result.current.loadParameter(command as Command, "test-param");
 			await waitFor(() => {
 				expect(result.current.parameter).toEqual(
-					new SelectParameter(loadResponse, command, "test-param"),
+					new SelectParameter(loadResponse, command as Command, "test-param"),
 				);
 			});
 			const mockData = { test: "value" };
 			result.current.refreshParameter(mockData);
 			await waitFor(() => {
 				expect(result.current.parameter.name).toBe("test-param");
-				expect(result.current.parameter.command).toBe(command);
+				expect(result.current.parameter.parameter.command).toBe(command);
 				expect(result.current.parameter).toEqual(
-					new SelectParameter(refreshResponse, command, "test-param"),
+					new SelectParameter(
+						refreshResponse,
+						command as Command,
+						"test-param",
+					),
 				);
 			});
 		});
@@ -254,7 +259,7 @@ describe("SelectParameterProviderのテスト", () => {
 				expect(result.current.parameter).toEqual({} as SelectParameter);
 			});
 
-			result.current.setParameter(params, command, "test-param");
+			result.current.setParameter(params, command as Command, "test-param");
 			const mockInput = { test: "value" };
 			await result.current.saveParameter(mockInput, mockHandleResult);
 
@@ -284,7 +289,7 @@ describe("SelectParameterProviderのテスト", () => {
 				{ wrapper },
 			);
 
-			result.current.setParameter(params, command, "test-param");
+			result.current.setParameter(params, command as Command, "test-param");
 			const mockInput = { test: "value" };
 			await result.current.saveParameter(mockInput, mockHandleResult);
 
@@ -316,7 +321,7 @@ describe("SelectParameterProviderのテスト", () => {
 				expect(result.current.parameter).toEqual({} as SelectParameter);
 			});
 
-			result.current.setParameter(params, command, "test-param");
+			result.current.setParameter(params, command as Command, "test-param");
 			const mockInput = { test: "value" };
 			await result.current.execParameter(mockInput, mockHandleResult);
 
@@ -346,7 +351,7 @@ describe("SelectParameterProviderのテスト", () => {
 				{ wrapper },
 			);
 
-			result.current.setParameter(params, command, "test-param");
+			result.current.setParameter(params, command as Command, "test-param");
 			const mockInput = { test: "value" };
 			await result.current.execParameter(mockInput, mockHandleResult);
 
