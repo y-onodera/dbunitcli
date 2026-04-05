@@ -15,15 +15,7 @@ import {
 	useRefreshSelectParameter,
 	useSaveParameter,
 } from "../../hooks/useSelectParameter";
-import type {
-	CommandParams,
-	DatasetSource,
-	JdbcOption,
-	SettingElements,
-	SrcElements,
-	SrcTypeSettings,
-	TemplateOption,
-} from "../../model/CommandParam";
+import type { DatasetSource } from "../../model/CommandParam";
 import type {
 	ConvertParams,
 	GenerateParams,
@@ -33,25 +25,10 @@ import type { FetchParams } from "../../utils/fetchUtils";
 import { enviromentFixture, makeMinimalParam } from "../setup";
 
 // モックデータ
-const createCommandParams = (): CommandParams => ({
-	prefix: "",
-});
-const createSrcElements = () => createCommandParams() as unknown as SrcElements;
-const createSrcTypeSettings = () =>
-	createCommandParams() as unknown as SrcTypeSettings;
-const createSettingElements = () =>
-	createCommandParams() as unknown as SettingElements;
-const createJdbcOption = () => createCommandParams() as unknown as JdbcOption;
-const createTemplateOption = () =>
-	createCommandParams() as unknown as TemplateOption;
-const createDatasetSource = (prefix: string): DatasetSource => ({
-	prefix,
-	srcElements: createSrcElements(),
-	srcTypeSettings: createSrcTypeSettings(),
-	settingElements: createSettingElements(),
-	jdbcOption: createJdbcOption(),
-	templateOption: createTemplateOption(),
-});
+const createDatasetSource = (prefix: string) =>
+	({
+		prefix,
+	}) as DatasetSource;
 const mockConvertParams = {
 	srcData: createDatasetSource(""),
 	convertResult: {
