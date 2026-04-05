@@ -17,11 +17,10 @@ export function CompareForm(prop: {
 	const oldData = prop.compare.oldData;
 	const expectData = prop.compare.expectData;
 	const convertResult = prop.compare.convertResult;
-
-	const targetTypeElement = prop.compare.commandElements.targetType;
-	const targetType = prop.compare.commandElements.targetType.value;
-	const settingElement = prop.compare.commandElements.setting;
-	const settingEncodingElement = prop.compare.commandElements.settingEncoding;
+	const targetTypeElement = prop.compare.targetType;
+	const targetType = prop.compare.targetType.value;
+	const settingElement = prop.compare.setting;
+	const settingEncodingElement = prop.compare.settingEncoding;
 
 	const oldDataInitialInfo = buildDatasetSrcInfo(oldData);
 

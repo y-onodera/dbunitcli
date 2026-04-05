@@ -10,7 +10,7 @@ export function GenerateForm(prop: {
 	generate: GenerateParams;
 }) {
 	const srcData = prop.generate.srcData;
-	const ce = prop.generate.commandElements;
+	const ce = prop.generate;
 	return (
 		<>
 			<fieldset className="border border-gray-200 p-3">
@@ -20,15 +20,17 @@ export function GenerateForm(prop: {
 					prefix=""
 					element={ce.generateType}
 				/>
-				<Select
-					handleTypeSelect={prop.handleTypeSelect}
-					prefix=""
-					element={ce.unit}
-				/>
-				<Text prefix="" element={ce.template} />
+				{ce.unit && (
+					<Select
+						handleTypeSelect={prop.handleTypeSelect}
+						prefix=""
+						element={ce.unit}
+					/>
+				)}
+				{ce.template && <Text prefix="" element={ce.template} />}
 				<Text prefix="" element={ce.result} />
 				<Text prefix="" element={ce.resultPath} />
-				<Text prefix="" element={ce.outputEncoding} />
+				{ce.outputEncoding && <Text prefix="" element={ce.outputEncoding} />}
 			</fieldset>
 			{prop.generate.templateOption && (
 				<fieldset className="border border-gray-200 p-3">

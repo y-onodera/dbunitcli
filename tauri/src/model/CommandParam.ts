@@ -40,7 +40,7 @@ export type SrcInfo = {
 	extension: string;
 };
 export type DatasetSrcInfo = SrcInfo & {
-	srcType: string;
+	srcType?: string;
 	setting?: string;
 	xlsxSchema: string;
 	fixedLength: string;
@@ -54,7 +54,6 @@ export type DatasetSrcInfo = SrcInfo & {
 	addFileInfo: boolean;
 };
 export type SrcElements = CommandParams & {
-	srcType: CommandParam;
 	src: CommandParam;
 	encoding?: CommandParam;
 	recursive: CommandParam;
@@ -70,59 +69,59 @@ export type SettingElements = CommandParams & {
 	loadData: CommandParam;
 	includeMetaData: CommandParam;
 };
-export type DatasetSource = CommandParams & {
-	srcElements: SrcElements;
-	srcTypeSettings: SrcTypeSettings;
-	settingElements: SettingElements;
-	jdbcOption: JdbcOption | undefined;
-	templateOption: TemplateOption | undefined;
-};
+export type DatasetSource = CommandParams &
+	SrcElements &
+	SrcTypeSettings &
+	SettingElements &
+	(JdbcOption | undefined) &
+	(TemplateOption | undefined) & {
+		srcType: CommandParam;
+	};
 export function buildDatasetSrcInfo(datasrc: DatasetSource): DatasetSrcInfo {
 	const xlsxSchema =
-		datasrc.srcElements.srcType.name === "xlsx" ||
-		datasrc.srcElements.srcType.name === "xls"
-			? (datasrc.srcTypeSettings as XlsTypeSettings).xlsxSchema.value
+		datasrc.srcType?.value === "xlsx" || datasrc.srcType?.value === "xls"
+			? (datasrc as XlsTypeSettings).xlsxSchema.value
 			: "";
 	const fixedLength =
-		datasrc.srcElements.srcType.name === "fixed"
-			? (datasrc.srcTypeSettings as FixedTypeSettings).fixedLength.value
+		datasrc.srcType?.value === "fixed"
+			? (datasrc as FixedTypeSettings).fixedLength.value
 			: "";
 	const regHeaderSplit =
-		datasrc.srcElements.srcType.name === "reg"
-			? (datasrc.srcTypeSettings as RegTypeSettings).regHeaderSplit.value
+		datasrc.srcType?.value === "reg"
+			? (datasrc as RegTypeSettings).regHeaderSplit.value
 			: "";
 	const regDataSplit =
-		datasrc.srcElements.srcType.name === "reg"
-			? (datasrc.srcTypeSettings as RegTypeSettings).regDataSplit.value
+		datasrc.srcType?.value === "reg"
+			? (datasrc as RegTypeSettings).regDataSplit.value
 			: "";
 	const delimiter =
-		datasrc.srcElements.srcType.name === "csv"
-			? (datasrc.srcTypeSettings as CsvTypeSettings).delimiter.value
+		datasrc.srcType?.value === "csv"
+			? (datasrc as CsvTypeSettings).delimiter.value
 			: "";
 	const ignoreQuoted =
-		datasrc.srcElements.srcType.name === "csv"
-			? (datasrc.srcTypeSettings as CsvTypeSettings).ignoreQuoted.value
+		datasrc.srcType?.value === "csv"
+			? (datasrc as CsvTypeSettings).ignoreQuoted.value
 			: "";
 	return {
-		srcPath: datasrc.srcElements.src.value,
-		encoding: datasrc.srcElements.encoding?.value || "",
-		regInclude: datasrc.srcElements.regInclude.value,
-		regExclude: datasrc.srcElements.regExclude.value,
-		recursive: datasrc.srcElements.recursive.value,
-		extension: datasrc.srcElements.extension.value,
-		regTableInclude: datasrc.settingElements.regTableInclude.value,
-		regTableExclude: datasrc.settingElements.regTableExclude.value,
-		srcType: datasrc.srcElements.srcType.value,
-		setting: datasrc.settingElements.setting.value,
+		srcPath: datasrc.src.value,
+		encoding: datasrc.encoding?.value || "",
+		regInclude: datasrc.regInclude.value,
+		regExclude: datasrc.regExclude.value,
+		recursive: datasrc.recursive.value,
+		extension: datasrc.extension?.value || "",
+		regTableInclude: datasrc.regTableInclude.value,
+		regTableExclude: datasrc.regTableExclude.value,
+		srcType: datasrc.srcType?.value,
+		setting: datasrc.setting.value,
 		xlsxSchema: xlsxSchema,
 		fixedLength: fixedLength,
 		regHeaderSplit: regHeaderSplit,
 		regDataSplit: regDataSplit,
 		delimiter: delimiter,
 		ignoreQuoted: ignoreQuoted === "true",
-		headerName: datasrc.srcTypeSettings.headerName.value,
-		startRow: datasrc.srcTypeSettings.startRow?.value || "",
-		addFileInfo: datasrc.srcTypeSettings.addFileInfo.value === "true",
+		headerName: datasrc.headerName?.value || "",
+		startRow: datasrc.startRow?.value || "",
+		addFileInfo: datasrc.addFileInfo?.value === "true",
 	};
 }
 export type JdbcOption = CommandParams & {

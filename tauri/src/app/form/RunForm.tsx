@@ -13,7 +13,7 @@ export function RunForm(prop: {
 	const srcData = prop.run.srcData;
 	const templateOption = prop.run.templateOption;
 	const jdbcOption = prop.run.jdbcOption;
-	const ce = prop.run.commandElements;
+	const ce = prop.run;
 	return (
 		<>
 			<fieldset className="border border-gray-200 p-3">
@@ -42,6 +42,7 @@ export function RunForm(prop: {
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={srcData}
+				defalutType="file"
 			/>
 		</>
 	);

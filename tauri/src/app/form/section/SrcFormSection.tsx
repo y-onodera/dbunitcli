@@ -4,36 +4,27 @@ import type { CommandParam, SrcElements } from "../../../model/CommandParam";
 import { isSqlRelatedType } from "../../../model/QueryDatasource";
 import Check from "./element/Check";
 import FileText from "./element/FileText";
-import type { SelectProp } from "./element/FormElementProp";
 import ResourceText from "./element/ResourceText";
-import Select from "./element/Select";
 import SqlSrcText from "./element/SqlSrcText";
 
 export default function SrcFormSection({
 	srcElements,
-	handleTypeSelect,
+	srcType,
 	handleValueChange,
 	handleToggleChecked,
 }: {
 	srcElements: SrcElements;
-	handleTypeSelect: SelectProp["handleTypeSelect"];
+	srcType: string;
 	handleValueChange: (param: CommandParam) => (newValue: string) => void;
 	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
 	const prefix = srcElements.prefix;
-	const srcType = srcElements.srcType.value;
 
 	return (
 		<>
-			<Select
-				handleTypeSelect={handleTypeSelect}
-				prefix={prefix}
-				element={srcElements.srcType}
-				hidden={false}
-			/>
-			{(isSqlRelatedType(srcElements.srcType.value) && (
+			{(isSqlRelatedType(srcType) && (
 				<SqlSrcText
 					prefix={prefix}
 					element={srcElements.src}
@@ -82,12 +73,14 @@ export default function SrcFormSection({
 				handleValueChange={handleValueChange(srcElements.regExclude)}
 				hidden={!showOptional}
 			/>
-			<ResourceText
-				prefix={prefix}
-				element={srcElements.extension}
-				handleValueChange={handleValueChange(srcElements.extension)}
-				hidden={!showOptional}
-			/>
+			{srcElements.extension && (
+				<ResourceText
+					prefix={prefix}
+					element={srcElements.extension}
+					handleValueChange={handleValueChange(srcElements.extension)}
+					hidden={!showOptional}
+				/>
+			)}
 		</>
 	);
 }

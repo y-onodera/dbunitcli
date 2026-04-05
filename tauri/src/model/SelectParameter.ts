@@ -101,27 +101,23 @@ export type ConvertParams = {
 	srcData: DatasetSource;
 	convertResult: ConvertResult;
 };
-export type CompareParams = {
-	commandElements: CompareElements;
+export type CompareParams = CompareElements & {
 	newData: DatasetSource;
 	oldData: DatasetSource;
 	imageOption: ImageOption;
 	convertResult: ConvertResult;
 	expectData: DatasetSource;
 };
-export type GenerateParams = {
-	commandElements: GenerateElements;
+export type GenerateParams = GenerateElements & {
 	srcData: DatasetSource;
 	templateOption?: TemplateOption;
 };
-export type RunParams = {
-	commandElements: RunElements;
+export type RunParams = RunElements & {
 	srcData: DatasetSource;
 	templateOption?: TemplateOption;
 	jdbcOption?: JdbcOption;
 };
-export type ParameterizeParams = {
-	commandElements: ParameterizeElements;
+export type ParameterizeParams = ParameterizeElements & {
 	paramData: DatasetSource;
 	templateOption?: TemplateOption;
 };

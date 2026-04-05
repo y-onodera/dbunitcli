@@ -17,16 +17,16 @@ import TableSqlFormSection from "./srctype/TableSqlFormSection";
 import XlsFormSection from "./srctype/XlsFormSection";
 
 export default function DatasetCommandFormSection({
+	srcType,
 	commandParams,
 	handleValueChange,
 	handleToggleChecked,
 }: {
-	commandParams: SrcTypeSettings | null;
+	srcType: string;
+	commandParams: SrcTypeSettings;
 	handleValueChange: (param: CommandParam) => (newValue: string) => void;
 	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
 }) {
-	const { srcType } = useDatasetSrcInfo();
-
 	if (srcType === "csv") {
 		return (
 			<CsvFormSection

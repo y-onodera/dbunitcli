@@ -53,18 +53,22 @@ export default function DatasetSettingSection({
 				handleValueChange={handleValueChange(settingElements.regTableExclude)}
 				hidden={!showOptional}
 			/>
-			<Check
-				prefix={prefix}
-				element={settingElements.loadData}
-				handleOnChange={handleToggleChecked(settingElements.loadData)}
-				hidden={!showOptional}
-			/>
-			<Check
-				prefix={prefix}
-				element={settingElements.includeMetaData}
-				handleOnChange={handleToggleChecked(settingElements.includeMetaData)}
-				hidden={!showOptional}
-			/>
+			{settingElements.loadData && (
+				<Check
+					prefix={prefix}
+					element={settingElements.loadData}
+					handleOnChange={handleToggleChecked(settingElements.loadData)}
+					hidden={!showOptional}
+				/>
+			)}
+			{settingElements.includeMetaData && (
+				<Check
+					prefix={prefix}
+					element={settingElements.includeMetaData}
+					handleOnChange={handleToggleChecked(settingElements.includeMetaData)}
+					hidden={!showOptional}
+				/>
+			)}
 		</>
 	);
 }

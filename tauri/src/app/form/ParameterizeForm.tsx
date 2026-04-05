@@ -12,7 +12,7 @@ export function ParameterizeForm(prop: {
 }) {
 	const paramData = prop.parameterize.paramData;
 	const templateOption = prop.parameterize.templateOption;
-	const ce = prop.parameterize.commandElements;
+	const ce = prop.parameterize;
 	return (
 		<>
 			<fieldset className="border border-gray-200 p-3">
