@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 public record TemplateRender(
         File templateGroup
@@ -56,12 +57,22 @@ public record TemplateRender(
         return result;
     }
 
+    private static final Pattern TEMPLATE_VAR_DELIMITER_PATTERN =
+            Pattern.compile("(-(?:[\\w.]*\\.)?(?:templateVarStart|templateVarStop)=)(.)");
+
+    private static String escapeTemplateVarDelimiterValues(final String template) {
+        if (!template.contains("templateVarStart") && !template.contains("templateVarStop")) {
+            return template;
+        }
+        return TEMPLATE_VAR_DELIMITER_PATTERN.matcher(template).replaceAll("$1\\\\$2");
+    }
+
     public ST createST(final String result) {
         return new ST(this.createSTGroup(), result);
     }
 
     public ST createST(final String target, final Parameter parameter) {
-        final String template = this.replaceParameter(target, parameter);
+        final String template = this.escapeTemplateVarDelimiterValues(this.replaceParameter(target, parameter));
         final ST st = this.createST(template);
         if (Optional.ofNullable(this.templateParameterAttribute()).orElse("").isEmpty()) {
             parameter.forEach(st::add);
