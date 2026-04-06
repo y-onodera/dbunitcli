@@ -169,7 +169,7 @@ export const useResolveAbsolutePath = () => {
 			}
 		} catch (e) {
 			console.error(
-				"resolvePathViaSidecar failed, falling back to frontend:",
+				"workspace/resolve-path request failed, falling back to frontend:",
 				e,
 			);
 		}
