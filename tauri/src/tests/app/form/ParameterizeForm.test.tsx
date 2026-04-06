@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ParameterizeForm } from "../../../app/form/ParameterizeForm";
-import type { ParameterizeParams } from "../../../model/SelectParameter";
+import type { ParameterizeOptions } from "../../../model/SelectParameter";
 import { enviromentFixture, workspaceResourcesFixture } from "../../setup";
 import { parameterizeLoadResponseFixture } from "./fixtures";
 
@@ -32,12 +32,13 @@ vi.mock("../../../hooks/useJdbc", () => ({
 function makeParameterizeProps(): {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
-	parameterize: ParameterizeParams;
+	parameterize: ParameterizeOptions;
 } {
 	return {
 		handleTypeSelect: vi.fn().mockResolvedValue(undefined),
 		name: "test",
-		parameterize: parameterizeLoadResponseFixture as unknown as ParameterizeParams,
+		parameterize:
+			parameterizeLoadResponseFixture as unknown as ParameterizeOptions,
 	};
 }
 

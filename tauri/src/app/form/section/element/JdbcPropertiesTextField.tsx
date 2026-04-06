@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import { useDeleteJdbcProperties } from "../../../../hooks/useJdbc";
-import type { CommandParam } from "../../../../model/CommandParam";
+import type { CommandOption } from "../../../../model/CommandParam";
 import { RemoveResource } from "../../../settings/ResourceEditButton";
 import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import ResourceText from "./ResourceText";
@@ -12,7 +12,7 @@ export default function JdbcPropertiesTextField({
 	onValueChange,
 }: {
 	prefix: string;
-	element: CommandParam;
+	element: CommandOption;
 	onValueChange: (name: string, value: string) => void;
 }) {
 	const settings = useResourcesSettings();

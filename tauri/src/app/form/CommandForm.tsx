@@ -14,15 +14,15 @@ export default function CommandForm(prop: {
 	};
 }) {
 	const select = useSelectParameter();
-	const refreshSelect = useRefreshSelectParameter(select.parameter?.command);
+	const refreshSelect = useRefreshSelectParameter(select.options?.command);
 	const handleTypeSelect = () => refreshSelect(prop.formData(false).values);
-	switch (select.parameter?.command) {
+	switch (select.options?.command) {
 		case "convert":
 			return (
 				<ConvertForm
 					handleTypeSelect={handleTypeSelect}
 					name={select.name}
-					convert={select.parameter}
+					convert={select.options}
 				/>
 			);
 		case "compare":
@@ -30,7 +30,7 @@ export default function CommandForm(prop: {
 				<CompareForm
 					handleTypeSelect={handleTypeSelect}
 					name={select.name}
-					compare={select.parameter}
+					compare={select.options}
 				/>
 			);
 		case "generate":
@@ -38,7 +38,7 @@ export default function CommandForm(prop: {
 				<GenerateForm
 					handleTypeSelect={handleTypeSelect}
 					name={select.name}
-					generate={select.parameter}
+					generate={select.options}
 				/>
 			);
 		case "run":
@@ -46,7 +46,7 @@ export default function CommandForm(prop: {
 				<RunForm
 					handleTypeSelect={handleTypeSelect}
 					name={select.name}
-					run={select.parameter}
+					run={select.options}
 				/>
 			);
 		case "parameterize":
@@ -54,7 +54,7 @@ export default function CommandForm(prop: {
 				<ParameterizeForm
 					handleTypeSelect={handleTypeSelect}
 					name={select.name}
-					parameterize={select.parameter}
+					parameterize={select.options}
 				/>
 			);
 		default:

@@ -1,5 +1,5 @@
-import type { CommandParam } from "../../model/CommandParam";
-import type { Parameter } from "../../model/SelectParameter";
+import type { CommandOption } from "../../model/CommandParam";
+import type { Options } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
 import { makeMinimalParam } from "../setup";
 
@@ -32,34 +32,34 @@ const rawConvert = {
 	srcData: {
 		name: "convertSrcData",
 		prefix: "convert",
-		elements: [] as CommandParam[],
+		elements: [] as CommandOption[],
 	},
 	convertResult: {
 		prefix: "convertResult",
 		elements: convertResultElements,
 	},
-} as unknown as Parameter;
+} as unknown as Options;
 
 const rawCompare = {
-	elements: [] as CommandParam[],
+	elements: [] as CommandOption[],
 	newData: {
 		name: "compareNewData",
 		prefix: "compare",
-		elements: [] as CommandParam[],
+		elements: [] as CommandOption[],
 	},
 	oldData: {
 		name: "compareOldData",
 		prefix: "compare",
-		elements: [] as CommandParam[],
+		elements: [] as CommandOption[],
 	},
 	imageOption: { name: "", prefix: "", elements: imageOptionElements },
 	convertResult: { prefix: "compare", elements: convertResultElements },
 	expectData: {
 		name: "compareExpectData",
 		prefix: "compare",
-		elements: [] as CommandParam[],
+		elements: [] as CommandOption[],
 	},
-} as unknown as Parameter;
+} as unknown as Options;
 
 const rawGenerate = {
 	elements: [
@@ -73,18 +73,18 @@ const rawGenerate = {
 	srcData: {
 		name: "generateSrcData",
 		prefix: "generate",
-		elements: [] as CommandParam[],
+		elements: [] as CommandOption[],
 	},
-} as unknown as Parameter;
+} as unknown as Options;
 
 const rawRun = {
 	elements: ["scriptType"].map(makeMinimalParam),
 	srcData: {
 		name: "runSrcData",
 		prefix: "run",
-		elements: [] as CommandParam[],
+		elements: [] as CommandOption[],
 	},
-} as unknown as Parameter;
+} as unknown as Options;
 
 const rawParameterize = {
 	elements: [
@@ -98,9 +98,9 @@ const rawParameterize = {
 	paramData: {
 		name: "parameterizeParamData",
 		prefix: "parameterize",
-		elements: [] as CommandParam[],
+		elements: [] as CommandOption[],
 	},
-} as unknown as Parameter;
+} as unknown as Options;
 
 describe("SelectParameterクラス", () => {
 	it("convertコマンドで初期化できること", () => {

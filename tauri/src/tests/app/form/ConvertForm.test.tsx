@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ConvertForm } from "../../../app/form/ConvertForm";
-import type { ConvertParams } from "../../../model/SelectParameter";
+import type { ConvertOptions } from "../../../model/SelectParameter";
 import { enviromentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	convertLoadResponseFixture,
@@ -41,11 +41,15 @@ function makeConvertProps(
 		| typeof convertRefreshSrcTypeXlsxResponseFixture
 		| typeof convertRefreshSrcTypeTableResponseFixture
 		| typeof convertRefreshResultTypeXlsxResponseFixture = convertLoadResponseFixture,
-): { handleTypeSelect: () => Promise<void>; name: string; convert: ConvertParams } {
+): {
+	handleTypeSelect: () => Promise<void>;
+	name: string;
+	convert: ConvertOptions;
+} {
 	return {
 		handleTypeSelect: vi.fn().mockResolvedValue(undefined),
 		name: "test",
-		convert: fixture as unknown as ConvertParams,
+		convert: fixture as unknown as ConvertOptions,
 	};
 }
 

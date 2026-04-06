@@ -1,4 +1,4 @@
-import type { GenerateParams } from "../../model/SelectParameter";
+import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
@@ -8,7 +8,7 @@ import TemplateFormSection from "./section/TemplateFormSection";
 export function GenerateForm(prop: {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
-	generate: GenerateParams;
+	generate: GenerateOptions;
 }) {
 	const srcData = prop.generate.srcData;
 	const ce = prop.generate;

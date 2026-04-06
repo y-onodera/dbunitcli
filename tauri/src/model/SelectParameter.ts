@@ -1,9 +1,9 @@
 import type {
-	CommandParam,
-	CommandParams,
-	ConvertResult,
+	CommandOption,
+	CommandOptions,
 	DatasetSource,
 	JdbcOption,
+	ResultOption,
 	TemplateOption,
 } from "./CommandParam";
 export type Command =
@@ -15,90 +15,79 @@ export type Command =
 export class SelectParameter {
 	readonly name: string;
 	readonly command: Command;
-	readonly parameter: Parameter;
+	readonly options: Options;
 
-	constructor(response: Parameter, command: Command, name: string) {
+	constructor(response: Options, command: Command, name: string) {
 		this.name = name;
 		this.command = command;
-		this.parameter = response;
-		this.parameter.command = this.command;
-	}
-	currentParameter(): Parameter {
-		return this.parameter;
+		this.options = response;
+		this.options.command = this.command;
 	}
 }
-export type Parameter =
-	| ConvertParams
-	| CompareParams
-	| GenerateParams
-	| RunParams
-	| ParameterizeParams;
-type CompareElements = CommandParams & {
-	targetType: CommandParam;
-	setting: CommandParam;
-	settingEncoding: CommandParam;
+export type Options =
+	| ConvertOptions
+	| CompareOptions
+	| GenerateOptions
+	| RunOptions
+	| ParameterizeOptions;
+export type ImageOption = CommandOptions & {
+	threshold: CommandOption;
+	pixelToleranceLevel: CommandOption;
+	allowingPercentOfDifferentPixels: CommandOption;
+	rectangleLineWidth: CommandOption;
+	minimalRectangleSize: CommandOption;
+	maximalRectangleCount: CommandOption;
+	excludedAreas: CommandOption;
+	drawExcludedRectangles: CommandOption;
+	fillExcludedRectangles: CommandOption;
+	percentOpacityExcludedRectangles: CommandOption;
+	excludedRectangleColor: CommandOption;
+	fillDifferenceRectangles: CommandOption;
+	percentOpacityDifferenceRectangles: CommandOption;
+	differenceRectangleColor: CommandOption;
 };
-export type ImageOption = CommandParams & {
-	threshold: CommandParam;
-	pixelToleranceLevel: CommandParam;
-	allowingPercentOfDifferentPixels: CommandParam;
-	rectangleLineWidth: CommandParam;
-	minimalRectangleSize: CommandParam;
-	maximalRectangleCount: CommandParam;
-	excludedAreas: CommandParam;
-	drawExcludedRectangles: CommandParam;
-	fillExcludedRectangles: CommandParam;
-	percentOpacityExcludedRectangles: CommandParam;
-	excludedRectangleColor: CommandParam;
-	fillDifferenceRectangles: CommandParam;
-	percentOpacityDifferenceRectangles: CommandParam;
-	differenceRectangleColor: CommandParam;
-};
-type GenerateElements = CommandParams & {
-	generateType: CommandParam;
-	unit: CommandParam;
-	template: CommandParam;
-	result: CommandParam;
-	resultPath: CommandParam;
-	outputEncoding: CommandParam;
-};
-type RunElements = CommandParams & {
-	scriptType: CommandParam;
-};
-type ParameterizeElements = CommandParams & {
-	unit: CommandParam;
-	parameterize: CommandParam;
-	ignoreFail: CommandParam;
-	cmd: CommandParam;
-	cmdParam: CommandParam;
-	template: CommandParam;
-};
-export type ConvertParams = {
+export type ConvertOptions = {
 	command: "convert";
 	srcData: DatasetSource;
-	convertResult: ConvertResult;
+	convertResult: ResultOption;
 };
-export type CompareParams = CompareElements & {
+export type CompareOptions = CommandOptions & {
 	command: "compare";
+	targetType: CommandOption;
+	setting: CommandOption;
+	settingEncoding: CommandOption;
 	newData: DatasetSource;
 	oldData: DatasetSource;
 	imageOption: ImageOption;
-	convertResult: ConvertResult;
+	convertResult: ResultOption;
 	expectData: DatasetSource;
 };
-export type GenerateParams = GenerateElements & {
+export type GenerateOptions = CommandOptions & {
 	command: "generate";
+	generateType: CommandOption;
+	unit: CommandOption;
+	template: CommandOption;
+	result: CommandOption;
+	resultPath: CommandOption;
+	outputEncoding: CommandOption;
 	srcData: DatasetSource;
 	templateOption?: TemplateOption;
 };
-export type RunParams = RunElements & {
+export type RunOptions = CommandOptions & {
 	command: "run";
+	scriptType: CommandOption;
 	srcData: DatasetSource;
 	templateOption?: TemplateOption;
 	jdbcOption?: JdbcOption;
 };
-export type ParameterizeParams = ParameterizeElements & {
+export type ParameterizeOptions = CommandOptions & {
 	command: "parameterize";
+	unit: CommandOption;
+	parameterize: CommandOption;
+	ignoreFail: CommandOption;
+	cmd: CommandOption;
+	cmdParam: CommandOption;
+	template: CommandOption;
 	paramData: DatasetSource;
 	templateOption?: TemplateOption;
 };

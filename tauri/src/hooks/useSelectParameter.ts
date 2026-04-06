@@ -6,8 +6,8 @@ import {
 import { useSetParameterList } from "../context/WorkspaceResourcesProvider";
 import type {
 	Command,
-	Parameter,
-	ParameterizeParams,
+	Options,
+	ParameterizeOptions,
 } from "../model/SelectParameter";
 import { SelectParameter } from "../model/SelectParameter";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";
@@ -32,7 +32,7 @@ export const useLoadSelectParameter = () => {
 		};
 		await fetchData(fetchParams)
 			.then((response) => response.json())
-			.then((parameter: Parameter) => {
+			.then((parameter: Options) => {
 				setParameter(new SelectParameter(parameter, command, name));
 			})
 			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
@@ -53,7 +53,7 @@ export const useRefreshSelectParameter = (command: string) => {
 		};
 		await fetchData(fetchParams)
 			.then((response) => response.json())
-			.then((parameter: Parameter) => {
+			.then((parameter: Options) => {
 				setParameter(
 					(current) =>
 						new SelectParameter(parameter, current.command, current.name),
@@ -167,7 +167,7 @@ export const useParameterizeFrom = () => {
 		};
 		await fetchData(fetchParams)
 			.then((response) => response.json())
-			.then((parameter: ParameterizeParams) => {
+			.then((parameter: ParameterizeOptions) => {
 				setParameter(new SelectParameter(parameter, "parameterize", name));
 				setParameterList((current) => {
 					if (current.parameterize.includes(name)) {

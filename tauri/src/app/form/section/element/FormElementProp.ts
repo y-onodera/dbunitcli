@@ -1,9 +1,9 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { CommandParam } from "../../../../model/CommandParam";
+import type { CommandOption } from "../../../../model/CommandParam";
 
 export type Prop = {
 	prefix: string;
-	element: CommandParam;
+	element: CommandOption;
 	hidden?: boolean;
 	srcType?: string;
 	hideDatasetSettingEdit?: boolean;

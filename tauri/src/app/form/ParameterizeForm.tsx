@@ -1,4 +1,4 @@
-import type { ParameterizeParams } from "../../model/SelectParameter";
+import type { ParameterizeOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import Check from "./section/element/Check";
 import FileText from "./section/element/FileText";
@@ -9,7 +9,7 @@ import TemplateFormSection from "./section/TemplateFormSection";
 export function ParameterizeForm(prop: {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
-	parameterize: ParameterizeParams;
+	parameterize: ParameterizeOptions;
 }) {
 	const paramData = prop.parameterize.paramData;
 	const templateOption = prop.parameterize.templateOption;

@@ -1,11 +1,11 @@
-import type { ConvertParams } from "../../model/SelectParameter";
-import ConvertResultFormSection from "./section/ConvertResultFormSection";
+import type { ConvertOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import ResultFormSection from "./section/ResultFormSection";
 
 export function ConvertForm(prop: {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
-	convert: ConvertParams;
+	convert: ConvertOptions;
 }) {
 	const srcData = prop.convert.srcData;
 	const convertResult = prop.convert.convertResult;
@@ -18,8 +18,8 @@ export function ConvertForm(prop: {
 			/>
 			<fieldset className="border border-gray-200 p-3">
 				<legend>{convertResult.prefix}</legend>
-				<ConvertResultFormSection
-					convertResult={convertResult}
+				<ResultFormSection
+					resultOption={convertResult}
 					handleTypeSelect={prop.handleTypeSelect}
 				/>
 			</fieldset>

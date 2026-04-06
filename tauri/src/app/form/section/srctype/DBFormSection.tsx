@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { ExpandButton } from "../../../../components/element/ButtonIcon";
 import type {
-	CommandParam,
-	SqlTypeSettings,
-	TableTypeSettings,
+	CommandOption,
+	SqlOptions,
+	TableOptions,
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
 import PlainText from "../element/PlainText";
 import TemplateText from "../element/TemplateText";
 
 export default function DBFormSection({
-	settings,
+	options: settings,
 	handleValueChange,
 	handleToggleChecked,
 }: {
-	settings: SqlTypeSettings | TableTypeSettings;
-	handleValueChange: (param: CommandParam) => (newValue: string) => void;
-	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
+	options: SqlOptions | TableOptions;
+	handleValueChange: (param: CommandOption) => (newValue: string) => void;
+	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);

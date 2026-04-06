@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { ExpandButton } from "../../../../components/element/ButtonIcon";
 import type {
-	CommandParam,
-	FixedTypeSettings,
+	CommandOption,
+	FixedOptions,
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
 import PlainText from "../element/PlainText";
 
 export default function FixedFormSection({
-	settings,
+	options: settings,
 	handleValueChange,
 	handleToggleChecked,
 }: {
-	settings: FixedTypeSettings;
-	handleValueChange: (param: CommandParam) => (newValue: string) => void;
-	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
+	options: FixedOptions;
+	handleValueChange: (param: CommandOption) => (newValue: string) => void;
+	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);

@@ -139,11 +139,7 @@ export const useRenameParameter = (command: string, name: string) => {
 					parameter.command === command.toLowerCase() &&
 					parameter.name === name
 				) {
-					setParameter(
-						parameter.currentParameter(),
-						parameter.command,
-						newName,
-					);
+					setParameter(parameter.options, parameter.command, newName);
 				}
 			})
 			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));

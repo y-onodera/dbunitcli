@@ -1,17 +1,17 @@
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandParam";
-import type { CompareParams } from "../../model/SelectParameter";
-import ConvertResultFormSection from "./section/ConvertResultFormSection";
+import type { CompareOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
 import ImageOptionFormSection from "./section/ImageOptionFormSection";
+import ResultFormSection from "./section/ResultFormSection";
 
 export function CompareForm(prop: {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
-	compare: CompareParams;
+	compare: CompareOptions;
 }) {
 	const imageOption = prop.compare.imageOption;
 	const newData = prop.compare.newData;
@@ -68,8 +68,8 @@ export function CompareForm(prop: {
 			/>
 			<fieldset className="border border-gray-200 p-3">
 				<legend>{convertResult.prefix}</legend>
-				<ConvertResultFormSection
-					convertResult={convertResult}
+				<ResultFormSection
+					resultOption={convertResult}
 					handleTypeSelect={prop.handleTypeSelect}
 				/>
 			</fieldset>

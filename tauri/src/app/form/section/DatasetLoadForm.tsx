@@ -4,7 +4,7 @@ import {
 	useSetDatasetSrcInfo,
 } from "../../../context/DatasetSrcInfoProvider";
 import type {
-	CommandParam,
+	CommandOption,
 	DatasetSource,
 	DatasetSrcInfo,
 	SrcType,
@@ -37,13 +37,14 @@ export function DatasetLoadForm(prop: {
 			</fieldset>
 		);
 	}
-	const handleToggleChecked = (element: CommandParam) => (checked: boolean) => {
-		setDatasetSrcInfo({
-			...datasetSrcInfo,
-			[element.name]: checked,
-		} as DatasetSrcInfo);
-	};
-	const handleValueChange = (element: CommandParam) => (newValue: string) => {
+	const handleToggleChecked =
+		(element: CommandOption) => (checked: boolean) => {
+			setDatasetSrcInfo({
+				...datasetSrcInfo,
+				[element.name]: checked,
+			} as DatasetSrcInfo);
+		};
+	const handleValueChange = (element: CommandOption) => (newValue: string) => {
 		if (element.name in datasetSrcInfo) {
 			setDatasetSrcInfo({
 				...datasetSrcInfo,
@@ -52,7 +53,7 @@ export function DatasetLoadForm(prop: {
 		}
 	};
 	const srcElements = prop.srcData;
-	const srcTypeSettings = prop.srcData;
+	const srcTypeOptions = prop.srcData;
 	const settingElements = prop.srcData;
 	const jdbcOption = prop.srcData;
 	const initialDatasetSrcInfo = buildDatasetSrcInfo(prop.srcData);
@@ -81,7 +82,7 @@ export function DatasetLoadForm(prop: {
 					<JdbcFormSection jdbcOption={jdbcOption} />
 				)}
 				<SrcTypeFormSection
-					commandParams={srcTypeSettings}
+					options={srcTypeOptions}
 					handleValueChange={handleValueChange}
 					handleToggleChecked={handleToggleChecked}
 				/>

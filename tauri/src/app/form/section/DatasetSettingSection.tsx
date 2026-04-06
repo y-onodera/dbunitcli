@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
 import type {
-	CommandParam,
+	CommandOption,
 	SettingElements,
 } from "../../../model/CommandParam";
 import Check from "./element/Check";
@@ -14,8 +14,8 @@ export default function DatasetSettingSection({
 	handleToggleChecked,
 }: {
 	settingElements: SettingElements;
-	handleValueChange: (param: CommandParam) => (newValue: string) => void;
-	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
+	handleValueChange: (param: CommandOption) => (newValue: string) => void;
+	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);

@@ -1,5 +1,5 @@
 import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
-import type { RunParams } from "../../model/SelectParameter";
+import type { RunOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import Select from "./section/element/Select";
 import JdbcFormSection from "./section/JdbcFormSection";
@@ -8,7 +8,7 @@ import TemplateFormSection from "./section/TemplateFormSection";
 export function RunForm(prop: {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
-	run: RunParams;
+	run: RunOptions;
 }) {
 	const srcData = prop.run.srcData;
 	const templateOption = prop.run.templateOption;

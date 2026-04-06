@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { ExpandButton } from "../../../../components/element/ButtonIcon";
 import type {
-	CommandParam,
-	CsvqTypeSettings,
+	CommandOption,
+	CsvqOptions,
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
 import PlainText from "../element/PlainText";
 import TemplateText from "../element/TemplateText";
 
 export default function CsvqFormSection({
-	settings,
+	options: settings,
 	handleValueChange,
 	handleToggleChecked,
 }: {
-	settings: CsvqTypeSettings;
-	handleValueChange: (param: CommandParam) => (newValue: string) => void;
-	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
+	options: CsvqOptions;
+	handleValueChange: (param: CommandOption) => (newValue: string) => void;
+	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);

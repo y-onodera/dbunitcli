@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { GenerateForm } from "../../../app/form/GenerateForm";
-import type { GenerateParams } from "../../../model/SelectParameter";
+import type { GenerateOptions } from "../../../model/SelectParameter";
 import { enviromentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	generateLoadResponseFixture,
@@ -36,11 +36,15 @@ function makeGenerateProps(
 	fixture:
 		| typeof generateLoadResponseFixture
 		| typeof generateRefreshSrcTypeTableResponseFixture = generateLoadResponseFixture,
-): { handleTypeSelect: () => Promise<void>; name: string; generate: GenerateParams } {
+): {
+	handleTypeSelect: () => Promise<void>;
+	name: string;
+	generate: GenerateOptions;
+} {
 	return {
 		handleTypeSelect: vi.fn().mockResolvedValue(undefined),
 		name: "test",
-		generate: fixture as unknown as GenerateParams,
+		generate: fixture as unknown as GenerateOptions,
 	};
 }
 

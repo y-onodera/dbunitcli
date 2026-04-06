@@ -2,9 +2,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import CommandForm from "../../../app/form/CommandForm";
-import type {
+import {
 	Command,
-	Parameter,
+	Options,
 	SelectParameter,
 } from "../../../model/SelectParameter";
 import {
@@ -75,15 +75,9 @@ beforeEach(() => {
 
 function makeSelectParameter(
 	command: Command,
-	refreshOverrides: Parameter,
+	refreshOverrides: Options,
 ): SelectParameter {
-	refreshOverrides.command = command;
-	return {
-		command,
-		name: "test-param",
-		parameter: refreshOverrides,
-		currentParameter: () => undefined,
-	} as unknown as SelectParameter;
+	return new SelectParameter(refreshOverrides, command, "test-param");
 }
 
 const mockFormValues = { key: "val" as FormDataEntryValue };

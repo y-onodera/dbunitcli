@@ -2,7 +2,7 @@ import { cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { afterEach, vi } from "vitest";
 import type { Enviroment } from "../context/EnviromentProvider";
-import type { CommandParam } from "../model/CommandParam";
+import type { CommandOption } from "../model/CommandParam";
 import {
 	ParameterList,
 	QueryFiles,
@@ -11,7 +11,7 @@ import {
 	type WorkspaceResources,
 } from "../model/WorkspaceResources";
 
-export function makeMinimalParam(name: string): CommandParam {
+export function makeMinimalParam(name: string): CommandOption {
 	return {
 		name,
 		value: "",

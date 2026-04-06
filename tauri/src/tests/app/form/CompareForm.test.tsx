@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { CompareForm } from "../../../app/form/CompareForm";
-import type { CompareParams } from "../../../model/SelectParameter";
+import type { CompareOptions } from "../../../model/SelectParameter";
 import { enviromentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	compareLoadResponseFixture,
@@ -40,11 +40,15 @@ function makeCompareProps(
 		| typeof compareRefreshTargetTypeImageResponseFixture
 		| typeof compareRefreshNewSrcTypeTableResponseFixture
 		| typeof compareRefreshExpectSrcTypeCsvResponseFixture = compareLoadResponseFixture,
-): { handleTypeSelect: () => Promise<void>; name: string; compare: CompareParams } {
+): {
+	handleTypeSelect: () => Promise<void>;
+	name: string;
+	compare: CompareOptions;
+} {
 	return {
 		handleTypeSelect: vi.fn().mockResolvedValue(undefined),
 		name: "test",
-		compare: fixture as unknown as CompareParams,
+		compare: fixture as unknown as CompareOptions,
 	};
 }
 

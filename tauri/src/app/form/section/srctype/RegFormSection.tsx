@@ -1,20 +1,17 @@
 import { useState } from "react";
 import { ExpandButton } from "../../../../components/element/ButtonIcon";
-import type {
-	CommandParam,
-	RegTypeSettings,
-} from "../../../../model/CommandParam";
+import type { CommandOption, RegOptions } from "../../../../model/CommandParam";
 import Check from "../element/Check";
 import PlainText from "../element/PlainText";
 
 export default function RegFormSection({
-	settings,
+	options: settings,
 	handleValueChange,
 	handleToggleChecked,
 }: {
-	settings: RegTypeSettings;
-	handleValueChange: (param: CommandParam) => (newValue: string) => void;
-	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
+	options: RegOptions;
+	handleValueChange: (param: CommandOption) => (newValue: string) => void;
+	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);

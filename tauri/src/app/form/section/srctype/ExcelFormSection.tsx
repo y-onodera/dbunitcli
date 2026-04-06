@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { ExpandButton } from "../../../../components/element/ButtonIcon";
 import type {
-	CommandParam,
-	XlsTypeSettings,
-	XlsxTypeSettings,
+	CommandOption,
+	XlsOptions,
+	XlsxOptions,
 } from "../../../../model/CommandParam";
 import Check from "../element/Check";
 import PlainText from "../element/PlainText";
 import XlsxSchemaText from "./XlsxSchemaText";
 
 export default function ExcelFormSection({
-	settings,
+	options: settings,
 	handleValueChange,
 	handleToggleChecked,
 }: {
-	settings: XlsTypeSettings | XlsxTypeSettings;
-	handleValueChange: (param: CommandParam) => (newValue: string) => void;
-	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
+	options: XlsOptions | XlsxOptions;
+	handleValueChange: (param: CommandOption) => (newValue: string) => void;
+	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);

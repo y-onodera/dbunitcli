@@ -1,5 +1,5 @@
 import {
-	type CommandParam,
+	type CommandOption,
 	isCsvqType,
 	isCsvType,
 	isFixedType,
@@ -8,7 +8,7 @@ import {
 	isTableType,
 	isXlsType,
 	isXlsxType,
-	type SrcTypeSettings,
+	type SrcTypeOptions,
 } from "../../../model/CommandParam";
 import CsvFormSection from "./srctype/CsvFormSection";
 import CsvqFormSection from "./srctype/CsvqFormSection";
@@ -18,63 +18,63 @@ import FixedFormSection from "./srctype/FixedFormSection";
 import RegFormSection from "./srctype/RegFormSection";
 
 export default function SrcTypeFormSection({
-	commandParams,
+	options,
 	handleValueChange,
 	handleToggleChecked,
 }: {
-	commandParams: SrcTypeSettings;
-	handleValueChange: (param: CommandParam) => (newValue: string) => void;
-	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
+	options: SrcTypeOptions;
+	handleValueChange: (param: CommandOption) => (newValue: string) => void;
+	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
-	if (isCsvType(commandParams)) {
+	if (isCsvType(options)) {
 		return (
 			<CsvFormSection
-				settings={commandParams}
+				options={options}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}
-	if (isCsvqType(commandParams)) {
+	if (isCsvqType(options)) {
 		return (
 			<CsvqFormSection
-				settings={commandParams}
+				options={options}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}
-	if (isTableType(commandParams) || isSqlType(commandParams)) {
+	if (isTableType(options) || isSqlType(options)) {
 		return (
 			<DBFormSection
-				settings={commandParams}
+				options={options}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}
-	if (isRegType(commandParams)) {
+	if (isRegType(options)) {
 		return (
 			<RegFormSection
-				settings={commandParams}
+				options={options}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}
-	if (isFixedType(commandParams)) {
+	if (isFixedType(options)) {
 		return (
 			<FixedFormSection
-				settings={commandParams}
+				options={options}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}
-	if (isXlsType(commandParams) || isXlsxType(commandParams)) {
+	if (isXlsType(options) || isXlsxType(options)) {
 		return (
 			<ExcelFormSection
-				settings={commandParams}
+				options={options}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>

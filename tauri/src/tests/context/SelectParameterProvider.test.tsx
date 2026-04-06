@@ -18,8 +18,8 @@ import {
 import type { DatasetSource } from "../../model/CommandParam";
 import type {
 	Command,
-	ConvertParams,
-	GenerateParams,
+	ConvertOptions,
+	GenerateOptions,
 } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
 import type { FetchParams } from "../../utils/fetchUtils";
@@ -43,14 +43,14 @@ const mockConvertParams = {
 		].map(makeMinimalParam),
 		jdbc: undefined,
 	},
-} as unknown as ConvertParams;
+} as unknown as ConvertOptions;
 const mockRefreshConvertParams = {
 	srcData: { ...mockConvertParams.srcData, name: "refresh-test-param" },
 	convertResult: {
 		...mockConvertParams.convertResult,
 		name: "refresh-test-param",
 	},
-} as unknown as ConvertParams;
+} as unknown as ConvertOptions;
 const mockGenerateParams = {
 	elements: [
 		"generateType",
@@ -71,7 +71,7 @@ const mockGenerateParams = {
 			"templateVarStop",
 		].map(makeMinimalParam),
 	},
-} as unknown as GenerateParams;
+} as unknown as GenerateOptions;
 const mockRefreshGenerateParams = {
 	...mockGenerateParams,
 	srcData: { ...mockGenerateParams.srcData, name: "refresh-test-param" },
@@ -79,7 +79,7 @@ const mockRefreshGenerateParams = {
 		...mockGenerateParams.templateOption,
 		name: "refresh-test-param",
 	},
-} as unknown as GenerateParams;
+} as unknown as GenerateOptions;
 const { mockFetchData } = vi.hoisted(() => {
 	return {
 		mockFetchData: vi.fn((params: FetchParams) => {
@@ -156,7 +156,7 @@ describe("SelectParameterProviderのテスト", () => {
 			result.current.setParameter(mockConvertParams, "convert", "test-param");
 			await waitFor(() => {
 				expect(result.current.parameter.name).toBe("test-param");
-				expect(result.current.parameter.parameter.command).toBe("convert");
+				expect(result.current.parameter.options.command).toBe("convert");
 			});
 		});
 	});
@@ -183,7 +183,7 @@ describe("SelectParameterProviderのテスト", () => {
 			result.current.loadParameter(command as Command, "test-param");
 			await waitFor(() => {
 				expect(result.current.parameter.name).toBe("test-param");
-				expect(result.current.parameter.parameter.command).toBe(command);
+				expect(result.current.parameter.options.command).toBe(command);
 				expect(result.current.parameter).toEqual(
 					new SelectParameter(response, command as Command, "test-param"),
 				);
@@ -229,7 +229,7 @@ describe("SelectParameterProviderのテスト", () => {
 			result.current.refreshParameter(mockData);
 			await waitFor(() => {
 				expect(result.current.parameter.name).toBe("test-param");
-				expect(result.current.parameter.parameter.command).toBe(command);
+				expect(result.current.parameter.options.command).toBe(command);
 				expect(result.current.parameter).toEqual(
 					new SelectParameter(
 						refreshResponse,

@@ -1,20 +1,17 @@
 import { useState } from "react";
 import { ExpandButton } from "../../../../components/element/ButtonIcon";
-import type {
-	CommandParam,
-	CsvTypeSettings,
-} from "../../../../model/CommandParam";
+import type { CommandOption, CsvOptions } from "../../../../model/CommandParam";
 import Check from "../element/Check";
 import PlainText from "../element/PlainText";
 
 export default function CsvFormSection({
-	settings,
+	options: settings,
 	handleValueChange,
 	handleToggleChecked,
 }: {
-	settings: CsvTypeSettings;
-	handleValueChange: (param: CommandParam) => (newValue: string) => void;
-	handleToggleChecked: (param: CommandParam) => (checked: boolean) => void;
+	options: CsvOptions;
+	handleValueChange: (param: CommandOption) => (newValue: string) => void;
+	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);

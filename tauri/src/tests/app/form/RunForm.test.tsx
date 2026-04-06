@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { RunForm } from "../../../app/form/RunForm";
-import type { RunParams } from "../../../model/SelectParameter";
+import type { RunOptions } from "../../../model/SelectParameter";
 import { enviromentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	runLoadResponseFixture,
@@ -35,11 +35,11 @@ function makeRunProps(
 		| typeof runLoadResponseFixture
 		| typeof runRefreshScriptTypeCmdResponseFixture
 		| typeof runRefreshScriptTypeSqlResponseFixture = runLoadResponseFixture,
-): { handleTypeSelect: () => Promise<void>; name: string; run: RunParams } {
+): { handleTypeSelect: () => Promise<void>; name: string; run: RunOptions } {
 	return {
 		handleTypeSelect: vi.fn().mockResolvedValue(undefined),
 		name: "test",
-		run: fixture as unknown as RunParams,
+		run: fixture as unknown as RunOptions,
 	};
 }
 

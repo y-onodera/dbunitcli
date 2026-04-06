@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import { BlueEditButton } from "../../../../components/element/ButtonIcon";
-import type { CommandParam } from "../../../../model/CommandParam";
+import type { CommandOption } from "../../../../model/CommandParam";
 import JdbcUrlBuilderDialog from "../../../settings/JdbcUrlBuilderDialog";
 import PlainText from "./PlainText";
 
@@ -11,7 +11,7 @@ export default function JdbcUrlTextField({
 	onValueChange,
 }: {
 	prefix: string;
-	element: CommandParam;
+	element: CommandOption;
 	onValueChange: (name: string, value: string) => void;
 }) {
 	return (
