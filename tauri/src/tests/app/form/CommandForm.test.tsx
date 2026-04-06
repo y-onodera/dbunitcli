@@ -2,11 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import CommandForm from "../../../app/form/CommandForm";
-import {
-	Command,
-	Options,
-	SelectParameter,
-} from "../../../model/SelectParameter";
+import type { Command, Options } from "../../../model/SelectParameter";
+import { SelectParameter } from "../../../model/SelectParameter";
 import {
 	compareLoadResponseFixture,
 	compareRefreshTargetTypeImageResponseFixture,
