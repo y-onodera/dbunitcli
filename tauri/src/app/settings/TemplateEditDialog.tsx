@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, use, useState } from "react";
 import { SettingDialog } from "../../components/dialog";
 import {
 	useTemplateLoadContent,
@@ -15,29 +15,38 @@ export default function TemplateEditDialog({
 	setPath?: (path: string) => void;
 	handleDialogClose: () => void;
 }) {
-	const [content, setContent] = useState<string | null>(null);
 	const loadContent = useTemplateLoadContent();
-	const saveContent = useTemplateSaveContent();
+	const promise = name ? loadContent(name) : Promise.resolve("");
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<Dialog
+				promise={promise}
+				name={name}
+				setPath={setPath}
+				handleDialogClose={handleDialogClose}
+			/>
+		</Suspense>
+	);
+}
 
-	useEffect(() => {
-		if (!name) {
-			setContent("");
-			return;
-		}
-		let cancelled = false;
-		loadContent(name).then((result) => {
-			if (!cancelled) {
-				setContent(result);
-			}
-		});
-		return () => {
-			cancelled = true;
-		};
-	}, [name, loadContent]);
+function Dialog({
+	promise,
+	name,
+	setPath,
+	handleDialogClose,
+}: {
+	promise: Promise<string>;
+	name: string;
+	setPath?: (path: string) => void;
+	handleDialogClose: () => void;
+}) {
+	const initialContent = use(promise);
+	const [content, setContent] = useState<string>(initialContent);
+	const saveContent = useTemplateSaveContent();
 
 	const handleSave = (path: string) =>
 		saveOnSuccess(
-			() => saveContent(path, content ?? ""),
+			() => saveContent(path, content),
 			() => {
 				setPath?.(path);
 				handleDialogClose();
@@ -49,19 +58,14 @@ export default function TemplateEditDialog({
 			fileName={name}
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
-			commitDisabled={content === null}
 		>
 			<div className="w-[800px] p-4">
 				<h2 className="text-lg font-bold mb-2">Template File Edit</h2>
-				{content === null ? (
-					<p className="text-sm text-gray-400 p-3">Loading...</p>
-				) : (
-					<textarea
-						className="text-sm bg-gray-50 border border-gray-300 rounded-lg p-3 w-full h-96 font-mono focus-visible:ring-3 ring-indigo-300"
-						value={content}
-						onChange={(e) => setContent(e.target.value)}
-					/>
-				)}
+				<textarea
+					className="text-sm bg-gray-50 border border-gray-300 rounded-lg p-3 w-full h-96 font-mono focus-visible:ring-3 ring-indigo-300"
+					value={content}
+					onChange={(e) => setContent(e.target.value)}
+				/>
 			</div>
 		</SettingDialog>
 	);

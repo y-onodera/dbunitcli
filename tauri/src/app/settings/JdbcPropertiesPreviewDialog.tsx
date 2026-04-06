@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, use } from "react";
 import { SettingDialog } from "../../components/dialog";
 import { useJdbcReadContent } from "../../hooks/useJdbc";
 
@@ -29,22 +29,32 @@ export default function JdbcPropertiesPreviewDialog({
 	handleDialogClose,
 	handleApply,
 }: JdbcPropertiesPreviewDialogProps) {
-	const [content, setContent] = useState<Record<string, string> | null>(null);
 	const readContent = useJdbcReadContent();
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<Dialog
+				promise={readContent(path)}
+				path={path}
+				handleDialogClose={handleDialogClose}
+				handleApply={handleApply}
+			/>
+		</Suspense>
+	);
+}
 
-	useEffect(() => {
-		let cancelled = false;
-		readContent(path).then((result) => {
-			if (!cancelled) {
-				setContent(result);
-			}
-		});
-		return () => {
-			cancelled = true;
-		};
-	}, [path, readContent]);
-
-	const jdbcFormValues = content !== null ? toJdbcFormValues(content) : {};
+function Dialog({
+	promise,
+	path,
+	handleDialogClose,
+	handleApply,
+}: {
+	promise: Promise<Record<string, string>>;
+	path: string;
+	handleDialogClose: () => void;
+	handleApply: (values: Partial<Record<string, string>>) => void;
+}) {
+	const content = use(promise);
+	const jdbcFormValues = toJdbcFormValues(content);
 
 	return (
 		<SettingDialog
@@ -56,13 +66,9 @@ export default function JdbcPropertiesPreviewDialog({
 			<div className="w-[600px]">
 				<h2 className="text-lg font-bold mb-2">Properties File Preview</h2>
 				<p className="text-sm text-gray-500 mb-3 break-all">{path}</p>
-				{content === null ? (
-					<p className="text-sm text-gray-400 p-3">Loading...</p>
-				) : (
-					<pre className="text-sm bg-gray-50 border border-gray-300 rounded-lg p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all">
-						{JSON.stringify(content, null, 2)}
-					</pre>
-				)}
+				<pre className="text-sm bg-gray-50 border border-gray-300 rounded-lg p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all">
+					{JSON.stringify(content, null, 2)}
+				</pre>
 			</div>
 		</SettingDialog>
 	);

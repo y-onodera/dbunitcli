@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, use, useState } from "react";
 import { SettingDialog } from "../../components/dialog";
 import { useJdbcTables } from "../../hooks/useJdbc";
 import { useSaveDataSource } from "../../hooks/useQueryDatasource";
@@ -13,35 +13,6 @@ interface JdbcTableSelectorDialogProps {
 	handleSave: (path: string) => void;
 }
 
-function TableContent({
-	loading,
-	tables,
-	selected,
-	onToggleAll,
-	onToggle,
-}: {
-	loading: boolean;
-	tables: string[];
-	selected: Set<string>;
-	onToggleAll: (checked: boolean) => void;
-	onToggle: (table: string) => void;
-}) {
-	if (loading) {
-		return <p className="text-sm text-gray-500">Loading...</p>;
-	}
-	if (tables.length === 0) {
-		return <p className="text-sm text-gray-500">No tables found</p>;
-	}
-	return (
-		<TableList
-			tables={tables}
-			selected={selected}
-			onToggleAll={onToggleAll}
-			onToggle={onToggle}
-		/>
-	);
-}
-
 export default function JdbcTableSelectorDialog({
 	jdbcValues,
 	currentContent,
@@ -49,33 +20,44 @@ export default function JdbcTableSelectorDialog({
 	handleDialogClose,
 	handleSave,
 }: JdbcTableSelectorDialogProps) {
-	const [tables, setTables] = useState<string[]>([]);
-	const [selected, setSelected] = useState<Set<string>>(new Set());
-	const [loading, setLoading] = useState(true);
 	const getJdbcTables = useJdbcTables();
-	const saveDataSource = useSaveDataSource();
-	const jdbcValuesRef = useRef(jdbcValues);
-	const currentContentRef = useRef(currentContent);
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<Dialog
+				promise={getJdbcTables(jdbcValues)}
+				currentContent={currentContent}
+				fileName={fileName}
+				handleDialogClose={handleDialogClose}
+				handleSave={handleSave}
+			/>
+		</Suspense>
+	);
+}
 
-	useEffect(() => {
-		const load = async () => {
-			setLoading(true);
-			try {
-				const result = await getJdbcTables(jdbcValuesRef.current);
-				setTables(result);
-				const existing = new Set(
-					currentContentRef.current
-						.split("\n")
-						.map((t) => t.trim())
-						.filter((t) => t.length > 0),
-				);
-				setSelected(existing);
-			} finally {
-				setLoading(false);
-			}
-		};
-		void load();
-	}, [getJdbcTables]);
+function Dialog({
+	promise,
+	currentContent,
+	fileName,
+	handleDialogClose,
+	handleSave,
+}: {
+	promise: Promise<string[]>;
+	currentContent: string;
+	fileName: string;
+	handleDialogClose: () => void;
+	handleSave: (path: string) => void;
+}) {
+	const tables = use(promise);
+	const [selected, setSelected] = useState<Set<string>>(
+		() =>
+			new Set(
+				currentContent
+					.split("\n")
+					.map((t) => t.trim())
+					.filter((t) => t.length > 0),
+			),
+	);
+	const saveDataSource = useSaveDataSource();
 
 	const toggleTable = (table: string) => {
 		setSelected((prev) => {
@@ -113,13 +95,16 @@ export default function JdbcTableSelectorDialog({
 		>
 			<div className="p-4">
 				<h2 className="text-lg font-semibold mb-4">Select Tables</h2>
-				<TableContent
-					loading={loading}
-					tables={tables}
-					selected={selected}
-					onToggleAll={toggleAll}
-					onToggle={toggleTable}
-				/>
+				{tables.length === 0 ? (
+					<p className="text-sm text-gray-500">No tables found</p>
+				) : (
+					<TableList
+						tables={tables}
+						selected={selected}
+						onToggleAll={toggleAll}
+						onToggle={toggleTable}
+					/>
+				)}
 			</div>
 		</SettingDialog>
 	);
