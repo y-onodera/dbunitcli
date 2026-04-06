@@ -1,3 +1,4 @@
+import { isAbsolute, sep } from "@tauri-apps/api/path";
 import { useEnviroment } from "../context/EnviromentProvider";
 import {
 	useSelectParameter,
@@ -7,7 +8,9 @@ import {
 	useSetParameterList,
 	useSetResourcesSettings,
 	useSetWorkspaceContext,
+	useWorkspaceContext,
 } from "../context/WorkspaceResourcesProvider";
+import type { Attribute } from "../model/CommandOption";
 import {
 	ParameterList,
 	ResourcesSettings,
@@ -143,5 +146,40 @@ export const useRenameParameter = (command: string, name: string) => {
 				}
 			})
 			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
+	};
+};
+
+export const useResolveAbsolutePath = () => {
+	const { apiUrl } = useEnviroment();
+	const context = useWorkspaceContext();
+	return async (path: string, attribute: Attribute): Promise<string> => {
+		const fetchParams = {
+			endpoint: `${apiUrl}workspace/resolve-path`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ path, defaultPath: attribute.defaultPath }),
+			},
+		};
+		try {
+			const response = await fetchData(fetchParams);
+			const sidecarResult = await response.text();
+			if (sidecarResult) {
+				return sidecarResult;
+			}
+		} catch (e) {
+			console.error(
+				"resolvePathViaSidecar failed, falling back to frontend:",
+				e,
+			);
+		}
+		if (await isAbsolute(path)) {
+			return path;
+		}
+		const basePath = context.getPath(attribute.defaultPath);
+		if (path) {
+			return basePath + sep() + path;
+		}
+		return basePath;
 	};
 };
