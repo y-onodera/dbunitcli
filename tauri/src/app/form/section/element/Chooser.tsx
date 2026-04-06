@@ -10,13 +10,13 @@ import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvi
 import { useResolveAbsolutePath } from "../../../../hooks/useWorkspaceResources";
 import type { FileProp } from "./FormElementProp";
 
-export function FileChooser(prop: FileProp) {
+function useChooserHandler(prop: FileProp, directory?: boolean) {
 	const context = useWorkspaceContext();
 	const resolveAbsolutePath = useResolveAbsolutePath();
-	const handleFileChooserClick = () => {
+	return () => {
 		const basePath = context.getPath(prop.element.attribute.defaultPath);
 		resolveAbsolutePath(prop.path, prop.element.attribute).then((defaultPath) =>
-			open({ defaultPath }).then((files) => {
+			open({ defaultPath, directory }).then((files) => {
 				if (files) {
 					prop.setPath((files as string).replace(basePath + sep(), ""));
 					prop.onSelect?.();
@@ -24,23 +24,14 @@ export function FileChooser(prop: FileProp) {
 			}),
 		);
 	};
-	return <FileButton handleClick={handleFileChooserClick} />;
 }
+
+export function FileChooser(prop: FileProp) {
+	return <FileButton handleClick={useChooserHandler(prop)} />;
+}
+
 export function DirectoryChooser(prop: FileProp) {
-	const context = useWorkspaceContext();
-	const resolveAbsolutePath = useResolveAbsolutePath();
-	const handleDirectoryChooserClick = () => {
-		const basePath = context.getPath(prop.element.attribute.defaultPath);
-		resolveAbsolutePath(prop.path, prop.element.attribute).then((defaultPath) =>
-			open({ defaultPath, directory: true }).then((files) => {
-				if (files) {
-					prop.setPath((files as string).replace(basePath + sep(), ""));
-					prop.onSelect?.();
-				}
-			}),
-		);
-	};
-	return <DirectoryButton handleClick={handleDirectoryChooserClick} />;
+	return <DirectoryButton handleClick={useChooserHandler(prop, true)} />;
 }
 
 export function OpenInOS(prop: FileProp) {
