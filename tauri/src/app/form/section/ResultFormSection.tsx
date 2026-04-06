@@ -1,4 +1,4 @@
-import type { ResultOption } from "../../../model/CommandParam";
+import type { ResultOption } from "../../../model/CommandOption";
 import Check from "./element/Check";
 import FileText from "./element/FileText";
 import PlainText from "./element/PlainText";

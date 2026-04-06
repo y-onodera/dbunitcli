@@ -8,8 +8,8 @@ import type {
 	DatasetSource,
 	DatasetSrcInfo,
 	SrcType,
-} from "../../../model/CommandParam";
-import { buildDatasetSrcInfo } from "../../../model/CommandParam";
+} from "../../../model/CommandOption";
+import { buildDatasetSrcInfo } from "../../../model/CommandOption";
 import DatasetSettingSection from "./DatasetSettingSection";
 import Select from "./element/Select";
 import JdbcFormSection from "./JdbcFormSection";

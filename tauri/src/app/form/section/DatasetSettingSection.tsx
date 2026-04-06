@@ -3,7 +3,7 @@ import { ExpandButton } from "../../../components/element/ButtonIcon";
 import type {
 	CommandOption,
 	SettingElements,
-} from "../../../model/CommandParam";
+} from "../../../model/CommandOption";
 import Check from "./element/Check";
 import DatasetSettingText from "./element/DatasetSettingText";
 import PlainText from "./element/PlainText";

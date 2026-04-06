@@ -1,5 +1,5 @@
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
-import { buildDatasetSrcInfo } from "../../model/CommandParam";
+import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import FileText from "./section/element/FileText";

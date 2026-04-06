@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
-import type { DatasetSrcInfo } from "../model/CommandParam";
+import type { DatasetSrcInfo } from "../model/CommandOption";
 import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,

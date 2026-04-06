@@ -8,7 +8,7 @@ import {
 } from "../../../../components/element/ButtonIcon";
 import { useEnviroment } from "../../../../context/EnviromentProvider";
 import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
-import type { Attribute, DefaultPath } from "../../../../model/CommandParam";
+import type { Attribute, DefaultPath } from "../../../../model/CommandOption";
 import { isSqlRelatedType } from "../../../../model/QueryDatasource";
 import type { WorkspaceContext } from "../../../../model/WorkspaceResources";
 import { fetchData } from "../../../../utils/fetchUtils";

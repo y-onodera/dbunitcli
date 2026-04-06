@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import { BlueEditButton } from "../../../../components/element/ButtonIcon";
-import type { CommandOption } from "../../../../model/CommandParam";
+import type { CommandOption } from "../../../../model/CommandOption";
 import JdbcUrlBuilderDialog from "../../../settings/JdbcUrlBuilderDialog";
 import PlainText from "./PlainText";
 

@@ -5,7 +5,7 @@ import {
 	useJdbcConnectionTest,
 	useJdbcSaveProperties,
 } from "../../../hooks/useJdbc";
-import type { JdbcOption } from "../../../model/CommandParam";
+import type { JdbcOption } from "../../../model/CommandOption";
 import JdbcSavePropertiesDialog from "../../settings/JdbcSavePropertiesDialog";
 import JdbcPropertiesTextField from "./element/JdbcPropertiesTextField";
 import JdbcUrlTextField from "./element/JdbcUrlTextField";

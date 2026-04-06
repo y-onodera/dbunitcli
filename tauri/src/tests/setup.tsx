@@ -2,7 +2,7 @@ import { cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { afterEach, vi } from "vitest";
 import type { Enviroment } from "../context/EnviromentProvider";
-import type { CommandOption } from "../model/CommandParam";
+import type { CommandOption } from "../model/CommandOption";
 import {
 	ParameterList,
 	QueryFiles,

@@ -9,7 +9,7 @@ import {
 	isXlsType,
 	isXlsxType,
 	type SrcTypeOptions,
-} from "../../../model/CommandParam";
+} from "../../../model/CommandOption";
 import CsvFormSection from "./srctype/CsvFormSection";
 import CsvqFormSection from "./srctype/CsvqFormSection";
 import DBFormSection from "./srctype/DBFormSection";

@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import { useDeleteJdbcProperties } from "../../../../hooks/useJdbc";
-import type { CommandOption } from "../../../../model/CommandParam";
+import type { CommandOption } from "../../../../model/CommandOption";
 import { RemoveResource } from "../../../settings/ResourceEditButton";
 import ResourceDropDownMenu from "./ResourceDropDownMenu";
 import ResourceText from "./ResourceText";

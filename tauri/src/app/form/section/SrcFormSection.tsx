@@ -4,7 +4,7 @@ import type {
 	CommandOption,
 	SrcElements,
 	SrcType,
-} from "../../../model/CommandParam";
+} from "../../../model/CommandOption";
 import { isSqlRelatedType } from "../../../model/QueryDatasource";
 import Check from "./element/Check";
 import FileText from "./element/FileText";

@@ -15,7 +15,7 @@ import {
 	useRefreshSelectParameter,
 	useSaveParameter,
 } from "../../hooks/useSelectParameter";
-import type { DatasetSource } from "../../model/CommandParam";
+import type { DatasetSource } from "../../model/CommandOption";
 import type {
 	Command,
 	ConvertOptions,

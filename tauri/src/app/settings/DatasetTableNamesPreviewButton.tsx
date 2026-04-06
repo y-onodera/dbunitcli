@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
 import { useDatasetSrcInfo } from "../../context/DatasetSrcInfoProvider";
 import { useDatasetTableNames } from "../../hooks/useDatasetSettings";
-import type { DatasetSrcInfo } from "../../model/CommandParam";
+import type { DatasetSrcInfo } from "../../model/CommandOption";
 
 export default function DatasetTableNamesPreviewButton({
 	title,

@@ -1,4 +1,4 @@
-import type { TemplateOption } from "../../../model/CommandParam";
+import type { TemplateOption } from "../../../model/CommandOption";
 import PlainText from "./element/PlainText";
 import TemplateText from "./element/TemplateText";
 

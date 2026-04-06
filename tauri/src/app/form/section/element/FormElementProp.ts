@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { CommandOption } from "../../../../model/CommandParam";
+import type { CommandOption } from "../../../../model/CommandOption";
 
 export type Prop = {
 	prefix: string;

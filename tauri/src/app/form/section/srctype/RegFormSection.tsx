@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { ExpandButton } from "../../../../components/element/ButtonIcon";
-import type { CommandOption, RegOptions } from "../../../../model/CommandParam";
+import type {
+	CommandOption,
+	RegOptions,
+} from "../../../../model/CommandOption";
 import Check from "../element/Check";
 import PlainText from "../element/PlainText";
 

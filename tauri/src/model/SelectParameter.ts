@@ -5,7 +5,7 @@ import type {
 	JdbcOption,
 	ResultOption,
 	TemplateOption,
-} from "./CommandParam";
+} from "./CommandOption";
 export type Command =
 	| "convert"
 	| "compare"

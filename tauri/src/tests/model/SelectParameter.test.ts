@@ -1,4 +1,4 @@
-import type { CommandOption } from "../../model/CommandParam";
+import type { CommandOption } from "../../model/CommandOption";
 import type { Options } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
 import { makeMinimalParam } from "../setup";

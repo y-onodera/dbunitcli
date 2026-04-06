@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import type { DatasetSrcInfo } from "../model/CommandParam";
+import type { DatasetSrcInfo } from "../model/CommandOption";
 import { JdbcConnectionProvider } from "./JdbcConnectionProvider";
 
 type DatasetSrcInfoContextValue = {

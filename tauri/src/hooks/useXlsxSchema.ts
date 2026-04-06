@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
-import type { SrcInfo } from "../model/CommandParam";
+import type { SrcInfo } from "../model/CommandOption";
 import type { ResourcesSettings } from "../model/WorkspaceResources";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
 import { fetchData, handleFetchError } from "../utils/fetchUtils";

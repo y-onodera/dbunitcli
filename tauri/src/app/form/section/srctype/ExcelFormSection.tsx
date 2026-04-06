@@ -4,7 +4,7 @@ import type {
 	CommandOption,
 	XlsOptions,
 	XlsxOptions,
-} from "../../../../model/CommandParam";
+} from "../../../../model/CommandOption";
 import Check from "../element/Check";
 import PlainText from "../element/PlainText";
 import XlsxSchemaText from "./XlsxSchemaText";

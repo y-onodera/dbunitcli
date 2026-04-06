@@ -1,4 +1,4 @@
-import type { CommandOption, DefaultPath } from "../../../model/CommandParam";
+import type { CommandOption, DefaultPath } from "../../../model/CommandOption";
 import type {
 	CompareOptions,
 	ConvertOptions,

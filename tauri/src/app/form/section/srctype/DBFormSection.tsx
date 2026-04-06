@@ -4,7 +4,7 @@ import type {
 	CommandOption,
 	SqlOptions,
 	TableOptions,
-} from "../../../../model/CommandParam";
+} from "../../../../model/CommandOption";
 import Check from "../element/Check";
 import PlainText from "../element/PlainText";
 import TemplateText from "../element/TemplateText";
