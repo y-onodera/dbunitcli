@@ -4,6 +4,7 @@ import {
 	WhiteButton,
 } from "../../components/element/Button";
 import { useJdbcTables } from "../../hooks/useJdbc";
+import { useTableSelection } from "../../hooks/useTableSelection";
 import TableList from "./TableList";
 
 interface SqlTableInsertDialogProps {
@@ -63,27 +64,7 @@ function TablesContent({
 	onClose: () => void;
 }) {
 	const tables = use(promise);
-	const [selected, setSelected] = useState<Set<string>>(new Set());
-
-	const toggleTable = (table: string) => {
-		setSelected((prev) => {
-			const next = new Set(prev);
-			if (next.has(table)) {
-				next.delete(table);
-			} else {
-				next.add(table);
-			}
-			return next;
-		});
-	};
-
-	const toggleAll = (checked: boolean) => {
-		if (checked) {
-			setSelected(new Set(tables));
-		} else {
-			setSelected(new Set());
-		}
-	};
+	const { selected, toggle, toggleAll } = useTableSelection(tables);
 
 	const handleInsert = () => {
 		const selectedTables = tables.filter((t) => selected.has(t));
@@ -100,7 +81,7 @@ function TablesContent({
 						tables={tables}
 						selected={selected}
 						onToggleAll={toggleAll}
-						onToggle={toggleTable}
+						onToggle={toggle}
 						maxHeightClass="max-h-72"
 					/>
 				)}

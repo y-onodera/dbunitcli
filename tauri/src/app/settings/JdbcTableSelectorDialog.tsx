@@ -1,7 +1,8 @@
-import { Suspense, use, useState } from "react";
+import { Suspense, use, useMemo } from "react";
 import { SettingDialog } from "../../components/dialog";
 import { useJdbcTables } from "../../hooks/useJdbc";
 import { useSaveDataSource } from "../../hooks/useQueryDatasource";
+import { useTableSelection } from "../../hooks/useTableSelection";
 import { saveOnSuccess } from "../../utils/fetchUtils";
 import TableList from "./TableList";
 
@@ -48,36 +49,16 @@ function Dialog({
 	handleSave: (path: string) => void;
 }) {
 	const tables = use(promise);
-	const [selected, setSelected] = useState<Set<string>>(
+	const initial = useMemo(
 		() =>
-			new Set(
-				currentContent
-					.split("\n")
-					.map((t) => t.trim())
-					.filter((t) => t.length > 0),
-			),
+			currentContent
+				.split("\n")
+				.map((t) => t.trim())
+				.filter((t) => t.length > 0),
+		[currentContent],
 	);
+	const { selected, toggle, toggleAll } = useTableSelection(tables, initial);
 	const saveDataSource = useSaveDataSource();
-
-	const toggleTable = (table: string) => {
-		setSelected((prev) => {
-			const next = new Set(prev);
-			if (next.has(table)) {
-				next.delete(table);
-			} else {
-				next.add(table);
-			}
-			return next;
-		});
-	};
-
-	const toggleAll = (checked: boolean) => {
-		if (checked) {
-			setSelected(new Set(tables));
-		} else {
-			setSelected(new Set());
-		}
-	};
 
 	const handleSaveWithPath = (path: string) => {
 		const contents = tables.filter((t) => selected.has(t)).join("\n");
@@ -102,7 +83,7 @@ function Dialog({
 						tables={tables}
 						selected={selected}
 						onToggleAll={toggleAll}
-						onToggle={toggleTable}
+						onToggle={toggle}
 					/>
 				)}
 			</div>
