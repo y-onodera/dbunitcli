@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { Suspense, use, useState } from "react";
 import {
 	BlueButton,
 	WhiteButton,
@@ -17,20 +17,53 @@ export default function SqlTableInsertDialog({
 	onInsert,
 	onClose,
 }: SqlTableInsertDialogProps) {
-	const [tables, setTables] = useState<string[] | null>(null);
-	const [selected, setSelected] = useState<Set<string>>(new Set());
-	const [loading, setLoading] = useState(false);
+	const [tablesPromise, setTablesPromise] = useState<Promise<string[]> | null>(
+		null,
+	);
 	const getJdbcTables = useJdbcTables();
 
-	const handleLoad = useCallback(async () => {
-		setLoading(true);
-		try {
-			const result = await getJdbcTables(jdbcValues);
-			setTables(result);
-		} finally {
-			setLoading(false);
-		}
-	}, [getJdbcTables, jdbcValues]);
+	const handleLoad = () => {
+		setTablesPromise(getJdbcTables(jdbcValues));
+	};
+
+	return (
+		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+			<div className="bg-white rounded-lg shadow-lg p-6 w-96 max-w-full">
+				<h2 className="text-lg font-semibold mb-4">Select Tables</h2>
+				<div className="mb-4">
+					<BlueButton title="Load Tables" handleClick={handleLoad} />
+				</div>
+				{tablesPromise === null ? (
+					<div className="flex gap-2 justify-end">
+						<WhiteButton title="Cancel" handleClick={onClose} />
+					</div>
+				) : (
+					<Suspense
+						fallback={<p className="text-sm text-gray-500">Loading...</p>}
+					>
+						<TablesContent
+							promise={tablesPromise}
+							onInsert={onInsert}
+							onClose={onClose}
+						/>
+					</Suspense>
+				)}
+			</div>
+		</div>
+	);
+}
+
+function TablesContent({
+	promise,
+	onInsert,
+	onClose,
+}: {
+	promise: Promise<string[]>;
+	onInsert: (tables: string[]) => void;
+	onClose: () => void;
+}) {
+	const tables = use(promise);
+	const [selected, setSelected] = useState<Set<string>>(new Set());
 
 	const toggleTable = (table: string) => {
 		setSelected((prev) => {
@@ -46,50 +79,40 @@ export default function SqlTableInsertDialog({
 
 	const toggleAll = (checked: boolean) => {
 		if (checked) {
-			setSelected(new Set(tables ?? []));
+			setSelected(new Set(tables));
 		} else {
 			setSelected(new Set());
 		}
 	};
 
 	const handleInsert = () => {
-		const selectedTables = (tables ?? []).filter((t) => selected.has(t));
+		const selectedTables = tables.filter((t) => selected.has(t));
 		onInsert(selectedTables);
 	};
 
 	return (
-		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-			<div className="bg-white rounded-lg shadow-lg p-6 w-96 max-w-full">
-				<h2 className="text-lg font-semibold mb-4">Select Tables</h2>
-				<div className="mb-4">
-					<BlueButton title="Load Tables" handleClick={handleLoad} disabled={loading} />
-				</div>
-				<div className="mb-4 min-h-8">
-					{loading && (
-						<p className="text-sm text-gray-500">Loading...</p>
-					)}
-					{!loading && tables !== null && tables.length === 0 && (
-						<p className="text-sm text-gray-500">No tables found</p>
-					)}
-					{!loading && tables !== null && tables.length > 0 && (
-						<TableList
-							tables={tables}
-							selected={selected}
-							onToggleAll={toggleAll}
-							onToggle={toggleTable}
-							maxHeightClass="max-h-72"
-						/>
-					)}
-				</div>
-				<div className="flex gap-2 justify-end">
-					<BlueButton
-						title="Insert"
-						handleClick={handleInsert}
-						disabled={selected.size === 0}
+		<>
+			<div className="mb-4 min-h-8">
+				{tables.length === 0 ? (
+					<p className="text-sm text-gray-500">No tables found</p>
+				) : (
+					<TableList
+						tables={tables}
+						selected={selected}
+						onToggleAll={toggleAll}
+						onToggle={toggleTable}
+						maxHeightClass="max-h-72"
 					/>
-					<WhiteButton title="Cancel" handleClick={onClose} />
-				</div>
+				)}
 			</div>
-		</div>
+			<div className="flex gap-2 justify-end">
+				<BlueButton
+					title="Insert"
+					handleClick={handleInsert}
+					disabled={selected.size === 0}
+				/>
+				<WhiteButton title="Cancel" handleClick={onClose} />
+			</div>
+		</>
 	);
 }
