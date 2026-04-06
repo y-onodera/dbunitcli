@@ -18,7 +18,6 @@ export default function SqlSrcText({
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
-			srcType={srcType}
 			resourceFiles={resourceFiles}
 			handleValueChange={handleValueChange}
 		>

@@ -1,3 +1,12 @@
+export type DefaultPath =
+	| "WORKSPACE"
+	| "DATASET"
+	| "RESULT"
+	| "SETTING"
+	| "TEMPLATE"
+	| "PARAMETERIZE_TEMPLATE"
+	| "JDBC"
+	| "XLSX_SCHEMA";
 export type WorkspaceResources = {
 	parameterList: ParameterListBuilder;
 	resources: ResourcesSettings;
@@ -14,6 +23,26 @@ export type WorkspaceContextBuilder = {
 	xlsxSchemaBase: string;
 };
 export class WorkspaceContext {
+	getPath(defaultPath: DefaultPath): string {
+		switch (defaultPath) {
+			case "DATASET":
+				return this.datasetBase;
+			case "RESULT":
+				return this.resultBase;
+			case "SETTING":
+				return this.settingBase;
+			case "TEMPLATE":
+				return this.templateBase;
+			case "PARAMETERIZE_TEMPLATE":
+				return this.parameterizeTemplateBase;
+			case "JDBC":
+				return this.jdbcBase;
+			case "XLSX_SCHEMA":
+				return this.xlsxSchemaBase;
+			default:
+				return this.workspace;
+		}
+	}
 	static create(): WorkspaceContext {
 		return new WorkspaceContext("", "", "", "", "", "", "", "");
 	}

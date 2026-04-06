@@ -6,7 +6,6 @@ import {
 	ResourceDatalist,
 } from "../../../../components/element/Input";
 import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
-import { getPath } from "./Chooser";
 import type { TextProp } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
 
@@ -22,7 +21,6 @@ export default function ResourceText({
 	prefix,
 	element,
 	hidden,
-	srcType,
 	resourceFiles = [],
 	handleValueChange: onValueChange,
 	children,
@@ -31,7 +29,7 @@ export default function ResourceText({
 	const hasResources = resourceFiles.length > 0;
 	const isValueInDatalist = resourceFiles.includes(path);
 	const context = useWorkspaceContext();
-	const defaultPath = getPath(context, element.attribute.defaultPath, srcType);
+	const defaultPath = context.getPath(element.attribute.defaultPath);
 	const id = getId(prefix, element.name);
 	const fieldName = getName(prefix, element.name);
 

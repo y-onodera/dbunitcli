@@ -12,7 +12,6 @@ export type FileProp = Prop & {
 	path: string;
 	setPath: Dispatch<SetStateAction<string>>;
 	onSelect?: () => void;
-	srcType?: string;
 };
 export type TextProp = Prop & {
 	resourceFiles?: string[];

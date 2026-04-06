@@ -1,12 +1,5 @@
-export type DefaultPath =
-	| "WORKSPACE"
-	| "DATASET"
-	| "RESULT"
-	| "SETTING"
-	| "TEMPLATE"
-	| "PARAMETERIZE_TEMPLATE"
-	| "JDBC"
-	| "XLSX_SCHEMA";
+import type { DefaultPath } from "./WorkspaceResources";
+
 export type Attribute = {
 	type: string;
 	required: boolean;
