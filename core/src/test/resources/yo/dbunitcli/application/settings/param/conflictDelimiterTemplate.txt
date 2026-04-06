@@ -1,0 +1,5 @@
+-templateVarStart=$
+-templateVarStop=$
+-src=$param.src$
+-srcType=csv
+-result=target/test-classes/yo/dbunitcli/application/command/param/conflictDelimiter/result

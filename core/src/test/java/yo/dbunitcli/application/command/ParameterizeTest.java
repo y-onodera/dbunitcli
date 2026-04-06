@@ -77,6 +77,13 @@ public class ParameterizeTest {
         }
 
         @Test
+        public void testTemplateVarStartStopConflictWithRenderingDelimiter() {
+            Parameterize.main(new String[]{"-param.src=" + baseDir + "src/csv/has space"
+                    , "-cmd=convert"
+                    , "-template=" + baseDir + "/settings/param/conflictDelimiterTemplate.txt"});
+        }
+
+        @Test
         public void testExecCommandNoneParameter() {
             Parameterize.main(new String[]{
                     "-cmd=$param.inputParam.cmdName$"
