@@ -127,9 +127,9 @@ public class Workspace {
 
         final ContextDto context = new ContextDto();
         result.setContext(context);
-        final String rawWorkspace = rawOrAbsolute(FileResources.PROPERTY_WORKSPACE,
-                () -> FileResources.baseDir().toPath());
-        final String expandedWorkspace = FileResources.baseDir().toPath().toAbsolutePath().normalize().toString();
+        final Path baseDirPath = FileResources.baseDir().toPath();
+        final String rawWorkspace = rawOrAbsolute(FileResources.PROPERTY_WORKSPACE, () -> baseDirPath);
+        final String expandedWorkspace = baseDirPath.toAbsolutePath().normalize().toString();
         context.setWorkspace(rawWorkspace);
         context.setDatasetBase(rawOrAbsolute(FileResources.PROPERTY_DATASET_BASE,
                 () -> FileResources.datasetDir().toPath()));
