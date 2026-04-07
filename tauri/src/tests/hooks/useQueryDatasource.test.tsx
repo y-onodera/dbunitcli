@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
 	type Enviroment,
@@ -156,12 +156,12 @@ describe("QueryDatasourceProviderのテスト", () => {
 				{ wrapper },
 			);
 
-			await waitFor(() => {
+			await act(async () => {
 				rerender();
-				expect(result.current.resources.queryFiles).toStrictEqual(
-					mockWorkspaceResources.resources.queryFiles,
-				);
 			});
+			expect(result.current.resources.queryFiles).toStrictEqual(
+				mockWorkspaceResources.resources.queryFiles,
+			);
 
 			const deleteResult = await act(async () => {
 				return await result.current.deleteDataSource("test-query");
