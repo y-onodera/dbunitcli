@@ -9,6 +9,7 @@
 /sidecar/logs/dbunitcli*.log
 /sidecar/.roo/work
 /sidecar/target/
+/sidecar/option/
 /core/dependency-reduced-pom.xml
 /tauri/src-tauri/backend/
 /tauri/.roo/work
