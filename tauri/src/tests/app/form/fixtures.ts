@@ -1,4 +1,4 @@
-import type { CommandOption, DefaultPath } from "../../../model/CommandOption";
+import type { CommandOption } from "../../../model/CommandOption";
 import type {
 	CompareOptions,
 	ConvertOptions,
@@ -6,6 +6,7 @@ import type {
 	ParameterizeOptions,
 	RunOptions,
 } from "../../../model/SelectParameter";
+import type { DefaultPath } from "../../../model/WorkspaceResources";
 
 function makeElement(
 	name: string,
