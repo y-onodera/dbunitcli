@@ -127,15 +127,46 @@ public class Workspace {
 
         final ContextDto context = new ContextDto();
         result.setContext(context);
-        context.setWorkspace(FileResources.baseDir().toPath().toAbsolutePath().normalize().toString());
-        context.setDatasetBase(FileResources.datasetDir().toPath().toAbsolutePath().normalize().toString());
-        context.setResultBase(FileResources.resultDir().toPath().toAbsolutePath().normalize().toString());
-        context.setSettingBase(FileResources.settingDir().toPath().toAbsolutePath().normalize().toString());
-        context.setTemplateBase(FileResources.templateFileDir().toPath().toAbsolutePath().normalize().toString());
-        context.setParameterizeTemplateBase(FileResources.parameterizeTemplateDir().toPath().toAbsolutePath().normalize().toString());
-        context.setJdbcBase(FileResources.jdbcPropDir().toPath().toAbsolutePath().normalize().toString());
-        context.setXlsxSchemaBase(FileResources.xlsxSchemaDir().toPath().toAbsolutePath().normalize().toString());
+        final Path baseDirPath = FileResources.baseDir().toPath();
+        final String rawWorkspace = rawOrAbsolute(FileResources.PROPERTY_WORKSPACE, () -> baseDirPath);
+        final String expandedWorkspace = baseDirPath.toAbsolutePath().normalize().toString();
+        context.setWorkspace(rawWorkspace);
+        context.setDatasetBase(rawOrAbsolute(FileResources.PROPERTY_DATASET_BASE,
+                () -> FileResources.datasetDir().toPath()));
+        context.setResultBase(rawOrAbsolute(FileResources.PROPERTY_RESULT_BASE,
+                () -> FileResources.resultDir().toPath()));
+        context.setSettingBase(withRawWorkspacePrefix(
+                FileResources.settingDir().toPath().toAbsolutePath().normalize().toString(),
+                expandedWorkspace, rawWorkspace));
+        context.setTemplateBase(withRawWorkspacePrefix(
+                FileResources.templateFileDir().toPath().toAbsolutePath().normalize().toString(),
+                expandedWorkspace, rawWorkspace));
+        context.setParameterizeTemplateBase(withRawWorkspacePrefix(
+                FileResources.parameterizeTemplateDir().toPath().toAbsolutePath().normalize().toString(),
+                expandedWorkspace, rawWorkspace));
+        context.setJdbcBase(withRawWorkspacePrefix(
+                FileResources.jdbcPropDir().toPath().toAbsolutePath().normalize().toString(),
+                expandedWorkspace, rawWorkspace));
+        context.setXlsxSchemaBase(withRawWorkspacePrefix(
+                FileResources.xlsxSchemaDir().toPath().toAbsolutePath().normalize().toString(),
+                expandedWorkspace, rawWorkspace));
         return result;
+    }
+
+    private static String rawOrAbsolute(final String propertyName, final Supplier<Path> expandedPath) {
+        final String raw = System.getProperty(propertyName);
+        if (raw != null && raw.contains("%")) {
+            return raw;
+        }
+        return expandedPath.get().toAbsolutePath().normalize().toString();
+    }
+
+    private static String withRawWorkspacePrefix(
+            final String absPath, final String expandedWorkspace, final String rawWorkspace) {
+        if (rawWorkspace.contains("%") && absPath.startsWith(expandedWorkspace)) {
+            return rawWorkspace + absPath.substring(expandedWorkspace.length());
+        }
+        return absPath;
     }
 
     public Stream<String> parameterNames(final yo.dbunitcli.application.CommandType type) {
@@ -220,15 +251,17 @@ public class Workspace {
         }
 
         public Workspace build() {
-            final File baseDir = new File(this.getPath());
+            final File rawFile = new File(this.getPath());
+            System.setProperty(FileResources.PROPERTY_WORKSPACE, this.getPath());
+            final File expandedBaseDir = FileResources.baseDir();
             final Resources.Builder resources = Resources.builder();
             final Options.Builder options = Options.builder();
-            if (baseDir.exists() || baseDir.mkdirs()) {
-                options.workspace(baseDir);
-                resources.workspace(baseDir);
+            if (expandedBaseDir.exists() || expandedBaseDir.mkdirs()) {
+                options.workspace(expandedBaseDir);
+                resources.workspace(expandedBaseDir);
             }
-            Workspace.LOGGER.info("current workspace:{}", baseDir.getAbsolutePath());
-            return new Workspace(baseDir.toPath(), options.build(), resources.build());
+            Workspace.LOGGER.info("current workspace:{}", expandedBaseDir.getAbsolutePath());
+            return new Workspace(rawFile.toPath(), options.build(), resources.build());
         }
     }
 }

@@ -1,0 +1,5 @@
+# テキストファイルのデフォルト設定
+* text=auto
+
+# テストリソースファイルは改行をLF固定にする（プラットフォーム依存を避けるため）
+core/src/test/resources/**/*.txt text eol=lf

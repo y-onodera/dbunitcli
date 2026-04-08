@@ -9,6 +9,7 @@
 /sidecar/logs/dbunitcli*.log
 /sidecar/.roo/work
 /sidecar/target/
+/sidecar/option/
 /core/dependency-reduced-pom.xml
 /tauri/src-tauri/backend/
 /tauri/.roo/work
@@ -19,3 +20,4 @@ tauri/src-tauri/Cargo.lock
 tauri/src/App.css
 tauri/bun.lock
 node_modules/
+*.mv.db

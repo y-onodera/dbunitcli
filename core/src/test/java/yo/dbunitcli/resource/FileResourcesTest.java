@@ -56,7 +56,7 @@ class FileResourcesTest {
         @Test
         void searchInOrderDatasetBase() {
             final File result = FileResources.searchDatasetBase("main");
-            Assertions.assertEquals(new File("src\\main"), result);
+            Assertions.assertEquals(new File("src/main"), result);
         }
 
         @Test
@@ -67,14 +67,14 @@ class FileResourcesTest {
 
         @Test
         void searchInOrderDatasetBaseAbsolutePath() {
-            final File result = FileResources.searchDatasetBase("C:\\test");
-            Assertions.assertEquals(new File("C:\\test"), result);
+            final File result = FileResources.searchDatasetBase("C:/test");
+            Assertions.assertEquals(new File("C:/test"), result);
         }
 
         @Test
         void searchInOrderWorkspace() {
             final File result = FileResources.searchWorkspace("main");
-            Assertions.assertEquals(new File("src\\main"), result);
+            Assertions.assertEquals(new File("src/main"), result);
         }
 
         @Test
@@ -85,8 +85,8 @@ class FileResourcesTest {
 
         @Test
         void searchInOrderWorkspaceAbsolutePath() {
-            final File result = FileResources.searchWorkspace("C:\\test");
-            Assertions.assertEquals(new File("C:\\test"), result);
+            final File result = FileResources.searchWorkspace("C:/test");
+            Assertions.assertEquals(new File("C:/test"), result);
         }
 
         @Test
@@ -124,7 +124,7 @@ class FileResourcesTest {
         @Test
         void searchInOrderDatasetBase() {
             final File result = FileResources.searchDatasetBase("main");
-            Assertions.assertEquals(new File("src\\main"), result);
+            Assertions.assertEquals(new File("src/main"), result);
         }
 
         @Test
@@ -135,8 +135,8 @@ class FileResourcesTest {
 
         @Test
         void searchInOrderDatasetBaseAbsolutePath() {
-            final File result = FileResources.searchDatasetBase("C:\\test");
-            Assertions.assertEquals(new File("C:\\test"), result);
+            final File result = FileResources.searchDatasetBase("C:/test");
+            Assertions.assertEquals(new File("C:/test"), result);
         }
 
         @Test
@@ -375,40 +375,39 @@ class FileResourcesTest {
 
     @Nested
     class EnvironmentVariableTest {
+        private static final String HOME_VAR = System.getenv("USERPROFILE") != null ? "USERPROFILE" : "HOME";
+        private static final String HOME_VALUE = System.getenv(HOME_VAR);
+
         @Test
         void searchWorkspaceWithUserProfile() {
-            final String userProfile = System.getenv("USERPROFILE");
-            final File result = FileResources.searchWorkspace("%USERPROFILE%\\test");
-            final File expected = new File(userProfile + "\\test");
+            final File result = FileResources.searchWorkspace("%" + HOME_VAR + "%/test");
+            final File expected = new File(HOME_VALUE + "/test");
             Assertions.assertEquals(expected, result);
         }
 
         @Test
         void searchDatasetBaseWithUserProfile() {
-            final String userProfile = System.getenv("USERPROFILE");
-            final File result = FileResources.searchDatasetBase("%USERPROFILE%\\data");
-            final File expected = new File(userProfile + "\\data");
+            final File result = FileResources.searchDatasetBase("%" + HOME_VAR + "%/data");
+            final File expected = new File(HOME_VALUE + "/data");
             Assertions.assertEquals(expected, result);
         }
 
         @Test
         void resultDirWithUserProfile() {
-            final String userProfile = System.getenv("USERPROFILE");
-            final File result = FileResources.resultDir("%USERPROFILE%\\result");
-            final File expected = new File(userProfile + "\\result");
+            final File result = FileResources.resultDir("%" + HOME_VAR + "%/result");
+            final File expected = new File(HOME_VALUE + "/result");
             Assertions.assertEquals(expected, result);
         }
 
         @Test
         void baseDirWithUserProfileProperty() {
-            final String userProfile = System.getenv("USERPROFILE");
             final Properties newProperty = new Properties();
             newProperty.putAll(FileResourcesTest.backup);
-            newProperty.put(FileResources.PROPERTY_WORKSPACE, "%USERPROFILE%\\workspace");
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, "%" + HOME_VAR + "%/workspace");
             System.setProperties(newProperty);
 
             final File result = FileResources.baseDir();
-            final File expected = new File(userProfile + "\\workspace");
+            final File expected = new File(HOME_VALUE + "/workspace");
             Assertions.assertEquals(expected, result);
 
             FileResourcesTest.restore();
