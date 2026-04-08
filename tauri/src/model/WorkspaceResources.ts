@@ -151,7 +151,6 @@ export type ResourcesSettingsBuilder = {
 	xlsxSchemas?: string[];
 	jdbcFiles?: string[];
 	templateFiles?: string[];
-	queryFiles?: QueryFilesBuilder;
 };
 export class ResourcesSettings {
 	static create(): ResourcesSettings {
@@ -164,57 +163,16 @@ export class ResourcesSettings {
 	readonly xlsxSchemas: string[];
 	readonly jdbcFiles: string[];
 	readonly templateFiles: string[];
-	readonly queryFiles: QueryFiles;
 	constructor(builder: ResourcesSettingsBuilder) {
 		this.datasetSettings = builder.datasetSettings ?? [];
 		this.xlsxSchemas = builder.xlsxSchemas ?? [];
 		this.jdbcFiles = builder.jdbcFiles ?? [];
 		this.templateFiles = builder.templateFiles ?? [];
-		this.queryFiles = new QueryFiles(builder.queryFiles ?? {});
 	}
 	with(builder: ResourcesSettingsBuilder): ResourcesSettings {
 		return new ResourcesSettings({
 			...this,
 			...builder,
-		});
-	}
-	querys(srcType: string | undefined): string[] {
-		return this.queryFiles.of(srcType);
-	}
-}
-export type QueryFilesBuilder = {
-	sql?: string[];
-	table?: string[];
-	csvq?: string[];
-};
-export class QueryFiles {
-	static create(): QueryFiles {
-		return new QueryFiles({});
-	}
-	readonly sql: string[];
-	readonly table: string[];
-	readonly csvq: string[];
-	constructor(builder: QueryFilesBuilder) {
-		this.sql = builder.sql ?? [];
-		this.table = builder.table ?? [];
-		this.csvq = builder.csvq ?? [];
-	}
-	of(srcType: string | undefined): string[] {
-		if (srcType === "sql") {
-			return this.sql;
-		}
-		if (srcType === "table") {
-			return this.table;
-		}
-		if (srcType === "csvq") {
-			return this.csvq;
-		}
-		return [];
-	}
-	replace(type: string, files: string[]): QueryFiles {
-		return new QueryFiles({
-			...this,
-			[type]: files,
 		});
 	}
 }

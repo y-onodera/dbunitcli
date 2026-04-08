@@ -1,6 +1,5 @@
-import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import type { TextProp } from "./FormElementProp";
-import ResourceText from "./ResourceText";
+import PlainText from "./PlainText";
 import SqlSrcDropDownMenu from "./SqlSrcDropDownMenu";
 
 export default function SqlSrcText({
@@ -10,27 +9,22 @@ export default function SqlSrcText({
 	srcType,
 	handleValueChange,
 }: TextProp) {
-	const settings = useResourcesSettings();
-	const resourceFiles = settings.querys(srcType);
-
 	return (
-		<ResourceText
+		<PlainText
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
-			resourceFiles={resourceFiles}
 			handleValueChange={handleValueChange}
 		>
-			{({ path, setPath, isValueInDatalist }) => (
+			{({ value, setValue }) => (
 				<SqlSrcDropDownMenu
-					path={path}
-					setPath={setPath}
+					path={value}
+					setPath={setValue}
 					prefix={prefix}
 					element={element}
 					srcType={srcType}
-					isValueInDatalist={isValueInDatalist}
 				/>
 			)}
-		</ResourceText>
+		</PlainText>
 	);
 }

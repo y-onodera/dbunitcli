@@ -5,7 +5,6 @@ import type { Enviroment } from "../context/EnviromentProvider";
 import type { CommandOption } from "../model/CommandOption";
 import {
 	ParameterList,
-	QueryFiles,
 	ResourcesSettings,
 	WorkspaceContext,
 	type WorkspaceResources,
@@ -48,11 +47,6 @@ export const workspaceResourcesFixture: WorkspaceResources = {
 		xlsxSchemas: ["schema1"],
 		jdbcFiles: ["jdbc1"],
 		templateFiles: ["template1"],
-		queryFiles: new QueryFiles({
-			sql: ["sql"],
-			table: [],
-			csvq: [],
-		}),
 	}),
 };
 

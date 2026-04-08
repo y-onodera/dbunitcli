@@ -8,9 +8,7 @@ import SqlEditorButton, {
 import type { FileProp } from "./FormElementProp";
 import ResourceDropDownMenu from "./ResourceDropDownMenu";
 
-type Props = Omit<FileProp, "onSelect" | "hidden"> & {
-	isValueInDatalist: boolean;
-};
+type Props = Omit<FileProp, "onSelect" | "hidden">;
 
 export default function SqlSrcDropDownMenu({
 	path,
@@ -18,7 +16,6 @@ export default function SqlSrcDropDownMenu({
 	prefix,
 	element,
 	srcType,
-	isValueInDatalist,
 }: Props) {
 	const { connectionOk } = useJdbcConnectionState();
 	const isSqlOrTable = srcType === "sql" || srcType === "table";
@@ -42,7 +39,6 @@ export default function SqlSrcDropDownMenu({
 			prefix={prefix}
 			element={element}
 			srcType={srcType}
-			isValueInDatalist={isValueInDatalist}
 			editButtons={editButtons}
 			removeButton={
 				isSqlOrTable

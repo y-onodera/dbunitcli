@@ -1,31 +1,28 @@
 import type { TextProp } from "./FormElementProp";
+import PlainText from "./PlainText";
 import ResourceDropDownMenu from "./ResourceDropDownMenu";
-import ResourceText from "./ResourceText";
 
 export default function FileText({
 	prefix,
 	element,
 	hidden,
-	srcType,
 	handleValueChange: onValueChange,
 }: TextProp) {
 	return (
-		<ResourceText
+		<PlainText
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
-			resourceFiles={[]}
 			handleValueChange={onValueChange}
 		>
-			{({ path, setPath }) => (
+			{({ value, setValue }) => (
 				<ResourceDropDownMenu
-					path={path}
-					setPath={setPath}
+					path={value}
+					setPath={setValue}
 					prefix={prefix}
 					element={element}
-					srcType={srcType}
 				/>
 			)}
-		</ResourceText>
+		</PlainText>
 	);
 }

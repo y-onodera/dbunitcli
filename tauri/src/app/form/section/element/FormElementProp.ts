@@ -14,7 +14,6 @@ export type FileProp = Prop & {
 	onSelect?: () => void;
 };
 export type TextProp = Prop & {
-	resourceFiles?: string[];
 	handleValueChange?: (value: string) => void;
 };
 export type SelectProp = Prop & {

@@ -1,32 +1,27 @@
-import type { Dispatch, SetStateAction } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
-import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type {
 	QueryDatasource,
 	QueryDatasourceType,
 } from "../model/QueryDatasource";
-import type { ResourcesSettings } from "../model/WorkspaceResources";
-import { fetchData, handleFetchError } from "../utils/fetchUtils";
-
-type QueryDatasourceResult = "success" | "failed";
+import {
+	fetchData,
+	handleFetchError,
+	type OperationResult,
+} from "../utils/fetchUtils";
 
 export const useDeleteDataSource = (type: QueryDatasourceType) => {
 	const environment = useEnviroment();
-	const setResourcesSettings = useSetResourcesSettings();
 	return async (name: string) => {
-		return deleteDataSource(
-			environment.apiUrl,
+		return postDataSource(environment.apiUrl, "query-datasource/delete", {
 			type,
 			name,
-			setResourcesSettings,
-		);
+		});
 	};
 };
 export const useSaveDataSource = () => {
 	const environment = useEnviroment();
-	const setResourcesSettings = useSetResourcesSettings();
 	return async (input: QueryDatasource) => {
-		return saveDataSource(environment.apiUrl, input, setResourcesSettings);
+		return postDataSource(environment.apiUrl, "query-datasource/save", input);
 	};
 };
 export const useLoadDataSource = () => {
@@ -55,58 +50,23 @@ async function loadDataSource(
 			return "";
 		});
 }
-async function deleteDataSource(
+async function postDataSource(
 	apiUrl: string,
-	type: QueryDatasourceType,
-	name: string,
-	setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>,
-): Promise<QueryDatasourceResult> {
+	path: string,
+	body: unknown,
+): Promise<OperationResult> {
 	const fetchParams = {
-		endpoint: `${apiUrl}query-datasource/delete`,
+		endpoint: `${apiUrl}${path}`,
 		options: {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ type, name }),
+			body: JSON.stringify(body),
 		},
 	};
 	return await fetchData(fetchParams)
-		.then((response) => response.json())
-		.then((files: string[]) => {
-			setResourcesSettings((current) =>
-				current.with({ queryFiles: current.queryFiles.replace(type, files) }),
-			);
-			return "success" as QueryDatasourceResult;
-		})
+		.then(() => "success" as OperationResult)
 		.catch((ex) => {
 			handleFetchError((ex as Error).message, fetchParams);
-			return "failed" as QueryDatasourceResult;
-		});
-}
-async function saveDataSource(
-	apiUrl: string,
-	input: QueryDatasource,
-	setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>,
-): Promise<QueryDatasourceResult> {
-	const fetchParams = {
-		endpoint: `${apiUrl}query-datasource/save`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(input),
-		},
-	};
-	return await fetchData(fetchParams)
-		.then((response) => response.json())
-		.then((files: string[]) => {
-			setResourcesSettings((current) =>
-				current.with({
-					queryFiles: current.queryFiles.replace(input.type, files),
-				}),
-			);
-			return "success" as QueryDatasourceResult;
-		})
-		.catch((ex) => {
-			handleFetchError((ex as Error).message, fetchParams);
-			return "failed" as QueryDatasourceResult;
+			return "failed" as OperationResult;
 		});
 }
