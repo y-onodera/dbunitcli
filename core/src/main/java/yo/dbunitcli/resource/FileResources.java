@@ -72,10 +72,13 @@ public record FileResources() {
             return path;
         }
         String expandedPath = path;
-        if (expandedPath.contains("%USERPROFILE%")) {
-            final String userProfile = System.getenv("USERPROFILE");
-            if (Strings.isNotEmpty(userProfile)) {
-                expandedPath = expandedPath.replace("%USERPROFILE%", userProfile);
+        for (final String varName : new String[]{"USERPROFILE", "HOME"}) {
+            final String placeholder = "%" + varName + "%";
+            if (expandedPath.contains(placeholder)) {
+                final String value = System.getenv(varName);
+                if (Strings.isNotEmpty(value)) {
+                    expandedPath = expandedPath.replace(placeholder, value);
+                }
             }
         }
         return expandedPath;
