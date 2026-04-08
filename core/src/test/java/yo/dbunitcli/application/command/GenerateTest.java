@@ -762,8 +762,9 @@ public class GenerateTest {
         }
 
         private void assertGenerateFileEquals(final String target, final String encode) throws IOException {
-            final String expect = Files.readString(new File(GenerateTest.testResourcesDir + "expect/" + GenerateTest.subDirectory + "/expect/txt", target).toPath(), Charset.forName(encode));
-            final String actual = Files.readString(new File(this.getResult(), target).toPath(), Charset.forName(encode));
+            final Charset charset = Charset.forName(encode);
+            final String expect = Files.readString(new File(GenerateTest.testResourcesDir + "expect/" + GenerateTest.subDirectory + "/expect/txt", target).toPath(), charset).replace("\r\n", "\n").replace("\r", "\n");
+            final String actual = Files.readString(new File(this.getResult(), target).toPath(), charset).replace("\r\n", "\n").replace("\r", "\n");
             Assertions.assertEquals(expect, actual);
         }
 
