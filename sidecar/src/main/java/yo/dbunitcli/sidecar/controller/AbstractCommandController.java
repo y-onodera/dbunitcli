@@ -26,7 +26,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCommandController.class);
 
-    private static final EnumSet<Option.BaseDir> SIDECAR_RESOLVE_BASEDIRS = EnumSet.of(
+    private static final EnumSet<Option.BaseDir> SIDECAR_RESOLVE_BASEDIR = EnumSet.of(
             Option.BaseDir.SETTING, Option.BaseDir.TEMPLATE, Option.BaseDir.JDBC,
             Option.BaseDir.XLSX_SCHEMA, Option.BaseDir.PARAMETERIZE_TEMPLATE);
 
@@ -156,7 +156,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
             LOGGER.info(System.getProperty(FileResources.PROPERTY_WORKSPACE));
             final CommandParameters parameters = new CommandParameters(this.getCommandType(), body.getInput())
                     .resolveFilePaths((baseDir, value) ->
-                            SIDECAR_RESOLVE_BASEDIRS.contains(baseDir) && !new File(value).isAbsolute()
+                            SIDECAR_RESOLVE_BASEDIR.contains(baseDir) && !new File(value).isAbsolute()
                                     ? new File(Workspace.resolveBaseDir(baseDir, null), value).getAbsolutePath()
                                     : value);
             try {
