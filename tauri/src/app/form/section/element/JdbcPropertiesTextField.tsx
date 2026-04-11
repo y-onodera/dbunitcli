@@ -3,8 +3,7 @@ import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProv
 import { useDeleteJdbcProperties } from "../../../../hooks/useJdbc";
 import type { CommandOption } from "../../../../model/CommandOption";
 import { RemoveResource } from "../../../settings/ResourceEditButton";
-import ResourceDropDownMenu from "./ResourceDropDownMenu";
-import ResourceText from "./ResourceText";
+import Text, { TextDropDownMenu } from "./Text";
 
 export default function JdbcPropertiesTextField({
 	prefix,
@@ -17,10 +16,11 @@ export default function JdbcPropertiesTextField({
 }) {
 	const settings = useResourcesSettings();
 	return (
-		<ResourceText
+		<Text
 			prefix={prefix}
 			element={element}
 			resourceFiles={settings.jdbcFiles}
+			showDefaulePath={true}
 			handleValueChange={(value) => onValueChange(element.name, value)}
 		>
 			{({ path, setPath, isValueInDatalist }) => {
@@ -30,7 +30,7 @@ export default function JdbcPropertiesTextField({
 					onValueChange(element.name, newPath);
 				};
 				return (
-					<ResourceDropDownMenu
+					<TextDropDownMenu
 						prefix={prefix}
 						element={element}
 						path={path}
@@ -49,7 +49,7 @@ export default function JdbcPropertiesTextField({
 					/>
 				);
 			}}
-		</ResourceText>
+		</Text>
 	);
 }
 

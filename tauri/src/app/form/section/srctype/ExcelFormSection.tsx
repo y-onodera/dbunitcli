@@ -7,7 +7,7 @@ import type {
 } from "../../../../model/CommandOption";
 import Check from "../element/Check";
 import PlainText from "../element/PlainText";
-import XlsxSchemaText from "./XlsxSchemaText";
+import XlsxSchemaText from "../element/XlsxSchemaText";
 
 export default function ExcelFormSection({
 	options: settings,

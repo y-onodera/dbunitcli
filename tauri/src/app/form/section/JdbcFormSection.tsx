@@ -40,6 +40,11 @@ export default function JdbcFormSection({
 
 	return (
 		<>
+			<JdbcPropertiesTextField
+				prefix={prefix}
+				element={jdbcOption.jdbcProperties}
+				onValueChange={handleJdbcValueChange}
+			/>
 			<JdbcUrlTextField
 				prefix={prefix}
 				element={jdbcOption.jdbcUrl}
@@ -58,11 +63,6 @@ export default function JdbcFormSection({
 				handleValueChange={(value) =>
 					handleJdbcValueChange(jdbcOption.jdbcPass.name, value)
 				}
-			/>
-			<JdbcPropertiesTextField
-				prefix={prefix}
-				element={jdbcOption.jdbcProperties}
-				onValueChange={handleJdbcValueChange}
 			/>
 			<div className="mt-2 flex items-center gap-3">
 				<JdbcConnectionTestButton

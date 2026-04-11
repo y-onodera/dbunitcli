@@ -20,13 +20,13 @@ export default function JdbcUrlTextField({
 			element={element}
 			handleValueChange={(value: string) => onValueChange(element.name, value)}
 		>
-			{({ value, setValue }) => {
+			{({ path, setPath }) => {
 				const wrappedSetPath: Dispatch<SetStateAction<string>> = (action) => {
-					const newPath = typeof action === "function" ? action(value) : action;
-					setValue(newPath);
+					const newPath = typeof action === "function" ? action(path) : action;
+					setPath(newPath);
 					onValueChange(element.name, newPath);
 				};
-				return <JdbcUrlBuilderButton value={value} setValue={wrappedSetPath} />;
+				return <JdbcUrlBuilderButton value={path} setValue={wrappedSetPath} />;
 			}}
 		</PlainText>
 	);

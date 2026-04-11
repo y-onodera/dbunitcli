@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import type { CommandOption } from "../../../../model/CommandOption";
 
 export type Prop = {
@@ -14,6 +14,14 @@ export type FileProp = Prop & {
 	onSelect?: () => void;
 };
 export type TextProp = Prop & {
+	resourceFiles?: string[];
+	showDefaulePath?: boolean;
+	afterContent?: (args: { path: string }) => ReactNode;
+	children?: (args: {
+		path: string;
+		setPath: Dispatch<SetStateAction<string>>;
+		isValueInDatalist?: boolean;
+	}) => ReactNode;
 	handleValueChange?: (value: string) => void;
 };
 export type SelectProp = Prop & {

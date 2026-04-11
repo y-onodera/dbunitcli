@@ -15,9 +15,6 @@ type SqlEditorButtonProps = ResourceEditButtonProp & {
 	type: QueryDatasourceType;
 };
 
-/**
- * SQLエディタまたはテーブル定義エディタを表示するためのボタンコンポーネント
- */
 export default function SqlEditorButton({
 	path,
 	setPath,

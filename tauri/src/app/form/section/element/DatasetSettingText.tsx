@@ -5,8 +5,7 @@ import DatasetSettingEditButton, {
 } from "../../../settings/DatasetSettingEditButton";
 import DatasetTableNamesPreviewButton from "../../../settings/DatasetTableNamesPreviewButton";
 import type { TextProp } from "./FormElementProp";
-import ResourceDropDownMenu from "./ResourceDropDownMenu";
-import ResourceText from "./ResourceText";
+import Text, { TextDropDownMenu } from "./Text";
 
 export default function DatasetSettingText({
 	prefix,
@@ -19,11 +18,12 @@ export default function DatasetSettingText({
 	const resourceFiles = settings.datasetSettings;
 
 	return (
-		<ResourceText
+		<Text
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
 			resourceFiles={resourceFiles}
+			showDefaulePath={true}
 			afterContent={({ path }) =>
 				datasetSrcInfo.srcType && !hideDatasetSettingEdit ? (
 					<div className="mt-2 flex items-center gap-3">
@@ -39,7 +39,7 @@ export default function DatasetSettingText({
 			}
 		>
 			{({ path, setPath, isValueInDatalist }) => (
-				<ResourceDropDownMenu
+				<TextDropDownMenu
 					path={path}
 					setPath={setPath}
 					prefix={prefix}
@@ -61,6 +61,6 @@ export default function DatasetSettingText({
 					)}
 				/>
 			)}
-		</ResourceText>
+		</Text>
 	);
 }

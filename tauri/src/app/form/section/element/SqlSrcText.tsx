@@ -1,7 +1,12 @@
-import type { TextProp } from "./FormElementProp";
-import PlainText from "./PlainText";
-import SqlSrcDropDownMenu from "./SqlSrcDropDownMenu";
+import type { ReactNode } from "react";
+import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
+import SqlEditorButton, {
+	RemoveSqlEditorButton,
+} from "../../../settings/SqlEditorButton";
+import type { FileProp, TextProp } from "./FormElementProp";
+import Text, { TextDropDownMenu } from "./Text";
 
+type Props = Omit<FileProp, "onSelect" | "hidden">;
 export default function SqlSrcText({
 	prefix,
 	element,
@@ -10,21 +15,62 @@ export default function SqlSrcText({
 	handleValueChange,
 }: TextProp) {
 	return (
-		<PlainText
+		<Text
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
+			showDefaulePath={true}
 			handleValueChange={handleValueChange}
 		>
-			{({ value, setValue }) => (
+			{({ path, setPath }) => (
 				<SqlSrcDropDownMenu
-					path={value}
-					setPath={setValue}
+					path={path}
+					setPath={setPath}
 					prefix={prefix}
 					element={element}
 					srcType={srcType}
 				/>
 			)}
-		</PlainText>
+		</Text>
+	);
+}
+function SqlSrcDropDownMenu({
+	path,
+	setPath,
+	prefix,
+	element,
+	srcType,
+}: Props) {
+	const isSqlOrTable = srcType === "sql" || srcType === "table";
+
+	const editButtons: ReactNode[] = [];
+	editButtons.push(
+		<SqlEditorButton
+			type={srcType as QueryDatasourceType}
+			path={path}
+			setPath={setPath}
+		/>,
+	);
+
+	return (
+		<TextDropDownMenu
+			path={path}
+			setPath={setPath}
+			prefix={prefix}
+			element={element}
+			srcType={srcType}
+			editButtons={editButtons}
+			removeButton={
+				isSqlOrTable
+					? () => (
+							<RemoveSqlEditorButton
+								path={path}
+								setPath={setPath}
+								type={srcType as QueryDatasourceType}
+							/>
+						)
+					: undefined
+			}
+		/>
 	);
 }

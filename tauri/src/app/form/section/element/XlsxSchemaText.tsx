@@ -2,9 +2,8 @@ import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProv
 import XlsxSchemaEditButton, {
 	RemoveXlsxSchemaButton,
 } from "../../../settings/XlsxSchemaEditButton";
-import type { TextProp } from "../element/FormElementProp";
-import ResourceDropDownMenu from "../element/ResourceDropDownMenu";
-import ResourceText from "../element/ResourceText";
+import type { TextProp } from "./FormElementProp";
+import Text, { TextDropDownMenu } from "./Text";
 
 export default function XlsxSchemaText({
 	prefix,
@@ -15,15 +14,16 @@ export default function XlsxSchemaText({
 	const settings = useResourcesSettings();
 
 	return (
-		<ResourceText
+		<Text
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
 			resourceFiles={settings.xlsxSchemas}
+			showDefaulePath={true}
 			handleValueChange={handleValueChange}
 		>
 			{({ path, setPath, isValueInDatalist }) => (
-				<ResourceDropDownMenu
+				<TextDropDownMenu
 					path={path}
 					setPath={setPath}
 					prefix={prefix}
@@ -37,6 +37,6 @@ export default function XlsxSchemaText({
 					)}
 				/>
 			)}
-		</ResourceText>
+		</Text>
 	);
 }

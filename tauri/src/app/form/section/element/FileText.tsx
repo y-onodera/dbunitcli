@@ -1,6 +1,5 @@
 import type { TextProp } from "./FormElementProp";
-import PlainText from "./PlainText";
-import ResourceDropDownMenu from "./ResourceDropDownMenu";
+import Text, { TextDropDownMenu } from "./Text";
 
 export default function FileText({
 	prefix,
@@ -9,20 +8,21 @@ export default function FileText({
 	handleValueChange: onValueChange,
 }: TextProp) {
 	return (
-		<PlainText
+		<Text
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
+			showDefaulePath={true}
 			handleValueChange={onValueChange}
 		>
-			{({ value, setValue }) => (
-				<ResourceDropDownMenu
-					path={value}
-					setPath={setValue}
+			{({ path, setPath }) => (
+				<TextDropDownMenu
+					path={path}
+					setPath={setPath}
 					prefix={prefix}
 					element={element}
 				/>
 			)}
-		</PlainText>
+		</Text>
 	);
 }

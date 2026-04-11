@@ -3,8 +3,7 @@ import TemplateEditButton, {
 	RemoveTemplateButton,
 } from "../../../settings/TemplateEditButton";
 import type { TextProp } from "./FormElementProp";
-import ResourceDropDownMenu from "./ResourceDropDownMenu";
-import ResourceText from "./ResourceText";
+import Text, { TextDropDownMenu } from "./Text";
 
 export default function TemplateText({
 	prefix,
@@ -15,15 +14,16 @@ export default function TemplateText({
 	const settings = useResourcesSettings();
 
 	return (
-		<ResourceText
+		<Text
 			prefix={prefix}
 			element={element}
 			handleValueChange={handleValueChange}
 			hidden={hidden}
 			resourceFiles={settings.templateFiles}
+			showDefaulePath={true}
 		>
 			{({ path, setPath, isValueInDatalist }) => (
-				<ResourceDropDownMenu
+				<TextDropDownMenu
 					path={path}
 					setPath={setPath}
 					prefix={prefix}
@@ -37,6 +37,6 @@ export default function TemplateText({
 					)}
 				/>
 			)}
-		</ResourceText>
+		</Text>
 	);
 }
