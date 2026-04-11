@@ -29,15 +29,13 @@ import java.util.stream.Stream;
 public class Workspace {
     private static final Logger LOGGER = LoggerFactory.getLogger(Workspace.class);
 
-    public static File resolveBaseDir(final Option.BaseDir baseDir, final String srcType) {
-        return resolveBaseDir(baseDir.name(), srcType);
+    public static File resolveBaseDir(final Option.BaseDir baseDir) {
+        return resolveBaseDir(baseDir.name());
     }
 
-    public static File resolveBaseDir(final String defaultPath, final String srcType) {
+    public static File resolveBaseDir(final String defaultPath) {
         return switch (defaultPath) {
-            case "DATASET" -> Strings.isNotEmpty(srcType)
-                    ? new File(FileResources.datasetDir(), srcType)
-                    : FileResources.datasetDir();
+            case "DATASET" -> FileResources.datasetDir();
             case "RESULT" -> FileResources.resultDir();
             case "SETTING" -> FileResources.settingDir();
             case "TEMPLATE" -> FileResources.templateFileDir();

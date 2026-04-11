@@ -58,7 +58,7 @@ public class WorkspaceController implements ControllerExceptionHandler {
                 return absolute.getAbsolutePath();
             }
             for (final File root : new File[]{
-                    Workspace.resolveBaseDir(request.getDefaultPath(), request.getSrcType()),
+                    Workspace.resolveBaseDir(request.getDefaultPath()),
                     FileResources.baseDir(),
                     new File(System.getProperty("user.dir"))
             }) {
