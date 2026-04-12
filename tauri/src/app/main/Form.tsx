@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import Footer from "../footer/Footer";
 import CommandForm from "../form/CommandForm";
 
@@ -31,24 +30,7 @@ export default function Form() {
 				}}
 			>
 				<CommandForm formData={formData} />
-				<Suspense
-					fallback={
-						<div className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 ">
-							<div className="relative p-4 w-full max-w-md max-h-full">
-								<div className="relative bg-white rounded-lg shadow-sm ">
-									<div className="p-4 md:p-5 flex flex-col justify-center items-center">
-										<h3 className="mb-5 text-lg font-normal text-gray-500 ">
-											Now Execution
-										</h3>
-										<div className="block animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent" />
-									</div>
-								</div>
-							</div>
-						</div>
-					}
-				>
-					<Footer formData={formData} />
-				</Suspense>
+				<Footer formData={formData} />
 			</form>
 		</div>
 	);

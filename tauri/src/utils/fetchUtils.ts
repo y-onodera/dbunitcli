@@ -43,6 +43,9 @@ export const handleFetchError = (
 	console.error("Fetch Error:", errorInfo);
 };
 
+export const getErrorMessage = (error: unknown): string =>
+	error instanceof Error ? error.message : String(error);
+
 export type OperationResult = "success" | "failed";
 
 export async function saveOnSuccess(

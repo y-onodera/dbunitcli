@@ -1,5 +1,5 @@
 import { core } from "@tauri-apps/api";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import {
@@ -21,26 +21,63 @@ export default function Footer(prop: {
 		resultMessage: "",
 		resultDir: "",
 	} as Running);
+	const [isLoading, setIsLoading] = useState(false);
+	const executingRef = useRef(false);
 	const parameter = useSelectParameter();
 	const saveParameter = useSaveParameter();
 	const execParameter = useExecParameter();
 	const saveShell = useSaveShell();
+
+	useEffect(() => {
+		if (running.command === "" || executingRef.current) {
+			return;
+		}
+		executingRef.current = true;
+		let active = true;
+		setIsLoading(true);
+
+		const handleResult = (result: Running) => {
+			if (active) {
+				executingRef.current = false;
+				setRunning(result);
+				setIsLoading(false);
+			}
+		};
+
+		if (running.command === "exec") {
+			execParameter(prop.formData(false).values, handleResult);
+		} else if (running.command === "save") {
+			saveParameter(prop.formData(false).values, handleResult);
+		} else if (running.command === "saveShell") {
+			saveShell(handleResult);
+		}
+
+		return () => {
+			active = false;
+		};
+	}, [running.command, execParameter, saveParameter, saveShell]);
+
 	const openDirectory = async (path: string) => {
 		await core.invoke("open_directory", { path });
 	};
-	if (running.command === "exec") {
-		throw new Promise(() =>
-			execParameter(prop.formData(true).values, setRunning),
+
+	if (isLoading) {
+		return (
+			<div className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 ">
+				<div className="relative p-4 w-full max-w-md max-h-full">
+					<div className="relative bg-white rounded-lg shadow-sm ">
+						<div className="p-4 md:p-5 flex flex-col justify-center items-center">
+							<h3 className="mb-5 text-lg font-normal text-gray-500 ">
+								Now Execution
+							</h3>
+							<div className="block animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent" />
+						</div>
+					</div>
+				</div>
+			</div>
 		);
 	}
-	if (running.command === "save") {
-		throw new Promise(() =>
-			saveParameter(prop.formData(false).values, setRunning),
-		);
-	}
-	if (running.command === "saveShell") {
-		throw new Promise(() => saveShell(setRunning));
-	}
+
 	return (
 		<>
 			<ResultDialog hidden={running.resultMessage === ""}>

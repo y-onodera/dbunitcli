@@ -5,9 +5,7 @@ import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { SrcInfo } from "../model/CommandOption";
 import type { ResourcesSettings } from "../model/WorkspaceResources";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
-import { fetchData, handleFetchError } from "../utils/fetchUtils";
-
-type OperationResult = "success" | "failed";
+import { fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
 export const useDeleteXlsxSchema = () => {
 	const environment = useEnviroment();
@@ -56,7 +54,7 @@ async function loadXlsxSchema(
 		.then((response) => response.json())
 		.then((schema: XlsxSchemaBuilder) => XlsxSchema.build(schema))
 		.catch((ex) => {
-			handleFetchError((ex as Error).message, fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 			return XlsxSchema.create();
 		});
 }
@@ -83,7 +81,7 @@ async function saveXlsxSchema(
 			return "success" as OperationResult;
 		})
 		.catch((ex) => {
-			handleFetchError((ex as Error).message, fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 			return "failed" as OperationResult;
 		});
 }
@@ -109,7 +107,7 @@ async function deleteXlsxSchema(
 			return "success" as OperationResult;
 		})
 		.catch((ex) => {
-			handleFetchError((ex as Error).message, fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 			return "failed" as OperationResult;
 		});
 }

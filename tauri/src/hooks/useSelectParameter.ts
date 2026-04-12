@@ -10,7 +10,7 @@ import type {
 	ParameterizeOptions,
 } from "../model/SelectParameter";
 import { SelectParameter } from "../model/SelectParameter";
-import { fetchData, handleFetchError } from "../utils/fetchUtils";
+import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
 
 export type Running = {
 	command: string;
@@ -30,12 +30,12 @@ export const useLoadSelectParameter = () => {
 				body: JSON.stringify({ name }),
 			},
 		};
-		await fetchData(fetchParams)
-			.then((response) => response.json())
-			.then((parameter: Options) => {
-				setParameter(new SelectParameter(parameter, command, name));
-			})
-			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
+		try {
+			const response = await fetchData(fetchParams);
+			setParameter(new SelectParameter(await response.json(), command, name));
+		} catch (ex) {
+			handleFetchError(getErrorMessage(ex), fetchParams);
+		}
 	};
 };
 
@@ -51,105 +51,82 @@ export const useRefreshSelectParameter = (command: string) => {
 				body: JSON.stringify(values),
 			},
 		};
-		await fetchData(fetchParams)
-			.then((response) => response.json())
-			.then((parameter: Options) => {
-				setParameter(
-					(current) =>
-						new SelectParameter(parameter, current.command, current.name),
-				);
-			})
-			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
+		try {
+			const response = await fetchData(fetchParams);
+			const parameter: Options = await response.json();
+			setParameter(
+				(current) => new SelectParameter(parameter, current.command, current.name),
+			);
+		} catch (ex) {
+			handleFetchError(getErrorMessage(ex), fetchParams);
+		}
+	};
+};
+
+type ParameterAction = "save" | "exec" | "shell";
+
+const parseResponse = async (
+	action: ParameterAction,
+	response: Response,
+): Promise<Running> => {
+	if (action === "save") {
+		return { command: "", resultMessage: "Save Success", resultDir: "" };
+	}
+	const resultDir = await response.text();
+	return {
+		command: "",
+		resultMessage: action === "exec" ? "Execution Success" : "Save Shell Success",
+		resultDir,
+	};
+};
+
+const useParameterAction = () => {
+	const parameter = useSelectParameter();
+	const environment = useEnviroment();
+	return async (
+		action: ParameterAction,
+		extraBody: Record<string, unknown>,
+		handleResult: (result: Running) => void,
+	) => {
+		const fetchParams = {
+			endpoint: `${environment.apiUrl + parameter.command}/${action}`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name: parameter.name, ...extraBody }),
+			},
+		};
+		try {
+			const response = await fetchData(fetchParams);
+			handleResult(await parseResponse(action, response));
+		} catch (ex) {
+			const errorMessage = getErrorMessage(ex);
+			handleFetchError(errorMessage, fetchParams);
+			handleResult({ command: "", resultMessage: errorMessage, resultDir: "" });
+		}
 	};
 };
 
 export const useSaveParameter = () => {
-	const parameter = useSelectParameter();
-	const environment = useEnviroment();
+	const execute = useParameterAction();
 	return async (
 		input: { [k: string]: FormDataEntryValue },
 		handleResult: (result: Running) => void,
-	) => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl + parameter.command}/save`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name: parameter.name, input }),
-			},
-		};
-		await fetchData(fetchParams)
-			.then(() => {
-				handleResult({
-					command: "",
-					resultMessage: "Save Success",
-					resultDir: "",
-				});
-			})
-			.catch((ex) => {
-				handleFetchError((ex as Error).message, fetchParams);
-				handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
-			});
-	};
+	) => execute("save", { input }, handleResult);
 };
 
 export const useExecParameter = () => {
-	const parameter = useSelectParameter();
-	const environment = useEnviroment();
+	const execute = useParameterAction();
 	return async (
 		input: { [k: string]: FormDataEntryValue },
 		handleResult: (result: Running) => void,
-	) => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl + parameter.command}/exec`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name: parameter.name, input }),
-			},
-		};
-		await fetchData(fetchParams)
-			.then((response) => response.text())
-			.then((resultDir: string) =>
-				handleResult({
-					command: "",
-					resultMessage: "Execution Success",
-					resultDir,
-				}),
-			)
-			.catch((ex) => {
-				handleFetchError((ex as Error).message, fetchParams);
-				handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
-			});
-	};
+	) => execute("exec", { input }, handleResult);
 };
 
 export const useSaveShell = () => {
-	const parameter = useSelectParameter();
-	const environment = useEnviroment();
-	return async (handleResult: (result: Running) => void) => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl + parameter.command}/shell`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name: parameter.name }),
-			},
-		};
-		await fetchData(fetchParams)
-			.then((response) => response.text())
-			.then((resultDir: string) =>
-				handleResult({
-					command: "",
-					resultMessage: "Save Shell Success",
-					resultDir,
-				}),
-			)
-			.catch((ex) => {
-				handleFetchError((ex as Error).message, fetchParams);
-				handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
-			});
-	};
+	const execute = useParameterAction();
+	return async (handleResult: (result: Running) => void) =>
+		execute("shell", {}, handleResult);
 };
 
 export const useParameterizeFrom = () => {
@@ -165,20 +142,18 @@ export const useParameterizeFrom = () => {
 				body: JSON.stringify({ name }),
 			},
 		};
-		await fetchData(fetchParams)
-			.then((response) => response.json())
-			.then((parameter: ParameterizeOptions) => {
-				setParameter(new SelectParameter(parameter, "parameterize", name));
-				setParameterList((current) => {
-					if (current.parameterize.includes(name)) {
-						return current;
-					}
-					return current.replace("parameterize", [
-						...current.parameterize,
-						name,
-					]);
-				});
-			})
-			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
+		try {
+			const response = await fetchData(fetchParams);
+			const parameter: ParameterizeOptions = await response.json();
+			setParameter(new SelectParameter(parameter, "parameterize", name));
+			setParameterList((current) => {
+				if (current.parameterize.includes(name)) {
+					return current;
+				}
+				return current.replace("parameterize", [...current.parameterize, name]);
+			});
+		} catch (ex) {
+			handleFetchError(getErrorMessage(ex), fetchParams);
+		}
 	};
 };

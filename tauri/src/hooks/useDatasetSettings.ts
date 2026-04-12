@@ -9,9 +9,7 @@ import {
 	type DatasetSettingsBuilder,
 } from "../model/DatasetSettings";
 import type { ResourcesSettings } from "../model/WorkspaceResources";
-import { fetchData, handleFetchError } from "../utils/fetchUtils";
-
-type OperationResult = "success" | "failed";
+import { fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
 export const useDatasetTableNamesApi = () => {
 	const { apiUrl } = useEnviroment();
@@ -142,7 +140,7 @@ async function loadDatasetSettings(
 		.then((response) => response.json())
 		.then((setting: DatasetSettingsBuilder) => DatasetSettings.build(setting))
 		.catch((ex) => {
-			handleFetchError((ex as Error).message, fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 			return DatasetSettings.create();
 		});
 }
@@ -171,7 +169,7 @@ async function saveDatasetSettings(
 			return "success" as OperationResult;
 		})
 		.catch((ex) => {
-			handleFetchError((ex as Error).message, fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 			return "failed" as OperationResult;
 		});
 }
@@ -199,7 +197,7 @@ async function deleteDatasetSettings(
 			return "success" as OperationResult;
 		})
 		.catch((ex) => {
-			handleFetchError((ex as Error).message, fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 			return "failed" as OperationResult;
 		});
 }

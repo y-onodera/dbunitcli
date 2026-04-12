@@ -17,7 +17,7 @@ import {
 	WorkspaceContext,
 	type WorkspaceResources,
 } from "../model/WorkspaceResources";
-import { fetchData, handleFetchError } from "../utils/fetchUtils";
+import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
 
 export const useWorkspaceUpdate = () => {
 	const setContext = useSetWorkspaceContext();
@@ -46,7 +46,7 @@ export const useWorkspaceUpdate = () => {
 				setParameterList(ParameterList.from(resources.parameterList));
 				setResourcesSettings(new ResourcesSettings(resources.resources));
 			})
-			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
+			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
 	};
 };
 
@@ -68,7 +68,7 @@ export const useAddParameter = (command: string) => {
 					current.replace(command.toLowerCase(), parameters),
 				);
 			})
-			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
+			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
 	};
 };
 
@@ -91,7 +91,7 @@ export const useDeleteParameter = (command: string, name: string) => {
 					current.replace(command.toLowerCase(), parameters),
 				);
 			})
-			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
+			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
 	};
 };
 
@@ -114,7 +114,7 @@ export const useCopyParameter = (command: string, name: string) => {
 					current.replace(command.toLowerCase(), parameters),
 				);
 			})
-			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
+			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
 	};
 };
 
@@ -145,7 +145,7 @@ export const useRenameParameter = (command: string, name: string) => {
 					setParameter(parameter.options, parameter.command, newName);
 				}
 			})
-			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
+			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
 	};
 };
 

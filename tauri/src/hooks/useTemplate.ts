@@ -3,6 +3,7 @@ import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import {
 	fetchData,
+	getErrorMessage,
 	handleFetchError,
 	type OperationResult,
 } from "../utils/fetchUtils";
@@ -24,7 +25,7 @@ export const useTemplateLoadContent = () => {
 				const data = (await response.json()) as { content?: string };
 				return data.content ?? "";
 			} catch (e) {
-				handleFetchError((e as Error).message, params);
+				handleFetchError(getErrorMessage(e), params);
 				return "";
 			}
 		},
@@ -53,7 +54,7 @@ export const useDeleteTemplate = () => {
 				);
 				return "success";
 			} catch (e) {
-				handleFetchError((e as Error).message, params);
+				handleFetchError(getErrorMessage(e), params);
 				return "failed";
 			}
 		},
@@ -82,7 +83,7 @@ export const useTemplateSaveContent = () => {
 				);
 				return "success";
 			} catch (e) {
-				handleFetchError((e as Error).message, params);
+				handleFetchError(getErrorMessage(e), params);
 				return "failed";
 			}
 		},
