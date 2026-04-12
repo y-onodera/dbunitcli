@@ -15,19 +15,34 @@ export default function SqlTableInsertDialog({
 	onInsert,
 	onClose,
 }: SqlTableInsertDialogProps) {
-	const [tables, setTables] = useState<string[]>([]);
+	const [tables, setTables] = useState<string[] | null>(null);
 	const [loading, setLoading] = useState(false);
-	const [loaded, setLoaded] = useState(false);
 	const getJdbcTables = useJdbcTables();
 
 	const handleLoad = () => {
+		if (loading) {
+			return;
+		}
 		setLoading(true);
 		getJdbcTables(jdbcValues).then((result) => {
 			setTables(result);
 			setLoading(false);
-			setLoaded(true);
 		});
 	};
+
+	function renderBody() {
+		if (loading) {
+			return <p className="text-sm text-gray-500">Loading...</p>;
+		}
+		if (tables !== null) {
+			return <TablesContent tables={tables} onInsert={onInsert} onClose={onClose} />;
+		}
+		return (
+			<div className="flex gap-2 justify-end">
+				<WhiteButton title="Cancel" handleClick={onClose} />
+			</div>
+		);
+	}
 
 	return (
 		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -36,28 +51,8 @@ export default function SqlTableInsertDialog({
 				<div className="mb-4">
 					<BlueButton title="Load Tables" handleClick={handleLoad} />
 				</div>
-				{renderBody(tables, loading, loaded, onInsert, onClose)}
+				{renderBody()}
 			</div>
-		</div>
-	);
-}
-
-function renderBody(
-	tables: string[],
-	loading: boolean,
-	loaded: boolean,
-	onInsert: (tables: string[]) => void,
-	onClose: () => void,
-) {
-	if (loading) {
-		return <p className="text-sm text-gray-500">Loading...</p>;
-	}
-	if (loaded) {
-		return <TablesContent tables={tables} onInsert={onInsert} onClose={onClose} />;
-	}
-	return (
-		<div className="flex gap-2 justify-end">
-			<WhiteButton title="Cancel" handleClick={onClose} />
 		</div>
 	);
 }

@@ -19,11 +19,17 @@ export const useTemplateData = (name: string): { content: string; loading: boole
 			setLoading(false);
 			return;
 		}
+		let isMounted = true;
 		setLoading(true);
 		loadTemplateContent(apiUrl, name).then((result) => {
-			setContent(result);
-			setLoading(false);
+			if (isMounted) {
+				setContent(result);
+				setLoading(false);
+			}
 		});
+		return () => {
+			isMounted = false;
+		};
 	}, [name, apiUrl]);
 
 	return { content, loading };

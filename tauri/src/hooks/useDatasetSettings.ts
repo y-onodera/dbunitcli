@@ -118,9 +118,7 @@ export const useDatasetSettingsData = (
 	fileName: string,
 ): { settings: DatasetSettings; loading: boolean } => {
 	const { apiUrl } = useEnviroment();
-	const [settings, setSettings] = useState<DatasetSettings>(() =>
-		DatasetSettings.create(),
-	);
+	const [settings, setSettings] = useState(DatasetSettings.create());
 	const [loading, setLoading] = useState(fileName !== "");
 
 	useEffect(() => {
@@ -129,11 +127,17 @@ export const useDatasetSettingsData = (
 			setLoading(false);
 			return;
 		}
+		let isMounted = true;
 		setLoading(true);
 		loadDatasetSettings(apiUrl, fileName).then((result) => {
-			setSettings(result);
-			setLoading(false);
+			if (isMounted) {
+				setSettings(result);
+				setLoading(false);
+			}
 		});
+		return () => {
+			isMounted = false;
+		};
 	}, [fileName, apiUrl]);
 
 	return { settings, loading };

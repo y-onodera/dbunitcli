@@ -32,7 +32,7 @@ export const useXlsxSchemaData = (
 	fileName: string,
 ): { schema: XlsxSchema; loading: boolean } => {
 	const { apiUrl } = useEnviroment();
-	const [schema, setSchema] = useState<XlsxSchema>(() => XlsxSchema.create());
+	const [schema, setSchema] = useState(XlsxSchema.create());
 	const [loading, setLoading] = useState(fileName !== "");
 
 	useEffect(() => {
@@ -41,11 +41,17 @@ export const useXlsxSchemaData = (
 			setLoading(false);
 			return;
 		}
+		let isMounted = true;
 		setLoading(true);
 		loadXlsxSchema(apiUrl, fileName).then((result) => {
-			setSchema(result);
-			setLoading(false);
+			if (isMounted) {
+				setSchema(result);
+				setLoading(false);
+			}
 		});
+		return () => {
+			isMounted = false;
+		};
 	}, [fileName, apiUrl]);
 
 	return { schema, loading };
