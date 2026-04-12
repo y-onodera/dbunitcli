@@ -15,7 +15,6 @@ import { enviromentFixture } from "../setup";
 
 // モックデータ
 const mockQueryDatasource: QueryDatasource = {
-	type: "sql",
 	name: "test-query",
 	contents: "SELECT * FROM test_table;",
 };
@@ -57,21 +56,21 @@ describe("QueryDatasourceProviderのテスト", () => {
 		it("正常なロードが行われることを確認", async () => {
 			const { result } = renderHook(() => useLoadDataSource(), { wrapper });
 			expect(result.current).toBeTypeOf("function");
-			const res = await result.current("sql", "test-query");
+			const res = await result.current("test-query");
 			expect(res).toBe(mockLoadedContents);
 		});
 
 		it("csvqタイプでも正常にロードできることを確認", async () => {
 			const { result } = renderHook(() => useLoadDataSource(), { wrapper });
 			expect(result.current).toBeTypeOf("function");
-			const res = await result.current("csvq", "test-query");
+			const res = await result.current("test-query");
 			expect(res).toBe(mockLoadedContents);
 		});
 
 		it("tableタイプでも正常にロードできることを確認", async () => {
 			const { result } = renderHook(() => useLoadDataSource(), { wrapper });
 			expect(result.current).toBeTypeOf("function");
-			const res = await result.current("table", "test-table");
+			const res = await result.current("test-table");
 			expect(res).toBe(mockLoadedContents);
 		});
 	});
