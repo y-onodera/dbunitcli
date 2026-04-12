@@ -93,7 +93,7 @@ export const useSaveParameter = () => {
 					handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
 				});
 		},
-		[parameter, environment],
+		[parameter.command, parameter.name, environment.apiUrl],
 	);
 };
 
@@ -127,7 +127,7 @@ export const useExecParameter = () => {
 					handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
 				});
 		},
-		[parameter, environment],
+		[parameter.command, parameter.name, environment.apiUrl],
 	);
 };
 
@@ -158,7 +158,7 @@ export const useSaveShell = () => {
 					handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
 				});
 		},
-		[parameter, environment],
+		[parameter.command, parameter.name, environment.apiUrl],
 	);
 };
 

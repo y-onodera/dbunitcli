@@ -45,14 +45,11 @@ export default function Footer(prop: {
 		};
 
 		if (running.command === "exec") {
-			execParameter(prop.formData(true).values, handleResult);
+			execParameter(prop.formData(false).values, handleResult);
 		} else if (running.command === "save") {
 			saveParameter(prop.formData(false).values, handleResult);
 		} else if (running.command === "saveShell") {
 			saveShell(handleResult);
-		} else {
-			executingRef.current = false;
-			setIsLoading(false);
 		}
 
 		return () => {
