@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { EditButton } from "../../components/element/ButtonIcon";
-import { useDeleteTemplate } from "../../hooks/useTemplate";
+import { EditButton } from "../../../../components/element/ButtonIcon";
+import { useDeleteTemplate } from "../../../../hooks/useTemplate";
 import {
 	RemoveResource,
 	type ResourceEditButtonProp,

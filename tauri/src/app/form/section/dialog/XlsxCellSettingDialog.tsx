@@ -1,14 +1,20 @@
 import { useState } from "react";
-import { Check, Fieldset, SettingDialog, Text } from "../../components/dialog";
-import { ResourceDatalist } from "../../components/element/Input";
-import { useDatasetSrcInfo } from "../../context/DatasetSrcInfoProvider";
-import { useSrcInfoSheets } from "../../hooks/useXlsxSchema";
-import type { RowSetting } from "../../model/XlsxSchema";
+import {
+	Arrays,
+	Check,
+	Fieldset,
+	SettingDialog,
+	Text,
+} from "../../../../components/dialog";
+import { ResourceDatalist } from "../../../../components/element/Input";
+import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
+import { useSrcInfoSheets } from "../../../../hooks/useXlsxSchema";
+import type { CellSetting } from "../../../../model/XlsxSchema";
 
-export default function XlsxRowSettingDialog(props: {
-	setting: RowSetting;
+export default function XlsxCellSettingDialog(props: {
+	setting: CellSetting;
 	handleDialogClose: () => void;
-	handleCommit: (newSettings: RowSetting) => void;
+	handleCommit: (newSettings: CellSetting) => void;
 }) {
 	const [target, setTarget] = useState(props.setting);
 	const datasetSrcInfo = useDatasetSrcInfo();
@@ -46,29 +52,14 @@ export default function XlsxRowSettingDialog(props: {
 						setTarget((cur) => cur.with({ header: ev.target.value.split(",") }))
 					}
 				/>
-				<Text
-					name="dataStart"
-					value={target.dataStart}
-					handleChange={(ev) =>
-						setTarget((cur) => cur.with({ dataStart: ev.target.value }))
+				<Arrays
+					name="rows"
+					values={target.rows.map((row) => row.cellAddress.join(","))}
+					handleChange={(text, index) =>
+						setTarget((cur) => cur.replaceRows(text.split(","), index))
 					}
-				/>
-				<Text
-					name="columnIndex"
-					value={target.columnIndex.join(",")}
-					handleChange={(ev) =>
-						setTarget((cur) =>
-							cur.with({ columnIndex: ev.target.value.split(",") }),
-						)
-					}
-				/>
-				<Text
-					name="breakKey"
-					value={target.breakKey.join(",")}
-					handleChange={(ev) =>
-						setTarget((cur) =>
-							cur.with({ breakKey: ev.target.value.split(",") }),
-						)
+					handleRemove={(index) =>
+						setTarget((cur) => cur.replaceRows([], index))
 					}
 				/>
 				<Check

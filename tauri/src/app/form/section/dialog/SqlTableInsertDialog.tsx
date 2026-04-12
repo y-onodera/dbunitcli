@@ -1,10 +1,7 @@
 import { Suspense, use, useState } from "react";
-import {
-	BlueButton,
-	WhiteButton,
-} from "../../components/element/Button";
-import { useJdbcTables } from "../../hooks/useJdbc";
-import { useTableSelection } from "../../hooks/useTableSelection";
+import { BlueButton, WhiteButton } from "../../../../components/element/Button";
+import { useJdbcTables } from "../../../../hooks/useJdbc";
+import { useTableSelection } from "../../../../hooks/useTableSelection";
 import TableList from "./TableList";
 
 interface SqlTableInsertDialogProps {

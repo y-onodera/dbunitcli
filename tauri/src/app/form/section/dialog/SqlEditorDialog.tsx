@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { BlueButton } from "../../components/element/Button";
-import { SettingDialog } from "../../components/dialog";
-import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
-import { useSaveDataSource } from "../../hooks/useQueryDatasource";
-import type { QueryDatasourceType } from "../../model/QueryDatasource";
-import { saveOnSuccess } from "../../utils/fetchUtils";
+import { SettingDialog } from "../../../../components/dialog";
+import { BlueButton } from "../../../../components/element/Button";
+import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
+import { useSaveDataSource } from "../../../../hooks/useQueryDatasource";
+import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
+import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 
 type SqlEditorDialogProps = {

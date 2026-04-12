@@ -1,18 +1,21 @@
 import { useState } from "react";
-import { SettingDialog } from "../../components/dialog";
+import { SettingDialog } from "../../../../components/dialog";
 import {
 	ControllTextBox,
 	InputLabel,
 	PreviewField,
 	SelectBox,
-} from "../../components/element/Input";
-import type { JdbcUrlBuilderState, RdbType } from "../../model/JdbcUrlBuilder";
+} from "../../../../components/element/Input";
+import type {
+	JdbcUrlBuilderState,
+	RdbType,
+} from "../../../../model/JdbcUrlBuilder";
 import {
 	buildJdbcUrl,
 	DEFAULT_PORTS,
 	parseJdbcUrl,
 	SERVICE_NAME_LABEL,
-} from "../../model/JdbcUrlBuilder";
+} from "../../../../model/JdbcUrlBuilder";
 
 type JdbcUrlBuilderDialogProps = {
 	currentUrl: string;

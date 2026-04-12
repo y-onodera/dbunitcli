@@ -1,5 +1,8 @@
 import { type ReactElement, useState } from "react";
-import { DeleteButton, EditButton } from "../../components/element/ButtonIcon";
+import {
+	DeleteButton,
+	EditButton,
+} from "../../../../components/element/ButtonIcon";
 
 export type ResourceEditButtonProp = {
 	path: string;

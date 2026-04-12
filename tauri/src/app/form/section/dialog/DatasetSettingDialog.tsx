@@ -8,12 +8,12 @@ import {
 	Select,
 	SettingDialog,
 	Text,
-} from "../../components/dialog";
-import { ExpandButton } from "../../components/element/ButtonIcon";
-import { ResourceDatalist } from "../../components/element/Input";
-import { useDatasetSrcInfo } from "../../context/DatasetSrcInfoProvider";
-import { useDatasetTableNames } from "../../hooks/useDatasetSettings";
-import type { DatasetSetting } from "../../model/DatasetSettings";
+} from "../../../../components/dialog";
+import { ExpandButton } from "../../../../components/element/ButtonIcon";
+import { ResourceDatalist } from "../../../../components/element/Input";
+import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
+import { useDatasetTableNames } from "../../../../hooks/useDatasetSettings";
+import type { DatasetSetting } from "../../../../model/DatasetSettings";
 
 export default function DatasetSettingDialog(props: {
 	setting: DatasetSetting;

@@ -1,5 +1,5 @@
-import { SettingDialog } from "../../components/dialog";
-import { PreviewField } from "../../components/element/Input";
+import { SettingDialog } from "../../../../components/dialog";
+import { PreviewField } from "../../../../components/element/Input";
 
 type JdbcSavePropertiesDialogProps = {
 	jdbcValues: Record<string, string>;

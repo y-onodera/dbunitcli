@@ -1,10 +1,10 @@
 import { Suspense, use, useState } from "react";
-import { SettingDialog } from "../../components/dialog";
+import { SettingDialog } from "../../../../components/dialog";
 import {
 	useTemplateLoadContent,
 	useTemplateSaveContent,
-} from "../../hooks/useTemplate";
-import { saveOnSuccess } from "../../utils/fetchUtils";
+} from "../../../../hooks/useTemplate";
+import { saveOnSuccess } from "../../../../utils/fetchUtils";
 
 export default function TemplateEditDialog({
 	name,

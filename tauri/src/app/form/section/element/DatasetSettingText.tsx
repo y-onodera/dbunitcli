@@ -2,8 +2,8 @@ import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import DatasetSettingEditButton, {
 	RemoveDatasetSettingButton,
-} from "../../../settings/DatasetSettingEditButton";
-import DatasetTableNamesPreviewButton from "../../../settings/DatasetTableNamesPreviewButton";
+} from "../dialog/DatasetSettingEditButton";
+import DatasetTableNamesPreviewButton from "../dialog/DatasetTableNamesPreviewButton";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 

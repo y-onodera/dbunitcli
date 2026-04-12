@@ -1,17 +1,16 @@
 import { Suspense, use, useState } from "react";
-import { SettingDialog, SettingTable } from "../../components/dialog";
+import { SettingDialog, SettingTable } from "../../../../components/dialog";
 import {
 	useLoadXlsxSchema,
 	useSaveXlsxSchema,
-} from "../../hooks/useXlsxSchema";
+} from "../../../../hooks/useXlsxSchema";
+import type { CellSetting, RowSetting } from "../../../../model/XlsxSchema";
 import {
-	type CellSetting,
 	createCellSetting,
 	createRowSetting,
-	type RowSetting,
 	XlsxSchema,
-} from "../../model/XlsxSchema";
-import { saveOnSuccess } from "../../utils/fetchUtils";
+} from "../../../../model/XlsxSchema";
+import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 

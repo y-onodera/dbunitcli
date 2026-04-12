@@ -1,6 +1,6 @@
 import { Suspense, use } from "react";
-import { SettingDialog } from "../../components/dialog";
-import { useJdbcReadContent } from "../../hooks/useJdbc";
+import { SettingDialog } from "../../../../components/dialog";
+import { useJdbcReadContent } from "../../../../hooks/useJdbc";
 
 type JdbcPropertiesPreviewDialogProps = {
 	path: string;

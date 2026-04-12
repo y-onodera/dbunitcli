@@ -1,9 +1,9 @@
 import { Suspense, use, useMemo } from "react";
-import { SettingDialog } from "../../components/dialog";
-import { useJdbcTables } from "../../hooks/useJdbc";
-import { useSaveDataSource } from "../../hooks/useQueryDatasource";
-import { useTableSelection } from "../../hooks/useTableSelection";
-import { saveOnSuccess } from "../../utils/fetchUtils";
+import { SettingDialog } from "../../../../components/dialog";
+import { useJdbcTables } from "../../../../hooks/useJdbc";
+import { useSaveDataSource } from "../../../../hooks/useQueryDatasource";
+import { useTableSelection } from "../../../../hooks/useTableSelection";
+import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import TableList from "./TableList";
 
 interface JdbcTableSelectorDialogProps {

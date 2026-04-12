@@ -1,4 +1,4 @@
-import { useDeleteXlsxSchema } from "../../hooks/useXlsxSchema";
+import { useDeleteXlsxSchema } from "../../../../hooks/useXlsxSchema";
 import ResourceEditButton, {
 	RemoveResource,
 	type ResourceEditButtonProp,

@@ -1,9 +1,9 @@
 import { Suspense, use, useEffect, useRef, useState } from "react";
-import { BlueButton, WhiteButton } from "../../components/element/Button";
-import { useJdbcConnectionState } from "../../context/JdbcConnectionProvider";
-import { useDatasetSrcInfo } from "../../context/DatasetSrcInfoProvider";
-import { useDatasetTableNamesApi } from "../../hooks/useDatasetSettings";
-import type { DatasetSrcInfo } from "../../model/CommandOption";
+import { BlueButton, WhiteButton } from "../../../../components/element/Button";
+import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
+import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
+import { useDatasetTableNamesApi } from "../../../../hooks/useDatasetSettings";
+import type { DatasetSrcInfo } from "../../../../model/CommandOption";
 
 export default function DatasetTableNamesPreviewButton({
 	title,
@@ -52,7 +52,10 @@ function DatasetTableNamesPreviewDialog({
 
 	return (
 		<Suspense fallback={<div>Loading...</div>}>
-			<TableNamesContent promise={promise} handleDialogClose={handleDialogClose} />
+			<TableNamesContent
+				promise={promise}
+				handleDialogClose={handleDialogClose}
+			/>
 		</Suspense>
 	);
 }

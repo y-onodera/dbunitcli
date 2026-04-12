@@ -1,15 +1,15 @@
 import { Suspense, use, useState } from "react";
-import { SettingDialog, SettingTable } from "../../components/dialog";
+import { SettingDialog, SettingTable } from "../../../../components/dialog";
 import {
 	useLoadDatasetSettings,
 	useSaveDatasetSettings,
-} from "../../hooks/useDatasetSettings";
-import type { DatasetSetting } from "../../model/DatasetSettings";
+} from "../../../../hooks/useDatasetSettings";
+import type { DatasetSetting } from "../../../../model/DatasetSettings";
 import {
 	DatasetSettings,
 	newDatasetSetting,
-} from "../../model/DatasetSettings";
-import { saveOnSuccess } from "../../utils/fetchUtils";
+} from "../../../../model/DatasetSettings";
+import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
 
 export default function DatasetSettingsDialog(props: {

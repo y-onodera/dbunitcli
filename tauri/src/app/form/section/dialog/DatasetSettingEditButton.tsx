@@ -1,4 +1,4 @@
-import { useDeleteDatasetSettings } from "../../hooks/useDatasetSettings";
+import { useDeleteDatasetSettings } from "../../../../hooks/useDatasetSettings";
 import DatasetSettingsDialog from "./DatasetSettingsDialog";
 import ResourceEditButton, {
 	RemoveResource,

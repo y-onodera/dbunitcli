@@ -1,8 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
-import { useDeleteJdbcProperties } from "../../../../hooks/useJdbc";
 import type { CommandOption } from "../../../../model/CommandOption";
-import { RemoveResource } from "../../../settings/ResourceEditButton";
+import { RemoveJdbcPropertiesButton } from "../dialog/RemoveJdbcPropertiesButton";
 import Text, { TextDropDownMenu } from "./Text";
 
 export default function JdbcPropertiesTextField({
@@ -50,22 +49,5 @@ export default function JdbcPropertiesTextField({
 				);
 			}}
 		</Text>
-	);
-}
-
-function RemoveJdbcPropertiesButton({
-	path,
-	setPath,
-}: {
-	path: string;
-	setPath: (value: string) => void;
-}) {
-	const deleteJdbcProperties = useDeleteJdbcProperties();
-	return (
-		<RemoveResource
-			path={path}
-			setPath={setPath}
-			deleteResource={deleteJdbcProperties}
-		/>
 	);
 }

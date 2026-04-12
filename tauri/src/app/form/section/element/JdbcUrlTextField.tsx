@@ -1,8 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useState } from "react";
-import { BlueEditButton } from "../../../../components/element/ButtonIcon";
 import type { CommandOption } from "../../../../model/CommandOption";
-import JdbcUrlBuilderDialog from "../../../settings/JdbcUrlBuilderDialog";
+import { JdbcUrlBuilderButton } from "../dialog/JdbcUrlBuilderButton";
 import PlainText from "./PlainText";
 
 export default function JdbcUrlTextField({
@@ -29,30 +27,5 @@ export default function JdbcUrlTextField({
 				return <JdbcUrlBuilderButton value={path} setValue={wrappedSetPath} />;
 			}}
 		</PlainText>
-	);
-}
-
-function JdbcUrlBuilderButton({
-	value,
-	setValue,
-}: {
-	value: string;
-	setValue: Dispatch<SetStateAction<string>>;
-}) {
-	const [showDialog, setShowDialog] = useState(false);
-	return (
-		<>
-			<BlueEditButton handleClick={() => setShowDialog(true)} />
-			{showDialog && (
-				<JdbcUrlBuilderDialog
-					currentUrl={value}
-					handleDialogClose={() => setShowDialog(false)}
-					handleSave={(url) => {
-						setValue(url);
-						setShowDialog(false);
-					}}
-				/>
-			)}
-		</>
 	);
 }

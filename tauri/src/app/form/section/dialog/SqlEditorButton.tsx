@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { EditButton } from "../../components/element/ButtonIcon";
+import { EditButton } from "../../../../components/element/ButtonIcon";
 import {
 	useDeleteDataSource,
 	useLoadDataSource,
-} from "../../hooks/useQueryDatasource";
-import type { QueryDatasourceType } from "../../model/QueryDatasource";
+} from "../../../../hooks/useQueryDatasource";
+import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import {
 	RemoveResource,
 	type ResourceEditButtonProp,

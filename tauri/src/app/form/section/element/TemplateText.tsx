@@ -1,7 +1,7 @@
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import TemplateEditButton, {
 	RemoveTemplateButton,
-} from "../../../settings/TemplateEditButton";
+} from "../dialog/TemplateEditButton";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 
