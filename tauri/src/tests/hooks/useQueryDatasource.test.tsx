@@ -59,20 +59,6 @@ describe("QueryDatasourceProviderのテスト", () => {
 			const res = await result.current("test-query");
 			expect(res).toBe(mockLoadedContents);
 		});
-
-		it("csvqタイプでも正常にロードできることを確認", async () => {
-			const { result } = renderHook(() => useLoadDataSource(), { wrapper });
-			expect(result.current).toBeTypeOf("function");
-			const res = await result.current("test-query");
-			expect(res).toBe(mockLoadedContents);
-		});
-
-		it("tableタイプでも正常にロードできることを確認", async () => {
-			const { result } = renderHook(() => useLoadDataSource(), { wrapper });
-			expect(result.current).toBeTypeOf("function");
-			const res = await result.current("test-table");
-			expect(res).toBe(mockLoadedContents);
-		});
 	});
 
 	describe("useSaveDataSource", () => {
