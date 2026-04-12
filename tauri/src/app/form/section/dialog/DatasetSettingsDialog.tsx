@@ -1,8 +1,8 @@
-import { Suspense, use, useState } from "react";
+import { useState } from "react";
 import { SettingDialog, SettingTable } from "../../../../components/dialog";
 import {
+	useDatasetSettingsData,
 	useDeleteDatasetSettings,
-	useLoadDatasetSettings,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
 import type { DatasetSetting } from "../../../../model/DatasetSettings";
@@ -22,28 +22,28 @@ export default function DatasetSettingsDialog(props: {
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
-	const loadSettings = useLoadDatasetSettings();
+	const { settings, loading } = useDatasetSettingsData(props.fileName);
+	if (loading) {
+		return <div>Loading...</div>;
+	}
 	return (
-		<Suspense fallback={<div>Loading...</div>}>
-			<Dialog
-				promise={loadSettings(props.fileName)}
-				fileName={props.fileName}
-				handleDialogClose={props.handleDialogClose}
-				handleSave={props.handleSave}
-			/>
-		</Suspense>
+		<Dialog
+			settings={settings}
+			fileName={props.fileName}
+			handleDialogClose={props.handleDialogClose}
+			handleSave={props.handleSave}
+		/>
 	);
 }
 function Dialog(props: {
-	promise: Promise<DatasetSettings>;
+	settings: DatasetSettings;
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
 	const saveSettings = useSaveDatasetSettings();
-	const dataSettingsData = use(props.promise);
 	const [dataSettings, setDataSettings] =
-		useState<DatasetSettings>(dataSettingsData);
+		useState<DatasetSettings>(props.settings);
 	return (
 		<SettingDialog
 			handleDialogClose={props.handleDialogClose}

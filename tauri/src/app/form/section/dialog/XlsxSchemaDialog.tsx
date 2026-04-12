@@ -1,9 +1,9 @@
-import { Suspense, use, useState } from "react";
+import { useState } from "react";
 import { SettingDialog, SettingTable } from "../../../../components/dialog";
 import {
 	useDeleteXlsxSchema,
-	useLoadXlsxSchema,
 	useSaveXlsxSchema,
+	useXlsxSchemaData,
 } from "../../../../hooks/useXlsxSchema";
 import type { CellSetting, RowSetting } from "../../../../model/XlsxSchema";
 import {
@@ -24,27 +24,27 @@ export default function XlsxSchemaDialog(props: {
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
-	const loadXlsxSchema = useLoadXlsxSchema();
+	const { schema, loading } = useXlsxSchemaData(props.fileName);
+	if (loading) {
+		return <div>Loading...</div>;
+	}
 	return (
-		<Suspense fallback={<div>Loading...</div>}>
-			<Dialog
-				promise={loadXlsxSchema(props.fileName)}
-				fileName={props.fileName}
-				handleDialogClose={props.handleDialogClose}
-				handleSave={props.handleSave}
-			/>
-		</Suspense>
+		<Dialog
+			schema={schema}
+			fileName={props.fileName}
+			handleDialogClose={props.handleDialogClose}
+			handleSave={props.handleSave}
+		/>
 	);
 }
 function Dialog(props: {
-	promise: Promise<XlsxSchema>;
+	schema: XlsxSchema;
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
 	const saveSchema = useSaveXlsxSchema();
-	const xlsxSchemaData = use(props.promise);
-	const [xlsxSchema, setXlsxSchema] = useState(xlsxSchemaData);
+	const [xlsxSchema, setXlsxSchema] = useState(props.schema);
 
 	return (
 		<SettingDialog

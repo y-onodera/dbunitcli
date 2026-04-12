@@ -1,9 +1,9 @@
-import { Suspense, use, useState } from "react";
+import { useState } from "react";
 import { SettingDialog } from "../../../../components/dialog";
 import { EditButton } from "../../../../components/element/ButtonIcon";
 import {
 	useDeleteTemplate,
-	useTemplateLoadContent,
+	useTemplateData,
 	useTemplateSaveContent,
 } from "../../../../hooks/useTemplate";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
@@ -21,32 +21,31 @@ export default function TemplateEditDialog({
 	setPath?: (path: string) => void;
 	handleDialogClose: () => void;
 }) {
-	const loadContent = useTemplateLoadContent();
-	const promise = name ? loadContent(name) : Promise.resolve("");
+	const { content, loading } = useTemplateData(name);
+	if (loading) {
+		return <div>Loading...</div>;
+	}
 	return (
-		<Suspense fallback={<div>Loading...</div>}>
-			<Dialog
-				promise={promise}
-				name={name}
-				setPath={setPath}
-				handleDialogClose={handleDialogClose}
-			/>
-		</Suspense>
+		<Dialog
+			content={content}
+			name={name}
+			setPath={setPath}
+			handleDialogClose={handleDialogClose}
+		/>
 	);
 }
 
 function Dialog({
-	promise,
+	content: initialContent,
 	name,
 	setPath,
 	handleDialogClose,
 }: {
-	promise: Promise<string>;
+	content: string;
 	name: string;
 	setPath?: (path: string) => void;
 	handleDialogClose: () => void;
 }) {
-	const initialContent = use(promise);
 	const [content, setContent] = useState<string>(initialContent);
 	const saveContent = useTemplateSaveContent();
 

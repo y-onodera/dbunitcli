@@ -1,4 +1,4 @@
-import { Suspense, use, useState } from "react";
+import { useState } from "react";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { useJdbcTables } from "../../../../hooks/useJdbc";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
@@ -15,13 +15,18 @@ export default function SqlTableInsertDialog({
 	onInsert,
 	onClose,
 }: SqlTableInsertDialogProps) {
-	const [tablesPromise, setTablesPromise] = useState<Promise<string[]> | null>(
-		null,
-	);
+	const [tables, setTables] = useState<string[]>([]);
+	const [loading, setLoading] = useState(false);
+	const [loaded, setLoaded] = useState(false);
 	const getJdbcTables = useJdbcTables();
 
 	const handleLoad = () => {
-		setTablesPromise(getJdbcTables(jdbcValues));
+		setLoading(true);
+		getJdbcTables(jdbcValues).then((result) => {
+			setTables(result);
+			setLoading(false);
+			setLoaded(true);
+		});
 	};
 
 	return (
@@ -31,36 +36,41 @@ export default function SqlTableInsertDialog({
 				<div className="mb-4">
 					<BlueButton title="Load Tables" handleClick={handleLoad} />
 				</div>
-				{tablesPromise === null ? (
-					<div className="flex gap-2 justify-end">
-						<WhiteButton title="Cancel" handleClick={onClose} />
-					</div>
-				) : (
-					<Suspense
-						fallback={<p className="text-sm text-gray-500">Loading...</p>}
-					>
-						<TablesContent
-							promise={tablesPromise}
-							onInsert={onInsert}
-							onClose={onClose}
-						/>
-					</Suspense>
-				)}
+				{renderBody(tables, loading, loaded, onInsert, onClose)}
 			</div>
 		</div>
 	);
 }
 
+function renderBody(
+	tables: string[],
+	loading: boolean,
+	loaded: boolean,
+	onInsert: (tables: string[]) => void,
+	onClose: () => void,
+) {
+	if (loading) {
+		return <p className="text-sm text-gray-500">Loading...</p>;
+	}
+	if (loaded) {
+		return <TablesContent tables={tables} onInsert={onInsert} onClose={onClose} />;
+	}
+	return (
+		<div className="flex gap-2 justify-end">
+			<WhiteButton title="Cancel" handleClick={onClose} />
+		</div>
+	);
+}
+
 function TablesContent({
-	promise,
+	tables,
 	onInsert,
 	onClose,
 }: {
-	promise: Promise<string[]>;
+	tables: string[];
 	onInsert: (tables: string[]) => void;
 	onClose: () => void;
 }) {
-	const tables = use(promise);
 	const { selected, toggle, toggleAll } = useTableSelection(tables);
 
 	const handleInsert = () => {
