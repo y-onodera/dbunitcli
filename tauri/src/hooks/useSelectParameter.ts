@@ -10,7 +10,7 @@ import type {
 	ParameterizeOptions,
 } from "../model/SelectParameter";
 import { SelectParameter } from "../model/SelectParameter";
-import { fetchData, handleFetchError } from "../utils/fetchUtils";
+import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
 
 export type Running = {
 	command: string;
@@ -34,7 +34,7 @@ export const useLoadSelectParameter = () => {
 			const response = await fetchData(fetchParams);
 			setParameter(new SelectParameter(await response.json(), command, name));
 		} catch (ex) {
-			handleFetchError(ex instanceof Error ? ex.message : String(ex), fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 		}
 	};
 };
@@ -58,7 +58,7 @@ export const useRefreshSelectParameter = (command: string) => {
 				(current) => new SelectParameter(parameter, current.command, current.name),
 			);
 		} catch (ex) {
-			handleFetchError(ex instanceof Error ? ex.message : String(ex), fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 		}
 	};
 };
@@ -100,7 +100,7 @@ const useParameterAction = () => {
 			const response = await fetchData(fetchParams);
 			handleResult(await parseResponse(action, response));
 		} catch (ex) {
-			const errorMessage = ex instanceof Error ? ex.message : String(ex);
+			const errorMessage = getErrorMessage(ex);
 			handleFetchError(errorMessage, fetchParams);
 			handleResult({ command: "", resultMessage: errorMessage, resultDir: "" });
 		}
@@ -142,7 +142,7 @@ export const useParameterizeFrom = () => {
 				body: JSON.stringify({ name }),
 			},
 		};
-			try {
+		try {
 			const response = await fetchData(fetchParams);
 			const parameter: ParameterizeOptions = await response.json();
 			setParameter(new SelectParameter(parameter, "parameterize", name));
@@ -153,7 +153,7 @@ export const useParameterizeFrom = () => {
 				return current.replace("parameterize", [...current.parameterize, name]);
 			});
 		} catch (ex) {
-			handleFetchError(ex instanceof Error ? ex.message : String(ex), fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 		}
 	};
 };
