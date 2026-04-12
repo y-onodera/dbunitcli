@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { SettingDialog } from "../../../../components/dialog";
+import { BlueEditButton } from "../../../../components/element/ButtonIcon";
 import {
 	ControllTextBox,
 	InputLabel,
@@ -134,5 +135,29 @@ export default function JdbcUrlBuilderDialog({
 				</div>
 			</div>
 		</SettingDialog>
+	);
+}
+export function JdbcUrlBuilderButton({
+	value,
+	setValue,
+}: {
+	value: string;
+	setValue: Dispatch<SetStateAction<string>>;
+}) {
+	const [showDialog, setShowDialog] = useState(false);
+	return (
+		<>
+			<BlueEditButton handleClick={() => setShowDialog(true)} />
+			{showDialog && (
+				<JdbcUrlBuilderDialog
+					currentUrl={value}
+					handleDialogClose={() => setShowDialog(false)}
+					handleSave={(url) => {
+						setValue(url);
+						setShowDialog(false);
+					}}
+				/>
+			)}
+		</>
 	);
 }

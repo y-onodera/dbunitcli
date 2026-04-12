@@ -1,10 +1,16 @@
 import { Suspense, use, useState } from "react";
 import { SettingDialog } from "../../../../components/dialog";
+import { EditButton } from "../../../../components/element/ButtonIcon";
 import {
+	useDeleteTemplate,
 	useTemplateLoadContent,
 	useTemplateSaveContent,
 } from "../../../../hooks/useTemplate";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
+import {
+	RemoveResource,
+	type ResourceEditButtonProp,
+} from "./ResourceEditButton";
 
 export default function TemplateEditDialog({
 	name,
@@ -68,5 +74,39 @@ function Dialog({
 				/>
 			</div>
 		</SettingDialog>
+	);
+}
+export function TemplateEditButton({
+	path,
+	setPath,
+}: {
+	path: string;
+	setPath?: (path: string) => void;
+}) {
+	const [showDialog, setShowDialog] = useState(false);
+	return (
+		<>
+			<EditButton handleClick={() => setShowDialog(true)} />
+			{showDialog && (
+				<TemplateEditDialog
+					name={path}
+					setPath={setPath}
+					handleDialogClose={() => setShowDialog(false)}
+				/>
+			)}
+		</>
+	);
+}
+export function RemoveTemplateButton({
+	path,
+	setPath,
+}: ResourceEditButtonProp) {
+	const deleteTemplate = useDeleteTemplate();
+	return (
+		<RemoveResource
+			path={path}
+			setPath={setPath}
+			deleteResource={deleteTemplate}
+		/>
 	);
 }

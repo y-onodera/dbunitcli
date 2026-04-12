@@ -27,21 +27,17 @@ export const useSaveDataSource = () => {
 };
 export const useLoadDataSource = () => {
 	const environment = useEnviroment();
-	return async (type: QueryDatasourceType, name: string) => {
-		return loadDataSource(environment.apiUrl, type, name);
+	return async (name: string) => {
+		return loadDataSource(environment.apiUrl, name);
 	};
 };
-async function loadDataSource(
-	apiUrl: string,
-	type: QueryDatasourceType,
-	name: string,
-): Promise<string> {
+async function loadDataSource(apiUrl: string, name: string): Promise<string> {
 	const fetchParams = {
 		endpoint: `${apiUrl}query-datasource/load`,
 		options: {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ type, name }),
+			body: JSON.stringify({ name }),
 		},
 	};
 	return await fetchData(fetchParams)

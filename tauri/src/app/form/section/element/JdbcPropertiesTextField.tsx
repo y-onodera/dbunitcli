@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import type { CommandOption } from "../../../../model/CommandOption";
-import { RemoveJdbcPropertiesButton } from "../dialog/RemoveJdbcPropertiesButton";
+import { RemoveJdbcPropertiesButton } from "../dialog/JdbcSavePropertiesDialog";
 import Text, { TextDropDownMenu } from "./Text";
 
 export default function JdbcPropertiesTextField({

@@ -1,7 +1,6 @@
 export type QueryDatasourceType = "csvq" | "sql" | "table";
 
 export type QueryDatasource = {
-	type: QueryDatasourceType;
 	name: string;
 	contents: string;
 };

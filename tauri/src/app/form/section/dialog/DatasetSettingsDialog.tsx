@@ -1,6 +1,7 @@
 import { Suspense, use, useState } from "react";
 import { SettingDialog, SettingTable } from "../../../../components/dialog";
 import {
+	useDeleteDatasetSettings,
 	useLoadDatasetSettings,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
@@ -11,6 +12,10 @@ import {
 } from "../../../../model/DatasetSettings";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
+import ResourceEditButton, {
+	RemoveResource,
+	type ResourceEditButtonProp,
+} from "./ResourceEditButton";
 
 export default function DatasetSettingsDialog(props: {
 	fileName: string;
@@ -99,5 +104,40 @@ function Dialog(props: {
 				getKey={(setting) => setting.displayName()}
 			/>
 		</SettingDialog>
+	);
+}
+export function DatasetSettingEditButton({
+	path,
+	setPath,
+}: ResourceEditButtonProp) {
+	const renderDialog = (open: boolean, closeDialog: () => void) => {
+		if (!open) {
+			return null;
+		}
+		return (
+			<DatasetSettingsDialog
+				fileName={path}
+				handleDialogClose={closeDialog}
+				handleSave={(newPath: string) => {
+					setPath(newPath);
+					closeDialog();
+				}}
+			/>
+		);
+	};
+
+	return <ResourceEditButton renderDialog={renderDialog} />;
+}
+export function RemoveDatasetSettingButton({
+	path,
+	setPath,
+}: ResourceEditButtonProp) {
+	const deleteSettings = useDeleteDatasetSettings();
+	return (
+		<RemoveResource
+			path={path}
+			setPath={setPath}
+			deleteResource={deleteSettings}
+		/>
 	);
 }

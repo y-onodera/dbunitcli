@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
-import SqlEditorButton, {
+import {
 	RemoveSqlEditorButton,
-} from "../dialog/SqlEditorButton";
+	SqlEditorButton,
+} from "../dialog/SqlEditorDialog";
 import type { FileProp, TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 

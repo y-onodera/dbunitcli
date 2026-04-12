@@ -1,7 +1,8 @@
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
-import XlsxSchemaEditButton, {
+import {
 	RemoveXlsxSchemaButton,
-} from "../dialog/XlsxSchemaEditButton";
+	XlsxSchemaEditButton,
+} from "../dialog/XlsxSchemaDialog";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 

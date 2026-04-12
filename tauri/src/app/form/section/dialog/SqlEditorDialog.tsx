@@ -1,10 +1,19 @@
 import { useState } from "react";
 import { SettingDialog } from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
+import { EditButton } from "../../../../components/element/ButtonIcon";
 import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
-import { useSaveDataSource } from "../../../../hooks/useQueryDatasource";
+import {
+	useDeleteDataSource,
+	useLoadDataSource,
+	useSaveDataSource,
+} from "../../../../hooks/useQueryDatasource";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
+import {
+	RemoveResource,
+	type ResourceEditButtonProp,
+} from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 
 type SqlEditorDialogProps = {
@@ -23,7 +32,7 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 
 	const handleCommit = (path: string) =>
 		saveOnSuccess(
-			() => saveDataSource({ type: props.type, name: path, contents: content }),
+			() => saveDataSource({ name: path, contents: content }),
 			() => props.handleSave(path),
 		);
 
@@ -81,5 +90,65 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 				/>
 			)}
 		</SettingDialog>
+	);
+}
+type SqlEditorButtonProps = ResourceEditButtonProp & {
+	type: QueryDatasourceType;
+};
+export function SqlEditorButton({ path, setPath, type }: SqlEditorButtonProps) {
+	const [showDialog, setShowDialog] = useState(false);
+	const [content, setContent] = useState("");
+	const loadDataSource = useLoadDataSource();
+	const handleOpen = async () => {
+		try {
+			if (path) {
+				const result = await loadDataSource(path);
+				setContent(result);
+			}
+			setShowDialog(true);
+		} catch (ex) {
+			alert(ex);
+		}
+	};
+
+	const handleClose = () => {
+		setShowDialog(false);
+		setContent("");
+	};
+
+	const handleSave = (path: string) => {
+		setPath(path);
+		setShowDialog(false);
+		setContent("");
+	};
+
+	return (
+		<>
+			<EditButton handleClick={handleOpen} />
+			{showDialog && (
+				<SqlEditorDialog
+					type={type}
+					fileName={path}
+					value={content}
+					handleDialogClose={handleClose}
+					handleSave={handleSave}
+				/>
+			)}
+		</>
+	);
+}
+export function RemoveSqlEditorButton({
+	path,
+	setPath,
+	type,
+}: SqlEditorButtonProps) {
+	const deleteDataSource = useDeleteDataSource(type);
+
+	return (
+		<RemoveResource
+			path={path}
+			setPath={setPath}
+			deleteResource={deleteDataSource}
+		/>
 	);
 }

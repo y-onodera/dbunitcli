@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { CommandOption } from "../../../../model/CommandOption";
-import { JdbcUrlBuilderButton } from "../dialog/JdbcUrlBuilderButton";
+import { JdbcUrlBuilderButton } from "../dialog/JdbcUrlBuilderDialog";
 import PlainText from "./PlainText";
 
 export default function JdbcUrlTextField({
