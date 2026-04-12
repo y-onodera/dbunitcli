@@ -63,13 +63,29 @@ export const useRefreshSelectParameter = (command: string) => {
 	};
 };
 
+type ParameterAction = "save" | "exec" | "shell";
+
+const parseResponse = async (
+	action: ParameterAction,
+	response: Response,
+): Promise<Running> => {
+	if (action === "save") {
+		return { command: "", resultMessage: "Save Success", resultDir: "" };
+	}
+	const resultDir = await response.text();
+	return {
+		command: "",
+		resultMessage: action === "exec" ? "Execution Success" : "Save Shell Success",
+		resultDir,
+	};
+};
+
 const useParameterAction = () => {
 	const parameter = useSelectParameter();
 	const environment = useEnviroment();
 	return async (
-		action: string,
+		action: ParameterAction,
 		extraBody: Record<string, unknown>,
-		toResult: (response: Response) => Promise<Running>,
 		handleResult: (result: Running) => void,
 	) => {
 		const fetchParams = {
@@ -80,13 +96,12 @@ const useParameterAction = () => {
 				body: JSON.stringify({ name: parameter.name, ...extraBody }),
 			},
 		};
-		await fetchData(fetchParams)
-			.then(toResult)
-			.then(handleResult)
-			.catch((ex) => {
-				handleFetchError((ex as Error).message, fetchParams);
-				handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
-			});
+		try {
+			handleResult(await parseResponse(action, await fetchData(fetchParams)));
+		} catch (ex) {
+			handleFetchError((ex as Error).message, fetchParams);
+			handleResult({ command: "", resultMessage: (ex as Error).message, resultDir: "" });
+		}
 	};
 };
 
@@ -95,13 +110,7 @@ export const useSaveParameter = () => {
 	return async (
 		input: { [k: string]: FormDataEntryValue },
 		handleResult: (result: Running) => void,
-	) =>
-		execute(
-			"save",
-			{ input },
-			async () => ({ command: "", resultMessage: "Save Success", resultDir: "" }),
-			handleResult,
-		);
+	) => execute("save", { input }, handleResult);
 };
 
 export const useExecParameter = () => {
@@ -109,38 +118,13 @@ export const useExecParameter = () => {
 	return async (
 		input: { [k: string]: FormDataEntryValue },
 		handleResult: (result: Running) => void,
-	) =>
-		execute(
-			"exec",
-			{ input },
-			(response) =>
-				response
-					.text()
-					.then((resultDir) => ({
-						command: "",
-						resultMessage: "Execution Success",
-						resultDir,
-					})),
-			handleResult,
-		);
+	) => execute("exec", { input }, handleResult);
 };
 
 export const useSaveShell = () => {
 	const execute = useParameterAction();
 	return async (handleResult: (result: Running) => void) =>
-		execute(
-			"shell",
-			{},
-			(response) =>
-				response
-					.text()
-					.then((resultDir) => ({
-						command: "",
-						resultMessage: "Save Shell Success",
-						resultDir,
-					})),
-			handleResult,
-		);
+		execute("shell", {}, handleResult);
 };
 
 export const useParameterizeFrom = () => {
