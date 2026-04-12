@@ -30,12 +30,12 @@ export const useLoadSelectParameter = () => {
 				body: JSON.stringify({ name }),
 			},
 		};
-		await fetchData(fetchParams)
-			.then((response) => response.json())
-			.then((parameter: Options) => {
-				setParameter(new SelectParameter(parameter, command, name));
-			})
-			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
+		try {
+			const response = await fetchData(fetchParams);
+			setParameter(new SelectParameter(await response.json(), command, name));
+		} catch (ex) {
+			handleFetchError(ex instanceof Error ? ex.message : String(ex), fetchParams);
+		}
 	};
 };
 
@@ -51,15 +51,15 @@ export const useRefreshSelectParameter = (command: string) => {
 				body: JSON.stringify(values),
 			},
 		};
-		await fetchData(fetchParams)
-			.then((response) => response.json())
-			.then((parameter: Options) => {
-				setParameter(
-					(current) =>
-						new SelectParameter(parameter, current.command, current.name),
-				);
-			})
-			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
+		try {
+			const response = await fetchData(fetchParams);
+			const parameter: Options = await response.json();
+			setParameter(
+				(current) => new SelectParameter(parameter, current.command, current.name),
+			);
+		} catch (ex) {
+			handleFetchError(ex instanceof Error ? ex.message : String(ex), fetchParams);
+		}
 	};
 };
 
@@ -97,10 +97,12 @@ const useParameterAction = () => {
 			},
 		};
 		try {
-			handleResult(await parseResponse(action, await fetchData(fetchParams)));
+			const response = await fetchData(fetchParams);
+			handleResult(await parseResponse(action, response));
 		} catch (ex) {
-			handleFetchError((ex as Error).message, fetchParams);
-			handleResult({ command: "", resultMessage: (ex as Error).message, resultDir: "" });
+			const errorMessage = ex instanceof Error ? ex.message : String(ex);
+			handleFetchError(errorMessage, fetchParams);
+			handleResult({ command: "", resultMessage: errorMessage, resultDir: "" });
 		}
 	};
 };
@@ -140,20 +142,18 @@ export const useParameterizeFrom = () => {
 				body: JSON.stringify({ name }),
 			},
 		};
-		await fetchData(fetchParams)
-			.then((response) => response.json())
-			.then((parameter: ParameterizeOptions) => {
-				setParameter(new SelectParameter(parameter, "parameterize", name));
-				setParameterList((current) => {
-					if (current.parameterize.includes(name)) {
-						return current;
-					}
-					return current.replace("parameterize", [
-						...current.parameterize,
-						name,
-					]);
-				});
-			})
-			.catch((ex) => handleFetchError((ex as Error).message, fetchParams));
+			try {
+			const response = await fetchData(fetchParams);
+			const parameter: ParameterizeOptions = await response.json();
+			setParameter(new SelectParameter(parameter, "parameterize", name));
+			setParameterList((current) => {
+				if (current.parameterize.includes(name)) {
+					return current;
+				}
+				return current.replace("parameterize", [...current.parameterize, name]);
+			});
+		} catch (ex) {
+			handleFetchError(ex instanceof Error ? ex.message : String(ex), fetchParams);
+		}
 	};
 };
