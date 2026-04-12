@@ -6,7 +6,7 @@ import {
 	WorkspaceContext,
 	type WorkspaceResources,
 } from "../model/WorkspaceResources";
-import { fetchData, handleFetchError } from "../utils/fetchUtils";
+import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
 import { useEnviroment } from "./EnviromentProvider";
 
 const workspaceContext = createContext<WorkspaceContext>(
@@ -38,7 +38,7 @@ export default function WorkspaceResourcesProvider(props: {
 		};
 		return await fetchData(fetchParams)
 			.then((response) => response.json())
-			.catch((ex) => handleFetchError(ex, fetchParams));
+			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
 	};
 	return (
 		<Suspense fallback={<div>Loading...</div>}>

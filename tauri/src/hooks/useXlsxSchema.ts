@@ -5,9 +5,7 @@ import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { SrcInfo } from "../model/CommandOption";
 import type { ResourcesSettings } from "../model/WorkspaceResources";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
-import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
-
-type OperationResult = "success" | "failed";
+import { fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
 export const useDeleteXlsxSchema = () => {
 	const environment = useEnviroment();

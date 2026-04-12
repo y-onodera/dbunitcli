@@ -9,9 +9,7 @@ import {
 	type DatasetSettingsBuilder,
 } from "../model/DatasetSettings";
 import type { ResourcesSettings } from "../model/WorkspaceResources";
-import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
-
-type OperationResult = "success" | "failed";
+import { fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
 export const useDatasetTableNamesApi = () => {
 	const { apiUrl } = useEnviroment();

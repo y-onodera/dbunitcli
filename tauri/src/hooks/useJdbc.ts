@@ -3,9 +3,7 @@ import { useCallback } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { ResourcesSettings } from "../model/WorkspaceResources";
-import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
-
-type OperationResult = "success" | "failed";
+import { fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
 export const useDeleteJdbcProperties = () => {
 	const { apiUrl } = useEnviroment();
