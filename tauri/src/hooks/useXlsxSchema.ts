@@ -28,11 +28,33 @@ export const useSaveXlsxSchema = () => {
 	};
 };
 
-export const useLoadXlsxSchema = () => {
-	const environment = useEnviroment();
-	return async (name: string) => {
-		return loadXlsxSchema(environment.apiUrl, name);
-	};
+export const useXlsxSchemaData = (
+	fileName: string,
+): { schema: XlsxSchema; loading: boolean } => {
+	const { apiUrl } = useEnviroment();
+	const [schema, setSchema] = useState(XlsxSchema.create());
+	const [loading, setLoading] = useState(fileName !== "");
+
+	useEffect(() => {
+		if (!fileName) {
+			setSchema(XlsxSchema.create());
+			setLoading(false);
+			return;
+		}
+		let isMounted = true;
+		setLoading(true);
+		loadXlsxSchema(apiUrl, fileName).then((result) => {
+			if (isMounted) {
+				setSchema(result);
+				setLoading(false);
+			}
+		});
+		return () => {
+			isMounted = false;
+		};
+	}, [fileName, apiUrl]);
+
+	return { schema, loading };
 };
 
 async function loadXlsxSchema(

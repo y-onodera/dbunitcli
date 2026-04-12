@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import {
@@ -8,29 +8,31 @@ import {
 	type OperationResult,
 } from "../utils/fetchUtils";
 
-export const useTemplateLoadContent = () => {
+export const useTemplateData = (name: string): { content: string; loading: boolean } => {
 	const { apiUrl } = useEnviroment();
-	return useCallback(
-		async (name: string): Promise<string> => {
-			const params = {
-				endpoint: `${apiUrl}template/load`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "text/plain" },
-					body: name,
-				},
-			};
-			try {
-				const response = await fetchData(params);
-				const data = (await response.json()) as { content?: string };
-				return data.content ?? "";
-			} catch (e) {
-				handleFetchError(getErrorMessage(e), params);
-				return "";
+	const [content, setContent] = useState("");
+	const [loading, setLoading] = useState(name !== "");
+
+	useEffect(() => {
+		if (!name) {
+			setContent("");
+			setLoading(false);
+			return;
+		}
+		let isMounted = true;
+		setLoading(true);
+		loadTemplateContent(apiUrl, name).then((result) => {
+			if (isMounted) {
+				setContent(result);
+				setLoading(false);
 			}
-		},
-		[apiUrl],
-	);
+		});
+		return () => {
+			isMounted = false;
+		};
+	}, [name, apiUrl]);
+
+	return { content, loading };
 };
 
 export const useDeleteTemplate = () => {
@@ -90,3 +92,22 @@ export const useTemplateSaveContent = () => {
 		[apiUrl, setResourcesSettings],
 	);
 };
+
+async function loadTemplateContent(apiUrl: string, name: string): Promise<string> {
+	const params = {
+		endpoint: `${apiUrl}template/load`,
+		options: {
+			method: "POST",
+			headers: { "Content-Type": "text/plain" },
+			body: name,
+		},
+	};
+	try {
+		const response = await fetchData(params);
+		const data = (await response.json()) as { content?: string };
+		return data.content ?? "";
+	} catch (e) {
+		handleFetchError(getErrorMessage(e), params);
+		return "";
+	}
+}

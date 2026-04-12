@@ -114,11 +114,33 @@ export const useSaveDatasetSettings = () => {
 	};
 };
 
-export const useLoadDatasetSettings = () => {
-	const environment = useEnviroment();
-	return async (name: string) => {
-		return loadDatasetSettings(environment.apiUrl, name);
-	};
+export const useDatasetSettingsData = (
+	fileName: string,
+): { settings: DatasetSettings; loading: boolean } => {
+	const { apiUrl } = useEnviroment();
+	const [settings, setSettings] = useState(DatasetSettings.create());
+	const [loading, setLoading] = useState(fileName !== "");
+
+	useEffect(() => {
+		if (!fileName) {
+			setSettings(DatasetSettings.create());
+			setLoading(false);
+			return;
+		}
+		let isMounted = true;
+		setLoading(true);
+		loadDatasetSettings(apiUrl, fileName).then((result) => {
+			if (isMounted) {
+				setSettings(result);
+				setLoading(false);
+			}
+		});
+		return () => {
+			isMounted = false;
+		};
+	}, [fileName, apiUrl]);
+
+	return { settings, loading };
 };
 
 async function loadDatasetSettings(

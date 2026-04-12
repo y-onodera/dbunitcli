@@ -8,8 +8,8 @@ import WorkspaceResourcesProvider, {
 	useResourcesSettings,
 } from "../../context/WorkspaceResourcesProvider";
 import {
+	useDatasetSettingsData,
 	useDeleteDatasetSettings,
-	useLoadDatasetSettings,
 	useSaveDatasetSettings,
 } from "../../hooks/useDatasetSettings";
 import { DatasetSettings } from "../../model/DatasetSettings";
@@ -80,29 +80,29 @@ vi.mock("../../utils/fetchUtils", () => ({
 }));
 
 describe("DatasetSettingsProviderのテスト", () => {
-	describe("useLoadDatasetSettingsのテスト", () => {
-		it("設定ファイル名が空白のときは初期値が返却されることを確認", async () => {
-			const { result, rerender } = renderHook(() => useLoadDatasetSettings(), {
-				wrapper,
-			});
+	describe("useDatasetSettingsDataのテスト", () => {
+		it("設定ファイル名が空白のときは初期値が返却されloadingがfalseになることを確認", async () => {
+			const { result, rerender } = renderHook(
+				() => useDatasetSettingsData(""),
+				{ wrapper },
+			);
 			await act(async () => {
 				rerender();
 			});
-			expect(result.current).toBeTypeOf("function");
-			const res = await result.current("");
-			expect(res).toEqual(DatasetSettings.create());
+			expect(result.current.loading).toBe(false);
+			expect(result.current.settings).toEqual(DatasetSettings.create());
 		});
 		it("データセット設定を正常に読み込めることを確認", async () => {
-			const { result, rerender } = renderHook(() => useLoadDatasetSettings(), {
-				wrapper,
-			});
+			const { result, rerender } = renderHook(
+				() => useDatasetSettingsData("test-setting"),
+				{ wrapper },
+			);
 			await act(async () => {
 				rerender();
 			});
-			expect(result.current).toBeTypeOf("function");
-			const res = await result.current("test-setting");
-			expect(res.settings).toHaveLength(1);
-			expect(res.settings[0].name).toStrictEqual(
+			expect(result.current.loading).toBe(false);
+			expect(result.current.settings.settings).toHaveLength(1);
+			expect(result.current.settings.settings[0].name).toStrictEqual(
 				mockDatasetSettingsResponse.settings[0].name,
 			);
 		});

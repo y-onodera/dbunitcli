@@ -9,8 +9,8 @@ import WorkspaceResourcesProvider, {
 } from "../../context/WorkspaceResourcesProvider";
 import {
 	useDeleteXlsxSchema,
-	useLoadXlsxSchema,
 	useSaveXlsxSchema,
+	useXlsxSchemaData,
 } from "../../hooks/useXlsxSchema";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
 import type { XlsxSchemaBuilder } from "../../model/XlsxSchema";
@@ -92,30 +92,29 @@ vi.mock("../../utils/fetchUtils", () => ({
 }));
 
 describe("XlsxSchemaProviderのテスト", () => {
-	describe("useLoadXlsxSchema", () => {
-		it("名前が空文字の場合にデフォルト値を返すことを確認", async () => {
-			const { result, rerender } = renderHook(() => useLoadXlsxSchema(), {
+	describe("useXlsxSchemaData", () => {
+		it("名前が空文字の場合にデフォルト値を返しloadingがfalseになることを確認", async () => {
+			const { result, rerender } = renderHook(() => useXlsxSchemaData(""), {
 				wrapper,
 			});
 			await act(async () => {
 				rerender();
 			});
-			expect(result.current).toBeTypeOf("function");
-			const res = await result.current("");
-			expect(res).toEqual(XlsxSchema.create());
+			expect(result.current.loading).toBe(false);
+			expect(result.current.schema).toEqual(XlsxSchema.create());
 		});
 
 		it("正常なロードが行われることを確認", async () => {
-			const { result, rerender } = renderHook(() => useLoadXlsxSchema(), {
-				wrapper,
-			});
+			const { result, rerender } = renderHook(
+				() => useXlsxSchemaData("test-setting"),
+				{ wrapper },
+			);
 			await act(async () => {
 				rerender();
 			});
-			expect(result.current).toBeTypeOf("function");
-			const res = await result.current("test-setting");
-			expect(res.rows).toHaveLength(1);
-			expect(res.cells).toHaveLength(1);
+			expect(result.current.loading).toBe(false);
+			expect(result.current.schema.rows).toHaveLength(1);
+			expect(result.current.schema.cells).toHaveLength(1);
 		});
 	});
 
