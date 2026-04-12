@@ -6,19 +6,9 @@ import yo.dbunitcli.dataset.DataSourceType;
 @Serdeable
 public class QueryDataSourceDto {
 
-    private DataSourceType type;
-
     private String name;
 
     private String contents;
-
-    public DataSourceType getType() {
-        return this.type;
-    }
-
-    public void setType(final DataSourceType type) {
-        this.type = type;
-    }
 
     public String getName() {
         return this.name;

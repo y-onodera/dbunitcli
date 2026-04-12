@@ -1,15 +1,13 @@
 package yo.dbunitcli.sidecar.domain.project;
 
-import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.resource.FileResources;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public record Datasource(DataSourceType type, ResourceFile resourceFile) {
-    public Datasource(final DataSourceType type) {
-        this(type, new ResourceFile(new File(FileResources.datasetDir(), type.toString())));
+public record Datasource( ResourceFile resourceFile) {
+    public Datasource() {
+        this(new ResourceFile(FileResources.datasetDir()));
     }
 
     public void save(final String fileName, final String contents) throws IOException {

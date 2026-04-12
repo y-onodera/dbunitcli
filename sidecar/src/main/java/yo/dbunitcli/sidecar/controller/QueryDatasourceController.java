@@ -17,14 +17,14 @@ public class QueryDatasourceController implements ControllerExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryDatasourceController.class);
 
     @Get(uri = "list", produces = MediaType.APPLICATION_JSON)
-    public String list(@QueryValue final DataSourceType type) {
-        return this.currentFileList(type);
+    public String list() {
+        return this.currentFileList();
     }
 
     @Post(uri = "load", produces = MediaType.TEXT_PLAIN)
     public String load(@Body final QueryDataSourceDto request) {
         try {
-            return new Datasource(request.getType()).read(request.getName());
+            return new Datasource().read(request.getName());
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -34,34 +34,34 @@ public class QueryDatasourceController implements ControllerExceptionHandler {
     @Post(uri = "save", produces = MediaType.APPLICATION_JSON)
     public String save(@Body final QueryDataSourceDto request) throws IOException {
         try {
-            new Datasource(request.getType()).save(request.getName(), request.getContents());
+            new Datasource().save(request.getName(), request.getContents());
         } catch (IOException e) {
             throw e;
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
         }
-        return this.currentFileList(request.getType());
+        return this.currentFileList();
     }
 
     @Post(uri = "delete", produces = MediaType.APPLICATION_JSON)
     public String delete(@Body final QueryDataSourceDto request) throws IOException {
         try {
-            new Datasource(request.getType()).delete(request.getName());
+            new Datasource().delete(request.getName());
         } catch (IOException e) {
             throw e;
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
         }
-        return this.currentFileList(request.getType());
+        return this.currentFileList();
     }
 
-    private String currentFileList(final DataSourceType type) {
+    private String currentFileList() {
         try {
             return ObjectMapper
                     .getDefault()
-                    .writeValueAsString(new Datasource(type).list());
+                    .writeValueAsString(new Datasource().list());
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);

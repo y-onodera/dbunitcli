@@ -38,8 +38,7 @@ public class QueryDatasourceControllerTest {
     @BeforeEach
     public void setUp() throws IOException {
         System.setProperty(FileResources.PROPERTY_DATASET_BASE, this.tempDir.toString());
-        final File parent = new File(this.tempDir.toFile(), "sql");
-        Files.createDirectory(parent.toPath());
+        final File parent = this.tempDir.toFile();
         this.target = new File(parent, "test.sql");
         Files.createFile(this.target.toPath());
         Files.writeString(this.target.toPath(), this.beforeContents, java.nio.charset.StandardCharsets.UTF_8);
@@ -55,7 +54,6 @@ public class QueryDatasourceControllerTest {
     @Test
     void testLoad() {
         final QueryDataSourceDto request = new QueryDataSourceDto();
-        request.setType(DataSourceType.sql);
         request.setName("test.sql");
 
         final HttpRequest<QueryDataSourceDto> httpRequest = HttpRequest.POST("dbunit-cli/query-datasource/load", request)
@@ -68,7 +66,6 @@ public class QueryDatasourceControllerTest {
     @Test
     void testSave() throws IOException {
         final QueryDataSourceDto request = new QueryDataSourceDto();
-        request.setType(DataSourceType.sql);
         request.setName("test.sql");
         final String contents = "test";
         request.setContents(contents);
@@ -81,7 +78,6 @@ public class QueryDatasourceControllerTest {
     @Test
     void testDelete() {
         final QueryDataSourceDto request = new QueryDataSourceDto();
-        request.setType(DataSourceType.sql);
         request.setName("test.sql");
         final HttpRequest<QueryDataSourceDto> httpRequest = HttpRequest.POST("dbunit-cli/query-datasource/delete", request)
                 .contentType(MediaType.APPLICATION_JSON_TYPE);

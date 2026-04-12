@@ -10,12 +10,7 @@
     "datasetSettings": ["test.json"],
     "xlsxSchemas": ["schema.json"],
     "jdbcFiles": ["sample.properties"],
-    "templateFiles": ["sample.json"],
-    "queryFiles": {
-      "csvq": [],
-      "sql": [],
-      "table": []
-    }
+    "templateFiles": ["sample.json"]
   },
   "context": {
     "workspace": "%s",

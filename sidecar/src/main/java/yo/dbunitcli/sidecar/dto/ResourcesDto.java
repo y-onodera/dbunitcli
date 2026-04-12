@@ -16,8 +16,6 @@ public class ResourcesDto {
 
     private List<String> templateFiles = new ArrayList<>();
 
-    private QueryFilesDto queryFiles = new QueryFilesDto();
-
     public List<String> getDatasetSettings() {
         return this.datasetSettings;
     }
@@ -32,10 +30,6 @@ public class ResourcesDto {
 
     public List<String> getTemplateFiles() {
         return this.templateFiles;
-    }
-
-    public QueryFilesDto getQueryFiles() {
-        return this.queryFiles;
     }
 
     public void setDatasetSettings(final List<String> datasetSettings) {
@@ -54,7 +48,4 @@ public class ResourcesDto {
         this.templateFiles = templateFiles;
     }
 
-    public void setQueryFiles(final QueryFilesDto queryFiles) {
-        this.queryFiles = queryFiles;
-    }
 }

@@ -1,7 +1,5 @@
 package yo.dbunitcli.sidecar.domain.project;
 
-import yo.dbunitcli.dataset.DataSourceType;
-import yo.dbunitcli.sidecar.dto.QueryFilesDto;
 import yo.dbunitcli.sidecar.dto.ResourcesDto;
 
 import java.io.File;
@@ -23,11 +21,6 @@ public record Resources(
         result.setJdbcFiles(this.jdbc().list());
         result.setTemplateFiles(this.template().list());
         result.setXlsxSchemas(this.xlsxSchema().list());
-        final QueryFilesDto datasourceFiles = new QueryFilesDto();
-        datasourceFiles.setCsvq(new Datasource(DataSourceType.csvq).list());
-        datasourceFiles.setSql(new Datasource(DataSourceType.sql).list());
-        datasourceFiles.setTable(new Datasource(DataSourceType.table).list());
-        result.setQueryFiles(datasourceFiles);
         return result;
     }
 
