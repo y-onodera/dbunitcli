@@ -5,6 +5,7 @@ import type {
 } from "../model/QueryDatasource";
 import {
 	fetchData,
+	getErrorMessage,
 	handleFetchError,
 	type OperationResult,
 } from "../utils/fetchUtils";
@@ -46,7 +47,7 @@ async function loadDataSource(
 	return await fetchData(fetchParams)
 		.then((response) => response.text())
 		.catch((ex) => {
-			handleFetchError((ex as Error).message, fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 			return "";
 		});
 }
@@ -66,7 +67,7 @@ async function postDataSource(
 	return await fetchData(fetchParams)
 		.then(() => "success" as OperationResult)
 		.catch((ex) => {
-			handleFetchError((ex as Error).message, fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 			return "failed" as OperationResult;
 		});
 }

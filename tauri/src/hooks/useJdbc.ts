@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { ResourcesSettings } from "../model/WorkspaceResources";
-import { fetchData, handleFetchError } from "../utils/fetchUtils";
+import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
 
 type OperationResult = "success" | "failed";
 
@@ -35,7 +35,7 @@ async function deleteJdbcProperties(
 			return "success" as OperationResult;
 		})
 		.catch((ex) => {
-			handleFetchError((ex as Error).message, fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 			return "failed" as OperationResult;
 		});
 }
@@ -65,7 +65,7 @@ export const useJdbcReadContent = () => {
 				const response = await fetchData(params);
 				return (await response.json()) as Record<string, string>;
 			} catch (e) {
-				handleFetchError((e as Error).message, params);
+				handleFetchError(getErrorMessage(e), params);
 				return {};
 			}
 		},
@@ -89,7 +89,7 @@ export const useJdbcTables = () => {
 				const response = await fetchData(params);
 				return (await response.json()) as string[];
 			} catch (e) {
-				handleFetchError((e as Error).message, params);
+				handleFetchError(getErrorMessage(e), params);
 				return [];
 			}
 		},
@@ -114,7 +114,7 @@ export const useJdbcConnectionTest = () => {
 			const response = await fetchData(params);
 			return (await response.json()) as { success: boolean; message: string };
 		} catch (e) {
-			handleFetchError((e as Error).message, params);
+			handleFetchError(getErrorMessage(e), params);
 			return null;
 		}
 	};
@@ -153,7 +153,7 @@ async function saveJdbcProperties(
 			return "success" as OperationResult;
 		})
 		.catch((ex) => {
-			handleFetchError((ex as Error).message, fetchParams);
+			handleFetchError(getErrorMessage(ex), fetchParams);
 			return "failed" as OperationResult;
 		});
 }
