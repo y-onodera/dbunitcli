@@ -120,6 +120,9 @@ const { mockFetchData } = vi.hoisted(() => {
 vi.mock("../../utils/fetchUtils", () => ({
 	fetchData: mockFetchData,
 	handleFetchError: vi.fn(),
+	getErrorMessage: vi.fn((error: unknown) =>
+		error instanceof Error ? error.message : String(error),
+	),
 }));
 
 const mockEnviroment: Enviroment = { ...enviromentFixture };
