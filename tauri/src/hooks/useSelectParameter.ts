@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import {
 	useSelectParameter,
@@ -67,99 +66,90 @@ export const useRefreshSelectParameter = (command: string) => {
 export const useSaveParameter = () => {
 	const parameter = useSelectParameter();
 	const environment = useEnviroment();
-	return useCallback(
-		async (
-			input: { [k: string]: FormDataEntryValue },
-			handleResult: (result: Running) => void,
-		) => {
-			const fetchParams = {
-				endpoint: `${environment.apiUrl + parameter.command}/save`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name: parameter.name, input }),
-				},
-			};
-			await fetchData(fetchParams)
-				.then(() => {
-					handleResult({
-						command: "",
-						resultMessage: "Save Success",
-						resultDir: "",
-					});
-				})
-				.catch((ex) => {
-					handleFetchError((ex as Error).message, fetchParams);
-					handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
+	return async (
+		input: { [k: string]: FormDataEntryValue },
+		handleResult: (result: Running) => void,
+	) => {
+		const fetchParams = {
+			endpoint: `${environment.apiUrl + parameter.command}/save`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name: parameter.name, input }),
+			},
+		};
+		await fetchData(fetchParams)
+			.then(() => {
+				handleResult({
+					command: "",
+					resultMessage: "Save Success",
+					resultDir: "",
 				});
-		},
-		[parameter.command, parameter.name, environment.apiUrl],
-	);
+			})
+			.catch((ex) => {
+				handleFetchError((ex as Error).message, fetchParams);
+				handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
+			});
+	};
 };
 
 export const useExecParameter = () => {
 	const parameter = useSelectParameter();
 	const environment = useEnviroment();
-	return useCallback(
-		async (
-			input: { [k: string]: FormDataEntryValue },
-			handleResult: (result: Running) => void,
-		) => {
-			const fetchParams = {
-				endpoint: `${environment.apiUrl + parameter.command}/exec`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name: parameter.name, input }),
-				},
-			};
-			await fetchData(fetchParams)
-				.then((response) => response.text())
-				.then((resultDir: string) =>
-					handleResult({
-						command: "",
-						resultMessage: "Execution Success",
-						resultDir,
-					}),
-				)
-				.catch((ex) => {
-					handleFetchError((ex as Error).message, fetchParams);
-					handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
-				});
-		},
-		[parameter.command, parameter.name, environment.apiUrl],
-	);
+	return async (
+		input: { [k: string]: FormDataEntryValue },
+		handleResult: (result: Running) => void,
+	) => {
+		const fetchParams = {
+			endpoint: `${environment.apiUrl + parameter.command}/exec`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name: parameter.name, input }),
+			},
+		};
+		await fetchData(fetchParams)
+			.then((response) => response.text())
+			.then((resultDir: string) =>
+				handleResult({
+					command: "",
+					resultMessage: "Execution Success",
+					resultDir,
+				}),
+			)
+			.catch((ex) => {
+				handleFetchError((ex as Error).message, fetchParams);
+				handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
+			});
+	};
 };
 
 export const useSaveShell = () => {
 	const parameter = useSelectParameter();
 	const environment = useEnviroment();
-	return useCallback(
-		async (handleResult: (result: Running) => void) => {
-			const fetchParams = {
-				endpoint: `${environment.apiUrl + parameter.command}/shell`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name: parameter.name }),
-				},
-			};
-			await fetchData(fetchParams)
-				.then((response) => response.text())
-				.then((resultDir: string) =>
-					handleResult({
-						command: "",
-						resultMessage: "Save Shell Success",
-						resultDir,
-					}),
-				)
-				.catch((ex) => {
-					handleFetchError((ex as Error).message, fetchParams);
-					handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
-				});
-		},
-		[parameter.command, parameter.name, environment.apiUrl],
-	);
+	return async (handleResult: (result: Running) => void) => {
+		const fetchParams = {
+			endpoint: `${environment.apiUrl + parameter.command}/shell`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name: parameter.name }),
+			},
+		};
+		await fetchData(fetchParams)
+			.then((response) => response.text())
+			.then((resultDir: string) =>
+				handleResult({
+					command: "",
+					resultMessage: "Save Shell Success",
+					resultDir,
+				}),
+			)
+			.catch((ex) => {
+				handleFetchError((ex as Error).message, fetchParams);
+				handleResult({ command: "", resultMessage: ex.message, resultDir: "" });
+			});
+	};
 };
 
 export const useParameterizeFrom = () => {
