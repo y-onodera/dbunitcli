@@ -19,7 +19,6 @@ import {
 } from "../model/WorkspaceResources";
 import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
 
-
 export const useWorkspaceUpdate = () => {
 	const setContext = useSetWorkspaceContext();
 	const setParameterList = useSetParameterList();
@@ -79,9 +78,9 @@ export const useParameterActions = (command: string, name: string) => {
 	const parameter = useSelectParameter();
 	const setParameter = useSetSelectParameter();
 
-	const handleDelete = async () => {
+	const postAndUpdateList = async (action: string) => {
 		const fetchParams = {
-			endpoint: `${apiUrl + command.toLowerCase()}/delete`,
+			endpoint: `${apiUrl + command.toLowerCase()}/${action}`,
 			options: {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -98,24 +97,8 @@ export const useParameterActions = (command: string, name: string) => {
 			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
 	};
 
-	const handleCopy = async () => {
-		const fetchParams = {
-			endpoint: `${apiUrl + command.toLowerCase()}/copy`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name }),
-			},
-		};
-		await fetchData(fetchParams)
-			.then((response) => response.json())
-			.then((parameters: string[]) => {
-				setParameterList((current) =>
-					current.replace(command.toLowerCase(), parameters),
-				);
-			})
-			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
-	};
+	const handleDelete = () => postAndUpdateList("delete");
+	const handleCopy = () => postAndUpdateList("copy");
 
 	const handleRename = async (newName: string) => {
 		const fetchParams = {
