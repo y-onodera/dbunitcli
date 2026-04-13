@@ -86,7 +86,7 @@ export default function Footer(prop: {
 							</h3>
 							<div className="block animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent" />
 							<div className="mt-4">
-								<WhiteButton title="Cancel" handleClick={handleCancel} />
+								<WhiteButton title="Abandoned" handleClick={handleCancel} />
 							</div>
 						</div>
 					</div>
