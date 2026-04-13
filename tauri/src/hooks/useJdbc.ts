@@ -47,30 +47,6 @@ function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 	};
 }
 
-export const useJdbcReadContent = () => {
-	const { apiUrl } = useEnviroment();
-	return useCallback(
-		async (path: string): Promise<Record<string, string>> => {
-			const params = {
-				endpoint: `${apiUrl}jdbc/read-content`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "text/plain" },
-					body: path,
-				},
-			};
-			try {
-				const response = await fetchData(params);
-				return (await response.json()) as Record<string, string>;
-			} catch (e) {
-				handleFetchError(getErrorMessage(e), params);
-				return {};
-			}
-		},
-		[apiUrl],
-	);
-};
-
 export const useJdbcTables = () => {
 	const { apiUrl } = useEnviroment();
 	return useCallback(

@@ -19,6 +19,7 @@ import {
 } from "../model/WorkspaceResources";
 import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
 
+
 export const useWorkspaceUpdate = () => {
 	const setContext = useSetWorkspaceContext();
 	const setParameterList = useSetParameterList();
@@ -72,60 +73,53 @@ export const useAddParameter = (command: string) => {
 	};
 };
 
-export const useDeleteParameter = (command: string, name: string) => {
-	const setParameter = useSetParameterList();
-	const environment = useEnviroment();
-	return async () => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl + command.toLowerCase()}/delete`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name }),
-			},
-		};
-		await fetchData(fetchParams)
-			.then((response) => response.json())
-			.then((parameters: string[]) => {
-				setParameter((current) =>
-					current.replace(command.toLowerCase(), parameters),
-				);
-			})
-			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
-	};
-};
-
-export const useCopyParameter = (command: string, name: string) => {
-	const setParameter = useSetParameterList();
-	const environment = useEnviroment();
-	return async () => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl + command.toLowerCase()}/copy`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name }),
-			},
-		};
-		await fetchData(fetchParams)
-			.then((response) => response.json())
-			.then((parameters: string[]) => {
-				setParameter((current) =>
-					current.replace(command.toLowerCase(), parameters),
-				);
-			})
-			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
-	};
-};
-
-export const useRenameParameter = (command: string, name: string) => {
+export const useParameterActions = (command: string, name: string) => {
+	const setParameterList = useSetParameterList();
+	const { apiUrl } = useEnviroment();
 	const parameter = useSelectParameter();
 	const setParameter = useSetSelectParameter();
-	const setParameterList = useSetParameterList();
-	const environment = useEnviroment();
-	return async (newName: string) => {
+
+	const handleDelete = async () => {
 		const fetchParams = {
-			endpoint: `${environment.apiUrl + command.toLowerCase()}/rename`,
+			endpoint: `${apiUrl + command.toLowerCase()}/delete`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name }),
+			},
+		};
+		await fetchData(fetchParams)
+			.then((response) => response.json())
+			.then((parameters: string[]) => {
+				setParameterList((current) =>
+					current.replace(command.toLowerCase(), parameters),
+				);
+			})
+			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
+	};
+
+	const handleCopy = async () => {
+		const fetchParams = {
+			endpoint: `${apiUrl + command.toLowerCase()}/copy`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name }),
+			},
+		};
+		await fetchData(fetchParams)
+			.then((response) => response.json())
+			.then((parameters: string[]) => {
+				setParameterList((current) =>
+					current.replace(command.toLowerCase(), parameters),
+				);
+			})
+			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
+	};
+
+	const handleRename = async (newName: string) => {
+		const fetchParams = {
+			endpoint: `${apiUrl + command.toLowerCase()}/rename`,
 			options: {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -147,6 +141,8 @@ export const useRenameParameter = (command: string, name: string) => {
 			})
 			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
 	};
+
+	return { handleDelete, handleCopy, handleRename };
 };
 
 export const useResolveAbsolutePath = () => {
