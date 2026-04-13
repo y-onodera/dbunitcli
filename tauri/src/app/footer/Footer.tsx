@@ -58,6 +58,7 @@ export default function Footer(prop: {
 
 		return () => {
 			active = false;
+			abortControllerRef.current?.abort();
 			abortControllerRef.current = null;
 		};
 	}, [running.command, execParameter, saveParameter, saveShell]);
