@@ -10,7 +10,7 @@ import type {
 	ParameterizeOptions,
 } from "../model/SelectParameter";
 import { SelectParameter } from "../model/SelectParameter";
-import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
+import { fetchData, getErrorMessage, handleFetchError, isAbortError } from "../utils/fetchUtils";
 
 export type Running = {
 	command: string;
@@ -87,6 +87,7 @@ const useParameterAction = () => {
 		action: ParameterAction,
 		extraBody: Record<string, unknown>,
 		handleResult: (result: Running) => void,
+		signal?: AbortSignal,
 	) => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl + parameter.command}/${action}`,
@@ -95,11 +96,15 @@ const useParameterAction = () => {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ name: parameter.name, ...extraBody }),
 			},
+			signal,
 		};
 		try {
 			const response = await fetchData(fetchParams);
 			handleResult(await parseResponse(action, response));
 		} catch (ex) {
+			if (isAbortError(ex)) {
+				return;
+			}
 			const errorMessage = getErrorMessage(ex);
 			handleFetchError(errorMessage, fetchParams);
 			handleResult({ command: "", resultMessage: errorMessage, resultDir: "" });
@@ -112,7 +117,8 @@ export const useSaveParameter = () => {
 	return async (
 		input: { [k: string]: FormDataEntryValue },
 		handleResult: (result: Running) => void,
-	) => execute("save", { input }, handleResult);
+		signal?: AbortSignal,
+	) => execute("save", { input }, handleResult, signal);
 };
 
 export const useExecParameter = () => {
@@ -120,13 +126,14 @@ export const useExecParameter = () => {
 	return async (
 		input: { [k: string]: FormDataEntryValue },
 		handleResult: (result: Running) => void,
-	) => execute("exec", { input }, handleResult);
+		signal?: AbortSignal,
+	) => execute("exec", { input }, handleResult, signal);
 };
 
 export const useSaveShell = () => {
 	const execute = useParameterAction();
-	return async (handleResult: (result: Running) => void) =>
-		execute("shell", {}, handleResult);
+	return async (handleResult: (result: Running) => void, signal?: AbortSignal) =>
+		execute("shell", {}, handleResult, signal);
 };
 
 export const useParameterizeFrom = () => {
