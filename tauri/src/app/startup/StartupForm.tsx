@@ -3,7 +3,6 @@ import type React from "react";
 import {
 	type Dispatch,
 	type SetStateAction,
-	useCallback,
 	useRef,
 	useState,
 } from "react";
@@ -29,30 +28,27 @@ const StartupForm: React.FC<{ onSelect: () => void; onClose?: () => void }> = ({
 	const [errors, setErrors] = useState<{ [key: string]: string }>({});
 	const prevWorkspaceRef = useRef(workspace);
 
-	const updateWorkspace = useCallback(
-		(newWorkspace: SetStateAction<string>) => {
-			const oldWorkspace = prevWorkspaceRef.current;
-			const resolved =
-				typeof newWorkspace === "function"
-					? newWorkspace(oldWorkspace)
-					: newWorkspace;
-			if (oldWorkspace) {
-				setDatasetBase((db) =>
-					db.startsWith(oldWorkspace)
-						? resolved + db.slice(oldWorkspace.length)
-						: db,
-				);
-				setResultBase((rb) =>
-					rb.startsWith(oldWorkspace)
-						? resolved + rb.slice(oldWorkspace.length)
-						: rb,
-				);
-			}
-			prevWorkspaceRef.current = resolved;
-			setWorkspace(resolved);
-		},
-		[],
-	);
+	const updateWorkspace = (newWorkspace: SetStateAction<string>) => {
+		const oldWorkspace = prevWorkspaceRef.current;
+		const resolved =
+			typeof newWorkspace === "function"
+				? newWorkspace(oldWorkspace)
+				: newWorkspace;
+		if (oldWorkspace) {
+			setDatasetBase((db) =>
+				db.startsWith(oldWorkspace)
+					? resolved + db.slice(oldWorkspace.length)
+					: db,
+			);
+			setResultBase((rb) =>
+				rb.startsWith(oldWorkspace)
+					? resolved + rb.slice(oldWorkspace.length)
+					: rb,
+			);
+		}
+		prevWorkspaceRef.current = resolved;
+		setWorkspace(resolved);
+	};
 
 	const handleSelect = async () => {
 		const newErrors: { [key: string]: string } = {};

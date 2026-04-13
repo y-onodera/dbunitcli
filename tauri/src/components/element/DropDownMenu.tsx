@@ -1,6 +1,5 @@
 import {
 	type ReactNode,
-	useCallback,
 	useEffect,
 	useRef,
 	useState,
@@ -47,8 +46,8 @@ export default function DropDownMenu({
 		};
 	}, [showMenu]);
 
-	const closeMenu = useCallback(() => setShowMenu(false), []);
-	const toggleMenu = useCallback(() => setShowMenu((prev) => !prev), []);
+	const closeMenu = () => setShowMenu(false);
+	const toggleMenu = () => setShowMenu((prev) => !prev);
 
 	return (
 		<div

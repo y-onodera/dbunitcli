@@ -8,11 +8,7 @@ import {
 } from "../../components/element/ButtonIcon";
 import { ControllTextBox } from "../../components/element/Input";
 import { useParameterizeFrom } from "../../hooks/useSelectParameter";
-import {
-	useCopyParameter,
-	useDeleteParameter,
-	useRenameParameter,
-} from "../../hooks/useWorkspaceResources";
+import { useParameterActions } from "../../hooks/useWorkspaceResources";
 import type { EditName } from "../main/Sidebar";
 
 type MenuEditProp = {
@@ -43,9 +39,7 @@ export default function NameEditMenu({
 		document.addEventListener("mousedown", handleClickOutside);
 		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, [setEditName]);
-	const handleMenuDelete = useDeleteParameter(editName.command, editName.name);
-	const handleMenuCopy = useCopyParameter(editName.command, editName.name);
-	const handleMenuRename = useRenameParameter(editName.command, editName.name);
+	const { handleDelete, handleCopy, handleRename } = useParameterActions(editName.command, editName.name);
 	const parameterizeFrom = useParameterizeFrom();
 	const canParameterize =
 		editName.command && editName.command !== "parameterize";
@@ -64,15 +58,15 @@ export default function NameEditMenu({
 					<MenuEdit
 						name={editName.name}
 						handleMenuDelete={() => {
-							handleMenuDelete();
+							handleDelete();
 							setEditName({} as EditName);
 						}}
 						handleMenuRename={(newName: string) => {
-							handleMenuRename(newName);
+							handleRename(newName);
 							setEditName({} as EditName);
 						}}
 						handleMenuCopy={() => {
-							handleMenuCopy();
+							handleCopy();
 							setEditName({} as EditName);
 						}}
 						handleMenuParameterize={

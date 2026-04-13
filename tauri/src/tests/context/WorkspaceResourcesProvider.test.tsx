@@ -17,9 +17,7 @@ import WorkspaceResourcesProvider, {
 } from "../../context/WorkspaceResourcesProvider";
 import {
 	useAddParameter,
-	useCopyParameter,
-	useDeleteParameter,
-	useRenameParameter,
+	useParameterActions,
 	useWorkspaceUpdate,
 } from "../../hooks/useWorkspaceResources";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
@@ -179,12 +177,14 @@ describe("WorkspaceResourcesProviderのテスト", () => {
 			]);
 		});
 
-		it("useDeleteParameterが正常に動作することを確認", async () => {
+		it("useParameterActionsが正常に動作することを確認", async () => {
 			const { result, rerender } = renderHook(
 				() => {
-					const deleteConvert2 = useDeleteParameter("convert", "convert2");
+					const deleteActions = useParameterActions("convert", "convert2");
+					const copyActions = useParameterActions("convert", "convert1");
+					const renameActions = useParameterActions("convert", "convert1");
 					const parameterList = useParameterList();
-					return { parameterList, deleteConvert2 };
+					return { parameterList, deleteActions, copyActions, renameActions };
 				},
 				{ wrapper },
 			);
@@ -195,56 +195,23 @@ describe("WorkspaceResourcesProviderのテスト", () => {
 				"convert1",
 				"convert2",
 			]);
+
 			await act(async () => {
-				result.current.deleteConvert2();
+				result.current.deleteActions.handleDelete();
 			});
 			expect(result.current.parameterList.convert).toEqual(["convert1"]);
-		});
 
-		it("useCopyParameterが正常に動作することを確認", async () => {
-			const { result, rerender } = renderHook(
-				() => {
-					const copyConvert1 = useCopyParameter("convert", "convert1");
-					const parameterList = useParameterList();
-					return { parameterList, copyConvert1 };
-				},
-				{ wrapper },
-			);
 			await act(async () => {
-				rerender();
-			});
-			expect(result.current.parameterList.convert).toEqual([
-				"convert1",
-				"convert2",
-			]);
-			await act(async () => {
-				result.current.copyConvert1();
+				result.current.copyActions.handleCopy();
 			});
 			expect(result.current.parameterList.convert).toEqual([
 				"convert1",
 				"convert2",
 				"copy",
 			]);
-		});
 
-		it("useRenameParameterが正常に動作することを確認", async () => {
-			const { result, rerender } = renderHook(
-				() => {
-					const renameConvert1 = useRenameParameter("convert", "convert1");
-					const parameterList = useParameterList();
-					return { parameterList, renameConvert1 };
-				},
-				{ wrapper },
-			);
 			await act(async () => {
-				rerender();
-			});
-			expect(result.current.parameterList.convert).toEqual([
-				"convert1",
-				"convert2",
-			]);
-			await act(async () => {
-				result.current.renameConvert1("newName");
+				result.current.renameActions.handleRename("newName");
 			});
 			expect(result.current.parameterList.convert).toEqual([
 				"newName",
