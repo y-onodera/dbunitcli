@@ -10,6 +10,7 @@ type ErrorInfo = {
 export type FetchParams = {
 	endpoint: string;
 	options: RequestInit;
+	signal?: AbortSignal;
 };
 
 const createErrorInfo = (
@@ -58,8 +59,11 @@ export async function saveOnSuccess(
 	}
 }
 
-export const fetchData = async ({ endpoint, options }: FetchParams) => {
-	const response = await fetch(endpoint, options);
+export const isAbortError = (error: unknown): boolean =>
+	error instanceof DOMException && error.name === "AbortError";
+
+export const fetchData = async ({ endpoint, options, signal }: FetchParams) => {
+	const response = await fetch(endpoint, { ...options, signal });
 	if (!response.ok) {
 		throw new Error(
 			`
