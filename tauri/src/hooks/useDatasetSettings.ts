@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
@@ -13,52 +13,49 @@ import { fetchData, getErrorMessage, handleFetchError, type OperationResult } fr
 
 export const useDatasetTableNamesApi = () => {
 	const { apiUrl } = useEnviroment();
-	return useCallback(
-		async (
-			info: DatasetSrcInfo,
-			jdbcValues: Record<string, string>,
-		): Promise<string[]> => {
-			if (!info.srcPath) {
-				return [];
-			}
-			const fetchParams = {
-				endpoint: `${apiUrl}dataset-setting/table-names`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						setting: info.setting ?? "",
-						srcType: info.srcType,
-						src: info.srcPath,
-						regTableInclude: info.regTableInclude,
-						regTableExclude: info.regTableExclude,
-						recursive: info.recursive === "true",
-						regInclude: info.regInclude,
-						regExclude: info.regExclude,
-						extension: info.extension,
-						xlsxSchema: info.xlsxSchema,
-						fixedLength: info.fixedLength,
-						regHeaderSplit: info.regHeaderSplit,
-						regDataSplit: info.regDataSplit,
-						encoding: info.encoding,
-						delimiter: info.delimiter,
-						ignoreQuoted: info.ignoreQuoted,
-						headerName: info.headerName,
-						startRow: info.startRow,
-						addFileInfo: info.addFileInfo,
-						jdbcUrl: jdbcValues.jdbcUrl ?? "",
-						jdbcUser: jdbcValues.jdbcUser ?? "",
-						jdbcPass: jdbcValues.jdbcPass ?? "",
-						jdbcProperties: jdbcValues.jdbcProperties ?? "",
-					}),
-				},
-			};
-			return fetchData(fetchParams)
-				.then((r) => r.json())
-				.catch(() => []);
-		},
-		[apiUrl],
-	);
+	return async (
+		info: DatasetSrcInfo,
+		jdbcValues: Record<string, string>,
+	): Promise<string[]> => {
+		if (!info.srcPath) {
+			return [];
+		}
+		const fetchParams = {
+			endpoint: `${apiUrl}dataset-setting/table-names`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					setting: info.setting ?? "",
+					srcType: info.srcType,
+					src: info.srcPath,
+					regTableInclude: info.regTableInclude,
+					regTableExclude: info.regTableExclude,
+					recursive: info.recursive === "true",
+					regInclude: info.regInclude,
+					regExclude: info.regExclude,
+					extension: info.extension,
+					xlsxSchema: info.xlsxSchema,
+					fixedLength: info.fixedLength,
+					regHeaderSplit: info.regHeaderSplit,
+					regDataSplit: info.regDataSplit,
+					encoding: info.encoding,
+					delimiter: info.delimiter,
+					ignoreQuoted: info.ignoreQuoted,
+					headerName: info.headerName,
+					startRow: info.startRow,
+					addFileInfo: info.addFileInfo,
+					jdbcUrl: jdbcValues.jdbcUrl ?? "",
+					jdbcUser: jdbcValues.jdbcUser ?? "",
+					jdbcPass: jdbcValues.jdbcPass ?? "",
+					jdbcProperties: jdbcValues.jdbcProperties ?? "",
+				}),
+			},
+		};
+		return fetchData(fetchParams)
+			.then((r) => r.json())
+			.catch(() => []);
+	};
 };
 
 export const useDatasetTableNames = (

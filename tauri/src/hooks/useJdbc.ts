@@ -1,5 +1,4 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useCallback } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { ResourcesSettings } from "../model/WorkspaceResources";
@@ -49,26 +48,23 @@ function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 
 export const useJdbcTables = () => {
 	const { apiUrl } = useEnviroment();
-	return useCallback(
-		async (jdbcValues: Record<string, string>): Promise<string[]> => {
-			const params = {
-				endpoint: `${apiUrl}jdbc/tables`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
-				},
-			};
-			try {
-				const response = await fetchData(params);
-				return (await response.json()) as string[];
-			} catch (e) {
-				handleFetchError(getErrorMessage(e), params);
-				return [];
-			}
-		},
-		[apiUrl],
-	);
+	return async (jdbcValues: Record<string, string>): Promise<string[]> => {
+		const params = {
+			endpoint: `${apiUrl}jdbc/tables`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
+			},
+		};
+		try {
+			const response = await fetchData(params);
+			return (await response.json()) as string[];
+		} catch (e) {
+			handleFetchError(getErrorMessage(e), params);
+			return [];
+		}
+	};
 };
 
 export const useJdbcConnectionTest = () => {

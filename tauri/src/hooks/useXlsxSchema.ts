@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { SrcInfo } from "../model/CommandOption";
@@ -136,33 +136,30 @@ async function deleteXlsxSchema(
 
 export const useXlsxSheets = () => {
 	const { apiUrl } = useEnviroment();
-	return useCallback(
-		async (srcInfo: SrcInfo): Promise<string[]> => {
-			if (!srcInfo.srcPath) {
-				return [];
-			}
-			const fetchParams = {
-				endpoint: `${apiUrl}xlsx-schema/sheets`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						src: srcInfo.srcPath,
-						regTableInclude: srcInfo.regTableInclude,
-						regTableExclude: srcInfo.regTableExclude,
-						recursive: srcInfo.recursive === "true",
-						regInclude: srcInfo.regInclude,
-						regExclude: srcInfo.regExclude,
-						extension: srcInfo.extension,
-					}),
-				},
-			};
-			return fetchData(fetchParams)
-				.then((r) => r.json())
-				.catch(() => []);
-		},
-		[apiUrl],
-	);
+	return async (srcInfo: SrcInfo): Promise<string[]> => {
+		if (!srcInfo.srcPath) {
+			return [];
+		}
+		const fetchParams = {
+			endpoint: `${apiUrl}xlsx-schema/sheets`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					src: srcInfo.srcPath,
+					regTableInclude: srcInfo.regTableInclude,
+					regTableExclude: srcInfo.regTableExclude,
+					recursive: srcInfo.recursive === "true",
+					regInclude: srcInfo.regInclude,
+					regExclude: srcInfo.regExclude,
+					extension: srcInfo.extension,
+				}),
+			},
+		};
+		return fetchData(fetchParams)
+			.then((r) => r.json())
+			.catch(() => []);
+	};
 };
 
 export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
