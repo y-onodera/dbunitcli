@@ -63,7 +63,7 @@ export const isAbortError = (error: unknown): boolean =>
 	error instanceof DOMException && error.name === "AbortError";
 
 export const fetchData = async ({ endpoint, options, signal }: FetchParams) => {
-	const response = await fetch(endpoint, { ...options, signal });
+	const response = await fetch(endpoint, { ...options, signal: signal ?? options.signal });
 	if (!response.ok) {
 		throw new Error(
 			`
