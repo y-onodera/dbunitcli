@@ -23,6 +23,7 @@ export default function Footer(prop: {
 	} as Running);
 	const [isLoading, setIsLoading] = useState(false);
 	const executingRef = useRef(false);
+	const abortControllerRef = useRef<AbortController | null>(null);
 	const parameter = useSelectParameter();
 	const saveParameter = useSaveParameter();
 	const execParameter = useExecParameter();
@@ -35,30 +36,42 @@ export default function Footer(prop: {
 		executingRef.current = true;
 		let active = true;
 		setIsLoading(true);
+		const controller = new AbortController();
+		abortControllerRef.current = controller;
 
 		const handleResult = (result: Running) => {
 			if (active) {
 				executingRef.current = false;
+				abortControllerRef.current = null;
 				setRunning(result);
 				setIsLoading(false);
 			}
 		};
 
 		if (running.command === "exec") {
-			execParameter(prop.formData(false).values, handleResult);
+			execParameter(prop.formData(false).values, handleResult, controller.signal);
 		} else if (running.command === "save") {
-			saveParameter(prop.formData(false).values, handleResult);
+			saveParameter(prop.formData(false).values, handleResult, controller.signal);
 		} else if (running.command === "saveShell") {
-			saveShell(handleResult);
+			saveShell(handleResult, controller.signal);
 		}
 
 		return () => {
 			active = false;
+			abortControllerRef.current = null;
 		};
 	}, [running.command, execParameter, saveParameter, saveShell]);
 
 	const openDirectory = async (path: string) => {
 		await core.invoke("open_directory", { path });
+	};
+
+	const handleCancel = () => {
+		abortControllerRef.current?.abort();
+		abortControllerRef.current = null;
+		executingRef.current = false;
+		setIsLoading(false);
+		setRunning({ command: "", resultMessage: "", resultDir: "" });
 	};
 
 	if (isLoading) {
@@ -71,6 +84,9 @@ export default function Footer(prop: {
 								Now Execution
 							</h3>
 							<div className="block animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent" />
+							<div className="mt-4">
+								<WhiteButton title="Cancel" handleClick={handleCancel} />
+							</div>
 						</div>
 					</div>
 				</div>
