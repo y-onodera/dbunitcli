@@ -25,6 +25,7 @@
     "dialog:allow-ask",
     "dialog:allow-confirm",
     "cli:allow-cli-matches",
+    "core:webview:allow-create-webview",
     {
       "identifier": "http:default",
       "allow": [

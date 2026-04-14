@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import NamedParameters from "../sidebar/NamedParameters";
 import NameEditMenu from "../sidebar/NameEditMenu";
+import SidebarHelpLink from "../sidebar/SidebarHelpLink";
 
 interface SidebarProps {
 	setSidebarWidth: (width: number) => void;
@@ -44,11 +45,14 @@ export default function Sidebar({ setSidebarWidth }: SidebarProps) {
 		<div
 			ref={sidebarRef}
 			style={{ width: `${width}px` }}
-			className="h-full overflow-y-auto"
+			className="flex flex-col h-full"
 		>
-			<div className="h-full px-3 pb-4 pt-4">
+			<div className="flex-1 overflow-y-auto px-3 pt-4 pb-2">
 				<NameEditMenu editName={editName} setEditName={setEditName} />
 				<NamedParameters setEditName={setEditName} />
+			</div>
+			<div className="border-t border-gray-200 px-3 py-2">
+				<SidebarHelpLink />
 			</div>
 			<div
 				onMouseDown={handleMouseDown}
