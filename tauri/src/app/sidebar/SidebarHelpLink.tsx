@@ -4,6 +4,11 @@ import { HelpIcon } from "../../components/element/Icon";
 
 export default function SidebarHelpLink() {
 	const handleOpenHelp = async () => {
+		const existing = await WebviewWindow.getByLabel("help");
+		if (existing !== null) {
+			await existing.setFocus();
+			return;
+		}
 		const webview = new WebviewWindow("help", {
 			url: "/help/index.html",
 			title: "Help",
