@@ -172,6 +172,20 @@ export function PreviewIcon(props: { title?: string; fill?: string }) {
 		</svg>
 	);
 }
+export function HelpIcon(props: { title?: string; fill?: string }) {
+	return (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			height="24px"
+			viewBox="0 -960 960 960"
+			width="24px"
+			fill={props.fill ?? "#5f6368"}
+		>
+			<title>{props.title ?? "help"}</title>
+			<path d="M478-240q21 0 35.5-14.5T528-290q0-21-14.5-35.5T478-340q-21 0-35.5 14.5T428-290q0 21 14.5 35.5T478-240Zm-36-154h74q0-36 8-52t42-44q30-26 44.5-51.5T626-600q0-57-41.5-91.5T484-726q-51 0-88.5 27T343-630l66 26q8-25 27.5-42t47.5-17q28 0 47 15.5t19 40.5q0 22-12.5 40.5T506-540q-35 30-49.5 54.5T442-394ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+		</svg>
+	);
+}
 export function ExpandIcon(props: { title?: string; close: boolean }) {
 	return (
 		<svg
