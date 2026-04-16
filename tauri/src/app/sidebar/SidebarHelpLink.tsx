@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { Button } from "../../components/element/Button";
 import { ButtonIcon } from "../../components/element/ButtonIcon";
 import { HelpIcon } from "../../components/element/Icon";
 
@@ -57,17 +58,19 @@ export default function SidebarHelpLink() {
 					<ul className="space-y-1">
 						{helpCommands.map((item) => (
 							<li key={item.command}>
-								<button
-									type="button"
-									className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 transition duration-100 ring-indigo-300 focus-visible:ring-3"
-									onClick={() => {
+								<Button
+									buttonstyle="w-full text-left px-3 py-2"
+									bgcolor="hover:bg-gray-100"
+									textstyle=""
+									border="outline-hidden"
+									handleClick={() => {
 										openHelpWindow(item.command, item.label);
 										setShowMenu(false);
 									}}
 								>
 									<span className="block text-sm font-semibold text-gray-700">{item.label}</span>
 									<span className="block text-xs text-gray-500">{item.description}</span>
-								</button>
+								</Button>
 							</li>
 						))}
 					</ul>
