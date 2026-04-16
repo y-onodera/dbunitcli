@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Help - Parameterize</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; Back to Help</a></p>
+  <h1>Parameterize</h1>
+  <p>Batch process with parameters. Executes a target command repeatedly, driven by rows from a parameter dataset.</p>
+
+  <h2>Options</h2>
+  <table>
+    <tr><th>Option</th><th>Description</th></tr>
+    <tr><td>unit</td><td>Pass parameter to template by row, table, or dataset</td></tr>
+    <tr><td>parameterize</td><td>Whether cmdParam is a template populated by parameters</td></tr>
+    <tr><td>ignoreFail</td><td>Continue other commands when compare finds unexpected differences</td></tr>
+    <tr><td>cmd</td><td>Data-driven target command</td></tr>
+    <tr><td>cmdParam</td><td>Parameter file for command; dynamically set filename from parameter dataset</td></tr>
+    <tr><td>template</td><td>Default template file (ignored when cmdParam exists)</td></tr>
+    <tr><td>paramData</td><td>Parameter dataset source</td></tr>
+    <tr><td>templateOption</td><td>Template engine options</td></tr>
+  </table>
+</body>
+</html>

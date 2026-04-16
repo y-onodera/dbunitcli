@@ -1,11 +1,27 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>DBUnit CLI Help</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    ul { list-style: none; padding: 0; }
+    li { margin-bottom: 1rem; }
+    a { display: block; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; text-decoration: none; color: inherit; transition: background 0.15s; }
+    a:hover { background: #f3f4f6; }
+    .cmd-name { font-size: 1.1rem; font-weight: 600; color: #4f46e5; }
+    .cmd-desc { font-size: 0.9rem; color: #6b7280; margin-top: 0.25rem; }
+  </style>
 </head>
 <body>
   <h1>DBUnit CLI Help</h1>
-  <p>Coming soon.</p>
+  <ul>
+    <li><a href="convert.html"><div class="cmd-name">Convert</div><div class="cmd-desc">Convert data between formats</div></a></li>
+    <li><a href="compare.html"><div class="cmd-name">Compare</div><div class="cmd-desc">Compare datasets and detect differences</div></a></li>
+    <li><a href="generate.html"><div class="cmd-name">Generate</div><div class="cmd-desc">Generate files from templates</div></a></li>
+    <li><a href="run.html"><div class="cmd-name">Run</div><div class="cmd-desc">Execute SQL or scripts</div></a></li>
+    <li><a href="parameterize.html"><div class="cmd-name">Parameterize</div><div class="cmd-desc">Batch process with parameters</div></a></li>
+  </ul>
 </body>
 </html>
