@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>Help - Parameterize</title>
+  <title>ヘルプ - Parameterize</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
     h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
@@ -16,21 +16,21 @@
   </style>
 </head>
 <body>
-  <p><a href="index.html">&larr; Back to Help</a></p>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Parameterize</h1>
-  <p>Batch process with parameters. Executes a target command repeatedly, driven by rows from a parameter dataset.</p>
+  <p>パラメータでバッチ処理します。パラメータデータセットの各行を入力として、対象コマンドを繰り返し実行します。</p>
 
-  <h2>Options</h2>
+  <h2>オプション</h2>
   <table>
-    <tr><th>Option</th><th>Description</th></tr>
-    <tr><td>unit</td><td>Pass parameter to template by row, table, or dataset</td></tr>
-    <tr><td>parameterize</td><td>Whether cmdParam is a template populated by parameters</td></tr>
-    <tr><td>ignoreFail</td><td>Continue other commands when compare finds unexpected differences</td></tr>
-    <tr><td>cmd</td><td>Data-driven target command</td></tr>
-    <tr><td>cmdParam</td><td>Parameter file for command; dynamically set filename from parameter dataset</td></tr>
-    <tr><td>template</td><td>Default template file (ignored when cmdParam exists)</td></tr>
-    <tr><td>paramData</td><td>Parameter dataset source</td></tr>
-    <tr><td>templateOption</td><td>Template engine options</td></tr>
+    <tr><th>オプション</th><th>説明</th></tr>
+    <tr><td>unit</td><td>テンプレートへのパラメータ受け渡し単位（行・テーブル・データセット）</td></tr>
+    <tr><td>parameterize</td><td>cmdParam をパラメータで展開するテンプレートとして扱うかどうか</td></tr>
+    <tr><td>ignoreFail</td><td>compare で想定外の差分が出た場合も他のコマンドを続行する</td></tr>
+    <tr><td>cmd</td><td>データ駆動で実行する対象コマンド</td></tr>
+    <tr><td>cmdParam</td><td>コマンド用パラメータファイル。ファイル名はパラメータデータセットから動的に決定</td></tr>
+    <tr><td>template</td><td>既定のテンプレートファイル（cmdParam がある場合は無視）</td></tr>
+    <tr><td>paramData</td><td>パラメータデータセットのソース</td></tr>
+    <tr><td>templateOption</td><td>テンプレートエンジンのオプション</td></tr>
   </table>
 </body>
 </html>
