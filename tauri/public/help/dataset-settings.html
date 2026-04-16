@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Dataset Settings</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Dataset Settings</h1>
+  <p>テーブルごとのメタデータ（主キー・カラム選択・ソート・フィルタなど）を定義する設定ファイルです。<code>settings</code> 配列で個別のテーブル設定を、<code>commonSettings</code> 配列で複数テーブル共通の設定を記述します。</p>
+
+  <h2>settings のフィールド</h2>
+  <table>
+    <tr><th>フィールド</th><th>説明</th></tr>
+    <tr><td>name</td><td>対象テーブル名。スキーマを含める場合は <code>schema.table</code> 形式</td></tr>
+    <tr><td>keys</td><td>主キーのカラム名（複数指定可）</td></tr>
+    <tr><td>include</td><td>処理対象にするカラム</td></tr>
+    <tr><td>exclude</td><td>除外するカラム</td></tr>
+    <tr><td>order</td><td>ソート順に使うカラム</td></tr>
+    <tr><td>filter</td><td>データ選択条件（JExl 式）</td></tr>
+    <tr><td>distinct</td><td>重複除去フラグ</td></tr>
+  </table>
+
+  <h2>commonSettings</h2>
+  <p><code>settings</code> と同じ形式で、複数テーブルに適用される共通設定を定義します。</p>
+  <h3>上書きルール</h3>
+  <ol>
+    <li><code>settings</code> の設定が優先されます</li>
+    <li>配列（<code>include</code>、<code>exclude</code> など）は結合されます</li>
+    <li>フラグ（<code>distinct</code>）は上書きされます</li>
+  </ol>
+
+  <h2>import</h2>
+  <p>外部の設定ファイルを読み込んで再利用できます。</p>
+  <pre>{
+  "import": [
+    { "path": "./common/base.json" },
+    { "path": "/abs/path/conf.json" }
+  ]
+}</pre>
+  <h3>パス解決の優先順位</h3>
+  <ol>
+    <li>絶対パス</li>
+    <li>設定ファイルからの相対パス</li>
+    <li>カレントディレクトリからの相対パス</li>
+  </ol>
+
+  <h2>記述例</h2>
+  <pre>{
+  "settings": [
+    {
+      "name": "users",
+      "keys": ["id"],
+      "exclude": ["created_at", "updated_at"],
+      "order": ["id"]
+    }
+  ],
+  "commonSettings": [
+    {
+      "exclude": ["created_at", "updated_at"]
+    }
+  ]
+}</pre>
+</body>
+</html>
