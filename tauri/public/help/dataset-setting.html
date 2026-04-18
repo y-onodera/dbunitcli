@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Dataset Setting</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Dataset Setting</h1>
+  <p>個別テーブルに対するメタデータ設定を編集するダイアログです。対象指定、分割・リネーム、追加カラム、フィルタ／並び順を構成します。ファイル全体の構造（<code>settings</code> / <code>commonSettings</code> / <code>import</code>）については <a href="dataset-settings.html">Dataset Settings</a> を参照してください。</p>
+
+  <h2>Target</h2>
+  <p>処理対象のテーブルをどのように特定するかを選択します。</p>
+  <table>
+    <tr><th>種別</th><th>説明</th></tr>
+    <tr><td>name</td><td>テーブル名を1件以上列挙して指定します。<code>filePath</code> で設定ファイルからの相対パスを指定することも可能です。</td></tr>
+    <tr><td>pattern</td><td>テーブル名の正規表現で対象を特定します。<code>patternExclue</code> で除外パターンを追加できます。</td></tr>
+    <tr><td>outerJoin / innerJoin / fullJoin</td><td>2テーブルを結合して1つの論理テーブルとして扱います。<code>left</code> と <code>right</code> に結合対象のテーブル名、条件は <code>on</code>（JeXL 式）か <code>column</code>（共通カラム名）で指定します。</td></tr>
+  </table>
+
+  <h2>Split / Rename</h2>
+  <p><code>split</code> を有効にすると、1つの入力から複数テーブルを派生させることができます。無効時はリネーム設定として機能します。</p>
+  <table>
+    <tr><th>フィールド</th><th>説明</th></tr>
+    <tr><td>prefix</td><td>出力テーブル名に付与する接頭辞</td></tr>
+    <tr><td>tableName</td><td>出力テーブル名のベース名</td></tr>
+    <tr><td>suffix</td><td>出力テーブル名に付与する接尾辞</td></tr>
+    <tr><td>limit</td><td>split 時の最大分割数</td></tr>
+    <tr><td>breakKey</td><td>split 時にテーブルを分割するキーとなるカラム</td></tr>
+  </table>
+
+  <h2>Additional Columns</h2>
+  <p>元データに存在しないカラムを追加します。値には JeXL 式を記述できます。</p>
+  <table>
+    <tr><th>型</th><th>説明</th></tr>
+    <tr><td>string</td><td>文字列型カラム。既存カラムの連結や <code>substring</code> による抽出に利用します。</td></tr>
+    <tr><td>number</td><td>数値型カラム。算術演算で集計値や派生値を定義します。</td></tr>
+    <tr><td>boolean</td><td>真偽値型カラム。条件式で判定結果を持たせます。</td></tr>
+    <tr><td>function</td><td>関数表現によるカラム。複雑なロジックを JeXL 関数として定義します。</td></tr>
+  </table>
+
+  <h2>Filter / Order</h2>
+  <table>
+    <tr><th>フィールド</th><th>説明</th></tr>
+    <tr><td>exclude</td><td>処理から除外するカラム</td></tr>
+    <tr><td>include</td><td>処理対象にするカラム（指定すると include 以外は除外）</td></tr>
+    <tr><td>keys</td><td>主キーのカラム名</td></tr>
+    <tr><td>filter</td><td>データ選択条件（JeXL 式）。複数指定した場合は AND 扱い。</td></tr>
+    <tr><td>order</td><td>並び順に使用するカラム</td></tr>
+  </table>
+
+  <h2>JeXL 式の書き方</h2>
+  <p><code>filter</code>、追加カラム（<code>string</code> / <code>number</code> / <code>boolean</code> / <code>function</code>）、結合条件 <code>on</code> では Apache Commons JEXL3 の式を利用できます。</p>
+
+  <h3>演算子</h3>
+  <table>
+    <tr><th>カテゴリ</th><th>演算子</th></tr>
+    <tr><td>比較</td><td><code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code></td></tr>
+    <tr><td>論理</td><td><code>&amp;&amp;</code> (AND), <code>||</code> (OR), <code>!</code> (NOT)</td></tr>
+    <tr><td>算術</td><td><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code></td></tr>
+    <tr><td>文字列連結</td><td><code>+</code></td></tr>
+    <tr><td>三項</td><td><code>condition ? valueIfTrue : valueIfFalse</code></td></tr>
+    <tr><td>NULL 比較</td><td><code>== null</code>, <code>!= null</code></td></tr>
+  </table>
+
+  <h3>文字列メソッド</h3>
+  <ul>
+    <li><code>contains(str)</code> — 指定文字列を含むか</li>
+    <li><code>startsWith(prefix)</code> — 指定文字列で始まるか</li>
+    <li><code>endsWith(suffix)</code> — 指定文字列で終わるか</li>
+    <li><code>matches(regex)</code> — 正規表現にマッチするか</li>
+    <li><code>substring(start, end)</code> — 部分文字列の取得</li>
+  </ul>
+  <p>文字列リテラルはシングルクォートで囲みます（例: <code>'APPROVED'</code>）。</p>
+
+  <h3>記述例</h3>
+
+  <p><strong>filter（金額とステータスの複合条件）</strong></p>
+<pre><code>amount &gt; 1000 &amp;&amp; status == 'APPROVED'</code></pre>
+
+  <p><strong>filter（NULL 判定と前方一致）</strong></p>
+<pre><code>type != null &amp;&amp; type.startsWith('SALE')</code></pre>
+
+  <p><strong>boolean（カラム名の接尾辞で判定）</strong></p>
+<pre><code>col.endsWith('_amount')</code></pre>
+
+  <p><strong>string（フルネーム連結）</strong></p>
+<pre><code>firstName + ' ' + lastName</code></pre>
+
+  <p><strong>string（日付の年月日部分を抽出）</strong></p>
+<pre><code>created_at.substring(0, 10)</code></pre>
+
+  <p><strong>number（小計の算出）</strong></p>
+<pre><code>price * quantity</code></pre>
+
+  <p><strong>boolean（三項演算子による区分判定）</strong></p>
+<pre><code>age &gt;= 20 ? true : false</code></pre>
+
+  <p><strong>function（条件に応じた区分値の生成）</strong></p>
+<pre><code>status == 'APPROVED' ? 'OK' : (status == 'REJECTED' ? 'NG' : 'PENDING')</code></pre>
+
+  <p><strong>join.on（結合条件）</strong></p>
+<pre><code>orders_item_id == items_id</code></pre>
+  <p>結合時のカラム参照は <code>&lt;テーブル名&gt;_&lt;カラム名&gt;</code> の形式を使用します。</p>
+
+  <h3>注意事項</h3>
+  <ol>
+    <li>文字列比較は大文字・小文字を区別します</li>
+    <li>日付比較は文字列として行われます（必要ならフォーマットを揃えてから比較）</li>
+    <li>NULL との比較は必ず <code>== null</code> / <code>!= null</code> を使用</li>
+    <li>複雑な条件は <code>filter</code> を複数行に分割して AND 合成することを推奨</li>
+  </ol>
+</body>
+</html>

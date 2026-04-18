@@ -9,11 +9,16 @@ import {
 	SettingDialog,
 	Text,
 } from "../../../../components/dialog";
-import { ExpandButton } from "../../../../components/element/ButtonIcon";
+import {
+	ButtonIcon,
+	ExpandButton,
+} from "../../../../components/element/ButtonIcon";
+import { HelpIcon } from "../../../../components/element/Icon";
 import { ResourceDatalist } from "../../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useDatasetTableNames } from "../../../../hooks/useDatasetSettings";
 import type { DatasetSetting } from "../../../../model/DatasetSettings";
+import { openHelpWindow } from "../../../../utils/helpWindow";
 
 export default function DatasetSettingDialog(props: {
 	setting: DatasetSetting;
@@ -35,6 +40,16 @@ export default function DatasetSettingDialog(props: {
 			handleDialogClose={props.handleDialogClose}
 			handleCommit={props.handleCommit}
 		>
+			<div className="flex justify-end px-4 pt-2">
+				<ButtonIcon
+					title="Help"
+					handleClick={() => {
+						openHelpWindow("dataset-setting", "Dataset Setting");
+					}}
+				>
+					<HelpIcon />
+				</ButtonIcon>
+			</div>
 			<Fieldset legend="Target">
 				<Select
 					name="target"
