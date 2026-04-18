@@ -123,6 +123,7 @@ vi.mock("../../utils/fetchUtils", () => ({
 	getErrorMessage: vi.fn((error: unknown) =>
 		error instanceof Error ? error.message : String(error),
 	),
+	isAbortError: vi.fn(() => false),
 }));
 
 const mockEnviroment: Enviroment = { ...enviromentFixture };
