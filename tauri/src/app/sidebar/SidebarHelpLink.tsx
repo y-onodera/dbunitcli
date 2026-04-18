@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { Button } from "../../components/element/Button";
 import { ButtonIcon } from "../../components/element/ButtonIcon";
 import { HelpIcon } from "../../components/element/Icon";
+import { openHelpWindow } from "../../utils/helpWindow";
 
 const helpCommands = [
 	{ command: "convert", label: "Convert", description: "Convert data between formats" },
@@ -11,22 +11,6 @@ const helpCommands = [
 	{ command: "run", label: "Run", description: "Execute SQL or scripts" },
 	{ command: "parameterize", label: "Parameterize", description: "Batch process with parameters" },
 ] as const;
-
-async function openHelpWindow(command: string, label: string) {
-	const windowLabel = `help-${command}`;
-	const existing = await WebviewWindow.getByLabel(windowLabel);
-	if (existing !== null) {
-		await existing.setFocus();
-		return;
-	}
-	const webview = new WebviewWindow(windowLabel, {
-		url: `/help/${command}.html`,
-		title: `Help - ${label}`,
-		width: 900,
-		height: 700,
-	});
-	webview.once("tauri://error", console.error);
-}
 
 export default function SidebarHelpLink() {
 	const [showMenu, setShowMenu] = useState(false);
