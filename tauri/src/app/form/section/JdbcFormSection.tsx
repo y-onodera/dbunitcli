@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { BlueButton } from "../../../components/element/Button";
+import { ExpandButton } from "../../../components/element/ButtonIcon";
 import { useSetJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
 import {
 	useJdbcConnectionTest,
@@ -37,18 +38,28 @@ export default function JdbcFormSection({
 	const handleConnectionFail = () => {
 		setJdbcConnection({ jdbcValues: {}, connectionOk: false });
 	};
+	const [showOptional, setShowOptional] = useState(false);
+	const toggleOptional = () => setShowOptional(!showOptional);
 
 	return (
-		<>
+		<fieldset className="border border-gray-200 p-3">
+			<legend>jdbc</legend>
+			<ExpandButton
+				toggleOptional={toggleOptional}
+				showOptional={showOptional}
+				caption="jdbc option"
+			/>
 			<JdbcPropertiesTextField
 				prefix={prefix}
 				element={jdbcOption.jdbcProperties}
 				onValueChange={handleJdbcValueChange}
+				hidden={!showOptional}
 			/>
 			<JdbcUrlTextField
 				prefix={prefix}
 				element={jdbcOption.jdbcUrl}
 				onValueChange={handleJdbcValueChange}
+				hidden={!showOptional}
 			/>
 			<PlainText
 				prefix={prefix}
@@ -56,6 +67,7 @@ export default function JdbcFormSection({
 				handleValueChange={(value) =>
 					handleJdbcValueChange(jdbcOption.jdbcUser.name, value)
 				}
+				hidden={!showOptional}
 			/>
 			<PlainText
 				prefix={prefix}
@@ -63,6 +75,7 @@ export default function JdbcFormSection({
 				handleValueChange={(value) =>
 					handleJdbcValueChange(jdbcOption.jdbcPass.name, value)
 				}
+				hidden={!showOptional}
 			/>
 			<div className="mt-2 flex items-center gap-3">
 				<JdbcConnectionTestButton
@@ -73,7 +86,7 @@ export default function JdbcFormSection({
 				/>
 				<JdbcSavePropertiesButton prefix={prefix} jdbcValues={jdbcValues} />
 			</div>
-		</>
+		</fieldset>
 	);
 }
 

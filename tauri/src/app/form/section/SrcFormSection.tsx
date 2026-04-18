@@ -52,39 +52,40 @@ export default function SrcFormSection({
 					hidden={false}
 				/>
 			)}
-			<div className="pt-2.5">
+			<fieldset className="border border-gray-200 p-3">
+				<legend>traversal</legend>
 				<ExpandButton
 					toggleOptional={toggleOptional}
 					showOptional={showOptional}
 					caption="traversal option"
 				/>
-			</div>
-			<Check
-				prefix={prefix}
-				element={srcElements.recursive}
-				handleOnChange={handleToggleChecked(srcElements.recursive)}
-				hidden={!showOptional}
-			/>
-			<PlainText
-				prefix={prefix}
-				element={srcElements.regInclude}
-				handleValueChange={handleValueChange(srcElements.regInclude)}
-				hidden={!showOptional}
-			/>
-			<PlainText
-				prefix={prefix}
-				element={srcElements.regExclude}
-				handleValueChange={handleValueChange(srcElements.regExclude)}
-				hidden={!showOptional}
-			/>
-			{srcElements.extension && (
-				<PlainText
+				{srcElements.extension && (
+					<PlainText
+						prefix={prefix}
+						element={srcElements.extension}
+						handleValueChange={handleValueChange(srcElements.extension)}
+						hidden={!showOptional}
+					/>
+				)}
+				<Check
 					prefix={prefix}
-					element={srcElements.extension}
-					handleValueChange={handleValueChange(srcElements.extension)}
+					element={srcElements.recursive}
+					handleOnChange={handleToggleChecked(srcElements.recursive)}
 					hidden={!showOptional}
 				/>
-			)}
+				<PlainText
+					prefix={prefix}
+					element={srcElements.regInclude}
+					handleValueChange={handleValueChange(srcElements.regInclude)}
+					hidden={!showOptional}
+				/>
+				<PlainText
+					prefix={prefix}
+					element={srcElements.regExclude}
+					handleValueChange={handleValueChange(srcElements.regExclude)}
+					hidden={!showOptional}
+				/>
+			</fieldset>
 		</>
 	);
 }

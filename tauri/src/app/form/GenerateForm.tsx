@@ -10,8 +10,8 @@ export function GenerateForm(prop: {
 	name: string;
 	generate: GenerateOptions;
 }) {
-	const srcData = prop.generate.srcData;
-	const ce = prop.generate;
+	const generate = prop.generate;
+	const srcData = generate.srcData;
 	return (
 		<>
 			<fieldset className="border border-gray-200 p-3">
@@ -19,27 +19,26 @@ export function GenerateForm(prop: {
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
 					prefix=""
-					element={ce.generateType}
+					element={generate.generateType}
 				/>
-				{ce.unit && (
+				{generate.unit && (
 					<Select
 						handleTypeSelect={prop.handleTypeSelect}
 						prefix=""
-						element={ce.unit}
+						element={generate.unit}
 					/>
 				)}
-				{ce.template && <FileText prefix="" element={ce.template} />}
-				<FileText prefix="" element={ce.result} />
-				<PlainText prefix="" element={ce.resultPath} />
-				{ce.outputEncoding && (
-					<PlainText prefix="" element={ce.outputEncoding} />
+				{generate.template && (
+					<FileText prefix="" element={generate.template} />
+				)}
+				<FileText prefix="" element={generate.result} />
+				<PlainText prefix="" element={generate.resultPath} />
+				{generate.outputEncoding && (
+					<PlainText prefix="" element={generate.outputEncoding} />
 				)}
 			</fieldset>
 			{prop.generate.templateOption && (
-				<fieldset className="border border-gray-200 p-3">
-					<legend>{prop.generate.templateOption.prefix}</legend>
-					<TemplateFormSection templateOption={prop.generate.templateOption} />
-				</fieldset>
+				<TemplateFormSection templateOption={prop.generate.templateOption} />
 			)}
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}

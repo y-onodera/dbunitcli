@@ -60,9 +60,11 @@ describe("CompareFormの描画テスト", () => {
 			const legends = document.querySelectorAll("fieldset legend");
 			expect(legends[0]).toHaveTextContent("compare");
 			expect(legends[1]).toHaveTextContent("new");
-			expect(legends[2]).toHaveTextContent("old");
-			expect(legends[3]).toHaveTextContent("result");
-			expect(legends[4]).toHaveTextContent("expect");
+			expect(legends[2]).toHaveTextContent("traversal");
+			expect(legends[3]).toHaveTextContent("old");
+			expect(legends[4]).toHaveTextContent("traversal");
+			expect(legends[5]).toHaveTextContent("result");
+			expect(legends[6]).toHaveTextContent("expect");
 		});
 
 		it("compareセクションにtargetTypeが含まれる", () => {

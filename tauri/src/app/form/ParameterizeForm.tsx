@@ -11,9 +11,9 @@ export function ParameterizeForm(prop: {
 	name: string;
 	parameterize: ParameterizeOptions;
 }) {
-	const paramData = prop.parameterize.paramData;
-	const templateOption = prop.parameterize.templateOption;
-	const ce = prop.parameterize;
+	const parameterize = prop.parameterize;
+	const paramData = parameterize.paramData;
+	const templateOption = parameterize.templateOption;
 	return (
 		<>
 			<fieldset className="border border-gray-200 p-3">
@@ -21,13 +21,13 @@ export function ParameterizeForm(prop: {
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
 					prefix=""
-					element={ce.unit}
+					element={parameterize.unit}
 				/>
-				<Check prefix="" element={ce.parameterize} />
-				<Check prefix="" element={ce.ignoreFail} />
-				<PlainText prefix="" element={ce.cmd} />
-				<PlainText prefix="" element={ce.cmdParam} />
-				<FileText prefix="" element={ce.template} />
+				<Check prefix="" element={parameterize.parameterize} />
+				<Check prefix="" element={parameterize.ignoreFail} />
+				<PlainText prefix="" element={parameterize.cmd} />
+				<PlainText prefix="" element={parameterize.cmdParam} />
+				<FileText prefix="" element={parameterize.template} />
 				{templateOption && (
 					<TemplateFormSection templateOption={templateOption} />
 				)}

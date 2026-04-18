@@ -7,10 +7,12 @@ import Text, { TextDropDownMenu } from "./Text";
 export default function JdbcPropertiesTextField({
 	prefix,
 	element,
+	hidden,
 	onValueChange,
 }: {
 	prefix: string;
 	element: CommandOption;
+	hidden?: boolean;
 	onValueChange: (name: string, value: string) => void;
 }) {
 	const settings = useResourcesSettings();
@@ -18,6 +20,7 @@ export default function JdbcPropertiesTextField({
 		<Text
 			prefix={prefix}
 			element={element}
+			hidden={hidden}
 			resourceFiles={settings.jdbcFiles}
 			showDefaulePath={true}
 			handleValueChange={(value) => onValueChange(element.name, value)}

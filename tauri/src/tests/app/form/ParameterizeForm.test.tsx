@@ -49,7 +49,8 @@ describe("ParameterizeFormの描画テスト", () => {
 
 			const legends = document.querySelectorAll("fieldset legend");
 			expect(legends[0]).toHaveTextContent("execute");
-			expect(legends[1]).toHaveTextContent("param");
+			expect(legends[1]).toHaveTextContent("template");
+			expect(legends[2]).toHaveTextContent("param");
 		});
 
 		it("executeセクションにunit・parameterize・ignoreFail・cmd・cmdParam・templateが含まれる", () => {

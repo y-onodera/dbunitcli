@@ -50,13 +50,14 @@ function makeGenerateProps(
 
 describe("GenerateFormの描画テスト", () => {
 	describe("csvソース（loadレスポンス）", () => {
-		it("generate・template・srcのセクションがこの順で表示される", () => {
+		it("generate・template・src・traversalのセクションがこの順で表示される", () => {
 			render(<GenerateForm {...makeGenerateProps()} />);
 
 			const legends = document.querySelectorAll("fieldset legend");
 			expect(legends[0]).toHaveTextContent("generate");
 			expect(legends[1]).toHaveTextContent("template");
 			expect(legends[2]).toHaveTextContent("src");
+			expect(legends[3]).toHaveTextContent("traversal");
 		});
 
 		it("generateセクションにgenerateType・unit・template・result・resultPath・outputEncodingが含まれる", () => {

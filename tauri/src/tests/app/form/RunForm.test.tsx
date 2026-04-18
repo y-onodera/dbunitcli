@@ -45,14 +45,14 @@ function makeRunProps(
 
 describe("RunFormの描画テスト", () => {
 	describe("sql scriptType（loadレスポンス）", () => {
-		it("run・template・jdbc・srcのセクションがこの順で表示される", () => {
+		it("run・jdbc・traversal・templateのセクションがこの順で表示される", () => {
 			render(<RunForm {...makeRunProps()} />);
 
 			const legends = document.querySelectorAll("fieldset legend");
 			expect(legends[0]).toHaveTextContent("run");
-			expect(legends[1]).toHaveTextContent("template");
-			expect(legends[2]).toHaveTextContent("jdbc");
-			expect(legends[3]).toHaveTextContent("src");
+			expect(legends[1]).toHaveTextContent("jdbc");
+			expect(legends[2]).toHaveTextContent("traversal");
+			expect(legends[3]).toHaveTextContent("template");
 		});
 
 		it("runセクションにscriptTypeが含まれる", () => {
@@ -85,7 +85,7 @@ describe("RunFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
-		it("srcセクションにsrcが含まれる", () => {
+		it("srcが含まれる", () => {
 			render(<RunForm {...makeRunProps()} />);
 
 			expect(
@@ -126,14 +126,23 @@ describe("RunFormの描画テスト", () => {
 			expect(legendTexts).not.toContain("jdbc");
 		});
 
-		it("srcセクションは表示される", () => {
-			render(
-				<RunForm {...makeRunProps(runRefreshScriptTypeCmdResponseFixture)} />,
-			);
+		it("srcが含まれる", () => {
+			render(<RunForm {...makeRunProps()} />);
 
-			const legends = document.querySelectorAll("fieldset legend");
-			const legendTexts = Array.from(legends).map((l) => l.textContent);
-			expect(legendTexts).toContain("src");
+			expect(
+				document.querySelector('input[type="text"][name="-src.src"]'),
+			).toBeInTheDocument();
+		});
+
+		it("traversal option要素（recursive等）は初期状態でhiddenになっている", () => {
+			render(<RunForm {...makeRunProps()} />);
+
+			expect(
+				document.querySelector('input[type="checkbox"][name="-src.recursive"]'),
+			).not.toBeVisible();
+			expect(
+				document.querySelector('input[type="text"][name="-src.regInclude"]'),
+			).not.toBeVisible();
 		});
 	});
 

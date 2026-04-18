@@ -76,6 +76,8 @@ export type GenerateOptions = CommandOptions & {
 export type RunOptions = CommandOptions & {
 	command: "run";
 	scriptType: CommandOption;
+	baseDir: CommandOption;
+	antTarget: CommandOption;
 	srcData: DatasetSource;
 	templateOption?: TemplateOption;
 	jdbcOption?: JdbcOption;

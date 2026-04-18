@@ -63,12 +63,13 @@ function expectPrecedesInDom(precedingEl: Element, followingEl: Element) {
 
 describe("ConvertFormの描画テスト", () => {
 	describe("csvソース・xlsxResult（loadレスポンス）", () => {
-		it("srcとresultのセクションがこの順で表示される", () => {
+		it("src・traversal・resultのセクションがこの順で表示される", () => {
 			render(<ConvertForm {...makeConvertProps()} />);
 
 			const legends = document.querySelectorAll("fieldset legend");
 			expect(legends[0]).toHaveTextContent("src");
-			expect(legends[1]).toHaveTextContent("result");
+			expect(legends[1]).toHaveTextContent("traversal");
+			expect(legends[2]).toHaveTextContent("result");
 		});
 
 		it("srcセクションにsrcType・src・encodingが含まれる", () => {
