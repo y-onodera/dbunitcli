@@ -31,15 +31,20 @@ export function GenerateForm(prop: {
 				{generate.template && (
 					<FileText prefix="" element={generate.template} />
 				)}
+				{prop.generate.templateOption &&
+					generate.generateType.value === "txt" && (
+						<TemplateFormSection
+							templateOption={prop.generate.templateOption}
+							showEncoding={true}
+							handleValueChange={() => (_: string) => {}}
+						/>
+					)}
 				<FileText prefix="" element={generate.result} />
 				<PlainText prefix="" element={generate.resultPath} />
 				{generate.outputEncoding && (
 					<PlainText prefix="" element={generate.outputEncoding} />
 				)}
 			</fieldset>
-			{prop.generate.templateOption && (
-				<TemplateFormSection templateOption={prop.generate.templateOption} />
-			)}
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}

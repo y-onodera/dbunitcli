@@ -1,6 +1,5 @@
 import {
 	type CommandOption,
-	isCsvqType,
 	isCsvType,
 	isFixedType,
 	isRegType,
@@ -11,7 +10,6 @@ import {
 	type SrcTypeOptions,
 } from "../../../model/CommandOption";
 import CsvFormSection from "./srctype/CsvFormSection";
-import CsvqFormSection from "./srctype/CsvqFormSection";
 import DBFormSection from "./srctype/DBFormSection";
 import ExcelFormSection from "./srctype/ExcelFormSection";
 import FixedFormSection from "./srctype/FixedFormSection";
@@ -35,31 +33,17 @@ export default function SrcTypeFormSection({
 			/>
 		);
 	}
-	if (isCsvqType(options)) {
-		return (
-			<CsvqFormSection
-				options={options}
-				handleValueChange={handleValueChange}
-				handleToggleChecked={handleToggleChecked}
-			/>
-		);
-	}
 	if (isTableType(options) || isSqlType(options)) {
 		return (
 			<DBFormSection
 				options={options}
-				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}
 	if (isRegType(options)) {
 		return (
-			<RegFormSection
-				options={options}
-				handleValueChange={handleValueChange}
-				handleToggleChecked={handleToggleChecked}
-			/>
+			<RegFormSection options={options} handleValueChange={handleValueChange} />
 		);
 	}
 	if (isFixedType(options)) {
@@ -67,7 +51,6 @@ export default function SrcTypeFormSection({
 			<FixedFormSection
 				options={options}
 				handleValueChange={handleValueChange}
-				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}
@@ -76,7 +59,6 @@ export default function SrcTypeFormSection({
 			<ExcelFormSection
 				options={options}
 				handleValueChange={handleValueChange}
-				handleToggleChecked={handleToggleChecked}
 			/>
 		);
 	}

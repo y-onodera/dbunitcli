@@ -29,7 +29,11 @@ export function ParameterizeForm(prop: {
 				<PlainText prefix="" element={parameterize.cmdParam} />
 				<FileText prefix="" element={parameterize.template} />
 				{templateOption && (
-					<TemplateFormSection templateOption={templateOption} />
+					<TemplateFormSection
+						templateOption={templateOption}
+						showEncoding={true}
+						handleValueChange={() => (_: string) => {}}
+					/>
 				)}
 			</fieldset>
 			<DatasetLoadForm

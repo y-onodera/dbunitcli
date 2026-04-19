@@ -3,9 +3,7 @@ import type { RunOptions } from "../../model/SelectParameter";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
-import JdbcFormSection from "./section/JdbcFormSection";
 import SrcFormSection from "./section/SrcFormSection";
-import TemplateFormSection from "./section/TemplateFormSection";
 
 export function RunForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -13,9 +11,6 @@ export function RunForm(prop: {
 	run: RunOptions;
 }) {
 	const run = prop.run;
-	const srcData = run.srcData;
-	const templateOption = run.templateOption;
-	const jdbcOption = run.jdbcOption;
 	return (
 		<fieldset className="border border-gray-200 p-3">
 			<legend>run</legend>
@@ -25,17 +20,16 @@ export function RunForm(prop: {
 				element={run.scriptType}
 			/>
 			<JdbcConnectionProvider>
-				{jdbcOption && <JdbcFormSection jdbcOption={jdbcOption} />}
 				<SrcFormSection
-					srcElements={srcData}
+					srcElements={run.srcData}
 					srcType={run.scriptType.value === "sql" ? "sql" : undefined}
+					jdbcOption={run.jdbcOption}
+					templateOption={run.templateOption}
 					handleValueChange={() => (_: string) => {}}
 					handleToggleChecked={() => (_: boolean) => {}}
 				/>
 			</JdbcConnectionProvider>
-			{(templateOption && (
-				<TemplateFormSection templateOption={templateOption} />
-			)) || (
+			{!run.jdbcOption && (
 				<>
 					<FileText
 						prefix=""

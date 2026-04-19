@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { CompareForm } from "../../../app/form/CompareForm";
 import type { CompareOptions } from "../../../model/SelectParameter";
@@ -61,10 +61,12 @@ describe("CompareFormの描画テスト", () => {
 			expect(legends[0]).toHaveTextContent("compare");
 			expect(legends[1]).toHaveTextContent("new");
 			expect(legends[2]).toHaveTextContent("traversal");
-			expect(legends[3]).toHaveTextContent("old");
-			expect(legends[4]).toHaveTextContent("traversal");
-			expect(legends[5]).toHaveTextContent("result");
-			expect(legends[6]).toHaveTextContent("expect");
+			expect(legends[3]).toHaveTextContent("data load");
+			expect(legends[4]).toHaveTextContent("old");
+			expect(legends[5]).toHaveTextContent("traversal");
+			expect(legends[6]).toHaveTextContent("data load");
+			expect(legends[7]).toHaveTextContent("result");
+			expect(legends[8]).toHaveTextContent("expect");
 		});
 
 		it("compareセクションにtargetTypeが含まれる", () => {
@@ -212,14 +214,18 @@ describe("CompareFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
-		it("Show table optionが表示される", () => {
+		it("useJdbcMetaData要素が直接表示される", () => {
 			render(
 				<CompareForm
 					{...makeCompareProps(compareRefreshNewSrcTypeTableResponseFixture)}
 				/>,
 			);
 
-			expect(screen.getByText(/Show table option/)).toBeInTheDocument();
+			expect(
+				document.querySelector(
+					'input[type="checkbox"][name="-new.useJdbcMetaData"]',
+				),
+			).toBeVisible();
 		});
 	});
 

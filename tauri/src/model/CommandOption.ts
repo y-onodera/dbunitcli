@@ -91,19 +91,19 @@ export type SrcElements = CommandOptions & {
 	regInclude: CommandOption;
 	regExclude: CommandOption;
 	extension?: CommandOption;
-};
-export type SettingElements = CommandOptions & {
-	setting: CommandOption;
-	settingEncoding: CommandOption;
-	regTableInclude: CommandOption;
-	regTableExclude: CommandOption;
+	headerName?: CommandOption;
+	startRow?: CommandOption;
+	addFileInfo?: CommandOption;
 	loadData: CommandOption;
 	includeMetaData: CommandOption;
+	regTableInclude: CommandOption;
+	regTableExclude: CommandOption;
+	setting: CommandOption;
+	settingEncoding: CommandOption;
 };
 export type DatasetSource = CommandOptions &
 	SrcElements &
 	SrcTypeOptions &
-	SettingElements &
 	(JdbcOption | undefined) &
 	(TemplateOption | undefined);
 export type SrcInfo = {
@@ -154,26 +154,21 @@ export type TemplateOption = CommandOptions & {
 	templateVarStart: CommandOption;
 	templateVarStop: CommandOption;
 };
-type FileSrcOptions = CommandOptions & {
-	headerName: CommandOption;
-	startRow: CommandOption;
-	addFileInfo: CommandOption;
-};
-export type CsvOptions = FileSrcOptions & {
+export type CsvOptions = CommandOptions & {
 	srcType: Csv;
 	delimiter: CommandOption;
 	ignoreQuoted: CommandOption;
 };
-export type RegOptions = FileSrcOptions & {
+export type RegOptions = CommandOptions & {
 	srcType: Reg;
 	regDataSplit: CommandOption;
 	regHeaderSplit: CommandOption;
 };
-export type FixedOptions = FileSrcOptions & {
+export type FixedOptions = CommandOptions & {
 	srcType: Fixed;
 	fixedLength: CommandOption;
 };
-type ExcelOptions = FileSrcOptions & {
+type ExcelOptions = CommandOptions & {
 	xlsxSchema: CommandOption;
 };
 export type XlsOptions = ExcelOptions & {
@@ -182,19 +177,10 @@ export type XlsOptions = ExcelOptions & {
 export type XlsxOptions = ExcelOptions & {
 	srcType: Xlsx;
 };
-type QueryOptions = CommandOptions & {
-	headerName: CommandOption;
-	addFileInfo: CommandOption;
-	encoding: CommandOption;
-	templateGroup: CommandOption;
-	templateParameterAttribute: CommandOption;
-	templateVarStart: CommandOption;
-	templateVarStop: CommandOption;
-};
-export type CsvqOptions = QueryOptions & {
+export type CsvqOptions = CommandOptions & {
 	srcType: Csvq;
 };
-type DBTypeOptions = QueryOptions & {
+type DBTypeOptions = CommandOptions & {
 	useJdbcMetaData: CommandOption;
 };
 export type SqlOptions = DBTypeOptions & {
@@ -207,7 +193,7 @@ export type NoneOptions = CommandOptions & {
 	srcType: None;
 };
 export type FileOptions = CommandOptions & {
-	srcType?: File;
+	srcType: File;
 };
 export type DirOptions = CommandOptions & {
 	srcType: Dir;
@@ -253,23 +239,6 @@ export function buildDatasetSrcInfo(datasrc: DatasetSource): DatasetSrcInfo {
 	const regDataSplit = isRegType(datasrc) ? datasrc.regDataSplit.value : "";
 	const delimiter = isCsvType(datasrc) ? datasrc.delimiter.value : "";
 	const ignoreQuoted = isCsvType(datasrc) ? datasrc.ignoreQuoted.value : "";
-	const startRow =
-		isSqlType(datasrc) ||
-		isCsvqType(datasrc) ||
-		isTableType(datasrc) ||
-		isNoneType(datasrc) ||
-		isFileType(datasrc) ||
-		isDirType(datasrc)
-			? ""
-			: datasrc.startRow.value;
-	const headerName =
-		isNoneType(datasrc) || isFileType(datasrc) || isDirType(datasrc)
-			? ""
-			: datasrc.headerName.value;
-	const addFileInfo =
-		isNoneType(datasrc) || isFileType(datasrc) || isDirType(datasrc)
-			? false
-			: datasrc.addFileInfo.value === "true";
 	return {
 		srcPath: datasrc.src.value,
 		encoding: datasrc.encoding?.value || "",
@@ -281,14 +250,14 @@ export function buildDatasetSrcInfo(datasrc: DatasetSource): DatasetSrcInfo {
 		regTableExclude: datasrc.regTableExclude.value,
 		srcType: datasrc.srcType?.value,
 		setting: datasrc.setting.value,
+		headerName: datasrc.headerName ? datasrc.headerName.value : "",
+		startRow: datasrc.startRow ? datasrc.startRow.value : "",
+		addFileInfo: datasrc.addFileInfo?.value === "true",
 		xlsxSchema: xlsxSchema,
 		fixedLength: fixedLength,
 		regHeaderSplit: regHeaderSplit,
 		regDataSplit: regDataSplit,
 		delimiter: delimiter,
 		ignoreQuoted: ignoreQuoted === "true",
-		headerName: headerName,
-		startRow: startRow,
-		addFileInfo: addFileInfo,
 	};
 }

@@ -111,12 +111,12 @@ describe("ParameterizeFormの描画テスト", () => {
 			).not.toBeVisible();
 		});
 
-		it("csv option要素（delimiter等）は初期状態でhiddenになっている", () => {
+		it("csv option要素（delimiter等）は初期状態で表示される", () => {
 			render(<ParameterizeForm {...makeParameterizeProps()} />);
 
 			expect(
 				document.querySelector('input[type="text"][name="-param.delimiter"]'),
-			).not.toBeVisible();
+			).toBeVisible();
 		});
 	});
 });

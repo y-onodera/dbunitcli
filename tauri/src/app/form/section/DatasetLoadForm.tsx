@@ -10,9 +10,9 @@ import type {
 	SrcType,
 } from "../../../model/CommandOption";
 import { buildDatasetSrcInfo } from "../../../model/CommandOption";
-import DatasetSettingSection from "./DatasetSettingSection";
+import DataLoadFormSection from "./DataLoadFormSection";
 import Select from "./element/Select";
-import JdbcFormSection from "./JdbcFormSection";
+import SettingFormSection from "./SettingFormSection";
 import SrcFormSection from "./SrcFormSection";
 import SrcTypeFormSection from "./SrcTypeFormSection";
 
@@ -53,9 +53,8 @@ export function DatasetLoadForm(prop: {
 		}
 	};
 	const srcElements = prop.srcData;
-	const srcTypeOptions = prop.srcData;
-	const settingElements = prop.srcData;
-	const jdbcOption = prop.srcData;
+	const jdbcOption = prop.srcData.jdbcProperties ? prop.srcData : undefined;
+	const templateOption = prop.srcData.templateGroup ? prop.srcData : undefined;
 	const initialDatasetSrcInfo = buildDatasetSrcInfo(prop.srcData);
 	return (
 		<DatasetSrcInfoProvider
@@ -75,19 +74,23 @@ export function DatasetLoadForm(prop: {
 				<SrcFormSection
 					srcElements={srcElements}
 					srcType={prop.defalutType || prop.srcData.srcType?.value}
+					jdbcOption={jdbcOption}
+					templateOption={templateOption}
 					handleValueChange={handleValueChange}
 					handleToggleChecked={handleToggleChecked}
 				/>
-				{jdbcOption.jdbcProperties && (
-					<JdbcFormSection jdbcOption={jdbcOption} />
-				)}
+				<DataLoadFormSection
+					options={srcElements}
+					handleValueChange={handleValueChange}
+					handleToggleChecked={handleToggleChecked}
+				/>
 				<SrcTypeFormSection
-					options={srcTypeOptions}
+					options={srcElements}
 					handleValueChange={handleValueChange}
 					handleToggleChecked={handleToggleChecked}
 				/>
-				<DatasetSettingSection
-					settingElements={settingElements}
+				<SettingFormSection
+					settingElements={srcElements}
 					handleValueChange={handleValueChange}
 					handleToggleChecked={handleToggleChecked}
 				/>

@@ -63,13 +63,14 @@ function expectPrecedesInDom(precedingEl: Element, followingEl: Element) {
 
 describe("ConvertFormの描画テスト", () => {
 	describe("csvソース・xlsxResult（loadレスポンス）", () => {
-		it("src・traversal・resultのセクションがこの順で表示される", () => {
+		it("src・traversal・data load・resultのセクションがこの順で表示される", () => {
 			render(<ConvertForm {...makeConvertProps()} />);
 
 			const legends = document.querySelectorAll("fieldset legend");
 			expect(legends[0]).toHaveTextContent("src");
 			expect(legends[1]).toHaveTextContent("traversal");
-			expect(legends[2]).toHaveTextContent("result");
+			expect(legends[2]).toHaveTextContent("data load");
+			expect(legends[3]).toHaveTextContent("result");
 		});
 
 		it("srcセクションにsrcType・src・encodingが含まれる", () => {
@@ -132,27 +133,32 @@ describe("ConvertFormの描画テスト", () => {
 			expect(screen.getByText(/Hide traversal option/)).toBeInTheDocument();
 		});
 
-		it("csv option要素（headerName・delimiter等）は初期状態でhiddenになっている", () => {
+		it("data load option要素（headerName等）は初期状態でhiddenになっている", () => {
 			render(<ConvertForm {...makeConvertProps()} />);
 
 			expect(
 				document.querySelector('input[type="text"][name="-src.headerName"]'),
 			).not.toBeVisible();
+		});
+
+		it("csv option要素（delimiter・ignoreQuoted）は初期状態で表示される", () => {
+			render(<ConvertForm {...makeConvertProps()} />);
+
 			expect(
 				document.querySelector('input[type="text"][name="-src.delimiter"]'),
-			).not.toBeVisible();
+			).toBeVisible();
 			expect(
 				document.querySelector(
 					'input[type="checkbox"][name="-src.ignoreQuoted"]',
 				),
-			).not.toBeVisible();
+			).toBeVisible();
 		});
 
-		it("Show csv optionはheaderNameの前のDOM位置に配置される", () => {
+		it("Show data load optionはheaderNameの前のDOM位置に配置される", () => {
 			render(<ConvertForm {...makeConvertProps()} />);
 
 			expectPrecedesInDom(
-				screen.getByText(/Show csv option/),
+				screen.getByText(/Show data load option/),
 				document.querySelector('input[type="text"][name="-src.headerName"]')!,
 			);
 		});
@@ -191,14 +197,16 @@ describe("ConvertFormの描画テスト", () => {
 			).not.toBeInTheDocument();
 		});
 
-		it("Show xlsx optionが表示される", () => {
+		it("xlsxSchema要素が直接表示される", () => {
 			render(
 				<ConvertForm
 					{...makeConvertProps(convertRefreshSrcTypeXlsxResponseFixture)}
 				/>,
 			);
 
-			expect(screen.getByText(/Show xlsx option/)).toBeInTheDocument();
+			expect(
+				document.querySelector('input[type="text"][name="-src.xlsxSchema"]'),
+			).toBeVisible();
 		});
 
 		it("resultセクションにoutputEncodingが含まれる（csv result）", () => {
@@ -235,14 +243,18 @@ describe("ConvertFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
-		it("Show table optionが表示される", () => {
+		it("useJdbcMetaData要素が直接表示される", () => {
 			render(
 				<ConvertForm
 					{...makeConvertProps(convertRefreshSrcTypeTableResponseFixture)}
 				/>,
 			);
 
-			expect(screen.getByText(/Show table option/)).toBeInTheDocument();
+			expect(
+				document.querySelector(
+					'input[type="checkbox"][name="-src.useJdbcMetaData"]',
+				),
+			).toBeVisible();
 		});
 	});
 

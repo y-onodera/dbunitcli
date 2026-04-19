@@ -2,23 +2,31 @@ import { useState } from "react";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
 import type {
 	CommandOption,
+	JdbcOption,
 	SrcElements,
 	SrcType,
+	TemplateOption,
 } from "../../../model/CommandOption";
 import { isSqlRelatedType } from "../../../model/QueryDatasource";
 import Check from "./element/Check";
 import FileText from "./element/FileText";
 import PlainText from "./element/PlainText";
 import SqlSrcText from "./element/SqlSrcText";
+import JdbcFormSection from "./JdbcFormSection";
+import TemplateFormSection from "./TemplateFormSection";
 
 export default function SrcFormSection({
 	srcElements,
 	srcType,
+	jdbcOption,
+	templateOption,
 	handleValueChange,
 	handleToggleChecked,
 }: {
 	srcElements: SrcElements;
 	srcType?: SrcType;
+	jdbcOption?: JdbcOption;
+	templateOption?: TemplateOption;
 	handleValueChange: (param: CommandOption) => (newValue: string) => void;
 	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
@@ -28,6 +36,7 @@ export default function SrcFormSection({
 
 	return (
 		<>
+			{jdbcOption && <JdbcFormSection jdbcOption={jdbcOption} />}
 			{(srcType && isSqlRelatedType(srcType) && (
 				<SqlSrcText
 					prefix={prefix}
@@ -86,6 +95,13 @@ export default function SrcFormSection({
 					hidden={!showOptional}
 				/>
 			</fieldset>
+			{templateOption && (
+				<TemplateFormSection
+					templateOption={templateOption}
+					showEncoding={!srcElements.encoding}
+					handleValueChange={handleValueChange}
+				/>
+			)}
 		</>
 	);
 }

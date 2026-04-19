@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { GenerateForm } from "../../../app/form/GenerateForm";
 import type { GenerateOptions } from "../../../model/SelectParameter";
@@ -116,12 +116,12 @@ describe("GenerateFormの描画テスト", () => {
 			).not.toBeVisible();
 		});
 
-		it("csv option要素（delimiter等）は初期状態でhiddenになっている", () => {
+		it("csv option要素（delimiter等）は初期状態で表示される", () => {
 			render(<GenerateForm {...makeGenerateProps()} />);
 
 			expect(
 				document.querySelector('input[type="text"][name="-src.delimiter"]'),
-			).not.toBeVisible();
+			).toBeVisible();
 		});
 	});
 
@@ -144,14 +144,18 @@ describe("GenerateFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
-		it("Show table optionが表示される", () => {
+		it("useJdbcMetaData要素が直接表示される", () => {
 			render(
 				<GenerateForm
 					{...makeGenerateProps(generateRefreshSrcTypeTableResponseFixture)}
 				/>,
 			);
 
-			expect(screen.getByText(/Show table option/)).toBeInTheDocument();
+			expect(
+				document.querySelector(
+					'input[type="checkbox"][name="-src.useJdbcMetaData"]',
+				),
+			).toBeVisible();
 		});
 	});
 });
