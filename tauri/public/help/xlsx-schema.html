@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Xlsx Schema</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Xlsx Schema</h1>
+  <p>Xlsx ファイルをデータセットとして読み込む際のマッピング定義を編集するダイアログです。1 つの Xlsx ファイルから複数の論理テーブルを抽出するための設定を、2 種類のマッピング形式で記述します。</p>
+
+  <h2>Rows Mapping Tables</h2>
+  <p>シート上に行方向に整列したデータ（ヘッダ行 + 連続するデータ行）をテーブルとして抽出します。通常の表形式データはこちらで定義します。</p>
+  <p>1 行が 1 レコードとなるテーブルを定義します。各行の編集ダイアログの詳細は <a href="xlsx-row-setting.html">Xlsx Row Setting</a> を参照してください。</p>
+
+  <h2>Random Cell Mapping Tables</h2>
+  <p>シート上の任意のセル位置から値を拾い集めてテーブルを構成します。帳票やフォーマット化された Xlsx など、行方向に整列していないデータの抽出に利用します。</p>
+  <p>指定したセルアドレスごとに 1 レコードを生成します。各行の編集ダイアログの詳細は <a href="xlsx-cell-setting.html">Xlsx Cell Setting</a> を参照してください。</p>
+
+  <h2>共通の考え方</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>sheetName</td><td>抽出対象となる Xlsx のシート名。</td></tr>
+    <tr><td>tableName</td><td>抽出結果に付与する論理テーブル名。<code>DatasetSetting</code> 等から参照する名前になります。</td></tr>
+    <tr><td>header</td><td>カラム名の並び。1 行 1 カラム定義で、Xlsx 上のカラム並びと対応させます。</td></tr>
+    <tr><td>addFileInfo</td><td>抽出結果に元ファイル情報のカラムを追加するかどうか。</td></tr>
+  </table>
+
+  <h2>保存</h2>
+  <p>ダイアログ下部のファイル名を指定して保存すると、設定内容が JSON ファイルとして書き出されます。<code>sheetName</code> と <code>tableName</code> が共に入力されている行のみが保存対象です。</p>
+</body>
+</html>

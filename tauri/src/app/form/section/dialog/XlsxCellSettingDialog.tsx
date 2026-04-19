@@ -6,10 +6,13 @@ import {
 	SettingDialog,
 	Text,
 } from "../../../../components/dialog";
+import { ButtonIcon } from "../../../../components/element/ButtonIcon";
+import { HelpIcon } from "../../../../components/element/Icon";
 import { ResourceDatalist } from "../../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useSrcInfoSheets } from "../../../../hooks/useXlsxSchema";
 import type { CellSetting } from "../../../../model/XlsxSchema";
+import { openHelpWindow } from "../../../../utils/helpWindow";
 
 export default function XlsxCellSettingDialog(props: {
 	setting: CellSetting;
@@ -26,6 +29,16 @@ export default function XlsxCellSettingDialog(props: {
 			handleDialogClose={props.handleDialogClose}
 			handleCommit={props.handleCommit}
 		>
+			<div className="flex justify-end px-4 pt-2">
+				<ButtonIcon
+					title="Help"
+					handleClick={() => {
+						openHelpWindow("xlsx-cell-setting", "Xlsx Cell Setting");
+					}}
+				>
+					<HelpIcon />
+				</ButtonIcon>
+			</div>
 			<Fieldset>
 				<Text
 					name="sheetName"
