@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { SettingDialog, SettingTable } from "../../../../components/dialog";
-import { ButtonIcon } from "../../../../components/element/ButtonIcon";
-import { HelpIcon } from "../../../../components/element/Icon";
+import {
+	DialogHelpButton,
+	SettingDialog,
+	SettingTable,
+} from "../../../../components/dialog";
 import {
 	useDeleteXlsxSchema,
 	useSaveXlsxSchema,
@@ -14,7 +16,6 @@ import {
 	XlsxSchema,
 } from "../../../../model/XlsxSchema";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
-import { openHelpWindow } from "../../../../utils/helpWindow";
 import ResourceEditButton, {
 	RemoveResource,
 	type ResourceEditButtonProp,
@@ -60,16 +61,7 @@ function Dialog(props: {
 				)
 			}
 		>
-			<div className="flex justify-end px-4 pt-2">
-				<ButtonIcon
-					title="Help"
-					handleClick={() => {
-						openHelpWindow("xlsx-schema", "Xlsx Schema");
-					}}
-				>
-					<HelpIcon />
-				</ButtonIcon>
-			</div>
+			<DialogHelpButton command="xlsx-schema" label="Xlsx Schema" />
 			<SettingTable<RowSetting>
 				caption="Rows Mapping Tables"
 				settings={xlsxSchema.rows}

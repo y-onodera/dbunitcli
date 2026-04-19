@@ -1,3 +1,4 @@
+export { DialogHelpButton } from "./DialogHelpButton";
 export type { SettingDialogProps } from "./SettingDialog";
 export {
 	Arrays,
