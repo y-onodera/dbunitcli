@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
 	Check,
+	DialogHelpButton,
 	Fieldset,
 	SettingDialog,
 	Text,
@@ -25,6 +26,10 @@ export default function XlsxRowSettingDialog(props: {
 			handleDialogClose={props.handleDialogClose}
 			handleCommit={props.handleCommit}
 		>
+			<DialogHelpButton
+				command="xlsx-row-setting"
+				label="Xlsx Row Setting"
+			/>
 			<Fieldset>
 				<Text
 					name="sheetName"

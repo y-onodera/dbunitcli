@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { SettingDialog, SettingTable } from "../../../../components/dialog";
+import {
+	DialogHelpButton,
+	SettingDialog,
+	SettingTable,
+} from "../../../../components/dialog";
 import {
 	useDeleteXlsxSchema,
 	useSaveXlsxSchema,
@@ -57,6 +61,7 @@ function Dialog(props: {
 				)
 			}
 		>
+			<DialogHelpButton command="xlsx-schema" label="Xlsx Schema" />
 			<SettingTable<RowSetting>
 				caption="Rows Mapping Tables"
 				settings={xlsxSchema.rows}

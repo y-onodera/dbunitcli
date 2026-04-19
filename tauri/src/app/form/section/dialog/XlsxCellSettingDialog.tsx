@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
 	Arrays,
 	Check,
+	DialogHelpButton,
 	Fieldset,
 	SettingDialog,
 	Text,
@@ -26,6 +27,10 @@ export default function XlsxCellSettingDialog(props: {
 			handleDialogClose={props.handleDialogClose}
 			handleCommit={props.handleCommit}
 		>
+			<DialogHelpButton
+				command="xlsx-cell-setting"
+				label="Xlsx Cell Setting"
+			/>
 			<Fieldset>
 				<Text
 					name="sheetName"
