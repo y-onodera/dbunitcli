@@ -42,7 +42,7 @@
     <tr><td>xls / xlsx</td><td>Excel ファイル。シート単位でテーブル化。シート / セル構造の定義に <a href="xlsx-schema.html">Xlsx Schema</a> を使用可能</td></tr>
     <tr><td>table</td><td>データベースのテーブル。JDBC 接続設定が必要</td></tr>
     <tr><td>sql</td><td>SQL クエリの実行結果。JDBC 接続設定と SQL ファイルを指定</td></tr>
-    <tr><td>csvq</td><td>CSV ファイル群を H2 インメモリ DB にロードし、SQL を実行した結果を取得。複数 CSV の JOIN などに使用</td></tr>
+    <tr><td>csvq</td><td>H2 上で SQL を実行した結果を取得。SQL 内の <code>CSVREAD()</code> 関数で CSV ファイルを参照し、複数 CSV の JOIN などに使用</td></tr>
     <tr><td>file</td><td>ディレクトリ配下のファイル一覧を、ファイルメタ情報（パス・サイズ・更新日時など）のテーブルとして読み込む</td></tr>
     <tr><td>dir</td><td>ディレクトリ配下のサブディレクトリ一覧を、メタ情報のテーブルとして読み込む</td></tr>
   </table>
@@ -132,21 +132,43 @@ JDBC 実行結果:
   [1, Alice]
   [3, Carol]</pre>
 
-  <p><strong>csvq</strong> — ディレクトリ内の CSV を H2 インメモリ DB にテーブルとしてロードし、指定の SQL を実行。</p>
-  <pre>入力ディレクトリ:
-  users.csv   → users(id, name)     : (1,Alice), (2,Bob)
-  orders.csv  → orders(id, user_id) : (10,1), (11,1), (12,2)
+  <p><strong>csvq</strong> — <code>src</code> に指定した SQL ファイルを、H2 データベース（ファイルモード）上で実行し、結果セットを 1 テーブルとして取得します。CSV ファイルの読み込みは SQL 内で <code>CSVREAD()</code> 関数を使って行うため、<strong>どの CSV を読むかも SQL ファイル内で指定します</strong>（フォームの <code>src</code> が指す先は SQL ファイルであり、CSV を置いたディレクトリではありません）。テーブル名は SQL ファイル名（拡張子除く）になります。</p>
+  <pre>入力 CSV (csvquery/csv/header.csv):
+KEYCOLUMN,CD1,NAME,VALUE
+1,A1,太郎,10000
+2,B1,次郎,20000
+3,C1,花子,30000
 
-SQL (user_orders.sql):
-  SELECT u.name, o.id AS order_id
-  FROM users u JOIN orders o ON u.id = o.user_id
+入力 CSV (csvquery/csv/detail.csv):
+KEYCOLUMN,DETAILNO,VALUE1,VAL
+1,1,100,200
+1,2,200,400
+2,1,0,0
+3,2,1002,2001
 
-テーブル名: user_orders
-カラム:     [name, order_id]
+SQL (joinQuery.sql):
+  SELECT
+      table1.*
+  FROM
+      CSVREAD('csvquery/csv/header.csv', null, 'charset=UTF-8') table1
+      INNER JOIN
+      CSVREAD('csvquery/csv/detail.csv', null, 'charset=UTF-8') table2
+      ON table1.KEYCOLUMN = table2.KEYCOLUMN
+  WHERE
+      table2.DETAILNO = 2
+  ORDER BY
+      table1.KEYCOLUMN DESC;
+
+指定:
+  srcType = csvq
+  src     = joinQuery.sql
+
+テーブル名: joinQuery
+カラム:     [KEYCOLUMN, CD1, NAME, VALUE]
 データ行:
-  [Alice, 10]
-  [Alice, 11]
-  [Bob,   12]</pre>
+  [3, C1, 花子, 30000]
+  [1, A1, 太郎, 10000]</pre>
+  <p><code>CSVREAD(fileName, columns, csvOptions)</code> の第 2 引数を <code>null</code> にすると先頭行がヘッダとして扱われます。第 3 引数では <code>charset</code>・<code>fieldSeparator</code>・<code>fieldDelimiter</code> などの H2 CSV オプションを指定できます（例: TSV を読む場合は <code>'charset=UTF-8 fieldSeparator=\t'</code>）。</p>
 
   <p><strong>file</strong> — <code>src</code> に指定したディレクトリを走査し、ファイルメタ情報を 1 テーブルとして生成。テーブル名は拡張子ごと（拡張子フィルタ無指定時は拡張子をテーブル名に使用）。</p>
   <pre>入力 (src = project/):
