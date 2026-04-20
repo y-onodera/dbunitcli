@@ -184,6 +184,70 @@ SQL (user_orders.sql):
 
   <p><strong>none</strong> — 入力なし。テーブルを生成しないため、例示すべきデータもありません。テンプレート処理のみ行う Generate などで用います。</p>
 
+  <h3>csv 固有オプション: delimiter / ignoreQuoted</h3>
+  <p><code>csv</code> を選択した場合のみ表示されるオプションです。</p>
+  <p><strong>delimiter</strong> — 区切り文字を 1 文字で指定します。デフォルトは <code>,</code>（カンマ）。タブ・改行など制御文字はエスケープ記法で指定可能で、<code>\b</code> / <code>\t</code> / <code>\n</code> / <code>\r</code> / <code>\f</code> がサポートされます。</p>
+  <pre>入力 (users.tsv):
+id&#9;name&#9;age
+1&#9;Alice&#9;30
+2&#9;Bob&#9;25
+
+指定:
+  srcType   = csv
+  delimiter = \t     (タブ区切り)
+
+カラム:     [id, name, age]
+データ行:
+  [1, Alice, 30]
+  [2, Bob,   25]</pre>
+
+  <p><strong>ignoreQuoted</strong> — 引用符（<code>"</code>）の扱いを切り替えます。デフォルトは OFF。</p>
+  <ul>
+    <li>OFF（既定）: 引用符をクォート文字として扱う。フィールドを囲む <code>"</code> は除去され、引用符内の区切り文字はフィールドの一部となる</li>
+    <li>ON: 引用符を特別扱いせず、ただの文字として保持する</li>
+  </ul>
+  <pre>入力 (multi.csv):
+key,column1,column2
+1,"a,b",3
+2,"あいうえお",5
+
+ignoreQuoted = OFF (既定):
+  カラム:     [key, column1, column2]
+  データ行:
+    [1, a,b,           3]        (外側の " は除去、内側のカンマは値の一部)
+    [2, あいうえお,     5]
+
+ignoreQuoted = ON:
+  カラム:     [key, column1, column2, (余分な列)]
+  データ行:
+    [1, "a, b", 3, ...]          (" がそのまま残り、"a,b" は 2 列に分割される)
+    [2, "あいうえお", 5]</pre>
+  <p>値に区切り文字や改行を含む可能性がある通常の CSV では OFF のままにしてください。ON は、引用符をリテラルとして保持したい特殊ファイル向けです。</p>
+
+  <h3>sql / table 固有オプション: useJdbcMetaData</h3>
+  <p><code>sql</code> または <code>table</code> を選択した場合のみ表示される、DBUnit のメタデータ取得方法を切り替えるフラグです。デフォルトは OFF。</p>
+  <ul>
+    <li>OFF（既定）: <code>connection.createTable(tableName)</code> を使用。対象テーブルのメタデータのみを JDBC から取得する軽量な経路</li>
+    <li>ON: <code>connection.createDataSet().getTable(tableName)</code> を使用。接続先スキーマ全体のデータセットを構築したうえで対象テーブルを取り出す。DBUnit 内部でのカラム型解決やプライマリキー情報の取得精度が上がる一方、スキーマが大きいと初期化コストが増える</li>
+  </ul>
+  <pre>DB スキーマ:
+  USERS  (id INT PK, name VARCHAR, age INT)
+  ORDERS (id INT PK, user_id INT, amount INT)
+
+指定:
+  srcType          = table
+  src              = USERS
+  useJdbcMetaData  = OFF (既定)
+    → USERS 単体の情報を JDBC から取得して読み込む
+
+指定:
+  srcType          = table
+  src              = USERS
+  useJdbcMetaData  = ON
+    → まず接続先全テーブル分のデータセットを構築し、その中から USERS を取り出す
+      (列型推論が DBUnit の createDataSet 経由になる)</pre>
+  <p>通常は OFF で十分です。DB の種類や方言によってデフォルト経路でカラム型が想定と異なる場合にのみ ON を検討してください。</p>
+
   <h2>Source</h2>
   <p>入力元となるファイルやクエリ、補助的なオプションを指定します。</p>
   <table>
