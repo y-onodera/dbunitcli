@@ -35,14 +35,154 @@
   <p>入力データの形式を選択します。選択した形式に応じて、固有の設定項目がフォーム下部に表示されます。</p>
   <table>
     <tr><th>形式</th><th>説明</th></tr>
-    <tr><td>csv</td><td>CSV / TSV など区切り文字付きテキスト。区切り文字・囲み文字などを指定</td></tr>
+    <tr><td>none</td><td>入力なし（空のデータセット）。入力データが不要なコマンド（テンプレート専用 Generate など）で使用</td></tr>
+    <tr><td>csv</td><td>CSV / TSV など区切り文字付きテキスト。区切り文字・囲み文字を指定可能</td></tr>
+    <tr><td>fixed</td><td>固定長テキスト。カラム幅（バイト数）と <code>headerName</code> を指定して列に分割</td></tr>
+    <tr><td>reg</td><td>正規表現でヘッダ行・データ行をパースして列に分割</td></tr>
+    <tr><td>xls / xlsx</td><td>Excel ファイル。シート単位でテーブル化。シート / セル構造の定義に <a href="xlsx-schema.html">Xlsx Schema</a> を使用可能</td></tr>
     <tr><td>table</td><td>データベースのテーブル。JDBC 接続設定が必要</td></tr>
-    <tr><td>sql</td><td>SQL クエリの実行結果。JDBC 接続設定と SQL 本文を指定</td></tr>
-    <tr><td>reg</td><td>正規表現でテキスト行をパースして抽出</td></tr>
-    <tr><td>fixed</td><td>固定長テキスト。カラム幅を指定して列に分割</td></tr>
-    <tr><td>xls / xlsx</td><td>Excel ファイル。シート / セル構造の定義に <a href="xlsx-schema.html">Xlsx Schema</a> を使用</td></tr>
+    <tr><td>sql</td><td>SQL クエリの実行結果。JDBC 接続設定と SQL ファイルを指定</td></tr>
+    <tr><td>csvq</td><td>CSV ファイル群を H2 インメモリ DB にロードし、SQL を実行した結果を取得。複数 CSV の JOIN などに使用</td></tr>
+    <tr><td>file</td><td>ディレクトリ配下のファイル一覧を、ファイルメタ情報（パス・サイズ・更新日時など）のテーブルとして読み込む</td></tr>
+    <tr><td>dir</td><td>ディレクトリ配下のサブディレクトリ一覧を、メタ情報のテーブルとして読み込む</td></tr>
   </table>
   <p>Xls / Xlsx を選択した場合、シートごとの列定義や任意セルの抽出定義を <code>xlsxSchema</code> ファイルで与えます。詳細は <a href="xlsx-schema.html">Xlsx Schema</a> を参照してください。</p>
+
+  <h3>Source Type ごとのデータイメージ</h3>
+  <p>それぞれの形式で、入力がどのようなテーブルに変換されるかの例を示します。</p>
+
+  <p><strong>csv</strong> — 1 行目をヘッダ、2 行目以降をデータとして 1 つのテーブルを生成。</p>
+  <pre>入力 (users.csv):
+id,name,age
+1,Alice,30
+2,Bob,25
+
+テーブル名: users  (拡張子を除いたファイル名)
+カラム:     [id, name, age]
+データ行:
+  [1, Alice, 30]
+  [2, Bob,   25]</pre>
+
+  <p><strong>fixed</strong> — 指定したバイト幅でカラム分割。<code>headerName</code> で列名を与える必要あり。</p>
+  <pre>入力 (members.txt, fixedLength=4,10):
+0001Alice
+0002Bob
+
+指定:
+  fixedLength = 4,10
+  headerName  = id,name
+
+カラム:     [id, name]
+データ行:
+  [0001, Alice     ]
+  [0002, Bob       ]</pre>
+
+  <p><strong>reg</strong> — ヘッダ行・データ行の分割を正規表現で指定。</p>
+  <pre>入力 (dirty.txt):
+No,Contents,Time
+1,"最小値1～最大値999,999,999まで",2019-04-01 12:22:30
+2,"文言A,文言B",2019-04-02 09:00:00
+
+指定:
+  regHeaderSplit = ,
+  regDataSplit   = ,(?=(?:[^"]*"[^"]*")*[^"]*$)
+
+カラム:     [No, Contents, Time]
+データ行:
+  [1, 最小値1～最大値999,999,999まで, 2019-04-01 12:22:30]
+  [2, 文言A,文言B,                    2019-04-02 09:00:00]</pre>
+
+  <p><strong>xls / xlsx</strong> — シートごとに 1 テーブル。先頭行がヘッダ、以降がデータ（既定）。</p>
+  <pre>入力 (book.xlsx):
+  Sheet "Users":   id,name / 1,Alice / 2,Bob
+  Sheet "Orders":  id,amount / 10,500 / 11,800
+
+テーブル "Users":
+  カラム:   [id, name]
+  データ行: [1, Alice] / [2, Bob]
+テーブル "Orders":
+  カラム:   [id, amount]
+  データ行: [10, 500] / [11, 800]</pre>
+
+  <p><strong>table</strong> — DB テーブル全行を読み込み、テーブル名と同名の 1 テーブルを生成。</p>
+  <pre>入力 (JDBC 接続先の USERS テーブル):
+  USERS(id INT, name VARCHAR, age INT)
+  (1, 'Alice', 30), (2, 'Bob', 25)
+
+指定:
+  src = USERS
+
+テーブル名: USERS
+カラム:     [id, name, age]
+データ行:
+  [1, Alice, 30]
+  [2, Bob,   25]</pre>
+
+  <p><strong>sql</strong> — SQL 実行結果から 1 テーブルを生成。テーブル名は SQL ファイル名（拡張子除く）。</p>
+  <pre>入力 (active_users.sql):
+  SELECT id, name FROM USERS WHERE active = 1
+
+JDBC 実行結果:
+  id=1 name=Alice
+  id=3 name=Carol
+
+テーブル名: active_users
+カラム:     [id, name]
+データ行:
+  [1, Alice]
+  [3, Carol]</pre>
+
+  <p><strong>csvq</strong> — ディレクトリ内の CSV を H2 インメモリ DB にテーブルとしてロードし、指定の SQL を実行。</p>
+  <pre>入力ディレクトリ:
+  users.csv   → users(id, name)     : (1,Alice), (2,Bob)
+  orders.csv  → orders(id, user_id) : (10,1), (11,1), (12,2)
+
+SQL (user_orders.sql):
+  SELECT u.name, o.id AS order_id
+  FROM users u JOIN orders o ON u.id = o.user_id
+
+テーブル名: user_orders
+カラム:     [name, order_id]
+データ行:
+  [Alice, 10]
+  [Alice, 11]
+  [Bob,   12]</pre>
+
+  <p><strong>file</strong> — <code>src</code> に指定したディレクトリを走査し、ファイルメタ情報を 1 テーブルとして生成。テーブル名は拡張子ごと（拡張子フィルタ無指定時は拡張子をテーブル名に使用）。</p>
+  <pre>入力 (src = project/):
+  project/a.txt         (2KB, 2026-04-01 10:00:00)
+  project/sub/b.txt     (5KB, 2026-04-02 11:00:00)
+  project/sub/c.log     (1KB, 2026-04-03 09:30:00)
+
+指定:
+  srcType   = file
+  recursive = true
+  extension = .txt
+
+テーブル名: txt
+カラム:     [PATH, NAME, DIR, RELATIVE_PATH, SIZE_KB, LAST_MODIFIED]
+データ行:
+  [/abs/project/a.txt,       a.txt, /abs/project,     a.txt,       2, 2026/04/01 10:00:00]
+  [/abs/project/sub/b.txt,   b.txt, /abs/project/sub, sub/b.txt,   5, 2026/04/02 11:00:00]</pre>
+
+  <p><strong>dir</strong> — <code>src</code> に指定したディレクトリ配下のサブディレクトリを走査し、メタ情報テーブルを生成。カラムは <code>file</code> と同じ（<code>SIZE_KB</code> は常に 0）。</p>
+  <pre>入力 (src = project/):
+  project/src/
+  project/src/main/
+  project/src/test/
+
+指定:
+  srcType   = dir
+  recursive = true
+
+テーブル名: project  (ルートディレクトリ名)
+カラム:     [PATH, NAME, DIR, RELATIVE_PATH, SIZE_KB, LAST_MODIFIED]
+データ行:
+  [/abs/project/src,      src,  /abs/project,     src,      0, 2026/04/01 10:00:00]
+  [/abs/project/src/main, main, /abs/project/src, src/main, 0, 2026/04/01 10:05:00]
+  [/abs/project/src/test, test, /abs/project/src, src/test, 0, 2026/04/02 09:00:00]</pre>
+
+  <p><strong>none</strong> — 入力なし。テーブルを生成しないため、例示すべきデータもありません。テンプレート処理のみ行う Generate などで用います。</p>
 
   <h2>Source</h2>
   <p>入力元となるファイルやクエリ、補助的なオプションを指定します。</p>
