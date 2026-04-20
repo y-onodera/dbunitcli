@@ -67,14 +67,118 @@
   <p>読み込んだデータをどのようにテーブル化するかを指定します。<code>data load option</code> の展開ボタンから設定します。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>headerName</td><td>ヘッダ行のカラム名を上書きする場合の指定</td></tr>
-    <tr><td>startRow</td><td>データ読み込みを開始する行番号（ヘッダをスキップする場合など）</td></tr>
-    <tr><td>addFileInfo</td><td>元ファイル名をカラムとして追加するか</td></tr>
+    <tr><td>headerName</td><td>カラム名をカンマ区切りで明示指定する。指定した場合、先頭行もデータ行として扱われる（詳細は下記）</td></tr>
+    <tr><td>startRow</td><td>データ読み込みを開始する行番号。<strong>1 始まり</strong>、デフォルトは <code>1</code>（詳細は下記）</td></tr>
+    <tr><td>addFileInfo</td><td>ON にすると、元ファイル情報を表す 3 カラム（<code>$FILE_PATH</code> / <code>$FILE_NAME</code> / <code>$SHEET_NAME</code>）を各行に追加する（詳細は下記）</td></tr>
     <tr><td>loadData</td><td>実データを読み込むか（メタデータのみが必要な場合に OFF）</td></tr>
     <tr><td>includeMetaData</td><td>メタデータカラムを含めるか</td></tr>
     <tr><td>regTableInclude</td><td>処理対象とするテーブル名の正規表現</td></tr>
     <tr><td>regTableExclude</td><td>処理対象から除外するテーブル名の正規表現</td></tr>
   </table>
+
+  <h3>headerName の詳細</h3>
+  <p>カラム名をカンマ区切りで与えると、その名前順にテーブル列が構築されます。<strong>指定された場合は先頭行も自動的にはヘッダとみなされず、すべての行がデータ行になります</strong>。既にヘッダ行が存在するファイルでヘッダを上書きしたい場合は、<code>startRow</code> と併用してヘッダ行をスキップしてください。</p>
+  <p><strong>例 1: ヘッダ行がない CSV に列名を与える</strong></p>
+  <pre>入力 (users.csv):
+John,30
+Jane,25
+
+指定:
+  headerName = name,age
+
+結果:
+  カラム:   [name, age]
+  データ行: 2 行（John,30 / Jane,25）</pre>
+  <p><strong>例 2: 既存ヘッダを別名に差し替える</strong></p>
+  <pre>入力 (users.csv):
+col_a,col_b
+John,30
+Jane,25
+
+指定:
+  headerName = name,age
+  startRow   = 2             (元のヘッダ行をスキップ)
+
+結果:
+  カラム:   [name, age]
+  データ行: 2 行</pre>
+
+  <h3>startRow の詳細</h3>
+  <p>読み込みを開始する行番号を 1 始まりで指定します。未指定時は <code>1</code>（ファイル先頭）です。タイトル行やメタ情報行をスキップしたいときに使用します。Excel 入力にも同様に適用されます。<code>headerName</code> を併用しない場合、<code>startRow</code> で指定した行がヘッダ行として扱われ、その次の行以降がデータになります。</p>
+  <p><strong>例 1: タイトル行をスキップする</strong></p>
+  <pre>入力 (sales.csv):
+  1 行目: 売上レポート Q4
+  2 行目: id,name
+  3 行目: 1,Alice
+  4 行目: 2,Bob
+
+指定:
+  startRow = 2
+
+結果:
+  ヘッダ:   [id, name]   (2 行目)
+  データ行: 2 行         (3 行目以降)</pre>
+  <p><strong>例 2: タイトル行＋メタ情報行をまとめてスキップする</strong></p>
+  <pre>入力 (report.csv):
+  1 行目: Report
+  2 行目: Generated 2026-04-20
+  3 行目: id,name
+  4 行目: 1,Alice
+
+指定:
+  startRow = 3
+
+結果:
+  ヘッダ:   [id, name]   (3 行目)
+  データ行: 1 行以上     (4 行目以降)</pre>
+  <p><strong>例 3: <code>headerName</code> と併用する</strong></p>
+  <pre>入力 (no_header.csv):
+  1 行目: # 事前コメント
+  2 行目: John,30
+  3 行目: Jane,25
+
+指定:
+  startRow   = 2
+  headerName = name,age
+
+結果:
+  カラム:   [name, age]           (headerName から)
+  データ行: 2 行                   (2 行目以降すべてデータ)</pre>
+
+  <h3>addFileInfo の詳細</h3>
+  <p>ON にすると、読み込んだ各行の末尾に元ファイル情報を示す次の 3 カラムが自動で追加されます。</p>
+  <table>
+    <tr><th>カラム</th><th>内容</th></tr>
+    <tr><td>$FILE_PATH</td><td>入力ファイルの絶対パス（区切りはスラッシュに正規化）</td></tr>
+    <tr><td>$FILE_NAME</td><td>入力ファイルのファイル名（例: <code>users.csv</code>）</td></tr>
+    <tr><td>$SHEET_NAME</td><td>Excel の場合はシート名。CSV など単一表の場合は空文字</td></tr>
+  </table>
+  <p>ディレクトリを <code>src</code> に指定して複数ファイルをまとめて読み込む際、どの行がどのファイル由来かを追跡したい場合に有効です。Compare の差分レポートでソース特定にも利用できます。</p>
+  <p><strong>例 1: CSV ファイル 1 件を読み込む場合</strong></p>
+  <pre>入力 (data/users.csv):
+id,name
+1,Alice
+
+指定:
+  addFileInfo = ON
+
+結果:
+  カラム: [id, name, $FILE_PATH, $FILE_NAME, $SHEET_NAME]
+  データ行:
+    [1, Alice, /abs/path/data/users.csv, users.csv, ""]</pre>
+  <p><strong>例 2: Excel の複数シートを読み込む場合</strong></p>
+  <pre>入力 (data/book.xlsx):
+  Sheet "Users":  id,name / 1,Alice
+  Sheet "Orders": id,amount / 10,500
+
+指定:
+  addFileInfo = ON
+
+結果 (テーブル "Users" の 1 行):
+  [1, Alice, /abs/path/data/book.xlsx, book.xlsx, Users]
+結果 (テーブル "Orders" の 1 行):
+  [10, 500, /abs/path/data/book.xlsx, book.xlsx, Orders]</pre>
+  <p>比較対象から追加カラムを除外したい場合は、<a href="dataset-settings.html">Dataset Settings</a> の除外カラム設定と併用してください。</p>
 
   <h2>Setting</h2>
   <p>Dataset Settings ファイルを指定することで、テーブルごとの主キー・ソート順・フィルタなどのメタデータを与えます。</p>
