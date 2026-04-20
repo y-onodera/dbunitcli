@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Dataset Load Form</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Dataset Load Form</h1>
+  <p>各コマンドで「データセットの入力」を指定するための共通フォームです。<a href="compare.html">Compare</a> の <code>oldData</code> / <code>newData</code> / <code>expectData</code>、<a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> / <a href="run.html">Run</a> の <code>srcData</code>、<a href="parameterize.html">Parameterize</a> の <code>paramData</code> は、いずれもこのフォームによって構成されます。</p>
+  <p>1 つの入力は、以下の 4 つの領域から構成されます。</p>
+  <ul>
+    <li><strong>Source Type 選択</strong> — 入力の形式（CSV / Table / SQL / Regex / Fixed / Xls / Xlsx）</li>
+    <li><strong>Source</strong> — 入力元ファイル・SQL、文字コード、ディレクトリ走査条件</li>
+    <li><strong>Data Load</strong> — ヘッダ・開始行・メタデータなど、読み込み時の挙動</li>
+    <li><strong>Setting</strong> — Dataset Settings ファイルによるテーブル単位のメタデータ指定</li>
+  </ul>
+
+  <h2>Source Type 選択</h2>
+  <p>入力データの形式を選択します。選択した形式に応じて、固有の設定項目がフォーム下部に表示されます。</p>
+  <table>
+    <tr><th>形式</th><th>説明</th></tr>
+    <tr><td>csv</td><td>CSV / TSV など区切り文字付きテキスト。区切り文字・囲み文字などを指定</td></tr>
+    <tr><td>table</td><td>データベースのテーブル。JDBC 接続設定が必要</td></tr>
+    <tr><td>sql</td><td>SQL クエリの実行結果。JDBC 接続設定と SQL 本文を指定</td></tr>
+    <tr><td>reg</td><td>正規表現でテキスト行をパースして抽出</td></tr>
+    <tr><td>fixed</td><td>固定長テキスト。カラム幅を指定して列に分割</td></tr>
+    <tr><td>xls / xlsx</td><td>Excel ファイル。シート / セル構造の定義に <a href="xlsx-schema.html">Xlsx Schema</a> を使用</td></tr>
+  </table>
+  <p>Xls / Xlsx を選択した場合、シートごとの列定義や任意セルの抽出定義を <code>xlsxSchema</code> ファイルで与えます。詳細は <a href="xlsx-schema.html">Xlsx Schema</a> を参照してください。</p>
+
+  <h2>Source</h2>
+  <p>入力元となるファイルやクエリ、補助的なオプションを指定します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>src</td><td>入力元のファイル・ディレクトリのパス。SQL / Table 系を選んでいる場合は SQL 本文の指定</td></tr>
+    <tr><td>encoding</td><td>テキスト系入力の文字コード</td></tr>
+    <tr><td>jdbcProperties</td><td>Table / SQL を選んだ場合の JDBC 接続情報（URL・ユーザ・パスワードなど）</td></tr>
+    <tr><td>templateGroup</td><td>テンプレート処理を行う場合の補助設定</td></tr>
+  </table>
+  <h3>traversal option</h3>
+  <p>ディレクトリを <code>src</code> に指定した際の走査条件です。<code>traversal option</code> の展開ボタンから設定します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>extension</td><td>対象とするファイル拡張子</td></tr>
+    <tr><td>recursive</td><td>サブディレクトリを再帰的に走査するか</td></tr>
+    <tr><td>regInclude</td><td>対象ファイル名の包含条件（正規表現）</td></tr>
+    <tr><td>regExclude</td><td>対象ファイル名の除外条件（正規表現）</td></tr>
+  </table>
+
+  <h2>Data Load</h2>
+  <p>読み込んだデータをどのようにテーブル化するかを指定します。<code>data load option</code> の展開ボタンから設定します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>headerName</td><td>ヘッダ行のカラム名を上書きする場合の指定</td></tr>
+    <tr><td>startRow</td><td>データ読み込みを開始する行番号（ヘッダをスキップする場合など）</td></tr>
+    <tr><td>addFileInfo</td><td>元ファイル名をカラムとして追加するか</td></tr>
+    <tr><td>loadData</td><td>実データを読み込むか（メタデータのみが必要な場合に OFF）</td></tr>
+    <tr><td>includeMetaData</td><td>メタデータカラムを含めるか</td></tr>
+    <tr><td>regTableInclude</td><td>処理対象とするテーブル名の正規表現</td></tr>
+    <tr><td>regTableExclude</td><td>処理対象から除外するテーブル名の正規表現</td></tr>
+  </table>
+
+  <h2>Setting</h2>
+  <p>Dataset Settings ファイルを指定することで、テーブルごとの主キー・ソート順・フィルタなどのメタデータを与えます。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>setting</td><td>Dataset Settings ファイルのパス。書式は <a href="dataset-settings.html">Dataset Settings</a> を参照</td></tr>
+    <tr><td>settingEncoding</td><td>Dataset Settings ファイルの文字コード</td></tr>
+  </table>
+  <p>テキストボックス横の編集ボタンから <a href="dataset-setting.html">Dataset Setting</a> ダイアログを開き、テーブルごとの設定を GUI で編集できます。</p>
+
+  <h2>関連ページ</h2>
+  <ul>
+    <li><a href="dataset-settings.html">Dataset Settings</a> — 設定ファイル全体（<code>settings</code> / <code>commonSettings</code> / <code>import</code>）の書式</li>
+    <li><a href="dataset-setting.html">Dataset Setting</a> — テーブル単位の設定ダイアログ</li>
+    <li><a href="xlsx-schema.html">Xlsx Schema</a> — Xlsx 入力のマッピング定義</li>
+    <li><a href="xlsx-row-setting.html">Xlsx Row Setting</a> — Rows Mapping の行単位設定</li>
+    <li><a href="xlsx-cell-setting.html">Xlsx Cell Setting</a> — Random Cell Mapping のセル単位設定</li>
+  </ul>
+</body>
+</html>
