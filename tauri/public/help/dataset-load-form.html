@@ -32,26 +32,37 @@
   </ul>
 
   <h2>Source Type 選択</h2>
-  <p>入力データの形式を選択します。選択した形式に応じて、固有の設定項目がフォーム下部に表示されます。</p>
+  <p>入力データの形式を選択します。選択した形式に応じて、固有の設定項目がフォーム下部に表示されます。以下の表は早見表です。各形式の詳細（<code>src</code> の意味・固有オプション・データイメージ例）は、形式名のリンクから対応する節を参照してください。</p>
   <table>
     <tr><th>形式</th><th>説明</th></tr>
-    <tr><td>none</td><td>入力なし（空のデータセット）。入力データが不要なコマンド（テンプレート専用 Generate など）で使用</td></tr>
-    <tr><td>csv</td><td>CSV / TSV など区切り文字付きテキスト。区切り文字・囲み文字を指定可能</td></tr>
-    <tr><td>fixed</td><td>固定長テキスト。カラム幅（バイト数）と <code>headerName</code> を指定して列に分割</td></tr>
-    <tr><td>reg</td><td>正規表現でヘッダ行・データ行をパースして列に分割</td></tr>
-    <tr><td>xls / xlsx</td><td>Excel ファイル。シート単位でテーブル化。シート / セル構造の定義に <a href="xlsx-schema.html">Xlsx Schema</a> を使用可能</td></tr>
-    <tr><td>table</td><td>データベースのテーブル。JDBC 接続設定が必要</td></tr>
-    <tr><td>sql</td><td>SQL クエリの実行結果。JDBC 接続設定と SQL ファイルを指定</td></tr>
-    <tr><td>csvq</td><td>H2 上で SQL を実行した結果を取得。SQL 内の <code>CSVREAD()</code> 関数で CSV ファイルを参照し、複数 CSV の JOIN などに使用</td></tr>
-    <tr><td>file</td><td>ディレクトリ配下のファイル一覧を、ファイルメタ情報（パス・サイズ・更新日時など）のテーブルとして読み込む</td></tr>
-    <tr><td>dir</td><td>ディレクトリ配下のサブディレクトリ一覧を、メタ情報のテーブルとして読み込む</td></tr>
+    <tr><td><a href="#srctype-none">none</a></td><td>入力なし（空のデータセット）。入力データが不要なコマンド（テンプレート専用 Generate など）で使用</td></tr>
+    <tr><td><a href="#srctype-csv">csv</a></td><td>CSV / TSV など区切り文字付きテキスト。区切り文字・囲み文字を指定可能</td></tr>
+    <tr><td><a href="#srctype-fixed">fixed</a></td><td>固定長テキスト。カラム幅（バイト数）と <code>headerName</code> を指定して列に分割</td></tr>
+    <tr><td><a href="#srctype-reg">reg</a></td><td>正規表現でヘッダ行・データ行をパースして列に分割</td></tr>
+    <tr><td><a href="#srctype-xlsx">xls / xlsx</a></td><td>Excel ファイル。シート単位でテーブル化</td></tr>
+    <tr><td><a href="#srctype-table">table</a></td><td>テーブル名を列挙したテキストファイルに従い、JDBC 接続先のテーブルを読み込む</td></tr>
+    <tr><td><a href="#srctype-sql">sql</a></td><td>SQL クエリの実行結果。JDBC 接続設定と SQL ファイルを指定</td></tr>
+    <tr><td><a href="#srctype-csvq">csvq</a></td><td>H2 上で SQL を実行した結果を取得。SQL 内の <code>CSVREAD()</code> 関数で CSV ファイルを参照し、複数 CSV の JOIN などに使用</td></tr>
+    <tr><td><a href="#srctype-file">file</a></td><td>ディレクトリ配下のファイル一覧を、ファイルメタ情報（パス・サイズ・更新日時など）のテーブルとして読み込む</td></tr>
+    <tr><td><a href="#srctype-dir">dir</a></td><td>ディレクトリ配下のサブディレクトリ一覧を、メタ情報のテーブルとして読み込む</td></tr>
   </table>
-  <p>Xls / Xlsx を選択した場合、シートごとの列定義や任意セルの抽出定義を <code>xlsxSchema</code> ファイルで与えます。詳細は <a href="xlsx-schema.html">Xlsx Schema</a> を参照してください。</p>
+  <p>各節は「<strong>src の意味</strong> / <strong>テーブル名の決まり方</strong> / <strong>固有オプション</strong> / <strong>データイメージ例</strong>」の順で構成されています。共通オプション（<code>encoding</code>・<code>headerName</code>・<code>startRow</code>・<code>addFileInfo</code>・ディレクトリ走査系）は後続の <a href="#section-source">Source</a> / <a href="#section-data-load">Data Load</a> 節を参照してください。</p>
 
-  <h3>Source Type ごとのデータイメージ</h3>
-  <p>それぞれの形式で、入力がどのようなテーブルに変換されるかの例を示します。</p>
-
-  <p><strong>csv</strong> — 1 行目をヘッダ、2 行目以降をデータとして 1 つのテーブルを生成。</p>
+  <h3 id="srctype-csv">csv</h3>
+  <p><strong>src の意味:</strong> CSV / TSV ファイル、または複数 CSV を含むディレクトリ。</p>
+  <p><strong>テーブル名:</strong> 拡張子を除いたファイル名。</p>
+  <p><strong>固有オプション:</strong></p>
+  <ul>
+    <li><code>delimiter</code> — 区切り文字を 1 文字で指定します。デフォルトは <code>,</code>（カンマ）。タブ・改行など制御文字はエスケープ記法で指定可能で、<code>\b</code> / <code>\t</code> / <code>\n</code> / <code>\r</code> / <code>\f</code> がサポートされます。</li>
+    <li><code>ignoreQuoted</code> — 引用符（<code>"</code>）の扱いを切り替えます。デフォルトは OFF。
+      <ul>
+        <li>OFF（既定）: 引用符をクォート文字として扱う。フィールドを囲む <code>"</code> は除去され、引用符内の区切り文字はフィールドの一部となる</li>
+        <li>ON: 引用符を特別扱いせず、ただの文字として保持する</li>
+      </ul>
+      値に区切り文字や改行を含む可能性がある通常の CSV では OFF のままにしてください。ON は、引用符をリテラルとして保持したい特殊ファイル向けです。
+    </li>
+  </ul>
+  <p><strong>データイメージ例:</strong> 1 行目をヘッダ、2 行目以降をデータとして 1 つのテーブルを生成。</p>
   <pre>入力 (users.csv):
 id,name,age
 1,Alice,30
@@ -62,8 +73,46 @@ id,name,age
 データ行:
   [1, Alice, 30]
   [2, Bob,   25]</pre>
+  <p><strong>delimiter の例（TSV を読む）:</strong></p>
+  <pre>入力 (users.tsv):
+id&#9;name&#9;age
+1&#9;Alice&#9;30
+2&#9;Bob&#9;25
 
-  <p><strong>fixed</strong> — 指定したバイト幅でカラム分割。<code>headerName</code> で列名を与える必要あり。</p>
+指定:
+  srcType   = csv
+  delimiter = \t     (タブ区切り)
+
+カラム:     [id, name, age]
+データ行:
+  [1, Alice, 30]
+  [2, Bob,   25]</pre>
+  <p><strong>ignoreQuoted の例:</strong></p>
+  <pre>入力 (multi.csv):
+key,column1,column2
+1,"a,b",3
+2,"あいうえお",5
+
+ignoreQuoted = OFF (既定):
+  カラム:     [key, column1, column2]
+  データ行:
+    [1, a,b,           3]        (外側の " は除去、内側のカンマは値の一部)
+    [2, あいうえお,     5]
+
+ignoreQuoted = ON:
+  カラム:     [key, column1, column2, (余分な列)]
+  データ行:
+    [1, "a, b", 3, ...]          (" がそのまま残り、"a,b" は 2 列に分割される)
+    [2, "あいうえお", 5]</pre>
+
+  <h3 id="srctype-fixed">fixed</h3>
+  <p><strong>src の意味:</strong> 固定長テキストファイル、または複数ファイルを含むディレクトリ。</p>
+  <p><strong>テーブル名:</strong> 拡張子を除いたファイル名。</p>
+  <p><strong>固有オプション:</strong></p>
+  <ul>
+    <li><code>fixedLength</code> — 各カラムのバイト幅をカンマ区切りで指定（例: <code>4,10</code>）。<code>headerName</code> による列名指定との併用が必須です。</li>
+  </ul>
+  <p><strong>データイメージ例:</strong> 指定したバイト幅でカラム分割。</p>
   <pre>入力 (members.txt, fixedLength=4,10):
 0001Alice
 0002Bob
@@ -77,7 +126,15 @@ id,name,age
   [0001, Alice     ]
   [0002, Bob       ]</pre>
 
-  <p><strong>reg</strong> — ヘッダ行・データ行の分割を正規表現で指定。</p>
+  <h3 id="srctype-reg">reg</h3>
+  <p><strong>src の意味:</strong> テキストファイル、または複数ファイルを含むディレクトリ。</p>
+  <p><strong>テーブル名:</strong> 拡張子を除いたファイル名。</p>
+  <p><strong>固有オプション:</strong></p>
+  <ul>
+    <li><code>regHeaderSplit</code> — ヘッダ行を列に分割する正規表現。</li>
+    <li><code>regDataSplit</code> — データ行を列に分割する正規表現。ヘッダと区切りロジックを変えたい場合（例: 引用符内のカンマを区切らない等）に使用します。</li>
+  </ul>
+  <p><strong>データイメージ例:</strong></p>
   <pre>入力 (dirty.txt):
 No,Contents,Time
 1,"最小値1～最大値999,999,999まで",2019-04-01 12:22:30
@@ -92,7 +149,14 @@ No,Contents,Time
   [1, 最小値1～最大値999,999,999まで, 2019-04-01 12:22:30]
   [2, 文言A,文言B,                    2019-04-02 09:00:00]</pre>
 
-  <p><strong>xls / xlsx</strong> — シートごとに 1 テーブル。先頭行がヘッダ、以降がデータ（既定）。</p>
+  <h3 id="srctype-xlsx">xls / xlsx</h3>
+  <p><strong>src の意味:</strong> Excel ファイル（<code>.xls</code> / <code>.xlsx</code>）、または複数 Excel を含むディレクトリ。</p>
+  <p><strong>テーブル名:</strong> 各シート名（ブック内の各シートが 1 テーブル）。</p>
+  <p><strong>固有オプション:</strong></p>
+  <ul>
+    <li><code>xlsxSchema</code> — シートごとの列定義や任意セルの抽出定義を記述したスキーマファイル。書式の詳細は <a href="xlsx-schema.html">Xlsx Schema</a> を参照してください。</li>
+  </ul>
+  <p><strong>データイメージ例:</strong> 先頭行がヘッダ、以降がデータ（既定）。</p>
   <pre>入力 (book.xlsx):
   Sheet "Users":   id,name / 1,Alice / 2,Bob
   Sheet "Orders":  id,amount / 10,500 / 11,800
@@ -104,21 +168,52 @@ No,Contents,Time
   カラム:   [id, amount]
   データ行: [10, 500] / [11, 800]</pre>
 
-  <p><strong>table</strong> — DB テーブル全行を読み込み、テーブル名と同名の 1 テーブルを生成。</p>
-  <pre>入力 (JDBC 接続先の USERS テーブル):
+  <h3 id="srctype-table">table</h3>
+  <p><strong>src の意味:</strong> 読み込み対象のテーブル名を 1 行 1 件で列挙したテキストファイル、または同種のファイルを含むディレクトリ。<strong>ファイル自体は DB テーブルの名前ではなく、テーブル名のリストを記述したテキストファイルです。</strong></p>
+  <p><strong>テーブル名:</strong> src ファイル内の各行に書かれたテーブル名がそのまま DBUnit 上のテーブル名になります。<code>jdbcProperties</code>（JDBC 接続設定）が必須です。</p>
+  <p><strong>固有オプション:</strong></p>
+  <ul>
+    <li><code>useJdbcMetaData</code> — DBUnit のメタデータ取得方法を切り替えるフラグ。デフォルトは OFF。
+      <ul>
+        <li>OFF（既定）: <code>connection.createTable(tableName)</code> を使用。対象テーブルのメタデータのみを JDBC から取得する軽量な経路</li>
+        <li>ON: <code>connection.createDataSet().getTable(tableName)</code> を使用。接続先スキーマ全体のデータセットを構築したうえで対象テーブルを取り出す。DBUnit 内部でのカラム型解決やプライマリキー情報の取得精度が上がる一方、スキーマが大きいと初期化コストが増える</li>
+      </ul>
+      通常は OFF で十分です。DB の種類や方言によってデフォルト経路でカラム型が想定と異なる場合にのみ ON を検討してください。
+    </li>
+  </ul>
+  <p><strong>注:</strong> <code>headerName</code> / <code>startRow</code> / <code>addFileInfo</code> は DB テーブルが対象のため無効です。src ファイル（テーブル名リスト）自体は空行・コメントを含まない前提で読み込まれます。</p>
+  <p><strong>データイメージ例:</strong> テーブル名リストファイル 1 件から複数テーブルを生成。</p>
+  <pre>入力 (tables.txt):
+USERS
+ORDERS
+
+JDBC 接続先:
   USERS(id INT, name VARCHAR, age INT)
-  (1, 'Alice', 30), (2, 'Bob', 25)
+    (1, 'Alice', 30), (2, 'Bob', 25)
+  ORDERS(id INT, amount INT)
+    (10, 500), (11, 800)
 
 指定:
-  src = USERS
+  srcType = table
+  src     = tables.txt
 
-テーブル名: USERS
-カラム:     [id, name, age]
-データ行:
-  [1, Alice, 30]
-  [2, Bob,   25]</pre>
+生成テーブル:
+  テーブル名: USERS
+    カラム:     [id, name, age]
+    データ行:   [1, Alice, 30] / [2, Bob, 25]
+  テーブル名: ORDERS
+    カラム:     [id, amount]
+    データ行:   [10, 500] / [11, 800]</pre>
 
-  <p><strong>sql</strong> — SQL 実行結果から 1 テーブルを生成。テーブル名は SQL ファイル名（拡張子除く）。</p>
+  <h3 id="srctype-sql">sql</h3>
+  <p><strong>src の意味:</strong> SQL クエリを記述したファイル、または複数 SQL を含むディレクトリ。<code>jdbcProperties</code>（JDBC 接続設定）が必須です。</p>
+  <p><strong>テーブル名:</strong> SQL ファイル名（拡張子除く）。</p>
+  <p><strong>固有オプション:</strong></p>
+  <ul>
+    <li><code>useJdbcMetaData</code> — 意味は <a href="#srctype-table">table</a> と同じ。DBUnit のメタデータ取得経路を切り替えます。詳細は table の節を参照してください。</li>
+  </ul>
+  <p><strong>注:</strong> <code>headerName</code> / <code>startRow</code> / <code>addFileInfo</code> は SQL 実行結果には適用されず無効です。</p>
+  <p><strong>データイメージ例:</strong></p>
   <pre>入力 (active_users.sql):
   SELECT id, name FROM USERS WHERE active = 1
 
@@ -132,7 +227,11 @@ JDBC 実行結果:
   [1, Alice]
   [3, Carol]</pre>
 
-  <p><strong>csvq</strong> — <code>src</code> に指定した SQL ファイルを、H2 データベース（ファイルモード）上で実行し、結果セットを 1 テーブルとして取得します。CSV ファイルの読み込みは SQL 内で <code>CSVREAD()</code> 関数を使って行うため、<strong>どの CSV を読むかも SQL ファイル内で指定します</strong>（フォームの <code>src</code> が指す先は SQL ファイルであり、CSV を置いたディレクトリではありません）。テーブル名は SQL ファイル名（拡張子除く）になります。</p>
+  <h3 id="srctype-csvq">csvq</h3>
+  <p><strong>src の意味:</strong> H2 データベース（ファイルモード）上で実行する SQL ファイル。<strong>どの CSV を読むかも SQL ファイル内で <code>CSVREAD()</code> 関数により指定します</strong>（<code>src</code> が指す先は SQL ファイルであり、CSV を置いたディレクトリではありません）。</p>
+  <p><strong>テーブル名:</strong> SQL ファイル名（拡張子除く）。</p>
+  <p><strong>固有オプション:</strong> なし。</p>
+  <p><strong>データイメージ例:</strong> 複数 CSV を SQL で JOIN した結果を 1 テーブルとして取得。</p>
   <pre>入力 CSV (csvquery/csv/header.csv):
 KEYCOLUMN,CD1,NAME,VALUE
 1,A1,太郎,10000
@@ -170,7 +269,11 @@ SQL (joinQuery.sql):
   [1, A1, 太郎, 10000]</pre>
   <p><code>CSVREAD(fileName, columns, csvOptions)</code> の第 2 引数を <code>null</code> にすると先頭行がヘッダとして扱われます。第 3 引数では <code>charset</code>・<code>fieldSeparator</code>・<code>fieldDelimiter</code> などの H2 CSV オプションを指定できます（例: TSV を読む場合は <code>'charset=UTF-8 fieldSeparator=\t'</code>）。</p>
 
-  <p><strong>file</strong> — <code>src</code> に指定したディレクトリを走査し、ファイルメタ情報を 1 テーブルとして生成。テーブル名は拡張子ごと（拡張子フィルタ無指定時は拡張子をテーブル名に使用）。</p>
+  <h3 id="srctype-file">file</h3>
+  <p><strong>src の意味:</strong> 走査対象のディレクトリ。</p>
+  <p><strong>テーブル名:</strong> 対象ファイルの拡張子（<code>extension</code> でフィルタした場合はその拡張子名）。</p>
+  <p><strong>固有オプション:</strong> なし。ディレクトリ走査系（<code>extension</code>・<code>recursive</code>・<code>regInclude</code>・<code>regExclude</code>）で対象を絞り込みます。</p>
+  <p><strong>データイメージ例:</strong> ディレクトリ配下のファイル一覧をメタ情報テーブルとして生成。</p>
   <pre>入力 (src = project/):
   project/a.txt         (2KB, 2026-04-01 10:00:00)
   project/sub/b.txt     (5KB, 2026-04-02 11:00:00)
@@ -187,7 +290,11 @@ SQL (joinQuery.sql):
   [/abs/project/a.txt,       a.txt, /abs/project,     a.txt,       2, 2026/04/01 10:00:00]
   [/abs/project/sub/b.txt,   b.txt, /abs/project/sub, sub/b.txt,   5, 2026/04/02 11:00:00]</pre>
 
-  <p><strong>dir</strong> — <code>src</code> に指定したディレクトリ配下のサブディレクトリを走査し、メタ情報テーブルを生成。カラムは <code>file</code> と同じ（<code>SIZE_KB</code> は常に 0）。</p>
+  <h3 id="srctype-dir">dir</h3>
+  <p><strong>src の意味:</strong> 走査対象のディレクトリ。</p>
+  <p><strong>テーブル名:</strong> ルートディレクトリ名。</p>
+  <p><strong>固有オプション:</strong> なし。ディレクトリ走査系（<code>recursive</code>・<code>regInclude</code>・<code>regExclude</code>）で対象を絞り込みます。</p>
+  <p><strong>データイメージ例:</strong> 配下のサブディレクトリをメタ情報テーブルとして生成（カラムは <code>file</code> と同じ。<code>SIZE_KB</code> は常に 0）。</p>
   <pre>入力 (src = project/):
   project/src/
   project/src/main/
@@ -204,77 +311,17 @@ SQL (joinQuery.sql):
   [/abs/project/src/main, main, /abs/project/src, src/main, 0, 2026/04/01 10:05:00]
   [/abs/project/src/test, test, /abs/project/src, src/test, 0, 2026/04/02 09:00:00]</pre>
 
-  <p><strong>none</strong> — 入力なし。テーブルを生成しないため、例示すべきデータもありません。テンプレート処理のみ行う Generate などで用います。</p>
+  <h3 id="srctype-none">none</h3>
+  <p><strong>src の意味:</strong> 指定不要（入力を持たない）。</p>
+  <p><strong>テーブル名:</strong> テーブルを生成しません。</p>
+  <p><strong>固有オプション:</strong> なし。</p>
+  <p><strong>データイメージ例:</strong> 入力・生成テーブルがないため、例示すべきデータはありません。テンプレート処理のみ行う Generate などで用います。</p>
 
-  <h3>csv 固有オプション: delimiter / ignoreQuoted</h3>
-  <p><code>csv</code> を選択した場合のみ表示されるオプションです。</p>
-  <p><strong>delimiter</strong> — 区切り文字を 1 文字で指定します。デフォルトは <code>,</code>（カンマ）。タブ・改行など制御文字はエスケープ記法で指定可能で、<code>\b</code> / <code>\t</code> / <code>\n</code> / <code>\r</code> / <code>\f</code> がサポートされます。</p>
-  <pre>入力 (users.tsv):
-id&#9;name&#9;age
-1&#9;Alice&#9;30
-2&#9;Bob&#9;25
-
-指定:
-  srcType   = csv
-  delimiter = \t     (タブ区切り)
-
-カラム:     [id, name, age]
-データ行:
-  [1, Alice, 30]
-  [2, Bob,   25]</pre>
-
-  <p><strong>ignoreQuoted</strong> — 引用符（<code>"</code>）の扱いを切り替えます。デフォルトは OFF。</p>
-  <ul>
-    <li>OFF（既定）: 引用符をクォート文字として扱う。フィールドを囲む <code>"</code> は除去され、引用符内の区切り文字はフィールドの一部となる</li>
-    <li>ON: 引用符を特別扱いせず、ただの文字として保持する</li>
-  </ul>
-  <pre>入力 (multi.csv):
-key,column1,column2
-1,"a,b",3
-2,"あいうえお",5
-
-ignoreQuoted = OFF (既定):
-  カラム:     [key, column1, column2]
-  データ行:
-    [1, a,b,           3]        (外側の " は除去、内側のカンマは値の一部)
-    [2, あいうえお,     5]
-
-ignoreQuoted = ON:
-  カラム:     [key, column1, column2, (余分な列)]
-  データ行:
-    [1, "a, b", 3, ...]          (" がそのまま残り、"a,b" は 2 列に分割される)
-    [2, "あいうえお", 5]</pre>
-  <p>値に区切り文字や改行を含む可能性がある通常の CSV では OFF のままにしてください。ON は、引用符をリテラルとして保持したい特殊ファイル向けです。</p>
-
-  <h3>sql / table 固有オプション: useJdbcMetaData</h3>
-  <p><code>sql</code> または <code>table</code> を選択した場合のみ表示される、DBUnit のメタデータ取得方法を切り替えるフラグです。デフォルトは OFF。</p>
-  <ul>
-    <li>OFF（既定）: <code>connection.createTable(tableName)</code> を使用。対象テーブルのメタデータのみを JDBC から取得する軽量な経路</li>
-    <li>ON: <code>connection.createDataSet().getTable(tableName)</code> を使用。接続先スキーマ全体のデータセットを構築したうえで対象テーブルを取り出す。DBUnit 内部でのカラム型解決やプライマリキー情報の取得精度が上がる一方、スキーマが大きいと初期化コストが増える</li>
-  </ul>
-  <pre>DB スキーマ:
-  USERS  (id INT PK, name VARCHAR, age INT)
-  ORDERS (id INT PK, user_id INT, amount INT)
-
-指定:
-  srcType          = table
-  src              = USERS
-  useJdbcMetaData  = OFF (既定)
-    → USERS 単体の情報を JDBC から取得して読み込む
-
-指定:
-  srcType          = table
-  src              = USERS
-  useJdbcMetaData  = ON
-    → まず接続先全テーブル分のデータセットを構築し、その中から USERS を取り出す
-      (列型推論が DBUnit の createDataSet 経由になる)</pre>
-  <p>通常は OFF で十分です。DB の種類や方言によってデフォルト経路でカラム型が想定と異なる場合にのみ ON を検討してください。</p>
-
-  <h2>Source</h2>
+  <h2 id="section-source">Source</h2>
   <p>入力元となるファイルやクエリ、補助的なオプションを指定します。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>src</td><td>入力元のファイル・ディレクトリのパス。SQL / Table 系を選んでいる場合は SQL 本文の指定</td></tr>
+    <tr><td>src</td><td>入力元のパス。Source Type によって意味が異なる: ファイル・ディレクトリ（<code>csv</code> / <code>fixed</code> / <code>reg</code> / <code>xls</code> / <code>xlsx</code> / <code>file</code> / <code>dir</code>）、SQL ファイル（<code>sql</code> / <code>csvq</code>）、テーブル名リストファイル（<code>table</code>）</td></tr>
     <tr><td>encoding</td><td>テキスト系入力の文字コード</td></tr>
     <tr><td>jdbcProperties</td><td>Table / SQL を選んだ場合の JDBC 接続情報（URL・ユーザ・パスワードなど）</td></tr>
     <tr><td>templateGroup</td><td>テンプレート処理を行う場合の補助設定</td></tr>
@@ -289,7 +336,7 @@ ignoreQuoted = ON:
     <tr><td>regExclude</td><td>対象ファイル名の除外条件（正規表現）</td></tr>
   </table>
 
-  <h2>Data Load</h2>
+  <h2 id="section-data-load">Data Load</h2>
   <p>読み込んだデータをどのようにテーブル化するかを指定します。<code>data load option</code> の展開ボタンから設定します。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
