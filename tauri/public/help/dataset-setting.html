@@ -29,7 +29,7 @@
   <table>
     <tr><th>種別</th><th>説明</th></tr>
     <tr><td>name</td><td>テーブル名を1件以上列挙して指定します。<code>filePath</code> で設定ファイルからの相対パスを指定することも可能です。</td></tr>
-    <tr><td>pattern</td><td>テーブル名の正規表現で対象を特定します。<code>patternExclue</code> で除外パターンを追加できます。</td></tr>
+    <tr><td>pattern</td><td>テーブル名のマッチで対象を特定します。<code>pattern</code> オブジェクトには部分一致用の <code>string</code> または正規表現用の <code>regex</code> を指定し、<code>exclude</code> 配列で除外パターンを追加できます。</td></tr>
     <tr><td>outerJoin / innerJoin / fullJoin</td><td>2テーブルを結合して1つの論理テーブルとして扱います。<code>left</code> と <code>right</code> に結合対象のテーブル名、条件は <code>on</code>（JeXL 式）か <code>column</code>（共通カラム名）で指定します。</td></tr>
   </table>
 
@@ -70,8 +70,8 @@ orders_order_id | orders_item_id | orders_qty | items_id | items_name
     <tr><td>prefix</td><td>出力テーブル名に付与する接頭辞</td></tr>
     <tr><td>tableName</td><td>出力テーブル名のベース名</td></tr>
     <tr><td>suffix</td><td>出力テーブル名に付与する接尾辞</td></tr>
-    <tr><td>limit</td><td>split 時の最大分割数</td></tr>
-    <tr><td>breakKey</td><td>split 時にテーブルを分割するキーとなるカラム</td></tr>
+    <tr><td>limit</td><td>1 出力テーブルあたりに含める breakKey のグループ数（breakKey 未指定時は行数）の上限。上限に達すると次の行から新しい出力テーブルへ切り替わる。<code>0</code>（未指定）のとき split は行われない。</td></tr>
+    <tr><td>breakKey</td><td>split 時にテーブルを切り替えるキーとなるカラム。値が変化した回数が <code>limit</code> に達すると出力テーブルが切り替わる。未指定の場合は <code>limit</code> 行ごとに切り替わる。</td></tr>
   </table>
 
   <h3>変化の例</h3>
@@ -79,35 +79,50 @@ orders_order_id | orders_item_id | orders_qty | items_id | items_name
   <p><strong>prefix / tableName / suffix（リネーム）</strong></p>
   <p>入力 <code>users</code> に対し <code>prefix: "tmp_"</code>、<code>tableName: "accounts"</code>、<code>suffix: "_v1"</code> を指定すると、出力テーブル名は <code>tmp_accounts_v1</code> になります。データ内容はそのまま維持されます。</p>
 
-  <p><strong>split（breakKey で分割）</strong></p>
-<pre><code>Before (orders):
+  <p><strong>split（breakKey でグループ単位に分割）</strong></p>
+  <p>出力テーブル名は <code>prefix</code> / <code>suffix</code> に <code>%d</code> を含めることで、分割順の連番（0, 1, 2, ...）が埋め込まれます。breakKey の値自体はテーブル名には使われません。</p>
+<pre><code>Before (orders, breakKey 昇順にソート済み):
 id | type | amount
 ---+------+-------
 1  | A    | 100
-2  | B    | 200
 3  | A    | 150
+2  | B    | 200
 4  | C    | 80
 
-After (split: { tableName: "orders", breakKey: ["type"] }):
-Table: orders_A
+After (split: { tableName: "orders", suffix: "_%d", breakKey: ["type"], limit: 1 }):
+Table: orders_0
 id | type | amount
 ---+------+-------
 1  | A    | 100
 3  | A    | 150
 
-Table: orders_B
+Table: orders_1
 id | type | amount
 ---+------+-------
 2  | B    | 200
 
-Table: orders_C
+Table: orders_2
 id | type | amount
 ---+------+-------
 4  | C    | 80
 </code></pre>
 
-  <p><strong>split.limit（最大分割数の制限）</strong></p>
-  <p>上記で <code>limit: "2"</code> を指定すると、分割先は最初の 2 テーブル（<code>orders_A</code>、<code>orders_B</code>）までに制限され、それ以降の行は破棄されます。</p>
+  <p><strong>split.limit（1 テーブルに含めるグループ数の上限）</strong></p>
+  <p><code>limit</code> は「1 出力テーブルあたりに含める breakKey のグループ数の上限」です。上限に達すると、それ以降の行は新しい出力テーブルに振り分けられます（行は破棄されません）。上記と同じ入力に対して <code>limit: 2</code> を指定すると、2 グループ分（A と B）が 1 テーブル目に、残りのグループ（C）が 2 テーブル目に格納されます。</p>
+<pre><code>After (split: { tableName: "orders", suffix: "_%d", breakKey: ["type"], limit: 2 }):
+Table: orders_0
+id | type | amount
+---+------+-------
+1  | A    | 100
+3  | A    | 150
+2  | B    | 200
+
+Table: orders_1
+id | type | amount
+---+------+-------
+4  | C    | 80
+</code></pre>
+  <p>breakKey を指定しない場合、<code>limit</code> は「1 出力テーブルあたりの行数」として扱われ、<code>limit</code> 行ごとに新しい出力テーブルへ切り替わります。</p>
 
   <h2>Additional Columns</h2>
   <p>元データに存在しないカラムを追加します。値には JeXL 式を記述できます。</p>
