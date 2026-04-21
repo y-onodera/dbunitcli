@@ -33,6 +33,36 @@
     <tr><td>outerJoin / innerJoin / fullJoin</td><td>2テーブルを結合して1つの論理テーブルとして扱います。<code>left</code> と <code>right</code> に結合対象のテーブル名、条件は <code>on</code>（JeXL 式）か <code>column</code>（共通カラム名）で指定します。</td></tr>
   </table>
 
+  <h3>変化の例</h3>
+
+  <p><strong>name（対象テーブルの絞り込み）</strong></p>
+  <p>入力に <code>users</code>、<code>orders</code>、<code>logs</code> がある状態で <code>name: ["users", "orders"]</code> を指定すると、<code>logs</code> は処理対象から外れます。</p>
+
+  <p><strong>pattern（正規表現マッチ）</strong></p>
+  <p><code>pattern: { string: "t_.*", exclude: ["t_tmp_.*"] }</code> を指定すると、<code>t_users</code> や <code>t_orders</code> は対象になり、<code>t_tmp_work</code> は除外されます。</p>
+
+  <p><strong>innerJoin（内部結合）</strong></p>
+<pre><code>Before (orders):
+order_id | item_id | qty
+---------+---------+----
+1        | 101     | 2
+2        | 102     | 3
+3        | 999     | 1
+
+Before (items):
+id  | name
+----+------
+101 | Pen
+102 | Book
+
+After innerJoin (left=orders, right=items, column=["item_id","id"]):
+orders_order_id | orders_item_id | orders_qty | items_id | items_name
+----------------+----------------+------------+----------+-----------
+1               | 101            | 2          | 101      | Pen
+2               | 102            | 3          | 102      | Book
+</code></pre>
+  <p><code>outerJoin</code> は左側（orders）の全行を残し、一致しない右側カラムは NULL になります。<code>fullJoin</code> は両側の未一致行も残します。</p>
+
   <h2>Split / Rename</h2>
   <p><code>split</code> を有効にすると、1つの入力から複数テーブルを派生させることができます。無効時はリネーム設定として機能します。</p>
   <table>
@@ -44,6 +74,41 @@
     <tr><td>breakKey</td><td>split 時にテーブルを分割するキーとなるカラム</td></tr>
   </table>
 
+  <h3>変化の例</h3>
+
+  <p><strong>prefix / tableName / suffix（リネーム）</strong></p>
+  <p>入力 <code>users</code> に対し <code>prefix: "tmp_"</code>、<code>tableName: "accounts"</code>、<code>suffix: "_v1"</code> を指定すると、出力テーブル名は <code>tmp_accounts_v1</code> になります。データ内容はそのまま維持されます。</p>
+
+  <p><strong>split（breakKey で分割）</strong></p>
+<pre><code>Before (orders):
+id | type | amount
+---+------+-------
+1  | A    | 100
+2  | B    | 200
+3  | A    | 150
+4  | C    | 80
+
+After (split: { tableName: "orders", breakKey: ["type"] }):
+Table: orders_A
+id | type | amount
+---+------+-------
+1  | A    | 100
+3  | A    | 150
+
+Table: orders_B
+id | type | amount
+---+------+-------
+2  | B    | 200
+
+Table: orders_C
+id | type | amount
+---+------+-------
+4  | C    | 80
+</code></pre>
+
+  <p><strong>split.limit（最大分割数の制限）</strong></p>
+  <p>上記で <code>limit: "2"</code> を指定すると、分割先は最初の 2 テーブル（<code>orders_A</code>、<code>orders_B</code>）までに制限され、それ以降の行は破棄されます。</p>
+
   <h2>Additional Columns</h2>
   <p>元データに存在しないカラムを追加します。値には JeXL 式を記述できます。</p>
   <table>
@@ -54,6 +119,66 @@
     <tr><td>function</td><td>関数表現によるカラム。複雑なロジックを JeXL 関数として定義します。</td></tr>
   </table>
 
+  <h3>変化の例</h3>
+
+  <p><strong>string（文字列連結）</strong></p>
+<pre><code>Before (users):
+id | firstName | lastName
+---+-----------+---------
+1  | John      | Smith
+2  | Anna      | Lee
+
+After (string: { fullName: "firstName + ' ' + lastName" }):
+id | firstName | lastName | fullName
+---+-----------+----------+-----------
+1  | John      | Smith    | John Smith
+2  | Anna      | Lee      | Anna Lee
+</code></pre>
+
+  <p><strong>number（算術による派生カラム）</strong></p>
+<pre><code>Before (items):
+id | price | quantity
+---+-------+---------
+1  | 100   | 3
+2  | 250   | 2
+
+After (number: { subtotal: "price * quantity" }):
+id | price | quantity | subtotal
+---+-------+----------+---------
+1  | 100   | 3        | 300
+2  | 250   | 2        | 500
+</code></pre>
+
+  <p><strong>boolean（条件式による判定）</strong></p>
+<pre><code>Before (users):
+id | age
+---+----
+1  | 25
+2  | 17
+
+After (boolean: { adult: "age &gt;= 20" }):
+id | age | adult
+---+-----+------
+1  | 25  | true
+2  | 17  | false
+</code></pre>
+
+  <p><strong>function（条件分岐による区分値）</strong></p>
+<pre><code>Before (orders):
+id | status
+---+---------
+1  | APPROVED
+2  | REJECTED
+3  | PENDING
+
+After (function: { mark: "status == 'APPROVED' ? 'OK' : (status == 'REJECTED' ? 'NG' : 'HOLD')" }):
+id | status   | mark
+---+----------+-----
+1  | APPROVED | OK
+2  | REJECTED | NG
+3  | PENDING  | HOLD
+</code></pre>
+
   <h2>Filter / Order</h2>
   <table>
     <tr><th>フィールド</th><th>説明</th></tr>
@@ -63,6 +188,65 @@
     <tr><td>filter</td><td>データ選択条件（JeXL 式）。複数指定した場合は AND 扱い。</td></tr>
     <tr><td>order</td><td>並び順に使用するカラム</td></tr>
   </table>
+
+  <h3>変化の例</h3>
+
+  <p><strong>exclude（カラム除外）</strong></p>
+<pre><code>Before (users):
+id | name  | created_at          | updated_at
+---+-------+---------------------+---------------------
+1  | Alice | 2024-01-01 10:00:00 | 2024-01-02 09:00:00
+
+After (exclude: ["created_at", "updated_at"]):
+id | name
+---+------
+1  | Alice
+</code></pre>
+
+  <p><strong>include（対象カラムの限定）</strong></p>
+<pre><code>Before (users):
+id | name  | email       | age
+---+-------+-------------+----
+1  | Alice | a@example   | 25
+
+After (include: ["id", "name"]):
+id | name
+---+------
+1  | Alice
+</code></pre>
+
+  <p><strong>keys（主キー指定）</strong></p>
+  <p>カラム構成や行数は変わりません。比較コマンドでの突合キーや、<code>distinct</code>・ソート挙動の基準として使われます。</p>
+
+  <p><strong>filter（行のフィルタ）</strong></p>
+<pre><code>Before (orders):
+id | amount | status
+---+--------+---------
+1  | 1500   | APPROVED
+2  | 500    | APPROVED
+3  | 2000   | REJECTED
+
+After (filter: ["amount &gt; 1000 &amp;&amp; status == 'APPROVED'"]):
+id | amount | status
+---+--------+---------
+1  | 1500   | APPROVED
+</code></pre>
+
+  <p><strong>order（並び替え）</strong></p>
+<pre><code>Before (users):
+id | name
+---+------
+3  | Carol
+1  | Alice
+2  | Bob
+
+After (order: ["id"]):
+id | name
+---+------
+1  | Alice
+2  | Bob
+3  | Carol
+</code></pre>
 
   <h2>JeXL 式の書き方</h2>
   <p><code>filter</code>、追加カラム（<code>string</code> / <code>number</code> / <code>boolean</code> / <code>function</code>）、結合条件 <code>on</code> では Apache Commons JEXL3 の式を利用できます。</p>
