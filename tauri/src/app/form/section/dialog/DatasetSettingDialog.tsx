@@ -188,12 +188,11 @@ function renderModeContent(
 ): React.ReactElement {
 	const mode = target.mode();
 	if (mode === "split") {
-		const split = target.split ?? {};
 		return (
 			<>
 				<Text
 					name="prefix"
-					value={split.prefix ?? ""}
+					value={target.split?.prefix ?? ""}
 					handleChange={(newVal) =>
 						setTarget((cur) =>
 							cur.replaceSplit({ prefix: newVal.target.value }),
@@ -202,7 +201,7 @@ function renderModeContent(
 				/>
 				<Text
 					name="tableName"
-					value={split.tableName ?? ""}
+					value={target.split?.tableName ?? ""}
 					handleChange={(newVal) =>
 						setTarget((cur) =>
 							cur.replaceSplit({ tableName: newVal.target.value }),
@@ -211,7 +210,7 @@ function renderModeContent(
 				/>
 				<Text
 					name="suffix"
-					value={split.suffix ?? ""}
+					value={target.split?.suffix ?? ""}
 					handleChange={(newVal) =>
 						setTarget((cur) =>
 							cur.replaceSplit({ suffix: newVal.target.value }),
@@ -220,7 +219,7 @@ function renderModeContent(
 				/>
 				<Text
 					name="limit"
-					value={split.limit ?? ""}
+					value={target.split?.limit ?? ""}
 					handleChange={(newVal) =>
 						setTarget((cur) =>
 							cur.replaceSplit({ limit: newVal.target.value }),
@@ -229,7 +228,7 @@ function renderModeContent(
 				/>
 				<Arrays
 					name="breakKey"
-					values={split.breakKey ?? []}
+					values={target.split?.breakKey ?? []}
 					handleChange={(text, index) =>
 						setTarget((cur) => cur.replaceSplitBreakKey(text, index))
 					}
@@ -249,17 +248,7 @@ function renderModeContent(
 					setTarget((cur) => cur.with({ separate: convert(cur.separate) }))
 				}
 				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={({
-					setting,
-					handleDialogClose,
-					handleCommit,
-				}) => (
-					<DatasetSettingDialog
-						setting={setting}
-						handleDialogClose={handleDialogClose}
-						handleCommit={handleCommit}
-					/>
-				)}
+				SettingDialogComponent={DatasetSettingDialog}
 				newSetting={newDatasetSetting}
 				getKey={(setting) => setting.displayName()}
 			/>
