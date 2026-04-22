@@ -325,4 +325,107 @@ describe("DatasetSettingクラス", () => {
 		const updatedSetting = setting.removeOrder(0);
 		expect(updatedSetting.order).toEqual([]);
 	});
+
+	it("デフォルトのモードはrenameを返すこと", () => {
+		const setting = newDatasetSetting();
+		expect(setting.mode()).toBe("rename");
+	});
+
+	it("splitが設定されているときmodeはsplitを返すこと", () => {
+		const setting = new DatasetSetting({ split: { tableName: "t" } });
+		expect(setting.mode()).toBe("split");
+	});
+
+	it("separateに要素があるときmodeはseparateを返すこと", () => {
+		const setting = new DatasetSetting({
+			separate: [{ name: "child" }],
+		});
+		expect(setting.mode()).toBe("separate");
+	});
+
+	it("withMode(split)はtop-level tableNameをsplit.tableNameに降格すること", () => {
+		const setting = new DatasetSetting({ tableName: "orig" });
+		const updated = setting.withMode("split");
+		expect(updated.mode()).toBe("split");
+		expect(updated.tableName).toBeUndefined();
+		expect(updated.split?.tableName).toBe("orig");
+	});
+
+	it("withMode(rename)はsplit.tableNameをtop-levelに昇格すること", () => {
+		const setting = new DatasetSetting({ split: { tableName: "split_t" } });
+		const updated = setting.withMode("rename");
+		expect(updated.mode()).toBe("rename");
+		expect(updated.split).toBeUndefined();
+		expect(updated.tableName).toBe("split_t");
+	});
+
+	it("withMode(separate)はsplitとtop-levelの名前関連フィールドをクリアすること", () => {
+		const setting = new DatasetSetting({
+			prefix: "p",
+			tableName: "t",
+			suffix: "s",
+			split: { tableName: "x" },
+		});
+		const updated = setting.withMode("separate");
+		expect(updated.mode()).toBe("separate");
+		expect(updated.prefix).toBeUndefined();
+		expect(updated.tableName).toBeUndefined();
+		expect(updated.suffix).toBeUndefined();
+		expect(updated.split).toBeUndefined();
+		expect(updated.separate.length).toBe(1);
+	});
+
+	it("withMode(split)はseparateをクリアすること", () => {
+		const setting = new DatasetSetting({
+			separate: [{ name: "child" }],
+		});
+		const updated = setting.withMode("split");
+		expect(updated.mode()).toBe("split");
+		expect(updated.separate).toEqual([]);
+	});
+
+	it("同じモードへのwithModeは同一インスタンスを返すこと", () => {
+		const setting = newDatasetSetting();
+		expect(setting.withMode("rename")).toBe(setting);
+	});
+
+	it("addSeparateで子設定を追加できること", () => {
+		const setting = newDatasetSetting();
+		const child = new DatasetSetting({ name: "child" });
+		const updated = setting.addSeparate(child);
+		expect(updated.separate.length).toBe(1);
+		expect(updated.separate[0].name).toEqual(["child"]);
+		expect(setting.separate.length).toBe(0);
+	});
+
+	it("updateSeparateで子設定を差し替えられること", () => {
+		const before = new DatasetSetting({ name: "before" });
+		const after = new DatasetSetting({ name: "after" });
+		const setting = newDatasetSetting().addSeparate(before);
+		const updated = setting.updateSeparate(setting.separate[0], after);
+		expect(updated.separate[0].name).toEqual(["after"]);
+	});
+
+	it("deleteSeparateで子設定を削除できること", () => {
+		const child = new DatasetSetting({ name: "child" });
+		const setting = newDatasetSetting().addSeparate(child);
+		const updated = setting.deleteSeparate(setting.separate[0]);
+		expect(updated.separate.length).toBe(0);
+	});
+
+	it("toJSONは空のseparateを省略すること", () => {
+		const setting = new DatasetSetting({ name: "test" });
+		const json = JSON.parse(JSON.stringify(setting));
+		expect(json.separate).toBeUndefined();
+	});
+
+	it("toJSONはseparateに要素があれば出力すること", () => {
+		const setting = new DatasetSetting({
+			name: "parent",
+			separate: [{ name: "child" }],
+		});
+		const json = JSON.parse(JSON.stringify(setting));
+		expect(Array.isArray(json.separate)).toBe(true);
+		expect(json.separate.length).toBe(1);
+	});
 });

@@ -20,6 +20,7 @@ export type NameFilter = {
 	any: string | string[];
 	filePath?: string;
 };
+export type DatasetSettingMode = "rename" | "split" | "separate";
 export type DatasetSettingsBuilder = {
 	settings: DatasetSettingBuilder[];
 	commonSettings: DatasetSettingBuilder[];
@@ -274,10 +275,61 @@ export class DatasetSetting {
 		});
 	}
 
-	withSplit(isSplit: boolean): DatasetSetting {
-		const tableName = isSplit ? undefined : (this.split?.tableName ?? "");
-		const split = isSplit ? { tableName: this.tableName ?? "" } : undefined;
-		return this.with({ tableName, split });
+	withMode(mode: DatasetSettingMode): DatasetSetting {
+		if (this.mode() === mode) {
+			return this;
+		}
+		if (mode === "separate") {
+			return this.with({
+				prefix: undefined,
+				tableName: undefined,
+				suffix: undefined,
+				split: undefined,
+				separate:
+					this.separate.length > 0 ? this.separate : [new DatasetSetting({})],
+			});
+		}
+		if (mode === "split") {
+			return this.with({
+				tableName: undefined,
+				split: { tableName: this.tableName ?? "" },
+				separate: [],
+			});
+		}
+		return this.with({
+			tableName: this.split?.tableName ?? "",
+			split: undefined,
+			separate: [],
+		});
+	}
+
+	addSeparate(setting: DatasetSetting): DatasetSetting {
+		return this.with({ separate: [...this.separate, setting] });
+	}
+
+	updateSeparate(
+		before: DatasetSetting,
+		after: DatasetSetting,
+	): DatasetSetting {
+		return this.with({
+			separate: this.separate.map((it) => (it === before ? after : it)),
+		});
+	}
+
+	deleteSeparate(setting: DatasetSetting): DatasetSetting {
+		return this.with({
+			separate: this.separate.filter((it) => it !== setting),
+		});
+	}
+
+	mode(): DatasetSettingMode {
+		if (this.separate.length > 0) {
+			return "separate";
+		}
+		if (this.split) {
+			return "split";
+		}
+		return "rename";
 	}
 
 	replaceSplit(newVal: Split): DatasetSetting {
@@ -424,7 +476,7 @@ export class DatasetSetting {
 	}
 
 	toJSON() {
-		const { filePath, name, ...rest } = this;
+		const { filePath, name, separate, ...rest } = this;
 		let nameValue: NameFilter | undefined;
 		if (name?.length) {
 			nameValue = filePath ? { any: name, filePath } : { any: name };
@@ -432,6 +484,7 @@ export class DatasetSetting {
 		return {
 			...rest,
 			name: nameValue,
+			...(separate.length > 0 ? { separate } : {}),
 		};
 	}
 

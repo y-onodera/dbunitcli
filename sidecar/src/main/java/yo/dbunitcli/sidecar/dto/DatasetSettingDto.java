@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @Serdeable
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DatasetSettingDto {
     private NameDto name;
     private PatternDto pattern;
