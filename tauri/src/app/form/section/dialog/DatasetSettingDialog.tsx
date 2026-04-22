@@ -75,7 +75,7 @@ export default function DatasetSettingDialog(props: {
 				<Select
 					name="mode"
 					defaultValue={target.mode()}
-					handleOnChange={(v) =>
+					handleOnChange={async (v) =>
 						setTarget((cur) => cur.withMode(v as DatasetSettingMode))
 					}
 				>
