@@ -286,7 +286,7 @@ export class DatasetSetting {
 				suffix: undefined,
 				split: undefined,
 				separate:
-					this.separate.length > 0 ? this.separate : [new DatasetSetting({})],
+					this.separate.length > 0 ? this.separate : [newDatasetSetting()],
 			});
 		}
 		if (mode === "split") {
@@ -300,25 +300,6 @@ export class DatasetSetting {
 			tableName: this.split?.tableName ?? "",
 			split: undefined,
 			separate: [],
-		});
-	}
-
-	addSeparate(setting: DatasetSetting): DatasetSetting {
-		return this.with({ separate: [...this.separate, setting] });
-	}
-
-	updateSeparate(
-		before: DatasetSetting,
-		after: DatasetSetting,
-	): DatasetSetting {
-		return this.with({
-			separate: this.separate.map((it) => (it === before ? after : it)),
-		});
-	}
-
-	deleteSeparate(setting: DatasetSetting): DatasetSetting {
-		return this.with({
-			separate: this.separate.filter((it) => it !== setting),
 		});
 	}
 

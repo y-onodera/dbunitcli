@@ -389,30 +389,6 @@ describe("DatasetSettingクラス", () => {
 		expect(setting.withMode("rename")).toBe(setting);
 	});
 
-	it("addSeparateで子設定を追加できること", () => {
-		const setting = newDatasetSetting();
-		const child = new DatasetSetting({ name: "child" });
-		const updated = setting.addSeparate(child);
-		expect(updated.separate.length).toBe(1);
-		expect(updated.separate[0].name).toEqual(["child"]);
-		expect(setting.separate.length).toBe(0);
-	});
-
-	it("updateSeparateで子設定を差し替えられること", () => {
-		const before = new DatasetSetting({ name: "before" });
-		const after = new DatasetSetting({ name: "after" });
-		const setting = newDatasetSetting().addSeparate(before);
-		const updated = setting.updateSeparate(setting.separate[0], after);
-		expect(updated.separate[0].name).toEqual(["after"]);
-	});
-
-	it("deleteSeparateで子設定を削除できること", () => {
-		const child = new DatasetSetting({ name: "child" });
-		const setting = newDatasetSetting().addSeparate(child);
-		const updated = setting.deleteSeparate(setting.separate[0]);
-		expect(updated.separate.length).toBe(0);
-	});
-
 	it("toJSONは空のseparateを省略すること", () => {
 		const setting = new DatasetSetting({ name: "test" });
 		const json = JSON.parse(JSON.stringify(setting));
