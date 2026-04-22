@@ -1,21 +1,29 @@
 #!/usr/bin/env bash
-# Claude on the web 環境のみ実行（JAVA_TOOL_OPTIONS に JWT プロキシが設定されている場合）
-if ! echo "${JAVA_TOOL_OPTIONS:-}" | grep -q "jwt_"; then
-  exit 0
+
+IS_WEB_PROXY=false
+if echo "${JAVA_TOOL_OPTIONS:-}" | grep -q "jwt_"; then
+  IS_WEB_PROXY=true
 fi
 
-# ローカルプロキシを先に起動（JDK ダウンロードで使用するため）
-nohup python3 /home/user/dbunitcli/.claude/maven-proxy.py >> /tmp/maven-proxy.log 2>&1 &
-PROXY_PID=$!
-echo "Maven proxy setup complete (PID: $PROXY_PID)"
+CURL_PROXY_ARGS=""
+if [ "$IS_WEB_PROXY" = true ]; then
+  CURL_PROXY_ARGS="--proxy http://127.0.0.1:3128"
+fi
 
-# ポートが利用可能になるまで待機（最大5秒）
-for i in $(seq 1 10); do
-  if nc -z 127.0.0.1 3128 2>/dev/null; then
-    break
-  fi
-  sleep 0.5
-done
+if [ "$IS_WEB_PROXY" = true ]; then
+  # ローカルプロキシを先に起動（JDK ダウンロードで使用するため）
+  nohup python3 /home/user/dbunitcli/.claude/maven-proxy.py >> /tmp/maven-proxy.log 2>&1 &
+  PROXY_PID=$!
+  echo "Maven proxy setup complete (PID: $PROXY_PID)"
+
+  # ポートが利用可能になるまで待機（最大5秒）
+  for i in $(seq 1 10); do
+    if nc -z 127.0.0.1 3128 2>/dev/null; then
+      break
+    fi
+    sleep 0.5
+  done
+fi
 
 # JDK 25 のインストール（現在のバージョンが 25 未満の場合）
 REQUIRED_JAVA_VERSION=25
@@ -34,7 +42,8 @@ if [ -z "$CURRENT_JAVA_MAJOR" ] || [ "$CURRENT_JAVA_MAJOR" -lt "$REQUIRED_JAVA_V
     ORACLE_URL="https://download.oracle.com/java/25/latest/jdk-25_linux-x64_bin.tar.gz"
     TMP_JDK=$(mktemp /tmp/jdk25-XXXXXX.tar.gz)
     rm -rf "$JDK25_DIR" && mkdir -p "$JDK25_DIR"
-    if curl -sL --proxy http://127.0.0.1:3128 "$ORACLE_URL" -o "$TMP_JDK" && tar -xz -C "$JDK25_DIR" --strip-components=1 -f "$TMP_JDK"; then
+    # shellcheck disable=SC2086
+    if curl -sL $CURL_PROXY_ARGS "$ORACLE_URL" -o "$TMP_JDK" && tar -xz -C "$JDK25_DIR" --strip-components=1 -f "$TMP_JDK"; then
       echo "JDK 25 installed at $JDK25_DIR"
       JDK25_READY=true
     else
@@ -62,16 +71,18 @@ else
   echo "Java $CURRENT_JAVA_MAJOR >= $REQUIRED_JAVA_VERSION, no installation needed"
 fi
 
-# Create ~/.mavenrc to override JAVA_TOOL_OPTIONS proxy settings
-# MAVEN_OPTS flags are appended to JVM command line, overriding JAVA_TOOL_OPTIONS
+# Create ~/.mavenrc to set JAVA_HOME and optionally proxy settings
 {
   [ "$JDK25_READY" = true ] && echo "JAVA_HOME=\"$JDK25_DIR\""
-  printf 'MAVEN_OPTS="-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=3128 -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=3128 -Dhttp.nonProxyHosts= $MAVEN_OPTS"\n'
+  if [ "$IS_WEB_PROXY" = true ]; then
+    printf 'MAVEN_OPTS="-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=3128 -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=3128 -Dhttp.nonProxyHosts= $MAVEN_OPTS"\n'
+  fi
 } > "$HOME/.mavenrc"
 echo "~/.mavenrc created"
 
-mkdir -p "$HOME/.m2"
-cat > "$HOME/.m2/settings.xml" << 'EOF'
+if [ "$IS_WEB_PROXY" = true ]; then
+  mkdir -p "$HOME/.m2"
+  cat > "$HOME/.m2/settings.xml" << 'EOF'
 <settings>
  <proxies>
   <proxy>
@@ -84,55 +95,4 @@ cat > "$HOME/.m2/settings.xml" << 'EOF'
  </proxies>
 </settings>
 EOF
-
-# Node.js のインストール（バージョンが 20 未満の場合）
-REQUIRED_NODE_VERSION=20
-NODE_LATEST_DIR="$HOME/node-latest"
-NODE_READY=false
-
-if command -v node &>/dev/null; then
-  CURRENT_NODE_MAJOR=$(node --version 2>&1 | grep -oP '(?<=v)[0-9]+' | head -1)
-else
-  CURRENT_NODE_MAJOR=0
-fi
-echo "Current Node.js major version: ${CURRENT_NODE_MAJOR:-unknown}"
-
-if [ -z "$CURRENT_NODE_MAJOR" ] || [ "$CURRENT_NODE_MAJOR" -lt "$REQUIRED_NODE_VERSION" ]; then
-  if [ -f "$NODE_LATEST_DIR/bin/node" ]; then
-    echo "Node.js already installed at $NODE_LATEST_DIR"
-    NODE_READY=true
-  else
-    echo "Installing latest Node.js LTS..."
-    NODE_VERSION=$(curl -sL --proxy http://127.0.0.1:3128 "https://nodejs.org/dist/latest-lts/SHASUMS256.txt" \
-      | grep -oP 'node-v\K[0-9]+\.[0-9]+\.[0-9]+(?=-linux-x64)' | head -1)
-    if [ -z "$NODE_VERSION" ]; then
-      NODE_VERSION="22.14.0"  # フォールバック
-    fi
-    NODE_URL="https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.gz"
-    TMP_NODE=$(mktemp /tmp/node-XXXXXX.tar.gz)
-    rm -rf "$NODE_LATEST_DIR" && mkdir -p "$NODE_LATEST_DIR"
-    if curl -sL --proxy http://127.0.0.1:3128 "$NODE_URL" -o "$TMP_NODE" \
-       && tar -xz -C "$NODE_LATEST_DIR" --strip-components=1 -f "$TMP_NODE"; then
-      echo "Node.js v${NODE_VERSION} installed at $NODE_LATEST_DIR"
-      NODE_READY=true
-    else
-      echo "Failed to install Node.js"
-      rm -rf "$NODE_LATEST_DIR"
-    fi
-    rm -f "$TMP_NODE"
-  fi
-
-  if [ "$NODE_READY" = true ]; then
-    if ! grep -q "node-latest" "$HOME/.bashrc" 2>/dev/null; then
-      cat >> "$HOME/.bashrc" << EOF
-
-# Node.js latest LTS (installed by Claude setup)
-export PATH="$NODE_LATEST_DIR/bin:\$PATH"
-EOF
-    fi
-    export PATH="$NODE_LATEST_DIR/bin:$PATH"
-    echo "Node.js $(node --version 2>/dev/null) is now active"
-  fi
-else
-  echo "Node.js $CURRENT_NODE_MAJOR >= $REQUIRED_NODE_VERSION, no installation needed"
 fi
