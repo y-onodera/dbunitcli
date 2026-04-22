@@ -5,6 +5,11 @@ if echo "${JAVA_TOOL_OPTIONS:-}" | grep -q "jwt_"; then
   IS_WEB_PROXY=true
 fi
 
+CURL_PROXY_ARGS=""
+if [ "$IS_WEB_PROXY" = true ]; then
+  CURL_PROXY_ARGS="--proxy http://127.0.0.1:3128"
+fi
+
 if [ "$IS_WEB_PROXY" = true ]; then
   # ローカルプロキシを先に起動（JDK ダウンロードで使用するため）
   nohup python3 /home/user/dbunitcli/.claude/maven-proxy.py >> /tmp/maven-proxy.log 2>&1 &
@@ -37,10 +42,6 @@ if [ -z "$CURRENT_JAVA_MAJOR" ] || [ "$CURRENT_JAVA_MAJOR" -lt "$REQUIRED_JAVA_V
     ORACLE_URL="https://download.oracle.com/java/25/latest/jdk-25_linux-x64_bin.tar.gz"
     TMP_JDK=$(mktemp /tmp/jdk25-XXXXXX.tar.gz)
     rm -rf "$JDK25_DIR" && mkdir -p "$JDK25_DIR"
-    CURL_PROXY_ARGS=""
-    if [ "$IS_WEB_PROXY" = true ]; then
-      CURL_PROXY_ARGS="--proxy http://127.0.0.1:3128"
-    fi
     # shellcheck disable=SC2086
     if curl -sL $CURL_PROXY_ARGS "$ORACLE_URL" -o "$TMP_JDK" && tar -xz -C "$JDK25_DIR" --strip-components=1 -f "$TMP_JDK"; then
       echo "JDK 25 installed at $JDK25_DIR"
