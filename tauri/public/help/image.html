@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Image Option</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Image Option</h1>
+  <p><a href="compare.html">Compare</a> で <code>targetType</code> に <strong>image</strong> または <strong>pdf</strong> を選択した場合に表示される、画像差分オプションです。比較エンジンには <a href="https://github.com/romankh3/image-comparison">image-comparison</a> ライブラリを使用します。</p>
+  <p>入力には <a href="dataset-load-form.html#srctype-file">Source Type = file</a> を用いてディレクトリを走査し、拡張子フィルタ（例: <code>.png</code>、<code>.pdf</code>）で対象ファイルを絞り込みます。Compare は <code>oldData</code> と <code>newData</code> のファイルを 1 対 1 で突き合わせ、差分画像と判定結果を出力します。</p>
+
+  <h2 id="section-fields">設定項目</h2>
+  <p>フォームの <code>image</code> セクションに表示される項目の一覧です。すべて任意で、未指定時は以下の既定値が使われます。</p>
+
+  <h3>比較しきい値</h3>
+  <table>
+    <tr><th>項目</th><th>型</th><th>説明</th><th>既定</th></tr>
+    <tr><td>threshold</td><td>整数</td><td>2 ピクセルが異なるとみなす RGB 距離のしきい値。大きくするほど差分に寛容</td><td>5</td></tr>
+    <tr><td>pixelToleranceLevel</td><td>小数 (0.0–1.0)</td><td>ピクセル単位の許容レベル。例: <code>0.1</code> は 10% の差まで同一とみなす</td><td>0.01</td></tr>
+    <tr><td>allowingPercentOfDifferentPixels</td><td>小数 (0.0–1.0)</td><td>画像全体で MATCH 判定を維持できる差分ピクセル比率。これを超えると MISMATCH になる</td><td>0.01</td></tr>
+  </table>
+
+  <h3>差分矩形の描画</h3>
+  <p>差分があった領域は、出力される差分画像上で矩形として強調描画されます。</p>
+  <table>
+    <tr><th>項目</th><th>型</th><th>説明</th><th>既定</th></tr>
+    <tr><td>rectangleLineWidth</td><td>整数 (px)</td><td>矩形枠線の幅</td><td>1</td></tr>
+    <tr><td>minimalRectangleSize</td><td>整数 (px)</td><td>描画する矩形の最小サイズ。小さな差分を無視したいときに利用</td><td>1</td></tr>
+    <tr><td>maximalRectangleCount</td><td>整数</td><td>描画する矩形の最大数。<code>-1</code> は無制限</td><td>-1</td></tr>
+    <tr><td>fillDifferenceRectangles</td><td>真偽値</td><td>差分矩形を塗りつぶす（枠だけでなく中を塗る）</td><td>false</td></tr>
+    <tr><td>percentOpacityDifferenceRectangles</td><td>小数 (0–100)</td><td>差分矩形の塗りの不透明度（%）</td><td>20.0</td></tr>
+    <tr><td>differenceRectangleColor</td><td>色</td><td>差分矩形の色（後述「色の指定」参照）</td><td>red</td></tr>
+  </table>
+
+  <h3>除外領域</h3>
+  <p>比較から特定の矩形領域を除外できます。タイムスタンプや動的に変わる UI パーツなど、差分を許容したい領域を指定するのに使います。</p>
+  <table>
+    <tr><th>項目</th><th>型</th><th>説明</th><th>既定</th></tr>
+    <tr><td>excludedAreas</td><td>文字列</td><td>除外する矩形のリスト。書式は <code>[x1,y1,x2,y2]</code> を 0 個以上連結（後述）</td><td>空（除外なし）</td></tr>
+    <tr><td>drawExcludedRectangles</td><td>真偽値</td><td>除外矩形の枠線を差分画像に描画する</td><td>true</td></tr>
+    <tr><td>fillExcludedRectangles</td><td>真偽値</td><td>除外矩形を塗りつぶす</td><td>false</td></tr>
+    <tr><td>percentOpacityExcludedRectangles</td><td>小数 (0–100)</td><td>除外矩形の塗りの不透明度（%）</td><td>20.0</td></tr>
+    <tr><td>excludedRectangleColor</td><td>色</td><td>除外矩形の色</td><td>green</td></tr>
+  </table>
+
+  <h3 id="section-excluded-areas-format"><code>excludedAreas</code> の書式</h3>
+  <p>1 つの矩形は <code>[x1,y1,x2,y2]</code>（画像の左上原点、<code>x1,y1</code> は左上隅、<code>x2,y2</code> は右下隅、単位はピクセル）で表します。複数指定する場合は区切り文字なしで連結します。</p>
+  <pre>例: 2 つの矩形を除外する
+  [10,20,100,150][200,50,300,200]
+
+意味:
+  (10,20)-(100,150)  の矩形と (200,50)-(300,200) の矩形を除外</pre>
+
+  <h3 id="section-color-format">色の指定</h3>
+  <p>色は Java の <code>Color.getColor()</code> が解釈する形式で指定します。代表的な書き方は 16 進リテラル（例: <code>0xFF0000</code> で赤、<code>0x00FF00</code> で緑、<code>0x0000FF</code> で青）です。未指定または解釈に失敗した場合は、差分矩形は <code>red</code>、除外矩形は <code>green</code> にフォールバックします。</p>
+
+  <h2 id="section-output">出力イメージ</h2>
+  <p>Compare の差分レポートには、以下 3 種類の矩形が重ねて描画された差分画像が含まれます。</p>
+  <ul>
+    <li><strong>差分矩形</strong> — 実際にピクセルが異なる領域（既定: 赤枠）</li>
+    <li><strong>除外矩形</strong> — <code>excludedAreas</code> で指定した無視領域（既定: 緑枠）</li>
+    <li>各矩形は <code>fill*Rectangles</code> と <code>percentOpacity*</code> の組み合わせで半透明に塗りつぶし可能</li>
+  </ul>
+
+  <h2>関連ページ</h2>
+  <ul>
+    <li><a href="compare.html">Compare</a> — 画像・PDF 比較のコマンド</li>
+    <li><a href="dataset-load-form.html#srctype-file">Dataset Load Form</a> — <code>file</code> 形式で画像ファイルを入力する</li>
+  </ul>
+</body>
+</html>
