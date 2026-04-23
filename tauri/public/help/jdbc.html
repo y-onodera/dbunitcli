@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - JDBC</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>JDBC</h1>
+  <p>データベースへ接続するための設定を指定します。以下の場面で必要になります。</p>
+  <ul>
+    <li><a href="dataset-load-form.html#srctype-table">Source Type = table</a>（テーブル名リストから読み込む）</li>
+    <li><a href="dataset-load-form.html#srctype-sql">Source Type = sql</a>（SQL クエリ結果を読み込む）</li>
+    <li>Result Type = table（<a href="compare.html">Compare</a> / <a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> の結果をテーブルに出力）</li>
+    <li><a href="run.html">Run</a> の Script Type = sql（SQL スクリプトを DB で実行）</li>
+  </ul>
+
+  <h2 id="section-fields">設定項目</h2>
+  <p>フォームの <code>jdbc option</code> 展開ボタンから設定します。各項目は個別に入力しても、<code>jdbcProperties</code> に保存済みの <code>.properties</code> ファイルを選んでも構いません。両方が指定された場合、<strong><code>jdbcUrl</code> / <code>jdbcUser</code> / <code>jdbcPass</code> が <code>jdbcProperties</code> の同名キーを上書き</strong>します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>jdbcProperties</td><td>接続情報を記述した <code>.properties</code> ファイルのパス。中身は <code>url=</code> / <code>user=</code> / <code>pass=</code> の 3 行。ワークスペースの <code>jdbc/</code> ディレクトリ配下を既定の参照先とします。</td></tr>
+    <tr><td>jdbcUrl</td><td>JDBC 接続 URL（例: <code>jdbc:postgresql://localhost:5432/mydb</code>）。<code>jdbcProperties</code> の <code>url</code> を上書きします。</td></tr>
+    <tr><td>jdbcUser</td><td>ログインユーザ名。<code>jdbcProperties</code> の <code>user</code> を上書きします。</td></tr>
+    <tr><td>jdbcPass</td><td>ログインパスワード。<code>jdbcProperties</code> の <code>pass</code> を上書きします。</td></tr>
+    <tr><td>useJdbcMetaData</td><td>DBUnit のメタデータ取得経路を切り替えるフラグ（<a href="dataset-load-form.html#srctype-table">table</a> / <a href="dataset-load-form.html#srctype-sql">sql</a> の Data Load オプション）。デフォルトは OFF。詳細は Dataset Load Form の table の節を参照。</td></tr>
+  </table>
+
+  <h3>.properties ファイルの書式</h3>
+  <p>Java 標準の Properties 形式。以下 3 つのキーを定義します。</p>
+  <pre>url=jdbc:postgresql://localhost:5432/mydb
+user=app_user
+pass=app_password</pre>
+
+  <h2 id="section-url-builder">JDBC URL Builder</h2>
+  <p><code>jdbcUrl</code> テキストボックス横の編集ボタンから開くダイアログです。代表的な RDB の URL テンプレートに従って URL を組み立てます。Host / Port / Service Name (Database Name) を入力すると、下部の Preview に完成 URL が表示され、Apply で <code>jdbcUrl</code> に反映されます。</p>
+  <table>
+    <tr><th>Database</th><th>既定ポート</th><th>URL テンプレート</th></tr>
+    <tr><td>oracle</td><td>1521</td><td>jdbc:oracle:thin:@//{host}:{port}/{serviceName}</td></tr>
+    <tr><td>postgres</td><td>5432</td><td>jdbc:postgresql://{host}:{port}/{serviceName}</td></tr>
+    <tr><td>h2</td><td>9092</td><td>jdbc:h2:tcp://{host}:{port}/{serviceName}</td></tr>
+  </table>
+  <p>Database ラベル（Service Name / Database Name）は RDB 種別に応じて切り替わります（Oracle は Service Name、PostgreSQL / H2 は Database Name）。既存 URL を開いた場合、Builder はその URL を解析してフォーム項目を初期値に復元します。</p>
+
+  <h2 id="section-connection-test">Connection Test</h2>
+  <p>フォーム下部の <code>Connection Test</code> ボタンを押すと sidecar 経由で実際の接続を試し、結果（成功 / 失敗メッセージ）を隣に表示します。以下のいずれかが揃っていると押下可能です。</p>
+  <ul>
+    <li><code>jdbcUrl</code> + <code>jdbcUser</code> + <code>jdbcPass</code> がすべて入力されている</li>
+    <li><code>jdbcProperties</code> が選択されている</li>
+  </ul>
+  <p>フォーム値を変更すると接続 OK 状態は解除され、再度テストが必要になります。</p>
+
+  <h2 id="section-save-properties">Save as Properties</h2>
+  <p>現在入力中の URL / User / Pass を新規 <code>.properties</code> ファイルとしてワークスペースの <code>jdbc/</code> に保存します。保存後は <code>jdbcProperties</code> で再利用できます。ダイアログには保存される内容のプレビュー（Pass はマスク）とファイル名入力欄が表示されます。</p>
+
+  <h2>関連ページ</h2>
+  <ul>
+    <li><a href="dataset-load-form.html">Dataset Load Form</a> — <code>srcType</code> に応じた JDBC の要否と <code>useJdbcMetaData</code> の詳細</li>
+    <li><a href="run.html">Run</a> — <code>scriptType = sql</code> で JDBC を使用</li>
+    <li><a href="compare.html">Compare</a> / <a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> — 結果を DB テーブルに出力する場合に JDBC を使用</li>
+  </ul>
+</body>
+</html>

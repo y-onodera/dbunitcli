@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Template</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Template</h1>
+  <p>テンプレート処理のための設定です。テンプレートエンジンは <strong>StringTemplate 4 (ST4)</strong>。式は既定で <code>$...$</code> の記法を用い、入力データセットの各行をパラメータとして埋め込みます。以下の場面で利用されます。</p>
+  <ul>
+    <li><a href="generate.html">Generate</a> — 入力データセットをもとにファイル（SQL / テキスト / xlsx / 設定ファイル等）を生成</li>
+    <li><a href="run.html">Run</a> — SQL / ANT スクリプトを実行する前にテンプレートとしてレンダリング</li>
+    <li><a href="parameterize.html">Parameterize</a> — パラメータごとにコマンド引数や設定をレンダリング</li>
+    <li><a href="dataset-load-form.html#section-source">Dataset Load Form</a> の <code>templateGroup</code> — 入力読み込み時にテンプレートを適用（任意）</li>
+  </ul>
+
+  <h2 id="section-fields">設定項目</h2>
+  <p>フォームの <code>template option</code> 展開ボタンから設定します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>既定</th></tr>
+    <tr><td>encoding</td><td>テンプレートファイルの文字コード。Generate の <code>template</code> ファイル等に適用</td><td>システム既定の文字コード</td></tr>
+    <tr><td>templateGroup</td><td>StringTemplate グループファイル（<code>.stg</code>）のパス。共通マクロ（サブテンプレート）を別ファイルにまとめて読み込みます。ワークスペースの <code>template/</code> ディレクトリを基準に解決</td><td>空（グループなし）</td></tr>
+    <tr><td>templateParameterAttribute</td><td>テンプレート内で入力行にアクセスする属性名。例えば <code>param</code> を指定すると、テンプレートに渡されたレコードは <code>$param.columnName$</code> で参照できます。空文字を指定した場合は属性でラップせず、カラム名で直接参照します</td><td>param</td></tr>
+    <tr><td>templateVarStart</td><td>テンプレート式の開始文字（1 文字）</td><td>$</td></tr>
+    <tr><td>templateVarStop</td><td>テンプレート式の終了文字（1 文字）</td><td>$</td></tr>
+  </table>
+
+  <h3 id="section-xlsx-options">xlsx 出力時の追加オプション</h3>
+  <p><a href="generate.html">Generate</a> で <code>generateType = xlsx</code> を選んだ場合に適用される数式処理系のオプションです（内部的に Apache POI で処理）。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>既定</th></tr>
+    <tr><td>formulaProcess</td><td>xlsx 出力時に数式セルを処理するか。<code>false</code> にすると低メモリで動作しますが、数式内のセル参照が行追加にあわせて更新されません</td><td>true</td></tr>
+    <tr><td>evaluateFormulas</td><td><code>formulaProcess</code> が有効なときに Excel 数式を評価するか</td><td>true</td></tr>
+    <tr><td>forceFormulaRecalc</td><td>出力ファイルを Excel で開いたときに自動再計算させるフラグを立てる</td><td>false</td></tr>
+    <tr><td>fastFormulaProcess</td><td>高速な数式プロセッサを使用する</td><td>false</td></tr>
+    <tr><td>deleteBlankCells</td><td>数式評価後に空セルを削除する</td><td>false</td></tr>
+  </table>
+
+  <h2 id="section-parameter-binding">パラメータのバインド</h2>
+  <p>入力データセットの各行は、テンプレートに対して <code>templateParameterAttribute</code> で指定した属性名のオブジェクトとして渡されます。</p>
+  <p><strong>例 1: <code>templateParameterAttribute = param</code>（既定）</strong></p>
+  <pre>入力行 (1 件):
+  tableName = USERS
+  columnNames = id, name
+  values = 1, 'Alice'
+
+テンプレート (insert.sql):
+  INSERT INTO $param.tableName$ ($param.columnNames$) VALUES ($param.values$);
+
+レンダリング結果:
+  INSERT INTO USERS (id, name) VALUES (1, 'Alice');</pre>
+  <p><strong>例 2: <code>templateParameterAttribute</code> を空に指定（直接バインド）</strong></p>
+  <pre>テンプレート (insert.sql):
+  INSERT INTO $tableName$ ($columnNames$) VALUES ($values$);
+
+レンダリング結果:
+  INSERT INTO USERS (id, name) VALUES (1, 'Alice');</pre>
+  <p><strong>例 3: <code>templateVarStart</code> / <code>templateVarStop</code> を変更</strong></p>
+  <p>テンプレートに <code>$</code> を多く含む SQL（PostgreSQL の <code>$$</code> 区切り等）を扱うときに、式の区切り文字を別の文字に変更できます。</p>
+  <pre>指定:
+  templateVarStart = &lt;
+  templateVarStop  = &gt;
+
+テンプレート:
+  CREATE FUNCTION f() RETURNS void AS $$ ... $$ LANGUAGE sql;
+  -- &lt;param.tableName&gt; をここで使える
+
+結果:
+  区切りが &lt;...&gt; に切り替わるため、$$ はそのまま出力される</pre>
+
+  <h2 id="section-template-group">templateGroup（共通マクロ）</h2>
+  <p>StringTemplate のグループファイル（<code>.stg</code>）に再利用可能なサブテンプレートを定義し、本体テンプレートから呼び出せます。</p>
+  <pre>グループファイル (macros.stg):
+  quote(s) ::= &lt;&lt;'&lt;s&gt;'&gt;&gt;
+
+本体テンプレート (insert.sql):
+  INSERT INTO $param.tableName$ VALUES ($param.name:quote()$);
+
+レンダリング結果:
+  INSERT INTO USERS VALUES ('Alice');</pre>
+
+  <h2>関連ページ</h2>
+  <ul>
+    <li><a href="generate.html">Generate</a> — テンプレートを使ったファイル生成の主要コマンド</li>
+    <li><a href="run.html">Run</a> — SQL / ANT スクリプトの前処理として使用</li>
+    <li><a href="parameterize.html">Parameterize</a> — パラメータごとに設定をレンダリング</li>
+    <li><a href="dataset-load-form.html#section-source">Dataset Load Form</a> — Source の <code>templateGroup</code> による入力前処理</li>
+  </ul>
+</body>
+</html>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SectionHelpButton } from "../../../components/dialog";
 import { BlueButton } from "../../../components/element/Button";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
 import { useSetJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
@@ -44,11 +45,14 @@ export default function JdbcFormSection({
 	return (
 		<fieldset className="border border-gray-200 p-3">
 			<legend>jdbc</legend>
-			<ExpandButton
-				toggleOptional={toggleOptional}
-				showOptional={showOptional}
-				caption="jdbc option"
-			/>
+			<div className="flex items-center gap-2">
+				<ExpandButton
+					toggleOptional={toggleOptional}
+					showOptional={showOptional}
+					caption="jdbc option"
+				/>
+				<SectionHelpButton command="jdbc" label="JDBC" />
+			</div>
 			<JdbcPropertiesTextField
 				prefix={prefix}
 				element={jdbcOption.jdbcProperties}
