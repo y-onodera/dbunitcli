@@ -22,7 +22,7 @@
 <body>
   <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Dataset Setting</h1>
-  <p>個別テーブルに対するメタデータ設定を編集するダイアログです。対象指定、分割・リネーム、追加カラム、フィルタ／並び順を構成します。ファイル全体の構造（<code>settings</code> / <code>commonSettings</code> / <code>import</code>）については <a href="dataset-settings.html">Dataset Settings</a> を参照してください。</p>
+  <p>個別テーブルに対するメタデータ設定を編集するダイアログです。対象指定、分割・リネーム、派生テーブルの分離、追加カラム、フィルタ／並び順を構成します。ファイル全体の構造（<code>settings</code> / <code>commonSettings</code> / <code>import</code>）については <a href="dataset-settings.html">Dataset Settings</a> を参照してください。</p>
 
   <h2>Target</h2>
   <p>処理対象のテーブルをどのように特定するかを選択します。</p>
@@ -123,6 +123,83 @@ id | type | amount
 4  | C    | 80
 </code></pre>
   <p>breakKey を指定しない場合、<code>limit</code> は「1 出力テーブルあたりの行数」として扱われ、<code>limit</code> 行ごとに新しい出力テーブルへ切り替わります。</p>
+
+  <h2>Separate</h2>
+  <p><code>separate</code> は配列で、各要素が 1 つの派生テーブル定義となり、1 つの入力から複数の派生テーブルを並列に生成します。<code>split</code> が <code>breakKey</code> / <code>limit</code> で連番テーブルを自動生成するのに対し、<code>separate</code> は派生テーブルごとに列・行・並び順などを明示的に自由定義できる点が異なります。</p>
+  <p>各派生テーブルでは、通常のテーブル設定と同じフィールドを指定できます。<code>include</code> / <code>exclude</code> による<strong>列方向の切り出し</strong>と、<code>filter</code> / <code>distinct</code> による<strong>行方向の切り出し</strong>の両方に利用でき、1 要素の中で同時に指定することも可能です。</p>
+  <table>
+    <tr><th>フィールド</th><th>説明</th></tr>
+    <tr><td>name</td><td>派生テーブルの出力テーブル名</td></tr>
+    <tr><td>keys</td><td>派生テーブルの主キーとなるカラム</td></tr>
+    <tr><td>include</td><td>派生テーブルに残すカラム（列の切り出し）。指定すると include 以外は除外される。</td></tr>
+    <tr><td>exclude</td><td>派生テーブルから除外するカラム</td></tr>
+    <tr><td>filter</td><td>派生テーブルに残す行の条件（JeXL 式）。複数指定した場合は AND 扱い。</td></tr>
+    <tr><td>order</td><td>派生テーブル内の並び順に使用するカラム</td></tr>
+    <tr><td>distinct</td><td>派生テーブルの重複行を排除するフラグ</td></tr>
+    <tr><td>string / number / boolean / function</td><td>追加カラム定義。派生テーブルごとに個別に指定できる（詳細は Additional Columns を参照）。</td></tr>
+  </table>
+
+  <h3>変化の例</h3>
+
+  <p><strong>列方向の切り出し（連絡先カラムを別テーブルへ）</strong></p>
+  <p>入力 <code>users</code> から連絡先関連のカラムだけを <code>user_profiles</code> に切り出します。元テーブル <code>users</code> 自体は <code>separate</code> の対象外になるため、連絡先カラムを残したい場合は別途 <code>settings</code> を追加してください。</p>
+<pre><code>Before (users):
+user_id | name  | address       | tel          | fax
+--------+-------+---------------+--------------+--------------
+1       | Alice | Tokyo         | 03-0000-0001 | 03-0000-0002
+2       | Bob   | Osaka         | 06-0000-0001 | 06-0000-0002
+
+After (separate: [{ name: "user_profiles", keys: ["user_id"], include: ["user_id", "address", "tel", "fax"] }]):
+Table: user_profiles
+user_id | address | tel          | fax
+--------+---------+--------------+--------------
+1       | Tokyo   | 03-0000-0001 | 03-0000-0002
+2       | Osaka   | 06-0000-0001 | 06-0000-0002
+</code></pre>
+
+  <p><strong>行方向の切り出し（ステータス別に派生テーブルを作成）</strong></p>
+  <p><code>separate</code> 配列に複数要素を定義することで、同じ入力から異なる条件の派生テーブルを並列に生成できます。</p>
+<pre><code>Before (orders):
+id | status   | amount
+---+----------+-------
+1  | APPROVED | 1500
+2  | REJECTED | 500
+3  | APPROVED | 2000
+4  | REJECTED | 300
+
+After (separate: [
+  { name: "orders_approved", keys: ["id"], filter: ["status == 'APPROVED'"] },
+  { name: "orders_rejected", keys: ["id"], filter: ["status == 'REJECTED'"] }
+]):
+Table: orders_approved
+id | status   | amount
+---+----------+-------
+1  | APPROVED | 1500
+3  | APPROVED | 2000
+
+Table: orders_rejected
+id | status   | amount
+---+----------+-------
+2  | REJECTED | 500
+4  | REJECTED | 300
+</code></pre>
+
+  <p><strong>列方向 + 行方向の組み合わせ</strong></p>
+  <p>1 つの派生テーブル定義の中で <code>include</code> と <code>filter</code> を同時に指定すると、「条件に合致する行」の「特定カラムだけ」を切り出せます。</p>
+<pre><code>Before (orders):
+id | status   | amount | memo
+---+----------+--------+------
+1  | APPROVED | 1500   | x
+2  | REJECTED | 500    | y
+3  | APPROVED | 2000   | z
+
+After (separate: [{ name: "orders_approved_summary", keys: ["id"], include: ["id", "amount"], filter: ["status == 'APPROVED'"] }]):
+Table: orders_approved_summary
+id | amount
+---+-------
+1  | 1500
+3  | 2000
+</code></pre>
 
   <h2>Additional Columns</h2>
   <p>元データに存在しないカラムを追加します。値には JeXL 式を記述できます。</p>
