@@ -1,3 +1,4 @@
+import { SectionHelpButton } from "../../components/dialog";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
@@ -53,6 +54,7 @@ export function CompareForm(prop: {
 			{prop.compare.imageOption && (
 				<fieldset className="border border-gray-200 p-3">
 					<legend>image</legend>
+					<SectionHelpButton command="image" label="Image Option" />
 					<ImageOptionFormSection imageOption={imageOption} />
 				</fieldset>
 			)}
