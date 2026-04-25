@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { SrcInfo } from "../model/CommandOption";
@@ -134,37 +134,34 @@ async function deleteXlsxSchema(
 		});
 }
 
-export const useXlsxSheets = () => {
-	const { apiUrl } = useEnviroment();
-	return async (srcInfo: SrcInfo): Promise<string[]> => {
-		if (!srcInfo.srcPath) {
-			return [];
-		}
-		const fetchParams = {
-			endpoint: `${apiUrl}xlsx-schema/sheets`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					src: srcInfo.srcPath,
-					regTableInclude: srcInfo.regTableInclude,
-					regTableExclude: srcInfo.regTableExclude,
-					recursive: srcInfo.recursive === "true",
-					regInclude: srcInfo.regInclude,
-					regExclude: srcInfo.regExclude,
-					extension: srcInfo.extension,
-				}),
-			},
-		};
-		return fetchData(fetchParams)
-			.then((r) => r.json())
-			.catch(() => []);
+async function fetchSheets(apiUrl: string, srcInfo: SrcInfo): Promise<string[]> {
+	if (!srcInfo.srcPath) {
+		return [];
+	}
+	const fetchParams = {
+		endpoint: `${apiUrl}xlsx-schema/sheets`,
+		options: {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				src: srcInfo.srcPath,
+				regTableInclude: srcInfo.regTableInclude,
+				regTableExclude: srcInfo.regTableExclude,
+				recursive: srcInfo.recursive === "true",
+				regInclude: srcInfo.regInclude,
+				regExclude: srcInfo.regExclude,
+				extension: srcInfo.extension,
+			}),
+		},
 	};
-};
+	return fetchData(fetchParams)
+		.then((r) => r.json())
+		.catch(() => []);
+}
 
 export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 	const [sheetNames, setSheetNames] = useState<string[]>([]);
-	const loadSheets = useXlsxSheets();
+	const { apiUrl } = useEnviroment();
 	const srcPath = srcInfo.srcPath;
 	const regTableInclude = srcInfo.regTableInclude;
 	const regTableExclude = srcInfo.regTableExclude;
@@ -173,15 +170,12 @@ export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 	const regExclude = srcInfo.regExclude;
 	const extension = srcInfo.extension;
 
-	const loadSheetsRef = useRef(loadSheets);
-	loadSheetsRef.current = loadSheets;
-
 	useEffect(() => {
 		if (!srcPath) {
 			return;
 		}
 		let isMounted = true;
-		loadSheetsRef.current({
+		fetchSheets(apiUrl, {
 			srcPath,
 			regTableInclude,
 			regTableExclude,
@@ -198,6 +192,7 @@ export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 			isMounted = false;
 		};
 	}, [
+		apiUrl,
 		srcPath,
 		regTableInclude,
 		regTableExclude,

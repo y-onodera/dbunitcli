@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
@@ -11,67 +11,62 @@ import {
 import type { ResourcesSettings } from "../model/WorkspaceResources";
 import { fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
-export const useDatasetTableNamesApi = () => {
-	const { apiUrl } = useEnviroment();
-	return async (
-		info: DatasetSrcInfo,
-		jdbcValues: Record<string, string>,
-	): Promise<string[]> => {
-		if (!info.srcPath) {
-			return [];
-		}
-		const fetchParams = {
-			endpoint: `${apiUrl}dataset-setting/table-names`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					setting: info.setting ?? "",
-					srcType: info.srcType,
-					src: info.srcPath,
-					regTableInclude: info.regTableInclude,
-					regTableExclude: info.regTableExclude,
-					recursive: info.recursive === "true",
-					regInclude: info.regInclude,
-					regExclude: info.regExclude,
-					extension: info.extension,
-					xlsxSchema: info.xlsxSchema,
-					fixedLength: info.fixedLength,
-					regHeaderSplit: info.regHeaderSplit,
-					regDataSplit: info.regDataSplit,
-					encoding: info.encoding,
-					delimiter: info.delimiter,
-					ignoreQuoted: info.ignoreQuoted,
-					headerName: info.headerName,
-					startRow: info.startRow,
-					addFileInfo: info.addFileInfo,
-					jdbcUrl: jdbcValues.jdbcUrl ?? "",
-					jdbcUser: jdbcValues.jdbcUser ?? "",
-					jdbcPass: jdbcValues.jdbcPass ?? "",
-					jdbcProperties: jdbcValues.jdbcProperties ?? "",
-				}),
-			},
-		};
-		return fetchData(fetchParams)
-			.then((r) => r.json())
-			.catch(() => []);
+async function fetchTableNames(
+	apiUrl: string,
+	info: DatasetSrcInfo,
+	jdbcValues: Record<string, string>,
+): Promise<string[]> {
+	if (!info.srcPath) {
+		return [];
+	}
+	const fetchParams = {
+		endpoint: `${apiUrl}dataset-setting/table-names`,
+		options: {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				setting: info.setting ?? "",
+				srcType: info.srcType,
+				src: info.srcPath,
+				regTableInclude: info.regTableInclude,
+				regTableExclude: info.regTableExclude,
+				recursive: info.recursive === "true",
+				regInclude: info.regInclude,
+				regExclude: info.regExclude,
+				extension: info.extension,
+				xlsxSchema: info.xlsxSchema,
+				fixedLength: info.fixedLength,
+				regHeaderSplit: info.regHeaderSplit,
+				regDataSplit: info.regDataSplit,
+				encoding: info.encoding,
+				delimiter: info.delimiter,
+				ignoreQuoted: info.ignoreQuoted,
+				headerName: info.headerName,
+				startRow: info.startRow,
+				addFileInfo: info.addFileInfo,
+				jdbcUrl: jdbcValues.jdbcUrl ?? "",
+				jdbcUser: jdbcValues.jdbcUser ?? "",
+				jdbcPass: jdbcValues.jdbcPass ?? "",
+				jdbcProperties: jdbcValues.jdbcProperties ?? "",
+			}),
+		},
 	};
-};
+	return fetchData(fetchParams)
+		.then((r) => r.json())
+		.catch(() => []);
+}
 
 export const useDatasetTableNames = (
 	srcInfo: DatasetSrcInfo,
 ): { tableNames: string[]; loading: boolean } => {
 	const [tableNames, setTableNames] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
+	const { apiUrl } = useEnviroment();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
-	const loadTableNames = useDatasetTableNamesApi();
 
 	const srcPath = srcInfo.srcPath;
 	const srcType = srcInfo.srcType;
 	const sqlNotReady = srcType === "sql" && !connectionOk;
-
-	const loadTableNamesRef = useRef(loadTableNames);
-	loadTableNamesRef.current = loadTableNames;
 
 	useEffect(() => {
 		if (!srcPath || !srcType || srcType === "none" || sqlNotReady) {
@@ -81,7 +76,7 @@ export const useDatasetTableNames = (
 		}
 		let isMounted = true;
 		setLoading(true);
-		loadTableNamesRef.current(srcInfo, jdbcValues).then((names) => {
+		fetchTableNames(apiUrl, srcInfo, jdbcValues).then((names) => {
 			if (isMounted) {
 				setTableNames(names);
 				setLoading(false);
@@ -90,7 +85,7 @@ export const useDatasetTableNames = (
 		return () => {
 			isMounted = false;
 		};
-	}, [srcPath, srcType, srcInfo, sqlNotReady, jdbcValues]);
+	}, [apiUrl, srcPath, srcType, srcInfo, sqlNotReady, jdbcValues]);
 
 	return { tableNames, loading };
 };
