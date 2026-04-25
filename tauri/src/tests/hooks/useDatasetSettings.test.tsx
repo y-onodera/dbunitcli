@@ -45,7 +45,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 	<MockProvider>{children}</MockProvider>
 );
 
-// API呼び出しのモック
 const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 	const mockFetchData = vi.fn((params: FetchParams) => {
 		if (params.endpoint.includes("/workspace/resources")) {
@@ -81,7 +80,6 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 	return { mockFetchData, mockFetchAndUpdate };
 });
 
-// 必要なモジュールをモック化
 vi.mock("../../utils/fetchUtils", () => ({
 	fetchData: mockFetchData,
 	fetchAndUpdate: mockFetchAndUpdate,

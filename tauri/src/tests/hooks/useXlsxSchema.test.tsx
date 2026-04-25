@@ -60,7 +60,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 const mockUpdatedSettings = ["test-setting", "other-setting"];
 const mockRemainingSettings = [] as string[];
 
-// API呼び出しのモック
 const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 	const mockFetchData = vi.fn((params: FetchParams) => {
 		if (params.endpoint.includes("/workspace/resources")) {
