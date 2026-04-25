@@ -79,11 +79,17 @@ export const useDatasetTableNames = (
 			setLoading(false);
 			return;
 		}
+		let isMounted = true;
 		setLoading(true);
 		loadTableNamesRef.current(srcInfo, jdbcValues).then((names) => {
-			setTableNames(names);
-			setLoading(false);
+			if (isMounted) {
+				setTableNames(names);
+				setLoading(false);
+			}
 		});
+		return () => {
+			isMounted = false;
+		};
 	}, [srcPath, srcType, srcInfo, sqlNotReady, jdbcValues]);
 
 	return { tableNames, loading };
