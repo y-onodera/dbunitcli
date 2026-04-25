@@ -45,38 +45,44 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 	<MockProvider>{children}</MockProvider>
 );
 
-// API呼び出しのモック
-const { mockFetchData } = vi.hoisted(() => {
-	return {
-		mockFetchData: vi.fn((params: FetchParams) => {
-			if (params.endpoint.includes("/workspace/resources")) {
-				return Promise.resolve(
-					new Response(JSON.stringify(mockWorkspaceResources)),
-				);
-			}
-			if (params.endpoint.includes("/dataset-setting/load")) {
-				return Promise.resolve(
-					new Response(JSON.stringify(mockDatasetSettingsResponse)),
-				);
-			}
-			if (params.endpoint.includes("/dataset-setting/save")) {
-				return Promise.resolve(
-					new Response(JSON.stringify(mockUpdatedSettings)),
-				);
-			}
-			if (params.endpoint.includes("/dataset-setting/delete")) {
-				return Promise.resolve(
-					new Response(JSON.stringify(mockRemainingSettings)),
-				);
-			}
-			return Promise.resolve(new Response());
-		}),
-	};
+const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
+	const mockFetchData = vi.fn((params: FetchParams) => {
+		if (params.endpoint.includes("/workspace/resources")) {
+			return Promise.resolve(
+				new Response(JSON.stringify(mockWorkspaceResources)),
+			);
+		}
+		if (params.endpoint.includes("/dataset-setting/load")) {
+			return Promise.resolve(
+				new Response(JSON.stringify(mockDatasetSettingsResponse)),
+			);
+		}
+		if (params.endpoint.includes("/dataset-setting/save")) {
+			return Promise.resolve(
+				new Response(JSON.stringify(mockUpdatedSettings)),
+			);
+		}
+		if (params.endpoint.includes("/dataset-setting/delete")) {
+			return Promise.resolve(
+				new Response(JSON.stringify(mockRemainingSettings)),
+			);
+		}
+		return Promise.resolve(new Response());
+	});
+	const mockFetchAndUpdate = vi.fn(
+		async (params: FetchParams, onSuccess: (data: unknown) => void) => {
+			const response = await mockFetchData(params);
+			const data = await response.json();
+			onSuccess(data);
+			return "success" as const;
+		},
+	);
+	return { mockFetchData, mockFetchAndUpdate };
 });
 
-// 必要なモジュールをモック化
 vi.mock("../../utils/fetchUtils", () => ({
 	fetchData: mockFetchData,
+	fetchAndUpdate: mockFetchAndUpdate,
 }));
 
 describe("DatasetSettingsProviderのテスト", () => {
