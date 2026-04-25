@@ -2,9 +2,9 @@ import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import {
-	type Enviroment,
-	enviromentContext,
-} from "../../context/EnviromentProvider";
+	type Environment,
+	environmentContext,
+} from "../../context/EnvironmentProvider";
 import SelectParameterProvider, {
 	useSelectParameter,
 	useSetSelectParameter,
@@ -23,7 +23,7 @@ import type {
 } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
 import type { FetchParams } from "../../utils/fetchUtils";
-import { enviromentFixture, makeMinimalParam } from "../setup";
+import { environmentFixture, makeMinimalParam } from "../setup";
 
 // モックデータ
 const createDatasetSource = (prefix: string) =>
@@ -126,13 +126,13 @@ vi.mock("../../utils/fetchUtils", () => ({
 	isAbortError: vi.fn(() => false),
 }));
 
-const mockEnviroment: Enviroment = { ...enviromentFixture };
+const mockEnvironment: Environment = { ...environmentFixture };
 
 // カスタムラッパーコンポーネント
 const wrapper = ({ children }: { children: ReactNode }) => (
-	<enviromentContext.Provider value={mockEnviroment}>
+	<environmentContext.Provider value={mockEnvironment}>
 		<SelectParameterProvider>{children}</SelectParameterProvider>
-	</enviromentContext.Provider>
+	</environmentContext.Provider>
 );
 
 describe("SelectParameterProviderのテスト", () => {

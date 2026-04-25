@@ -1,5 +1,5 @@
 import { isAbsolute, sep } from "@tauri-apps/api/path";
-import { useEnviroment } from "../context/EnviromentProvider";
+import { useEnvironment } from "../context/EnvironmentProvider";
 import {
 	useSelectParameter,
 	useSetSelectParameter,
@@ -23,7 +23,7 @@ export const useWorkspaceUpdate = () => {
 	const setContext = useSetWorkspaceContext();
 	const setParameterList = useSetParameterList();
 	const setResourcesSettings = useSetResourcesSettings();
-	const environment = useEnviroment();
+	const environment = useEnvironment();
 	return async (workspace: string, datasetBase: string, resultBase: string) => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl}workspace/update`,
@@ -52,7 +52,7 @@ export const useWorkspaceUpdate = () => {
 
 export const useAddParameter = (command: string) => {
 	const setParameter = useSetParameterList();
-	const environment = useEnviroment();
+	const environment = useEnvironment();
 	return async () => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl + command.toLowerCase()}/add`,
@@ -74,7 +74,7 @@ export const useAddParameter = (command: string) => {
 
 export const useParameterActions = (command: string, name: string) => {
 	const setParameterList = useSetParameterList();
-	const { apiUrl } = useEnviroment();
+	const { apiUrl } = useEnvironment();
 	const parameter = useSelectParameter();
 	const setParameter = useSetSelectParameter();
 
@@ -129,7 +129,7 @@ export const useParameterActions = (command: string, name: string) => {
 };
 
 export const useResolveAbsolutePath = () => {
-	const { apiUrl } = useEnviroment();
+	const { apiUrl } = useEnvironment();
 	const context = useWorkspaceContext();
 	return async (path: string, attribute: Attribute): Promise<string> => {
 		const fetchParams = {

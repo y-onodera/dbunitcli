@@ -1,4 +1,4 @@
-import { useEnviroment } from "../context/EnviromentProvider";
+import { useEnvironment } from "../context/EnvironmentProvider";
 import type {
 	QueryDatasource,
 	QueryDatasourceType,
@@ -11,7 +11,7 @@ import {
 } from "../utils/fetchUtils";
 
 export const useDeleteDataSource = (type: QueryDatasourceType) => {
-	const environment = useEnviroment();
+	const environment = useEnvironment();
 	return async (name: string) => {
 		return postDataSource(environment.apiUrl, "query-datasource/delete", {
 			type,
@@ -20,13 +20,13 @@ export const useDeleteDataSource = (type: QueryDatasourceType) => {
 	};
 };
 export const useSaveDataSource = () => {
-	const environment = useEnviroment();
+	const environment = useEnvironment();
 	return async (input: QueryDatasource) => {
 		return postDataSource(environment.apiUrl, "query-datasource/save", input);
 	};
 };
 export const useLoadDataSource = () => {
-	const environment = useEnviroment();
+	const environment = useEnvironment();
 	return async (name: string) => {
 		return loadDataSource(environment.apiUrl, name);
 	};

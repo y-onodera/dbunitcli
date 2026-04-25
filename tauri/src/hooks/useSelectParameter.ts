@@ -1,4 +1,4 @@
-import { useEnviroment } from "../context/EnviromentProvider";
+import { useEnvironment } from "../context/EnvironmentProvider";
 import {
 	useSelectParameter,
 	useSetSelectParameterState,
@@ -20,7 +20,7 @@ export type Running = {
 
 export const useLoadSelectParameter = () => {
 	const setParameter = useSetSelectParameterState();
-	const environment = useEnviroment();
+	const environment = useEnvironment();
 	return async (command: Command, name: string) => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl + command.toLowerCase()}/load`,
@@ -41,7 +41,7 @@ export const useLoadSelectParameter = () => {
 
 export const useRefreshSelectParameter = (command: string) => {
 	const setParameter = useSetSelectParameterState();
-	const environment = useEnviroment();
+	const environment = useEnvironment();
 	return async (values: { [k: string]: FormDataEntryValue }) => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl + command.toLowerCase()}/refresh`,
@@ -82,7 +82,7 @@ const parseResponse = async (
 
 const useParameterAction = () => {
 	const parameter = useSelectParameter();
-	const environment = useEnviroment();
+	const environment = useEnvironment();
 	return async (
 		action: ParameterAction,
 		extraBody: Record<string, unknown>,
@@ -139,7 +139,7 @@ export const useSaveShell = () => {
 export const useParameterizeFrom = () => {
 	const setParameter = useSetSelectParameterState();
 	const setParameterList = useSetParameterList();
-	const environment = useEnviroment();
+	const environment = useEnvironment();
 	return async (sourceCommand: string, name: string) => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl + sourceCommand.toLowerCase()}/parameterize`,

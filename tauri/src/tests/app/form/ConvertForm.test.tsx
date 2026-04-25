@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ConvertForm } from "../../../app/form/ConvertForm";
 import type { ConvertOptions } from "../../../model/SelectParameter";
-import { enviromentFixture, workspaceResourcesFixture } from "../../setup";
+import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	convertLoadResponseFixture,
 	convertRefreshResultTypeXlsxResponseFixture,
@@ -24,8 +24,8 @@ vi.mock("../../../context/WorkspaceResourcesProvider", () => ({
 	useWorkspaceContext: () => workspaceResourcesFixture.context,
 	useResourcesSettings: () => workspaceResourcesFixture.resources,
 }));
-vi.mock("../../../context/EnviromentProvider", () => ({
-	useEnviroment: () => enviromentFixture,
+vi.mock("../../../context/EnvironmentProvider", () => ({
+	useEnvironment: () => environmentFixture,
 }));
 
 // JDBC API フックのモック（クリック時のみ API を呼ぶ）

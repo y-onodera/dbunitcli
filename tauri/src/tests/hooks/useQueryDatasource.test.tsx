@@ -1,9 +1,9 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
-	type Enviroment,
-	enviromentContext,
-} from "../../context/EnviromentProvider";
+	type Environment,
+	environmentContext,
+} from "../../context/EnvironmentProvider";
 import {
 	useDeleteDataSource,
 	useLoadDataSource,
@@ -11,7 +11,7 @@ import {
 } from "../../hooks/useQueryDatasource";
 import type { QueryDatasource } from "../../model/QueryDatasource";
 import type { FetchParams } from "../../utils/fetchUtils";
-import { enviromentFixture } from "../setup";
+import { environmentFixture } from "../setup";
 
 // モックデータ
 const mockQueryDatasource: QueryDatasource = {
@@ -19,12 +19,12 @@ const mockQueryDatasource: QueryDatasource = {
 	contents: "SELECT * FROM test_table;",
 };
 
-const mockEnviroment: Enviroment = { ...enviromentFixture };
+const mockEnvironment: Environment = { ...environmentFixture };
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-	<enviromentContext.Provider value={mockEnviroment}>
+	<environmentContext.Provider value={mockEnvironment}>
 		{children}
-	</enviromentContext.Provider>
+	</environmentContext.Provider>
 );
 
 const mockLoadedContents = "SELECT * FROM test_table WHERE id = 1;";
@@ -69,7 +69,7 @@ describe("QueryDatasourceProviderのテスト", () => {
 			);
 			expect(saveResult).toBe("success");
 			expect(mockFetchData).toHaveBeenCalledWith({
-				endpoint: `${mockEnviroment.apiUrl}query-datasource/save`,
+				endpoint: `${mockEnvironment.apiUrl}query-datasource/save`,
 				options: {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
@@ -87,7 +87,7 @@ describe("QueryDatasourceProviderのテスト", () => {
 			const deleteResult = await act(async () => result.current("test-query"));
 			expect(deleteResult).toBe("success");
 			expect(mockFetchData).toHaveBeenCalledWith({
-				endpoint: `${mockEnviroment.apiUrl}query-datasource/delete`,
+				endpoint: `${mockEnvironment.apiUrl}query-datasource/delete`,
 				options: {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },

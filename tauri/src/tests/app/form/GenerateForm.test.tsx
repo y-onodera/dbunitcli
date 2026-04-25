@@ -2,7 +2,7 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { GenerateForm } from "../../../app/form/GenerateForm";
 import type { GenerateOptions } from "../../../model/SelectParameter";
-import { enviromentFixture, workspaceResourcesFixture } from "../../setup";
+import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	generateLoadResponseFixture,
 	generateRefreshSrcTypeTableResponseFixture,
@@ -21,8 +21,8 @@ vi.mock("../../../context/WorkspaceResourcesProvider", () => ({
 	useWorkspaceContext: () => workspaceResourcesFixture.context,
 	useResourcesSettings: () => workspaceResourcesFixture.resources,
 }));
-vi.mock("../../../context/EnviromentProvider", () => ({
-	useEnviroment: () => enviromentFixture,
+vi.mock("../../../context/EnvironmentProvider", () => ({
+	useEnvironment: () => environmentFixture,
 }));
 
 // JDBC API フックのモック

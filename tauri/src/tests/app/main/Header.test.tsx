@@ -4,23 +4,23 @@ import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import Header from "../../../app/main/Header";
 import {
-	type Enviroment,
-	enviromentContext,
-} from "../../../context/EnviromentProvider";
+	type Environment,
+	environmentContext,
+} from "../../../context/EnvironmentProvider";
 import SelectParameterProvider from "../../../context/SelectParameterProvider";
 import WorkspaceResourcesProvider from "../../../context/WorkspaceResourcesProvider";
 import type { FetchParams } from "../../../utils/fetchUtils";
-import { enviromentFixture, workspaceResourcesFixture } from "../../setup";
+import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 
-const mockEnviroment: Enviroment = { ...enviromentFixture };
+const mockEnvironment: Environment = { ...environmentFixture };
 
 function MockProvider({ children }: { children: ReactNode }) {
 	return (
-		<enviromentContext.Provider value={mockEnviroment}>
+		<environmentContext.Provider value={mockEnvironment}>
 			<WorkspaceResourcesProvider>
 				<SelectParameterProvider>{children}</SelectParameterProvider>
 			</WorkspaceResourcesProvider>
-		</enviromentContext.Provider>
+		</environmentContext.Provider>
 	);
 }
 const wrapper = ({ children }: { children: ReactNode }) => (

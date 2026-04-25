@@ -1,41 +1,6 @@
-import type { Dispatch, SetStateAction } from "react";
-import { useEnviroment } from "../context/EnviromentProvider";
+import { useEnvironment } from "../context/EnvironmentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
-import type { ResourcesSettings } from "../model/WorkspaceResources";
-import { fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
-
-export const useDeleteJdbcProperties = () => {
-	const { apiUrl } = useEnviroment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string): Promise<OperationResult> => {
-		return deleteJdbcProperties(apiUrl, name, setResourcesSettings);
-	};
-};
-
-async function deleteJdbcProperties(
-	apiUrl: string,
-	name: string,
-	setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>,
-): Promise<OperationResult> {
-	const fetchParams = {
-		endpoint: `${apiUrl}jdbc/delete`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "text/plain" },
-			body: name,
-		},
-	};
-	return await fetchData(fetchParams)
-		.then((response) => response.json())
-		.then((files: string[]) => {
-			setResourcesSettings((current) => current.with({ jdbcFiles: files }));
-			return "success" as OperationResult;
-		})
-		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
-			return "failed" as OperationResult;
-		});
-}
+import { fetchAndUpdate, fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
 function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 	return {
@@ -46,8 +11,21 @@ function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 	};
 }
 
+export const useDeleteJdbcProperties = () => {
+	const { apiUrl } = useEnvironment();
+	const setResourcesSettings = useSetResourcesSettings();
+	return async (name: string): Promise<OperationResult> =>
+		fetchAndUpdate<string[]>(
+			{
+				endpoint: `${apiUrl}jdbc/delete`,
+				options: { method: "POST", headers: { "Content-Type": "text/plain" }, body: name },
+			},
+			(files) => setResourcesSettings((current) => current.with({ jdbcFiles: files })),
+		);
+};
+
 export const useJdbcTables = () => {
-	const { apiUrl } = useEnviroment();
+	const { apiUrl } = useEnvironment();
 	return async (jdbcValues: Record<string, string>): Promise<string[]> => {
 		const params = {
 			endpoint: `${apiUrl}jdbc/tables`,
@@ -68,7 +46,7 @@ export const useJdbcTables = () => {
 };
 
 export const useJdbcConnectionTest = () => {
-	const { apiUrl } = useEnviroment();
+	const { apiUrl } = useEnvironment();
 	return async (
 		jdbcValues: Record<string, string>,
 	): Promise<{ success: boolean; message: string } | null> => {
@@ -91,39 +69,14 @@ export const useJdbcConnectionTest = () => {
 };
 
 export const useJdbcSaveProperties = () => {
-	const { apiUrl } = useEnviroment();
+	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();
-	return async (
-		name: string,
-		jdbcValues: Record<string, string>,
-	): Promise<OperationResult> => {
-		return saveJdbcProperties(apiUrl, name, jdbcValues, setResourcesSettings);
-	};
+	return async (name: string, jdbcValues: Record<string, string>): Promise<OperationResult> =>
+		fetchAndUpdate<string[]>(
+			{
+				endpoint: `${apiUrl}jdbc/save-properties`,
+				options: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, input: toJdbcRequestBody(jdbcValues) }) },
+			},
+			(files) => setResourcesSettings((current) => current.with({ jdbcFiles: files })),
+		);
 };
-
-async function saveJdbcProperties(
-	apiUrl: string,
-	name: string,
-	jdbcValues: Record<string, string>,
-	setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>,
-): Promise<OperationResult> {
-	const fetchParams = {
-		endpoint: `${apiUrl}jdbc/save-properties`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name, input: toJdbcRequestBody(jdbcValues) }),
-		},
-	};
-
-	return await fetchData(fetchParams)
-		.then((response) => response.json())
-		.then((files: string[]) => {
-			setResourcesSettings((current) => current.with({ jdbcFiles: files }));
-			return "success" as OperationResult;
-		})
-		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
-			return "failed" as OperationResult;
-		});
-}

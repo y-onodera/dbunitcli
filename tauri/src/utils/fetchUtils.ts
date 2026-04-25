@@ -62,6 +62,22 @@ export async function saveOnSuccess(
 export const isAbortError = (error: unknown): boolean =>
 	error instanceof DOMException && error.name === "AbortError";
 
+export async function fetchAndUpdate<T>(
+	fetchParams: FetchParams,
+	onSuccess: (data: T) => void,
+): Promise<OperationResult> {
+	return fetchData(fetchParams)
+		.then((r) => r.json())
+		.then((data: T) => {
+			onSuccess(data);
+			return "success" as OperationResult;
+		})
+		.catch((ex) => {
+			handleFetchError(getErrorMessage(ex), fetchParams);
+			return "failed" as OperationResult;
+		});
+}
+
 export const fetchData = async ({ endpoint, options, signal }: FetchParams) => {
 	const response = await fetch(endpoint, { ...options, signal: signal ?? options.signal });
 	if (!response.ok) {

@@ -1,37 +1,40 @@
-import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useState } from "react";
-import { useEnviroment } from "../context/EnviromentProvider";
+import { useEnvironment } from "../context/EnvironmentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { SrcInfo } from "../model/CommandOption";
-import type { ResourcesSettings } from "../model/WorkspaceResources";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
-import { fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
+import { fetchAndUpdate, fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
 export const useDeleteXlsxSchema = () => {
-	const environment = useEnviroment();
+	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string) => {
-		return deleteXlsxSchema(environment.apiUrl, name, setResourcesSettings);
-	};
+	return async (name: string): Promise<OperationResult> =>
+		fetchAndUpdate<string[]>(
+			{
+				endpoint: `${apiUrl}xlsx-schema/delete`,
+				options: { method: "POST", headers: { "Content-Type": "text/plain" }, body: name },
+			},
+			(schemas) => setResourcesSettings((current) => current.with({ xlsxSchemas: schemas })),
+		);
 };
 
 export const useSaveXlsxSchema = () => {
-	const environment = useEnviroment();
+	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string, input: XlsxSchema) => {
-		return saveXlsxSchema(
-			environment.apiUrl,
-			name,
-			input,
-			setResourcesSettings,
+	return async (name: string, input: XlsxSchema): Promise<OperationResult> =>
+		fetchAndUpdate<string[]>(
+			{
+				endpoint: `${apiUrl}xlsx-schema/save`,
+				options: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, input }) },
+			},
+			(schemas) => setResourcesSettings((current) => current.with({ xlsxSchemas: schemas })),
 		);
-	};
 };
 
 export const useXlsxSchemaData = (
 	fileName: string,
 ): { schema: XlsxSchema; loading: boolean } => {
-	const { apiUrl } = useEnviroment();
+	const { apiUrl } = useEnvironment();
 	const [schema, setSchema] = useState(XlsxSchema.create());
 	const [loading, setLoading] = useState(fileName !== "");
 
@@ -81,59 +84,6 @@ async function loadXlsxSchema(
 		});
 }
 
-async function saveXlsxSchema(
-	apiUrl: string,
-	name: string,
-	input: XlsxSchema,
-	setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>,
-): Promise<OperationResult> {
-	const fetchParams = {
-		endpoint: `${apiUrl}xlsx-schema/save`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name, input }),
-		},
-	};
-
-	return await fetchData(fetchParams)
-		.then((response) => response.json())
-		.then((schemas: string[]) => {
-			setResourcesSettings((current) => current.with({ xlsxSchemas: schemas }));
-			return "success" as OperationResult;
-		})
-		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
-			return "failed" as OperationResult;
-		});
-}
-
-async function deleteXlsxSchema(
-	apiUrl: string,
-	name: string,
-	setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>,
-): Promise<OperationResult> {
-	const fetchParams = {
-		endpoint: `${apiUrl}xlsx-schema/delete`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "text/plain" },
-			body: name,
-		},
-	};
-
-	return await fetchData(fetchParams)
-		.then((response) => response.json())
-		.then((schemas: string[]) => {
-			setResourcesSettings((current) => current.with({ xlsxSchemas: schemas }));
-			return "success" as OperationResult;
-		})
-		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
-			return "failed" as OperationResult;
-		});
-}
-
 async function fetchSheets(apiUrl: string, srcInfo: SrcInfo): Promise<string[]> {
 	if (!srcInfo.srcPath) {
 		return [];
@@ -161,7 +111,7 @@ async function fetchSheets(apiUrl: string, srcInfo: SrcInfo): Promise<string[]> 
 
 export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 	const [sheetNames, setSheetNames] = useState<string[]>([]);
-	const { apiUrl } = useEnviroment();
+	const { apiUrl } = useEnvironment();
 	const srcPath = srcInfo.srcPath;
 	const regTableInclude = srcInfo.regTableInclude;
 	const regTableExclude = srcInfo.regTableExclude;
