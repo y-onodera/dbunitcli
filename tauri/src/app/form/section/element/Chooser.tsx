@@ -15,10 +15,26 @@ function useChooserHandler(prop: FileProp, directory?: boolean) {
 	const resolveAbsolutePath = useResolveAbsolutePath();
 	return () => {
 		const basePath = context.getPath(prop.element.attribute.defaultPath);
+		const workspacePath = context.workspace;
 		resolveAbsolutePath(prop.path, prop.element.attribute).then((defaultPath) =>
 			open({ defaultPath, directory }).then((files) => {
 				if (files) {
-					prop.setPath((files as string).replace(basePath + sep(), ""));
+					const fullPath = files as string;
+					const primaryPrefix = basePath + sep();
+					const secondaryPrefix = workspacePath + sep();
+					let relative: string;
+					if (fullPath.startsWith(primaryPrefix)) {
+						relative = fullPath.slice(primaryPrefix.length);
+					} else if (
+						workspacePath !== "" &&
+						workspacePath !== basePath &&
+						fullPath.startsWith(secondaryPrefix)
+					) {
+						relative = fullPath.slice(secondaryPrefix.length);
+					} else {
+						relative = fullPath;
+					}
+					prop.setPath(relative);
 					prop.onSelect?.();
 				}
 			}),

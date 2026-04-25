@@ -30,6 +30,9 @@ export default function Text({
 	const basePath = showDefaulePath
 		? context.getPath(element.attribute.defaultPath)
 		: "";
+	const workspacePath = context.workspace;
+	const showWorkspaceAsSecondary =
+		showDefaulePath && workspacePath !== "" && workspacePath !== basePath;
 
 	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
 		const newValue = ev.target.value;
@@ -62,6 +65,9 @@ export default function Text({
 						)}
 						{!hidden && showDefaulePath && (
 							<p className="text-xs text-gray-400 truncate">{basePath}</p>
+						)}
+						{!hidden && showWorkspaceAsSecondary && (
+							<p className="text-xs text-gray-400 truncate">{workspacePath}</p>
 						)}
 					</div>
 					{!hidden &&
