@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
@@ -70,6 +70,9 @@ export const useDatasetTableNames = (
 	const srcType = srcInfo.srcType;
 	const sqlNotReady = srcType === "sql" && !connectionOk;
 
+	const loadTableNamesRef = useRef(loadTableNames);
+	loadTableNamesRef.current = loadTableNames;
+
 	useEffect(() => {
 		if (!srcPath || !srcType || srcType === "none" || sqlNotReady) {
 			setTableNames([]);
@@ -77,11 +80,11 @@ export const useDatasetTableNames = (
 			return;
 		}
 		setLoading(true);
-		loadTableNames(srcInfo, jdbcValues).then((names) => {
+		loadTableNamesRef.current(srcInfo, jdbcValues).then((names) => {
 			setTableNames(names);
 			setLoading(false);
 		});
-	}, [srcPath, srcType, srcInfo, sqlNotReady, jdbcValues, loadTableNames]);
+	}, [srcPath, srcType, srcInfo, sqlNotReady, jdbcValues]);
 
 	return { tableNames, loading };
 };
