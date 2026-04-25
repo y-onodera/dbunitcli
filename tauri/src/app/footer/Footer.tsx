@@ -29,6 +29,13 @@ export default function Footer(prop: {
 	const execParameter = useExecParameter();
 	const saveShell = useSaveShell();
 
+	const execParameterRef = useRef(execParameter);
+	const saveParameterRef = useRef(saveParameter);
+	const saveShellRef = useRef(saveShell);
+	execParameterRef.current = execParameter;
+	saveParameterRef.current = saveParameter;
+	saveShellRef.current = saveShell;
+
 	useEffect(() => {
 		if (running.command === "" || executingRef.current) {
 			return;
@@ -49,11 +56,11 @@ export default function Footer(prop: {
 		};
 
 		if (running.command === "exec") {
-			execParameter(prop.formData(false).values, handleResult, controller.signal);
+			execParameterRef.current(prop.formData(false).values, handleResult, controller.signal);
 		} else if (running.command === "save") {
-			saveParameter(prop.formData(false).values, handleResult, controller.signal);
+			saveParameterRef.current(prop.formData(false).values, handleResult, controller.signal);
 		} else if (running.command === "saveShell") {
-			saveShell(handleResult, controller.signal);
+			saveShellRef.current(handleResult, controller.signal);
 		}
 
 		return () => {
@@ -61,7 +68,7 @@ export default function Footer(prop: {
 			abortControllerRef.current?.abort();
 			abortControllerRef.current = null;
 		};
-	}, [running.command, execParameter, saveParameter, saveShell]);
+	}, [running.command]);
 
 	const openDirectory = async (path: string) => {
 		await core.invoke("open_directory", { path });
