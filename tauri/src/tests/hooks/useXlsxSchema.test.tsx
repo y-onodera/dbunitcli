@@ -61,34 +61,42 @@ const mockUpdatedSettings = ["test-setting", "other-setting"];
 const mockRemainingSettings = [] as string[];
 
 // API呼び出しのモック
-const { mockFetchData } = vi.hoisted(() => {
-	return {
-		mockFetchData: vi.fn((params: FetchParams) => {
-			if (params.endpoint.includes("/workspace/resources")) {
-				return Promise.resolve(
-					new Response(JSON.stringify(mockWorkspaceResources)),
-				);
-			}
-			if (params.endpoint.includes("/xlsx-schema/load")) {
-				return Promise.resolve(new Response(JSON.stringify(mockXlsxSchema)));
-			}
-			if (params.endpoint.includes("/xlsx-schema/save")) {
-				return Promise.resolve(
-					new Response(JSON.stringify(mockUpdatedSettings)),
-				);
-			}
-			if (params.endpoint.includes("/xlsx-schema/delete")) {
-				return Promise.resolve(
-					new Response(JSON.stringify(mockRemainingSettings)),
-				);
-			}
-			return Promise.resolve(new Response());
-		}),
-	};
+const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
+	const mockFetchData = vi.fn((params: FetchParams) => {
+		if (params.endpoint.includes("/workspace/resources")) {
+			return Promise.resolve(
+				new Response(JSON.stringify(mockWorkspaceResources)),
+			);
+		}
+		if (params.endpoint.includes("/xlsx-schema/load")) {
+			return Promise.resolve(new Response(JSON.stringify(mockXlsxSchema)));
+		}
+		if (params.endpoint.includes("/xlsx-schema/save")) {
+			return Promise.resolve(
+				new Response(JSON.stringify(mockUpdatedSettings)),
+			);
+		}
+		if (params.endpoint.includes("/xlsx-schema/delete")) {
+			return Promise.resolve(
+				new Response(JSON.stringify(mockRemainingSettings)),
+			);
+		}
+		return Promise.resolve(new Response());
+	});
+	const mockFetchAndUpdate = vi.fn(
+		async (params: FetchParams, onSuccess: (data: unknown) => void) => {
+			const response = await mockFetchData(params);
+			const data = await response.json();
+			onSuccess(data);
+			return "success" as const;
+		},
+	);
+	return { mockFetchData, mockFetchAndUpdate };
 });
 
 vi.mock("../../utils/fetchUtils", () => ({
 	fetchData: mockFetchData,
+	fetchAndUpdate: mockFetchAndUpdate,
 }));
 
 describe("XlsxSchemaProviderのテスト", () => {
