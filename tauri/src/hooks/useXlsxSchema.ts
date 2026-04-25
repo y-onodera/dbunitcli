@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEnviroment } from "../context/EnviromentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { SrcInfo } from "../model/CommandOption";
@@ -173,11 +173,15 @@ export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 	const regExclude = srcInfo.regExclude;
 	const extension = srcInfo.extension;
 
+	const loadSheetsRef = useRef(loadSheets);
+	loadSheetsRef.current = loadSheets;
+
 	useEffect(() => {
 		if (!srcPath) {
 			return;
 		}
-		loadSheets({
+		let isMounted = true;
+		loadSheetsRef.current({
 			srcPath,
 			regTableInclude,
 			regTableExclude,
@@ -185,7 +189,14 @@ export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 			regInclude,
 			regExclude,
 			extension,
-		}).then(setSheetNames);
+		}).then((names) => {
+			if (isMounted) {
+				setSheetNames(names);
+			}
+		});
+		return () => {
+			isMounted = false;
+		};
 	}, [
 		srcPath,
 		regTableInclude,
@@ -194,7 +205,6 @@ export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 		regInclude,
 		regExclude,
 		extension,
-		loadSheets,
 	]);
 
 	return sheetNames;
