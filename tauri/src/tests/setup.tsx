@@ -1,7 +1,7 @@
 import { cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { afterEach, vi } from "vitest";
-import type { Enviroment } from "../context/EnviromentProvider";
+import type { Environment } from "../context/EnvironmentProvider";
 import type { CommandOption } from "../model/CommandOption";
 import {
 	ParameterList,
@@ -50,7 +50,7 @@ export const workspaceResourcesFixture: WorkspaceResources = {
 	}),
 };
 
-export const enviromentFixture: Enviroment = {
+export const environmentFixture: Environment = {
 	apiUrl: "http://localhost:8080/",
 	workspace: "",
 	dataset_base: "",

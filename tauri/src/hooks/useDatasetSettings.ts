@@ -1,6 +1,5 @@
-import type { Dispatch, SetStateAction } from "react";
-import { useEffect, useRef, useState } from "react";
-import { useEnviroment } from "../context/EnviromentProvider";
+import { useEffect, useState } from "react";
+import { useEnvironment } from "../context/EnvironmentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { DatasetSrcInfo } from "../model/CommandOption";
@@ -8,70 +7,64 @@ import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
 } from "../model/DatasetSettings";
-import type { ResourcesSettings } from "../model/WorkspaceResources";
-import { fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
+import { fetchAndUpdate, fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
-export const useDatasetTableNamesApi = () => {
-	const { apiUrl } = useEnviroment();
-	return async (
-		info: DatasetSrcInfo,
-		jdbcValues: Record<string, string>,
-	): Promise<string[]> => {
-		if (!info.srcPath) {
-			return [];
-		}
-		const fetchParams = {
-			endpoint: `${apiUrl}dataset-setting/table-names`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					setting: info.setting ?? "",
-					srcType: info.srcType,
-					src: info.srcPath,
-					regTableInclude: info.regTableInclude,
-					regTableExclude: info.regTableExclude,
-					recursive: info.recursive === "true",
-					regInclude: info.regInclude,
-					regExclude: info.regExclude,
-					extension: info.extension,
-					xlsxSchema: info.xlsxSchema,
-					fixedLength: info.fixedLength,
-					regHeaderSplit: info.regHeaderSplit,
-					regDataSplit: info.regDataSplit,
-					encoding: info.encoding,
-					delimiter: info.delimiter,
-					ignoreQuoted: info.ignoreQuoted,
-					headerName: info.headerName,
-					startRow: info.startRow,
-					addFileInfo: info.addFileInfo,
-					jdbcUrl: jdbcValues.jdbcUrl ?? "",
-					jdbcUser: jdbcValues.jdbcUser ?? "",
-					jdbcPass: jdbcValues.jdbcPass ?? "",
-					jdbcProperties: jdbcValues.jdbcProperties ?? "",
-				}),
-			},
-		};
-		return fetchData(fetchParams)
-			.then((r) => r.json())
-			.catch(() => []);
+async function fetchTableNames(
+	apiUrl: string,
+	info: DatasetSrcInfo,
+	jdbcValues: Record<string, string>,
+): Promise<string[]> {
+	if (!info.srcPath) {
+		return [];
+	}
+	const fetchParams = {
+		endpoint: `${apiUrl}dataset-setting/table-names`,
+		options: {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				setting: info.setting ?? "",
+				srcType: info.srcType,
+				src: info.srcPath,
+				regTableInclude: info.regTableInclude,
+				regTableExclude: info.regTableExclude,
+				recursive: info.recursive === "true",
+				regInclude: info.regInclude,
+				regExclude: info.regExclude,
+				extension: info.extension,
+				xlsxSchema: info.xlsxSchema,
+				fixedLength: info.fixedLength,
+				regHeaderSplit: info.regHeaderSplit,
+				regDataSplit: info.regDataSplit,
+				encoding: info.encoding,
+				delimiter: info.delimiter,
+				ignoreQuoted: info.ignoreQuoted,
+				headerName: info.headerName,
+				startRow: info.startRow,
+				addFileInfo: info.addFileInfo,
+				jdbcUrl: jdbcValues.jdbcUrl ?? "",
+				jdbcUser: jdbcValues.jdbcUser ?? "",
+				jdbcPass: jdbcValues.jdbcPass ?? "",
+				jdbcProperties: jdbcValues.jdbcProperties ?? "",
+			}),
+		},
 	};
-};
+	return fetchData(fetchParams)
+		.then((r) => r.json())
+		.catch(() => []);
+}
 
 export const useDatasetTableNames = (
 	srcInfo: DatasetSrcInfo,
 ): { tableNames: string[]; loading: boolean } => {
 	const [tableNames, setTableNames] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
+	const { apiUrl } = useEnvironment();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
-	const loadTableNames = useDatasetTableNamesApi();
 
 	const srcPath = srcInfo.srcPath;
 	const srcType = srcInfo.srcType;
 	const sqlNotReady = srcType === "sql" && !connectionOk;
-
-	const loadTableNamesRef = useRef(loadTableNames);
-	loadTableNamesRef.current = loadTableNames;
 
 	useEffect(() => {
 		if (!srcPath || !srcType || srcType === "none" || sqlNotReady) {
@@ -81,7 +74,7 @@ export const useDatasetTableNames = (
 		}
 		let isMounted = true;
 		setLoading(true);
-		loadTableNamesRef.current(srcInfo, jdbcValues).then((names) => {
+		fetchTableNames(apiUrl, srcInfo, jdbcValues).then((names) => {
 			if (isMounted) {
 				setTableNames(names);
 				setLoading(false);
@@ -90,40 +83,41 @@ export const useDatasetTableNames = (
 		return () => {
 			isMounted = false;
 		};
-	}, [srcPath, srcType, srcInfo, sqlNotReady, jdbcValues]);
+	}, [apiUrl, srcPath, srcType, srcInfo, sqlNotReady, jdbcValues]);
 
 	return { tableNames, loading };
 };
 
 export const useDeleteDatasetSettings = () => {
-	const environment = useEnviroment();
+	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string) => {
-		return deleteDatasetSettings(
-			environment.apiUrl,
-			name,
-			setResourcesSettings,
+	return async (name: string): Promise<OperationResult> =>
+		fetchAndUpdate<string[]>(
+			{
+				endpoint: `${apiUrl}dataset-setting/delete`,
+				options: { method: "POST", headers: { "Content-Type": "text/plain" }, body: name },
+			},
+			(settings) => setResourcesSettings((current) => current.with({ datasetSettings: settings })),
 		);
-	};
 };
 
 export const useSaveDatasetSettings = () => {
-	const environment = useEnviroment();
+	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string, input: DatasetSettings) => {
-		return saveDatasetSettings(
-			environment.apiUrl,
-			name,
-			input,
-			setResourcesSettings,
+	return async (name: string, input: DatasetSettings): Promise<OperationResult> =>
+		fetchAndUpdate<string[]>(
+			{
+				endpoint: `${apiUrl}dataset-setting/save`,
+				options: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, input }) },
+			},
+			(settings) => setResourcesSettings((current) => current.with({ datasetSettings: settings })),
 		);
-	};
 };
 
 export const useDatasetSettingsData = (
 	fileName: string,
 ): { settings: DatasetSettings; loading: boolean } => {
-	const { apiUrl } = useEnviroment();
+	const { apiUrl } = useEnvironment();
 	const [settings, setSettings] = useState(DatasetSettings.create());
 	const [loading, setLoading] = useState(fileName !== "");
 
@@ -170,62 +164,5 @@ async function loadDatasetSettings(
 		.catch((ex) => {
 			handleFetchError(getErrorMessage(ex), fetchParams);
 			return DatasetSettings.create();
-		});
-}
-
-async function saveDatasetSettings(
-	apiUrl: string,
-	name: string,
-	input: DatasetSettings,
-	setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>,
-): Promise<OperationResult> {
-	const fetchParams = {
-		endpoint: `${apiUrl}dataset-setting/save`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name, input }),
-		},
-	};
-
-	return await fetchData(fetchParams)
-		.then((response) => response.json())
-		.then((settings: string[]) => {
-			setResourcesSettings((current) =>
-				current.with({ datasetSettings: settings }),
-			);
-			return "success" as OperationResult;
-		})
-		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
-			return "failed" as OperationResult;
-		});
-}
-
-async function deleteDatasetSettings(
-	apiUrl: string,
-	name: string,
-	setResourcesSettings: Dispatch<SetStateAction<ResourcesSettings>>,
-): Promise<OperationResult> {
-	const fetchParams = {
-		endpoint: `${apiUrl}dataset-setting/delete`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "text/plain" },
-			body: name,
-		},
-	};
-
-	return await fetchData(fetchParams)
-		.then((response) => response.json())
-		.then((settings: string[]) => {
-			setResourcesSettings((current) =>
-				current.with({ datasetSettings: settings }),
-			);
-			return "success" as OperationResult;
-		})
-		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
-			return "failed" as OperationResult;
 		});
 }

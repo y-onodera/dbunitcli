@@ -2,15 +2,15 @@ import { getMatches } from "@tauri-apps/plugin-cli";
 import type { ReactNode } from "react";
 import { createContext, Suspense, use } from "react";
 
-export type Enviroment = {
+export type Environment = {
 	apiUrl: string;
 	workspace: string;
 	dataset_base: string;
 	result_base: string;
 };
-export const enviromentContext = createContext<Enviroment>({} as Enviroment);
-export default function EnviromentProvider(props: { children: ReactNode }) {
-	const getEnviroment = async () => {
+export const environmentContext = createContext<Environment>({} as Environment);
+export default function EnvironmentProvider(props: { children: ReactNode }) {
+	const getEnvironment = async () => {
 		const matches = await getMatches();
 		const port = matches.args.port.value ? matches.args.port.value : "8080";
 		const workspace = matches.args.workspace.value
@@ -31,19 +31,19 @@ export default function EnviromentProvider(props: { children: ReactNode }) {
 	};
 	return (
 		<Suspense fallback={<div>Loading...</div>}>
-			<CreateContext promise={getEnviroment()}>{props.children}</CreateContext>
+			<CreateContext promise={getEnvironment()}>{props.children}</CreateContext>
 		</Suspense>
 	);
 }
 function CreateContext(props: {
-	promise: Promise<Enviroment>;
+	promise: Promise<Environment>;
 	children: ReactNode;
 }) {
-	const enviroment = use(props.promise);
+	const environment = use(props.promise);
 	return (
-		<enviromentContext.Provider value={enviroment}>
+		<environmentContext.Provider value={environment}>
 			{props.children}
-		</enviromentContext.Provider>
+		</environmentContext.Provider>
 	);
 }
-export const useEnviroment = () => use(enviromentContext);
+export const useEnvironment = () => use(environmentContext);

@@ -2,7 +2,7 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { RunForm } from "../../../app/form/RunForm";
 import type { RunOptions } from "../../../model/SelectParameter";
-import { enviromentFixture, workspaceResourcesFixture } from "../../setup";
+import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	runLoadResponseFixture,
 	runRefreshScriptTypeCmdResponseFixture,
@@ -20,8 +20,8 @@ vi.mock("../../../context/WorkspaceResourcesProvider", () => ({
 	useWorkspaceContext: () => workspaceResourcesFixture.context,
 	useResourcesSettings: () => workspaceResourcesFixture.resources,
 }));
-vi.mock("../../../context/EnviromentProvider", () => ({
-	useEnviroment: () => enviromentFixture,
+vi.mock("../../../context/EnvironmentProvider", () => ({
+	useEnvironment: () => environmentFixture,
 }));
 
 vi.mock("../../../hooks/useJdbc", () => ({

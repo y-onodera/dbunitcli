@@ -9,20 +9,20 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import StartupForm from "../../../app/startup/StartupForm";
 import {
-	type Enviroment,
-	enviromentContext,
-} from "../../../context/EnviromentProvider";
+	type Environment,
+	environmentContext,
+} from "../../../context/EnvironmentProvider";
 import WorkspaceResourcesProvider from "../../../context/WorkspaceResourcesProvider";
 import type { FetchParams } from "../../../utils/fetchUtils";
-import { enviromentFixture, workspaceResourcesFixture } from "../../setup";
+import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 
-const mockEnviroment: Enviroment = { ...enviromentFixture };
+const mockEnvironment: Environment = { ...environmentFixture };
 
 function MockProvider({ children }: { children: React.ReactNode }) {
 	return (
-		<enviromentContext.Provider value={mockEnviroment}>
+		<environmentContext.Provider value={mockEnvironment}>
 			<WorkspaceResourcesProvider>{children}</WorkspaceResourcesProvider>
-		</enviromentContext.Provider>
+		</environmentContext.Provider>
 	);
 }
 const wrapper = ({ children }: { children: React.ReactNode }) => (

@@ -1,9 +1,9 @@
 import { act, render, renderHook, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
-import EnviromentProvider, {
-	useEnviroment,
-} from "../../context/EnviromentProvider";
+import EnvironmentProvider, {
+	useEnvironment,
+} from "../../context/EnvironmentProvider";
 
 // Tauri Plugin CLIのモック
 const mockArgs: {
@@ -35,12 +35,12 @@ const TestComponent = () => {
 
 // カスタムラッパーコンポーネント
 const wrapper = ({ children }: { children: ReactNode }) => (
-	<EnviromentProvider>{children}</EnviromentProvider>
+	<EnvironmentProvider>{children}</EnvironmentProvider>
 );
 
-describe("EnviromentProviderのテスト", () => {
+describe("EnvironmentProviderのテスト", () => {
 	it("環境設定が正しく読み込まれることを確認", async () => {
-		const { result, rerender } = renderHook(() => useEnviroment(), { wrapper });
+		const { result, rerender } = renderHook(() => useEnvironment(), { wrapper });
 
 		await act(async () => {
 			rerender();
@@ -61,7 +61,7 @@ describe("EnviromentProviderのテスト", () => {
 			"dataset.base": { value: "" },
 			"result.base": { value: "" },
 		};
-		const { result, rerender } = renderHook(() => useEnviroment(), { wrapper });
+		const { result, rerender } = renderHook(() => useEnvironment(), { wrapper });
 
 		await act(async () => {
 			rerender();

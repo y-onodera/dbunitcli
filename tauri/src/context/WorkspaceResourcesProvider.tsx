@@ -7,7 +7,7 @@ import {
 	type WorkspaceResources,
 } from "../model/WorkspaceResources";
 import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
-import { useEnviroment } from "./EnviromentProvider";
+import { useEnvironment } from "./EnvironmentProvider";
 
 const workspaceContext = createContext<WorkspaceContext>(
 	{} as WorkspaceContext,
@@ -28,7 +28,7 @@ const setResourcesSettingsContext = createContext<
 export default function WorkspaceResourcesProvider(props: {
 	children: ReactNode;
 }) {
-	const environment = useEnviroment();
+	const environment = useEnvironment();
 	const workspaceReload = async () => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl}workspace/resources`,
