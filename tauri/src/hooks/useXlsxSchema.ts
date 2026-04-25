@@ -175,15 +175,7 @@ export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 			return;
 		}
 		let isMounted = true;
-		fetchSheets(apiUrl, {
-			srcPath,
-			regTableInclude,
-			regTableExclude,
-			recursive,
-			regInclude,
-			regExclude,
-			extension,
-		}).then((names) => {
+		fetchSheets(apiUrl, srcInfo).then((names) => {
 			if (isMounted) {
 				setSheetNames(names);
 			}
