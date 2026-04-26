@@ -1,5 +1,6 @@
 package yo.dbunitcli.sidecar.domain.project;
 
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ResourcesDto;
 
 import java.io.File;
@@ -30,10 +31,10 @@ public record Resources(
         public Resources build() {
             return new Resources(
                     this.baseDir,
-                    new ResourceFile(new File(this.baseDir, "jdbc")),
-                    new ResourceFile(new File(this.baseDir, "setting")),
-                    new ResourceFile(new File(this.baseDir, "template")),
-                    new ResourceFile(new File(this.baseDir, "xlsx-schema"))
+                    new ResourceFile(new File(this.baseDir, "jdbc"), FileResources::searchJdbc),
+                    new ResourceFile(new File(this.baseDir, "setting"), FileResources::searchSetting),
+                    new ResourceFile(new File(this.baseDir, "template"), FileResources::searchTemplate),
+                    new ResourceFile(new File(this.baseDir, "xlsx-schema"), FileResources::searchXlsxSchema)
             );
         }
 

@@ -10,13 +10,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public record ResourceFile(File baseDir, Set<String> files) {
+public record ResourceFile(File baseDir, Set<String> files, Function<String, Optional<Path>> pathResolver) {
 
-    public ResourceFile(final File parentDir) {
-        this(parentDir, new TreeSet<>());
+    private static Function<String, Optional<Path>> toPath(final Function<String, File> toFile) {
+        return it -> {
+            File file = toFile.apply(it);
+            if (file!=null && file.exists()) {
+                return Optional.of(file.toPath());
+            }
+            return Optional.empty();
+        };
+    }
+
+    public ResourceFile(final File parentDir, Function<String, File> toFile) {
+        this(parentDir, new TreeSet<>(), toPath(toFile));
         this.reload();
     }
 
@@ -32,7 +43,8 @@ public record ResourceFile(File baseDir, Set<String> files) {
 
     public Optional<Path> select(String target) {
         return this.files.stream().filter(it -> it.equals(target)).findFirst()
-                .map(it -> new File(this.baseDir, it).toPath());
+                .map(it -> new File(this.baseDir, it).toPath())
+                .or(() -> this.pathResolver.apply(target));
     }
 
     public List<String> list() {

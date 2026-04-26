@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.command.Type;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +23,9 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
     }
 
     public Stream<Path> paths(final Type type) {
-        return this.parameters().getOrDefault(type, new ResourceFile(this.getParent(type))).pathStream();
+        return this.parameters()
+                .getOrDefault(type, new ResourceFile(this.getParent(type), FileResources::searchWorkspace))
+                .pathStream();
     }
 
     public Stream<String> names(final yo.dbunitcli.application.CommandType type) {
@@ -102,12 +105,15 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
                         .addParameterFiles(Type.parameterize)
                 ;
                 this.templates = new ResourceFile(
-                        new File(this.parameters.get(Type.parameterize).baseDir(), "template"));
+                        new File(this.parameters.get(Type.parameterize).baseDir(), "template")
+                        , FileResources::searchTemplate);
             }
         }
 
         private Builder addParameterFiles(final Type command) {
-            this.parameters.put(command, new ResourceFile(new File(this.baseDir, command.name())));
+            this.parameters.put(command, new ResourceFile(new File(this.baseDir, command.name())
+                    , FileResources::searchWorkspace
+            ));
             return this;
         }
     }

@@ -5,9 +5,9 @@ import yo.dbunitcli.resource.FileResources;
 import java.io.IOException;
 import java.util.List;
 
-public record Datasource( ResourceFile resourceFile) {
+public record Datasource(ResourceFile resourceFile) {
     public Datasource() {
-        this(new ResourceFile(FileResources.datasetDir()));
+        this(new ResourceFile(FileResources.datasetDir(), FileResources::searchDatasetBase));
     }
 
     public void save(final String fileName, final String contents) throws IOException {
