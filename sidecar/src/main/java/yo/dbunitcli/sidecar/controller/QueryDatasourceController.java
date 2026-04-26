@@ -1,15 +1,20 @@
 package yo.dbunitcli.sidecar.controller;
 
 import io.micronaut.http.MediaType;
-import io.micronaut.http.annotation.*;
+import io.micronaut.http.annotation.Body;
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.DataSourceType;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Datasource;
 import yo.dbunitcli.sidecar.dto.QueryDataSourceDto;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Controller("/query-datasource")
 public class QueryDatasourceController implements ControllerExceptionHandler {
@@ -24,7 +29,14 @@ public class QueryDatasourceController implements ControllerExceptionHandler {
     @Post(uri = "load", produces = MediaType.TEXT_PLAIN)
     public String load(@Body final QueryDataSourceDto request) {
         try {
-            return new Datasource().read(request.getName());
+            if (new Datasource().list().contains(request.getName())) {
+                return new Datasource().read(request.getName());
+            }
+            File searched = FileResources.searchDatasetBase(request.getName());
+            if (searched.exists()) {
+                return FileResources.read(searched, StandardCharsets.UTF_8.name());
+            }
+            return "";
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
