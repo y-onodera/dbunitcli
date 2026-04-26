@@ -9,7 +9,6 @@ use tauri::WindowEvent;
 use tauri_plugin_cli::CliExt;
 #[tauri::command]
 fn open_directory(path: String) {
-    println!("{:?}", path);
     Command::new("explorer").args([path]).spawn().unwrap();
 }
 pub fn run() {
@@ -71,17 +70,21 @@ pub fn run() {
                 .stderr(Stdio::piped())
                 .spawn()
                 .expect("Failed to spawn child process");
-            thread::spawn(move || loop {
-                let s = rx.recv();
-                if s.unwrap() == -1 {
-                    child.kill().expect("Failed to stop child process");
+            thread::spawn(move || {
+                while let Ok(signal) = rx.recv() {
+                    if signal == -1 {
+                        child.kill().expect("Failed to stop child process");
+                        break;
+                    }
                 }
             });
             Ok(())
         })
-        .on_window_event(move |_, event| match event {
+        .on_window_event(move |window, event| match event {
             WindowEvent::Destroyed => {
-                tx.send(-1).expect("Failed to stop child process");
+                if window.label() == "main" {
+                    tx.send(-1).expect("Failed to stop child process");
+                }
             }
             _ => {}
         })
