@@ -3,7 +3,13 @@ import { useEnvironment } from "../context/EnvironmentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { SrcInfo } from "../model/CommandOption";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
-import { fetchAndUpdate, fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
+import {
+	fetchAndUpdate,
+	fetchData,
+	getErrorMessage,
+	handleFetchError,
+	type OperationResult,
+} from "../utils/fetchUtils";
 
 export const useDeleteXlsxSchema = () => {
 	const { apiUrl } = useEnvironment();
@@ -12,9 +18,16 @@ export const useDeleteXlsxSchema = () => {
 		fetchAndUpdate<string[]>(
 			{
 				endpoint: `${apiUrl}xlsx-schema/delete`,
-				options: { method: "POST", headers: { "Content-Type": "text/plain" }, body: name },
+				options: {
+					method: "POST",
+					headers: { "Content-Type": "text/plain" },
+					body: name,
+				},
 			},
-			(schemas) => setResourcesSettings((current) => current.with({ xlsxSchemas: schemas })),
+			(schemas) =>
+				setResourcesSettings((current) =>
+					current.with({ xlsxSchemas: schemas }),
+				),
 		);
 };
 
@@ -25,9 +38,16 @@ export const useSaveXlsxSchema = () => {
 		fetchAndUpdate<string[]>(
 			{
 				endpoint: `${apiUrl}xlsx-schema/save`,
-				options: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, input }) },
+				options: {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ name, input }),
+				},
 			},
-			(schemas) => setResourcesSettings((current) => current.with({ xlsxSchemas: schemas })),
+			(schemas) =>
+				setResourcesSettings((current) =>
+					current.with({ xlsxSchemas: schemas }),
+				),
 		);
 };
 
@@ -84,7 +104,10 @@ async function loadXlsxSchema(
 		});
 }
 
-async function fetchSheets(apiUrl: string, srcInfo: SrcInfo): Promise<string[]> {
+async function fetchSheets(
+	apiUrl: string,
+	srcInfo: SrcInfo,
+): Promise<string[]> {
 	if (!srcInfo.srcPath) {
 		return [];
 	}
@@ -125,7 +148,15 @@ export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 			return;
 		}
 		let isMounted = true;
-		fetchSheets(apiUrl, srcInfo).then((names) => {
+		fetchSheets(apiUrl, {
+			srcPath,
+			regTableInclude,
+			regTableExclude,
+			recursive,
+			regInclude,
+			regExclude,
+			extension,
+		}).then((names) => {
 			if (isMounted) {
 				setSheetNames(names);
 			}
