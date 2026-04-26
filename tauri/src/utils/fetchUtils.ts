@@ -79,14 +79,21 @@ export async function fetchAndUpdate<T>(
 }
 
 export const fetchData = async ({ endpoint, options, signal }: FetchParams) => {
-	const response = await fetch(endpoint, { ...options, signal: signal ?? options.signal });
+	const mergedOptions = { ...options, signal: signal ?? options.signal };
+	let response: Response;
+	try {
+		response = await fetch(endpoint, mergedOptions);
+	} catch (ex) {
+		if (isAbortError(ex)) {
+			throw ex;
+		}
+		// reqwest のコネクションプールに残った stale keep-alive 接続が原因で
+		// 接続エラーになる場合があるため、1 回だけリトライする
+		response = await fetch(endpoint, mergedOptions);
+	}
 	if (!response.ok) {
 		throw new Error(
-			`
-				An error occurred
-				Status: ${response.status}
-				Details: ${response.statusText || "Fetch request failed"}
-					`.trim(),
+			`Status: ${response.status}\nDetails: ${response.statusText || "Fetch request failed"}`,
 		);
 	}
 	return response;
