@@ -36,7 +36,7 @@ public record SqlRunner(DatabaseConnectionLoader connectionLoader, Parameter par
                 }
                 exec.execute();
             } catch (final Throwable var30) {
-                LOGGER.error("error " + target.getName(), var30);
+                LOGGER.error("error {}", target.getName(), var30);
                 throw new AssertionError(var30);
             }
         });
