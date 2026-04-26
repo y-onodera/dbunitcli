@@ -142,7 +142,10 @@ public record ParameterizeOption(
         } else {
             template = FileResources.searchTemplate(this.template);
         }
-        return FileResources.read(Objects.requireNonNull(template), this.templateOption.encoding());
+        if(template == null) {
+            return "";
+        }
+        return FileResources.read(template, this.templateOption.encoding());
     }
 
 }

@@ -25,8 +25,8 @@ public record ExcelOption(String prefix, String xlsxSchemaSource) implements Com
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         try {
-            return builder.setXlsxSchema(new FromJsonXlsxSchemaBuilder().build(FileResources.searchXlsxSchema(this.xlsxSchemaSource)))
-                    ;
+            return builder.setXlsxSchema(new FromJsonXlsxSchemaBuilder()
+                    .build(FileResources.searchXlsxSchema(this.xlsxSchemaSource)));
         } catch (final Exception e) {
             throw new AssertionError(e.getMessage(), e);
         }
