@@ -79,9 +79,11 @@ pub fn run() {
             });
             Ok(())
         })
-        .on_window_event(move |_, event| match event {
+        .on_window_event(move |window, event| match event {
             WindowEvent::Destroyed => {
-                tx.send(-1).expect("Failed to stop child process");
+                if window.label() == "main" {
+                    tx.send(-1).expect("Failed to stop child process");
+                }
             }
             _ => {}
         })
