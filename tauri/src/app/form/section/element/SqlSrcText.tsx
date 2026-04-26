@@ -61,6 +61,7 @@ function SqlSrcDropDownMenu({
 			element={element}
 			srcType={srcType}
 			editButtons={editButtons}
+			showOpenButton={false}
 			removeButton={
 				isSqlOrTable
 					? () => (
