@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export function useTableSelection(tables: string[], initial: string[] = []) {
+export function useTableSelection(initial: string[] = []) {
 	const [selected, setSelected] = useState<Set<string>>(
 		() => new Set(initial),
 	);
