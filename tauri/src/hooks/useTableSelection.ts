@@ -20,10 +20,12 @@ export function useTableSelection(initial: string[] = []) {
 	const toggleAll = (targets: string[], checked: boolean) => {
 		setSelected((prev) => {
 			const next = new Set(prev);
-			for (const t of targets) {
-				if (checked) {
+			if (checked) {
+				for (const t of targets) {
 					next.add(t);
-				} else {
+				}
+			} else {
+				for (const t of targets) {
 					next.delete(t);
 				}
 			}
