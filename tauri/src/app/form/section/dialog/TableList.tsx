@@ -16,8 +16,9 @@ export default function TableList({
 	maxHeightClass = "max-h-96",
 }: TableListProps) {
 	const [filter, setFilter] = useState("");
-	const filteredTables = filter
-		? tables.filter((t) => t.toLowerCase().includes(filter.toLowerCase()))
+	const filterLower = filter.toLowerCase();
+	const filteredTables = filterLower
+		? tables.filter((t) => t.toLowerCase().includes(filterLower))
 		: tables;
 	const allSelected =
 		filteredTables.length > 0 && filteredTables.every((t) => selected.has(t));

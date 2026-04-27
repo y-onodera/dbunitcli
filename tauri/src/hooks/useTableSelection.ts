@@ -18,23 +18,17 @@ export function useTableSelection(tables: string[], initial: string[] = []) {
 	};
 
 	const toggleAll = (targets: string[], checked: boolean) => {
-		if (checked) {
-			setSelected((prev) => {
-				const next = new Set(prev);
-				for (const t of targets) {
+		setSelected((prev) => {
+			const next = new Set(prev);
+			for (const t of targets) {
+				if (checked) {
 					next.add(t);
-				}
-				return next;
-			});
-		} else {
-			setSelected((prev) => {
-				const next = new Set(prev);
-				for (const t of targets) {
+				} else {
 					next.delete(t);
 				}
-				return next;
-			});
-		}
+			}
+			return next;
+		});
 	};
 
 	return { selected, toggle, toggleAll };
