@@ -66,7 +66,7 @@ function TablesContent({
 	onInsert: (tables: string[]) => void;
 	onClose: () => void;
 }) {
-	const { selected, toggle, toggleAll } = useTableSelection(tables);
+	const { selected, toggle, toggleAll } = useTableSelection();
 
 	const handleInsert = () => {
 		const selectedTables = tables.filter((t) => selected.has(t));
