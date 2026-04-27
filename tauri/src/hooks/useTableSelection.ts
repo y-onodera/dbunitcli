@@ -17,11 +17,23 @@ export function useTableSelection(tables: string[], initial: string[] = []) {
 		});
 	};
 
-	const toggleAll = (checked: boolean) => {
+	const toggleAll = (targets: string[], checked: boolean) => {
 		if (checked) {
-			setSelected(new Set(tables));
+			setSelected((prev) => {
+				const next = new Set(prev);
+				for (const t of targets) {
+					next.add(t);
+				}
+				return next;
+			});
 		} else {
-			setSelected(new Set());
+			setSelected((prev) => {
+				const next = new Set(prev);
+				for (const t of targets) {
+					next.delete(t);
+				}
+				return next;
+			});
 		}
 	};
 
