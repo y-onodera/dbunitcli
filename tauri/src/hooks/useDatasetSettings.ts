@@ -7,7 +7,13 @@ import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
 } from "../model/DatasetSettings";
-import { fetchAndUpdate, fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
+import {
+	fetchAndUpdate,
+	fetchData,
+	getErrorMessage,
+	handleFetchError,
+	type OperationResult,
+} from "../utils/fetchUtils";
 
 async function fetchTableNames(
 	apiUrl: string,
@@ -88,6 +94,99 @@ export const useDatasetTableNames = (
 	return { tableNames, loading };
 };
 
+export type TablePreview = {
+	headers: string[];
+	rows: string[][];
+};
+
+async function fetchTablePreview(
+	apiUrl: string,
+	info: DatasetSrcInfo,
+	tableName: string,
+	jdbcValues: Record<string, string>,
+): Promise<TablePreview> {
+	if (!info.srcPath || !tableName) {
+		return { headers: [], rows: [] };
+	}
+	const fetchParams = {
+		endpoint: `${apiUrl}dataset-setting/table-preview`,
+		options: {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				setting: info.setting ?? "",
+				srcType: info.srcType,
+				src: info.srcPath,
+				regTableInclude: info.regTableInclude,
+				regTableExclude: info.regTableExclude,
+				recursive: info.recursive === "true",
+				regInclude: info.regInclude,
+				regExclude: info.regExclude,
+				extension: info.extension,
+				xlsxSchema: info.xlsxSchema,
+				fixedLength: info.fixedLength,
+				regHeaderSplit: info.regHeaderSplit,
+				regDataSplit: info.regDataSplit,
+				encoding: info.encoding,
+				delimiter: info.delimiter,
+				ignoreQuoted: info.ignoreQuoted,
+				headerName: info.headerName,
+				startRow: info.startRow,
+				addFileInfo: info.addFileInfo,
+				jdbcUrl: jdbcValues.jdbcUrl ?? "",
+				jdbcUser: jdbcValues.jdbcUser ?? "",
+				jdbcPass: jdbcValues.jdbcPass ?? "",
+				jdbcProperties: jdbcValues.jdbcProperties ?? "",
+				tableName,
+			}),
+		},
+	};
+	return fetchData(fetchParams)
+		.then((r) => r.json())
+		.catch(() => ({ headers: [], rows: [] }));
+}
+
+export const useDatasetTablePreview = (
+	srcInfo: DatasetSrcInfo,
+	tableName: string,
+): { preview: TablePreview | null; loading: boolean } => {
+	const [preview, setPreview] = useState<TablePreview | null>(null);
+	const [loading, setLoading] = useState(false);
+	const { apiUrl } = useEnvironment();
+	const { jdbcValues, connectionOk } = useJdbcConnectionState();
+
+	const srcPath = srcInfo.srcPath;
+	const srcType = srcInfo.srcType;
+	const sqlNotReady = srcType === "sql" && !connectionOk;
+
+	useEffect(() => {
+		if (
+			!srcPath ||
+			!srcType ||
+			srcType === "none" ||
+			sqlNotReady ||
+			!tableName
+		) {
+			setPreview(null);
+			setLoading(false);
+			return;
+		}
+		let isMounted = true;
+		setLoading(true);
+		fetchTablePreview(apiUrl, srcInfo, tableName, jdbcValues).then((result) => {
+			if (isMounted) {
+				setPreview(result);
+				setLoading(false);
+			}
+		});
+		return () => {
+			isMounted = false;
+		};
+	}, [apiUrl, srcPath, srcType, srcInfo, sqlNotReady, jdbcValues, tableName]);
+
+	return { preview, loading };
+};
+
 export const useDeleteDatasetSettings = () => {
 	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();
@@ -95,22 +194,39 @@ export const useDeleteDatasetSettings = () => {
 		fetchAndUpdate<string[]>(
 			{
 				endpoint: `${apiUrl}dataset-setting/delete`,
-				options: { method: "POST", headers: { "Content-Type": "text/plain" }, body: name },
+				options: {
+					method: "POST",
+					headers: { "Content-Type": "text/plain" },
+					body: name,
+				},
 			},
-			(settings) => setResourcesSettings((current) => current.with({ datasetSettings: settings })),
+			(settings) =>
+				setResourcesSettings((current) =>
+					current.with({ datasetSettings: settings }),
+				),
 		);
 };
 
 export const useSaveDatasetSettings = () => {
 	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string, input: DatasetSettings): Promise<OperationResult> =>
+	return async (
+		name: string,
+		input: DatasetSettings,
+	): Promise<OperationResult> =>
 		fetchAndUpdate<string[]>(
 			{
 				endpoint: `${apiUrl}dataset-setting/save`,
-				options: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, input }) },
+				options: {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ name, input }),
+				},
 			},
-			(settings) => setResourcesSettings((current) => current.with({ datasetSettings: settings })),
+			(settings) =>
+				setResourcesSettings((current) =>
+					current.with({ datasetSettings: settings }),
+				),
 		);
 };
 
