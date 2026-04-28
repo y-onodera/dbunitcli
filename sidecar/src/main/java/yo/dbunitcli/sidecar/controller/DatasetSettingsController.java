@@ -10,9 +10,9 @@ import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
+import org.dbunit.dataset.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.dbunit.dataset.Column;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
@@ -43,36 +43,11 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
         try {
-            final DataSetLoadDto dto = new DataSetLoadDto();
-            dto.setSrc(request.getSrc());
-            dto.setSrcType(yo.dbunitcli.dataset.DataSourceType.valueOf(request.getSrcType()));
-            dto.setRegTableInclude(request.getRegTableInclude());
-            dto.setRegTableExclude(request.getRegTableExclude());
-            dto.setRecursive(String.valueOf(request.isRecursive()));
-            dto.setRegInclude(request.getRegInclude());
-            dto.setRegExclude(request.getRegExclude());
-            dto.setExtension(request.getExtension());
-            dto.setLoadData("false");
-            dto.setXlsxSchemaSource(request.getXlsxSchema());
-            dto.setFixedLength(request.getFixedLength());
-            dto.setRegHeaderSplit(request.getRegHeaderSplit());
-            dto.setRegDataSplit(request.getRegDataSplit());
-            dto.setEncoding(request.getEncoding());
-            dto.setDelimiter(request.getDelimiter());
-            dto.setIgnoreQuoted(request.isIgnoreQuoted());
-            dto.setHeaderName(request.getHeaderName());
-            dto.setStartRow(request.getStartRow());
-            dto.setAddFileInfo(request.isAddFileInfo());
-            dto.getJdbc().setJdbcUrl(request.getJdbcUrl());
-            dto.getJdbc().setJdbcUser(request.getJdbcUser());
-            dto.getJdbc().setJdbcPass(request.getJdbcPass());
-            dto.getJdbc().setJdbcProperties(request.getJdbcProperties());
-
-            final DataSetLoadOption option = new DataSetLoadOption(Objects.toString(request.getSetting(), ""), dto);
+            final DataSetLoadOption option = new DataSetLoadOption(
+                    Objects.toString(request.getSetting(), ""), buildDataSetLoadDto(request, "false"));
             final ComparableDataSetParam param = option.getParam().build();
             return ObjectMapper.getDefault().writeValueAsString(
-                    new ComparableDataSetLoader(Parameter.none())
-                            .loadDataSet(param).getTableNames()
+                    new ComparableDataSetLoader(Parameter.none()).loadDataSet(param).getTableNames()
             );
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
@@ -83,37 +58,14 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Post(uri = "table-preview", produces = MediaType.APPLICATION_JSON)
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {
-            final DataSetLoadDto dto = new DataSetLoadDto();
-            dto.setSrc(request.getSrc());
-            dto.setSrcType(yo.dbunitcli.dataset.DataSourceType.valueOf(request.getSrcType()));
-            dto.setRegTableInclude(request.getRegTableInclude());
-            dto.setRegTableExclude(request.getRegTableExclude());
-            dto.setRecursive(String.valueOf(request.isRecursive()));
-            dto.setRegInclude(request.getRegInclude());
-            dto.setRegExclude(request.getRegExclude());
-            dto.setExtension(request.getExtension());
-            dto.setLoadData("true");
-            dto.setXlsxSchemaSource(request.getXlsxSchema());
-            dto.setFixedLength(request.getFixedLength());
-            dto.setRegHeaderSplit(request.getRegHeaderSplit());
-            dto.setRegDataSplit(request.getRegDataSplit());
-            dto.setEncoding(request.getEncoding());
-            dto.setDelimiter(request.getDelimiter());
-            dto.setIgnoreQuoted(request.isIgnoreQuoted());
-            dto.setHeaderName(request.getHeaderName());
-            dto.setStartRow(request.getStartRow());
-            dto.setAddFileInfo(request.isAddFileInfo());
-            dto.getJdbc().setJdbcUrl(request.getJdbcUrl());
-            dto.getJdbc().setJdbcUser(request.getJdbcUser());
-            dto.getJdbc().setJdbcPass(request.getJdbcPass());
-            dto.getJdbc().setJdbcProperties(request.getJdbcProperties());
-
-            final DataSetLoadOption option = new DataSetLoadOption(Objects.toString(request.getSetting(), ""), dto);
+            final DataSetLoadOption option = new DataSetLoadOption(
+                    Objects.toString(request.getSetting(), ""), buildDataSetLoadDto(request, "true"));
             final ComparableDataSetParam param = option.getParam().build();
             final ComparableDataSet dataSet = new ComparableDataSetLoader(Parameter.none()).loadDataSet(param);
             final ComparableTable table = dataSet.getTable(request.getTableName());
             if (table == null) {
-                return ObjectMapper.getDefault().writeValueAsString(new DatasetTablePreviewResponseDto(new String[0], List.of()));
+                return ObjectMapper.getDefault().writeValueAsString(
+                        new DatasetTablePreviewResponseDto(new String[0], List.of()));
             }
             final Column[] columns = table.getTableMetaData().getColumns();
             final String[] headers = Arrays.stream(columns).map(Column::getColumnName).toArray(String[]::new);
@@ -132,10 +84,39 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table preview", th);
             try {
-                return ObjectMapper.getDefault().writeValueAsString(new DatasetTablePreviewResponseDto(new String[0], List.of()));
+                return ObjectMapper.getDefault().writeValueAsString(
+                        new DatasetTablePreviewResponseDto(new String[0], List.of()));
             } catch (final Exception ex) {
                 return "{\"headers\":[],\"rows\":[]}";
             }
         }
+    }
+
+    private DataSetLoadDto buildDataSetLoadDto(final DatasetTableNamesRequestDto request, final String loadData) {
+        final DataSetLoadDto dto = new DataSetLoadDto();
+        dto.setSrc(request.getSrc());
+        dto.setSrcType(yo.dbunitcli.dataset.DataSourceType.valueOf(request.getSrcType()));
+        dto.setRegTableInclude(request.getRegTableInclude());
+        dto.setRegTableExclude(request.getRegTableExclude());
+        dto.setRecursive(String.valueOf(request.isRecursive()));
+        dto.setRegInclude(request.getRegInclude());
+        dto.setRegExclude(request.getRegExclude());
+        dto.setExtension(request.getExtension());
+        dto.setLoadData(loadData);
+        dto.setXlsxSchemaSource(request.getXlsxSchema());
+        dto.setFixedLength(request.getFixedLength());
+        dto.setRegHeaderSplit(request.getRegHeaderSplit());
+        dto.setRegDataSplit(request.getRegDataSplit());
+        dto.setEncoding(request.getEncoding());
+        dto.setDelimiter(request.getDelimiter());
+        dto.setIgnoreQuoted(request.isIgnoreQuoted());
+        dto.setHeaderName(request.getHeaderName());
+        dto.setStartRow(request.getStartRow());
+        dto.setAddFileInfo(request.isAddFileInfo());
+        dto.getJdbc().setJdbcUrl(request.getJdbcUrl());
+        dto.getJdbc().setJdbcUser(request.getJdbcUser());
+        dto.getJdbc().setJdbcPass(request.getJdbcPass());
+        dto.getJdbc().setJdbcProperties(request.getJdbcProperties());
+        return dto;
     }
 }
