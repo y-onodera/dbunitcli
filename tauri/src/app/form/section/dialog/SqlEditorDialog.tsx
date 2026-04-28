@@ -36,15 +36,17 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 			() => props.handleSave(path),
 		);
 
+	const appendToContent = (text: string) => {
+		setContent((prev) => (prev === "" || prev.endsWith("\n") ? prev + text : `${prev}\n${text}`));
+	};
+
 	const handleInsert = (tables: string[]) => {
-		const suffix = tables.join("\n");
-		setContent((prev) => {
-			if (prev === "" || prev.endsWith("\n")) {
-				return prev + suffix;
-			}
-			return `${prev}\n${suffix}`;
-		});
+		appendToContent(tables.join("\n"));
 		setShowTableSelector(false);
+	};
+
+	const handleInsertColumn = (column: string) => {
+		appendToContent(column);
 	};
 
 	return (
@@ -86,6 +88,7 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 				<SqlTableInsertDialog
 					jdbcValues={jdbcValues}
 					onInsert={handleInsert}
+					onInsertColumn={handleInsertColumn}
 					onClose={() => setShowTableSelector(false)}
 				/>
 			)}
