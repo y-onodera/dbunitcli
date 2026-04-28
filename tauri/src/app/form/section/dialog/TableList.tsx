@@ -22,8 +22,7 @@ export default function TableList({
 	onInsertColumn,
 }: TableListProps) {
 	const [filter, setFilter] = useState("");
-	const [expandedColumns, setExpandedColumns] = useState<Map<string, string[]>>(new Map());
-	const [loadingTable, setLoadingTable] = useState<string | null>(null);
+	const [columnMap, setColumnMap] = useState<Map<string, string[] | "loading">>(new Map());
 
 	const filterLower = filter.toLowerCase();
 	const filteredTables = filterLower
@@ -33,26 +32,29 @@ export default function TableList({
 		filteredTables.length > 0 && filteredTables.every((t) => selected.has(t));
 
 	const handleQueryColumns = (table: string) => {
-		if (!onQueryColumns || loadingTable === table) {
+		if (!onQueryColumns) {
 			return;
 		}
-		if (expandedColumns.has(table)) {
-			setExpandedColumns((prev) => {
+		if (columnMap.get(table) === "loading") {
+			return;
+		}
+		if (columnMap.has(table)) {
+			setColumnMap((prev) => {
 				const next = new Map(prev);
 				next.delete(table);
 				return next;
 			});
 			return;
 		}
-		setLoadingTable(table);
-		onQueryColumns(table).then((columns) => {
-			setExpandedColumns((prev) => {
+		setColumnMap((prev) => new Map(prev).set(table, "loading"));
+		onQueryColumns(table).then(
+			(columns) => setColumnMap((prev) => new Map(prev).set(table, columns)),
+			() => setColumnMap((prev) => {
 				const next = new Map(prev);
-				next.set(table, columns);
+				next.delete(table);
 				return next;
-			});
-			setLoadingTable(null);
-		});
+			}),
+		);
 	};
 
 	return (
@@ -111,17 +113,17 @@ export default function TableList({
 														handleQueryColumns(table);
 													}}
 												>
-													{loadingTable === table ? (
+													{columnMap.get(table) === "loading" ? (
 														<span className="text-xs text-gray-400 w-3 h-3">…</span>
 													) : (
-														<ExpandIcon close={!expandedColumns.has(table)} />
+														<ExpandIcon close={!columnMap.has(table)} />
 													)}
 												</ButtonIcon>
 											)}
 										</div>
 									</td>
 								</tr>
-								{expandedColumns.get(table)?.map((col) => (
+								{Array.isArray(columnMap.get(table)) && (columnMap.get(table) as string[]).map((col) => (
 									<tr
 										key={`${table}::${col}`}
 										className="bg-gray-50 border-t border-gray-100"
