@@ -1,23 +1,26 @@
 import { useState } from "react";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import { useJdbcTables } from "../../../../hooks/useJdbc";
+import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
 import TableList from "./TableList";
 
 interface SqlTableInsertDialogProps {
 	jdbcValues: Record<string, string>;
 	onInsert: (tables: string[]) => void;
+	onInsertColumn?: (column: string) => void;
 	onClose: () => void;
 }
 
 export default function SqlTableInsertDialog({
 	jdbcValues,
 	onInsert,
+	onInsertColumn,
 	onClose,
 }: SqlTableInsertDialogProps) {
 	const [tables, setTables] = useState<string[] | null>(null);
 	const [loading, setLoading] = useState(false);
 	const getJdbcTables = useJdbcTables();
+	const getJdbcColumns = useJdbcColumns();
 
 	const handleLoad = () => {
 		if (loading) {
@@ -30,12 +33,23 @@ export default function SqlTableInsertDialog({
 		});
 	};
 
+	const queryColumns = (table: string): Promise<string[]> =>
+		getJdbcColumns(jdbcValues, table);
+
 	function renderBody() {
 		if (loading) {
 			return <p className="text-sm text-gray-500">Loading...</p>;
 		}
 		if (tables !== null) {
-			return <TablesContent tables={tables} onInsert={onInsert} onClose={onClose} />;
+			return (
+				<TablesContent
+					tables={tables}
+					onInsert={onInsert}
+					onInsertColumn={onInsertColumn}
+					onQueryColumns={queryColumns}
+					onClose={onClose}
+				/>
+			);
 		}
 		return (
 			<div className="flex gap-2 justify-end">
@@ -60,10 +74,14 @@ export default function SqlTableInsertDialog({
 function TablesContent({
 	tables,
 	onInsert,
+	onInsertColumn,
+	onQueryColumns,
 	onClose,
 }: {
 	tables: string[];
 	onInsert: (tables: string[]) => void;
+	onInsertColumn?: (column: string) => void;
+	onQueryColumns?: (table: string) => Promise<string[]>;
 	onClose: () => void;
 }) {
 	const { selected, toggle, toggleAll } = useTableSelection();
@@ -85,6 +103,8 @@ function TablesContent({
 						onToggleAll={toggleAll}
 						onToggle={toggle}
 						maxHeightClass="max-h-72"
+						onQueryColumns={onQueryColumns}
+						onInsertColumn={onInsertColumn}
 					/>
 				)}
 			</div>

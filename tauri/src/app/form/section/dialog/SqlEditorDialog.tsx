@@ -47,6 +47,15 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 		setShowTableSelector(false);
 	};
 
+	const handleInsertColumn = (column: string) => {
+		setContent((prev) => {
+			if (prev === "" || prev.endsWith("\n")) {
+				return prev + column;
+			}
+			return `${prev}\n${column}`;
+		});
+	};
+
 	return (
 		<SettingDialog
 			handleDialogClose={props.handleDialogClose}
@@ -86,6 +95,7 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 				<SqlTableInsertDialog
 					jdbcValues={jdbcValues}
 					onInsert={handleInsert}
+					onInsertColumn={handleInsertColumn}
 					onClose={() => setShowTableSelector(false)}
 				/>
 			)}

@@ -7,17 +7,20 @@ import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import jakarta.inject.Inject;
 import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.dataset.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.option.JdbcOption;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
+import yo.dbunitcli.sidecar.dto.JdbcColumnsRequestDto;
 import yo.dbunitcli.sidecar.dto.JdbcDto;
 import yo.dbunitcli.sidecar.dto.JdbcSavePropertiesRequestDto;
 import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 
@@ -78,6 +81,30 @@ public class JdbcResourceFileController extends AbstractResourceFileController<R
             return "[]";
         } finally {
             if (conn!=null) {
+                try {
+                    conn.getConnection().close();
+                } catch (final Exception ex) {
+                    LOGGER.error("Failed to close connection", ex);
+                }
+            }
+        }
+    }
+
+    @Post(uri = "columns", produces = MediaType.APPLICATION_JSON)
+    public String columns(@Body final JdbcColumnsRequestDto body) {
+        IDatabaseConnection conn = null;
+        final JdbcOption option = new JdbcOption("jdbc", body.getProperties(), body.getUrl(), body.getUser(), body.getPass());
+        try {
+            conn = option.getDatabaseConnectionLoader().loadConnection();
+            final Column[] columns = conn.createDataSet().getTableMetaData(body.getTable()).getColumns();
+            return ObjectMapper.getDefault().writeValueAsString(
+                    Arrays.stream(columns).map(Column::getColumnName).toList()
+            );
+        } catch (final Throwable e) {
+            LOGGER.error("Failed to get column list for table: {}", body.getTable(), e);
+            return "[]";
+        } finally {
+            if (conn != null) {
                 try {
                     conn.getConnection().close();
                 } catch (final Exception ex) {
