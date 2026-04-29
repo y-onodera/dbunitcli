@@ -950,48 +950,34 @@ export const runRefreshScriptTypeSqlResponseFixture = {
 	},
 } as RunOptions;
 
-// generate-refresh-generateType-xlsx フィクスチャ（formulaProcess あり）
-export const generateRefreshGenerateTypeXlsxResponseFixture = {
-	prefix: "",
-	generateType: makeElement("generateType", "ENUM", "xlsx", "WORKSPACE", false, [
-		"txt",
-		"xlsx",
-		"xls",
-		"settings",
-		"sql",
-		"xlsxTemplate",
-	]),
-	unit: makeElement("unit", "ENUM", "record", "WORKSPACE", false, [
-		"record",
-		"table",
-		"dataset",
-	]),
-	template: makeElement("template", "FILE", "", "TEMPLATE", true),
-	result: makeElement("result", "DIR", "", "RESULT", false),
-	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
-	srcData: makeCsvSrcData("src", ""),
-	templateOption: makeJxlsTemplateOption(true),
-} as GenerateOptions;
+const GENERATE_TYPE_OPTIONS = ["txt", "xlsx", "xls", "settings", "sql", "xlsxTemplate"];
+const UNIT_OPTIONS = ["record", "table", "dataset"];
 
-// generate-refresh-generateType-xls フィクスチャ（formulaProcess なし）
-export const generateRefreshGenerateTypeXlsResponseFixture = {
-	prefix: "",
-	generateType: makeElement("generateType", "ENUM", "xls", "WORKSPACE", false, [
-		"txt",
-		"xlsx",
-		"xls",
-		"settings",
-		"sql",
-		"xlsxTemplate",
-	]),
-	unit: makeElement("unit", "ENUM", "record", "WORKSPACE", false, [
-		"record",
-		"table",
-		"dataset",
-	]),
-	template: makeElement("template", "FILE", "", "TEMPLATE", true),
-	result: makeElement("result", "DIR", "", "RESULT", false),
-	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
-	srcData: makeCsvSrcData("src", ""),
-	templateOption: makeJxlsTemplateOption(false),
-} as GenerateOptions;
+function makeGenerateJxlsFixture(
+	generateTypeValue: "xlsx" | "xls",
+	includeFormulaProcess: boolean,
+): GenerateOptions {
+	return {
+		prefix: "",
+		generateType: makeElement(
+			"generateType",
+			"ENUM",
+			generateTypeValue,
+			"WORKSPACE",
+			false,
+			GENERATE_TYPE_OPTIONS,
+		),
+		unit: makeElement("unit", "ENUM", "record", "WORKSPACE", false, UNIT_OPTIONS),
+		template: makeElement("template", "FILE", "", "TEMPLATE", true),
+		result: makeElement("result", "DIR", "", "RESULT", false),
+		resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
+		srcData: makeCsvSrcData("src", ""),
+		templateOption: makeJxlsTemplateOption(includeFormulaProcess),
+	} as GenerateOptions;
+}
+
+export const generateRefreshGenerateTypeXlsxResponseFixture =
+	makeGenerateJxlsFixture("xlsx", true);
+
+export const generateRefreshGenerateTypeXlsResponseFixture =
+	makeGenerateJxlsFixture("xls", false);

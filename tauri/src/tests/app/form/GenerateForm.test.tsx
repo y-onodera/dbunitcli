@@ -34,13 +34,7 @@ vi.mock("../../../hooks/useJdbc", () => ({
 	useDeleteJdbcProperties: () => vi.fn(),
 }));
 
-function makeGenerateProps(
-	fixture:
-		| typeof generateLoadResponseFixture
-		| typeof generateRefreshSrcTypeTableResponseFixture
-		| typeof generateRefreshGenerateTypeXlsxResponseFixture
-		| typeof generateRefreshGenerateTypeXlsResponseFixture = generateLoadResponseFixture,
-): {
+function makeGenerateProps(fixture: GenerateOptions = generateLoadResponseFixture): {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
 	generate: GenerateOptions;
@@ -48,7 +42,7 @@ function makeGenerateProps(
 	return {
 		handleTypeSelect: vi.fn().mockResolvedValue(undefined),
 		name: "test",
-		generate: fixture as unknown as GenerateOptions,
+		generate: fixture,
 	};
 }
 
