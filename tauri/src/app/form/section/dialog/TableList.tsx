@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { ButtonIcon } from "../../../../components/element/ButtonIcon";
 import { AddIcon, ExpandIcon } from "../../../../components/element/Icon";
 
@@ -25,6 +25,12 @@ export default function TableList({
 	const [columnMap, setColumnMap] = useState<Map<string, string[] | "loading">>(
 		new Map(),
 	);
+	const isMountedRef = useRef(true);
+	useEffect(() => {
+		return () => {
+			isMountedRef.current = false;
+		};
+	}, []);
 
 	const filterLower = filter.toLowerCase();
 	const filteredTables = filterLower
@@ -50,13 +56,20 @@ export default function TableList({
 		}
 		setColumnMap((prev) => new Map(prev).set(table, "loading"));
 		onQueryColumns(table).then(
-			(columns) => setColumnMap((prev) => new Map(prev).set(table, columns)),
-			() =>
-				setColumnMap((prev) => {
-					const next = new Map(prev);
-					next.delete(table);
-					return next;
-				}),
+			(columns) => {
+				if (isMountedRef.current) {
+					setColumnMap((prev) => new Map(prev).set(table, columns));
+				}
+			},
+			() => {
+				if (isMountedRef.current) {
+					setColumnMap((prev) => {
+						const next = new Map(prev);
+						next.delete(table);
+						return next;
+					});
+				}
+			},
 		);
 	};
 
