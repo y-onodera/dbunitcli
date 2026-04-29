@@ -72,6 +72,51 @@ function makeTemplateOption() {
 	};
 }
 
+function makeJxlsTemplateOption(includeFormulaProcess: boolean) {
+	return {
+		...makeTemplateOption(),
+		...(includeFormulaProcess
+			? {
+					formulaProcess: makeElement(
+						"formulaProcess",
+						"FLG",
+						"true",
+						"WORKSPACE",
+						false,
+					),
+				}
+			: {}),
+		evaluateFormulas: makeElement(
+			"evaluateFormulas",
+			"FLG",
+			"true",
+			"WORKSPACE",
+			false,
+		),
+		forceFormulaRecalc: makeElement(
+			"forceFormulaRecalc",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
+		fastFormulaProcess: makeElement(
+			"fastFormulaProcess",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
+		deleteBlankCells: makeElement(
+			"deleteBlankCells",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
+	};
+}
+
 function makeCsvSrcData(
 	prefix: string,
 	src: string,
@@ -904,3 +949,35 @@ export const runRefreshScriptTypeSqlResponseFixture = {
 		jdbcPass: makeElement("jdbcPass", "TEXT", "", "WORKSPACE", false),
 	},
 } as RunOptions;
+
+const GENERATE_TYPE_OPTIONS = ["txt", "xlsx", "xls", "settings", "sql", "xlsxTemplate"];
+const UNIT_OPTIONS = ["record", "table", "dataset"];
+
+function makeGenerateJxlsFixture(
+	generateTypeValue: "xlsx" | "xls",
+	includeFormulaProcess: boolean,
+): GenerateOptions {
+	return {
+		prefix: "",
+		generateType: makeElement(
+			"generateType",
+			"ENUM",
+			generateTypeValue,
+			"WORKSPACE",
+			false,
+			GENERATE_TYPE_OPTIONS,
+		),
+		unit: makeElement("unit", "ENUM", "record", "WORKSPACE", false, UNIT_OPTIONS),
+		template: makeElement("template", "FILE", "", "TEMPLATE", true),
+		result: makeElement("result", "DIR", "", "RESULT", false),
+		resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
+		srcData: makeCsvSrcData("src", ""),
+		templateOption: makeJxlsTemplateOption(includeFormulaProcess),
+	} as GenerateOptions;
+}
+
+export const generateRefreshGenerateTypeXlsxResponseFixture =
+	makeGenerateJxlsFixture("xlsx", true);
+
+export const generateRefreshGenerateTypeXlsResponseFixture =
+	makeGenerateJxlsFixture("xls", false);

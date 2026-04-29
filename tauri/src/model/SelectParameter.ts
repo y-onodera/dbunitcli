@@ -30,6 +30,13 @@ export type Options =
 	| GenerateOptions
 	| RunOptions
 	| ParameterizeOptions;
+export type GenerateTemplateOption = TemplateOption & {
+	formulaProcess?: CommandOption;
+	evaluateFormulas?: CommandOption;
+	forceFormulaRecalc?: CommandOption;
+	fastFormulaProcess?: CommandOption;
+	deleteBlankCells?: CommandOption;
+};
 export type ImageOption = CommandOptions & {
 	threshold: CommandOption;
 	pixelToleranceLevel: CommandOption;
@@ -71,7 +78,7 @@ export type GenerateOptions = CommandOptions & {
 	resultPath: CommandOption;
 	outputEncoding: CommandOption;
 	srcData: DatasetSource;
-	templateOption?: TemplateOption;
+	templateOption?: GenerateTemplateOption;
 };
 export type RunOptions = CommandOptions & {
 	command: "run";

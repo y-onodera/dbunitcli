@@ -1,5 +1,6 @@
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import JxlsFormSection from "./section/JxlsFormSection";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
@@ -12,6 +13,9 @@ export function GenerateForm(prop: {
 }) {
 	const generate = prop.generate;
 	const srcData = generate.srcData;
+	const generateTypeValue = generate.generateType.value;
+	const isExcelGenerate =
+		generateTypeValue === "xlsx" || generateTypeValue === "xls";
 	return (
 		<>
 			<fieldset className="border border-gray-200 p-3">
@@ -32,13 +36,18 @@ export function GenerateForm(prop: {
 					<FileText prefix="" element={generate.template} />
 				)}
 				{prop.generate.templateOption &&
-					generate.generateType.value === "txt" && (
+					generateTypeValue === "txt" && (
 						<TemplateFormSection
 							templateOption={prop.generate.templateOption}
 							showEncoding={true}
 							handleValueChange={() => (_: string) => {}}
 						/>
 					)}
+				{prop.generate.templateOption && isExcelGenerate && (
+					<JxlsFormSection
+						templateOption={prop.generate.templateOption}
+					/>
+				)}
 				<FileText prefix="" element={generate.result} />
 				<PlainText prefix="" element={generate.resultPath} />
 				{generate.outputEncoding && (
