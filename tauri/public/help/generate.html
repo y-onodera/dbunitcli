@@ -31,10 +31,19 @@
     <tr><td>xlsxTemplate</td><td>jxls テンプレートのひな型 xlsx を生成</td></tr>
   </table>
 
+  <h2>unit</h2>
+  <p>生成の単位を指定します。デフォルトは <code>record</code> です。<br>
+  ただし <code>generateType</code> が <code>settings</code> / <code>xlsxTemplate</code> の場合は <code>dataset</code>、<code>sql</code> の場合は <code>table</code> に固定されます。</p>
+  <table>
+    <tr><th>値</th><th>説明</th></tr>
+    <tr><td>record</td><td>行ごとに 1 ファイルを出力</td></tr>
+    <tr><td>table</td><td>テーブルごとに 1 ファイルを出力</td></tr>
+    <tr><td>dataset</td><td>データセット全体から 1 ファイルを出力</td></tr>
+  </table>
+
   <h2>その他のオプション</h2>
   <table>
     <tr><th>オプション</th><th>説明</th></tr>
-    <tr><td>unit</td><td>行・テーブル・データセット単位で生成</td></tr>
     <tr><td>template</td><td>テンプレートファイル</td></tr>
     <tr><td>result</td><td>生成結果ファイルを配置するディレクトリ</td></tr>
     <tr><td>resultPath</td><td>result ディレクトリからの相対パス</td></tr>
