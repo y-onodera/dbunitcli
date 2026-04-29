@@ -63,6 +63,10 @@ const save = useSaveXxx();
 
 非同期処理が完了する前にコンポーネントがアンマウントされる可能性がある場合は必ず `isMounted` ガードを付ける。
 
+### useEffect 内で非同期処理を開始する場合
+
+`let isMounted` をローカル変数として使う（effect のスコープ内で完結するため）。
+
 ```typescript
 useEffect(() => {
     let isMounted = true;
@@ -71,4 +75,21 @@ useEffect(() => {
     });
     return () => { isMounted = false; };
 }, [apiUrl, param]);
+```
+
+### イベントハンドラで非同期処理を開始する場合
+
+`useEffect` のスコープ外から Promise を開始する場合（ボタンクリック等）は `useRef` を使う。ローカル変数はコールバックのクロージャをまたげないため `useRef` が必要。
+
+```typescript
+const isMountedRef = useRef(true);
+useEffect(() => {
+    return () => { isMountedRef.current = false; };
+}, []);
+
+const handleLoad = () => {
+    fetchXxx(param).then((result) => {
+        if (isMountedRef.current) { setData(result); }
+    });
+};
 ```
