@@ -29,8 +29,6 @@
 	--color-link: oklch(0.623 0.214 259.77); /* blue-500 */
 	--color-link-hover: oklch(0.546 0.243 262.88); /* blue-600 */
 
-	/* Icon fill */
-	--color-icon: oklch(0.46 0 0); /* #5f6368 相当 */
 }
 
 @layer base {
