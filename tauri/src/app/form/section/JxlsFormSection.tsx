@@ -7,10 +7,8 @@ import PlainText from "./element/PlainText";
 
 export default function JxlsFormSection({
 	templateOption,
-	showFormulaProcess,
 }: {
 	templateOption: TemplateOption;
-	showFormulaProcess: boolean;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
@@ -30,7 +28,7 @@ export default function JxlsFormSection({
 				element={templateOption.templateParameterAttribute}
 				hidden={!showOptional}
 			/>
-			{showFormulaProcess && templateOption.formulaProcess && (
+			{templateOption.formulaProcess && (
 				<Check
 					prefix={templateOption.prefix}
 					element={templateOption.formulaProcess}
