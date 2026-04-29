@@ -2,11 +2,17 @@ import type {
 	CommandOption,
 	CommandOptions,
 	DatasetSource,
-	GenerateTemplateOption,
 	JdbcOption,
 	ResultOption,
 	TemplateOption,
 } from "./CommandOption";
+export type GenerateTemplateOption = TemplateOption & {
+	formulaProcess?: CommandOption;
+	evaluateFormulas?: CommandOption;
+	forceFormulaRecalc?: CommandOption;
+	fastFormulaProcess?: CommandOption;
+	deleteBlankCells?: CommandOption;
+};
 export type Command =
 	| "convert"
 	| "compare"

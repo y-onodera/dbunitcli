@@ -154,13 +154,6 @@ export type TemplateOption = CommandOptions & {
 	templateVarStart: CommandOption;
 	templateVarStop: CommandOption;
 };
-export type GenerateTemplateOption = TemplateOption & {
-	formulaProcess?: CommandOption;
-	evaluateFormulas?: CommandOption;
-	forceFormulaRecalc?: CommandOption;
-	fastFormulaProcess?: CommandOption;
-	deleteBlankCells?: CommandOption;
-};
 export type CsvOptions = CommandOptions & {
 	srcType: Csv;
 	delimiter: CommandOption;
