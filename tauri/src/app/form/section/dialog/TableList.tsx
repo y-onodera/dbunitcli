@@ -22,7 +22,9 @@ export default function TableList({
 	onInsertColumn,
 }: TableListProps) {
 	const [filter, setFilter] = useState("");
-	const [columnMap, setColumnMap] = useState<Map<string, string[] | "loading">>(new Map());
+	const [columnMap, setColumnMap] = useState<Map<string, string[] | "loading">>(
+		new Map(),
+	);
 
 	const filterLower = filter.toLowerCase();
 	const filteredTables = filterLower
@@ -49,11 +51,12 @@ export default function TableList({
 		setColumnMap((prev) => new Map(prev).set(table, "loading"));
 		onQueryColumns(table).then(
 			(columns) => setColumnMap((prev) => new Map(prev).set(table, columns)),
-			() => setColumnMap((prev) => {
-				const next = new Map(prev);
-				next.delete(table);
-				return next;
-			}),
+			() =>
+				setColumnMap((prev) => {
+					const next = new Map(prev);
+					next.delete(table);
+					return next;
+				}),
 		);
 	};
 
@@ -64,7 +67,7 @@ export default function TableList({
 				value={filter}
 				onChange={(e) => setFilter(e.target.value)}
 				placeholder="Filter tables..."
-				className="w-full mb-1 px-2 py-1 text-sm border border-border rounded bg-surface-subtle focus:outline-none focus-visible:ring-3 ring-ring"
+				className="w-full mb-1 px-2 py-1 text-sm border border-border rounded bg-surface-subtle focus:outline-none focus-visible:ring-3 ring-primary-ring"
 			/>
 			<div
 				className={`relative overflow-x-auto ${maxHeightClass} overflow-y-auto border border-border-subtle rounded`}
@@ -91,7 +94,7 @@ export default function TableList({
 						{filteredTables.map((table) => (
 							<Fragment key={table}>
 								<tr
-									className="hover:bg-surface-subtle cursor-pointer border-t border-border-minimal"
+									className="hover:bg-surface-subtle cursor-pointer border-t border-border-faint"
 									onClick={() => onToggle(table)}
 								>
 									<td className="px-3 py-1.5">
@@ -114,7 +117,9 @@ export default function TableList({
 													}}
 												>
 													{columnMap.get(table) === "loading" ? (
-														<span className="text-xs text-content-disabled w-3 h-3">…</span>
+														<span className="text-xs text-content-disabled w-3 h-3">
+															…
+														</span>
 													) : (
 														<ExpandIcon close={!columnMap.has(table)} />
 													)}
@@ -123,26 +128,27 @@ export default function TableList({
 										</div>
 									</td>
 								</tr>
-								{Array.isArray(columnMap.get(table)) && (columnMap.get(table) as string[]).map((col) => (
-									<tr
-										key={`${table}::${col}`}
-										className="bg-surface-subtle border-t border-border-minimal"
-									>
-										<td />
-										<td className="px-6 py-1">
-											<div className="flex items-center gap-2">
-												<span className="text-xs text-content-muted">{col}</span>
-												{onInsertColumn && (
-													<ButtonIcon
-														handleClick={() => onInsertColumn(col)}
-													>
-														<AddIcon title="Insert column" />
-													</ButtonIcon>
-												)}
-											</div>
-										</td>
-									</tr>
-								))}
+								{Array.isArray(columnMap.get(table)) &&
+									(columnMap.get(table) as string[]).map((col) => (
+										<tr
+											key={`${table}::${col}`}
+											className="bg-surface-subtle border-t border-border-faint"
+										>
+											<td />
+											<td className="px-6 py-1">
+												<div className="flex items-center gap-2">
+													<span className="text-xs text-content-muted">
+														{col}
+													</span>
+													{onInsertColumn && (
+														<ButtonIcon handleClick={() => onInsertColumn(col)}>
+															<AddIcon title="Insert column" />
+														</ButtonIcon>
+													)}
+												</div>
+											</td>
+										</tr>
+									))}
 							</Fragment>
 						))}
 					</tbody>

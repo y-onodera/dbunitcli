@@ -9,7 +9,7 @@ export function ButtonWithIcon(props: {
 		<Button
 			buttonstyle="p-2.5 ms-2"
 			bgcolor="bg-primary hover:bg-primary-hover"
-			textstyle="font-medium text-sm text-content-on-primary"
+			textstyle="font-medium text-sm text-content-inverse"
 			border="border border-border"
 			handleClick={props.handleClick}
 		>
@@ -27,7 +27,7 @@ export function BlueButton(props: {
 		<Button
 			buttonstyle=""
 			bgcolor="bg-primary hover:bg-primary-hover"
-			textstyle="text-center text-sm font-semibold text-content-on-primary"
+			textstyle="text-center text-sm font-semibold text-content-inverse"
 			border="border border-border"
 			disabled={props.disabled}
 			id={props.id}
@@ -44,7 +44,7 @@ export function WhiteButton(props: {
 	return (
 		<Button
 			buttonstyle=""
-			bgcolor="bg-surface hover:bg-surface-disabled-input"
+			bgcolor="bg-surface hover:bg-input-disabled"
 			textstyle="text-center text-sm font-semibold text-content-muted"
 			border="border border-border"
 			handleClick={props.handleClick}
@@ -92,7 +92,7 @@ export function Button(props: {
                          rounded-lg
                          ${props.border}
                          transition duration-100
-                         ring-ring
+                         ring-primary-ring
                          focus-visible:ring-3
                          disabled:bg-surface-disabled disabled:text-content-disabled disabled:border-surface-disabled disabled:cursor-not-allowed disabled:hover:bg-surface-disabled`}
 			onClick={props.handleClick}

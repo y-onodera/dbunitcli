@@ -37,7 +37,9 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 		);
 
 	const appendToContent = (text: string) => {
-		setContent((prev) => (prev === "" || prev.endsWith("\n") ? prev + text : `${prev}\n${text}`));
+		setContent((prev) =>
+			prev === "" || prev.endsWith("\n") ? prev + text : `${prev}\n${text}`,
+		);
 	};
 
 	const handleInsert = (tables: string[]) => {
@@ -72,7 +74,7 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 						id="contents"
 						className="w-full h-96 p-4 border border-border rounded-lg
                          font-mono text-base bg-surface-subtle
-                         focus-visible:ring-3 ring-ring"
+                         focus-visible:ring-3 ring-primary-ring"
 						value={content}
 						onChange={(e) => setContent(e.target.value)}
 						placeholder={

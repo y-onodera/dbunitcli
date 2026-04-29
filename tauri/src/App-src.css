@@ -18,11 +18,11 @@
 	[multiple]:focus,
 	textarea:focus,
 	select:focus {
-		--tw-ring-color: var(--color-ring);
-		border-color: var(--color-ring);
+		--tw-ring-color: var(--color-primary-ring);
+		border-color: var(--color-primary-ring);
 	}
 	[type="checkbox"]:focus,
 	[type="radio"]:focus {
-		--tw-ring-color: var(--color-ring);
+		--tw-ring-color: var(--color-primary-ring);
 	}
 }

@@ -21,8 +21,8 @@ paths:
 - 生の `<button>` は使わない。必ずコンポーネントを使う
 
 ## Tailwind CSS
-- フォーカスリングは必ず `ring-ring focus-visible:ring-3`（全インタラクティブ要素）
-- インプット系のボーダー: `border border-border`、背景: `bg-surface-subtle`
+- フォーカスリングは必ず `ring-primary-ring focus-visible:ring-3`（全インタラクティブ要素）
+- インプット系のボーダー: `border border-border`、背景: `bg-input`（入力専用）/ `bg-surface-subtle`（表示専用）
 - disabled ボタン: `bg-surface-disabled text-content-disabled border-surface-disabled cursor-not-allowed`（`Button` の props で渡す）
 - コンポーネントが提供するスタイルに手を加えない。カスタムが必要なら `Button` の props を使う
 - デザイントークンは `src/tokens.css` の `@theme` で定義。色は `bg-primary`/`text-content` 等のセマンティッククラスを使う（`bg-indigo-500`/`text-gray-900` 等のパレットクラスは使わない）

@@ -97,7 +97,7 @@ export function CheckBox(props: {
 				className="w-4 h-4
                            text-primary
                            border border-border
-                           ring-ring
+                           ring-primary-ring
                            focus-visible:ring-3 "
 				style={props.hidden ? { display: "none" } : {}}
 				checked={checked}
@@ -161,9 +161,9 @@ function inputStyle(wStyle: string) {
                z-20
                text-sm text-content
                rounded-lg
-               bg-surface-subtle
-               disabled:bg-surface-disabled-input
+               bg-input
+               disabled:bg-input-disabled
                border border-border
-               ring-ring
+               ring-primary-ring
                focus-visible:ring-3 `;
 }

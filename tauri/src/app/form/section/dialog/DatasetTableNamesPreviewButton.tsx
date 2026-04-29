@@ -54,12 +54,17 @@ function DatasetTableNamesPreviewDialog({
 			return <p className="text-sm text-content-disabled p-3">Loading...</p>;
 		}
 		if (tableNames.length === 0) {
-			return <p className="text-sm text-content-disabled p-3">No tables found.</p>;
+			return (
+				<p className="text-sm text-content-disabled p-3">No tables found.</p>
+			);
 		}
 		return (
 			<ul className="text-sm bg-surface-subtle border border-border rounded-lg p-3 overflow-auto max-h-96 space-y-1">
 				{tableNames.map((name) => (
-					<li key={name} className="flex items-center gap-2 text-content-secondary">
+					<li
+						key={name}
+						className="flex items-center gap-2 text-content-secondary"
+					>
 						<span className="flex-1">{name}</span>
 						<PreviewButton
 							title={`Preview ${name}`}
@@ -119,7 +124,9 @@ function TableDataPreviewDialog({
 			return <p className="text-sm text-content-disabled p-3">Loading...</p>;
 		}
 		if (!preview || preview.headers.length === 0) {
-			return <p className="text-sm text-content-disabled p-3">No data found.</p>;
+			return (
+				<p className="text-sm text-content-disabled p-3">No data found.</p>
+			);
 		}
 		return (
 			<div className="overflow-x-auto max-h-64 border border-border rounded-lg">
@@ -140,7 +147,7 @@ function TableDataPreviewDialog({
 						{preview.rows.map((row) => (
 							<tr
 								key={row.join("\x00")}
-								className="border-t border-border-minimal hover:bg-surface-subtle"
+								className="border-t border-border-faint hover:bg-surface-subtle"
 							>
 								{preview.headers.map((header, i) => (
 									<td
