@@ -138,7 +138,7 @@ export function ButtonIcon(props: {
 		<Button
 			buttonstyle="flex items-center group p-1"
 			bgcolor=""
-			textstyle="text-gray-500 hover:text-blue-600"
+			textstyle="text-content-muted hover:text-link-hover"
 			border="outline-hidden"
 			ariaLabel={props.title || undefined}
 			handleClick={props.handleClick}
@@ -157,9 +157,9 @@ export function BlueButtonIcon(props: {
 	return (
 		<Button
 			buttonstyle="flex items-center p-2 ms-2"
-			bgcolor="bg-indigo-500 hover:bg-indigo-600"
+			bgcolor="bg-primary hover:bg-primary-hover"
 			textstyle=""
-			border="border border-gray-300"
+			border="border border-border"
 			ariaLabel={props.title || undefined}
 			handleClick={props.handleClick}
 		>

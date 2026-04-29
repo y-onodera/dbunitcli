@@ -26,7 +26,7 @@ export function DatasetLoadForm(prop: {
 	const setDatasetSrcInfo = useSetDatasetSrcInfo();
 	if (prop.srcData.srcType?.value === "none") {
 		return (
-			<fieldset className="border border-gray-200 p-3">
+			<fieldset className="border border-border-subtle p-3">
 				<legend>{prop.srcData.prefix}</legend>
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
@@ -61,7 +61,7 @@ export function DatasetLoadForm(prop: {
 			key={prop.name + prop.srcData.prefix}
 			initialValue={initialDatasetSrcInfo}
 		>
-			<fieldset className="border border-gray-200 p-3">
+			<fieldset className="border border-border-subtle p-3">
 				<legend>{prop.srcData.prefix}</legend>
 				{prop.srcData.srcType && (
 					<Select

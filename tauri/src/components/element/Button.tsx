@@ -8,9 +8,9 @@ export function ButtonWithIcon(props: {
 	return (
 		<Button
 			buttonstyle="p-2.5 ms-2"
-			bgcolor="bg-indigo-500 hover:bg-indigo-600"
-			textstyle="font-medium text-sm text-white"
-			border="border border-gray-300"
+			bgcolor="bg-primary hover:bg-primary-hover"
+			textstyle="font-medium text-sm text-content-on-primary"
+			border="border border-border"
 			handleClick={props.handleClick}
 		>
 			{props.children}
@@ -26,9 +26,9 @@ export function BlueButton(props: {
 	return (
 		<Button
 			buttonstyle=""
-			bgcolor="bg-indigo-500 hover:bg-indigo-600"
-			textstyle="text-center text-sm font-semibold text-white"
-			border="border border-gray-300"
+			bgcolor="bg-primary hover:bg-primary-hover"
+			textstyle="text-center text-sm font-semibold text-content-on-primary"
+			border="border border-border"
 			disabled={props.disabled}
 			id={props.id}
 			handleClick={props.handleClick}
@@ -44,9 +44,9 @@ export function WhiteButton(props: {
 	return (
 		<Button
 			buttonstyle=""
-			bgcolor="bg-white hover:bg-gray-300"
-			textstyle="text-center text-sm font-semibold text-gray-500"
-			border="border border-gray-300"
+			bgcolor="bg-surface hover:bg-surface-disabled-input"
+			textstyle="text-center text-sm font-semibold text-content-muted"
+			border="border border-border"
 			handleClick={props.handleClick}
 		>
 			{props.title}
@@ -60,8 +60,8 @@ export function LinkButton(props: {
 	return (
 		<Button
 			buttonstyle="flex items-center justify-start w-full p-1 ms-2"
-			bgcolor="hover:bg-gray-100"
-			textstyle="text-left text-gray-500 hover:text-blue-600"
+			bgcolor="hover:bg-surface-muted"
+			textstyle="text-left text-content-muted hover:text-link-hover"
 			border="outline-hidden"
 			handleClick={props.handleClick}
 		>
@@ -92,9 +92,9 @@ export function Button(props: {
                          rounded-lg
                          ${props.border}
                          transition duration-100
-                         ring-indigo-300
+                         ring-ring
                          focus-visible:ring-3
-                         disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed disabled:hover:bg-gray-200`}
+                         disabled:bg-surface-disabled disabled:text-content-disabled disabled:border-surface-disabled disabled:cursor-not-allowed disabled:hover:bg-surface-disabled`}
 			onClick={props.handleClick}
 		>
 			{props.children}

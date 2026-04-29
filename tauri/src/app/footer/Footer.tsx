@@ -86,12 +86,12 @@ export default function Footer(prop: {
 		return (
 			<div className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 ">
 				<div className="relative p-4 w-full max-w-md max-h-full">
-					<div className="relative bg-white rounded-lg shadow-sm ">
+					<div className="relative bg-surface rounded-lg shadow-sm ">
 						<div className="p-4 md:p-5 flex flex-col justify-center items-center">
-							<h3 className="mb-5 text-lg font-normal text-gray-500 ">
+							<h3 className="mb-5 text-lg font-normal text-content-muted ">
 								Now Execution
 							</h3>
-							<div className="block animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent" />
+							<div className="block animate-spin h-10 w-10 border-4 border-link rounded-full border-t-transparent" />
 							<div className="mt-4">
 								<WhiteButton title="Abandoned" handleClick={handleCancel} />
 							</div>
@@ -106,7 +106,7 @@ export default function Footer(prop: {
 		<>
 			<ResultDialog hidden={running.resultMessage === ""}>
 				<div className="p-4 md:p-5">
-					<h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+					<h3 className="mb-5 text-lg font-normal text-content-muted">
 						{running.resultMessage}
 					</h3>
 					<div className="flex items-center justify-end gap-2">
@@ -129,7 +129,7 @@ export default function Footer(prop: {
 				<div
 					className="fixed bottom-0 right-1
                                 w-full z-50
-								bg-gray-100
+								bg-surface-muted
                                 flex items-center justify-end p-4 gap-2"
 				>
 					<BlueButton
@@ -165,7 +165,7 @@ export default function Footer(prop: {
 							});
 						}}
 					/>
-					<span className="text-sm text-gray-500">*Required</span>
+					<span className="text-sm text-content-muted">*Required</span>
 				</div>
 			)}
 		</>

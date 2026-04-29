@@ -38,7 +38,7 @@ export default function SqlTableInsertDialog({
 
 	function renderBody() {
 		if (loading) {
-			return <p className="text-sm text-gray-500">Loading...</p>;
+			return <p className="text-sm text-content-muted">Loading...</p>;
 		}
 		if (tables !== null) {
 			return (
@@ -60,7 +60,7 @@ export default function SqlTableInsertDialog({
 
 	return (
 		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-			<div className="bg-white rounded-lg shadow-lg p-6 w-96 max-w-full">
+			<div className="bg-surface rounded-lg shadow-lg p-6 w-96 max-w-full">
 				<h2 className="text-lg font-semibold mb-4">Select Tables</h2>
 				<div className="mb-4">
 					<BlueButton title="Load Tables" handleClick={handleLoad} />
@@ -95,7 +95,7 @@ function TablesContent({
 		<>
 			<div className="mb-4 min-h-8">
 				{tables.length === 0 ? (
-					<p className="text-sm text-gray-500">No tables found</p>
+					<p className="text-sm text-content-muted">No tables found</p>
 				) : (
 					<TableList
 						tables={tables}

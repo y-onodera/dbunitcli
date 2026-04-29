@@ -64,10 +64,10 @@ export default function Text({
 							<ResourceDatalist id={id} resources={resourceFiles} />
 						)}
 						{!hidden && showDefaulePath && (
-							<p className="text-xs text-gray-400 truncate">{basePath}</p>
+							<p className="text-xs text-content-disabled truncate">{basePath}</p>
 						)}
 						{!hidden && showWorkspaceAsSecondary && (
-							<p className="text-xs text-gray-400 truncate">{workspacePath}</p>
+							<p className="text-xs text-content-disabled truncate">{workspacePath}</p>
 						)}
 					</div>
 					{!hidden &&

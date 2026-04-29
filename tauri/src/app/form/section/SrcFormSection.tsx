@@ -61,7 +61,7 @@ export default function SrcFormSection({
 					hidden={false}
 				/>
 			)}
-			<fieldset className="border border-gray-200 p-3">
+			<fieldset className="border border-border-subtle p-3">
 				<legend>traversal</legend>
 				<ExpandButton
 					toggleOptional={toggleOptional}

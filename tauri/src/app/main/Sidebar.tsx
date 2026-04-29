@@ -51,7 +51,7 @@ export default function Sidebar({ setSidebarWidth }: SidebarProps) {
 				<NameEditMenu editName={editName} setEditName={setEditName} />
 				<NamedParameters setEditName={setEditName} />
 			</div>
-			<div className="border-t border-gray-200 px-3 py-2">
+			<div className="border-t border-border-subtle px-3 py-2">
 				<SidebarHelpLink />
 			</div>
 			<div

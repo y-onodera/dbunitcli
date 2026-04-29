@@ -67,7 +67,7 @@ function Dialog({
 			<div className="w-[800px] p-4">
 				<h2 className="text-lg font-bold mb-2">Template File Edit</h2>
 				<textarea
-					className="text-sm bg-gray-50 border border-gray-300 rounded-lg p-3 w-full h-96 font-mono focus-visible:ring-3 ring-indigo-300"
+					className="text-sm bg-surface-subtle border border-border rounded-lg p-3 w-full h-96 font-mono focus-visible:ring-3 ring-ring"
 					value={content}
 					onChange={(e) => setContent(e.target.value)}
 				/>
