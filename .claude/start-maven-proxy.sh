@@ -71,6 +71,26 @@ else
   echo "Java $CURRENT_JAVA_MAJOR >= $REQUIRED_JAVA_VERSION, no installation needed"
 fi
 
+# TLS インスペクション環境向け: システム CA を JDK の cacerts にインポート
+# (Maven が Maven Central などへ HTTPS 接続できるようにする)
+JDK_HOME="${JAVA_HOME:-$JDK25_DIR}"
+CACERTS="$JDK_HOME/lib/security/cacerts"
+if [ -f "$CACERTS" ] && [ -d /usr/local/share/ca-certificates ]; then
+  IMPORTED=0
+  for crt in /usr/local/share/ca-certificates/*.crt; do
+    [ -f "$crt" ] || continue
+    alias_name="claude-$(basename "$crt" .crt)"
+    if ! "$JDK_HOME/bin/keytool" -list -keystore "$CACERTS" -storepass changeit -alias "$alias_name" >/dev/null 2>&1; then
+      if "$JDK_HOME/bin/keytool" -importcert -noprompt -trustcacerts \
+          -keystore "$CACERTS" -storepass changeit \
+          -alias "$alias_name" -file "$crt" >/dev/null 2>&1; then
+        IMPORTED=$((IMPORTED + 1))
+      fi
+    fi
+  done
+  echo "Imported $IMPORTED system CA certificate(s) into JDK cacerts"
+fi
+
 # Create ~/.mavenrc to set JAVA_HOME and optionally proxy settings
 {
   [ "$JDK25_READY" = true ] && echo "JAVA_HOME=\"$JDK25_DIR\""
