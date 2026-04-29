@@ -153,6 +153,8 @@ export type TemplateOption = CommandOptions & {
 	templateParameterAttribute: CommandOption;
 	templateVarStart: CommandOption;
 	templateVarStop: CommandOption;
+};
+export type GenerateTemplateOption = TemplateOption & {
 	formulaProcess?: CommandOption;
 	evaluateFormulas?: CommandOption;
 	forceFormulaRecalc?: CommandOption;

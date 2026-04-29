@@ -2,6 +2,7 @@ import type {
 	CommandOption,
 	CommandOptions,
 	DatasetSource,
+	GenerateTemplateOption,
 	JdbcOption,
 	ResultOption,
 	TemplateOption,
@@ -71,7 +72,7 @@ export type GenerateOptions = CommandOptions & {
 	resultPath: CommandOption;
 	outputEncoding: CommandOption;
 	srcData: DatasetSource;
-	templateOption?: TemplateOption;
+	templateOption?: GenerateTemplateOption;
 };
 export type RunOptions = CommandOptions & {
 	command: "run";

@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { SectionHelpButton } from "../../../components/dialog";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
-import type { TemplateOption } from "../../../model/CommandOption";
+import type { GenerateTemplateOption } from "../../../model/CommandOption";
 import Check from "./element/Check";
 import PlainText from "./element/PlainText";
 
 export default function JxlsFormSection({
 	templateOption,
 }: {
-	templateOption: TemplateOption;
+	templateOption: GenerateTemplateOption;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
