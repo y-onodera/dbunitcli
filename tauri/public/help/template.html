@@ -41,16 +41,8 @@
     <tr><td>templateVarStop</td><td>テンプレート式の終了文字（1 文字）</td><td>$</td></tr>
   </table>
 
-  <h3 id="section-xlsx-options">xlsx 出力時の追加オプション</h3>
-  <p><a href="generate.html">Generate</a> で <code>generateType = xlsx</code> を選んだ場合に適用される数式処理系のオプションです（内部的に Apache POI で処理）。</p>
-  <table>
-    <tr><th>項目</th><th>説明</th><th>既定</th></tr>
-    <tr><td>formulaProcess</td><td>xlsx 出力時に数式セルを処理するか。<code>false</code> にすると低メモリで動作しますが、数式内のセル参照が行追加にあわせて更新されません</td><td>true</td></tr>
-    <tr><td>evaluateFormulas</td><td><code>formulaProcess</code> が有効なときに Excel 数式を評価するか</td><td>true</td></tr>
-    <tr><td>forceFormulaRecalc</td><td>出力ファイルを Excel で開いたときに自動再計算させるフラグを立てる</td><td>false</td></tr>
-    <tr><td>fastFormulaProcess</td><td>高速な数式プロセッサを使用する</td><td>false</td></tr>
-    <tr><td>deleteBlankCells</td><td>数式評価後に空セルを削除する</td><td>false</td></tr>
-  </table>
+  <h3 id="section-xlsx-options">xlsx / xls 出力時の追加オプション</h3>
+  <p><a href="generate.html">Generate</a> で <code>generateType = xlsx</code> または <code>xls</code> を選んだ場合は jxls オプションが適用されます。詳細は <a href="generate.html#section-jxls">Generate — jxls オプション</a> を参照してください。<code>formulaProcess</code> は xlsx 専用です。</p>
 
   <h2 id="section-parameter-binding">パラメータのバインド</h2>
   <p>入力データセットの各行は、テンプレートに対して <code>templateParameterAttribute</code> で指定した属性名のオブジェクトとして渡されます。</p>
