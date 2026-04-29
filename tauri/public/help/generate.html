@@ -13,6 +13,7 @@
     th { background: #f9fafb; font-weight: 600; color: #374151; }
     td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
     a { color: #4f46e5; }
+    .center { text-align: center; }
   </style>
 </head>
 <body>
@@ -39,6 +40,20 @@
     <tr><td>record</td><td>行ごとに 1 ファイルを出力</td></tr>
     <tr><td>table</td><td>テーブルごとに 1 ファイルを出力</td></tr>
     <tr><td>dataset</td><td>データセット全体から 1 ファイルを出力</td></tr>
+  </table>
+
+  <h2>テンプレート変数</h2>
+  <p>unit の選択によってテンプレート内で使用できる変数が異なります。</p>
+  <table>
+    <tr><th>変数名</th><th>説明</th><th class="center">record</th><th class="center">table</th><th class="center">dataset</th></tr>
+    <tr><td>rowNumber</td><td>行 / テーブルのインデックス（0始まり、dataset は常に 0）</td><td class="center">○</td><td class="center">○</td><td class="center">○</td></tr>
+    <tr><td>tableName</td><td>テーブル名</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
+    <tr><td>columns</td><td>カラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
+    <tr><td>primaryKeys</td><td>主キーカラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
+    <tr><td>columnsExcludeKey</td><td>主キー以外のカラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
+    <tr><td>row</td><td>現在行のデータ（列名 → 値 の Map）</td><td class="center">○</td><td class="center">—</td><td class="center">—</td></tr>
+    <tr><td>rows</td><td>テーブル全行のリスト（各要素は列名 → 値 の Map）</td><td class="center">—</td><td class="center">○</td><td class="center">—</td></tr>
+    <tr><td>dataSet</td><td>テーブル名をキーとする Map。各値は table スコープと同じ構造</td><td class="center">—</td><td class="center">—</td><td class="center">○</td></tr>
   </table>
 
   <h2>その他のオプション</h2>
