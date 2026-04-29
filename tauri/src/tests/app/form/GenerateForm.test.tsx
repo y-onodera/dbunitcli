@@ -5,6 +5,8 @@ import type { GenerateOptions } from "../../../model/SelectParameter";
 import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	generateLoadResponseFixture,
+	generateRefreshGenerateTypeXlsResponseFixture,
+	generateRefreshGenerateTypeXlsxResponseFixture,
 	generateRefreshSrcTypeTableResponseFixture,
 } from "./fixtures";
 
@@ -35,7 +37,9 @@ vi.mock("../../../hooks/useJdbc", () => ({
 function makeGenerateProps(
 	fixture:
 		| typeof generateLoadResponseFixture
-		| typeof generateRefreshSrcTypeTableResponseFixture = generateLoadResponseFixture,
+		| typeof generateRefreshSrcTypeTableResponseFixture
+		| typeof generateRefreshGenerateTypeXlsxResponseFixture
+		| typeof generateRefreshGenerateTypeXlsResponseFixture = generateLoadResponseFixture,
 ): {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
@@ -156,6 +160,99 @@ describe("GenerateFormの描画テスト", () => {
 					'input[type="checkbox"][name="-src.useJdbcMetaData"]',
 				),
 			).toBeVisible();
+		});
+	});
+
+	describe("xlsxタイプ（generateType=xlsx）", () => {
+		it("generate・jxls・src・traversalのセクションがこの順で表示される", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(generateRefreshGenerateTypeXlsxResponseFixture)}
+				/>,
+			);
+
+			const legends = document.querySelectorAll("fieldset legend");
+			expect(legends[0]).toHaveTextContent("generate");
+			expect(legends[1]).toHaveTextContent("jxls");
+			expect(legends[2]).toHaveTextContent("src");
+			expect(legends[3]).toHaveTextContent("traversal");
+		});
+
+		it("jxlsオプション要素は初期状態でhiddenになっている", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(generateRefreshGenerateTypeXlsxResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector(
+					'input[type="checkbox"][name="-template.formulaProcess"]',
+				),
+			).not.toBeVisible();
+			expect(
+				document.querySelector(
+					'input[type="checkbox"][name="-template.evaluateFormulas"]',
+				),
+			).not.toBeVisible();
+		});
+
+		it("formulaProcessがjxlsセクションに含まれる", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(generateRefreshGenerateTypeXlsxResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector(
+					'input[type="checkbox"][name="-template.formulaProcess"]',
+				),
+			).toBeInTheDocument();
+		});
+	});
+
+	describe("xlsタイプ（generateType=xls）", () => {
+		it("generate・jxls・src・traversalのセクションがこの順で表示される", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(generateRefreshGenerateTypeXlsResponseFixture)}
+				/>,
+			);
+
+			const legends = document.querySelectorAll("fieldset legend");
+			expect(legends[0]).toHaveTextContent("generate");
+			expect(legends[1]).toHaveTextContent("jxls");
+			expect(legends[2]).toHaveTextContent("src");
+			expect(legends[3]).toHaveTextContent("traversal");
+		});
+
+		it("formulaProcessはjxlsセクションに含まれない", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(generateRefreshGenerateTypeXlsResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector(
+					'input[type="checkbox"][name="-template.formulaProcess"]',
+				),
+			).not.toBeInTheDocument();
+		});
+
+		it("evaluateFormulasがjxlsセクションに含まれる", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(generateRefreshGenerateTypeXlsResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector(
+					'input[type="checkbox"][name="-template.evaluateFormulas"]',
+				),
+			).toBeInTheDocument();
 		});
 	});
 });

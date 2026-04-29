@@ -72,6 +72,51 @@ function makeTemplateOption() {
 	};
 }
 
+function makeJxlsTemplateOption(includeFormulaProcess: boolean) {
+	return {
+		...makeTemplateOption(),
+		...(includeFormulaProcess
+			? {
+					formulaProcess: makeElement(
+						"formulaProcess",
+						"FLG",
+						"true",
+						"WORKSPACE",
+						false,
+					),
+				}
+			: {}),
+		evaluateFormulas: makeElement(
+			"evaluateFormulas",
+			"FLG",
+			"true",
+			"WORKSPACE",
+			false,
+		),
+		forceFormulaRecalc: makeElement(
+			"forceFormulaRecalc",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
+		fastFormulaProcess: makeElement(
+			"fastFormulaProcess",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
+		deleteBlankCells: makeElement(
+			"deleteBlankCells",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
+	};
+}
+
 function makeCsvSrcData(
 	prefix: string,
 	src: string,
@@ -904,3 +949,49 @@ export const runRefreshScriptTypeSqlResponseFixture = {
 		jdbcPass: makeElement("jdbcPass", "TEXT", "", "WORKSPACE", false),
 	},
 } as RunOptions;
+
+// generate-refresh-generateType-xlsx フィクスチャ（formulaProcess あり）
+export const generateRefreshGenerateTypeXlsxResponseFixture = {
+	prefix: "",
+	generateType: makeElement("generateType", "ENUM", "xlsx", "WORKSPACE", false, [
+		"txt",
+		"xlsx",
+		"xls",
+		"settings",
+		"sql",
+		"xlsxTemplate",
+	]),
+	unit: makeElement("unit", "ENUM", "record", "WORKSPACE", false, [
+		"record",
+		"table",
+		"dataset",
+	]),
+	template: makeElement("template", "FILE", "", "TEMPLATE", true),
+	result: makeElement("result", "DIR", "", "RESULT", false),
+	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
+	srcData: makeCsvSrcData("src", ""),
+	templateOption: makeJxlsTemplateOption(true),
+} as GenerateOptions;
+
+// generate-refresh-generateType-xls フィクスチャ（formulaProcess なし）
+export const generateRefreshGenerateTypeXlsResponseFixture = {
+	prefix: "",
+	generateType: makeElement("generateType", "ENUM", "xls", "WORKSPACE", false, [
+		"txt",
+		"xlsx",
+		"xls",
+		"settings",
+		"sql",
+		"xlsxTemplate",
+	]),
+	unit: makeElement("unit", "ENUM", "record", "WORKSPACE", false, [
+		"record",
+		"table",
+		"dataset",
+	]),
+	template: makeElement("template", "FILE", "", "TEMPLATE", true),
+	result: makeElement("result", "DIR", "", "RESULT", false),
+	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
+	srcData: makeCsvSrcData("src", ""),
+	templateOption: makeJxlsTemplateOption(false),
+} as GenerateOptions;
