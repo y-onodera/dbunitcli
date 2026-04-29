@@ -20,7 +20,7 @@ export default function TemplateFormSection({
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
 	return (
-		<fieldset className="border border-gray-200 p-3">
+		<fieldset className="border border-border-subtle p-3">
 			<legend>template</legend>
 			<div className="flex items-center gap-2">
 				<ExpandButton

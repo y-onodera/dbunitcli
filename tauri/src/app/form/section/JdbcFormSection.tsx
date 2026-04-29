@@ -43,7 +43,7 @@ export default function JdbcFormSection({
 	const toggleOptional = () => setShowOptional(!showOptional);
 
 	return (
-		<fieldset className="border border-gray-200 p-3">
+		<fieldset className="border border-border-subtle p-3">
 			<legend>jdbc</legend>
 			<div className="flex items-center gap-2">
 				<ExpandButton
@@ -143,7 +143,7 @@ function JdbcConnectionTestButton({
 			/>
 			{result && (
 				<span
-					className={`text-sm font-medium ${result.success ? "text-green-600" : "text-red-600"}`}
+					className={`text-sm font-medium ${result.success ? "text-success" : "text-error"}`}
 				>
 					{result.success ? "✓ " : "✗ "}
 					{result.message}

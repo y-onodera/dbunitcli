@@ -1,9 +1,4 @@
-import {
-	type ReactNode,
-	useEffect,
-	useRef,
-	useState,
-} from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { BlueSettingButton } from "./ButtonIcon";
 
 export default function DropDownMenu({
@@ -58,7 +53,7 @@ export default function DropDownMenu({
 			{showMenu && (
 				<div
 					ref={menuRef}
-					className="absolute z-50 p-4 text-gray-900 bg-white border border-gray-100 rounded-lg shadow-md"
+					className="absolute z-50 p-4 text-content bg-surface border border-border-faint rounded-lg shadow-md"
 					style={
 						menuPosition === "right"
 							? { left: "100%", top: 0 }

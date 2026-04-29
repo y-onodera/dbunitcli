@@ -11,9 +11,9 @@ export function InputLabel(props: {
 		<label
 			htmlFor={props.id}
 			style={props.hidden ? { display: "none" } : {}}
-			className={`block 
+			className={`block
                    ${props.wStyle ? props.wStyle : "w-full"}
-                   font-medium text-sm text-gray-900 
+                   font-medium text-sm text-content
                    `}
 		>
 			{props.text}
@@ -95,9 +95,9 @@ export function CheckBox(props: {
 				id={props.id}
 				type="checkbox"
 				className="w-4 h-4
-                           text-indigo-500
-                           border border-gray-300
-                           ring-indigo-300
+                           text-primary
+                           border border-border
+                           ring-primary-ring
                            focus-visible:ring-3 "
 				style={props.hidden ? { display: "none" } : {}}
 				checked={checked}
@@ -147,23 +147,23 @@ export function PreviewField({
 			<InputLabel text={label} id={id} required={false} />
 			<div
 				id={id}
-				className="block p-2.5 w-full text-sm text-gray-700 rounded-lg bg-gray-100 border border-gray-300 font-mono break-all"
+				className="block p-2.5 w-full text-sm text-content-secondary rounded-lg bg-surface-muted border border-border font-mono break-all"
 			>
-				{value || <span className="text-gray-400">{placeholder}</span>}
+				{value || <span className="text-content-disabled">{placeholder}</span>}
 			</div>
 		</div>
 	);
 }
 function inputStyle(wStyle: string) {
-	return `block 
-               p-2.5 
-               ${wStyle} 
-               z-20 
-               text-sm text-gray-900
-               rounded-lg 
-               bg-gray-50 
-               disabled:bg-gray-300
-               border border-gray-300 
-               ring-indigo-300
+	return `block
+               p-2.5
+               ${wStyle}
+               z-20
+               text-sm text-content
+               rounded-lg
+               bg-input
+               disabled:bg-input-disabled
+               border border-border
+               ring-primary-ring
                focus-visible:ring-3 `;
 }

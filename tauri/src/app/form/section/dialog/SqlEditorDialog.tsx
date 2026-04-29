@@ -37,7 +37,9 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 		);
 
 	const appendToContent = (text: string) => {
-		setContent((prev) => (prev === "" || prev.endsWith("\n") ? prev + text : `${prev}\n${text}`));
+		setContent((prev) =>
+			prev === "" || prev.endsWith("\n") ? prev + text : `${prev}\n${text}`,
+		);
 	};
 
 	const handleInsert = (tables: string[]) => {
@@ -70,9 +72,9 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 				<div className="relative">
 					<textarea
 						id="contents"
-						className="w-full h-96 p-4 border border-gray-300 rounded-lg
-                         font-mono text-base bg-gray-50
-                         focus-visible:ring-3 ring-indigo-300"
+						className="w-full h-96 p-4 border border-border rounded-lg
+                         font-mono text-base bg-surface-subtle
+                         focus-visible:ring-3 ring-primary-ring"
 						value={content}
 						onChange={(e) => setContent(e.target.value)}
 						placeholder={

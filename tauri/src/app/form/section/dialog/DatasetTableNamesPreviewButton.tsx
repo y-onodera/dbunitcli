@@ -51,15 +51,20 @@ function DatasetTableNamesPreviewDialog({
 
 	function renderContent() {
 		if (loading) {
-			return <p className="text-sm text-gray-400 p-3">Loading...</p>;
+			return <p className="text-sm text-content-disabled p-3">Loading...</p>;
 		}
 		if (tableNames.length === 0) {
-			return <p className="text-sm text-gray-400 p-3">No tables found.</p>;
+			return (
+				<p className="text-sm text-content-disabled p-3">No tables found.</p>
+			);
 		}
 		return (
-			<ul className="text-sm bg-gray-50 border border-gray-300 rounded-lg p-3 overflow-auto max-h-96 space-y-1">
+			<ul className="text-sm bg-surface-subtle border border-border rounded-lg p-3 overflow-auto max-h-96 space-y-1">
 				{tableNames.map((name) => (
-					<li key={name} className="flex items-center gap-2 text-gray-700">
+					<li
+						key={name}
+						className="flex items-center gap-2 text-content-secondary"
+					>
 						<span className="flex-1">{name}</span>
 						<PreviewButton
 							title={`Preview ${name}`}
@@ -75,7 +80,7 @@ function DatasetTableNamesPreviewDialog({
 		<dialog
 			ref={dialogRef}
 			onClose={handleDialogClose}
-			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-white border border-gray-200"
+			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-surface border border-border-subtle"
 		>
 			<div className="p-4 rounded-lg mt-2">
 				<h2 className="text-lg font-bold mb-2">Table List Preview</h2>
@@ -116,20 +121,22 @@ function TableDataPreviewDialog({
 
 	function renderContent() {
 		if (loading) {
-			return <p className="text-sm text-gray-400 p-3">Loading...</p>;
+			return <p className="text-sm text-content-disabled p-3">Loading...</p>;
 		}
 		if (!preview || preview.headers.length === 0) {
-			return <p className="text-sm text-gray-400 p-3">No data found.</p>;
+			return (
+				<p className="text-sm text-content-disabled p-3">No data found.</p>
+			);
 		}
 		return (
-			<div className="overflow-x-auto max-h-64 border border-gray-300 rounded-lg">
+			<div className="overflow-x-auto max-h-64 border border-border rounded-lg">
 				<table className="text-sm text-left w-full">
-					<thead className="bg-gray-100 sticky top-0">
+					<thead className="bg-surface-muted sticky top-0">
 						<tr>
 							{preview.headers.map((header) => (
 								<th
 									key={header}
-									className="px-3 py-2 font-medium text-gray-700 whitespace-nowrap border-b border-gray-300"
+									className="px-3 py-2 font-medium text-content-secondary whitespace-nowrap border-b border-border"
 								>
 									{header}
 								</th>
@@ -140,12 +147,12 @@ function TableDataPreviewDialog({
 						{preview.rows.map((row) => (
 							<tr
 								key={row.join("\x00")}
-								className="border-t border-gray-100 hover:bg-gray-50"
+								className="border-t border-border-faint hover:bg-surface-subtle"
 							>
 								{preview.headers.map((header, i) => (
 									<td
 										key={header}
-										className="px-3 py-1.5 text-gray-600 whitespace-nowrap"
+										className="px-3 py-1.5 text-content-muted whitespace-nowrap"
 									>
 										{row[i] ?? ""}
 									</td>
@@ -162,7 +169,7 @@ function TableDataPreviewDialog({
 		<dialog
 			ref={dialogRef}
 			onClose={handleClose}
-			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-white border border-gray-200"
+			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-surface border border-border-subtle"
 		>
 			<div className="p-4 rounded-lg mt-2">
 				<h2 className="text-lg font-bold mb-2">{tableName} — Data Preview</h2>

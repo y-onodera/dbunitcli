@@ -17,7 +17,7 @@ export default function DataLoadFormSection({
 	const toggleOptional = () => setShowOptional(!showOptional);
 	const prefix = options.prefix;
 	return (
-		<fieldset className="border border-gray-200 p-3">
+		<fieldset className="border border-border-subtle p-3">
 			<legend>data load</legend>
 			<ExpandButton
 				toggleOptional={toggleOptional}

@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { ButtonIcon } from "../../../../components/element/ButtonIcon";
 import { AddIcon, ExpandIcon } from "../../../../components/element/Icon";
 
@@ -22,7 +22,15 @@ export default function TableList({
 	onInsertColumn,
 }: TableListProps) {
 	const [filter, setFilter] = useState("");
-	const [columnMap, setColumnMap] = useState<Map<string, string[] | "loading">>(new Map());
+	const [columnMap, setColumnMap] = useState<Map<string, string[] | "loading">>(
+		new Map(),
+	);
+	const isMountedRef = useRef(true);
+	useEffect(() => {
+		return () => {
+			isMountedRef.current = false;
+		};
+	}, []);
 
 	const filterLower = filter.toLowerCase();
 	const filteredTables = filterLower
@@ -48,12 +56,20 @@ export default function TableList({
 		}
 		setColumnMap((prev) => new Map(prev).set(table, "loading"));
 		onQueryColumns(table).then(
-			(columns) => setColumnMap((prev) => new Map(prev).set(table, columns)),
-			() => setColumnMap((prev) => {
-				const next = new Map(prev);
-				next.delete(table);
-				return next;
-			}),
+			(columns) => {
+				if (isMountedRef.current) {
+					setColumnMap((prev) => new Map(prev).set(table, columns));
+				}
+			},
+			() => {
+				if (isMountedRef.current) {
+					setColumnMap((prev) => {
+						const next = new Map(prev);
+						next.delete(table);
+						return next;
+					});
+				}
+			},
 		);
 	};
 
@@ -64,13 +80,13 @@ export default function TableList({
 				value={filter}
 				onChange={(e) => setFilter(e.target.value)}
 				placeholder="Filter tables..."
-				className="w-full mb-1 px-2 py-1 text-sm border border-gray-300 rounded bg-gray-50 focus:outline-none focus-visible:ring-3 ring-indigo-300"
+				className="w-full mb-1 px-2 py-1 text-sm border border-border rounded bg-input focus-visible:ring-3 ring-primary-ring"
 			/>
 			<div
-				className={`relative overflow-x-auto ${maxHeightClass} overflow-y-auto border border-gray-200 rounded`}
+				className={`relative overflow-x-auto ${maxHeightClass} overflow-y-auto border border-border-subtle rounded`}
 			>
 				<table className="w-full text-sm text-left">
-					<thead className="bg-gray-50 sticky top-0">
+					<thead className="bg-surface-subtle sticky top-0">
 						<tr>
 							<th className="px-3 py-2 w-8">
 								<input
@@ -79,10 +95,10 @@ export default function TableList({
 									onChange={(e) =>
 										onToggleAll(filteredTables, e.target.checked)
 									}
-									className="w-4 h-4 accent-indigo-600"
+									className="w-4 h-4 accent-primary-hover"
 								/>
 							</th>
-							<th className="px-3 py-2 font-medium text-gray-700">
+							<th className="px-3 py-2 font-medium text-content-secondary">
 								Table Name
 							</th>
 						</tr>
@@ -91,7 +107,7 @@ export default function TableList({
 						{filteredTables.map((table) => (
 							<Fragment key={table}>
 								<tr
-									className="hover:bg-gray-50 cursor-pointer border-t border-gray-100"
+									className="hover:bg-surface-subtle cursor-pointer border-t border-border-faint"
 									onClick={() => onToggle(table)}
 								>
 									<td className="px-3 py-1.5">
@@ -100,7 +116,7 @@ export default function TableList({
 											checked={selected.has(table)}
 											onChange={() => onToggle(table)}
 											onClick={(e) => e.stopPropagation()}
-											className="w-4 h-4 accent-indigo-600"
+											className="w-4 h-4 accent-primary-hover"
 										/>
 									</td>
 									<td className="px-3 py-1.5">
@@ -114,7 +130,9 @@ export default function TableList({
 													}}
 												>
 													{columnMap.get(table) === "loading" ? (
-														<span className="text-xs text-gray-400 w-3 h-3">…</span>
+														<span className="text-xs text-content-disabled w-3 h-3">
+															…
+														</span>
 													) : (
 														<ExpandIcon close={!columnMap.has(table)} />
 													)}
@@ -123,26 +141,27 @@ export default function TableList({
 										</div>
 									</td>
 								</tr>
-								{Array.isArray(columnMap.get(table)) && (columnMap.get(table) as string[]).map((col) => (
-									<tr
-										key={`${table}::${col}`}
-										className="bg-gray-50 border-t border-gray-100"
-									>
-										<td />
-										<td className="px-6 py-1">
-											<div className="flex items-center gap-2">
-												<span className="text-xs text-gray-500">{col}</span>
-												{onInsertColumn && (
-													<ButtonIcon
-														handleClick={() => onInsertColumn(col)}
-													>
-														<AddIcon title="Insert column" />
-													</ButtonIcon>
-												)}
-											</div>
-										</td>
-									</tr>
-								))}
+								{Array.isArray(columnMap.get(table)) &&
+									(columnMap.get(table) as string[]).map((col) => (
+										<tr
+											key={`${table}::${col}`}
+											className="bg-surface-subtle border-t border-border-faint"
+										>
+											<td />
+											<td className="px-6 py-1">
+												<div className="flex items-center gap-2">
+													<span className="text-xs text-content-muted">
+														{col}
+													</span>
+													{onInsertColumn && (
+														<ButtonIcon handleClick={() => onInsertColumn(col)}>
+															<AddIcon title="Insert column" />
+														</ButtonIcon>
+													)}
+												</div>
+											</td>
+										</tr>
+									))}
 							</Fragment>
 						))}
 					</tbody>
