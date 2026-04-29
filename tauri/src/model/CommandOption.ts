@@ -153,6 +153,11 @@ export type TemplateOption = CommandOptions & {
 	templateParameterAttribute: CommandOption;
 	templateVarStart: CommandOption;
 	templateVarStop: CommandOption;
+	formulaProcess?: CommandOption;
+	evaluateFormulas?: CommandOption;
+	forceFormulaRecalc?: CommandOption;
+	fastFormulaProcess?: CommandOption;
+	deleteBlankCells?: CommandOption;
 };
 export type CsvOptions = CommandOptions & {
 	srcType: Csv;
