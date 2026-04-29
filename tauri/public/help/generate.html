@@ -24,23 +24,11 @@
   <table>
     <tr><th>値</th><th>説明</th></tr>
     <tr><td>txt</td><td>StringTemplate 4 を使ったテキストファイル生成（SQL・CSV 等）。<a href="template.html">Template</a> オプションが適用されます</td></tr>
-    <tr><td>xlsx</td><td>jxls を使った xlsx テンプレートへのデータ埋め込み。<strong>jxls option</strong> セクションが表示されます</td></tr>
-    <tr><td>xls</td><td>jxls を使った xls テンプレートへのデータ埋め込み。<strong>jxls option</strong> セクションが表示されます</td></tr>
+    <tr><td>xlsx</td><td>jxls を使った xlsx テンプレートへのデータ埋め込み。<a href="jxls.html">Jxls</a> オプションが適用されます</td></tr>
+    <tr><td>xls</td><td>jxls を使った xls テンプレートへのデータ埋め込み。<a href="jxls.html">Jxls</a> オプションが適用されます</td></tr>
     <tr><td>settings</td><td>データセット設定ファイルのひな型を生成</td></tr>
     <tr><td>sql</td><td>INSERT / UPDATE / DELETE / CLEAN_INSERT SQL ファイルを生成</td></tr>
     <tr><td>xlsxTemplate</td><td>jxls テンプレートのひな型 xlsx を生成</td></tr>
-  </table>
-
-  <h2 id="section-jxls">jxls オプション（xlsx / xls）</h2>
-  <p><code>generateType</code> が <code>xlsx</code> または <code>xls</code> のとき、<strong>jxls option</strong> 展開ボタンから以下のオプションを設定できます。</p>
-  <table>
-    <tr><th>項目</th><th>説明</th><th>既定</th></tr>
-    <tr><td>templateParameterAttribute</td><td>テンプレート内でデータ行にアクセスする属性名。空にするとカラム名で直接参照</td><td>param</td></tr>
-    <tr><td>formulaProcess</td><td>（xlsx のみ）数式セルを処理するか。<code>false</code> にすると低メモリで動作しますが、行追加時のセル参照更新が行われません</td><td>true</td></tr>
-    <tr><td>evaluateFormulas</td><td>Excel 数式を評価するか</td><td>true</td></tr>
-    <tr><td>forceFormulaRecalc</td><td>Excel で開いたときに自動再計算させるフラグを立てる</td><td>false</td></tr>
-    <tr><td>fastFormulaProcess</td><td>高速な数式プロセッサを使用する</td><td>false</td></tr>
-    <tr><td>deleteBlankCells</td><td>数式評価後に空セルを削除する</td><td>false</td></tr>
   </table>
 
   <h2>その他のオプション</h2>
@@ -53,6 +41,6 @@
     <tr><td>outputEncoding</td><td>出力ファイルのエンコーディング（txt タイプのみ）</td></tr>
   </table>
   <p><code>srcData</code> の入力フォーム詳細は <a href="dataset-load-form.html">Dataset Load Form</a> を参照してください。<br>
-  <code>txt</code> タイプの template オプション詳細は <a href="template.html">Template</a> を参照してください。</p>
+  <code>txt</code> タイプのテンプレートオプションは <a href="template.html">Template (StringTemplate 4)</a>、<code>xlsx</code> / <code>xls</code> タイプのオプションは <a href="jxls.html">Jxls</a> を参照してください。</p>
 </body>
 </html>

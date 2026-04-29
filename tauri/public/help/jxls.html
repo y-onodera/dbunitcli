@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Jxls</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Jxls</h1>
+  <p><a href="generate.html">Generate</a> で <code>generateType = xlsx</code> または <code>xls</code> を選んだ場合に使用するテンプレートエンジンです。Excel ファイル（<code>.xlsx</code> / <code>.xls</code>）をテンプレートとして、入力データセットの各行を埋め込んで出力します。</p>
+  <p>テンプレートには jxls のコメント記法（セルのコメントに <code>jx:each</code> 等のディレクティブを記述）を使います。</p>
+
+  <h2 id="section-fields">設定項目</h2>
+  <p>フォームの <strong>jxls option</strong> 展開ボタンから設定します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>既定</th></tr>
+    <tr><td>templateParameterAttribute</td><td>テンプレート内でデータ行にアクセスする属性名。例えば <code>param</code> を指定すると <code>param.columnName</code> で参照できます。空にするとカラム名で直接参照します</td><td>param</td></tr>
+    <tr><td>formulaProcess</td><td>（xlsx のみ）数式セルを処理するか。<code>false</code> にすると低メモリで動作しますが、行追加時にセル参照が更新されません</td><td>true</td></tr>
+    <tr><td>evaluateFormulas</td><td>Excel 数式を評価するか</td><td>true</td></tr>
+    <tr><td>forceFormulaRecalc</td><td>出力ファイルを Excel で開いたときに自動再計算させるフラグを立てる</td><td>false</td></tr>
+    <tr><td>fastFormulaProcess</td><td>高速な数式プロセッサを使用する</td><td>false</td></tr>
+    <tr><td>deleteBlankCells</td><td>数式評価後に空セルを削除する</td><td>false</td></tr>
+  </table>
+
+  <h2 id="section-template">テンプレートの書き方</h2>
+  <p>Excel のセルコメントにディレクティブを記述します。各行のデータは <code>templateParameterAttribute</code> で指定した名前のオブジェクトとして参照します（既定: <code>param</code>）。</p>
+  <pre>セル A1 のコメント:
+  jx:each(items="items" var="param" lastCell="C1")
+
+セル A1: $[param.id]
+セル B1: $[param.name]
+セル C1: $[param.value]</pre>
+  <p>データセットの各行が <code>items</code> として渡され、行ごとに展開されます。</p>
+
+  <h2>関連ページ</h2>
+  <ul>
+    <li><a href="generate.html">Generate</a> — generateType の選択と generate コマンド全体の設定</li>
+    <li><a href="template.html">Template (StringTemplate 4)</a> — <code>generateType = txt</code> で使うテンプレートエンジン</li>
+  </ul>
+</body>
+</html>

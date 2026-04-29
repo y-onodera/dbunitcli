@@ -21,7 +21,7 @@ export default function JxlsFormSection({
 					showOptional={showOptional}
 					caption="jxls option"
 				/>
-				<SectionHelpButton command="generate" label="Jxls" />
+				<SectionHelpButton command="jxls" label="Jxls" />
 			</div>
 			<PlainText
 				prefix={templateOption.prefix}

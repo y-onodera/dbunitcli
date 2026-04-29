@@ -24,7 +24,7 @@
   <h1>Template</h1>
   <p>テンプレート処理のための設定です。テンプレートエンジンは <strong>StringTemplate 4 (ST4)</strong>。式は既定で <code>$...$</code> の記法を用い、入力データセットの各行をパラメータとして埋め込みます。以下の場面で利用されます。</p>
   <ul>
-    <li><a href="generate.html">Generate</a> — 入力データセットをもとにファイル（SQL / テキスト / xlsx / 設定ファイル等）を生成</li>
+    <li><a href="generate.html">Generate</a> — <code>generateType = txt</code> でテキストファイル（SQL・CSV 等）を生成。xlsx / xls 出力は <a href="jxls.html">Jxls</a> を参照</li>
     <li><a href="run.html">Run</a> — SQL / ANT スクリプトを実行する前にテンプレートとしてレンダリング</li>
     <li><a href="parameterize.html">Parameterize</a> — パラメータごとにコマンド引数や設定をレンダリング</li>
     <li><a href="dataset-load-form.html#section-source">Dataset Load Form</a> の <code>templateGroup</code> — 入力読み込み時にテンプレートを適用（任意）</li>
