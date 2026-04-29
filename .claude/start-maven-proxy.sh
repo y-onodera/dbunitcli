@@ -75,19 +75,18 @@ fi
 # (Maven が Maven Central などへ HTTPS 接続できるようにする)
 JDK_HOME="${JAVA_HOME:-$JDK25_DIR}"
 CACERTS="$JDK_HOME/lib/security/cacerts"
-if [ -f "$CACERTS" ] && [ -d /usr/local/share/ca-certificates ]; then
+CACERTS_MARKER="$JDK_HOME/.claude-cacerts-imported"
+if [ ! -f "$CACERTS_MARKER" ] && [ -f "$CACERTS" ] && [ -d /usr/local/share/ca-certificates ]; then
   IMPORTED=0
   for crt in /usr/local/share/ca-certificates/*.crt; do
     [ -f "$crt" ] || continue
-    alias_name="claude-$(basename "$crt" .crt)"
-    if ! "$JDK_HOME/bin/keytool" -list -keystore "$CACERTS" -storepass changeit -alias "$alias_name" >/dev/null 2>&1; then
-      if "$JDK_HOME/bin/keytool" -importcert -noprompt -trustcacerts \
-          -keystore "$CACERTS" -storepass changeit \
-          -alias "$alias_name" -file "$crt" >/dev/null 2>&1; then
-        IMPORTED=$((IMPORTED + 1))
-      fi
+    if "$JDK_HOME/bin/keytool" -importcert -noprompt -trustcacerts \
+        -keystore "$CACERTS" -storepass changeit \
+        -alias "claude-$(basename "$crt" .crt)" -file "$crt" >/dev/null 2>&1; then
+      IMPORTED=$((IMPORTED + 1))
     fi
   done
+  touch "$CACERTS_MARKER"
   echo "Imported $IMPORTED system CA certificate(s) into JDK cacerts"
 fi
 
