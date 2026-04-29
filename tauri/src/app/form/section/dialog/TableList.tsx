@@ -67,7 +67,7 @@ export default function TableList({
 				value={filter}
 				onChange={(e) => setFilter(e.target.value)}
 				placeholder="Filter tables..."
-				className="w-full mb-1 px-2 py-1 text-sm border border-border rounded bg-surface-subtle focus:outline-none focus-visible:ring-3 ring-primary-ring"
+				className="w-full mb-1 px-2 py-1 text-sm border border-border rounded bg-input focus-visible:ring-3 ring-primary-ring"
 			/>
 			<div
 				className={`relative overflow-x-auto ${maxHeightClass} overflow-y-auto border border-border-subtle rounded`}
