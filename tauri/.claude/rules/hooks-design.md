@@ -1,95 +1,19 @@
 # hooks/ 設計規約
 
-## useEffect 内で使う非同期処理はモジュールレベル関数で書く
+## useEffect 内の非同期処理はモジュールレベル関数で書く
 
-`useEffect` 内から呼ぶ非同期 API 関数は、**フックではなくモジュールレベルの `async function`** として定義する。
+`useEffect` 内から呼ぶ非同期 API 関数は**モジュールレベルの `async function`** として定義する。フックが返すクロージャを deps に含めると「setState → 再レンダー → 新クロージャ → effect 再発火」の無限ループが起きる。
 
-### なぜか
-
-フックが返すクロージャは毎レンダーで新しい参照になる。
-`useEffect` の依存配列に含めると、effect 内の `setState` → 再レンダー → 新しいクロージャ → effect 再発火 の無限ループが起きる。
-
-モジュールレベル関数は参照が安定しているため依存配列に入れる必要がなく、ループが起きない。
-
-### OK: モジュールレベル関数 + apiUrl を deps に含める
-
-```typescript
-// hooks/useXxx.ts
-
-// モジュールレベル関数 — 参照が安定
-async function fetchXxx(apiUrl: string, param: Param): Promise<Result> {
-    ...
-}
-
-export const useXxx = (param: Param) => {
-    const { apiUrl } = useEnviroment();
-    const [data, setData] = useState<Result | null>(null);
-
-    useEffect(() => {
-        let isMounted = true;
-        fetchXxx(apiUrl, param).then((result) => {
-            if (isMounted) { setData(result); }
-        });
-        return () => { isMounted = false; };
-    }, [apiUrl, param]);  // fetchXxx は deps 不要
-
-    return data;
-};
-```
-
-### NG: フックが返すクロージャを deps に含める
-
-```typescript
-// 毎レンダーで新しい関数参照 → 無限ループ
-const loadData = useLoadDataApi();  // フックが返すクロージャ
-useEffect(() => {
-    setLoading(true);               // 再レンダー → 新クロージャ → effect 再発火
-    loadData(param).then(...);
-}, [loadData, param]);              // NG: loadData が deps にある
-```
-
-### イベントハンドラ用フックはそのままでよい
-
-ボタンクリックなど **`useEffect` 外から呼ぶだけ** の関数はフックが返すクロージャでも問題ない。
-deps に含めないので無限ループは起きない。
-
-```typescript
-// イベントハンドラとして使うだけなら OK
-const save = useSaveXxx();
-<button onClick={() => save(input)} />
-```
+イベントハンドラとして使うだけの関数（deps に含めない）はクロージャのままでよい。
 
 ## isMounted ガード
 
-非同期処理が完了する前にコンポーネントがアンマウントされる可能性がある場合は必ず `isMounted` ガードを付ける。
+非同期処理がアンマウント後に完了しうる場合は必ず付ける。
 
-### useEffect 内で非同期処理を開始する場合
+| 起点 | パターン |
+|---|---|
+| `useEffect` 内 | `let isMounted = true` ローカル変数 + `return () => { isMounted = false }` |
+| イベントハンドラ | `const isMountedRef = useRef(true)` + `useEffect(() => () => { isMountedRef.current = false }, [])` |
 
-`let isMounted` をローカル変数として使う（effect のスコープ内で完結するため）。
+`useEffect` 外から Promise を開始する場合はクロージャをまたぐため `useRef` が必要。
 
-```typescript
-useEffect(() => {
-    let isMounted = true;
-    fetchXxx(apiUrl, param).then((result) => {
-        if (isMounted) { setData(result); }
-    });
-    return () => { isMounted = false; };
-}, [apiUrl, param]);
-```
-
-### イベントハンドラで非同期処理を開始する場合
-
-`useEffect` のスコープ外から Promise を開始する場合（ボタンクリック等）は `useRef` を使う。ローカル変数はコールバックのクロージャをまたげないため `useRef` が必要。
-
-```typescript
-const isMountedRef = useRef(true);
-useEffect(() => {
-    return () => { isMountedRef.current = false; };
-}, []);
-
-const handleLoad = () => {
-    fetchXxx(param).then((result) => {
-        if (isMountedRef.current) { setData(result); }
-    });
-};
-```
