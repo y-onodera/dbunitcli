@@ -8,24 +8,33 @@ export function ParameterInputDialog(props: {
 }) {
 	const [params, setParams] = useState(props.params);
 
+	const removeEntry = (
+		index: number,
+		current: { [key: string]: string },
+	) => {
+		const entries = Object.entries(current);
+		entries.splice(index, 1);
+		return Object.fromEntries(entries);
+	};
+
 	const handleChange = (
 		index: number,
 		newValue: { [prop: string]: string },
 	) => {
-		const entries = Object.entries(params);
 		const newKey = Object.keys(newValue)[0];
 		if (!newKey) {
-			entries.splice(index, 1);
+			setParams((cur) => removeEntry(index, cur));
 		} else {
-			entries[index] = [newKey, Object.values(newValue)[0] ?? ""];
+			setParams((cur) => {
+				const entries = Object.entries(cur);
+				entries[index] = [newKey, Object.values(newValue)[0] ?? ""];
+				return Object.fromEntries(entries);
+			});
 		}
-		setParams(Object.fromEntries(entries));
 	};
 
 	const handleRemove = (index: number) => {
-		const entries = Object.entries(params);
-		entries.splice(index, 1);
-		setParams(Object.fromEntries(entries));
+		setParams((cur) => removeEntry(index, cur));
 	};
 
 	return (

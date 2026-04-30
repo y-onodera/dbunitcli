@@ -98,16 +98,14 @@ export default function CommandForm(prop: {
 						</span>
 					)}
 				</div>
-				{Object.entries(paramInputs)
-					.filter(([name]) => name !== "")
-					.map(([name, value]) => (
-						<input
-							key={name}
-							type="hidden"
-							name={`-P${name}`}
-							value={value}
-						/>
-					))}
+				{Object.entries(paramInputs).map(([name, value]) => (
+					<input
+						key={name}
+						type="hidden"
+						name={`-P${name}`}
+						value={value}
+					/>
+				))}
 				{showParamDialog && (
 					<ParameterInputDialog
 						params={paramInputs}
