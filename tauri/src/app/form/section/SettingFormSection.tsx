@@ -18,6 +18,7 @@ export default function SettingFormSection({
 				prefix={prefix}
 				element={settingElements.setting}
 				hidden={false}
+				handleValueChange={handleValueChange(settingElements.setting)}
 			/>
 			<PlainText
 				prefix={prefix}

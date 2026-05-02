@@ -13,6 +13,7 @@ export default function DatasetSettingText({
 	element,
 	hidden,
 	hideDatasetSettingEdit,
+	handleValueChange,
 }: TextProp) {
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const settings = useResourcesSettings();
@@ -25,10 +26,11 @@ export default function DatasetSettingText({
 			hidden={hidden}
 			resourceFiles={resourceFiles}
 			showDefaulePath={true}
+			handleValueChange={handleValueChange}
 			afterContent={({ path }) =>
 				datasetSrcInfo.srcType && !hideDatasetSettingEdit ? (
 					<div className="mt-2 flex items-center gap-3">
-						<DatasetTableNamesPreviewButton title="Preview Before Settings" />
+						<DatasetTableNamesPreviewButton title="Preview Before Settings" setting="" />
 						{path && (
 							<DatasetTableNamesPreviewButton
 								title="Preview Aply Settings"
