@@ -1,6 +1,7 @@
 import { core } from "@tauri-apps/api";
 import { useEffect, useRef, useState } from "react";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
+import { BlueEditButton } from "../../components/element/ButtonIcon";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import {
 	type Running,
@@ -8,6 +9,7 @@ import {
 	useSaveParameter,
 	useSaveShell,
 } from "../../hooks/useSelectParameter";
+import { ParameterInputDialog } from "../form/section/dialog/ParameterInputDialog";
 import ResultDialog from "./ResultDialog";
 
 export default function Footer(prop: {
@@ -16,6 +18,8 @@ export default function Footer(prop: {
 		validationError: boolean;
 	};
 }) {
+	const [paramInputs, setParamInputs] = useState<{ [key: string]: string }>({});
+	const [showParamDialog, setShowParamDialog] = useState(false);
 	const [running, setRunning] = useState({
 		command: "",
 		resultMessage: "",
@@ -35,6 +39,10 @@ export default function Footer(prop: {
 	execParameterRef.current = execParameter;
 	saveParameterRef.current = saveParameter;
 	saveShellRef.current = saveShell;
+
+	useEffect(() => {
+		setParamInputs({});
+	}, [parameter.name]);
 
 	useEffect(() => {
 		if (running.command === "" || executingRef.current) {
@@ -102,6 +110,8 @@ export default function Footer(prop: {
 		);
 	}
 
+	const paramCount = Object.keys(paramInputs).length;
+
 	return (
 		<>
 			<ResultDialog hidden={running.resultMessage === ""}>
@@ -166,7 +176,34 @@ export default function Footer(prop: {
 						}}
 					/>
 					<span className="text-sm text-content-muted">*Required</span>
+					<BlueEditButton
+						title="Parameters (-P)"
+						handleClick={() => setShowParamDialog(true)}
+					/>
+					{paramCount > 0 && (
+						<span className="text-sm text-content-muted">
+							{paramCount} parameter(s) set
+						</span>
+					)}
 				</div>
+			)}
+			{Object.entries(paramInputs).map(([name, value]) => (
+				<input
+					key={name}
+					type="hidden"
+					name={`-P${name}`}
+					value={value}
+				/>
+			))}
+			{showParamDialog && (
+				<ParameterInputDialog
+					params={paramInputs}
+					handleDialogClose={() => setShowParamDialog(false)}
+					handleCommit={(newParams) => {
+						setParamInputs(newParams);
+						setShowParamDialog(false);
+					}}
+				/>
 			)}
 		</>
 	);
