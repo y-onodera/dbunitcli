@@ -140,42 +140,8 @@ export default function Footer(prop: {
 					className="fixed bottom-0 right-1
                                 w-full z-50
 								bg-surface-muted
-                                flex items-center justify-end p-4 gap-2"
+                                flex items-center p-4 gap-2"
 				>
-					<BlueButton
-						title="Exec"
-						handleClick={() => {
-							const input = prop.formData(true);
-							if (!input.validationError) {
-								setRunning({
-									command: "exec",
-									resultMessage: "",
-									resultDir: "",
-								});
-							}
-						}}
-					/>
-					<BlueButton
-						title="Save"
-						handleClick={() => {
-							setRunning({
-								command: "save",
-								resultMessage: "",
-								resultDir: "",
-							});
-						}}
-					/>
-					<BlueButton
-						title="Save Shell"
-						handleClick={() => {
-							setRunning({
-								command: "saveShell",
-								resultMessage: "",
-								resultDir: "",
-							});
-						}}
-					/>
-					<span className="text-sm text-content-muted">*Required</span>
 					<BlueEditButton
 						title="Parameters (-P)"
 						handleClick={() => setShowParamDialog(true)}
@@ -185,6 +151,42 @@ export default function Footer(prop: {
 							{paramCount} parameter(s) set
 						</span>
 					)}
+					<div className="ml-auto flex items-center gap-2">
+						<BlueButton
+							title="Exec"
+							handleClick={() => {
+								const input = prop.formData(true);
+								if (!input.validationError) {
+									setRunning({
+										command: "exec",
+										resultMessage: "",
+										resultDir: "",
+									});
+								}
+							}}
+						/>
+						<BlueButton
+							title="Save"
+							handleClick={() => {
+								setRunning({
+									command: "save",
+									resultMessage: "",
+									resultDir: "",
+								});
+							}}
+						/>
+						<BlueButton
+							title="Save Shell"
+							handleClick={() => {
+								setRunning({
+									command: "saveShell",
+									resultMessage: "",
+									resultDir: "",
+								});
+							}}
+						/>
+						<span className="text-sm text-content-muted">*Required</span>
+					</div>
 				</div>
 			)}
 			{Object.entries(paramInputs).map(([name, value]) => (
