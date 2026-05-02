@@ -1,27 +1,8 @@
-# Claude Code プロジェクト設定
+# DBUnit-CLI
 
-## プロジェクト構造
-DBUnit-CLIは以下の4つのプロジェクトで構成される統合アプリケーションです：
-- `core/` - コアモジュール
-  - コアとなるCLI機能を提供
-  - GraalVMのnative-imageとしてビルド
-  - 共通ライブラリとしてjarを提供
-  - データベース操作の基本機能を実装
-- `sidecar/` - サイドカーアプリケーション（Micronaut）
-  - Micronautベースのバックエンドサービス
-  - TauriアプリケーションのREST API提供
-  - coreの機能をHTTPインターフェースで公開
-- `gui/` - GUIモジュール
-  - JavaFXベースのGUIアプリケーション
-  - coreの機能をデスクトップアプリとして提供
-  - ユーザーフレンドリーなインターフェース
-- `tauri/` - Tauriアプリケーション
-  - 次世代GUIフロントエンド（Tauri v2）
-  - sidecarのAPIを利用したモダンなUI
-  - クロスプラットフォーム対応
+Maven マルチモジュール構成の統合アプリケーション。
 
-## 開発環境
-- Java プロジェクト
-- Maven ビルドシステム
-- Micronaut フレームワーク（sidecar）
-- Tauri フレームワーク（GUI）
+- `core/` - CLI機能・共通jar・GraalVM native-image対応
+- `sidecar/` - Micronaut製REST API（coreをHTTP公開、tauriのバックエンド）
+- `gui/` - JavaFX製デスクトップGUI
+- `tauri/` - Tauri v2フロントエンド（sidecar APIを利用）
