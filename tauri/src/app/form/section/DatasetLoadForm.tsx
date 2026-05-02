@@ -16,14 +16,81 @@ import SettingFormSection from "./SettingFormSection";
 import SrcFormSection from "./SrcFormSection";
 import SrcTypeFormSection from "./SrcTypeFormSection";
 
+function DatasetLoadFormContent({
+	srcData,
+	handleTypeSelect,
+	defaultType,
+}: {
+	srcData: DatasetSource;
+	handleTypeSelect: () => Promise<void>;
+	defaultType?: SrcType;
+}) {
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const setDatasetSrcInfo = useSetDatasetSrcInfo();
+
+	const handleToggleChecked =
+		(element: CommandOption) => (checked: boolean) => {
+			if (element.name in datasetSrcInfo) {
+				setDatasetSrcInfo({
+					...datasetSrcInfo,
+					[element.name]: checked,
+				} as DatasetSrcInfo);
+			}
+		};
+	const handleValueChange = (element: CommandOption) => (newValue: string) => {
+		if (element.name in datasetSrcInfo) {
+			setDatasetSrcInfo({
+				...datasetSrcInfo,
+				[element.name]: newValue,
+			} as DatasetSrcInfo);
+		}
+	};
+	const jdbcOption = srcData.jdbcProperties ? srcData : undefined;
+	const templateOption = srcData.templateGroup ? srcData : undefined;
+	return (
+		<fieldset className="border border-border-subtle p-3">
+			<legend>{srcData.prefix}</legend>
+			{srcData.srcType && (
+				<Select
+					handleTypeSelect={handleTypeSelect}
+					prefix={srcData.prefix}
+					element={srcData.srcType}
+					hidden={false}
+				/>
+			)}
+			<SrcFormSection
+				srcElements={srcData}
+				srcType={defaultType ?? srcData.srcType?.value}
+				jdbcOption={jdbcOption}
+				templateOption={templateOption}
+				handleValueChange={handleValueChange}
+				handleToggleChecked={handleToggleChecked}
+			/>
+			<DataLoadFormSection
+				options={srcData}
+				handleValueChange={handleValueChange}
+				handleToggleChecked={handleToggleChecked}
+			/>
+			<SrcTypeFormSection
+				options={srcData}
+				handleValueChange={handleValueChange}
+				handleToggleChecked={handleToggleChecked}
+			/>
+			<SettingFormSection
+				settingElements={srcData}
+				handleValueChange={handleValueChange}
+				handleToggleChecked={handleToggleChecked}
+			/>
+		</fieldset>
+	);
+}
+
 export function DatasetLoadForm(prop: {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
 	srcData: DatasetSource;
 	defalutType?: SrcType;
 }) {
-	const datasetSrcInfo = useDatasetSrcInfo();
-	const setDatasetSrcInfo = useSetDatasetSrcInfo();
 	if (prop.srcData.srcType?.value === "none") {
 		return (
 			<fieldset className="border border-border-subtle p-3">
@@ -37,64 +104,17 @@ export function DatasetLoadForm(prop: {
 			</fieldset>
 		);
 	}
-	const handleToggleChecked =
-		(element: CommandOption) => (checked: boolean) => {
-			setDatasetSrcInfo({
-				...datasetSrcInfo,
-				[element.name]: checked,
-			} as DatasetSrcInfo);
-		};
-	const handleValueChange = (element: CommandOption) => (newValue: string) => {
-		if (element.name in datasetSrcInfo) {
-			setDatasetSrcInfo({
-				...datasetSrcInfo,
-				[element.name]: newValue,
-			} as DatasetSrcInfo);
-		}
-	};
-	const srcElements = prop.srcData;
-	const jdbcOption = prop.srcData.jdbcProperties ? prop.srcData : undefined;
-	const templateOption = prop.srcData.templateGroup ? prop.srcData : undefined;
 	const initialDatasetSrcInfo = buildDatasetSrcInfo(prop.srcData);
 	return (
 		<DatasetSrcInfoProvider
 			key={prop.name + prop.srcData.prefix}
 			initialValue={initialDatasetSrcInfo}
 		>
-			<fieldset className="border border-border-subtle p-3">
-				<legend>{prop.srcData.prefix}</legend>
-				{prop.srcData.srcType && (
-					<Select
-						handleTypeSelect={prop.handleTypeSelect}
-						prefix={prop.srcData.prefix}
-						element={prop.srcData.srcType}
-						hidden={false}
-					/>
-				)}
-				<SrcFormSection
-					srcElements={srcElements}
-					srcType={prop.defalutType || prop.srcData.srcType?.value}
-					jdbcOption={jdbcOption}
-					templateOption={templateOption}
-					handleValueChange={handleValueChange}
-					handleToggleChecked={handleToggleChecked}
-				/>
-				<DataLoadFormSection
-					options={srcElements}
-					handleValueChange={handleValueChange}
-					handleToggleChecked={handleToggleChecked}
-				/>
-				<SrcTypeFormSection
-					options={srcElements}
-					handleValueChange={handleValueChange}
-					handleToggleChecked={handleToggleChecked}
-				/>
-				<SettingFormSection
-					settingElements={srcElements}
-					handleValueChange={handleValueChange}
-					handleToggleChecked={handleToggleChecked}
-				/>
-			</fieldset>
+			<DatasetLoadFormContent
+				srcData={prop.srcData}
+				handleTypeSelect={prop.handleTypeSelect}
+				defaultType={prop.defalutType}
+			/>
 		</DatasetSrcInfoProvider>
 	);
 }
