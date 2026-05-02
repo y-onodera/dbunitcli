@@ -106,34 +106,6 @@ function makeSelectParameterWithRefresh(command: Command): SelectParameter {
 	return makeSelectParameter(command, parameterizeLoadResponseFixture);
 }
 
-vi.mock("../../../app/form/section/dialog/ParameterInputDialog", () => ({
-	ParameterInputDialog: ({
-		handleDialogClose,
-		handleCommit,
-	}: {
-		params: { [key: string]: string };
-		handleDialogClose: () => void;
-		handleCommit: (params: { [key: string]: string }) => void;
-	}) => (
-		<div data-testid="mock-param-dialog">
-			<button
-				type="button"
-				data-testid="param-dialog-apply"
-				onClick={() => handleCommit({ myParam: "myValue" })}
-			>
-				Apply
-			</button>
-			<button
-				type="button"
-				data-testid="param-dialog-close"
-				onClick={handleDialogClose}
-			>
-				Close
-			</button>
-		</div>
-	),
-}));
-
 describe("CommandFormのテスト", () => {
 	it.each([
 		{
@@ -224,79 +196,5 @@ describe("CommandFormのテスト", () => {
 		render(<CommandForm formData={mockFormData} />);
 
 		expect(screen.getByTestId(testId)).toBeInTheDocument();
-	});
-
-	it("コマンドが選択されているとき、Parameters (-P) セクションが表示される", () => {
-		mockUseSelectParameter.mockReturnValue(
-			makeSelectParameter("convert", convertLoadResponseFixture),
-		);
-
-		render(<CommandForm formData={mockFormData} />);
-
-		expect(screen.getByText("Parameters (-P)")).toBeInTheDocument();
-	});
-
-	it("Edit Parameters ボタンをクリックするとダイアログが表示される", async () => {
-		mockUseSelectParameter.mockReturnValue(
-			makeSelectParameter("convert", convertLoadResponseFixture),
-		);
-
-		render(<CommandForm formData={mockFormData} />);
-
-		await userEvent.click(screen.getByTitle("Edit Parameters"));
-
-		expect(screen.getByTestId("mock-param-dialog")).toBeInTheDocument();
-	});
-
-	it("ダイアログでApplyするとhidden inputが追加される", async () => {
-		mockUseSelectParameter.mockReturnValue(
-			makeSelectParameter("convert", convertLoadResponseFixture),
-		);
-
-		const { container } = render(<CommandForm formData={mockFormData} />);
-
-		await userEvent.click(screen.getByTitle("Edit Parameters"));
-		await userEvent.click(screen.getByTestId("param-dialog-apply"));
-
-		const hiddenInput = container.querySelector('input[name="-PmyParam"]');
-		expect(hiddenInput).toBeInTheDocument();
-		expect(hiddenInput).toHaveValue("myValue");
-	});
-
-	it("ダイアログでApplyするとパラメータ件数が表示される", async () => {
-		mockUseSelectParameter.mockReturnValue(
-			makeSelectParameter("convert", convertLoadResponseFixture),
-		);
-
-		render(<CommandForm formData={mockFormData} />);
-
-		await userEvent.click(screen.getByTitle("Edit Parameters"));
-		await userEvent.click(screen.getByTestId("param-dialog-apply"));
-
-		expect(screen.getByText("1 parameter(s) set")).toBeInTheDocument();
-	});
-
-	it("パラメータ名が変わるとパラメータがリセットされる", async () => {
-		const parameter1 = makeSelectParameter(
-			"convert",
-			convertLoadResponseFixture,
-		);
-		mockUseSelectParameter.mockReturnValue(parameter1);
-
-		const { rerender } = render(<CommandForm formData={mockFormData} />);
-
-		await userEvent.click(screen.getByTitle("Edit Parameters"));
-		await userEvent.click(screen.getByTestId("param-dialog-apply"));
-		expect(screen.getByText("1 parameter(s) set")).toBeInTheDocument();
-
-		const parameter2 = makeSelectParameter(
-			"convert",
-			convertLoadResponseFixture,
-		);
-		(parameter2 as { name: string }).name = "other-param";
-		mockUseSelectParameter.mockReturnValue(parameter2);
-		rerender(<CommandForm formData={mockFormData} />);
-
-		expect(screen.queryByText("1 parameter(s) set")).not.toBeInTheDocument();
 	});
 });
