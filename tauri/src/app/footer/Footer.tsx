@@ -1,6 +1,8 @@
 import { core } from "@tauri-apps/api";
 import { useEffect, useRef, useState } from "react";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
+import { BlueEditButton } from "../../components/element/ButtonIcon";
+import { useParamInputs, useSetParamInputs } from "../../context/ParameterInputProvider";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import {
 	type Running,
@@ -8,6 +10,7 @@ import {
 	useSaveParameter,
 	useSaveShell,
 } from "../../hooks/useSelectParameter";
+import { ParameterInputDialog } from "../form/section/dialog/ParameterInputDialog";
 import ResultDialog from "./ResultDialog";
 
 export default function Footer(prop: {
@@ -16,6 +19,9 @@ export default function Footer(prop: {
 		validationError: boolean;
 	};
 }) {
+	const paramInputs = useParamInputs();
+	const setParamInputs = useSetParamInputs();
+	const [showParamDialog, setShowParamDialog] = useState(false);
 	const [running, setRunning] = useState({
 		command: "",
 		resultMessage: "",
@@ -35,6 +41,10 @@ export default function Footer(prop: {
 	execParameterRef.current = execParameter;
 	saveParameterRef.current = saveParameter;
 	saveShellRef.current = saveShell;
+
+	useEffect(() => {
+		setParamInputs({});
+	}, [parameter.name]);
 
 	useEffect(() => {
 		if (running.command === "" || executingRef.current) {
@@ -102,6 +112,8 @@ export default function Footer(prop: {
 		);
 	}
 
+	const paramCount = Object.keys(paramInputs).length;
+
 	return (
 		<>
 			<ResultDialog hidden={running.resultMessage === ""}>
@@ -130,43 +142,72 @@ export default function Footer(prop: {
 					className="fixed bottom-0 right-1
                                 w-full z-50
 								bg-surface-muted
-                                flex items-center justify-end p-4 gap-2"
+                                flex items-center p-4 gap-2"
 				>
-					<BlueButton
-						title="Exec"
-						handleClick={() => {
-							const input = prop.formData(true);
-							if (!input.validationError) {
+					<BlueEditButton
+						title="Parameters (-P)"
+						handleClick={() => setShowParamDialog(true)}
+					/>
+					{paramCount > 0 && (
+						<span className="text-sm text-content-muted">
+							{paramCount} parameter(s) set
+						</span>
+					)}
+					<div className="ml-auto flex items-center gap-2">
+						<BlueButton
+							title="Exec"
+							handleClick={() => {
+								const input = prop.formData(true);
+								if (!input.validationError) {
+									setRunning({
+										command: "exec",
+										resultMessage: "",
+										resultDir: "",
+									});
+								}
+							}}
+						/>
+						<BlueButton
+							title="Save"
+							handleClick={() => {
 								setRunning({
-									command: "exec",
+									command: "save",
 									resultMessage: "",
 									resultDir: "",
 								});
-							}
-						}}
-					/>
-					<BlueButton
-						title="Save"
-						handleClick={() => {
-							setRunning({
-								command: "save",
-								resultMessage: "",
-								resultDir: "",
-							});
-						}}
-					/>
-					<BlueButton
-						title="Save Shell"
-						handleClick={() => {
-							setRunning({
-								command: "saveShell",
-								resultMessage: "",
-								resultDir: "",
-							});
-						}}
-					/>
-					<span className="text-sm text-content-muted">*Required</span>
+							}}
+						/>
+						<BlueButton
+							title="Save Shell"
+							handleClick={() => {
+								setRunning({
+									command: "saveShell",
+									resultMessage: "",
+									resultDir: "",
+								});
+							}}
+						/>
+						<span className="text-sm text-content-muted">*Required</span>
+					</div>
 				</div>
+			)}
+			{Object.entries(paramInputs).map(([name, value]) => (
+				<input
+					key={name}
+					type="hidden"
+					name={`-P${name}`}
+					value={value}
+				/>
+			))}
+			{showParamDialog && (
+				<ParameterInputDialog
+					params={paramInputs}
+					handleDialogClose={() => setShowParamDialog(false)}
+					handleCommit={(newParams) => {
+						setParamInputs(newParams);
+						setShowParamDialog(false);
+					}}
+				/>
 			)}
 		</>
 	);

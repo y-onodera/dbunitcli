@@ -1,5 +1,6 @@
 import Footer from "../footer/Footer";
 import CommandForm from "../form/CommandForm";
+import ParameterInputProvider from "../../context/ParameterInputProvider";
 
 const formid = "commandForm";
 export default function Form() {
@@ -21,17 +22,19 @@ export default function Form() {
 	};
 	return (
 		<div className="p-2 rounded-lg mt-10">
-			<form
-				id={formid}
-				className="grid gap-6 mb-6 pb-20 grid-cols-1"
-				noValidate
-				onSubmit={(e) => {
-					e.preventDefault();
-				}}
-			>
-				<CommandForm formData={formData} />
-				<Footer formData={formData} />
-			</form>
+			<ParameterInputProvider>
+				<form
+					id={formid}
+					className="grid gap-6 mb-6 pb-20 grid-cols-1"
+					noValidate
+					onSubmit={(e) => {
+						e.preventDefault();
+					}}
+				>
+					<CommandForm formData={formData} />
+					<Footer formData={formData} />
+				</form>
+			</ParameterInputProvider>
 		</div>
 	);
 }
