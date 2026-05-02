@@ -16,6 +16,12 @@ import {
 	type OperationResult,
 } from "../utils/fetchUtils";
 
+function buildParamExtra(paramInputs: Record<string, string>): Record<string, string> {
+	return Object.fromEntries(
+		Object.entries(paramInputs).map(([k, v]) => [`-P${k}`, v]),
+	);
+}
+
 function buildDatasetRequestBody(
 	info: DatasetSrcInfo,
 	jdbcValues: Record<string, string>,
@@ -58,9 +64,7 @@ async function fetchTableNames(
 	if (!info.srcPath) {
 		return [];
 	}
-	const paramExtra = Object.fromEntries(
-		Object.entries(paramInputs).map(([k, v]) => [`-P${k}`, v]),
-	);
+	const paramExtra = buildParamExtra(paramInputs);
 	const fetchParams = {
 		endpoint: `${apiUrl}dataset-setting/table-names`,
 		options: {
@@ -124,9 +128,7 @@ async function fetchTablePreview(
 	if (!info.srcPath || !tableName) {
 		return { headers: [], rows: [] };
 	}
-	const paramExtra = Object.fromEntries(
-		Object.entries(paramInputs).map(([k, v]) => [`-P${k}`, v]),
-	);
+	const paramExtra = buildParamExtra(paramInputs);
 	const fetchParams = {
 		endpoint: `${apiUrl}dataset-setting/table-preview`,
 		options: {

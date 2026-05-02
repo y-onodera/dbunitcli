@@ -23,17 +23,17 @@ export default function Form() {
 	return (
 		<div className="p-2 rounded-lg mt-10">
 			<ParameterInputProvider>
-			<form
-				id={formid}
-				className="grid gap-6 mb-6 pb-20 grid-cols-1"
-				noValidate
-				onSubmit={(e) => {
-					e.preventDefault();
-				}}
-			>
-				<CommandForm formData={formData} />
-				<Footer formData={formData} />
-			</form>
+				<form
+					id={formid}
+					className="grid gap-6 mb-6 pb-20 grid-cols-1"
+					noValidate
+					onSubmit={(e) => {
+						e.preventDefault();
+					}}
+				>
+					<CommandForm formData={formData} />
+					<Footer formData={formData} />
+				</form>
 			</ParameterInputProvider>
 		</div>
 	);
