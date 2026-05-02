@@ -66,10 +66,7 @@ function DatasetTableNamesPreviewDialog({
 						className="flex items-center gap-2 text-content-secondary"
 					>
 						<span className="flex-1">{name}</span>
-						<PreviewButton
-							title={`Preview ${name}`}
-							handleClick={() => setPreviewTable(name)}
-						/>
+						<PreviewButton handleClick={() => setPreviewTable(name)} />
 					</li>
 				))}
 			</ul>
