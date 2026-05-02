@@ -2,6 +2,7 @@ import { core } from "@tauri-apps/api";
 import { useEffect, useRef, useState } from "react";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
 import { BlueEditButton } from "../../components/element/ButtonIcon";
+import { useParamInputs, useSetParamInputs } from "../../context/ParameterInputProvider";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import {
 	type Running,
@@ -18,7 +19,8 @@ export default function Footer(prop: {
 		validationError: boolean;
 	};
 }) {
-	const [paramInputs, setParamInputs] = useState<{ [key: string]: string }>({});
+	const paramInputs = useParamInputs();
+	const setParamInputs = useSetParamInputs();
 	const [showParamDialog, setShowParamDialog] = useState(false);
 	const [running, setRunning] = useState({
 		command: "",

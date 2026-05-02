@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useParamInputs } from "../context/ParameterInputProvider";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
@@ -52,16 +53,20 @@ async function fetchTableNames(
 	apiUrl: string,
 	info: DatasetSrcInfo,
 	jdbcValues: Record<string, string>,
+	paramInputs: Record<string, string>,
 ): Promise<string[]> {
 	if (!info.srcPath) {
 		return [];
 	}
+	const paramExtra = Object.fromEntries(
+		Object.entries(paramInputs).map(([k, v]) => [`-P${k}`, v]),
+	);
 	const fetchParams = {
 		endpoint: `${apiUrl}dataset-setting/table-names`,
 		options: {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: buildDatasetRequestBody(info, jdbcValues),
+			body: buildDatasetRequestBody(info, jdbcValues, paramExtra),
 		},
 	};
 	return fetchData(fetchParams)
@@ -76,6 +81,7 @@ export const useDatasetTableNames = (
 	const [loading, setLoading] = useState(false);
 	const { apiUrl } = useEnvironment();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
+	const paramInputs = useParamInputs();
 
 	const srcPath = srcInfo.srcPath;
 	const srcType = srcInfo.srcType;
@@ -89,7 +95,7 @@ export const useDatasetTableNames = (
 		}
 		let isMounted = true;
 		setLoading(true);
-		fetchTableNames(apiUrl, srcInfo, jdbcValues).then((names) => {
+		fetchTableNames(apiUrl, srcInfo, jdbcValues, paramInputs).then((names) => {
 			if (isMounted) {
 				setTableNames(names);
 				setLoading(false);
@@ -98,7 +104,7 @@ export const useDatasetTableNames = (
 		return () => {
 			isMounted = false;
 		};
-	}, [apiUrl, srcPath, srcType, srcInfo, sqlNotReady, jdbcValues]);
+	}, [apiUrl, srcPath, srcType, srcInfo, sqlNotReady, jdbcValues, paramInputs]);
 
 	return { tableNames, loading };
 };
@@ -113,16 +119,20 @@ async function fetchTablePreview(
 	info: DatasetSrcInfo,
 	tableName: string,
 	jdbcValues: Record<string, string>,
+	paramInputs: Record<string, string>,
 ): Promise<TablePreview> {
 	if (!info.srcPath || !tableName) {
 		return { headers: [], rows: [] };
 	}
+	const paramExtra = Object.fromEntries(
+		Object.entries(paramInputs).map(([k, v]) => [`-P${k}`, v]),
+	);
 	const fetchParams = {
 		endpoint: `${apiUrl}dataset-setting/table-preview`,
 		options: {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: buildDatasetRequestBody(info, jdbcValues, { tableName }),
+			body: buildDatasetRequestBody(info, jdbcValues, { tableName, ...paramExtra }),
 		},
 	};
 	return fetchData(fetchParams)
@@ -138,6 +148,7 @@ export const useDatasetTablePreview = (
 	const [loading, setLoading] = useState(false);
 	const { apiUrl } = useEnvironment();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
+	const paramInputs = useParamInputs();
 
 	const srcPath = srcInfo.srcPath;
 	const srcType = srcInfo.srcType;
@@ -157,7 +168,7 @@ export const useDatasetTablePreview = (
 		}
 		let isMounted = true;
 		setLoading(true);
-		fetchTablePreview(apiUrl, srcInfo, tableName, jdbcValues).then((result) => {
+		fetchTablePreview(apiUrl, srcInfo, tableName, jdbcValues, paramInputs).then((result) => {
 			if (isMounted) {
 				setPreview(result);
 				setLoading(false);
@@ -166,7 +177,7 @@ export const useDatasetTablePreview = (
 		return () => {
 			isMounted = false;
 		};
-	}, [apiUrl, srcPath, srcType, srcInfo, sqlNotReady, jdbcValues, tableName]);
+	}, [apiUrl, srcPath, srcType, srcInfo, sqlNotReady, jdbcValues, tableName, paramInputs]);
 
 	return { preview, loading };
 };
