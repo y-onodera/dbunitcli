@@ -27,7 +27,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "cd /home/user/dbunitcli/tauri && bunx vitest run 1>&2 || exit 2",
+						"command": "cd /home/user/dbunitcli/tauri && bun install --frozen-lockfile 1>&2 && bunx vitest run 1>&2 || exit 2",
 						"timeout": 120
 					}
 				]
