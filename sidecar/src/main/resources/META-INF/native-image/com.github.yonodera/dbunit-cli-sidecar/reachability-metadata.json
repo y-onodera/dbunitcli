@@ -7,7 +7,7 @@
       "type": "byte[]"
     },
     {
-      "type": "ch.qos.logback.classic.joran.SerializedModelConfigurator",
+      "type": "yo.dbunitcli.sidecar.LogbackTylerConfigurator",
       "methods": [
         {
           "name": "<init>",
@@ -4757,9 +4757,6 @@
     },
     {
       "glob": "application.properties"
-    },
-    {
-      "glob": "logback.xml"
     },
     {
       "glob": "shell/saveShell.stg"
