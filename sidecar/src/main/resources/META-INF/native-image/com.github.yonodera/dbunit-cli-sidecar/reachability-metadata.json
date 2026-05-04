@@ -4756,24 +4756,6 @@
       "glob": "META-INF/services/org.slf4j.spi.SLF4JServiceProvider"
     },
     {
-      "glob": "log4j2.StatusLogger.json"
-    },
-    {
-      "glob": "log4j2.StatusLogger.properties"
-    },
-    {
-      "glob": "log4j2.component.json"
-    },
-    {
-      "glob": "log4j2.component.properties"
-    },
-    {
-      "glob": "log4j2.propertyMapping.json"
-    },
-    {
-      "glob": "log4j2.system.properties"
-    },
-    {
       "glob": "application.properties"
     },
     {
@@ -4781,9 +4763,6 @@
     },
     {
       "glob": "shell/saveShell.stg"
-    },
-    {
-      "glob": "logback.scmo"
     },
     {
       "glob": "oracle/jdbc/defaultConnectionProperties.properties"
