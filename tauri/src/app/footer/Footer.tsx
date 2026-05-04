@@ -2,7 +2,10 @@ import { core } from "@tauri-apps/api";
 import { useEffect, useRef, useState } from "react";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
 import { BlueEditButton } from "../../components/element/ButtonIcon";
-import { useParamInputs, useSetParamInputs } from "../../context/ParameterInputProvider";
+import {
+	useParamInputs,
+	useSetParamInputs,
+} from "../../context/ParameterInputProvider";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import {
 	type Running,
@@ -13,6 +16,9 @@ import {
 import { ParameterInputDialog } from "../form/section/dialog/ParameterInputDialog";
 import ResultDialog from "./ResultDialog";
 
+const RESET_RUNNING: Running = { command: "", resultMessage: "", resultDir: "" };
+const PARAMS_LABEL = "Edit Parameters (-P)";
+
 export default function Footer(prop: {
 	formData: (validate: boolean) => {
 		values: { [k: string]: FormDataEntryValue };
@@ -22,11 +28,7 @@ export default function Footer(prop: {
 	const paramInputs = useParamInputs();
 	const setParamInputs = useSetParamInputs();
 	const [showParamDialog, setShowParamDialog] = useState(false);
-	const [running, setRunning] = useState({
-		command: "",
-		resultMessage: "",
-		resultDir: "",
-	} as Running);
+	const [running, setRunning] = useState<Running>(RESET_RUNNING);
 	const [isLoading, setIsLoading] = useState(false);
 	const executingRef = useRef(false);
 	const abortControllerRef = useRef<AbortController | null>(null);
@@ -66,9 +68,17 @@ export default function Footer(prop: {
 		};
 
 		if (running.command === "exec") {
-			execParameterRef.current(prop.formData(false).values, handleResult, controller.signal);
+			execParameterRef.current(
+				prop.formData(false).values,
+				handleResult,
+				controller.signal,
+			);
 		} else if (running.command === "save") {
-			saveParameterRef.current(prop.formData(false).values, handleResult, controller.signal);
+			saveParameterRef.current(
+				prop.formData(false).values,
+				handleResult,
+				controller.signal,
+			);
 		} else if (running.command === "saveShell") {
 			saveShellRef.current(handleResult, controller.signal);
 		}
@@ -89,7 +99,7 @@ export default function Footer(prop: {
 		abortControllerRef.current = null;
 		executingRef.current = false;
 		setIsLoading(false);
-		setRunning({ command: "", resultMessage: "", resultDir: "" });
+		setRunning(RESET_RUNNING);
 	};
 
 	if (isLoading) {
@@ -131,7 +141,7 @@ export default function Footer(prop: {
 						<WhiteButton
 							title="Close"
 							handleClick={() => {
-								setRunning({ command: "", resultMessage: "", resultDir: "" });
+								setRunning(RESET_RUNNING);
 							}}
 						/>
 					</div>
@@ -144,16 +154,19 @@ export default function Footer(prop: {
 								bg-surface-muted
                                 flex items-center p-4 gap-2"
 				>
-					<BlueEditButton
-						title="Parameters (-P)"
-						handleClick={() => setShowParamDialog(true)}
-					/>
-					{paramCount > 0 && (
-						<span className="text-sm text-content-muted">
-							{paramCount} parameter(s) set
-						</span>
-					)}
 					<div className="ml-auto flex items-center gap-2">
+						<BlueEditButton
+							title={PARAMS_LABEL}
+							handleClick={() => setShowParamDialog(true)}
+						/>
+						<span className="text-sm font-medium text-content-muted">
+							{PARAMS_LABEL}
+						</span>
+						{paramCount > 0 && (
+							<span className="text-sm text-content-muted">
+								— {paramCount} parameter(s) set
+							</span>
+						)}
 						<BlueButton
 							title="Exec"
 							handleClick={() => {
@@ -192,12 +205,7 @@ export default function Footer(prop: {
 				</div>
 			)}
 			{Object.entries(paramInputs).map(([name, value]) => (
-				<input
-					key={name}
-					type="hidden"
-					name={`-P${name}`}
-					value={value}
-				/>
+				<input key={name} type="hidden" name={`-P${name}`} value={value} />
 			))}
 			{showParamDialog && (
 				<ParameterInputDialog
