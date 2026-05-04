@@ -41,29 +41,42 @@ export default function DatasetSettingText({
 				) : null
 			}
 		>
-			{({ path, setPath, isValueInDatalist }) => (
-				<TextDropDownMenu
-					path={path}
-					setPath={setPath}
-					prefix={prefix}
-					element={element}
-					isValueInDatalist={isValueInDatalist}
-					editButtons={
-						!hideDatasetSettingEdit
-							? [
-									<DatasetSettingEditButton
-										key="edit"
-										path={path}
-										setPath={setPath}
-									/>,
-								]
-							: undefined
+			{({ path, setPath, isValueInDatalist }) => {
+				const handleSetPath = (
+					newValue: string | ((prev: string) => string),
+				) => {
+					setPath(newValue);
+					if (typeof newValue === "string") {
+						handleValueChange?.(newValue);
 					}
-					removeButton={() => (
-						<RemoveDatasetSettingButton path={path} setPath={setPath} />
-					)}
-				/>
-			)}
+				};
+				return (
+					<TextDropDownMenu
+						path={path}
+						setPath={handleSetPath}
+						prefix={prefix}
+						element={element}
+						isValueInDatalist={isValueInDatalist}
+						editButtons={
+							!hideDatasetSettingEdit
+								? [
+										<DatasetSettingEditButton
+											key="edit"
+											path={path}
+											setPath={handleSetPath}
+										/>,
+									]
+								: undefined
+						}
+						removeButton={() => (
+							<RemoveDatasetSettingButton
+								path={path}
+								setPath={handleSetPath}
+							/>
+						)}
+					/>
+				);
+			}}
 		</Text>
 	);
 }
