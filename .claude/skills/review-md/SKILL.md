@@ -1,5 +1,5 @@
 ---
-description: Claude動作制御mdファイルの品質確認。変更時に再利用性・品質・効率の3観点と数値基準でチェックする。
+description: CLAUDE.md / .claude/rules/*.md / .claude/skills/*/SKILL.md を変更したら必ず実行。再利用性・品質・効率の3観点で品質確認する。
 TRIGGER when: CLAUDE.md、.claude/rules/*.md、.claude/skills/*/SKILL.md の変更・追加・修正を含む実装タスクが完了したとき。
 DO NOT TRIGGER when: コードファイル（.ts/.tsx/.js/.jsx/.java/.rs）のみの変更、またはmdを読み取りのみの場合。
 ---
