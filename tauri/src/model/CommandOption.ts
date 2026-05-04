@@ -119,6 +119,7 @@ export type SrcInfo = {
 export type DatasetSrcInfo = SrcInfo & {
 	srcType?: SrcType;
 	setting?: string;
+	settingEncoding: string;
 	xlsxSchema: string;
 	fixedLength: string;
 	regHeaderSplit: string;
@@ -250,6 +251,7 @@ export function buildDatasetSrcInfo(datasrc: DatasetSource): DatasetSrcInfo {
 		regTableExclude: datasrc.regTableExclude.value,
 		srcType: datasrc.srcType?.value,
 		setting: datasrc.setting.value,
+		settingEncoding: datasrc.settingEncoding.value,
 		headerName: datasrc.headerName ? datasrc.headerName.value : "",
 		startRow: datasrc.startRow ? datasrc.startRow.value : "",
 		addFileInfo: datasrc.addFileInfo?.value === "true",
