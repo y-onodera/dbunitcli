@@ -1,10 +1,5 @@
 package yo.dbunitcli.sidecar.controller;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
@@ -27,6 +22,11 @@ import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
 @Controller("dataset-setting")
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetSettingsController.class);
@@ -35,16 +35,10 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         super(workspace);
     }
 
-    @Override
-    protected ResourceFile getResourceFile() {
-        return this.workspace.resources().datasetSetting();
-    }
-
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
         try {
-            final DataSetLoadOption option = new DataSetLoadOption(
-                    Objects.toString(request.getSetting(), ""), buildDataSetLoadDto(request, "false"));
+            final DataSetLoadOption option = new DataSetLoadOption("", this.buildDataSetLoadDto(request, "false"));
             final ComparableDataSetParam param = option.getParam().build();
             return ObjectMapper.getDefault().writeValueAsString(
                     new ComparableDataSetLoader(Parameter.none()).loadDataSet(param).getTableNames()
@@ -58,8 +52,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Post(uri = "table-preview", produces = MediaType.APPLICATION_JSON)
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {
-            final DataSetLoadOption option = new DataSetLoadOption(
-                    Objects.toString(request.getSetting(), ""), buildDataSetLoadDto(request, "true"));
+            final DataSetLoadOption option = new DataSetLoadOption("", this.buildDataSetLoadDto(request, "true"));
             final ComparableDataSetParam param = option.getParam().build();
             final ComparableDataSet dataSet = new ComparableDataSetLoader(Parameter.none()).loadDataSet(param);
             final ComparableTable table = dataSet.getTable(request.getTableName());
@@ -92,6 +85,11 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
+    @Override
+    protected ResourceFile getResourceFile() {
+        return this.workspace.resources().datasetSetting();
+    }
+
     private DataSetLoadDto buildDataSetLoadDto(final DatasetTableNamesRequestDto request, final String loadData) {
         final DataSetLoadDto dto = new DataSetLoadDto();
         dto.setSrc(request.getSrc());
@@ -117,6 +115,8 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         dto.getJdbc().setJdbcUser(request.getJdbcUser());
         dto.getJdbc().setJdbcPass(request.getJdbcPass());
         dto.getJdbc().setJdbcProperties(request.getJdbcProperties());
+        dto.setSetting(request.getSetting());
+        dto.setSettingEncoding(request.getSettingEncoding());
         return dto;
     }
 }

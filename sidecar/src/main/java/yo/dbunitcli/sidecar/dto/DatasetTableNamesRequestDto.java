@@ -5,11 +5,9 @@ import io.micronaut.serde.annotation.Serdeable;
 @Serdeable
 public class DatasetTableNamesRequestDto {
 
-    // 基本
     private String srcType;
     private String src;
 
-    // ファイルトラバーサル共通
     private String regTableInclude;
     private String regTableExclude;
     private boolean recursive;
@@ -17,30 +15,24 @@ public class DatasetTableNamesRequestDto {
     private String regExclude;
     private String extension;
 
-    // xlsx / xls 用
     private String xlsxSchema;
 
-    // fixed 用
     private String fixedLength;
 
-    // reg (regex) 用
     private String regHeaderSplit;
     private String regDataSplit;
 
-    // csv / fixed / reg 共通
     private String encoding;
     private String delimiter;
     private boolean ignoreQuoted;
 
-    // 汎用
     private String headerName;
     private String startRow;
     private boolean addFileInfo;
 
-    // dataset setting ファイル名
     private String setting;
+    private String settingEncoding;
 
-    // sql / table タイプ向け JDBC 情報
     private String jdbcUrl;
     private String jdbcUser;
     private String jdbcPass;
@@ -228,5 +220,13 @@ public class DatasetTableNamesRequestDto {
 
     public void setJdbcProperties(final String jdbcProperties) {
         this.jdbcProperties = jdbcProperties;
+    }
+
+    public String getSettingEncoding() {
+        return this.settingEncoding;
+    }
+
+    public void setSettingEncoding(final String settingEncoding) {
+        this.settingEncoding = settingEncoding;
     }
 }
