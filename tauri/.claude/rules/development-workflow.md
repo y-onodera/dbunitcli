@@ -4,43 +4,27 @@ paths:
   - "src/**/*.tsx"
 ---
 
-# このコードベースでの作業方法
+# 作業方法
 
-## 新しいコマンドの追加
-
+## 新コマンド追加
 1. `src/app/form/` にフォームコンポーネントを作成
-2. `src/model/CommandParam.ts` に対応するモデル型を追加
-3. 状態管理用に Context プロバイダを更新
-4. メイン `Form.tsx` のルーティングにフォームを追加
+2. `src/model/CommandParam.ts` にモデル型を追加
+3. Context プロバイダを更新
+4. `Form.tsx` のルーティングに追加
 
-## バックエンド統合の変更
-
+## バックエンド統合
 - Java プロセス引数は `lib.rs` で設定
-- HTTP API 呼び出しは fetch ユーティリティで処理
-- ファイルシステム操作は Tauri の dialog プラグインを使用
+- HTTP API → fetch ユーティリティ、FS操作 → Tauri dialog プラグイン
 
-## 新機能のテスト
+## テスト・ファイル拡張子
+テスト: モデル・ユーティリティ → 単体、Context → 統合、コンポーネント → Testing Library
 
-- モデルとユーティリティの単体テストを追加
-- Context プロバイダの統合テストを追加
-- コンポーネントインタラクションテストには Testing Library を使用
 
-## ファイル拡張子の使い分け
-
-### context/ と hooks/ の役割分担
 | ディレクトリ | 内容 | 拡張子 |
 |---|---|---|
-| `context/` | createContext + Provider コンポーネント + context 読み取りフック | `.tsx` |
-| `hooks/` | APIコール・状態更新フック（fetchData を使うもの） | `.ts` |
+| `context/` | createContext + Provider + contextフック | `.tsx` |
+| `hooks/` | fetchData・状態更新フック | `.ts` |
 | `utils/` | 汎用ユーティリティ | `.ts` |
 
-### .ts / .tsx の判断フロー
-- JSX を返す Provider / Component を定義する → `.tsx`
-- `createContext` で context を定義する（context 読み取りフックを同居させる）→ `.tsx`
-- テストファイルで JSX（wrapper など）を使う → `.test.tsx`
-- APIコール・状態更新のカスタムフック（hooks/ 配置）→ `.ts`
-- モデル・ユーティリティ → `.ts`
-
-### hooks/ への追加判断
-- `fetchData` を呼ぶカスタムフック → `hooks/*.ts`（APIコールをコンポーネントから分離）
-- 複数の context を組み合わせる操作フック → `hooks/*.ts`
+- JSX を返す / `createContext` → `.tsx`、テストで JSX → `.test.tsx`
+- hooks/ 追加条件: fetchData を呼ぶ、または複数 context を組み合わせるフック
