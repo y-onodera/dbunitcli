@@ -4744,9 +4744,6 @@
       "glob": "META-INF/services/org.apache.logging.log4j.util.PropertySource"
     },
     {
-      "glob": "META-INF/services/org.apache.maven.surefire.spi.MasterProcessChannelProcessorFactory"
-    },
-    {
       "glob": "META-INF/services/org.apache.poi.ss.usermodel.WorkbookProvider"
     },
     {

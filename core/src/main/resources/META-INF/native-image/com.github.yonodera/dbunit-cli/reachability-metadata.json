@@ -7,7 +7,7 @@
       "type": "byte[]"
     },
     {
-      "type": "ch.qos.logback.classic.joran.SerializedModelConfigurator",
+      "type": "yo.dbunitcli.LogbackTylerConfigurator",
       "methods": [
         {
           "name": "<init>",
@@ -4744,9 +4744,6 @@
       "glob": "META-INF/services/org.apache.logging.log4j.util.PropertySource"
     },
     {
-      "glob": "META-INF/services/org.apache.maven.surefire.spi.MasterProcessChannelProcessorFactory"
-    },
-    {
       "glob": "META-INF/services/org.apache.poi.ss.usermodel.WorkbookProvider"
     },
     {
@@ -4754,30 +4751,6 @@
     },
     {
       "glob": "META-INF/services/org.slf4j.spi.SLF4JServiceProvider"
-    },
-    {
-      "glob": "log4j2.StatusLogger.json"
-    },
-    {
-      "glob": "log4j2.StatusLogger.properties"
-    },
-    {
-      "glob": "log4j2.component.json"
-    },
-    {
-      "glob": "log4j2.component.properties"
-    },
-    {
-      "glob": "log4j2.propertyMapping.json"
-    },
-    {
-      "glob": "log4j2.system.properties"
-    },
-    {
-      "glob": "logback.xml"
-    },
-    {
-      "glob": "logback.scmo"
     },
     {
       "glob": "oracle/jdbc/defaultConnectionProperties.properties"
