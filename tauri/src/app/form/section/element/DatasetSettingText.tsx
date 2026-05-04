@@ -1,3 +1,4 @@
+import type { Dispatch, SetStateAction } from "react";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import {
@@ -30,10 +31,13 @@ export default function DatasetSettingText({
 			afterContent={({ path }) =>
 				datasetSrcInfo.srcType && !hideDatasetSettingEdit ? (
 					<div className="mt-2 flex items-center gap-3">
-						<DatasetTableNamesPreviewButton title="Preview Before Settings" setting="" />
+						<DatasetTableNamesPreviewButton
+							title="Preview Before Settings"
+							setting=""
+						/>
 						{path && (
 							<DatasetTableNamesPreviewButton
-								title="Preview Aply Settings"
+								title="Preview Apply Settings"
 								setting={path}
 							/>
 						)}
@@ -42,13 +46,10 @@ export default function DatasetSettingText({
 			}
 		>
 			{({ path, setPath, isValueInDatalist }) => {
-				const handleSetPath = (
-					newValue: string | ((prev: string) => string),
-				) => {
-					setPath(newValue);
-					if (typeof newValue === "string") {
-						handleValueChange?.(newValue);
-					}
+				const handleSetPath: Dispatch<SetStateAction<string>> = (action) => {
+					const newPath = typeof action === "function" ? action(path) : action;
+					setPath(newPath);
+					handleValueChange?.(newPath);
 				};
 				return (
 					<TextDropDownMenu
@@ -69,10 +70,7 @@ export default function DatasetSettingText({
 								: undefined
 						}
 						removeButton={() => (
-							<RemoveDatasetSettingButton
-								path={path}
-								setPath={handleSetPath}
-							/>
+							<RemoveDatasetSettingButton path={path} setPath={handleSetPath} />
 						)}
 					/>
 				);
