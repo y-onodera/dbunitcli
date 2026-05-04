@@ -2,7 +2,6 @@
 <!DOCTYPE configuration>
 
 <configuration>
-    <serializeModel file="src/main/resources/logback.scmo"/>
     <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
     <import class="ch.qos.logback.core.rolling.RollingFileAppender"/>
     <import class="ch.qos.logback.core.ConsoleAppender"/>
