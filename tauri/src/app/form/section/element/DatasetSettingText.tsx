@@ -1,3 +1,4 @@
+import type { Dispatch, SetStateAction } from "react";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import {
@@ -30,10 +31,13 @@ export default function DatasetSettingText({
 			afterContent={({ path }) =>
 				datasetSrcInfo.srcType && !hideDatasetSettingEdit ? (
 					<div className="mt-2 flex items-center gap-3">
-						<DatasetTableNamesPreviewButton title="Preview Before Settings" setting="" />
+						<DatasetTableNamesPreviewButton
+							title="Preview Before Settings"
+							setting=""
+						/>
 						{path && (
 							<DatasetTableNamesPreviewButton
-								title="Preview Aply Settings"
+								title="Preview Apply Settings"
 								setting={path}
 							/>
 						)}
@@ -41,29 +45,36 @@ export default function DatasetSettingText({
 				) : null
 			}
 		>
-			{({ path, setPath, isValueInDatalist }) => (
-				<TextDropDownMenu
-					path={path}
-					setPath={setPath}
-					prefix={prefix}
-					element={element}
-					isValueInDatalist={isValueInDatalist}
-					editButtons={
-						!hideDatasetSettingEdit
-							? [
-									<DatasetSettingEditButton
-										key="edit"
-										path={path}
-										setPath={setPath}
-									/>,
-								]
-							: undefined
-					}
-					removeButton={() => (
-						<RemoveDatasetSettingButton path={path} setPath={setPath} />
-					)}
-				/>
-			)}
+			{({ path, setPath, isValueInDatalist }) => {
+				const handleSetPath: Dispatch<SetStateAction<string>> = (action) => {
+					const newPath = typeof action === "function" ? action(path) : action;
+					setPath(newPath);
+					handleValueChange?.(newPath);
+				};
+				return (
+					<TextDropDownMenu
+						path={path}
+						setPath={handleSetPath}
+						prefix={prefix}
+						element={element}
+						isValueInDatalist={isValueInDatalist}
+						editButtons={
+							!hideDatasetSettingEdit
+								? [
+										<DatasetSettingEditButton
+											key="edit"
+											path={path}
+											setPath={handleSetPath}
+										/>,
+									]
+								: undefined
+						}
+						removeButton={() => (
+							<RemoveDatasetSettingButton path={path} setPath={handleSetPath} />
+						)}
+					/>
+				);
+			}}
 		</Text>
 	);
 }
