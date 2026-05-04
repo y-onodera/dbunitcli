@@ -3,54 +3,28 @@ paths:
   - "src/**/*.tsx"
 ---
 
-# UI 一貫性ルール
+# UI一貫性（UIラベル・ボタン・ダイアログタイトルはすべて英語）
 
-## 言語
-- **UIラベル・ボタン・ダイアログタイトルはすべて英語**
+## ボタン
 
-## ボタンコンポーネント
 | 用途 | コンポーネント |
 |------|--------------|
 | 確定・保存・適用 | `BlueButton` |
 | キャンセル・閉じる | `WhiteButton` |
-| disabled / id が必要 | `Button`（props で条件分岐） |
+| disabled / id が必要 | `Button` |
 | アイコン+テキスト（インライン） | `ButtonWithIcon` |
 | 用途固定アイコン | `EditButton`, `DeleteButton` 等 |
 
-- ダイアログ: `BlueButton`（左）→ `WhiteButton`（右）の順
-- 生の `<button>` は使わない。必ずコンポーネントを使う
+- ダイアログ: `BlueButton`（左）→ `WhiteButton`（右）、生の `<button>` 禁止
 
 ## Tailwind CSS
-- フォーカスリングは必ず `ring-primary-ring focus-visible:ring-3`（全インタラクティブ要素）
-- インプット系のボーダー: `border border-border`、背景: `bg-input`（入力専用）/ `bg-surface-subtle`（表示専用）
-- disabled ボタン: `bg-surface-disabled text-content-disabled border-surface-disabled cursor-not-allowed`（`Button` の props で渡す）
-- コンポーネントが提供するスタイルに手を加えない。カスタムが必要なら `Button` の props を使う
-- デザイントークンは `src/tokens.css` の `@theme` で定義。色は `bg-primary`/`text-content` 等のセマンティッククラスを使う（`bg-indigo-500`/`text-gray-900` 等のパレットクラスは使わない）
+- フォーカスリング: `ring-primary-ring focus-visible:ring-3`
+- 入力ボーダー: `border border-border`、背景: `bg-input`（入力専用）/ `bg-surface-subtle`（表示専用）
+- 色はセマンティッククラス（`bg-primary`/`text-content`等）。パレットクラス（`bg-indigo-500`等）禁止
 
-## テキストボックス横のアイコンボタン
+## テキストボックス横ボタン
+- アイコン1つ: `BlueButtonIcon`系、アイコン2つ以上: `BlueSettingButton`（ドロップダウン）
+- ドロップダウン内: 編集系→`EditButton`、参照系→`PreviewButton`、削除→`DeleteButton`、ファイル→`FileButton`、ディレクトリ→`DirectoryButton`
 
-- **配色はブルー（`BlueButtonIcon` 系）でラベルなし**に統一
-- グレーの `IconButton` 系（`EditButton`, `FileButton` 等）はテキストボックス横に直接使わない
-- **アイコンが2つ以上必要な場合**は `BlueSettingButton` のドロップダウンメニューにまとめる
-- ドロップダウン内のアイテムはグレーの `IconButton` 系（テキストラベル付き）でよい
-
-### テキストボックス横ボタンの用途別コンポーネント
-
-| 状況 | コンポーネント | 例 |
-|------|--------------|-----|
-| アイコン1つ（単一操作） | `BlueEditButton` 等 `BlueButtonIcon` 系 | JdbcUrlBuilderButton |
-| アイコン2つ以上（複数操作） | `BlueSettingButton`（ドロップダウン） | CommandFormElement の DropDownMenu, JdbcPropertiesDropDownMenu |
-
-### ドロップダウン内のアイコンボタン
-
-| 用途 | コンポーネント | 例 |
-|------|--------------|-----|
-| ダイアログを起動（編集・ビルダー系） | `EditButton` | DatasetSettingEditButton, TemplateEditButton |
-| ダイアログを起動（プレビュー・参照系） | `PreviewButton` | JdbcPropertiesPreviewButton |
-| リソース削除 | `DeleteButton` | RemoveDatasetSettingButton 等 |
-| ファイル選択ダイアログ | `FileButton` | FileChooser の FileButton |
-| ディレクトリ選択ダイアログ | `DirectoryButton` | DirectoryChooser の DirectoryButton |
-
-## ExpandButton の caption
-- パターン: `"<type> option"`（英語小文字）
-- 例: `"traversal option"`, `"table option"`, `"csv option"`
+## ExpandButton caption
+- `"<type> option"` 形式（英語小文字）例: `"traversal option"`

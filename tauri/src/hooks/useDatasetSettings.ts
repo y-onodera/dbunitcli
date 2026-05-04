@@ -42,6 +42,7 @@ function buildDatasetRequestBody(
 		regHeaderSplit: info.regHeaderSplit,
 		regDataSplit: info.regDataSplit,
 		encoding: info.encoding,
+		settingEncoding: info.settingEncoding,
 		delimiter: info.delimiter,
 		ignoreQuoted: info.ignoreQuoted,
 		headerName: info.headerName,
