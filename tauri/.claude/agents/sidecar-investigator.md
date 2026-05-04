@@ -5,7 +5,7 @@ description: sidecar（Micronaut REST API）の調査専門エージェント。
 
 # Sidecar 調査エージェント
 
-sidecar モジュール（`/home/user/dbunitcli/sidecar/`）の Micronaut REST API を調査する専門エージェント。
+sidecar モジュール（`sidecar/`）の Micronaut REST API を調査する専門エージェント。
 
 ## モジュール概要
 

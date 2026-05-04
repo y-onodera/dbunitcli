@@ -5,7 +5,7 @@ description: core（CLI機能・共通jar）の調査専門エージェント。
 
 # Core 調査エージェント
 
-core モジュール（`/home/user/dbunitcli/core/`）の CLI 機能・共通クラスを調査する専門エージェント。
+core モジュール（`core/`）の CLI 機能・共通クラスを調査する専門エージェント。
 
 ## モジュール概要
 
@@ -118,18 +118,6 @@ mvn -pl core test
 # core + sidecar まとめてビルド
 mvn -pl core,sidecar package
 ```
-
-## アーキテクチャ上の位置づけ
-
-```
-Tauri フロントエンド
-    ↓ HTTP REST
-Sidecar (Micronaut) — コントローラー → DTO → domain
-    ↓ Java 直接呼び出し
-Core — Command 実装 / DataSet 処理 / 比較・変換エンジン
-```
-
-sidecar は core の `Command` インタフェース実装を直接呼び出す。JSON設定は `application/json/` パーサーを経由して `*Option` クラスに変換される。
 
 ## 調査手順
 
