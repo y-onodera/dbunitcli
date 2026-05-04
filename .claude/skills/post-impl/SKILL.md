@@ -4,4 +4,7 @@ TRIGGER when: コードファイル（.ts, .tsx, .js, .jsx, .java, .rs 等）ま
 DO NOT TRIGGER when: 読み取りのみ、質問への回答のみ、計画作成のみ、コード未変更時。/simplify または /post-impl 実行中の個別Edit後。
 ---
 
-変更・追加・修正されたすべてのコードファイルに対して `/simplify` を実行すること。
+以下の順で実行すること。
+
+1. 変更・追加・修正されたすべてのコードファイルに対して `/simplify` を実行する。
+2. `tauri/` 配下のファイルが変更対象に含まれる場合、`bun vitest run` を `tauri/` ディレクトリで実行してテストがすべて通ることを確認する。
