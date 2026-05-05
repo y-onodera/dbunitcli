@@ -2,8 +2,12 @@ package yo.dbunitcli.sidecar.dto;
 
 import io.micronaut.serde.annotation.Serdeable;
 
+import java.util.Map;
+
 @Serdeable
 public class DatasetTableNamesRequestDto {
+
+    private Map<String, String> parameters;
 
     private String srcType;
     private String src;
@@ -37,6 +41,14 @@ public class DatasetTableNamesRequestDto {
     private String jdbcUser;
     private String jdbcPass;
     private String jdbcProperties;
+
+    public Map<String, String> getParameters() {
+        return this.parameters;
+    }
+
+    public void setParameters(final Map<String, String> parameters) {
+        this.parameters = parameters;
+    }
 
     public String getSetting() {
         return this.setting;
