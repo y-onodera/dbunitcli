@@ -120,7 +120,7 @@ function TableDataPreviewDialog({
 		if (loading) {
 			return <p className="text-sm text-content-disabled p-3">Loading...</p>;
 		}
-		if (!preview || preview.headers.length === 0) {
+		if (!preview?.headers || preview.headers.length === 0) {
 			return (
 				<p className="text-sm text-content-disabled p-3">No data found.</p>
 			);
