@@ -35,11 +35,7 @@ async function loadCommandOptions(
 }
 
 export function resolveCommand(cmdValue: string): Command | null {
-	const normalized = cmdValue.replace(/\\/g, "/").replace(/\/$/, "");
-	const parts = normalized.split("/").filter(Boolean);
-	if (parts.length < 2) return null;
-	const folderName = parts[parts.length - 2];
-	const lower = folderName.toLowerCase() as Command;
+	const lower = cmdValue.trim().toLowerCase() as Command;
 	return COMMANDS.includes(lower) ? lower : null;
 }
 
