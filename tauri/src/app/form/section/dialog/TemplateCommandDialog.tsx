@@ -34,18 +34,13 @@ async function loadCommandOptions(
 	return options;
 }
 
-export function resolveCommandAndName(
-	cmdValue: string,
-): { command: Command; name: string } | null {
+export function resolveCommand(cmdValue: string): Command | null {
 	const normalized = cmdValue.replace(/\\/g, "/").replace(/\/$/, "");
 	const parts = normalized.split("/").filter(Boolean);
 	if (parts.length < 2) return null;
-	const fileName = parts[parts.length - 1];
 	const folderName = parts[parts.length - 2];
 	const lower = folderName.toLowerCase() as Command;
-	if (!COMMANDS.includes(lower)) return null;
-	const name = fileName.replace(/\.[^.]+$/, "");
-	return { command: lower, name };
+	return COMMANDS.includes(lower) ? lower : null;
 }
 
 function renderCommandForm(options: Options, name: string) {
