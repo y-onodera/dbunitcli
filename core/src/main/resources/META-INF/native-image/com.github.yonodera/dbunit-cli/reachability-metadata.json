@@ -6683,6 +6683,9 @@
       "glob": "org/apache/xmlbeans/impl/regex/message_en_US.properties"
     },
     {
+      "glob": "org/apache/poi/schemas/ooxml/**/*.xsb"
+    },
+    {
       "glob": "org/apache/xmlbeans/**/*.xsb"
     },
     {
