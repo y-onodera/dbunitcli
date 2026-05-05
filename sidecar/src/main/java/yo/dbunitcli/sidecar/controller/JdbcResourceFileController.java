@@ -16,7 +16,6 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.JdbcColumnsRequestDto;
 import yo.dbunitcli.sidecar.dto.JdbcDto;
 import yo.dbunitcli.sidecar.dto.JdbcSavePropertiesRequestDto;
-import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -25,7 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.Properties;
 
 @Controller("jdbc")
-public class JdbcResourceFileController extends AbstractResourceFileController<ResourceSaveRequest<?>> {
+public class JdbcResourceFileController extends AbstractResourceFileController<JdbcSavePropertiesRequestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcResourceFileController.class);
 
