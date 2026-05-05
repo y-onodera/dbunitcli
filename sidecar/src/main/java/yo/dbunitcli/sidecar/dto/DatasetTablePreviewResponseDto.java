@@ -8,9 +8,9 @@ import java.util.List;
 public class DatasetTablePreviewResponseDto {
 
     private String[] headers;
-    private List<String[]> rows;
+    private List<Object[]> rows;
 
-    public DatasetTablePreviewResponseDto(final String[] headers, final List<String[]> rows) {
+    public DatasetTablePreviewResponseDto(final String[] headers, final List<Object[]> rows) {
         this.headers = headers;
         this.rows = rows;
     }
@@ -23,11 +23,11 @@ public class DatasetTablePreviewResponseDto {
         this.headers = headers;
     }
 
-    public List<String[]> getRows() {
+    public List<Object[]> getRows() {
         return this.rows;
     }
 
-    public void setRows(final List<String[]> rows) {
+    public void setRows(final List<Object[]> rows) {
         this.rows = rows;
     }
 }

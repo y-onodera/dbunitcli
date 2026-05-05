@@ -6,14 +6,16 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import org.dbunit.dataset.Column;
+import org.dbunit.dataset.ITableMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
-import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
@@ -37,10 +39,9 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
         try {
-            final DataSetLoadOption option = new DataSetLoadOption("", this.buildDataSetLoadDto(request, "false"));
-            final ComparableDataSetParam param = option.getParam().build();
             return ObjectMapper.getDefault().writeValueAsString(
-                    new ComparableDataSetLoader(Parameter.none()).loadDataSet(param).getTableNames());
+                    new ComparableDataSetLoader(Parameter.none()).loadDataSet(this.toParam(request, "false").build())
+                                                                 .getTableNames());
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
             return "[]";
@@ -50,27 +51,18 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Post(uri = "table-preview", produces = MediaType.APPLICATION_JSON)
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {
-            final DataSetLoadOption option = new DataSetLoadOption("", this.buildDataSetLoadDto(request, "true"));
-            final ComparableDataSetParam param = option.getParam().build();
-            final ComparableDataSet dataSet = new ComparableDataSetLoader(Parameter.none()).loadDataSet(param);
-            final ComparableTable table = dataSet.getTable(request.getTableName());
-            if (table == null) {
+            List<ComparableTable.Builder> metaDataBuilder = new ArrayList<>();
+            new ComparableDataSetLoader(Parameter.none()).getComparableDataSetProducer(
+                    this.toParam(request, "true").setConverter(new TargetTableHandler(request, metaDataBuilder))
+                        .build()).produce();
+            if (metaDataBuilder.isEmpty()) {
                 return ObjectMapper.getDefault()
                                    .writeValueAsString(new DatasetTablePreviewResponseDto(new String[0], List.of()));
             }
+            ComparableTable table = metaDataBuilder.getFirst().build();
             final Column[] columns = table.getTableMetaData().getColumns();
             final String[] headers = Arrays.stream(columns).map(Column::getColumnName).toArray(String[]::new);
-            final int rowCount = Math.min(table.getRowCount(), 5);
-            final List<String[]> rows = new ArrayList<>(rowCount);
-            for (int i = 0; i < rowCount; i++) {
-                final Object[] row = table.getRow(i);
-                final String[] strRow = new String[headers.length];
-                for (int j = 0; j < headers.length; j++) {
-                    final Object val = j < row.length ? row[j] : null;
-                    strRow[j] = val == null ? "" : val.toString();
-                }
-                rows.add(strRow);
-            }
+            final List<Object[]> rows = table.rows().rows();
             return ObjectMapper.getDefault().writeValueAsString(new DatasetTablePreviewResponseDto(headers, rows));
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table preview", th);
@@ -88,7 +80,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         return this.workspace.resources().datasetSetting();
     }
 
-    private DataSetLoadDto buildDataSetLoadDto(final DatasetTableNamesRequestDto request, final String loadData) {
+    private ComparableDataSetParam.Builder toParam(final DatasetTableNamesRequestDto request, final String loadData) {
         final DataSetLoadDto dto = new DataSetLoadDto();
         dto.setSrc(request.getSrc());
         dto.setSrcType(yo.dbunitcli.dataset.DataSourceType.valueOf(request.getSrcType()));
@@ -115,6 +107,57 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         dto.getJdbc().setJdbcProperties(request.getJdbcProperties());
         dto.setSetting(request.getSetting());
         dto.setSettingEncoding(request.getSettingEncoding());
-        return dto;
+        return new DataSetLoadOption("", dto).getParam();
+    }
+
+    private static class TargetTableHandler implements IDataSetConverter {
+        private final DatasetTablePreviewRequestDto request;
+        private final List<ComparableTable.Builder> metaDataBuilder;
+        boolean processTarget;
+        int handleRows;
+
+        public TargetTableHandler(DatasetTablePreviewRequestDto request,
+                                  List<ComparableTable.Builder> metaDataBuilder) {
+            this.request = request;
+            this.metaDataBuilder = metaDataBuilder;
+            this.processTarget = false;
+            this.handleRows = 0;
+        }
+
+        @Override
+        public boolean isExportEmptyTable() {
+            return true;
+        }
+
+        @Override
+        public void reStartTable(AddSettingTableMetaData tableMetaData, Integer writeRows) {
+
+        }
+
+        @Override
+        public IDataSetConverter split() {
+            return this;
+        }
+
+        @Override
+        public void startTable(ITableMetaData metaData) {
+            if (metaData.getTableName().equals(this.request.getTableName())) {
+                this.metaDataBuilder.add(new ComparableTable.Builder(metaData));
+                this.processTarget = this.handleRows <= 5;
+            }
+        }
+
+        @Override
+        public void endTable() {
+            this.processTarget = false;
+        }
+
+        @Override
+        public void row(Object[] values) {
+            if (this.processTarget) {
+                this.metaDataBuilder.getFirst().addRow(values);
+                this.handleRows++;
+            }
+        }
     }
 }
