@@ -25,6 +25,7 @@ import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Controller("dataset-setting")
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
@@ -40,7 +41,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             final DataSetLoadOption option = new DataSetLoadOption("", this.buildDataSetLoadDto(request, "false"));
             final ComparableDataSetParam param = option.getParam().build();
             return ObjectMapper.getDefault().writeValueAsString(
-                    new ComparableDataSetLoader(Parameter.none()).loadDataSet(param).getTableNames());
+                    new ComparableDataSetLoader(this.buildParameter(request)).loadDataSet(param).getTableNames());
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
             return "[]";
@@ -52,7 +53,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         try {
             final DataSetLoadOption option = new DataSetLoadOption("", this.buildDataSetLoadDto(request, "true"));
             final ComparableDataSetParam param = option.getParam().build();
-            final ComparableDataSet dataSet = new ComparableDataSetLoader(Parameter.none()).loadDataSet(param);
+            final ComparableDataSet dataSet = new ComparableDataSetLoader(this.buildParameter(request)).loadDataSet(param);
             final ComparableTable table = dataSet.getTable(request.getTableName());
             if (table == null) {
                 return ObjectMapper.getDefault()
@@ -86,6 +87,14 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().datasetSetting();
+    }
+
+    private Parameter buildParameter(final DatasetTableNamesRequestDto request) {
+        final Map<String, String> params = request.getParameters();
+        if (params == null) {
+            return Parameter.none();
+        }
+        return Parameter.none().addAll(params);
     }
 
     private DataSetLoadDto buildDataSetLoadDto(final DatasetTableNamesRequestDto request, final String loadData) {
