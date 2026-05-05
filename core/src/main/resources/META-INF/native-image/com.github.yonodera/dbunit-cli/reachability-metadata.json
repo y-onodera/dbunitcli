@@ -4783,12 +4783,6 @@
       "glob": "org/apache/pdfbox/resources/glyphlist/zapfdingbats.txt"
     },
     {
-      "glob": "org/apache/poi/schemas/ooxml/element/*/*.xsb"
-    },
-    {
-      "glob": "org/apache/poi/schemas/ooxml/system/ooxml/*.xsb"
-    },
-    {
       "glob": "org/apache/poi/ss/formula/function/functionMetadata.txt"
     },
     {
@@ -4819,16 +4813,10 @@
       "glob": "org/apache/xmlbeans/impl/regex/message_en_US.properties"
     },
     {
-      "glob": "org/apache/xmlbeans/metadata/system/sXMLCONFIG/index.xsb"
+      "glob": "org/apache/xmlbeans/**/*.xsb"
     },
     {
-      "glob": "org/apache/xmlbeans/metadata/system/sXMLLANG/index.xsb"
-    },
-    {
-      "glob": "org/apache/xmlbeans/metadata/system/sXMLSCHEMA/index.xsb"
-    },
-    {
-      "glob": "org/apache/xmlbeans/metadata/system/sXMLTOOLS/index.xsb"
+      "glob": "org/openxmlformats/schemas/**/*.xsb"
     },
     {
       "glob": "org/h2/util/data.zip"
