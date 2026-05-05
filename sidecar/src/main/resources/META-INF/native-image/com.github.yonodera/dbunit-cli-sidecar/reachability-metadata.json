@@ -2295,6 +2295,38 @@
       ]
     },
     {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STAxis$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STBorderStyle$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STCalcMode$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STCellComments$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
       "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STCellFormulaType$Enum",
       "fields": [
         {
@@ -2311,10 +2343,268 @@
       ]
     },
     {
-      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STFontScheme$Enum"
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STCfType$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
     },
     {
-      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STPatternType$Enum"
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STCfvoType$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STConditionalFormattingOperator$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STDataConsolidateFunction$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STDataValidationErrorStyle$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STDataValidationOperator$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STDataValidationType$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STDvAspect$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STFieldSortType$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STFontScheme$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STHorizontalAlignment$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STIconSetType$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STItemType$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STObjects$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STOrientation$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STPageOrder$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STPane$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STPaneState$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STPatternType$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STPhoneticType$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STPrintError$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STRefMode$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STSheetState$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STSheetViewType$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STSourceType$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STTableStyleType$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STTextRotation$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STTimePeriod$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STTotalsRowFunction$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STUnderlineValues$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STUpdateLinks$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STVerticalAlignment$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
+    },
+    {
+      "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.STVisibility$Enum",
+      "fields": [
+        {
+          "name": "table"
+        }
+      ]
     },
     {
       "type": "org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CalcChainDocumentImpl",
