@@ -5,7 +5,7 @@ import io.micronaut.serde.annotation.Serdeable;
 import java.util.List;
 
 @Serdeable
-public class SplitDto  {
+public class SplitDto {
     private String prefix;
     private String tableName;
     private String suffix;
@@ -14,7 +14,7 @@ public class SplitDto  {
     private int limit;
 
     public String getPrefix() {
-        return prefix;
+        return this.prefix;
     }
 
     public void setPrefix(String prefix) {
@@ -22,7 +22,7 @@ public class SplitDto  {
     }
 
     public String getTableName() {
-        return tableName;
+        return this.tableName;
     }
 
     public void setTableName(String tableName) {
@@ -30,7 +30,7 @@ public class SplitDto  {
     }
 
     public String getSuffix() {
-        return suffix;
+        return this.suffix;
     }
 
     public void setSuffix(String suffix) {
@@ -54,7 +54,7 @@ public class SplitDto  {
     }
 
     public int getLimit() {
-        return limit;
+        return this.limit;
     }
 
     public void setLimit(int limit) {
