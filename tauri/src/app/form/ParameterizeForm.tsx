@@ -1,10 +1,16 @@
+import { useState } from "react";
+import { useParameterList } from "../../context/WorkspaceResourcesProvider";
 import type { ParameterizeOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import Check from "./section/element/Check";
-import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
+import Text, { TextDropDownMenu } from "./section/element/Text";
 import TemplateFormSection from "./section/TemplateFormSection";
+import {
+	TemplateCommandButton,
+	resolveCommandAndName,
+} from "./section/dialog/TemplateCommandDialog";
 
 export function ParameterizeForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -14,6 +20,12 @@ export function ParameterizeForm(prop: {
 	const parameterize = prop.parameterize;
 	const paramData = parameterize.paramData;
 	const templateOption = parameterize.templateOption;
+	const [cmdValue, setCmdValue] = useState(parameterize.cmd.value);
+	const parameterList = useParameterList();
+
+	const resolved = resolveCommandAndName(cmdValue);
+	const templateDataList = resolved ? parameterList[resolved.command] : [];
+
 	return (
 		<>
 			<fieldset className="border border-gray-200 p-3">
@@ -25,9 +37,36 @@ export function ParameterizeForm(prop: {
 				/>
 				<Check prefix="" element={parameterize.parameterize} />
 				<Check prefix="" element={parameterize.ignoreFail} />
-				<PlainText prefix="" element={parameterize.cmd} />
+				<PlainText
+					prefix=""
+					element={parameterize.cmd}
+					handleValueChange={setCmdValue}
+				/>
 				<PlainText prefix="" element={parameterize.cmdParam} />
-				<FileText prefix="" element={parameterize.template} />
+				<Text
+					prefix=""
+					element={parameterize.template}
+					showDefaulePath={true}
+					resourceFiles={templateDataList}
+				>
+					{({ path, setPath, isValueInDatalist }) => (
+						<TextDropDownMenu
+							path={path}
+							setPath={setPath}
+							prefix=""
+							element={parameterize.template}
+							isValueInDatalist={isValueInDatalist}
+							editButtons={[
+								<TemplateCommandButton
+									key="open-cmd"
+									command={resolved?.command ?? null}
+									name={resolved?.name ?? ""}
+									cmdValue={cmdValue}
+								/>,
+							]}
+						/>
+					)}
+				</Text>
 				{templateOption && (
 					<TemplateFormSection
 						templateOption={templateOption}

@@ -17,6 +17,7 @@ vi.mock("@tauri-apps/api/path", () => ({
 vi.mock("../../../context/WorkspaceResourcesProvider", () => ({
 	useWorkspaceContext: () => workspaceResourcesFixture.context,
 	useResourcesSettings: () => workspaceResourcesFixture.resources,
+	useParameterList: () => workspaceResourcesFixture.parameterList,
 }));
 vi.mock("../../../context/EnvironmentProvider", () => ({
 	useEnvironment: () => environmentFixture,

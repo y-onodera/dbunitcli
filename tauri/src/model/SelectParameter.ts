@@ -12,6 +12,13 @@ export type Command =
 	| "generate"
 	| "run"
 	| "parameterize";
+export const COMMANDS: Command[] = [
+	"convert",
+	"compare",
+	"generate",
+	"run",
+	"parameterize",
+];
 export class SelectParameter {
 	readonly name: string;
 	readonly command: Command;
