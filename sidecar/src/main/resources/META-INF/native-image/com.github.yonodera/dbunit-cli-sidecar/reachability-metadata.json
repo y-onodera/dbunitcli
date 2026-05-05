@@ -7785,6 +7785,9 @@
       "glob": "org/apache/poi/schemas/ooxml/**/*.xsb"
     },
     {
+      "glob": "org/apache/xmlbeans/**/*.xsb"
+    },
+    {
       "glob": "org/openxmlformats/schemas/**/*.xsb"
     },
     {
