@@ -3,3 +3,4 @@
 
 # テストリソースファイルは改行をLF固定にする（プラットフォーム依存を避けるため）
 core/src/test/resources/**/*.txt text eol=lf
+sidecar/src/test/resources/**/* text eol=lf
