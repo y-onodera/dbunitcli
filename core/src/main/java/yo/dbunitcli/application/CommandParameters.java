@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -53,7 +54,11 @@ public record CommandParameters(CommandType type, String[] args) {
             }
             newArgs.add(key + "=" + resolved);
         }
-        return changed ? new CommandParameters(this.type, newArgs.toArray(new String[0])) : this;
+        if (!changed) {
+            return this;
+        }
+        Arrays.stream(this.args).filter(it -> it.startsWith("-P")).forEach(newArgs::add);
+        return new CommandParameters(this.type, newArgs.toArray(new String[0]));
     }
 
     public CommandParameters shrink() {
