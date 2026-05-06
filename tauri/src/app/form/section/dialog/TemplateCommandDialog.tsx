@@ -55,6 +55,10 @@ function ParameterizeTemplateDialog({
 	}, []);
 
 	useEffect(() => {
+		if (!name) {
+			setLoadState({ status: "error", message: "No template selected" });
+			return;
+		}
 		let isMounted = true;
 		async function load() {
 			const content = await loadParameterizeTemplateContent(
