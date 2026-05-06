@@ -59,9 +59,7 @@ export function ParameterizeForm(prop: {
 							editButtons={[
 								<TemplateCommandButton
 									key="open-cmd"
-									command={resolved}
 									name={path}
-									cmdValue={cmdValue}
 								/>,
 							]}
 						/>

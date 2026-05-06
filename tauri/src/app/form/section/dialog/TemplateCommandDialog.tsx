@@ -2,36 +2,30 @@ import { useEffect, useRef, useState } from "react";
 import { WhiteButton } from "../../../../components/element/Button";
 import { PreviewButton } from "../../../../components/element/ButtonIcon";
 import { useEnvironment } from "../../../../context/EnvironmentProvider";
-import type { Command, Options } from "../../../../model/SelectParameter";
+import type { Command } from "../../../../model/SelectParameter";
 import { COMMANDS } from "../../../../model/SelectParameter";
 import { fetchData, getErrorMessage } from "../../../../utils/fetchUtils";
-import { CompareForm } from "../../CompareForm";
-import { ConvertForm } from "../../ConvertForm";
-import { GenerateForm } from "../../GenerateForm";
-import { RunForm } from "../../RunForm";
 
 type LoadState =
 	| { status: "loading" }
 	| { status: "error"; message: string }
-	| { status: "loaded"; options: Options };
+	| { status: "loaded"; content: string };
 
-async function loadCommandOptions(
+async function loadParameterizeTemplateContent(
 	apiUrl: string,
-	command: Command,
 	name: string,
-): Promise<Options> {
+): Promise<string> {
 	const fetchParams = {
-		endpoint: `${apiUrl + command}/load`,
+		endpoint: `${apiUrl}parameterize/template/load`,
 		options: {
 			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name }),
+			headers: { "Content-Type": "text/plain" },
+			body: name,
 		},
 	};
 	const response = await fetchData(fetchParams);
-	const options = (await response.json()) as Options;
-	(options as Record<string, unknown>).command = command;
-	return options;
+	const data = (await response.json()) as { content?: string };
+	return data.content ?? "";
 }
 
 export function resolveCommand(cmdValue: string): Command | null {
@@ -39,41 +33,17 @@ export function resolveCommand(cmdValue: string): Command | null {
 	return COMMANDS.includes(lower) ? lower : null;
 }
 
-function renderCommandForm(options: Options, name: string) {
-	const noop = async () => {};
-	switch (options.command) {
-		case "convert":
-			return (
-				<ConvertForm handleTypeSelect={noop} name={name} convert={options} />
-			);
-		case "compare":
-			return (
-				<CompareForm handleTypeSelect={noop} name={name} compare={options} />
-			);
-		case "generate":
-			return (
-				<GenerateForm handleTypeSelect={noop} name={name} generate={options} />
-			);
-		case "run":
-			return <RunForm handleTypeSelect={noop} name={name} run={options} />;
-		default:
-			return (
-				<p className="text-content-muted">
-					This command type cannot be displayed.
-				</p>
-			);
-	}
+function extractNameFromTemplatePath(templatePath: string): string {
+	const filename =
+		templatePath.replace(/\\/g, "/").split("/").pop() ?? templatePath;
+	return filename.replace(/\.[^.]+$/, "");
 }
 
-function TemplateCommandDialog({
-	command,
+function ParameterizeTemplateDialog({
 	name,
-	cmdValue,
 	handleDialogClose,
 }: {
-	command: Command | null;
 	name: string;
-	cmdValue: string;
 	handleDialogClose: () => void;
 }) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
@@ -85,15 +55,13 @@ function TemplateCommandDialog({
 	}, []);
 
 	useEffect(() => {
-		if (!command) return;
 		let isMounted = true;
 		async function load() {
-			const options = await loadCommandOptions(
+			const content = await loadParameterizeTemplateContent(
 				environment.apiUrl,
-				command as Command,
 				name,
 			);
-			if (isMounted) setLoadState({ status: "loaded", options });
+			if (isMounted) setLoadState({ status: "loaded", content });
 		}
 		load().catch((ex) => {
 			if (isMounted)
@@ -102,7 +70,7 @@ function TemplateCommandDialog({
 		return () => {
 			isMounted = false;
 		};
-	}, [command, name, environment.apiUrl]);
+	}, [name, environment.apiUrl]);
 
 	return (
 		<dialog
@@ -111,31 +79,19 @@ function TemplateCommandDialog({
 			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-white border border-gray-200"
 		>
 			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
-				{command ? (
-					<>
-						<h2 className="text-lg font-bold mb-4">
-							{command} - {name}
-						</h2>
-						{loadState.status === "loading" && (
-							<div className="text-content-muted">Loading...</div>
-						)}
-						{loadState.status === "error" && (
-							<div className="text-error">Error: {loadState.message}</div>
-						)}
-						{loadState.status === "loaded" &&
-							renderCommandForm(loadState.options, name)}
-					</>
-				) : (
-					<>
-						<h2 className="text-lg font-bold mb-2">Command resolution error</h2>
-						<p className="text-error">
-							Cannot resolve command from cmd value: &quot;{cmdValue}&quot;
-						</p>
-						<p className="text-content-muted text-sm mt-1">
-							The parent folder name must be one of: convert, compare, generate,
-							run, parameterize.
-						</p>
-					</>
+				<h2 className="text-lg font-bold mb-4">Template - {name}</h2>
+				{loadState.status === "loading" && (
+					<div className="text-content-muted">Loading...</div>
+				)}
+				{loadState.status === "error" && (
+					<div className="text-error">Error: {loadState.message}</div>
+				)}
+				{loadState.status === "loaded" && (
+					<textarea
+						className="text-sm bg-surface-subtle border border-border rounded-lg p-3 w-full h-96 font-mono focus-visible:ring-3 ring-primary-ring"
+						value={loadState.content}
+						readOnly
+					/>
 				)}
 			</div>
 			<div className="flex justify-end p-4">
@@ -146,23 +102,18 @@ function TemplateCommandDialog({
 }
 
 export function TemplateCommandButton({
-	command,
 	name,
-	cmdValue,
 }: {
-	command: Command | null;
 	name: string;
-	cmdValue: string;
 }) {
 	const [showDialog, setShowDialog] = useState(false);
+	const paramName = extractNameFromTemplatePath(name);
 	return (
 		<>
 			<PreviewButton handleClick={() => setShowDialog(true)} />
 			{showDialog && (
-				<TemplateCommandDialog
-					command={command}
-					name={name}
-					cmdValue={cmdValue}
+				<ParameterizeTemplateDialog
+					name={paramName}
 					handleDialogClose={() => setShowDialog(false)}
 				/>
 			)}
