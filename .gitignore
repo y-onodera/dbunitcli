@@ -6,7 +6,7 @@
 /gui/logs/
 /gui/target/
 /sidecar/allure-results/
-/sidecar/logs/dbunitcli*.log
+/sidecar/logs/
 /sidecar/.roo/work
 /sidecar/target/
 /sidecar/option/
