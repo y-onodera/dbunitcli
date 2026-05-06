@@ -9,7 +9,7 @@ import Text, { TextDropDownMenu } from "./section/element/Text";
 import TemplateFormSection from "./section/TemplateFormSection";
 import {
 	TemplateCommandButton,
-	resolveCommandAndName,
+	resolveCommand,
 } from "./section/dialog/TemplateCommandDialog";
 
 export function ParameterizeForm(prop: {
@@ -23,8 +23,8 @@ export function ParameterizeForm(prop: {
 	const [cmdValue, setCmdValue] = useState(parameterize.cmd.value);
 	const parameterList = useParameterList();
 
-	const resolved = resolveCommandAndName(cmdValue);
-	const templateDataList = resolved ? parameterList[resolved.command] : [];
+	const resolved = resolveCommand(cmdValue);
+	const templateDataList = resolved ? parameterList[resolved] : [];
 
 	return (
 		<>
@@ -59,9 +59,7 @@ export function ParameterizeForm(prop: {
 							editButtons={[
 								<TemplateCommandButton
 									key="open-cmd"
-									command={resolved?.command ?? null}
-									name={resolved?.name ?? ""}
-									cmdValue={cmdValue}
+									name={path}
 								/>,
 							]}
 						/>
