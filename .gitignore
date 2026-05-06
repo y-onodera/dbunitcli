@@ -11,6 +11,7 @@
 /sidecar/target/
 /sidecar/option/
 /core/dependency-reduced-pom.xml
+/gui/dependency-reduced-pom.xml
 /tauri/src-tauri/backend/
 /tauri/.roo/work
 /target/
