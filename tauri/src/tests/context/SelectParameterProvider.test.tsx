@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -9,9 +9,14 @@ import SelectParameterProvider, {
 	useSelectParameter,
 	useSetSelectParameter,
 } from "../../context/SelectParameterProvider";
+import WorkspaceResourcesProvider, {
+	useParameterList,
+} from "../../context/WorkspaceResourcesProvider";
 import {
+	useAddParameter,
 	useExecParameter,
 	useLoadSelectParameter,
+	useParameterActions,
 	useRefreshSelectParameter,
 	useSaveParameter,
 } from "../../hooks/useSelectParameter";
@@ -23,7 +28,11 @@ import type {
 } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
 import type { FetchParams } from "../../utils/fetchUtils";
-import { environmentFixture, makeMinimalParam } from "../setup";
+import {
+	environmentFixture,
+	makeMinimalParam,
+	workspaceResourcesFixture,
+} from "../setup";
 
 // モックデータ
 const createDatasetSource = (prefix: string) =>
@@ -113,6 +122,29 @@ const { mockFetchData } = vi.hoisted(() => {
 			if (params.endpoint.includes("/convert/exec")) {
 				return Promise.resolve(new Response("success"));
 			}
+			if (params.endpoint.includes("workspace/resources")) {
+				return Promise.resolve(
+					new Response(JSON.stringify(workspaceResourcesFixture)),
+				);
+			}
+			if (params.endpoint.includes("/convert/add")) {
+				return Promise.resolve(
+					new Response(JSON.stringify(["convert1", "convert2", "add"])),
+				);
+			}
+			if (params.endpoint.includes("/convert/delete")) {
+				return Promise.resolve(new Response(JSON.stringify(["convert1"])));
+			}
+			if (params.endpoint.includes("/convert/copy")) {
+				return Promise.resolve(
+					new Response(JSON.stringify(["convert1", "convert2", "copy"])),
+				);
+			}
+			if (params.endpoint.includes("/convert/rename")) {
+				return Promise.resolve(
+					new Response(JSON.stringify(["newName", "convert2"])),
+				);
+			}
 			return Promise.resolve(new Response());
 		}),
 	};
@@ -132,6 +164,13 @@ const mockEnvironment: Environment = { ...environmentFixture };
 const wrapper = ({ children }: { children: ReactNode }) => (
 	<environmentContext.Provider value={mockEnvironment}>
 		<SelectParameterProvider>{children}</SelectParameterProvider>
+	</environmentContext.Provider>
+);
+const workspaceWrapper = ({ children }: { children: ReactNode }) => (
+	<environmentContext.Provider value={mockEnvironment}>
+		<WorkspaceResourcesProvider>
+			<SelectParameterProvider>{children}</SelectParameterProvider>
+		</WorkspaceResourcesProvider>
 	</environmentContext.Provider>
 );
 
@@ -366,6 +405,74 @@ describe("SelectParameterProviderのテスト", () => {
 					resultDir: "",
 				});
 			});
+		});
+	});
+
+	describe("パラメータ操作のテスト", () => {
+		it("useAddParameterが正常に動作することを確認", async () => {
+			const { result, rerender } = renderHook(
+				() => ({
+					addConvert: useAddParameter("convert"),
+					parameterList: useParameterList(),
+				}),
+				{ wrapper: workspaceWrapper },
+			);
+			await act(async () => {
+				rerender();
+			});
+			expect(result.current.parameterList.convert).toEqual([
+				"convert1",
+				"convert2",
+			]);
+			await act(async () => {
+				result.current.addConvert();
+			});
+			expect(result.current.parameterList.convert).toEqual([
+				"convert1",
+				"convert2",
+				"add",
+			]);
+		});
+
+		it("useParameterActionsが正常に動作することを確認", async () => {
+			const { result, rerender } = renderHook(
+				() => ({
+					deleteActions: useParameterActions("convert", "convert2"),
+					copyActions: useParameterActions("convert", "convert1"),
+					renameActions: useParameterActions("convert", "convert1"),
+					parameterList: useParameterList(),
+				}),
+				{ wrapper: workspaceWrapper },
+			);
+			await act(async () => {
+				rerender();
+			});
+			expect(result.current.parameterList.convert).toEqual([
+				"convert1",
+				"convert2",
+			]);
+
+			await act(async () => {
+				result.current.deleteActions.handleDelete();
+			});
+			expect(result.current.parameterList.convert).toEqual(["convert1"]);
+
+			await act(async () => {
+				result.current.copyActions.handleCopy();
+			});
+			expect(result.current.parameterList.convert).toEqual([
+				"convert1",
+				"convert2",
+				"copy",
+			]);
+
+			await act(async () => {
+				result.current.renameActions.handleRename("newName");
+			});
+			expect(result.current.parameterList.convert).toEqual([
+				"newName",
+				"convert2",
+			]);
 		});
 	});
 });

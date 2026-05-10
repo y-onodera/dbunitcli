@@ -15,11 +15,7 @@ import WorkspaceResourcesProvider, {
 	useResourcesSettings,
 	useWorkspaceContext,
 } from "../../context/WorkspaceResourcesProvider";
-import {
-	useAddParameter,
-	useParameterActions,
-	useWorkspaceUpdate,
-} from "../../hooks/useWorkspaceResources";
+import { useWorkspaceUpdate } from "../../hooks/useWorkspaceResources";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
 import {
 	ParameterList,
@@ -61,26 +57,6 @@ const { mockFetchData } = vi.hoisted(() => {
 							parameterList: mockWorkspaceResources.parameterList,
 							resources: mockWorkspaceResources.resources,
 						}),
-				} as Response);
-			}
-			if (params.endpoint === "http://localhost:8080/convert/add") {
-				return Promise.resolve({
-					json: () => Promise.resolve(["convert1", "convert2", "add"]),
-				} as Response);
-			}
-			if (params.endpoint === "http://localhost:8080/convert/delete") {
-				return Promise.resolve({
-					json: () => Promise.resolve(["convert1"]),
-				} as Response);
-			}
-			if (params.endpoint === "http://localhost:8080/convert/copy") {
-				return Promise.resolve({
-					json: () => Promise.resolve(["convert1", "convert2", "copy"]),
-				} as Response);
-			}
-			if (params.endpoint === "http://localhost:8080/convert/rename") {
-				return Promise.resolve({
-					json: () => Promise.resolve(["newName", "convert2"]),
 				} as Response);
 			}
 			return Promise.resolve({
@@ -150,73 +126,4 @@ describe("WorkspaceResourcesProviderのテスト", () => {
 		});
 	});
 
-	describe("パラメータ操作のテスト", () => {
-		it("useAddParameterが正常に動作することを確認", async () => {
-			const { result, rerender } = renderHook(
-				() => {
-					const addConvert = useAddParameter("convert");
-					const parameterList = useParameterList();
-					return { parameterList, addConvert };
-				},
-				{ wrapper },
-			);
-			await act(async () => {
-				rerender();
-			});
-			expect(result.current.parameterList.convert).toEqual([
-				"convert1",
-				"convert2",
-			]);
-			await act(async () => {
-				result.current.addConvert();
-			});
-			expect(result.current.parameterList.convert).toEqual([
-				"convert1",
-				"convert2",
-				"add",
-			]);
-		});
-
-		it("useParameterActionsが正常に動作することを確認", async () => {
-			const { result, rerender } = renderHook(
-				() => {
-					const deleteActions = useParameterActions("convert", "convert2");
-					const copyActions = useParameterActions("convert", "convert1");
-					const renameActions = useParameterActions("convert", "convert1");
-					const parameterList = useParameterList();
-					return { parameterList, deleteActions, copyActions, renameActions };
-				},
-				{ wrapper },
-			);
-			await act(async () => {
-				rerender();
-			});
-			expect(result.current.parameterList.convert).toEqual([
-				"convert1",
-				"convert2",
-			]);
-
-			await act(async () => {
-				result.current.deleteActions.handleDelete();
-			});
-			expect(result.current.parameterList.convert).toEqual(["convert1"]);
-
-			await act(async () => {
-				result.current.copyActions.handleCopy();
-			});
-			expect(result.current.parameterList.convert).toEqual([
-				"convert1",
-				"convert2",
-				"copy",
-			]);
-
-			await act(async () => {
-				result.current.renameActions.handleRename("newName");
-			});
-			expect(result.current.parameterList.convert).toEqual([
-				"newName",
-				"convert2",
-			]);
-		});
-	});
 });

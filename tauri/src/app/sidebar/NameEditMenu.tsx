@@ -7,8 +7,10 @@ import {
 	ParameterizeButton,
 } from "../../components/element/ButtonIcon";
 import { ControllTextBox } from "../../components/element/Input";
-import { useParameterizeFrom } from "../../hooks/useSelectParameter";
-import { useParameterActions } from "../../hooks/useWorkspaceResources";
+import {
+	useParameterActions,
+	useParameterizeFrom,
+} from "../../hooks/useSelectParameter";
 import type { EditName } from "../main/Sidebar";
 
 type MenuEditProp = {
@@ -39,7 +41,10 @@ export default function NameEditMenu({
 		document.addEventListener("mousedown", handleClickOutside);
 		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, [setEditName]);
-	const { handleDelete, handleCopy, handleRename } = useParameterActions(editName.command, editName.name);
+	const { handleDelete, handleCopy, handleRename } = useParameterActions(
+		editName.command,
+		editName.name,
+	);
 	const parameterizeFrom = useParameterizeFrom();
 	const canParameterize =
 		editName.command && editName.command !== "parameterize";

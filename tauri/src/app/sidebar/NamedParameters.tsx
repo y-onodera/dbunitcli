@@ -7,8 +7,10 @@ import {
 } from "../../components/element/ButtonIcon";
 import { ExpandIcon } from "../../components/element/Icon";
 import { useParameterList } from "../../context/WorkspaceResourcesProvider";
-import { useLoadSelectParameter } from "../../hooks/useSelectParameter";
-import { useAddParameter } from "../../hooks/useWorkspaceResources";
+import {
+	useAddParameter,
+	useLoadSelectParameter,
+} from "../../hooks/useSelectParameter";
 import type { Command } from "../../model/SelectParameter";
 import type { EditName } from "../main/Sidebar";
 
