@@ -84,7 +84,11 @@ export default function Footer(prop: {
 				controller.signal,
 			);
 		} else if (running.command === "saveShell") {
-			saveShellRef.current(handleResult, controller.signal);
+			saveShellRef.current(
+				{ ...formValues, ...paramExtra },
+				handleResult,
+				controller.signal,
+			);
 		}
 
 		return () => {
