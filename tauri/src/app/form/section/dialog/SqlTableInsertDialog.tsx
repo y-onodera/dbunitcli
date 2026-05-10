@@ -60,7 +60,7 @@ export default function SqlTableInsertDialog({
 
 	return (
 		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-			<div className={`bg-surface rounded-lg shadow-lg p-6 max-w-full ${onInsertColumn ? "w-[660px]" : "w-96"}`}>
+			<div className="bg-surface rounded-lg shadow-lg p-6 w-96 max-w-full">
 				<h2 className="text-lg font-semibold mb-4">Select Tables</h2>
 				<div className="mb-4">
 					<BlueButton title="Load Tables" handleClick={handleLoad} />
@@ -85,15 +85,10 @@ function TablesContent({
 	onClose: () => void;
 }) {
 	const { selected, toggle, toggleAll } = useTableSelection();
-	const {
-		selected: selectedColumns,
-		toggle: toggleColumn,
-		toggleAll: toggleAllColumns,
-	} = useTableSelection();
-	const [columnTarget, setColumnTarget] = useState<string | null>(null);
-	const [columnData, setColumnData] = useState<string[] | "loading" | null>(
-		null,
-	);
+	const [columnDialog, setColumnDialog] = useState<{
+		table: string;
+		data: string[] | "loading";
+	} | null>(null);
 	const isMountedRef = useRef(true);
 	useEffect(() => {
 		return () => {
@@ -107,67 +102,40 @@ function TablesContent({
 	};
 
 	const handleSelectTable = (table: string) => {
-		if (table === columnTarget) {
-			setColumnTarget(null);
-			setColumnData(null);
+		if (columnDialog?.table === table && columnDialog.data === "loading") {
 			return;
 		}
-		setColumnTarget(table);
-		setColumnData("loading");
-		toggleAllColumns(Array.from(selectedColumns), false);
+		setColumnDialog({ table, data: "loading" });
 		onQueryColumns?.(table).then(
 			(columns) => {
 				if (isMountedRef.current) {
-					setColumnData(columns);
+					setColumnDialog((prev) =>
+						prev?.table === table ? { table, data: columns } : prev,
+					);
 				}
 			},
 			() => {
 				if (isMountedRef.current) {
-					setColumnData(null);
-					setColumnTarget(null);
+					setColumnDialog(null);
 				}
 			},
 		);
 	};
 
-	const handleInsertColumns = () => {
-		if (!Array.isArray(columnData)) return;
-		for (const col of columnData.filter((c) => selectedColumns.has(c))) {
-			onInsertColumn?.(col);
-		}
-	};
-
-	const tableList =
-		tables.length === 0 ? (
-			<p className="text-sm text-content-muted">No tables found</p>
-		) : (
-			<TableList
-				tables={tables}
-				selected={selected}
-				onToggleAll={toggleAll}
-				onToggle={toggle}
-				maxHeightClass="max-h-72"
-				onQueryColumns={onInsertColumn ? undefined : onQueryColumns}
-				onSelectTable={onInsertColumn ? handleSelectTable : undefined}
-				activeTable={columnTarget ?? undefined}
-			/>
-		);
-
 	return (
 		<>
-			<div className="mb-4 min-h-8 flex gap-4">
-				<div className={columnTarget !== null ? "flex-1 min-w-0" : "w-full"}>
-					{tableList}
-				</div>
-				{columnTarget !== null && onInsertColumn && (
-					<ColumnPanel
-						table={columnTarget}
-						columnData={columnData}
-						selectedColumns={selectedColumns}
-						onToggleColumn={toggleColumn}
-						onToggleAllColumns={toggleAllColumns}
-						onInsertColumns={handleInsertColumns}
-						insertDisabled={selectedColumns.size === 0}
+			<div className="mb-4 min-h-8">
+				{tables.length === 0 ? (
+					<p className="text-sm text-content-muted">No tables found</p>
+				) : (
+					<TableList
+						tables={tables}
+						selected={selected}
+						onToggleAll={toggleAll}
+						onToggle={toggle}
+						maxHeightClass="max-h-72"
+						onQueryColumns={onInsertColumn ? undefined : onQueryColumns}
+						onSelectTable={onInsertColumn ? handleSelectTable : undefined}
 					/>
 				)}
 			</div>
@@ -179,95 +147,129 @@ function TablesContent({
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</div>
+			{columnDialog !== null && onInsertColumn && (
+				<ColumnSelectDialog
+					table={columnDialog.table}
+					columnData={columnDialog.data}
+					onInsert={(columns) => {
+						for (const col of columns) onInsertColumn(col);
+						setColumnDialog(null);
+					}}
+					onClose={() => setColumnDialog(null)}
+				/>
+			)}
 		</>
 	);
 }
 
-function ColumnPanel({
+function ColumnSelectDialog({
 	table,
 	columnData,
-	selectedColumns,
-	onToggleColumn,
-	onToggleAllColumns,
-	onInsertColumns,
-	insertDisabled,
+	onInsert,
+	onClose,
 }: {
 	table: string;
-	columnData: string[] | "loading" | null;
-	selectedColumns: Set<string>;
-	onToggleColumn: (col: string) => void;
-	onToggleAllColumns: (cols: string[], checked: boolean) => void;
-	onInsertColumns: () => void;
-	insertDisabled: boolean;
+	columnData: string[] | "loading";
+	onInsert: (columns: string[]) => void;
+	onClose: () => void;
 }) {
+	const [filter, setFilter] = useState("");
+	const { selected, toggle, toggleAll } = useTableSelection();
+
 	if (columnData === "loading") {
 		return (
-			<div className="w-48 flex items-center justify-center">
-				<p className="text-sm text-content-muted">Loading...</p>
+			<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
+				<div className="bg-surface rounded-lg shadow-lg p-6 w-80 max-w-full">
+					<p className="text-sm text-content-muted">Loading...</p>
+				</div>
 			</div>
 		);
 	}
 
-	const columns = Array.isArray(columnData) ? columnData : [];
+	const filterLower = filter.toLowerCase();
+	const filteredColumns = filterLower
+		? columnData.filter((c) => c.toLowerCase().includes(filterLower))
+		: columnData;
 	const allSelected =
-		columns.length > 0 && columns.every((c) => selectedColumns.has(c));
+		filteredColumns.length > 0 && filteredColumns.every((c) => selected.has(c));
 
 	return (
-		<div className="w-48 flex flex-col gap-2">
-			<p
-				className="text-xs font-medium text-content-secondary truncate"
-				title={table}
-			>
-				{table}
-			</p>
-			<div className="overflow-y-auto max-h-64 border border-border-subtle rounded">
-				{columns.length === 0 ? (
-					<p className="text-sm text-content-muted px-3 py-2">No columns</p>
-				) : (
-					<table className="w-full text-sm text-left">
-						<thead className="bg-surface-subtle sticky top-0">
-							<tr>
-								<th className="px-2 py-1 w-6">
-									<input
-										type="checkbox"
-										checked={allSelected}
-										onChange={(e) => onToggleAllColumns(columns, e.target.checked)}
-										className="w-4 h-4 accent-primary-hover"
-									/>
-								</th>
-								<th className="px-2 py-1 font-medium text-content-secondary text-xs">
-									Column
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{columns.map((col) => (
-								<tr
-									key={col}
-									className="hover:bg-surface-subtle cursor-pointer border-t border-border-faint"
-									onClick={() => onToggleColumn(col)}
-								>
-									<td className="px-2 py-1">
-										<input
-											type="checkbox"
-											checked={selectedColumns.has(col)}
-											onChange={() => onToggleColumn(col)}
-											onClick={(e) => e.stopPropagation()}
-											className="w-4 h-4 accent-primary-hover"
-										/>
-									</td>
-									<td className="px-2 py-1 text-xs">{col}</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				)}
+		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
+			<div className="bg-surface rounded-lg shadow-lg p-6 w-80 max-w-full">
+				<h2 className="text-lg font-semibold mb-1">Select Columns</h2>
+				<p
+					className="text-xs text-content-secondary mb-4 truncate"
+					title={table}
+				>
+					{table}
+				</p>
+				<div className="mb-4">
+					<input
+						type="text"
+						value={filter}
+						onChange={(e) => setFilter(e.target.value)}
+						placeholder="Filter columns..."
+						className="w-full mb-1 px-2 py-1 text-sm border border-border rounded bg-input focus-visible:ring-3 ring-primary-ring"
+					/>
+					<div className="relative overflow-x-auto max-h-72 overflow-y-auto border border-border-subtle rounded">
+						{columnData.length === 0 ? (
+							<p className="text-sm text-content-muted px-3 py-2">
+								No columns found
+							</p>
+						) : (
+							<table className="w-full text-sm text-left">
+								<thead className="bg-surface-subtle sticky top-0">
+									<tr>
+										<th className="px-3 py-2 w-8">
+											<input
+												type="checkbox"
+												checked={allSelected}
+												onChange={(e) =>
+													toggleAll(filteredColumns, e.target.checked)
+												}
+												className="w-4 h-4 accent-primary-hover"
+											/>
+										</th>
+										<th className="px-3 py-2 font-medium text-content-secondary">
+											Column Name
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									{filteredColumns.map((col) => (
+										<tr
+											key={col}
+											className="hover:bg-surface-subtle cursor-pointer border-t border-border-faint"
+											onClick={() => toggle(col)}
+										>
+											<td className="px-3 py-1.5">
+												<input
+													type="checkbox"
+													checked={selected.has(col)}
+													onChange={() => toggle(col)}
+													onClick={(e) => e.stopPropagation()}
+													className="w-4 h-4 accent-primary-hover"
+												/>
+											</td>
+											<td className="px-3 py-1.5">{col}</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						)}
+					</div>
+				</div>
+				<div className="flex gap-2 justify-end">
+					<BlueButton
+						title="Insert Columns"
+						handleClick={() =>
+							onInsert(columnData.filter((c) => selected.has(c)))
+						}
+						disabled={selected.size === 0}
+					/>
+					<WhiteButton title="Cancel" handleClick={onClose} />
+				</div>
 			</div>
-			<BlueButton
-				title="Insert Columns"
-				handleClick={onInsertColumns}
-				disabled={insertDisabled}
-			/>
 		</div>
 	);
 }
