@@ -129,7 +129,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     @Post(uri = "shell", produces = MediaType.TEXT_PLAIN)
     public String shell(@Body final CommandRequestDto body) throws IOException {
         try {
-            return Path.of(this.workspace.saveShell(this.getCommandType(), body.getName())).getParent().toString();
+            return Path.of(this.workspace.saveShell(this.getCommandType(), body.getName(), this.resolveParameters(body.getInput()))).getParent().toString();
         } catch (IOException e) {
             throw e;
         } catch (final Throwable th) {
@@ -154,11 +154,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     public String exec(@Body final CommandRequestDto body) {
         try {
             LOGGER.info(System.getProperty(FileResources.PROPERTY_WORKSPACE));
-            final CommandParameters parameters = new CommandParameters(this.getCommandType(), body.getInput())
-                    .resolveFilePaths((baseDir, value) ->
-                            SIDECAR_RESOLVE_BASEDIR.contains(baseDir) && !new File(value).isAbsolute()
-                                    ? new File(Workspace.resolveBaseDir(baseDir), value).getAbsolutePath()
-                                    : value);
+            final CommandParameters parameters = this.resolveParameters(body.getInput());
             try {
                 parameters.exec(body.getName());
             } catch (final Command.CommandFailException th) {
@@ -169,6 +165,14 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
         }
+    }
+
+    private CommandParameters resolveParameters(final Map<String, String> input) {
+        return new CommandParameters(this.getCommandType(), input)
+                .resolveFilePaths((baseDir, value) ->
+                        SIDECAR_RESOLVE_BASEDIR.contains(baseDir) && !new File(value).isAbsolute()
+                                ? new File(Workspace.resolveBaseDir(baseDir), value).getAbsolutePath()
+                                : value);
     }
 
     abstract protected Type getCommandType();
