@@ -1,6 +1,6 @@
+import { openHelpWindow } from "../../utils/helpWindow";
 import { ButtonIcon } from "../element/ButtonIcon";
 import { HelpIcon } from "../element/Icon";
-import { openHelpWindow } from "../../utils/helpWindow";
 
 export function SectionHelpButton(props: { command: string; label: string }) {
 	return (
