@@ -67,15 +67,19 @@ export default function Footer(prop: {
 			}
 		};
 
+		const formValues = prop.formData(false).values;
+		const paramExtra = Object.fromEntries(
+			Object.entries(paramInputs).map(([k, v]) => [`-P${k}`, v]),
+		);
 		if (running.command === "exec") {
 			execParameterRef.current(
-				prop.formData(false).values,
+				{ ...formValues, ...paramExtra },
 				handleResult,
 				controller.signal,
 			);
 		} else if (running.command === "save") {
 			saveParameterRef.current(
-				prop.formData(false).values,
+				{ ...formValues, ...paramExtra },
 				handleResult,
 				controller.signal,
 			);
@@ -204,9 +208,6 @@ export default function Footer(prop: {
 					</div>
 				</div>
 			)}
-			{Object.entries(paramInputs).map(([name, value]) => (
-				<input key={name} type="hidden" name={`-P${name}`} value={value} />
-			))}
 			{showParamDialog && (
 				<ParameterInputDialog
 					params={paramInputs}
