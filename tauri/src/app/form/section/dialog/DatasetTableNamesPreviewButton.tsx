@@ -141,7 +141,7 @@ function TableDataPreviewDialog({
 						</tr>
 					</thead>
 					<tbody>
-						{preview.rows.map((row) => (
+						{preview.rows?.map((row) => (
 							<tr
 								key={row.join("\x00")}
 								className="border-t border-border-faint hover:bg-surface-subtle"
