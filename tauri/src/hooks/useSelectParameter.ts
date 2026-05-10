@@ -132,11 +132,8 @@ export const useExecParameter = () => {
 
 export const useSaveShell = () => {
 	const execute = useParameterAction();
-	return async (
-		input: { [k: string]: FormDataEntryValue },
-		handleResult: (result: Running) => void,
-		signal?: AbortSignal,
-	) => execute("shell", { input }, handleResult, signal);
+	return async (handleResult: (result: Running) => void, signal?: AbortSignal) =>
+		execute("shell", {}, handleResult, signal);
 };
 
 export const useParameterizeFrom = () => {
