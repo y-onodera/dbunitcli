@@ -32,29 +32,25 @@ export default function SrcTypeFormSection({
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
-	}
-	if (isTableType(options) || isSqlType(options)) {
+	} else if (isTableType(options) || isSqlType(options)) {
 		return (
 			<DBFormSection
 				options={options}
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
-	}
-	if (isRegType(options)) {
+	} else if (isRegType(options)) {
 		return (
 			<RegFormSection options={options} handleValueChange={handleValueChange} />
 		);
-	}
-	if (isFixedType(options)) {
+	} else if (isFixedType(options)) {
 		return (
 			<FixedFormSection
 				options={options}
 				handleValueChange={handleValueChange}
 			/>
 		);
-	}
-	if (isXlsType(options) || isXlsxType(options)) {
+	} else if (isXlsType(options) || isXlsxType(options)) {
 		return (
 			<ExcelFormSection
 				options={options}
