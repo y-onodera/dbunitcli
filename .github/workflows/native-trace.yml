@@ -8,11 +8,14 @@ on:
       - '.github/workflows/native-trace.yml'
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up graalvm
         uses: graalvm/setup-graalvm@v1
         with:
@@ -30,7 +33,7 @@ jobs:
       - name: Save native-image-config
         run: |
           mvn clean test -Pnative-trace "-fcore/pom.xml"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: native-image-config
           path: |

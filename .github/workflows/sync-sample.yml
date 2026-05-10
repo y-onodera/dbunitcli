@@ -7,11 +7,14 @@ on:
     paths:
       - 'sidecar/src/test/resources/workspace/sample/**'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Sync sample directory
         run: |

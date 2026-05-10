@@ -1,11 +1,14 @@
 name: tauri-build
 on:
     workflow_dispatch:
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   tauri-build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Get latest successful run-id
         id: get_run_id
         run: |
@@ -14,7 +17,7 @@ jobs:
           | jq -r '.workflow_runs[0].id')
           echo "run-id=$GH_RUN_ID" >> $env:GITHUB_ENV
       - name: Download native-image-sidecar
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: native-image-sidecar
           repository: y-onodera/dbunitcli
@@ -28,19 +31,19 @@ jobs:
           copy -path "*.exe" ./tauri/src-tauri/backend
           copy -path "./lib/font*" ./tauri/src-tauri/backend/lib
       - name: setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: latest
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: |
           cd tauri
           bun install
           bun tauri build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: installer
           path: ./tauri/src-tauri/target/release/bundle/nsis/*.exe
