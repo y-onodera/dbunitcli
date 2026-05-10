@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { SettingDialog } from "../../../../components/dialog";
 import { EditButton } from "../../../../components/element/ButtonIcon";
+import { TextArea } from "../../../../components/element/Input";
 import {
 	useDeleteTemplate,
 	useTemplateData,
@@ -66,8 +67,7 @@ function Dialog({
 		>
 			<div className="w-[800px] p-4">
 				<h2 className="text-lg font-bold mb-2">Template File Edit</h2>
-				<textarea
-					className="text-sm bg-surface-subtle border border-border rounded-lg p-3 w-full h-96 font-mono focus-visible:ring-3 ring-primary-ring"
+				<TextArea
 					value={content}
 					onChange={(e) => setContent(e.target.value)}
 				/>

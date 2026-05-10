@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SettingDialog } from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
 import { EditButton } from "../../../../components/element/ButtonIcon";
+import { TextArea } from "../../../../components/element/Input";
 import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
 import {
 	useDeleteDataSource,
@@ -69,22 +70,17 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 						/>
 					</div>
 				)}
-				<div className="relative">
-					<textarea
-						id="contents"
-						className="w-full h-96 p-4 border border-border rounded-lg
-                         font-mono text-base bg-surface-subtle
-                         focus-visible:ring-3 ring-primary-ring"
-						value={content}
-						onChange={(e) => setContent(e.target.value)}
-						placeholder={
-							props.type === "sql"
-								? "Enter SQL query..."
-								: "Enter table definition..."
-						}
-						spellCheck={false}
-					/>
-				</div>
+				<TextArea
+					id="contents"
+					value={content}
+					onChange={(e) => setContent(e.target.value)}
+					placeholder={
+						props.type === "sql"
+							? "Enter SQL query..."
+							: "Enter table definition..."
+					}
+					spellCheck={false}
+				/>
 			</div>
 			{showTableSelector && (
 				<SqlTableInsertDialog

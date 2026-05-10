@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { WhiteButton } from "../../../../components/element/Button";
 import { PreviewButton } from "../../../../components/element/ButtonIcon";
+import { TextArea } from "../../../../components/element/Input";
 import { useEnvironment } from "../../../../context/EnvironmentProvider";
 import type { Command } from "../../../../model/SelectParameter";
 import { COMMANDS } from "../../../../model/SelectParameter";
@@ -65,11 +66,14 @@ function ParameterizeTemplateDialog({
 				environment.apiUrl,
 				name,
 			);
-			if (isMounted) setLoadState({ status: "loaded", content });
+			if (isMounted) {
+				setLoadState({ status: "loaded", content });
+			}
 		}
 		load().catch((ex) => {
-			if (isMounted)
+			if (isMounted) {
 				setLoadState({ status: "error", message: getErrorMessage(ex) });
+			}
 		});
 		return () => {
 			isMounted = false;
@@ -91,11 +95,7 @@ function ParameterizeTemplateDialog({
 					<div className="text-error">Error: {loadState.message}</div>
 				)}
 				{loadState.status === "loaded" && (
-					<textarea
-						className="text-sm bg-surface-subtle border border-border rounded-lg p-3 w-full h-96 font-mono focus-visible:ring-3 ring-primary-ring"
-						value={loadState.content}
-						readOnly
-					/>
+					<TextArea value={loadState.content} readOnly />
 				)}
 			</div>
 			<div className="flex justify-end p-4">
@@ -105,11 +105,7 @@ function ParameterizeTemplateDialog({
 	);
 }
 
-export function TemplateCommandButton({
-	name,
-}: {
-	name: string;
-}) {
+export function TemplateCommandButton({ name }: { name: string }) {
 	const [showDialog, setShowDialog] = useState(false);
 	const paramName = extractNameFromTemplatePath(name);
 	return (

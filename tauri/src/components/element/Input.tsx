@@ -147,11 +147,46 @@ export function PreviewField({
 			<InputLabel text={label} id={id} required={false} />
 			<div
 				id={id}
-				className="block p-2.5 w-full text-sm text-content-secondary rounded-lg bg-surface-muted border border-border font-mono break-all"
+				className="block p-2.5 
+                           w-full 
+                           text-sm text-content-secondary 
+                           rounded-lg 
+                           bg-surface-muted 
+                           border border-border 
+                           font-mono 
+                           break-all"
 			>
 				{value || <span className="text-content-disabled">{placeholder}</span>}
 			</div>
 		</div>
+	);
+}
+export function TextArea(props: {
+	id?: string;
+	value: string;
+	readOnly?: boolean;
+	placeholder?: string;
+	spellCheck?: boolean;
+	onChange?: (ev: React.ChangeEvent<HTMLTextAreaElement>) => void;
+}) {
+	return (
+		<textarea
+			id={props.id}
+			className="p-2.5
+                       w-full h-96 
+                       text-sm text-content
+                       rounded-lg
+                       bg-input
+                       disabled:bg-input-disabled
+                       border border-border
+                       ring-primary-ring
+                       focus-visible:ring-3 "
+			value={props.value}
+			readOnly={props.readOnly}
+			placeholder={props.placeholder}
+			spellCheck={props.spellCheck}
+			onChange={props.onChange}
+		/>
 	);
 }
 function inputStyle(wStyle: string) {
