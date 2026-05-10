@@ -10,6 +10,8 @@ export interface TableListProps {
 	maxHeightClass?: string;
 	onQueryColumns?: (table: string) => Promise<string[]>;
 	onInsertColumn?: (column: string) => void;
+	onSelectTable?: (table: string) => void;
+	activeTable?: string;
 }
 
 export default function TableList({
@@ -20,6 +22,8 @@ export default function TableList({
 	maxHeightClass = "max-h-96",
 	onQueryColumns,
 	onInsertColumn,
+	onSelectTable,
+	activeTable,
 }: TableListProps) {
 	const [filter, setFilter] = useState("");
 	const [columnMap, setColumnMap] = useState<Map<string, string[] | "loading">>(
@@ -136,6 +140,16 @@ export default function TableList({
 													) : (
 														<ExpandIcon close={!columnMap.has(table)} />
 													)}
+												</ButtonIcon>
+											)}
+											{onSelectTable && (
+												<ButtonIcon
+													handleClick={(e) => {
+														e.stopPropagation();
+														onSelectTable(table);
+													}}
+												>
+													<ExpandIcon close={activeTable !== table} />
 												</ButtonIcon>
 											)}
 										</div>
