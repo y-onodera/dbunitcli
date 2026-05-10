@@ -31,13 +31,13 @@ jobs:
           copy -path "*.exe" ./tauri/src-tauri/backend
           copy -path "./lib/font*" ./tauri/src-tauri/backend/lib
       - name: setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: latest
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: |
           cd tauri
