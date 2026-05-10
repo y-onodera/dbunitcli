@@ -19,7 +19,7 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up graalvm
         uses: graalvm/setup-graalvm@v1
         with:
@@ -41,18 +41,18 @@ jobs:
         run: mvn allure:report -fcore/pom.xml
         shell: cmd
       - name: Upload TestReport
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: unitTestReport
           path: ./core/target/site
       - name: Upload jar
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: executableJar
           path: ./core/target/**jar-with-dependencies.jar
       - name: Upload GUI jar
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gui executableJar
           path: ./gui/target/**jar-with-dependencies.jar
@@ -61,7 +61,7 @@ jobs:
     needs: [ build ]
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up graalvm
         uses: graalvm/setup-graalvm@v1
         with:
@@ -85,14 +85,14 @@ jobs:
           mkdir sidecar/target/lib
           copy -path "$env:GRAALVM_HOME/lib/font*" ./core/target/lib
           copy -path "$env:GRAALVM_HOME/lib/font*" ./sidecar/target/lib
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: native-image
           path: |
             ./core/target/*.dll
             ./core/target/dbunit-cli.exe
             ./core/target/lib
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: native-image-sidecar
           path: |
@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout ️
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Download unitTestReport
         uses: actions/download-artifact@v4
         with:
