@@ -38,10 +38,11 @@ function DatasetLoadFormContent({
 			}
 		};
 	const handleValueChange = (element: CommandOption) => (newValue: string) => {
-		if (element.name in datasetSrcInfo) {
+		const key = element.name === "src" ? "srcPath" : element.name;
+		if (key in datasetSrcInfo) {
 			setDatasetSrcInfo({
 				...datasetSrcInfo,
-				[element.name]: newValue,
+				[key]: newValue,
 			} as DatasetSrcInfo);
 		}
 	};
@@ -107,7 +108,7 @@ export function DatasetLoadForm(prop: {
 	const initialDatasetSrcInfo = buildDatasetSrcInfo(prop.srcData);
 	return (
 		<DatasetSrcInfoProvider
-			key={prop.name + prop.srcData.prefix}
+			key={`${prop.name}:${prop.srcData.prefix}:${prop.srcData.srcType?.value ?? ""}`}
 			initialValue={initialDatasetSrcInfo}
 		>
 			<DatasetLoadFormContent
