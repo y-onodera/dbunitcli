@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { ButtonIcon } from "../../../../components/element/ButtonIcon";
-import { AddIcon, ExpandIcon } from "../../../../components/element/Icon";
+import { AddIcon, ExpandIcon, PreviewIcon } from "../../../../components/element/Icon";
 
 export interface TableListProps {
 	tables: string[];
@@ -10,6 +10,7 @@ export interface TableListProps {
 	maxHeightClass?: string;
 	onQueryColumns?: (table: string) => Promise<string[]>;
 	onInsertColumn?: (column: string) => void;
+	onSelectTable?: (table: string) => void;
 }
 
 export default function TableList({
@@ -20,6 +21,7 @@ export default function TableList({
 	maxHeightClass = "max-h-96",
 	onQueryColumns,
 	onInsertColumn,
+	onSelectTable,
 }: TableListProps) {
 	const [filter, setFilter] = useState("");
 	const [columnMap, setColumnMap] = useState<Map<string, string[] | "loading">>(
@@ -136,6 +138,16 @@ export default function TableList({
 													) : (
 														<ExpandIcon close={!columnMap.has(table)} />
 													)}
+												</ButtonIcon>
+											)}
+											{onSelectTable && (
+												<ButtonIcon
+													handleClick={(e) => {
+														e.stopPropagation();
+														onSelectTable(table);
+													}}
+												>
+													<PreviewIcon title="Select columns" />
 												</ButtonIcon>
 											)}
 										</div>
