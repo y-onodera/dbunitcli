@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -176,7 +175,7 @@ public class Workspace {
         return this.options().paths(type);
     }
 
-    public String saveShell(final Type commandType, final String name, final CommandParameters parameters) throws IOException {
+    public String saveShell(final Type commandType, final String name) throws IOException {
         final Path launchDir = Path.of(System.getProperty("user.dir")).toAbsolutePath().normalize();
         final Path backendDir = this.installDir().resolve("backend");
         final STGroup group = new STGroupFile("shell/saveShell.stg", '$', '$');
@@ -190,7 +189,7 @@ public class Workspace {
         template.add("resultBaseProperty", FileResources.PROPERTY_RESULT_BASE);
         template.add("resultBase", rawOrRelative(launchDir, FileResources.PROPERTY_RESULT_BASE, () -> FileResources.resultDir().toPath().toAbsolutePath().normalize()));
         template.add("commandType", commandType.name());
-        template.add("args", Arrays.asList(parameters.args()));
+        template.add("name", name);
         final String content = template.render();
         final File scriptFile = new File(launchDir.toFile(), commandType.name() + "_" + name + ".bat");
         // BATファイルはWindowsのOSデフォルト文字コードで保存する必要がある
