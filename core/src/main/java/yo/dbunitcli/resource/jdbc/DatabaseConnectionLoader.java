@@ -17,6 +17,8 @@ import java.util.Properties;
 
 public record DatabaseConnectionLoader(Properties jdbcProp) {
 
+    private static final int CONNECT_TIMEOUT_SECONDS = 30;
+
     public IDatabaseConnection loadConnection() {
         final String url = this.jdbcProp.get("url").toString();
         final String user = this.jdbcProp.get("user").toString();
@@ -25,7 +27,9 @@ public record DatabaseConnectionLoader(Properties jdbcProp) {
         try {
             if (url.contains("jdbc:oracle:thin")) {
                 Class.forName("oracle.jdbc.driver.OracleDriver");
-                final Connection conn = DriverManager.getConnection(url, user, pass);
+                final Properties props = baseProperties(user, pass);
+                props.setProperty("oracle.net.CONNECT_TIMEOUT", String.valueOf(CONNECT_TIMEOUT_SECONDS * 1000));
+                final Connection conn = DriverManager.getConnection(url, props);
                 result = new DatabaseConnection(conn, user);
                 final DatabaseConfig config = result.getConfig();
                 config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new Oracle10DataTypeFactory());
@@ -35,7 +39,9 @@ public record DatabaseConnectionLoader(Properties jdbcProp) {
                 config.setProperty(DatabaseConfig.PROPERTY_RESULTSET_TABLE_FACTORY, new ForwardOnlyResultSetTableFactory());
             } else if (url.contains("jdbc:sqlserver")) {
                 Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-                final Connection conn = DriverManager.getConnection(url, user, pass);
+                final Properties props = baseProperties(user, pass);
+                props.setProperty("loginTimeout", String.valueOf(CONNECT_TIMEOUT_SECONDS));
+                final Connection conn = DriverManager.getConnection(url, props);
                 result = new DatabaseConnection(conn, conn.getCatalog());
                 final DatabaseConfig config = result.getConfig();
                 config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new MsSqlDataTypeFactory());
@@ -44,7 +50,11 @@ public record DatabaseConnectionLoader(Properties jdbcProp) {
                 config.setProperty(DatabaseConfig.PROPERTY_RESULTSET_TABLE_FACTORY, new ForwardOnlyResultSetTableFactory());
             } else if (url.contains("jdbc:postgresql")) {
                 Class.forName("org.postgresql.Driver");
-                final Connection conn = DriverManager.getConnection(url, user, pass);
+                final Properties props = baseProperties(user, pass);
+                props.setProperty("connectTimeout", String.valueOf(CONNECT_TIMEOUT_SECONDS));
+                // socketTimeout covers data transfer after connect, so allow more time than connectTimeout
+                props.setProperty("socketTimeout", String.valueOf(CONNECT_TIMEOUT_SECONDS * 2));
+                final Connection conn = DriverManager.getConnection(url, props);
                 result = new DatabaseConnection(conn);
                 final DatabaseConfig config = result.getConfig();
                 config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new PostgresqlDataTypeFactory());
@@ -54,6 +64,7 @@ public record DatabaseConnectionLoader(Properties jdbcProp) {
                 config.setProperty(DatabaseConfig.PROPERTY_RESULTSET_TABLE_FACTORY, new ForwardOnlyResultSetTableFactory());
             } else if (url.contains("jdbc:h2")) {
                 Class.forName("org.h2.Driver");
+                // H2 is embedded/local; no network timeout needed
                 final Connection conn = DriverManager.getConnection(url, user, pass);
                 result = new DatabaseConnection(conn);
                 final DatabaseConfig config = result.getConfig();
@@ -69,5 +80,12 @@ public record DatabaseConnectionLoader(Properties jdbcProp) {
         } catch (final ClassNotFoundException | SQLException | DatabaseUnitException ex) {
             throw new AssertionError(ex);
         }
+    }
+
+    private static Properties baseProperties(final String user, final String pass) {
+        final Properties props = new Properties();
+        props.setProperty("user", user);
+        props.setProperty("password", pass);
+        return props;
     }
 }
