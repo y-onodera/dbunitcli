@@ -182,7 +182,10 @@ function ColumnSelectDialog({
 		return (
 			<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
 				<div className="bg-surface rounded-lg shadow-lg p-6 w-80 max-w-full">
-					<p className="text-sm text-content-muted">Loading...</p>
+					<p className="text-sm text-content-muted mb-4">Loading...</p>
+					<div className="flex gap-2 justify-end">
+						<WhiteButton title="Cancel" handleClick={onClose} />
+					</div>
 				</div>
 			</div>
 		);
