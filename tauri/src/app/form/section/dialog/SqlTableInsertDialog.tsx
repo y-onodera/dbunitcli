@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import { FilterInput } from "../../../../components/element/Input";
-import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
-import { useTableSelection } from "../../../../hooks/useTableSelection";
 import {
 	DialogActions,
 	DialogTitle,
 	ModalOverlay,
 } from "../../../../components/dialog";
+import { BlueButton, WhiteButton } from "../../../../components/element/Button";
+import { FilterInput } from "../../../../components/element/Input";
+import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
+import { useTableSelection } from "../../../../hooks/useTableSelection";
 import TableList from "./TableList";
 
 interface SqlTableInsertDialogProps {
@@ -210,10 +210,7 @@ function ColumnSelectDialog({
 	return (
 		<ModalOverlay width="w-80" zClass="z-[60]">
 			<h2 className="text-lg font-semibold mb-1">Select Columns</h2>
-			<p
-				className="text-xs text-content-secondary mb-4 truncate"
-				title={table}
-			>
+			<p className="text-xs text-content-secondary mb-4 truncate" title={table}>
 				{table}
 			</p>
 			<div className="mb-4">

@@ -13,7 +13,9 @@ export function ModalOverlay({
 		<div
 			className={`fixed inset-0 bg-black/50 flex items-center justify-center ${zClass}`}
 		>
-			<div className={`bg-surface rounded-lg shadow-lg p-6 max-w-full ${width}`}>
+			<div
+				className={`bg-surface rounded-lg shadow-lg p-6 max-w-full ${width}`}
+			>
 				{children}
 			</div>
 		</div>
