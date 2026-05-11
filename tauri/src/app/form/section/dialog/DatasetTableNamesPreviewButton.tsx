@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { PreviewButton } from "../../../../components/element/ButtonIcon";
+import { DialogTitle } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
 	useDatasetTableNames,
@@ -80,7 +81,7 @@ function DatasetTableNamesPreviewDialog({
 			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-surface border border-border-subtle"
 		>
 			<div className="p-4 rounded-lg mt-2">
-				<h2 className="text-lg font-bold mb-2">Table List Preview</h2>
+				<DialogTitle>Table List Preview</DialogTitle>
 				{renderContent()}
 			</div>
 			<div className="flex items-center justify-end p-4 gap-2">
@@ -169,7 +170,7 @@ function TableDataPreviewDialog({
 			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-surface border border-border-subtle"
 		>
 			<div className="p-4 rounded-lg mt-2">
-				<h2 className="text-lg font-bold mb-2">{tableName} — Data Preview</h2>
+				<DialogTitle>{tableName} — Data Preview</DialogTitle>
 				{renderContent()}
 			</div>
 			<div className="flex items-center justify-end p-4 gap-2">

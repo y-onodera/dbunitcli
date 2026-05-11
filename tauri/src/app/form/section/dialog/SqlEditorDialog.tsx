@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SettingDialog } from "../../../../components/dialog";
+import { DialogTitle, SettingDialog } from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
 import { EditButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
@@ -59,9 +59,9 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 			handleSave={handleCommit}
 		>
 			<div className="w-[640px] p-4">
-				<h2 className="text-xl font-bold mb-4">
+				<DialogTitle>
 					{props.type === "sql" ? "Edit SQL" : "Edit Table Definition"}
-				</h2>
+				</DialogTitle>
 				{connectionOk && (
 					<div className="mb-2">
 						<BlueButton

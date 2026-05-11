@@ -189,6 +189,25 @@ export function TextArea(props: {
 		/>
 	);
 }
+export function FilterInput({
+	value,
+	onChange,
+	placeholder,
+}: {
+	value: string;
+	onChange: (value: string) => void;
+	placeholder?: string;
+}) {
+	return (
+		<input
+			type="text"
+			value={value}
+			onChange={(e) => onChange(e.target.value)}
+			placeholder={placeholder}
+			className="w-full mb-1 px-2 py-1 text-sm border border-border rounded bg-input focus-visible:ring-3 ring-primary-ring"
+		/>
+	);
+}
 function inputStyle(wStyle: string) {
 	return `block
                p-2.5

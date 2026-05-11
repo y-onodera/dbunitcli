@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SettingDialog } from "../../../../components/dialog";
+import { DialogTitle, SettingDialog } from "../../../../components/dialog";
 import { EditButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
 import {
@@ -66,7 +66,7 @@ function Dialog({
 			handleSave={handleSave}
 		>
 			<div className="w-[800px] p-4">
-				<h2 className="text-lg font-bold mb-2">Template File Edit</h2>
+				<DialogTitle>Template File Edit</DialogTitle>
 				<TextArea
 					value={content}
 					onChange={(e) => setContent(e.target.value)}

@@ -1,4 +1,4 @@
-import { SettingDialog } from "../../../../components/dialog";
+import { DialogTitle, SettingDialog } from "../../../../components/dialog";
 import { PreviewField } from "../../../../components/element/Input";
 import { useDeleteJdbcProperties } from "../../../../hooks/useJdbc";
 import { RemoveResource } from "./ResourceEditButton";
@@ -21,7 +21,7 @@ export default function JdbcSavePropertiesDialog({
 			handleSave={handleSave}
 		>
 			<div className="w-[480px] p-4">
-				<h2 className="text-lg font-bold mb-4">Save JDBC Properties</h2>
+				<DialogTitle>Save JDBC Properties</DialogTitle>
 
 				{jdbcValues.jdbcProperties && (
 					<div className="mb-3">

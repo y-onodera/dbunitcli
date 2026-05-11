@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { ButtonIcon } from "../../../../components/element/ButtonIcon";
+import { FilterInput } from "../../../../components/element/Input";
 import { AddIcon, ExpandIcon, PreviewIcon } from "../../../../components/element/Icon";
 
 export interface TableListProps {
@@ -77,12 +78,10 @@ export default function TableList({
 
 	return (
 		<div>
-			<input
-				type="text"
+			<FilterInput
 				value={filter}
-				onChange={(e) => setFilter(e.target.value)}
+				onChange={setFilter}
 				placeholder="Filter tables..."
-				className="w-full mb-1 px-2 py-1 text-sm border border-border rounded bg-input focus-visible:ring-3 ring-primary-ring"
 			/>
 			<div
 				className={`relative overflow-x-auto ${maxHeightClass} overflow-y-auto border border-border-subtle rounded`}

@@ -1,5 +1,5 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
-import { SettingDialog } from "../../../../components/dialog";
+import { DialogTitle, SettingDialog } from "../../../../components/dialog";
 import { BlueEditButton } from "../../../../components/element/ButtonIcon";
 import {
 	ControllTextBox,
@@ -61,7 +61,7 @@ export default function JdbcUrlBuilderDialog({
 			commitLabel="Apply"
 		>
 			<div className="w-[480px]">
-				<h2 className="text-lg font-bold mb-4">JDBC URL Builder</h2>
+				<DialogTitle>JDBC URL Builder</DialogTitle>
 
 				<div className="mb-3">
 					<InputLabel
