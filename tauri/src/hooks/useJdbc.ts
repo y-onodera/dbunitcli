@@ -2,6 +2,8 @@ import { useEnvironment } from "../context/EnvironmentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import { fetchAndUpdate, fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
+const JDBC_TIMEOUT_MS = 60_000;
+
 function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 	return {
 		url: jdbcValues.jdbcUrl ?? "",
@@ -34,6 +36,7 @@ export const useJdbcTables = () => {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
 			},
+			timeoutMs: JDBC_TIMEOUT_MS,
 		};
 		try {
 			const response = await fetchData(params);
@@ -55,6 +58,7 @@ export const useJdbcColumns = () => {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ ...toJdbcRequestBody(jdbcValues), table }),
 			},
+			timeoutMs: JDBC_TIMEOUT_MS,
 		};
 		try {
 			const response = await fetchData(params);
@@ -78,6 +82,7 @@ export const useJdbcConnectionTest = () => {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
 			},
+			timeoutMs: JDBC_TIMEOUT_MS,
 		};
 		try {
 			const response = await fetchData(params);

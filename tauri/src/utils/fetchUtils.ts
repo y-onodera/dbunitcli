@@ -11,6 +11,7 @@ export type FetchParams = {
 	endpoint: string;
 	options: RequestInit;
 	signal?: AbortSignal;
+	timeoutMs?: number;
 };
 
 const createErrorInfo = (
@@ -78,23 +79,35 @@ export async function fetchAndUpdate<T>(
 		});
 }
 
-export const fetchData = async ({ endpoint, options, signal }: FetchParams) => {
-	const mergedOptions = { ...options, signal: signal ?? options.signal };
-	let response: Response;
+export const fetchData = async ({ endpoint, options, signal, timeoutMs }: FetchParams) => {
+	let controller: AbortController | null = null;
+	let timeoutId: ReturnType<typeof setTimeout> | null = null;
+	if (!signal && timeoutMs !== undefined) {
+		controller = new AbortController();
+		timeoutId = setTimeout(() => controller!.abort(), timeoutMs);
+	}
+	const mergedOptions = { ...options, signal: signal ?? controller?.signal ?? options.signal };
 	try {
-		response = await fetch(endpoint, mergedOptions);
-	} catch (ex) {
-		if (isAbortError(ex)) {
-			throw ex;
+		let response: Response;
+		try {
+			response = await fetch(endpoint, mergedOptions);
+		} catch (ex) {
+			if (isAbortError(ex)) {
+				throw ex;
+			}
+			// reqwest のコネクションプールに残った stale keep-alive 接続が原因で
+			// 接続エラーになる場合があるため、1 回だけリトライする
+			response = await fetch(endpoint, mergedOptions);
 		}
-		// reqwest のコネクションプールに残った stale keep-alive 接続が原因で
-		// 接続エラーになる場合があるため、1 回だけリトライする
-		response = await fetch(endpoint, mergedOptions);
+		if (!response.ok) {
+			throw new Error(
+				`Status: ${response.status}\nDetails: ${response.statusText || "Fetch request failed"}`,
+			);
+		}
+		return response;
+	} finally {
+		if (timeoutId !== null) {
+			clearTimeout(timeoutId);
+		}
 	}
-	if (!response.ok) {
-		throw new Error(
-			`Status: ${response.status}\nDetails: ${response.statusText || "Fetch request failed"}`,
-		);
-	}
-	return response;
 };
