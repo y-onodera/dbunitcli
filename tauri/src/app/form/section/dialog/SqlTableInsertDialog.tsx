@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import {
+	DialogActions,
+	DialogTitle,
+	ModalOverlay,
+} from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
+import { FilterInput } from "../../../../components/element/Input";
 import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
 import TableList from "./TableList";
@@ -41,9 +47,9 @@ export default function SqlTableInsertDialog({
 			return (
 				<>
 					<p className="text-sm text-content-muted mb-4">Loading...</p>
-					<div className="flex gap-2 justify-end">
+					<DialogActions>
 						<WhiteButton title="Cancel" handleClick={onClose} />
-					</div>
+					</DialogActions>
 				</>
 			);
 		}
@@ -59,22 +65,20 @@ export default function SqlTableInsertDialog({
 			);
 		}
 		return (
-			<div className="flex gap-2 justify-end">
+			<DialogActions>
 				<WhiteButton title="Cancel" handleClick={onClose} />
-			</div>
+			</DialogActions>
 		);
 	}
 
 	return (
-		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-			<div className="bg-surface rounded-lg shadow-lg p-6 w-96 max-w-full">
-				<h2 className="text-lg font-semibold mb-4">Select Tables</h2>
-				<div className="mb-4">
-					<BlueButton title="Load Tables" handleClick={handleLoad} />
-				</div>
-				{renderBody()}
+		<ModalOverlay>
+			<DialogTitle>Select Tables</DialogTitle>
+			<div className="mb-4">
+				<BlueButton title="Load Tables" handleClick={handleLoad} />
 			</div>
-		</div>
+			{renderBody()}
+		</ModalOverlay>
 	);
 }
 
@@ -146,14 +150,14 @@ function TablesContent({
 					/>
 				)}
 			</div>
-			<div className="flex gap-2 justify-end">
+			<DialogActions>
 				<BlueButton
 					title="Insert"
 					handleClick={handleInsert}
 					disabled={selected.size === 0}
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
-			</div>
+			</DialogActions>
 			{columnDialog !== null && onInsertColumn && (
 				<ColumnSelectDialog
 					table={columnDialog.table}
@@ -187,14 +191,12 @@ function ColumnSelectDialog({
 
 	if (columnData === "loading") {
 		return (
-			<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
-				<div className="bg-surface rounded-lg shadow-lg p-6 w-80 max-w-full">
-					<p className="text-sm text-content-muted mb-4">Loading...</p>
-					<div className="flex gap-2 justify-end">
-						<WhiteButton title="Cancel" handleClick={onClose} />
-					</div>
-				</div>
-			</div>
+			<ModalOverlay width="w-80" zClass="z-[60]">
+				<p className="text-sm text-content-muted mb-4">Loading...</p>
+				<DialogActions>
+					<WhiteButton title="Cancel" handleClick={onClose} />
+				</DialogActions>
+			</ModalOverlay>
 		);
 	}
 
@@ -206,82 +208,75 @@ function ColumnSelectDialog({
 		filteredColumns.length > 0 && filteredColumns.every((c) => selected.has(c));
 
 	return (
-		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
-			<div className="bg-surface rounded-lg shadow-lg p-6 w-80 max-w-full">
-				<h2 className="text-lg font-semibold mb-1">Select Columns</h2>
-				<p
-					className="text-xs text-content-secondary mb-4 truncate"
-					title={table}
-				>
-					{table}
-				</p>
-				<div className="mb-4">
-					<input
-						type="text"
-						value={filter}
-						onChange={(e) => setFilter(e.target.value)}
-						placeholder="Filter columns..."
-						className="w-full mb-1 px-2 py-1 text-sm border border-border rounded bg-input focus-visible:ring-3 ring-primary-ring"
-					/>
-					<div className="relative overflow-x-auto max-h-72 overflow-y-auto border border-border-subtle rounded">
-						{columnData.length === 0 ? (
-							<p className="text-sm text-content-muted px-3 py-2">
-								No columns found
-							</p>
-						) : (
-							<table className="w-full text-sm text-left">
-								<thead className="bg-surface-subtle sticky top-0">
-									<tr>
-										<th className="px-3 py-2 w-8">
+		<ModalOverlay width="w-80" zClass="z-[60]">
+			<h2 className="text-lg font-semibold mb-1">Select Columns</h2>
+			<p className="text-xs text-content-secondary mb-4 truncate" title={table}>
+				{table}
+			</p>
+			<div className="mb-4">
+				<FilterInput
+					value={filter}
+					onChange={setFilter}
+					placeholder="Filter columns..."
+				/>
+				<div className="relative overflow-x-auto max-h-72 overflow-y-auto border border-border-subtle rounded">
+					{columnData.length === 0 ? (
+						<p className="text-sm text-content-muted px-3 py-2">
+							No columns found
+						</p>
+					) : (
+						<table className="w-full text-sm text-left">
+							<thead className="bg-surface-subtle sticky top-0">
+								<tr>
+									<th className="px-3 py-2 w-8">
+										<input
+											type="checkbox"
+											checked={allSelected}
+											onChange={(e) =>
+												toggleAll(filteredColumns, e.target.checked)
+											}
+											className="w-4 h-4 accent-primary-hover"
+										/>
+									</th>
+									<th className="px-3 py-2 font-medium text-content-secondary">
+										Column Name
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								{filteredColumns.map((col) => (
+									<tr
+										key={col}
+										className="hover:bg-surface-subtle cursor-pointer border-t border-border-faint"
+										onClick={() => toggle(col)}
+									>
+										<td className="px-3 py-1.5">
 											<input
 												type="checkbox"
-												checked={allSelected}
-												onChange={(e) =>
-													toggleAll(filteredColumns, e.target.checked)
-												}
+												checked={selected.has(col)}
+												onChange={() => toggle(col)}
+												onClick={(e) => e.stopPropagation()}
 												className="w-4 h-4 accent-primary-hover"
 											/>
-										</th>
-										<th className="px-3 py-2 font-medium text-content-secondary">
-											Column Name
-										</th>
+										</td>
+										<td className="px-3 py-1.5">{col}</td>
 									</tr>
-								</thead>
-								<tbody>
-									{filteredColumns.map((col) => (
-										<tr
-											key={col}
-											className="hover:bg-surface-subtle cursor-pointer border-t border-border-faint"
-											onClick={() => toggle(col)}
-										>
-											<td className="px-3 py-1.5">
-												<input
-													type="checkbox"
-													checked={selected.has(col)}
-													onChange={() => toggle(col)}
-													onClick={(e) => e.stopPropagation()}
-													className="w-4 h-4 accent-primary-hover"
-												/>
-											</td>
-											<td className="px-3 py-1.5">{col}</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						)}
-					</div>
-				</div>
-				<div className="flex gap-2 justify-end">
-					<BlueButton
-						title="Insert Columns"
-						handleClick={() =>
-							onInsert(columnData.filter((c) => selected.has(c)))
-						}
-						disabled={selected.size === 0}
-					/>
-					<WhiteButton title="Cancel" handleClick={onClose} />
+								))}
+							</tbody>
+						</table>
+					)}
 				</div>
 			</div>
-		</div>
+			<DialogActions>
+				<BlueButton
+					title="Insert Columns"
+					handleClick={() =>
+						onInsert(columnData.filter((c) => selected.has(c)))
+					}
+					disabled={selected.size === 0}
+				/>
+				<WhiteButton title="Cancel" handleClick={onClose} />
+			</DialogActions>
+		</ModalOverlay>
 	);
 }

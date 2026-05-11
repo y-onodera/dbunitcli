@@ -1,4 +1,9 @@
 export { DialogHelpButton, SectionHelpButton } from "./DialogHelpButton";
+export {
+	DialogActions,
+	DialogTitle,
+	ModalOverlay,
+} from "./ModalOverlay";
 export type { SettingDialogProps } from "./SettingDialog";
 export {
 	Arrays,

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { DialogTitle } from "../../../../components/dialog";
 import { WhiteButton } from "../../../../components/element/Button";
 import { PreviewButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
@@ -87,7 +88,7 @@ function ParameterizeTemplateDialog({
 			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-white border border-gray-200"
 		>
 			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
-				<h2 className="text-lg font-bold mb-4">Template - {name}</h2>
+				<DialogTitle>Template - {name}</DialogTitle>
 				{loadState.status === "loading" && (
 					<div className="text-content-muted">Loading...</div>
 				)}
