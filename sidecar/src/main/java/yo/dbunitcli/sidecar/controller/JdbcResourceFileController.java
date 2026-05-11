@@ -95,7 +95,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         final JdbcOption option = new JdbcOption("jdbc", body.getProperties(), body.getUrl(), body.getUser(), body.getPass());
         try {
             conn = option.getDatabaseConnectionLoader().loadConnection();
-            final Column[] columns = conn.createDataSet().getTableMetaData(body.getTable()).getColumns();
+            final Column[] columns = conn.createDataSet(new String[]{body.getTable()}).getTableMetaData(body.getTable()).getColumns();
             return ObjectMapper.getDefault().writeValueAsString(
                     Arrays.stream(columns).map(Column::getColumnName).toList()
             );

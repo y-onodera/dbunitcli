@@ -38,7 +38,14 @@ export default function SqlTableInsertDialog({
 
 	function renderBody() {
 		if (loading) {
-			return <p className="text-sm text-content-muted">Loading...</p>;
+			return (
+				<>
+					<p className="text-sm text-content-muted mb-4">Loading...</p>
+					<div className="flex gap-2 justify-end">
+						<WhiteButton title="Cancel" handleClick={onClose} />
+					</div>
+				</>
+			);
 		}
 		if (tables !== null) {
 			return (
