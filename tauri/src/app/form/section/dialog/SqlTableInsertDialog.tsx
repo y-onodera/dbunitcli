@@ -152,7 +152,9 @@ function TablesContent({
 					table={columnDialog.table}
 					columnData={columnDialog.data}
 					onInsert={(columns) => {
-						for (const col of columns) onInsertColumn(col);
+						for (const col of columns) {
+							onInsertColumn(col);
+						}
 						setColumnDialog(null);
 					}}
 					onClose={() => setColumnDialog(null)}
