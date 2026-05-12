@@ -1,3 +1,4 @@
+import { SectionFieldset } from "../../components/dialog";
 import { SectionHelpButton } from "../../components/dialog";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
@@ -28,7 +29,7 @@ export function CompareForm(prop: {
 
 	return (
 		<>
-			<fieldset className="border border-border-subtle p-3">
+			<SectionFieldset>
 				<legend>compare</legend>
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
@@ -50,13 +51,13 @@ export function CompareForm(prop: {
 					/>
 				)}
 				<PlainText prefix="" element={settingEncodingElement} />
-			</fieldset>
+			</SectionFieldset>
 			{prop.compare.imageOption && (
-				<fieldset className="border border-border-subtle p-3">
+				<SectionFieldset>
 					<legend>image</legend>
 					<SectionHelpButton command="image" label="Image Option" />
 					<ImageOptionFormSection imageOption={imageOption} />
-				</fieldset>
+				</SectionFieldset>
 			)}
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
@@ -68,13 +69,13 @@ export function CompareForm(prop: {
 				name={prop.name}
 				srcData={oldData}
 			/>
-			<fieldset className="border border-border-subtle p-3">
+			<SectionFieldset>
 				<legend>{convertResult.prefix}</legend>
 				<ResultFormSection
 					resultOption={convertResult}
 					handleTypeSelect={prop.handleTypeSelect}
 				/>
-			</fieldset>
+			</SectionFieldset>
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}

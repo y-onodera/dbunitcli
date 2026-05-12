@@ -1,3 +1,4 @@
+import { SectionFieldset } from "../../components/dialog";
 import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
 import type { RunOptions } from "../../model/SelectParameter";
 import FileText from "./section/element/FileText";
@@ -12,7 +13,7 @@ export function RunForm(prop: {
 }) {
 	const run = prop.run;
 	return (
-		<fieldset className="border border-border-subtle p-3">
+		<SectionFieldset>
 			<legend>run</legend>
 			<Select
 				handleTypeSelect={prop.handleTypeSelect}
@@ -47,6 +48,6 @@ export function RunForm(prop: {
 					)}
 				</>
 			)}
-		</fieldset>
+		</SectionFieldset>
 	);
 }

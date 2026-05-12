@@ -1,3 +1,4 @@
+import { SectionFieldset } from "../../../components/dialog";
 import {
 	DatasetSrcInfoProvider,
 	useDatasetSrcInfo,
@@ -49,7 +50,7 @@ function DatasetLoadFormContent({
 	const jdbcOption = srcData.jdbcProperties ? srcData : undefined;
 	const templateOption = srcData.templateGroup ? srcData : undefined;
 	return (
-		<fieldset className="border border-border-subtle p-3">
+		<SectionFieldset>
 			<legend>{srcData.prefix}</legend>
 			{srcData.srcType && (
 				<Select
@@ -82,7 +83,7 @@ function DatasetLoadFormContent({
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
-		</fieldset>
+		</SectionFieldset>
 	);
 }
 
@@ -94,7 +95,7 @@ export function DatasetLoadForm(prop: {
 }) {
 	if (prop.srcData.srcType?.value === "none") {
 		return (
-			<fieldset className="border border-border-subtle p-3">
+			<SectionFieldset>
 				<legend>{prop.srcData.prefix}</legend>
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
@@ -102,7 +103,7 @@ export function DatasetLoadForm(prop: {
 					element={prop.srcData.srcType}
 					hidden={false}
 				/>
-			</fieldset>
+			</SectionFieldset>
 		);
 	}
 	const initialDatasetSrcInfo = buildDatasetSrcInfo(prop.srcData);

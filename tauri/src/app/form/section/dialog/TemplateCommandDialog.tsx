@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { DialogTitle } from "../../../../components/dialog";
+import { useState } from "react";
+import { DialogFooter, DialogTitle, FullDialog } from "../../../../components/dialog";
 import { WhiteButton } from "../../../../components/element/Button";
 import { PreviewButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
@@ -82,11 +82,7 @@ function ParameterizeTemplateDialog({
 	}, [name, environment.apiUrl]);
 
 	return (
-		<dialog
-			ref={dialogRef}
-			onClose={handleDialogClose}
-			className="overflow-y-auto fixed top-0 right-0 left-0 z-modal bg-surface border border-border-subtle"
-		>
+		<FullDialog onClose={handleDialogClose}>
 			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
 				<DialogTitle>Template - {name}</DialogTitle>
 				{loadState.status === "loading" && (
@@ -99,10 +95,10 @@ function ParameterizeTemplateDialog({
 					<TextArea value={loadState.content} readOnly />
 				)}
 			</div>
-			<div className="flex justify-end p-4">
+			<DialogFooter>
 				<WhiteButton title="Close" handleClick={handleDialogClose} />
-			</div>
-		</dialog>
+			</DialogFooter>
+		</FullDialog>
 	);
 }
 

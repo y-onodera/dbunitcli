@@ -1,3 +1,4 @@
+import { SectionFieldset } from "../../../components/dialog";
 import { useState } from "react";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
 import type { CommandOption, SrcElements } from "../../../model/CommandOption";
@@ -17,7 +18,7 @@ export default function DataLoadFormSection({
 	const toggleOptional = () => setShowOptional(!showOptional);
 	const prefix = options.prefix;
 	return (
-		<fieldset className="border border-border-subtle p-3">
+		<SectionFieldset>
 			<legend>data load</legend>
 			<ExpandButton
 				toggleOptional={toggleOptional}
@@ -76,6 +77,6 @@ export default function DataLoadFormSection({
 				handleValueChange={handleValueChange(options.regTableExclude)}
 				hidden={!showOptional}
 			/>
-		</fieldset>
+		</SectionFieldset>
 	);
 }

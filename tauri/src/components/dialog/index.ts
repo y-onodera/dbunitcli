@@ -1,6 +1,8 @@
 export { DialogHelpButton, SectionHelpButton } from "./DialogHelpButton";
+export { FullDialog } from "./FullDialog";
 export {
 	DialogActions,
+	DialogFooter,
 	DialogTitle,
 	ModalOverlay,
 } from "./ModalOverlay";
@@ -12,6 +14,7 @@ export {
 	Fieldset,
 	KeyValues,
 	KeyValueText,
+	SectionFieldset,
 	Select,
 	SettingDialog,
 	Text,

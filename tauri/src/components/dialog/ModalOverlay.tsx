@@ -27,5 +27,9 @@ export function DialogTitle({ children }: { children: ReactNode }) {
 }
 
 export function DialogActions({ children }: { children: ReactNode }) {
-	return <div className="flex gap-2 justify-end">{children}</div>;
+	return <div className="flex items-center gap-2 justify-end">{children}</div>;
+}
+
+export function DialogFooter({ children }: { children: ReactNode }) {
+	return <div className="flex items-center gap-2 justify-end p-4">{children}</div>;
 }

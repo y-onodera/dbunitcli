@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { BlueButton, WhiteButton } from "../element/Button";
 import { AddButton, RemoveButton } from "../element/ButtonIcon";
 import {
@@ -7,6 +7,8 @@ import {
 	InputLabel,
 	SelectBox,
 } from "../element/Input";
+import { DialogFooter } from "./ModalOverlay";
+import { FullDialog } from "./FullDialog";
 
 type CommonProps = {
 	handleDialogClose: () => void;
@@ -32,20 +34,11 @@ type FileMode = {
 export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
 
 export function SettingDialog<T>(props: SettingDialogProps<T>) {
-	const dialogRef = useRef<HTMLDialogElement>(null);
 	const [fileNameValue, setFileNameValue] = useState(props.fileName ?? "");
-	useEffect(() => {
-		dialogRef.current?.showModal();
-	}, []);
-
 	const isFileMode = props.fileName !== undefined;
 
 	return (
-		<dialog
-			ref={dialogRef}
-			onClose={props.handleDialogClose}
-			className="overflow-y-auto fixed top-0 right-0 left-0 z-modal bg-surface border border-border-subtle"
-		>
+		<FullDialog onClose={props.handleDialogClose}>
 			<div
 				className={
 					isFileMode
@@ -75,7 +68,7 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 					</div>
 				</div>
 			)}
-			<div className="flex items-center justify-end p-4 gap-2">
+			<DialogFooter>
 				<BlueButton
 					title={props.commitLabel ?? "Save"}
 					disabled={props.commitDisabled}
@@ -88,8 +81,8 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 					}}
 				/>
 				<WhiteButton title="Close" handleClick={props.handleDialogClose} />
-			</div>
-		</dialog>
+			</DialogFooter>
+		</FullDialog>
 	);
 }
 
@@ -402,5 +395,11 @@ export function KeyValueText(props: {
 				)}
 			</div>
 		</>
+	);
+}
+
+export function SectionFieldset({ children }: { children: ReactNode }) {
+	return (
+		<fieldset className="border border-border-subtle p-3">{children}</fieldset>
 	);
 }
