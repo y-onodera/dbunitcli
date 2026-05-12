@@ -85,7 +85,7 @@ function ParameterizeTemplateDialog({
 		<dialog
 			ref={dialogRef}
 			onClose={handleDialogClose}
-			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-white border border-gray-200"
+			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-surface border border-border-subtle"
 		>
 			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
 				<DialogTitle>Template - {name}</DialogTitle>

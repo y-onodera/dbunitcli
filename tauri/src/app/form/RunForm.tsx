@@ -12,7 +12,7 @@ export function RunForm(prop: {
 }) {
 	const run = prop.run;
 	return (
-		<fieldset className="border border-gray-200 p-3">
+		<fieldset className="border border-border-subtle p-3">
 			<legend>run</legend>
 			<Select
 				handleTypeSelect={prop.handleTypeSelect}

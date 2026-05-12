@@ -38,13 +38,13 @@ export default function SidebarHelpLink() {
 				<HelpIcon />
 			</ButtonIcon>
 			{showMenu && (
-				<div className="absolute bottom-full left-0 mb-1 z-50 p-2 bg-white border border-gray-100 rounded-lg shadow-md w-64">
+				<div className="absolute bottom-full left-0 mb-1 z-50 p-2 bg-surface border border-border-subtle rounded-lg shadow-md w-64">
 					<ul className="space-y-1">
 						{helpCommands.map((item) => (
 							<li key={item.command}>
 								<Button
 									buttonstyle="w-full text-left px-3 py-2"
-									bgcolor="hover:bg-gray-100"
+									bgcolor="hover:bg-surface-subtle"
 									textstyle=""
 									border="outline-hidden"
 									handleClick={() => {
@@ -52,8 +52,8 @@ export default function SidebarHelpLink() {
 										setShowMenu(false);
 									}}
 								>
-									<span className="block text-sm font-semibold text-gray-700">{item.label}</span>
-									<span className="block text-xs text-gray-500">{item.description}</span>
+									<span className="block text-sm font-semibold text-content">{item.label}</span>
+									<span className="block text-xs text-content-secondary">{item.description}</span>
 								</Button>
 							</li>
 						))}

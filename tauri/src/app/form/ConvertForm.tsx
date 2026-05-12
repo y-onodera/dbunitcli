@@ -16,7 +16,7 @@ export function ConvertForm(prop: {
 				name={prop.name}
 				srcData={srcData}
 			/>
-			<fieldset className="border border-gray-200 p-3">
+			<fieldset className="border border-border-subtle p-3">
 				<legend>{convertResult.prefix}</legend>
 				<ResultFormSection
 					resultOption={convertResult}

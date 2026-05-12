@@ -44,10 +44,7 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 		<dialog
 			ref={dialogRef}
 			onClose={props.handleDialogClose}
-			className="overflow-y-auto fixed
-                    top-0 right-0 left-0 z-50
-                    bg-white
-                    border border-gray-200"
+			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-surface border border-border-subtle"
 		>
 			<div
 				className={
@@ -98,9 +95,9 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 
 export function Fieldset(props: { children: ReactNode; legend?: string }) {
 	return (
-		<fieldset className="border border-gray-200 p-2.5 m-2">
+		<fieldset className="border border-border-subtle p-2.5 m-2">
 			{props.legend && (
-				<legend className="text-xs font-semibold text-gray-500 px-1">
+				<legend className="text-xs font-semibold text-content-secondary px-1">
 					{props.legend}
 				</legend>
 			)}
@@ -262,7 +259,7 @@ export function ArraysText(props: {
 		<>
 			{showLabel && (
 				<div className="grid grid-cols-5 pb-1">
-					<span className="col-start-2 text-xs text-gray-500">column</span>
+					<span className="col-start-2 text-xs text-content-secondary">column</span>
 				</div>
 			)}
 			<div className="grid grid-cols-5 pb-2">
@@ -364,8 +361,8 @@ export function KeyValueText(props: {
 		<>
 			{props.index === 0 && (
 				<div className="grid grid-cols-5 pb-1">
-					<span className="col-start-2 text-xs text-gray-500">name</span>
-					<span className="col-start-3 col-span-2 ml-1 text-xs text-gray-500">
+					<span className="col-start-2 text-xs text-content-secondary">name</span>
+					<span className="col-start-3 col-span-2 ml-1 text-xs text-content-secondary">
 						expression
 					</span>
 				</div>
