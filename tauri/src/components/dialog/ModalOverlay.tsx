@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 export function ModalOverlay({
 	children,
 	width = "w-96",
-	zClass = "z-50",
+	zClass = "z-modal",
 }: {
 	children: ReactNode;
 	width?: string;
@@ -14,7 +14,7 @@ export function ModalOverlay({
 			className={`fixed inset-0 bg-black/50 flex items-center justify-center ${zClass}`}
 		>
 			<div
-				className={`bg-surface rounded-lg shadow-lg p-6 max-w-full ${width}`}
+				className={`bg-surface rounded-lg shadow-modal p-6 max-w-full ${width}`}
 			>
 				{children}
 			</div>
@@ -27,5 +27,9 @@ export function DialogTitle({ children }: { children: ReactNode }) {
 }
 
 export function DialogActions({ children }: { children: ReactNode }) {
-	return <div className="flex gap-2 justify-end">{children}</div>;
+	return <div className="flex items-center gap-2 justify-end">{children}</div>;
+}
+
+export function DialogFooter({ children }: { children: ReactNode }) {
+	return <div className="flex items-center gap-2 justify-end p-4">{children}</div>;
 }

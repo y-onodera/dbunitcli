@@ -1,3 +1,4 @@
+import { SectionFieldset } from "../../../components/dialog";
 import { useState } from "react";
 import { SectionHelpButton } from "../../../components/dialog";
 import { BlueButton } from "../../../components/element/Button";
@@ -43,7 +44,7 @@ export default function JdbcFormSection({
 	const toggleOptional = () => setShowOptional(!showOptional);
 
 	return (
-		<fieldset className="border border-border-subtle p-3">
+		<SectionFieldset>
 			<legend>jdbc</legend>
 			<div className="flex items-center gap-2">
 				<ExpandButton
@@ -90,7 +91,7 @@ export default function JdbcFormSection({
 				/>
 				<JdbcSavePropertiesButton prefix={prefix} jdbcValues={jdbcValues} />
 			</div>
-		</fieldset>
+		</SectionFieldset>
 	);
 }
 

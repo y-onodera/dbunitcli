@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { DialogTitle } from "../../../../components/dialog";
+import { useState } from "react";
+import { DialogFooter, DialogTitle, FullDialog } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { PreviewButton } from "../../../../components/element/ButtonIcon";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
@@ -44,11 +44,6 @@ function DatasetTableNamesPreviewDialog({
 }) {
 	const { tableNames, loading } = useDatasetTableNames(datasetSrcInfo);
 	const [previewTable, setPreviewTable] = useState<string | null>(null);
-	const dialogRef = useRef<HTMLDialogElement>(null);
-
-	useEffect(() => {
-		dialogRef.current?.showModal();
-	}, []);
 
 	function renderContent() {
 		if (loading) {
@@ -75,18 +70,14 @@ function DatasetTableNamesPreviewDialog({
 	}
 
 	return (
-		<dialog
-			ref={dialogRef}
-			onClose={handleDialogClose}
-			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-surface border border-border-subtle"
-		>
+		<FullDialog onClose={handleDialogClose}>
 			<div className="p-4 rounded-lg mt-2">
 				<DialogTitle>Table List Preview</DialogTitle>
 				{renderContent()}
 			</div>
-			<div className="flex items-center justify-end p-4 gap-2">
+			<DialogFooter>
 				<WhiteButton title="Close" handleClick={handleDialogClose} />
-			</div>
+			</DialogFooter>
 			{previewTable !== null && (
 				<TableDataPreviewDialog
 					datasetSrcInfo={datasetSrcInfo}
@@ -94,7 +85,7 @@ function DatasetTableNamesPreviewDialog({
 					handleClose={() => setPreviewTable(null)}
 				/>
 			)}
-		</dialog>
+		</FullDialog>
 	);
 }
 
@@ -111,11 +102,6 @@ function TableDataPreviewDialog({
 		datasetSrcInfo,
 		tableName,
 	);
-	const dialogRef = useRef<HTMLDialogElement>(null);
-
-	useEffect(() => {
-		dialogRef.current?.showModal();
-	}, []);
 
 	function renderContent() {
 		if (loading) {
@@ -164,18 +150,14 @@ function TableDataPreviewDialog({
 	}
 
 	return (
-		<dialog
-			ref={dialogRef}
-			onClose={handleClose}
-			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-surface border border-border-subtle"
-		>
+		<FullDialog onClose={handleClose}>
 			<div className="p-4 rounded-lg mt-2">
 				<DialogTitle>{tableName} — Data Preview</DialogTitle>
 				{renderContent()}
 			</div>
-			<div className="flex items-center justify-end p-4 gap-2">
+			<DialogFooter>
 				<WhiteButton title="Close" handleClick={handleClose} />
-			</div>
-		</dialog>
+			</DialogFooter>
+		</FullDialog>
 	);
 }

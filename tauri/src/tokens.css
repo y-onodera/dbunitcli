@@ -1,4 +1,15 @@
 @theme {
+	/* Z-index layers */
+	--z-dropdown: 10;
+	--z-sidebar: 40;
+	--z-modal: 50;
+	--z-modal-nested: 60;
+
+	/* Shadow layers */
+	--shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+	--shadow-dropdown: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+	--shadow-modal: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
 	/* Primary action */
 	--color-primary: oklch(0.585 0.233 277.55); /* indigo-500 */
 	--color-primary-hover: oklch(0.511 0.262 276.44); /* indigo-600 */

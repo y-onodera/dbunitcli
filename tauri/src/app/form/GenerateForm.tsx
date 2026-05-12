@@ -1,3 +1,4 @@
+import { SectionFieldset } from "../../components/dialog";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import JxlsFormSection from "./section/JxlsFormSection";
@@ -18,7 +19,7 @@ export function GenerateForm(prop: {
 		generateTypeValue === "xlsx" || generateTypeValue === "xls";
 	return (
 		<>
-			<fieldset className="border border-border-subtle p-3">
+			<SectionFieldset>
 				<legend>generate</legend>
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
@@ -53,7 +54,7 @@ export function GenerateForm(prop: {
 				{generate.outputEncoding && (
 					<PlainText prefix="" element={generate.outputEncoding} />
 				)}
-			</fieldset>
+			</SectionFieldset>
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}

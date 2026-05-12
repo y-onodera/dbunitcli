@@ -1,3 +1,4 @@
+import { SectionFieldset } from "../../components/dialog";
 import { useState } from "react";
 import { useParameterList } from "../../context/WorkspaceResourcesProvider";
 import type { ParameterizeOptions } from "../../model/SelectParameter";
@@ -28,7 +29,7 @@ export function ParameterizeForm(prop: {
 
 	return (
 		<>
-			<fieldset className="border border-border-subtle p-3">
+			<SectionFieldset>
 				<legend>execute</legend>
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
@@ -72,7 +73,7 @@ export function ParameterizeForm(prop: {
 						handleValueChange={() => (_: string) => {}}
 					/>
 				)}
-			</fieldset>
+			</SectionFieldset>
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}

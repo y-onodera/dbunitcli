@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { FullDialog } from "../../components/dialog";
 import { DirectoryButton } from "../../components/element/ButtonIcon";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import StartupForm from "../startup/StartupForm";
@@ -26,19 +27,11 @@ export default function Header() {
 }
 
 function WorkspaceDialog({ onClose }: { onClose: () => void }) {
-	const dialogRef = useRef<HTMLDialogElement>(null);
-	useEffect(() => {
-		dialogRef.current?.showModal();
-	}, []);
 	return (
-		<dialog
-			ref={dialogRef}
-			onClose={onClose}
-			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-surface border border-border-subtle w-full max-w-4xl"
-		>
+		<FullDialog onClose={onClose} className="w-full max-w-4xl">
 			<div className="p-4 rounded-lg mt-2">
 				<StartupForm onSelect={onClose} onClose={onClose} />
 			</div>
-		</dialog>
+		</FullDialog>
 	);
 }

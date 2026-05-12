@@ -2,6 +2,15 @@
 @import "./tokens.css";
 @plugin "@tailwindcss/forms";
 
+@layer components {
+	.text-caption {
+		@apply text-xs text-content-secondary;
+	}
+	.text-label {
+		@apply text-sm font-semibold text-content;
+	}
+}
+
 @layer base {
 	[type="text"]:focus,
 	[type="email"]:focus,

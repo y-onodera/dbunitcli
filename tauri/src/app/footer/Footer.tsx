@@ -108,9 +108,9 @@ export default function Footer(prop: {
 
 	if (isLoading) {
 		return (
-			<div className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 ">
+			<div className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-modal ">
 				<div className="relative p-4 w-full max-w-md max-h-full">
-					<div className="relative bg-surface rounded-lg shadow-sm ">
+					<div className="relative bg-surface rounded-lg shadow-card ">
 						<div className="p-4 md:p-5 flex flex-col justify-center items-center">
 							<h3 className="mb-5 text-lg font-normal text-content-muted ">
 								Now Execution
@@ -154,7 +154,7 @@ export default function Footer(prop: {
 			{parameter.command && (
 				<div
 					className="fixed bottom-0 right-1
-                                w-full z-50
+                                w-full z-modal
 								bg-surface-muted
                                 flex items-center p-4 gap-2"
 				>

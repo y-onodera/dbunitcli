@@ -1,6 +1,8 @@
 export { DialogHelpButton, SectionHelpButton } from "./DialogHelpButton";
+export { FullDialog } from "./FullDialog";
 export {
 	DialogActions,
+	DialogFooter,
 	DialogTitle,
 	ModalOverlay,
 } from "./ModalOverlay";
@@ -16,4 +18,5 @@ export {
 	SettingDialog,
 	Text,
 } from "./SettingDialog";
+export { SectionFieldset } from "./SectionFieldset";
 export { default as SettingTable } from "./SettingTable";

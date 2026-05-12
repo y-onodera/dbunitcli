@@ -1,3 +1,4 @@
+import { SectionFieldset } from "../../../components/dialog";
 import { useState } from "react";
 import { SectionHelpButton } from "../../../components/dialog";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
@@ -13,7 +14,7 @@ export default function JxlsFormSection({
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
 	return (
-		<fieldset className="border border-border-subtle p-3">
+		<SectionFieldset>
 			<legend>jxls</legend>
 			<div className="flex items-center gap-2">
 				<ExpandButton
@@ -63,6 +64,6 @@ export default function JxlsFormSection({
 					hidden={!showOptional}
 				/>
 			)}
-		</fieldset>
+		</SectionFieldset>
 	);
 }

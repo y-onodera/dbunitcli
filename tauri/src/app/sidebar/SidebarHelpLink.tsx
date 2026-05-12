@@ -38,7 +38,7 @@ export default function SidebarHelpLink() {
 				<HelpIcon />
 			</ButtonIcon>
 			{showMenu && (
-				<div className="absolute bottom-full left-0 mb-1 z-50 p-2 bg-surface border border-border-subtle rounded-lg shadow-md w-64">
+				<div className="absolute bottom-full left-0 mb-1 z-modal p-2 bg-surface border border-border-subtle rounded-lg shadow-dropdown w-64">
 					<ul className="space-y-1">
 						{helpCommands.map((item) => (
 							<li key={item.command}>
