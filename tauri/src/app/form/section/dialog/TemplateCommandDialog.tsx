@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DialogFooter, DialogTitle, FullDialog } from "../../../../components/dialog";
 import { WhiteButton } from "../../../../components/element/Button";
 import { PreviewButton } from "../../../../components/element/ButtonIcon";
@@ -48,13 +48,8 @@ function ParameterizeTemplateDialog({
 	name: string;
 	handleDialogClose: () => void;
 }) {
-	const dialogRef = useRef<HTMLDialogElement>(null);
 	const environment = useEnvironment();
 	const [loadState, setLoadState] = useState<LoadState>({ status: "loading" });
-
-	useEffect(() => {
-		dialogRef.current?.showModal();
-	}, []);
 
 	useEffect(() => {
 		if (!name) {
