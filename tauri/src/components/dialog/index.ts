@@ -14,9 +14,9 @@ export {
 	Fieldset,
 	KeyValues,
 	KeyValueText,
-	SectionFieldset,
 	Select,
 	SettingDialog,
 	Text,
 } from "./SettingDialog";
+export { SectionFieldset } from "./SectionFieldset";
 export { default as SettingTable } from "./SettingTable";
