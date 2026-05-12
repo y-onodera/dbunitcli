@@ -191,7 +191,7 @@ function ColumnSelectDialog({
 
 	if (columnData === "loading") {
 		return (
-			<ModalOverlay width="w-80" zClass="z-[60]">
+			<ModalOverlay width="w-80" zClass="z-modal-nested">
 				<p className="text-sm text-content-muted mb-4">Loading...</p>
 				<DialogActions>
 					<WhiteButton title="Cancel" handleClick={onClose} />
@@ -208,9 +208,9 @@ function ColumnSelectDialog({
 		filteredColumns.length > 0 && filteredColumns.every((c) => selected.has(c));
 
 	return (
-		<ModalOverlay width="w-80" zClass="z-[60]">
-			<h2 className="text-lg font-semibold mb-1">Select Columns</h2>
-			<p className="text-xs text-content-secondary mb-4 truncate" title={table}>
+		<ModalOverlay width="w-80" zClass="z-modal-nested">
+			<DialogTitle>Select Columns</DialogTitle>
+			<p className="text-caption mb-4 truncate" title={table}>
 				{table}
 			</p>
 			<div className="mb-4">

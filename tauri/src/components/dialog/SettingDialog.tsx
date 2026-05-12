@@ -44,7 +44,7 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 		<dialog
 			ref={dialogRef}
 			onClose={props.handleDialogClose}
-			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-surface border border-border-subtle"
+			className="overflow-y-auto fixed top-0 right-0 left-0 z-modal bg-surface border border-border-subtle"
 		>
 			<div
 				className={

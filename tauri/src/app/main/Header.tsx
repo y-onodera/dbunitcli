@@ -34,7 +34,7 @@ function WorkspaceDialog({ onClose }: { onClose: () => void }) {
 		<dialog
 			ref={dialogRef}
 			onClose={onClose}
-			className="overflow-y-auto fixed top-0 right-0 left-0 z-50 bg-surface border border-border-subtle w-full max-w-4xl"
+			className="overflow-y-auto fixed top-0 right-0 left-0 z-modal bg-surface border border-border-subtle w-full max-w-4xl"
 		>
 			<div className="p-4 rounded-lg mt-2">
 				<StartupForm onSelect={onClose} onClose={onClose} />
