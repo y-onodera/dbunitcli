@@ -57,10 +57,10 @@ export default function SettingTable<T>({
 				/>
 			)}
 			<table className="table-fixed w-full">
-				<caption className="caption-top text-sm font-semibold text-gray-700 text-left px-2 py-1">
+				<caption className="caption-top text-sm font-semibold text-content text-left px-2 py-1">
 					{caption}
 				</caption>
-				<thead className="text-xs text-gray-700 uppercase bg-gray-50">
+				<thead className="text-xs text-content uppercase bg-surface-subtle">
 					<tr>
 						<th scope="col" className="px-6 py-3 border">
 							Target
@@ -75,7 +75,7 @@ export default function SettingTable<T>({
 						<tr key={getKey(setting)}>
 							<th
 								scope="row"
-								className="px-6 min-w-80 max-w-80 text-left text-sm text-gray-900 border"
+								className="px-6 min-w-80 max-w-80 text-left text-sm text-content border"
 							>
 								{renderSetting(setting)}
 							</th>

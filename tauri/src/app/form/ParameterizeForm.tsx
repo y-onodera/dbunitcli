@@ -28,7 +28,7 @@ export function ParameterizeForm(prop: {
 
 	return (
 		<>
-			<fieldset className="border border-gray-200 p-3">
+			<fieldset className="border border-border-subtle p-3">
 				<legend>execute</legend>
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}

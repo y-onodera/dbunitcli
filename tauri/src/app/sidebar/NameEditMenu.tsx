@@ -53,7 +53,7 @@ export default function NameEditMenu({
 			{editName.name && (
 				<div
 					ref={wrapperRef}
-					className="absolute z-10 p-4 pb-0 text-gray-900 bg-white border border-gray-100 rounded-lg shadow-md"
+					className="absolute z-10 p-4 pb-0 text-content bg-surface border border-border-subtle rounded-lg shadow-md"
 					style={
 						editName.afterEdge
 							? { left: editName.x, top: editName.y - 150 }

@@ -28,7 +28,7 @@ export function CompareForm(prop: {
 
 	return (
 		<>
-			<fieldset className="border border-gray-200 p-3">
+			<fieldset className="border border-border-subtle p-3">
 				<legend>compare</legend>
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
@@ -52,7 +52,7 @@ export function CompareForm(prop: {
 				<PlainText prefix="" element={settingEncodingElement} />
 			</fieldset>
 			{prop.compare.imageOption && (
-				<fieldset className="border border-gray-200 p-3">
+				<fieldset className="border border-border-subtle p-3">
 					<legend>image</legend>
 					<SectionHelpButton command="image" label="Image Option" />
 					<ImageOptionFormSection imageOption={imageOption} />
@@ -68,7 +68,7 @@ export function CompareForm(prop: {
 				name={prop.name}
 				srcData={oldData}
 			/>
-			<fieldset className="border border-gray-200 p-3">
+			<fieldset className="border border-border-subtle p-3">
 				<legend>{convertResult.prefix}</legend>
 				<ResultFormSection
 					resultOption={convertResult}
