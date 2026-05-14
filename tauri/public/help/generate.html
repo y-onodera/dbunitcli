@@ -63,6 +63,12 @@
     <tr><td>result</td><td>生成結果ファイルを配置するディレクトリ</td></tr>
     <tr><td>resultPath</td><td>result ディレクトリからの相対パス</td></tr>
     <tr><td>outputEncoding</td><td>出力ファイルのエンコーディング（txt タイプのみ）</td></tr>
+    <tr><td>commit</td><td>生成 SQL に <code>commit;</code> を出力するか（sql タイプのみ／既定: true）</td></tr>
+    <tr><td>op</td><td>生成 SQL の操作種別。INSERT / UPDATE / DELETE / REFRESH / CLEAN_INSERT から選択（sql タイプのみ）</td></tr>
+    <tr><td>sqlFilePrefix</td><td>生成 SQL ファイル名の先頭に付ける文字列（sql タイプのみ）</td></tr>
+    <tr><td>sqlFileSuffix</td><td>生成 SQL ファイル名の末尾に付ける文字列（sql タイプのみ）</td></tr>
+    <tr><td>includeAllColumns</td><td>設定ファイルに全カラムを含めるか（settings タイプのみ／既定: false）</td></tr>
+    <tr><td>lazyLoad</td><td>大規模データ向けに POI の遅延ロードを使うか（xlsx / xls タイプのみ／既定: true）</td></tr>
   </table>
   <p><code>srcData</code> の入力フォーム詳細は <a href="dataset-load-form.html">Dataset Load Form</a> を参照してください。<br>
   <code>txt</code> タイプのテンプレートオプションは <a href="template.html">Template (StringTemplate 4)</a>、<code>xlsx</code> / <code>xls</code> タイプのオプションは <a href="jxls.html">Jxls</a> を参照してください。</p>
