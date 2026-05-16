@@ -3,6 +3,7 @@ import type React from "react";
 import {
 	type Dispatch,
 	type SetStateAction,
+	useEffect,
 	useRef,
 	useState,
 } from "react";
@@ -139,10 +140,20 @@ function DirectoryChooser(prop: {
 	text: string;
 	setPath: Dispatch<SetStateAction<string>>;
 }) {
+	const abortControllerRef = useRef<AbortController | null>(null);
+	useEffect(() => {
+		const controller = new AbortController();
+		abortControllerRef.current = controller;
+		return () => {
+			controller.abort();
+		};
+	}, []);
 	const handleDirectoryChooserClick = () => {
-		open({ defaultPath: prop.text, directory: true }).then(
-			(files) => files && prop.setPath(files as string),
-		);
+		open({ defaultPath: prop.text, directory: true }).then((files) => {
+			if (files && !abortControllerRef.current?.signal.aborted) {
+				prop.setPath(files as string);
+			}
+		});
 	};
 	return (
 		<ButtonWithIcon

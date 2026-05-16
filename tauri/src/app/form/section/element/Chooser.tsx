@@ -1,6 +1,7 @@
 import { core } from "@tauri-apps/api";
 import { sep } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
+import { useEffect, useRef } from "react";
 import {
 	DirectoryButton,
 	FileButton,
@@ -13,12 +14,20 @@ import type { FileProp } from "./FormElementProp";
 function useChooserHandler(prop: FileProp, directory?: boolean) {
 	const context = useWorkspaceContext();
 	const resolveAbsolutePath = useResolveAbsolutePath();
+	const abortControllerRef = useRef<AbortController | null>(null);
+	useEffect(() => {
+		const controller = new AbortController();
+		abortControllerRef.current = controller;
+		return () => {
+			controller.abort();
+		};
+	}, []);
 	return () => {
 		const basePath = context.getPath(prop.element.attribute.defaultPath);
 		const workspacePath = context.workspace;
 		resolveAbsolutePath(prop.path, prop.element.attribute).then((defaultPath) =>
 			open({ defaultPath, directory }).then((files) => {
-				if (files) {
+				if (files && !abortControllerRef.current?.signal.aborted) {
 					const fullPath = files as string;
 					const primaryPrefix = basePath + sep();
 					const secondaryPrefix = workspacePath + sep();

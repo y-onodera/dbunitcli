@@ -64,16 +64,16 @@ export const useXlsxSchemaData = (
 			setLoading(false);
 			return;
 		}
-		let isMounted = true;
+		const controller = new AbortController();
 		setLoading(true);
 		loadXlsxSchema(apiUrl, fileName).then((result) => {
-			if (isMounted) {
+			if (!controller.signal.aborted) {
 				setSchema(result);
 				setLoading(false);
 			}
 		});
 		return () => {
-			isMounted = false;
+			controller.abort();
 		};
 	}, [fileName, apiUrl]);
 
@@ -147,7 +147,7 @@ export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 		if (!srcPath) {
 			return;
 		}
-		let isMounted = true;
+		const controller = new AbortController();
 		fetchSheets(apiUrl, {
 			srcPath,
 			regTableInclude,
@@ -157,12 +157,12 @@ export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 			regExclude,
 			extension,
 		}).then((names) => {
-			if (isMounted) {
+			if (!controller.signal.aborted) {
 				setSheetNames(names);
 			}
 		});
 		return () => {
-			isMounted = false;
+			controller.abort();
 		};
 	}, [
 		apiUrl,

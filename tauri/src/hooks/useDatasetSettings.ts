@@ -91,16 +91,16 @@ export const useDatasetTableNames = (
 			setLoading(false);
 			return;
 		}
-		let isMounted = true;
+		const controller = new AbortController();
 		setLoading(true);
 		fetchTableNames(apiUrl, srcInfo, jdbcValues, paramInputs).then((names) => {
-			if (isMounted) {
+			if (!controller.signal.aborted) {
 				setTableNames(names);
 				setLoading(false);
 			}
 		});
 		return () => {
-			isMounted = false;
+			controller.abort();
 		};
 	}, [apiUrl, srcPath, srcType, srcInfo, sqlNotReady, jdbcValues, paramInputs]);
 
@@ -161,16 +161,16 @@ export const useDatasetTablePreview = (
 			setLoading(false);
 			return;
 		}
-		let isMounted = true;
+		const controller = new AbortController();
 		setLoading(true);
 		fetchTablePreview(apiUrl, srcInfo, tableName, jdbcValues, paramInputs).then((result) => {
-			if (isMounted) {
+			if (!controller.signal.aborted) {
 				setPreview(result);
 				setLoading(false);
 			}
 		});
 		return () => {
-			isMounted = false;
+			controller.abort();
 		};
 	}, [apiUrl, srcPath, srcType, srcInfo, sqlNotReady, jdbcValues, tableName, paramInputs]);
 
@@ -233,16 +233,16 @@ export const useDatasetSettingsData = (
 			setLoading(false);
 			return;
 		}
-		let isMounted = true;
+		const controller = new AbortController();
 		setLoading(true);
 		loadDatasetSettings(apiUrl, fileName).then((result) => {
-			if (isMounted) {
+			if (!controller.signal.aborted) {
 				setSettings(result);
 				setLoading(false);
 			}
 		});
 		return () => {
-			isMounted = false;
+			controller.abort();
 		};
 	}, [fileName, apiUrl]);
 
