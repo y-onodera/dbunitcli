@@ -6,14 +6,14 @@
 
 イベントハンドラとして使うだけの関数（deps に含めない）はクロージャのままでよい。
 
-## isMounted ガード
+## アンマウントガード（AbortController）
 
-非同期処理がアンマウント後に完了しうる場合は必ず付ける。
+非同期処理がアンマウント後に完了しうる場合は `AbortController` で必ずガードする。
 
 | 起点 | パターン |
 |---|---|
-| `useEffect` 内 | `let isMounted = true` ローカル変数 + `return () => { isMounted = false }` |
-| イベントハンドラ | `const isMountedRef = useRef(true)` + `useEffect(() => () => { isMountedRef.current = false }, [])` |
+| `useEffect` 内 | `const controller = new AbortController()` + `return () => controller.abort()`、コールバックで `if (!controller.signal.aborted)` |
+| イベントハンドラ | `const abortControllerRef = useRef<AbortController \| null>(null)` + `useEffect` でマウント時に生成・アンマウント時に `controller.abort()`、コールバックで `if (!abortControllerRef.current?.signal.aborted)` |
 
-`useEffect` 外から Promise を開始する場合はクロージャをまたぐため `useRef` が必要。
+`useEffect` 外から Promise を開始する場合はクロージャをまたぐため `useRef` が必要。cleanup で ref を `null` にしないこと（`signal.aborted` 判定が無効化されるため）。
 

@@ -32,11 +32,12 @@ export default function TableList({
 	const [columnMap, setColumnMap] = useState<Map<string, string[] | "loading">>(
 		new Map(),
 	);
-	const isMountedRef = useRef(true);
+	const abortControllerRef = useRef<AbortController | null>(null);
 	useEffect(() => {
-		isMountedRef.current = true;
+		const controller = new AbortController();
+		abortControllerRef.current = controller;
 		return () => {
-			isMountedRef.current = false;
+			controller.abort();
 		};
 	}, []);
 
@@ -65,12 +66,12 @@ export default function TableList({
 		setColumnMap((prev) => new Map(prev).set(table, "loading"));
 		onQueryColumns(table).then(
 			(columns) => {
-				if (isMountedRef.current) {
+				if (!abortControllerRef.current?.signal.aborted) {
 					setColumnMap((prev) => new Map(prev).set(table, columns));
 				}
 			},
 			() => {
-				if (isMountedRef.current) {
+				if (!abortControllerRef.current?.signal.aborted) {
 					setColumnMap((prev) => {
 						const next = new Map(prev);
 						next.delete(table);
