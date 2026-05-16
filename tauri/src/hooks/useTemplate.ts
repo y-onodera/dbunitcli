@@ -20,16 +20,16 @@ export const useTemplateData = (name: string): { content: string; loading: boole
 			setLoading(false);
 			return;
 		}
-		let isMounted = true;
+		const controller = new AbortController();
 		setLoading(true);
 		loadTemplateContent(apiUrl, name).then((result) => {
-			if (isMounted) {
+			if (!controller.signal.aborted) {
 				setContent(result);
 				setLoading(false);
 			}
 		});
 		return () => {
-			isMounted = false;
+			controller.abort();
 		};
 	}, [name, apiUrl]);
 

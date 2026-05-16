@@ -56,23 +56,23 @@ function ParameterizeTemplateDialog({
 			setLoadState({ status: "error", message: "No template selected" });
 			return;
 		}
-		let isMounted = true;
+		const controller = new AbortController();
 		async function load() {
 			const content = await loadParameterizeTemplateContent(
 				environment.apiUrl,
 				name,
 			);
-			if (isMounted) {
+			if (!controller.signal.aborted) {
 				setLoadState({ status: "loaded", content });
 			}
 		}
 		load().catch((ex) => {
-			if (isMounted) {
+			if (!controller.signal.aborted) {
 				setLoadState({ status: "error", message: getErrorMessage(ex) });
 			}
 		});
 		return () => {
-			isMounted = false;
+			controller.abort();
 		};
 	}, [name, environment.apiUrl]);
 

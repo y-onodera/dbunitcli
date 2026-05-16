@@ -100,11 +100,12 @@ function TablesContent({
 		table: string;
 		data: string[] | "loading";
 	} | null>(null);
-	const isMountedRef = useRef(true);
+	const abortControllerRef = useRef<AbortController | null>(null);
 	useEffect(() => {
-		isMountedRef.current = true;
+		const controller = new AbortController();
+		abortControllerRef.current = controller;
 		return () => {
-			isMountedRef.current = false;
+			controller.abort();
 		};
 	}, []);
 
@@ -120,14 +121,14 @@ function TablesContent({
 		setColumnDialog({ table, data: "loading" });
 		onQueryColumns?.(table).then(
 			(columns) => {
-				if (isMountedRef.current) {
+				if (!abortControllerRef.current?.signal.aborted) {
 					setColumnDialog((prev) =>
 						prev?.table === table ? { table, data: columns } : prev,
 					);
 				}
 			},
 			() => {
-				if (isMountedRef.current) {
+				if (!abortControllerRef.current?.signal.aborted) {
 					setColumnDialog(null);
 				}
 			},

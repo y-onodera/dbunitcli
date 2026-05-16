@@ -53,13 +53,12 @@ export default function Footer(prop: {
 			return;
 		}
 		executingRef.current = true;
-		let active = true;
 		setIsLoading(true);
 		const controller = new AbortController();
 		abortControllerRef.current = controller;
 
 		const handleResult = (result: Running) => {
-			if (active) {
+			if (!controller.signal.aborted) {
 				executingRef.current = false;
 				abortControllerRef.current = null;
 				setRunning(result);
@@ -88,7 +87,6 @@ export default function Footer(prop: {
 		}
 
 		return () => {
-			active = false;
 			abortControllerRef.current?.abort();
 			abortControllerRef.current = null;
 		};
