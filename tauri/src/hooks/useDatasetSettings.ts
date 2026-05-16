@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParamInputs } from "../context/ParameterInputProvider";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
+import { useParamInputs } from "../context/ParameterInputProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { DatasetSrcInfo } from "../model/CommandOption";
 import {
@@ -64,7 +64,9 @@ async function fetchTableNames(
 		options: {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: buildDatasetRequestBody(info, jdbcValues, { parameters: paramInputs }),
+			body: buildDatasetRequestBody(info, jdbcValues, {
+				parameters: paramInputs,
+			}),
 		},
 	};
 	return fetchData(fetchParams)
@@ -127,7 +129,10 @@ async function fetchTablePreview(
 		options: {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: buildDatasetRequestBody(info, jdbcValues, { tableName, parameters: paramInputs }),
+			body: buildDatasetRequestBody(info, jdbcValues, {
+				tableName,
+				parameters: paramInputs,
+			}),
 		},
 	};
 	return fetchData(fetchParams)
@@ -163,16 +168,27 @@ export const useDatasetTablePreview = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		fetchTablePreview(apiUrl, srcInfo, tableName, jdbcValues, paramInputs).then((result) => {
-			if (!controller.signal.aborted) {
-				setPreview(result);
-				setLoading(false);
-			}
-		});
+		fetchTablePreview(apiUrl, srcInfo, tableName, jdbcValues, paramInputs).then(
+			(result) => {
+				if (!controller.signal.aborted) {
+					setPreview(result);
+					setLoading(false);
+				}
+			},
+		);
 		return () => {
 			controller.abort();
 		};
-	}, [apiUrl, srcPath, srcType, srcInfo, sqlNotReady, jdbcValues, tableName, paramInputs]);
+	}, [
+		apiUrl,
+		srcPath,
+		srcType,
+		srcInfo,
+		sqlNotReady,
+		jdbcValues,
+		tableName,
+		paramInputs,
+	]);
 
 	return { preview, loading };
 };
@@ -247,6 +263,29 @@ export const useDatasetSettingsData = (
 	}, [fileName, apiUrl]);
 
 	return { settings, loading };
+};
+
+export const useColumnNamesFetcher = () => {
+	const { apiUrl } = useEnvironment();
+	const { jdbcValues } = useJdbcConnectionState();
+	const paramInputs = useParamInputs();
+	return async (
+		srcInfo: DatasetSrcInfo,
+		tableName: string,
+		signal: AbortSignal,
+	): Promise<string[]> => {
+		if (signal.aborted) {
+			return [];
+		}
+		const preview = await fetchTablePreview(
+			apiUrl,
+			srcInfo,
+			tableName,
+			jdbcValues,
+			paramInputs,
+		);
+		return preview.headers;
+	};
 };
 
 async function loadDatasetSettings(

@@ -10,10 +10,11 @@ import {
 	Text,
 } from "../../../../components/dialog";
 import {
+	BlueButtonIcon,
 	ButtonIcon,
 	ExpandButton,
 } from "../../../../components/element/ButtonIcon";
-import { HelpIcon } from "../../../../components/element/Icon";
+import { HelpIcon, PreviewIcon } from "../../../../components/element/Icon";
 import { ResourceDatalist } from "../../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useDatasetTableNames } from "../../../../hooks/useDatasetSettings";
@@ -23,6 +24,7 @@ import type {
 } from "../../../../model/DatasetSettings";
 import { newDatasetSetting } from "../../../../model/DatasetSettings";
 import { openHelpWindow } from "../../../../utils/helpWindow";
+import ColumnDatalistDialog from "./ColumnDatalistDialog";
 
 export default function DatasetSettingDialog(props: {
 	setting: DatasetSetting;
@@ -34,6 +36,10 @@ export default function DatasetSettingDialog(props: {
 		setTarget((current) => current.replace(select));
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
+	const [columnDatalist, setColumnDatalist] = useState<string[]>([]);
+	const [showColumnDialog, setShowColumnDialog] = useState(false);
+	const columnList =
+		columnDatalist.length > 0 ? "column_datalist_list" : undefined;
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const { tableNames } = useDatasetTableNames(datasetSrcInfo);
 	const tableList = tableNames.length > 0 ? "tableName_list" : undefined;
@@ -83,7 +89,7 @@ export default function DatasetSettingDialog(props: {
 					<option value="split">split</option>
 					<option value="separate">separate</option>
 				</Select>
-				{renderModeContent(target, setTarget)}
+				{renderModeContent(target, setTarget, columnList)}
 			</Fieldset>
 			<Fieldset legend="Additional Columns">
 				<ExpandButton
@@ -137,9 +143,18 @@ export default function DatasetSettingDialog(props: {
 				)}
 			</Fieldset>
 			<Fieldset legend="Filter / Order">
+				<div className="flex justify-end pb-1">
+					<BlueButtonIcon
+						title="Load column datalist"
+						handleClick={() => setShowColumnDialog(true)}
+					>
+						<PreviewIcon title="Load column datalist" fill="white" />
+					</BlueButtonIcon>
+				</div>
 				<Arrays
 					name="exclude"
 					values={target.exclude}
+					list={columnList}
 					handleChange={(text, index) =>
 						setTarget((cur) => cur.replaceExclude(text, index))
 					}
@@ -148,6 +163,7 @@ export default function DatasetSettingDialog(props: {
 				<Arrays
 					name="include"
 					values={target.include}
+					list={columnList}
 					handleChange={(text, index) =>
 						setTarget((cur) => cur.replaceInclude(text, index))
 					}
@@ -156,6 +172,7 @@ export default function DatasetSettingDialog(props: {
 				<Arrays
 					name="keys"
 					values={target.keys}
+					list={columnList}
 					handleChange={(text, index) =>
 						setTarget((cur) => cur.replaceKeys(text, index))
 					}
@@ -164,6 +181,7 @@ export default function DatasetSettingDialog(props: {
 				<Arrays
 					name="filter"
 					values={target.filter}
+					list={columnList}
 					handleChange={(text, index) =>
 						setTarget((cur) => cur.replaceFilter(text, index))
 					}
@@ -172,12 +190,24 @@ export default function DatasetSettingDialog(props: {
 				<Arrays
 					name="order"
 					values={target.order}
+					list={columnList}
 					handleChange={(text, index) =>
 						setTarget((cur) => cur.replaceOrder(text, index))
 					}
 					handleRemove={(index) => setTarget((cur) => cur.removeOrder(index))}
 				/>
+				{columnDatalist.length > 0 && (
+					<ResourceDatalist id="column_datalist" resources={columnDatalist} />
+				)}
 			</Fieldset>
+			{showColumnDialog && (
+				<ColumnDatalistDialog
+					tableNames={tableNames}
+					target={target}
+					onLoad={(columns) => setColumnDatalist(columns)}
+					onClose={() => setShowColumnDialog(false)}
+				/>
+			)}
 		</SettingDialog>
 	);
 }
@@ -185,6 +215,7 @@ export default function DatasetSettingDialog(props: {
 function renderModeContent(
 	target: DatasetSetting,
 	setTarget: React.Dispatch<React.SetStateAction<DatasetSetting>>,
+	columnList: string | undefined,
 ): React.ReactElement {
 	const mode = target.mode();
 	if (mode === "split") {
@@ -221,14 +252,13 @@ function renderModeContent(
 					name="limit"
 					value={target.split?.limit ?? ""}
 					handleChange={(newVal) =>
-						setTarget((cur) =>
-							cur.replaceSplit({ limit: newVal.target.value }),
-						)
+						setTarget((cur) => cur.replaceSplit({ limit: newVal.target.value }))
 					}
 				/>
 				<Arrays
 					name="breakKey"
 					values={target.split?.breakKey ?? []}
+					list={columnList}
 					handleChange={(text, index) =>
 						setTarget((cur) => cur.replaceSplitBreakKey(text, index))
 					}
