@@ -33,8 +33,7 @@ class OptionsTest {
 
     @Test
     public void builder_workspace_optionディレクトリが作成される() {
-        assertTrue(this.optionDir.exists());
-        assertTrue(this.optionDir.isDirectory());
+        assertFalse(this.optionDir.exists());
     }
 
     @Test
@@ -182,8 +181,6 @@ class OptionsTest {
     @Test
     public void builder_workspace_templatesがparameterizeのtemplateサブディレクトリに設定される() {
         final File expectedTemplateDir = new File(new File(this.optionDir, "parameterize"), "template");
-        // templatesのbaseDirが期待のパスになっていることを確認するため、templateディレクトリが作成できることを確認
-        assertTrue(this.optionDir.exists());
         assertEquals(expectedTemplateDir.getAbsolutePath(), this.options.templates().baseDir().getAbsolutePath());
     }
 

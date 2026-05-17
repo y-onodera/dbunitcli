@@ -28,17 +28,18 @@ public class Application {
 
     @Context
     public Workspace load(final ApplicationContext context) {
-        final Workspace workspace = Workspace.builder().build();
-        workspace.contextReload(
-                context.getEnvironment()
-                        .get(FileResources.PROPERTY_WORKSPACE, String.class)
-                        .orElse(workspace.path().toString()),
-                context.getEnvironment()
-                        .get(FileResources.PROPERTY_DATASET_BASE, String.class)
-                        .orElse(null),
-                context.getEnvironment()
-                        .get(FileResources.PROPERTY_RESULT_BASE, String.class)
-                        .orElse(null));
-        return workspace;
+        final String workspace = context.getEnvironment()
+                .get(FileResources.PROPERTY_WORKSPACE, String.class)
+                .orElse(".");
+        System.setProperty(FileResources.PROPERTY_WORKSPACE, workspace);
+        context.getEnvironment()
+                .get(FileResources.PROPERTY_DATASET_BASE, String.class)
+                .filter(yo.dbunitcli.Strings::isNotEmpty)
+                .ifPresent(v -> System.setProperty(FileResources.PROPERTY_DATASET_BASE, v));
+        context.getEnvironment()
+                .get(FileResources.PROPERTY_RESULT_BASE, String.class)
+                .filter(yo.dbunitcli.Strings::isNotEmpty)
+                .ifPresent(v -> System.setProperty(FileResources.PROPERTY_RESULT_BASE, v));
+        return Workspace.builder().setPath(workspace).build();
     }
 }
