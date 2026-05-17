@@ -97,17 +97,14 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
 
         public void workspace(final File workspace) {
             this.baseDir = new File(workspace, "option");
-            if (this.baseDir.exists() || this.baseDir.mkdirs()) {
-                this.addParameterFiles(Type.compare)
-                        .addParameterFiles(Type.convert)
-                        .addParameterFiles(Type.generate)
-                        .addParameterFiles(Type.run)
-                        .addParameterFiles(Type.parameterize)
-                ;
-                this.templates = new ResourceFile(
-                        new File(this.parameters.get(Type.parameterize).baseDir(), "template")
-                        , FileResources::searchTemplate);
-            }
+            this.addParameterFiles(Type.compare)
+                    .addParameterFiles(Type.convert)
+                    .addParameterFiles(Type.generate)
+                    .addParameterFiles(Type.run)
+                    .addParameterFiles(Type.parameterize);
+            this.templates = new ResourceFile(
+                    new File(this.parameters.get(Type.parameterize).baseDir(), "template")
+                    , FileResources::searchTemplate);
         }
 
         private Builder addParameterFiles(final Type command) {

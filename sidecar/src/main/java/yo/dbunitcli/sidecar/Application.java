@@ -5,6 +5,7 @@ import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.runtime.Micronaut;
 import io.micronaut.serde.annotation.SerdeImport;
+import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.command.Parameterize;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.resource.FileResources;
@@ -28,17 +29,17 @@ public class Application {
 
     @Context
     public Workspace load(final ApplicationContext context) {
-        final Workspace workspace = Workspace.builder().build();
-        workspace.contextReload(
-                context.getEnvironment()
-                        .get(FileResources.PROPERTY_WORKSPACE, String.class)
-                        .orElse(workspace.path().toString()),
-                context.getEnvironment()
-                        .get(FileResources.PROPERTY_DATASET_BASE, String.class)
-                        .orElse(null),
-                context.getEnvironment()
-                        .get(FileResources.PROPERTY_RESULT_BASE, String.class)
-                        .orElse(null));
-        return workspace;
+        final String workspace = context.getEnvironment()
+                .get(FileResources.PROPERTY_WORKSPACE, String.class)
+                .orElse(".");
+        context.getEnvironment()
+                .get(FileResources.PROPERTY_DATASET_BASE, String.class)
+                .filter(Strings::isNotEmpty)
+                .ifPresent(v -> System.setProperty(FileResources.PROPERTY_DATASET_BASE, v));
+        context.getEnvironment()
+                .get(FileResources.PROPERTY_RESULT_BASE, String.class)
+                .filter(Strings::isNotEmpty)
+                .ifPresent(v -> System.setProperty(FileResources.PROPERTY_RESULT_BASE, v));
+        return Workspace.builder().setPath(workspace).build();
     }
 }

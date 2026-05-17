@@ -94,6 +94,7 @@ public class Workspace {
         if (Strings.isNotEmpty(resultBase)) {
             System.setProperty(FileResources.PROPERTY_RESULT_BASE, resultBase);
         }
+        FileResources.baseDir().mkdirs();
         final var newWorkspace = Workspace.builder().setPath(workspace).build();
         this.options = newWorkspace.options();
         this.resources = newWorkspace.resources();
@@ -254,10 +255,8 @@ public class Workspace {
             final File expandedBaseDir = FileResources.baseDir();
             final Resources.Builder resources = Resources.builder();
             final Options.Builder options = Options.builder();
-            if (expandedBaseDir.exists() || expandedBaseDir.mkdirs()) {
-                options.workspace(expandedBaseDir);
-                resources.workspace(expandedBaseDir);
-            }
+            options.workspace(expandedBaseDir);
+            resources.workspace(expandedBaseDir);
             Workspace.LOGGER.info("current workspace:{}", expandedBaseDir.getAbsolutePath());
             return new Workspace(rawFile.toPath(), options.build(), resources.build());
         }
