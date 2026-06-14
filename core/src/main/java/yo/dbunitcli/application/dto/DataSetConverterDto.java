@@ -16,7 +16,8 @@ public class DataSetConverterDto implements CompositeDto {
     private String exportEmptyTable;
     @CommandLine.Option(names = "-resultPath", description = "result file relative path from -result=dir.")
     private String resultPath;
-    @CommandLine.Option(names = "-op", description = "import operation UPDATE | INSERT | DELETE | REFRESH | CLEAN_INSERT")
+    @CommandLine.Option(names = "-op", description = "import operation UPDATE | INSERT | DELETE | REFRESH | " +
+            "CLEAN_INSERT")
     private DbOperation operation;
     @CommandLine.Option(names = "-exportHeader", description = "if true then export file has no header row ")
     private String exportHeader;
@@ -24,6 +25,8 @@ public class DataSetConverterDto implements CompositeDto {
     private String outputEncoding;
     @CommandLine.Option(names = "-excelTable", description = "SHEET or BOOK")
     private String excelTable;
+    @CommandLine.Option(names = "-format", description = "if resultType is format, use this args for String.format()")
+    private String format;
 
     private JdbcDto jdbc = new JdbcDto();
 
@@ -94,6 +97,14 @@ public class DataSetConverterDto implements CompositeDto {
 
     public void setExcelTable(final String excelTable) {
         this.excelTable = excelTable;
+    }
+
+    public String getFormat() {
+        return this.format;
+    }
+
+    public void setFormat(final String format) {
+        this.format = format;
     }
 
     public JdbcDto getJdbc() {

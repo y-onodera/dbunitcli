@@ -4,32 +4,23 @@ import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.File;
 
-public record DataSetConverterParam(
-        DatabaseConnectionLoader databaseConnectionLoader
-        , ResultType resultType
-        , DbOperation operation
-        , File resultDir
-        , String fileName
-        , String outputEncoding
-        , String excelTable
-        , boolean exportEmptyTable
-        , boolean exportHeader) {
+public record DataSetConverterParam(DatabaseConnectionLoader databaseConnectionLoader, ResultType resultType,
+                                    DbOperation operation, File resultDir, String fileName, String outputEncoding,
+                                    String excelTable, String format, boolean exportEmptyTable, boolean exportHeader) {
+
+
+    public DataSetConverterParam(final Builder builder) {
+        this(builder.getDatabaseConnectionLoader(), builder.getResultType(), builder.getOperation(),
+             builder.getResultDir(), builder.getResultPath(), builder.getOutputEncoding(), builder.getExcelTable(),
+             builder.getFormat(), builder.isExportEmptyTable(), builder.isSkipHeader());
+    }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public DataSetConverterParam(final Builder builder) {
-        this(builder.getDatabaseConnectionLoader()
-                , builder.getResultType()
-                , builder.getOperation()
-                , builder.getResultDir()
-                , builder.getResultPath()
-                , builder.getOutputEncoding()
-                , builder.getExcelTable()
-                , builder.isExportEmptyTable()
-                , builder.isSkipHeader()
-        );
+    public String format() {
+        return this.format;
     }
 
     public static class Builder {
@@ -42,6 +33,7 @@ public record DataSetConverterParam(
         private boolean exportEmptyTable;
         private boolean skipHeader;
         private String resultPath;
+        private String format;
 
         public DataSetConverterParam build() {
             return new DataSetConverterParam(this);
@@ -110,13 +102,13 @@ public record DataSetConverterParam(
             return this;
         }
 
+        public String getResultPath() {
+            return this.resultPath;
+        }
+
         public Builder setResultPath(final String resultPath) {
             this.resultPath = resultPath;
             return this;
-        }
-
-        public String getResultPath() {
-            return this.resultPath;
         }
 
         public boolean isSkipHeader() {
@@ -125,6 +117,15 @@ public record DataSetConverterParam(
 
         public Builder setSkipHeader(final boolean skipHeader) {
             this.skipHeader = skipHeader;
+            return this;
+        }
+
+        public String getFormat() {
+            return this.format;
+        }
+
+        public Builder setFormat(final String format) {
+            this.format = format;
             return this;
         }
     }

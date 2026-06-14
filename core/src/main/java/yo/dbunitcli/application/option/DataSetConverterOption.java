@@ -4,7 +4,6 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.DataSetConverterDto;
 import yo.dbunitcli.dataset.DataSetConverterParam;
-import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.resource.FileResources;
@@ -22,16 +21,14 @@ public record DataSetConverterOption(
         , boolean skipHeader
         , String outputEncoding
         , String excelTable
+        , String format
 ) implements Option {
-
-    private static ResultType resultType(final DataSetConverterDto dto) {
-        return dto.getResultType() != null ? dto.getResultType() : ResultType.csv;
-    }
 
     public DataSetConverterOption(final String prefix, final DataSetConverterDto dto) {
         this(prefix
                 , DataSetConverterOption.resultType(dto)
-                , DataSetConverterOption.resultType(dto) == ResultType.table ? new JdbcOption(prefix, dto.getJdbc()) : new JdbcOption(prefix)
+                , DataSetConverterOption.resultType(dto) == ResultType.table ? new JdbcOption(prefix, dto.getJdbc()) :
+                     new JdbcOption(prefix)
                 , dto.getOperation()
                 , dto.getResultDir()
                 , dto.getResultPath()
@@ -39,7 +36,12 @@ public record DataSetConverterOption(
                 , Strings.isEmpty(dto.getExportHeader()) || Boolean.parseBoolean(dto.getExportHeader())
                 , Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8"
                 , Strings.isNotEmpty(dto.getExcelTable()) ? dto.getExcelTable() : "SHEET"
+                , dto.getFormat()
         );
+    }
+
+    private static ResultType resultType(final DataSetConverterDto dto) {
+        return dto.getResultType() != null ? dto.getResultType() : ResultType.csv;
     }
 
     @Override
@@ -54,18 +56,21 @@ public record DataSetConverterOption(
         if (this.resultType == null) {
             return result;
         }
-        final DataSourceType type = DataSourceType.valueOf(this.resultType.name());
-        if (type == DataSourceType.table) {
+        final ResultType type = ResultType.valueOf(this.resultType.name());
+        if (type == ResultType.table) {
             result.put("-op", this.operation == null ? DbOperation.CLEAN_INSERT : this.operation
-                            , DbOperation.class)
-                    .addComponent("jdbc", this.jdbcOption.toParameters());
+                          , DbOperation.class)
+                  .addComponent("jdbc", this.jdbcOption.toParameters());
         } else {
             result.putDir("-result", this.resultDir, BaseDir.RESULT)
-                    .put("-resultPath", this.resultPath)
-                    .put("-exportEmptyTable", this.exportEmptyTable)
-                    .put("-exportHeader", this.skipHeader);
-            if (type == DataSourceType.csv) {
+                  .put("-resultPath", this.resultPath)
+                  .put("-exportEmptyTable", this.exportEmptyTable)
+                  .put("-exportHeader", this.skipHeader);
+            if (type == ResultType.csv) {
                 result.put("-outputEncoding", this.outputEncoding);
+            } else if (type == ResultType.format) {
+                result.put("-outputEncoding", this.outputEncoding);
+                result.put("-format", this.format);
             } else {
                 result.put("-excelTable", this.excelTable);
             }
@@ -75,15 +80,16 @@ public record DataSetConverterOption(
 
     public DataSetConverterParam.Builder getParam() {
         return DataSetConverterParam.builder()
-                .setResultType(this.resultType)
-                .setOperation(this.operation)
-                .setDatabaseConnectionLoader(this.jdbcOption.getDatabaseConnectionLoader())
-                .setResultDir(this.getResultDir())
-                .setResultPath(this.resultPath)
-                .setExportEmptyTable(this.exportEmptyTable)
-                .setSkipHeader(this.skipHeader)
-                .setOutputEncoding(this.outputEncoding)
-                .setExcelTable(this.excelTable)
+                                    .setResultType(this.resultType)
+                                    .setOperation(this.operation)
+                                    .setDatabaseConnectionLoader(this.jdbcOption.getDatabaseConnectionLoader())
+                                    .setResultDir(this.getResultDir())
+                                    .setResultPath(this.resultPath)
+                                    .setExportEmptyTable(this.exportEmptyTable)
+                                    .setSkipHeader(this.skipHeader)
+                                    .setOutputEncoding(this.outputEncoding)
+                                    .setExcelTable(this.excelTable)
+                                    .setFormat(this.format)
                 ;
     }
 
