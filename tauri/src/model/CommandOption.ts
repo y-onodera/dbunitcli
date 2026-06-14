@@ -145,6 +145,8 @@ export type ResultOption = CommandOptions & {
 	exportHeader: CommandOption;
 	outputEncoding?: CommandOption;
 	excelTable?: CommandOption;
+	format?: CommandOption;
+	outputExtension?: CommandOption;
 	op?: CommandOption;
 	jdbc?: JdbcOption;
 };

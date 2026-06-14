@@ -15,6 +15,8 @@ export default function ResultFormSection({
 	const prefix = resultOption.prefix;
 	const excelTable = resultOption.excelTable;
 	const outputEncoding = resultOption.outputEncoding;
+	const format = resultOption.format;
+	const outputExtension = resultOption.outputExtension;
 	return (
 		<>
 			<Select
@@ -36,6 +38,8 @@ export default function ResultFormSection({
 			)}
 			{excelTable && <PlainText prefix={prefix} element={excelTable} />}
 			{outputEncoding && <PlainText prefix={prefix} element={outputEncoding} />}
+			{format && <PlainText prefix={prefix} element={format} />}
+			{outputExtension && <PlainText prefix={prefix} element={outputExtension} />}
 			{resultOption.op && (
 				<Select
 					prefix={prefix}
