@@ -398,7 +398,8 @@
         "selectOption": [
           "csv",
           "xls",
-          "xlsx"
+          "xlsx",
+          "format"
         ],
         "required": true,
         "defaultPath": "WORKSPACE"
