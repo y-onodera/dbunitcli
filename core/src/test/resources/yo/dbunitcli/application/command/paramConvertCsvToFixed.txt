@@ -4,3 +4,4 @@
 -resultType=format
 -format=%-5s%-10s%-5s%-3s
 -outputEncoding=UTF-8
+-outputExtension=txt

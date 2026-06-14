@@ -22,6 +22,7 @@ public record DataSetConverterOption(
         , String outputEncoding
         , String excelTable
         , String format
+        , String extension
 ) implements Option {
 
     public DataSetConverterOption(final String prefix, final DataSetConverterDto dto) {
@@ -37,6 +38,7 @@ public record DataSetConverterOption(
                 , Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8"
                 , Strings.isNotEmpty(dto.getExcelTable()) ? dto.getExcelTable() : "SHEET"
                 , dto.getFormat()
+                , dto.getExtension()
         );
     }
 
@@ -71,6 +73,7 @@ public record DataSetConverterOption(
             } else if (type == ResultType.format) {
                 result.put("-outputEncoding", this.outputEncoding);
                 result.put("-format", this.format);
+                result.put("-outputExtension", this.extension);
             } else {
                 result.put("-excelTable", this.excelTable);
             }
@@ -90,6 +93,7 @@ public record DataSetConverterOption(
                                     .setOutputEncoding(this.outputEncoding)
                                     .setExcelTable(this.excelTable)
                                     .setFormat(this.format)
+                                    .setExtension(this.extension)
                 ;
     }
 

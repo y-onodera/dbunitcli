@@ -6,13 +6,14 @@ import java.io.File;
 
 public record DataSetConverterParam(DatabaseConnectionLoader databaseConnectionLoader, ResultType resultType,
                                     DbOperation operation, File resultDir, String fileName, String outputEncoding,
-                                    String excelTable, String format, boolean exportEmptyTable, boolean exportHeader) {
+                                    String excelTable, String format, boolean exportEmptyTable, boolean exportHeader,
+                                    String extension) {
 
 
     public DataSetConverterParam(final Builder builder) {
         this(builder.getDatabaseConnectionLoader(), builder.getResultType(), builder.getOperation(),
              builder.getResultDir(), builder.getResultPath(), builder.getOutputEncoding(), builder.getExcelTable(),
-             builder.getFormat(), builder.isExportEmptyTable(), builder.isSkipHeader());
+             builder.getFormat(), builder.isExportEmptyTable(), builder.isSkipHeader(), builder.getExtension());
     }
 
     public static Builder builder() {
@@ -34,6 +35,7 @@ public record DataSetConverterParam(DatabaseConnectionLoader databaseConnectionL
         private boolean skipHeader;
         private String resultPath;
         private String format;
+        private String extension;
 
         public DataSetConverterParam build() {
             return new DataSetConverterParam(this);
@@ -126,6 +128,15 @@ public record DataSetConverterParam(DatabaseConnectionLoader databaseConnectionL
 
         public Builder setFormat(final String format) {
             this.format = format;
+            return this;
+        }
+
+        public String getExtension() {
+            return this.extension;
+        }
+
+        public Builder setExtension(final String extension) {
+            this.extension = extension;
             return this;
         }
     }

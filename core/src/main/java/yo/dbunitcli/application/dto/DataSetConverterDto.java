@@ -27,6 +27,8 @@ public class DataSetConverterDto implements CompositeDto {
     private String excelTable;
     @CommandLine.Option(names = "-format", description = "if resultType is format, use this args for String.format()")
     private String format;
+    @CommandLine.Option(names = "-outputExtension", description = "if resultType is format, output file extension (default: txt)")
+    private String extension;
 
     private JdbcDto jdbc = new JdbcDto();
 
@@ -105,6 +107,14 @@ public class DataSetConverterDto implements CompositeDto {
 
     public void setFormat(final String format) {
         this.format = format;
+    }
+
+    public String getExtension() {
+        return this.extension;
+    }
+
+    public void setExtension(final String extension) {
+        this.extension = extension;
     }
 
     public JdbcDto getJdbc() {
