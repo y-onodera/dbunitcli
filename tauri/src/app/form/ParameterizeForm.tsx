@@ -1,4 +1,4 @@
-import { SectionFieldset } from "../../components/dialog";
+import { SectionFieldset, SectionHelpButton } from "../../components/dialog";
 import { useState } from "react";
 import { useParameterList } from "../../context/WorkspaceResourcesProvider";
 import type { ParameterizeOptions } from "../../model/SelectParameter";
@@ -31,6 +31,7 @@ export function ParameterizeForm(prop: {
 		<>
 			<SectionFieldset>
 				<legend>execute</legend>
+				<SectionHelpButton command="parameterize" label="Parameterize" />
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
 					prefix=""
