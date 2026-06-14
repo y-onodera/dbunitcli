@@ -1,4 +1,4 @@
-import { SectionFieldset } from "../../components/dialog";
+import { SectionFieldset, SectionHelpButton } from "../../components/dialog";
 import type { ConvertOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import ResultFormSection from "./section/ResultFormSection";
@@ -19,6 +19,7 @@ export function ConvertForm(prop: {
 			/>
 			<SectionFieldset>
 				<legend>{convertResult.prefix}</legend>
+				<SectionHelpButton command="convert" label="Convert" />
 				<ResultFormSection
 					resultOption={convertResult}
 					handleTypeSelect={prop.handleTypeSelect}

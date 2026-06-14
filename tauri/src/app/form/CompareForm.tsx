@@ -31,6 +31,7 @@ export function CompareForm(prop: {
 		<>
 			<SectionFieldset>
 				<legend>compare</legend>
+				<SectionHelpButton command="compare" label="Compare" />
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
 					prefix=""
