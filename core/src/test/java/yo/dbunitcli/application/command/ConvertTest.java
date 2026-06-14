@@ -24,6 +24,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
@@ -1371,6 +1372,17 @@ public class ConvertTest {
             Assertions.assertTrue(Arrays.asList(columnNames).contains("$SHEET_NAME"));
             Assertions.assertEquals("ComplexLayout.xls", userMaster.getValue(0, "$FILE_NAME"));
             Assertions.assertTrue(userMaster.getValue(0, "$FILE_PATH").toString().endsWith("ComplexLayout.xls"));
+        }
+
+        @Test
+        public void testFromCsvToFixed() throws Exception {
+            Convert.main(this.getArgs("/paramConvertCsvToFixed.txt"));
+            final List<String> lines = Files.readAllLines(
+                    new File(this.getBaseDir() + "/convert/csv2fixed/result/multi1.txt").toPath(),
+                    StandardCharsets.UTF_8);
+            Assertions.assertEquals(4, lines.size());
+            Assertions.assertEquals("1    2         3    4  ", lines.get(0));
+            Assertions.assertEquals("3                      ", lines.get(3));
         }
 
         @Test

@@ -42,6 +42,10 @@ public abstract class FlatFileConverter implements IDataSetConverter {
         return this.exportEmptyTable;
     }
 
+    protected String getExtension() {
+        return "csv";
+    }
+
     @Override
     public void startTable(ITableMetaData metaData) throws DataSetException {
         final String activeTableName = metaData.getTableName();
@@ -50,7 +54,7 @@ public abstract class FlatFileConverter implements IDataSetConverter {
             this.activeMetaData = metaData;
             this.writeRows = 0;
             final File directory = new File(this.theDirectory);
-            this.file = new File(directory, activeTableName + ".csv");
+            this.file = new File(directory, activeTableName + "." + this.getExtension());
             LOGGER.info("convert - start fileName={}", this.file);
             if (!directory.exists()) {
                 Files.createDirectories(directory.toPath());
@@ -73,7 +77,7 @@ public abstract class FlatFileConverter implements IDataSetConverter {
             this.activeMetaData = tableMetaData;
             this.writeRows = writeRows;
             final File directory = new File(this.theDirectory);
-            this.file = new File(directory, tableMetaData.getTableName() + ".csv");
+            this.file = new File(directory, tableMetaData.getTableName() + "." + this.getExtension());
             LOGGER.info("convert - restart fileName={},rows={}", this.file, this.writeRows);
             final FileOutputStream fos = new FileOutputStream(this.file, true);
             this.writer = new OutputStreamWriter(fos, this.encoding);

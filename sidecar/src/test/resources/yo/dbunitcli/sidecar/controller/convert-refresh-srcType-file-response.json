@@ -133,7 +133,8 @@
           "csv",
           "xls",
           "xlsx",
-          "table"
+          "table",
+          "format"
         ],
         "required": false,
         "defaultPath": "WORKSPACE"
