@@ -138,7 +138,8 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
         String truncated = value;
         byte[] truncatedBytes = truncated.getBytes(charset);
         while (truncatedBytes.length > targetBytes) {
-            truncated = truncated.substring(0, truncated.length() - 1);
+            final int cpCount = truncated.codePointCount(0, truncated.length());
+            truncated = truncated.substring(0, truncated.offsetByCodePoints(0, cpCount - 1));
             truncatedBytes = truncated.getBytes(charset);
         }
 
