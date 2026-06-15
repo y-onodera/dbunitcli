@@ -10,7 +10,8 @@ public record Resources(
         , ResourceFile jdbc
         , ResourceFile datasetSetting
         , ResourceFile template
-        , ResourceFile xlsxSchema) {
+        , ResourceFile xlsxSchema
+        , ResourceFile fixedColumnDef) {
 
     public static Builder builder() {
         return new Builder();
@@ -22,6 +23,7 @@ public record Resources(
         result.setJdbcFiles(this.jdbc().list());
         result.setTemplateFiles(this.template().list());
         result.setXlsxSchemas(this.xlsxSchema().list());
+        result.setFixedColumnDefs(this.fixedColumnDef().list());
         return result;
     }
 
@@ -34,7 +36,8 @@ public record Resources(
                     new ResourceFile(new File(this.baseDir, "jdbc"), FileResources::searchJdbc),
                     new ResourceFile(new File(this.baseDir, "setting"), FileResources::searchSetting),
                     new ResourceFile(new File(this.baseDir, "template"), FileResources::searchTemplate),
-                    new ResourceFile(new File(this.baseDir, "xlsx-schema"), FileResources::searchXlsxSchema)
+                    new ResourceFile(new File(this.baseDir, "xlsx-schema"), FileResources::searchXlsxSchema),
+                    new ResourceFile(new File(this.baseDir, "fixed-column-def"), FileResources::searchFixedColumnDef)
             );
         }
 

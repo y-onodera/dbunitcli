@@ -28,7 +28,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
 
     private static final EnumSet<Option.BaseDir> SIDECAR_RESOLVE_BASEDIR = EnumSet.of(
             Option.BaseDir.SETTING, Option.BaseDir.TEMPLATE, Option.BaseDir.JDBC,
-            Option.BaseDir.XLSX_SCHEMA, Option.BaseDir.PARAMETERIZE_TEMPLATE);
+            Option.BaseDir.XLSX_SCHEMA, Option.BaseDir.PARAMETERIZE_TEMPLATE, Option.BaseDir.FIXED_COLUMN_DEF);
 
     private final Workspace workspace;
 

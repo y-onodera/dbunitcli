@@ -1,5 +1,6 @@
 import type { ResultOption } from "../../../model/CommandOption";
 import Check from "./element/Check";
+import FixedColumnDefText from "./element/FixedColumnDefText";
 import FileText from "./element/FileText";
 import PlainText from "./element/PlainText";
 import Select from "./element/Select";
@@ -17,6 +18,8 @@ export default function ResultFormSection({
 	const outputEncoding = resultOption.outputEncoding;
 	const format = resultOption.format;
 	const outputExtension = resultOption.outputExtension;
+	const fixedColumnDef = resultOption.fixedColumnDef;
+	const fixedLengthType = resultOption.fixedLengthType;
 	return (
 		<>
 			<Select
@@ -40,6 +43,10 @@ export default function ResultFormSection({
 			{outputEncoding && <PlainText prefix={prefix} element={outputEncoding} />}
 			{format && <PlainText prefix={prefix} element={format} />}
 			{outputExtension && <PlainText prefix={prefix} element={outputExtension} />}
+			{fixedColumnDef && (
+				<FixedColumnDefText prefix={prefix} element={fixedColumnDef} />
+			)}
+			{fixedLengthType && <PlainText prefix={prefix} element={fixedLengthType} />}
 			{resultOption.op && (
 				<Select
 					prefix={prefix}
