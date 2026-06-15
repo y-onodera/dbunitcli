@@ -29,6 +29,10 @@ public class DataSetConverterDto implements CompositeDto {
     private String format;
     @CommandLine.Option(names = "-outputExtension", description = "if resultType is format, output file extension (default: txt)")
     private String extension;
+    @CommandLine.Option(names = "-fixedColumnDef", description = "JSON definition file path for fixed-length output")
+    private String fixedColumnDefFile;
+    @CommandLine.Option(names = "-fixedLengthType", description = "char or byte (default: char)")
+    private String fixedLengthType;
 
     private JdbcDto jdbc = new JdbcDto();
 
@@ -115,6 +119,22 @@ public class DataSetConverterDto implements CompositeDto {
 
     public void setExtension(final String extension) {
         this.extension = extension;
+    }
+
+    public String getFixedColumnDefFile() {
+        return this.fixedColumnDefFile;
+    }
+
+    public void setFixedColumnDefFile(final String fixedColumnDefFile) {
+        this.fixedColumnDefFile = fixedColumnDefFile;
+    }
+
+    public String getFixedLengthType() {
+        return this.fixedLengthType;
+    }
+
+    public void setFixedLengthType(final String fixedLengthType) {
+        this.fixedLengthType = fixedLengthType;
     }
 
     public JdbcDto getJdbc() {

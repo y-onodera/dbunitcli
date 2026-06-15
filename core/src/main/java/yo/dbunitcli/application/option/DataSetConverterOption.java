@@ -23,6 +23,8 @@ public record DataSetConverterOption(
         , String excelTable
         , String format
         , String extension
+        , String fixedColumnDefFile
+        , String fixedLengthType
 ) implements Option {
 
     public DataSetConverterOption(final String prefix, final DataSetConverterDto dto) {
@@ -39,6 +41,8 @@ public record DataSetConverterOption(
                 , Strings.isNotEmpty(dto.getExcelTable()) ? dto.getExcelTable() : "SHEET"
                 , dto.getFormat()
                 , dto.getExtension()
+                , dto.getFixedColumnDefFile()
+                , Strings.isNotEmpty(dto.getFixedLengthType()) ? dto.getFixedLengthType() : "char"
         );
     }
 
@@ -74,6 +78,10 @@ public record DataSetConverterOption(
                 result.put("-outputEncoding", this.outputEncoding);
                 result.put("-format", this.format);
                 result.put("-outputExtension", this.extension);
+            } else if (type == ResultType.fixed) {
+                result.put("-outputEncoding", this.outputEncoding);
+                result.put("-fixedColumnDef", this.fixedColumnDefFile);
+                result.put("-fixedLengthType", this.fixedLengthType);
             } else {
                 result.put("-excelTable", this.excelTable);
             }
@@ -94,6 +102,8 @@ public record DataSetConverterOption(
                                     .setExcelTable(this.excelTable)
                                     .setFormat(this.format)
                                     .setExtension(this.extension)
+                                    .setFixedColumnDefFile(this.fixedColumnDefFile)
+                                    .setFixedLengthType(this.fixedLengthType)
                 ;
     }
 
