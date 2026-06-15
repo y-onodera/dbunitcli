@@ -17,6 +17,7 @@ public class DataSetConverterLoader {
             case xls -> new XlsConverter(param);
             case csv -> new CsvConverter(param);
             case format -> new FormattedFileConverter(param);
+            case fixed -> new FixedFileConverter(param);
         };
     }
 }
