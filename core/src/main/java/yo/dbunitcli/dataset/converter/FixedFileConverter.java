@@ -32,6 +32,7 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
 
     private final List<FixedColumnDef> columnDefs;
     private final LengthType lengthType;
+    private final Charset charset;
     private Map<String, Integer> columnIndexByName;
 
     public FixedFileConverter(final String theDirectory, final File resultDir, final String encoding,
@@ -40,6 +41,7 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
         super(theDirectory, resultDir, encoding, exportEmptyTable, false);
         this.columnDefs = columnDefs;
         this.lengthType = lengthType;
+        this.charset = Charset.forName(encoding);
     }
 
     public FixedFileConverter(final DataSetConverterParam param) {
@@ -130,7 +132,6 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
     }
 
     private String padByte(final String value, final FixedColumnDef def) {
-        final Charset charset = Charset.forName(this.encoding);
         final int targetBytes = def.length();
         final String padChar = def.pad();
         final int padByteLen = padChar.getBytes(charset).length;

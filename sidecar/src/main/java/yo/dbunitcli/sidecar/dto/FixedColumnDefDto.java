@@ -18,42 +18,6 @@ public class FixedColumnDefDto {
     }
 
     @Serdeable
-    public static class ColumnDefSetting {
-        private String name;
-        private int length;
-        private String align;
-        private String pad;
-
-        public String getName() {
-            return this.name;
-        }
-
-        public void setName(final String name) {
-            this.name = name;
-        }
-
-        public int getLength() {
-            return this.length;
-        }
-
-        public void setLength(final int length) {
-            this.length = length;
-        }
-
-        public String getAlign() {
-            return this.align;
-        }
-
-        public void setAlign(final String align) {
-            this.align = align;
-        }
-
-        public String getPad() {
-            return this.pad;
-        }
-
-        public void setPad(final String pad) {
-            this.pad = pad;
-        }
+    public record ColumnDefSetting(String name, int length, String align, String pad) {
     }
 }
