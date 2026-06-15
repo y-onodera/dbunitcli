@@ -16,6 +16,8 @@ public class ResourcesDto {
 
     private List<String> templateFiles = new ArrayList<>();
 
+    private List<String> fixedColumnDefs = new ArrayList<>();
+
     public List<String> getDatasetSettings() {
         return this.datasetSettings;
     }
@@ -46,6 +48,14 @@ public class ResourcesDto {
 
     public void setTemplateFiles(final List<String> templateFiles) {
         this.templateFiles = templateFiles;
+    }
+
+    public List<String> getFixedColumnDefs() {
+        return this.fixedColumnDefs;
+    }
+
+    public void setFixedColumnDefs(final List<String> fixedColumnDefs) {
+        this.fixedColumnDefs = fixedColumnDefs;
     }
 
 }

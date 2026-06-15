@@ -42,6 +42,7 @@ public class Workspace {
             case "PARAMETERIZE_TEMPLATE" -> FileResources.parameterizeTemplateDir();
             case "JDBC" -> FileResources.jdbcPropDir();
             case "XLSX_SCHEMA" -> FileResources.xlsxSchemaDir();
+            case "FIXED_COLUMN_DEF" -> FileResources.fixedColumnDefDir();
             default -> FileResources.baseDir();
         };
     }
@@ -148,6 +149,9 @@ public class Workspace {
                 expandedWorkspace, rawWorkspace));
         context.setXlsxSchemaBase(withRawWorkspacePrefix(
                 FileResources.xlsxSchemaDir().toPath().toAbsolutePath().normalize().toString(),
+                expandedWorkspace, rawWorkspace));
+        context.setFixedColumnDefBase(withRawWorkspacePrefix(
+                FileResources.fixedColumnDefDir().toPath().toAbsolutePath().normalize().toString(),
                 expandedWorkspace, rawWorkspace));
         return result;
     }

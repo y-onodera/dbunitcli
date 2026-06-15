@@ -12,6 +12,7 @@ public class ContextDto {
     private String parameterizeTemplateBase;
     private String jdbcBase;
     private String xlsxSchemaBase;
+    private String fixedColumnDefBase;
 
     public String getWorkspace() {
         return this.workspace;
@@ -75,5 +76,13 @@ public class ContextDto {
 
     public void setXlsxSchemaBase(final String xlsxSchemaBase) {
         this.xlsxSchemaBase = xlsxSchemaBase;
+    }
+
+    public String getFixedColumnDefBase() {
+        return this.fixedColumnDefBase;
+    }
+
+    public void setFixedColumnDefBase(final String fixedColumnDefBase) {
+        this.fixedColumnDefBase = fixedColumnDefBase;
     }
 }

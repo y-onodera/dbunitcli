@@ -80,7 +80,7 @@ public record DataSetConverterOption(
                 result.put("-outputExtension", this.extension);
             } else if (type == ResultType.fixed) {
                 result.put("-outputEncoding", this.outputEncoding);
-                result.put("-fixedColumnDef", this.fixedColumnDefFile);
+                result.putFile("-fixedColumnDef", this.fixedColumnDefFile, BaseDir.FIXED_COLUMN_DEF);
                 result.put("-fixedLengthType", this.fixedLengthType);
             } else {
                 result.put("-excelTable", this.excelTable);

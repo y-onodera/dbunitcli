@@ -10,7 +10,8 @@
     "datasetSettings": ["test.json"],
     "xlsxSchemas": ["schema.json"],
     "jdbcFiles": ["sample.properties"],
-    "templateFiles": ["sample.json"]
+    "templateFiles": ["sample.json"],
+    "fixedColumnDefs": ["sample.json"]
   },
   "context": {
     "workspace": "%s",
@@ -20,6 +21,7 @@
     "templateBase": "%s",
     "parameterizeTemplateBase": "%s",
     "jdbcBase": "%s",
-    "xlsxSchemaBase": "%s"
+    "xlsxSchemaBase": "%s",
+    "fixedColumnDefBase": "%s"
   }
 }

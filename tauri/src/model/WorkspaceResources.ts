@@ -6,7 +6,8 @@ export type DefaultPath =
 	| "TEMPLATE"
 	| "PARAMETERIZE_TEMPLATE"
 	| "JDBC"
-	| "XLSX_SCHEMA";
+	| "XLSX_SCHEMA"
+	| "FIXED_COLUMN_DEF";
 export type WorkspaceResources = {
 	parameterList: ParameterListBuilder;
 	resources: ResourcesSettings;
@@ -21,6 +22,7 @@ export type WorkspaceContextBuilder = {
 	parameterizeTemplateBase: string;
 	jdbcBase: string;
 	xlsxSchemaBase: string;
+	fixedColumnDefBase?: string;
 };
 export class WorkspaceContext {
 	getPath(defaultPath: DefaultPath): string {
@@ -39,12 +41,14 @@ export class WorkspaceContext {
 				return this.jdbcBase;
 			case "XLSX_SCHEMA":
 				return this.xlsxSchemaBase;
+			case "FIXED_COLUMN_DEF":
+				return this.fixedColumnDefBase;
 			default:
 				return this.workspace;
 		}
 	}
 	static create(): WorkspaceContext {
-		return new WorkspaceContext("", "", "", "", "", "", "", "");
+		return new WorkspaceContext("", "", "", "", "", "", "", "", "");
 	}
 	static from(builder: WorkspaceContextBuilder): WorkspaceContext {
 		return new WorkspaceContext(
@@ -56,6 +60,7 @@ export class WorkspaceContext {
 			builder.parameterizeTemplateBase,
 			builder.jdbcBase,
 			builder.xlsxSchemaBase,
+			builder.fixedColumnDefBase ?? "",
 		);
 	}
 	readonly workspace: string;
@@ -66,6 +71,7 @@ export class WorkspaceContext {
 	readonly parameterizeTemplateBase: string;
 	readonly jdbcBase: string;
 	readonly xlsxSchemaBase: string;
+	readonly fixedColumnDefBase: string;
 	constructor(
 		workspace: string,
 		datasetBase: string,
@@ -75,6 +81,7 @@ export class WorkspaceContext {
 		parameterizeTemplateBase: string,
 		jdbcBase: string,
 		xlsxSchemaBase: string,
+		fixedColumnDefBase: string,
 	) {
 		this.workspace = workspace;
 		this.datasetBase = datasetBase;
@@ -84,6 +91,7 @@ export class WorkspaceContext {
 		this.parameterizeTemplateBase = parameterizeTemplateBase;
 		this.jdbcBase = jdbcBase;
 		this.xlsxSchemaBase = xlsxSchemaBase;
+		this.fixedColumnDefBase = fixedColumnDefBase;
 	}
 	with(overrides: Partial<WorkspaceContextBuilder>): WorkspaceContext {
 		return new WorkspaceContext(
@@ -95,6 +103,7 @@ export class WorkspaceContext {
 			overrides.parameterizeTemplateBase ?? this.parameterizeTemplateBase,
 			overrides.jdbcBase ?? this.jdbcBase,
 			overrides.xlsxSchemaBase ?? this.xlsxSchemaBase,
+			overrides.fixedColumnDefBase ?? this.fixedColumnDefBase,
 		);
 	}
 }
@@ -151,6 +160,7 @@ export type ResourcesSettingsBuilder = {
 	xlsxSchemas?: string[];
 	jdbcFiles?: string[];
 	templateFiles?: string[];
+	fixedColumnDefs?: string[];
 };
 export class ResourcesSettings {
 	static create(): ResourcesSettings {
@@ -163,11 +173,13 @@ export class ResourcesSettings {
 	readonly xlsxSchemas: string[];
 	readonly jdbcFiles: string[];
 	readonly templateFiles: string[];
+	readonly fixedColumnDefs: string[];
 	constructor(builder: ResourcesSettingsBuilder) {
 		this.datasetSettings = builder.datasetSettings ?? [];
 		this.xlsxSchemas = builder.xlsxSchemas ?? [];
 		this.jdbcFiles = builder.jdbcFiles ?? [];
 		this.templateFiles = builder.templateFiles ?? [];
+		this.fixedColumnDefs = builder.fixedColumnDefs ?? [];
 	}
 	with(builder: ResourcesSettingsBuilder): ResourcesSettings {
 		return new ResourcesSettings({

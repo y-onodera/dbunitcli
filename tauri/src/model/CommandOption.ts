@@ -147,6 +147,8 @@ export type ResultOption = CommandOptions & {
 	excelTable?: CommandOption;
 	format?: CommandOption;
 	outputExtension?: CommandOption;
+	fixedColumnDef?: CommandOption;
+	fixedLengthType?: CommandOption;
 	op?: CommandOption;
 	jdbc?: JdbcOption;
 };

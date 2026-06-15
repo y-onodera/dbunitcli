@@ -67,6 +67,17 @@ public record FileResources() {
         return FileResources.searchInOrder(xlsxSchemaPath, xlsxSchemaDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
+    public static File fixedColumnDefDir() {
+        return new File(baseDir(), "resources/fixed-column-def");
+    }
+
+    public static File searchFixedColumnDef(final String path) {
+        if (Strings.isEmpty(path)) {
+            return null;
+        }
+        return FileResources.searchInOrder(path, fixedColumnDefDir().toPath().normalize().toString(), FileResources::searchWorkspace);
+    }
+
     private static String expandEnvironmentVariables(final String path) {
         if (Strings.isEmpty(path)) {
             return path;
