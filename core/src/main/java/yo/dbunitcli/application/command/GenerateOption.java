@@ -21,9 +21,9 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public record GenerateOption(
@@ -350,13 +350,13 @@ public record GenerateOption(
                         ? option.fixedLength.split(",")
                         : new String[0];
                 final boolean leftAlign = !"right".equalsIgnoreCase(option.align);
-                final List<FixedColumnDef> defs = new ArrayList<>(columns.length);
-                for (int i = 0; i < columns.length; i++) {
-                    final int length = i < lengths.length
-                            ? Integer.parseInt(lengths[i].trim())
-                            : option.defaultLength;
-                    defs.add(new FixedColumnDef(columns[i].getColumnName(), length, leftAlign, null));
-                }
+                final List<FixedColumnDef> defs = IntStream.range(0, columns.length)
+                        .mapToObj(i -> new FixedColumnDef(
+                                columns[i].getColumnName(),
+                                i < lengths.length ? Integer.parseInt(lengths[i].trim()) : option.defaultLength,
+                                leftAlign,
+                                null))
+                        .toList();
                 new FixedColumnDefTemplate().write(defs, resultFile, option.outputEncoding);
             }
         };
