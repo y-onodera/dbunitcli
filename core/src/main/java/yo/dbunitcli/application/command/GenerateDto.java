@@ -32,6 +32,12 @@ public class GenerateDto extends CommandDto {
     private String includeAllColumns;
     @CommandLine.Option(names = "-lazyLoad", description = "use lazy load for excel generation")
     private String lazyLoad;
+    @CommandLine.Option(names = "-fixedLength", description = "comma-separated column lengths for fixedColumnDef generation")
+    private String fixedLength;
+    @CommandLine.Option(names = "-defaultLength", description = "default column length for fixedColumnDef generation")
+    private String defaultLength;
+    @CommandLine.Option(names = "-align", description = "column alignment for fixedColumnDef generation (left or right)")
+    private String align;
     private DataSetLoadDto srcData = new DataSetLoadDto();
 
     private TemplateRenderDto templateOption = new TemplateRenderDto();
@@ -130,6 +136,30 @@ public class GenerateDto extends CommandDto {
 
     public void setLazyLoad(final String lazyLoad) {
         this.lazyLoad = lazyLoad;
+    }
+
+    public String getFixedLength() {
+        return this.fixedLength;
+    }
+
+    public void setFixedLength(final String fixedLength) {
+        this.fixedLength = fixedLength;
+    }
+
+    public String getDefaultLength() {
+        return this.defaultLength;
+    }
+
+    public void setDefaultLength(final String defaultLength) {
+        this.defaultLength = defaultLength;
+    }
+
+    public String getAlign() {
+        return this.align;
+    }
+
+    public void setAlign(final String align) {
+        this.align = align;
     }
 
     public DataSetLoadDto getSrcData() {

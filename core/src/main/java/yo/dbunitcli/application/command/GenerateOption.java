@@ -1,5 +1,12 @@
 package yo.dbunitcli.application.command;
 
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonWriter;
+import jakarta.json.JsonWriterFactory;
+import jakarta.json.stream.JsonGenerator;
+import org.dbunit.dataset.Column;
 import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.CommandLineOption;
@@ -17,7 +24,12 @@ import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -37,6 +49,9 @@ public record GenerateOption(
         , TemplateRenderOption templateOption
         , boolean includeAllColumns
         , boolean lazyLoad
+        , String fixedLength
+        , int defaultLength
+        , String align
 ) implements CommandLineOption<GenerateDto> {
 
     public static GenerateDto toDto(final String[] args) {
@@ -72,6 +87,9 @@ public record GenerateOption(
                 , new TemplateRenderOption("template", dto.getTemplateOption())
                 , Strings.isNotEmpty(dto.getIncludeAllColumns()) && Boolean.parseBoolean(dto.getIncludeAllColumns())
                 , !Strings.isNotEmpty(dto.getLazyLoad()) || Boolean.parseBoolean(dto.getLazyLoad())
+                , Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : ""
+                , Strings.isNotEmpty(dto.getDefaultLength()) ? Integer.parseInt(dto.getDefaultLength()) : 10
+                , Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left"
         );
     }
 
@@ -103,6 +121,10 @@ public record GenerateOption(
         if (this.generateType() == GenerateType.sql) {
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
             return this.resultPath + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
+        }
+        if (this.generateType() == GenerateType.fixedColumnDef) {
+            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
+            return this.resultPath + "/" + tableName + ".json";
         }
         return this.resultPath;
     }
@@ -151,6 +173,12 @@ public record GenerateOption(
             }
             case xlsxTemplate -> srcComponent.remove("-src.loadData");
             case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
+            case fixedColumnDef -> {
+                result.put("-fixedLength", this.fixedLength)
+                        .put("-defaultLength", Integer.toString(this.defaultLength))
+                        .put("-align", this.align);
+                srcComponent.remove("-src.loadData");
+            }
         }
         result.addComponent("srcData", srcComponent.build());
         if (!this.generateType.isFixedTemplate()) {
@@ -172,6 +200,8 @@ public record GenerateOption(
         } else if (this.generateType() == GenerateType.sql) {
             builder.setUseJdbcMetaData(true);
         } else if (this.generateType() == GenerateType.xlsxTemplate) {
+            builder.setLoadData(false);
+        } else if (this.generateType() == GenerateType.fixedColumnDef) {
             builder.setLoadData(false);
         }
         return builder.build();
@@ -307,6 +337,46 @@ public record GenerateOption(
             @Override
             protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
                 JxlsTemplateGenerator.createTemplate(resultFile, param);
+            }
+        },
+        fixedColumnDef {
+            @Override
+            public boolean isFixedTemplate() {
+                return true;
+            }
+
+            @Override
+            public ParameterUnit getFixedUnit() {
+                return ParameterUnit.table;
+            }
+
+            @Override
+            protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
+                final Column[] columns = (Column[]) param.get("columns");
+                final String[] lengths = Strings.isNotEmpty(option.fixedLength)
+                        ? option.fixedLength.split(",")
+                        : new String[0];
+                final String alignValue = !"right".equalsIgnoreCase(option.align) ? "left" : "right";
+
+                final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+                for (int i = 0; i < columns.length; i++) {
+                    final int length = i < lengths.length
+                            ? Integer.parseInt(lengths[i].trim())
+                            : option.defaultLength;
+                    arrayBuilder.add(Json.createObjectBuilder()
+                            .add("name", columns[i].getColumnName())
+                            .add("length", length)
+                            .add("align", alignValue));
+                }
+                final JsonObjectBuilder root = Json.createObjectBuilder().add("columns", arrayBuilder);
+
+                final Map<String, Object> config = new HashMap<>();
+                config.put(JsonGenerator.PRETTY_PRINTING, true);
+                final JsonWriterFactory writerFactory = Json.createWriterFactory(config);
+                try (final Writer fw = new OutputStreamWriter(new FileOutputStream(resultFile), option.outputEncoding);
+                     final JsonWriter jsonWriter = writerFactory.createWriter(fw)) {
+                    jsonWriter.writeObject(root.build());
+                }
             }
         };
 
