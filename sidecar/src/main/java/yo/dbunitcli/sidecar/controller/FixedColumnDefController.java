@@ -1,8 +1,10 @@
 package yo.dbunitcli.sidecar.controller;
 
 import io.micronaut.http.annotation.Controller;
+import org.stringtemplate.v4.ST;
 import yo.dbunitcli.dataset.converter.FixedColumnDef;
-import yo.dbunitcli.dataset.converter.FixedColumnDefTemplate;
+import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.resource.st4.TemplateRender;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.FixedColumnDefRequestDto;
@@ -21,10 +23,15 @@ public class FixedColumnDefController extends AbstractResourceFileController<Fix
 
     @Override
     protected String serializeJson(final FixedColumnDefRequestDto body) {
-        return new FixedColumnDefTemplate().render(
-                body.getInput().getColumns().stream()
-                        .map(col -> new FixedColumnDef(col.name(), col.length(),
-                                !"right".equalsIgnoreCase(col.align()), col.pad()))
-                        .toList());
+        final TemplateRender render = new TemplateRender.Builder()
+                .setTemplateParameterAttribute(null)
+                .build();
+        final ST st = new ST(render.createSTGroup(),
+                FileResources.readClasspathResource("fixedcolumndef/fixedColumnDefTemplate.txt"));
+        st.add("columns", body.getInput().getColumns().stream()
+                .map(col -> new FixedColumnDef(col.name(), col.length(),
+                        !"right".equalsIgnoreCase(col.align()), col.pad()))
+                .toList());
+        return st.render();
     }
 }

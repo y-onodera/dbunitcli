@@ -12,7 +12,6 @@ import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.converter.FixedColumnDef;
-import yo.dbunitcli.dataset.converter.FixedColumnDefTemplate;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
@@ -357,7 +356,11 @@ public record GenerateOption(
                                 leftAlign,
                                 null))
                         .toList();
-                new FixedColumnDefTemplate().write(defs, resultFile, option.outputEncoding);
+                new TemplateRender.Builder()
+                        .setTemplateParameterAttribute(null)
+                        .build()
+                        .write(FileResources.readClasspathResource("fixedcolumndef/fixedColumnDefTemplate.txt"),
+                                Parameter.none().add("columns", defs), resultFile, option.outputEncoding);
             }
         };
 
