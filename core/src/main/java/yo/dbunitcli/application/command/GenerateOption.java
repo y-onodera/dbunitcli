@@ -1,11 +1,5 @@
 package yo.dbunitcli.application.command;
 
-import jakarta.json.Json;
-import jakarta.json.JsonArrayBuilder;
-import jakarta.json.JsonObjectBuilder;
-import jakarta.json.JsonWriter;
-import jakarta.json.JsonWriterFactory;
-import jakarta.json.stream.JsonGenerator;
 import org.dbunit.dataset.Column;
 import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.Strings;
@@ -17,6 +11,8 @@ import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DbOperation;
+import yo.dbunitcli.dataset.converter.FixedColumnDef;
+import yo.dbunitcli.dataset.converter.FixedColumnDefTemplate;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
@@ -24,12 +20,9 @@ import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -356,27 +349,15 @@ public record GenerateOption(
                 final String[] lengths = Strings.isNotEmpty(option.fixedLength)
                         ? option.fixedLength.split(",")
                         : new String[0];
-                final String alignValue = !"right".equalsIgnoreCase(option.align) ? "left" : "right";
-
-                final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+                final boolean leftAlign = !"right".equalsIgnoreCase(option.align);
+                final List<FixedColumnDef> defs = new ArrayList<>(columns.length);
                 for (int i = 0; i < columns.length; i++) {
                     final int length = i < lengths.length
                             ? Integer.parseInt(lengths[i].trim())
                             : option.defaultLength;
-                    arrayBuilder.add(Json.createObjectBuilder()
-                            .add("name", columns[i].getColumnName())
-                            .add("length", length)
-                            .add("align", alignValue));
+                    defs.add(new FixedColumnDef(columns[i].getColumnName(), length, leftAlign, null));
                 }
-                final JsonObjectBuilder root = Json.createObjectBuilder().add("columns", arrayBuilder);
-
-                final Map<String, Object> config = new HashMap<>();
-                config.put(JsonGenerator.PRETTY_PRINTING, true);
-                final JsonWriterFactory writerFactory = Json.createWriterFactory(config);
-                try (final Writer fw = new OutputStreamWriter(new FileOutputStream(resultFile), option.outputEncoding);
-                     final JsonWriter jsonWriter = writerFactory.createWriter(fw)) {
-                    jsonWriter.writeObject(root.build());
-                }
+                new FixedColumnDefTemplate().write(defs, resultFile, option.outputEncoding);
             }
         };
 

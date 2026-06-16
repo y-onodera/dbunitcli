@@ -7,4 +7,8 @@ public record FixedColumnDef(String name, int length, boolean leftAlign, String 
             pad = " ";
         }
     }
+
+    public String align() {
+        return this.leftAlign ? "left" : "right";
+    }
 }
