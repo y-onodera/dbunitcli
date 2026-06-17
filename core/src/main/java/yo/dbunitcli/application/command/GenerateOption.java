@@ -356,11 +356,12 @@ public record GenerateOption(
                                 leftAlign,
                                 null))
                         .toList();
-                new TemplateRender.Builder()
+                final TemplateRender render = new TemplateRender.Builder()
                         .setTemplateParameterAttribute(null)
-                        .build()
-                        .write(FileResources.readClasspathResource("fixedcolumndef/fixedColumnDefTemplate.txt"),
-                                Parameter.none().add("columns", defs), resultFile, option.outputEncoding);
+                        .build();
+                render.write(render.createSTGroup("fixedcolumndef/fixedColumnDefTemplate.stg"),
+                        FileResources.readClasspathResource("fixedcolumndef/fixedColumnDefTemplate.txt"),
+                        Parameter.none().add("columns", defs), resultFile, option.outputEncoding);
             }
         };
 

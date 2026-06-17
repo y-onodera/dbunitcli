@@ -26,7 +26,7 @@ public class FixedColumnDefController extends AbstractResourceFileController<Fix
         final TemplateRender render = new TemplateRender.Builder()
                 .setTemplateParameterAttribute(null)
                 .build();
-        final ST st = new ST(render.createSTGroup(),
+        final ST st = new ST(render.createSTGroup("fixedcolumndef/fixedColumnDefTemplate.stg"),
                 FileResources.readClasspathResource("fixedcolumndef/fixedColumnDefTemplate.txt"));
         st.add("columns", body.getInput().getColumns().stream()
                 .map(col -> new FixedColumnDef(col.name(), col.length(),
