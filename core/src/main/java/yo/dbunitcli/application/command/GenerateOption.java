@@ -191,9 +191,8 @@ public record GenerateOption(
             builder.setLoadData(false);
         } else if (this.generateType() == GenerateType.sql) {
             builder.setUseJdbcMetaData(true);
-        } else if (this.generateType() == GenerateType.xlsxTemplate) {
-            builder.setLoadData(false);
-        } else if (this.generateType() == GenerateType.fixedColumnDef) {
+        } else if (this.generateType() == GenerateType.xlsxTemplate
+                || this.generateType() == GenerateType.fixedColumnDef) {
             builder.setLoadData(false);
         }
         return builder.build();
