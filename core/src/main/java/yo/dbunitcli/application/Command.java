@@ -23,6 +23,9 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
             this.exec(this.parseOption(args, Parameter.none()));
         } catch (final CommandFailException ex) {
             Command.LOGGER.info(ex.getMessage());
+            if (Boolean.getBoolean("dbunitcli.noExit")) {
+                throw new RuntimeException("1");
+            }
             System.exit(1);
         } catch (final Throwable th) {
             Command.LOGGER.error("args:{}", Arrays.toString(args));

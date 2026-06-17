@@ -1,8 +1,5 @@
 package yo.dbunitcli.application.command;
 
-import mockit.Mock;
-import mockit.MockUp;
-import mockit.integration.junit5.JMockitExtension;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Copy;
 import org.apache.tools.ant.taskdefs.Delete;
@@ -10,7 +7,6 @@ import org.apache.tools.ant.taskdefs.Replace;
 import org.apache.tools.ant.types.FileSet;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
-import org.junit.jupiter.api.extension.ExtendWith;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -355,18 +351,7 @@ public class CompareTest {
 
     @Tag("jvmTest")
     @Nested
-    @ExtendWith(JMockitExtension.class)
     class ExitCodeTest {
-
-        @BeforeEach
-        public void setUp() {
-            new MockUp<System>() {
-                @Mock
-                public void exit(final int value) {
-                    throw new RuntimeException(String.valueOf(value));
-                }
-            };
-        }
 
         @Test
         public void testFailedResultDiffNotExpected() {
