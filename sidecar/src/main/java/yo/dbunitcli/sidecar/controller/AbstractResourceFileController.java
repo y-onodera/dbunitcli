@@ -46,7 +46,7 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
     @Post(uri = "save", produces = MediaType.APPLICATION_JSON)
     public String save(@Body final DTO body) throws IOException {
         try {
-            this.saveJson(body.getName(), JsonMapper.createDefault().writeValueAsString(body.getInput()));
+            this.saveJson(body.getName(), this.serializeJson(body));
         } catch (IOException e) {
             throw e;
         } catch (final Throwable th) {
@@ -54,6 +54,10 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
             throw new ApplicationException(th);
         }
         return this.currentFileList();
+    }
+
+    protected String serializeJson(final DTO body) throws IOException {
+        return JsonMapper.createDefault().writeValueAsString(body.getInput());
     }
 
     @Post(uri = "delete", consumes = MediaType.TEXT_PLAIN, produces = MediaType.APPLICATION_JSON)

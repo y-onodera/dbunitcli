@@ -1,0 +1,1 @@
+columnEntry(col) ::= <<{"name": "$col.name$", "length": $col.length$, "align": "$col.align$", "pad": "$col.pad$"}>>

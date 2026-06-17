@@ -1,5 +1,6 @@
 package yo.dbunitcli.application.command;
 
+import org.dbunit.dataset.Column;
 import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.CommandLineOption;
@@ -10,6 +11,7 @@ import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DbOperation;
+import yo.dbunitcli.dataset.converter.FixedColumnDef;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
@@ -18,7 +20,9 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public record GenerateOption(
@@ -37,6 +41,9 @@ public record GenerateOption(
         , TemplateRenderOption templateOption
         , boolean includeAllColumns
         , boolean lazyLoad
+        , String fixedLength
+        , int defaultLength
+        , String align
 ) implements CommandLineOption<GenerateDto> {
 
     public static GenerateDto toDto(final String[] args) {
@@ -72,6 +79,9 @@ public record GenerateOption(
                 , new TemplateRenderOption("template", dto.getTemplateOption())
                 , Strings.isNotEmpty(dto.getIncludeAllColumns()) && Boolean.parseBoolean(dto.getIncludeAllColumns())
                 , !Strings.isNotEmpty(dto.getLazyLoad()) || Boolean.parseBoolean(dto.getLazyLoad())
+                , Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : ""
+                , Strings.isNotEmpty(dto.getDefaultLength()) ? Integer.parseInt(dto.getDefaultLength()) : 10
+                , Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left"
         );
     }
 
@@ -103,6 +113,10 @@ public record GenerateOption(
         if (this.generateType() == GenerateType.sql) {
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
             return this.resultPath + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
+        }
+        if (this.generateType() == GenerateType.fixedColumnDef) {
+            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
+            return this.resultPath + "/" + tableName + ".json";
         }
         return this.resultPath;
     }
@@ -151,6 +165,12 @@ public record GenerateOption(
             }
             case xlsxTemplate -> srcComponent.remove("-src.loadData");
             case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
+            case fixedColumnDef -> {
+                result.put("-fixedLength", this.fixedLength)
+                        .put("-defaultLength", Integer.toString(this.defaultLength))
+                        .put("-align", this.align);
+                srcComponent.remove("-src.loadData");
+            }
         }
         result.addComponent("srcData", srcComponent.build());
         if (!this.generateType.isFixedTemplate()) {
@@ -171,7 +191,8 @@ public record GenerateOption(
             builder.setLoadData(false);
         } else if (this.generateType() == GenerateType.sql) {
             builder.setUseJdbcMetaData(true);
-        } else if (this.generateType() == GenerateType.xlsxTemplate) {
+        } else if (this.generateType() == GenerateType.xlsxTemplate
+                || this.generateType() == GenerateType.fixedColumnDef) {
             builder.setLoadData(false);
         }
         return builder.build();
@@ -307,6 +328,39 @@ public record GenerateOption(
             @Override
             protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
                 JxlsTemplateGenerator.createTemplate(resultFile, param);
+            }
+        },
+        fixedColumnDef {
+            @Override
+            public boolean isFixedTemplate() {
+                return true;
+            }
+
+            @Override
+            public ParameterUnit getFixedUnit() {
+                return ParameterUnit.table;
+            }
+
+            @Override
+            protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
+                final Column[] columns = (Column[]) param.get("columns");
+                final String[] lengths = Strings.isNotEmpty(option.fixedLength)
+                        ? option.fixedLength.split(",")
+                        : new String[0];
+                final boolean leftAlign = !"right".equalsIgnoreCase(option.align);
+                final List<FixedColumnDef> defs = IntStream.range(0, columns.length)
+                        .mapToObj(i -> new FixedColumnDef(
+                                columns[i].getColumnName(),
+                                i < lengths.length ? Integer.parseInt(lengths[i].trim()) : option.defaultLength,
+                                leftAlign,
+                                null))
+                        .toList();
+                final TemplateRender render = new TemplateRender.Builder()
+                        .setTemplateParameterAttribute(null)
+                        .build();
+                render.write(render.createSTGroup("fixedcolumndef/fixedColumnDefTemplate.stg"),
+                        FileResources.readClasspathResource("fixedcolumndef/fixedColumnDefTemplate.txt"),
+                        Parameter.none().add("columns", defs), resultFile, option.outputEncoding);
             }
         };
 

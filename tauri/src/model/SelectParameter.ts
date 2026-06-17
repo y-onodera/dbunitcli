@@ -79,8 +79,11 @@ export type CompareOptions = CommandOptions & {
 export type GenerateOptions = CommandOptions & {
 	command: "generate";
 	generateType: CommandOption;
-	unit: CommandOption;
-	template: CommandOption;
+	unit?: CommandOption;
+	template?: CommandOption;
+	fixedLength?: CommandOption;
+	defaultLength?: CommandOption;
+	align?: CommandOption;
 	result: CommandOption;
 	resultPath: CommandOption;
 	outputEncoding: CommandOption;
