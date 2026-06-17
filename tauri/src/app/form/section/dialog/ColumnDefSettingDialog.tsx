@@ -46,8 +46,13 @@ export default function ColumnDefSettingDialog(props: {
 					name="pad"
 					value={target.pad}
 					handleChange={(ev) =>
-						setTarget((cur) => cur.with({ pad: ev.target.value.slice(0, 1) || " " }))
+						setTarget((cur) => cur.with({ pad: ev.target.value.slice(0, 1) }))
 					}
+					handleBlur={(ev) => {
+						if (!ev.target.value) {
+							setTarget((cur) => cur.with({ pad: " " }));
+						}
+					}}
 				/>
 			</Fieldset>
 		</SettingDialog>

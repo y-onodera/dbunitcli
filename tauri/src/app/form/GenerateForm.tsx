@@ -50,12 +50,11 @@ export function GenerateForm(prop: {
 						templateOption={prop.generate.templateOption}
 					/>
 				)}
-				{[generate.fixedLength, generate.defaultLength, generate.align].map(
-					(field) =>
-						field && (
-							<PlainText key={field.name} prefix="" element={field} />
-						),
-				)}
+				{[generate.fixedLength, generate.defaultLength, generate.align]
+					.filter((field): field is NonNullable<typeof field> => field != null)
+					.map((field) => (
+						<PlainText key={field.name} prefix="" element={field} />
+					))}
 				<FileText prefix="" element={generate.result} />
 				<PlainText prefix="" element={generate.resultPath} />
 				{generate.outputEncoding && (

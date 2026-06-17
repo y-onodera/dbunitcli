@@ -128,6 +128,7 @@ export function Text(props: {
 	name: string;
 	value: string;
 	handleChange: (text: React.ChangeEvent<HTMLInputElement>) => void;
+	handleBlur?: (ev: React.FocusEvent<HTMLInputElement>) => void;
 	ignoreLabel?: boolean;
 	list?: string;
 }) {
@@ -148,6 +149,7 @@ export function Text(props: {
 				wStyle="col-start-2 col-span-3"
 				value={props.value}
 				handleChange={props.handleChange}
+				handleBlur={props.handleBlur}
 				list={props.list}
 			/>
 		</div>
