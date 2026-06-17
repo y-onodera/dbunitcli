@@ -50,14 +50,11 @@ export function GenerateForm(prop: {
 						templateOption={prop.generate.templateOption}
 					/>
 				)}
-				{generate.fixedLength && (
-					<PlainText prefix="" element={generate.fixedLength} />
-				)}
-				{generate.defaultLength && (
-					<PlainText prefix="" element={generate.defaultLength} />
-				)}
-				{generate.align && (
-					<PlainText prefix="" element={generate.align} />
+				{[generate.fixedLength, generate.defaultLength, generate.align].map(
+					(field) =>
+						field && (
+							<PlainText key={field.name} prefix="" element={field} />
+						),
 				)}
 				<FileText prefix="" element={generate.result} />
 				<PlainText prefix="" element={generate.resultPath} />
