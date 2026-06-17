@@ -88,7 +88,7 @@ public class GenerateTest {
                 });
             }
             Compare.main(new String[]{
-                    "@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/xlsx/compareResult.txt"
+                    "@" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/xlsx/compareResult" + compareResultSuffix + ".txt"
                     , "-old.src=" + GenerateTest.testResourcesDir + "/expect/generate/table/expect/Test1"
                     , "-new.src=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1" + resultSuffix + ".xlsx"
                     , "-result=" + this.getBaseDir() + "/generate/table/result/xlsx/Test1" + compareResultSuffix
