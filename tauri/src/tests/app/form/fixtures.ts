@@ -520,6 +520,7 @@ export const generateLoadResponseFixture = {
 		"settings",
 		"sql",
 		"xlsxTemplate",
+		"fixedColumnDef",
 	]),
 	unit: makeElement("unit", "ENUM", "record", "WORKSPACE", false, [
 		"record",
@@ -841,6 +842,7 @@ export const generateRefreshSrcTypeTableResponseFixture = {
 		"settings",
 		"sql",
 		"xlsxTemplate",
+		"fixedColumnDef",
 	]),
 	unit: makeElement("unit", "ENUM", "record", "WORKSPACE", false, [
 		"record",

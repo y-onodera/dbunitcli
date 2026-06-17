@@ -50,6 +50,15 @@ export function GenerateForm(prop: {
 						templateOption={prop.generate.templateOption}
 					/>
 				)}
+				{generate.fixedLength && (
+					<PlainText prefix="" element={generate.fixedLength} />
+				)}
+				{generate.defaultLength && (
+					<PlainText prefix="" element={generate.defaultLength} />
+				)}
+				{generate.align && (
+					<PlainText prefix="" element={generate.align} />
+				)}
 				<FileText prefix="" element={generate.result} />
 				<PlainText prefix="" element={generate.resultPath} />
 				{generate.outputEncoding && (
