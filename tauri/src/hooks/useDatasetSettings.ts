@@ -265,6 +265,62 @@ export const useDatasetSettingsData = (
 	return { settings, loading };
 };
 
+export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
+	const [columnNames, setColumnNames] = useState<string[]>([]);
+	const { apiUrl } = useEnvironment();
+	const { jdbcValues, connectionOk } = useJdbcConnectionState();
+	const paramInputs = useParamInputs();
+
+	const srcPath = srcInfo.srcPath;
+	const srcType = srcInfo.srcType;
+	const sqlNotReady = srcType === "sql" && !connectionOk;
+
+	useEffect(() => {
+		if (!srcPath || !srcType || srcType === "none" || sqlNotReady) {
+			setColumnNames([]);
+			return;
+		}
+		const controller = new AbortController();
+		loadAllColumnNames(apiUrl, srcInfo, jdbcValues, paramInputs).then(
+			(names) => {
+				if (!controller.signal.aborted) {
+					setColumnNames(names);
+				}
+			},
+		);
+		return () => {
+			controller.abort();
+		};
+	}, [apiUrl, srcPath, srcType, sqlNotReady, jdbcValues, paramInputs]);
+
+	return columnNames;
+};
+
+async function loadAllColumnNames(
+	apiUrl: string,
+	info: DatasetSrcInfo,
+	jdbcValues: Record<string, string>,
+	paramInputs: Record<string, string>,
+): Promise<string[]> {
+	const tableNames = await fetchTableNames(apiUrl, info, jdbcValues, paramInputs);
+	const previews = await Promise.all(
+		tableNames.map((tableName) =>
+			fetchTablePreview(apiUrl, info, tableName, jdbcValues, paramInputs),
+		),
+	);
+	const seen = new Set<string>();
+	const allColumns: string[] = [];
+	for (const preview of previews) {
+		for (const col of preview.headers) {
+			if (!seen.has(col)) {
+				seen.add(col);
+				allColumns.push(col);
+			}
+		}
+	}
+	return allColumns;
+}
+
 export const useColumnNamesFetcher = () => {
 	const { apiUrl } = useEnvironment();
 	const { jdbcValues } = useJdbcConnectionState();

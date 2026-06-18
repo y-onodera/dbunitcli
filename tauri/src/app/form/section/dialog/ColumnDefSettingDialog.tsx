@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Fieldset, Select, SettingDialog, Text } from "../../../../components/dialog";
+import { ResourceDatalist } from "../../../../components/element/Input";
+import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
+import { useSrcInfoColumnNames } from "../../../../hooks/useDatasetSettings";
 import type { ColumnDef } from "../../../../model/FixedColumnDef";
 
 export default function ColumnDefSettingDialog(props: {
@@ -8,6 +11,8 @@ export default function ColumnDefSettingDialog(props: {
 	handleCommit: (newSetting: ColumnDef) => void;
 }) {
 	const [target, setTarget] = useState(props.setting);
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const columnNames = useSrcInfoColumnNames(datasetSrcInfo);
 
 	return (
 		<SettingDialog
@@ -19,10 +24,14 @@ export default function ColumnDefSettingDialog(props: {
 				<Text
 					name="name"
 					value={target.name}
+					list={columnNames.length > 0 ? "name_list" : undefined}
 					handleChange={(ev) =>
 						setTarget((cur) => cur.with({ name: ev.target.value }))
 					}
 				/>
+				{columnNames.length > 0 && (
+					<ResourceDatalist id="name" resources={columnNames} />
+				)}
 				<Text
 					name="length"
 					value={String(target.length)}
