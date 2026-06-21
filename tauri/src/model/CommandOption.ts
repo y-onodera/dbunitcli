@@ -241,10 +241,9 @@ export function isDirType(options: SrcTypeOptions): options is DirOptions {
 export function buildDatasetSrcInfo(datasrc: DatasetSource): DatasetSrcInfo {
 	const xlsxSchema =
 		isXlsType(datasrc) || isXlsxType(datasrc) ? datasrc.xlsxSchema.value : "";
-	const fixedLength = isFixedType(datasrc) ? datasrc.fixedLength.value : "";
-	const fixedLengthType = isFixedType(datasrc)
-		? datasrc.fixedLengthType.value
-		: "";
+	const isFixed = isFixedType(datasrc);
+	const fixedLength = isFixed ? datasrc.fixedLength.value : "";
+	const fixedLengthType = isFixed ? datasrc.fixedLengthType.value : "";
 	const regHeaderSplit = isRegType(datasrc) ? datasrc.regHeaderSplit.value : "";
 	const regDataSplit = isRegType(datasrc) ? datasrc.regDataSplit.value : "";
 	const delimiter = isCsvType(datasrc) ? datasrc.delimiter.value : "";
