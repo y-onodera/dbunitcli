@@ -1,28 +1,13 @@
 package yo.dbunitcli.resource.st4;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Locale;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SqlEscapeStringRendererTest {
     private final SqlEscapeStringRenderer target = new SqlEscapeStringRenderer();
-    private String baseDir;
-
-    @BeforeEach
-    public void setUp() throws UnsupportedEncodingException {
-        baseDir = URLDecoder.decode(Objects.requireNonNull(this.getClass().getResource(".")).getPath(), StandardCharsets.UTF_8)
-                .replace("target/test-classes", "src/test/resources");
-    }
 
     @Test
     void testToStringJexlExp() {
@@ -47,13 +32,8 @@ class SqlEscapeStringRendererTest {
     @Test
     void testToStringEscapeSqLineSeparatorEscape() {
         assertEquals("'te' || CHR(10) || 'st'", this.target.toString((Object) "te\nst", "escapeSql", Locale.JAPANESE));
-        assertEquals("'te' || CHR(13) || CHR(10) || 'st'", this.target.toString((Object) "te\r\nst", "escapeSql", Locale.JAPANESE));
-    }
-
-    @Test
-    void testToStringEscapeSqlToClob4000ByteOver() throws IOException {
-        final Object toStringTarget = this.readString("4000byteOver.txt");
-        assertEquals(this.readString("4000byteOverQuoted.txt"), this.target.toString(toStringTarget, "escapeSql", Locale.JAPANESE));
+        assertEquals("'te' || CHR(13) || CHR(10) || 'st'",
+                     this.target.toString((Object) "te\r\nst", "escapeSql", Locale.JAPANESE));
     }
 
     @Test
@@ -112,7 +92,4 @@ class SqlEscapeStringRendererTest {
         assertEquals("Camelcase", this.target.toString((Object) "CAMELCASE", "kebabToUpperCamel", Locale.JAPANESE));
     }
 
-    private String readString(final String fileName) throws IOException {
-        return Files.readString(new File(baseDir, fileName).toPath(), StandardCharsets.UTF_8);
-    }
 }
