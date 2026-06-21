@@ -122,33 +122,70 @@
   <p><code>filePath</code> の値はファイルパス全体に対する Java 正規表現です。<code>.*/domestic/.*</code> はパス中に <code>domestic/</code> を含むファイルにのみマッチします。どちらの設定にもマッチしないファイルは <code>commonSettings</code> が適用されます（指定がなければ全カラム順序比較）。</p>
 
   <h2 id="section-result">比較結果の形式</h2>
-  <p>比較結果は <code>COMPARE_RESULT</code> という名前のテーブルとして出力されます。<code>convertResult</code> で指定した形式（CSV・Excel 等）でファイルに書き出されます。</p>
+  <p>比較結果は <code>convertResult</code> で指定した出力先ディレクトリに、以下の 2 種類のファイルとして書き出されます。</p>
+  <ol>
+    <li><strong>COMPARE_RESULT</strong> — 全テーブルの差分サマリ（常に出力）</li>
+    <li><strong>テーブルごとの詳細ファイル</strong> — 行レベルの差分詳細（差分がある場合のみ出力）</li>
+  </ol>
 
-  <h3>COMPARE_RESULT テーブルのカラム</h3>
+  <h3 id="result-summary">COMPARE_RESULT（差分サマリ）</h3>
+  <p>すべてのテーブル・ファイルの差分を 1 テーブルにまとめた集計結果です。<code>TARGET_NAME</code> → <code>DIFF</code> → <code>COLUMN_INDEX</code> の順にソートされます。</p>
   <table>
     <tr><th>カラム</th><th>説明</th></tr>
-    <tr><td>targetName</td><td>差分が検出されたテーブル名（image/pdf モードではファイル名）</td></tr>
-    <tr><td>diff</td><td>差分の種類（下表参照）</td></tr>
-    <tr><td>oldDefine</td><td>旧データ側の値・定義</td></tr>
-    <tr><td>newDefine</td><td>新データ側の値・定義</td></tr>
-    <tr><td>columnIndex</td><td>差分が発生したカラムの位置（0 始まり）</td></tr>
-    <tr><td>rows</td><td>差分が発生した行番号（0 始まり）</td></tr>
+    <tr><td>OLD_PATH</td><td>旧データのソースパス（ディレクトリまたは DB 接続先）</td></tr>
+    <tr><td>NEW_PATH</td><td>新データのソースパス</td></tr>
+    <tr><td>TARGET_NAME</td><td>差分が検出されたテーブル名（image/pdf モードではファイル名）</td></tr>
+    <tr><td>DIFF</td><td>差分の種類（下表参照）</td></tr>
+    <tr><td>OLD_VALUE</td><td>旧データ側の値・件数・カラム名</td></tr>
+    <tr><td>NEW_VALUE</td><td>新データ側の値・件数・カラム名</td></tr>
+    <tr><td>COLUMN_INDEX</td><td>差分が発生したカラムの位置（0 始まり。カラム差分以外は 0）</td></tr>
+    <tr><td>DIFF_ROWS</td><td>差分行数（<code>MODIFY_VALUE</code> は差分値が検出された行数、<code>KEY_DELETE</code>/<code>KEY_ADD</code>/<code>ROWS_COUNT</code> は行数差）</td></tr>
   </table>
 
-  <h3>diff の値一覧</h3>
+  <h3>DIFF の値一覧</h3>
   <table>
-    <tr><th>値</th><th>意味</th></tr>
-    <tr><td>TABLE_COUNT</td><td>テーブル数が異なる</td></tr>
-    <tr><td>TABLE_DELETE</td><td>旧データにあるテーブルが新データに存在しない</td></tr>
-    <tr><td>TABLE_ADD</td><td>新データに追加されたテーブルが旧データに存在しない</td></tr>
-    <tr><td>COLUMNS_COUNT</td><td>カラム数が異なる</td></tr>
-    <tr><td>COLUMNS_MODIFY</td><td>同位置のカラム名が異なる</td></tr>
-    <tr><td>COLUMNS_DELETE</td><td>旧データにあるカラムが新データに存在しない</td></tr>
-    <tr><td>COLUMNS_ADD</td><td>新データに追加されたカラムが旧データに存在しない</td></tr>
-    <tr><td>ROWS_COUNT</td><td>行数が異なる</td></tr>
-    <tr><td>KEY_DELETE</td><td>旧データにある主キー行が新データに存在しない</td></tr>
-    <tr><td>KEY_ADD</td><td>新データに追加された主キー行が旧データに存在しない</td></tr>
-    <tr><td>MODIFY_VALUE</td><td>同一キーの行でカラム値が異なる</td></tr>
+    <tr><th>値</th><th>意味</th><th>OLD_VALUE</th><th>NEW_VALUE</th></tr>
+    <tr><td>TABLE_COUNT</td><td>テーブル数が異なる</td><td>旧テーブル数</td><td>新テーブル数</td></tr>
+    <tr><td>TABLE_DELETE</td><td>旧データにあるテーブルが新データに存在しない</td><td>テーブル名</td><td>（空）</td></tr>
+    <tr><td>TABLE_ADD</td><td>新データに追加されたテーブルが旧データに存在しない</td><td>（空）</td><td>テーブル名</td></tr>
+    <tr><td>COLUMNS_COUNT</td><td>カラム数が異なる</td><td>旧カラム数</td><td>新カラム数</td></tr>
+    <tr><td>COLUMNS_MODIFY</td><td>同位置のカラム名が異なる</td><td>旧カラム名</td><td>新カラム名</td></tr>
+    <tr><td>COLUMNS_DELETE</td><td>旧データにあるカラムが新データに存在しない</td><td>旧カラム名</td><td>（空）</td></tr>
+    <tr><td>COLUMNS_ADD</td><td>新データに追加されたカラムが旧データに存在しない</td><td>（空）</td><td>新カラム名</td></tr>
+    <tr><td>ROWS_COUNT</td><td>行数が異なる</td><td>旧行数</td><td>新行数</td></tr>
+    <tr><td>KEY_DELETE</td><td>旧データにある主キー行が新データに存在しない</td><td>削除行数</td><td>0</td></tr>
+    <tr><td>KEY_ADD</td><td>新データに追加された主キー行が旧データに存在しない</td><td>0</td><td>追加行数</td></tr>
+    <tr><td>MODIFY_VALUE</td><td>同一キーの行でカラム値が異なる</td><td>旧カラム名</td><td>新カラム名</td></tr>
+  </table>
+
+  <h3 id="result-detail">テーブルごとの詳細ファイル</h3>
+  <p>行レベルの差分がある場合、<code>convertResult</code> の出力先に以下 3 種類のテーブルが追加で書き出されます。テーブル名はすべて元テーブル名に接尾辞を付けた形式です。</p>
+
+  <h4>{テーブル名}$MODIFY — 値が変化した行</h4>
+  <p>主キーが一致するが値が異なる行について、旧値（OLD）と新値（NEW）を 2 行ペアで記録します。<code>$ROW_AFTER_SORT</code> → <code>$MODIFY</code> の順でソートされます。</p>
+  <table>
+    <tr><th>カラム</th><th>説明</th></tr>
+    <tr><td>$MODIFY</td><td><code>OLD</code>（旧データ行）または <code>NEW</code>（新データ行）</td></tr>
+    <tr><td>$ROW_AFTER_SORT</td><td>ソート後の行番号（0 始まり）。OLD と NEW で同じ値になるため、ペアの識別に使用</td></tr>
+    <tr><td>$ROW_ORIGINAL</td><td>ソート前の元の行番号（0 始まり）</td></tr>
+    <tr><td>$DIFF_COLUMN_INDEXES</td><td>値が異なるカラムの名前とインデックスの一覧（例: <code>price[2],qty[3]</code>）</td></tr>
+    <tr><td>（元テーブルの全カラム）</td><td>元テーブルのすべてのカラム値</td></tr>
+  </table>
+
+  <h4>{テーブル名}$DELETE — 削除された行（旧データにあり、新データにない）</h4>
+  <p><code>$ROW_INDEX</code> の昇順でソートされます。</p>
+  <table>
+    <tr><th>カラム</th><th>説明</th></tr>
+    <tr><td>$ROW_INDEX</td><td>旧データでの行番号（0 始まり）</td></tr>
+    <tr><td>（元テーブルの全カラム）</td><td>旧データ側の行の全カラム値</td></tr>
+  </table>
+
+  <h4>{テーブル名}$ADD — 追加された行（新データにあり、旧データにない）</h4>
+  <p><code>$ROW_INDEX</code> の昇順でソートされます。</p>
+  <table>
+    <tr><th>カラム</th><th>説明</th></tr>
+    <tr><td>$ROW_INDEX</td><td>新データでの行番号（0 始まり）</td></tr>
+    <tr><td>（元テーブルの全カラム）</td><td>新データ側の行の全カラム値</td></tr>
   </table>
 
   <h3>expectData を指定した場合</h3>
