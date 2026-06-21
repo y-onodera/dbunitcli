@@ -8,6 +8,7 @@ import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.datatype.TypeCastException;
 import yo.dbunitcli.application.json.FromJsonFixedColumnDefBuilder;
 import yo.dbunitcli.dataset.AddSettingTableMetaData;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
@@ -20,12 +21,12 @@ import java.util.stream.IntStream;
 public class FixedFileConverter extends FlatFileConverter implements IDataSetConverter {
 
     private final List<FixedColumnDef> columnDefs;
-    private final LengthType lengthType;
+    private final ComparableDataSetParam.LengthType lengthType;
     private Map<String, Integer> columnIndexByName;
 
     public FixedFileConverter(final String theDirectory, final File resultDir, final String encoding,
                               final boolean exportEmptyTable, final List<FixedColumnDef> columnDefs,
-                              final LengthType lengthType) {
+                              final ComparableDataSetParam.LengthType lengthType) {
         super(theDirectory, resultDir, encoding, exportEmptyTable, false);
         this.columnDefs = columnDefs;
         this.lengthType = lengthType;
@@ -34,7 +35,7 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
     public FixedFileConverter(final DataSetConverterParam param) {
         this(param.resultDir().getAbsolutePath(), param.resultDir(), param.outputEncoding(), param.exportEmptyTable(),
              new FromJsonFixedColumnDefBuilder().build(new File(param.fixedColumnDefFile())),
-             LengthType.of(param.fixedLengthType()));
+             ComparableDataSetParam.LengthType.of(param.fixedLengthType()));
     }
 
     @Override
@@ -102,7 +103,7 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
     }
 
     private String pad(final String value, final FixedColumnDef def) {
-        if (this.lengthType == LengthType.BYTE) {
+        if (this.lengthType == ComparableDataSetParam.LengthType.BYTE) {
             return this.padByte(value, def);
         }
         return this.padChar(value, def);
@@ -142,14 +143,4 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
         }
     }
 
-    public enum LengthType {
-        CHAR, BYTE;
-
-        public static LengthType of(final String value) {
-            if ("byte".equalsIgnoreCase(value)) {
-                return BYTE;
-            }
-            return CHAR;
-        }
-    }
 }

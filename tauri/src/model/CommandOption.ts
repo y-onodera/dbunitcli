@@ -122,6 +122,7 @@ export type DatasetSrcInfo = SrcInfo & {
 	settingEncoding: string;
 	xlsxSchema: string;
 	fixedLength: string;
+	fixedLengthType: string;
 	regHeaderSplit: string;
 	regDataSplit: string;
 	encoding: string;
@@ -172,6 +173,7 @@ export type RegOptions = CommandOptions & {
 export type FixedOptions = CommandOptions & {
 	srcType: Fixed;
 	fixedLength: CommandOption;
+	fixedLengthType: CommandOption;
 };
 type ExcelOptions = CommandOptions & {
 	xlsxSchema: CommandOption;
@@ -239,7 +241,9 @@ export function isDirType(options: SrcTypeOptions): options is DirOptions {
 export function buildDatasetSrcInfo(datasrc: DatasetSource): DatasetSrcInfo {
 	const xlsxSchema =
 		isXlsType(datasrc) || isXlsxType(datasrc) ? datasrc.xlsxSchema.value : "";
-	const fixedLength = isFixedType(datasrc) ? datasrc.fixedLength.value : "";
+	const isFixed = isFixedType(datasrc);
+	const fixedLength = isFixed ? datasrc.fixedLength.value : "";
+	const fixedLengthType = isFixed ? datasrc.fixedLengthType.value : "";
 	const regHeaderSplit = isRegType(datasrc) ? datasrc.regHeaderSplit.value : "";
 	const regDataSplit = isRegType(datasrc) ? datasrc.regDataSplit.value : "";
 	const delimiter = isCsvType(datasrc) ? datasrc.delimiter.value : "";
@@ -261,6 +265,7 @@ export function buildDatasetSrcInfo(datasrc: DatasetSource): DatasetSrcInfo {
 		addFileInfo: datasrc.addFileInfo?.value === "true",
 		xlsxSchema: xlsxSchema,
 		fixedLength: fixedLength,
+		fixedLengthType: fixedLengthType,
 		regHeaderSplit: regHeaderSplit,
 		regDataSplit: regDataSplit,
 		delimiter: delimiter,

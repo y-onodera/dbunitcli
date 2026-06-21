@@ -9,6 +9,7 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.junit.jupiter.api.*;
 import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
+import yo.dbunitcli.application.command.Compare;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
@@ -1347,6 +1348,36 @@ public class ConvertTest {
             Assertions.assertEquals("single.xlsx", table.getValue(0, "$FILE_NAME"));
             Assertions.assertTrue(table.getValue(0, "$FILE_PATH").toString().endsWith("single.xlsx"));
             Assertions.assertEquals("single", table.getValue(0, "$SHEET_NAME"));
+        }
+
+        @Test
+        public void testFromCsvToFixedFileByChar() {
+            Convert.main(this.getArgs("/paramConvertCsvToFixedFileByChar.txt"));
+            Compare.main(new String[]{
+                    "-old.src=src/test/resources/yo/dbunitcli/application/src/fixed/fixed_char_expected",
+                    "-new.src=" + this.getBaseDir() + "/convert/csv2fixedfile/char/result/fixed_char.txt",
+                    "-srcType=fixed",
+                    "-headerName=key,value",
+                    "-fixedLength=5,10",
+                    "-fixedLengthType=char",
+                    "-encoding=UTF-8",
+                    "-result=" + this.getBaseDir() + "/convert/csv2fixedfile/char/compare/result"
+            });
+        }
+
+        @Test
+        public void testFromCsvToFixedFileByByte() {
+            Convert.main(this.getArgs("/paramConvertCsvToFixedFileByByte.txt"));
+            Compare.main(new String[]{
+                    "-old.src=src/test/resources/yo/dbunitcli/application/src/fixed/fixed_byte_expected",
+                    "-new.src=" + this.getBaseDir() + "/convert/csv2fixedfile/byte/result/fixed_byte.txt",
+                    "-srcType=fixed",
+                    "-headerName=key,value",
+                    "-fixedLength=10,10",
+                    "-fixedLengthType=byte",
+                    "-encoding=UTF-8",
+                    "-result=" + this.getBaseDir() + "/convert/csv2fixedfile/byte/compare/result"
+            });
         }
 
         @Test

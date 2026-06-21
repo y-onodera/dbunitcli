@@ -1,0 +1,6 @@
+{
+  "columns": [
+    {"name": "key",   "length": 5,  "align": "left", "pad": " "},
+    {"name": "value", "length": 10, "align": "left", "pad": " "}
+  ]
+}
