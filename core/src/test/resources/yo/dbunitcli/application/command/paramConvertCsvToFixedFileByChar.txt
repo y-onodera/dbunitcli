@@ -1,0 +1,8 @@
+-src=src/test/resources/yo/dbunitcli/application/src/csv/fixed/fixed_char.csv
+-srcType=csv
+-encoding=UTF-8
+-result=target/test-classes/yo/dbunitcli/application/command/convert/csv2fixedfile/char/result
+-resultType=fixed
+-fixedColumnDef=src/test/resources/yo/dbunitcli/application/settings/fixed/fixedColumnDefChar.json
+-fixedLengthType=char
+-outputEncoding=UTF-8

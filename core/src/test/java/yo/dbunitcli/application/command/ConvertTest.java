@@ -1350,6 +1350,31 @@ public class ConvertTest {
         }
 
         @Test
+        public void testFromCsvToFixedFileByChar() throws Exception {
+            Convert.main(this.getArgs("/paramConvertCsvToFixedFileByChar.txt"));
+            final List<String> lines = Files.readAllLines(
+                    new File(this.getBaseDir() + "/convert/csv2fixedfile/char/result/fixed_char.txt").toPath(),
+                    StandardCharsets.UTF_8);
+            Assertions.assertEquals(2, lines.size());
+            Assertions.assertEquals("abc  hello     ", lines.get(0));
+            Assertions.assertEquals("あ    world     ", lines.get(1));
+        }
+
+        @Test
+        public void testFromCsvToFixedFileByByte() throws Exception {
+            Convert.main(this.getArgs("/paramConvertCsvToFixedFileByByte.txt"));
+            final List<String> lines = Files.readAllLines(
+                    new File(this.getBaseDir() + "/convert/csv2fixedfile/byte/result/fixed_byte.txt").toPath(),
+                    StandardCharsets.UTF_8);
+            Assertions.assertEquals(2, lines.size());
+            Assertions.assertEquals(20, lines.get(0).getBytes(StandardCharsets.UTF_8).length);
+            Assertions.assertEquals("abc       hello     ", lines.get(0));
+            Assertions.assertEquals(20, lines.get(1).getBytes(StandardCharsets.UTF_8).length);
+            // 𠮷あ = 4+3 = 7バイト、パディング3スペースで合計10バイト
+            Assertions.assertEquals("𠮷あ   world     ", lines.get(1));
+        }
+
+        @Test
         public void testFromXlsWithSchemaToCsvWithAddFileInfo() throws Exception {
             Convert.main(this.getArgs("/paramConvertXlsWithSchemaToCsvWithAddFileInfo.txt"));
             final File src = new File(this.getBaseDir() + "/convert/xlswithschema2csv/add_file_info_result");

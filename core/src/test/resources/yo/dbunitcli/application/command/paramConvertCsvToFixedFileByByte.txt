@@ -1,0 +1,8 @@
+-src=src/test/resources/yo/dbunitcli/application/src/csv/fixed/fixed_byte.csv
+-srcType=csv
+-encoding=UTF-8
+-result=target/test-classes/yo/dbunitcli/application/command/convert/csv2fixedfile/byte/result
+-resultType=fixed
+-fixedColumnDef=src/test/resources/yo/dbunitcli/application/settings/fixed/fixedColumnDefByte.json
+-fixedLengthType=byte
+-outputEncoding=UTF-8
