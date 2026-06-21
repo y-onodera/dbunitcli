@@ -7,12 +7,16 @@
     body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
     h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
     h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
     p { color: #4b5563; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
     th { background: #f9fafb; font-weight: 600; color: #374151; }
     td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
     a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
   </style>
 </head>
 <body>
@@ -23,15 +27,139 @@
   <h2>オプション</h2>
   <table>
     <tr><th>オプション</th><th>説明</th></tr>
-    <tr><td>targetType</td><td>比較対象の種類</td></tr>
-    <tr><td>setting</td><td>ファイル比較の設定</td></tr>
-    <tr><td>settingEncoding</td><td>設定ファイルのエンコーディング</td></tr>
+    <tr><td>targetType</td><td>比較対象の種類（下記参照）</td></tr>
+    <tr><td>setting</td><td>比較設定ファイル（<code>data</code> モード時のみ有効。<a href="dataset-settings.html">Dataset Settings</a> 形式）</td></tr>
+    <tr><td>settingEncoding</td><td>設定ファイルのエンコーディング（デフォルト: システム既定）</td></tr>
     <tr><td>oldData</td><td>比較元（旧）データセット</td></tr>
     <tr><td>newData</td><td>比較対象となる新データセット</td></tr>
-    <tr><td>expectData</td><td>期待値データセット</td></tr>
-    <tr><td>imageOption</td><td>画像比較のオプション</td></tr>
+    <tr><td>expectData</td><td>期待値データセット（省略時はスキップ）</td></tr>
+    <tr><td>imageOption</td><td>画像比較のオプション（<code>image</code> / <code>pdf</code> モード時のみ表示）</td></tr>
     <tr><td>convertResult</td><td>出力形式と出力先の設定</td></tr>
   </table>
   <p><code>oldData</code> / <code>newData</code> / <code>expectData</code> の入力フォーム詳細は <a href="dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
+
+  <h2 id="section-target-type">targetType ごとの比較方法</h2>
+  <p><code>targetType</code> には <code>data</code>・<code>image</code>・<code>pdf</code> の 3 種類があります。</p>
+
+  <h3 id="targettype-data">data（デフォルト）</h3>
+  <p>CSV・Excel・DB テーブルなど、表形式のデータセットを比較します。<code>setting</code> に指定した <a href="dataset-settings.html">Dataset Settings</a> ファイルで主キー・カラム選択・ソート順などを制御できます。</p>
+  <ul>
+    <li><code>oldData</code> と <code>newData</code> で対応するテーブルを 1 対 1 に突き合わせます</li>
+    <li>テーブルの一致は名前で行われます。名前が対応しないテーブルは追加／削除として検出されます</li>
+    <li><code>setting</code> を省略するとすべてのカラムを対象に順序比較します</li>
+  </ul>
+
+  <h3 id="targettype-image">image</h3>
+  <p>PNG 画像ファイルをピクセル単位で比較します。<code>oldData</code> / <code>newData</code> には Source Type = <code>file</code> のディレクトリを指定してください。拡張子は自動的に <code>.png</code> に固定されます。</p>
+  <ul>
+    <li>ファイル名が一致するペアを 1 対 1 で突き合わせます</li>
+    <li>差分の許容度や描画方法は <code>imageOption</code>（<a href="image.html">Image Option</a>）で調整できます</li>
+    <li><code>setting</code> は無視されます（比較キーは内部で <code>NAME</code> 固定）</li>
+  </ul>
+
+  <h3 id="targettype-pdf">pdf</h3>
+  <p>PDF ファイルをページ画像として比較します。<code>oldData</code> / <code>newData</code> には Source Type = <code>file</code> のディレクトリを指定してください。拡張子は自動的に <code>.pdf</code> に固定されます。</p>
+  <ul>
+    <li>ファイル名が一致するペアを 1 対 1 で突き合わせます</li>
+    <li>差分の許容度や描画方法は <code>imageOption</code>（<a href="image.html">Image Option</a>）で調整できます</li>
+    <li><code>setting</code> は無視されます（比較キーは内部で <code>NAME</code> 固定）</li>
+  </ul>
+
+  <h2 id="section-setting">setting による比較内容の変更（data モード）</h2>
+  <p><code>targetType=data</code> のとき、<code>setting</code> に <a href="dataset-settings.html">Dataset Settings</a> 形式の JSON ファイルを指定することで、テーブルごとに比較内容を細かく制御できます。</p>
+
+  <h3>主な制御項目</h3>
+  <table>
+    <tr><th>設定フィールド</th><th>比較への影響</th></tr>
+    <tr><td>keys</td><td>比較の主キーとなるカラムを指定。指定がない場合は行順序で比較</td></tr>
+    <tr><td>include</td><td>比較対象に含めるカラムを限定</td></tr>
+    <tr><td>exclude</td><td>比較対象から除外するカラム（タイムスタンプ列など差分を無視したい列に使用）</td></tr>
+    <tr><td>order</td><td>比較前にデータをソートするカラム</td></tr>
+    <tr><td>filter</td><td>比較前に行を絞り込む JeXL 条件式</td></tr>
+  </table>
+
+  <h3>記述例</h3>
+  <pre>{
+  "settings": [
+    {
+      "name": "orders",
+      "keys": ["order_id"],
+      "exclude": ["created_at", "updated_at"],
+      "order": ["order_id"]
+    }
+  ],
+  "commonSettings": [
+    {
+      "exclude": ["created_at", "updated_at"]
+    }
+  ]
+}</pre>
+  <p>この例では <code>orders</code> テーブルを <code>order_id</code> で突き合わせ、タイムスタンプ列を比較対象から除外します。<code>commonSettings</code> の <code>exclude</code> はすべてのテーブルに適用されます。</p>
+
+  <h3>filePath を使って別フォルダの同名ファイルに異なる設定を適用する</h3>
+  <p>CSV や Excel を再帰的に読み込む場合、異なるサブフォルダに同名ファイルが存在することがあります。<code>name</code> を <code>{ "any": "テーブル名", "filePath": "正規表現" }</code> 形式で指定すると、ファイルパスで絞り込んだうえで設定を適用できます。</p>
+  <p>たとえば次のようなフォルダ構成で、<code>summary.csv</code> が 2 か所に存在するケースを考えます。</p>
+  <pre>old/
+  domestic/
+    summary.csv   ← 主キー: region_code
+  overseas/
+    summary.csv   ← 主キー: country_code</pre>
+  <p>この場合、<code>name</code> にテーブル名と <code>filePath</code> の正規表現を組み合わせることで、フォルダごとに異なる設定を適用できます。</p>
+  <pre>{
+  "settings": [
+    {
+      "name": { "any": "summary", "filePath": ".*/domestic/.*" },
+      "keys": ["region_code"],
+      "order": ["region_code"]
+    },
+    {
+      "name": { "any": "summary", "filePath": ".*/overseas/.*" },
+      "keys": ["country_code"],
+      "order": ["country_code"]
+    }
+  ]
+}</pre>
+  <p><code>filePath</code> の値はファイルパス全体に対する Java 正規表現です。<code>.*/domestic/.*</code> はパス中に <code>domestic/</code> を含むファイルにのみマッチします。どちらの設定にもマッチしないファイルは <code>commonSettings</code> が適用されます（指定がなければ全カラム順序比較）。</p>
+
+  <h2 id="section-result">比較結果の形式</h2>
+  <p>比較結果は <code>COMPARE_RESULT</code> という名前のテーブルとして出力されます。<code>convertResult</code> で指定した形式（CSV・Excel 等）でファイルに書き出されます。</p>
+
+  <h3>COMPARE_RESULT テーブルのカラム</h3>
+  <table>
+    <tr><th>カラム</th><th>説明</th></tr>
+    <tr><td>targetName</td><td>差分が検出されたテーブル名（image/pdf モードではファイル名）</td></tr>
+    <tr><td>diff</td><td>差分の種類（下表参照）</td></tr>
+    <tr><td>oldDefine</td><td>旧データ側の値・定義</td></tr>
+    <tr><td>newDefine</td><td>新データ側の値・定義</td></tr>
+    <tr><td>columnIndex</td><td>差分が発生したカラムの位置（0 始まり）</td></tr>
+    <tr><td>rows</td><td>差分が発生した行番号（0 始まり）</td></tr>
+  </table>
+
+  <h3>diff の値一覧</h3>
+  <table>
+    <tr><th>値</th><th>意味</th></tr>
+    <tr><td>TABLE_COUNT</td><td>テーブル数が異なる</td></tr>
+    <tr><td>TABLE_DELETE</td><td>旧データにあるテーブルが新データに存在しない</td></tr>
+    <tr><td>TABLE_ADD</td><td>新データに追加されたテーブルが旧データに存在しない</td></tr>
+    <tr><td>COLUMNS_COUNT</td><td>カラム数が異なる</td></tr>
+    <tr><td>COLUMNS_MODIFY</td><td>同位置のカラム名が異なる</td></tr>
+    <tr><td>COLUMNS_DELETE</td><td>旧データにあるカラムが新データに存在しない</td></tr>
+    <tr><td>COLUMNS_ADD</td><td>新データに追加されたカラムが旧データに存在しない</td></tr>
+    <tr><td>ROWS_COUNT</td><td>行数が異なる</td></tr>
+    <tr><td>KEY_DELETE</td><td>旧データにある主キー行が新データに存在しない</td></tr>
+    <tr><td>KEY_ADD</td><td>新データに追加された主キー行が旧データに存在しない</td></tr>
+    <tr><td>MODIFY_VALUE</td><td>同一キーの行でカラム値が異なる</td></tr>
+  </table>
+
+  <h3>expectData を指定した場合</h3>
+  <p><code>expectData</code> に期待値データセットを指定すると、<code>convertResult</code> の出力結果と期待値を再度突き合わせて検証します。期待値と一致しない差分は <code>convertResult</code> 配下の <code>expectedDiff/</code> ディレクトリに同形式で出力されます。</p>
+
+  <h2>関連ページ</h2>
+  <ul>
+    <li><a href="dataset-load-form.html">Dataset Load Form</a> — oldData / newData / expectData の入力フォーム</li>
+    <li><a href="dataset-settings.html">Dataset Settings</a> — setting ファイルの形式</li>
+    <li><a href="image.html">Image Option</a> — image / pdf モードの詳細オプション</li>
+    <li><a href="result-form.html">Result Form</a> — convertResult の出力形式設定</li>
+  </ul>
 </body>
 </html>
