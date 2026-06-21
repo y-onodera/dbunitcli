@@ -20,19 +20,21 @@ public abstract class FlatFileConverter implements IDataSetConverter {
     protected final String encoding;
     protected final boolean exportHeader;
     protected final Charset charset;
+    protected final String extension;
     protected ITableMetaData activeMetaData;
     protected int writeRows;
     protected File file;
     protected Writer writer;
 
     public FlatFileConverter(final String theDirectory, final File resultDir, final String encoding,
-                             final boolean exportEmptyTable, boolean exportHeader) {
+                             final boolean exportEmptyTable, final boolean exportHeader, final String extension) {
         this.exportEmptyTable = exportEmptyTable;
         this.theDirectory = theDirectory;
         this.resultDir = resultDir;
         this.encoding = encoding;
         this.exportHeader = exportHeader;
         this.charset = Charset.forName(this.encoding);
+        this.extension = extension;
     }
 
     @Override
@@ -97,7 +99,7 @@ public abstract class FlatFileConverter implements IDataSetConverter {
     }
 
     protected String getExtension() {
-        return "csv";
+        return this.extension;
     }
 
     protected void writeHeader() {

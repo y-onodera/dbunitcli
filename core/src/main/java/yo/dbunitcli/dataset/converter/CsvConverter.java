@@ -24,22 +24,28 @@ public class CsvConverter extends FlatFileConverter {
                 , param.resultDir()
                 , param.outputEncoding()
                 , param.exportEmptyTable()
-                , param.exportHeader());
+                , param.exportHeader()
+                , param.extension());
     }
 
     public CsvConverter(final File resultDir, final String encoding) {
-        this(resultDir.getAbsolutePath(), resultDir, encoding, true, true);
+        this(resultDir.getAbsolutePath(), resultDir, encoding, true, true, null);
     }
 
     public CsvConverter(final String theDirectory, final File resultDir, final String encoding,
                         final boolean exportEmptyTable, final boolean exportHeader) {
-        super(theDirectory, resultDir, encoding, exportEmptyTable, exportHeader);
+        this(theDirectory, resultDir, encoding, exportEmptyTable, exportHeader, null);
+    }
+
+    public CsvConverter(final String theDirectory, final File resultDir, final String encoding,
+                        final boolean exportEmptyTable, final boolean exportHeader, final String extension) {
+        super(theDirectory, resultDir, encoding, exportEmptyTable, exportHeader, extension != null ? extension : "csv");
     }
 
     @Override
     public IDataSetConverter split() {
         return new CsvConverter(this.theDirectory, this.resultDir, this.encoding, this.exportEmptyTable,
-                                this.exportHeader);
+                                this.exportHeader, this.extension);
     }
 
     @Override

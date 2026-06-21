@@ -74,12 +74,14 @@ public record DataSetConverterOption(
                   .put("-exportHeader", this.skipHeader);
             if (type == ResultType.csv) {
                 result.put("-outputEncoding", this.outputEncoding);
+                result.put("-outputExtension", this.extension);
             } else if (type == ResultType.format) {
                 result.put("-outputEncoding", this.outputEncoding);
                 result.put("-format", this.format);
                 result.put("-outputExtension", this.extension);
             } else if (type == ResultType.fixed) {
                 result.put("-outputEncoding", this.outputEncoding);
+                result.put("-outputExtension", this.extension);
                 result.putFile("-fixedColumnDef", this.fixedColumnDefFile, BaseDir.FIXED_COLUMN_DEF);
                 result.put("-fixedLengthType", this.fixedLengthType);
             } else {
