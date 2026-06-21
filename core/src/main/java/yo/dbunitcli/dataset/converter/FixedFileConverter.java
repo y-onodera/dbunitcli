@@ -27,7 +27,13 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
     public FixedFileConverter(final String theDirectory, final File resultDir, final String encoding,
                               final boolean exportEmptyTable, final List<FixedColumnDef> columnDefs,
                               final ComparableDataSetParam.LengthType lengthType) {
-        super(theDirectory, resultDir, encoding, exportEmptyTable, false);
+        this(theDirectory, resultDir, encoding, exportEmptyTable, columnDefs, lengthType, null);
+    }
+
+    public FixedFileConverter(final String theDirectory, final File resultDir, final String encoding,
+                              final boolean exportEmptyTable, final List<FixedColumnDef> columnDefs,
+                              final ComparableDataSetParam.LengthType lengthType, final String extension) {
+        super(theDirectory, resultDir, encoding, exportEmptyTable, false, extension != null ? extension : "txt");
         this.columnDefs = columnDefs;
         this.lengthType = lengthType;
     }
@@ -35,7 +41,7 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
     public FixedFileConverter(final DataSetConverterParam param) {
         this(param.resultDir().getAbsolutePath(), param.resultDir(), param.outputEncoding(), param.exportEmptyTable(),
              new FromJsonFixedColumnDefBuilder().build(new File(param.fixedColumnDefFile())),
-             ComparableDataSetParam.LengthType.of(param.fixedLengthType()));
+             ComparableDataSetParam.LengthType.of(param.fixedLengthType()), param.extension());
     }
 
     @Override
@@ -51,14 +57,9 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
     }
 
     @Override
-    protected String getExtension() {
-        return "txt";
-    }
-
-    @Override
     public IDataSetConverter split() {
         return new FixedFileConverter(this.theDirectory, this.resultDir, this.encoding, this.exportEmptyTable,
-                                      this.columnDefs, this.lengthType);
+                                      this.columnDefs, this.lengthType, this.extension);
     }
 
     @Override

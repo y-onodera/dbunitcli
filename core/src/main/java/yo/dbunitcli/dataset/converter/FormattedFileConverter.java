@@ -14,23 +14,16 @@ import java.util.stream.IntStream;
 public class FormattedFileConverter extends FlatFileConverter implements IDataSetConverter {
 
     private final String format;
-    private final String extension;
 
     public FormattedFileConverter(final String theDirectory, final File resultDir, final String encoding,
                                   final boolean exportEmptyTable, final String format, final String extension) {
-        super(theDirectory, resultDir, encoding, exportEmptyTable, false);
+        super(theDirectory, resultDir, encoding, exportEmptyTable, false, extension != null ? extension : "txt");
         this.format = format;
-        this.extension = extension != null ? extension : "txt";
     }
 
     public FormattedFileConverter(final DataSetConverterParam param) {
         this(param.resultDir().getAbsolutePath(), param.resultDir(), param.outputEncoding(), param.exportEmptyTable(),
              param.format(), param.extension());
-    }
-
-    @Override
-    protected String getExtension() {
-        return this.extension;
     }
 
     @Override
