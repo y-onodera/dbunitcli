@@ -110,16 +110,18 @@ ignoreQuoted = ON:
   <p><strong>テーブル名:</strong> 拡張子を除いたファイル名。</p>
   <p><strong>固有オプション:</strong></p>
   <ul>
-    <li><code>fixedLength</code> — 各カラムのバイト幅をカンマ区切りで指定（例: <code>4,10</code>）。<code>headerName</code> による列名指定との併用が必須です。</li>
+    <li><code>fixedLength</code> — 各カラムの幅をカンマ区切りで指定（例: <code>4,10</code>）。幅の単位は <code>fixedLengthType</code> に従います。<code>headerName</code> による列名指定との併用が必須です。</li>
+    <li><code>fixedLengthType</code> — 幅の計算方法: <code>char</code>（文字数基準、デフォルト）/ <code>byte</code>（バイト数基準）。マルチバイト文字を含むファイルを <code>byte</code> で処理する場合は文字化けに注意してください。</li>
   </ul>
-  <p><strong>データイメージ例:</strong> 指定したバイト幅でカラム分割。</p>
-  <pre>入力 (members.txt, fixedLength=4,10):
+  <p><strong>データイメージ例:</strong> 指定した幅でカラム分割（<code>fixedLengthType=char</code> の場合）。</p>
+  <pre>入力 (members.txt):
 0001Alice
 0002Bob
 
 指定:
-  fixedLength = 4,10
-  headerName  = id,name
+  fixedLength     = 4,10
+  fixedLengthType = char   (デフォルト)
+  headerName      = id,name
 
 カラム:     [id, name]
 データ行:
