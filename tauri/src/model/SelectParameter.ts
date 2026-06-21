@@ -87,6 +87,11 @@ export type GenerateOptions = CommandOptions & {
 	result: CommandOption;
 	resultPath: CommandOption;
 	outputEncoding: CommandOption;
+	commit?: CommandOption;
+	sqlFilePrefix?: CommandOption;
+	sqlFileSuffix?: CommandOption;
+	includeAllColumns?: CommandOption;
+	lazyLoad?: CommandOption;
 	srcData: DatasetSource;
 	templateOption?: GenerateTemplateOption;
 };

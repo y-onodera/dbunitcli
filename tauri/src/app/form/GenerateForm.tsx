@@ -2,6 +2,7 @@ import { SectionFieldset, SectionHelpButton } from "../../components/dialog";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import JxlsFormSection from "./section/JxlsFormSection";
+import Check from "./section/element/Check";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
@@ -59,6 +60,21 @@ export function GenerateForm(prop: {
 				<PlainText prefix="" element={generate.resultPath} />
 				{generate.outputEncoding && (
 					<PlainText prefix="" element={generate.outputEncoding} />
+				)}
+				{generate.commit && (
+					<Check prefix="" element={generate.commit} />
+				)}
+				{generate.sqlFilePrefix && (
+					<PlainText prefix="" element={generate.sqlFilePrefix} />
+				)}
+				{generate.sqlFileSuffix && (
+					<PlainText prefix="" element={generate.sqlFileSuffix} />
+				)}
+				{generate.includeAllColumns && (
+					<Check prefix="" element={generate.includeAllColumns} />
+				)}
+				{generate.lazyLoad && (
+					<Check prefix="" element={generate.lazyLoad} />
 				)}
 			</SectionFieldset>
 			<DatasetLoadForm
