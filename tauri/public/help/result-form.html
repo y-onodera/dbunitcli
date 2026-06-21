@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Result Form</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Result Form</h1>
+  <p>各コマンドで「出力先と出力形式」を指定するための共通フォームです。<a href="convert.html">Convert</a> の <code>convertResult</code>、<a href="compare.html">Compare</a> の出力設定などで使用されます。</p>
+  <p>フォームの構成は <strong>Result Type 選択</strong>により変わります。選択した形式ごとに表示される項目が異なります。</p>
+
+  <h2>Result Type 選択</h2>
+  <p>出力データの形式を選択します。以下の 6 種類から選択できます。</p>
+  <table>
+    <tr><th>形式</th><th>説明</th></tr>
+    <tr><td><a href="#resulttype-csv">csv</a></td><td>CSV（区切り文字付きテキスト）で出力。拡張子・文字コードを変更可能</td></tr>
+    <tr><td><a href="#resulttype-xls">xls</a></td><td>Excel 97-2003 形式（<code>.xls</code>）で出力</td></tr>
+    <tr><td><a href="#resulttype-xlsx">xlsx</a></td><td>Excel 2007 以降の形式（<code>.xlsx</code>）で出力</td></tr>
+    <tr><td><a href="#resulttype-table">table</a></td><td>JDBC 接続先の DB テーブルへ書き込む</td></tr>
+    <tr><td><a href="#resulttype-format">format</a></td><td><code>String.format()</code> 書式でテキストとして出力</td></tr>
+    <tr><td><a href="#resulttype-fixed">fixed</a></td><td>固定長テキストで出力</td></tr>
+  </table>
+
+  <h2 id="section-common">共通項目（table 以外）</h2>
+  <p>Result Type が <code>table</code> 以外の場合に表示される共通項目です。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>result</td><td>出力先ディレクトリのパス</td></tr>
+    <tr><td>resultPath</td><td>出力先パスのテンプレート文字列。テーブル名などを変数として使用可能</td></tr>
+    <tr><td>exportEmptyTable</td><td>ON にすると、データ行が 0 件のテーブルも出力する（デフォルト: ON）</td></tr>
+    <tr><td>exportHeader</td><td>ON にすると、出力ファイルにヘッダ行を含める（デフォルト: ON）</td></tr>
+  </table>
+
+  <h2 id="resulttype-csv">csv</h2>
+  <p>テーブルを CSV ファイルとして出力します。1 テーブルにつき 1 ファイルが生成されます。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>outputEncoding</td><td>出力ファイルの文字コード（デフォルト: <code>UTF-8</code>）</td></tr>
+    <tr><td>outputExtension</td><td>出力ファイルの拡張子（デフォルト: <code>.csv</code>）。TSV として出力したい場合は <code>.tsv</code> を指定</td></tr>
+  </table>
+  <p><strong>出力例:</strong></p>
+  <pre>テーブル名: users
+result    = output/
+outputEncoding = UTF-8
+
+生成ファイル: output/users.csv
+id,name,age
+1,Alice,30
+2,Bob,25</pre>
+
+  <h2 id="resulttype-xls">xls</h2>
+  <p>テーブルを Excel 97-2003 形式（<code>.xls</code>）で出力します。<code>excelTable</code> の設定により、テーブルをどのシートに書き込むかを制御します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>excelTable</td><td>Excel 出力時のシート配置モード（デフォルト: <code>SHEET</code>）。<code>SHEET</code>: 1 テーブル = 1 シート、<code>BOOK</code>: 全テーブルを 1 ブックにまとめる</td></tr>
+  </table>
+
+  <h2 id="resulttype-xlsx">xlsx</h2>
+  <p>テーブルを Excel 2007 以降の形式（<code>.xlsx</code>）で出力します。項目は <a href="#resulttype-xls">xls</a> と同じです。</p>
+
+  <h2 id="resulttype-table">table</h2>
+  <p>データを JDBC 接続先の DB テーブルへ書き込みます。<code>result</code> / <code>resultPath</code> / <code>exportEmptyTable</code> / <code>exportHeader</code> は表示されず、代わりに以下の項目が表示されます。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>op</td><td>DB への書き込み操作（下表参照）</td></tr>
+    <tr><td>jdbc</td><td>接続先の <a href="jdbc.html">JDBC 接続情報</a>（URL・ユーザ・パスワードなど）</td></tr>
+  </table>
+  <h3>op（DB 操作）</h3>
+  <table>
+    <tr><th>値</th><th>説明</th></tr>
+    <tr><td>CLEAN_INSERT</td><td>既存データを全削除してから INSERT（デフォルト）</td></tr>
+    <tr><td>INSERT</td><td>既存データを残したまま INSERT</td></tr>
+    <tr><td>UPDATE</td><td>主キーで一致する行を UPDATE</td></tr>
+    <tr><td>REFRESH</td><td>一致行は UPDATE、存在しない行は INSERT</td></tr>
+    <tr><td>DELETE</td><td>主キーで一致する行を DELETE</td></tr>
+  </table>
+
+  <h2 id="resulttype-format">format</h2>
+  <p><code>java.lang.String.format()</code> の書式文字列を使い、各行のデータをテキスト出力します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>outputEncoding</td><td>出力ファイルの文字コード（デフォルト: <code>UTF-8</code>）</td></tr>
+    <tr><td>format</td><td><code>String.format()</code> 書式文字列。例: <code>%s,%s\n</code></td></tr>
+    <tr><td>outputExtension</td><td>出力ファイルの拡張子（デフォルト: <code>.txt</code>）</td></tr>
+  </table>
+  <p><strong>出力例:</strong></p>
+  <pre>テーブル:
+  id=1, name=Alice
+  id=2, name=Bob
+
+format = %s:%s\n
+
+生成ファイル:
+1:Alice
+2:Bob</pre>
+
+  <h2 id="resulttype-fixed">fixed</h2>
+  <p>各カラムを固定長バイト幅でパディングしたテキストファイルとして出力します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>outputEncoding</td><td>出力ファイルの文字コード（デフォルト: <code>UTF-8</code>）</td></tr>
+    <tr><td>outputExtension</td><td>出力ファイルの拡張子（デフォルト: <code>.txt</code>）</td></tr>
+    <tr><td>fixedColumnDef</td><td>各カラムの固定長幅定義ファイルのパス。カラムごとのバイト幅をカンマ区切りで記述したファイルを指定</td></tr>
+    <tr><td>fixedLengthType</td><td>バイト幅の計算方法: <code>char</code>（文字数基準、デフォルト）/ <code>byte</code>（バイト数基準）</td></tr>
+  </table>
+  <p><strong>出力例:</strong></p>
+  <pre>テーブル:
+  id=1, name=Alice
+
+fixedColumnDef: 4,10
+fixedLengthType: char
+
+生成ファイル:
+1   Alice     </pre>
+
+  <h2>関連ページ</h2>
+  <ul>
+    <li><a href="jdbc.html">JDBC</a> — DB 接続設定の詳細</li>
+    <li><a href="convert.html">Convert</a> — Result Form を使用するコマンド</li>
+    <li><a href="compare.html">Compare</a> — Result Form を使用するコマンド</li>
+  </ul>
+</body>
+</html>

@@ -7,9 +7,10 @@
     body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
     h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
     h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
     p { color: #4b5563; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
     th { background: #f9fafb; font-weight: 600; color: #374151; }
     td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
     a { color: #4f46e5; }
@@ -19,22 +20,24 @@
 <body>
   <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Generate</h1>
-  <p>テンプレートからファイルを生成します。ソースデータとテンプレートエンジンを用いて、SQL や CSV などの出力ファイルを作成します。</p>
+  <p>テンプレートまたは組み込み定義からファイルを生成します。ソースデータをもとに SQL・テキスト・Excel・固定長定義ファイルなどを出力します。</p>
 
   <h2>generateType</h2>
+  <p>生成の種類を選択します。選択した種類に応じて、表示されるオプションが変わります。</p>
   <table>
-    <tr><th>値</th><th>説明</th></tr>
-    <tr><td>txt</td><td>StringTemplate 4 を使ったテキストファイル生成（SQL・CSV 等）。<a href="template.html">Template</a> オプションが適用されます</td></tr>
-    <tr><td>xlsx</td><td>jxls を使った xlsx テンプレートへのデータ埋め込み。<a href="jxls.html">Jxls</a> オプションが適用されます</td></tr>
-    <tr><td>xls</td><td>jxls を使った xls テンプレートへのデータ埋め込み。<a href="jxls.html">Jxls</a> オプションが適用されます</td></tr>
-    <tr><td>settings</td><td>データセット設定ファイルのひな型を生成</td></tr>
-    <tr><td>sql</td><td>INSERT / UPDATE / DELETE / CLEAN_INSERT SQL ファイルを生成</td></tr>
-    <tr><td>xlsxTemplate</td><td>jxls テンプレートのひな型 xlsx を生成</td></tr>
+    <tr><th>値</th><th>説明</th><th>unit</th></tr>
+    <tr><td><a href="#type-txt">txt</a></td><td>StringTemplate 4 を使ったテキストファイル生成（SQL・CSV・任意テキスト等）</td><td>record / table / dataset</td></tr>
+    <tr><td><a href="#type-xlsx">xlsx</a></td><td>jxls を使った <code>.xlsx</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
+    <tr><td><a href="#type-xls">xls</a></td><td>jxls を使った <code>.xls</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
+    <tr><td><a href="#type-settings">settings</a></td><td>Dataset Settings ファイルのひな型を生成</td><td>dataset（固定）</td></tr>
+    <tr><td><a href="#type-sql">sql</a></td><td>INSERT / UPDATE / DELETE / CLEAN_INSERT SQL ファイルを生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="#type-xlsxTemplate">xlsxTemplate</a></td><td>jxls テンプレートのひな型 <code>.xlsx</code> を生成</td><td>dataset（固定）</td></tr>
+    <tr><td><a href="#type-fixedColumnDef">fixedColumnDef</a></td><td>固定長出力用のカラム幅定義ファイルを生成</td><td>table（固定）</td></tr>
   </table>
 
   <h2>unit</h2>
   <p>生成の単位を指定します。デフォルトは <code>record</code> です。<br>
-  ただし <code>generateType</code> が <code>settings</code> / <code>xlsxTemplate</code> の場合は <code>dataset</code>、<code>sql</code> の場合は <code>table</code> に固定されます。</p>
+  <code>settings</code> / <code>xlsxTemplate</code> は <code>dataset</code>、<code>sql</code> / <code>fixedColumnDef</code> は <code>table</code> に固定されます。</p>
   <table>
     <tr><th>値</th><th>説明</th></tr>
     <tr><td>record</td><td>行ごとに 1 ファイルを出力</td></tr>
@@ -42,11 +45,23 @@
     <tr><td>dataset</td><td>データセット全体から 1 ファイルを出力</td></tr>
   </table>
 
-  <h2>テンプレート変数</h2>
+  <h2>共通オプション</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>template</td><td>テンプレートファイルのパス（<code>txt</code> / <code>xlsx</code> / <code>xls</code> タイプで使用）</td></tr>
+    <tr><td>result</td><td>生成結果ファイルを配置するディレクトリ</td></tr>
+    <tr><td>resultPath</td><td><code>result</code> ディレクトリからの相対パス（テンプレート変数を使用可能）</td></tr>
+    <tr><td>outputEncoding</td><td>出力ファイルの文字コード（<code>txt</code> タイプのみ、デフォルト: <code>UTF-8</code>）</td></tr>
+  </table>
+
+  <h2 id="type-txt">txt</h2>
+  <p>StringTemplate 4 テンプレートファイルを使い、テキストファイルを生成します。<code>template</code> オプションでテンプレートファイルを指定します。テンプレートエンジンの詳細設定は <code>template option</code> の展開ボタンから設定します（<a href="template.html">Template</a> 参照）。</p>
+
+  <h3>テンプレート変数</h3>
   <p>unit の選択によってテンプレート内で使用できる変数が異なります。</p>
   <table>
     <tr><th>変数名</th><th>説明</th><th class="center">record</th><th class="center">table</th><th class="center">dataset</th></tr>
-    <tr><td>rowNumber</td><td>行 / テーブルのインデックス（0始まり、dataset は常に 0）</td><td class="center">○</td><td class="center">○</td><td class="center">○</td></tr>
+    <tr><td>rowNumber</td><td>行 / テーブルのインデックス（0 始まり、dataset は常に 0）</td><td class="center">○</td><td class="center">○</td><td class="center">○</td></tr>
     <tr><td>tableName</td><td>テーブル名</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
     <tr><td>columns</td><td>カラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
     <tr><td>primaryKeys</td><td>主キーカラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
@@ -56,21 +71,33 @@
     <tr><td>dataSet</td><td>テーブル名をキーとする Map。各値は table スコープと同じ構造</td><td class="center">—</td><td class="center">—</td><td class="center">○</td></tr>
   </table>
 
-  <h2>その他のオプション</h2>
+  <h2 id="type-xlsx">xlsx / <span id="type-xls">xls</span></h2>
+  <p>jxls テンプレートファイルを使い、Excel ファイルを生成します。<code>template</code> オプションでテンプレートファイルを指定します。jxls 固有の設定は <code>jxls option</code> の展開ボタンから設定します（<a href="jxls.html">Jxls</a> 参照）。</p>
+
+  <h2 id="type-settings">settings</h2>
+  <p>データセットのカラム情報から Dataset Settings ファイルのひな型を生成します。<code>unit</code> は <code>dataset</code> に固定です。<code>template</code> は使用しません。</p>
+
+  <h2 id="type-sql">sql</h2>
+  <p>テーブルのカラム情報から SQL ファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません。</p>
+
+  <h2 id="type-xlsxTemplate">xlsxTemplate</h2>
+  <p>jxls テンプレートのひな型となる <code>.xlsx</code> ファイルを生成します。<code>unit</code> は <code>dataset</code> に固定です。<code>template</code> は使用しません。</p>
+
+  <h2 id="type-fixedColumnDef">fixedColumnDef</h2>
+  <p>固定長出力（<a href="result-form.html">Result Form</a> の fixed 形式）で使用するカラム幅定義ファイルを生成します。<code>unit</code> は <code>table</code> に固定です。以下の項目を設定します。</p>
   <table>
-    <tr><th>オプション</th><th>説明</th></tr>
-    <tr><td>template</td><td>テンプレートファイル</td></tr>
-    <tr><td>result</td><td>生成結果ファイルを配置するディレクトリ</td></tr>
-    <tr><td>resultPath</td><td>result ディレクトリからの相対パス</td></tr>
-    <tr><td>outputEncoding</td><td>出力ファイルのエンコーディング（txt タイプのみ）</td></tr>
-    <tr><td>commit</td><td>生成 SQL に <code>commit;</code> を出力するか（sql タイプのみ／既定: true）</td></tr>
-    <tr><td>op</td><td>生成 SQL の操作種別。INSERT / UPDATE / DELETE / REFRESH / CLEAN_INSERT から選択（sql タイプのみ）</td></tr>
-    <tr><td>sqlFilePrefix</td><td>生成 SQL ファイル名の先頭に付ける文字列（sql タイプのみ）</td></tr>
-    <tr><td>sqlFileSuffix</td><td>生成 SQL ファイル名の末尾に付ける文字列（sql タイプのみ）</td></tr>
-    <tr><td>includeAllColumns</td><td>設定ファイルに全カラムを含めるか（settings タイプのみ／既定: false）</td></tr>
-    <tr><td>lazyLoad</td><td>大規模データ向けに POI の遅延ロードを使うか（xlsx / xls タイプのみ／既定: true）</td></tr>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>fixedLength</td><td>各カラムの幅をカンマ区切りで指定（例: <code>4,10,20</code>）。カラム数より少ない場合、残りのカラムには <code>defaultLength</code> が使われる</td></tr>
+    <tr><td>defaultLength</td><td><code>fixedLength</code> で幅が指定されなかったカラムに適用するデフォルト幅（数値）</td></tr>
+    <tr><td>align</td><td>パディングの方向: <code>left</code>（右余白）/ <code>right</code>（左余白）</td></tr>
   </table>
-  <p><code>srcData</code> の入力フォーム詳細は <a href="dataset-load-form.html">Dataset Load Form</a> を参照してください。<br>
-  <code>txt</code> タイプのテンプレートオプションは <a href="template.html">Template (StringTemplate 4)</a>、<code>xlsx</code> / <code>xls</code> タイプのオプションは <a href="jxls.html">Jxls</a> を参照してください。</p>
+
+  <h2>関連ページ</h2>
+  <ul>
+    <li><a href="dataset-load-form.html">Dataset Load Form</a> — <code>srcData</code> 入力フォームの詳細</li>
+    <li><a href="template.html">Template</a> — <code>txt</code> タイプの StringTemplate 4 オプション</li>
+    <li><a href="jxls.html">Jxls</a> — <code>xlsx</code> / <code>xls</code> タイプの jxls オプション</li>
+    <li><a href="result-form.html">Result Form</a> — fixed 出力形式の詳細</li>
+  </ul>
 </body>
 </html>
