@@ -112,197 +112,141 @@ SELECT * FROM $param.tableName$;</pre>
   VALUES
     ('O''Brien', 'Alice');</pre>
 
-  <h2 id="section-builtin-templates">組み込みテンプレート</h2>
-  <p>DBUnit CLI はよく使う生成パターンを組み込みテンプレートとして提供しています。Generate コマンドの <code>template</code> / <code>templateGroup</code> にこれらを指定することで、データセットから SQL や設定ファイルを即座に生成できます。</p>
-  <p>各テンプレートには <strong>.txt</strong>（本体）と <strong>.stg</strong>（共通マクロ定義グループ）が対になっています。<code>template</code> に .txt を、<code>templateGroup</code> に .stg を指定します。</p>
+  <h2 id="section-template-writing">ST4 テンプレートの書き方</h2>
+  <p>以下の構文は組み込みテンプレート（<code>core/src/main/resources/</code> 以下の <code>.txt</code> / <code>.stg</code>）で実際に使われているパターンです。</p>
 
-  <h3 id="section-sql-insert">INSERT 文生成（insertTemplate）</h3>
-  <p>テーブルの各行を <code>INSERT INTO</code> 文に変換します。<code>inputParam.commit</code> が true のとき末尾に <code>commit;</code> を追加します。</p>
-  <table>
-    <tr><th>設定項目</th><th>値</th></tr>
-    <tr><td>template</td><td><code>sql/insertTemplate.txt</code></td></tr>
-    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
-  </table>
-  <p><strong>入力データ（USERS テーブル、主キー: id）:</strong></p>
-  <pre>id | name    | age
----+---------+----
- 1 | Alice   |  30
- 2 | O'Brien |  25</pre>
-  <p><strong>生成結果:</strong></p>
-  <pre>insert into USERS (id ,name ,age ) values (1 ,'Alice' ,30 );
-insert into USERS (id ,name ,age ) values (2 ,'O''Brien' ,25 );</pre>
-  <p>文字列値はシングルクォートで囲まれ、<code>'</code> は自動的に <code>''</code> にエスケープされます。空値は <code>null</code> に変換されます。</p>
+  <h3 id="section-attr">変数参照</h3>
+  <p><code>$属性名$</code> で値を展開します。<code>.</code> でプロパティをたどれます。</p>
+  <pre>-- テンプレート (本体 .txt)
+insert into $tableName$ values ($param.value$);
 
-  <h3 id="section-sql-clean-insert">全削除 + INSERT 文生成（cleanInsertTemplate）</h3>
-  <p>テーブルを全件削除してから INSERT します。テストデータ初期化に便利です。</p>
-  <table>
-    <tr><th>設定項目</th><th>値</th></tr>
-    <tr><td>template</td><td><code>sql/cleanInsertTemplate.txt</code></td></tr>
-    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
-  </table>
-  <p><strong>生成結果（USERS テーブル）:</strong></p>
-  <pre>delete from USERS;
+-- 入力: tableName=USERS, param.value=1
+-- 出力:
+insert into USERS values (1);</pre>
 
-insert into USERS (id ,name ,age ) values (1 ,'Alice' ,30 );
-insert into USERS (id ,name ,age ) values (2 ,'O''Brien' ,25 );</pre>
+  <h3 id="section-iteration">繰り返し（イテレーション）</h3>
+  <p><code>$リスト:{変数 | 本文}$</code> でリストを繰り返し展開します。<code>; separator="区切り文字"</code> で要素間の区切りを指定できます。</p>
+  <p>組み込み INSERT テンプレート（<code>sql/sqlTemplate.stg</code>）での使用例：</p>
+  <pre>-- .stg（グループファイル）内のサブテンプレート定義
+insert() ::= &lt;&lt;
+$rows:{row |insert into $tableName$ ($columns:{column | $column.columnName$ }; separator=","$) values (...);
+}$
+&gt;&gt;
 
-  <h3 id="section-sql-delete-insert">DELETE + INSERT 文生成（deleteInsertTemplate）</h3>
-  <p>主キーで対象行を DELETE してから INSERT します。既存データを保持しつつ特定行を差し替えます。</p>
-  <table>
-    <tr><th>設定項目</th><th>値</th></tr>
-    <tr><td>template</td><td><code>sql/deleteInsertTemplate.txt</code></td></tr>
-    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
-  </table>
-  <p><strong>生成結果（主キー: id）:</strong></p>
-  <pre>delete from USERS where id = 1 ;
-delete from USERS where id = 2 ;
+-- 入力: tableName=USERS, columns=[id, name, age], rows=[行1, 行2]
+-- 出力:
+insert into USERS (id,name,age) values (...);
+insert into USERS (id,name,age) values (...);</pre>
 
-insert into USERS (id ,name ,age ) values (1 ,'Alice' ,30 );
-insert into USERS (id ,name ,age ) values (2 ,'O''Brien' ,25 );</pre>
+  <h3 id="section-conditional">条件分岐</h3>
+  <p><code>$if(条件)$...$elseif(条件)$...$else$...$endif$</code> で条件によって出力を切り替えます。<code>!</code> で否定、<code>strip()</code> でリストの空要素除去後に真偽判定できます。</p>
+  <p>組み込みの <code>value()</code> サブテンプレートでの使用例（<code>sql/sqlTemplate.stg</code>）：</p>
+  <pre>-- 値が空なら null、数値型ならそのまま、文字列型なら escapeSql で引用符付き出力
+value(row, column) ::= &lt;&lt;$if(!DropEmpty.(row.(column.columnName)))$null$elseif(column.dataType.number)$$row.(column.columnName)$$else$$row.(column.columnName); format="escapeSql"$$endif$&gt;&gt;
 
-  <h3 id="section-sql-delete">DELETE 文生成（deleteTemplate）</h3>
-  <p>主キー条件で対象行を DELETE します。</p>
-  <table>
-    <tr><th>設定項目</th><th>値</th></tr>
-    <tr><td>template</td><td><code>sql/deleteTemplate.txt</code></td></tr>
-    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
-  </table>
-  <p><strong>生成結果:</strong></p>
-  <pre>delete from USERS where id = 1 ;
-delete from USERS where id = 2 ;</pre>
+-- 入力: value=""  → null
+-- 入力: value=42  (数値) → 42
+-- 入力: value="O'Brien" (文字列) → 'O''Brien'</pre>
+  <p>主キーの有無で出力を切り替える例（<code>settings/settingTemplate.stg</code>）：</p>
+  <pre>-- strip() でリストの空要素を除いて空でなければ主キーあり
+setting(table) ::= &lt;&lt;
+$if(strip(table.primaryKeys))$$usePrimaryKeys(table)$$else$$useColumns(table)$$endif$
+&gt;&gt;</pre>
+  <p><code>commit;</code> を条件付きで出力する例（<code>sql/sqlTemplate.stg</code>）：</p>
+  <pre>commit() ::= &lt;&lt;$if(inputParam.commit)$commit;$endif$&gt;&gt;
 
-  <h3 id="section-sql-update">UPDATE 文生成（updateTemplate）</h3>
-  <p>主キー以外のカラムを <code>SET</code> 句に、主キーを <code>WHERE</code> 句に展開した UPDATE 文を生成します。</p>
-  <table>
-    <tr><th>設定項目</th><th>値</th></tr>
-    <tr><td>template</td><td><code>sql/updateTemplate.txt</code></td></tr>
-    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
-  </table>
-  <p><strong>生成結果（主キー: id）:</strong></p>
-  <pre>update USERS set name = 'Alice' ,age = 30 where id = 1 ;
-update USERS set name = 'O''Brien' ,age = 25 where id = 2 ;</pre>
+-- inputParam.commit=true  → commit;
+-- inputParam.commit=false → （空文字）</pre>
 
-  <h3 id="section-sql-ddl">CREATE TABLE 生成（ddlTemplate）</h3>
-  <p>テーブルのカラム定義行（カラム名・SQL 型・精度・スケール・NULL 制約・コメント）から <code>CREATE TABLE</code> 文を生成します。主キー情報があれば <code>PRIMARY KEY</code> 句も出力されます。</p>
-  <table>
-    <tr><th>設定項目</th><th>値</th></tr>
-    <tr><td>template</td><td><code>sql/ddlTemplate.txt</code></td></tr>
-    <tr><td>templateGroup</td><td><code>sql/ddlTemplate.stg</code></td></tr>
-  </table>
-  <p><strong>入力データ（カラム定義行）:</strong></p>
-  <pre>columnName | sqlType  | precision | scale | nullable | comment
------------+----------+-----------+-------+----------+----------
-id         | NUMBER   | 10        | 0     | false    | 'ユーザーID'
-name       | VARCHAR2 | 100       |       | false    | '氏名'
-age        | NUMBER   | 3         | 0     | true     | '年齢'</pre>
-  <p><strong>生成結果（主キー: id）:</strong></p>
-  <pre>create table USERS (
-id NUMBER(10,0) not null,
-name VARCHAR2(100) not null,
-age NUMBER(3,0)
-comment on column USERS.id is 'ユーザーID'
-comment on column USERS.name is '氏名'
-comment on column USERS.age is '年齢'
-,
-primary key (id)
-);</pre>
+  <h3 id="section-subtemplate">サブテンプレート定義と呼び出し</h3>
+  <p><code>.stg</code> ファイルにサブテンプレートを定義し、本体 <code>.txt</code> や他のサブテンプレートから呼び出せます。引数を渡すことも可能です。</p>
+  <pre>-- .stg（グループファイル）
+insert() ::= &lt;&lt;
+$rows:{row |insert into $tableName$ (...) values (...);
+}$
+&gt;&gt;
 
-  <h3 id="section-setting-template">Dataset Setting 生成（settingTemplate）</h3>
-  <p>テーブルのカラム情報から Dataset Settings の JSON を生成します。主キーがあればそれをキーに、なければ全カラムをキーとして設定します。</p>
-  <table>
-    <tr><th>設定項目</th><th>値</th></tr>
-    <tr><td>template</td><td><code>settings/settingTemplate.txt</code></td></tr>
-    <tr><td>templateGroup</td><td><code>settings/settingTemplate.stg</code></td></tr>
-  </table>
-  <p><strong>入力: USERS テーブル（主キー: id、カラム: id, name, age）</strong></p>
-  <p><strong>生成結果（<code>includeAllColumns=false</code> の場合）:</strong></p>
-  <pre>{
-  "settings": [
+deleteAll() ::= &lt;&lt;
+delete from $tableName$;
+&gt;&gt;
+
+commit() ::= &lt;&lt;$if(inputParam.commit)$commit;$endif$&gt;&gt;
+
+-- 引数付きサブテンプレート
+value(row, column) ::= &lt;&lt;...&gt;&gt;
+
+setting(table) ::= &lt;&lt;
+$if(strip(table.primaryKeys))$$usePrimaryKeys(table)$$else$$useColumns(table)$$endif$
+&gt;&gt;</pre>
+  <pre>-- 本体 .txt でサブテンプレートを呼び出す（cleanInsertTemplate.txt の例）
+$deleteAll()$
+
+$insert()$$commit()$
+
+-- 出力:
+delete from USERS;
+
+insert into USERS (id,name,age) values (1,'Alice',30);
+insert into USERS (id,name,age) values (2,'O''Brien',25);</pre>
+
+  <h3 id="section-map">マップリテラルと間接参照</h3>
+  <p><code>["キー": 値, default: 値]</code> でマップを定義し、<code>$マップ.(キー)$</code> でキーを変数として間接参照できます。空文字キーに空リスト <code>[]</code> を対応付けると、空値を falsy として扱う慣用パターンになります。</p>
+  <p><code>sql/sqlTemplate.stg</code> での空値判定への応用：</p>
+  <pre>-- 空文字 "" → [] (falsy)、それ以外 → キー自身 (truthy) にマップするテーブル
+DropEmpty ::= ["": [], default: key]
+
+-- $if(!DropEmpty.(row.(column.columnName)))$ で
+-- row の当該カラム値が空文字のとき null を出力する
+value(row, column) ::= &lt;&lt;$if(!DropEmpty.(row.(column.columnName)))$null$elseif(...)$...
+&gt;&gt;</pre>
+
+  <h3 id="section-format-in-template">テンプレート内での書式指定</h3>
+  <p>属性参照の後ろに <code>; format="書式名"</code> を付けて、<a href="#section-extended">拡張書式</a>をテンプレート本体で直接適用できます（サブテンプレート呼び出し構文 <code>:書式名()</code> とは別記法）。</p>
+  <p><code>sql/sqlTemplate.stg</code> での使用例：</p>
+  <pre>-- 文字列値を SQL エスケープしてシングルクォートで囲む
+$row.(column.columnName); format="escapeSql"$
+
+-- 入力: O'Brien
+-- 出力: 'O''Brien'</pre>
+
+  <h3 id="section-nested-iteration">ネストした繰り返し</h3>
+  <p>外側の繰り返し変数をそのまま内側で参照できます。<code>settings/settingTemplate.stg</code> でのネスト例：</p>
+  <pre>-- テーブルのリストを外側で回し、各テーブルのカラムを内側で回す
+$dataSet.keys:{tableName |$setting(dataSet.(tableName))$}; separator="\n  , "$
+
+-- setting() の中で primaryKeys・columns をさらに繰り返す
+usePrimaryKeys(table) ::= &lt;&lt;
     {
-      "name" : "USERS"
-     ,"keys":["id"]
+      "name" : "$table.tableName$"
+     ,"keys":[$table.primaryKeys:{column | "$column.columnName$"}; separator=" ,"$]
     }
-  ]
-}</pre>
-  <p><strong>生成結果（<code>includeAllColumns=true</code> の場合）:</strong></p>
-  <pre>{
-  "settings": [
-    {
-      "name" : "USERS"
-     ,"keys":["id"]
-     ,"include":["id" ,"name" ,"age"]
-     ,"exclude":[]
-     ,"string":{
-        "name":"name"
-      }
-     ,"number":{
-        "id":"id"
-       ,"age":"age"
-      }
-     ,"boolean":{}
-     ,"sqlFunction":{}
-    }
-  ]
-}</pre>
+&gt;&gt;</pre>
 
-  <h3 id="section-fixedcolumndef-template">固定長カラム定義生成（fixedColumnDefTemplate）</h3>
-  <p>固定長テキスト出力に必要なカラム幅・整列・パディング設定の JSON を生成します。</p>
-  <table>
-    <tr><th>設定項目</th><th>値</th></tr>
-    <tr><td>template</td><td><code>fixedcolumndef/fixedColumnDefTemplate.txt</code></td></tr>
-    <tr><td>templateGroup</td><td><code>fixedcolumndef/fixedColumnDefTemplate.stg</code></td></tr>
-  </table>
-  <p><strong>入力データ（カラム定義行）:</strong></p>
-  <pre>name | length | align | pad
------+--------+-------+----
-id   | 4      | right | 0
-name | 20     | left  |  </pre>
-  <p><strong>生成結果:</strong></p>
-  <pre>{
-  "columns": [
-{"name": "id", "length": 4, "align": "right", "pad": "0"},{"name": "name", "length": 20, "align": "left", "pad": " "}
-  ]
-}</pre>
+  <h3 id="section-full-example">総合例：INSERT 文テンプレートの自作</h3>
+  <p>上記パターンをすべて組み合わせて、数値・文字列・空値を正しく扱う INSERT テンプレートを自作する例です。</p>
+  <pre>-- myInsert.stg（グループファイル）
+DropEmpty ::= ["": [], default: key]
 
-  <h3 id="section-param-template">バッチパラメータ生成（generateParamTemplate）</h3>
-  <p>Generate コマンドのバッチ実行用パラメータファイルを生成します。<a href="parameterize.html">Parameterize</a> コマンドと組み合わせ、複数の Generate 実行を自動化する場面で使います。</p>
-  <table>
-    <tr><th>設定項目</th><th>値</th></tr>
-    <tr><td>template</td><td><code>param/generateParamTemplate.txt</code></td></tr>
-  </table>
-  <p><strong>テンプレート内容:</strong></p>
-  <pre>-srcType=$srcType$
--src=$src$
--encoding=$encoding$
--setting=$setting$
--generateType=$generateType$
--template=$template$
--templateGroup=$templateGroup$
--templateEncoding=$templateEncoding$
--outputEncoding=$outputEncoding$
--resultPath=$resultPath$</pre>
-  <p><strong>入力行（1 件）:</strong></p>
-  <pre>srcType=csv
-src=data/users.csv
-encoding=UTF-8
-setting=settings/users.json
-generateType=txt
-template=sql/insertTemplate.txt
-templateGroup=sql/sqlTemplate.stg
-templateEncoding=UTF-8
-outputEncoding=UTF-8
-resultPath=output/$\{tableName\}.sql</pre>
-  <p><strong>生成結果（1 ファイル）:</strong></p>
-  <pre>-srcType=csv
--src=data/users.csv
--encoding=UTF-8
--setting=settings/users.json
--generateType=txt
--template=sql/insertTemplate.txt
--templateGroup=sql/sqlTemplate.stg
--templateEncoding=UTF-8
--outputEncoding=UTF-8
--resultPath=output/${tableName}.sql</pre>
+value(row, column) ::= &lt;&lt;$if(!DropEmpty.(row.(column.columnName)))$null$elseif(column.dataType.number)$$row.(column.columnName)$$else$$row.(column.columnName); format="escapeSql"$$endif$&gt;&gt;
+
+insert() ::= &lt;&lt;
+$rows:{row |insert into $tableName$ ($columns:{col | $col.columnName$}; separator=", "$) values ($columns:{col | $value(row, col)$}; separator=", "$);
+}$
+&gt;&gt;
+
+commit() ::= &lt;&lt;$if(inputParam.commit)$
+commit;$endif$
+&gt;&gt;</pre>
+  <pre>-- myInsert.txt（本体）
+$insert()$$commit()$</pre>
+  <pre>-- 入力: USERS テーブル（id=数値, name=文字列, age=数値）
+-- 行1: id=1, name=Alice,   age=30
+-- 行2: id=2, name=O'Brien, age=（空）
+
+-- 出力（inputParam.commit=true）:
+insert into USERS (id, name, age) values (1, 'Alice', 30);
+insert into USERS (id, name, age) values (2, 'O''Brien', null);
+commit;</pre>
 
   <h2>関連ページ</h2>
   <ul>
