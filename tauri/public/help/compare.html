@@ -96,6 +96,31 @@
 }</pre>
   <p>この例では <code>orders</code> テーブルを <code>order_id</code> で突き合わせ、タイムスタンプ列を比較対象から除外します。<code>commonSettings</code> の <code>exclude</code> はすべてのテーブルに適用されます。</p>
 
+  <h3>filePath を使って別フォルダの同名ファイルに異なる設定を適用する</h3>
+  <p>CSV や Excel を再帰的に読み込む場合、異なるサブフォルダに同名ファイルが存在することがあります。<code>name</code> を <code>{ "any": "テーブル名", "filePath": "正規表現" }</code> 形式で指定すると、ファイルパスで絞り込んだうえで設定を適用できます。</p>
+  <p>たとえば次のようなフォルダ構成で、<code>summary.csv</code> が 2 か所に存在するケースを考えます。</p>
+  <pre>old/
+  domestic/
+    summary.csv   ← 主キー: region_code
+  overseas/
+    summary.csv   ← 主キー: country_code</pre>
+  <p>この場合、<code>name</code> にテーブル名と <code>filePath</code> の正規表現を組み合わせることで、フォルダごとに異なる設定を適用できます。</p>
+  <pre>{
+  "settings": [
+    {
+      "name": { "any": "summary", "filePath": ".*/domestic/.*" },
+      "keys": ["region_code"],
+      "order": ["region_code"]
+    },
+    {
+      "name": { "any": "summary", "filePath": ".*/overseas/.*" },
+      "keys": ["country_code"],
+      "order": ["country_code"]
+    }
+  ]
+}</pre>
+  <p><code>filePath</code> の値はファイルパス全体に対する Java 正規表現です。<code>.*/domestic/.*</code> はパス中に <code>domestic/</code> を含むファイルにのみマッチします。どちらの設定にもマッチしないファイルは <code>commonSettings</code> が適用されます（指定がなければ全カラム順序比較）。</p>
+
   <h2 id="section-result">比較結果の形式</h2>
   <p>比較結果は <code>COMPARE_RESULT</code> という名前のテーブルとして出力されます。<code>convertResult</code> で指定した形式（CSV・Excel 等）でファイルに書き出されます。</p>
 
