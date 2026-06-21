@@ -112,11 +112,204 @@ SELECT * FROM $param.tableName$;</pre>
   VALUES
     ('O''Brien', 'Alice');</pre>
 
+  <h2 id="section-builtin-templates">組み込みテンプレート</h2>
+  <p>DBUnit CLI はよく使う生成パターンを組み込みテンプレートとして提供しています。Generate コマンドの <code>template</code> / <code>templateGroup</code> にこれらを指定することで、データセットから SQL や設定ファイルを即座に生成できます。</p>
+  <p>各テンプレートには <strong>.txt</strong>（本体）と <strong>.stg</strong>（共通マクロ定義グループ）が対になっています。<code>template</code> に .txt を、<code>templateGroup</code> に .stg を指定します。</p>
+
+  <h3 id="section-sql-insert">INSERT 文生成（insertTemplate）</h3>
+  <p>テーブルの各行を <code>INSERT INTO</code> 文に変換します。<code>inputParam.commit</code> が true のとき末尾に <code>commit;</code> を追加します。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>sql/insertTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>入力データ（USERS テーブル、主キー: id）:</strong></p>
+  <pre>id | name    | age
+---+---------+----
+ 1 | Alice   |  30
+ 2 | O'Brien |  25</pre>
+  <p><strong>生成結果:</strong></p>
+  <pre>insert into USERS (id ,name ,age ) values (1 ,'Alice' ,30 );
+insert into USERS (id ,name ,age ) values (2 ,'O''Brien' ,25 );</pre>
+  <p>文字列値はシングルクォートで囲まれ、<code>'</code> は自動的に <code>''</code> にエスケープされます。空値は <code>null</code> に変換されます。</p>
+
+  <h3 id="section-sql-clean-insert">全削除 + INSERT 文生成（cleanInsertTemplate）</h3>
+  <p>テーブルを全件削除してから INSERT します。テストデータ初期化に便利です。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>sql/cleanInsertTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>生成結果（USERS テーブル）:</strong></p>
+  <pre>delete from USERS;
+
+insert into USERS (id ,name ,age ) values (1 ,'Alice' ,30 );
+insert into USERS (id ,name ,age ) values (2 ,'O''Brien' ,25 );</pre>
+
+  <h3 id="section-sql-delete-insert">DELETE + INSERT 文生成（deleteInsertTemplate）</h3>
+  <p>主キーで対象行を DELETE してから INSERT します。既存データを保持しつつ特定行を差し替えます。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>sql/deleteInsertTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>生成結果（主キー: id）:</strong></p>
+  <pre>delete from USERS where id = 1 ;
+delete from USERS where id = 2 ;
+
+insert into USERS (id ,name ,age ) values (1 ,'Alice' ,30 );
+insert into USERS (id ,name ,age ) values (2 ,'O''Brien' ,25 );</pre>
+
+  <h3 id="section-sql-delete">DELETE 文生成（deleteTemplate）</h3>
+  <p>主キー条件で対象行を DELETE します。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>sql/deleteTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>生成結果:</strong></p>
+  <pre>delete from USERS where id = 1 ;
+delete from USERS where id = 2 ;</pre>
+
+  <h3 id="section-sql-update">UPDATE 文生成（updateTemplate）</h3>
+  <p>主キー以外のカラムを <code>SET</code> 句に、主キーを <code>WHERE</code> 句に展開した UPDATE 文を生成します。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>sql/updateTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>生成結果（主キー: id）:</strong></p>
+  <pre>update USERS set name = 'Alice' ,age = 30 where id = 1 ;
+update USERS set name = 'O''Brien' ,age = 25 where id = 2 ;</pre>
+
+  <h3 id="section-sql-ddl">CREATE TABLE 生成（ddlTemplate）</h3>
+  <p>テーブルのカラム定義行（カラム名・SQL 型・精度・スケール・NULL 制約・コメント）から <code>CREATE TABLE</code> 文を生成します。主キー情報があれば <code>PRIMARY KEY</code> 句も出力されます。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>sql/ddlTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>sql/ddlTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>入力データ（カラム定義行）:</strong></p>
+  <pre>columnName | sqlType  | precision | scale | nullable | comment
+-----------+----------+-----------+-------+----------+----------
+id         | NUMBER   | 10        | 0     | false    | 'ユーザーID'
+name       | VARCHAR2 | 100       |       | false    | '氏名'
+age        | NUMBER   | 3         | 0     | true     | '年齢'</pre>
+  <p><strong>生成結果（主キー: id）:</strong></p>
+  <pre>create table USERS (
+id NUMBER(10,0) not null,
+name VARCHAR2(100) not null,
+age NUMBER(3,0)
+comment on column USERS.id is 'ユーザーID'
+comment on column USERS.name is '氏名'
+comment on column USERS.age is '年齢'
+,
+primary key (id)
+);</pre>
+
+  <h3 id="section-setting-template">Dataset Setting 生成（settingTemplate）</h3>
+  <p>テーブルのカラム情報から Dataset Settings の JSON を生成します。主キーがあればそれをキーに、なければ全カラムをキーとして設定します。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>settings/settingTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>settings/settingTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>入力: USERS テーブル（主キー: id、カラム: id, name, age）</strong></p>
+  <p><strong>生成結果（<code>includeAllColumns=false</code> の場合）:</strong></p>
+  <pre>{
+  "settings": [
+    {
+      "name" : "USERS"
+     ,"keys":["id"]
+    }
+  ]
+}</pre>
+  <p><strong>生成結果（<code>includeAllColumns=true</code> の場合）:</strong></p>
+  <pre>{
+  "settings": [
+    {
+      "name" : "USERS"
+     ,"keys":["id"]
+     ,"include":["id" ,"name" ,"age"]
+     ,"exclude":[]
+     ,"string":{
+        "name":"name"
+      }
+     ,"number":{
+        "id":"id"
+       ,"age":"age"
+      }
+     ,"boolean":{}
+     ,"sqlFunction":{}
+    }
+  ]
+}</pre>
+
+  <h3 id="section-fixedcolumndef-template">固定長カラム定義生成（fixedColumnDefTemplate）</h3>
+  <p>固定長テキスト出力に必要なカラム幅・整列・パディング設定の JSON を生成します。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>fixedcolumndef/fixedColumnDefTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>fixedcolumndef/fixedColumnDefTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>入力データ（カラム定義行）:</strong></p>
+  <pre>name | length | align | pad
+-----+--------+-------+----
+id   | 4      | right | 0
+name | 20     | left  |  </pre>
+  <p><strong>生成結果:</strong></p>
+  <pre>{
+  "columns": [
+{"name": "id", "length": 4, "align": "right", "pad": "0"},{"name": "name", "length": 20, "align": "left", "pad": " "}
+  ]
+}</pre>
+
+  <h3 id="section-param-template">バッチパラメータ生成（generateParamTemplate）</h3>
+  <p>Generate コマンドのバッチ実行用パラメータファイルを生成します。<a href="parameterize.html">Parameterize</a> コマンドと組み合わせ、複数の Generate 実行を自動化する場面で使います。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>param/generateParamTemplate.txt</code></td></tr>
+  </table>
+  <p><strong>テンプレート内容:</strong></p>
+  <pre>-srcType=$srcType$
+-src=$src$
+-encoding=$encoding$
+-setting=$setting$
+-generateType=$generateType$
+-template=$template$
+-templateGroup=$templateGroup$
+-templateEncoding=$templateEncoding$
+-outputEncoding=$outputEncoding$
+-resultPath=$resultPath$</pre>
+  <p><strong>入力行（1 件）:</strong></p>
+  <pre>srcType=csv
+src=data/users.csv
+encoding=UTF-8
+setting=settings/users.json
+generateType=txt
+template=sql/insertTemplate.txt
+templateGroup=sql/sqlTemplate.stg
+templateEncoding=UTF-8
+outputEncoding=UTF-8
+resultPath=output/$\{tableName\}.sql</pre>
+  <p><strong>生成結果（1 ファイル）:</strong></p>
+  <pre>-srcType=csv
+-src=data/users.csv
+-encoding=UTF-8
+-setting=settings/users.json
+-generateType=txt
+-template=sql/insertTemplate.txt
+-templateGroup=sql/sqlTemplate.stg
+-templateEncoding=UTF-8
+-outputEncoding=UTF-8
+-resultPath=output/${tableName}.sql</pre>
+
   <h2>関連ページ</h2>
   <ul>
     <li><a href="template.html">Template</a> — ST4 テンプレートの設定項目・パラメータバインド・グループファイル</li>
     <li><a href="generate.html">Generate</a> — テンプレートを使ったファイル生成コマンド</li>
     <li><a href="run.html">Run</a> — SQL / ANT スクリプトの前処理として使用</li>
+    <li><a href="result-form.html">Result Form</a> — 出力先・出力形式の設定</li>
   </ul>
 </body>
 </html>
