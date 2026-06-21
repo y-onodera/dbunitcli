@@ -9,6 +9,7 @@ import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 
 public abstract class FlatFileConverter implements IDataSetConverter {
@@ -18,18 +19,20 @@ public abstract class FlatFileConverter implements IDataSetConverter {
     protected final File resultDir;
     protected final String encoding;
     protected final boolean exportHeader;
+    protected final Charset charset;
     protected ITableMetaData activeMetaData;
     protected int writeRows;
     protected File file;
     protected Writer writer;
 
-    public FlatFileConverter(final String theDirectory, final File resultDir,
-                             final String encoding, final boolean exportEmptyTable, boolean exportHeader) {
+    public FlatFileConverter(final String theDirectory, final File resultDir, final String encoding,
+                             final boolean exportEmptyTable, boolean exportHeader) {
         this.exportEmptyTable = exportEmptyTable;
         this.theDirectory = theDirectory;
         this.resultDir = resultDir;
         this.encoding = encoding;
         this.exportHeader = exportHeader;
+        this.charset = Charset.forName(this.encoding);
     }
 
     @Override
@@ -40,10 +43,6 @@ public abstract class FlatFileConverter implements IDataSetConverter {
     @Override
     public boolean isExportEmptyTable() {
         return this.exportEmptyTable;
-    }
-
-    protected String getExtension() {
-        return "csv";
     }
 
     @Override
@@ -95,6 +94,10 @@ public abstract class FlatFileConverter implements IDataSetConverter {
         } catch (final IOException var3) {
             throw new AssertionError(var3);
         }
+    }
+
+    protected String getExtension() {
+        return "csv";
     }
 
     protected void writeHeader() {

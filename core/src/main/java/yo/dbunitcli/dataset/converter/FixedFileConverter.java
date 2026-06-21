@@ -12,27 +12,15 @@ import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
 import java.io.File;
-import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class FixedFileConverter extends FlatFileConverter implements IDataSetConverter {
 
-    public enum LengthType {
-        CHAR, BYTE;
-
-        public static LengthType of(final String value) {
-            if ("byte".equalsIgnoreCase(value)) {
-                return BYTE;
-            }
-            return CHAR;
-        }
-    }
-
     private final List<FixedColumnDef> columnDefs;
     private final LengthType lengthType;
-    private final Charset charset;
     private Map<String, Integer> columnIndexByName;
 
     public FixedFileConverter(final String theDirectory, final File resultDir, final String encoding,
@@ -41,12 +29,10 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
         super(theDirectory, resultDir, encoding, exportEmptyTable, false);
         this.columnDefs = columnDefs;
         this.lengthType = lengthType;
-        this.charset = Charset.forName(encoding);
     }
 
     public FixedFileConverter(final DataSetConverterParam param) {
-        this(param.resultDir().getAbsolutePath(), param.resultDir(), param.outputEncoding(),
-             param.exportEmptyTable(),
+        this(param.resultDir().getAbsolutePath(), param.resultDir(), param.outputEncoding(), param.exportEmptyTable(),
              new FromJsonFixedColumnDefBuilder().build(new File(param.fixedColumnDefFile())),
              LengthType.of(param.fixedLengthType()));
     }
@@ -54,13 +40,13 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
     @Override
     public void startTable(final ITableMetaData metaData) throws DataSetException {
         super.startTable(metaData);
-        this.columnIndexByName = buildColumnIndex(metaData);
+        this.columnIndexByName = this.buildColumnIndex(metaData);
     }
 
     @Override
     public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
         super.reStartTable(tableMetaData, writeRows);
-        this.columnIndexByName = buildColumnIndex(tableMetaData);
+        this.columnIndexByName = tableMetaData.columnIndexes();
     }
 
     @Override
@@ -70,16 +56,15 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
 
     @Override
     public IDataSetConverter split() {
-        return new FixedFileConverter(this.theDirectory, this.resultDir, this.encoding,
-                                      this.exportEmptyTable, this.columnDefs, this.lengthType);
+        return new FixedFileConverter(this.theDirectory, this.resultDir, this.encoding, this.exportEmptyTable,
+                                      this.columnDefs, this.lengthType);
     }
 
     @Override
     public void row(final Object[] values) throws DataSetException {
         final StringBuilder sb = new StringBuilder();
         for (final FixedColumnDef def : this.columnDefs) {
-            final String value = valueAt(values, def.name());
-            sb.append(pad(value, def));
+            sb.append(this.pad(this.valueAt(values, def.name()), def));
         }
         this.write(sb.toString());
         this.write(System.lineSeparator());
@@ -87,16 +72,17 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
     }
 
     private Map<String, Integer> buildColumnIndex(final ITableMetaData metaData) {
+        Column[] columns;
         try {
-            final Column[] columns = metaData.getColumns();
-            final Map<String, Integer> index = new HashMap<>(columns.length * 2);
-            for (int i = 0; i < columns.length; i++) {
-                index.put(columns[i].getColumnName().toLowerCase(), i);
-            }
-            return index;
+            columns = metaData.getColumns();
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
+        return IntStream.range(0, columns.length)
+                        .boxed()
+                        .collect(Collectors.toMap(
+                                it -> columns[it].getColumnName().toLowerCase()
+                                , it -> it));
     }
 
     private String valueAt(final Object[] values, final String name) {
@@ -117,9 +103,9 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
 
     private String pad(final String value, final FixedColumnDef def) {
         if (this.lengthType == LengthType.BYTE) {
-            return padByte(value, def);
+            return this.padByte(value, def);
         }
-        return padChar(value, def);
+        return this.padChar(value, def);
     }
 
     private String padChar(final String value, final FixedColumnDef def) {
@@ -134,14 +120,14 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
     private String padByte(final String value, final FixedColumnDef def) {
         final int targetBytes = def.length();
         final String padChar = def.pad();
-        final int padByteLen = padChar.getBytes(charset).length;
+        final int padByteLen = padChar.getBytes(this.charset).length;
 
         String truncated = value;
-        byte[] truncatedBytes = truncated.getBytes(charset);
+        byte[] truncatedBytes = truncated.getBytes(this.charset);
         while (truncatedBytes.length > targetBytes) {
             final int cpCount = truncated.codePointCount(0, truncated.length());
             truncated = truncated.substring(0, truncated.offsetByCodePoints(0, cpCount - 1));
-            truncatedBytes = truncated.getBytes(charset);
+            truncatedBytes = truncated.getBytes(this.charset);
         }
 
         final int remaining = targetBytes - truncatedBytes.length;
@@ -153,6 +139,17 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
             return truncated + padding + spaceFill;
         } else {
             return spaceFill + padding + truncated;
+        }
+    }
+
+    public enum LengthType {
+        CHAR, BYTE;
+
+        public static LengthType of(final String value) {
+            if ("byte".equalsIgnoreCase(value)) {
+                return BYTE;
+            }
+            return CHAR;
         }
     }
 }

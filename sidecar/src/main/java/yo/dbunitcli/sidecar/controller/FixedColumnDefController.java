@@ -30,7 +30,7 @@ public class FixedColumnDefController extends AbstractResourceFileController<Fix
                 FileResources.readClasspathResource("fixedcolumndef/fixedColumnDefTemplate.txt"));
         st.add("columns", body.getInput().getColumns().stream()
                 .map(col -> new FixedColumnDef(col.name(), col.length(),
-                        !"right".equalsIgnoreCase(col.align()), col.pad()))
+                        col.align(), col.pad()))
                 .toList());
         return st.render();
     }

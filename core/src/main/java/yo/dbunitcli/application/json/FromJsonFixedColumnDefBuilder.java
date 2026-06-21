@@ -24,9 +24,9 @@ public class FromJsonFixedColumnDefBuilder {
                 final JsonObject col = columns.getJsonObject(i);
                 final String name = col.getString("name");
                 final int length = col.getInt("length");
-                final boolean leftAlign = !"right".equalsIgnoreCase(col.getString("align", "left"));
+                final String align = col.getString("align", "left");
                 final String pad = col.getString("pad", " ");
-                result.add(new FixedColumnDef(name, length, leftAlign, pad));
+                result.add(new FixedColumnDef(name, length, align, pad));
             }
             return result;
         } catch (final IOException e) {

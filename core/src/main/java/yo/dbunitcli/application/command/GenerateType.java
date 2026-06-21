@@ -147,28 +147,35 @@ public enum GenerateType {
         }
 
         @Override
+        public String getTemplateString(final GenerateOption option) {
+            return FileResources.readClasspathResource("fixedcolumndef/fixedColumnDefTemplate.txt");
+        }
+
+        @Override
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
             final Column[] columns = (Column[]) param.get("columns");
             final String[] lengths = Strings.isNotEmpty(option.fixedLength())
                     ? option.fixedLength().split(",")
                     : new String[0];
-            final boolean leftAlign = !"right".equalsIgnoreCase(option.align());
             final List<FixedColumnDef> defs = IntStream.range(0, columns.length)
                                                        .mapToObj(i -> new FixedColumnDef(
                                                                columns[i].getColumnName(),
                                                                i < lengths.length ?
                                                                        Integer.parseInt(lengths[i].trim()) :
                                                                        option.defaultLength(),
-                                                               leftAlign,
-                                                               null))
+                                                               option.align(),
+                                                               " "))
                                                        .toList();
-            final TemplateRender render = new TemplateRender.Builder()
+            super.write(option,resultFile,param.add("columns", defs));
+        }
+
+        @Override
+        protected STGroup getStGroup() {
+            return new TemplateRender.Builder()
                     .setTemplateParameterAttribute(null)
-                    .build();
-            render.write(render.createSTGroup("fixedcolumndef/fixedColumnDefTemplate.stg"),
-                         FileResources.readClasspathResource("fixedcolumndef/fixedColumnDefTemplate.txt"),
-                         Parameter.none().add("columns", defs), resultFile, option.outputEncoding());
+                    .build()
+                    .createSTGroup("fixedcolumndef/fixedColumnDefTemplate.stg");
         }
     };
 
