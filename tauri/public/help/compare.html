@@ -188,6 +188,39 @@
     <tr><td>（元テーブルの全カラム）</td><td>新データ側の行の全カラム値</td></tr>
   </table>
 
+  <h3 id="result-image-pdf">image / pdf モードの比較結果</h3>
+  <p><code>targetType</code> が <code>image</code> または <code>pdf</code> のとき、<code>COMPARE_RESULT</code> のカラム構成と <code>DIFF</code> の意味が <code>data</code> モードと異なります。テーブルごとの詳細ファイル（<code>$MODIFY</code> / <code>$DELETE</code> / <code>$ADD</code>）は出力されません。</p>
+
+  <h4>COMPARE_RESULT のカラム（image / pdf モード）</h4>
+  <p><code>OLD_VALUE</code>・<code>NEW_VALUE</code>・<code>COLUMN_INDEX</code>・<code>DIFF_ROWS</code> は含まれません。<code>TARGET_NAME</code> → <code>DIFF</code> の順にソートされます。</p>
+  <table>
+    <tr><th>カラム</th><th>説明</th></tr>
+    <tr><td>OLD_PATH</td><td>旧データのソースディレクトリパス</td></tr>
+    <tr><td>NEW_PATH</td><td>新データのソースディレクトリパス</td></tr>
+    <tr><td>TARGET_NAME</td><td>対象ファイル名（pdf は「ファイル名 page{ページ番号}」形式）</td></tr>
+    <tr><td>DIFF</td><td>差分の内容（下表参照）</td></tr>
+  </table>
+
+  <h4>DIFF の値（image モード）</h4>
+  <p>一致した場合（MATCH）は <code>COMPARE_RESULT</code> に行が出力されません。差分がある場合のみ記録されます。</p>
+  <table>
+    <tr><th>値</th><th>意味</th></tr>
+    <tr><td><code>File Delete</code></td><td>旧データにあるファイルが新データに存在しない</td></tr>
+    <tr><td><code>File Add</code></td><td>新データにあるファイルが旧データに存在しない</td></tr>
+    <tr><td><code>[x1,y1,x2,y2]...</code></td><td>ピクセル差分あり。差分矩形の座標リスト（左上・右下のピクセル座標を <code>[x1,y1,x2,y2]</code> 形式で連結）</td></tr>
+  </table>
+  <p>ピクセル差分があるファイルは、差分を強調描画した PNG 画像が <code>convertResult</code> の出力先に <code>{ファイル名}.png</code> として保存されます。</p>
+
+  <h4>DIFF の値（pdf モード）</h4>
+  <table>
+    <tr><th>値</th><th>意味</th></tr>
+    <tr><td><code>File Delete</code></td><td>旧データにあるファイルが新データに存在しない</td></tr>
+    <tr><td><code>File Add</code></td><td>新データにあるファイルが旧データに存在しない</td></tr>
+    <tr><td><code>Page Number Change[new:{新},old:{旧}]</code></td><td>ページ数が異なる（例: <code>Page Number Change[new:5,old:4]</code>）。ページ数が異なる場合はページ内容の比較を行いません</td></tr>
+    <tr><td><code>[x1,y1,x2,y2]...</code></td><td>ページ画像のピクセル差分あり。差分矩形の座標リスト。<code>TARGET_NAME</code> は <code>{ファイル名} page{ページ番号}</code> 形式（例: <code>report.pdf page01</code>）</td></tr>
+  </table>
+  <p>ページ差分がある場合、差分画像が <code>convertResult</code> の出力先に <code>{ファイル名}{ページ番号}.png</code>（ゼロパディングあり）として保存されます。</p>
+
   <h3>expectData を指定した場合</h3>
   <p><code>expectData</code> に期待値データセットを指定すると、<code>convertResult</code> の出力結果と期待値を再度突き合わせて検証します。期待値と一致しない差分は <code>convertResult</code> 配下の <code>expectedDiff/</code> ディレクトリに同形式で出力されます。</p>
 
