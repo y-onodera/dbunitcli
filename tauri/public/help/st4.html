@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - StringTemplate 4 書式リファレンス</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>StringTemplate 4 書式リファレンス</h1>
+  <p>DBUnit CLI のテンプレート処理では <strong>StringTemplate 4 (ST4)</strong> を使用します。テンプレート内の値は <code>$値:書式名()$</code> の形式でフォーマットできます。ST4 標準の書式に加えて、DBUnit CLI 独自の拡張書式が利用可能です。</p>
+
+  <h2 id="section-syntax">基本構文</h2>
+  <p>書式は ST4 のレンダラー呼び出しとして、属性参照の直後に <code>:</code> で連結します。</p>
+  <pre>$param.columnName:書式名()$</pre>
+  <p>区切り文字が変更されている場合は、対応する文字で囲みます（例: <code>&lt;param.columnName:書式名()&gt;</code>）。詳細は <a href="template.html">Template</a> の <code>templateVarStart</code> / <code>templateVarStop</code> を参照してください。</p>
+
+  <h2 id="section-builtin">ST4 標準書式</h2>
+  <p>ST4 の <code>StringRenderer</code> が提供する標準書式です。</p>
+  <table>
+    <tr><th>書式名</th><th>説明</th><th>入力例</th><th>出力例</th></tr>
+    <tr><td>upper</td><td>大文字に変換</td><td>hello</td><td>HELLO</td></tr>
+    <tr><td>lower</td><td>小文字に変換</td><td>HELLO</td><td>hello</td></tr>
+    <tr><td>cap</td><td>先頭を大文字に変換</td><td>hello world</td><td>Hello world</td></tr>
+    <tr><td>url-encode</td><td>URL エンコード</td><td>a b</td><td>a+b</td></tr>
+    <tr><td>xml-encode</td><td>XML エンティティにエスケープ（<code>&amp;</code> <code>&lt;</code> 等）</td><td>&lt;tag&gt;</td><td>&amp;lt;tag&amp;gt;</td></tr>
+  </table>
+
+  <h2 id="section-extended">DBUnit CLI 拡張書式（SqlEscapeStringRenderer）</h2>
+  <p>DBUnit CLI は <code>SqlEscapeStringRenderer</code> により以下の拡張書式を追加しています。</p>
+
+  <h3 id="section-naming">命名規則変換</h3>
+  <table>
+    <tr><th>書式名</th><th>説明</th><th>入力例</th><th>出力例</th></tr>
+    <tr><td>camelToSnake</td><td>キャメルケース → スネークケース（小文字）</td><td>userId</td><td>user_id</td></tr>
+    <tr><td>camelToUpperSnake</td><td>キャメルケース → スネークケース（大文字）</td><td>userId</td><td>USER_ID</td></tr>
+    <tr><td>snakeToCamel</td><td>スネークケース → キャメルケース（先頭小文字）</td><td>user_id</td><td>userId</td></tr>
+    <tr><td>snakeToUpperCamel</td><td>スネークケース → アッパーキャメルケース（先頭大文字）</td><td>user_id</td><td>UserId</td></tr>
+    <tr><td>camelToKebab</td><td>キャメルケース → ケバブケース（小文字）</td><td>userId</td><td>user-id</td></tr>
+    <tr><td>camelToUpperKebab</td><td>キャメルケース → ケバブケース（大文字）</td><td>userId</td><td>USER-ID</td></tr>
+    <tr><td>kebabToCamel</td><td>ケバブケース → キャメルケース（先頭小文字）</td><td>user-id</td><td>userId</td></tr>
+    <tr><td>kebabToUpperCamel</td><td>ケバブケース → アッパーキャメルケース（先頭大文字）</td><td>user-id</td><td>UserId</td></tr>
+  </table>
+  <p><strong>使用例（カラム名 <code>userId</code> を SQL の列定義に使う）:</strong></p>
+  <pre>ALTER TABLE $param.tableName$ ADD COLUMN $param.columnName:camelToSnake()$ VARCHAR(255);</pre>
+  <pre>-- 入力: tableName=userProfile, columnName=firstName
+-- 出力: ALTER TABLE userProfile ADD COLUMN first_name VARCHAR(255);</pre>
+
+  <h3 id="section-sql">SQL エスケープ</h3>
+  <table>
+    <tr><th>書式名</th><th>説明</th></tr>
+    <tr><td>escapeSql</td><td>シングルクォートを <code>''</code> にエスケープして SQL 文字列リテラルとして安全に出力する。4,000 バイト超の値は Oracle の <code>TO_CLOB()</code> に分割して連結。改行文字（<code>\n</code> / <code>\r\n</code>）は <code>CHR(10)</code> / <code>CHR(13) || CHR(10)</code> で連結</td></tr>
+  </table>
+  <p><strong>使用例:</strong></p>
+  <pre>INSERT INTO messages (body) VALUES ($param.body:escapeSql()$);</pre>
+  <pre>-- 入力: body = It's a test
+-- 出力: INSERT INTO messages (body) VALUES ('It''s a test');
+
+-- 入力: body = line1\nline2
+-- 出力: INSERT INTO messages (body) VALUES ('line1' || CHR(10) || 'line2');</pre>
+  <p>4,000 バイトを超える長文テキストの場合:</p>
+  <pre>-- 出力例（4,001 バイトの文字列）:
+-- TO_CLOB('...最初の4000バイト...') || TO_CLOB('...残りのバイト...')</pre>
+
+  <h3 id="section-escape">式展開エスケープ</h3>
+  <p>テンプレート内で別のテンプレートエンジンの式記法をそのまま出力したい場合に使います。</p>
+  <table>
+    <tr><th>書式名</th><th>説明</th><th>入力例</th><th>出力例</th></tr>
+    <tr><td>jexlExp</td><td>値を JEXL 式 <code>${...}</code> として出力</td><td>user.name</td><td>${user.name}</td></tr>
+    <tr><td>ST4Exp</td><td>値を ST4 式 <code>$...$</code> として出力（ST4 テンプレートを生成するテンプレートで使用）</td><td>param.id</td><td>$param.id$</td></tr>
+  </table>
+  <p><strong>使用例（ST4 テンプレートを生成する ST4 テンプレート）:</strong></p>
+  <pre>-- 入力: expr = param.tableName
+-- テンプレート:
+SELECT * FROM $param.expr:ST4Exp()$;
+
+-- 出力（ST4 式が文字列としてそのまま埋め込まれる）:
+SELECT * FROM $param.tableName$;</pre>
+
+  <h2 id="section-examples">複合例</h2>
+  <p>命名規則変換と SQL エスケープを組み合わせた例です。</p>
+  <pre>テンプレート (insert.sql):
+  INSERT INTO $param.tableName:camelToSnake()$
+    ($param.col1:camelToSnake()$, $param.col2:camelToSnake()$)
+  VALUES
+    ($param.val1:escapeSql()$, $param.val2:escapeSql()$);
+
+入力行:
+  tableName = userProfile
+  col1      = firstName
+  col2      = lastName
+  val1      = O'Brien
+  val2      = Alice
+
+レンダリング結果:
+  INSERT INTO user_profile
+    (first_name, last_name)
+  VALUES
+    ('O''Brien', 'Alice');</pre>
+
+  <h2 id="section-builtin-templates">組み込みテンプレート</h2>
+  <p>DBUnit CLI はよく使う生成パターンを組み込みテンプレートとして提供しています。Generate コマンドの <code>template</code> / <code>templateGroup</code> にこれらを指定することで、データセットから SQL や設定ファイルを即座に生成できます。</p>
+  <p>各テンプレートには <strong>.txt</strong>（本体）と <strong>.stg</strong>（共通マクロ定義グループ）が対になっています。<code>template</code> に .txt を、<code>templateGroup</code> に .stg を指定します。</p>
+
+  <h3 id="section-sql-insert">INSERT 文生成（insertTemplate）</h3>
+  <p>テーブルの各行を <code>INSERT INTO</code> 文に変換します。<code>inputParam.commit</code> が true のとき末尾に <code>commit;</code> を追加します。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>sql/insertTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>入力データ（USERS テーブル、主キー: id）:</strong></p>
+  <pre>id | name    | age
+---+---------+----
+ 1 | Alice   |  30
+ 2 | O'Brien |  25</pre>
+  <p><strong>生成結果:</strong></p>
+  <pre>insert into USERS (id ,name ,age ) values (1 ,'Alice' ,30 );
+insert into USERS (id ,name ,age ) values (2 ,'O''Brien' ,25 );</pre>
+  <p>文字列値はシングルクォートで囲まれ、<code>'</code> は自動的に <code>''</code> にエスケープされます。空値は <code>null</code> に変換されます。</p>
+
+  <h3 id="section-sql-clean-insert">全削除 + INSERT 文生成（cleanInsertTemplate）</h3>
+  <p>テーブルを全件削除してから INSERT します。テストデータ初期化に便利です。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>sql/cleanInsertTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>生成結果（USERS テーブル）:</strong></p>
+  <pre>delete from USERS;
+
+insert into USERS (id ,name ,age ) values (1 ,'Alice' ,30 );
+insert into USERS (id ,name ,age ) values (2 ,'O''Brien' ,25 );</pre>
+
+  <h3 id="section-sql-delete-insert">DELETE + INSERT 文生成（deleteInsertTemplate）</h3>
+  <p>主キーで対象行を DELETE してから INSERT します。既存データを保持しつつ特定行を差し替えます。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>sql/deleteInsertTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>生成結果（主キー: id）:</strong></p>
+  <pre>delete from USERS where id = 1 ;
+delete from USERS where id = 2 ;
+
+insert into USERS (id ,name ,age ) values (1 ,'Alice' ,30 );
+insert into USERS (id ,name ,age ) values (2 ,'O''Brien' ,25 );</pre>
+
+  <h3 id="section-sql-delete">DELETE 文生成（deleteTemplate）</h3>
+  <p>主キー条件で対象行を DELETE します。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>sql/deleteTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>生成結果:</strong></p>
+  <pre>delete from USERS where id = 1 ;
+delete from USERS where id = 2 ;</pre>
+
+  <h3 id="section-sql-update">UPDATE 文生成（updateTemplate）</h3>
+  <p>主キー以外のカラムを <code>SET</code> 句に、主キーを <code>WHERE</code> 句に展開した UPDATE 文を生成します。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>sql/updateTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>sql/sqlTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>生成結果（主キー: id）:</strong></p>
+  <pre>update USERS set name = 'Alice' ,age = 30 where id = 1 ;
+update USERS set name = 'O''Brien' ,age = 25 where id = 2 ;</pre>
+
+  <h3 id="section-sql-ddl">CREATE TABLE 生成（ddlTemplate）</h3>
+  <p>テーブルのカラム定義行（カラム名・SQL 型・精度・スケール・NULL 制約・コメント）から <code>CREATE TABLE</code> 文を生成します。主キー情報があれば <code>PRIMARY KEY</code> 句も出力されます。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>sql/ddlTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>sql/ddlTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>入力データ（カラム定義行）:</strong></p>
+  <pre>columnName | sqlType  | precision | scale | nullable | comment
+-----------+----------+-----------+-------+----------+----------
+id         | NUMBER   | 10        | 0     | false    | 'ユーザーID'
+name       | VARCHAR2 | 100       |       | false    | '氏名'
+age        | NUMBER   | 3         | 0     | true     | '年齢'</pre>
+  <p><strong>生成結果（主キー: id）:</strong></p>
+  <pre>create table USERS (
+id NUMBER(10,0) not null,
+name VARCHAR2(100) not null,
+age NUMBER(3,0)
+comment on column USERS.id is 'ユーザーID'
+comment on column USERS.name is '氏名'
+comment on column USERS.age is '年齢'
+,
+primary key (id)
+);</pre>
+
+  <h3 id="section-setting-template">Dataset Setting 生成（settingTemplate）</h3>
+  <p>テーブルのカラム情報から Dataset Settings の JSON を生成します。主キーがあればそれをキーに、なければ全カラムをキーとして設定します。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>settings/settingTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>settings/settingTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>入力: USERS テーブル（主キー: id、カラム: id, name, age）</strong></p>
+  <p><strong>生成結果（<code>includeAllColumns=false</code> の場合）:</strong></p>
+  <pre>{
+  "settings": [
+    {
+      "name" : "USERS"
+     ,"keys":["id"]
+    }
+  ]
+}</pre>
+  <p><strong>生成結果（<code>includeAllColumns=true</code> の場合）:</strong></p>
+  <pre>{
+  "settings": [
+    {
+      "name" : "USERS"
+     ,"keys":["id"]
+     ,"include":["id" ,"name" ,"age"]
+     ,"exclude":[]
+     ,"string":{
+        "name":"name"
+      }
+     ,"number":{
+        "id":"id"
+       ,"age":"age"
+      }
+     ,"boolean":{}
+     ,"sqlFunction":{}
+    }
+  ]
+}</pre>
+
+  <h3 id="section-fixedcolumndef-template">固定長カラム定義生成（fixedColumnDefTemplate）</h3>
+  <p>固定長テキスト出力に必要なカラム幅・整列・パディング設定の JSON を生成します。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>fixedcolumndef/fixedColumnDefTemplate.txt</code></td></tr>
+    <tr><td>templateGroup</td><td><code>fixedcolumndef/fixedColumnDefTemplate.stg</code></td></tr>
+  </table>
+  <p><strong>入力データ（カラム定義行）:</strong></p>
+  <pre>name | length | align | pad
+-----+--------+-------+----
+id   | 4      | right | 0
+name | 20     | left  |  </pre>
+  <p><strong>生成結果:</strong></p>
+  <pre>{
+  "columns": [
+{"name": "id", "length": 4, "align": "right", "pad": "0"},{"name": "name", "length": 20, "align": "left", "pad": " "}
+  ]
+}</pre>
+
+  <h3 id="section-param-template">バッチパラメータ生成（generateParamTemplate）</h3>
+  <p>Generate コマンドのバッチ実行用パラメータファイルを生成します。<a href="parameterize.html">Parameterize</a> コマンドと組み合わせ、複数の Generate 実行を自動化する場面で使います。</p>
+  <table>
+    <tr><th>設定項目</th><th>値</th></tr>
+    <tr><td>template</td><td><code>param/generateParamTemplate.txt</code></td></tr>
+  </table>
+  <p><strong>テンプレート内容:</strong></p>
+  <pre>-srcType=$srcType$
+-src=$src$
+-encoding=$encoding$
+-setting=$setting$
+-generateType=$generateType$
+-template=$template$
+-templateGroup=$templateGroup$
+-templateEncoding=$templateEncoding$
+-outputEncoding=$outputEncoding$
+-resultPath=$resultPath$</pre>
+  <p><strong>入力行（1 件）:</strong></p>
+  <pre>srcType=csv
+src=data/users.csv
+encoding=UTF-8
+setting=settings/users.json
+generateType=txt
+template=sql/insertTemplate.txt
+templateGroup=sql/sqlTemplate.stg
+templateEncoding=UTF-8
+outputEncoding=UTF-8
+resultPath=output/$\{tableName\}.sql</pre>
+  <p><strong>生成結果（1 ファイル）:</strong></p>
+  <pre>-srcType=csv
+-src=data/users.csv
+-encoding=UTF-8
+-setting=settings/users.json
+-generateType=txt
+-template=sql/insertTemplate.txt
+-templateGroup=sql/sqlTemplate.stg
+-templateEncoding=UTF-8
+-outputEncoding=UTF-8
+-resultPath=output/${tableName}.sql</pre>
+
+  <h2>関連ページ</h2>
+  <ul>
+    <li><a href="template.html">Template</a> — ST4 テンプレートの設定項目・パラメータバインド・グループファイル</li>
+    <li><a href="generate.html">Generate</a> — テンプレートを使ったファイル生成コマンド</li>
+    <li><a href="run.html">Run</a> — SQL / ANT スクリプトの前処理として使用</li>
+    <li><a href="result-form.html">Result Form</a> — 出力先・出力形式の設定</li>
+  </ul>
+</body>
+</html>

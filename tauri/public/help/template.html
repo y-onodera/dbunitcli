@@ -87,8 +87,22 @@
 レンダリング結果:
   INSERT INTO USERS VALUES ('Alice');</pre>
 
+  <h2 id="section-format">書式（フォーマット指定子）</h2>
+  <p>テンプレート内で <code>$値:書式名()$</code> の形式で値を変換して出力できます。ST4 標準書式に加え、DBUnit CLI 独自の拡張書式（命名規則変換・SQL エスケープ等）が利用可能です。詳細は <a href="st4.html">StringTemplate 4 書式リファレンス</a> を参照してください。</p>
+  <table>
+    <tr><th>書式名</th><th>種別</th><th>概要</th></tr>
+    <tr><td>upper / lower / cap</td><td>ST4 標準</td><td>大文字・小文字・先頭大文字変換</td></tr>
+    <tr><td>camelToSnake / camelToUpperSnake</td><td>拡張</td><td>キャメルケース → スネークケース</td></tr>
+    <tr><td>snakeToCamel / snakeToUpperCamel</td><td>拡張</td><td>スネークケース → キャメルケース</td></tr>
+    <tr><td>camelToKebab / camelToUpperKebab</td><td>拡張</td><td>キャメルケース → ケバブケース</td></tr>
+    <tr><td>kebabToCamel / kebabToUpperCamel</td><td>拡張</td><td>ケバブケース → キャメルケース</td></tr>
+    <tr><td>escapeSql</td><td>拡張</td><td>SQL 文字列リテラルとして安全にエスケープ（CLOB 対応）</td></tr>
+    <tr><td>jexlExp / ST4Exp</td><td>拡張</td><td>JEXL / ST4 の式記法をそのまま出力</td></tr>
+  </table>
+
   <h2>関連ページ</h2>
   <ul>
+    <li><a href="st4.html">StringTemplate 4 書式リファレンス</a> — 拡張書式の全一覧と使用例</li>
     <li><a href="generate.html">Generate</a> — テンプレートを使ったファイル生成の主要コマンド</li>
     <li><a href="run.html">Run</a> — SQL / ANT スクリプトの前処理として使用</li>
     <li><a href="parameterize.html">Parameterize</a> — パラメータごとに設定をレンダリング</li>
