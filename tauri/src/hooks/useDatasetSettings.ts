@@ -33,6 +33,7 @@ function buildDatasetRequestBody(
 		extension: info.extension,
 		xlsxSchema: info.xlsxSchema,
 		fixedLength: info.fixedLength,
+		fixedLengthType: info.fixedLengthType,
 		regHeaderSplit: info.regHeaderSplit,
 		regDataSplit: info.regDataSplit,
 		encoding: info.encoding,

@@ -14,11 +14,19 @@ export default function FixedFormSection({
 	const prefix = settings.prefix;
 
 	return (
-		<PlainText
-			prefix={prefix}
-			element={settings.fixedLength}
-			handleValueChange={handleValueChange(settings.fixedLength)}
-			hidden={false}
-		/>
+		<>
+			<PlainText
+				prefix={prefix}
+				element={settings.fixedLength}
+				handleValueChange={handleValueChange(settings.fixedLength)}
+				hidden={false}
+			/>
+			<PlainText
+				prefix={prefix}
+				element={settings.fixedLengthType}
+				handleValueChange={handleValueChange(settings.fixedLengthType)}
+				hidden={false}
+			/>
+		</>
 	);
 }
