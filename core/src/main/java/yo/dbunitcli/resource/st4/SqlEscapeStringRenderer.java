@@ -42,13 +42,17 @@ public class SqlEscapeStringRenderer extends StringRenderer {
     private String toClob(final String toString) {
         final int length = toString.getBytes(StandardCharsets.UTF_8).length;
         if (toString.contains("\r\n")) {
-            return Arrays.stream(toString.split("\r\n"))
-                    .map(it -> this.quoted(it, length))
-                    .reduce("", (current, newOne) -> current.isEmpty() ? newOne : current + " || CHR(13) || CHR(10) || " + newOne);
+            return Arrays.stream(toString.split("\r\n")).map(it -> this.quoted(it, length)).reduce("",
+                                                                                                   (current, newOne) ->
+                                                                                                           current.isEmpty() ?
+                                                                                                                   newOne :
+                                                                                                                   current + " || CHR(13) || CHR(10) || " + newOne);
         } else if (toString.contains("\n")) {
-            return Arrays.stream(toString.split("\n"))
-                    .map(toString1 -> this.quoted(toString1, length))
-                    .reduce("", (current, newOne) -> current.isEmpty() ? newOne : current + " || CHR(10) || " + newOne);
+            return Arrays.stream(toString.split("\n")).map(toString1 -> this.quoted(toString1, length)).reduce("",
+                                                                                                               (current, newOne) ->
+                                                                                                                       current.isEmpty() ?
+                                                                                                                               newOne :
+                                                                                                                               current + " || CHR(10) || " + newOne);
         }
         return this.quoted(toString, length);
     }

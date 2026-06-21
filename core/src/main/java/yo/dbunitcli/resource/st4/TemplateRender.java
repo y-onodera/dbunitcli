@@ -14,28 +14,30 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-public record TemplateRender(
-        File templateGroup
-        , String templateParameterAttribute
-        , char templateVarStart
-        , char templateVarStop
-        , String encoding) {
+public record TemplateRender(File templateGroup, String templateParameterAttribute, char templateVarStart,
+                             char templateVarStop, String encoding) {
 
-    public static Builder builder() {
-        return new Builder();
-    }
+    private static final Pattern TEMPLATE_VAR_DELIMITER_PATTERN = Pattern.compile(
+            "(-(?:[\\w.]*\\.)?(?:templateVarStart|templateVarStop)=)(.)");
 
     public TemplateRender() {
         this(new Builder());
     }
 
     public TemplateRender(final Builder builder) {
-        this(builder.getTemplateGroup()
-                , builder.getTemplateParameterAttribute()
-                , builder.getTemplateVarStart()
-                , builder.getTemplateVarStop()
-                , builder.getEncoding()
-        );
+        this(builder.getTemplateGroup(), builder.getTemplateParameterAttribute(), builder.getTemplateVarStart(),
+             builder.getTemplateVarStop(), builder.getEncoding());
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    private static String escapeTemplateVarDelimiterValues(final String template) {
+        if (!template.contains("templateVarStart") && !template.contains("templateVarStop")) {
+            return template;
+        }
+        return TEMPLATE_VAR_DELIMITER_PATTERN.matcher(template).replaceAll("$1\\\\$2");
     }
 
     public String render(final File aFile, final Parameter parameter) {
@@ -57,22 +59,12 @@ public record TemplateRender(
         return result;
     }
 
-    private static final Pattern TEMPLATE_VAR_DELIMITER_PATTERN =
-            Pattern.compile("(-(?:[\\w.]*\\.)?(?:templateVarStart|templateVarStop)=)(.)");
-
-    private static String escapeTemplateVarDelimiterValues(final String template) {
-        if (!template.contains("templateVarStart") && !template.contains("templateVarStop")) {
-            return template;
-        }
-        return TEMPLATE_VAR_DELIMITER_PATTERN.matcher(template).replaceAll("$1\\\\$2");
-    }
-
     public ST createST(final String result) {
         return new ST(this.createSTGroup(), result);
     }
 
     public ST createST(final String target, final Parameter parameter) {
-        final String template = this.escapeTemplateVarDelimiterValues(this.replaceParameter(target, parameter));
+        final String template = escapeTemplateVarDelimiterValues(this.replaceParameter(target, parameter));
         final ST st = this.createST(template);
         if (Optional.ofNullable(this.templateParameterAttribute()).orElse("").isEmpty()) {
             parameter.forEach(st::add);
@@ -104,11 +96,8 @@ public record TemplateRender(
         return stGroup;
     }
 
-    public void write(final String templateString, final Parameter param, final File resultFile, final String outputEncoding) throws IOException {
-        this.write(this.createSTGroup(), templateString, param, resultFile, outputEncoding);
-    }
-
-    public void write(final STGroup stGroup, final String templateString, final Parameter param, final File resultFile, final String outputEncoding) throws IOException {
+    public void write(final STGroup stGroup, final String templateString, final Parameter param, final File resultFile,
+                      final String outputEncoding) throws IOException {
         final ST result = new ST(stGroup == null ? this.createSTGroup() : stGroup, templateString);
         param.forEach(result::add);
         result.write(resultFile, ErrorManager.DEFAULT_ERROR_LISTENER, outputEncoding);
@@ -139,25 +128,13 @@ public record TemplateRender(
             return this.templateGroup;
         }
 
-        public String getTemplateParameterAttribute() {
-            return this.templateParameterAttribute;
-        }
-
-        public char getTemplateVarStart() {
-            return this.templateVarStart;
-        }
-
-        public char getTemplateVarStop() {
-            return this.templateVarStop;
-        }
-
-        public String getEncoding() {
-            return this.encoding;
-        }
-
         public Builder setTemplateGroup(final File templateGroup) {
             this.templateGroup = templateGroup;
             return this;
+        }
+
+        public String getTemplateParameterAttribute() {
+            return this.templateParameterAttribute;
         }
 
         public Builder setTemplateParameterAttribute(final String templateParameterAttribute) {
@@ -165,14 +142,26 @@ public record TemplateRender(
             return this;
         }
 
+        public char getTemplateVarStart() {
+            return this.templateVarStart;
+        }
+
         public Builder setTemplateVarStart(final char templateVarStart) {
             this.templateVarStart = templateVarStart;
             return this;
         }
 
+        public char getTemplateVarStop() {
+            return this.templateVarStop;
+        }
+
         public Builder setTemplateVarStop(final char templateVarStop) {
             this.templateVarStop = templateVarStop;
             return this;
+        }
+
+        public String getEncoding() {
+            return this.encoding;
         }
 
         public Builder setEncoding(final String encoding) {
