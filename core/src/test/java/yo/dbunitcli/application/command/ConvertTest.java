@@ -9,6 +9,7 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.junit.jupiter.api.*;
 import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
+import yo.dbunitcli.application.command.Compare;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
@@ -1361,17 +1362,17 @@ public class ConvertTest {
         }
 
         @Test
-        public void testFromCsvToFixedFileByByte() throws Exception {
+        public void testFromCsvToFixedFileByByte() {
             Convert.main(this.getArgs("/paramConvertCsvToFixedFileByByte.txt"));
-            final List<String> lines = Files.readAllLines(
-                    new File(this.getBaseDir() + "/convert/csv2fixedfile/byte/result/fixed_byte.txt").toPath(),
-                    StandardCharsets.UTF_8);
-            Assertions.assertEquals(2, lines.size());
-            Assertions.assertEquals(20, lines.get(0).getBytes(StandardCharsets.UTF_8).length);
-            Assertions.assertEquals("abc       hello     ", lines.get(0));
-            Assertions.assertEquals(20, lines.get(1).getBytes(StandardCharsets.UTF_8).length);
-            // 𠮷あ = 4+3 = 7バイト、パディング3スペースで合計10バイト
-            Assertions.assertEquals("𠮷あ   world     ", lines.get(1));
+            Compare.main(new String[]{
+                    "-old.src=src/test/resources/yo/dbunitcli/application/src/fixed/fixed_byte_expected",
+                    "-new.src=" + this.getBaseDir() + "/convert/csv2fixedfile/byte/result/fixed_byte.txt",
+                    "-srcType=fixed",
+                    "-headerName=key,value",
+                    "-fixedLength=10,10",
+                    "-encoding=UTF-8",
+                    "-result=" + this.getBaseDir() + "/convert/csv2fixedfile/byte/compare/result"
+            });
         }
 
         @Test
