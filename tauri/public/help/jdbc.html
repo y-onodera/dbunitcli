@@ -24,8 +24,8 @@
   <h1>JDBC</h1>
   <p>データベースへ接続するための設定を指定します。以下の場面で必要になります。</p>
   <ul>
-    <li><a href="dataset-load-form.html#srctype-table">Source Type = table</a>（テーブル名リストから読み込む）</li>
-    <li><a href="dataset-load-form.html#srctype-sql">Source Type = sql</a>（SQL クエリ結果を読み込む）</li>
+    <li><a href="dataset-load-form.html">Source Type = table</a>（テーブル名リストから読み込む）</li>
+    <li><a href="dataset-load-form.html">Source Type = sql</a>（SQL クエリ結果を読み込む）</li>
     <li>Result Type = table（<a href="compare.html">Compare</a> / <a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> の結果をテーブルに出力）</li>
     <li><a href="run.html">Run</a> の Script Type = sql（SQL スクリプトを DB で実行）</li>
   </ul>
@@ -38,7 +38,7 @@
     <tr><td>jdbcUrl</td><td>JDBC 接続 URL（例: <code>jdbc:postgresql://localhost:5432/mydb</code>）。<code>jdbcProperties</code> の <code>url</code> を上書きします。</td></tr>
     <tr><td>jdbcUser</td><td>ログインユーザ名。<code>jdbcProperties</code> の <code>user</code> を上書きします。</td></tr>
     <tr><td>jdbcPass</td><td>ログインパスワード。<code>jdbcProperties</code> の <code>pass</code> を上書きします。</td></tr>
-    <tr><td>useJdbcMetaData</td><td>DBUnit のメタデータ取得経路を切り替えるフラグ（<a href="dataset-load-form.html#srctype-table">table</a> / <a href="dataset-load-form.html#srctype-sql">sql</a> の Data Load オプション）。デフォルトは OFF。詳細は Dataset Load Form の table の節を参照。</td></tr>
+    <tr><td>useJdbcMetaData</td><td>DBUnit のメタデータ取得経路を切り替えるフラグ（<a href="dataset-load-form.html">Dataset Load Form</a> の table / sql の固有オプション）。デフォルトは OFF。詳細は Dataset Load Form の table の節を参照。</td></tr>
   </table>
 
   <h3>.properties ファイルの書式</h3>
