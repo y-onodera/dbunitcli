@@ -47,6 +47,8 @@ public class DataSetLoadDto implements CompositeDto {
     private boolean ignoreQuoted = false;
     @CommandLine.Option(names = "-fixedLength", description = "comma separate column Lengths")
     private String fixedLength;
+    @CommandLine.Option(names = "-fixedLengthType", description = "char or byte (default: byte)")
+    private String fixedLengthType;
     @CommandLine.Option(names = "-regDataSplit", description = "regex to use split data row")
     private String regDataSplit;
     @CommandLine.Option(names = "-regHeaderSplit", description = "regex to use split header row")
@@ -164,6 +166,14 @@ public class DataSetLoadDto implements CompositeDto {
 
     public void setFixedLength(final String fixedLength) {
         this.fixedLength = fixedLength;
+    }
+
+    public String getFixedLengthType() {
+        return this.fixedLengthType;
+    }
+
+    public void setFixedLengthType(final String fixedLengthType) {
+        this.fixedLengthType = fixedLengthType;
     }
 
     public String getHeaderName() {

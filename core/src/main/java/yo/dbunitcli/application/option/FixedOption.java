@@ -6,10 +6,11 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 public record FixedOption(
         String prefix
         , String fixedLength
+        , String fixedLengthType
 ) implements ComparableDataSetParamOption {
 
     public FixedOption(final String prefix, final DataSetLoadDto dto) {
-        this(prefix, dto.getFixedLength());
+        this(prefix, dto.getFixedLength(), dto.getFixedLengthType());
     }
 
     @Override
@@ -20,12 +21,14 @@ public record FixedOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
-                .put("-fixedLength", this.fixedLength);
+                .put("-fixedLength", this.fixedLength)
+                .put("-fixedLengthType", this.fixedLengthType);
     }
 
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
-        return builder.setFixedLength(this.fixedLength);
+        return builder.setFixedLength(this.fixedLength)
+                      .setFixedLengthType(this.fixedLengthType);
     }
 
 }

@@ -31,6 +31,7 @@ public record ComparableDataSetParam(
         , boolean loadData
         , boolean addFileInfo
         , String fixedLength
+        , String fixedLengthType
         , char delimiter
         , boolean ignoreQuoted
         , String extension
@@ -61,6 +62,7 @@ public record ComparableDataSetParam(
                 , builder.isLoadData()
                 , builder.addFileInfo()
                 , builder.getFixedLength()
+                , builder.getFixedLengthType()
                 , builder.getDelimiter()
                 , builder.isIgnoreQuoted()
                 , builder.getExtension()
@@ -121,6 +123,7 @@ public record ComparableDataSetParam(
                 .setLoadData(this.loadData)
                 .setAddFileInfo(this.addFileInfo)
                 .setFixedLength(this.fixedLength)
+                .setFixedLengthType(this.fixedLengthType)
                 .setDelimiter(this.delimiter)
                 .setIgnoreQuoted(this.ignoreQuoted)
                 .setExtension(this.extension)
@@ -147,6 +150,7 @@ public record ComparableDataSetParam(
         private boolean loadData = true;
         private boolean addFileInfo = false;
         private String fixedLength;
+        private String fixedLengthType;
         private String extension;
         private TemplateRender templateRender;
         private DatabaseConnectionLoader databaseConnectionLoader;
@@ -357,6 +361,15 @@ public record ComparableDataSetParam(
             return this;
         }
 
+        public String getFixedLengthType() {
+            return this.fixedLengthType;
+        }
+
+        public Builder setFixedLengthType(final String fixedLengthType) {
+            this.fixedLengthType = fixedLengthType;
+            return this;
+        }
+
         public Builder setSTTemplateLoader(final TemplateRender templateRender) {
             this.templateRender = templateRender;
             return this;
@@ -402,5 +415,16 @@ public record ComparableDataSetParam(
             return this;
         }
 
+    }
+
+    public enum LengthType {
+        CHAR, BYTE;
+
+        public static LengthType of(final String value) {
+            if ("byte".equalsIgnoreCase(value)) {
+                return BYTE;
+            }
+            return CHAR;
+        }
     }
 }

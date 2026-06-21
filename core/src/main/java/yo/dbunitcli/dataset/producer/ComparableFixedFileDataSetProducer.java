@@ -71,6 +71,24 @@ public record ComparableFixedFileDataSetProducer(ComparableDataSetParam param,
         }
 
         private Object[] split(final String s) throws UnsupportedEncodingException {
+            if (ComparableDataSetParam.LengthType.of(this.param.fixedLengthType()) == ComparableDataSetParam.LengthType.CHAR) {
+                return this.splitByChar(s);
+            }
+            return this.splitByByte(s);
+        }
+
+        private Object[] splitByChar(final String s) {
+            final Object[] result = new Object[this.columnLengths.size()];
+            int from = 0;
+            for (int index = 0, max = this.columnLengths.size(); index < max; index++) {
+                final int to = Math.min(from + this.columnLengths.get(index), s.length());
+                result[index] = s.substring(from, to);
+                from = from + this.columnLengths.get(index);
+            }
+            return result;
+        }
+
+        private Object[] splitByByte(final String s) throws UnsupportedEncodingException {
             final Object[] result = new Object[this.columnLengths.size()];
             final byte[] bytes = s.getBytes(this.param.encoding());
             int from = 0;

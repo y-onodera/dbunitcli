@@ -1351,14 +1351,18 @@ public class ConvertTest {
         }
 
         @Test
-        public void testFromCsvToFixedFileByChar() throws Exception {
+        public void testFromCsvToFixedFileByChar() {
             Convert.main(this.getArgs("/paramConvertCsvToFixedFileByChar.txt"));
-            final List<String> lines = Files.readAllLines(
-                    new File(this.getBaseDir() + "/convert/csv2fixedfile/char/result/fixed_char.txt").toPath(),
-                    StandardCharsets.UTF_8);
-            Assertions.assertEquals(2, lines.size());
-            Assertions.assertEquals("abc  hello     ", lines.get(0));
-            Assertions.assertEquals("あ    world     ", lines.get(1));
+            Compare.main(new String[]{
+                    "-old.src=src/test/resources/yo/dbunitcli/application/src/fixed/fixed_char_expected",
+                    "-new.src=" + this.getBaseDir() + "/convert/csv2fixedfile/char/result/fixed_char.txt",
+                    "-srcType=fixed",
+                    "-headerName=key,value",
+                    "-fixedLength=5,10",
+                    "-fixedLengthType=char",
+                    "-encoding=UTF-8",
+                    "-result=" + this.getBaseDir() + "/convert/csv2fixedfile/char/compare/result"
+            });
         }
 
         @Test
@@ -1370,6 +1374,7 @@ public class ConvertTest {
                     "-srcType=fixed",
                     "-headerName=key,value",
                     "-fixedLength=10,10",
+                    "-fixedLengthType=byte",
                     "-encoding=UTF-8",
                     "-result=" + this.getBaseDir() + "/convert/csv2fixedfile/byte/compare/result"
             });
