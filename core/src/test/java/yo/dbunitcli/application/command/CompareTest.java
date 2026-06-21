@@ -6,15 +6,12 @@ import org.apache.tools.ant.taskdefs.Delete;
 import org.apache.tools.ant.taskdefs.Replace;
 import org.apache.tools.ant.types.FileSet;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
-@Tag("jvmTest")
-@DisabledInNativeImage
 public class CompareTest {
 
     private static final Project PROJECT = new Project();
@@ -349,7 +346,6 @@ public class CompareTest {
         }
     }
 
-    @Tag("jvmTest")
     @Nested
     class ExitCodeTest {
 

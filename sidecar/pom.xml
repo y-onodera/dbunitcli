@@ -29,9 +29,6 @@
         </profile>
         <profile>
             <id>native-trace</id>
-            <properties>
-                <exclude.testcase>jvmTest</exclude.testcase>
-            </properties>
             <build>
                 <plugins>
                     <plugin>

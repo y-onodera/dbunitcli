@@ -19,7 +19,7 @@
         <aspectj.version>1.9.4</aspectj.version>
         <allure.version>2.25.0</allure.version>
         <junit-jupiter.version>5.10.1</junit-jupiter.version>
-        <surefire.argLine>-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Ddbunitcli.noExit=true -javaagent:"${settings.localRepository}/org/jmockit/jmockit/1.49/jmockit-1.49.jar" -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"</surefire.argLine>
+        <surefire.argLine>-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Ddbunitcli.noExit=true -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"</surefire.argLine>
     </properties>
     <profiles>
         <profile>
@@ -318,12 +318,6 @@
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
             <version>1.10.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jmockit</groupId>
-            <artifactId>jmockit</artifactId>
-            <version>1.49</version>
             <scope>test</scope>
         </dependency>
        <dependency>
