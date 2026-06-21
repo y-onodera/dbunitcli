@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - StringTemplate 4 書式リファレンス</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>StringTemplate 4 書式リファレンス</h1>
+  <p>DBUnit CLI のテンプレート処理では <strong>StringTemplate 4 (ST4)</strong> を使用します。テンプレート内の値は <code>$値:書式名()$</code> の形式でフォーマットできます。ST4 標準の書式に加えて、DBUnit CLI 独自の拡張書式が利用可能です。</p>
+
+  <h2 id="section-syntax">基本構文</h2>
+  <p>書式は ST4 のレンダラー呼び出しとして、属性参照の直後に <code>:</code> で連結します。</p>
+  <pre>$param.columnName:書式名()$</pre>
+  <p>区切り文字が変更されている場合は、対応する文字で囲みます（例: <code>&lt;param.columnName:書式名()&gt;</code>）。詳細は <a href="template.html">Template</a> の <code>templateVarStart</code> / <code>templateVarStop</code> を参照してください。</p>
+
+  <h2 id="section-builtin">ST4 標準書式</h2>
+  <p>ST4 の <code>StringRenderer</code> が提供する標準書式です。</p>
+  <table>
+    <tr><th>書式名</th><th>説明</th><th>入力例</th><th>出力例</th></tr>
+    <tr><td>upper</td><td>大文字に変換</td><td>hello</td><td>HELLO</td></tr>
+    <tr><td>lower</td><td>小文字に変換</td><td>HELLO</td><td>hello</td></tr>
+    <tr><td>cap</td><td>先頭を大文字に変換</td><td>hello world</td><td>Hello world</td></tr>
+    <tr><td>url-encode</td><td>URL エンコード</td><td>a b</td><td>a+b</td></tr>
+    <tr><td>xml-encode</td><td>XML エンティティにエスケープ（<code>&amp;</code> <code>&lt;</code> 等）</td><td>&lt;tag&gt;</td><td>&amp;lt;tag&amp;gt;</td></tr>
+  </table>
+
+  <h2 id="section-extended">DBUnit CLI 拡張書式（SqlEscapeStringRenderer）</h2>
+  <p>DBUnit CLI は <code>SqlEscapeStringRenderer</code> により以下の拡張書式を追加しています。</p>
+
+  <h3 id="section-naming">命名規則変換</h3>
+  <table>
+    <tr><th>書式名</th><th>説明</th><th>入力例</th><th>出力例</th></tr>
+    <tr><td>camelToSnake</td><td>キャメルケース → スネークケース（小文字）</td><td>userId</td><td>user_id</td></tr>
+    <tr><td>camelToUpperSnake</td><td>キャメルケース → スネークケース（大文字）</td><td>userId</td><td>USER_ID</td></tr>
+    <tr><td>snakeToCamel</td><td>スネークケース → キャメルケース（先頭小文字）</td><td>user_id</td><td>userId</td></tr>
+    <tr><td>snakeToUpperCamel</td><td>スネークケース → アッパーキャメルケース（先頭大文字）</td><td>user_id</td><td>UserId</td></tr>
+    <tr><td>camelToKebab</td><td>キャメルケース → ケバブケース（小文字）</td><td>userId</td><td>user-id</td></tr>
+    <tr><td>camelToUpperKebab</td><td>キャメルケース → ケバブケース（大文字）</td><td>userId</td><td>USER-ID</td></tr>
+    <tr><td>kebabToCamel</td><td>ケバブケース → キャメルケース（先頭小文字）</td><td>user-id</td><td>userId</td></tr>
+    <tr><td>kebabToUpperCamel</td><td>ケバブケース → アッパーキャメルケース（先頭大文字）</td><td>user-id</td><td>UserId</td></tr>
+  </table>
+  <p><strong>使用例（カラム名 <code>userId</code> を SQL の列定義に使う）:</strong></p>
+  <pre>ALTER TABLE $param.tableName$ ADD COLUMN $param.columnName:camelToSnake()$ VARCHAR(255);</pre>
+  <pre>-- 入力: tableName=userProfile, columnName=firstName
+-- 出力: ALTER TABLE userProfile ADD COLUMN first_name VARCHAR(255);</pre>
+
+  <h3 id="section-sql">SQL エスケープ</h3>
+  <table>
+    <tr><th>書式名</th><th>説明</th></tr>
+    <tr><td>escapeSql</td><td>シングルクォートを <code>''</code> にエスケープして SQL 文字列リテラルとして安全に出力する。4,000 バイト超の値は Oracle の <code>TO_CLOB()</code> に分割して連結。改行文字（<code>\n</code> / <code>\r\n</code>）は <code>CHR(10)</code> / <code>CHR(13) || CHR(10)</code> で連結</td></tr>
+  </table>
+  <p><strong>使用例:</strong></p>
+  <pre>INSERT INTO messages (body) VALUES ($param.body:escapeSql()$);</pre>
+  <pre>-- 入力: body = It's a test
+-- 出力: INSERT INTO messages (body) VALUES ('It''s a test');
+
+-- 入力: body = line1\nline2
+-- 出力: INSERT INTO messages (body) VALUES ('line1' || CHR(10) || 'line2');</pre>
+  <p>4,000 バイトを超える長文テキストの場合:</p>
+  <pre>-- 出力例（4,001 バイトの文字列）:
+-- TO_CLOB('...最初の4000バイト...') || TO_CLOB('...残りのバイト...')</pre>
+
+  <h3 id="section-escape">式展開エスケープ</h3>
+  <p>テンプレート内で別のテンプレートエンジンの式記法をそのまま出力したい場合に使います。</p>
+  <table>
+    <tr><th>書式名</th><th>説明</th><th>入力例</th><th>出力例</th></tr>
+    <tr><td>jexlExp</td><td>値を JEXL 式 <code>${...}</code> として出力</td><td>user.name</td><td>${user.name}</td></tr>
+    <tr><td>ST4Exp</td><td>値を ST4 式 <code>$...$</code> として出力（ST4 テンプレートを生成するテンプレートで使用）</td><td>param.id</td><td>$param.id$</td></tr>
+  </table>
+  <p><strong>使用例（ST4 テンプレートを生成する ST4 テンプレート）:</strong></p>
+  <pre>-- 入力: expr = param.tableName
+-- テンプレート:
+SELECT * FROM $param.expr:ST4Exp()$;
+
+-- 出力（ST4 式が文字列としてそのまま埋め込まれる）:
+SELECT * FROM $param.tableName$;</pre>
+
+  <h2 id="section-examples">複合例</h2>
+  <p>命名規則変換と SQL エスケープを組み合わせた例です。</p>
+  <pre>テンプレート (insert.sql):
+  INSERT INTO $param.tableName:camelToSnake()$
+    ($param.col1:camelToSnake()$, $param.col2:camelToSnake()$)
+  VALUES
+    ($param.val1:escapeSql()$, $param.val2:escapeSql()$);
+
+入力行:
+  tableName = userProfile
+  col1      = firstName
+  col2      = lastName
+  val1      = O'Brien
+  val2      = Alice
+
+レンダリング結果:
+  INSERT INTO user_profile
+    (first_name, last_name)
+  VALUES
+    ('O''Brien', 'Alice');</pre>
+
+  <h2>関連ページ</h2>
+  <ul>
+    <li><a href="template.html">Template</a> — ST4 テンプレートの設定項目・パラメータバインド・グループファイル</li>
+    <li><a href="generate.html">Generate</a> — テンプレートを使ったファイル生成コマンド</li>
+    <li><a href="run.html">Run</a> — SQL / ANT スクリプトの前処理として使用</li>
+  </ul>
+</body>
+</html>
