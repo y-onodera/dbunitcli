@@ -9,7 +9,7 @@ import yo.dbunitcli.dataset.DbOperation;
 
 public class GenerateDto extends CommandDto {
     @CommandLine.Option(names = "-generateType")
-    private GenerateOption.GenerateType generateType;
+    private GenerateType generateType;
     @CommandLine.Option(names = "-result", description = "directory result files at")
     private String resultDir;
     @CommandLine.Option(names = "-resultPath", description = "result file relative path from -result=dir.")
@@ -42,11 +42,11 @@ public class GenerateDto extends CommandDto {
 
     private TemplateRenderDto templateOption = new TemplateRenderDto();
 
-    public GenerateOption.GenerateType getGenerateType() {
+    public GenerateType getGenerateType() {
         return this.generateType;
     }
 
-    public void setGenerateType(final GenerateOption.GenerateType generateType) {
+    public void setGenerateType(final GenerateType generateType) {
         this.generateType = generateType;
     }
 

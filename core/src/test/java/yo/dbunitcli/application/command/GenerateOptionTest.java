@@ -42,7 +42,7 @@ class GenerateOptionTest {
 
         @BeforeEach
         void setUp() {
-            GenerateOptionTest.this.src.setGenerateType(GenerateOption.GenerateType.txt);
+            GenerateOptionTest.this.src.setGenerateType(GenerateType.txt);
         }
 
         @Test
@@ -67,7 +67,7 @@ class GenerateOptionTest {
 
         @BeforeEach
         void setUp() {
-            GenerateOptionTest.this.src.setGenerateType(GenerateOption.GenerateType.sql);
+            GenerateOptionTest.this.src.setGenerateType(GenerateType.sql);
         }
 
         @Test
@@ -92,7 +92,7 @@ class GenerateOptionTest {
 
         @BeforeEach
         void setUp() {
-            GenerateOptionTest.this.src.setGenerateType(GenerateOption.GenerateType.settings);
+            GenerateOptionTest.this.src.setGenerateType(GenerateType.settings);
         }
 
         @Test
@@ -137,7 +137,7 @@ class GenerateOptionTest {
 
         @BeforeEach
         void setUp() {
-            GenerateOptionTest.this.src.setGenerateType(GenerateOption.GenerateType.xlsx);
+            GenerateOptionTest.this.src.setGenerateType(GenerateType.xlsx);
         }
 
         @Test
@@ -162,7 +162,7 @@ class GenerateOptionTest {
 
         @BeforeEach
         void setUp() {
-            GenerateOptionTest.this.src.setGenerateType(GenerateOption.GenerateType.xls);
+            GenerateOptionTest.this.src.setGenerateType(GenerateType.xls);
         }
 
         @Test
@@ -171,7 +171,7 @@ class GenerateOptionTest {
             final Option.Parameters result = target.toParameters();
             final Option.Arg generateType = result.getArg("-generateType");
             assertEquals(GenerateOptionTest.this.src.getGenerateType().toString(), generateType.value());
-            assertEquals(Arrays.stream(GenerateOption.GenerateType.values())
+            assertEquals(Arrays.stream(GenerateType.values())
                     .map(Enum::toString)
                     .toList(), generateType.attribute().selectOption());
             assertEquals(GenerateOptionTest.this.src.getUnit().toString(), result.getArg("-unit").value());

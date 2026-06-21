@@ -1,7 +1,5 @@
 package yo.dbunitcli.application.command;
 
-import org.dbunit.dataset.Column;
-import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.ParameterUnit;
@@ -11,18 +9,12 @@ import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DbOperation;
-import yo.dbunitcli.dataset.converter.FixedColumnDef;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
-import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
-import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
-import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public record GenerateOption(
@@ -216,188 +208,4 @@ public record GenerateOption(
         return templateComponent.build();
     }
 
-    private String getSqlTemplate() {
-        return switch (this.operation) {
-            case INSERT -> "sql/insertTemplate.txt";
-            case DELETE -> "sql/deleteTemplate.txt";
-            case UPDATE -> "sql/updateTemplate.txt";
-            case CLEAN_INSERT -> "sql/cleanInsertTemplate.txt";
-            default -> "sql/deleteInsertTemplate.txt";
-        };
-    }
-
-    public enum GenerateType {
-        txt {
-            @Override
-            public String getTemplateString(final GenerateOption option) {
-                final File templatePath = option.getTemplatePath();
-                if (templatePath == null || !templatePath.exists() || !templatePath.isFile()) {
-                    throw new AssertionError(option.template + " is not exist file"
-                            , new IllegalArgumentException(String.valueOf(option.template)));
-                }
-                return FileResources.read(templatePath, option.templateOption.encoding());
-            }
-        },
-        xlsx {
-            @Override
-            protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
-                JxlsTemplateRender.builder()
-                        .setTemplateParameterAttribute(option.templateOption.templateParameterAttribute())
-                        .setFormulaProcess(option.templateOption.formulaProcess())
-                        .setEvaluateFormulas(option.templateOption.evaluateFormulas())
-                        .setForceFormulaRecalc(option.templateOption.forceFormulaRecalc())
-                        .setFastFormulaProcess(option.templateOption.fastFormulaProcess())
-                        .setDeleteBlankCells(option.templateOption.deleteBlankCells())
-                        .build()
-                        .render(option.getTemplatePath(), resultFile, param, option.unit != ParameterUnit.record);
-            }
-        },
-        xls {
-            @Override
-            protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
-                JxlsTemplateRender.builder()
-                        .setTemplateParameterAttribute(option.templateOption.templateParameterAttribute())
-                        .setFormulaProcess(option.templateOption.formulaProcess())
-                        .setEvaluateFormulas(option.templateOption.evaluateFormulas())
-                        .setForceFormulaRecalc(option.templateOption.forceFormulaRecalc())
-                        .setFastFormulaProcess(option.templateOption.fastFormulaProcess())
-                        .setDeleteBlankCells(option.templateOption.deleteBlankCells())
-                        .build()
-                        .render(option.getTemplatePath(), resultFile, param, option.unit != ParameterUnit.record);
-            }
-        },
-        settings {
-            @Override
-            public boolean isFixedTemplate() {
-                return true;
-            }
-
-            @Override
-            public ParameterUnit getFixedUnit() {
-                return ParameterUnit.dataset;
-            }
-
-            @Override
-            public String getTemplateString(final GenerateOption option) {
-                return FileResources.readClasspathResource("settings/settingTemplate.txt");
-            }
-
-            @Override
-            protected STGroup getStGroup() {
-                return new TemplateRender.Builder()
-                        .setTemplateParameterAttribute(null)
-                        .build()
-                        .createSTGroup("settings/settingTemplate.stg");
-            }
-        },
-        sql {
-            @Override
-            public boolean isFixedTemplate() {
-                return true;
-            }
-
-            @Override
-            public ParameterUnit getFixedUnit() {
-                return ParameterUnit.table;
-            }
-
-            @Override
-            public String getTemplateString(final GenerateOption option) {
-                return FileResources.readClasspathResource(option.getSqlTemplate());
-            }
-
-            @Override
-            protected STGroup getStGroup() {
-                return new TemplateRender.Builder()
-                        .setTemplateParameterAttribute(null)
-                        .build()
-                        .createSTGroup("sql/sqlTemplate.stg");
-            }
-        },
-        xlsxTemplate {
-            @Override
-            public boolean isFixedTemplate() {
-                return true;
-            }
-
-            @Override
-            public ParameterUnit getFixedUnit() {
-                return ParameterUnit.dataset;
-            }
-
-            @Override
-            protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
-                JxlsTemplateGenerator.createTemplate(resultFile, param);
-            }
-        },
-        fixedColumnDef {
-            @Override
-            public boolean isFixedTemplate() {
-                return true;
-            }
-
-            @Override
-            public ParameterUnit getFixedUnit() {
-                return ParameterUnit.table;
-            }
-
-            @Override
-            protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
-                final Column[] columns = (Column[]) param.get("columns");
-                final String[] lengths = Strings.isNotEmpty(option.fixedLength)
-                        ? option.fixedLength.split(",")
-                        : new String[0];
-                final boolean leftAlign = !"right".equalsIgnoreCase(option.align);
-                final List<FixedColumnDef> defs = IntStream.range(0, columns.length)
-                        .mapToObj(i -> new FixedColumnDef(
-                                columns[i].getColumnName(),
-                                i < lengths.length ? Integer.parseInt(lengths[i].trim()) : option.defaultLength,
-                                leftAlign,
-                                null))
-                        .toList();
-                final TemplateRender render = new TemplateRender.Builder()
-                        .setTemplateParameterAttribute(null)
-                        .build();
-                render.write(render.createSTGroup("fixedcolumndef/fixedColumnDefTemplate.stg"),
-                        FileResources.readClasspathResource("fixedcolumndef/fixedColumnDefTemplate.txt"),
-                        Parameter.none().add("columns", defs), resultFile, option.outputEncoding);
-            }
-        };
-
-        public boolean isAny(final GenerateType... expects) {
-            return Stream.of(expects).anyMatch(it -> it == this);
-        }
-
-        protected STGroup getStGroup() {
-            return null;
-        }
-
-        protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
-            option.templateOption.getTemplateRender().write(this.getStGroup()
-                    , option.templateString()
-                    , param
-                    , resultFile
-                    , option.outputEncoding);
-        }
-
-        protected boolean isFixedTemplate() {
-            return false;
-        }
-
-        protected ParameterUnit getFixedUnit() {
-            return null;
-        }
-
-        protected String getTemplateString(final GenerateOption option) {
-            return null;
-        }
-
-        private boolean isExcel() {
-            return this.isAny(xlsx, xls);
-        }
-
-        private boolean isText() {
-            return !this.isAny(xlsx, xls, xlsxTemplate);
-        }
-    }
 }
