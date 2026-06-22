@@ -8,9 +8,6 @@ import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.converter.FixedColumnDef;
 import yo.dbunitcli.resource.FileResources;
-
-import java.util.List;
-import java.util.Map;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -18,6 +15,7 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -201,19 +199,10 @@ public enum GenerateType {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
-            final List<Map<String, Object>> rows = (List<Map<String, Object>>) param.get("rows");
             final String tableName = param.get("tableName").toString();
-            final String className = Strings.capitalize(tableName.toLowerCase());
-            final List<JavaBeanField> fields = rows == null ? List.of()
-                    : rows.stream()
-                          .map(JavaBeanField::of)
-                          .toList();
-            super.write(option, resultFile, param
-                    .add("className", className)
-                    .add("fields", fields));
+            super.write(option, resultFile, param.add("className", Strings.capitalize(tableName.toLowerCase())));
         }
     },
     fixedColumnDef {

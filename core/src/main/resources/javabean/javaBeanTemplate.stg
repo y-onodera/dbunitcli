@@ -1,14 +1,14 @@
 javaBeanClass() ::= <<
 public class $className$ {
-$fields:{f |     private $f.javaType$ $f.fieldName$;}; separator="\n"$
+$rows:{row |    private $row.javaType$ $row.COLUMN_NAME; format="snakeToCamel"$;}; separator="\n"$
 
-$fields:{f |
-    public $f.javaType$ $f.getterName$() {
-        return this.$f.fieldName$;
+$rows:{row |
+    public $row.javaType$ $if(row.isBoolean)$is$else$get$endif$$row.COLUMN_NAME; format="snakeToUpperCamel"$() {
+        return this.$row.COLUMN_NAME; format="snakeToCamel"$;
     }
 
-    public void $f.setterName$($f.javaType$ $f.fieldName$) {
-        this.$f.fieldName$ = $f.fieldName$;
+    public void set$row.COLUMN_NAME; format="snakeToUpperCamel"$($row.javaType$ $row.COLUMN_NAME; format="snakeToCamel"$) {
+        this.$row.COLUMN_NAME; format="snakeToCamel"$ = $row.COLUMN_NAME; format="snakeToCamel"$;
     }
 }; separator="\n"$}
 >>
