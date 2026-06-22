@@ -55,22 +55,24 @@
   <pre>OLD_DIR,NEW_DIR,SETTING
 data/old/orders,data/new/orders,settings/orders.json
 data/old/products,data/new/products,settings/products.json</pre>
-  <p><code>template</code> に指定する Compare パラメータファイルのテンプレート（例: <code>templates/compare_param.st4</code>）:</p>
-  <pre>{
-  "oldData": { "src": "&lt;param.OLD_DIR&gt;" },
-  "newData": { "src": "&lt;param.NEW_DIR&gt;" },
-  "setting": "&lt;param.SETTING&gt;"
-}</pre>
+  <p><code>template</code> に指定する Compare パラメータファイルのテンプレート（例: <code>templates/compare_param.txt</code>）:</p>
+  <pre>-oldData.src=$param.OLD_DIR$
+-oldData.srcType=file
+-newData.src=$param.NEW_DIR$
+-newData.srcType=file
+-setting=$param.SETTING$
+-convertResult.resultType=csv
+-convertResult.result=result/compare</pre>
   <table>
     <tr><th>設定項目</th><th>値の例</th></tr>
     <tr><td>unit</td><td>row</td></tr>
     <tr><td>parameterize</td><td>false</td></tr>
     <tr><td>ignoreFail</td><td>true（差分があっても次の行を処理する）</td></tr>
     <tr><td>cmd</td><td>compare</td></tr>
-    <tr><td>template</td><td>templates/compare_param.st4</td></tr>
+    <tr><td>template</td><td>templates/compare_param.txt</td></tr>
     <tr><td>paramData.src</td><td>params/compare_params.csv</td></tr>
   </table>
-  <p><code>paramData</code> の各行（<code>OLD_DIR</code>・<code>NEW_DIR</code>・<code>SETTING</code>）が <code>&lt;param.列名&gt;</code> としてテンプレートに展開され、行数分だけ Compare が実行されます。</p>
+  <p><code>paramData</code> の各行（<code>OLD_DIR</code>・<code>NEW_DIR</code>・<code>SETTING</code>）が <code>$param.列名$</code> としてテンプレートに展開され、行数分だけ Compare が実行されます。</p>
 
   <h3 id="example-cmdparam">cmdParam でパラメータファイルを動的に切り替える</h3>
   <p>パラメータ CSV の列値でコマンドパラメータファイルのパスを動的に決定する例です。<code>parameterize</code> を有効にすると <code>cmdParam</code> の文字列もテンプレートとして展開されます。</p>
@@ -84,26 +86,31 @@ customers</pre>
     <tr><td>unit</td><td>row</td></tr>
     <tr><td>parameterize</td><td>true</td></tr>
     <tr><td>cmd</td><td>convert</td></tr>
-    <tr><td>cmdParam</td><td>params/&lt;param.TARGET&gt;.json</td></tr>
+    <tr><td>cmdParam</td><td>params/$param.TARGET$.txt</td></tr>
     <tr><td>paramData.src</td><td>params/targets.csv</td></tr>
   </table>
-  <p>1 行目では <code>cmdParam</code> が <code>params/orders.json</code> に展開され Convert が実行されます。2 行目では <code>params/products.json</code>、3 行目では <code>params/customers.json</code> が使われます。</p>
+  <p>1 行目では <code>cmdParam</code> が <code>params/orders.txt</code> に展開され Convert が実行されます。2 行目では <code>params/products.txt</code>、3 行目では <code>params/customers.txt</code> が使われます。各 .txt ファイルはコマンドライン引数を記述したパラメータファイルです。</p>
 
   <h3 id="example-generate">Generate をパラメータ駆動で繰り返す</h3>
-  <p>テーブル名の一覧から SQL ファイルを一括生成する例です。</p>
+  <p>データソースとテーブル名の一覧から SQL ファイルを一括生成する例です。</p>
   <p><code>paramData</code> に読み込む CSV（例: <code>params/tables.csv</code>）:</p>
-  <pre>SCHEMA,TABLE_NAME
-public,orders
-public,products</pre>
+  <pre>SRC,SRC_TYPE,RESULT
+data/orders,csv,result/orders
+data/products,csv,result/products</pre>
+  <p><code>template</code> に指定する Generate パラメータファイルのテンプレート（例: <code>templates/generate_param.txt</code>）:</p>
+  <pre>-generateType=sql
+-srcData.src=$param.SRC$
+-srcData.srcType=$param.SRC_TYPE$
+-result=$param.RESULT$</pre>
   <table>
     <tr><th>設定項目</th><th>値の例</th></tr>
     <tr><td>unit</td><td>row</td></tr>
     <tr><td>parameterize</td><td>false</td></tr>
     <tr><td>cmd</td><td>generate</td></tr>
-    <tr><td>template</td><td>templates/generate_param.st4</td></tr>
+    <tr><td>template</td><td>templates/generate_param.txt</td></tr>
     <tr><td>paramData.src</td><td>params/tables.csv</td></tr>
   </table>
-  <p>各行の <code>SCHEMA</code>・<code>TABLE_NAME</code> がテンプレートに渡され、テーブルごとに Generate が実行されます。</p>
+  <p>各行の <code>SRC</code>・<code>SRC_TYPE</code>・<code>RESULT</code> がテンプレートに渡され、テーブルごとに Generate が実行されます。</p>
 
   <h2>関連ページ</h2>
   <ul>
