@@ -27,7 +27,7 @@ public enum DataSourceType {
             return this.name();
         }
     },
-    meta;
+    jdbcMetadata;
 
     public String getExtension() {
         return null;
