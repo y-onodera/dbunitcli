@@ -11,6 +11,7 @@ import yo.dbunitcli.dataset.ComparableTableMappingTask;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -58,8 +59,9 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
                     while (colRs.next()) {
                         final String colName = colRs.getString("COLUMN_NAME");
                         final String typeName = colRs.getString("TYPE_NAME");
-                        final String colSize = colRs.getString("COLUMN_SIZE");
-                        final String decDigits = colRs.getString("DECIMAL_DIGITS");
+                        final int jdbcType = colRs.getInt("DATA_TYPE");
+                        final String colSize = resolveColumnSize(typeName, jdbcType, colRs.getString("COLUMN_SIZE"));
+                        final String decDigits = resolveDecimalDigits(colRs.getString("DECIMAL_DIGITS"));
                         final boolean nullable = colRs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
                         final String remarks = colRs.getString("REMARKS");
                         mapper.addRow(new Object[]{
@@ -90,6 +92,22 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
                 }
             }
             return pkColumns;
+        }
+
+        private static String resolveColumnSize(final String typeName, final int jdbcType, final String columnSize) {
+            if (typeName.contains("(")) {
+                return null;
+            }
+            return switch (jdbcType) {
+                case Types.DATE, Types.TIME, Types.TIMESTAMP,
+                     Types.BLOB, Types.CLOB, Types.NCLOB,
+                     Types.BOOLEAN, Types.BIT -> null;
+                default -> columnSize;
+            };
+        }
+
+        private static String resolveDecimalDigits(final String decimalDigits) {
+            return "0".equals(decimalDigits) || decimalDigits == null ? null : decimalDigits;
         }
 
         private static String loadTableRemarks(final DatabaseMetaData meta, final String tableName)
