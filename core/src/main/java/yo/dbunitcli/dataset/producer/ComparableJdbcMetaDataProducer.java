@@ -21,9 +21,9 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
             new Column("TYPE_NAME", DataType.VARCHAR),
             new Column("COLUMN_SIZE", DataType.VARCHAR),
             new Column("DECIMAL_DIGITS", DataType.VARCHAR),
-            new Column("NULLABLE", DataType.VARCHAR),
+            new Column("NULLABLE", DataType.BOOLEAN),
             new Column("REMARKS", DataType.VARCHAR),
-            new Column("IS_PK", DataType.VARCHAR)
+            new Column("IS_PK", DataType.BOOLEAN)
     };
 
     public ComparableJdbcMetaDataProducer(final ComparableDataSetParam param) {
@@ -57,12 +57,12 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
                         final String typeName = colRs.getString("TYPE_NAME");
                         final String colSize = colRs.getString("COLUMN_SIZE");
                         final String decDigits = colRs.getString("DECIMAL_DIGITS");
-                        final String nullable = colRs.getInt("NULLABLE") == DatabaseMetaData.columnNoNulls ? "NO" : "YES";
+                        final boolean nullable = colRs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
                         final String remarks = colRs.getString("REMARKS");
                         mapper.addRow(new Object[]{
                                 colName, typeName, colSize, decDigits, nullable,
                                 remarks != null ? remarks : "",
-                                pkColumns.contains(colName) ? "YES" : "NO"
+                                pkColumns.contains(colName)
                         });
                     }
                 }

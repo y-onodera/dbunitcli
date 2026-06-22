@@ -16,11 +16,10 @@ deleteAll() ::= <<
 delete from $tableName$;
 >>
 commit() ::= <<$if(inputParam.commit)$commit;$endif$>>
-NullableNotNullMap ::= ["NO": " NOT NULL", default: ""]
 ddlType(row) ::= <<$row.TYPE_NAME$$if(row.COLUMN_SIZE)$($row.COLUMN_SIZE$$if(row.DECIMAL_DIGITS)$,$row.DECIMAL_DIGITS$$endif$)$endif$>>
 createTable() ::= <<
 CREATE TABLE $tableName$ (
-    $rows:{row | $row.COLUMN_NAME$ $ddlType(row)$$if(row.REMARKS)$ /* $row.REMARKS$ */$endif$$NullableNotNullMap.(row.NULLABLE)$}; separator=",\n    "$
+    $rows:{row | $row.COLUMN_NAME$ $ddlType(row)$$if(row.REMARKS)$ /* $row.REMARKS$ */$endif$$if(!row.NULLABLE)$ NOT NULL$endif$}; separator=",\n    "$
     $if(pkColumnNames)$,PRIMARY KEY ($pkColumnNames:{name | $name$}; separator=", "$)
     $endif$
 );

@@ -149,7 +149,7 @@ public enum GenerateType {
             final List<Map<String, Object>> rows = (List<Map<String, Object>>) param.get("rows");
             final List<String> pkColumnNames = rows == null ? List.of()
                     : rows.stream()
-                          .filter(row -> "YES".equals(row.get("IS_PK")))
+                          .filter(row -> Boolean.TRUE.equals(row.get("IS_PK")))
                           .map(row -> row.get("COLUMN_NAME").toString())
                           .toList();
             super.write(option, resultFile, param.add("pkColumnNames", pkColumnNames));
