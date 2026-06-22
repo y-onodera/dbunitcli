@@ -7,12 +7,16 @@
     body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
     h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
     h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
     p { color: #4b5563; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
     th { background: #f9fafb; font-weight: 600; color: #374151; }
     td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
     a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
   </style>
 </head>
 <body>
@@ -33,5 +37,81 @@
     <tr><td>templateOption</td><td>テンプレートエンジンのオプション</td></tr>
   </table>
   <p><code>paramData</code> の入力フォーム詳細は <a href="dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
+
+  <h2 id="section-unit">unit の動作</h2>
+  <p><code>unit</code> はテンプレートへのパラメータ受け渡し単位を指定します。</p>
+  <table>
+    <tr><th>値</th><th>説明</th></tr>
+    <tr><td>row</td><td><code>paramData</code> の行ごとに 1 回コマンドを実行</td></tr>
+    <tr><td>table</td><td><code>paramData</code> のテーブルごとに 1 回コマンドを実行</td></tr>
+    <tr><td>dataset</td><td><code>paramData</code> 全体を 1 つとして 1 回コマンドを実行</td></tr>
+  </table>
+
+  <h2 id="section-examples">具体例</h2>
+
+  <h3 id="example-compare">Compare をパラメータ駆動で繰り返す</h3>
+  <p>比較対象のディレクトリパスをパラメータ CSV で管理し、複数の比較を一括実行する例です。</p>
+  <p><code>paramData</code> に読み込む CSV（例: <code>params/compare_params.csv</code>）:</p>
+  <pre>OLD_DIR,NEW_DIR,SETTING
+data/old/orders,data/new/orders,settings/orders.json
+data/old/products,data/new/products,settings/products.json</pre>
+  <p><code>template</code> に指定する Compare パラメータファイルのテンプレート（例: <code>templates/compare_param.st4</code>）:</p>
+  <pre>{
+  "oldData": { "src": "&lt;param.OLD_DIR&gt;" },
+  "newData": { "src": "&lt;param.NEW_DIR&gt;" },
+  "setting": "&lt;param.SETTING&gt;"
+}</pre>
+  <table>
+    <tr><th>設定項目</th><th>値の例</th></tr>
+    <tr><td>unit</td><td>row</td></tr>
+    <tr><td>parameterize</td><td>false</td></tr>
+    <tr><td>ignoreFail</td><td>true（差分があっても次の行を処理する）</td></tr>
+    <tr><td>cmd</td><td>compare</td></tr>
+    <tr><td>template</td><td>templates/compare_param.st4</td></tr>
+    <tr><td>paramData.src</td><td>params/compare_params.csv</td></tr>
+  </table>
+  <p><code>paramData</code> の各行（<code>OLD_DIR</code>・<code>NEW_DIR</code>・<code>SETTING</code>）が <code>&lt;param.列名&gt;</code> としてテンプレートに展開され、行数分だけ Compare が実行されます。</p>
+
+  <h3 id="example-cmdparam">cmdParam でパラメータファイルを動的に切り替える</h3>
+  <p>パラメータ CSV の列値でコマンドパラメータファイルのパスを動的に決定する例です。<code>parameterize</code> を有効にすると <code>cmdParam</code> の文字列もテンプレートとして展開されます。</p>
+  <p><code>paramData</code> に読み込む CSV（例: <code>params/targets.csv</code>）:</p>
+  <pre>TARGET
+orders
+products
+customers</pre>
+  <table>
+    <tr><th>設定項目</th><th>値の例</th></tr>
+    <tr><td>unit</td><td>row</td></tr>
+    <tr><td>parameterize</td><td>true</td></tr>
+    <tr><td>cmd</td><td>convert</td></tr>
+    <tr><td>cmdParam</td><td>params/&lt;param.TARGET&gt;.json</td></tr>
+    <tr><td>paramData.src</td><td>params/targets.csv</td></tr>
+  </table>
+  <p>1 行目では <code>cmdParam</code> が <code>params/orders.json</code> に展開され Convert が実行されます。2 行目では <code>params/products.json</code>、3 行目では <code>params/customers.json</code> が使われます。</p>
+
+  <h3 id="example-generate">Generate をパラメータ駆動で繰り返す</h3>
+  <p>テーブル名の一覧から SQL ファイルを一括生成する例です。</p>
+  <p><code>paramData</code> に読み込む CSV（例: <code>params/tables.csv</code>）:</p>
+  <pre>SCHEMA,TABLE_NAME
+public,orders
+public,products</pre>
+  <table>
+    <tr><th>設定項目</th><th>値の例</th></tr>
+    <tr><td>unit</td><td>row</td></tr>
+    <tr><td>parameterize</td><td>false</td></tr>
+    <tr><td>cmd</td><td>generate</td></tr>
+    <tr><td>template</td><td>templates/generate_param.st4</td></tr>
+    <tr><td>paramData.src</td><td>params/tables.csv</td></tr>
+  </table>
+  <p>各行の <code>SCHEMA</code>・<code>TABLE_NAME</code> がテンプレートに渡され、テーブルごとに Generate が実行されます。</p>
+
+  <h2>関連ページ</h2>
+  <ul>
+    <li><a href="dataset-load-form.html">Dataset Load Form</a> — <code>paramData</code> の入力フォーム詳細</li>
+    <li><a href="template.html">Template</a> — テンプレートエンジンのオプション</li>
+    <li><a href="compare.html">Compare</a> — Compare コマンドのオプション</li>
+    <li><a href="convert.html">Convert</a> — Convert コマンドのオプション</li>
+    <li><a href="generate.html">Generate</a> — Generate コマンドのオプション</li>
+  </ul>
 </body>
 </html>
