@@ -45,10 +45,12 @@ public record JavaBeanField(String fieldName, String javaType, boolean nullable)
 
     public static JavaBeanField of(final Map<String, Object> row) {
         final String columnName = row.get("COLUMN_NAME").toString();
-        final String typeName = normalizeTypeName(row.get("TYPE_NAME").toString());
         final boolean nullable = Boolean.TRUE.equals(row.get("NULLABLE"));
         final String fieldName = Strings.snakeToCamel(columnName.toLowerCase(), Character::toLowerCase);
-        final String javaType = resolveJavaType(typeName);
+        final Object javaTypeOverride = row.get("javaType");
+        final String javaType = javaTypeOverride != null && !javaTypeOverride.toString().isEmpty()
+                ? javaTypeOverride.toString()
+                : resolveJavaType(normalizeTypeName(row.get("TYPE_NAME").toString()));
         return new JavaBeanField(fieldName, javaType, nullable);
     }
 
