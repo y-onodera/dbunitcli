@@ -23,11 +23,46 @@
   <h2>オプション</h2>
   <table>
     <tr><th>オプション</th><th>説明</th></tr>
-    <tr><td>scriptType</td><td>実行するスクリプトの種類（SQL・ANT・バッチ）</td></tr>
-    <tr><td>srcData</td><td>ソースデータセット</td></tr>
-    <tr><td>templateOption</td><td>テンプレートエンジンのオプション</td></tr>
-    <tr><td>jdbcOption</td><td>JDBC 接続設定</td></tr>
+    <tr><td>scriptType</td><td>実行するスクリプトの種類。<code>sql</code> / <code>ant</code> / <code>bat</code> / <code>cmd</code> から選択（デフォルト: <code>sql</code>）</td></tr>
+    <tr><td>srcData</td><td>実行対象ファイルの指定。拡張子は scriptType に応じて自動設定（sql→.sql, ant→.xml, bat→.bat, cmd→.cmd）</td></tr>
+    <tr><td>templateOption</td><td>テンプレートエンジンのオプション（<code>sql</code> のみ有効）</td></tr>
+    <tr><td>jdbcOption</td><td>JDBC 接続設定（<code>sql</code> のみ有効）</td></tr>
+    <tr><td>baseDir</td><td>スクリプトの作業ディレクトリ（<code>ant</code> / <code>bat</code> / <code>cmd</code> のみ有効）</td></tr>
+    <tr><td>antTarget</td><td>実行する ANT ターゲット名（<code>ant</code> のみ有効）</td></tr>
   </table>
   <p><code>srcData</code> の入力フォーム詳細は <a href="dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
+
+  <h2 id="sql">SQL 実行例</h2>
+  <p>SQL ファイルをテンプレートエンジンで加工してからデータベースに対して実行します。パラメータは <code>srcData</code> で渡したデータセットの各行がテンプレート変数として展開されます。</p>
+  <table>
+    <tr><th>設定項目</th><th>値の例</th></tr>
+    <tr><td>scriptType</td><td>sql</td></tr>
+    <tr><td>srcData.src</td><td>params/run_params.csv（実行パラメータを格納した CSV）</td></tr>
+    <tr><td>templateOption.templateRender</td><td>st4（StringTemplate 4 を使用）</td></tr>
+    <tr><td>jdbcOption.url</td><td>jdbc:h2:./db/testdb</td></tr>
+    <tr><td>jdbcOption.user</td><td>sa</td></tr>
+  </table>
+  <p>SQL ファイル内では <code>&lt;param.COLUMN_NAME&gt;</code> の形式でパラメータを参照できます。<code>srcData</code> の行数分だけ SQL が繰り返し実行されます。</p>
+
+  <h2 id="ant">ANT 実行例</h2>
+  <p>Apache ANT の build.xml を実行します。<code>srcData</code> で指定したファイル一覧（.xml）が対象となり、各ファイルに対して <code>antTarget</code> で指定したターゲットが実行されます。パラメータは ANT プロパティとして渡されます。</p>
+  <table>
+    <tr><th>設定項目</th><th>値の例</th></tr>
+    <tr><td>scriptType</td><td>ant</td></tr>
+    <tr><td>srcData.src</td><td>scripts/（build.xml を格納したディレクトリ）</td></tr>
+    <tr><td>baseDir</td><td>work/（ANT 実行時の作業ディレクトリ）</td></tr>
+    <tr><td>antTarget</td><td>deploy（実行するターゲット名。省略時はデフォルトターゲット）</td></tr>
+  </table>
+  <p><code>srcData</code> で渡したデータセットの各行は ANT プロパティ（<code>property name="COLUMN_NAME" value="..."</code>）として build.xml 内から参照できます。</p>
+
+  <h2 id="bat">BAT / CMD 実行例</h2>
+  <p>Windows バッチファイル（.bat / .cmd）を実行します。<code>srcData</code> で指定したファイル一覧が対象となり、各ファイルを <code>baseDir</code> を作業ディレクトリとして順に実行します。パラメータは環境変数として渡されます。</p>
+  <table>
+    <tr><th>設定項目</th><th>値の例</th></tr>
+    <tr><td>scriptType</td><td>bat</td></tr>
+    <tr><td>srcData.src</td><td>scripts/（.bat ファイルを格納したディレクトリ）</td></tr>
+    <tr><td>baseDir</td><td>work/（バッチ実行時の作業ディレクトリ）</td></tr>
+  </table>
+  <p><code>srcData</code> で渡したデータセットの各行は環境変数としてバッチファイル内から <code>%COLUMN_NAME%</code> の形式で参照できます。<code>cmd</code> を選択した場合も動作は同様です。</p>
 </body>
 </html>
