@@ -1,5 +1,7 @@
 javaBeanClass() ::= <<
-public class $className$ {
+$if(first(rows).PACKAGE)$package $first(rows).PACKAGE$;
+
+$endif$public class $className$ {
 $rows:{row |    private $row.javaType$ $row.COLUMN_NAME; format="snakeToCamel"$;}; separator="\n"$
 
 $rows:{row |
