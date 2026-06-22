@@ -1,1 +1,3 @@
 $createTable()$
+$commentOnTable()$
+$commentOnColumns()$

@@ -102,7 +102,7 @@ public record GenerateOption(
 
     @Override
     public String resultPath() {
-        if (this.generateType() == GenerateType.sql) {
+        if (this.generateType().isAny(GenerateType.sql, GenerateType.ddl)) {
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
             return this.resultPath + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
         }
@@ -150,6 +150,8 @@ public record GenerateOption(
                         .put("-sqlFileSuffix", this.sqlFileSuffix);
                 srcComponent.remove("-src.useJdbcMetaData");
             }
+            case ddl -> result.put("-sqlFilePrefix", this.sqlFilePrefix)
+                        .put("-sqlFileSuffix", this.sqlFileSuffix);
             case settings -> {
                 result.put("-includeAllColumns", Boolean.toString(this.includeAllColumns));
                 srcComponent.remove("-src.useJdbcMetaData")

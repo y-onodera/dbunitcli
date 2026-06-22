@@ -8,6 +8,9 @@ import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.converter.FixedColumnDef;
 import yo.dbunitcli.resource.FileResources;
+
+import java.util.List;
+import java.util.Map;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -117,6 +120,44 @@ public enum GenerateType {
             };
         }
 
+    },
+    ddl {
+        @Override
+        public boolean isFixedTemplate() {
+            return true;
+        }
+
+        @Override
+        public ParameterUnit getFixedUnit() {
+            return ParameterUnit.table;
+        }
+
+        @Override
+        public String getTemplateString(final GenerateOption option) {
+            return FileResources.readClasspathResource("sql/ddlTemplate.txt");
+        }
+
+        @Override
+        protected STGroup getStGroup() {
+            return sql.getStGroup();
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
+                throws IOException {
+            final List<Map<String, Object>> rows = (List<Map<String, Object>>) param.get("rows");
+            final List<String> pkColumnNames = rows == null ? List.of()
+                    : rows.stream()
+                          .filter(row -> Boolean.TRUE.equals(row.get("IS_PK")))
+                          .map(row -> row.get("COLUMN_NAME").toString())
+                          .toList();
+            final String tableRemarks = rows == null || rows.isEmpty() ? ""
+                    : (String) rows.getFirst().getOrDefault("TABLE_REMARKS", "");
+            super.write(option, resultFile, param
+                    .add("pkColumnNames", pkColumnNames)
+                    .add("tableRemarks", tableRemarks));
+        }
     },
     xlsxTemplate {
         @Override
