@@ -19,8 +19,12 @@ commit() ::= <<$if(inputParam.commit)$commit;$endif$>>
 ddlType(row) ::= <<$row.TYPE_NAME$$if(row.COLUMN_SIZE)$($row.COLUMN_SIZE$$if(row.DECIMAL_DIGITS)$,$row.DECIMAL_DIGITS$$endif$)$endif$>>
 createTable() ::= <<
 CREATE TABLE $tableName$ (
-    $rows:{row | $row.COLUMN_NAME$ $ddlType(row)$$if(row.REMARKS)$ /* $row.REMARKS$ */$endif$$if(!row.NULLABLE)$ NOT NULL$endif$}; separator=",\n    "$
+    $rows:{row | $row.COLUMN_NAME$ $ddlType(row)$$if(!row.NULLABLE)$ NOT NULL$endif$}; separator=",\n    "$
     $if(pkColumnNames)$,PRIMARY KEY ($pkColumnNames:{name | $name$}; separator=", "$)
     $endif$
 );
+>>
+commentOnColumns() ::= <<
+$rows:{row | $if(row.REMARKS)$COMMENT ON COLUMN $tableName$.$row.COLUMN_NAME$ IS '$row.REMARKS$';
+$endif$}$
 >>
