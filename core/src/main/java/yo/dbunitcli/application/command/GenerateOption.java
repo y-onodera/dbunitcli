@@ -4,6 +4,7 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.ArgumentMapper;
+import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
@@ -187,7 +188,16 @@ public record GenerateOption(
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
         switch (this.generateType()) {
-            case settings, javaBean -> { builder.setUseJdbcMetaData(true); builder.setLoadData(false); }
+            case settings -> { builder.setUseJdbcMetaData(true); builder.setLoadData(false); }
+            case javaBean -> {
+                builder.setUseJdbcMetaData(true);
+                builder.setLoadData(false);
+                if (Strings.isEmpty(this.srcData.getSetting())) {
+                    builder.setTableSeparators(new FromJsonTableSeparatorsBuilder(this.srcData.settingEncoding())
+                            .loadFromClasspath("javabean/javaBeanSettings.json")
+                            .build());
+                }
+            }
             case sql -> builder.setUseJdbcMetaData(true);
             case xlsxTemplate, fixedColumnDef -> builder.setLoadData(false);
             default -> { }
