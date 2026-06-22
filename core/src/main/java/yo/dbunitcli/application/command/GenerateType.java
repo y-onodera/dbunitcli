@@ -118,6 +118,27 @@ public enum GenerateType {
         }
 
     },
+    ddl {
+        @Override
+        public boolean isFixedTemplate() {
+            return true;
+        }
+
+        @Override
+        public ParameterUnit getFixedUnit() {
+            return ParameterUnit.table;
+        }
+
+        @Override
+        public String getTemplateString(final GenerateOption option) {
+            return FileResources.readClasspathResource("sql/ddlTemplate.txt");
+        }
+
+        @Override
+        protected STGroup getStGroup() {
+            return sql.getStGroup();
+        }
+    },
     xlsxTemplate {
         @Override
         public boolean isFixedTemplate() {

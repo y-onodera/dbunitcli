@@ -16,3 +16,11 @@ deleteAll() ::= <<
 delete from $tableName$;
 >>
 commit() ::= <<$if(inputParam.commit)$commit;$endif$>>
+NullableMap ::= ["NO_NULLS": " NOT NULL", default: ""]
+createTable() ::= <<
+CREATE TABLE $tableName$ (
+    $columns:{column | $column.columnName$ $column.dataType$$NullableMap.(column.nullable)$}; separator=",\n    "$
+    $if(primaryKeys)$,PRIMARY KEY ($primaryKeys:{column | $column.columnName$}; separator=", "$)
+    $endif$
+);
+>>

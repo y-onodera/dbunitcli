@@ -102,7 +102,7 @@ public record GenerateOption(
 
     @Override
     public String resultPath() {
-        if (this.generateType() == GenerateType.sql) {
+        if (this.generateType().isAny(GenerateType.sql, GenerateType.ddl)) {
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
             return this.resultPath + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
         }
@@ -150,6 +150,12 @@ public record GenerateOption(
                         .put("-sqlFileSuffix", this.sqlFileSuffix);
                 srcComponent.remove("-src.useJdbcMetaData");
             }
+            case ddl -> {
+                result.put("-sqlFilePrefix", this.sqlFilePrefix)
+                        .put("-sqlFileSuffix", this.sqlFileSuffix);
+                srcComponent.remove("-src.useJdbcMetaData")
+                        .remove("-src.loadData");
+            }
             case settings -> {
                 result.put("-includeAllColumns", Boolean.toString(this.includeAllColumns));
                 srcComponent.remove("-src.useJdbcMetaData")
@@ -183,6 +189,9 @@ public record GenerateOption(
             builder.setLoadData(false);
         } else if (this.generateType() == GenerateType.sql) {
             builder.setUseJdbcMetaData(true);
+        } else if (this.generateType() == GenerateType.ddl) {
+            builder.setUseJdbcMetaData(true);
+            builder.setLoadData(false);
         } else if (this.generateType() == GenerateType.xlsxTemplate
                 || this.generateType() == GenerateType.fixedColumnDef) {
             builder.setLoadData(false);
