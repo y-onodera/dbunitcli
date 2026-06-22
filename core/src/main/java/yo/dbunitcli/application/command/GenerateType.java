@@ -152,7 +152,11 @@ public enum GenerateType {
                           .filter(row -> Boolean.TRUE.equals(row.get("IS_PK")))
                           .map(row -> row.get("COLUMN_NAME").toString())
                           .toList();
-            super.write(option, resultFile, param.add("pkColumnNames", pkColumnNames));
+            final String tableRemarks = rows == null || rows.isEmpty() ? ""
+                    : (String) rows.getFirst().getOrDefault("TABLE_REMARKS", "");
+            super.write(option, resultFile, param
+                    .add("pkColumnNames", pkColumnNames)
+                    .add("tableRemarks", tableRemarks));
         }
     },
     xlsxTemplate {

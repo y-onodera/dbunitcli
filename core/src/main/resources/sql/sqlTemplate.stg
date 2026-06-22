@@ -24,6 +24,8 @@ CREATE TABLE $tableName$ (
     $endif$
 );
 >>
+commentOnTable() ::= <<$if(tableRemarks)$COMMENT ON TABLE $tableName$ IS '$tableRemarks$';
+$endif$>>
 commentOnColumns() ::= <<
 $rows:{row | $if(row.REMARKS)$COMMENT ON COLUMN $tableName$.$row.COLUMN_NAME$ IS '$row.REMARKS$';
 $endif$}$

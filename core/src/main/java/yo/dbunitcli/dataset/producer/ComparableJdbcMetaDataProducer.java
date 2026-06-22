@@ -17,6 +17,8 @@ import java.util.Set;
 public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer {
 
     private static final Column[] COLUMN_DEF_SCHEMA = {
+            new Column("TABLE_NAME", DataType.VARCHAR),
+            new Column("TABLE_REMARKS", DataType.VARCHAR),
             new Column("COLUMN_NAME", DataType.VARCHAR),
             new Column("TYPE_NAME", DataType.VARCHAR),
             new Column("COLUMN_SIZE", DataType.VARCHAR),
@@ -48,6 +50,7 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
             try {
                 final DatabaseMetaData meta = this.connection.getConnection().getMetaData();
                 final Set<String> pkColumns = loadPrimaryKeys(meta, tableName);
+                final String tableRemarks = loadTableRemarks(meta, tableName);
                 final var metaData = new DefaultTableMetaData(tableName, COLUMN_DEF_SCHEMA);
                 final var mapper = context.createMapper(this.source.wrap(metaData));
                 mapper.startTable();
@@ -60,6 +63,7 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
                         final boolean nullable = colRs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
                         final String remarks = colRs.getString("REMARKS");
                         mapper.addRow(new Object[]{
+                                tableName, tableRemarks,
                                 colName, typeName, colSize, decDigits, nullable,
                                 remarks != null ? remarks : "",
                                 pkColumns.contains(colName)
@@ -86,6 +90,17 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
                 }
             }
             return pkColumns;
+        }
+
+        private static String loadTableRemarks(final DatabaseMetaData meta, final String tableName)
+                throws SQLException {
+            try (ResultSet tableRs = meta.getTables(null, null, tableName, null)) {
+                if (tableRs.next()) {
+                    final String remarks = tableRs.getString("REMARKS");
+                    return remarks != null ? remarks : "";
+                }
+            }
+            return "";
         }
     }
 }
