@@ -1,0 +1,14 @@
+javaBeanClass() ::= <<
+public class $className$ {
+$fields:{f |     private $f.javaType$ $f.fieldName$;}; separator="\n"$
+
+$fields:{f |
+    public $f.javaType$ $f.getterName$() {
+        return this.$f.fieldName$;
+    }
+
+    public void $f.setterName$($f.javaType$ $f.fieldName$) {
+        this.$f.fieldName$ = $f.fieldName$;
+    }
+}; separator="\n"$}
+>>

@@ -176,6 +176,46 @@ public enum GenerateType {
             JxlsTemplateGenerator.createTemplate(resultFile, param);
         }
     },
+    javaBean {
+        @Override
+        public boolean isFixedTemplate() {
+            return true;
+        }
+
+        @Override
+        public ParameterUnit getFixedUnit() {
+            return ParameterUnit.table;
+        }
+
+        @Override
+        public String getTemplateString(final GenerateOption option) {
+            return FileResources.readClasspathResource("javabean/javaBeanTemplate.txt");
+        }
+
+        @Override
+        protected STGroup getStGroup() {
+            return new TemplateRender.Builder()
+                    .setTemplateParameterAttribute(null)
+                    .build()
+                    .createSTGroup("javabean/javaBeanTemplate.stg");
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
+                throws IOException {
+            final List<Map<String, Object>> rows = (List<Map<String, Object>>) param.get("rows");
+            final String tableName = param.get("tableName").toString();
+            final String className = Strings.capitalize(tableName.toLowerCase());
+            final List<JavaBeanField> fields = rows == null ? List.of()
+                    : rows.stream()
+                          .map(JavaBeanField::of)
+                          .toList();
+            super.write(option, resultFile, param
+                    .add("className", className)
+                    .add("fields", fields));
+        }
+    },
     fixedColumnDef {
         @Override
         public boolean isFixedTemplate() {

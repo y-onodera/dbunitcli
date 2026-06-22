@@ -110,6 +110,10 @@ public record GenerateOption(
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
             return this.resultPath + "/" + tableName + ".json";
         }
+        if (this.generateType() == GenerateType.javaBean) {
+            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
+            return this.resultPath + "/" + Strings.capitalize(tableName.toLowerCase()) + ".java";
+        }
         return this.resultPath;
     }
 
@@ -159,6 +163,8 @@ public record GenerateOption(
             }
             case xlsxTemplate -> srcComponent.remove("-src.loadData");
             case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
+            case javaBean -> srcComponent.remove("-src.loadData")
+                        .remove("-src.useJdbcMetaData");
             case fixedColumnDef -> {
                 result.put("-fixedLength", this.fixedLength)
                         .put("-defaultLength", Integer.toString(this.defaultLength))
@@ -180,14 +186,11 @@ public record GenerateOption(
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
-        if (this.generateType() == GenerateType.settings) {
-            builder.setUseJdbcMetaData(true);
-            builder.setLoadData(false);
-        } else if (this.generateType() == GenerateType.sql) {
-            builder.setUseJdbcMetaData(true);
-        } else if (this.generateType() == GenerateType.xlsxTemplate
-                || this.generateType() == GenerateType.fixedColumnDef) {
-            builder.setLoadData(false);
+        switch (this.generateType()) {
+            case settings, javaBean -> { builder.setUseJdbcMetaData(true); builder.setLoadData(false); }
+            case sql -> builder.setUseJdbcMetaData(true);
+            case xlsxTemplate, fixedColumnDef -> builder.setLoadData(false);
+            default -> { }
         }
         return builder.build();
     }
