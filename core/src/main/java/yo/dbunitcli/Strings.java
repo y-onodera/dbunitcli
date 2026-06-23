@@ -14,6 +14,13 @@ public enum Strings {
         return !Strings.isEmpty(s);
     }
 
+    public static String capitalize(final String s) {
+        if (s == null || s.isEmpty()) {
+            return s;
+        }
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+
     public static String camelToSnake(final String camel, final Function<Character, Character> caseFormat) {
         return Strings.camelToOtherFormat(camel, '_', caseFormat);
     }

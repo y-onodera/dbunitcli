@@ -1,0 +1,18 @@
+javaBeanClass() ::= <<
+$if(first(rows).PACKAGE)$package $first(rows).PACKAGE$;
+
+$endif$$if(first(rows).TABLE_REMARKS)$/** $first(rows).TABLE_REMARKS$ */
+$endif$public class $className$ {
+$rows:{row |$if(row.REMARKS)$    /** $row.REMARKS$ */
+$endif$    private $row.javaType$ $row.COLUMN_NAME; format="snakeToCamel"$;}; separator="\n"$
+
+$rows:{row |
+    public $row.javaType$ $if(row.isBoolean)$is$else$get$endif$$row.COLUMN_NAME; format="snakeToUpperCamel"$() {
+        return this.$row.COLUMN_NAME; format="snakeToCamel"$;
+    }
+
+    public void set$row.COLUMN_NAME; format="snakeToUpperCamel"$($row.javaType$ $row.COLUMN_NAME; format="snakeToCamel"$) {
+        this.$row.COLUMN_NAME; format="snakeToCamel"$ = $row.COLUMN_NAME; format="snakeToCamel"$;
+    }
+}; separator="\n"$}
+>>

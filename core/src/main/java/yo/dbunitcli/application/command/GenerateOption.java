@@ -4,10 +4,12 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.ArgumentMapper;
+import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
@@ -110,6 +112,10 @@ public record GenerateOption(
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
             return this.resultPath + "/" + tableName + ".json";
         }
+        if (this.generateType() == GenerateType.javaBean) {
+            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
+            return this.resultPath + "/" + Strings.capitalize(tableName.toLowerCase()) + ".java";
+        }
         return this.resultPath;
     }
 
@@ -159,6 +165,9 @@ public record GenerateOption(
             }
             case xlsxTemplate -> srcComponent.remove("-src.loadData");
             case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
+            case javaBean -> srcComponent.remove("-src.loadData")
+                        .remove("-src.useJdbcMetaData");
+            case scaffold -> { return result; }
             case fixedColumnDef -> {
                 result.put("-fixedLength", this.fixedLength)
                         .put("-defaultLength", Integer.toString(this.defaultLength))
@@ -180,14 +189,21 @@ public record GenerateOption(
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
-        if (this.generateType() == GenerateType.settings) {
-            builder.setUseJdbcMetaData(true);
-            builder.setLoadData(false);
-        } else if (this.generateType() == GenerateType.sql) {
-            builder.setUseJdbcMetaData(true);
-        } else if (this.generateType() == GenerateType.xlsxTemplate
-                || this.generateType() == GenerateType.fixedColumnDef) {
-            builder.setLoadData(false);
+        switch (this.generateType()) {
+            case settings -> { builder.setUseJdbcMetaData(true); builder.setLoadData(false); }
+            case javaBean -> {
+                builder.setUseJdbcMetaData(true);
+                builder.setLoadData(false);
+                if (Strings.isEmpty(this.srcData.getSetting())) {
+                    builder.setTableSeparators(new FromJsonTableSeparatorsBuilder(this.srcData.settingEncoding())
+                            .loadFromClasspath("javabean/javaBeanSettings.json")
+                            .build());
+                }
+            }
+            case sql -> builder.setUseJdbcMetaData(true);
+            case xlsxTemplate, fixedColumnDef -> builder.setLoadData(false);
+            case scaffold -> builder.setSource(DataSourceType.none);
+            default -> { }
         }
         return builder.build();
     }

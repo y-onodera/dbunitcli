@@ -8,16 +8,17 @@ import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.converter.FixedColumnDef;
 import yo.dbunitcli.resource.FileResources;
-
-import java.util.List;
-import java.util.Map;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -147,15 +148,18 @@ public enum GenerateType {
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
             final List<Map<String, Object>> rows = (List<Map<String, Object>>) param.get("rows");
-            final List<String> pkColumnNames = rows == null ? List.of()
-                    : rows.stream()
-                          .filter(row -> Boolean.TRUE.equals(row.get("IS_PK")))
-                          .map(row -> row.get("COLUMN_NAME").toString())
-                          .toList();
+            final List<Map<String, Object>> pkRows = rows == null ? List.of()
+                    : rows.stream().filter(row -> Boolean.TRUE.equals(row.get("IS_PK"))).toList();
+            final List<String> pkColumnNames = pkRows.stream()
+                    .map(row -> row.get("COLUMN_NAME").toString())
+                    .toList();
+            final String pkConstraintName = pkRows.isEmpty() ? null
+                    : (String) pkRows.getFirst().get("PK_NAME");
             final String tableRemarks = rows == null || rows.isEmpty() ? ""
                     : (String) rows.getFirst().getOrDefault("TABLE_REMARKS", "");
             super.write(option, resultFile, param
                     .add("pkColumnNames", pkColumnNames)
+                    .add("pkConstraintName", pkConstraintName)
                     .add("tableRemarks", tableRemarks));
         }
     },
@@ -174,6 +178,69 @@ public enum GenerateType {
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
             JxlsTemplateGenerator.createTemplate(resultFile, param);
+        }
+    },
+    javaBean {
+        @Override
+        public boolean isFixedTemplate() {
+            return true;
+        }
+
+        @Override
+        public ParameterUnit getFixedUnit() {
+            return ParameterUnit.table;
+        }
+
+        @Override
+        public String getTemplateString(final GenerateOption option) {
+            return FileResources.readClasspathResource("javabean/javaBeanTemplate.txt");
+        }
+
+        @Override
+        protected STGroup getStGroup() {
+            return new TemplateRender.Builder()
+                    .setTemplateParameterAttribute(null)
+                    .build()
+                    .createSTGroup("javabean/javaBeanTemplate.stg");
+        }
+
+        @Override
+        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
+                throws IOException {
+            final String tableName = param.get("tableName").toString();
+            super.write(option, resultFile, param.add("className", Strings.capitalize(tableName.toLowerCase())));
+        }
+    },
+    scaffold {
+        @Override
+        public boolean isFixedTemplate() {
+            return true;
+        }
+
+        @Override
+        public ParameterUnit getFixedUnit() {
+            return ParameterUnit.dataset;
+        }
+
+        @Override
+        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
+                throws IOException {
+            final File baseDir = option.getResultDir();
+            final File settingDir = new File(baseDir, "resources/setting");
+            final File templateDir = new File(baseDir, "resources/template");
+            settingDir.mkdirs();
+            templateDir.mkdirs();
+            this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "scaffold.json"));
+            this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
+            this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
+            this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
+            this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
+        }
+
+        private void copyClasspathResource(final String resource, final File dest) throws IOException {
+            try (final InputStream is = GenerateType.class.getClassLoader().getResourceAsStream(resource)) {
+                Files.copy(is, dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
         }
     },
     fixedColumnDef {

@@ -55,6 +55,17 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         }
     }
 
+    public FromJsonTableSeparatorsBuilder loadFromClasspath(final String resource) {
+        try (final InputStream is = FromJsonTableSeparatorsBuilder.class.getClassLoader().getResourceAsStream(resource);
+             final JsonReader jsonReader = Json.createReader(new InputStreamReader(is, this.settingEncoding))) {
+            final JsonObject settingJson = jsonReader.read().asJsonObject();
+            return this.configureSetting(settingJson)
+                    .configureCommonSetting(settingJson);
+        } catch (final IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     public FromJsonTableSeparatorsBuilder configureSetting(final JsonObject setting) {
         if (!setting.containsKey("settings")) {
             return this;

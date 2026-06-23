@@ -10,7 +10,10 @@
         "xls",
         "settings",
         "sql",
+        "ddl",
         "xlsxTemplate",
+        "javaBean",
+        "scaffold",
         "fixedColumnDef"
       ],
       "required": false,
@@ -84,7 +87,8 @@
           "reg",
           "fixed",
           "xls",
-          "xlsx"
+          "xlsx",
+          "jdbcMetadata"
         ],
         "required": false,
         "defaultPath": "WORKSPACE"
