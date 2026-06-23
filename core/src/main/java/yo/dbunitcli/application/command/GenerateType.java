@@ -219,7 +219,7 @@ public enum GenerateType {
         return Stream.of(expects).anyMatch(it -> it == this);
     }
 
-    protected STGroup getStGroup() {
+    public STGroup getStGroup() {
         return this.stGroup;
     }
 
