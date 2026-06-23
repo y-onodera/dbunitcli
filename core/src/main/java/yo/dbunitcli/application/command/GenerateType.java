@@ -227,7 +227,7 @@ public enum GenerateType {
             final File templateDir = new File(baseDir, "resources/template");
             settingDir.mkdirs();
             templateDir.mkdirs();
-            this.copyClasspathResource("scaffold/scaffoldSettings.json", new File(settingDir, "scaffold.json"));
+            this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "scaffold.json"));
             this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
             this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
             this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
