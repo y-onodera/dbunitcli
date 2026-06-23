@@ -14,14 +14,13 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public enum GenerateType {
-    txt {
+    txt(null) {
         @Override
         public String getTemplateString(final GenerateOption option) {
             final File templatePath = option.getTemplatePath();
@@ -32,7 +31,7 @@ public enum GenerateType {
             return FileResources.read(templatePath, option.templateOption().encoding());
         }
     },
-    xlsx {
+    xlsx(null) {
         @Override
         protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
             JxlsTemplateRender.builder()
@@ -46,7 +45,7 @@ public enum GenerateType {
                               .render(option.getTemplatePath(), resultFile, param, option.unit() != ParameterUnit.record);
         }
     },
-    xls {
+    xls(null) {
         @Override
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
@@ -61,7 +60,7 @@ public enum GenerateType {
                               .render(option.getTemplatePath(), resultFile, param, option.unit() != ParameterUnit.record);
         }
     },
-    settings {
+    settings("settings/settingTemplate.stg") {
         @Override
         public boolean isFixedTemplate() {
             return true;
@@ -77,15 +76,8 @@ public enum GenerateType {
             return FileResources.readClasspathResource("settings/settingTemplate.txt");
         }
 
-        @Override
-        protected STGroup getStGroup() {
-            return new TemplateRender.Builder()
-                    .setTemplateParameterAttribute(null)
-                    .build()
-                    .createSTGroup("settings/settingTemplate.stg");
-        }
     },
-    sql {
+    sql("sql/sqlTemplate.stg") {
         @Override
         public boolean isFixedTemplate() {
             return true;
@@ -101,14 +93,6 @@ public enum GenerateType {
             return FileResources.readClasspathResource(this.getSqlTemplate(option.operation()));
         }
 
-        @Override
-        protected STGroup getStGroup() {
-            return new TemplateRender.Builder()
-                    .setTemplateParameterAttribute(null)
-                    .build()
-                    .createSTGroup("sql/sqlTemplate.stg");
-        }
-
         private String getSqlTemplate(DbOperation operation) {
             return switch (operation) {
                 case INSERT -> "sql/insertTemplate.txt";
@@ -120,7 +104,7 @@ public enum GenerateType {
         }
 
     },
-    ddl {
+    ddl("sql/ddlTemplate.stg") {
         @Override
         public boolean isFixedTemplate() {
             return true;
@@ -134,11 +118,6 @@ public enum GenerateType {
         @Override
         public String getTemplateString(final GenerateOption option) {
             return FileResources.readClasspathResource("sql/ddlTemplate.txt");
-        }
-
-        @Override
-        protected STGroup getStGroup() {
-            return sql.getStGroup();
         }
 
         @Override
@@ -161,7 +140,7 @@ public enum GenerateType {
                     .add("tableRemarks", tableRemarks));
         }
     },
-    xlsxTemplate {
+    xlsxTemplate(null) {
         @Override
         public boolean isFixedTemplate() {
             return true;
@@ -178,7 +157,7 @@ public enum GenerateType {
             JxlsTemplateGenerator.createTemplate(resultFile, param);
         }
     },
-    javaBean {
+    javaBean("javabean/javaBeanTemplate.stg") {
         @Override
         public boolean isFixedTemplate() {
             return true;
@@ -195,21 +174,13 @@ public enum GenerateType {
         }
 
         @Override
-        protected STGroup getStGroup() {
-            return new TemplateRender.Builder()
-                    .setTemplateParameterAttribute(null)
-                    .build()
-                    .createSTGroup("javabean/javaBeanTemplate.stg");
-        }
-
-        @Override
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
             final String tableName = param.get("tableName").toString();
             super.write(option, resultFile, param.add("className", Strings.capitalize(tableName.toLowerCase())));
         }
     },
-    fixedColumnDef {
+    fixedColumnDef("fixedcolumndef/fixedColumnDefTemplate.stg") {
         @Override
         public boolean isFixedTemplate() {
             return true;
@@ -244,21 +215,26 @@ public enum GenerateType {
             super.write(option,resultFile,param.add("columns", defs));
         }
 
-        @Override
-        protected STGroup getStGroup() {
-            return new TemplateRender.Builder()
-                    .setTemplateParameterAttribute(null)
-                    .build()
-                    .createSTGroup("fixedcolumndef/fixedColumnDefTemplate.stg");
-        }
     };
+
+    private final String stgPath;
+
+    GenerateType(final String stgPath) {
+        this.stgPath = stgPath;
+    }
 
     public boolean isAny(final GenerateType... expects) {
         return Stream.of(expects).anyMatch(it -> it == this);
     }
 
     protected STGroup getStGroup() {
-        return null;
+        if (this.stgPath == null) {
+            return null;
+        }
+        return new TemplateRender.Builder()
+                .setTemplateParameterAttribute(null)
+                .build()
+                .createSTGroup(this.stgPath);
     }
 
     protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
