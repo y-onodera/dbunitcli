@@ -98,10 +98,6 @@ public record GenerateOption(
     }
 
     public String resultPath(final Parameter param) {
-        if (this.generateType() == GenerateType.javaBean) {
-            final String tableName = param.get("tableName").toString();
-            return this.resultPath + "/" + Strings.snakeToCamel(tableName, Character::toUpperCase) + ".java";
-        }
         return this.templateOption.getTemplateRender().render(this.resultPath(), param);
     }
 
@@ -114,6 +110,9 @@ public record GenerateOption(
         if (this.generateType() == GenerateType.fixedColumnDef) {
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
             return this.resultPath + "/" + tableName + ".json";
+        }
+        if (this.generateType() == GenerateType.javaBean) {
+            return this.resultPath + "/" + this.templateOption.getTemplateRender().getAttributeName("tableName", "snakeToUpperCamel") + ".java";
         }
         return this.resultPath;
     }
