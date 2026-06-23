@@ -9,7 +9,6 @@ import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
@@ -167,7 +166,6 @@ public record GenerateOption(
             case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
             case javaBean -> srcComponent.remove("-src.loadData")
                         .remove("-src.useJdbcMetaData");
-            case scaffold -> { return result; }
             case fixedColumnDef -> {
                 result.put("-fixedLength", this.fixedLength)
                         .put("-defaultLength", Integer.toString(this.defaultLength))
@@ -189,11 +187,12 @@ public record GenerateOption(
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
+        if (this.generateType().isMetadataOnly()) {
+            builder.setUseJdbcMetaData(true);
+            builder.setLoadData(false);
+        }
         switch (this.generateType()) {
-            case settings -> { builder.setUseJdbcMetaData(true); builder.setLoadData(false); }
             case javaBean -> {
-                builder.setUseJdbcMetaData(true);
-                builder.setLoadData(false);
                 if (Strings.isEmpty(this.srcData.getSetting())) {
                     builder.setTableSeparators(new FromJsonTableSeparatorsBuilder(this.srcData.settingEncoding())
                             .loadFromClasspath("javabean/javaBeanSettings.json")
@@ -202,7 +201,6 @@ public record GenerateOption(
             }
             case sql -> builder.setUseJdbcMetaData(true);
             case xlsxTemplate, fixedColumnDef -> builder.setLoadData(false);
-            case scaffold -> builder.setSource(DataSourceType.none);
             default -> { }
         }
         return builder.build();
