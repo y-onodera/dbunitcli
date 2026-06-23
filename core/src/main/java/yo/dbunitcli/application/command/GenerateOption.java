@@ -9,6 +9,7 @@ import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
@@ -201,7 +202,7 @@ public record GenerateOption(
             }
             case sql -> builder.setUseJdbcMetaData(true);
             case xlsxTemplate, fixedColumnDef -> builder.setLoadData(false);
-            case scaffold -> builder.setSource(yo.dbunitcli.dataset.DataSourceType.none);
+            case scaffold -> builder.setSource(DataSourceType.none);
             default -> { }
         }
         return builder.build();
