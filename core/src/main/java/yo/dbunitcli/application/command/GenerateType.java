@@ -148,15 +148,18 @@ public enum GenerateType {
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
             final List<Map<String, Object>> rows = (List<Map<String, Object>>) param.get("rows");
-            final List<String> pkColumnNames = rows == null ? List.of()
-                    : rows.stream()
-                          .filter(row -> Boolean.TRUE.equals(row.get("IS_PK")))
-                          .map(row -> row.get("COLUMN_NAME").toString())
-                          .toList();
+            final List<Map<String, Object>> pkRows = rows == null ? List.of()
+                    : rows.stream().filter(row -> Boolean.TRUE.equals(row.get("IS_PK"))).toList();
+            final List<String> pkColumnNames = pkRows.stream()
+                    .map(row -> row.get("COLUMN_NAME").toString())
+                    .toList();
+            final String pkConstraintName = pkRows.isEmpty() ? null
+                    : (String) pkRows.getFirst().get("PK_NAME");
             final String tableRemarks = rows == null || rows.isEmpty() ? ""
                     : (String) rows.getFirst().getOrDefault("TABLE_REMARKS", "");
             super.write(option, resultFile, param
                     .add("pkColumnNames", pkColumnNames)
+                    .add("pkConstraintName", pkConstraintName)
                     .add("tableRemarks", tableRemarks));
         }
     },

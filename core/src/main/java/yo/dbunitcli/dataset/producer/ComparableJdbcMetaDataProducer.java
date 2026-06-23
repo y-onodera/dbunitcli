@@ -12,8 +12,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer {
 
@@ -26,7 +26,8 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
             new Column("DECIMAL_DIGITS", DataType.VARCHAR),
             new Column("NULLABLE", DataType.BOOLEAN),
             new Column("REMARKS", DataType.VARCHAR),
-            new Column("IS_PK", DataType.BOOLEAN)
+            new Column("IS_PK", DataType.BOOLEAN),
+            new Column("PK_NAME", DataType.VARCHAR)
     };
 
     public ComparableJdbcMetaDataProducer(final ComparableDataSetParam param) {
@@ -50,7 +51,7 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
             final String tableName = this.source.tableName();
             try {
                 final DatabaseMetaData meta = this.connection.getConnection().getMetaData();
-                final Set<String> pkColumns = loadPrimaryKeys(meta, tableName);
+                final Map<String, String> pkInfo = loadPrimaryKeys(meta, tableName);
                 final String tableRemarks = loadTableRemarks(meta, tableName);
                 final var metaData = new DefaultTableMetaData(tableName, COLUMN_DEF_SCHEMA);
                 final var mapper = context.createMapper(this.source.wrap(metaData));
@@ -64,11 +65,13 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
                         final String decDigits = resolveDecimalDigits(colRs.getString("DECIMAL_DIGITS"));
                         final boolean nullable = colRs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
                         final String remarks = colRs.getString("REMARKS");
+                        final boolean isPk = pkInfo.containsKey(colName);
                         mapper.addRow(new Object[]{
                                 tableName, tableRemarks,
                                 colName, typeName, colSize, decDigits, nullable,
                                 remarks != null ? remarks : "",
-                                pkColumns.contains(colName)
+                                isPk,
+                                isPk ? pkInfo.get(colName) : null
                         });
                     }
                 }
@@ -83,12 +86,12 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
             return new MetaDataTableExecutor(this.source, builder.build(), this.connection);
         }
 
-        private static Set<String> loadPrimaryKeys(final DatabaseMetaData meta, final String tableName)
+        private static Map<String, String> loadPrimaryKeys(final DatabaseMetaData meta, final String tableName)
                 throws SQLException {
-            final Set<String> pkColumns = new HashSet<>();
+            final Map<String, String> pkColumns = new LinkedHashMap<>();
             try (ResultSet pkRs = meta.getPrimaryKeys(null, null, tableName)) {
                 while (pkRs.next()) {
-                    pkColumns.add(pkRs.getString("COLUMN_NAME"));
+                    pkColumns.put(pkRs.getString("COLUMN_NAME"), pkRs.getString("PK_NAME"));
                 }
             }
             return pkColumns;
