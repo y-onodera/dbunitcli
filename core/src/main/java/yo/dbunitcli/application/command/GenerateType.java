@@ -14,6 +14,8 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -203,6 +205,42 @@ public enum GenerateType {
                 throws IOException {
             final String tableName = param.get("tableName").toString();
             super.write(option, resultFile, param.add("className", Strings.capitalize(tableName.toLowerCase())));
+        }
+    },
+    scaffold {
+        @Override
+        public boolean isFixedTemplate() {
+            return true;
+        }
+
+        @Override
+        public ParameterUnit getFixedUnit() {
+            return ParameterUnit.dataset;
+        }
+
+        @Override
+        public String getTemplateString(final GenerateOption option) {
+            return "";
+        }
+
+        @Override
+        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
+                throws IOException {
+            final File baseDir = option.getResultDir();
+            final File settingDir = new File(baseDir, "resources/setting");
+            final File templateDir = new File(baseDir, "resources/template");
+            settingDir.mkdirs();
+            templateDir.mkdirs();
+            this.writeClasspathResource("scaffold/scaffoldSettings.json", new File(settingDir, "scaffold.json"));
+            this.writeClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
+            this.writeClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
+            this.writeClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
+            this.writeClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
+        }
+
+        private void writeClasspathResource(final String resource, final File dest) throws IOException {
+            final String content = FileResources.readClasspathResource(resource);
+            Files.writeString(dest.toPath(), content, StandardCharsets.UTF_8);
         }
     },
     fixedColumnDef {

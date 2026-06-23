@@ -1,0 +1,13 @@
+{
+  "commonSettings": [
+    {
+      "string": {
+        "PACKAGE": "''",
+        "javaType": "TYPE_NAME.toUpperCase().contains('CHAR') || TYPE_NAME.toUpperCase().contains('TEXT') || TYPE_NAME.toUpperCase().contains('CLOB') ? 'String' : TYPE_NAME.toUpperCase().contains('TIMESTAMP') || TYPE_NAME.toUpperCase().contains('DATETIME') ? 'java.time.LocalDateTime' : TYPE_NAME.toUpperCase().contains('DATE') ? 'java.time.LocalDate' : TYPE_NAME.toUpperCase().contains('TIME') ? 'java.time.LocalTime' : TYPE_NAME.toUpperCase().contains('BOOL') || TYPE_NAME.toUpperCase().contains('BIT') ? 'Boolean' : TYPE_NAME.toUpperCase().contains('BINARY') || TYPE_NAME.toUpperCase().contains('BLOB') ? 'byte[]' : TYPE_NAME.toUpperCase().contains('BIGINT') || TYPE_NAME.toUpperCase().contains('INT8') ? 'Long' : TYPE_NAME.toUpperCase().contains('INT') ? 'Integer' : TYPE_NAME.toUpperCase().contains('DECIMAL') || TYPE_NAME.toUpperCase().contains('NUMERIC') || TYPE_NAME.toUpperCase().contains('NUMBER') || TYPE_NAME.toUpperCase().contains('FLOAT') || TYPE_NAME.toUpperCase().contains('DOUBLE') || TYPE_NAME.toUpperCase().contains('REAL') ? 'java.math.BigDecimal' : 'Object'"
+      },
+      "boolean": {
+        "isBoolean": "javaType == 'Boolean'"
+      }
+    }
+  ]
+}

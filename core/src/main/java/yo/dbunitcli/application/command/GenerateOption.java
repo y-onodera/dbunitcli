@@ -166,6 +166,7 @@ public record GenerateOption(
             case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
             case javaBean -> srcComponent.remove("-src.loadData")
                         .remove("-src.useJdbcMetaData");
+            case scaffold -> { return result; }
             case fixedColumnDef -> {
                 result.put("-fixedLength", this.fixedLength)
                         .put("-defaultLength", Integer.toString(this.defaultLength))
@@ -200,6 +201,7 @@ public record GenerateOption(
             }
             case sql -> builder.setUseJdbcMetaData(true);
             case xlsxTemplate, fixedColumnDef -> builder.setLoadData(false);
+            case scaffold -> builder.setSource(yo.dbunitcli.dataset.DataSourceType.none);
             default -> { }
         }
         return builder.build();
