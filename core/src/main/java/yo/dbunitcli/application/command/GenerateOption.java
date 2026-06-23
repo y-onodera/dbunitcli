@@ -5,20 +5,16 @@ import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
-import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DbOperation;
-import yo.dbunitcli.dataset.IDataSetConverter;
-import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -41,7 +37,6 @@ public record GenerateOption(
         , String fixedLength
         , int defaultLength
         , String align
-        , DataSetConverterOption datasetResult
 ) implements CommandLineOption<GenerateDto> {
 
     public static GenerateDto toDto(final String[] args) {
@@ -50,7 +45,6 @@ public record GenerateOption(
                 .populate(args, dto);
         new ArgumentMapper("src").populate(args, dto.getSrcData());
         new ArgumentMapper("template").populate(args, dto.getTemplateOption());
-        new ArgumentMapper("datasetResult").populate(args, dto.getDatasetResult());
         return dto;
     }
 
@@ -81,7 +75,6 @@ public record GenerateOption(
                 , Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : ""
                 , Strings.isNotEmpty(dto.getDefaultLength()) ? Integer.parseInt(dto.getDefaultLength()) : 10
                 , Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left"
-                , new DataSetConverterOption("datasetResult", dto.getDatasetResult())
         );
     }
 
@@ -173,12 +166,6 @@ public record GenerateOption(
             case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
             case javaBean -> srcComponent.remove("-src.loadData")
                         .remove("-src.useJdbcMetaData");
-            case scaffold -> {
-                result.addComponent("srcData", srcComponent.build());
-                result.addComponent("datasetResult", this.datasetResult.toParameters());
-                result.putDir("-result", this.resultDir, BaseDir.RESULT);
-                return result;
-            }
             case fixedColumnDef -> {
                 result.put("-fixedLength", this.fixedLength)
                         .put("-defaultLength", Integer.toString(this.defaultLength))
@@ -217,32 +204,6 @@ public record GenerateOption(
             default -> { }
         }
         return builder.build();
-    }
-
-    public List<String> scaffoldParamLines(final GenerateType genType) {
-        final ParametersBuilder builder = new ParametersBuilder();
-        builder.put("-generateType", genType, GenerateType.class);
-        final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
-        srcComponent.remove("-src.loadData")
-                    .remove("-src.useJdbcMetaData")
-                    .put("-setting", "resources/setting/scaffold.json");
-        builder.addComponent("srcData", srcComponent.build());
-        builder.putDir("-result", this.resultDir, BaseDir.RESULT);
-        if (genType == GenerateType.ddl) {
-            builder.put("-sqlFilePrefix", this.sqlFilePrefix)
-                   .put("-sqlFileSuffix", this.sqlFileSuffix);
-        }
-        return builder.build().toList(false);
-    }
-
-    public void convertMetadata() {
-        final IDataSetConverter converter = new DataSetConverterLoader()
-                .get(this.datasetResult.getParam().build());
-        this.getComparableDataSetLoader()
-                .loadDataSet(this.dataSetParam()
-                        .toBuilder()
-                        .setConverter(converter)
-                        .build());
     }
 
     public File getTemplatePath() {

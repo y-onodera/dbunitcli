@@ -1,0 +1,3 @@
+-src.srcType=jdbcMetadata
+-src.src=resources/src/csv
+-result=target/scaffold/result

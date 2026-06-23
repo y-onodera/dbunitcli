@@ -101,7 +101,8 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
                     .addParameterFiles(Type.convert)
                     .addParameterFiles(Type.generate)
                     .addParameterFiles(Type.run)
-                    .addParameterFiles(Type.parameterize);
+                    .addParameterFiles(Type.parameterize)
+                    .addParameterFiles(Type.scaffold);
             this.templates = new ResourceFile(
                     new File(this.parameters.get(Type.parameterize).baseDir(), "template")
                     , FileResources::searchTemplate);

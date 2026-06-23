@@ -3,7 +3,6 @@ package yo.dbunitcli.application.command;
 import picocli.CommandLine;
 import yo.dbunitcli.application.CommandDto;
 import yo.dbunitcli.application.ParameterUnit;
-import yo.dbunitcli.application.dto.DataSetConverterDto;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.dto.TemplateRenderDto;
 import yo.dbunitcli.dataset.DbOperation;
@@ -42,8 +41,6 @@ public class GenerateDto extends CommandDto {
     private DataSetLoadDto srcData = new DataSetLoadDto();
 
     private TemplateRenderDto templateOption = new TemplateRenderDto();
-
-    private DataSetConverterDto datasetResult = new DataSetConverterDto();
 
     public GenerateType getGenerateType() {
         return this.generateType;
@@ -179,13 +176,5 @@ public class GenerateDto extends CommandDto {
 
     public void setTemplateOption(final TemplateRenderDto templateOption) {
         this.templateOption = templateOption;
-    }
-
-    public DataSetConverterDto getDatasetResult() {
-        return this.datasetResult;
-    }
-
-    public void setDatasetResult(final DataSetConverterDto datasetResult) {
-        this.datasetResult = datasetResult;
     }
 }

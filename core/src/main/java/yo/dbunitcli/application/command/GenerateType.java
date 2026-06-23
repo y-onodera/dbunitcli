@@ -14,10 +14,7 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -212,58 +209,6 @@ public enum GenerateType {
             super.write(option, resultFile, param.add("className", Strings.capitalize(tableName.toLowerCase())));
         }
     },
-    scaffold {
-        @Override
-        public boolean isFixedTemplate() {
-            return true;
-        }
-
-        @Override
-        public ParameterUnit getFixedUnit() {
-            return ParameterUnit.dataset;
-        }
-
-        @Override
-        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
-                throws IOException {
-            final File baseDir = option.getResultDir();
-            final File settingDir = new File(baseDir, "resources/setting");
-            final File templateDir = new File(baseDir, "resources/template");
-            final File paramDir = new File(baseDir, "resources/param");
-            settingDir.mkdirs();
-            templateDir.mkdirs();
-            paramDir.mkdirs();
-            this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "scaffold.json"));
-            this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
-            this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
-            this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
-            this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
-            @SuppressWarnings("unchecked")
-            final Map<String, Map<String, Object>> dataSet =
-                    (Map<String, Map<String, Object>>) param.get("dataSet");
-            if (dataSet != null) {
-                for (final String tableName : dataSet.keySet()) {
-                    this.writeParamFile(option, paramDir, tableName, GenerateType.ddl);
-                    this.writeParamFile(option, paramDir, tableName, GenerateType.javaBean);
-                }
-            }
-            option.convertMetadata();
-        }
-
-        private void writeParamFile(final GenerateOption option, final File paramDir,
-                                    final String tableName, final GenerateType genType) throws IOException {
-            final List<String> lines = option.scaffoldParamLines(genType);
-            lines.add("-regTableInclude=" + tableName);
-            final File paramFile = new File(paramDir, tableName + "_" + genType.name() + ".param");
-            Files.write(paramFile.toPath(), lines, StandardCharsets.UTF_8);
-        }
-
-        private void copyClasspathResource(final String resource, final File dest) throws IOException {
-            try (final InputStream is = GenerateType.class.getClassLoader().getResourceAsStream(resource)) {
-                Files.copy(is, dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            }
-        }
-    },
     fixedColumnDef {
         @Override
         public boolean isFixedTemplate() {
@@ -341,7 +286,7 @@ public enum GenerateType {
     }
 
     public boolean isMetadataOnly() {
-        return this.isAny(settings, javaBean, scaffold);
+        return this.isAny(settings, javaBean);
     }
 
     public boolean isText() {

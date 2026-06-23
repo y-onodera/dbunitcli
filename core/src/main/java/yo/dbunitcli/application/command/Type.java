@@ -4,7 +4,7 @@ import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.CommandType;
 
 public enum Type implements CommandType {
-    compare, convert, generate, parameterize, run;
+    compare, convert, generate, parameterize, run, scaffold;
 
     @Override
     public Command<?, ?> getCommand() {
@@ -14,6 +14,7 @@ public enum Type implements CommandType {
             case generate -> new Generate();
             case parameterize -> new Parameterize();
             case run -> new Run();
+            case scaffold -> new Scaffold();
         };
     }
 }
