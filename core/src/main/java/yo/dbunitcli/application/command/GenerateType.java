@@ -340,6 +340,10 @@ public enum GenerateType {
         return this.isAny(xlsx, xls);
     }
 
+    public boolean isMetadataOnly() {
+        return this.isAny(settings, javaBean, scaffold);
+    }
+
     public boolean isText() {
         return !this.isAny(xlsx, xls, xlsxTemplate);
     }

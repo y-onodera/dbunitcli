@@ -200,11 +200,12 @@ public record GenerateOption(
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
+        if (this.generateType().isMetadataOnly()) {
+            builder.setUseJdbcMetaData(true);
+            builder.setLoadData(false);
+        }
         switch (this.generateType()) {
-            case settings -> { builder.setUseJdbcMetaData(true); builder.setLoadData(false); }
             case javaBean -> {
-                builder.setUseJdbcMetaData(true);
-                builder.setLoadData(false);
                 if (Strings.isEmpty(this.srcData.getSetting())) {
                     builder.setTableSeparators(new FromJsonTableSeparatorsBuilder(this.srcData.settingEncoding())
                             .loadFromClasspath("javabean/javaBeanSettings.json")
@@ -213,7 +214,6 @@ public record GenerateOption(
             }
             case sql -> builder.setUseJdbcMetaData(true);
             case xlsxTemplate, fixedColumnDef -> builder.setLoadData(false);
-            case scaffold -> { builder.setUseJdbcMetaData(true); builder.setLoadData(false); }
             default -> { }
         }
         return builder.build();
