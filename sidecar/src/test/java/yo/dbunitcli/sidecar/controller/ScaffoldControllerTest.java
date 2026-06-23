@@ -29,14 +29,14 @@ class ScaffoldControllerTest {
     Workspace workspace;
 
     @AfterEach
-    public void tearDown() throws IOException {
+    public void tearDown() {
         this.tryDelete("new item");
         this.tryDelete("savedScaffold");
         this.tryDelete("jdbcToScaffold(1)");
         this.tryDelete("renamed");
     }
 
-    private void tryDelete(final String name) throws IOException {
+    private void tryDelete(final String name) {
         try {
             this.client.toBlocking().retrieve(
                     HttpRequest.POST("dbunit-cli/scaffold/delete", "{\"name\":\"" + name + "\"}"));

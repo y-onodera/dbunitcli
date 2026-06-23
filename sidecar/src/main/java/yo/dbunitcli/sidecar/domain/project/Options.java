@@ -9,6 +9,7 @@ import yo.dbunitcli.resource.FileResources;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -97,12 +98,7 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
 
         public void workspace(final File workspace) {
             this.baseDir = new File(workspace, "option");
-            this.addParameterFiles(Type.compare)
-                    .addParameterFiles(Type.convert)
-                    .addParameterFiles(Type.generate)
-                    .addParameterFiles(Type.run)
-                    .addParameterFiles(Type.parameterize)
-                    .addParameterFiles(Type.scaffold);
+            Arrays.stream(Type.values()).forEach(this::addParameterFiles);
             this.templates = new ResourceFile(
                     new File(this.parameters.get(Type.parameterize).baseDir(), "template")
                     , FileResources::searchTemplate);

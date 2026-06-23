@@ -96,7 +96,7 @@ public record ScaffoldOption(
         return result;
     }
 
-    private List<String> paramLines(final String genType) {
+    private List<String> paramLines(final String genType, final String tableName) {
         final ParametersBuilder builder = new ParametersBuilder();
         builder.put("-generateType", genType, false);
         final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
@@ -109,15 +109,14 @@ public record ScaffoldOption(
             builder.put("-sqlFilePrefix", this.sqlFilePrefix)
                    .put("-sqlFileSuffix", this.sqlFileSuffix);
         }
+        builder.put("-regTableInclude", tableName);
         return builder.build().toList(false);
     }
 
     private void writeParamFile(final File paramDir, final String tableName, final String genType)
             throws IOException {
-        final List<String> lines = this.paramLines(genType);
-        lines.add("-regTableInclude=" + tableName);
         Files.write(new File(paramDir, tableName + "_" + genType + ".param").toPath(),
-                lines, StandardCharsets.UTF_8);
+                this.paramLines(genType, tableName), StandardCharsets.UTF_8);
     }
 
     private void copyClasspathResource(final String resource, final File dest) throws IOException {
