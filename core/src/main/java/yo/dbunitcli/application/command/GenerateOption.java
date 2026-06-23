@@ -12,6 +12,7 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
@@ -112,8 +113,10 @@ public record GenerateOption(
             return this.resultPath + "/" + tableName + ".json";
         }
         if (this.generateType() == GenerateType.javaBean) {
-            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
-            return this.resultPath + "/" + Strings.capitalize(tableName.toLowerCase()) + ".java";
+            final TemplateRender render = this.templateOption.getTemplateRender();
+            final String prefix = Optional.ofNullable(render.templateParameterAttribute()).orElse("");
+            final String attr = (prefix.isEmpty() ? "" : prefix + ".") + "tableName; format=\"snakeToUpperCamel\"";
+            return this.resultPath + "/" + render.templateVarStart() + attr + render.templateVarStop() + ".java";
         }
         return this.resultPath;
     }
@@ -190,6 +193,9 @@ public record GenerateOption(
         if (this.generateType().isMetadataOnly()) {
             builder.setUseJdbcMetaData(true);
             builder.setLoadData(false);
+        }
+        if (this.generateType().requiresJdbcMetaData()) {
+            builder.setUseJdbcMetaData(true);
         }
         switch (this.generateType()) {
             case javaBean -> {

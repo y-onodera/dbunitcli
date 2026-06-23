@@ -1,3 +1,13 @@
+delimiters "$", "$"
+getter(row) ::= <<
+    public $row.javaType$ $if(row.isBoolean)$is$else$get$endif$$row.COLUMN_NAME; format="snakeToUpperCamel"$() {
+        return this.$row.COLUMN_NAME; format="snakeToCamel"$;
+    }>>
+camelName(row) ::= <<$row.COLUMN_NAME; format="snakeToCamel"$>>
+setter(row) ::= <<
+    public void set$row.COLUMN_NAME; format="snakeToUpperCamel"$($row.javaType$ $camelName(row)$) {
+        this.$camelName(row)$ = $camelName(row)$;
+    }>>
 javaBeanClass() ::= <<
 $if(first(rows).PACKAGE)$package $first(rows).PACKAGE$;
 
@@ -6,13 +16,8 @@ $endif$public class $className$ {
 $rows:{row |$if(row.REMARKS)$    /** $row.REMARKS$ */
 $endif$    private $row.javaType$ $row.COLUMN_NAME; format="snakeToCamel"$;}; separator="\n"$
 
-$rows:{row |
-    public $row.javaType$ $if(row.isBoolean)$is$else$get$endif$$row.COLUMN_NAME; format="snakeToUpperCamel"$() {
-        return this.$row.COLUMN_NAME; format="snakeToCamel"$;
-    }
+$rows:{row |$getter(row)$
 
-    public void set$row.COLUMN_NAME; format="snakeToUpperCamel"$($row.javaType$ $row.COLUMN_NAME; format="snakeToCamel"$) {
-        this.$row.COLUMN_NAME; format="snakeToCamel"$ = $row.COLUMN_NAME; format="snakeToCamel"$;
-    }
-}; separator="\n"$}
+$setter(row)$}; separator="\n"$
+}
 >>

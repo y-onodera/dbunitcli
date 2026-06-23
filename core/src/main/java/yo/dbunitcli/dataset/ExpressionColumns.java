@@ -90,8 +90,7 @@ public record ExpressionColumns(List<Expressions> values) {
                                 yield new BigDecimal(val);
                             }
                         })
-                .findFirst()
-                .orElse("");
+                .reduce(null, (a, b) -> b != null ? b : a);
     }
 
     public enum ParameterType {

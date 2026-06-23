@@ -262,7 +262,11 @@ public enum GenerateType {
     }
 
     public boolean isMetadataOnly() {
-        return this.isAny(settings, javaBean);
+        return this.isAny(settings);
+    }
+
+    public boolean requiresJdbcMetaData() {
+        return this.isAny(javaBean);
     }
 
     public boolean isText() {
