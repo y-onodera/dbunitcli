@@ -197,14 +197,13 @@ public record GenerateOption(
         if (this.generateType().requiresJdbcMetaData()) {
             builder.setUseJdbcMetaData(true);
         }
+        final String defaultSettings = this.generateType().defaultSettingsPath();
+        if (defaultSettings != null && Strings.isEmpty(this.srcData.getSetting())) {
+            builder.setTableSeparators(new FromJsonTableSeparatorsBuilder(this.srcData.settingEncoding())
+                    .loadFromClasspath(defaultSettings)
+                    .build());
+        }
         switch (this.generateType()) {
-            case javaBean -> {
-                if (Strings.isEmpty(this.srcData.getSetting())) {
-                    builder.setTableSeparators(new FromJsonTableSeparatorsBuilder(this.srcData.settingEncoding())
-                            .loadFromClasspath("javabean/javaBeanSettings.json")
-                            .build());
-                }
-            }
             case sql -> builder.setUseJdbcMetaData(true);
             case xlsxTemplate, fixedColumnDef -> builder.setLoadData(false);
             default -> { }

@@ -1,0 +1,7 @@
+-srcType=csv
+-src=src/test/resources/yo/dbunitcli/application/src/generate/jdbc_metadata_mapped
+-encoding=UTF-8
+-setting=src/test/resources/yo/dbunitcli/application/command/javaBeanMappingSettings.json
+-settingEncoding=UTF-8
+-generateType=javaBean
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/javabean/result

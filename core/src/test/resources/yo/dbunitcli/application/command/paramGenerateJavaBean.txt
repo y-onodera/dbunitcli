@@ -1,7 +1,5 @@
 -srcType=csv
 -src=src/test/resources/yo/dbunitcli/application/src/generate/jdbc_metadata
 -encoding=UTF-8
--setting=src/main/resources/javabean/javaBeanSettings.json
--settingEncoding=UTF-8
 -generateType=javaBean
 -resultPath=target/test-classes/yo/dbunitcli/application/generate/javabean/result

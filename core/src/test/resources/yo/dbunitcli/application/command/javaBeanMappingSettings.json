@@ -1,0 +1,20 @@
+{
+  "commonSettings": [
+    {
+      "string": {
+        "COLUMN_NAME": "col_name",
+        "TYPE_NAME": "sql_type",
+        "TABLE_REMARKS": "table_desc",
+        "REMARKS": "col_desc",
+        "TABLE_NAME": "table_name",
+        "PACKAGE": "java_pkg != null && !java_pkg.isEmpty() ? java_pkg : null",
+        "javaType": "sql_type.toUpperCase().contains('CHAR') || sql_type.toUpperCase().contains('TEXT') || sql_type.toUpperCase().contains('CLOB') ? 'String' : sql_type.toUpperCase().contains('TIMESTAMP') || sql_type.toUpperCase().contains('DATETIME') ? 'java.time.LocalDateTime' : sql_type.toUpperCase().contains('DATE') ? 'java.time.LocalDate' : sql_type.toUpperCase().contains('TIME') ? 'java.time.LocalTime' : sql_type.toUpperCase().contains('BOOL') || sql_type.toUpperCase().contains('BIT') ? 'Boolean' : sql_type.toUpperCase().contains('BINARY') || sql_type.toUpperCase().contains('BLOB') ? 'byte[]' : sql_type.toUpperCase().contains('BIGINT') || sql_type.toUpperCase().contains('INT8') ? 'Long' : sql_type.toUpperCase().contains('INT') ? 'Integer' : sql_type.toUpperCase().contains('DECIMAL') || sql_type.toUpperCase().contains('NUMERIC') || sql_type.toUpperCase().contains('NUMBER') || sql_type.toUpperCase().contains('FLOAT') || sql_type.toUpperCase().contains('DOUBLE') || sql_type.toUpperCase().contains('REAL') ? 'java.math.BigDecimal' : 'Object'"
+      },
+      "boolean": {
+        "NULLABLE": "is_nullable",
+        "IS_PK": "is_pk",
+        "isBoolean": "javaType == 'Boolean'"
+      }
+    }
+  ]
+}

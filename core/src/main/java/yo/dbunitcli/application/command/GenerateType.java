@@ -116,6 +116,11 @@ public enum GenerateType {
         }
 
         @Override
+        public String defaultSettingsPath() {
+            return "sql/ddlSettings.json";
+        }
+
+        @Override
         public String getTemplateString(final GenerateOption option) {
             return FileResources.readClasspathResource("sql/ddlTemplate.txt");
         }
@@ -166,6 +171,11 @@ public enum GenerateType {
         @Override
         public ParameterUnit getFixedUnit() {
             return ParameterUnit.table;
+        }
+
+        @Override
+        public String defaultSettingsPath() {
+            return "javabean/javaBeanSettings.json";
         }
 
         @Override
@@ -267,6 +277,10 @@ public enum GenerateType {
 
     public boolean requiresJdbcMetaData() {
         return this.isAny(javaBean);
+    }
+
+    public String defaultSettingsPath() {
+        return null;
     }
 
     public boolean isText() {

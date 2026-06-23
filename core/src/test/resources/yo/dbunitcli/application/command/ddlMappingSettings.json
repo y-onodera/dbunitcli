@@ -1,0 +1,20 @@
+{
+  "commonSettings": [
+    {
+      "string": {
+        "COLUMN_NAME": "col_name",
+        "TYPE_NAME": "sql_type",
+        "COLUMN_SIZE": "precision != null && !precision.isEmpty() ? precision : null",
+        "DECIMAL_DIGITS": "scale != null && !scale.isEmpty() ? scale : null",
+        "PK_NAME": "pk_constraint_name",
+        "TABLE_REMARKS": "table_desc",
+        "REMARKS": "col_desc",
+        "TABLE_NAME": "table_name"
+      },
+      "boolean": {
+        "NULLABLE": "is_nullable",
+        "IS_PK": "is_pk"
+      }
+    }
+  ]
+}
