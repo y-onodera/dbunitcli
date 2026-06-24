@@ -172,6 +172,20 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateDdlWithScaffoldSettings() throws Exception {
+            Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateDdlWithScaffoldSettings.txt"});
+            GenerateTest.subDirectory = "generate/ddl";
+            this.assertGenerateFileEquals("EMPLOYEE.sql", "UTF-8");
+        }
+
+        @Test
+        public void testGenerateJavaBeanWithScaffoldSettings() throws Exception {
+            Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateJavaBeanWithScaffoldSettings.txt"});
+            GenerateTest.subDirectory = "generate/javabean";
+            this.assertGenerateFileEquals("Employee.java", "UTF-8");
+        }
+
+        @Test
         public void testGenerateDdlWithMapping() throws Exception {
             Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateDdlWithMapping.txt"});
             GenerateTest.subDirectory = "generate/ddl";
