@@ -9,7 +9,6 @@ import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -102,9 +101,6 @@ public record ScaffoldOption(
                 final ComparableDataSetParam.Builder paramBuilder = this.srcData.getParam()
                         .setUseJdbcMetaData(true)
                         .setLoadData(false);
-                if (this.datasetResult.resultType() != null) {
-                    paramBuilder.setConverter(new DataSetConverterLoader().get(this.datasetResult.getParam().build()));
-                }
                 final ComparableDataSet dataSet = this.getComparableDataSetLoader().loadDataSet(paramBuilder.build());
                 for (final String tableName : dataSet.getTableNames()) {
                     if (needDdlParam) {

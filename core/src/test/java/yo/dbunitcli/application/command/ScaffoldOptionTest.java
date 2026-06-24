@@ -45,7 +45,8 @@ class ScaffoldOptionTest {
                 "-src.srcType=jdbcMetadata",
                 "-src.jdbcUrl=" + JDBC_URL,
                 "-src.jdbcUser=" + JDBC_USER,
-                "-src.jdbcPass=" + JDBC_PASS
+                "-src.jdbcPass=" + JDBC_PASS,
+                "-src.regTableInclude=(?i)DOCUMENT"
         };
         return Stream.concat(Arrays.stream(base), Arrays.stream(extra)).toArray(String[]::new);
     }
