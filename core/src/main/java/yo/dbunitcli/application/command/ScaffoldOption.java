@@ -3,6 +3,7 @@ package yo.dbunitcli.application.command;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
+import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
@@ -17,6 +18,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.List;
 
 public record ScaffoldOption(
@@ -24,9 +26,14 @@ public record ScaffoldOption(
         , String resultDir
         , String sqlFilePrefix
         , String sqlFileSuffix
+        , List<String> generateTargets
+        , String commandType
+        , String[] commandInput
         , DataSetLoadOption srcData
         , DataSetConverterOption datasetResult
 ) implements CommandLineOption<ScaffoldDto> {
+
+    private static final String COMMAND_INPUT_PREFIX = "-commandInput.";
 
     public static ScaffoldDto toDto(final String[] args) {
         final ScaffoldDto dto = new ScaffoldDto();
@@ -34,6 +41,10 @@ public record ScaffoldOption(
                 .populate(args, dto);
         new ArgumentMapper("src").populate(args, dto.getSrcData());
         new ArgumentMapper("datasetResult").populate(args, dto.getDatasetResult());
+        dto.setCommandInput(Arrays.stream(args)
+                .filter(it -> it.startsWith(COMMAND_INPUT_PREFIX))
+                .map(it -> "-" + it.substring(COMMAND_INPUT_PREFIX.length()))
+                .toArray(String[]::new));
         return dto;
     }
 
@@ -42,6 +53,9 @@ public record ScaffoldOption(
                 , Strings.isNotEmpty(dto.getResultDir()) ? dto.getResultDir() : resultFile
                 , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
                 , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
+                , dto.getGenerateTargets() != null ? dto.getGenerateTargets() : List.of()
+                , Strings.isNotEmpty(dto.getCommandType()) ? dto.getCommandType() : ""
+                , dto.getCommandInput()
                 , new DataSetLoadOption("src", dto.getSrcData())
                 , new DataSetConverterOption("datasetResult", dto.getDatasetResult())
         );
@@ -55,22 +69,42 @@ public record ScaffoldOption(
         settingDir.mkdirs();
         templateDir.mkdirs();
         paramDir.mkdirs();
-        this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "scaffold.json"));
-        this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
-        this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
-        this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
-        this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
-
-        final ComparableDataSetParam.Builder paramBuilder = this.srcData.getParam()
-                .setUseJdbcMetaData(true)
-                .setLoadData(false);
-        if (this.datasetResult.resultType() != null) {
-            paramBuilder.setConverter(new DataSetConverterLoader().get(this.datasetResult.getParam().build()));
+        final boolean allTargets = this.generateTargets.isEmpty();
+        final boolean generateDdl = allTargets || this.generateTargets.contains("ddl");
+        final boolean generateJavaBean = allTargets || this.generateTargets.contains("javaBean");
+        final boolean generateParameter = (allTargets || this.generateTargets.contains("parameter"))
+                && Strings.isNotEmpty(this.commandType);
+        if (generateJavaBean) {
+            this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "scaffold.json"));
+            this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
+            this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
         }
-        final ComparableDataSet dataSet = this.getComparableDataSetLoader().loadDataSet(paramBuilder.build());
-        for (final String tableName : dataSet.getTableNames()) {
-            this.writeParamFile(paramDir, tableName, "ddl");
-            this.writeParamFile(paramDir, tableName, "javaBean");
+        if (generateDdl) {
+            this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
+            this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
+        }
+        if (generateDdl || generateJavaBean) {
+            final ComparableDataSetParam.Builder paramBuilder = this.srcData.getParam()
+                    .setUseJdbcMetaData(true)
+                    .setLoadData(false);
+            if (this.datasetResult.resultType() != null) {
+                paramBuilder.setConverter(new DataSetConverterLoader().get(this.datasetResult.getParam().build()));
+            }
+            final ComparableDataSet dataSet = this.getComparableDataSetLoader().loadDataSet(paramBuilder.build());
+            for (final String tableName : dataSet.getTableNames()) {
+                if (generateDdl) {
+                    this.writeParamFile(paramDir, tableName, "ddl");
+                }
+                if (generateJavaBean) {
+                    this.writeParamFile(paramDir, tableName, "javaBean");
+                }
+            }
+        }
+        if (generateParameter) {
+            final String[] shrunkArgs = new CommandParameters(Type.valueOf(this.commandType), this.commandInput)
+                    .shrink().args();
+            Files.write(new File(paramDir, this.commandType + ".param").toPath(),
+                    Arrays.asList(shrunkArgs), StandardCharsets.UTF_8);
         }
     }
 
@@ -93,6 +127,17 @@ public record ScaffoldOption(
         result.putDir("-result", this.resultDir, BaseDir.RESULT)
               .put("-sqlFilePrefix", this.sqlFilePrefix)
               .put("-sqlFileSuffix", this.sqlFileSuffix);
+        if (!this.generateTargets.isEmpty()) {
+            result.put("-generateTargets", String.join(",", this.generateTargets));
+        }
+        result.put("-commandType", this.commandType);
+        Arrays.stream(this.commandInput)
+              .filter(arg -> arg.startsWith("-"))
+              .forEach(arg -> {
+                  final int eqIdx = arg.indexOf('=');
+                  final String key = COMMAND_INPUT_PREFIX + arg.substring(1, eqIdx > 0 ? eqIdx : arg.length());
+                  result.put(key, eqIdx > 0 ? arg.substring(eqIdx + 1) : "true");
+              });
         return result;
     }
 
