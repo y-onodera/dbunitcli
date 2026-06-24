@@ -28,7 +28,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCommandController.class);
 
-    protected static final EnumSet<Option.BaseDir> SIDECAR_RESOLVE_BASEDIR = EnumSet.of(
+    private static final EnumSet<Option.BaseDir> SIDECAR_RESOLVE_BASEDIR = EnumSet.of(
             Option.BaseDir.SETTING, Option.BaseDir.TEMPLATE, Option.BaseDir.JDBC,
             Option.BaseDir.XLSX_SCHEMA, Option.BaseDir.PARAMETERIZE_TEMPLATE, Option.BaseDir.FIXED_COLUMN_DEF);
 
