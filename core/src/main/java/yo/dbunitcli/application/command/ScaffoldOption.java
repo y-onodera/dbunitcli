@@ -60,7 +60,6 @@ public record ScaffoldOption(
         final boolean allTargets = this.generateTargets.isEmpty();
         final boolean generateDdl = allTargets || this.generateTargets.contains("ddl");
         final boolean generateJavaBean = allTargets || this.generateTargets.contains("javaBean");
-        final boolean generateParameter = allTargets || this.generateTargets.contains("parameter");
         if (generateJavaBean) {
             this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "scaffold.json"));
         }
@@ -72,7 +71,7 @@ public record ScaffoldOption(
             this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
             this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
         }
-        if (generateDdl || generateJavaBean || generateParameter) {
+        if (generateDdl || generateJavaBean) {
             final ComparableDataSetParam.Builder paramBuilder = this.srcData.getParam()
                     .setUseJdbcMetaData(true)
                     .setLoadData(false);
@@ -81,10 +80,10 @@ public record ScaffoldOption(
             }
             final ComparableDataSet dataSet = this.getComparableDataSetLoader().loadDataSet(paramBuilder.build());
             for (final String tableName : dataSet.getTableNames()) {
-                if (generateDdl || generateParameter) {
+                if (generateDdl) {
                     this.writeParamFile(paramDir, tableName, "ddl");
                 }
-                if (generateJavaBean || generateParameter) {
+                if (generateJavaBean) {
                     this.writeParamFile(paramDir, tableName, "javaBean");
                 }
             }
