@@ -7,6 +7,7 @@ import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTableMappingContext;
 import yo.dbunitcli.dataset.ComparableTableMappingTask;
+import yo.dbunitcli.dataset.NameFilter;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -41,16 +42,15 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
     public Stream<? extends Source> getSourceStream() {
         try {
             final DatabaseMetaData meta = this.connection.getConnection().getMetaData();
+            final NameFilter filter = this.param().tableNameFilter();
             final List<Source> sources = new ArrayList<>();
             try (ResultSet rs = meta.getTables(null, null, "%", new String[]{"TABLE"})) {
                 while (rs.next()) {
                     final String tableName = rs.getString("TABLE_NAME");
-                    if (this.param().tableNameFilter().predicate(tableName)) {
-                        sources.add(Source.NONE.tableName(tableName));
-                    }
+                    sources.add(Source.NONE.tableName(tableName));
                 }
             }
-            return sources.stream();
+            return sources.stream().filter(it -> filter.predicate(it.tableName()));
         } catch (final SQLException e) {
             throw new AssertionError(e);
         }
