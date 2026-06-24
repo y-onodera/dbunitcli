@@ -112,6 +112,14 @@ public record TemplateRender(File templateGroup, String templateParameterAttribu
         return token;
     }
 
+    public String getAttributeName(final String name, final String format) {
+        String token = name;
+        if (!Optional.ofNullable(this.templateParameterAttribute()).orElse("").isEmpty()) {
+            token = this.templateParameterAttribute() + "." + name;
+        }
+        return this.templateVarStart() + token + "; format=\"" + format + "\"" + this.templateVarStop();
+    }
+
     public static class Builder {
 
         private File templateGroup;

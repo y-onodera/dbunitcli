@@ -96,6 +96,7 @@
                     <include>**/*.txt</include>
                     <include>**/*.stg</include>
                     <include>**/*.xml</include>
+                    <include>**/*.json</include>
                     <include>**/*.scmo</include>
                 </includes>
             </resource>

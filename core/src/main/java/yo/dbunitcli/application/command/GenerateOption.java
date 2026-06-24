@@ -112,8 +112,7 @@ public record GenerateOption(
             return this.resultPath + "/" + tableName + ".json";
         }
         if (this.generateType() == GenerateType.javaBean) {
-            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
-            return this.resultPath + "/" + Strings.capitalize(tableName.toLowerCase()) + ".java";
+            return this.resultPath + "/" + this.templateOption.getTemplateRender().getAttributeName("tableName", "snakeToUpperCamel") + ".java";
         }
         return this.resultPath;
     }
@@ -191,14 +190,16 @@ public record GenerateOption(
             builder.setUseJdbcMetaData(true);
             builder.setLoadData(false);
         }
+        if (this.generateType().requiresJdbcMetaData()) {
+            builder.setUseJdbcMetaData(true);
+        }
+        final String defaultSettings = this.generateType().defaultSettingsPath();
+        if (defaultSettings != null && Strings.isEmpty(this.srcData.getSetting())) {
+            builder.setTableSeparators(new FromJsonTableSeparatorsBuilder(this.srcData.settingEncoding())
+                    .loadFromClasspath(defaultSettings)
+                    .build());
+        }
         switch (this.generateType()) {
-            case javaBean -> {
-                if (Strings.isEmpty(this.srcData.getSetting())) {
-                    builder.setTableSeparators(new FromJsonTableSeparatorsBuilder(this.srcData.settingEncoding())
-                            .loadFromClasspath("javabean/javaBeanSettings.json")
-                            .build());
-                }
-            }
             case sql -> builder.setUseJdbcMetaData(true);
             case xlsxTemplate, fixedColumnDef -> builder.setLoadData(false);
             default -> { }

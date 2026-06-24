@@ -158,6 +158,34 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateDdl() throws Exception {
+            Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateDdl.txt"});
+            GenerateTest.subDirectory = "generate/ddl";
+            this.assertGenerateFileEquals("EMPLOYEE.sql", "UTF-8");
+        }
+
+        @Test
+        public void testGenerateJavaBean() throws Exception {
+            Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateJavaBean.txt"});
+            GenerateTest.subDirectory = "generate/javabean";
+            this.assertGenerateFileEquals("Employee.java", "UTF-8");
+        }
+
+        @Test
+        public void testGenerateDdlWithMapping() throws Exception {
+            Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateDdlWithMapping.txt"});
+            GenerateTest.subDirectory = "generate/ddl";
+            this.assertGenerateFileEquals("EMPLOYEE.sql", "UTF-8");
+        }
+
+        @Test
+        public void testGenerateJavaBeanWithMapping() throws Exception {
+            Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateJavaBeanWithMapping.txt"});
+            GenerateTest.subDirectory = "generate/javabean";
+            this.assertGenerateFileEquals("Employee.java", "UTF-8");
+        }
+
+        @Test
         public void testGenerateInsert() throws Exception {
             Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateInsert.txt"});
             GenerateTest.subDirectory = "generate/sql/insert";

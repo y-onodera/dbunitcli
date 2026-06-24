@@ -1,0 +1,5 @@
+-srcType=csv
+-src=src/test/resources/yo/dbunitcli/application/src/generate/jdbc_metadata
+-encoding=UTF-8
+-generateType=ddl
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/ddl/result

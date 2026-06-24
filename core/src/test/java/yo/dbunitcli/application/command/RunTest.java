@@ -6,6 +6,8 @@ import org.apache.tools.ant.taskdefs.Delete;
 import org.apache.tools.ant.taskdefs.Replace;
 import org.apache.tools.ant.types.FileSet;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -65,6 +67,7 @@ public class RunTest {
         }
 
         @Test
+        @EnabledOnOs(OS.WINDOWS)
         public void testCmd() throws Exception {
             RunTest.cmd = "cmd";
             Run.main(new String[]{"@" + RunTest.PARAMETER_DIR + "/paramRunCmd.txt"});
@@ -72,6 +75,7 @@ public class RunTest {
         }
 
         @Test
+        @EnabledOnOs(OS.WINDOWS)
         public void testBat() throws Exception {
             RunTest.cmd = "bat";
             Run.main(new String[]{"@" + RunTest.PARAMETER_DIR + "/paramRunBat.txt"});

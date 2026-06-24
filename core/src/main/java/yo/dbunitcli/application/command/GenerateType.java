@@ -14,14 +14,13 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public enum GenerateType {
-    txt {
+    txt(null, null) {
         @Override
         public String getTemplateString(final GenerateOption option) {
             final File templatePath = option.getTemplatePath();
@@ -32,7 +31,7 @@ public enum GenerateType {
             return FileResources.read(templatePath, option.templateOption().encoding());
         }
     },
-    xlsx {
+    xlsx(null, null) {
         @Override
         protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
             JxlsTemplateRender.builder()
@@ -46,7 +45,7 @@ public enum GenerateType {
                               .render(option.getTemplatePath(), resultFile, param, option.unit() != ParameterUnit.record);
         }
     },
-    xls {
+    xls(null, null) {
         @Override
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
@@ -61,7 +60,7 @@ public enum GenerateType {
                               .render(option.getTemplatePath(), resultFile, param, option.unit() != ParameterUnit.record);
         }
     },
-    settings {
+    settings("settings/settingTemplate.stg", "settings/settingTemplate.txt") {
         @Override
         public boolean isFixedTemplate() {
             return true;
@@ -71,21 +70,8 @@ public enum GenerateType {
         public ParameterUnit getFixedUnit() {
             return ParameterUnit.dataset;
         }
-
-        @Override
-        public String getTemplateString(final GenerateOption option) {
-            return FileResources.readClasspathResource("settings/settingTemplate.txt");
-        }
-
-        @Override
-        protected STGroup getStGroup() {
-            return new TemplateRender.Builder()
-                    .setTemplateParameterAttribute(null)
-                    .build()
-                    .createSTGroup("settings/settingTemplate.stg");
-        }
     },
-    sql {
+    sql("sql/sqlTemplate.stg", null) {
         @Override
         public boolean isFixedTemplate() {
             return true;
@@ -98,29 +84,16 @@ public enum GenerateType {
 
         @Override
         public String getTemplateString(final GenerateOption option) {
-            return FileResources.readClasspathResource(this.getSqlTemplate(option.operation()));
-        }
-
-        @Override
-        protected STGroup getStGroup() {
-            return new TemplateRender.Builder()
-                    .setTemplateParameterAttribute(null)
-                    .build()
-                    .createSTGroup("sql/sqlTemplate.stg");
-        }
-
-        private String getSqlTemplate(DbOperation operation) {
-            return switch (operation) {
+            return FileResources.readClasspathResource(switch (option.operation()) {
                 case INSERT -> "sql/insertTemplate.txt";
                 case DELETE -> "sql/deleteTemplate.txt";
                 case UPDATE -> "sql/updateTemplate.txt";
                 case CLEAN_INSERT -> "sql/cleanInsertTemplate.txt";
                 default -> "sql/deleteInsertTemplate.txt";
-            };
+            });
         }
-
     },
-    ddl {
+    ddl("sql/ddlTemplate.stg", "sql/ddlTemplate.txt") {
         @Override
         public boolean isFixedTemplate() {
             return true;
@@ -132,13 +105,8 @@ public enum GenerateType {
         }
 
         @Override
-        public String getTemplateString(final GenerateOption option) {
-            return FileResources.readClasspathResource("sql/ddlTemplate.txt");
-        }
-
-        @Override
-        protected STGroup getStGroup() {
-            return sql.getStGroup();
+        public String defaultSettingsPath() {
+            return "sql/ddlSettings.json";
         }
 
         @Override
@@ -161,7 +129,7 @@ public enum GenerateType {
                     .add("tableRemarks", tableRemarks));
         }
     },
-    xlsxTemplate {
+    xlsxTemplate(null, null) {
         @Override
         public boolean isFixedTemplate() {
             return true;
@@ -178,7 +146,7 @@ public enum GenerateType {
             JxlsTemplateGenerator.createTemplate(resultFile, param);
         }
     },
-    javaBean {
+    javaBean("javabean/javaBeanTemplate.stg", "javabean/javaBeanTemplate.txt") {
         @Override
         public boolean isFixedTemplate() {
             return true;
@@ -190,16 +158,8 @@ public enum GenerateType {
         }
 
         @Override
-        public String getTemplateString(final GenerateOption option) {
-            return FileResources.readClasspathResource("javabean/javaBeanTemplate.txt");
-        }
-
-        @Override
-        protected STGroup getStGroup() {
-            return new TemplateRender.Builder()
-                    .setTemplateParameterAttribute(null)
-                    .build()
-                    .createSTGroup("javabean/javaBeanTemplate.stg");
+        public String defaultSettingsPath() {
+            return "javabean/javaBeanSettings.json";
         }
 
         @Override
@@ -209,7 +169,7 @@ public enum GenerateType {
             super.write(option, resultFile, param.add("className", Strings.capitalize(tableName.toLowerCase())));
         }
     },
-    fixedColumnDef {
+    fixedColumnDef("fixedcolumndef/fixedColumnDefTemplate.stg", "fixedcolumndef/fixedColumnDefTemplate.txt") {
         @Override
         public boolean isFixedTemplate() {
             return true;
@@ -218,11 +178,6 @@ public enum GenerateType {
         @Override
         public ParameterUnit getFixedUnit() {
             return ParameterUnit.table;
-        }
-
-        @Override
-        public String getTemplateString(final GenerateOption option) {
-            return FileResources.readClasspathResource("fixedcolumndef/fixedColumnDefTemplate.txt");
         }
 
         @Override
@@ -241,24 +196,31 @@ public enum GenerateType {
                                                                option.align(),
                                                                " "))
                                                        .toList();
-            super.write(option,resultFile,param.add("columns", defs));
-        }
-
-        @Override
-        protected STGroup getStGroup() {
-            return new TemplateRender.Builder()
-                    .setTemplateParameterAttribute(null)
-                    .build()
-                    .createSTGroup("fixedcolumndef/fixedColumnDefTemplate.stg");
+            super.write(option, resultFile, param.add("columns", defs));
         }
     };
+
+    private final STGroup stGroup;
+    private final String fixedTemplateString;
+
+    GenerateType(final String stgPath, final String templatePath) {
+        this.stGroup = stgPath != null ? loadStGroup(stgPath) : null;
+        this.fixedTemplateString = templatePath != null ? FileResources.readClasspathResource(templatePath) : null;
+    }
+
+    private static STGroup loadStGroup(final String stgPath) {
+        return new TemplateRender.Builder()
+                .setTemplateParameterAttribute(null)
+                .build()
+                .createSTGroup(stgPath);
+    }
 
     public boolean isAny(final GenerateType... expects) {
         return Stream.of(expects).anyMatch(it -> it == this);
     }
 
-    protected STGroup getStGroup() {
-        return null;
+    public STGroup getStGroup() {
+        return this.stGroup;
     }
 
     protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
@@ -277,8 +239,8 @@ public enum GenerateType {
         return null;
     }
 
-    protected String getTemplateString(final GenerateOption option) {
-        return null;
+    public String getTemplateString(final GenerateOption option) {
+        return this.fixedTemplateString;
     }
 
     public boolean isExcel() {
@@ -286,7 +248,15 @@ public enum GenerateType {
     }
 
     public boolean isMetadataOnly() {
-        return this.isAny(settings, javaBean);
+        return this.isAny(settings);
+    }
+
+    public boolean requiresJdbcMetaData() {
+        return this.isAny(javaBean);
+    }
+
+    public String defaultSettingsPath() {
+        return null;
     }
 
     public boolean isText() {

@@ -1,0 +1,4 @@
+col_name,sql_type,precision,scale,is_nullable,is_pk,pk_constraint_name,table_desc,col_desc,table_name,java_pkg
+EMPLOYEE_ID,INTEGER,10,,false,true,PK_EMPLOYEE,社員マスタ,社員ID,EMPLOYEE,yo.example
+EMPLOYEE_NAME,VARCHAR,100,,true,false,PK_EMPLOYEE,社員マスタ,氏名,EMPLOYEE,yo.example
+SALARY,DECIMAL,10,2,true,false,PK_EMPLOYEE,社員マスタ,給与,EMPLOYEE,yo.example
