@@ -43,7 +43,7 @@ public record ScaffoldOption(
         new ArgumentMapper("datasetResult").populate(args, dto.getDatasetResult());
         dto.setCommandInput(Arrays.stream(args)
                 .filter(it -> it.startsWith(COMMAND_INPUT_PREFIX))
-                .map(it -> it.replace(COMMAND_INPUT_PREFIX, "-"))
+                .map(it -> "-" + it.substring(COMMAND_INPUT_PREFIX.length()))
                 .toArray(String[]::new));
         return dto;
     }
@@ -55,7 +55,7 @@ public record ScaffoldOption(
                 , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
                 , dto.getGenerateTargets() != null ? dto.getGenerateTargets() : List.of()
                 , Strings.isNotEmpty(dto.getCommandType()) ? dto.getCommandType() : ""
-                , dto.getCommandInput() != null ? dto.getCommandInput() : new String[0]
+                , dto.getCommandInput()
                 , new DataSetLoadOption("src", dto.getSrcData())
                 , new DataSetConverterOption("datasetResult", dto.getDatasetResult())
         );
@@ -131,14 +131,13 @@ public record ScaffoldOption(
             result.put("-generateTargets", String.join(",", this.generateTargets));
         }
         result.put("-commandType", this.commandType);
-        for (final String arg : this.commandInput) {
-            final int eqIdx = arg.indexOf('=');
-            if (eqIdx > 0) {
-                result.put(COMMAND_INPUT_PREFIX + arg.substring(1, eqIdx), arg.substring(eqIdx + 1));
-            } else if (arg.startsWith("-")) {
-                result.put(COMMAND_INPUT_PREFIX + arg.substring(1), "true");
-            }
-        }
+        Arrays.stream(this.commandInput)
+              .filter(arg -> arg.startsWith("-"))
+              .forEach(arg -> {
+                  final int eqIdx = arg.indexOf('=');
+                  final String key = COMMAND_INPUT_PREFIX + arg.substring(1, eqIdx > 0 ? eqIdx : arg.length());
+                  result.put(key, eqIdx > 0 ? arg.substring(eqIdx + 1) : "true");
+              });
         return result;
     }
 
