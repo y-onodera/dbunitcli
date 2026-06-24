@@ -9,11 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.CommandParameters;
+import yo.dbunitcli.application.CommandType;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.CommandRequestDto;
+import yo.dbunitcli.sidecar.dto.TypedRefreshRequestDto;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +28,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCommandController.class);
 
-    private static final EnumSet<Option.BaseDir> SIDECAR_RESOLVE_BASEDIR = EnumSet.of(
+    protected static final EnumSet<Option.BaseDir> SIDECAR_RESOLVE_BASEDIR = EnumSet.of(
             Option.BaseDir.SETTING, Option.BaseDir.TEMPLATE, Option.BaseDir.JDBC,
             Option.BaseDir.XLSX_SCHEMA, Option.BaseDir.PARAMETERIZE_TEMPLATE, Option.BaseDir.FIXED_COLUMN_DEF);
 
@@ -55,6 +57,18 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     public String refresh(@Body final Map<String, String> input) {
         try {
             return this.toJson(this.requestToResponse(input));
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
+    }
+
+    @Post(uri = "refresh-with-type", produces = MediaType.APPLICATION_JSON)
+    public String refreshWithType(@Body final TypedRefreshRequestDto body) {
+        try {
+            final Type type = Type.valueOf(body.getCommandType());
+            final Map<String, String> input = body.getInput() != null ? body.getInput() : Map.of();
+            return this.toJson(new CommandParameters(type, input).serialize());
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -152,19 +166,23 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
 
     @Post(uri = "exec", produces = MediaType.TEXT_PLAIN)
     public String exec(@Body final CommandRequestDto body) {
+        return this.execWithInput(this.getCommandType(), body.getInput(), body.getName());
+    }
+
+    protected String execWithInput(final CommandType type, final Map<String, String> input, final String name) {
         try {
             LOGGER.info(System.getProperty(FileResources.PROPERTY_WORKSPACE));
-            final CommandParameters parameters = new CommandParameters(this.getCommandType(), body.getInput())
+            final CommandParameters parameters = new CommandParameters(type, input != null ? input : Map.of())
                     .resolveFilePaths((baseDir, value) ->
                             SIDECAR_RESOLVE_BASEDIR.contains(baseDir) && !new File(value).isAbsolute()
                                     ? new File(Workspace.resolveBaseDir(baseDir), value).getAbsolutePath()
                                     : value);
             try {
-                parameters.exec(body.getName());
+                parameters.exec(name);
             } catch (final Command.CommandFailException th) {
                 LOGGER.info("cause:", th);
             }
-            return parameters.resultDir(body.getName());
+            return parameters.resultDir(name);
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);

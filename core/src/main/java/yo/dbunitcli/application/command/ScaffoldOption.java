@@ -24,6 +24,7 @@ public record ScaffoldOption(
         , String resultDir
         , String sqlFilePrefix
         , String sqlFileSuffix
+        , List<String> generateTargets
         , DataSetLoadOption srcData
         , DataSetConverterOption datasetResult
 ) implements CommandLineOption<ScaffoldDto> {
@@ -42,6 +43,7 @@ public record ScaffoldOption(
                 , Strings.isNotEmpty(dto.getResultDir()) ? dto.getResultDir() : resultFile
                 , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
                 , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
+                , dto.getGenerateTargets() != null ? dto.getGenerateTargets() : List.of()
                 , new DataSetLoadOption("src", dto.getSrcData())
                 , new DataSetConverterOption("datasetResult", dto.getDatasetResult())
         );
@@ -55,22 +57,37 @@ public record ScaffoldOption(
         settingDir.mkdirs();
         templateDir.mkdirs();
         paramDir.mkdirs();
-        this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "scaffold.json"));
-        this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
-        this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
-        this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
-        this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
-
-        final ComparableDataSetParam.Builder paramBuilder = this.srcData.getParam()
-                .setUseJdbcMetaData(true)
-                .setLoadData(false);
-        if (this.datasetResult.resultType() != null) {
-            paramBuilder.setConverter(new DataSetConverterLoader().get(this.datasetResult.getParam().build()));
+        final boolean allTargets = this.generateTargets.isEmpty();
+        final boolean generateDdl = allTargets || this.generateTargets.contains("ddl");
+        final boolean generateJavaBean = allTargets || this.generateTargets.contains("javaBean");
+        final boolean generateParameter = allTargets || this.generateTargets.contains("parameter");
+        if (generateJavaBean) {
+            this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "scaffold.json"));
         }
-        final ComparableDataSet dataSet = this.getComparableDataSetLoader().loadDataSet(paramBuilder.build());
-        for (final String tableName : dataSet.getTableNames()) {
-            this.writeParamFile(paramDir, tableName, "ddl");
-            this.writeParamFile(paramDir, tableName, "javaBean");
+        if (generateDdl) {
+            this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
+            this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
+        }
+        if (generateJavaBean) {
+            this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
+            this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
+        }
+        if (generateDdl || generateJavaBean || generateParameter) {
+            final ComparableDataSetParam.Builder paramBuilder = this.srcData.getParam()
+                    .setUseJdbcMetaData(true)
+                    .setLoadData(false);
+            if (this.datasetResult.resultType() != null) {
+                paramBuilder.setConverter(new DataSetConverterLoader().get(this.datasetResult.getParam().build()));
+            }
+            final ComparableDataSet dataSet = this.getComparableDataSetLoader().loadDataSet(paramBuilder.build());
+            for (final String tableName : dataSet.getTableNames()) {
+                if (generateDdl || generateParameter) {
+                    this.writeParamFile(paramDir, tableName, "ddl");
+                }
+                if (generateJavaBean || generateParameter) {
+                    this.writeParamFile(paramDir, tableName, "javaBean");
+                }
+            }
         }
     }
 
@@ -93,6 +110,9 @@ public record ScaffoldOption(
         result.putDir("-result", this.resultDir, BaseDir.RESULT)
               .put("-sqlFilePrefix", this.sqlFilePrefix)
               .put("-sqlFileSuffix", this.sqlFileSuffix);
+        if (!this.generateTargets.isEmpty()) {
+            result.put("-generateTargets", String.join(",", this.generateTargets));
+        }
         return result;
     }
 

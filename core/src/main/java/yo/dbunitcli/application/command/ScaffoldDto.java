@@ -5,6 +5,8 @@ import yo.dbunitcli.application.CommandDto;
 import yo.dbunitcli.application.dto.DataSetConverterDto;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 
+import java.util.List;
+
 public class ScaffoldDto extends CommandDto {
     @CommandLine.Option(names = "-result", description = "directory to create workspace structure")
     private String resultDir;
@@ -12,6 +14,8 @@ public class ScaffoldDto extends CommandDto {
     private String sqlFileSuffix;
     @CommandLine.Option(names = "-sqlFilePrefix", description = "generate sqlFile fileName prefix")
     private String sqlFilePrefix;
+    @CommandLine.Option(names = "-generateTargets", split = ",", description = "targets to generate: ddl,javaBean,parameter")
+    private List<String> generateTargets;
 
     private DataSetLoadDto srcData = new DataSetLoadDto();
     private DataSetConverterDto datasetResult = new DataSetConverterDto();
@@ -38,6 +42,14 @@ public class ScaffoldDto extends CommandDto {
 
     public void setSqlFilePrefix(final String sqlFilePrefix) {
         this.sqlFilePrefix = sqlFilePrefix;
+    }
+
+    public List<String> getGenerateTargets() {
+        return this.generateTargets;
+    }
+
+    public void setGenerateTargets(final List<String> generateTargets) {
+        this.generateTargets = generateTargets;
     }
 
     public DataSetLoadDto getSrcData() {
