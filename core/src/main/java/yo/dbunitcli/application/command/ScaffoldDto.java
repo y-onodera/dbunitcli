@@ -14,8 +14,28 @@ public class ScaffoldDto extends CommandDto {
     private String sqlFileSuffix;
     @CommandLine.Option(names = "-sqlFilePrefix", description = "generate sqlFile fileName prefix")
     private String sqlFilePrefix;
-    @CommandLine.Option(names = "-generateTargets", split = ",", description = "targets to generate: ddl,javaBean")
+    @CommandLine.Option(names = "-generateTargets", split = ",", description = "targets to generate: ddl,javaBean,parameter")
     private List<String> generateTargets;
+    @CommandLine.Option(names = "-commandType", description = "commandType for parameter generation")
+    private String commandType;
+
+    private String[] commandInput = new String[0];
+
+    public String getCommandType() {
+        return this.commandType;
+    }
+
+    public void setCommandType(final String commandType) {
+        this.commandType = commandType;
+    }
+
+    public String[] getCommandInput() {
+        return this.commandInput;
+    }
+
+    public void setCommandInput(final String[] commandInput) {
+        this.commandInput = commandInput;
+    }
 
     private DataSetLoadDto srcData = new DataSetLoadDto();
     private DataSetConverterDto datasetResult = new DataSetConverterDto();

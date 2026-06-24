@@ -3,6 +3,7 @@ package yo.dbunitcli.application.command;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
+import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
@@ -17,6 +18,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.List;
 
 public record ScaffoldOption(
@@ -25,9 +27,13 @@ public record ScaffoldOption(
         , String sqlFilePrefix
         , String sqlFileSuffix
         , List<String> generateTargets
+        , String commandType
+        , String[] commandInput
         , DataSetLoadOption srcData
         , DataSetConverterOption datasetResult
 ) implements CommandLineOption<ScaffoldDto> {
+
+    private static final String COMMAND_INPUT_PREFIX = "-commandInput.";
 
     public static ScaffoldDto toDto(final String[] args) {
         final ScaffoldDto dto = new ScaffoldDto();
@@ -35,6 +41,10 @@ public record ScaffoldOption(
                 .populate(args, dto);
         new ArgumentMapper("src").populate(args, dto.getSrcData());
         new ArgumentMapper("datasetResult").populate(args, dto.getDatasetResult());
+        dto.setCommandInput(Arrays.stream(args)
+                .filter(it -> it.startsWith(COMMAND_INPUT_PREFIX))
+                .map(it -> it.replace(COMMAND_INPUT_PREFIX, "-"))
+                .toArray(String[]::new));
         return dto;
     }
 
@@ -44,6 +54,8 @@ public record ScaffoldOption(
                 , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
                 , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
                 , dto.getGenerateTargets() != null ? dto.getGenerateTargets() : List.of()
+                , Strings.isNotEmpty(dto.getCommandType()) ? dto.getCommandType() : ""
+                , dto.getCommandInput() != null ? dto.getCommandInput() : new String[0]
                 , new DataSetLoadOption("src", dto.getSrcData())
                 , new DataSetConverterOption("datasetResult", dto.getDatasetResult())
         );
@@ -60,6 +72,8 @@ public record ScaffoldOption(
         final boolean allTargets = this.generateTargets.isEmpty();
         final boolean generateDdl = allTargets || this.generateTargets.contains("ddl");
         final boolean generateJavaBean = allTargets || this.generateTargets.contains("javaBean");
+        final boolean generateParameter = (allTargets || this.generateTargets.contains("parameter"))
+                && Strings.isNotEmpty(this.commandType);
         if (generateJavaBean) {
             this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "scaffold.json"));
             this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
@@ -86,6 +100,12 @@ public record ScaffoldOption(
                 }
             }
         }
+        if (generateParameter) {
+            final String[] shrunkArgs = new CommandParameters(Type.valueOf(this.commandType), this.commandInput)
+                    .shrink().args();
+            Files.write(new File(paramDir, this.commandType + ".param").toPath(),
+                    Arrays.asList(shrunkArgs), StandardCharsets.UTF_8);
+        }
     }
 
     public File getResultDir() {
@@ -109,6 +129,15 @@ public record ScaffoldOption(
               .put("-sqlFileSuffix", this.sqlFileSuffix);
         if (!this.generateTargets.isEmpty()) {
             result.put("-generateTargets", String.join(",", this.generateTargets));
+        }
+        result.put("-commandType", this.commandType);
+        for (final String arg : this.commandInput) {
+            final int eqIdx = arg.indexOf('=');
+            if (eqIdx > 0) {
+                result.put(COMMAND_INPUT_PREFIX + arg.substring(1, eqIdx), arg.substring(eqIdx + 1));
+            } else if (arg.startsWith("-")) {
+                result.put(COMMAND_INPUT_PREFIX + arg.substring(1), "true");
+            }
         }
         return result;
     }
