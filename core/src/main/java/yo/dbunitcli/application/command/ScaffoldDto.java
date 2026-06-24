@@ -14,7 +14,7 @@ public class ScaffoldDto extends CommandDto {
     private String sqlFileSuffix;
     @CommandLine.Option(names = "-sqlFilePrefix", description = "generate sqlFile fileName prefix")
     private String sqlFilePrefix;
-    @CommandLine.Option(names = "-generateTargets", split = ",", description = "targets to generate: ddl,javaBean,parameter")
+    @CommandLine.Option(names = "-generateTargets", split = ",", description = "targets to generate: ddl,javaBean")
     private List<String> generateTargets;
 
     private DataSetLoadDto srcData = new DataSetLoadDto();

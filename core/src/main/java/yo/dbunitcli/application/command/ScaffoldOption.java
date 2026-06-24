@@ -62,14 +62,12 @@ public record ScaffoldOption(
         final boolean generateJavaBean = allTargets || this.generateTargets.contains("javaBean");
         if (generateJavaBean) {
             this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "scaffold.json"));
+            this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
+            this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
         }
         if (generateDdl) {
             this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
             this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
-        }
-        if (generateJavaBean) {
-            this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
-            this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
         }
         if (generateDdl || generateJavaBean) {
             final ComparableDataSetParam.Builder paramBuilder = this.srcData.getParam()
