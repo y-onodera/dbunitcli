@@ -16,10 +16,8 @@ public class ScaffoldDto extends CommandDto {
     private String sqlFilePrefix;
     @CommandLine.Option(names = "-target", description = "target to generate: ddl, javaBean, or parameter (required, no default)")
     private String target;
-    @CommandLine.Option(names = "-ddlIncludes", split = ",", description = "scaffold contents for ddl: setting,template,parameter (default: all)")
-    private List<String> ddlIncludes;
-    @CommandLine.Option(names = "-javaBeanIncludes", split = ",", description = "scaffold contents for javaBean: setting,template,parameter (default: all)")
-    private List<String> javaBeanIncludes;
+    @CommandLine.Option(names = "-include", split = ",", description = "scaffold contents: setting,template,parameter (default: all)")
+    private List<String> include;
     @CommandLine.Option(names = "-commandType", description = "commandType for parameter generation")
     private String commandType;
 
@@ -76,20 +74,12 @@ public class ScaffoldDto extends CommandDto {
         this.target = target;
     }
 
-    public List<String> getDdlIncludes() {
-        return this.ddlIncludes;
+    public List<String> getInclude() {
+        return this.include;
     }
 
-    public void setDdlIncludes(final List<String> ddlIncludes) {
-        this.ddlIncludes = ddlIncludes;
-    }
-
-    public List<String> getJavaBeanIncludes() {
-        return this.javaBeanIncludes;
-    }
-
-    public void setJavaBeanIncludes(final List<String> javaBeanIncludes) {
-        this.javaBeanIncludes = javaBeanIncludes;
+    public void setInclude(final List<String> include) {
+        this.include = include;
     }
 
     public DataSetLoadDto getSrcData() {

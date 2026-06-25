@@ -26,8 +26,7 @@ public record ScaffoldOption(
         , String sqlFilePrefix
         , String sqlFileSuffix
         , String target
-        , List<String> ddlIncludes
-        , List<String> javaBeanIncludes
+        , List<String> include
         , String commandType
         , String[] commandInput
         , DataSetLoadOption srcData
@@ -55,8 +54,7 @@ public record ScaffoldOption(
                 , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
                 , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
                 , Strings.isNotEmpty(dto.getTarget()) ? dto.getTarget() : ""
-                , dto.getDdlIncludes() != null ? dto.getDdlIncludes() : List.of()
-                , dto.getJavaBeanIncludes() != null ? dto.getJavaBeanIncludes() : List.of()
+                , dto.getInclude() != null ? dto.getInclude() : List.of()
                 , Strings.isNotEmpty(dto.getCommandType()) ? dto.getCommandType() : ""
                 , dto.getCommandInput()
                 , new DataSetLoadOption("src", ScaffoldOption.srcDataWithDefault(dto), true)
@@ -85,26 +83,26 @@ public record ScaffoldOption(
         final boolean generateParameter = "parameter".equals(this.target)
                 && Strings.isNotEmpty(this.commandType);
         if (generateJavaBean) {
-            if (this.includes(this.javaBeanIncludes, "setting")) {
+            if (this.includes(this.include, "setting")) {
                 this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "javaBean.json"));
             }
-            if (this.includes(this.javaBeanIncludes, "template")) {
+            if (this.includes(this.include, "template")) {
                 this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
                 this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
             }
         }
         if (generateDdl) {
-            if (this.includes(this.ddlIncludes, "setting")) {
+            if (this.includes(this.include, "setting")) {
                 this.copyClasspathResource("sql/ddlSettings.json", new File(settingDir, "ddl.json"));
             }
-            if (this.includes(this.ddlIncludes, "template")) {
+            if (this.includes(this.include, "template")) {
                 this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
                 this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
             }
         }
         if (generateDdl || generateJavaBean) {
-            final boolean needDdlParam = generateDdl && this.includes(this.ddlIncludes, "parameter");
-            final boolean needJavaBeanParam = generateJavaBean && this.includes(this.javaBeanIncludes, "parameter");
+            final boolean needDdlParam = generateDdl && this.includes(this.include, "parameter");
+            final boolean needJavaBeanParam = generateJavaBean && this.includes(this.include, "parameter");
             if (needDdlParam) {
                 this.writeGenericParamFile(paramDir, "ddl");
             }
@@ -140,11 +138,8 @@ public record ScaffoldOption(
               .put("-sqlFilePrefix", this.sqlFilePrefix)
               .put("-sqlFileSuffix", this.sqlFileSuffix)
               .put("-target", this.target);
-        if (!this.ddlIncludes.isEmpty()) {
-            result.put("-ddlIncludes", String.join(",", this.ddlIncludes));
-        }
-        if (!this.javaBeanIncludes.isEmpty()) {
-            result.put("-javaBeanIncludes", String.join(",", this.javaBeanIncludes));
+        if (!this.include.isEmpty()) {
+            result.put("-include", String.join(",", this.include));
         }
         result.put("-commandType", this.commandType);
         Arrays.stream(this.commandInput)

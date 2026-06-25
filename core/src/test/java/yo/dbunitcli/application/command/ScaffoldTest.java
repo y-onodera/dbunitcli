@@ -38,7 +38,7 @@ public class ScaffoldTest {
 
         @Test
         void settingOnly_settingのみ生成される() {
-            Scaffold.main(args("ddl/setting", "-target=ddl", "-ddlIncludes=setting"));
+            Scaffold.main(args("ddl/setting", "-target=ddl", "-include=setting"));
             assertTrue(resultFile("ddl/setting", "resources/setting/ddl.json").exists());
             assertFalse(resultFile("ddl/setting", "resources/template/ddl.stg").exists());
             assertFalse(resultFile("ddl/setting", "resources/template/ddl.txt").exists());
@@ -47,7 +47,7 @@ public class ScaffoldTest {
 
         @Test
         void templateOnly_templateのみ生成される() {
-            Scaffold.main(args("ddl/template", "-target=ddl", "-ddlIncludes=template"));
+            Scaffold.main(args("ddl/template", "-target=ddl", "-include=template"));
             assertFalse(resultFile("ddl/template", "resources/setting/ddl.json").exists());
             assertTrue(resultFile("ddl/template", "resources/template/ddl.stg").exists());
             assertTrue(resultFile("ddl/template", "resources/template/ddl.txt").exists());
@@ -56,7 +56,7 @@ public class ScaffoldTest {
 
         @Test
         void parameterOnly_parameterのみ生成される() {
-            Scaffold.main(args("ddl/parameter", "-target=ddl", "-ddlIncludes=parameter"));
+            Scaffold.main(args("ddl/parameter", "-target=ddl", "-include=parameter"));
             assertFalse(resultFile("ddl/parameter", "resources/setting/ddl.json").exists());
             assertFalse(resultFile("ddl/parameter", "resources/template/ddl.stg").exists());
             assertFalse(resultFile("ddl/parameter", "resources/template/ddl.txt").exists());
@@ -65,7 +65,7 @@ public class ScaffoldTest {
 
         @Test
         void settingAndTemplate_settingとtemplateが生成される() {
-            Scaffold.main(args("ddl/setting-template", "-target=ddl", "-ddlIncludes=setting,template"));
+            Scaffold.main(args("ddl/setting-template", "-target=ddl", "-include=setting,template"));
             assertTrue(resultFile("ddl/setting-template", "resources/setting/ddl.json").exists());
             assertTrue(resultFile("ddl/setting-template", "resources/template/ddl.stg").exists());
             assertTrue(resultFile("ddl/setting-template", "resources/template/ddl.txt").exists());
@@ -87,7 +87,7 @@ public class ScaffoldTest {
 
         @Test
         void settingOnly_settingのみ生成される() {
-            Scaffold.main(args("javaBean/setting", "-target=javaBean", "-javaBeanIncludes=setting"));
+            Scaffold.main(args("javaBean/setting", "-target=javaBean", "-include=setting"));
             assertTrue(resultFile("javaBean/setting", "resources/setting/javaBean.json").exists());
             assertFalse(resultFile("javaBean/setting", "resources/template/javaBean.stg").exists());
             assertFalse(resultFile("javaBean/setting", "resources/template/javaBean.txt").exists());
@@ -96,7 +96,7 @@ public class ScaffoldTest {
 
         @Test
         void templateOnly_templateのみ生成される() {
-            Scaffold.main(args("javaBean/template", "-target=javaBean", "-javaBeanIncludes=template"));
+            Scaffold.main(args("javaBean/template", "-target=javaBean", "-include=template"));
             assertFalse(resultFile("javaBean/template", "resources/setting/javaBean.json").exists());
             assertTrue(resultFile("javaBean/template", "resources/template/javaBean.stg").exists());
             assertTrue(resultFile("javaBean/template", "resources/template/javaBean.txt").exists());
@@ -105,7 +105,7 @@ public class ScaffoldTest {
 
         @Test
         void parameterOnly_parameterのみ生成される() {
-            Scaffold.main(args("javaBean/parameter", "-target=javaBean", "-javaBeanIncludes=parameter"));
+            Scaffold.main(args("javaBean/parameter", "-target=javaBean", "-include=parameter"));
             assertFalse(resultFile("javaBean/parameter", "resources/setting/javaBean.json").exists());
             assertFalse(resultFile("javaBean/parameter", "resources/template/javaBean.stg").exists());
             assertFalse(resultFile("javaBean/parameter", "resources/template/javaBean.txt").exists());
@@ -114,7 +114,7 @@ public class ScaffoldTest {
 
         @Test
         void settingAndTemplate_settingとtemplateが生成される() {
-            Scaffold.main(args("javaBean/setting-template", "-target=javaBean", "-javaBeanIncludes=setting,template"));
+            Scaffold.main(args("javaBean/setting-template", "-target=javaBean", "-include=setting,template"));
             assertTrue(resultFile("javaBean/setting-template", "resources/setting/javaBean.json").exists());
             assertTrue(resultFile("javaBean/setting-template", "resources/template/javaBean.stg").exists());
             assertTrue(resultFile("javaBean/setting-template", "resources/template/javaBean.txt").exists());
