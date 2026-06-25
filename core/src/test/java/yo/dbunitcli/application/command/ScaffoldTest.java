@@ -1,7 +1,6 @@
 package yo.dbunitcli.application.command;
 
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.DisabledInNativeImage;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -9,14 +8,11 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Tag("IntegrationTest")
-@DisabledInNativeImage
-class ScaffoldOptionTest {
+public class ScaffoldTest {
 
     private static final String JDBC_URL = "jdbc:h2:mem:scaffoldtest;DB_CLOSE_DELAY=-1";
     private static final String JDBC_USER = "admin";
@@ -40,15 +36,17 @@ class ScaffoldOptionTest {
     }
 
     private String[] baseArgs(final String subDir, final String... extra) {
-        final String[] base = {
-                "-result=" + Path.of(RESULT_BASE, subDir),
-                "-src.srcType=jdbcMetadata",
-                "-src.jdbcUrl=" + JDBC_URL,
-                "-src.jdbcUser=" + JDBC_USER,
-                "-src.jdbcPass=" + JDBC_PASS,
-                "-src.regTableInclude=(?i)DOCUMENT"
-        };
-        return Stream.concat(Arrays.stream(base), Arrays.stream(extra)).toArray(String[]::new);
+        return Stream.concat(
+                Stream.of(
+                        "-result=" + Path.of(RESULT_BASE, subDir),
+                        "-src.srcType=jdbcMetadata",
+                        "-src.jdbcUrl=" + JDBC_URL,
+                        "-src.jdbcUser=" + JDBC_USER,
+                        "-src.jdbcPass=" + JDBC_PASS,
+                        "-src.regTableInclude=(?i)DOCUMENT"
+                ),
+                Stream.of(extra)
+        ).toArray(String[]::new);
     }
 
     private File resultFile(final String subDir, final String relativePath) {
@@ -158,8 +156,8 @@ class ScaffoldOptionTest {
 
         private String[] argsWithoutSrc(final String subDir, final String... extra) {
             return Stream.concat(
-                    Arrays.stream(new String[]{"-result=" + Path.of(RESULT_BASE, subDir)}),
-                    Arrays.stream(extra)
+                    Stream.of("-result=" + Path.of(RESULT_BASE, subDir)),
+                    Stream.of(extra)
             ).toArray(String[]::new);
         }
 
