@@ -153,9 +153,16 @@ public record ScaffoldOption(
     }
 
     private void writeGenericParamFile(final File paramDir, final String genType) throws IOException {
+        final boolean useTemplate = this.includes(this.include, "template");
+        final boolean useSetting = this.includes(this.include, "setting");
         final ParametersBuilder builder = new ParametersBuilder();
-        builder.put("-generateType", genType, false);
-        builder.put("-setting", "resources/setting/" + genType + ".json");
+        builder.put("-generateType", useTemplate ? "txt" : genType, false);
+        if (useTemplate) {
+            builder.put("-template", "resources/template/" + genType + ".stg");
+        }
+        if (useSetting) {
+            builder.put("-setting", "resources/setting/" + genType + ".json");
+        }
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
         if ("ddl".equals(genType)) {
             builder.put("-sqlFilePrefix", this.sqlFilePrefix)
