@@ -25,7 +25,7 @@ public record ScaffoldOption(
         , String resultDir
         , String sqlFilePrefix
         , String sqlFileSuffix
-        , List<String> generateTargets
+        , String target
         , List<String> ddlIncludes
         , List<String> javaBeanIncludes
         , String commandType
@@ -54,7 +54,7 @@ public record ScaffoldOption(
                 , Strings.isNotEmpty(dto.getResultDir()) ? dto.getResultDir() : resultFile
                 , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
                 , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
-                , dto.getGenerateTargets() != null ? dto.getGenerateTargets() : List.of()
+                , Strings.isNotEmpty(dto.getTarget()) ? dto.getTarget() : ""
                 , dto.getDdlIncludes() != null ? dto.getDdlIncludes() : List.of()
                 , dto.getJavaBeanIncludes() != null ? dto.getJavaBeanIncludes() : List.of()
                 , Strings.isNotEmpty(dto.getCommandType()) ? dto.getCommandType() : ""
@@ -72,9 +72,9 @@ public record ScaffoldOption(
         settingDir.mkdirs();
         templateDir.mkdirs();
         paramDir.mkdirs();
-        final boolean generateDdl = this.generateTargets.contains("ddl");
-        final boolean generateJavaBean = this.generateTargets.contains("javaBean");
-        final boolean generateParameter = this.generateTargets.contains("parameter")
+        final boolean generateDdl = "ddl".equals(this.target);
+        final boolean generateJavaBean = "javaBean".equals(this.target);
+        final boolean generateParameter = "parameter".equals(this.target)
                 && Strings.isNotEmpty(this.commandType);
         if (generateJavaBean) {
             if (this.includes(this.javaBeanIncludes, "setting")) {
@@ -138,10 +138,8 @@ public record ScaffoldOption(
         result.addComponent("datasetResult", this.datasetResult.toParameters());
         result.putDir("-result", this.resultDir, BaseDir.RESULT)
               .put("-sqlFilePrefix", this.sqlFilePrefix)
-              .put("-sqlFileSuffix", this.sqlFileSuffix);
-        if (!this.generateTargets.isEmpty()) {
-            result.put("-generateTargets", String.join(",", this.generateTargets));
-        }
+              .put("-sqlFileSuffix", this.sqlFileSuffix)
+              .put("-target", this.target);
         if (!this.ddlIncludes.isEmpty()) {
             result.put("-ddlIncludes", String.join(",", this.ddlIncludes));
         }
