@@ -164,21 +164,25 @@ class ScaffoldOptionTest {
         }
 
         @Test
-        void srcdata未指定でddlのsettingとtemplateが生成される() {
+        void srcdata未指定でddlの全ファイルが生成される() throws Exception {
             Scaffold.main(argsWithoutSrc("nosrc/ddl", "-target=ddl"));
             assertTrue(resultFile("nosrc/ddl", "resources/setting/ddl.json").exists());
             assertTrue(resultFile("nosrc/ddl", "resources/template/ddl.stg").exists());
             assertTrue(resultFile("nosrc/ddl", "resources/template/ddl.txt").exists());
-            assertFalse(resultFile("nosrc/ddl", "resources/param/DOCUMENT_ddl.param").exists());
+            final File paramFile = resultFile("nosrc/ddl", "resources/param/ddl.param");
+            assertTrue(paramFile.exists());
+            assertTrue(Files.size(paramFile.toPath()) > 0);
         }
 
         @Test
-        void srcdata未指定でjavaBeanのsettingとtemplateが生成される() {
+        void srcdata未指定でjavaBeanの全ファイルが生成される() throws Exception {
             Scaffold.main(argsWithoutSrc("nosrc/javaBean", "-target=javaBean"));
             assertTrue(resultFile("nosrc/javaBean", "resources/setting/javaBean.json").exists());
             assertTrue(resultFile("nosrc/javaBean", "resources/template/javaBean.stg").exists());
             assertTrue(resultFile("nosrc/javaBean", "resources/template/javaBean.txt").exists());
-            assertFalse(resultFile("nosrc/javaBean", "resources/param/DOCUMENT_javaBean.param").exists());
+            final File paramFile = resultFile("nosrc/javaBean", "resources/param/javaBean.param");
+            assertTrue(paramFile.exists());
+            assertTrue(Files.size(paramFile.toPath()) > 0);
         }
     }
 
