@@ -14,8 +14,12 @@ public class ScaffoldDto extends CommandDto {
     private String sqlFileSuffix;
     @CommandLine.Option(names = "-sqlFilePrefix", description = "generate sqlFile fileName prefix")
     private String sqlFilePrefix;
-    @CommandLine.Option(names = "-generateTargets", split = ",", description = "targets to generate: ddl,javaBean,parameter")
-    private List<String> generateTargets;
+    @CommandLine.Option(names = "-target", description = "target to generate: ddl, javaBean, or parameter (required, no default)")
+    private String target;
+    @CommandLine.Option(names = "-ddlIncludes", split = ",", description = "scaffold contents for ddl: setting,template,parameter (default: all)")
+    private List<String> ddlIncludes;
+    @CommandLine.Option(names = "-javaBeanIncludes", split = ",", description = "scaffold contents for javaBean: setting,template,parameter (default: all)")
+    private List<String> javaBeanIncludes;
     @CommandLine.Option(names = "-commandType", description = "commandType for parameter generation")
     private String commandType;
 
@@ -64,12 +68,28 @@ public class ScaffoldDto extends CommandDto {
         this.sqlFilePrefix = sqlFilePrefix;
     }
 
-    public List<String> getGenerateTargets() {
-        return this.generateTargets;
+    public String getTarget() {
+        return this.target;
     }
 
-    public void setGenerateTargets(final List<String> generateTargets) {
-        this.generateTargets = generateTargets;
+    public void setTarget(final String target) {
+        this.target = target;
+    }
+
+    public List<String> getDdlIncludes() {
+        return this.ddlIncludes;
+    }
+
+    public void setDdlIncludes(final List<String> ddlIncludes) {
+        this.ddlIncludes = ddlIncludes;
+    }
+
+    public List<String> getJavaBeanIncludes() {
+        return this.javaBeanIncludes;
+    }
+
+    public void setJavaBeanIncludes(final List<String> javaBeanIncludes) {
+        this.javaBeanIncludes = javaBeanIncludes;
     }
 
     public DataSetLoadDto getSrcData() {

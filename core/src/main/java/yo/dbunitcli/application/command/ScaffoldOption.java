@@ -6,10 +6,11 @@ import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
+import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
+import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -26,7 +27,9 @@ public record ScaffoldOption(
         , String resultDir
         , String sqlFilePrefix
         , String sqlFileSuffix
-        , List<String> generateTargets
+        , String target
+        , List<String> ddlIncludes
+        , List<String> javaBeanIncludes
         , String commandType
         , String[] commandInput
         , DataSetLoadOption srcData
@@ -53,12 +56,22 @@ public record ScaffoldOption(
                 , Strings.isNotEmpty(dto.getResultDir()) ? dto.getResultDir() : resultFile
                 , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
                 , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
-                , dto.getGenerateTargets() != null ? dto.getGenerateTargets() : List.of()
+                , Strings.isNotEmpty(dto.getTarget()) ? dto.getTarget() : ""
+                , dto.getDdlIncludes() != null ? dto.getDdlIncludes() : List.of()
+                , dto.getJavaBeanIncludes() != null ? dto.getJavaBeanIncludes() : List.of()
                 , Strings.isNotEmpty(dto.getCommandType()) ? dto.getCommandType() : ""
                 , dto.getCommandInput()
-                , new DataSetLoadOption("src", dto.getSrcData())
+                , new DataSetLoadOption("src", ScaffoldOption.srcDataWithDefault(dto), true)
                 , new DataSetConverterOption("datasetResult", dto.getDatasetResult())
         );
+    }
+
+    private static DataSetLoadDto srcDataWithDefault(final ScaffoldDto dto) {
+        final DataSetLoadDto srcData = dto.getSrcData();
+        if (srcData.getSrcType() == null) {
+            srcData.setSrcType(DataSourceType.none);
+        }
+        return srcData;
     }
 
     public void execute() throws IOException {
@@ -69,34 +82,52 @@ public record ScaffoldOption(
         settingDir.mkdirs();
         templateDir.mkdirs();
         paramDir.mkdirs();
-        final boolean allTargets = this.generateTargets.isEmpty();
-        final boolean generateDdl = allTargets || this.generateTargets.contains("ddl");
-        final boolean generateJavaBean = allTargets || this.generateTargets.contains("javaBean");
-        final boolean generateParameter = (allTargets || this.generateTargets.contains("parameter"))
+        final boolean generateDdl = "ddl".equals(this.target);
+        final boolean generateJavaBean = "javaBean".equals(this.target);
+        final boolean generateParameter = "parameter".equals(this.target)
                 && Strings.isNotEmpty(this.commandType);
         if (generateJavaBean) {
-            this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "scaffold.json"));
-            this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
-            this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
+            if (this.includes(this.javaBeanIncludes, "setting")) {
+                this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "javaBean.json"));
+            }
+            if (this.includes(this.javaBeanIncludes, "template")) {
+                this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
+                this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
+            }
         }
         if (generateDdl) {
-            this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
-            this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
+            if (this.includes(this.ddlIncludes, "setting")) {
+                this.copyClasspathResource("sql/ddlSettings.json", new File(settingDir, "ddl.json"));
+            }
+            if (this.includes(this.ddlIncludes, "template")) {
+                this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
+                this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
+            }
         }
         if (generateDdl || generateJavaBean) {
-            final ComparableDataSetParam.Builder paramBuilder = this.srcData.getParam()
-                    .setUseJdbcMetaData(true)
-                    .setLoadData(false);
-            if (this.datasetResult.resultType() != null) {
-                paramBuilder.setConverter(new DataSetConverterLoader().get(this.datasetResult.getParam().build()));
-            }
-            final ComparableDataSet dataSet = this.getComparableDataSetLoader().loadDataSet(paramBuilder.build());
-            for (final String tableName : dataSet.getTableNames()) {
-                if (generateDdl) {
-                    this.writeParamFile(paramDir, tableName, "ddl");
-                }
-                if (generateJavaBean) {
-                    this.writeParamFile(paramDir, tableName, "javaBean");
+            final boolean needDdlParam = generateDdl && this.includes(this.ddlIncludes, "parameter");
+            final boolean needJavaBeanParam = generateJavaBean && this.includes(this.javaBeanIncludes, "parameter");
+            if (needDdlParam || needJavaBeanParam) {
+                if (this.srcData.srcType() != DataSourceType.none) {
+                    final ComparableDataSetParam.Builder paramBuilder = this.srcData.getParam()
+                            .setUseJdbcMetaData(true)
+                            .setLoadData(false);
+                    final ComparableDataSet dataSet = this.getComparableDataSetLoader().loadDataSet(paramBuilder.build());
+                    for (final String tableName : dataSet.getTableNames()) {
+                        if (needDdlParam) {
+                            this.writeParamFile(paramDir, tableName, "ddl");
+                        }
+                        if (needJavaBeanParam) {
+                            this.writeParamFile(paramDir, tableName, "javaBean");
+                        }
+                    }
+                } else {
+                    if (needDdlParam) {
+                        this.writeGenericParamFile(paramDir, "ddl");
+                    }
+                    if (needJavaBeanParam) {
+                        this.writeGenericParamFile(paramDir, "javaBean");
+                    }
                 }
             }
         }
@@ -126,9 +157,13 @@ public record ScaffoldOption(
         result.addComponent("datasetResult", this.datasetResult.toParameters());
         result.putDir("-result", this.resultDir, BaseDir.RESULT)
               .put("-sqlFilePrefix", this.sqlFilePrefix)
-              .put("-sqlFileSuffix", this.sqlFileSuffix);
-        if (!this.generateTargets.isEmpty()) {
-            result.put("-generateTargets", String.join(",", this.generateTargets));
+              .put("-sqlFileSuffix", this.sqlFileSuffix)
+              .put("-target", this.target);
+        if (!this.ddlIncludes.isEmpty()) {
+            result.put("-ddlIncludes", String.join(",", this.ddlIncludes));
+        }
+        if (!this.javaBeanIncludes.isEmpty()) {
+            result.put("-javaBeanIncludes", String.join(",", this.javaBeanIncludes));
         }
         result.put("-commandType", this.commandType);
         Arrays.stream(this.commandInput)
@@ -147,7 +182,7 @@ public record ScaffoldOption(
         final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
         srcComponent.remove("-src.loadData")
                     .remove("-src.useJdbcMetaData")
-                    .put("-setting", "resources/setting/scaffold.json");
+                    .put("-setting", "resources/setting/" + genType + ".json");
         builder.addComponent("srcData", srcComponent.build());
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
         if ("ddl".equals(genType)) {
@@ -164,9 +199,26 @@ public record ScaffoldOption(
                 this.paramLines(genType, tableName), StandardCharsets.UTF_8);
     }
 
+    private void writeGenericParamFile(final File paramDir, final String genType) throws IOException {
+        final ParametersBuilder builder = new ParametersBuilder();
+        builder.put("-generateType", genType, false);
+        builder.put("-setting", "resources/setting/" + genType + ".json");
+        builder.putDir("-result", this.resultDir, BaseDir.RESULT);
+        if ("ddl".equals(genType)) {
+            builder.put("-sqlFilePrefix", this.sqlFilePrefix)
+                   .put("-sqlFileSuffix", this.sqlFileSuffix);
+        }
+        Files.write(new File(paramDir, genType + ".param").toPath(),
+                builder.build().toList(false), StandardCharsets.UTF_8);
+    }
+
     private void copyClasspathResource(final String resource, final File dest) throws IOException {
         try (final InputStream is = ScaffoldOption.class.getClassLoader().getResourceAsStream(resource)) {
             Files.copy(is, dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
+    }
+
+    private boolean includes(final List<String> includes, final String item) {
+        return includes.isEmpty() || includes.contains(item);
     }
 }

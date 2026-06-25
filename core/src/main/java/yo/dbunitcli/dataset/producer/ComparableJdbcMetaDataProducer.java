@@ -7,13 +7,17 @@ import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTableMappingContext;
 import yo.dbunitcli.dataset.ComparableTableMappingTask;
+import yo.dbunitcli.dataset.NameFilter;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer {
 
@@ -32,6 +36,24 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
 
     public ComparableJdbcMetaDataProducer(final ComparableDataSetParam param) {
         super(param);
+    }
+
+    @Override
+    public Stream<? extends Source> getSourceStream() {
+        try {
+            final DatabaseMetaData meta = this.connection.getConnection().getMetaData();
+            final NameFilter filter = this.param().tableNameFilter();
+            final List<Source> sources = new ArrayList<>();
+            try (ResultSet rs = meta.getTables(null, null, "%", new String[]{"TABLE"})) {
+                while (rs.next()) {
+                    final String tableName = rs.getString("TABLE_NAME");
+                    sources.add(Source.NONE.tableName(tableName));
+                }
+            }
+            return sources.stream().filter(it -> filter.predicate(it.tableName()));
+        } catch (final SQLException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
