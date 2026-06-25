@@ -154,6 +154,35 @@ class ScaffoldOptionTest {
     }
 
     @Nested
+    class NoSrcData {
+
+        private String[] argsWithoutSrc(final String subDir, final String... extra) {
+            return Stream.concat(
+                    Arrays.stream(new String[]{"-result=" + Path.of(RESULT_BASE, subDir)}),
+                    Arrays.stream(extra)
+            ).toArray(String[]::new);
+        }
+
+        @Test
+        void srcdata未指定でddlのsettingとtemplateが生成される() {
+            Scaffold.main(argsWithoutSrc("nosrc/ddl", "-target=ddl"));
+            assertTrue(resultFile("nosrc/ddl", "resources/setting/ddl.json").exists());
+            assertTrue(resultFile("nosrc/ddl", "resources/template/ddl.stg").exists());
+            assertTrue(resultFile("nosrc/ddl", "resources/template/ddl.txt").exists());
+            assertFalse(resultFile("nosrc/ddl", "resources/param/DOCUMENT_ddl.param").exists());
+        }
+
+        @Test
+        void srcdata未指定でjavaBeanのsettingとtemplateが生成される() {
+            Scaffold.main(argsWithoutSrc("nosrc/javaBean", "-target=javaBean"));
+            assertTrue(resultFile("nosrc/javaBean", "resources/setting/javaBean.json").exists());
+            assertTrue(resultFile("nosrc/javaBean", "resources/template/javaBean.stg").exists());
+            assertTrue(resultFile("nosrc/javaBean", "resources/template/javaBean.txt").exists());
+            assertFalse(resultFile("nosrc/javaBean", "resources/param/DOCUMENT_javaBean.param").exists());
+        }
+    }
+
+    @Nested
     class ParameterTarget {
 
         @Test

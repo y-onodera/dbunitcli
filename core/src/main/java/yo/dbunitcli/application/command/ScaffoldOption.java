@@ -6,9 +6,11 @@ import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
+import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -59,9 +61,17 @@ public record ScaffoldOption(
                 , dto.getJavaBeanIncludes() != null ? dto.getJavaBeanIncludes() : List.of()
                 , Strings.isNotEmpty(dto.getCommandType()) ? dto.getCommandType() : ""
                 , dto.getCommandInput()
-                , new DataSetLoadOption("src", dto.getSrcData())
+                , new DataSetLoadOption("src", ScaffoldOption.srcDataWithDefault(dto), true)
                 , new DataSetConverterOption("datasetResult", dto.getDatasetResult())
         );
+    }
+
+    private static DataSetLoadDto srcDataWithDefault(final ScaffoldDto dto) {
+        final DataSetLoadDto srcData = dto.getSrcData();
+        if (srcData.getSrcType() == null) {
+            srcData.setSrcType(DataSourceType.none);
+        }
+        return srcData;
     }
 
     public void execute() throws IOException {
@@ -97,7 +107,7 @@ public record ScaffoldOption(
         if (generateDdl || generateJavaBean) {
             final boolean needDdlParam = generateDdl && this.includes(this.ddlIncludes, "parameter");
             final boolean needJavaBeanParam = generateJavaBean && this.includes(this.javaBeanIncludes, "parameter");
-            if (needDdlParam || needJavaBeanParam) {
+            if ((needDdlParam || needJavaBeanParam) && this.srcData.srcType() != DataSourceType.none) {
                 final ComparableDataSetParam.Builder paramBuilder = this.srcData.getParam()
                         .setUseJdbcMetaData(true)
                         .setLoadData(false);
