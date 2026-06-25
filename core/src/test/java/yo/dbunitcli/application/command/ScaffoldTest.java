@@ -19,23 +19,7 @@ public class ScaffoldTest {
     private static final String JDBC_PASS = "admin";
     private static final String RESULT_BASE = "target/test-temp/scaffold";
 
-    @BeforeAll
-    static void createTable() throws Exception {
-        try (Connection conn = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
-             Statement st = conn.createStatement()) {
-            st.execute("CREATE TABLE IF NOT EXISTS DOCUMENT (ID INTEGER PRIMARY KEY, NAME VARCHAR(40))");
-        }
-    }
-
-    @AfterAll
-    static void dropTable() throws Exception {
-        try (Connection conn = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
-             Statement st = conn.createStatement()) {
-            st.execute("DROP TABLE IF EXISTS DOCUMENT");
-        }
-    }
-
-    private String[] baseArgs(final String subDir, final String... extra) {
+    private static String[] jdbcArgs(final String subDir, final String... extra) {
         return Stream.concat(
                 Stream.of(
                         "-result=" + Path.of(RESULT_BASE, subDir),
@@ -49,16 +33,32 @@ public class ScaffoldTest {
         ).toArray(String[]::new);
     }
 
-    private File resultFile(final String subDir, final String relativePath) {
+    private static File resultFile(final String subDir, final String relativePath) {
         return Path.of(RESULT_BASE, subDir, relativePath).toFile();
     }
 
     @Nested
     class DdlTarget {
 
+        @BeforeAll
+        static void createTable() throws Exception {
+            try (Connection conn = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
+                 Statement st = conn.createStatement()) {
+                st.execute("CREATE TABLE IF NOT EXISTS DOCUMENT (ID INTEGER PRIMARY KEY, NAME VARCHAR(40))");
+            }
+        }
+
+        @AfterAll
+        static void dropTable() throws Exception {
+            try (Connection conn = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
+                 Statement st = conn.createStatement()) {
+                st.execute("DROP TABLE IF EXISTS DOCUMENT");
+            }
+        }
+
         @Test
         void allIncludes_全ファイルが生成される() {
-            Scaffold.main(baseArgs("ddl/all", "-target=ddl"));
+            Scaffold.main(jdbcArgs("ddl/all", "-target=ddl"));
             assertTrue(resultFile("ddl/all", "resources/setting/ddl.json").exists());
             assertTrue(resultFile("ddl/all", "resources/template/ddl.stg").exists());
             assertTrue(resultFile("ddl/all", "resources/template/ddl.txt").exists());
@@ -67,7 +67,7 @@ public class ScaffoldTest {
 
         @Test
         void settingOnly_settingのみ生成される() {
-            Scaffold.main(baseArgs("ddl/setting", "-target=ddl", "-ddlIncludes=setting"));
+            Scaffold.main(jdbcArgs("ddl/setting", "-target=ddl", "-ddlIncludes=setting"));
             assertTrue(resultFile("ddl/setting", "resources/setting/ddl.json").exists());
             assertFalse(resultFile("ddl/setting", "resources/template/ddl.stg").exists());
             assertFalse(resultFile("ddl/setting", "resources/template/ddl.txt").exists());
@@ -76,7 +76,7 @@ public class ScaffoldTest {
 
         @Test
         void templateOnly_templateのみ生成される() {
-            Scaffold.main(baseArgs("ddl/template", "-target=ddl", "-ddlIncludes=template"));
+            Scaffold.main(jdbcArgs("ddl/template", "-target=ddl", "-ddlIncludes=template"));
             assertFalse(resultFile("ddl/template", "resources/setting/ddl.json").exists());
             assertTrue(resultFile("ddl/template", "resources/template/ddl.stg").exists());
             assertTrue(resultFile("ddl/template", "resources/template/ddl.txt").exists());
@@ -85,7 +85,7 @@ public class ScaffoldTest {
 
         @Test
         void parameterOnly_parameterのみ生成される() {
-            Scaffold.main(baseArgs("ddl/parameter", "-target=ddl", "-ddlIncludes=parameter"));
+            Scaffold.main(jdbcArgs("ddl/parameter", "-target=ddl", "-ddlIncludes=parameter"));
             assertFalse(resultFile("ddl/parameter", "resources/setting/ddl.json").exists());
             assertFalse(resultFile("ddl/parameter", "resources/template/ddl.stg").exists());
             assertFalse(resultFile("ddl/parameter", "resources/template/ddl.txt").exists());
@@ -94,7 +94,7 @@ public class ScaffoldTest {
 
         @Test
         void settingAndTemplate_settingとtemplateが生成される() {
-            Scaffold.main(baseArgs("ddl/setting-template", "-target=ddl", "-ddlIncludes=setting,template"));
+            Scaffold.main(jdbcArgs("ddl/setting-template", "-target=ddl", "-ddlIncludes=setting,template"));
             assertTrue(resultFile("ddl/setting-template", "resources/setting/ddl.json").exists());
             assertTrue(resultFile("ddl/setting-template", "resources/template/ddl.stg").exists());
             assertTrue(resultFile("ddl/setting-template", "resources/template/ddl.txt").exists());
@@ -105,9 +105,25 @@ public class ScaffoldTest {
     @Nested
     class JavaBeanTarget {
 
+        @BeforeAll
+        static void createTable() throws Exception {
+            try (Connection conn = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
+                 Statement st = conn.createStatement()) {
+                st.execute("CREATE TABLE IF NOT EXISTS DOCUMENT (ID INTEGER PRIMARY KEY, NAME VARCHAR(40))");
+            }
+        }
+
+        @AfterAll
+        static void dropTable() throws Exception {
+            try (Connection conn = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
+                 Statement st = conn.createStatement()) {
+                st.execute("DROP TABLE IF EXISTS DOCUMENT");
+            }
+        }
+
         @Test
         void allIncludes_全ファイルが生成される() {
-            Scaffold.main(baseArgs("javaBean/all", "-target=javaBean"));
+            Scaffold.main(jdbcArgs("javaBean/all", "-target=javaBean"));
             assertTrue(resultFile("javaBean/all", "resources/setting/javaBean.json").exists());
             assertTrue(resultFile("javaBean/all", "resources/template/javaBean.stg").exists());
             assertTrue(resultFile("javaBean/all", "resources/template/javaBean.txt").exists());
@@ -116,7 +132,7 @@ public class ScaffoldTest {
 
         @Test
         void settingOnly_settingのみ生成される() {
-            Scaffold.main(baseArgs("javaBean/setting", "-target=javaBean", "-javaBeanIncludes=setting"));
+            Scaffold.main(jdbcArgs("javaBean/setting", "-target=javaBean", "-javaBeanIncludes=setting"));
             assertTrue(resultFile("javaBean/setting", "resources/setting/javaBean.json").exists());
             assertFalse(resultFile("javaBean/setting", "resources/template/javaBean.stg").exists());
             assertFalse(resultFile("javaBean/setting", "resources/template/javaBean.txt").exists());
@@ -125,7 +141,7 @@ public class ScaffoldTest {
 
         @Test
         void templateOnly_templateのみ生成される() {
-            Scaffold.main(baseArgs("javaBean/template", "-target=javaBean", "-javaBeanIncludes=template"));
+            Scaffold.main(jdbcArgs("javaBean/template", "-target=javaBean", "-javaBeanIncludes=template"));
             assertFalse(resultFile("javaBean/template", "resources/setting/javaBean.json").exists());
             assertTrue(resultFile("javaBean/template", "resources/template/javaBean.stg").exists());
             assertTrue(resultFile("javaBean/template", "resources/template/javaBean.txt").exists());
@@ -134,7 +150,7 @@ public class ScaffoldTest {
 
         @Test
         void parameterOnly_parameterのみ生成される() {
-            Scaffold.main(baseArgs("javaBean/parameter", "-target=javaBean", "-javaBeanIncludes=parameter"));
+            Scaffold.main(jdbcArgs("javaBean/parameter", "-target=javaBean", "-javaBeanIncludes=parameter"));
             assertFalse(resultFile("javaBean/parameter", "resources/setting/javaBean.json").exists());
             assertFalse(resultFile("javaBean/parameter", "resources/template/javaBean.stg").exists());
             assertFalse(resultFile("javaBean/parameter", "resources/template/javaBean.txt").exists());
@@ -143,7 +159,7 @@ public class ScaffoldTest {
 
         @Test
         void settingAndTemplate_settingとtemplateが生成される() {
-            Scaffold.main(baseArgs("javaBean/setting-template", "-target=javaBean", "-javaBeanIncludes=setting,template"));
+            Scaffold.main(jdbcArgs("javaBean/setting-template", "-target=javaBean", "-javaBeanIncludes=setting,template"));
             assertTrue(resultFile("javaBean/setting-template", "resources/setting/javaBean.json").exists());
             assertTrue(resultFile("javaBean/setting-template", "resources/template/javaBean.stg").exists());
             assertTrue(resultFile("javaBean/setting-template", "resources/template/javaBean.txt").exists());
@@ -154,16 +170,9 @@ public class ScaffoldTest {
     @Nested
     class NoSrcData {
 
-        private String[] argsWithoutSrc(final String subDir, final String... extra) {
-            return Stream.concat(
-                    Stream.of("-result=" + Path.of(RESULT_BASE, subDir)),
-                    Stream.of(extra)
-            ).toArray(String[]::new);
-        }
-
         @Test
         void srcdata未指定でddlの全ファイルが生成される() throws Exception {
-            Scaffold.main(argsWithoutSrc("nosrc/ddl", "-target=ddl"));
+            Scaffold.main(new String[]{"-result=" + Path.of(RESULT_BASE, "nosrc/ddl"), "-target=ddl"});
             assertTrue(resultFile("nosrc/ddl", "resources/setting/ddl.json").exists());
             assertTrue(resultFile("nosrc/ddl", "resources/template/ddl.stg").exists());
             assertTrue(resultFile("nosrc/ddl", "resources/template/ddl.txt").exists());
@@ -174,7 +183,7 @@ public class ScaffoldTest {
 
         @Test
         void srcdata未指定でjavaBeanの全ファイルが生成される() throws Exception {
-            Scaffold.main(argsWithoutSrc("nosrc/javaBean", "-target=javaBean"));
+            Scaffold.main(new String[]{"-result=" + Path.of(RESULT_BASE, "nosrc/javaBean"), "-target=javaBean"});
             assertTrue(resultFile("nosrc/javaBean", "resources/setting/javaBean.json").exists());
             assertTrue(resultFile("nosrc/javaBean", "resources/template/javaBean.stg").exists());
             assertTrue(resultFile("nosrc/javaBean", "resources/template/javaBean.txt").exists());
@@ -189,9 +198,11 @@ public class ScaffoldTest {
 
         @Test
         void commandTypeを指定するとparamファイルが生成される() throws Exception {
-            Scaffold.main(baseArgs("parameter/generate",
+            Scaffold.main(new String[]{
+                    "-result=" + Path.of(RESULT_BASE, "parameter/generate"),
                     "-target=parameter",
-                    "-commandType=generate"));
+                    "-commandType=generate"
+            });
             final File paramFile = resultFile("parameter/generate", "resources/param/generate.param");
             assertTrue(paramFile.exists());
             assertTrue(Files.size(paramFile.toPath()) > 0);
@@ -201,7 +212,7 @@ public class ScaffoldTest {
 
         @Test
         void generateTargetsが空のとき何も生成されない() {
-            Scaffold.main(baseArgs("empty"));
+            Scaffold.main(new String[]{"-result=" + Path.of(RESULT_BASE, "empty")});
             assertFalse(resultFile("empty", "resources/setting/ddl.json").exists());
             assertFalse(resultFile("empty", "resources/setting/javaBean.json").exists());
             assertFalse(resultFile("empty", "resources/template/ddl.stg").exists());
