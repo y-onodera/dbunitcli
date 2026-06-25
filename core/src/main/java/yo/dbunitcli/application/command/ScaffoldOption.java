@@ -8,8 +8,6 @@ import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.common.Parameter;
-import yo.dbunitcli.dataset.ComparableDataSet;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.resource.FileResources;
 
@@ -107,28 +105,11 @@ public record ScaffoldOption(
         if (generateDdl || generateJavaBean) {
             final boolean needDdlParam = generateDdl && this.includes(this.ddlIncludes, "parameter");
             final boolean needJavaBeanParam = generateJavaBean && this.includes(this.javaBeanIncludes, "parameter");
-            if (needDdlParam || needJavaBeanParam) {
-                if (this.srcData.srcType() != DataSourceType.none) {
-                    final ComparableDataSetParam.Builder paramBuilder = this.srcData.getParam()
-                            .setUseJdbcMetaData(true)
-                            .setLoadData(false);
-                    final ComparableDataSet dataSet = this.getComparableDataSetLoader().loadDataSet(paramBuilder.build());
-                    for (final String tableName : dataSet.getTableNames()) {
-                        if (needDdlParam) {
-                            this.writeParamFile(paramDir, tableName, "ddl");
-                        }
-                        if (needJavaBeanParam) {
-                            this.writeParamFile(paramDir, tableName, "javaBean");
-                        }
-                    }
-                } else {
-                    if (needDdlParam) {
-                        this.writeGenericParamFile(paramDir, "ddl");
-                    }
-                    if (needJavaBeanParam) {
-                        this.writeGenericParamFile(paramDir, "javaBean");
-                    }
-                }
+            if (needDdlParam) {
+                this.writeGenericParamFile(paramDir, "ddl");
+            }
+            if (needJavaBeanParam) {
+                this.writeGenericParamFile(paramDir, "javaBean");
             }
         }
         if (generateParameter) {
@@ -174,29 +155,6 @@ public record ScaffoldOption(
                   result.put(key, eqIdx > 0 ? arg.substring(eqIdx + 1) : "true");
               });
         return result;
-    }
-
-    private List<String> paramLines(final String genType, final String tableName) {
-        final ParametersBuilder builder = new ParametersBuilder();
-        builder.put("-generateType", genType, false);
-        final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
-        srcComponent.remove("-src.loadData")
-                    .remove("-src.useJdbcMetaData")
-                    .put("-setting", "resources/setting/" + genType + ".json");
-        builder.addComponent("srcData", srcComponent.build());
-        builder.putDir("-result", this.resultDir, BaseDir.RESULT);
-        if ("ddl".equals(genType)) {
-            builder.put("-sqlFilePrefix", this.sqlFilePrefix)
-                   .put("-sqlFileSuffix", this.sqlFileSuffix);
-        }
-        builder.put("-regTableInclude", tableName);
-        return builder.build().toList(false);
-    }
-
-    private void writeParamFile(final File paramDir, final String tableName, final String genType)
-            throws IOException {
-        Files.write(new File(paramDir, tableName + "_" + genType + ".param").toPath(),
-                this.paramLines(genType, tableName), StandardCharsets.UTF_8);
     }
 
     private void writeGenericParamFile(final File paramDir, final String genType) throws IOException {
