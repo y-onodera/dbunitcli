@@ -5,8 +5,6 @@ import yo.dbunitcli.application.CommandDto;
 import yo.dbunitcli.application.dto.DataSetConverterDto;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 
-import java.util.List;
-
 public class ScaffoldDto extends CommandDto {
     @CommandLine.Option(names = "-result", description = "directory to create workspace structure")
     private String resultDir;
@@ -16,8 +14,12 @@ public class ScaffoldDto extends CommandDto {
     private String sqlFilePrefix;
     @CommandLine.Option(names = "-target", description = "target to generate: ddl, javaBean, or parameter (required, no default)")
     private String target;
-    @CommandLine.Option(names = "-include", split = ",", description = "scaffold contents: setting,template,parameter (default: all)")
-    private List<String> include;
+    @CommandLine.Option(names = "-setting", description = "setting file name to scaffold (omit to skip)")
+    private String settingName;
+    @CommandLine.Option(names = "-template", description = "template file name to scaffold (omit to skip)")
+    private String templateName;
+    @CommandLine.Option(names = "-parameter", description = "parameter file name to scaffold (omit to skip)")
+    private String parameterName;
     @CommandLine.Option(names = "-commandType", description = "commandType for parameter generation")
     private String commandType;
 
@@ -74,12 +76,28 @@ public class ScaffoldDto extends CommandDto {
         this.target = target;
     }
 
-    public List<String> getInclude() {
-        return this.include;
+    public String getSettingName() {
+        return this.settingName;
     }
 
-    public void setInclude(final List<String> include) {
-        this.include = include;
+    public void setSettingName(final String settingName) {
+        this.settingName = settingName;
+    }
+
+    public String getTemplateName() {
+        return this.templateName;
+    }
+
+    public void setTemplateName(final String templateName) {
+        this.templateName = templateName;
+    }
+
+    public String getParameterName() {
+        return this.parameterName;
+    }
+
+    public void setParameterName(final String parameterName) {
+        this.parameterName = parameterName;
     }
 
     public DataSetLoadDto getSrcData() {

@@ -18,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-import java.util.List;
 
 public record ScaffoldOption(
         Parameter parameter
@@ -26,7 +25,9 @@ public record ScaffoldOption(
         , String sqlFilePrefix
         , String sqlFileSuffix
         , String target
-        , List<String> include
+        , String settingName
+        , String templateName
+        , String parameterName
         , String commandType
         , String[] commandInput
         , DataSetLoadOption srcData
@@ -54,7 +55,9 @@ public record ScaffoldOption(
                 , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
                 , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
                 , Strings.isNotEmpty(dto.getTarget()) ? dto.getTarget() : ""
-                , dto.getInclude() != null ? dto.getInclude() : List.of()
+                , Strings.isNotEmpty(dto.getSettingName()) ? dto.getSettingName() : ""
+                , Strings.isNotEmpty(dto.getTemplateName()) ? dto.getTemplateName() : ""
+                , Strings.isNotEmpty(dto.getParameterName()) ? dto.getParameterName() : ""
                 , Strings.isNotEmpty(dto.getCommandType()) ? dto.getCommandType() : ""
                 , dto.getCommandInput()
                 , new DataSetLoadOption("src", ScaffoldOption.srcDataWithDefault(dto), true)
@@ -75,42 +78,38 @@ public record ScaffoldOption(
         final File settingDir = new File(baseDir, "resources/setting");
         final File templateDir = new File(baseDir, "resources/template");
         final File paramDir = new File(baseDir, "resources/param");
-        settingDir.mkdirs();
-        templateDir.mkdirs();
-        paramDir.mkdirs();
         final boolean generateDdl = "ddl".equals(this.target);
         final boolean generateJavaBean = "javaBean".equals(this.target);
         final boolean generateParameter = "parameter".equals(this.target)
                 && Strings.isNotEmpty(this.commandType);
         if (generateJavaBean) {
-            if (this.includes(this.include, "setting")) {
-                this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, "javaBean.json"));
+            if (Strings.isNotEmpty(this.settingName)) {
+                settingDir.mkdirs();
+                this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, this.settingName + ".json"));
             }
-            if (this.includes(this.include, "template")) {
-                this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, "javaBean.stg"));
-                this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, "javaBean.txt"));
+            if (Strings.isNotEmpty(this.templateName)) {
+                templateDir.mkdirs();
+                this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, this.templateName + ".stg"));
+                this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, this.templateName + ".txt"));
             }
         }
         if (generateDdl) {
-            if (this.includes(this.include, "setting")) {
-                this.copyClasspathResource("sql/ddlSettings.json", new File(settingDir, "ddl.json"));
+            if (Strings.isNotEmpty(this.settingName)) {
+                settingDir.mkdirs();
+                this.copyClasspathResource("sql/ddlSettings.json", new File(settingDir, this.settingName + ".json"));
             }
-            if (this.includes(this.include, "template")) {
-                this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, "ddl.stg"));
-                this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, "ddl.txt"));
+            if (Strings.isNotEmpty(this.templateName)) {
+                templateDir.mkdirs();
+                this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, this.templateName + ".stg"));
+                this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, this.templateName + ".txt"));
             }
         }
-        if (generateDdl || generateJavaBean) {
-            final boolean needDdlParam = generateDdl && this.includes(this.include, "parameter");
-            final boolean needJavaBeanParam = generateJavaBean && this.includes(this.include, "parameter");
-            if (needDdlParam) {
-                this.writeGenericParamFile(paramDir, "ddl");
-            }
-            if (needJavaBeanParam) {
-                this.writeGenericParamFile(paramDir, "javaBean");
-            }
+        if ((generateDdl || generateJavaBean) && Strings.isNotEmpty(this.parameterName)) {
+            paramDir.mkdirs();
+            this.writeGenericParamFile(paramDir, generateDdl);
         }
         if (generateParameter) {
+            paramDir.mkdirs();
             final String[] shrunkArgs = new CommandParameters(Type.valueOf(this.commandType), this.commandInput)
                     .shrink().args();
             Files.write(new File(paramDir, this.commandType + ".param").toPath(),
@@ -138,9 +137,9 @@ public record ScaffoldOption(
               .put("-sqlFilePrefix", this.sqlFilePrefix)
               .put("-sqlFileSuffix", this.sqlFileSuffix)
               .put("-target", this.target);
-        if (!this.include.isEmpty()) {
-            result.put("-include", String.join(",", this.include));
-        }
+        result.put("-setting", this.settingName)
+              .put("-template", this.templateName)
+              .put("-parameter", this.parameterName);
         result.put("-commandType", this.commandType);
         Arrays.stream(this.commandInput)
               .filter(arg -> arg.startsWith("-"))
@@ -152,23 +151,22 @@ public record ScaffoldOption(
         return result;
     }
 
-    private void writeGenericParamFile(final File paramDir, final String genType) throws IOException {
-        final boolean useTemplate = this.includes(this.include, "template");
-        final boolean useSetting = this.includes(this.include, "setting");
+    private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {
+        final boolean hasTemplate = Strings.isNotEmpty(this.templateName);
         final ParametersBuilder builder = new ParametersBuilder();
-        builder.put("-generateType", useTemplate ? "txt" : genType, false);
-        if (useTemplate) {
-            builder.put("-template", "resources/template/" + genType + ".stg");
+        builder.put("-generateType", hasTemplate ? "txt" : (isDdl ? "ddl" : "javaBean"), false);
+        if (hasTemplate) {
+            builder.put("-template", "resources/template/" + this.templateName + ".stg");
         }
-        if (useSetting) {
-            builder.put("-setting", "resources/setting/" + genType + ".json");
+        if (Strings.isNotEmpty(this.settingName)) {
+            builder.put("-setting", "resources/setting/" + this.settingName + ".json");
         }
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
-        if ("ddl".equals(genType)) {
+        if (isDdl) {
             builder.put("-sqlFilePrefix", this.sqlFilePrefix)
                    .put("-sqlFileSuffix", this.sqlFileSuffix);
         }
-        Files.write(new File(paramDir, genType + ".param").toPath(),
+        Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
                 builder.build().toList(false), StandardCharsets.UTF_8);
     }
 
@@ -176,9 +174,5 @@ public record ScaffoldOption(
         try (final InputStream is = ScaffoldOption.class.getClassLoader().getResourceAsStream(resource)) {
             Files.copy(is, dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
-    }
-
-    private boolean includes(final List<String> includes, final String item) {
-        return includes.isEmpty() || includes.contains(item);
     }
 }
