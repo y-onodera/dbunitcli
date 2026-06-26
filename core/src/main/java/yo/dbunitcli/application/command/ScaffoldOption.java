@@ -18,8 +18,6 @@ import java.util.Arrays;
 public record ScaffoldOption(
         Parameter parameter
         , String resultDir
-        , String sqlFilePrefix
-        , String sqlFileSuffix
         , String target
         , String settingName
         , String templateName
@@ -44,8 +42,6 @@ public record ScaffoldOption(
     public ScaffoldOption(final String resultFile, final ScaffoldDto dto, final Parameter param) {
         this(param
                 , Strings.isNotEmpty(dto.getResultDir()) ? dto.getResultDir() : resultFile
-                , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
-                , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
                 , Strings.isNotEmpty(dto.getTarget()) ? dto.getTarget() : ""
                 , Strings.isNotEmpty(dto.getSettingName()) ? dto.getSettingName() : ""
                 , Strings.isNotEmpty(dto.getTemplateName()) ? dto.getTemplateName() : ""
@@ -112,8 +108,6 @@ public record ScaffoldOption(
     public ParametersBuilder toParametersBuilder() {
         final ParametersBuilder result = new ParametersBuilder();
         result.putDir("-result", this.resultDir, BaseDir.RESULT)
-              .put("-sqlFilePrefix", this.sqlFilePrefix)
-              .put("-sqlFileSuffix", this.sqlFileSuffix)
               .put("-target", this.target);
         result.put("-setting", this.settingName)
               .put("-template", this.templateName)
@@ -140,10 +134,6 @@ public record ScaffoldOption(
             builder.put("-setting", "resources/setting/" + this.settingName + ".json");
         }
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
-        if (isDdl) {
-            builder.put("-sqlFilePrefix", this.sqlFilePrefix)
-                   .put("-sqlFileSuffix", this.sqlFileSuffix);
-        }
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
                 builder.build().toList(false), StandardCharsets.UTF_8);
     }
