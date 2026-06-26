@@ -56,14 +56,14 @@ public record ScaffoldOption(
         final File settingDir = new File(baseDir, "resources/setting");
         final File templateDir = new File(baseDir, "resources/template");
         final File paramDir = new File(baseDir, "resources/param");
-        final boolean generateDdl = "ddl".equals(this.target);
-        final boolean generateJavaBean = "javaBean".equals(this.target);
+        final boolean generateDdl = GenerateType.ddl.name().equals(this.target);
+        final boolean generateJavaBean = GenerateType.javaBean.name().equals(this.target);
         final boolean generateParameter = "parameter".equals(this.target)
                 && Strings.isNotEmpty(this.commandType);
         if (generateJavaBean) {
             if (Strings.isNotEmpty(this.settingName)) {
                 settingDir.mkdirs();
-                this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, this.settingName + ".json"));
+                this.copyClasspathResource(GenerateType.javaBean.defaultSettingsPath(), new File(settingDir, this.settingName + ".json"));
             }
             if (Strings.isNotEmpty(this.templateName)) {
                 templateDir.mkdirs();
@@ -74,7 +74,7 @@ public record ScaffoldOption(
         if (generateDdl) {
             if (Strings.isNotEmpty(this.settingName)) {
                 settingDir.mkdirs();
-                this.copyClasspathResource("sql/ddlSettings.json", new File(settingDir, this.settingName + ".json"));
+                this.copyClasspathResource(GenerateType.ddl.defaultSettingsPath(), new File(settingDir, this.settingName + ".json"));
             }
             if (Strings.isNotEmpty(this.templateName)) {
                 templateDir.mkdirs();
@@ -126,7 +126,7 @@ public record ScaffoldOption(
     private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {
         final boolean hasTemplate = Strings.isNotEmpty(this.templateName);
         final ParametersBuilder builder = new ParametersBuilder();
-        builder.put("-generateType", hasTemplate ? "txt" : (isDdl ? "ddl" : "javaBean"), false);
+        builder.put("-generateType", hasTemplate ? GenerateType.txt.name() : (isDdl ? GenerateType.ddl.name() : GenerateType.javaBean.name()), false);
         if (hasTemplate) {
             builder.put("-template", "resources/template/" + this.templateName + ".stg");
         }
