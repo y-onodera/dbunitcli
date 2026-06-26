@@ -1,9 +1,12 @@
 package yo.dbunitcli.application.command;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -153,10 +156,66 @@ public class ScaffoldTest {
             public void testParameterFileGenerated() throws Exception {
                 TestCase.this.scaffold("parameter/generate", "-target=parameter", "-commandType=generate");
                 final File paramFile = TestCase.this.resultFile("parameter/generate", "resources/param/generate.param");
-                assertTrue(paramFile.exists());
-                assertTrue(Files.size(paramFile.toPath()) > 0);
+                assertParamFileExists(paramFile);
                 assertFalse(TestCase.this.resultFile("parameter/generate", "resources/setting/ddl.json").exists());
                 assertFalse(TestCase.this.resultFile("parameter/generate", "resources/setting/javaBean.json").exists());
+            }
+
+            @ParameterizedTest
+            @ValueSource(strings = {"compare", "convert", "parameterize", "run"})
+            public void testParameterFileGeneratedForCommandType(final String commandType) throws Exception {
+                TestCase.this.scaffold("parameter/" + commandType, "-target=parameter", "-commandType=" + commandType);
+                assertParamFileExists(TestCase.this.resultFile("parameter/" + commandType, "resources/param/" + commandType + ".param"));
+            }
+
+            @ParameterizedTest
+            @ValueSource(strings = {"txt", "ddl", "javaBean"})
+            public void testGenerateWithGenerateType(final String generateType) throws Exception {
+                final String subDir = "parameter/generate-type-" + generateType;
+                TestCase.this.scaffold(subDir, "-target=parameter", "-commandType=generate",
+                        "-commandInput.generateType=" + generateType);
+                assertParamFileContains(TestCase.this.resultFile(subDir, "resources/param/generate.param"),
+                        "-generateType=" + generateType);
+            }
+
+            @ParameterizedTest
+            @ValueSource(strings = {"csv", "xlsx"})
+            public void testGenerateWithSrcType(final String srcType) throws Exception {
+                final String subDir = "parameter/generate-src-" + srcType;
+                TestCase.this.scaffold(subDir, "-target=parameter", "-commandType=generate",
+                        "-commandInput.src.srcType=" + srcType);
+                assertParamFileContains(TestCase.this.resultFile(subDir, "resources/param/generate.param"),
+                        "-src.srcType=" + srcType);
+            }
+
+            @ParameterizedTest
+            @ValueSource(strings = {"data", "image"})
+            public void testCompareWithTargetType(final String targetType) throws Exception {
+                final String subDir = "parameter/compare-target-" + targetType;
+                TestCase.this.scaffold(subDir, "-target=parameter", "-commandType=compare",
+                        "-commandInput.targetType=" + targetType);
+                assertParamFileContains(TestCase.this.resultFile(subDir, "resources/param/compare.param"),
+                        "-targetType=" + targetType);
+            }
+
+            @ParameterizedTest
+            @ValueSource(strings = {"csv", "xlsx"})
+            public void testConvertWithSrcType(final String srcType) throws Exception {
+                final String subDir = "parameter/convert-src-" + srcType;
+                TestCase.this.scaffold(subDir, "-target=parameter", "-commandType=convert",
+                        "-commandInput.src.srcType=" + srcType);
+                assertParamFileContains(TestCase.this.resultFile(subDir, "resources/param/convert.param"),
+                        "-src.srcType=" + srcType);
+            }
+
+            @ParameterizedTest
+            @ValueSource(strings = {"sql", "ant"})
+            public void testRunWithScriptType(final String scriptType) throws Exception {
+                final String subDir = "parameter/run-script-" + scriptType;
+                TestCase.this.scaffold(subDir, "-target=parameter", "-commandType=run",
+                        "-commandInput.scriptType=" + scriptType);
+                assertParamFileContains(TestCase.this.resultFile(subDir, "resources/param/run.param"),
+                        "-scriptType=" + scriptType);
             }
 
             @Test
@@ -166,6 +225,17 @@ public class ScaffoldTest {
                 assertFalse(TestCase.this.resultFile("empty", "resources/setting/javaBean.json").exists());
                 assertFalse(TestCase.this.resultFile("empty", "resources/template/ddl.stg").exists());
                 assertFalse(TestCase.this.resultFile("empty", "resources/template/javaBean.stg").exists());
+            }
+
+            private void assertParamFileExists(final File paramFile) throws IOException {
+                assertTrue(paramFile.exists());
+                assertTrue(Files.size(paramFile.toPath()) > 0);
+            }
+
+            private void assertParamFileContains(final File paramFile, final String expected) throws IOException {
+                assertTrue(paramFile.exists());
+                final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
+                assertTrue(lines.stream().anyMatch(l -> l.contains(expected)));
             }
         }
 
