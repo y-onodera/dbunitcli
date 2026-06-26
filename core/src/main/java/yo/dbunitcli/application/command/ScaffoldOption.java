@@ -4,11 +4,7 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.CommandParameters;
-import yo.dbunitcli.application.option.DataSetConverterOption;
-import yo.dbunitcli.application.option.DataSetLoadOption;
-import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.common.Parameter;
-import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -30,8 +26,6 @@ public record ScaffoldOption(
         , String parameterName
         , String commandType
         , String[] commandInput
-        , DataSetLoadOption srcData
-        , DataSetConverterOption datasetResult
 ) implements CommandLineOption<ScaffoldDto> {
 
     private static final String COMMAND_INPUT_PREFIX = "-commandInput.";
@@ -40,8 +34,6 @@ public record ScaffoldOption(
         final ScaffoldDto dto = new ScaffoldDto();
         new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, CommandLineOption.ARGUMENT_FILTER)
                 .populate(args, dto);
-        new ArgumentMapper("src").populate(args, dto.getSrcData());
-        new ArgumentMapper("datasetResult").populate(args, dto.getDatasetResult());
         dto.setCommandInput(Arrays.stream(args)
                 .filter(it -> it.startsWith(COMMAND_INPUT_PREFIX))
                 .map(it -> "-" + it.substring(COMMAND_INPUT_PREFIX.length()))
@@ -60,17 +52,7 @@ public record ScaffoldOption(
                 , Strings.isNotEmpty(dto.getParameterName()) ? dto.getParameterName() : ""
                 , Strings.isNotEmpty(dto.getCommandType()) ? dto.getCommandType() : ""
                 , dto.getCommandInput()
-                , new DataSetLoadOption("src", ScaffoldOption.srcDataWithDefault(dto), true)
-                , new DataSetConverterOption("datasetResult", dto.getDatasetResult())
         );
-    }
-
-    private static DataSetLoadDto srcDataWithDefault(final ScaffoldDto dto) {
-        final DataSetLoadDto srcData = dto.getSrcData();
-        if (srcData.getSrcType() == null) {
-            srcData.setSrcType(DataSourceType.none);
-        }
-        return srcData;
     }
 
     public void execute() throws IOException {
@@ -129,10 +111,6 @@ public record ScaffoldOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         final ParametersBuilder result = new ParametersBuilder();
-        final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
-        srcComponent.remove("-src.loadData").remove("-src.useJdbcMetaData");
-        result.addComponent("srcData", srcComponent.build());
-        result.addComponent("datasetResult", this.datasetResult.toParameters());
         result.putDir("-result", this.resultDir, BaseDir.RESULT)
               .put("-sqlFilePrefix", this.sqlFilePrefix)
               .put("-sqlFileSuffix", this.sqlFileSuffix)

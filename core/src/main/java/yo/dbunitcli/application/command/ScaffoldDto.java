@@ -2,8 +2,6 @@ package yo.dbunitcli.application.command;
 
 import picocli.CommandLine;
 import yo.dbunitcli.application.CommandDto;
-import yo.dbunitcli.application.dto.DataSetConverterDto;
-import yo.dbunitcli.application.dto.DataSetLoadDto;
 
 public class ScaffoldDto extends CommandDto {
     @CommandLine.Option(names = "-result", description = "directory to create workspace structure")
@@ -40,9 +38,6 @@ public class ScaffoldDto extends CommandDto {
     public void setCommandInput(final String[] commandInput) {
         this.commandInput = commandInput;
     }
-
-    private DataSetLoadDto srcData = new DataSetLoadDto();
-    private DataSetConverterDto datasetResult = new DataSetConverterDto();
 
     public String getResultDir() {
         return this.resultDir;
@@ -100,19 +95,4 @@ public class ScaffoldDto extends CommandDto {
         this.parameterName = parameterName;
     }
 
-    public DataSetLoadDto getSrcData() {
-        return this.srcData;
-    }
-
-    public void setSrcData(final DataSetLoadDto srcData) {
-        this.srcData = srcData;
-    }
-
-    public DataSetConverterDto getDatasetResult() {
-        return this.datasetResult;
-    }
-
-    public void setDatasetResult(final DataSetConverterDto datasetResult) {
-        this.datasetResult = datasetResult;
-    }
 }
