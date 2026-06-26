@@ -4,11 +4,7 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.CommandParameters;
-import yo.dbunitcli.application.option.DataSetConverterOption;
-import yo.dbunitcli.application.option.DataSetLoadOption;
-import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.common.Parameter;
-import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -22,16 +18,12 @@ import java.util.Arrays;
 public record ScaffoldOption(
         Parameter parameter
         , String resultDir
-        , String sqlFilePrefix
-        , String sqlFileSuffix
         , String target
         , String settingName
         , String templateName
         , String parameterName
         , String commandType
         , String[] commandInput
-        , DataSetLoadOption srcData
-        , DataSetConverterOption datasetResult
 ) implements CommandLineOption<ScaffoldDto> {
 
     private static final String COMMAND_INPUT_PREFIX = "-commandInput.";
@@ -40,8 +32,6 @@ public record ScaffoldOption(
         final ScaffoldDto dto = new ScaffoldDto();
         new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, CommandLineOption.ARGUMENT_FILTER)
                 .populate(args, dto);
-        new ArgumentMapper("src").populate(args, dto.getSrcData());
-        new ArgumentMapper("datasetResult").populate(args, dto.getDatasetResult());
         dto.setCommandInput(Arrays.stream(args)
                 .filter(it -> it.startsWith(COMMAND_INPUT_PREFIX))
                 .map(it -> "-" + it.substring(COMMAND_INPUT_PREFIX.length()))
@@ -52,25 +42,13 @@ public record ScaffoldOption(
     public ScaffoldOption(final String resultFile, final ScaffoldDto dto, final Parameter param) {
         this(param
                 , Strings.isNotEmpty(dto.getResultDir()) ? dto.getResultDir() : resultFile
-                , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
-                , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
                 , Strings.isNotEmpty(dto.getTarget()) ? dto.getTarget() : ""
                 , Strings.isNotEmpty(dto.getSettingName()) ? dto.getSettingName() : ""
                 , Strings.isNotEmpty(dto.getTemplateName()) ? dto.getTemplateName() : ""
                 , Strings.isNotEmpty(dto.getParameterName()) ? dto.getParameterName() : ""
                 , Strings.isNotEmpty(dto.getCommandType()) ? dto.getCommandType() : ""
                 , dto.getCommandInput()
-                , new DataSetLoadOption("src", ScaffoldOption.srcDataWithDefault(dto), true)
-                , new DataSetConverterOption("datasetResult", dto.getDatasetResult())
         );
-    }
-
-    private static DataSetLoadDto srcDataWithDefault(final ScaffoldDto dto) {
-        final DataSetLoadDto srcData = dto.getSrcData();
-        if (srcData.getSrcType() == null) {
-            srcData.setSrcType(DataSourceType.none);
-        }
-        return srcData;
     }
 
     public void execute() throws IOException {
@@ -78,14 +56,14 @@ public record ScaffoldOption(
         final File settingDir = new File(baseDir, "resources/setting");
         final File templateDir = new File(baseDir, "resources/template");
         final File paramDir = new File(baseDir, "resources/param");
-        final boolean generateDdl = "ddl".equals(this.target);
-        final boolean generateJavaBean = "javaBean".equals(this.target);
+        final boolean generateDdl = GenerateType.ddl.name().equals(this.target);
+        final boolean generateJavaBean = GenerateType.javaBean.name().equals(this.target);
         final boolean generateParameter = "parameter".equals(this.target)
                 && Strings.isNotEmpty(this.commandType);
         if (generateJavaBean) {
             if (Strings.isNotEmpty(this.settingName)) {
                 settingDir.mkdirs();
-                this.copyClasspathResource("javabean/javaBeanSettings.json", new File(settingDir, this.settingName + ".json"));
+                this.copyClasspathResource(GenerateType.javaBean.defaultSettingsPath(), new File(settingDir, this.settingName + ".json"));
             }
             if (Strings.isNotEmpty(this.templateName)) {
                 templateDir.mkdirs();
@@ -96,7 +74,7 @@ public record ScaffoldOption(
         if (generateDdl) {
             if (Strings.isNotEmpty(this.settingName)) {
                 settingDir.mkdirs();
-                this.copyClasspathResource("sql/ddlSettings.json", new File(settingDir, this.settingName + ".json"));
+                this.copyClasspathResource(GenerateType.ddl.defaultSettingsPath(), new File(settingDir, this.settingName + ".json"));
             }
             if (Strings.isNotEmpty(this.templateName)) {
                 templateDir.mkdirs();
@@ -129,13 +107,7 @@ public record ScaffoldOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         final ParametersBuilder result = new ParametersBuilder();
-        final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
-        srcComponent.remove("-src.loadData").remove("-src.useJdbcMetaData");
-        result.addComponent("srcData", srcComponent.build());
-        result.addComponent("datasetResult", this.datasetResult.toParameters());
         result.putDir("-result", this.resultDir, BaseDir.RESULT)
-              .put("-sqlFilePrefix", this.sqlFilePrefix)
-              .put("-sqlFileSuffix", this.sqlFileSuffix)
               .put("-target", this.target);
         result.put("-setting", this.settingName)
               .put("-template", this.templateName)
@@ -154,7 +126,7 @@ public record ScaffoldOption(
     private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {
         final boolean hasTemplate = Strings.isNotEmpty(this.templateName);
         final ParametersBuilder builder = new ParametersBuilder();
-        builder.put("-generateType", hasTemplate ? "txt" : (isDdl ? "ddl" : "javaBean"), false);
+        builder.put("-generateType", hasTemplate ? GenerateType.txt.name() : (isDdl ? GenerateType.ddl.name() : GenerateType.javaBean.name()), false);
         if (hasTemplate) {
             builder.put("-template", "resources/template/" + this.templateName + ".stg");
         }
@@ -162,10 +134,6 @@ public record ScaffoldOption(
             builder.put("-setting", "resources/setting/" + this.settingName + ".json");
         }
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
-        if (isDdl) {
-            builder.put("-sqlFilePrefix", this.sqlFilePrefix)
-                   .put("-sqlFileSuffix", this.sqlFileSuffix);
-        }
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
                 builder.build().toList(false), StandardCharsets.UTF_8);
     }
