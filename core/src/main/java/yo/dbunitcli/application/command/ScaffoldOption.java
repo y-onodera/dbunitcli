@@ -28,17 +28,6 @@ public record ScaffoldOption(
 
     private static final String COMMAND_INPUT_PREFIX = "-commandInput.";
 
-    public static ScaffoldDto toDto(final String[] args) {
-        final ScaffoldDto dto = new ScaffoldDto();
-        new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, CommandLineOption.ARGUMENT_FILTER)
-                .populate(args, dto);
-        dto.setCommandInput(Arrays.stream(args)
-                .filter(it -> it.startsWith(COMMAND_INPUT_PREFIX))
-                .map(it -> "-" + it.substring(COMMAND_INPUT_PREFIX.length()))
-                .toArray(String[]::new));
-        return dto;
-    }
-
     public ScaffoldOption(final String resultFile, final ScaffoldDto dto, final Parameter param) {
         this(param
                 , Strings.isNotEmpty(dto.getResultDir()) ? dto.getResultDir() : resultFile
@@ -51,47 +40,55 @@ public record ScaffoldOption(
         );
     }
 
+    public static ScaffoldDto toDto(final String[] args) {
+        final ScaffoldDto dto = new ScaffoldDto();
+        new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, CommandLineOption.ARGUMENT_FILTER)
+                .populate(args, dto);
+        dto.setCommandInput(Arrays.stream(args)
+                                  .filter(it -> it.startsWith(COMMAND_INPUT_PREFIX))
+                                  .map(it -> "-" + it.substring(COMMAND_INPUT_PREFIX.length()))
+                                  .toArray(String[]::new));
+        return dto;
+    }
+
     public void execute() throws IOException {
         final File baseDir = FileResources.resultDir(this.resultDir);
-        final File settingDir = new File(baseDir, "resources/setting");
-        final File templateDir = new File(baseDir, "resources/template");
-        final File paramDir = new File(baseDir, "resources/param");
+        final File settingDir = new File(baseDir, FileResources.RESOURCES_SETTING_PATH);
+        final File templateDir = new File(baseDir, FileResources.RESOURCES_TEMPLATE_PATH);
+        final File paramDir = new File(baseDir, "option");
         final boolean generateDdl = GenerateType.ddl.name().equals(this.target);
         final boolean generateJavaBean = GenerateType.javaBean.name().equals(this.target);
         final boolean generateParameter = "parameter".equals(this.target)
                 && Strings.isNotEmpty(this.commandType);
-        if (generateJavaBean) {
+        if (generateJavaBean || generateDdl) {
+            GenerateType generateType = GenerateType.valueOf(this.target);
             if (Strings.isNotEmpty(this.settingName)) {
-                settingDir.mkdirs();
-                this.copyClasspathResource(GenerateType.javaBean.defaultSettingsPath(), new File(settingDir, this.settingName + ".json"));
+                if (settingDir.mkdirs() || settingDir.isDirectory()) {
+                    this.copyClasspathResource(generateType.defaultSettingsPath(),
+                                               new File(settingDir, this.settingName + ".json"));
+                }
             }
             if (Strings.isNotEmpty(this.templateName)) {
-                templateDir.mkdirs();
-                this.copyClasspathResource("javabean/javaBeanTemplate.stg", new File(templateDir, this.templateName + ".stg"));
-                this.copyClasspathResource("javabean/javaBeanTemplate.txt", new File(templateDir, this.templateName + ".txt"));
+                if (templateDir.mkdirs() || templateDir.isDirectory()) {
+                    this.copyClasspathResource(generateType.getStgPath(),
+                                               new File(templateDir, this.templateName + ".stg"));
+                    this.copyClasspathResource(generateType.getTemplatePath(),
+                                               new File(templateDir, this.templateName + ".txt"));
+                }
             }
-        }
-        if (generateDdl) {
-            if (Strings.isNotEmpty(this.settingName)) {
-                settingDir.mkdirs();
-                this.copyClasspathResource(GenerateType.ddl.defaultSettingsPath(), new File(settingDir, this.settingName + ".json"));
+            if (Strings.isNotEmpty(this.parameterName)) {
+                if (paramDir.mkdirs() || paramDir.isDirectory()) {
+                    this.writeGenericParamFile(paramDir, generateDdl);
+                }
             }
-            if (Strings.isNotEmpty(this.templateName)) {
-                templateDir.mkdirs();
-                this.copyClasspathResource("sql/ddlTemplate.stg", new File(templateDir, this.templateName + ".stg"));
-                this.copyClasspathResource("sql/ddlTemplate.txt", new File(templateDir, this.templateName + ".txt"));
-            }
-        }
-        if ((generateDdl || generateJavaBean) && Strings.isNotEmpty(this.parameterName)) {
-            paramDir.mkdirs();
-            this.writeGenericParamFile(paramDir, generateDdl);
         }
         if (generateParameter) {
-            paramDir.mkdirs();
-            final String[] shrunkArgs = new CommandParameters(Type.valueOf(this.commandType), this.commandInput)
-                    .shrink().args();
-            Files.write(new File(paramDir, this.commandType + ".param").toPath(),
-                    Arrays.asList(shrunkArgs), StandardCharsets.UTF_8);
+            if (paramDir.mkdirs() || paramDir.isDirectory()) {
+                final String[] shrunkArgs = new CommandParameters(Type.valueOf(this.commandType), this.commandInput)
+                        .shrink().args();
+                Files.write(new File(paramDir, this.commandType + ".param").toPath(),
+                            Arrays.asList(shrunkArgs), StandardCharsets.UTF_8);
+            }
         }
     }
 
@@ -126,7 +123,8 @@ public record ScaffoldOption(
     private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {
         final boolean hasTemplate = Strings.isNotEmpty(this.templateName);
         final ParametersBuilder builder = new ParametersBuilder();
-        builder.put("-generateType", hasTemplate ? GenerateType.txt.name() : (isDdl ? GenerateType.ddl.name() : GenerateType.javaBean.name()), false);
+        builder.put("-generateType", hasTemplate ? GenerateType.txt.name() :
+                (isDdl ? GenerateType.ddl.name() : GenerateType.javaBean.name()), false);
         if (hasTemplate) {
             builder.put("-template", "resources/template/" + this.templateName + ".stg");
         }
@@ -135,7 +133,7 @@ public record ScaffoldOption(
         }
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
-                builder.build().toList(false), StandardCharsets.UTF_8);
+                    builder.build().toList(false), StandardCharsets.UTF_8);
     }
 
     private void copyClasspathResource(final String resource, final File dest) throws IOException {

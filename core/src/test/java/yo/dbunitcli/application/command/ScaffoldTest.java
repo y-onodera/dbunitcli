@@ -1,6 +1,9 @@
 package yo.dbunitcli.application.command;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import yo.dbunitcli.resource.FileResources;
@@ -13,7 +16,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ScaffoldTest {
 
@@ -47,6 +51,10 @@ public class ScaffoldTest {
             return Path.of(this.getResultBase(), subDir, relativePath).toFile();
         }
 
+        private void scaffold(final String subDir, final String... extra) {
+            Scaffold.main(this.args(subDir, extra));
+        }
+
         @Nested
         class DdlTarget {
 
@@ -56,7 +64,7 @@ public class ScaffoldTest {
                 assertTrue(TestCase.this.resultFile("ddl/all", "resources/setting/ddl.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/all", "resources/template/ddl.stg").exists());
                 assertTrue(TestCase.this.resultFile("ddl/all", "resources/template/ddl.txt").exists());
-                final File paramFile = TestCase.this.resultFile("ddl/all", "resources/param/ddl.param");
+                final File paramFile = TestCase.this.resultFile("ddl/all", "option/ddl.param");
                 assertTrue(paramFile.exists());
                 final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-generateType=txt")));
@@ -70,7 +78,7 @@ public class ScaffoldTest {
                 assertTrue(TestCase.this.resultFile("ddl/setting", "resources/setting/ddl.json").exists());
                 assertFalse(TestCase.this.resultFile("ddl/setting", "resources/template/ddl.stg").exists());
                 assertFalse(TestCase.this.resultFile("ddl/setting", "resources/template/ddl.txt").exists());
-                assertFalse(TestCase.this.resultFile("ddl/setting", "resources/param/ddl.param").exists());
+                assertFalse(TestCase.this.resultFile("ddl/setting", "option/ddl.param").exists());
             }
 
             @Test
@@ -79,7 +87,7 @@ public class ScaffoldTest {
                 assertFalse(TestCase.this.resultFile("ddl/template", "resources/setting/ddl.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/template", "resources/template/ddl.stg").exists());
                 assertTrue(TestCase.this.resultFile("ddl/template", "resources/template/ddl.txt").exists());
-                assertFalse(TestCase.this.resultFile("ddl/template", "resources/param/ddl.param").exists());
+                assertFalse(TestCase.this.resultFile("ddl/template", "option/ddl.param").exists());
             }
 
             @Test
@@ -88,7 +96,7 @@ public class ScaffoldTest {
                 assertFalse(TestCase.this.resultFile("ddl/parameter", "resources/setting/ddl.json").exists());
                 assertFalse(TestCase.this.resultFile("ddl/parameter", "resources/template/ddl.stg").exists());
                 assertFalse(TestCase.this.resultFile("ddl/parameter", "resources/template/ddl.txt").exists());
-                final File paramFile = TestCase.this.resultFile("ddl/parameter", "resources/param/ddl.param");
+                final File paramFile = TestCase.this.resultFile("ddl/parameter", "option/ddl.param");
                 assertTrue(paramFile.exists());
                 final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-generateType=ddl")));
@@ -102,16 +110,17 @@ public class ScaffoldTest {
                 assertTrue(TestCase.this.resultFile("ddl/setting-template", "resources/setting/ddl.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/setting-template", "resources/template/ddl.stg").exists());
                 assertTrue(TestCase.this.resultFile("ddl/setting-template", "resources/template/ddl.txt").exists());
-                assertFalse(TestCase.this.resultFile("ddl/setting-template", "resources/param/ddl.param").exists());
+                assertFalse(TestCase.this.resultFile("ddl/setting-template", "option/ddl.param").exists());
             }
 
             @Test
             public void testCustomFileName() {
-                TestCase.this.scaffold("ddl/custom", "-target=ddl", "-setting=myDdl", "-template=myDdl", "-parameter=myDdl");
+                TestCase.this.scaffold("ddl/custom", "-target=ddl", "-setting=myDdl", "-template=myDdl",
+                                       "-parameter=myDdl");
                 assertTrue(TestCase.this.resultFile("ddl/custom", "resources/setting/myDdl.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/custom", "resources/template/myDdl.stg").exists());
                 assertTrue(TestCase.this.resultFile("ddl/custom", "resources/template/myDdl.txt").exists());
-                assertTrue(TestCase.this.resultFile("ddl/custom", "resources/param/myDdl.param").exists());
+                assertTrue(TestCase.this.resultFile("ddl/custom", "option/myDdl.param").exists());
             }
         }
 
@@ -120,20 +129,22 @@ public class ScaffoldTest {
 
             @Test
             public void testAllFiles() {
-                TestCase.this.scaffold("javaBean/all", "-target=javaBean", "-setting=javaBean", "-template=javaBean", "-parameter=javaBean");
+                TestCase.this.scaffold("javaBean/all", "-target=javaBean", "-setting=javaBean", "-template=javaBean",
+                                       "-parameter=javaBean");
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/setting/javaBean.json").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/template/javaBean.stg").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/template/javaBean.txt").exists());
-                assertTrue(TestCase.this.resultFile("javaBean/all", "resources/param/javaBean.param").exists());
+                assertTrue(TestCase.this.resultFile("javaBean/all", "option/javaBean.param").exists());
             }
 
             @Test
             public void testCustomFileName() {
-                TestCase.this.scaffold("javaBean/custom", "-target=javaBean", "-setting=myBean", "-template=myBean", "-parameter=myBean");
+                TestCase.this.scaffold("javaBean/custom", "-target=javaBean", "-setting=myBean", "-template=myBean",
+                                       "-parameter=myBean");
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/setting/myBean.json").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.stg").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.txt").exists());
-                assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/param/myBean.param").exists());
+                assertTrue(TestCase.this.resultFile("javaBean/custom", "option/myBean.param").exists());
             }
         }
 
@@ -145,7 +156,7 @@ public class ScaffoldTest {
                 TestCase.this.scaffold("nooutput/ddl", "-target=ddl");
                 assertFalse(TestCase.this.resultFile("nooutput/ddl", "resources/setting/ddl.json").exists());
                 assertFalse(TestCase.this.resultFile("nooutput/ddl", "resources/template/ddl.stg").exists());
-                assertFalse(TestCase.this.resultFile("nooutput/ddl", "resources/param/ddl.param").exists());
+                assertFalse(TestCase.this.resultFile("nooutput/ddl", "option/ddl.param").exists());
             }
         }
 
@@ -155,8 +166,8 @@ public class ScaffoldTest {
             @Test
             public void testParameterFileGenerated() throws Exception {
                 TestCase.this.scaffold("parameter/generate", "-target=parameter", "-commandType=generate");
-                final File paramFile = TestCase.this.resultFile("parameter/generate", "resources/param/generate.param");
-                assertParamFileExists(paramFile);
+                final File paramFile = TestCase.this.resultFile("parameter/generate", "option/generate.param");
+                this.assertParamFileExists(paramFile);
                 assertFalse(TestCase.this.resultFile("parameter/generate", "resources/setting/ddl.json").exists());
                 assertFalse(TestCase.this.resultFile("parameter/generate", "resources/setting/javaBean.json").exists());
             }
@@ -165,7 +176,8 @@ public class ScaffoldTest {
             @ValueSource(strings = {"compare", "convert", "parameterize", "run"})
             public void testParameterFileGeneratedForCommandType(final String commandType) throws Exception {
                 TestCase.this.scaffold("parameter/" + commandType, "-target=parameter", "-commandType=" + commandType);
-                assertParamFileExists(TestCase.this.resultFile("parameter/" + commandType, "resources/param/" + commandType + ".param"));
+                this.assertParamFileExists(TestCase.this.resultFile("parameter/" + commandType,
+                                                                    "option/" + commandType + ".param"));
             }
 
             @ParameterizedTest
@@ -173,9 +185,9 @@ public class ScaffoldTest {
             public void testGenerateWithGenerateType(final String generateType) throws Exception {
                 final String subDir = "parameter/generate-type-" + generateType;
                 TestCase.this.scaffold(subDir, "-target=parameter", "-commandType=generate",
-                        "-commandInput.generateType=" + generateType);
-                assertParamFileContains(TestCase.this.resultFile(subDir, "resources/param/generate.param"),
-                        "-generateType=" + generateType);
+                                       "-commandInput.generateType=" + generateType);
+                this.assertParamFileContains(TestCase.this.resultFile(subDir, "option/generate.param"),
+                                             "-generateType=" + generateType);
             }
 
             @ParameterizedTest
@@ -183,9 +195,9 @@ public class ScaffoldTest {
             public void testGenerateWithSrcType(final String srcType) throws Exception {
                 final String subDir = "parameter/generate-src-" + srcType;
                 TestCase.this.scaffold(subDir, "-target=parameter", "-commandType=generate",
-                        "-commandInput.src.srcType=" + srcType);
-                assertParamFileContains(TestCase.this.resultFile(subDir, "resources/param/generate.param"),
-                        "-src.srcType=" + srcType);
+                                       "-commandInput.src.srcType=" + srcType);
+                this.assertParamFileContains(TestCase.this.resultFile(subDir, "option/generate.param"),
+                                             "-src.srcType=" + srcType);
             }
 
             @ParameterizedTest
@@ -193,9 +205,9 @@ public class ScaffoldTest {
             public void testCompareWithTargetType(final String targetType) throws Exception {
                 final String subDir = "parameter/compare-target-" + targetType;
                 TestCase.this.scaffold(subDir, "-target=parameter", "-commandType=compare",
-                        "-commandInput.targetType=" + targetType);
-                assertParamFileContains(TestCase.this.resultFile(subDir, "resources/param/compare.param"),
-                        "-targetType=" + targetType);
+                                       "-commandInput.targetType=" + targetType);
+                this.assertParamFileContains(TestCase.this.resultFile(subDir, "option/compare.param"),
+                                             "-targetType=" + targetType);
             }
 
             @ParameterizedTest
@@ -203,9 +215,9 @@ public class ScaffoldTest {
             public void testConvertWithSrcType(final String srcType) throws Exception {
                 final String subDir = "parameter/convert-src-" + srcType;
                 TestCase.this.scaffold(subDir, "-target=parameter", "-commandType=convert",
-                        "-commandInput.src.srcType=" + srcType);
-                assertParamFileContains(TestCase.this.resultFile(subDir, "resources/param/convert.param"),
-                        "-src.srcType=" + srcType);
+                                       "-commandInput.src.srcType=" + srcType);
+                this.assertParamFileContains(TestCase.this.resultFile(subDir, "option/convert.param"),
+                                             "-src.srcType=" + srcType);
             }
 
             @ParameterizedTest
@@ -213,9 +225,9 @@ public class ScaffoldTest {
             public void testRunWithScriptType(final String scriptType) throws Exception {
                 final String subDir = "parameter/run-script-" + scriptType;
                 TestCase.this.scaffold(subDir, "-target=parameter", "-commandType=run",
-                        "-commandInput.scriptType=" + scriptType);
-                assertParamFileContains(TestCase.this.resultFile(subDir, "resources/param/run.param"),
-                        "-scriptType=" + scriptType);
+                                       "-commandInput.scriptType=" + scriptType);
+                this.assertParamFileContains(TestCase.this.resultFile(subDir, "option/run.param"),
+                                             "-scriptType=" + scriptType);
             }
 
             @Test
@@ -237,10 +249,6 @@ public class ScaffoldTest {
                 final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
                 assertTrue(lines.stream().anyMatch(l -> l.contains(expected)));
             }
-        }
-
-        private void scaffold(final String subDir, final String... extra) {
-            Scaffold.main(this.args(subDir, extra));
         }
     }
 

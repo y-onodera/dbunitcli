@@ -15,6 +15,11 @@ public record FileResources() {
     public static final String PROPERTY_WORKSPACE = "yo.dbunit.cli.workspace";
     public static final String PROPERTY_DATASET_BASE = "yo.dbunit.cli.dataset.base";
     public static final String PROPERTY_RESULT_BASE = "yo.dbunit.cli.result.base";
+    public static final String RESOURCES_SETTING_PATH = "resources/setting";
+    public static final String RESOURCES_TEMPLATE_PATH = "resources/template";
+    public static final String RESOURCES_JDBC_PATH = "resources/jdbc";
+    public static final String RESOURCES_XLSX_SCHEMA_PATH = "resources/xlsxSchema";
+    public static final String OPTION_PARAMETERIZE_TEMPLATE_PATH = "option/parameterize/template";
 
     public static String readClasspathResource(final String aURL) {
         return FileResources.readClasspathResource(aURL, StandardCharsets.UTF_8);
@@ -143,23 +148,23 @@ public record FileResources() {
     }
 
     public static File settingDir() {
-        return new File(baseDir(), "resources/setting");
+        return new File(baseDir(), RESOURCES_SETTING_PATH);
     }
 
     public static File templateFileDir() {
-        return new File(baseDir(), "resources/template");
+        return new File(baseDir(), RESOURCES_TEMPLATE_PATH);
     }
 
     public static File jdbcPropDir() {
-        return new File(baseDir(), "resources/jdbc");
+        return new File(baseDir(), RESOURCES_JDBC_PATH);
     }
 
     public static File xlsxSchemaDir() {
-        return new File(baseDir(), "resources/xlsxSchema");
+        return new File(baseDir(), RESOURCES_XLSX_SCHEMA_PATH);
     }
 
     public static File parameterizeTemplateDir() {
-        return new File(baseDir(), "option/parameterize/template");
+        return new File(baseDir(), OPTION_PARAMETERIZE_TEMPLATE_PATH);
     }
 
 }

@@ -1,9 +1,9 @@
 package yo.dbunitcli.application.command;
 
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.ParameterUnit;
-import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
@@ -18,31 +18,36 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public record GenerateOption(
-        Parameter parameter
-        , String resultDir
-        , String resultPath
-        , GenerateType generateType
-        , ParameterUnit unit
-        , DbOperation operation
-        , String sqlFilePrefix
-        , String sqlFileSuffix
-        , boolean commit
-        , String template
-        , String outputEncoding
-        , DataSetLoadOption srcData
-        , TemplateRenderOption templateOption
-        , boolean includeAllColumns
-        , boolean lazyLoad
-        , String fixedLength
-        , int defaultLength
-        , String align
-) implements CommandLineOption<GenerateDto> {
+public record GenerateOption(Parameter parameter, String resultDir, String resultPath, GenerateType generateType,
+                             ParameterUnit unit, DbOperation operation, String sqlFilePrefix, String sqlFileSuffix,
+                             boolean commit, String template, String outputEncoding, DataSetLoadOption srcData,
+                             TemplateRenderOption templateOption, boolean includeAllColumns, boolean lazyLoad,
+                             String fixedLength, int defaultLength, String align)
+        implements CommandLineOption<GenerateDto> {
+
+    public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
+        this(param, dto.getResultDir(),
+             Optional.ofNullable(dto.getResultPath()).filter(it -> !it.isEmpty()).orElse(resultFile),
+             GenerateOption.getGenerateType(dto), GenerateOption.getGenerateType(dto).isFixedTemplate() ?
+                     GenerateOption.getGenerateType(dto).getFixedUnit() :
+                     dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record, dto.getOperation(),
+             Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : "",
+             Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : "",
+             !Strings.isNotEmpty(dto.getCommit()) || Boolean.parseBoolean(dto.getCommit()), dto.getTemplate(),
+             Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8",
+             new DataSetLoadOption("src", dto.getSrcData()),
+             new TemplateRenderOption("template", dto.getTemplateOption()),
+             Strings.isNotEmpty(dto.getIncludeAllColumns()) && Boolean.parseBoolean(dto.getIncludeAllColumns()),
+             !Strings.isNotEmpty(dto.getLazyLoad()) || Boolean.parseBoolean(dto.getLazyLoad()),
+             Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : "",
+             Strings.isNotEmpty(dto.getDefaultLength()) ? Integer.parseInt(dto.getDefaultLength()) : 10,
+             Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left");
+    }
 
     public static GenerateDto toDto(final String[] args) {
         final GenerateDto dto = new GenerateDto();
-        new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, CommandLineOption.ARGUMENT_FILTER)
-                .populate(args, dto);
+        new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, CommandLineOption.ARGUMENT_FILTER).populate(args,
+                                                                                                                dto);
         new ArgumentMapper("src").populate(args, dto.getSrcData());
         new ArgumentMapper("template").populate(args, dto.getTemplateOption());
         return dto;
@@ -50,32 +55,6 @@ public record GenerateOption(
 
     private static GenerateType getGenerateType(final GenerateDto dto) {
         return dto.getGenerateType() != null ? dto.getGenerateType() : GenerateType.txt;
-    }
-
-    public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
-        this(param
-                , dto.getResultDir()
-                , Optional.ofNullable(dto.getResultPath())
-                        .filter(it -> !it.isEmpty())
-                        .orElse(resultFile)
-                , GenerateOption.getGenerateType(dto)
-                , GenerateOption.getGenerateType(dto).isFixedTemplate()
-                        ? GenerateOption.getGenerateType(dto).getFixedUnit()
-                        : dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record
-                , dto.getOperation()
-                , Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : ""
-                , Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : ""
-                , !Strings.isNotEmpty(dto.getCommit()) || Boolean.parseBoolean(dto.getCommit())
-                , dto.getTemplate()
-                , Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8"
-                , new DataSetLoadOption("src", dto.getSrcData())
-                , new TemplateRenderOption("template", dto.getTemplateOption())
-                , Strings.isNotEmpty(dto.getIncludeAllColumns()) && Boolean.parseBoolean(dto.getIncludeAllColumns())
-                , !Strings.isNotEmpty(dto.getLazyLoad()) || Boolean.parseBoolean(dto.getLazyLoad())
-                , Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : ""
-                , Strings.isNotEmpty(dto.getDefaultLength()) ? Integer.parseInt(dto.getDefaultLength()) : 10
-                , Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left"
-        );
     }
 
     public String templateString() {
@@ -103,7 +82,8 @@ public record GenerateOption(
 
     @Override
     public String resultPath() {
-        if (this.generateType().isAny(GenerateType.sql, GenerateType.ddl)) {
+        if (Stream.of(GenerateType.sql, GenerateType.ddl)
+                  .anyMatch(it -> it == this.generateType())) {
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
             return this.resultPath + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
         }
@@ -112,7 +92,8 @@ public record GenerateOption(
             return this.resultPath + "/" + tableName + ".json";
         }
         if (this.generateType() == GenerateType.javaBean) {
-            return this.resultPath + "/" + this.templateOption.getTemplateRender().getAttributeName("tableName", "snakeToUpperCamel") + ".java";
+            return this.resultPath + "/" + this.templateOption.getTemplateRender().getAttributeName("tableName",
+                                                                                                    "snakeToUpperCamel") + ".java";
         }
         return this.resultPath;
     }
@@ -128,10 +109,8 @@ public record GenerateOption(
 
     @Override
     public ComparableDataSetLoader getComparableDataSetLoader() {
-        return new ComparableDataSetLoader(this.parameter()
-                .add("commit", this.commit)
-                .add("includeAllColumns", this.includeAllColumns)
-        );
+        return new ComparableDataSetLoader(
+                this.parameter().add("commit", this.commit).add("includeAllColumns", this.includeAllColumns));
     }
 
     @Override
@@ -143,41 +122,37 @@ public record GenerateOption(
         result.put("-generateType", this.generateType, GenerateType.class);
         if (!this.generateType.isFixedTemplate()) {
             result.put("-unit", this.unit, ParameterUnit.class)
-                    .putFile("-template", this.template, true, BaseDir.TEMPLATE);
+                  .putFile("-template", this.template, true, BaseDir.TEMPLATE);
         }
         final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
         switch (this.generateType) {
             case sql -> {
-                result.put("-commit", Boolean.toString(this.commit))
-                        .put("-op", this.operation, DbOperation.class)
-                        .put("-sqlFilePrefix", this.sqlFilePrefix)
-                        .put("-sqlFileSuffix", this.sqlFileSuffix);
+                result.put("-commit", Boolean.toString(this.commit)).put("-op", this.operation, DbOperation.class)
+                      .put("-sqlFilePrefix", this.sqlFilePrefix).put("-sqlFileSuffix", this.sqlFileSuffix);
                 srcComponent.remove("-src.useJdbcMetaData");
             }
-            case ddl -> result.put("-sqlFilePrefix", this.sqlFilePrefix)
-                        .put("-sqlFileSuffix", this.sqlFileSuffix);
+            case ddl -> {
+                result.put("-sqlFilePrefix", this.sqlFilePrefix).put("-sqlFileSuffix", this.sqlFileSuffix);
+                srcComponent.remove("-src.useJdbcMetaData");
+            }
+            case javaBean -> srcComponent.remove("-src.useJdbcMetaData");
+            case fixedColumnDef -> {
+                result.put("-fixedLength", this.fixedLength).put("-defaultLength", Integer.toString(this.defaultLength))
+                      .put("-align", this.align);
+                srcComponent.remove("-src.loadData");
+            }
             case settings -> {
                 result.put("-includeAllColumns", Boolean.toString(this.includeAllColumns));
-                srcComponent.remove("-src.useJdbcMetaData")
-                        .remove("-src.loadData");
+                srcComponent.remove("-src.useJdbcMetaData").remove("-src.loadData");
             }
             case xlsxTemplate -> srcComponent.remove("-src.loadData");
             case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
-            case javaBean -> srcComponent.remove("-src.loadData")
-                        .remove("-src.useJdbcMetaData");
-            case fixedColumnDef -> {
-                result.put("-fixedLength", this.fixedLength)
-                        .put("-defaultLength", Integer.toString(this.defaultLength))
-                        .put("-align", this.align);
-                srcComponent.remove("-src.loadData");
-            }
         }
         result.addComponent("srcData", srcComponent.build());
         if (!this.generateType.isFixedTemplate()) {
             result.addComponent("templateOption", this.templateOptionArgs());
         }
-        result.putDir("-result", this.resultDir, BaseDir.RESULT)
-                .put("-resultPath", this.resultPath);
+        result.putDir("-result", this.resultDir, BaseDir.RESULT).put("-resultPath", this.resultPath);
         if (this.generateType.isText()) {
             result.put("-outputEncoding", this.outputEncoding);
         }
@@ -186,23 +161,17 @@ public record GenerateOption(
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
-        if (this.generateType().isMetadataOnly()) {
-            builder.setUseJdbcMetaData(true);
-            builder.setLoadData(false);
-        }
-        if (this.generateType().requiresJdbcMetaData()) {
-            builder.setUseJdbcMetaData(true);
-        }
         final String defaultSettings = this.generateType().defaultSettingsPath();
         if (defaultSettings != null && Strings.isEmpty(this.srcData.getSetting())) {
             builder.setTableSeparators(new FromJsonTableSeparatorsBuilder(this.srcData.settingEncoding())
-                    .loadFromClasspath(defaultSettings)
-                    .build());
+                                               .loadFromClasspath(defaultSettings).build());
         }
         switch (this.generateType()) {
-            case sql -> builder.setUseJdbcMetaData(true);
+            case settings -> builder.setUseJdbcMetaData(true).setLoadData(false);
+            case ddl, javaBean, sql -> builder.setUseJdbcMetaData(true);
             case xlsxTemplate, fixedColumnDef -> builder.setLoadData(false);
-            default -> { }
+            default -> {
+            }
         }
         return builder.build();
     }
