@@ -25,8 +25,8 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
 
     public Stream<Path> paths(final Type type) {
         return this.parameters()
-                .getOrDefault(type, new ResourceFile(this.getParent(type), FileResources::searchWorkspace))
-                .pathStream();
+                   .getOrDefault(type, new ResourceFile(this.getParent(type), FileResources::searchWorkspace))
+                   .pathStream();
     }
 
     public Stream<String> names(final yo.dbunitcli.application.CommandType type) {
@@ -35,22 +35,22 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
 
     public Optional<CommandParameters> select(final yo.dbunitcli.application.CommandType type, final String name) {
         return this.parameters.get(type)
-                .select(name + ".txt")
-                .map(path -> {
-                    try {
-                        return new CommandParameters(type, path);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+                              .select(name + ".txt")
+                              .map(path -> {
+                                  try {
+                                      return new CommandParameters(type, path);
+                                  } catch (IOException e) {
+                                      throw new RuntimeException(e);
+                                  }
+                              });
     }
 
     public String add(final String name, final CommandParameters commandParameters) throws IOException {
         return this.parameters.get(commandParameters.type())
-                .add(name + ".txt", commandParameters.content())
-                .getFileName()
-                .toString()
-                .replace(".txt", "");
+                              .add(name + ".txt", commandParameters.content())
+                              .getFileName()
+                              .toString()
+                              .replace(".txt", "");
     }
 
     public void newItem(final Type type) throws IOException {
@@ -60,7 +60,7 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
 
     public void update(final String name, final CommandParameters commandParameters) throws IOException {
         this.parameters.get(commandParameters.type())
-                .update(name + ".txt", commandParameters.content());
+                       .update(name + ".txt", commandParameters.content());
     }
 
     public void delete(final Type type, final String name) throws IOException {
@@ -88,8 +88,8 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
 
     public static class Builder {
 
-        private File baseDir;
         private final Map<yo.dbunitcli.application.CommandType, ResourceFile> parameters = new HashMap<>();
+        private File baseDir;
         private ResourceFile templates;
 
         public Options build() {
@@ -98,7 +98,9 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
 
         public void workspace(final File workspace) {
             this.baseDir = new File(workspace, "option");
-            Arrays.stream(Type.values()).forEach(this::addParameterFiles);
+            Arrays.stream(Type.values())
+                  .filter(it -> it != Type.scaffold)
+                  .forEach(this::addParameterFiles);
             this.templates = new ResourceFile(
                     new File(this.parameters.get(Type.parameterize).baseDir(), "template")
                     , FileResources::searchTemplate);

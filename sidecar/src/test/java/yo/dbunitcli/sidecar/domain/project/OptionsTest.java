@@ -173,8 +173,13 @@ class OptionsTest {
     @Test
     public void builder_workspace_全コマンドタイプが登録されnamesが呼び出せる() {
         for (final Type type : Type.values()) {
-            assertDoesNotThrow(() -> this.options.names(type).toList(),
-                    type.name() + " の names() が例外をスロー");
+            if (type == Type.scaffold) {
+                assertThrows(RuntimeException.class, () -> this.options.names(type).toList(),
+                             type.name() + " が例外をスローしない");
+            } else {
+                assertDoesNotThrow(() -> this.options.names(type).toList(),
+                                   type.name() + " の names() が例外をスロー");
+            }
         }
     }
 
