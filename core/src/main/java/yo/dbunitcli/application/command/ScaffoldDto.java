@@ -3,9 +3,12 @@ package yo.dbunitcli.application.command;
 import picocli.CommandLine;
 import yo.dbunitcli.application.CommandDto;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
+import yo.dbunitcli.dataset.ResultType;
 
 public class ScaffoldDto extends CommandDto {
 
+    @CommandLine.Option(names = "-datasetType", description = "output format for dataset src template (default: csv)")
+    private ResultType datasetType;
     private DataSetLoadDto datasetDto = new DataSetLoadDto();
     @CommandLine.Option(names = "-result", description = "directory to create workspace structure")
     private String resultDir;
@@ -76,6 +79,14 @@ public class ScaffoldDto extends CommandDto {
 
     public void setParameterName(final String parameterName) {
         this.parameterName = parameterName;
+    }
+
+    public ResultType getDatasetType() {
+        return this.datasetType;
+    }
+
+    public void setDatasetType(final ResultType datasetType) {
+        this.datasetType = datasetType;
     }
 
     public DataSetLoadDto getDatasetDto() {
