@@ -54,6 +54,7 @@ public record ScaffoldOption(
             new Column("PK_NAME", DataType.VARCHAR),
             new Column("REMARKS", DataType.VARCHAR),
             new Column("TABLE_REMARKS", DataType.VARCHAR),
+            new Column("TABLE_NAME", DataType.VARCHAR),
             new Column("PACKAGE", DataType.VARCHAR)
     };
 
@@ -80,7 +81,10 @@ public record ScaffoldOption(
                                   .filter(it -> it.startsWith(COMMAND_INPUT_PREFIX))
                                   .map(it -> "-" + it.substring(COMMAND_INPUT_PREFIX.length()))
                                   .toArray(String[]::new));
-        new ArgumentMapper("dataset").populate(args, dto.getDatasetDto());
+        final String[] datasetArgs = Arrays.stream(args)
+                                              .filter(it -> it.startsWith("-dataset."))
+                                              .toArray(String[]::new);
+        new ArgumentMapper("dataset").populate(datasetArgs, dto.getDatasetDto());
         return dto;
     }
 
@@ -197,7 +201,7 @@ public record ScaffoldOption(
                 final Column[] sourceColumns = dataSet.getTable(tableName).getTableMetaData().getColumns();
                 final DefaultTable schemaTable = new DefaultTable(tableName, DDL_SCHEMA_COLUMNS);
                 for (final Column column : sourceColumns) {
-                    schemaTable.addRow(new Object[]{column.getColumnName(), "", "", "", "", "", "", "", "", ""});
+                    schemaTable.addRow(this.buildSchemaRow(column.getColumnName(), tableName));
                 }
                 converter.convert(schemaTable);
             }
@@ -205,6 +209,12 @@ public record ScaffoldOption(
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
+    }
+
+    private Object[] buildSchemaRow(final String columnName, final String tableName) {
+        // order must match DDL_SCHEMA_COLUMNS: COLUMN_NAME, TYPE_NAME, COLUMN_SIZE, DECIMAL_DIGITS,
+        // NULLABLE, IS_PK, PK_NAME, REMARKS, TABLE_REMARKS, TABLE_NAME, PACKAGE
+        return new Object[]{columnName, "", "", "", "", "", "", "", "", tableName, ""};
     }
 
     private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {

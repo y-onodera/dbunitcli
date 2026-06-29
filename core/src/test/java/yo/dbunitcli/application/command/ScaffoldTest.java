@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.Arrays;
 import java.nio.charset.StandardCharsets;
@@ -39,6 +40,10 @@ public class ScaffoldTest {
 
         protected String getResultBase() {
             return "target/test-temp/scaffold";
+        }
+
+        protected String getResultBasePrefix() {
+            return ".";
         }
 
         String[] args(final String subDir, final String... extra) {
@@ -221,6 +226,45 @@ public class ScaffoldTest {
         }
 
         @Nested
+        class ScaffoldToGenerate {
+
+            private static final String SRC_DIR =
+                    "src/test/resources/yo/dbunitcli/application/command/scaffold/src";
+
+            @Test
+            public void testDdlScaffoldToGenerate() throws Exception {
+                this.assertScaffoldGenerates("ddl", "e2e/ddl", "ddl/SAMPLE.sql");
+            }
+
+            @Test
+            public void testJavaBeanScaffoldToGenerate() throws Exception {
+                this.assertScaffoldGenerates("javaBean", "e2e/javaBean", "javaBean/Sample.java");
+            }
+
+            private void assertScaffoldGenerates(final String target, final String subDir,
+                                                  final String expectedOutput) throws Exception {
+                TestCase.this.scaffold(subDir, "-target=" + target, "-setting=" + target, "-parameter=" + target,
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                final File paramFile = TestCase.this.resultFile(subDir, "option/" + target + ".param");
+                assertTrue(paramFile.exists());
+
+                final File scaffoldDir = Path.of(TestCase.this.getResultBase(), subDir).toFile();
+                final Properties saved = (Properties) System.getProperties().clone();
+                final Properties withWorkspace = new Properties();
+                withWorkspace.putAll(saved);
+                withWorkspace.put(FileResources.PROPERTY_WORKSPACE, scaffoldDir.getCanonicalPath());
+                withWorkspace.put(FileResources.PROPERTY_RESULT_BASE, TestCase.this.getResultBasePrefix());
+                System.setProperties(withWorkspace);
+                try {
+                    Generate.main(new String[]{"@" + paramFile.getAbsolutePath()});
+                } finally {
+                    System.setProperties(saved);
+                }
+                assertTrue(new File(scaffoldDir, expectedOutput).exists());
+            }
+        }
+
+        @Nested
         class NoOutput {
 
             @Test
@@ -345,6 +389,11 @@ public class ScaffoldTest {
         protected String getResultBase() {
             return TEMP + "/target/test-temp/scaffold";
         }
+
+        @Override
+        protected String getResultBasePrefix() {
+            return TEMP;
+        }
     }
 
     @Nested
@@ -363,6 +412,11 @@ public class ScaffoldTest {
         @Override
         protected String getResultBase() {
             return TEMP + "/target/test-temp/scaffold";
+        }
+
+        @Override
+        protected String getResultBasePrefix() {
+            return TEMP;
         }
     }
 }
