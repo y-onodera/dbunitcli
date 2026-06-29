@@ -39,6 +39,7 @@ public record ScaffoldOption(
         , String[] commandInput
         , DataSetLoadOption dataset
         , ResultType datasetType
+        , String datasetEncoding
 ) implements CommandLineOption<ScaffoldDto> {
 
     private static final String COMMAND_INPUT_PREFIX = "-commandInput.";
@@ -67,6 +68,7 @@ public record ScaffoldOption(
                 , dto.getCommandInput()
                 , new DataSetLoadOption("dataset", dto.getDatasetDto(), true)
                 , dto.getDatasetType() != null ? dto.getDatasetType() : ResultType.csv
+                , Strings.isNotEmpty(dto.getDatasetEncoding()) ? dto.getDatasetEncoding() : "UTF-8"
         );
     }
 
@@ -153,6 +155,7 @@ public record ScaffoldOption(
               });
         if (this.hasDataset()) {
             result.put("-datasetType", this.datasetType, ResultType.class);
+            result.put("-datasetEncoding", this.datasetEncoding);
             result.addComponent("dataset", this.dataset.toParametersBuilder().build());
         }
         return result;
@@ -185,7 +188,7 @@ public record ScaffoldOption(
                 .setResultDir(srcDir)
                 .setExportEmptyTable(true)
                 .setSkipHeader(true)
-                .setOutputEncoding("UTF-8")
+                .setOutputEncoding(this.datasetEncoding)
                 .build();
         final IDataSetConverter converter = new DataSetConverterLoader().get(converterParam);
         try {
