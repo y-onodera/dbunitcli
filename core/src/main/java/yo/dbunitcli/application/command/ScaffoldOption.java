@@ -189,7 +189,6 @@ public record ScaffoldOption(
                 .setExportEmptyTable(true)
                 .setSkipHeader(true)
                 .setOutputEncoding(this.datasetEncoding)
-                .setExcelTable("SHEET")
                 .build();
         final IDataSetConverter converter = new DataSetConverterLoader().get(converterParam);
         try {

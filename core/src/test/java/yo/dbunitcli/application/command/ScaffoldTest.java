@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ScaffoldTest {
@@ -157,15 +158,12 @@ public class ScaffoldTest {
 
             @Test
             public void testDatasetCreatesSrcCsvForDdl() throws Exception {
-                TestCase.this.scaffold("dataset/ddl-csv", "-target=ddl", "-parameter=ddl",
-                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
-                final File srcFile = TestCase.this.resultFile("dataset/ddl-csv", "src/SAMPLE.csv");
-                assertTrue(srcFile.exists());
-                final List<String> lines = Files.readAllLines(srcFile.toPath(), StandardCharsets.UTF_8);
-                assertTrue(lines.stream().anyMatch(l -> l.contains("COLUMN_NAME")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("id")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("name")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("email")));
+                this.assertDatasetCreatesSrcCsv("ddl-csv", "ddl", "COLUMN_NAME", "id", "name", "email");
+            }
+
+            @Test
+            public void testDatasetCreatesSrcCsvForJavaBean() throws Exception {
+                this.assertDatasetCreatesSrcCsv("javaBean-csv", "javaBean", "COLUMN_NAME");
             }
 
             @Test
@@ -186,8 +184,10 @@ public class ScaffoldTest {
                                        "-datasetType=xlsx");
                 final File srcDir = TestCase.this.resultFile("dataset/ddl-xlsx", "src");
                 assertTrue(srcDir.isDirectory());
-                assertTrue(Arrays.stream(srcDir.listFiles()).anyMatch(f -> f.getName().endsWith(".xlsx")));
-                assertFalse(Arrays.stream(srcDir.listFiles()).anyMatch(f -> f.getName().endsWith(".csv")));
+                final File[] files = srcDir.listFiles();
+                assertNotNull(files);
+                assertTrue(Arrays.stream(files).anyMatch(f -> f.getName().endsWith(".xlsx")));
+                assertFalse(Arrays.stream(files).anyMatch(f -> f.getName().endsWith(".csv")));
             }
 
             @Test
@@ -207,14 +207,16 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-datasetEncoding=Shift_JIS")));
             }
 
-            @Test
-            public void testDatasetCreatesSrcCsvForJavaBean() throws Exception {
-                TestCase.this.scaffold("dataset/javaBean-csv", "-target=javaBean", "-parameter=javaBean",
+            private void assertDatasetCreatesSrcCsv(final String dir, final String target,
+                                                    final String... expectedColumns) throws Exception {
+                TestCase.this.scaffold("dataset/" + dir, "-target=" + target, "-parameter=" + target,
                                        "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
-                final File srcFile = TestCase.this.resultFile("dataset/javaBean-csv", "src/SAMPLE.csv");
+                final File srcFile = TestCase.this.resultFile("dataset/" + dir, "src/SAMPLE.csv");
                 assertTrue(srcFile.exists());
                 final List<String> lines = Files.readAllLines(srcFile.toPath(), StandardCharsets.UTF_8);
-                assertTrue(lines.stream().anyMatch(l -> l.contains("COLUMN_NAME")));
+                for (final String col : expectedColumns) {
+                    assertTrue(lines.stream().anyMatch(l -> l.contains(col)));
+                }
             }
         }
 
