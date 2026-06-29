@@ -10,6 +10,7 @@ import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -145,6 +146,75 @@ public class ScaffoldTest {
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.stg").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.txt").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "option/myBean.param").exists());
+            }
+        }
+
+        @Nested
+        class DatasetOption {
+
+            private static final String SRC_DIR =
+                    "src/test/resources/yo/dbunitcli/application/command/scaffold/src";
+
+            @Test
+            public void testDatasetCreatesSrcCsvForDdl() throws Exception {
+                TestCase.this.scaffold("dataset/ddl-csv", "-target=ddl", "-parameter=ddl",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                final File srcFile = TestCase.this.resultFile("dataset/ddl-csv", "src/SAMPLE.csv");
+                assertTrue(srcFile.exists());
+                final List<String> lines = Files.readAllLines(srcFile.toPath(), StandardCharsets.UTF_8);
+                assertTrue(lines.stream().anyMatch(l -> l.contains("COLUMN_NAME")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("id")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("name")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("email")));
+            }
+
+            @Test
+            public void testDatasetParamFileIncludesSrcInfo() throws Exception {
+                TestCase.this.scaffold("dataset/ddl-param", "-target=ddl", "-parameter=ddl",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                final File paramFile = TestCase.this.resultFile("dataset/ddl-param", "option/ddl.param");
+                assertTrue(paramFile.exists());
+                final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-src.src=src")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-src.srcType=csv")));
+            }
+
+            @Test
+            public void testDatasetTypeXlsxCreatesSrcXlsx() {
+                TestCase.this.scaffold("dataset/ddl-xlsx", "-target=ddl",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv",
+                                       "-datasetType=xlsx");
+                final File srcDir = TestCase.this.resultFile("dataset/ddl-xlsx", "src");
+                assertTrue(srcDir.isDirectory());
+                assertTrue(Arrays.stream(srcDir.listFiles()).anyMatch(f -> f.getName().endsWith(".xlsx")));
+                assertFalse(Arrays.stream(srcDir.listFiles()).anyMatch(f -> f.getName().endsWith(".csv")));
+            }
+
+            @Test
+            public void testNoDatasetOptionNoSrcDir() {
+                TestCase.this.scaffold("dataset/no-dataset", "-target=ddl", "-parameter=ddl");
+                assertFalse(TestCase.this.resultFile("dataset/no-dataset", "src").exists());
+            }
+
+            @Test
+            public void testDatasetEncodingInParamFile() throws Exception {
+                TestCase.this.scaffold("dataset/ddl-encoding", "-target=ddl", "-parameter=ddl",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv",
+                                       "-datasetEncoding=Shift_JIS");
+                final List<String> lines = Files.readAllLines(
+                        TestCase.this.resultFile("dataset/ddl-encoding", "option/ddl.param").toPath(),
+                        StandardCharsets.UTF_8);
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-datasetEncoding=Shift_JIS")));
+            }
+
+            @Test
+            public void testDatasetCreatesSrcCsvForJavaBean() throws Exception {
+                TestCase.this.scaffold("dataset/javaBean-csv", "-target=javaBean", "-parameter=javaBean",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                final File srcFile = TestCase.this.resultFile("dataset/javaBean-csv", "src/SAMPLE.csv");
+                assertTrue(srcFile.exists());
+                final List<String> lines = Files.readAllLines(srcFile.toPath(), StandardCharsets.UTF_8);
+                assertTrue(lines.stream().anyMatch(l -> l.contains("COLUMN_NAME")));
             }
         }
 

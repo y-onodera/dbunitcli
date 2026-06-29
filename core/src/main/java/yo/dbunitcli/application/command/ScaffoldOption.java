@@ -189,6 +189,7 @@ public record ScaffoldOption(
                 .setExportEmptyTable(true)
                 .setSkipHeader(true)
                 .setOutputEncoding(this.datasetEncoding)
+                .setExcelTable("SHEET")
                 .build();
         final IDataSetConverter converter = new DataSetConverterLoader().get(converterParam);
         try {
@@ -225,6 +226,8 @@ public record ScaffoldOption(
             if (srcType != null) {
                 builder.put("-src.srcType", srcType.name());
             }
+            builder.put("-datasetType", this.datasetType, ResultType.class);
+            builder.put("-datasetEncoding", this.datasetEncoding);
         }
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
                     builder.build().toList(false), StandardCharsets.UTF_8);
