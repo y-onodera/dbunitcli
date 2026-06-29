@@ -2,8 +2,11 @@ package yo.dbunitcli.application.command;
 
 import picocli.CommandLine;
 import yo.dbunitcli.application.CommandDto;
+import yo.dbunitcli.application.dto.DataSetLoadDto;
 
 public class ScaffoldDto extends CommandDto {
+
+    private DataSetLoadDto datasetDto = new DataSetLoadDto();
     @CommandLine.Option(names = "-result", description = "directory to create workspace structure")
     private String resultDir;
     @CommandLine.Option(names = "-target", description = "target to generate: ddl, javaBean, or parameter (required, no default)")
@@ -73,6 +76,14 @@ public class ScaffoldDto extends CommandDto {
 
     public void setParameterName(final String parameterName) {
         this.parameterName = parameterName;
+    }
+
+    public DataSetLoadDto getDatasetDto() {
+        return this.datasetDto;
+    }
+
+    public void setDatasetDto(final DataSetLoadDto datasetDto) {
+        this.datasetDto = datasetDto;
     }
 
 }
