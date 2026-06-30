@@ -105,6 +105,14 @@ public enum GenerateType {
         }
 
         @Override
+        public String getTemplateString(final GenerateOption option) {
+            if (Strings.isNotEmpty(option.template())) {
+                return txt.getTemplateString(option);
+            }
+            return FileResources.readClasspathResource(this.getTemplatePath());
+        }
+
+        @Override
         @SuppressWarnings("unchecked")
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
@@ -113,8 +121,12 @@ public enum GenerateType {
                     rows.stream().filter(row -> Boolean.TRUE.equals(row.get("IS_PK"))).toList();
             final List<String> pkColumnNames = pkRows.stream().map(row -> row.get("COLUMN_NAME").toString()).toList();
             final String pkConstraintName = pkRows.isEmpty() ? null : (String) pkRows.getFirst().get("PK_NAME");
-            super.write(option, resultFile,
-                        param.add("pkColumnNames", pkColumnNames).add("pkConstraintName", pkConstraintName));
+            final STGroup stGroup = Strings.isEmpty(option.templateOption().templateGroup())
+                    ? this.getStGroup() : null;
+            option.templateOption().getTemplateRender()
+                  .write(stGroup, option.templateString(),
+                         param.add("pkColumnNames", pkColumnNames).add("pkConstraintName", pkConstraintName),
+                         resultFile, option.outputEncoding());
         }
     }, xlsxTemplate(null, null) {
         @Override
@@ -149,10 +161,23 @@ public enum GenerateType {
         }
 
         @Override
+        public String getTemplateString(final GenerateOption option) {
+            if (Strings.isNotEmpty(option.template())) {
+                return txt.getTemplateString(option);
+            }
+            return FileResources.readClasspathResource(this.getTemplatePath());
+        }
+
+        @Override
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
             final String tableName = param.get("tableName").toString();
-            super.write(option, resultFile, param.add("className", Strings.capitalize(tableName.toLowerCase())));
+            final STGroup stGroup = Strings.isEmpty(option.templateOption().templateGroup())
+                    ? this.getStGroup() : null;
+            option.templateOption().getTemplateRender()
+                  .write(stGroup, option.templateString(),
+                         param.add("className", Strings.capitalize(tableName.toLowerCase())),
+                         resultFile, option.outputEncoding());
         }
     }, fixedColumnDef("fixedcolumndef/fixedColumnDefTemplate.stg", "fixedcolumndef/fixedColumnDefTemplate.txt") {
         @Override
