@@ -31,7 +31,7 @@ public record DataSetConverterParam(DatabaseConnectionLoader databaseConnectionL
         private DbOperation operation;
         private File resultDir;
         private String outputEncoding;
-        private String excelTable;
+        private String excelTable = "SHEET";
         private boolean exportEmptyTable;
         private boolean skipHeader;
         private String resultPath;

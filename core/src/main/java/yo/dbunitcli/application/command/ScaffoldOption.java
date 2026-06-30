@@ -1,10 +1,23 @@
 package yo.dbunitcli.application.command;
 
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.DefaultTable;
+import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.CommandParameters;
+import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
+import yo.dbunitcli.dataset.ComparableDataSet;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.DataSetConverterParam;
+import yo.dbunitcli.dataset.DataSourceType;
+import yo.dbunitcli.dataset.IDataSetConverter;
+import yo.dbunitcli.dataset.ResultType;
+import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
+import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -24,9 +37,26 @@ public record ScaffoldOption(
         , String parameterName
         , String commandType
         , String[] commandInput
+        , DataSetLoadOption dataset
+        , ResultType datasetType
+        , String datasetEncoding
 ) implements CommandLineOption<ScaffoldDto> {
 
     private static final String COMMAND_INPUT_PREFIX = "-commandInput.";
+    private static final String DATASET_SRC_DIR = "src";
+    private static final Column[] DDL_SCHEMA_COLUMNS = {
+            new Column("COLUMN_NAME", DataType.VARCHAR),
+            new Column("TYPE_NAME", DataType.VARCHAR),
+            new Column("COLUMN_SIZE", DataType.VARCHAR),
+            new Column("DECIMAL_DIGITS", DataType.VARCHAR),
+            new Column("NULLABLE", DataType.VARCHAR),
+            new Column("IS_PK", DataType.VARCHAR),
+            new Column("PK_NAME", DataType.VARCHAR),
+            new Column("REMARKS", DataType.VARCHAR),
+            new Column("TABLE_REMARKS", DataType.VARCHAR),
+            new Column("TABLE_NAME", DataType.VARCHAR),
+            new Column("PACKAGE", DataType.VARCHAR)
+    };
 
     public ScaffoldOption(final String resultFile, final ScaffoldDto dto, final Parameter param) {
         this(param
@@ -37,6 +67,9 @@ public record ScaffoldOption(
                 , Strings.isNotEmpty(dto.getParameterName()) ? dto.getParameterName() : ""
                 , Strings.isNotEmpty(dto.getCommandType()) ? dto.getCommandType() : ""
                 , dto.getCommandInput()
+                , new DataSetLoadOption("dataset", dto.getDatasetDto(), true)
+                , dto.getDatasetType() != null ? dto.getDatasetType() : ResultType.csv
+                , Strings.isNotEmpty(dto.getDatasetEncoding()) ? dto.getDatasetEncoding() : "UTF-8"
         );
     }
 
@@ -48,6 +81,10 @@ public record ScaffoldOption(
                                   .filter(it -> it.startsWith(COMMAND_INPUT_PREFIX))
                                   .map(it -> "-" + it.substring(COMMAND_INPUT_PREFIX.length()))
                                   .toArray(String[]::new));
+        final String[] datasetArgs = Arrays.stream(args)
+                                              .filter(it -> it.startsWith("-dataset."))
+                                              .toArray(String[]::new);
+        new ArgumentMapper("dataset").populate(datasetArgs, dto.getDatasetDto());
         return dto;
     }
 
@@ -75,6 +112,9 @@ public record ScaffoldOption(
                     this.copyClasspathResource(generateType.getTemplatePath(),
                                                new File(templateDir, this.templateName + ".txt"));
                 }
+            }
+            if (this.hasDataset()) {
+                this.writeDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR));
             }
             if (Strings.isNotEmpty(this.parameterName)) {
                 if (paramDir.mkdirs() || paramDir.isDirectory()) {
@@ -117,7 +157,64 @@ public record ScaffoldOption(
                   final String key = COMMAND_INPUT_PREFIX + arg.substring(1, eqIdx > 0 ? eqIdx : arg.length());
                   result.put(key, eqIdx > 0 ? arg.substring(eqIdx + 1) : "true");
               });
+        if (this.hasDataset()) {
+            result.put("-datasetType", this.datasetType, ResultType.class);
+            result.put("-datasetEncoding", this.datasetEncoding);
+            result.addComponent("dataset", this.dataset.toParametersBuilder().build());
+        }
         return result;
+    }
+
+    private DataSourceType resolveDataSourceType() {
+        return switch (this.datasetType) {
+            case csv, xls, xlsx, fixed, table -> this.datasetType.toDataSourceType();
+            default -> null;
+        };
+    }
+
+    private boolean hasDataset() {
+        return this.dataset != null
+                && this.dataset.srcType() != null
+                && this.dataset.srcType() != DataSourceType.none
+                && Strings.isNotEmpty(this.dataset.src());
+    }
+
+    private void writeDatasetSrcFiles(final File srcDir) throws IOException {
+        if (!srcDir.mkdirs() && !srcDir.isDirectory()) {
+            return;
+        }
+        final ComparableDataSetParam param = this.dataset.getParam()
+                .setLoadData(false)
+                .build();
+        final ComparableDataSet dataSet = new ComparableDataSetLoader(this.parameter).loadDataSet(param);
+        final DataSetConverterParam converterParam = DataSetConverterParam.builder()
+                .setResultType(this.datasetType)
+                .setResultDir(srcDir)
+                .setExportEmptyTable(true)
+                .setSkipHeader(true)
+                .setOutputEncoding(this.datasetEncoding)
+                .build();
+        final IDataSetConverter converter = new DataSetConverterLoader().get(converterParam);
+        try {
+            converter.startDataSet();
+            for (final String tableName : dataSet.getTableNames()) {
+                final Column[] sourceColumns = dataSet.getTable(tableName).getTableMetaData().getColumns();
+                final DefaultTable schemaTable = new DefaultTable(tableName, DDL_SCHEMA_COLUMNS);
+                for (final Column column : sourceColumns) {
+                    schemaTable.addRow(this.buildSchemaRow(column.getColumnName(), tableName));
+                }
+                converter.convert(schemaTable);
+            }
+            converter.endDataSet();
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private Object[] buildSchemaRow(final String columnName, final String tableName) {
+        // order must match DDL_SCHEMA_COLUMNS: COLUMN_NAME, TYPE_NAME, COLUMN_SIZE, DECIMAL_DIGITS,
+        // NULLABLE, IS_PK, PK_NAME, REMARKS, TABLE_REMARKS, TABLE_NAME, PACKAGE
+        return new Object[]{columnName, "", "", "", "", "", "", "", "", tableName, ""};
     }
 
     private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {
@@ -132,6 +229,15 @@ public record ScaffoldOption(
             builder.put("-setting", "resources/setting/" + this.settingName + ".json");
         }
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
+        if (this.hasDataset()) {
+            builder.put("-src.src", DATASET_SRC_DIR);
+            final DataSourceType srcType = this.resolveDataSourceType();
+            if (srcType != null) {
+                builder.put("-src.srcType", srcType.name());
+            }
+            builder.put("-datasetType", this.datasetType, ResultType.class);
+            builder.put("-datasetEncoding", this.datasetEncoding);
+        }
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
                     builder.build().toList(false), StandardCharsets.UTF_8);
     }

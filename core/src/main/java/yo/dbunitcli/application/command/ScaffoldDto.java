@@ -2,8 +2,16 @@ package yo.dbunitcli.application.command;
 
 import picocli.CommandLine;
 import yo.dbunitcli.application.CommandDto;
+import yo.dbunitcli.application.dto.DataSetLoadDto;
+import yo.dbunitcli.dataset.ResultType;
 
 public class ScaffoldDto extends CommandDto {
+
+    @CommandLine.Option(names = "-datasetType", description = "output format for dataset src template (default: csv)")
+    private ResultType datasetType;
+    @CommandLine.Option(names = "-datasetEncoding", description = "output encoding for dataset src template (not used for xls/xlsx, default: UTF-8)")
+    private String datasetEncoding;
+    private DataSetLoadDto datasetDto = new DataSetLoadDto();
     @CommandLine.Option(names = "-result", description = "directory to create workspace structure")
     private String resultDir;
     @CommandLine.Option(names = "-target", description = "target to generate: ddl, javaBean, or parameter (required, no default)")
@@ -73,6 +81,30 @@ public class ScaffoldDto extends CommandDto {
 
     public void setParameterName(final String parameterName) {
         this.parameterName = parameterName;
+    }
+
+    public ResultType getDatasetType() {
+        return this.datasetType;
+    }
+
+    public void setDatasetType(final ResultType datasetType) {
+        this.datasetType = datasetType;
+    }
+
+    public String getDatasetEncoding() {
+        return this.datasetEncoding;
+    }
+
+    public void setDatasetEncoding(final String datasetEncoding) {
+        this.datasetEncoding = datasetEncoding;
+    }
+
+    public DataSetLoadDto getDatasetDto() {
+        return this.datasetDto;
+    }
+
+    public void setDatasetDto(final DataSetLoadDto datasetDto) {
+        this.datasetDto = datasetDto;
     }
 
 }

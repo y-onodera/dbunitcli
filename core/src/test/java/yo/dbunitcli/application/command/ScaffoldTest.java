@@ -9,7 +9,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
+import java.util.Arrays;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ScaffoldTest {
@@ -37,6 +40,10 @@ public class ScaffoldTest {
 
         protected String getResultBase() {
             return "target/test-temp/scaffold";
+        }
+
+        protected String getResultBasePrefix() {
+            return ".";
         }
 
         String[] args(final String subDir, final String... extra) {
@@ -145,6 +152,115 @@ public class ScaffoldTest {
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.stg").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.txt").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "option/myBean.param").exists());
+            }
+        }
+
+        @Nested
+        class DatasetOption {
+
+            private static final String SRC_DIR =
+                    "src/test/resources/yo/dbunitcli/application/command/scaffold/src";
+
+            @Test
+            public void testDatasetCreatesSrcCsvForDdl() throws Exception {
+                this.assertDatasetCreatesSrcCsv("ddl-csv", "ddl", "COLUMN_NAME", "id", "name", "email");
+            }
+
+            @Test
+            public void testDatasetCreatesSrcCsvForJavaBean() throws Exception {
+                this.assertDatasetCreatesSrcCsv("javaBean-csv", "javaBean", "COLUMN_NAME");
+            }
+
+            @Test
+            public void testDatasetParamFileIncludesSrcInfo() throws Exception {
+                TestCase.this.scaffold("dataset/ddl-param", "-target=ddl", "-parameter=ddl",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                final File paramFile = TestCase.this.resultFile("dataset/ddl-param", "option/ddl.param");
+                assertTrue(paramFile.exists());
+                final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-src.src=src")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-src.srcType=csv")));
+            }
+
+            @Test
+            public void testDatasetTypeXlsxCreatesSrcXlsx() {
+                TestCase.this.scaffold("dataset/ddl-xlsx", "-target=ddl",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv",
+                                       "-datasetType=xlsx");
+                final File srcDir = TestCase.this.resultFile("dataset/ddl-xlsx", "src");
+                assertTrue(srcDir.isDirectory());
+                final File[] files = srcDir.listFiles();
+                assertNotNull(files);
+                assertTrue(Arrays.stream(files).anyMatch(f -> f.getName().endsWith(".xlsx")));
+                assertFalse(Arrays.stream(files).anyMatch(f -> f.getName().endsWith(".csv")));
+            }
+
+            @Test
+            public void testNoDatasetOptionNoSrcDir() {
+                TestCase.this.scaffold("dataset/no-dataset", "-target=ddl", "-parameter=ddl");
+                assertFalse(TestCase.this.resultFile("dataset/no-dataset", "src").exists());
+            }
+
+            @Test
+            public void testDatasetEncodingInParamFile() throws Exception {
+                TestCase.this.scaffold("dataset/ddl-encoding", "-target=ddl", "-parameter=ddl",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv",
+                                       "-datasetEncoding=Shift_JIS");
+                final List<String> lines = Files.readAllLines(
+                        TestCase.this.resultFile("dataset/ddl-encoding", "option/ddl.param").toPath(),
+                        StandardCharsets.UTF_8);
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-datasetEncoding=Shift_JIS")));
+            }
+
+            private void assertDatasetCreatesSrcCsv(final String dir, final String target,
+                                                    final String... expectedColumns) throws Exception {
+                TestCase.this.scaffold("dataset/" + dir, "-target=" + target, "-parameter=" + target,
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                final File srcFile = TestCase.this.resultFile("dataset/" + dir, "src/SAMPLE.csv");
+                assertTrue(srcFile.exists());
+                final List<String> lines = Files.readAllLines(srcFile.toPath(), StandardCharsets.UTF_8);
+                for (final String col : expectedColumns) {
+                    assertTrue(lines.stream().anyMatch(l -> l.contains(col)));
+                }
+            }
+        }
+
+        @Nested
+        class ScaffoldToGenerate {
+
+            private static final String SRC_DIR =
+                    "src/test/resources/yo/dbunitcli/application/command/scaffold/src";
+
+            @Test
+            public void testDdlScaffoldToGenerate() throws Exception {
+                this.assertScaffoldGenerates("ddl", "e2e/ddl", "ddl/SAMPLE.sql");
+            }
+
+            @Test
+            public void testJavaBeanScaffoldToGenerate() throws Exception {
+                this.assertScaffoldGenerates("javaBean", "e2e/javaBean", "javaBean/Sample.java");
+            }
+
+            private void assertScaffoldGenerates(final String target, final String subDir,
+                                                  final String expectedOutput) throws Exception {
+                TestCase.this.scaffold(subDir, "-target=" + target, "-setting=" + target, "-parameter=" + target,
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                final File paramFile = TestCase.this.resultFile(subDir, "option/" + target + ".param");
+                assertTrue(paramFile.exists());
+
+                final File scaffoldDir = Path.of(TestCase.this.getResultBase(), subDir).toFile();
+                final Properties saved = (Properties) System.getProperties().clone();
+                final Properties withWorkspace = new Properties();
+                withWorkspace.putAll(saved);
+                withWorkspace.put(FileResources.PROPERTY_WORKSPACE, scaffoldDir.getCanonicalPath());
+                withWorkspace.put(FileResources.PROPERTY_RESULT_BASE, TestCase.this.getResultBasePrefix());
+                System.setProperties(withWorkspace);
+                try {
+                    Generate.main(new String[]{"@" + paramFile.getAbsolutePath()});
+                } finally {
+                    System.setProperties(saved);
+                }
+                assertTrue(new File(scaffoldDir, expectedOutput).exists());
             }
         }
 
@@ -273,6 +389,11 @@ public class ScaffoldTest {
         protected String getResultBase() {
             return TEMP + "/target/test-temp/scaffold";
         }
+
+        @Override
+        protected String getResultBasePrefix() {
+            return TEMP;
+        }
     }
 
     @Nested
@@ -291,6 +412,11 @@ public class ScaffoldTest {
         @Override
         protected String getResultBase() {
             return TEMP + "/target/test-temp/scaffold";
+        }
+
+        @Override
+        protected String getResultBasePrefix() {
+            return TEMP;
         }
     }
 }
