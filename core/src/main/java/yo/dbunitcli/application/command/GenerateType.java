@@ -113,11 +113,8 @@ public enum GenerateType {
                     rows.stream().filter(row -> Boolean.TRUE.equals(row.get("IS_PK"))).toList();
             final List<String> pkColumnNames = pkRows.stream().map(row -> row.get("COLUMN_NAME").toString()).toList();
             final String pkConstraintName = pkRows.isEmpty() ? null : (String) pkRows.getFirst().get("PK_NAME");
-            final String tableRemarks =
-                    rows == null || rows.isEmpty() ? "" : (String) rows.getFirst().getOrDefault("TABLE_REMARKS", "");
             super.write(option, resultFile,
-                        param.add("pkColumnNames", pkColumnNames).add("pkConstraintName", pkConstraintName)
-                             .add("tableRemarks", tableRemarks));
+                        param.add("pkColumnNames", pkColumnNames).add("pkConstraintName", pkConstraintName));
         }
     }, xlsxTemplate(null, null) {
         @Override
