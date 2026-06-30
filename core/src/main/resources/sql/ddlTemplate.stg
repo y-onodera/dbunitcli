@@ -1,9 +1,8 @@
 ddlType(row) ::= <<$row.TYPE_NAME$$if(row.COLUMN_SIZE)$($row.COLUMN_SIZE$$if(row.DECIMAL_DIGITS)$,$row.DECIMAL_DIGITS$$endif$)$endif$>>
-hasPk() ::= <<$rows:{row | $if(row.IS_PK)$true$endif$}; separator=""$>>
 createTable() ::= <<
 CREATE TABLE $tableName; format="upper"$ (
     $rows:{row | $row.COLUMN_NAME; format="upper"$ $ddlType(row)$$if(!row.NULLABLE)$ NOT NULL$endif$}; separator=",\n    "$
-    $if(hasPk())$,CONSTRAINT $if(pkConstraintName)$$pkConstraintName$$else$PK_$tableName; format="upper"$$endif$ PRIMARY KEY ($pkColumnNames:{name | $name; format="upper"$}; separator=", "$)
+    $if(pkColumnNames)$,CONSTRAINT $if(pkConstraintName)$$pkConstraintName$$else$PK_$tableName; format="upper"$$endif$ PRIMARY KEY ($pkColumnNames:{name | $name; format="upper"$}; separator=", "$)
     $endif$
 );
 >>
