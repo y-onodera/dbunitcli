@@ -95,6 +95,11 @@ public enum GenerateType {
         }
 
         @Override
+        public boolean supportsUserTemplate() {
+            return true;
+        }
+
+        @Override
         public ParameterUnit getFixedUnit() {
             return ParameterUnit.table;
         }
@@ -147,6 +152,11 @@ public enum GenerateType {
     }, javaBean("javabean/javaBeanTemplate.stg", "javabean/javaBeanTemplate.txt") {
         @Override
         public boolean isFixedTemplate() {
+            return true;
+        }
+
+        @Override
+        public boolean supportsUserTemplate() {
             return true;
         }
 
@@ -247,6 +257,10 @@ public enum GenerateType {
     }
 
     protected boolean isFixedTemplate() {
+        return false;
+    }
+
+    public boolean supportsUserTemplate() {
         return false;
     }
 
