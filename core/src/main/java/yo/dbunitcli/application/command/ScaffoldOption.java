@@ -220,10 +220,10 @@ public record ScaffoldOption(
     private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {
         final boolean hasTemplate = Strings.isNotEmpty(this.templateName);
         final ParametersBuilder builder = new ParametersBuilder();
-        builder.put("-generateType", hasTemplate ? GenerateType.txt.name() :
-                (isDdl ? GenerateType.ddl.name() : GenerateType.javaBean.name()), false);
+        builder.put("-generateType", isDdl ? GenerateType.ddl.name() : GenerateType.javaBean.name(), false);
         if (hasTemplate) {
-            builder.put("-template", "resources/template/" + this.templateName + ".stg");
+            builder.put("-template", "resources/template/" + this.templateName + ".txt");
+            builder.put("-template.templateGroup", "resources/template/" + this.templateName + ".stg");
         }
         if (Strings.isNotEmpty(this.settingName)) {
             builder.put("-setting", "resources/setting/" + this.settingName + ".json");

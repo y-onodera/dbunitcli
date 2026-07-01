@@ -6,7 +6,7 @@ CREATE TABLE $tableName; format="upper"$ (
     $endif$
 );
 >>
-commentOnTable() ::= <<$if(tableRemarks)$COMMENT ON TABLE $tableName; format="upper"$ IS '$tableRemarks$';
+commentOnTable() ::= <<$if(first(rows).TABLE_REMARKS)$COMMENT ON TABLE $tableName; format="upper"$ IS '$first(rows).TABLE_REMARKS$';
 $endif$>>
 commentOnColumns() ::= <<
 $rows:{row | $if(row.REMARKS)$COMMENT ON COLUMN $tableName; format="upper"$.$row.COLUMN_NAME; format="upper"$ IS '$row.REMARKS$';

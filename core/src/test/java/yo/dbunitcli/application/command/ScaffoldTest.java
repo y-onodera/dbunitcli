@@ -74,8 +74,9 @@ public class ScaffoldTest {
                 final File paramFile = TestCase.this.resultFile("ddl/all", "option/ddl.param");
                 assertTrue(paramFile.exists());
                 final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-generateType=txt")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/ddl.stg")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-generateType=ddl")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/ddl.txt")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/ddl.stg")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-setting=resources/setting/ddl.json")));
             }
 
