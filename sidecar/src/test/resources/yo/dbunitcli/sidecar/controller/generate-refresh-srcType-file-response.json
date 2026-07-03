@@ -12,6 +12,7 @@
         "sql",
         "ddl",
         "xlsxTemplate",
+        "xlsxSchema",
         "javaBean",
         "fixedColumnDef"
       ],

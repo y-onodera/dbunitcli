@@ -1,0 +1,10 @@
+rowEntry(row) ::= <<
+    {
+      "sheetName": "$row.sheetName$"
+     ,"tableName": "$row.tableName$"
+     ,"header": [$row.header:{h | "$h$"}; separator=","$]
+     ,"dataStart": 1
+     ,"columnIndex": [$row.header:{h | $i0$}; separator=","$]
+     ,"breakKey": [$row.breakKey:{k | "$k$"}; separator=","$]
+    }
+>>
