@@ -3,6 +3,7 @@ package yo.dbunitcli.application;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.ComparableTableDto;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 
 import java.util.LinkedHashMap;
@@ -63,6 +64,23 @@ public enum ParameterUnit {
                             .withRowNumber(row[0]++)
                             .addAll((Map<String, Object>) tables.get(it)));
         }
+
+        @Override
+        public Stream<Parameter> templateStream(final ComparableDataSetLoader loader, final ComparableDataSetParam param) {
+            final Map<String, Object> tables = loader.getComparableDataSetProducer(param).lazyLoad(true);
+            final int[] row = new int[]{0};
+            return tables.keySet().stream()
+                    .map(tableName -> {
+                        final Map<String, Object> resolved = ((ComparableTableDto) tables.get(tableName)).resolve();
+                        final Map<String, Object> dataSet = new LinkedHashMap<>();
+                        dataSet.put(tableName, resolved);
+                        return loader.parameter()
+                                .asInputParam()
+                                .withRowNumber(row[0]++)
+                                .addAll(resolved)
+                                .add("dataSet", dataSet);
+                    });
+        }
     },
     dataset;
 
@@ -80,5 +98,9 @@ public enum ParameterUnit {
                 .asInputParam()
                 .withRowNumber(0)
                 .add("dataSet", loader.getComparableDataSetProducer(param).lazyLoad(true)));
+    }
+
+    public Stream<Parameter> templateStream(final ComparableDataSetLoader loader, final ComparableDataSetParam param) {
+        return this.dataSetToStream(loader, param);
     }
 }

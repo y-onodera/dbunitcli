@@ -62,10 +62,12 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     public Stream<Parameter> parameterStream() {
-        if (this.generateType.isExcel() && this.lazyLoad) {
-            return this.unit().lazyLoadStream(this.getComparableDataSetLoader(), this.dataSetParam());
+        if (this.generateType.isExcel()) {
+            return this.lazyLoad
+                    ? this.unit().lazyLoadStream(this.getComparableDataSetLoader(), this.dataSetParam())
+                    : this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
         }
-        return this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
+        return this.unit().templateStream(this.getComparableDataSetLoader(), this.dataSetParam());
     }
 
     public File resultFile(final Parameter param) {

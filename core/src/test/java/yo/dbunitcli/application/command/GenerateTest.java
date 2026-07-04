@@ -23,8 +23,10 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class GenerateTest {
     private static final Project PROJECT = new Project();
@@ -126,6 +128,25 @@ public class GenerateTest {
             this.assertGenerateFileEquals("Test1.txt", "UTF-8");
             this.assertGenerateFileEquals("Test2.txt", "UTF-8");
             this.assertGenerateFileEquals("Test3.txt", "UTF-8");
+        }
+
+        @Test
+        public void testGenerateTxtPerTableWithDataSetShape() throws Exception {
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table/source/csv"
+                    , "-encoding=MS932"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_table_with_separate.json"
+                    , "-generateType=txt"
+                    , "-unit=table"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/table_dataset_shape/template.txt"
+                    , "-templateParameterAttribute="
+                    , "-outputEncoding=UTF-8"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/table_dataset_shape/result/$tableName$.txt"
+            });
+            GenerateTest.subDirectory = "generate/table_dataset_shape";
+            this.assertGenerateFileEquals("merge.txt", "UTF-8");
+            this.assertGenerateFileEqualsIgnoringRowOrder("dataType.txt", "UTF-8");
         }
 
         @Test
@@ -822,6 +843,28 @@ public class GenerateTest {
             final String expect = Files.readString(new File(GenerateTest.testResourcesDir + "expect/" + GenerateTest.subDirectory + "/expect/txt", target).toPath(), charset).replace("\r\n", "\n").replace("\r", "\n");
             final String actual = Files.readString(new File(this.getResult(), target).toPath(), charset).replace("\r\n", "\n").replace("\r", "\n");
             Assertions.assertEquals(expect, actual);
+        }
+
+        // distinct row order depends on TableSeparators' internal HashSet iteration, which is not stable across JVM runs
+        private void assertGenerateFileEqualsIgnoringRowOrder(final String target, final String encode) throws IOException {
+            final Charset charset = Charset.forName(encode);
+            final String expect = Files.readString(new File(GenerateTest.testResourcesDir + "expect/" + GenerateTest.subDirectory + "/expect/txt", target).toPath(), charset).replace("\r\n", "\n").replace("\r", "\n");
+            final String actual = Files.readString(new File(this.getResult(), target).toPath(), charset).replace("\r\n", "\n").replace("\r", "\n");
+            Assertions.assertEquals(this.sortRowTokens(expect), this.sortRowTokens(actual));
+        }
+
+        private String sortRowTokens(final String content) {
+            return Arrays.stream(content.split("\n"))
+                    .map(line -> {
+                        final int separatorIndex = line.indexOf('=');
+                        if (separatorIndex < 0) {
+                            return line;
+                        }
+                        final String key = line.substring(0, separatorIndex + 1);
+                        final String value = line.substring(separatorIndex + 1);
+                        return key + Arrays.stream(value.split(",")).sorted().collect(Collectors.joining(","));
+                    })
+                    .collect(Collectors.joining("\n"));
         }
 
         protected String getResult() {
