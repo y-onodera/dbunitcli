@@ -147,7 +147,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                 result.put("-includeAllColumns", Boolean.toString(this.includeAllColumns));
                 srcComponent.remove("-src.useJdbcMetaData").remove("-src.loadData");
             }
-            case xlsxTemplate -> srcComponent.remove("-src.loadData");
+            case xlsxTemplate, xlsxSchema -> srcComponent.remove("-src.loadData");
             case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
         }
         result.addComponent("srcData", srcComponent.build());
@@ -171,7 +171,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         switch (this.generateType()) {
             case settings -> builder.setUseJdbcMetaData(true).setLoadData(false);
             case ddl, javaBean, sql -> builder.setUseJdbcMetaData(true);
-            case xlsxTemplate, fixedColumnDef -> builder.setLoadData(false);
+            case xlsxTemplate, fixedColumnDef, xlsxSchema -> builder.setLoadData(false);
             default -> {
             }
         }

@@ -12,7 +12,9 @@ import org.apache.tools.ant.types.FileSet;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import java.io.File;
 import java.io.IOException;
@@ -155,6 +157,18 @@ public class GenerateTest {
             Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateSettingsNoKeys.txt"});
             GenerateTest.subDirectory = "generate/settings";
             this.assertGenerateFileEquals("settings_no_keys.json", "UTF-8");
+        }
+
+        @Test
+        public void testGenerateXlsxSchema() throws Exception {
+            Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateXlsxSchema.txt"});
+            GenerateTest.subDirectory = "generate/xlsxSchema";
+            this.assertGenerateFileEquals("xlsxSchema.json", "UTF-8");
+            final XlsxSchema schema = new FromJsonXlsxSchemaBuilder()
+                    .build(new File(this.getResult(), "xlsxSchema.json"));
+            Assertions.assertTrue(schema.contains("Test1"));
+            Assertions.assertTrue(schema.contains("Test2"));
+            Assertions.assertTrue(schema.contains("Test3"));
         }
 
         @Test
