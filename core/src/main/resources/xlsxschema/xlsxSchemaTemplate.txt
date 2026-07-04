@@ -2,4 +2,7 @@
   "rows": [
 $schemaRows:{row | $rowEntry(row)$}; separator=","$
   ]
+ ,"cells": [
+$schemaCells:{cell | $cellEntry(cell)$}; separator=","$
+  ]
 }

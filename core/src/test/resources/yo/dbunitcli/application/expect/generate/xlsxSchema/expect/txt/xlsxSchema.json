@@ -23,4 +23,22 @@
      ,"breakKey": ["PrimaryKey"]
     }
   ]
+ ,"cells": [
+    {
+      "sheetName": "Test1"
+     ,"tableName": "Test1"
+     ,"header": ["Key","Column1","Column2","Column3"]
+     ,"rows": [{"cellAddress": ["A2","B2","C2","D2"]}]
+    },{
+      "sheetName": "Test2"
+     ,"tableName": "Test2"
+     ,"header": ["PrimaryKey","ColumnA","ColumnB"]
+     ,"rows": [{"cellAddress": ["A2","B2","C2"]}]
+    },{
+      "sheetName": "Test3"
+     ,"tableName": "Test3"
+     ,"header": ["PrimaryKey","PrimaryKey2","ColumnA","ColumnB"]
+     ,"rows": [{"cellAddress": ["A2","B2","C2","D2"]}]
+    }
+  ]
 }

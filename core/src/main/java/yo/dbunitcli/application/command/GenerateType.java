@@ -1,5 +1,6 @@
 package yo.dbunitcli.application.command;
 
+import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.Column;
 import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.Strings;
@@ -13,6 +14,7 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -162,22 +164,27 @@ public enum GenerateType {
             return ParameterUnit.dataset;
         }
 
+        private static final int DATA_START_ROW = 1;
+
         @Override
         @SuppressWarnings("unchecked")
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
             final Map<String, Map<String, Object>> dataSet = (Map<String, Map<String, Object>>) param.get("dataSet");
-            final List<Map<String, Object>> schemaRows = dataSet.values().stream()
-                    .map(this::toSchemaRow)
-                    .toList();
-            super.write(option, resultFile, param.add("schemaRows", schemaRows));
+            final List<Map<String, Object>> schemaRows = new ArrayList<>();
+            final List<Map<String, Object>> schemaCells = new ArrayList<>();
+            dataSet.values().forEach(table -> {
+                final List<String> header = Arrays.stream((Column[]) table.get("columns"))
+                        .map(Column::getColumnName).toList();
+                schemaRows.add(this.toSchemaRow(table, header));
+                schemaCells.add(this.toSchemaCell(table, header));
+            });
+            super.write(option, resultFile, param.add("schemaRows", schemaRows).add("schemaCells", schemaCells));
         }
 
-        private Map<String, Object> toSchemaRow(final Map<String, Object> table) {
-            final Column[] columns = (Column[]) table.get("columns");
+        private Map<String, Object> toSchemaRow(final Map<String, Object> table, final List<String> header) {
             final Column[] primaryKeys = (Column[]) table.get("primaryKeys");
             final String tableName = table.get("tableName").toString();
-            final List<String> header = Arrays.stream(columns).map(Column::getColumnName).toList();
             final List<String> breakKey = primaryKeys.length > 0
                     ? Arrays.stream(primaryKeys).map(Column::getColumnName).toList()
                     : header.isEmpty() ? List.of() : List.of(header.getFirst());
@@ -185,8 +192,22 @@ public enum GenerateType {
             row.put("sheetName", tableName);
             row.put("tableName", tableName);
             row.put("header", header);
+            row.put("dataStart", DATA_START_ROW);
             row.put("breakKey", breakKey);
             return row;
+        }
+
+        private Map<String, Object> toSchemaCell(final Map<String, Object> table, final List<String> header) {
+            final String tableName = table.get("tableName").toString();
+            final List<String> cellAddress = IntStream.range(0, header.size())
+                    .mapToObj(col -> new CellReference(DATA_START_ROW, col).formatAsString())
+                    .toList();
+            final Map<String, Object> cell = new LinkedHashMap<>();
+            cell.put("sheetName", tableName);
+            cell.put("tableName", tableName);
+            cell.put("header", header);
+            cell.put("rows", List.of(cellAddress));
+            return cell;
         }
     }, javaBean("javabean/javaBeanTemplate.stg", "javabean/javaBeanTemplate.txt") {
         @Override

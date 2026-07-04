@@ -3,8 +3,21 @@ rowEntry(row) ::= <<
       "sheetName": "$row.sheetName$"
      ,"tableName": "$row.tableName$"
      ,"header": [$row.header:{h | "$h$"}; separator=","$]
-     ,"dataStart": 1
+     ,"dataStart": $row.dataStart$
      ,"columnIndex": [$row.header:{h | $i0$}; separator=","$]
      ,"breakKey": [$row.breakKey:{k | "$k$"}; separator=","$]
+    }
+>>
+
+cellAddressEntry(r) ::= <<
+{"cellAddress": [$r:{a | "$a$"}; separator=","$]}
+>>
+
+cellEntry(cell) ::= <<
+    {
+      "sheetName": "$cell.sheetName$"
+     ,"tableName": "$cell.tableName$"
+     ,"header": [$cell.header:{h | "$h$"}; separator=","$]
+     ,"rows": [$cell.rows:{r | $cellAddressEntry(r)$}; separator=","$]
     }
 >>
