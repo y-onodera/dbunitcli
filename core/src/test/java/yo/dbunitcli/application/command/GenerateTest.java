@@ -866,7 +866,7 @@ public class GenerateTest {
         }
 
         protected String getBaseDir() {
-            return GenerateTest.baseDir.replaceAll("/target/", "/" + TOP_DIR + "result/target/");
+            return GenerateTest.baseDir.replace("/target/", "/" + TOP_DIR + "result/target/");
         }
     }
 
@@ -884,7 +884,7 @@ public class GenerateTest {
 
         @Override
         protected String getBaseDir() {
-            return super.getBaseDir().replaceAll("/target/", "/" + TEMP_DIR + "/base/target/");
+            return super.getBaseDir().replace("/target/", "/" + TEMP_DIR + "/base/target/");
         }
     }
 
@@ -901,7 +901,7 @@ public class GenerateTest {
 
         @Override
         protected String getBaseDir() {
-            return super.getBaseDir().replaceAll("/target/", "/" + TEMP_DIR + "/result/target/");
+            return super.getBaseDir().replace("/target/", "/" + TEMP_DIR + "/result/target/");
         }
     }
 

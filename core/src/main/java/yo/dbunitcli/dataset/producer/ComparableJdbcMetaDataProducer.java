@@ -13,10 +13,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer {
@@ -63,6 +60,44 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
 
     private static class MetaDataTableExecutor extends DBTableExecutor {
 
+        private static Map<String, String> loadPrimaryKeys(final DatabaseMetaData meta, final String tableName)
+                throws SQLException {
+            final Map<String, String> pkColumns = new LinkedHashMap<>();
+            try (ResultSet pkRs = meta.getPrimaryKeys(null, null, tableName)) {
+                while (pkRs.next()) {
+                    pkColumns.put(pkRs.getString("COLUMN_NAME"), pkRs.getString("PK_NAME"));
+                }
+            }
+            return pkColumns;
+        }
+
+        private static String resolveColumnSize(final String typeName, final int jdbcType, final String columnSize) {
+            if (typeName.contains("(")) {
+                return null;
+            }
+            return switch (jdbcType) {
+                case Types.DATE, Types.TIME, Types.TIMESTAMP,
+                     Types.BLOB, Types.CLOB, Types.NCLOB,
+                     Types.BOOLEAN, Types.BIT -> null;
+                default -> columnSize;
+            };
+        }
+
+        private static String resolveDecimalDigits(final String decimalDigits) {
+            return "0".equals(decimalDigits) || decimalDigits == null ? null : decimalDigits;
+        }
+
+        private static String loadTableRemarks(final DatabaseMetaData meta, final String tableName)
+                throws SQLException {
+            try (ResultSet tableRs = meta.getTables(null, null, tableName, null)) {
+                if (tableRs.next()) {
+                    return Optional.ofNullable(tableRs.getString("REMARKS"))
+                                   .orElse("");
+                }
+            }
+            return "";
+        }
+
         MetaDataTableExecutor(final Source source, final ComparableDataSetParam param,
                               final org.dbunit.database.IDatabaseConnection connection) {
             super(source, param, connection);
@@ -106,44 +141,6 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
         @Override
         public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
             return new MetaDataTableExecutor(this.source, builder.build(), this.connection);
-        }
-
-        private static Map<String, String> loadPrimaryKeys(final DatabaseMetaData meta, final String tableName)
-                throws SQLException {
-            final Map<String, String> pkColumns = new LinkedHashMap<>();
-            try (ResultSet pkRs = meta.getPrimaryKeys(null, null, tableName)) {
-                while (pkRs.next()) {
-                    pkColumns.put(pkRs.getString("COLUMN_NAME"), pkRs.getString("PK_NAME"));
-                }
-            }
-            return pkColumns;
-        }
-
-        private static String resolveColumnSize(final String typeName, final int jdbcType, final String columnSize) {
-            if (typeName.contains("(")) {
-                return null;
-            }
-            return switch (jdbcType) {
-                case Types.DATE, Types.TIME, Types.TIMESTAMP,
-                     Types.BLOB, Types.CLOB, Types.NCLOB,
-                     Types.BOOLEAN, Types.BIT -> null;
-                default -> columnSize;
-            };
-        }
-
-        private static String resolveDecimalDigits(final String decimalDigits) {
-            return "0".equals(decimalDigits) || decimalDigits == null ? null : decimalDigits;
-        }
-
-        private static String loadTableRemarks(final DatabaseMetaData meta, final String tableName)
-                throws SQLException {
-            try (ResultSet tableRs = meta.getTables(null, null, tableName, null)) {
-                if (tableRs.next()) {
-                    final String remarks = tableRs.getString("REMARKS");
-                    return remarks != null ? remarks : "";
-                }
-            }
-            return "";
         }
     }
 }

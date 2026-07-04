@@ -158,7 +158,7 @@ public class RunTest {
         }
 
         protected String getBaseDir() {
-            return super.getBaseDir().replaceAll("/target/", "/" + TOP_DIR + "dataset/target/");
+            return super.getBaseDir().replace("/target/", "/" + TOP_DIR + "dataset/target/");
         }
     }
 
@@ -199,7 +199,7 @@ public class RunTest {
 
         @Override
         protected String getBaseDir() {
-            return super.getBaseDir().replaceAll("/target/", "/" + TEMP_DIR + "/base/target/");
+            return super.getBaseDir().replace("/target/", "/" + TEMP_DIR + "/base/target/");
         }
     }
 
@@ -254,7 +254,7 @@ public class RunTest {
 
         @Override
         protected String getBaseDir() {
-            return super.getBaseDir().replaceAll("/target/", "/" + TEMP_DIR + "/dataset/target/");
+            return super.getBaseDir().replace("/target/", "/" + TEMP_DIR + "/dataset/target/");
         }
     }
 

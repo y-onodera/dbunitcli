@@ -145,7 +145,7 @@ public class ParameterizeTest {
 
         @Override
         protected String getResult() {
-            return super.getResult().replaceAll("/target/", "/" + TOP_DIR + "result/target/");
+            return super.getResult().replace("/target/", "/" + TOP_DIR + "result/target/");
         }
     }
 
@@ -163,7 +163,7 @@ public class ParameterizeTest {
 
         @Override
         protected String getResult() {
-            return super.getResult().replaceAll("/target/", "/" + TEMP_DIR + "/base/target/");
+            return super.getResult().replace("/target/", "/" + TEMP_DIR + "/base/target/");
         }
     }
 
@@ -180,7 +180,7 @@ public class ParameterizeTest {
 
         @Override
         protected String getResult() {
-            return super.getResult().replaceAll("/target/", "/" + TEMP_DIR + "/result/target/");
+            return super.getResult().replace("/target/", "/" + TEMP_DIR + "/result/target/");
         }
     }
 
