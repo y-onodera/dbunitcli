@@ -35,6 +35,12 @@ export function GenerateForm(prop: {
 						element={generate.unit}
 					/>
 				)}
+				{generate.unitSetting && (
+					<FileText prefix="" element={generate.unitSetting} />
+				)}
+				{generate.unitSettingEncoding && (
+					<PlainText prefix="" element={generate.unitSettingEncoding} />
+				)}
 				{generate.template && (
 					<FileText prefix="" element={generate.template} />
 				)}
@@ -63,6 +69,15 @@ export function GenerateForm(prop: {
 				)}
 				{generate.commit && (
 					<Check prefix="" element={generate.commit} />
+				)}
+				{generate.op && (
+					<Select
+						prefix=""
+						element={generate.op}
+						handleTypeSelect={(_: string) => {
+							return new Promise((_) => {});
+						}}
+					/>
 				)}
 				{generate.sqlFilePrefix && (
 					<PlainText prefix="" element={generate.sqlFilePrefix} />

@@ -983,3 +983,44 @@ export const generateRefreshGenerateTypeXlsxResponseFixture =
 
 export const generateRefreshGenerateTypeXlsResponseFixture =
 	makeGenerateJxlsFixture("xls", false);
+
+// generate-refresh-generateType-sql-response.json をもとにしたフィクスチャ
+export const generateRefreshGenerateTypeSqlResponseFixture = {
+	prefix: "",
+	generateType: makeElement(
+		"generateType",
+		"ENUM",
+		"sql",
+		"WORKSPACE",
+		false,
+		GENERATE_TYPE_OPTIONS,
+	),
+	unitSetting: makeElement("unitSetting", "FILE", "", "SETTING", false),
+	unitSettingEncoding: makeElement(
+		"unitSettingEncoding",
+		"TEXT",
+		"UTF-8",
+		"WORKSPACE",
+		false,
+	),
+	result: makeElement("result", "DIR", "", "RESULT", false),
+	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
+	outputEncoding: makeElement(
+		"outputEncoding",
+		"TEXT",
+		"UTF-8",
+		"WORKSPACE",
+		false,
+	),
+	commit: makeElement("commit", "FLG", "false", "WORKSPACE", false),
+	op: makeElement("op", "ENUM", "INSERT", "WORKSPACE", false, [
+		"INSERT",
+		"UPDATE",
+		"DELETE",
+		"REFRESH",
+		"CLEAN_INSERT",
+	]),
+	sqlFilePrefix: makeElement("sqlFilePrefix", "TEXT", "", "WORKSPACE", false),
+	sqlFileSuffix: makeElement("sqlFileSuffix", "TEXT", "", "WORKSPACE", false),
+	srcData: makeTableSrcData("src"),
+} as GenerateOptions;

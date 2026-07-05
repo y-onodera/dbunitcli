@@ -45,6 +45,14 @@
     <tr><td>dataset</td><td>データセット全体から 1 ファイルを出力</td></tr>
   </table>
 
+  <h3>unitSetting</h3>
+  <p><code>unit</code> が <code>table</code> かつ Excel 系（<code>xlsx</code> / <code>xls</code>）以外のタイプで表示されます。テーブル単位のテンプレート生成時に、テーブルの区切り方を定義する設定ファイルを指定します（未指定時は種類ごとの組み込み設定を使用）。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>unitSetting</td><td>テーブル区切り設定ファイルのパス</td><td>（空、組み込み設定を使用）</td></tr>
+    <tr><td>unitSettingEncoding</td><td>unitSetting ファイルの文字コード</td><td>システムデフォルト</td></tr>
+  </table>
+
   <h2>共通オプション</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
@@ -90,6 +98,7 @@
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>commit</td><td>生成した SQL をコミットするかどうか</td><td>false</td></tr>
+    <tr><td>op</td><td>生成する SQL の種別: <code>INSERT</code> / <code>UPDATE</code> / <code>DELETE</code> / <code>REFRESH</code> / <code>CLEAN_INSERT</code></td><td>（未指定）</td></tr>
     <tr><td>sqlFilePrefix</td><td>生成 SQL ファイル名のプレフィックス</td><td>（空）</td></tr>
     <tr><td>sqlFileSuffix</td><td>生成 SQL ファイル名のサフィックス</td><td>（空）</td></tr>
   </table>

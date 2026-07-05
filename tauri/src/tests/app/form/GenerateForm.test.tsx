@@ -5,6 +5,7 @@ import type { GenerateOptions } from "../../../model/SelectParameter";
 import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	generateLoadResponseFixture,
+	generateRefreshGenerateTypeSqlResponseFixture,
 	generateRefreshGenerateTypeXlsResponseFixture,
 	generateRefreshGenerateTypeXlsxResponseFixture,
 	generateRefreshSrcTypeTableResponseFixture,
@@ -247,6 +248,49 @@ describe("GenerateFormの描画テスト", () => {
 					'input[type="checkbox"][name="-template.evaluateFormulas"]',
 				),
 			).toBeInTheDocument();
+		});
+	});
+
+	describe("sqlタイプ（generateType=sql）", () => {
+		it("unitSetting・unitSettingEncodingが表示される", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(generateRefreshGenerateTypeSqlResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector('input[type="text"][name="-unitSetting"]'),
+			).toBeInTheDocument();
+			expect(
+				document.querySelector(
+					'input[type="text"][name="-unitSettingEncoding"]',
+				),
+			).toBeInTheDocument();
+		});
+
+		it("opがselectとして表示される", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(generateRefreshGenerateTypeSqlResponseFixture)}
+				/>,
+			);
+
+			const opSelect = document.querySelector('select[name="-op"]');
+			expect(opSelect).toBeInTheDocument();
+			expect(opSelect?.querySelectorAll("option")).toHaveLength(5);
+		});
+
+		it("unitは表示されない（table固定のためレスポンスに含まれない）", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(generateRefreshGenerateTypeSqlResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector('select[name="-unit"]'),
+			).not.toBeInTheDocument();
 		});
 	});
 });
