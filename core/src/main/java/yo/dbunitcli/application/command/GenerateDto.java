@@ -16,6 +16,10 @@ public class GenerateDto extends CommandDto {
     private String resultPath;
     @CommandLine.Option(names = "-unit", description = "generate by row or table or dataset")
     private ParameterUnit unit;
+    @CommandLine.Option(names = "-unitSetting", description = "settings file used to resolve rows for table unit template generation")
+    private String unitSetting;
+    @CommandLine.Option(names = "-unitSettingEncoding", description = "encoding of unitSetting file")
+    private String unitSettingEncoding;
     @CommandLine.Option(names = "-commit", description = "default commit;whether commit or not generate sql")
     private String commit;
     @CommandLine.Option(names = "-sqlFileSuffix", description = "generate sqlFile fileName suffix")
@@ -72,6 +76,22 @@ public class GenerateDto extends CommandDto {
 
     public void setUnit(final ParameterUnit unit) {
         this.unit = unit;
+    }
+
+    public String getUnitSetting() {
+        return this.unitSetting;
+    }
+
+    public void setUnitSetting(final String unitSetting) {
+        this.unitSetting = unitSetting;
+    }
+
+    public String getUnitSettingEncoding() {
+        return this.unitSettingEncoding;
+    }
+
+    public void setUnitSettingEncoding(final String unitSettingEncoding) {
+        this.unitSettingEncoding = unitSettingEncoding;
     }
 
     public String getCommit() {

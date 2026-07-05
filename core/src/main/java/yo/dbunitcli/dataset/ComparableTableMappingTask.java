@@ -62,9 +62,9 @@ public interface ComparableTableMappingTask {
             return this.param().tableSeparators();
         }
 
-        public List<Map<String, Object>> resolveRows() {
+        public List<Map<String, Object>> resolveRows(final TableSeparators tableSeparators) {
             final TableRowsCollector collector = new TableRowsCollector(this.targetTableName());
-            final ComparableTableMappingContext context = new ComparableTableMappingContext(this.targetTableSeparators(), collector);
+            final ComparableTableMappingContext context = new ComparableTableMappingContext(tableSeparators, collector);
             context.open();
             this.run(context);
             context.close();

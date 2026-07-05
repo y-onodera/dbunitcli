@@ -10,16 +10,19 @@ import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DbOperation;
+import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public record GenerateOption(Parameter parameter, String resultDir, String resultPath, GenerateType generateType,
-                             ParameterUnit unit, DbOperation operation, String sqlFilePrefix, String sqlFileSuffix,
+                             ParameterUnit unit, String unitSetting, String unitSettingEncoding, DbOperation operation,
+                             String sqlFilePrefix, String sqlFileSuffix,
                              boolean commit, String template, String outputEncoding, DataSetLoadOption srcData,
                              TemplateRenderOption templateOption, boolean includeAllColumns, boolean lazyLoad,
                              String fixedLength, int defaultLength, String align)
@@ -30,7 +33,12 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
              Optional.ofNullable(dto.getResultPath()).filter(it -> !it.isEmpty()).orElse(resultFile),
              GenerateOption.getGenerateType(dto), GenerateOption.getGenerateType(dto).isFixedTemplate() ?
                      GenerateOption.getGenerateType(dto).getFixedUnit() :
-                     dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record, dto.getOperation(),
+                     dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record,
+             Strings.isNotEmpty(dto.getUnitSetting()) ? dto.getUnitSetting() : "",
+             Strings.isNotEmpty(dto.getUnitSettingEncoding())
+                     ? dto.getUnitSettingEncoding()
+                     : Charset.defaultCharset().displayName(),
+             dto.getOperation(),
              Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : "",
              Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : "",
              !Strings.isNotEmpty(dto.getCommit()) || Boolean.parseBoolean(dto.getCommit()), dto.getTemplate(),
@@ -67,7 +75,28 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                     ? this.unit().lazyLoadStream(this.getComparableDataSetLoader(), this.dataSetParam())
                     : this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
         }
-        return this.unit().templateStream(this.getComparableDataSetLoader(), this.dataSetParam());
+        return this.unit().templateStream(this.getComparableDataSetLoader(), this.dataSetParam(),
+                                          this.unit() == ParameterUnit.table ? this.unitTableSeparators() : TableSeparators.NONE);
+    }
+
+    public TableSeparators unitTableSeparators() {
+        if (Strings.isEmpty(this.unitSetting)) {
+            final TableSeparators defaultTableSeparators = this.classpathDefaultTableSeparators(this.unitSettingEncoding);
+            if (defaultTableSeparators != null) {
+                return defaultTableSeparators;
+            }
+        }
+        try {
+            return new FromJsonTableSeparatorsBuilder(this.unitSettingEncoding).build(this.unitSetting);
+        } catch (final IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private TableSeparators classpathDefaultTableSeparators(final String settingEncoding) {
+        final String defaultSettings = this.generateType().defaultSettingsPath();
+        return defaultSettings == null ? null
+                : new FromJsonTableSeparatorsBuilder(settingEncoding).loadFromClasspath(defaultSettings).build();
     }
 
     public File resultFile(final Parameter param) {
@@ -125,6 +154,10 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         if (!this.generateType.isFixedTemplate()) {
             result.put("-unit", this.unit, ParameterUnit.class);
         }
+        if (this.unit == ParameterUnit.table && !this.generateType.isExcel()) {
+            result.putFile("-unitSetting", this.unitSetting, BaseDir.SETTING);
+            result.put("-unitSettingEncoding", this.unitSettingEncoding);
+        }
         if (!this.generateType.isFixedTemplate() || (this.generateType.supportsUserTemplate() && Strings.isNotEmpty(this.template))) {
             result.putFile("-template", this.template, true, BaseDir.TEMPLATE);
         }
@@ -165,10 +198,11 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
-        final String defaultSettings = this.generateType().defaultSettingsPath();
-        if (defaultSettings != null && Strings.isEmpty(this.srcData.getSetting())) {
-            builder.setTableSeparators(new FromJsonTableSeparatorsBuilder(this.srcData.settingEncoding())
-                                               .loadFromClasspath(defaultSettings).build());
+        if (Strings.isEmpty(this.srcData.getSetting())) {
+            final TableSeparators defaultTableSeparators = this.classpathDefaultTableSeparators(this.srcData.settingEncoding());
+            if (defaultTableSeparators != null) {
+                builder.setTableSeparators(defaultTableSeparators);
+            }
         }
         switch (this.generateType()) {
             case settings -> builder.setUseJdbcMetaData(true).setLoadData(false);

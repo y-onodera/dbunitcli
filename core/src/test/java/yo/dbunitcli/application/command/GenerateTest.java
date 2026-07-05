@@ -137,6 +137,7 @@ public class GenerateTest {
                     , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table/source/csv"
                     , "-encoding=MS932"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_table_with_separate.json"
+                    , "-unitSetting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_table_with_separate.json"
                     , "-generateType=txt"
                     , "-unit=table"
                     , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/table_dataset_shape/template.txt"
