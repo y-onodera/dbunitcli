@@ -145,7 +145,7 @@ public class GenerateTest {
                     , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/table_dataset_shape/result/$tableName$.txt"
             });
             GenerateTest.subDirectory = "generate/table_dataset_shape";
-            this.assertGenerateFileEquals("merge.txt", "UTF-8");
+            this.assertGenerateFileEqualsIgnoringRowOrder("merge.txt", "UTF-8");
             this.assertGenerateFileEqualsIgnoringRowOrder("dataType.txt", "UTF-8");
         }
 
@@ -845,7 +845,8 @@ public class GenerateTest {
             Assertions.assertEquals(expect, actual);
         }
 
-        // distinct row order depends on TableSeparators' internal HashSet iteration, which is not stable across JVM runs
+        // row order depends on source file listing order (Files.walk) and TableSeparators' internal HashSet iteration,
+        // neither of which is stable across OS/filesystem or JVM runs
         private void assertGenerateFileEqualsIgnoringRowOrder(final String target, final String encode) throws IOException {
             final Charset charset = Charset.forName(encode);
             final String expect = Files.readString(new File(GenerateTest.testResourcesDir + "expect/" + GenerateTest.subDirectory + "/expect/txt", target).toPath(), charset).replace("\r\n", "\n").replace("\r", "\n");
