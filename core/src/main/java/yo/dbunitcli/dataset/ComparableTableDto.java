@@ -87,12 +87,13 @@ public class ComparableTableDto extends HashMap<String, Object> {
         this.put("rows", task);
     }
 
-    public Map<String, Object> resolve() {
+    public Map<String, Object> resolve(final TableSeparators tableSeparators) {
         if (this.task == null) {
             return this;
         }
         final Map<String, Object> result = new LinkedHashMap<>(this);
-        result.put("rows", this.task.resolveRows());
+        result.put("rows", this.task.resolveRows(tableSeparators));
+        result.put("dataset", this.task.resolveDataSet(tableSeparators));
         return result;
     }
 

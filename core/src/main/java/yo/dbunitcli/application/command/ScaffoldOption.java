@@ -33,6 +33,7 @@ public record ScaffoldOption(
         , String resultDir
         , String target
         , String settingName
+        , String unitSettingName
         , String templateName
         , String parameterName
         , String commandType
@@ -63,6 +64,7 @@ public record ScaffoldOption(
                 , Strings.isNotEmpty(dto.getResultDir()) ? dto.getResultDir() : resultFile
                 , Strings.isNotEmpty(dto.getTarget()) ? dto.getTarget() : ""
                 , Strings.isNotEmpty(dto.getSettingName()) ? dto.getSettingName() : ""
+                , Strings.isNotEmpty(dto.getUnitSettingName()) ? dto.getUnitSettingName() : ""
                 , Strings.isNotEmpty(dto.getTemplateName()) ? dto.getTemplateName() : ""
                 , Strings.isNotEmpty(dto.getParameterName()) ? dto.getParameterName() : ""
                 , Strings.isNotEmpty(dto.getCommandType()) ? dto.getCommandType() : ""
@@ -99,12 +101,8 @@ public record ScaffoldOption(
                 && Strings.isNotEmpty(this.commandType);
         if (generateJavaBean || generateDdl) {
             GenerateType generateType = GenerateType.valueOf(this.target);
-            if (Strings.isNotEmpty(this.settingName)) {
-                if (settingDir.mkdirs() || settingDir.isDirectory()) {
-                    this.copyClasspathResource(generateType.defaultSettingsPath(),
-                                               new File(settingDir, this.settingName + ".json"));
-                }
-            }
+            this.copySettingResource(settingDir, generateType, this.settingName);
+            this.copySettingResource(settingDir, generateType, this.unitSettingName);
             if (Strings.isNotEmpty(this.templateName)) {
                 if (templateDir.mkdirs() || templateDir.isDirectory()) {
                     this.copyClasspathResource(generateType.getStgPath(),
@@ -147,6 +145,7 @@ public record ScaffoldOption(
         result.putDir("-result", this.resultDir, BaseDir.RESULT)
               .put("-target", this.target);
         result.put("-setting", this.settingName)
+              .put("-unitSetting", this.unitSettingName)
               .put("-template", this.templateName)
               .put("-parameter", this.parameterName);
         result.put("-commandType", this.commandType);
@@ -228,6 +227,9 @@ public record ScaffoldOption(
         if (Strings.isNotEmpty(this.settingName)) {
             builder.put("-setting", "resources/setting/" + this.settingName + ".json");
         }
+        if (Strings.isNotEmpty(this.unitSettingName)) {
+            builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
+        }
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
         if (this.hasDataset()) {
             builder.put("-src.src", DATASET_SRC_DIR);
@@ -240,6 +242,15 @@ public record ScaffoldOption(
         }
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
                     builder.build().toList(false), StandardCharsets.UTF_8);
+    }
+
+    private void copySettingResource(final File settingDir, final GenerateType generateType, final String name) throws IOException {
+        if (Strings.isEmpty(name)) {
+            return;
+        }
+        if (settingDir.mkdirs() || settingDir.isDirectory()) {
+            this.copyClasspathResource(generateType.defaultSettingsPath(), new File(settingDir, name + ".json"));
+        }
     }
 
     private void copyClasspathResource(final String resource, final File dest) throws IOException {

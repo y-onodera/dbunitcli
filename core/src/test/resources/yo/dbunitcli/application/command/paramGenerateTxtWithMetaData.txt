@@ -2,6 +2,7 @@
 -src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv
 -encoding=UTF-8
 -setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/settings.json
+-unitSetting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/settings.json
 -template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/template.txt
 -templateEncoding=UTF-8
 -templateParameterAttribute=

@@ -122,20 +122,12 @@ public enum GenerateType {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
-            final List<Map<String, Object>> rows = (List<Map<String, Object>>) param.get("rows");
-            final List<Map<String, Object>> pkRows = rows == null ? List.of() :
-                    rows.stream().filter(row -> Boolean.TRUE.equals(row.get("IS_PK"))).toList();
-            final List<String> pkColumnNames = pkRows.stream().map(row -> row.get("COLUMN_NAME").toString()).toList();
-            final String pkConstraintName = pkRows.isEmpty() ? null : (String) pkRows.getFirst().get("PK_NAME");
             final STGroup stGroup = Strings.isEmpty(option.templateOption().templateGroup())
                     ? this.getStGroup() : null;
             option.templateOption().getTemplateRender()
-                  .write(stGroup, option.templateString(),
-                         param.add("pkColumnNames", pkColumnNames).add("pkConstraintName", pkConstraintName),
-                         resultFile, option.outputEncoding());
+                  .write(stGroup, option.templateString(), param, resultFile, option.outputEncoding());
         }
     }, xlsxTemplate(null, null) {
         @Override
@@ -241,13 +233,10 @@ public enum GenerateType {
         @Override
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
-            final String tableName = param.get("tableName").toString();
             final STGroup stGroup = Strings.isEmpty(option.templateOption().templateGroup())
                     ? this.getStGroup() : null;
             option.templateOption().getTemplateRender()
-                  .write(stGroup, option.templateString(),
-                         param.add("className", Strings.capitalize(tableName.toLowerCase())),
-                         resultFile, option.outputEncoding());
+                  .write(stGroup, option.templateString(), param, resultFile, option.outputEncoding());
         }
     }, fixedColumnDef("fixedcolumndef/fixedColumnDefTemplate.stg", "fixedcolumndef/fixedColumnDefTemplate.txt") {
         @Override
