@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public record ScaffoldOption(
         Parameter parameter
@@ -58,6 +59,9 @@ public record ScaffoldOption(
             new Column("TABLE_NAME", DataType.VARCHAR),
             new Column("PACKAGE", DataType.VARCHAR)
     };
+    private static final String DDL_SCHEMA_HEADER_NAMES = Arrays.stream(DDL_SCHEMA_COLUMNS)
+            .map(Column::getColumnName)
+            .collect(Collectors.joining(","));
 
     public ScaffoldOption(final String resultFile, final ScaffoldDto dto, final Parameter param) {
         this(param
@@ -178,6 +182,20 @@ public record ScaffoldOption(
                 && Strings.isNotEmpty(this.dataset.src());
     }
 
+    private boolean isHeaderlessDataset() {
+        return switch (this.datasetType) {
+            case format, fixed -> true;
+            case csv, xls, xlsx, table -> false;
+        };
+    }
+
+    private boolean usesDatasetEncoding() {
+        return switch (this.datasetType) {
+            case csv, format, fixed -> true;
+            case xls, xlsx, table -> false;
+        };
+    }
+
     private void writeDatasetSrcFiles(final File srcDir) throws IOException {
         if (!srcDir.mkdirs() && !srcDir.isDirectory()) {
             return;
@@ -190,7 +208,7 @@ public record ScaffoldOption(
                 .setResultType(this.datasetType)
                 .setResultDir(srcDir)
                 .setExportEmptyTable(true)
-                .setSkipHeader(true)
+                .setSkipHeader(!this.isHeaderlessDataset())
                 .setOutputEncoding(this.datasetEncoding)
                 .build();
         final IDataSetConverter converter = new DataSetConverterLoader().get(converterParam);
@@ -237,8 +255,12 @@ public record ScaffoldOption(
             if (srcType != null) {
                 builder.put("-src.srcType", srcType.name());
             }
-            builder.put("-datasetType", this.datasetType, ResultType.class);
-            builder.put("-datasetEncoding", this.datasetEncoding);
+            if (this.usesDatasetEncoding()) {
+                builder.put("-encoding", this.datasetEncoding);
+            }
+            if (this.isHeaderlessDataset()) {
+                builder.put("-headerName", ScaffoldOption.DDL_SCHEMA_HEADER_NAMES);
+            }
         }
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
                     builder.build().toList(false), StandardCharsets.UTF_8);

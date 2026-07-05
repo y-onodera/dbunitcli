@@ -227,7 +227,7 @@ public class ScaffoldTest {
                 final List<String> lines = Files.readAllLines(
                         TestCase.this.resultFile("dataset/ddl-encoding", "option/ddl.param").toPath(),
                         StandardCharsets.UTF_8);
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-datasetEncoding=Shift_JIS")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-encoding=Shift_JIS")));
             }
 
             private void assertDatasetCreatesSrcCsv(final String dir, final String target,
