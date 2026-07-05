@@ -54,6 +54,9 @@ public record TemplateRender(File templateGroup, String templateParameterAttribu
     public String replaceParameter(final String target, final Parameter parameter) {
         String result = target;
         for (final Map.Entry<String, Object> entry : parameter.entrySet()) {
+            if (entry.getValue() == null) {
+                continue;
+            }
             result = result.replace(this.getAttributeName(entry.getKey()), entry.getValue().toString());
         }
         return result;

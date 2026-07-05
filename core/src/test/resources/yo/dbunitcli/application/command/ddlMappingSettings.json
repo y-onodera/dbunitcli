@@ -14,7 +14,11 @@
       "boolean": {
         "NULLABLE": "is_nullable",
         "IS_PK": "is_pk"
-      }
+      },
+      "aggregates": [
+        {"name": "pkColumnNames", "column": "COLUMN_NAME", "filter": ["IS_PK"]},
+        {"name": "pkConstraintName", "column": "PK_NAME", "filter": ["IS_PK"]}
+      ]
     }
   ]
 }

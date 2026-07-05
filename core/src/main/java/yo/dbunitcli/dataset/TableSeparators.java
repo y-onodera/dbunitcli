@@ -65,6 +65,12 @@ public record TableSeparators(List<TableSeparator> settings
         return this.addNewNameSetting(this.addSettings(metaData), metaData.getTableName());
     }
 
+    public List<TableAggregate> getAggregates(final ITableMetaData metaData) {
+        return this.getSeparators(metaData).stream()
+                .flatMap(it -> it.aggregates().stream())
+                .toList();
+    }
+
     private Stream<AddSettingTableMetaData> addNewNameSetting(final Stream<AddSettingTableMetaData> target, final String beforeTableName) {
         return target.flatMap(it -> {
             if (!Objects.equals(beforeTableName, it.getTableName())) {

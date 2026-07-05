@@ -182,7 +182,27 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
                 .setOrderColumns(this.collectSettings(settingJson, "order"))
                 .setFilter(this.collectFilters(settingJson))
                 .setDistinct(this.isDistinct(settingJson))
+                .setAggregates(this.collectAggregates(settingJson))
                 .build();
+    }
+
+    protected List<TableAggregate> collectAggregates(final JsonObject settingJson) {
+        if (!settingJson.containsKey("aggregates")) {
+            return new ArrayList<>();
+        }
+        final JsonArray aggregates = settingJson.getJsonArray("aggregates");
+        return IntStream.range(0, aggregates.size())
+                .mapToObj(aggregates::getJsonObject)
+                .map(this::getTableAggregate)
+                .collect(Collectors.toList());
+    }
+
+    protected TableAggregate getTableAggregate(final JsonObject json) {
+        return new TableAggregate(
+                json.getString("name"),
+                json.getString("column"),
+                TableSeparator.RowFilter.of(this.collectFilters(json))
+        );
     }
 
     protected TableMetaDataFilter getTargetFilter(final JsonObject settingJson) {
