@@ -27,7 +27,6 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
         , List<String> orderColumns
         , RowFilter filter
         , boolean distinct
-        , List<TableAggregate> aggregates
 ) {
 
     public static final TableMetaDataFilter ACCEPT_ALL = TableMetaDataFilterParser.always(true);
@@ -50,7 +49,6 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
                 , new ArrayList<>(builder.getOrderColumns())
                 , builder.getFilter()
                 , builder.isDistinct()
-                , new ArrayList<>(builder.getAggregates())
         );
     }
 
@@ -137,7 +135,6 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
                 || !this.orderColumns.isEmpty()
                 || this.filter != TableSeparator.NO_FILTER
                 || this.distinct
-                || !this.aggregates.isEmpty()
                 ;
     }
 
@@ -163,7 +160,7 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
 
         static JexlEngine JEXL = new JexlBuilder().create();
 
-        public static RowFilter of(final List<String> expression) {
+        static RowFilter of(final List<String> expression) {
             if (expression.isEmpty()) {
                 return TableSeparator.NO_FILTER;
             }
@@ -205,7 +202,6 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
         private RowFilter filter = TableSeparator.NO_FILTER;
 
         private boolean distinct = false;
-        private List<TableAggregate> aggregates = new ArrayList<>();
 
         private Builder() {
         }
@@ -220,7 +216,6 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
             this.orderColumns.addAll(tableSeparator.orderColumns());
             this.filter = tableSeparator.filter();
             this.distinct = tableSeparator.distinct();
-            this.aggregates.addAll(tableSeparator.aggregates());
         }
 
         public Builder with(final TableSeparator other) {
@@ -240,8 +235,6 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
                             .distinct()
                             .toList())
                     .setDistinct(this.isDistinct() || other.distinct())
-                    .setAggregates(Stream.concat(this.aggregates.stream(), other.aggregates().stream())
-                            .toList())
                     ;
         }
 
@@ -305,15 +298,6 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
 
         public ExpressionColumns getExpressionColumns() {
             return this.expressionColumns;
-        }
-
-        public List<TableAggregate> getAggregates() {
-            return this.aggregates;
-        }
-
-        public Builder setAggregates(final List<TableAggregate> aggregates) {
-            this.aggregates = aggregates;
-            return this;
         }
 
         public Builder setTargetFilter(final TableMetaDataFilter tableMetaDataFilter) {

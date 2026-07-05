@@ -1,23 +1,35 @@
 {
-  "commonSettings": [
+  "settings": [
     {
-      "string": {
-        "COLUMN_NAME": "col_name",
-        "TYPE_NAME": "sql_type",
-        "COLUMN_SIZE": "precision != null && !precision.isEmpty() ? precision : null",
-        "DECIMAL_DIGITS": "scale != null && !scale.isEmpty() ? scale : null",
-        "PK_NAME": "pk_constraint_name",
-        "TABLE_REMARKS": "table_desc",
-        "REMARKS": "col_desc",
-        "TABLE_NAME": "table_name"
-      },
-      "boolean": {
-        "NULLABLE": "is_nullable",
-        "IS_PK": "is_pk"
-      },
-      "aggregates": [
-        {"name": "pkColumnNames", "column": "COLUMN_NAME", "filter": ["IS_PK"]},
-        {"name": "pkConstraintName", "column": "PK_NAME", "filter": ["IS_PK"]}
+      "pattern": {"regex": ".*", "exclude": ["PK"]},
+      "separate": [
+        {
+          "string": {
+            "COLUMN_NAME": "col_name",
+            "TYPE_NAME": "sql_type",
+            "COLUMN_SIZE": "precision != null && !precision.isEmpty() ? precision : null",
+            "DECIMAL_DIGITS": "scale != null && !scale.isEmpty() ? scale : null",
+            "PK_NAME": "pk_constraint_name",
+            "TABLE_REMARKS": "table_desc",
+            "REMARKS": "col_desc",
+            "TABLE_NAME": "table_name"
+          },
+          "boolean": {
+            "NULLABLE": "is_nullable",
+            "IS_PK": "is_pk"
+          }
+        },
+        {
+          "tableName": "PK",
+          "filter": ["is_pk"],
+          "string": {
+            "COLUMN_NAME": "col_name",
+            "PK_NAME": "pk_constraint_name"
+          },
+          "boolean": {
+            "IS_PK": "is_pk"
+          }
+        }
       ]
     }
   ]

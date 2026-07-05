@@ -2,7 +2,6 @@ package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 
 import java.util.Arrays;
@@ -93,10 +92,8 @@ public class ComparableTableDto extends HashMap<String, Object> {
             return this;
         }
         final Map<String, Object> result = new LinkedHashMap<>(this);
-        final List<Map<String, Object>> rows = this.task.resolveRows(tableSeparators);
-        result.put("rows", rows);
-        tableSeparators.getAggregates(new DefaultTableMetaData(this.getTableName(), this.getColumns(), this.getPrimaryKeys()))
-                .forEach(aggregate -> result.put(aggregate.name(), aggregate.evaluate(rows)));
+        result.put("rows", this.task.resolveRows(tableSeparators));
+        result.put("dataset", this.task.resolveDataSet(tableSeparators));
         return result;
     }
 

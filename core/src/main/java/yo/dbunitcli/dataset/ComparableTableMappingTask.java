@@ -3,8 +3,10 @@ package yo.dbunitcli.dataset;
 import yo.dbunitcli.common.Source;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 
 public interface ComparableTableMappingTask {
@@ -64,11 +66,22 @@ public interface ComparableTableMappingTask {
 
         public List<Map<String, Object>> resolveRows(final TableSeparators tableSeparators) {
             final TableRowsCollector collector = new TableRowsCollector(this.targetTableName());
-            final ComparableTableMappingContext context = new ComparableTableMappingContext(tableSeparators, collector);
+            this.runWith(new ComparableTableMappingContext(tableSeparators, collector)).close();
+            return collector.getRows();
+        }
+
+        public Map<String, Object> resolveDataSet(final TableSeparators tableSeparators) {
+            final TreeMap<String, ComparableTable> tableMap = this.runWith(new ComparableTableMappingContext(tableSeparators, null)).close();
+            final Map<String, Object> result = new LinkedHashMap<>();
+            // each ComparableTable.toMap(true) is a one-element list holding the table's own metadata+rows wrapper
+            tableMap.forEach((tableName, table) -> result.put(tableName, table.toMap(true).getFirst()));
+            return result;
+        }
+
+        private ComparableTableMappingContext runWith(final ComparableTableMappingContext context) {
             context.open();
             this.run(context);
-            context.close();
-            return collector.getRows();
+            return context;
         }
 
         public WithTargetTable chain(final WithTargetTable target) {
