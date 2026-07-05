@@ -1,0 +1,4 @@
+tableName=dataType
+rows=:String,:Boolean,:Long,:Integer,:BigDecimal
+dataSet.tableName=dataType
+dataSet.rows=:String,:Boolean,:Long,:Integer,:BigDecimal

@@ -4,6 +4,7 @@ import yo.dbunitcli.common.Source;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public interface ComparableTableMappingTask {
@@ -59,6 +60,15 @@ public interface ComparableTableMappingTask {
 
         public TableSeparators targetTableSeparators() {
             return this.param().tableSeparators();
+        }
+
+        public List<Map<String, Object>> resolveRows() {
+            final TableRowsCollector collector = new TableRowsCollector(this.targetTableName());
+            final ComparableTableMappingContext context = new ComparableTableMappingContext(this.targetTableSeparators(), collector);
+            context.open();
+            this.run(context);
+            context.close();
+            return collector.getRows();
         }
 
         public WithTargetTable chain(final WithTargetTable target) {

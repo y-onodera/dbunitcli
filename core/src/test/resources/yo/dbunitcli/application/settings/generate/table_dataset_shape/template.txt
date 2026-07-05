@@ -1,0 +1,4 @@
+tableName=$tableName$
+rows=$rows:{row | $row.name$:$row.dataType$}; separator=","$
+dataSet.tableName=$dataSet.(tableName).tableName$
+dataSet.rows=$dataSet.(tableName).rows:{row | $row.name$:$row.dataType$}; separator=","$

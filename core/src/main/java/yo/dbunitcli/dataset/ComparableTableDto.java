@@ -6,6 +6,7 @@ import org.dbunit.dataset.ITableMetaData;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -84,6 +85,15 @@ public class ComparableTableDto extends HashMap<String, Object> {
     public void setRows(final ComparableTableMappingTask.WithTargetTable task) {
         this.task = task;
         this.put("rows", task);
+    }
+
+    public Map<String, Object> resolve() {
+        if (this.task == null) {
+            return this;
+        }
+        final Map<String, Object> result = new LinkedHashMap<>(this);
+        result.put("rows", this.task.resolveRows());
+        return result;
     }
 
 }

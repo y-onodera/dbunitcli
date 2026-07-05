@@ -1,0 +1,4 @@
+tableName=merge
+rows=stringValue:String,booleanValue:Boolean,longValue:Long,intValue:Integer,bigDecimalValue:BigDecimal,gk1:BigDecimal,gk2:BigDecimal,gk3:BigDecimal,bigDecimalValue:BigDecimal,stringValue:String,booleanValue:Boolean
+dataSet.tableName=merge
+dataSet.rows=stringValue:String,booleanValue:Boolean,longValue:Long,intValue:Integer,bigDecimalValue:BigDecimal,gk1:BigDecimal,gk2:BigDecimal,gk3:BigDecimal,bigDecimalValue:BigDecimal,stringValue:String,booleanValue:Boolean
