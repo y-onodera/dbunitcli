@@ -80,6 +80,8 @@ export type GenerateOptions = CommandOptions & {
 	command: "generate";
 	generateType: CommandOption;
 	unit?: CommandOption;
+	unitSetting?: CommandOption;
+	unitSettingEncoding?: CommandOption;
 	template?: CommandOption;
 	fixedLength?: CommandOption;
 	defaultLength?: CommandOption;
@@ -88,6 +90,7 @@ export type GenerateOptions = CommandOptions & {
 	resultPath: CommandOption;
 	outputEncoding: CommandOption;
 	commit?: CommandOption;
+	op?: CommandOption;
 	sqlFilePrefix?: CommandOption;
 	sqlFileSuffix?: CommandOption;
 	includeAllColumns?: CommandOption;
