@@ -18,6 +18,8 @@ public class ScaffoldDto extends CommandDto {
     private String target;
     @CommandLine.Option(names = "-setting", description = "setting file name to scaffold (omit to skip)")
     private String settingName;
+    @CommandLine.Option(names = "-unitSetting", description = "unitSetting file name to scaffold (omit to skip)")
+    private String unitSettingName;
     @CommandLine.Option(names = "-template", description = "template file name to scaffold (omit to skip)")
     private String templateName;
     @CommandLine.Option(names = "-parameter", description = "parameter file name to scaffold (omit to skip)")
@@ -65,6 +67,14 @@ public class ScaffoldDto extends CommandDto {
 
     public void setSettingName(final String settingName) {
         this.settingName = settingName;
+    }
+
+    public String getUnitSettingName() {
+        return this.unitSettingName;
+    }
+
+    public void setUnitSettingName(final String unitSettingName) {
+        this.unitSettingName = unitSettingName;
     }
 
     public String getTemplateName() {
