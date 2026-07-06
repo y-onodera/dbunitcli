@@ -33,6 +33,7 @@
     <tr><td><a href="#type-sql">sql</a></td><td>INSERT / UPDATE / DELETE / CLEAN_INSERT SQL ファイルを生成</td><td>table（固定）</td></tr>
     <tr><td><a href="#type-ddl">ddl</a></td><td>テーブルのカラム情報から CREATE TABLE 用の DDL ファイルを生成</td><td>table（固定）</td></tr>
     <tr><td><a href="#type-xlsxTemplate">xlsxTemplate</a></td><td>jxls テンプレートのひな型 <code>.xlsx</code> を生成</td><td>dataset（固定）</td></tr>
+    <tr><td><a href="#type-xlsxSchema">xlsxSchema</a></td><td>データセットのカラム情報から Xlsx Schema 設定ファイルのひな型を生成</td><td>dataset（固定）</td></tr>
     <tr><td><a href="#type-javaBean">javaBean</a></td><td>テーブルのカラム情報から JavaBean の <code>.java</code> ソースを生成</td><td>table（固定）</td></tr>
     <tr><td><a href="#type-fixedColumnDef">fixedColumnDef</a></td><td>固定長出力用のカラム幅定義ファイルを生成</td><td>table（固定）</td></tr>
   </table>
@@ -116,6 +117,9 @@
   <h2 id="type-xlsxTemplate">xlsxTemplate</h2>
   <p>jxls テンプレートのひな型となる <code>.xlsx</code> ファイルを生成します。<code>unit</code> は <code>dataset</code> に固定です。<code>template</code> は使用しません。</p>
 
+  <h2 id="type-xlsxSchema">xlsxSchema</h2>
+  <p>データセットのカラム情報から <a href="xlsx-schema.html">Xlsx Schema</a> 設定ファイルのひな型を生成します。<code>unit</code> は <code>dataset</code> に固定です。<code>template</code> は使用しません。</p>
+
   <h2 id="type-javaBean">javaBean</h2>
   <p>テーブルのカラム情報から JavaBean の <code>.java</code> ソースファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> を指定すると組み込みテンプレートの代わりに使用されます（未指定時は組み込み JavaBean テンプレートを使用）。ファイル名はテーブル名をアッパーキャメルケースに変換したものになります。</p>
 
@@ -134,6 +138,7 @@
     <li><a href="template.html">Template</a> — <code>txt</code> タイプの StringTemplate 4 オプション</li>
     <li><a href="jxls.html">Jxls</a> — <code>xlsx</code> / <code>xls</code> タイプの jxls オプション</li>
     <li><a href="result-form.html">Result Form</a> — fixed 出力形式の詳細</li>
+    <li><a href="xlsx-schema.html">Xlsx Schema</a> — <code>xlsxSchema</code> タイプが生成する設定ファイルの詳細</li>
   </ul>
 </body>
 </html>
