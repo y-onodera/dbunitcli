@@ -31,7 +31,9 @@
     <tr><td><a href="#type-xls">xls</a></td><td>jxls を使った <code>.xls</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
     <tr><td><a href="#type-settings">settings</a></td><td>Dataset Settings ファイルのひな型を生成</td><td>dataset（固定）</td></tr>
     <tr><td><a href="#type-sql">sql</a></td><td>INSERT / UPDATE / DELETE / CLEAN_INSERT SQL ファイルを生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="#type-ddl">ddl</a></td><td>テーブルのカラム情報から CREATE TABLE 用の DDL ファイルを生成</td><td>table（固定）</td></tr>
     <tr><td><a href="#type-xlsxTemplate">xlsxTemplate</a></td><td>jxls テンプレートのひな型 <code>.xlsx</code> を生成</td><td>dataset（固定）</td></tr>
+    <tr><td><a href="#type-javaBean">javaBean</a></td><td>テーブルのカラム情報から JavaBean の <code>.java</code> ソースを生成</td><td>table（固定）</td></tr>
     <tr><td><a href="#type-fixedColumnDef">fixedColumnDef</a></td><td>固定長出力用のカラム幅定義ファイルを生成</td><td>table（固定）</td></tr>
   </table>
 
@@ -103,8 +105,19 @@
     <tr><td>sqlFileSuffix</td><td>生成 SQL ファイル名のサフィックス</td><td>（空）</td></tr>
   </table>
 
+  <h2 id="type-ddl">ddl</h2>
+  <p>テーブルのカラム情報から CREATE TABLE 用の DDL ファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> を指定すると組み込みテンプレートの代わりに使用されます（未指定時は組み込み DDL テンプレートを使用）。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>sqlFilePrefix</td><td>生成 DDL ファイル名のプレフィックス</td><td>（空）</td></tr>
+    <tr><td>sqlFileSuffix</td><td>生成 DDL ファイル名のサフィックス</td><td>（空）</td></tr>
+  </table>
+
   <h2 id="type-xlsxTemplate">xlsxTemplate</h2>
   <p>jxls テンプレートのひな型となる <code>.xlsx</code> ファイルを生成します。<code>unit</code> は <code>dataset</code> に固定です。<code>template</code> は使用しません。</p>
+
+  <h2 id="type-javaBean">javaBean</h2>
+  <p>テーブルのカラム情報から JavaBean の <code>.java</code> ソースファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> を指定すると組み込みテンプレートの代わりに使用されます（未指定時は組み込み JavaBean テンプレートを使用）。ファイル名はテーブル名をアッパーキャメルケースに変換したものになります。</p>
 
   <h2 id="type-fixedColumnDef">fixedColumnDef</h2>
   <p>固定長出力（<a href="result-form.html">Result Form</a> の fixed 形式）で使用するカラム幅定義ファイルを生成します。<code>unit</code> は <code>table</code> に固定です。以下の項目を設定します。</p>
