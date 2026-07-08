@@ -8,7 +8,6 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.CommandParameters;
-import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSet;
@@ -63,42 +62,7 @@ public record ScaffoldOption(
     private static final String DDL_SCHEMA_HEADER_NAMES = Arrays.stream(DDL_SCHEMA_COLUMNS)
             .map(Column::getColumnName)
             .collect(Collectors.joining(","));
-    // GenerateType.xlsxSchema/fixedColumnDef precompute schemaRows/schemaCells (resp. a FixedColumnDef
-    // list) in Java before rendering, and only ever read the classpath template (supportsUserTemplate()
-    // is false for both), so they cannot be reused as-is here. These scaffold templates instead render
-    // directly against the raw "dataSet"/"rows" attributes under generateType=txt, driven by the same
-    // DDL_SCHEMA_COLUMNS-shaped dummy src that ddl/javaBean scaffolding writes. As a result they cover
-    // only the "rows" section of xlsxSchema (the "cells" section is optional and omitted) and hardcode a
-    // placeholder length/align/pad for fixedColumnDef for the user to edit; there is no per-column IS_PK
-    // data in the dummy src, so breakKey always falls back to the first column.
-    private static final String FIXED_COLUMN_DEF_SCAFFOLD_STG =
-            "columnEntry(row) ::= <<{\"name\": \"$row.COLUMN_NAME$\", \"length\": 10, \"align\": \"left\", \"pad\": \" \"}>>\n";
-    private static final String FIXED_COLUMN_DEF_SCAFFOLD_TXT = """
-            {
-              "columns": [
-            $rows:{row | $columnEntry(row)$}; separator=","$
-              ]
-            }
-            """;
-    private static final String XLSX_SCHEMA_SCAFFOLD_STG = """
-            rowEntry(table) ::= <<
-                {
-                  "sheetName": "$table.tableName$"
-                 ,"tableName": "$table.tableName$"
-                 ,"header": [$table.rows:{row | "$row.COLUMN_NAME$"}; separator=","$]
-                 ,"dataStart": 1
-                 ,"columnIndex": [$table.rows:{row | $i0$}; separator=","$]
-                 ,"breakKey": ["$first(table.rows).COLUMN_NAME$"]
-                }
-            >>
-            """;
-    private static final String XLSX_SCHEMA_SCAFFOLD_TXT = """
-            {
-              "rows": [
-            $dataSet.values:{table | $rowEntry(table)$}; separator=","$
-              ]
-            }
-            """;
+    private static final String MINIMAL_UNIT_SETTING = "{\n}\n";
 
     public ScaffoldOption(final String resultFile, final ScaffoldDto dto, final Parameter param) {
         this(param
@@ -164,7 +128,13 @@ public record ScaffoldOption(
             }
         }
         if ((generateXlsxSchema || generateFixedColumnDef) && this.hasDataset()) {
-            this.writeSchemaScaffold(baseDir, templateDir, paramDir, generateXlsxSchema);
+            this.writeTableColumnsSrcFiles(new File(baseDir, DATASET_SRC_DIR));
+            this.writeMinimalUnitSetting(settingDir, this.unitSettingName);
+            if (Strings.isNotEmpty(this.parameterName)) {
+                if (paramDir.mkdirs() || paramDir.isDirectory()) {
+                    this.writeSchemaParamFile(paramDir, generateXlsxSchema);
+                }
+            }
         }
         if (generateParameter) {
             if (paramDir.mkdirs() || paramDir.isDirectory()) {
@@ -242,18 +212,8 @@ public record ScaffoldOption(
         if (!srcDir.mkdirs() && !srcDir.isDirectory()) {
             return;
         }
-        final ComparableDataSetParam param = this.dataset.getParam()
-                .setLoadData(false)
-                .build();
-        final ComparableDataSet dataSet = new ComparableDataSetLoader(this.parameter).loadDataSet(param);
-        final DataSetConverterParam converterParam = DataSetConverterParam.builder()
-                .setResultType(this.datasetType)
-                .setResultDir(srcDir)
-                .setExportEmptyTable(true)
-                .setSkipHeader(!this.isHeaderlessDataset())
-                .setOutputEncoding(this.datasetEncoding)
-                .build();
-        final IDataSetConverter converter = new DataSetConverterLoader().get(converterParam);
+        final ComparableDataSet dataSet = this.loadDatasetForSrc();
+        final IDataSetConverter converter = this.createSrcConverter(srcDir);
         try {
             converter.startDataSet();
             for (final String tableName : dataSet.getTableNames()) {
@@ -268,6 +228,24 @@ public record ScaffoldOption(
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
+    }
+
+    private ComparableDataSet loadDatasetForSrc() {
+        final ComparableDataSetParam param = this.dataset.getParam()
+                .setLoadData(false)
+                .build();
+        return new ComparableDataSetLoader(this.parameter).loadDataSet(param);
+    }
+
+    private IDataSetConverter createSrcConverter(final File srcDir) {
+        final DataSetConverterParam converterParam = DataSetConverterParam.builder()
+                .setResultType(this.datasetType)
+                .setResultDir(srcDir)
+                .setExportEmptyTable(true)
+                .setSkipHeader(!this.isHeaderlessDataset())
+                .setOutputEncoding(this.datasetEncoding)
+                .build();
+        return new DataSetConverterLoader().get(converterParam);
     }
 
     private Object[] buildSchemaRow(final String columnName, final String tableName) {
@@ -293,6 +271,9 @@ public record ScaffoldOption(
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
         if (this.hasDataset()) {
             this.addDatasetSrcParams(builder);
+            if (this.isHeaderlessDataset()) {
+                builder.put("-headerName", ScaffoldOption.DDL_SCHEMA_HEADER_NAMES);
+            }
         }
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
                     builder.build().toList(false), StandardCharsets.UTF_8);
@@ -307,40 +288,41 @@ public record ScaffoldOption(
         if (this.usesDatasetEncoding()) {
             builder.put("-encoding", this.datasetEncoding);
         }
-        if (this.isHeaderlessDataset()) {
-            builder.put("-headerName", ScaffoldOption.DDL_SCHEMA_HEADER_NAMES);
+    }
+
+    private void writeTableColumnsSrcFiles(final File srcDir) throws IOException {
+        if (!srcDir.mkdirs() && !srcDir.isDirectory()) {
+            return;
+        }
+        final ComparableDataSet dataSet = this.loadDatasetForSrc();
+        final IDataSetConverter converter = this.createSrcConverter(srcDir);
+        converter.startDataSet();
+        for (final String tableName : dataSet.getTableNames()) {
+            converter.convert(dataSet.getTable(tableName));
+        }
+        converter.endDataSet();
+    }
+
+    private void writeMinimalUnitSetting(final File settingDir, final String name) throws IOException {
+        if (Strings.isEmpty(name)) {
+            return;
+        }
+        if (settingDir.mkdirs() || settingDir.isDirectory()) {
+            Files.writeString(new File(settingDir, name + ".json").toPath(), ScaffoldOption.MINIMAL_UNIT_SETTING,
+                               StandardCharsets.UTF_8);
         }
     }
 
-    private void writeSchemaScaffold(final File baseDir, final File templateDir, final File paramDir,
-                                      final boolean isXlsxSchema) throws IOException {
-        this.writeDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR));
-        final String name = Strings.isNotEmpty(this.templateName) ? this.templateName : this.target;
-        if (templateDir.mkdirs() || templateDir.isDirectory()) {
-            Files.writeString(new File(templateDir, name + ".stg").toPath(),
-                               isXlsxSchema ? ScaffoldOption.XLSX_SCHEMA_SCAFFOLD_STG
-                                       : ScaffoldOption.FIXED_COLUMN_DEF_SCAFFOLD_STG,
-                               StandardCharsets.UTF_8);
-            Files.writeString(new File(templateDir, name + ".txt").toPath(),
-                               isXlsxSchema ? ScaffoldOption.XLSX_SCHEMA_SCAFFOLD_TXT
-                                       : ScaffoldOption.FIXED_COLUMN_DEF_SCAFFOLD_TXT,
-                               StandardCharsets.UTF_8);
-        }
-        if (Strings.isNotEmpty(this.parameterName)) {
-            if (paramDir.mkdirs() || paramDir.isDirectory()) {
-                this.writeSchemaParamFile(paramDir, isXlsxSchema, name);
-            }
-        }
-    }
-
-    private void writeSchemaParamFile(final File paramDir, final boolean isXlsxSchema, final String templateFileName)
-            throws IOException {
+    private void writeSchemaParamFile(final File paramDir, final boolean isXlsxSchema) throws IOException {
+        final GenerateType generateType = isXlsxSchema ? GenerateType.xlsxSchema : GenerateType.fixedColumnDef;
         final ParametersBuilder builder = new ParametersBuilder();
-        builder.put("-generateType", GenerateType.txt.name(), false);
-        builder.put("-unit", (isXlsxSchema ? ParameterUnit.dataset : ParameterUnit.table).name(), false);
-        builder.put("-template", "resources/template/" + templateFileName + ".txt");
-        builder.put("-template.templateGroup", "resources/template/" + templateFileName + ".stg");
-        builder.put("-resultPath", isXlsxSchema ? templateFileName + ".json" : "$param.tableName$.json");
+        builder.put("-generateType", generateType.name(), false);
+        if (isXlsxSchema) {
+            builder.put("-resultPath", this.parameterName + ".json");
+        }
+        if (Strings.isNotEmpty(this.unitSettingName)) {
+            builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
+        }
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
         this.addDatasetSrcParams(builder);
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
