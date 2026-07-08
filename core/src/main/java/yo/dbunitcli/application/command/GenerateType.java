@@ -156,6 +156,11 @@ public enum GenerateType {
             return ParameterUnit.dataset;
         }
 
+        @Override
+        public String defaultSettingsPath() {
+            return "xlsxschema/xlsxSchemaSettings.json";
+        }
+
         private static final int DATA_START_ROW = 1;
 
         @Override
@@ -247,6 +252,11 @@ public enum GenerateType {
         @Override
         public ParameterUnit getFixedUnit() {
             return ParameterUnit.table;
+        }
+
+        @Override
+        public String defaultSettingsPath() {
+            return "fixedcolumndef/fixedColumnDefSettings.json";
         }
 
         @Override

@@ -62,7 +62,6 @@ public record ScaffoldOption(
     private static final String DDL_SCHEMA_HEADER_NAMES = Arrays.stream(DDL_SCHEMA_COLUMNS)
             .map(Column::getColumnName)
             .collect(Collectors.joining(","));
-    private static final String MINIMAL_UNIT_SETTING = "{\n}\n";
 
     public ScaffoldOption(final String resultFile, final ScaffoldDto dto, final Parameter param) {
         this(param
@@ -128,8 +127,8 @@ public record ScaffoldOption(
             }
         }
         if ((generateXlsxSchema || generateFixedColumnDef) && this.hasDataset()) {
+            this.copySettingResource(settingDir, GenerateType.valueOf(this.target), this.unitSettingName);
             this.writeTableColumnsSrcFiles(new File(baseDir, DATASET_SRC_DIR));
-            this.writeMinimalUnitSetting(settingDir, this.unitSettingName);
             if (Strings.isNotEmpty(this.parameterName)) {
                 if (paramDir.mkdirs() || paramDir.isDirectory()) {
                     this.writeSchemaParamFile(paramDir, generateXlsxSchema);
@@ -301,16 +300,6 @@ public record ScaffoldOption(
             converter.convert(dataSet.getTable(tableName));
         }
         converter.endDataSet();
-    }
-
-    private void writeMinimalUnitSetting(final File settingDir, final String name) throws IOException {
-        if (Strings.isEmpty(name)) {
-            return;
-        }
-        if (settingDir.mkdirs() || settingDir.isDirectory()) {
-            Files.writeString(new File(settingDir, name + ".json").toPath(), ScaffoldOption.MINIMAL_UNIT_SETTING,
-                               StandardCharsets.UTF_8);
-        }
     }
 
     private void writeSchemaParamFile(final File paramDir, final boolean isXlsxSchema) throws IOException {
