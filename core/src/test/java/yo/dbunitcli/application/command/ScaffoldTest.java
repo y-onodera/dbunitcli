@@ -1,5 +1,8 @@
 package yo.dbunitcli.application.command;
 
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -9,6 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.io.IOException;
 import java.util.Arrays;
@@ -17,6 +21,7 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,6 +36,9 @@ public class ScaffoldTest {
     }
 
     abstract static class TestCase {
+
+        private static final String SRC_DIR =
+                "src/test/resources/yo/dbunitcli/application/command/scaffold/src";
 
         @AfterAll
         static void restore() {
@@ -174,10 +182,69 @@ public class ScaffoldTest {
         }
 
         @Nested
-        class DatasetOption {
+        class XlsxSchemaTarget {
 
-            private static final String SRC_DIR =
-                    "src/test/resources/yo/dbunitcli/application/command/scaffold/src";
+            @Test
+            public void testDatasetGeneratesTemplateAndParam() {
+                TestCase.this.scaffold("xlsxSchema/all", "-target=xlsxSchema", "-parameter=xlsxSchema",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                assertTrue(TestCase.this.resultFile("xlsxSchema/all", "resources/template/xlsxSchema.stg").exists());
+                assertTrue(TestCase.this.resultFile("xlsxSchema/all", "resources/template/xlsxSchema.txt").exists());
+                assertTrue(TestCase.this.resultFile("xlsxSchema/all", "src/SAMPLE.csv").exists());
+                final File paramFile = TestCase.this.resultFile("xlsxSchema/all", "option/xlsxSchema.param");
+                assertTrue(paramFile.exists());
+            }
+
+            @Test
+            public void testNoOutputWithoutDataset() {
+                TestCase.this.scaffold("xlsxSchema/no-dataset", "-target=xlsxSchema", "-parameter=xlsxSchema");
+                assertFalse(TestCase.this.resultFile("xlsxSchema/no-dataset", "resources/template/xlsxSchema.stg")
+                                    .exists());
+                assertFalse(TestCase.this.resultFile("xlsxSchema/no-dataset", "option/xlsxSchema.param").exists());
+            }
+
+            @Test
+            public void testCustomFileName() {
+                TestCase.this.scaffold("xlsxSchema/custom", "-target=xlsxSchema", "-template=mySchema",
+                                       "-parameter=mySchema", "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                assertTrue(TestCase.this.resultFile("xlsxSchema/custom", "resources/template/mySchema.stg").exists());
+                assertTrue(TestCase.this.resultFile("xlsxSchema/custom", "resources/template/mySchema.txt").exists());
+                assertTrue(TestCase.this.resultFile("xlsxSchema/custom", "option/mySchema.param").exists());
+            }
+        }
+
+        @Nested
+        class FixedColumnDefTarget {
+
+            @Test
+            public void testDatasetGeneratesTemplateAndParam() throws Exception {
+                TestCase.this.scaffold("fixedColumnDef/all", "-target=fixedColumnDef", "-parameter=fixedColumnDef",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                assertTrue(TestCase.this.resultFile("fixedColumnDef/all", "resources/template/fixedColumnDef.stg")
+                                   .exists());
+                assertTrue(TestCase.this.resultFile("fixedColumnDef/all", "resources/template/fixedColumnDef.txt")
+                                   .exists());
+                assertTrue(TestCase.this.resultFile("fixedColumnDef/all", "src/SAMPLE.csv").exists());
+                final File paramFile = TestCase.this.resultFile("fixedColumnDef/all", "option/fixedColumnDef.param");
+                assertTrue(paramFile.exists());
+                final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-generateType=txt")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
+            }
+
+            @Test
+            public void testNoOutputWithoutDataset() {
+                TestCase.this.scaffold("fixedColumnDef/no-dataset", "-target=fixedColumnDef",
+                                       "-parameter=fixedColumnDef");
+                assertFalse(TestCase.this.resultFile("fixedColumnDef/no-dataset",
+                                                      "resources/template/fixedColumnDef.stg").exists());
+                assertFalse(TestCase.this.resultFile("fixedColumnDef/no-dataset", "option/fixedColumnDef.param")
+                                    .exists());
+            }
+        }
+
+        @Nested
+        class DatasetOption {
 
             @Test
             public void testDatasetCreatesSrcCsvForDdl() throws Exception {
@@ -246,9 +313,6 @@ public class ScaffoldTest {
         @Nested
         class ScaffoldToGenerate {
 
-            private static final String SRC_DIR =
-                    "src/test/resources/yo/dbunitcli/application/command/scaffold/src";
-
             @Test
             public void testDdlScaffoldToGenerate() throws Exception {
                 this.assertScaffoldGenerates("ddl", "e2e/ddl", "ddl/SAMPLE.sql");
@@ -257,6 +321,60 @@ public class ScaffoldTest {
             @Test
             public void testJavaBeanScaffoldToGenerate() throws Exception {
                 this.assertScaffoldGenerates("javaBean", "e2e/javaBean", "javaBean/Sample.java");
+            }
+
+            @Test
+            public void testXlsxSchemaScaffoldToGenerate() throws Exception {
+                final String subDir = "e2e/xlsxSchema";
+                TestCase.this.scaffold(subDir, "-target=xlsxSchema", "-parameter=xlsxSchema",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                final File paramFile = TestCase.this.resultFile(subDir, "option/xlsxSchema.param");
+                final File resultFile = this.runGenerate(subDir, paramFile, "xlsxSchema.json");
+                try (final JsonReader reader = Json.createReader(new FileInputStream(resultFile))) {
+                    final JsonObject json = reader.readObject();
+                    final JsonObject row = json.getJsonArray("rows").getJsonObject(0);
+                    assertEquals("SAMPLE", row.getString("tableName"));
+                    assertEquals(3, row.getJsonArray("header").size());
+                    assertEquals("id", row.getJsonArray("header").getString(0));
+                    assertEquals("name", row.getJsonArray("header").getString(1));
+                    assertEquals("email", row.getJsonArray("header").getString(2));
+                    assertEquals("id", row.getJsonArray("breakKey").getString(0));
+                }
+            }
+
+            @Test
+            public void testFixedColumnDefScaffoldToGenerate() throws Exception {
+                final String subDir = "e2e/fixedColumnDef";
+                TestCase.this.scaffold(subDir, "-target=fixedColumnDef", "-parameter=fixedColumnDef",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                final File paramFile = TestCase.this.resultFile(subDir, "option/fixedColumnDef.param");
+                final File resultFile = this.runGenerate(subDir, paramFile, "SAMPLE.json");
+                try (final JsonReader reader = Json.createReader(new FileInputStream(resultFile))) {
+                    final JsonObject json = reader.readObject();
+                    assertEquals(3, json.getJsonArray("columns").size());
+                    assertEquals("id", json.getJsonArray("columns").getJsonObject(0).getString("name"));
+                    assertEquals(10, json.getJsonArray("columns").getJsonObject(0).getInt("length"));
+                }
+            }
+
+            private File runGenerate(final String subDir, final File paramFile,
+                                      final String expectedOutput) throws Exception {
+                assertTrue(paramFile.exists());
+                final File scaffoldDir = Path.of(TestCase.this.getResultBase(), subDir).toFile();
+                final Properties saved = (Properties) System.getProperties().clone();
+                final Properties withWorkspace = new Properties();
+                withWorkspace.putAll(saved);
+                withWorkspace.put(FileResources.PROPERTY_WORKSPACE, scaffoldDir.getCanonicalPath());
+                withWorkspace.put(FileResources.PROPERTY_RESULT_BASE, TestCase.this.getResultBasePrefix());
+                System.setProperties(withWorkspace);
+                try {
+                    Generate.main(new String[]{"@" + paramFile.getAbsolutePath()});
+                } finally {
+                    System.setProperties(saved);
+                }
+                final File resultFile = new File(scaffoldDir, expectedOutput);
+                assertTrue(resultFile.exists());
+                return resultFile;
             }
 
             private void assertScaffoldGenerates(final String target, final String subDir,

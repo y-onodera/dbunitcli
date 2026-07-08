@@ -14,7 +14,7 @@ public class ScaffoldDto extends CommandDto {
     private DataSetLoadDto datasetDto = new DataSetLoadDto();
     @CommandLine.Option(names = "-result", description = "directory to create workspace structure")
     private String resultDir;
-    @CommandLine.Option(names = "-target", description = "target to generate: ddl, javaBean, or parameter (required, no default)")
+    @CommandLine.Option(names = "-target", description = "target to generate: ddl, javaBean, xlsxSchema, fixedColumnDef, or parameter (required, no default)")
     private String target;
     @CommandLine.Option(names = "-setting", description = "setting file name to scaffold (omit to skip)")
     private String settingName;
