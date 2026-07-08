@@ -1,2 +1,14 @@
 {
+  "commonSettings": [
+    {
+      "string": {
+        "name": "COLUMN_NAME",
+        "align": "'left'",
+        "pad": "' '"
+      },
+      "number": {
+        "length": "10"
+      }
+    }
+  ]
 }

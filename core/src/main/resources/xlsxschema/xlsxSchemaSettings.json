@@ -1,2 +1,21 @@
 {
+  "settings": [
+    {
+      "pattern": {"regex": ".*", "exclude": ["PK"]},
+      "separate": [
+        {
+          "boolean": {
+            "IS_PK": "IS_PK"
+          }
+        },
+        {
+          "tableName": "PK",
+          "filter": ["IS_PK"],
+          "boolean": {
+            "IS_PK": "IS_PK"
+          }
+        }
+      ]
+    }
+  ]
 }

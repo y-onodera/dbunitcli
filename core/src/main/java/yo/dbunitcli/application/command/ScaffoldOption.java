@@ -8,6 +8,7 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.CommandParameters;
+import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSet;
@@ -62,6 +63,48 @@ public record ScaffoldOption(
     private static final String DDL_SCHEMA_HEADER_NAMES = Arrays.stream(DDL_SCHEMA_COLUMNS)
             .map(Column::getColumnName)
             .collect(Collectors.joining(","));
+    // These are scaffold-only sample resources, deliberately NOT wired through
+    // GenerateType.defaultSettingsPath(): that hook is a global default applied to every plain
+    // -generateType=xlsxSchema/fixedColumnDef invocation (even outside scaffold), and the "separate into a
+    // PK table" rule below only makes sense against the DDL_SCHEMA_COLUMNS-shaped dummy src this scaffold
+    // writes, not an arbitrary real dataset.
+    private static final String XLSX_SCHEMA_SAMPLE_SETTINGS_PATH = "xlsxschema/xlsxSchemaSettings.json";
+    private static final String FIXED_COLUMN_DEF_SAMPLE_SETTINGS_PATH = "fixedcolumndef/fixedColumnDefSettings.json";
+    // fixedColumnDefTemplate.stg's columnEntry(col) macro is reused byte-for-byte (copied from the
+    // classpath); only this driving .txt differs from the built-in one, iterating "rows" (the per-column
+    // descriptor rows written by writeDatasetSrcFiles) instead of the Java-precomputed "columns" list,
+    // since generateType=txt has no Java-side precomputation step. The unitSetting sample resource
+    // (fixedcolumndef/fixedColumnDefSettings.json) supplies name/length/align/pad via expressionColumns.
+    private static final String FIXED_COLUMN_DEF_SCAFFOLD_TXT = """
+            {
+              "columns": [
+            $rows:{col | $columnEntry(col)$}; separator=","$
+              ]
+            }
+            """;
+    // Mirrors xlsxSchemaTemplate.stg's rowEntry(row)/JSON shape (sans the optional "cells" section), but
+    // reads straight off the "rows"/"dataset.PK.rows" attributes that unit=table + the unitSetting sample
+    // resource (xlsxschema/xlsxSchemaSettings.json, using the same "separate"-into-a-named-PK-table idiom
+    // as sql/ddlSettings.json) already provide, since generateType=txt has no Java-side precomputation.
+    private static final String XLSX_SCHEMA_SCAFFOLD_STG = """
+            rowEntry() ::= <<
+                {
+                  "sheetName": "$tableName$"
+                 ,"tableName": "$tableName$"
+                 ,"header": [$rows:{row | "$row.COLUMN_NAME$"}; separator=","$]
+                 ,"dataStart": 1
+                 ,"columnIndex": [$rows:{row | $i0$}; separator=","$]
+                 ,"breakKey": [$if(dataset.PK.rows)$$dataset.PK.rows:{row | "$row.COLUMN_NAME$"}; separator=","$$else$"$first(rows).COLUMN_NAME$"$endif$]
+                }
+            >>
+            """;
+    private static final String XLSX_SCHEMA_SCAFFOLD_TXT = """
+            {
+              "rows": [
+                $rowEntry()$
+              ]
+            }
+            """;
 
     public ScaffoldOption(final String resultFile, final ScaffoldDto dto, final Parameter param) {
         this(param
@@ -127,11 +170,22 @@ public record ScaffoldOption(
             }
         }
         if ((generateXlsxSchema || generateFixedColumnDef) && this.hasDataset()) {
-            this.copySettingResource(settingDir, GenerateType.valueOf(this.target), this.unitSettingName);
-            this.writeTableColumnsSrcFiles(new File(baseDir, DATASET_SRC_DIR));
+            final String name = Strings.isNotEmpty(this.templateName) ? this.templateName : this.target;
+            final String unitSettingFileName =
+                    Strings.isNotEmpty(this.unitSettingName) ? this.unitSettingName : this.target;
+            if (settingDir.mkdirs() || settingDir.isDirectory()) {
+                this.copyClasspathResource(
+                        generateXlsxSchema ? ScaffoldOption.XLSX_SCHEMA_SAMPLE_SETTINGS_PATH
+                                : ScaffoldOption.FIXED_COLUMN_DEF_SAMPLE_SETTINGS_PATH,
+                        new File(settingDir, unitSettingFileName + ".json"));
+            }
+            this.writeDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR));
+            if (templateDir.mkdirs() || templateDir.isDirectory()) {
+                this.writeSchemaTemplate(templateDir, name, generateXlsxSchema);
+            }
             if (Strings.isNotEmpty(this.parameterName)) {
                 if (paramDir.mkdirs() || paramDir.isDirectory()) {
-                    this.writeSchemaParamFile(paramDir, generateXlsxSchema);
+                    this.writeSchemaParamFile(paramDir, name, unitSettingFileName);
                 }
             }
         }
@@ -289,31 +343,34 @@ public record ScaffoldOption(
         }
     }
 
-    private void writeTableColumnsSrcFiles(final File srcDir) throws IOException {
-        if (!srcDir.mkdirs() && !srcDir.isDirectory()) {
-            return;
+    private void writeSchemaTemplate(final File templateDir, final String name, final boolean isXlsxSchema)
+            throws IOException {
+        if (isXlsxSchema) {
+            Files.writeString(new File(templateDir, name + ".stg").toPath(),
+                               ScaffoldOption.XLSX_SCHEMA_SCAFFOLD_STG, StandardCharsets.UTF_8);
+        } else {
+            this.copyClasspathResource(GenerateType.fixedColumnDef.getStgPath(), new File(templateDir, name + ".stg"));
         }
-        final ComparableDataSet dataSet = this.loadDatasetForSrc();
-        final IDataSetConverter converter = this.createSrcConverter(srcDir);
-        converter.startDataSet();
-        for (final String tableName : dataSet.getTableNames()) {
-            converter.convert(dataSet.getTable(tableName));
-        }
-        converter.endDataSet();
+        Files.writeString(new File(templateDir, name + ".txt").toPath(),
+                           isXlsxSchema ? ScaffoldOption.XLSX_SCHEMA_SCAFFOLD_TXT
+                                   : ScaffoldOption.FIXED_COLUMN_DEF_SCAFFOLD_TXT,
+                           StandardCharsets.UTF_8);
     }
 
-    private void writeSchemaParamFile(final File paramDir, final boolean isXlsxSchema) throws IOException {
-        final GenerateType generateType = isXlsxSchema ? GenerateType.xlsxSchema : GenerateType.fixedColumnDef;
+    private void writeSchemaParamFile(final File paramDir, final String templateFileName,
+                                       final String unitSettingFileName) throws IOException {
         final ParametersBuilder builder = new ParametersBuilder();
-        builder.put("-generateType", generateType.name(), false);
-        if (isXlsxSchema) {
-            builder.put("-resultPath", this.parameterName + ".json");
-        }
-        if (Strings.isNotEmpty(this.unitSettingName)) {
-            builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
-        }
+        builder.put("-generateType", GenerateType.txt.name(), false);
+        builder.put("-unit", ParameterUnit.table.name(), false);
+        builder.put("-template", "resources/template/" + templateFileName + ".txt");
+        builder.put("-template.templateGroup", "resources/template/" + templateFileName + ".stg");
+        builder.put("-unitSetting", "resources/setting/" + unitSettingFileName + ".json");
+        builder.put("-resultPath", "$param.tableName$.json");
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
         this.addDatasetSrcParams(builder);
+        if (this.isHeaderlessDataset()) {
+            builder.put("-headerName", ScaffoldOption.DDL_SCHEMA_HEADER_NAMES);
+        }
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
                     builder.build().toList(false), StandardCharsets.UTF_8);
     }
