@@ -29,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public record ScaffoldOption(
@@ -68,9 +67,18 @@ public record ScaffoldOption(
     // generateType=txt template with no Java-side precomputation, so writeDatasetSrcFiles instead
     // writes each target's dataset src rows directly in the shape its ScaffoldTemplate consumes,
     // keeping the unitSetting sample resource free of column-renaming/derivation busywork.
+    // SHEET_NAME/DATA_START/COLUMN_INDEX are seeded with the same values the built-in
+    // -generateType=xlsxSchema would compute (sheet name == table name, dataStart 1, positional
+    // index), but unlike the built-in generateType they're plain editable cells here: the fixed
+    // generateType=xlsxSchema can never produce a sheetName that differs from tableName, a
+    // non-default dataStart, or a non-contiguous columnIndex, since those are hardcoded in
+    // GenerateType.xlsxSchema.write(); editing this dataset is the only way to get that.
     private static final Column[] XLSX_SCHEMA_DATASET_COLUMNS = {
             new Column("COLUMN_NAME", DataType.VARCHAR),
-            new Column("IS_PK", DataType.VARCHAR)
+            new Column("IS_PK", DataType.VARCHAR),
+            new Column("SHEET_NAME", DataType.VARCHAR),
+            new Column("DATA_START", DataType.VARCHAR),
+            new Column("COLUMN_INDEX", DataType.VARCHAR)
     };
     private static final Column[] FIXED_COLUMN_DEF_DATASET_COLUMNS = {
             new Column("name", DataType.VARCHAR),
@@ -97,8 +105,8 @@ public record ScaffoldOption(
     // reads straight off the "rows"/"dataset.PK.rows" attributes that unit=table + the unitSetting sample
     // resource (xlsxschema/xlsxSchemaSettings.json, using the same "separate"-into-a-named-PK-table idiom
     // as sql/ddlSettings.json) already provide, since generateType=txt has no Java-side precomputation.
-    // IS_PK is the one column the dataset src still needs beyond COLUMN_NAME, precisely because the
-    // unitSetting's PK split genuinely depends on it.
+    // IS_PK is the one column that genuinely needs the unitSetting's PK split; every other JSON field
+    // (sheetName/dataStart/columnIndex/header/breakKey) reads straight off a same-named dataset column.
     private static final String XLSX_SCHEMA_SCAFFOLD_STG_PATH = "xlsxschema/xlsxSchemaScaffoldTemplate.stg";
     private static final String XLSX_SCHEMA_SCAFFOLD_TXT_PATH = "xlsxschema/xlsxSchemaScaffoldTemplate.txt";
 
@@ -178,8 +186,8 @@ public record ScaffoldOption(
             final Column[] datasetColumns =
                     generateXlsxSchema ? XLSX_SCHEMA_DATASET_COLUMNS : FIXED_COLUMN_DEF_DATASET_COLUMNS;
             this.writeDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR), datasetColumns,
-                                      generateXlsxSchema ? (col, tbl) -> this.buildXlsxSchemaRow(col)
-                                              : (col, tbl) -> this.buildFixedColumnDefRow(col));
+                                      generateXlsxSchema ? this::buildXlsxSchemaRow
+                                              : (col, tbl, idx) -> this.buildFixedColumnDefRow(col));
             if (templateDir.mkdirs() || templateDir.isDirectory()) {
                 this.writeSchemaTemplate(templateDir, name, generateXlsxSchema);
             }
@@ -261,12 +269,17 @@ public record ScaffoldOption(
         };
     }
 
+    @FunctionalInterface
+    private interface DatasetRowBuilder {
+        Object[] build(String columnName, String tableName, int columnIndex);
+    }
+
     private void writeDatasetSrcFiles(final File srcDir) throws IOException {
-        this.writeDatasetSrcFiles(srcDir, DDL_SCHEMA_COLUMNS, this::buildSchemaRow);
+        this.writeDatasetSrcFiles(srcDir, DDL_SCHEMA_COLUMNS, (col, tbl, idx) -> this.buildSchemaRow(col, tbl));
     }
 
     private void writeDatasetSrcFiles(final File srcDir, final Column[] schemaColumns,
-                                       final BiFunction<String, String, Object[]> rowBuilder) throws IOException {
+                                       final DatasetRowBuilder rowBuilder) throws IOException {
         if (!srcDir.mkdirs() && !srcDir.isDirectory()) {
             return;
         }
@@ -277,8 +290,9 @@ public record ScaffoldOption(
             for (final String tableName : dataSet.getTableNames()) {
                 final Column[] sourceColumns = dataSet.getTable(tableName).getTableMetaData().getColumns();
                 final DefaultTable schemaTable = new DefaultTable(tableName, schemaColumns);
+                int columnIndex = 0;
                 for (final Column column : sourceColumns) {
-                    schemaTable.addRow(rowBuilder.apply(column.getColumnName(), tableName));
+                    schemaTable.addRow(rowBuilder.build(column.getColumnName(), tableName, columnIndex++));
                 }
                 converter.convert(schemaTable);
             }
@@ -312,9 +326,12 @@ public record ScaffoldOption(
         return new Object[]{columnName, "", "", "", "", "", "", "", "", tableName, ""};
     }
 
-    private Object[] buildXlsxSchemaRow(final String columnName) {
-        // order must match XLSX_SCHEMA_DATASET_COLUMNS: COLUMN_NAME, IS_PK
-        return new Object[]{columnName, ""};
+    private Object[] buildXlsxSchemaRow(final String columnName, final String tableName, final int columnIndex) {
+        // order must match XLSX_SCHEMA_DATASET_COLUMNS: COLUMN_NAME, IS_PK, SHEET_NAME, DATA_START, COLUMN_INDEX.
+        // SHEET_NAME/DATA_START are per-table, not per-column, but every row is seeded with the same
+        // value since the template (rowEntry()) only reads first(rows).SHEET_NAME/first(rows).DATA_START:
+        // edit them consistently across a table's rows, since only the first row's value takes effect.
+        return new Object[]{columnName, "", tableName, "1", String.valueOf(columnIndex)};
     }
 
     private Object[] buildFixedColumnDefRow(final String columnName) {

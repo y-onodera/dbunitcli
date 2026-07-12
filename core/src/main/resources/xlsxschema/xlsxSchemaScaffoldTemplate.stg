@@ -1,10 +1,10 @@
 rowEntry() ::= <<
     {
-      "sheetName": "$tableName$"
+      "sheetName": "$first(rows).SHEET_NAME$"
      ,"tableName": "$tableName$"
      ,"header": [$rows:{row | "$row.COLUMN_NAME$"}; separator=","$]
-     ,"dataStart": 1
-     ,"columnIndex": [$rows:{row | $i0$}; separator=","$]
+     ,"dataStart": $first(rows).DATA_START$
+     ,"columnIndex": [$rows:{row | $row.COLUMN_INDEX$}; separator=","$]
      ,"breakKey": [$if(dataset.PK.rows)$$dataset.PK.rows:{row | "$row.COLUMN_NAME$"}; separator=","$$else$"$first(rows).COLUMN_NAME$"$endif$]
     }
 >>
