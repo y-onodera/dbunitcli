@@ -271,7 +271,7 @@ public class ScaffoldTest {
                 final File srcFile = TestCase.this.resultFile("fixedColumnDef/all", "src/SAMPLE.csv");
                 assertTrue(srcFile.exists());
                 final List<String> srcLines = Files.readAllLines(srcFile.toPath(), StandardCharsets.UTF_8);
-                assertTrue(srcLines.stream().anyMatch(l -> l.contains("COLUMN_NAME")));
+                assertTrue(srcLines.stream().anyMatch(l -> l.contains("\"name\",\"length\",\"align\",\"pad\"")));
                 assertTrue(srcLines.stream().anyMatch(l -> l.contains("id")));
                 assertTrue(TestCase.this.resultFile("fixedColumnDef/all", "resources/template/fixedColumnDef.stg")
                                    .exists());
