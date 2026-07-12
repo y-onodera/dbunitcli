@@ -99,11 +99,6 @@ public enum GenerateType {
         }
 
         @Override
-        public boolean supportsUserTemplate() {
-            return true;
-        }
-
-        @Override
         public ParameterUnit getFixedUnit() {
             return ParameterUnit.table;
         }
@@ -111,23 +106,6 @@ public enum GenerateType {
         @Override
         public String defaultSettingsPath() {
             return "sql/ddlSettings.json";
-        }
-
-        @Override
-        public String getTemplateString(final GenerateOption option) {
-            if (Strings.isNotEmpty(option.template())) {
-                return txt.getTemplateString(option);
-            }
-            return FileResources.readClasspathResource(this.getTemplatePath());
-        }
-
-        @Override
-        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
-                throws IOException {
-            final STGroup stGroup = Strings.isEmpty(option.templateOption().templateGroup())
-                    ? this.getStGroup() : null;
-            option.templateOption().getTemplateRender()
-                  .write(stGroup, option.templateString(), param, resultFile, option.outputEncoding());
         }
     }, xlsxTemplate(null, null) {
         @Override
@@ -208,11 +186,6 @@ public enum GenerateType {
         }
 
         @Override
-        public boolean supportsUserTemplate() {
-            return true;
-        }
-
-        @Override
         public ParameterUnit getFixedUnit() {
             return ParameterUnit.table;
         }
@@ -220,23 +193,6 @@ public enum GenerateType {
         @Override
         public String defaultSettingsPath() {
             return "javabean/javaBeanSettings.json";
-        }
-
-        @Override
-        public String getTemplateString(final GenerateOption option) {
-            if (Strings.isNotEmpty(option.template())) {
-                return txt.getTemplateString(option);
-            }
-            return FileResources.readClasspathResource(this.getTemplatePath());
-        }
-
-        @Override
-        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
-                throws IOException {
-            final STGroup stGroup = Strings.isEmpty(option.templateOption().templateGroup())
-                    ? this.getStGroup() : null;
-            option.templateOption().getTemplateRender()
-                  .write(stGroup, option.templateString(), param, resultFile, option.outputEncoding());
         }
     }, fixedColumnDef("fixedcolumndef/fixedColumnDefTemplate.stg", "fixedcolumndef/fixedColumnDefTemplate.txt") {
         @Override
@@ -306,10 +262,6 @@ public enum GenerateType {
     }
 
     protected boolean isFixedTemplate() {
-        return false;
-    }
-
-    public boolean supportsUserTemplate() {
         return false;
     }
 

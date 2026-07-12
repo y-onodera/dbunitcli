@@ -8,13 +8,13 @@
 | xlsx / xls | テンプレート指定 | 同上 | `write()`（jxls、`JxlsTemplateRender`） | （ユーザー指定 `-template`） |
 | settings | 固定成果物 | dataset固定 | `isFixedTemplate`, `getFixedUnit` | `settings/settingTemplate.stg,.txt` |
 | sql | 固定成果物 | table固定 | 上記 + `getTemplateString()`（`-op`別に分岐） | `sql/sqlTemplate.stg` + `sql/{insert,delete,update,cleanInsert,deleteInsert}Template.txt` |
-| ddl | 固定成果物 | table固定 | 上記 + `supportsUserTemplate`, `defaultSettingsPath`, `write()` | `sql/ddlTemplate.stg,.txt`, 既定settings `sql/ddlSettings.json` |
+| ddl | 固定成果物 | table固定 | 上記 + `defaultSettingsPath` | `sql/ddlTemplate.stg,.txt`, 既定settings `sql/ddlSettings.json` |
 | xlsxSchema | 固定成果物 | dataset固定 | 上記 + `write()`（schemaRows/schemaCells生成） | `xlsxschema/xlsxSchemaTemplate.stg,.txt` |
-| javaBean | 固定成果物 | table固定 | ddlと同様（`supportsUserTemplate`, `defaultSettingsPath`, `write()`） | `javabean/javaBeanTemplate.stg,.txt`, 既定settings `javabean/javaBeanSettings.json` |
+| javaBean | 固定成果物 | table固定 | ddlと同様（`defaultSettingsPath`） | `javabean/javaBeanTemplate.stg,.txt`, 既定settings `javabean/javaBeanSettings.json` |
 | fixedColumnDef | 固定成果物 | table固定 | 上記 + `write()`（`FixedColumnDef`リスト生成） | `fixedcolumndef/fixedColumnDefTemplate.stg,.txt` |
 | xlsxTemplate | 固定成果物 | dataset固定 | 上記 + `write()`（`JxlsTemplateGenerator.createTemplate`） | （なし、コード生成のみ） |
 
-`ddl` / `javaBean` のみ `supportsUserTemplate()=true` のため、固定成果物タイプでも `-template` で組み込みテンプレートを差し替え可能。
+固定成果物タイプはすべて`-template`での差し替えを持たない（組み込みテンプレート専用）。`ddl`/`javaBean`相当の内容を組み込み以外のテンプレートで生成したい場合は、`generateType=txt`＋`unit=table`＋`unitSetting`（既定値は各`defaultSettingsPath()`と同じ設定ファイルを流用可）を使う。
 
 ## unit
 

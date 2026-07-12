@@ -20,6 +20,7 @@ import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
@@ -286,12 +287,15 @@ public record ScaffoldOption(
     }
 
     private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {
-        final boolean hasTemplate = Strings.isNotEmpty(this.templateName);
         final ParametersBuilder builder = new ParametersBuilder();
-        builder.put("-generateType", isDdl ? GenerateType.ddl.name() : GenerateType.javaBean.name(), false);
-        if (hasTemplate) {
-            builder.put("-template", "resources/template/" + this.templateName + ".txt");
-            builder.put("-template.templateGroup", "resources/template/" + this.templateName + ".stg");
+        if (Strings.isNotEmpty(this.templateName)) {
+            // A custom template is driven through generateType=txt + unitSetting, reusing the same
+            // rows/tableName/dataset.PK attributes the built-in ddl/javaBean templates already rely on.
+            this.putTemplateGenerationParams(builder, this.templateName);
+            builder.put("-resultPath", isDdl ? "$param.tableName$.sql"
+                    : new TemplateRender.Builder().build().getAttributeName("tableName", "snakeToUpperCamel") + ".java");
+        } else {
+            builder.put("-generateType", isDdl ? GenerateType.ddl.name() : GenerateType.javaBean.name(), false);
         }
         if (Strings.isNotEmpty(this.settingName)) {
             builder.put("-setting", "resources/setting/" + this.settingName + ".json");
@@ -308,6 +312,13 @@ public record ScaffoldOption(
         }
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
                     builder.build().toList(false), StandardCharsets.UTF_8);
+    }
+
+    private void putTemplateGenerationParams(final ParametersBuilder builder, final String templateFileName) {
+        builder.put("-generateType", GenerateType.txt.name(), false);
+        builder.put("-unit", ParameterUnit.table.name(), false);
+        builder.put("-template", "resources/template/" + templateFileName + ".txt");
+        builder.put("-template.templateGroup", "resources/template/" + templateFileName + ".stg");
     }
 
     private void addDatasetSrcParams(final ParametersBuilder builder) {
@@ -335,10 +346,7 @@ public record ScaffoldOption(
     private void writeSchemaParamFile(final File paramDir, final String templateFileName,
                                        final String unitSettingFileName) throws IOException {
         final ParametersBuilder builder = new ParametersBuilder();
-        builder.put("-generateType", GenerateType.txt.name(), false);
-        builder.put("-unit", ParameterUnit.table.name(), false);
-        builder.put("-template", "resources/template/" + templateFileName + ".txt");
-        builder.put("-template.templateGroup", "resources/template/" + templateFileName + ".stg");
+        this.putTemplateGenerationParams(builder, templateFileName);
         builder.put("-unitSetting", "resources/setting/" + unitSettingFileName + ".json");
         builder.put("-resultPath", "$param.tableName$.json");
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
