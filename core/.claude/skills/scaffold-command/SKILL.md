@@ -11,7 +11,7 @@ Scaffoldは、template指定なしの固定成果物generateType（settings/sql/
 | ファイル（`application/`配下） | 内容 |
 |---|---|
 | `command/ScaffoldDto.java` | `-target` の説明文（対応target一覧）を更新 |
-| `command/ScaffoldOption.java` | `execute()` に新規target分岐を追加。ddl/javaBeanは組み込みテンプレート固定のため`-template`スキャフォールドを持たない。Java側precomputation依存タイプは`writeSchemaTemplate()`同様、専用`{typeName}ScaffoldTemplate.stg/.txt`が必要 |
+| `command/ScaffoldOption.java` | `execute()` に新規target分岐を追加。ddl/javaBeanは`-template`指定時、組み込み`.stg/.txt`をそのままコピーし`.param`は`generateType=txt`＋`unitSetting`で組み込みと同内容を再現する（`writeGenericParamFile()`）。Java側precomputation依存タイプは`writeSchemaTemplate()`同様、専用`{typeName}ScaffoldTemplate.stg/.txt`が必要 |
 | `src/main/resources/{typeName}/{typeName}ScaffoldTemplate.stg,.txt` | txt向け雛型（既存Generateテンプレートとは別物。precomputationなしでrows/unitSetting属性のみで完結） |
 | `command/ScaffoldTest.java` | targetごとの`@Nested`テストクラス。setting/unitSetting/template/parameterの単体・組み合わせ・カスタムファイル名パターン |
 
