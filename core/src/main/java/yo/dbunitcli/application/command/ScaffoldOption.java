@@ -66,8 +66,9 @@ public record ScaffoldOption(
     // Unlike DDL_SCHEMA_COLUMNS (generic DDL-shaped dummy row, needed by ddl/javaBean's own settings
     // json to derive TYPE_NAME/COLUMN_SIZE/... columns), xlsxSchema/fixedColumnDef drive a custom
     // generateType=txt template with no Java-side precomputation, so writeDatasetSrcFiles instead
-    // writes each target's dataset src rows directly in the shape its ScaffoldTemplate consumes,
-    // keeping the unitSetting sample resource free of column-renaming/derivation busywork.
+    // writes each target's dataset src rows directly in the shape GenerateType.xlsxSchema's shared
+    // rowEntry(row)/cellEntry(row) macros consume (see GenerateType.xlsxSchema.toColumnRow()), keeping
+    // the unitSetting sample resource free of column-renaming/derivation busywork.
     // SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS are seeded with the same values the built-in
     // -generateType=xlsxSchema would compute (sheet name == table name, dataStart 1, positional
     // index, POI CellReference(dataStart, columnIndex)), but unlike the built-in generateType
@@ -105,16 +106,13 @@ public record ScaffoldOption(
     // derive and is kept as an empty placeholder for callers who want to add filtering/renaming later.
     private static final String FIXED_COLUMN_DEF_SCAFFOLD_TXT_PATH =
             "fixedcolumndef/fixedColumnDefScaffoldTemplate.txt";
-    // Mirrors xlsxSchemaTemplate.stg's rowEntry(row)/cellEntry(cell) JSON shape (both "rows" and "cells"
-    // sections), reading straight off the "rows"/"dataset.PK.rows"/"dataset.CELLS.rows" attributes that
-    // unit=table + the unitSetting sample resource (xlsxschema/xlsxSchemaSettings.json) already provide,
-    // since generateType=txt has no Java-side precomputation. IS_PK is the one column that genuinely
-    // needs the unitSetting's PK split; the CELLS split is a plain identity rename (no filter) so the
-    // "cells" section can be customized (filtered/reordered) independently of "rows" later without
-    // touching this template. Every JSON field (sheetName/dataStart/columnIndex/cellAddress/header/
-    // breakKey) reads straight off a same-named dataset column.
-    private static final String XLSX_SCHEMA_SCAFFOLD_STG_PATH = "xlsxschema/xlsxSchemaScaffoldTemplate.stg";
-    private static final String XLSX_SCHEMA_SCAFFOLD_TXT_PATH = "xlsxschema/xlsxSchemaScaffoldTemplate.txt";
+    // Unlike fixedColumnDef/ddl/javaBean, xlsxSchema doesn't need a Scaffold-only *ScaffoldTemplate.stg/.txt:
+    // GenerateType.xlsxSchema.getStgPath()/getTemplatePath() (xlsxschema/xlsxSchemaTemplate.stg,.txt) are
+    // copied byte-for-byte. Their rowEntry(row)/cellEntry(row) macros read row.tableName/row.rows/
+    // row.dataset.PK.rows/row.dataset.CELLS.rows, and the driving .txt iterates "dataSet.values" — the same
+    // attribute names GenerateType.xlsxSchema.write() builds from real Column[]/primaryKeys[] metadata
+    // AND that unit=table's own ComparableTableDto.resolve() already exposes per table (tableName/rows/
+    // dataset), so the identical template works unmodified against either source.
 
     public ScaffoldOption(final String resultFile, final ScaffoldDto dto, final Parameter param) {
         this(param
@@ -336,7 +334,7 @@ public record ScaffoldOption(
         // order must match XLSX_SCHEMA_DATASET_COLUMNS: COLUMN_NAME, IS_PK, SHEET_NAME, DATA_START,
         // COLUMN_INDEX, CELL_ADDRESS.
         // SHEET_NAME/DATA_START are per-table, not per-column, but every row is seeded with the same
-        // value since the template (rowEntry()) only reads first(rows).SHEET_NAME/first(rows).DATA_START:
+        // value since rowEntry(row) only reads first(row.rows).SHEET_NAME/first(row.rows).DATA_START:
         // edit them consistently across a table's rows, since only the first row's value takes effect.
         final String cellAddress =
                 new CellReference(XLSX_SCHEMA_DEFAULT_DATA_START, columnIndex).formatAsString();
@@ -398,10 +396,10 @@ public record ScaffoldOption(
     private void writeSchemaTemplate(final File templateDir, final String name, final boolean isXlsxSchema)
             throws IOException {
         this.copyClasspathResource(
-                isXlsxSchema ? ScaffoldOption.XLSX_SCHEMA_SCAFFOLD_STG_PATH : GenerateType.fixedColumnDef.getStgPath(),
+                isXlsxSchema ? GenerateType.xlsxSchema.getStgPath() : GenerateType.fixedColumnDef.getStgPath(),
                 new File(templateDir, name + ".stg"));
         this.copyClasspathResource(
-                isXlsxSchema ? ScaffoldOption.XLSX_SCHEMA_SCAFFOLD_TXT_PATH
+                isXlsxSchema ? GenerateType.xlsxSchema.getTemplatePath()
                         : ScaffoldOption.FIXED_COLUMN_DEF_SCAFFOLD_TXT_PATH,
                 new File(templateDir, name + ".txt"));
     }

@@ -136,48 +136,51 @@ public enum GenerateType {
 
         private static final int DATA_START_ROW = 1;
 
+        // The shared xlsxSchemaTemplate.stg/.txt (also copied verbatim by Scaffold's xlsxSchema target, see
+        // ScaffoldOption.writeSchemaTemplate) expect "dataSet" to hold, per table, a "one row per column"
+        // shape: rows (COLUMN_NAME/SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS per column) plus
+        // dataset.PK/dataset.CELLS sub-tables. This keeps rowEntry(row)/cellEntry(row) identical whether
+        // "dataSet" was built here (from real Column[]/primaryKeys[] metadata) or by Scaffold's unit=table +
+        // unitSetting "separate" (from a user-edited dummy dataset).
         @Override
         @SuppressWarnings("unchecked")
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
             final Map<String, Map<String, Object>> dataSet = (Map<String, Map<String, Object>>) param.get("dataSet");
-            final List<Map<String, Object>> schemaRows = new ArrayList<>();
-            final List<Map<String, Object>> schemaCells = new ArrayList<>();
-            dataSet.values().forEach(table -> {
-                final List<String> header = Arrays.stream((Column[]) table.get("columns"))
-                        .map(Column::getColumnName).toList();
-                schemaRows.add(this.toSchemaRow(table, header));
-                schemaCells.add(this.toSchemaCell(table, header));
-            });
-            super.write(option, resultFile, param.add("schemaRows", schemaRows).add("schemaCells", schemaCells));
+            final Map<String, Object> schemaDataSet = new LinkedHashMap<>();
+            dataSet.forEach((tableName, table) -> schemaDataSet.put(tableName, this.toSchemaTable(table)));
+            super.write(option, resultFile, param.add("dataSet", schemaDataSet));
         }
 
-        private Map<String, Object> toSchemaRow(final Map<String, Object> table, final List<String> header) {
+        private Map<String, Object> toSchemaTable(final Map<String, Object> table) {
+            final Column[] columns = (Column[]) table.get("columns");
             final Column[] primaryKeys = (Column[]) table.get("primaryKeys");
             final String tableName = table.get("tableName").toString();
-            final List<String> breakKey = primaryKeys.length > 0
-                    ? Arrays.stream(primaryKeys).map(Column::getColumnName).toList()
-                    : header.isEmpty() ? List.of() : List.of(header.getFirst());
-            final Map<String, Object> row = new LinkedHashMap<>();
-            row.put("sheetName", tableName);
-            row.put("tableName", tableName);
-            row.put("header", header);
-            row.put("dataStart", DATA_START_ROW);
-            row.put("breakKey", breakKey);
-            return row;
+            final List<Map<String, Object>> rows = IntStream.range(0, columns.length)
+                    .mapToObj(i -> this.toColumnRow(columns[i].getColumnName(), tableName, i))
+                    .toList();
+            final Map<String, Map<String, Object>> columnRows = new LinkedHashMap<>();
+            rows.forEach(row -> columnRows.put(row.get("COLUMN_NAME").toString(), row));
+            final List<Map<String, Object>> pkRows = Arrays.stream(primaryKeys)
+                    .map(pk -> columnRows.get(pk.getColumnName())).toList();
+            final Map<String, Object> dataset = new LinkedHashMap<>();
+            dataset.put("PK", Map.of("rows", pkRows));
+            dataset.put("CELLS", Map.of("rows", rows));
+            final Map<String, Object> result = new LinkedHashMap<>();
+            result.put("tableName", tableName);
+            result.put("rows", rows);
+            result.put("dataset", dataset);
+            return result;
         }
 
-        private Map<String, Object> toSchemaCell(final Map<String, Object> table, final List<String> header) {
-            final String tableName = table.get("tableName").toString();
-            final List<String> cellAddress = IntStream.range(0, header.size())
-                    .mapToObj(col -> new CellReference(DATA_START_ROW, col).formatAsString())
-                    .toList();
-            final Map<String, Object> cell = new LinkedHashMap<>();
-            cell.put("sheetName", tableName);
-            cell.put("tableName", tableName);
-            cell.put("header", header);
-            cell.put("rows", List.of(cellAddress));
-            return cell;
+        private Map<String, Object> toColumnRow(final String columnName, final String tableName, final int columnIndex) {
+            final Map<String, Object> row = new LinkedHashMap<>();
+            row.put("COLUMN_NAME", columnName);
+            row.put("SHEET_NAME", tableName);
+            row.put("DATA_START", String.valueOf(DATA_START_ROW));
+            row.put("COLUMN_INDEX", String.valueOf(columnIndex));
+            row.put("CELL_ADDRESS", new CellReference(DATA_START_ROW, columnIndex).formatAsString());
+            return row;
         }
     }, javaBean("javabean/javaBeanTemplate.stg", "javabean/javaBeanTemplate.txt") {
         @Override

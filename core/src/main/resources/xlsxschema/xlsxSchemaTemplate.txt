@@ -1,8 +1,8 @@
 {
   "rows": [
-$schemaRows:{row | $rowEntry(row)$}; separator=","$
+$dataSet.values:{row | $rowEntry(row)$}; separator=","$
   ]
  ,"cells": [
-$schemaCells:{cell | $cellEntry(cell)$}; separator=","$
+$dataSet.values:{row | $cellEntry(row)$}; separator=","$
   ]
 }
