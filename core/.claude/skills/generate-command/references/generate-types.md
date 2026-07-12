@@ -14,11 +14,11 @@
 | fixedColumnDef | table固定 | false / false | true | テーブル毎（`<table>.json`） | `fixedcolumndef/fixedColumnDefTemplate.stg,.txt` |
 | xlsxTemplate | dataset固定 | false / false | true | 単一ファイル・コード生成専用（テンプレート不要、`write()`が`JxlsTemplateGenerator`でExcelを直接組み立てる） | （なし） |
 
-loadData/useJdbcMetaDataは`GenerateOption.dataSetParam()`のswitch分岐で決まる（`ComparableDataSetParam.Builder`のデフォルトは`loadData=true`, `useJdbcMetaData=false`）。
+loadData/useJdbcMetaDataは`GenerateType`の`loadData()`/`useJdbcMetaData()`をオーバーライドして決まる（デフォルトは`loadData()=true`, `useJdbcMetaData()=false`）。`GenerateOption.dataSetParam()`はこの2メソッドを呼ぶだけで、switch分岐は持たない。
 
 固定成果物タイプはすべて`-template`での差し替えを持たない（組み込みテンプレート専用）。`ddl`/`javaBean`相当の内容を組み込み以外のテンプレートで生成したい場合は、`generateType=txt`＋`unit=table`＋`unitSetting`（既定値は各`defaultSettingsPath()`と同じ設定ファイルを流用可）を使う。
 
-`xlsxSchema`は`ddl`/`javaBean`/`fixedColumnDef`と同じくテーブル毎に1ファイル出力する（`GenerateOption.resultPath()`が`<resultPath>/<tableName>.json`を自動生成）。`unit=table`なので`-unitSetting`でsrcデータセットの列を絞り込み/フィルタできる（`xlsxSchema`の`defaultSettingsPath()`は未定義なので既定は素通し）。
+`xlsxSchema`は`ddl`/`javaBean`/`fixedColumnDef`と同じくテーブル毎に1ファイル出力する（`GenerateType.xlsxSchema.resultPathTemplate()`が共有helper`tableFileResultPath()`経由で`<resultPath>/<tableName>.json`を自動生成）。`unit=table`なので`-unitSetting`でsrcデータセットの列を絞り込み/フィルタできる（`xlsxSchema`の`defaultSettingsPath()`は未定義なので既定は素通し）。
 
 ## Scaffoldとの結合
 
@@ -34,7 +34,7 @@ loadData/useJdbcMetaDataは`GenerateOption.dataSetParam()`のswitch分岐で決�
 
 | オプション | `GenerateDto` フィールド | `GenerateOption` での用途 |
 |---|---|---|
-| `template` / `result` / `resultPath` / `outputEncoding` | 共通 | 全タイプ共通（`resultPath()`はsql/ddl/fixedColumnDef/xlsxSchema/javaBeanで拡張子・命名を分岐） |
+| `template` / `result` / `resultPath` / `outputEncoding` | 共通 | 全タイプ共通（`GenerateType.resultPathTemplate()`をsql/ddl/fixedColumnDef/xlsxSchema/javaBeanがoverrideし拡張子・命名を分岐） |
 | `commit` / `op` / `sqlFilePrefix` / `sqlFileSuffix` | sql/ddl用 | `GenerateType.sql/ddl` の `toParametersBuilder()` 分岐 |
 | `includeAllColumns` | settings用 | `dataSetParam()` で `ComparableDataSetParam.Builder` に反映 |
 | `lazyLoad` | xlsx/xls用 | `parameterStream()` の分岐 |
@@ -46,9 +46,9 @@ loadData/useJdbcMetaDataは`GenerateOption.dataSetParam()`のswitch分岐で決�
 
 | ファイル（`application/`配下） | 内容 |
 |---|---|
-| `command/GenerateType.java` | enum定数追加。`write()`/`isFixedTemplate()`/`getFixedUnit()`/`defaultSettingsPath()`/`getTemplateString()` をoverride。固定成果物タイプに`-template`での差し替えは持たせない |
+| `command/GenerateType.java` | enum定数追加。4軸に対応する`loadData()`/`useJdbcMetaData()`/`isFixedTemplate()`+`getFixedUnit()`/`resultPathTemplate()`と、`write()`/`defaultSettingsPath()`/`getTemplateString()` をoverride。固定成果物タイプに`-template`での差し替えは持たせない |
 | `command/GenerateDto.java` | `@CommandLine.Option` フィールド追加（getter/setter） |
-| `command/GenerateOption.java` | recordフィールド追加。コンストラクタ/`toParametersBuilder()`/`dataSetParam()`/`resultPath()` に反映（データロード軸・出力形状軸の分岐はここ） |
+| `command/GenerateOption.java` | recordフィールド追加。コンストラクタ/`toParametersBuilder()`に反映（`dataSetParam()`/`resultPath(Parameter)`は`GenerateType`の軸1/軸4メソッドを呼ぶだけなので、通常はここを直接いじらない） |
 | `src/main/resources/{typeName}/*.stg,*.txt,*.json` | テンプレート/設定リソース（同名ディレクトリの`{typeName}ScaffoldTemplate.*`は別コマンド`Scaffold`用、対象外） |
 | `command/GenerateOptionTest.java` / `GenerateTest.java` | 単体（toParameters往復）/統合（`paramGenerate*.txt`+`expect/generate/**`）テスト |
 | `ParameterUnit.java` | record/table/dataset のストリーム生成（unit挙動を変える場合のみ） |

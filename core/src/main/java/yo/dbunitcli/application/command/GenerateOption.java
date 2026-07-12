@@ -108,26 +108,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     public String resultPath(final Parameter param) {
-        return this.templateOption.getTemplateRender().render(this.resultPath(), param);
-    }
-
-    @Override
-    public String resultPath() {
-        if (Stream.of(GenerateType.sql, GenerateType.ddl)
-                  .anyMatch(it -> it == this.generateType())) {
-            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
-            return this.resultPath + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
-        }
-        if (Stream.of(GenerateType.fixedColumnDef, GenerateType.xlsxSchema)
-                  .anyMatch(it -> it == this.generateType())) {
-            final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
-            return this.resultPath + "/" + tableName + ".json";
-        }
-        if (this.generateType() == GenerateType.javaBean) {
-            return this.resultPath + "/" + this.templateOption.getTemplateRender().getAttributeName("tableName",
-                                                                                                    "snakeToUpperCamel") + ".java";
-        }
-        return this.resultPath;
+        return this.templateOption.getTemplateRender().render(this.generateType().resultPathTemplate(this), param);
     }
 
     public void write(final File resultFile, final Parameter param) throws IOException {
@@ -163,28 +144,22 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             result.putFile("-template", this.template, true, BaseDir.TEMPLATE);
         }
         final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
+        if (this.generateType.useJdbcMetaData()) {
+            srcComponent.remove("-src.useJdbcMetaData");
+        }
+        if (!this.generateType.loadData()) {
+            srcComponent.remove("-src.loadData");
+        }
         switch (this.generateType) {
-            case sql -> {
-                result.put("-commit", Boolean.toString(this.commit)).put("-op", this.operation, DbOperation.class)
-                      .put("-sqlFilePrefix", this.sqlFilePrefix).put("-sqlFileSuffix", this.sqlFileSuffix);
-                srcComponent.remove("-src.useJdbcMetaData");
-            }
-            case ddl -> {
-                result.put("-sqlFilePrefix", this.sqlFilePrefix).put("-sqlFileSuffix", this.sqlFileSuffix);
-                srcComponent.remove("-src.useJdbcMetaData");
-            }
-            case javaBean -> srcComponent.remove("-src.useJdbcMetaData");
-            case fixedColumnDef -> {
-                result.put("-fixedLength", this.fixedLength).put("-defaultLength", Integer.toString(this.defaultLength))
-                      .put("-align", this.align);
-                srcComponent.remove("-src.loadData");
-            }
-            case settings -> {
-                result.put("-includeAllColumns", Boolean.toString(this.includeAllColumns));
-                srcComponent.remove("-src.useJdbcMetaData").remove("-src.loadData");
-            }
-            case xlsxTemplate, xlsxSchema -> srcComponent.remove("-src.loadData");
+            case sql -> result.put("-commit", Boolean.toString(this.commit)).put("-op", this.operation, DbOperation.class)
+                              .put("-sqlFilePrefix", this.sqlFilePrefix).put("-sqlFileSuffix", this.sqlFileSuffix);
+            case ddl -> result.put("-sqlFilePrefix", this.sqlFilePrefix).put("-sqlFileSuffix", this.sqlFileSuffix);
+            case fixedColumnDef -> result.put("-fixedLength", this.fixedLength)
+                                          .put("-defaultLength", Integer.toString(this.defaultLength)).put("-align", this.align);
+            case settings -> result.put("-includeAllColumns", Boolean.toString(this.includeAllColumns));
             case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
+            default -> {
+            }
         }
         result.addComponent("srcData", srcComponent.build());
         if (!this.generateType.isFixedTemplate()) {
@@ -205,13 +180,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                 builder.setTableSeparators(defaultTableSeparators);
             }
         }
-        switch (this.generateType()) {
-            case settings -> builder.setUseJdbcMetaData(true).setLoadData(false);
-            case ddl, javaBean, sql -> builder.setUseJdbcMetaData(true);
-            case xlsxTemplate, fixedColumnDef, xlsxSchema -> builder.setLoadData(false);
-            default -> {
-            }
-        }
+        builder.setUseJdbcMetaData(this.generateType().useJdbcMetaData())
+               .setLoadData(this.generateType().loadData());
         return builder.build();
     }
 
