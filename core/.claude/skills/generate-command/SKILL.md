@@ -11,7 +11,7 @@ DO NOT TRIGGER when: 読み取りのみ、または他コマンド（Compare/Con
 | `command/GenerateType.java` | enum定数追加。`write()`/`isFixedTemplate()`/`getFixedUnit()`/`defaultSettingsPath()`/`getTemplateString()` をoverride。固定成果物タイプに`-template`での差し替えは持たせない（組み込みテンプレート以外にしたい場合は利用者が`generateType=txt`＋`unitSetting`を使う） |
 | `command/GenerateDto.java` | `@CommandLine.Option` フィールド追加（getter/setter） |
 | `command/GenerateOption.java` | recordフィールド追加。コンストラクタ/`toParametersBuilder()`/`dataSetParam()`/`resultPath()` に反映 |
-| `src/main/resources/{typeName}/*.stg,*.txt,*.json` | テンプレート/設定リソース（同名ディレクトリの`*ScaffoldTemplate.*`は別コマンド`Scaffold`用、対象外） |
+| `src/main/resources/{typeName}/*.stg,*.txt,*.json` | テンプレート/設定リソース（同名ディレクトリの`{typeName}ScaffoldTemplate.*`は別コマンド`Scaffold`用、対象外） |
 | `command/GenerateOptionTest.java` / `GenerateTest.java` | 単体（toParameters往復）/統合（`paramGenerate*.txt`+`expect/generate/**`）テスト |
 | `ParameterUnit.java` | record/table/dataset のストリーム生成（unit挙動を変える場合のみ） |
 
@@ -19,4 +19,4 @@ generateType一覧・unit対応表・オプション所在は `references/genera
 
 ## 関連スキル
 
-tauri側は `tauri:update-help`、sidecar/tauri影響確認は `check-application-impact`。
+固定成果物型（unit固定）を変更する際は、同名targetを持つ`Scaffold`側が壊れないか`scaffold-command`スキルで確認。tauri側は `tauri:update-help`、sidecar/tauri影響確認は `check-application-impact`。
