@@ -1,5 +1,16 @@
 # scaffold target 詳細
 
+## 実装チェックリスト（target追加/修正時の変更箇所）
+
+`SKILL.md`の判断フローで設計を決めたら、以下のファイルに反映する。
+
+| ファイル（`application/`配下） | 内容 |
+|---|---|
+| `command/ScaffoldDto.java` | `-target` の説明文（対応target一覧）を更新 |
+| `command/ScaffoldOption.java` | `execute()` に新規target分岐を追加。ddl/javaBeanは`-template`指定時、組み込み`.stg/.txt`をそのままコピーし`.param`は`generateType=txt`＋`unitSetting`で組み込みと同内容を再現する（`writeGenericParamFile()`） |
+| `src/main/resources/{typeName}/{typeName}ScaffoldTemplate.stg,.txt` | 組み込み`.stg/.txt`を無改造流用できない場合のみ必要な専用雛型（判定基準は本ファイル「専用ScaffoldTemplate要否の判定」節） |
+| `command/ScaffoldTest.java` | targetごとの`@Nested`テストクラス。setting/unitSetting/template/parameterの単体・組み合わせ・カスタムファイル名パターン |
+
 ## 対応target と出力ファイル
 
 `-target` の値ごとに `ScaffoldOption.execute()` 内のフラグ（`generateDdl`/`generateJavaBean`/`generateXlsxSchema`/`generateFixedColumnDef`/`generateParameter`）で分岐する。
