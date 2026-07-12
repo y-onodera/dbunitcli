@@ -71,6 +71,16 @@ public enum GenerateType {
         public ParameterUnit getFixedUnit() {
             return ParameterUnit.dataset;
         }
+
+        @Override
+        protected boolean loadData() {
+            return false;
+        }
+
+        @Override
+        protected boolean useJdbcMetaData() {
+            return true;
+        }
     }, sql("sql/sqlTemplate.stg", null) {
         @Override
         public boolean isFixedTemplate() {
@@ -92,6 +102,16 @@ public enum GenerateType {
                 default -> "sql/deleteInsertTemplate.txt";
             });
         }
+
+        @Override
+        protected boolean useJdbcMetaData() {
+            return true;
+        }
+
+        @Override
+        protected String resultPathTemplate(final GenerateOption option) {
+            return GenerateType.sqlResultPath(option);
+        }
     }, ddl("sql/ddlTemplate.stg", "sql/ddlTemplate.txt") {
         @Override
         public boolean isFixedTemplate() {
@@ -107,6 +127,16 @@ public enum GenerateType {
         public String defaultSettingsPath() {
             return "sql/ddlSettings.json";
         }
+
+        @Override
+        protected boolean useJdbcMetaData() {
+            return true;
+        }
+
+        @Override
+        protected String resultPathTemplate(final GenerateOption option) {
+            return GenerateType.sqlResultPath(option);
+        }
     }, xlsxTemplate(null, null) {
         @Override
         public boolean isFixedTemplate() {
@@ -116,6 +146,11 @@ public enum GenerateType {
         @Override
         public ParameterUnit getFixedUnit() {
             return ParameterUnit.dataset;
+        }
+
+        @Override
+        protected boolean loadData() {
+            return false;
         }
 
         @Override
@@ -134,13 +169,22 @@ public enum GenerateType {
             return ParameterUnit.table;
         }
 
+        @Override
+        protected boolean loadData() {
+            return false;
+        }
+
+        @Override
+        protected String resultPathTemplate(final GenerateOption option) {
+            return GenerateType.tableFileResultPath(option, ".json");
+        }
+
         private static final int DATA_START_ROW = 1;
 
-        // One output file per table (GenerateOption.resultPath()'s xlsxSchema branch appends
-        // "<tableName>.json"), matching ddl/javaBean/fixedColumnDef rather than the old single
-        // combined-schema file. unit=table's ComparableTableDto.resolve() hands write() a "dataSet" with
-        // exactly one entry per call, so the loop below (and the shared template's own "dataSet.values"
-        // iteration) needs no table-count-specific logic either way.
+        // One output file per table (see resultPathTemplate() above), matching ddl/javaBean/fixedColumnDef
+        // rather than the old single combined-schema file. unit=table's ComparableTableDto.resolve() hands
+        // write() a "dataSet" with exactly one entry per call, so the loop below (and the shared template's
+        // own "dataSet.values" iteration) needs no table-count-specific logic either way.
         // The shared xlsxSchemaTemplate.stg/.txt (also copied verbatim by Scaffold's xlsxSchema target, see
         // ScaffoldOption.writeSchemaTemplate) expect "dataSet" to hold, per table, a "one row per column"
         // shape: rows (COLUMN_NAME/SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS per column) plus
@@ -202,6 +246,16 @@ public enum GenerateType {
         public String defaultSettingsPath() {
             return "javabean/javaBeanSettings.json";
         }
+
+        @Override
+        protected boolean useJdbcMetaData() {
+            return true;
+        }
+
+        @Override
+        protected String resultPathTemplate(final GenerateOption option) {
+            return GenerateType.tableFileResultPath(option, "", "", ".java", "snakeToUpperCamel");
+        }
     }, fixedColumnDef("fixedcolumndef/fixedColumnDefTemplate.stg", "fixedcolumndef/fixedColumnDefTemplate.txt") {
         @Override
         public boolean isFixedTemplate() {
@@ -211,6 +265,16 @@ public enum GenerateType {
         @Override
         public ParameterUnit getFixedUnit() {
             return ParameterUnit.table;
+        }
+
+        @Override
+        protected boolean loadData() {
+            return false;
+        }
+
+        @Override
+        protected String resultPathTemplate(final GenerateOption option) {
+            return GenerateType.tableFileResultPath(option, ".json");
         }
 
         @Override
@@ -275,6 +339,39 @@ public enum GenerateType {
 
     protected ParameterUnit getFixedUnit() {
         return null;
+    }
+
+    protected boolean loadData() {
+        return true;
+    }
+
+    protected boolean useJdbcMetaData() {
+        return false;
+    }
+
+    protected String resultPathTemplate(final GenerateOption option) {
+        return option.resultPath();
+    }
+
+    private static String tableFileResultPath(final GenerateOption option, final String extension) {
+        return GenerateType.tableFileResultPath(option, "", "", extension);
+    }
+
+    private static String tableFileResultPath(final GenerateOption option, final String prefix, final String suffix,
+                                              final String extension) {
+        return GenerateType.tableFileResultPath(option, prefix, suffix, extension, null);
+    }
+
+    private static String tableFileResultPath(final GenerateOption option, final String prefix, final String suffix,
+                                              final String extension, final String nameFormat) {
+        final String tableName = nameFormat == null
+                ? option.templateOption().getTemplateRender().getAttributeName("tableName")
+                : option.templateOption().getTemplateRender().getAttributeName("tableName", nameFormat);
+        return option.resultPath() + "/" + prefix + tableName + suffix + extension;
+    }
+
+    private static String sqlResultPath(final GenerateOption option) {
+        return GenerateType.tableFileResultPath(option, option.sqlFilePrefix(), option.sqlFileSuffix(), ".sql");
     }
 
     protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {

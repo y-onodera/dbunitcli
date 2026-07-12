@@ -1,22 +1,24 @@
 # generateType 詳細（出典: tauri/public/help/generate.html）
 
-## 一覧
+## 一覧（設計4軸での対応表）
 
-| generateType | 分類 | unit（固定/デフォルト） | `GenerateType`内の主なoverride | テンプレート/設定リソース |
-|---|---|---|---|---|
-| txt | テンプレート指定 | record/table/dataset（可変・デフォルトrecord） | `getTemplateString()` | （ユーザー指定 `-template`） |
-| xlsx / xls | テンプレート指定 | 同上 | `write()`（jxls、`JxlsTemplateRender`） | （ユーザー指定 `-template`） |
-| settings | 固定成果物 | dataset固定 | `isFixedTemplate`, `getFixedUnit` | `settings/settingTemplate.stg,.txt` |
-| sql | 固定成果物 | table固定 | 上記 + `getTemplateString()`（`-op`別に分岐） | `sql/sqlTemplate.stg` + `sql/{insert,delete,update,cleanInsert,deleteInsert}Template.txt` |
-| ddl | 固定成果物 | table固定 | 上記 + `defaultSettingsPath` | `sql/ddlTemplate.stg,.txt`, 既定settings `sql/ddlSettings.json` |
-| xlsxSchema | 固定成果物 | table固定 | 上記 + `write()`（テーブル毎に`dataSet`をrows/dataset.PK/dataset.CELLS形へ変換） | `xlsxschema/xlsxSchemaTemplate.stg,.txt` |
-| javaBean | 固定成果物 | table固定 | ddlと同様（`defaultSettingsPath`） | `javabean/javaBeanTemplate.stg,.txt`, 既定settings `javabean/javaBeanSettings.json` |
-| fixedColumnDef | 固定成果物 | table固定 | 上記 + `write()`（`FixedColumnDef`リスト生成） | `fixedcolumndef/fixedColumnDefTemplate.stg,.txt` |
-| xlsxTemplate | 固定成果物 | dataset固定 | 上記 + `write()`（`JxlsTemplateGenerator.createTemplate`） | （なし、コード生成のみ） |
+| generateType | unit | loadData / useJdbcMetaData | isFixedTemplate | 出力形状 | テンプレート/設定リソース |
+|---|---|---|---|---|---|
+| txt | record/table/dataset（可変・デフォルトrecord） | true / false（両方デフォルト） | false | 単一ファイル | （ユーザー指定`-template`） |
+| xlsx / xls | 同上 | 同上 | false | 単一ファイル（`-lazyLoad`で都度ストリーム書き込みに切替可） | （ユーザー指定`-template`） |
+| settings | dataset固定 | false / true | true | 単一ファイル | `settings/settingTemplate.stg,.txt` |
+| sql | table固定 | true / true | true | テーブル毎（`<sqlFilePrefix><table><sqlFileSuffix>.sql`） | `sql/sqlTemplate.stg` + `sql/{insert,delete,update,cleanInsert,deleteInsert}Template.txt`（`-op`で分岐） |
+| ddl | table固定 | true / true | true | テーブル毎（`<sqlFilePrefix><table><sqlFileSuffix>.sql`） | `sql/ddlTemplate.stg,.txt`、既定settings`sql/ddlSettings.json` |
+| xlsxSchema | table固定 | false / false | true | テーブル毎（`<table>.json`） | `xlsxschema/xlsxSchemaTemplate.stg,.txt` |
+| javaBean | table固定 | true / true | true | テーブル毎（`<Table（snakeToUpperCamel）>.java`） | `javabean/javaBeanTemplate.stg,.txt`、既定settings`javabean/javaBeanSettings.json` |
+| fixedColumnDef | table固定 | false / false | true | テーブル毎（`<table>.json`） | `fixedcolumndef/fixedColumnDefTemplate.stg,.txt` |
+| xlsxTemplate | dataset固定 | false / false | true | 単一ファイル・コード生成専用（テンプレート不要、`write()`が`JxlsTemplateGenerator`でExcelを直接組み立てる） | （なし） |
+
+loadData/useJdbcMetaDataは`GenerateType`の`loadData()`/`useJdbcMetaData()`をオーバーライドして決まる（デフォルトは`loadData()=true`, `useJdbcMetaData()=false`）。`GenerateOption.dataSetParam()`はこの2メソッドを呼ぶだけで、switch分岐は持たない。
 
 固定成果物タイプはすべて`-template`での差し替えを持たない（組み込みテンプレート専用）。`ddl`/`javaBean`相当の内容を組み込み以外のテンプレートで生成したい場合は、`generateType=txt`＋`unit=table`＋`unitSetting`（既定値は各`defaultSettingsPath()`と同じ設定ファイルを流用可）を使う。
 
-`xlsxSchema`は`ddl`/`javaBean`/`fixedColumnDef`と同じくテーブル毎に1ファイル出力する（`GenerateOption.resultPath()`が`<resultPath>/<tableName>.json`を自動生成）。`unit=table`なので`-unitSetting`でsrcデータセットの列を絞り込み/フィルタできる（`xlsxSchema`の`defaultSettingsPath()`は未定義なので既定は素通し）。
+`xlsxSchema`は`ddl`/`javaBean`/`fixedColumnDef`と同じくテーブル毎に1ファイル出力する（`GenerateType.xlsxSchema.resultPathTemplate()`が共有helper`tableFileResultPath()`経由で`<resultPath>/<tableName>.json`を自動生成）。`unit=table`なので`-unitSetting`でsrcデータセットの列を絞り込み/フィルタできる（`xlsxSchema`の`defaultSettingsPath()`は未定義なので既定は素通し）。
 
 ## Scaffoldとの結合
 
@@ -32,11 +34,24 @@
 
 | オプション | `GenerateDto` フィールド | `GenerateOption` での用途 |
 |---|---|---|
-| `template` / `result` / `resultPath` / `outputEncoding` | 共通 | 全タイプ共通（`resultPath()`はsql/ddl/fixedColumnDef/xlsxSchema/javaBeanで拡張子・命名を分岐） |
+| `template` / `result` / `resultPath` / `outputEncoding` | 共通 | 全タイプ共通（`GenerateType.resultPathTemplate()`をsql/ddl/fixedColumnDef/xlsxSchema/javaBeanがoverrideし拡張子・命名を分岐） |
 | `commit` / `op` / `sqlFilePrefix` / `sqlFileSuffix` | sql/ddl用 | `GenerateType.sql/ddl` の `toParametersBuilder()` 分岐 |
 | `includeAllColumns` | settings用 | `dataSetParam()` で `ComparableDataSetParam.Builder` に反映 |
 | `lazyLoad` | xlsx/xls用 | `parameterStream()` の分岐 |
 | `fixedLength` / `defaultLength` / `align` | fixedColumnDef用 | `GenerateType.fixedColumnDef.write()` 内で `FixedColumnDef` 生成 |
+
+## 実装チェックリスト（generateType追加/修正時の変更箇所）
+
+上記4軸で設計を決めたら、以下のファイルに反映する。
+
+| ファイル（`application/`配下） | 内容 |
+|---|---|
+| `command/GenerateType.java` | enum定数追加。4軸に対応する`loadData()`/`useJdbcMetaData()`/`isFixedTemplate()`+`getFixedUnit()`/`resultPathTemplate()`と、`write()`/`defaultSettingsPath()`/`getTemplateString()` をoverride。固定成果物タイプに`-template`での差し替えは持たせない |
+| `command/GenerateDto.java` | `@CommandLine.Option` フィールド追加（getter/setter） |
+| `command/GenerateOption.java` | recordフィールド追加。コンストラクタ/`toParametersBuilder()`に反映（`dataSetParam()`/`resultPath(Parameter)`は`GenerateType`の軸1/軸4メソッドを呼ぶだけなので、通常はここを直接いじらない） |
+| `src/main/resources/{typeName}/*.stg,*.txt,*.json` | テンプレート/設定リソース（同名ディレクトリの`{typeName}ScaffoldTemplate.*`は別コマンド`Scaffold`用、対象外） |
+| `command/GenerateOptionTest.java` / `GenerateTest.java` | 単体（toParameters往復）/統合（`paramGenerate*.txt`+`expect/generate/**`）テスト |
+| `ParameterUnit.java` | record/table/dataset のストリーム生成（unit挙動を変える場合のみ） |
 
 ## テストデータの場所
 
