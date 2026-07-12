@@ -130,14 +130,6 @@ public record ScaffoldOption(
             GenerateType generateType = GenerateType.valueOf(this.target);
             this.copySettingResource(settingDir, generateType, this.settingName);
             this.copySettingResource(settingDir, generateType, this.unitSettingName);
-            if (Strings.isNotEmpty(this.templateName)) {
-                if (templateDir.mkdirs() || templateDir.isDirectory()) {
-                    this.copyClasspathResource(generateType.getStgPath(),
-                                               new File(templateDir, this.templateName + ".stg"));
-                    this.copyClasspathResource(generateType.getTemplatePath(),
-                                               new File(templateDir, this.templateName + ".txt"));
-                }
-            }
             if (this.hasDataset()) {
                 this.writeDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR));
             }
@@ -286,13 +278,8 @@ public record ScaffoldOption(
     }
 
     private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {
-        final boolean hasTemplate = Strings.isNotEmpty(this.templateName);
         final ParametersBuilder builder = new ParametersBuilder();
         builder.put("-generateType", isDdl ? GenerateType.ddl.name() : GenerateType.javaBean.name(), false);
-        if (hasTemplate) {
-            builder.put("-template", "resources/template/" + this.templateName + ".txt");
-            builder.put("-template.templateGroup", "resources/template/" + this.templateName + ".stg");
-        }
         if (Strings.isNotEmpty(this.settingName)) {
             builder.put("-setting", "resources/setting/" + this.settingName + ".json");
         }

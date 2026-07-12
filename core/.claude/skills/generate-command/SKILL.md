@@ -8,7 +8,7 @@ DO NOT TRIGGER when: 読み取りのみ、または他コマンド（Compare/Con
 
 | ファイル（`application/`配下） | 内容 |
 |---|---|
-| `command/GenerateType.java` | enum定数追加。`write()`/`isFixedTemplate()`/`getFixedUnit()`/`supportsUserTemplate()`/`defaultSettingsPath()`/`getTemplateString()` をoverride |
+| `command/GenerateType.java` | enum定数追加。`write()`/`isFixedTemplate()`/`getFixedUnit()`/`defaultSettingsPath()`/`getTemplateString()` をoverride。固定成果物タイプに`-template`での差し替えは持たせない（組み込みテンプレート以外にしたい場合は利用者が`generateType=txt`＋`unitSetting`を使う） |
 | `command/GenerateDto.java` | `@CommandLine.Option` フィールド追加（getter/setter） |
 | `command/GenerateOption.java` | recordフィールド追加。コンストラクタ/`toParametersBuilder()`/`dataSetParam()`/`resultPath()` に反映 |
 | `src/main/resources/{typeName}/*.stg,*.txt,*.json` | テンプレート/設定リソース（同名ディレクトリの`*ScaffoldTemplate.*`は別コマンド`Scaffold`用、対象外） |

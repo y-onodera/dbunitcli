@@ -20,7 +20,7 @@ public class ScaffoldDto extends CommandDto {
     private String settingName;
     @CommandLine.Option(names = "-unitSetting", description = "unitSetting file name to scaffold (omit to skip)")
     private String unitSettingName;
-    @CommandLine.Option(names = "-template", description = "template file name to scaffold (omit to skip)")
+    @CommandLine.Option(names = "-template", description = "template file name to scaffold (xlsxSchema/fixedColumnDef only, omit to skip)")
     private String templateName;
     @CommandLine.Option(names = "-parameter", description = "parameter file name to scaffold (omit to skip)")
     private String parameterName;

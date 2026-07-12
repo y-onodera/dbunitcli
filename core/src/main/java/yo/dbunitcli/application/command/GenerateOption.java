@@ -158,7 +158,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             result.putFile("-unitSetting", this.unitSetting, BaseDir.SETTING);
             result.put("-unitSettingEncoding", this.unitSettingEncoding);
         }
-        if (!this.generateType.isFixedTemplate() || (this.generateType.supportsUserTemplate() && Strings.isNotEmpty(this.template))) {
+        if (!this.generateType.isFixedTemplate()) {
             result.putFile("-template", this.template, true, BaseDir.TEMPLATE);
         }
         final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
@@ -186,7 +186,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
         }
         result.addComponent("srcData", srcComponent.build());
-        if (!this.generateType.isFixedTemplate() || (this.generateType.supportsUserTemplate() && Strings.isNotEmpty(this.templateOption().templateGroup()))) {
+        if (!this.generateType.isFixedTemplate()) {
             result.addComponent("templateOption", this.templateOptionArgs());
         }
         result.putDir("-result", this.resultDir, BaseDir.RESULT).put("-resultPath", this.resultPath);

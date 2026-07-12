@@ -27,7 +27,7 @@
   <p>テンプレートまたは組み込み定義からファイルを生成します。<code>generateType</code> は大きく 2 系統に分かれます。</p>
   <ul>
     <li><strong>テンプレート指定タイプ</strong>（<code>txt</code> / <code>xlsx</code> / <code>xls</code>）: <code>template</code> オプションで指定した任意のテンプレートファイルにデータを埋め込みます。出力内容はテンプレート次第で自由に設計できます。</li>
-    <li><strong>固定成果物タイプ</strong>（<code>settings</code> / <code>sql</code> / <code>ddl</code> / <code>xlsxTemplate</code> / <code>xlsxSchema</code> / <code>javaBean</code> / <code>fixedColumnDef</code>）: テーブルのカラム情報等から、決まった形式の成果物ファイルを自動生成します。<code>template</code> は基本的に使用しません（<code>ddl</code> / <code>javaBean</code> のみ組み込みテンプレートを <code>template</code> で差し替え可能）。</li>
+    <li><strong>固定成果物タイプ</strong>（<code>settings</code> / <code>sql</code> / <code>ddl</code> / <code>xlsxTemplate</code> / <code>xlsxSchema</code> / <code>javaBean</code> / <code>fixedColumnDef</code>）: テーブルのカラム情報等から、決まった形式の成果物ファイルを自動生成します。<code>template</code> は使用しません。組み込みテンプレート以外の出力形式にしたい場合は、<code>generateType=txt</code> と <code>unitSetting</code> を組み合わせて同等の内容を再現してください。</li>
   </ul>
 
   <h2>generateType 一覧</h2>
@@ -66,7 +66,7 @@
   <h2>共通オプション</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>template</td><td>テンプレートファイルのパス（<code>txt</code> / <code>xlsx</code> / <code>xls</code> タイプで使用。<code>ddl</code> / <code>javaBean</code> は組み込みテンプレートの差し替えとして任意指定可）</td></tr>
+    <tr><td>template</td><td>テンプレートファイルのパス（<code>txt</code> / <code>xlsx</code> / <code>xls</code> タイプで使用）</td></tr>
     <tr><td>result</td><td>生成結果ファイルを配置するディレクトリ</td></tr>
     <tr><td>resultPath</td><td><code>result</code> ディレクトリからの相対パス（テンプレート変数を使用可能）</td></tr>
     <tr><td>outputEncoding</td><td>出力ファイルの文字コード（<code>txt</code> タイプのみ、デフォルト: <code>UTF-8</code>）</td></tr>
@@ -100,7 +100,7 @@
   </table>
 
   <h2>固定成果物タイプ</h2>
-  <p>テーブルのカラム情報等から、決まった形式の成果物ファイルを組み込みロジック・組み込みテンプレートで自動生成します。<code>template</code> は使用しません（<code>ddl</code> / <code>javaBean</code> のみ任意で差し替え可能）。生成されるファイル形式ごとに以下へ分けています。</p>
+  <p>テーブルのカラム情報等から、決まった形式の成果物ファイルを組み込みロジック・組み込みテンプレートで自動生成します。<code>template</code> は使用しません。生成されるファイル形式ごとに以下へ分けています。</p>
 
   <h3>テキスト / JSON 成果物</h3>
 
@@ -144,7 +144,7 @@ insert into Test1 (Key ,Column1 ,Column2 ,Column3 ) values ('1' ,'ああ' ,10000
 commit;</pre>
 
   <h4 id="type-ddl">ddl</h4>
-  <p>テーブルのカラム情報から CREATE TABLE 用の DDL ファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> を指定すると組み込みテンプレートの代わりに使用されます（未指定時は組み込み DDL テンプレートを使用）。ファイル名は <code>{sqlFilePrefix}{テーブル名}{sqlFileSuffix}.sql</code> になります。</p>
+  <p>テーブルのカラム情報から CREATE TABLE 用の DDL ファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません（組み込み DDL テンプレートのみ使用されます）。ファイル名は <code>{sqlFilePrefix}{テーブル名}{sqlFileSuffix}.sql</code> になります。組み込みテンプレート以外の出力にしたい場合は、<code>generateType=txt</code> と <code>unitSetting</code>（既定は <code>sql/ddlSettings.json</code>）を使って同等の内容を再現してください。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>sqlFilePrefix</td><td>生成 DDL ファイル名のプレフィックス</td><td>（空）</td></tr>
@@ -188,7 +188,7 @@ COMMENT ON COLUMN EMPLOYEE.SALARY IS '給与';</pre>
 }</pre>
 
   <h4 id="type-javaBean">javaBean</h4>
-  <p>テーブルのカラム情報から JavaBean の <code>.java</code> ソースファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> を指定すると組み込みテンプレートの代わりに使用されます（未指定時は組み込み JavaBean テンプレートを使用）。ファイル名はテーブル名をアッパーキャメルケースに変換したものになります（例: <code>EMPLOYEE</code> → <code>Employee.java</code>）。</p>
+  <p>テーブルのカラム情報から JavaBean の <code>.java</code> ソースファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません（組み込み JavaBean テンプレートのみ使用されます）。ファイル名はテーブル名をアッパーキャメルケースに変換したものになります（例: <code>EMPLOYEE</code> → <code>Employee.java</code>）。組み込みテンプレート以外の出力にしたい場合は、<code>generateType=txt</code> と <code>unitSetting</code>（既定は <code>javabean/javaBeanSettings.json</code>）を使って同等の内容を再現してください。</p>
   <p><strong>生成イメージ（ファイル名: <code>Employee.java</code>）:</strong></p>
   <pre>/** 社員マスタ */
 public class Employee {

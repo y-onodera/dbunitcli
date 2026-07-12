@@ -78,14 +78,13 @@ public class ScaffoldTest {
                                        "-template=ddl", "-parameter=ddl");
                 assertTrue(TestCase.this.resultFile("ddl/all", "resources/setting/ddl.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/all", "resources/setting/ddlUnit.json").exists());
-                assertTrue(TestCase.this.resultFile("ddl/all", "resources/template/ddl.stg").exists());
-                assertTrue(TestCase.this.resultFile("ddl/all", "resources/template/ddl.txt").exists());
+                assertFalse(TestCase.this.resultFile("ddl/all", "resources/template/ddl.stg").exists());
+                assertFalse(TestCase.this.resultFile("ddl/all", "resources/template/ddl.txt").exists());
                 final File paramFile = TestCase.this.resultFile("ddl/all", "option/ddl.param");
                 assertTrue(paramFile.exists());
                 final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-generateType=ddl")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/ddl.txt")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/ddl.stg")));
+                assertFalse(lines.stream().anyMatch(l -> l.contains("-template=")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-setting=resources/setting/ddl.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/ddlUnit.json")));
             }
@@ -109,11 +108,11 @@ public class ScaffoldTest {
             }
 
             @Test
-            public void testTemplateOnly() {
+            public void testTemplateOptionIsIgnored() {
                 TestCase.this.scaffold("ddl/template", "-target=ddl", "-template=ddl");
                 assertFalse(TestCase.this.resultFile("ddl/template", "resources/setting/ddl.json").exists());
-                assertTrue(TestCase.this.resultFile("ddl/template", "resources/template/ddl.stg").exists());
-                assertTrue(TestCase.this.resultFile("ddl/template", "resources/template/ddl.txt").exists());
+                assertFalse(TestCase.this.resultFile("ddl/template", "resources/template/ddl.stg").exists());
+                assertFalse(TestCase.this.resultFile("ddl/template", "resources/template/ddl.txt").exists());
                 assertFalse(TestCase.this.resultFile("ddl/template", "option/ddl.param").exists());
             }
 
@@ -136,8 +135,8 @@ public class ScaffoldTest {
             public void testSettingAndTemplate() {
                 TestCase.this.scaffold("ddl/setting-template", "-target=ddl", "-setting=ddl", "-template=ddl");
                 assertTrue(TestCase.this.resultFile("ddl/setting-template", "resources/setting/ddl.json").exists());
-                assertTrue(TestCase.this.resultFile("ddl/setting-template", "resources/template/ddl.stg").exists());
-                assertTrue(TestCase.this.resultFile("ddl/setting-template", "resources/template/ddl.txt").exists());
+                assertFalse(TestCase.this.resultFile("ddl/setting-template", "resources/template/ddl.stg").exists());
+                assertFalse(TestCase.this.resultFile("ddl/setting-template", "resources/template/ddl.txt").exists());
                 assertFalse(TestCase.this.resultFile("ddl/setting-template", "option/ddl.param").exists());
             }
 
@@ -146,8 +145,8 @@ public class ScaffoldTest {
                 TestCase.this.scaffold("ddl/custom", "-target=ddl", "-setting=myDdl", "-template=myDdl",
                                        "-parameter=myDdl");
                 assertTrue(TestCase.this.resultFile("ddl/custom", "resources/setting/myDdl.json").exists());
-                assertTrue(TestCase.this.resultFile("ddl/custom", "resources/template/myDdl.stg").exists());
-                assertTrue(TestCase.this.resultFile("ddl/custom", "resources/template/myDdl.txt").exists());
+                assertFalse(TestCase.this.resultFile("ddl/custom", "resources/template/myDdl.stg").exists());
+                assertFalse(TestCase.this.resultFile("ddl/custom", "resources/template/myDdl.txt").exists());
                 assertTrue(TestCase.this.resultFile("ddl/custom", "option/myDdl.param").exists());
             }
         }
@@ -161,11 +160,12 @@ public class ScaffoldTest {
                                        "-unitSetting=javaBeanUnit", "-template=javaBean", "-parameter=javaBean");
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/setting/javaBean.json").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/setting/javaBeanUnit.json").exists());
-                assertTrue(TestCase.this.resultFile("javaBean/all", "resources/template/javaBean.stg").exists());
-                assertTrue(TestCase.this.resultFile("javaBean/all", "resources/template/javaBean.txt").exists());
+                assertFalse(TestCase.this.resultFile("javaBean/all", "resources/template/javaBean.stg").exists());
+                assertFalse(TestCase.this.resultFile("javaBean/all", "resources/template/javaBean.txt").exists());
                 final File paramFile = TestCase.this.resultFile("javaBean/all", "option/javaBean.param");
                 assertTrue(paramFile.exists());
                 final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
+                assertFalse(lines.stream().anyMatch(l -> l.contains("-template=")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-setting=resources/setting/javaBean.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/javaBeanUnit.json")));
             }
@@ -175,8 +175,8 @@ public class ScaffoldTest {
                 TestCase.this.scaffold("javaBean/custom", "-target=javaBean", "-setting=myBean", "-template=myBean",
                                        "-parameter=myBean");
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/setting/myBean.json").exists());
-                assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.stg").exists());
-                assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.txt").exists());
+                assertFalse(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.stg").exists());
+                assertFalse(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.txt").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "option/myBean.param").exists());
             }
         }
