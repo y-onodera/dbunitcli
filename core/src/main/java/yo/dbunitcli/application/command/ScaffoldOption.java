@@ -75,36 +75,14 @@ public record ScaffoldOption(
     // descriptor rows written by writeDatasetSrcFiles) instead of the Java-precomputed "columns" list,
     // since generateType=txt has no Java-side precomputation step. The unitSetting sample resource
     // (fixedcolumndef/fixedColumnDefSettings.json) supplies name/length/align/pad via expressionColumns.
-    private static final String FIXED_COLUMN_DEF_SCAFFOLD_TXT = """
-            {
-              "columns": [
-            $rows:{col | $columnEntry(col)$}; separator=","$
-              ]
-            }
-            """;
+    private static final String FIXED_COLUMN_DEF_SCAFFOLD_TXT_PATH =
+            "fixedcolumndef/fixedColumnDefScaffoldTemplate.txt";
     // Mirrors xlsxSchemaTemplate.stg's rowEntry(row)/JSON shape (sans the optional "cells" section), but
     // reads straight off the "rows"/"dataset.PK.rows" attributes that unit=table + the unitSetting sample
     // resource (xlsxschema/xlsxSchemaSettings.json, using the same "separate"-into-a-named-PK-table idiom
     // as sql/ddlSettings.json) already provide, since generateType=txt has no Java-side precomputation.
-    private static final String XLSX_SCHEMA_SCAFFOLD_STG = """
-            rowEntry() ::= <<
-                {
-                  "sheetName": "$tableName$"
-                 ,"tableName": "$tableName$"
-                 ,"header": [$rows:{row | "$row.COLUMN_NAME$"}; separator=","$]
-                 ,"dataStart": 1
-                 ,"columnIndex": [$rows:{row | $i0$}; separator=","$]
-                 ,"breakKey": [$if(dataset.PK.rows)$$dataset.PK.rows:{row | "$row.COLUMN_NAME$"}; separator=","$$else$"$first(rows).COLUMN_NAME$"$endif$]
-                }
-            >>
-            """;
-    private static final String XLSX_SCHEMA_SCAFFOLD_TXT = """
-            {
-              "rows": [
-                $rowEntry()$
-              ]
-            }
-            """;
+    private static final String XLSX_SCHEMA_SCAFFOLD_STG_PATH = "xlsxschema/xlsxSchemaScaffoldTemplate.stg";
+    private static final String XLSX_SCHEMA_SCAFFOLD_TXT_PATH = "xlsxschema/xlsxSchemaScaffoldTemplate.txt";
 
     public ScaffoldOption(final String resultFile, final ScaffoldDto dto, final Parameter param) {
         this(param
@@ -345,16 +323,13 @@ public record ScaffoldOption(
 
     private void writeSchemaTemplate(final File templateDir, final String name, final boolean isXlsxSchema)
             throws IOException {
-        if (isXlsxSchema) {
-            Files.writeString(new File(templateDir, name + ".stg").toPath(),
-                               ScaffoldOption.XLSX_SCHEMA_SCAFFOLD_STG, StandardCharsets.UTF_8);
-        } else {
-            this.copyClasspathResource(GenerateType.fixedColumnDef.getStgPath(), new File(templateDir, name + ".stg"));
-        }
-        Files.writeString(new File(templateDir, name + ".txt").toPath(),
-                           isXlsxSchema ? ScaffoldOption.XLSX_SCHEMA_SCAFFOLD_TXT
-                                   : ScaffoldOption.FIXED_COLUMN_DEF_SCAFFOLD_TXT,
-                           StandardCharsets.UTF_8);
+        this.copyClasspathResource(
+                isXlsxSchema ? ScaffoldOption.XLSX_SCHEMA_SCAFFOLD_STG_PATH : GenerateType.fixedColumnDef.getStgPath(),
+                new File(templateDir, name + ".stg"));
+        this.copyClasspathResource(
+                isXlsxSchema ? ScaffoldOption.XLSX_SCHEMA_SCAFFOLD_TXT_PATH
+                        : ScaffoldOption.FIXED_COLUMN_DEF_SCAFFOLD_TXT_PATH,
+                new File(templateDir, name + ".txt"));
     }
 
     private void writeSchemaParamFile(final File paramDir, final String templateFileName,
