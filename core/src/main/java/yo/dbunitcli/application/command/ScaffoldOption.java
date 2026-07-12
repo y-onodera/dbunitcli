@@ -1,5 +1,6 @@
 package yo.dbunitcli.application.command;
 
+import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTable;
@@ -67,18 +68,21 @@ public record ScaffoldOption(
     // generateType=txt template with no Java-side precomputation, so writeDatasetSrcFiles instead
     // writes each target's dataset src rows directly in the shape its ScaffoldTemplate consumes,
     // keeping the unitSetting sample resource free of column-renaming/derivation busywork.
-    // SHEET_NAME/DATA_START/COLUMN_INDEX are seeded with the same values the built-in
+    // SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS are seeded with the same values the built-in
     // -generateType=xlsxSchema would compute (sheet name == table name, dataStart 1, positional
-    // index), but unlike the built-in generateType they're plain editable cells here: the fixed
-    // generateType=xlsxSchema can never produce a sheetName that differs from tableName, a
-    // non-default dataStart, or a non-contiguous columnIndex, since those are hardcoded in
-    // GenerateType.xlsxSchema.write(); editing this dataset is the only way to get that.
+    // index, POI CellReference(dataStart, columnIndex)), but unlike the built-in generateType
+    // they're plain editable cells here: the fixed generateType=xlsxSchema can never produce a
+    // sheetName that differs from tableName, a non-default dataStart, a non-contiguous columnIndex,
+    // or a cellAddress pointing anywhere but the default grid position, since those are hardcoded
+    // in GenerateType.xlsxSchema.write(); editing this dataset is the only way to get that.
+    private static final int XLSX_SCHEMA_DEFAULT_DATA_START = 1;
     private static final Column[] XLSX_SCHEMA_DATASET_COLUMNS = {
             new Column("COLUMN_NAME", DataType.VARCHAR),
             new Column("IS_PK", DataType.VARCHAR),
             new Column("SHEET_NAME", DataType.VARCHAR),
             new Column("DATA_START", DataType.VARCHAR),
-            new Column("COLUMN_INDEX", DataType.VARCHAR)
+            new Column("COLUMN_INDEX", DataType.VARCHAR),
+            new Column("CELL_ADDRESS", DataType.VARCHAR)
     };
     private static final Column[] FIXED_COLUMN_DEF_DATASET_COLUMNS = {
             new Column("name", DataType.VARCHAR),
@@ -88,9 +92,9 @@ public record ScaffoldOption(
     };
     // These are scaffold-only sample resources, deliberately NOT wired through
     // GenerateType.defaultSettingsPath(): that hook is a global default applied to every plain
-    // -generateType=xlsxSchema/fixedColumnDef invocation (even outside scaffold), and the "separate into a
-    // PK table" rule below only makes sense against the dummy src this scaffold writes, not an arbitrary
-    // real dataset.
+    // -generateType=xlsxSchema/fixedColumnDef invocation (even outside scaffold), and the "separate into
+    // named PK/CELLS sub-tables" rules below only make sense against the dummy src this scaffold writes,
+    // not an arbitrary real dataset.
     private static final String XLSX_SCHEMA_SAMPLE_SETTINGS_PATH = "xlsxschema/xlsxSchemaSettings.json";
     private static final String FIXED_COLUMN_DEF_SAMPLE_SETTINGS_PATH = "fixedcolumndef/fixedColumnDefSettings.json";
     // fixedColumnDefTemplate.stg's columnEntry(col) macro is reused byte-for-byte (copied from the
@@ -101,12 +105,14 @@ public record ScaffoldOption(
     // derive and is kept as an empty placeholder for callers who want to add filtering/renaming later.
     private static final String FIXED_COLUMN_DEF_SCAFFOLD_TXT_PATH =
             "fixedcolumndef/fixedColumnDefScaffoldTemplate.txt";
-    // Mirrors xlsxSchemaTemplate.stg's rowEntry(row)/JSON shape (sans the optional "cells" section), but
-    // reads straight off the "rows"/"dataset.PK.rows" attributes that unit=table + the unitSetting sample
-    // resource (xlsxschema/xlsxSchemaSettings.json, using the same "separate"-into-a-named-PK-table idiom
-    // as sql/ddlSettings.json) already provide, since generateType=txt has no Java-side precomputation.
-    // IS_PK is the one column that genuinely needs the unitSetting's PK split; every other JSON field
-    // (sheetName/dataStart/columnIndex/header/breakKey) reads straight off a same-named dataset column.
+    // Mirrors xlsxSchemaTemplate.stg's rowEntry(row)/cellEntry(cell) JSON shape (both "rows" and "cells"
+    // sections), reading straight off the "rows"/"dataset.PK.rows"/"dataset.CELLS.rows" attributes that
+    // unit=table + the unitSetting sample resource (xlsxschema/xlsxSchemaSettings.json) already provide,
+    // since generateType=txt has no Java-side precomputation. IS_PK is the one column that genuinely
+    // needs the unitSetting's PK split; the CELLS split is a plain identity rename (no filter) so the
+    // "cells" section can be customized (filtered/reordered) independently of "rows" later without
+    // touching this template. Every JSON field (sheetName/dataStart/columnIndex/cellAddress/header/
+    // breakKey) reads straight off a same-named dataset column.
     private static final String XLSX_SCHEMA_SCAFFOLD_STG_PATH = "xlsxschema/xlsxSchemaScaffoldTemplate.stg";
     private static final String XLSX_SCHEMA_SCAFFOLD_TXT_PATH = "xlsxschema/xlsxSchemaScaffoldTemplate.txt";
 
@@ -327,11 +333,15 @@ public record ScaffoldOption(
     }
 
     private Object[] buildXlsxSchemaRow(final String columnName, final String tableName, final int columnIndex) {
-        // order must match XLSX_SCHEMA_DATASET_COLUMNS: COLUMN_NAME, IS_PK, SHEET_NAME, DATA_START, COLUMN_INDEX.
+        // order must match XLSX_SCHEMA_DATASET_COLUMNS: COLUMN_NAME, IS_PK, SHEET_NAME, DATA_START,
+        // COLUMN_INDEX, CELL_ADDRESS.
         // SHEET_NAME/DATA_START are per-table, not per-column, but every row is seeded with the same
         // value since the template (rowEntry()) only reads first(rows).SHEET_NAME/first(rows).DATA_START:
         // edit them consistently across a table's rows, since only the first row's value takes effect.
-        return new Object[]{columnName, "", tableName, "1", String.valueOf(columnIndex)};
+        final String cellAddress =
+                new CellReference(XLSX_SCHEMA_DEFAULT_DATA_START, columnIndex).formatAsString();
+        return new Object[]{columnName, "", tableName, String.valueOf(XLSX_SCHEMA_DEFAULT_DATA_START),
+                String.valueOf(columnIndex), cellAddress};
     }
 
     private Object[] buildFixedColumnDefRow(final String columnName) {

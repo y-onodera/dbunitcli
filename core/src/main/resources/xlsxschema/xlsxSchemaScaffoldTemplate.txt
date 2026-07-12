@@ -2,4 +2,7 @@
   "rows": [
     $rowEntry()$
   ]
+ ,"cells": [
+    $cellEntry()$
+  ]
 }

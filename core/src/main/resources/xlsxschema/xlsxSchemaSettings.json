@@ -1,7 +1,7 @@
 {
   "settings": [
     {
-      "pattern": {"regex": ".*", "exclude": ["PK"]},
+      "pattern": {"regex": ".*", "exclude": ["PK", "CELLS"]},
       "separate": [
         {
           "boolean": {
@@ -14,6 +14,9 @@
           "boolean": {
             "IS_PK": "IS_PK"
           }
+        },
+        {
+          "tableName": "CELLS"
         }
       ]
     }

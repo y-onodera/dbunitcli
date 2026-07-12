@@ -8,3 +8,12 @@ rowEntry() ::= <<
      ,"breakKey": [$if(dataset.PK.rows)$$dataset.PK.rows:{row | "$row.COLUMN_NAME$"}; separator=","$$else$"$first(rows).COLUMN_NAME$"$endif$]
     }
 >>
+
+cellEntry() ::= <<
+    {
+      "sheetName": "$first(dataset.CELLS.rows).SHEET_NAME$"
+     ,"tableName": "$tableName$"
+     ,"header": [$dataset.CELLS.rows:{row | "$row.COLUMN_NAME$"}; separator=","$]
+     ,"rows": [{"cellAddress": [$dataset.CELLS.rows:{row | "$row.CELL_ADDRESS$"}; separator=","$]}]
+    }
+>>
