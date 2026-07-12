@@ -1,23 +1,19 @@
 rowEntry(row) ::= <<
     {
-      "sheetName": "$row.sheetName$"
+      "sheetName": "$first(row.rows).SHEET_NAME$"
      ,"tableName": "$row.tableName$"
-     ,"header": [$row.header:{h | "$h$"}; separator=","$]
-     ,"dataStart": $row.dataStart$
-     ,"columnIndex": [$row.header:{h | $i0$}; separator=","$]
-     ,"breakKey": [$row.breakKey:{k | "$k$"}; separator=","$]
+     ,"header": [$row.rows:{r | "$r.COLUMN_NAME$"}; separator=","$]
+     ,"dataStart": $first(row.rows).DATA_START$
+     ,"columnIndex": [$row.rows:{r | $r.COLUMN_INDEX$}; separator=","$]
+     ,"breakKey": [$if(row.dataset.PK.rows)$$row.dataset.PK.rows:{r | "$r.COLUMN_NAME$"}; separator=","$$else$"$first(row.rows).COLUMN_NAME$"$endif$]
     }
 >>
 
-cellAddressEntry(r) ::= <<
-{"cellAddress": [$r:{a | "$a$"}; separator=","$]}
->>
-
-cellEntry(cell) ::= <<
+cellEntry(row) ::= <<
     {
-      "sheetName": "$cell.sheetName$"
-     ,"tableName": "$cell.tableName$"
-     ,"header": [$cell.header:{h | "$h$"}; separator=","$]
-     ,"rows": [$cell.rows:{r | $cellAddressEntry(r)$}; separator=","$]
+      "sheetName": "$first(row.dataset.CELLS.rows).SHEET_NAME$"
+     ,"tableName": "$row.tableName$"
+     ,"header": [$row.dataset.CELLS.rows:{r | "$r.COLUMN_NAME$"}; separator=","$]
+     ,"rows": [{"cellAddress": [$row.dataset.CELLS.rows:{r | "$r.CELL_ADDRESS$"}; separator=","$]}]
     }
 >>

@@ -1,0 +1,20 @@
+{
+  "rows": [
+    {
+      "sheetName": "Test2"
+     ,"tableName": "Test2"
+     ,"header": ["PrimaryKey","ColumnA","ColumnB"]
+     ,"dataStart": 1
+     ,"columnIndex": [0,1,2]
+     ,"breakKey": ["PrimaryKey"]
+    }
+  ]
+ ,"cells": [
+    {
+      "sheetName": "Test2"
+     ,"tableName": "Test2"
+     ,"header": ["PrimaryKey","ColumnA","ColumnB"]
+     ,"rows": [{"cellAddress": ["A2","B2","C2"]}]
+    }
+  ]
+}

@@ -185,12 +185,14 @@ public class GenerateTest {
         public void testGenerateXlsxSchema() throws Exception {
             Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateXlsxSchema.txt"});
             GenerateTest.subDirectory = "generate/xlsxSchema";
-            this.assertGenerateFileEquals("xlsxSchema.json", "UTF-8");
-            final XlsxSchema schema = new FromJsonXlsxSchemaBuilder()
-                    .build(new File(this.getResult(), "xlsxSchema.json"));
-            Assertions.assertTrue(schema.contains("Test1"));
-            Assertions.assertTrue(schema.contains("Test2"));
-            Assertions.assertTrue(schema.contains("Test3"));
+            this.assertGenerateFileEquals("Test1.json", "UTF-8");
+            this.assertGenerateFileEquals("Test2.json", "UTF-8");
+            this.assertGenerateFileEquals("Test3.json", "UTF-8");
+            for (final String tableName : new String[]{"Test1", "Test2", "Test3"}) {
+                final XlsxSchema schema = new FromJsonXlsxSchemaBuilder()
+                        .build(new File(this.getResult(), tableName + ".json"));
+                Assertions.assertTrue(schema.contains(tableName));
+            }
         }
 
         @Test

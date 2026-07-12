@@ -118,7 +118,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
             return this.resultPath + "/" + this.sqlFilePrefix + tableName + this.sqlFileSuffix + ".sql";
         }
-        if (this.generateType() == GenerateType.fixedColumnDef) {
+        if (Stream.of(GenerateType.fixedColumnDef, GenerateType.xlsxSchema)
+                  .anyMatch(it -> it == this.generateType())) {
             final String tableName = this.templateOption.getTemplateRender().getAttributeName("tableName");
             return this.resultPath + "/" + tableName + ".json";
         }
