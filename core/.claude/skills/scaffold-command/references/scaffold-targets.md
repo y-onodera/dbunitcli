@@ -42,9 +42,23 @@ Scaffoldはtargetを`generateType=txt -unit=table`で駆動し、dataset(1行=1�
 
 両方を満たせない場合のみ`{typeName}ScaffoldTemplate.stg`および/または`.txt`を新設する。現状: `ddl`/`javaBean`/`xlsxSchema`はいずれも組み込みを完全流用（専用ファイルなし）、`fixedColumnDef`のみ`.stg`は流用・`.txt`のみ専用。
 
-## 未対応target
+## setting雛型の再利用パターン: JSON駆動 vs write()駆動
 
-`settings` / `sql` / `xlsxTemplate` は `ScaffoldOption.execute()` にこれらを判定する分岐が存在せず、`-target`にこれらを指定しても何も出力されない。追加する場合は本ファイル冒頭の表と同じ観点（setting/template/dataset/parameter雛型それぞれ何が必要か）を設計してから実装する。
+上記2条件を満たしテンプレートが流用できても、「1行=1カラム」のdatasetを最終形（PK/CELLSサブテーブル等）へ変換するロジックの所在によって、setting雛型の作り方・実装コストが変わる。
+
+- **`defaultSettingsPath()`の宣言的JSON（ddl/javaBean）**: `sql/ddlSettings.json`・`javabean/javaBeanSettings.json`は、列名キーの`separate`/`string`/`boolean`変換ルールだけで構成され、値が実DBメタデータ由来でもScaffoldのダミー空値でも同じルールで変換できる。そのため`copySettingResource()`で組み込みJSONをそのまま`-unitSetting`としてコピーするだけで済み、Scaffold側にJava変換コードは要らない
+- **`write()`内のJavaコード（xlsxSchema/fixedColumnDef）**: `defaultSettingsPath()`を持たず、`GenerateType.xxx.write()`内のJavaロジック（`toSchemaTable()`/`FixedColumnDef`構築等）が変換を担う。`generateType=txt`はこの`write()`を経由しないため、Scaffold側で同じ変換を`buildXlsxSchemaRow()`/`buildFixedColumnDefRow()`として複製し、専用のサンプルunitSetting（`xlsxSchemaSettings.json`等、`defaultSettingsPath()`とは別物）を用意している
+
+新target追加時、対応するGenerateTypeが`defaultSettingsPath()`を持つなら実装コストは低い（JSONコピーのみ）。`write()`側にロジックがあるなら、Scaffold側でのJava変換複製が必要になる点を見積もりに入れる。
+
+## 未対応target・非対応の理由
+
+`settings` / `sql` / `xlsxTemplate` は `ScaffoldOption.execute()` にこれらを判定する分岐が存在せず、`-target`にこれらを指定しても何も出力されない。理由はtargetごとに異なる:
+
+- `settings` / `xlsxTemplate`: `getFixedUnit()`が`dataset`固定（上記条件2を満たさない）。table固定への変更が前提（`xlsxSchema`の前例を参照）
+- `sql`: `getFixedUnit()`は`table`だが、テンプレート（`sqlTemplate.stg`の`insert()`/`update()`/`delete()`にある`value(row,column)`マクロ）が`rows`を「テーブル定義」ではなく「対象テーブルの実データレコード」として読み、`row.(column.columnName)`の値をそのままSQLへ埋め込む。Scaffoldが作れるのは列名だけのダミー行（値は空・機械生成、列定義1件=1行）なので、`-unitSetting`分割を通しても実データが必要な箇所は空のままで意味のあるSQLにならない。ddl/javaBean/xlsxSchema/fixedColumnDefが`rows`を「列定義の一覧」として読む（例: `ddlTemplate.stg`の`$row.COLUMN_NAME$`/`$row.TYPE_NAME$`）のとは対照的（`GenerateOption.dataSetParam()`の`loadData`/`useJdbcMetaData`はddl/javaBean/sqlで同一設定であり、この違いを生む要因ではない点に注意）
+
+追加する場合は本ファイル冒頭の表と同じ観点（setting/template/dataset/parameter雛型それぞれ何が必要か）に加え、上記の非対応理由を解消できるかを設計してから実装する。
 
 ## テストの場所
 
