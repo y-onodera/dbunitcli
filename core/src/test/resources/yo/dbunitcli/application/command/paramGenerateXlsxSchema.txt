@@ -2,4 +2,4 @@
 -src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv
 -encoding=UTF-8
 -generateType=xlsxSchema
--resultPath=target/test-classes/yo/dbunitcli/application/generate/xlsxSchema/result/xlsxSchema.json
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/xlsxSchema/result

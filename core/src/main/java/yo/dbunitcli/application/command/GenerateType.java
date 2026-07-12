@@ -131,11 +131,16 @@ public enum GenerateType {
 
         @Override
         public ParameterUnit getFixedUnit() {
-            return ParameterUnit.dataset;
+            return ParameterUnit.table;
         }
 
         private static final int DATA_START_ROW = 1;
 
+        // One output file per table (GenerateOption.resultPath()'s xlsxSchema branch appends
+        // "<tableName>.json"), matching ddl/javaBean/fixedColumnDef rather than the old single
+        // combined-schema file. unit=table's ComparableTableDto.resolve() hands write() a "dataSet" with
+        // exactly one entry per call, so the loop below (and the shared template's own "dataSet.values"
+        // iteration) needs no table-count-specific logic either way.
         // The shared xlsxSchemaTemplate.stg/.txt (also copied verbatim by Scaffold's xlsxSchema target, see
         // ScaffoldOption.writeSchemaTemplate) expect "dataSet" to hold, per table, a "one row per column"
         // shape: rows (COLUMN_NAME/SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS per column) plus
