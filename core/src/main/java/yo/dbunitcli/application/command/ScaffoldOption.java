@@ -1,9 +1,9 @@
 package yo.dbunitcli.application.command;
 
-import org.apache.poi.ss.util.CellReference;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTable;
+import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
@@ -14,12 +14,16 @@ import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
+import yo.dbunitcli.dataset.producer.ComparableFixedColumnDefMetaDataProducer;
+import yo.dbunitcli.dataset.producer.ComparableXlsxSchemaMetaDataProducer;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
@@ -29,7 +33,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public record ScaffoldOption(
@@ -65,32 +71,19 @@ public record ScaffoldOption(
     private static final String DDL_SCHEMA_HEADER_NAMES = ScaffoldOption.headerNames(DDL_SCHEMA_COLUMNS);
     // Unlike DDL_SCHEMA_COLUMNS (generic DDL-shaped dummy row, needed by ddl/javaBean's own settings
     // json to derive TYPE_NAME/COLUMN_SIZE/... columns), xlsxSchema/fixedColumnDef drive a custom
-    // generateType=txt template with no Java-side precomputation, so writeDatasetSrcFiles instead
-    // writes each target's dataset src rows directly in the shape GenerateType.xlsxSchema's shared
-    // rowEntry(row)/cellEntry(row) macros consume (see GenerateType.xlsxSchema.toColumnRow()), keeping
-    // the unitSetting sample resource free of column-renaming/derivation busywork.
-    // SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS are seeded with the same values the built-in
-    // -generateType=xlsxSchema would compute (sheet name == table name, dataStart 1, positional
-    // index, POI CellReference(dataStart, columnIndex)), but unlike the built-in generateType
-    // they're plain editable cells here: the fixed generateType=xlsxSchema can never produce a
-    // sheetName that differs from tableName, a non-default dataStart, a non-contiguous columnIndex,
-    // or a cellAddress pointing anywhere but the default grid position, since those are hardcoded
-    // in GenerateType.xlsxSchema.write(); editing this dataset is the only way to get that.
-    private static final int XLSX_SCHEMA_DEFAULT_DATA_START = 1;
-    private static final Column[] XLSX_SCHEMA_DATASET_COLUMNS = {
-            new Column("COLUMN_NAME", DataType.VARCHAR),
-            new Column("IS_PK", DataType.VARCHAR),
-            new Column("SHEET_NAME", DataType.VARCHAR),
-            new Column("DATA_START", DataType.VARCHAR),
-            new Column("COLUMN_INDEX", DataType.VARCHAR),
-            new Column("CELL_ADDRESS", DataType.VARCHAR)
-    };
-    private static final Column[] FIXED_COLUMN_DEF_DATASET_COLUMNS = {
-            new Column("name", DataType.VARCHAR),
-            new Column("length", DataType.VARCHAR),
-            new Column("align", DataType.VARCHAR),
-            new Column("pad", DataType.VARCHAR)
-    };
+    // generateType=txt template with no Java-side precomputation, so writeWrappedDatasetSrcFiles
+    // instead sources dataset rows directly from ComparableXlsxSchemaMetaDataProducer/
+    // ComparableFixedColumnDefMetaDataProducer (dataset/producer/) — the same
+    // ComparableDataSetProducerWrapper subclasses GenerateType.xlsxSchema/fixedColumnDef.wrapProducer()
+    // uses, just instantiated directly here instead of via wrapProducer()/write() (generateType=txt has
+    // no Java-side precomputation step to hook into). SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS
+    // and IS_PK are therefore real computed values (real primary-key metadata when available, e.g. via
+    // -dataset.useJdbcMetaData=true) rather than blank placeholders — still plain editable cells the
+    // user can freely override, since the fixed generateType=xlsxSchema can never itself produce a
+    // sheetName that differs from tableName, a non-default dataStart, a non-contiguous columnIndex, or
+    // a cellAddress pointing anywhere but the default grid position.
+    private static final int FIXED_COLUMN_DEF_DEFAULT_LENGTH = 10;
+    private static final String FIXED_COLUMN_DEF_DEFAULT_ALIGN = "left";
     // These are scaffold-only sample resources, deliberately NOT wired through
     // GenerateType.defaultSettingsPath(): that hook is a global default applied to every plain
     // -generateType=xlsxSchema/fixedColumnDef invocation (even outside scaffold), and the "separate into
@@ -100,8 +93,9 @@ public record ScaffoldOption(
     private static final String FIXED_COLUMN_DEF_SAMPLE_SETTINGS_PATH = "fixedcolumndef/fixedColumnDefSettings.json";
     // fixedColumnDefTemplate.stg's columnEntry(col) macro is reused byte-for-byte (copied from the
     // classpath); only this driving .txt differs from the built-in one, iterating "rows" (the per-column
-    // descriptor rows written by writeDatasetSrcFiles, already in name/length/align/pad shape) instead of
-    // the Java-precomputed "columns" list, since generateType=txt has no Java-side precomputation step.
+    // descriptor rows written by writeWrappedDatasetSrcFiles, already in name/length/align/pad shape)
+    // instead of the Java-precomputed "columns" list, since generateType=txt has no Java-side
+    // precomputation step.
     // The unitSetting sample resource (fixedcolumndef/fixedColumnDefSettings.json) has nothing left to
     // derive and is kept as an empty placeholder for callers who want to add filtering/renaming later.
     private static final String FIXED_COLUMN_DEF_SCAFFOLD_TXT_PATH =
@@ -187,11 +181,15 @@ public record ScaffoldOption(
                                 : ScaffoldOption.FIXED_COLUMN_DEF_SAMPLE_SETTINGS_PATH,
                         new File(settingDir, unitSettingFileName + ".json"));
             }
-            final Column[] datasetColumns =
-                    generateXlsxSchema ? XLSX_SCHEMA_DATASET_COLUMNS : FIXED_COLUMN_DEF_DATASET_COLUMNS;
-            this.writeDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR), datasetColumns,
-                                      generateXlsxSchema ? this::buildXlsxSchemaRow
-                                              : (col, tbl, idx) -> this.buildFixedColumnDefRow(col));
+            final Column[] datasetColumns = generateXlsxSchema
+                    ? ComparableXlsxSchemaMetaDataProducer.outputSchema()
+                    : ComparableFixedColumnDefMetaDataProducer.outputSchema();
+            final ComparableDataSetProducer sourceProducer = this.sourceProducer();
+            final ComparableDataSetProducerWrapper wrapped = generateXlsxSchema
+                    ? new ComparableXlsxSchemaMetaDataProducer(sourceProducer)
+                    : new ComparableFixedColumnDefMetaDataProducer(sourceProducer, new String[0],
+                                                                    FIXED_COLUMN_DEF_DEFAULT_LENGTH, FIXED_COLUMN_DEF_DEFAULT_ALIGN);
+            this.writeWrappedDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR), wrapped);
             if (templateDir.mkdirs() || templateDir.isDirectory()) {
                 this.writeSchemaTemplate(templateDir, name, generateXlsxSchema);
             }
@@ -273,44 +271,53 @@ public record ScaffoldOption(
         };
     }
 
-    @FunctionalInterface
-    private interface DatasetRowBuilder {
-        Object[] build(String columnName, String tableName, int columnIndex);
-    }
-
     private void writeDatasetSrcFiles(final File srcDir) throws IOException {
-        this.writeDatasetSrcFiles(srcDir, DDL_SCHEMA_COLUMNS, (col, tbl, idx) -> this.buildSchemaRow(col, tbl));
-    }
-
-    private void writeDatasetSrcFiles(final File srcDir, final Column[] schemaColumns,
-                                       final DatasetRowBuilder rowBuilder) throws IOException {
-        if (!srcDir.mkdirs() && !srcDir.isDirectory()) {
-            return;
-        }
         final ComparableDataSet dataSet = this.loadDatasetForSrc();
-        final IDataSetConverter converter = this.createSrcConverter(srcDir);
+        final List<DefaultTable> tables = new ArrayList<>();
         try {
-            converter.startDataSet();
             for (final String tableName : dataSet.getTableNames()) {
                 final Column[] sourceColumns = dataSet.getTable(tableName).getTableMetaData().getColumns();
-                final DefaultTable schemaTable = new DefaultTable(tableName, schemaColumns);
-                int columnIndex = 0;
+                final DefaultTable schemaTable = new DefaultTable(tableName, DDL_SCHEMA_COLUMNS);
                 for (final Column column : sourceColumns) {
-                    schemaTable.addRow(rowBuilder.build(column.getColumnName(), tableName, columnIndex++));
+                    schemaTable.addRow(this.buildSchemaRow(column.getColumnName(), tableName));
                 }
-                converter.convert(schemaTable);
+                tables.add(schemaTable);
             }
-            converter.endDataSet();
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
+        this.writeConverted(srcDir, tables);
+    }
+
+    private void writeWrappedDatasetSrcFiles(final File srcDir,
+                                              final ComparableDataSetProducerWrapper wrapped) throws IOException {
+        this.writeConverted(srcDir, Arrays.asList(wrapped.loadDataSet().getTables()));
+    }
+
+    private void writeConverted(final File srcDir, final Iterable<? extends ITable> tables) throws IOException {
+        if (!srcDir.mkdirs() && !srcDir.isDirectory()) {
+            return;
+        }
+        final IDataSetConverter converter = this.createSrcConverter(srcDir);
+        converter.startDataSet();
+        for (final ITable table : tables) {
+            converter.convert(table);
+        }
+        converter.endDataSet();
     }
 
     private ComparableDataSet loadDatasetForSrc() {
-        final ComparableDataSetParam param = this.dataset.getParam()
+        return this.sourceProducer().loadDataSet();
+    }
+
+    private ComparableDataSetProducer sourceProducer() {
+        return new ComparableDataSetLoader(this.parameter).getComparableDataSetProducer(this.sourceParam());
+    }
+
+    private ComparableDataSetParam sourceParam() {
+        return this.dataset.getParam()
                 .setLoadData(false)
                 .build();
-        return new ComparableDataSetLoader(this.parameter).loadDataSet(param);
     }
 
     private IDataSetConverter createSrcConverter(final File srcDir) {
@@ -328,23 +335,6 @@ public record ScaffoldOption(
         // order must match DDL_SCHEMA_COLUMNS: COLUMN_NAME, TYPE_NAME, COLUMN_SIZE, DECIMAL_DIGITS,
         // NULLABLE, IS_PK, PK_NAME, REMARKS, TABLE_REMARKS, TABLE_NAME, PACKAGE
         return new Object[]{columnName, "", "", "", "", "", "", "", "", tableName, ""};
-    }
-
-    private Object[] buildXlsxSchemaRow(final String columnName, final String tableName, final int columnIndex) {
-        // order must match XLSX_SCHEMA_DATASET_COLUMNS: COLUMN_NAME, IS_PK, SHEET_NAME, DATA_START,
-        // COLUMN_INDEX, CELL_ADDRESS.
-        // SHEET_NAME/DATA_START are per-table, not per-column, but every row is seeded with the same
-        // value since rowEntry(row) only reads first(row.rows).SHEET_NAME/first(row.rows).DATA_START:
-        // edit them consistently across a table's rows, since only the first row's value takes effect.
-        final String cellAddress =
-                new CellReference(XLSX_SCHEMA_DEFAULT_DATA_START, columnIndex).formatAsString();
-        return new Object[]{columnName, "", tableName, String.valueOf(XLSX_SCHEMA_DEFAULT_DATA_START),
-                String.valueOf(columnIndex), cellAddress};
-    }
-
-    private Object[] buildFixedColumnDefRow(final String columnName) {
-        // order must match FIXED_COLUMN_DEF_DATASET_COLUMNS: name, length, align, pad
-        return new Object[]{columnName, "10", "left", " "};
     }
 
     private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {

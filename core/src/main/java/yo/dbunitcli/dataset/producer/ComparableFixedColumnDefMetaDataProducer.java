@@ -28,6 +28,10 @@ public class ComparableFixedColumnDefMetaDataProducer extends ComparableDataSetP
         this.align = align;
     }
 
+    public static Column[] outputSchema() {
+        return COLUMN_DEF_SCHEMA.clone();
+    }
+
     @Override
     public void startTable(final ITableMetaData metaData) throws DataSetException {
         this.writeColumnRows(metaData.getTableName(), COLUMN_DEF_SCHEMA, metaData.getColumns(), (column, index) -> {

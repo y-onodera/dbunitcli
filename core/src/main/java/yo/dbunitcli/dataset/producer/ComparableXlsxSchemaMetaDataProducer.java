@@ -29,6 +29,10 @@ public class ComparableXlsxSchemaMetaDataProducer extends ComparableDataSetProdu
         super(delegate);
     }
 
+    public static Column[] outputSchema() {
+        return COLUMN_DEF_SCHEMA.clone();
+    }
+
     @Override
     public void startTable(final ITableMetaData metaData) throws DataSetException {
         final String tableName = metaData.getTableName();

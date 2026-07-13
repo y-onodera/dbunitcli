@@ -16,7 +16,7 @@
 
 loadData/useJdbcMetaDataは`GenerateType`の`loadData()`/`useJdbcMetaData()`をオーバーライドして決まる（デフォルトは`loadData()=true`, `useJdbcMetaData()=false`）。`GenerateOption.dataSetParam()`はこの2メソッドを呼ぶだけで、switch分岐は持たない。
 
-`xlsxSchema`/`fixedColumnDef`は追加で`wrapProducer(option, producer)`をoverrideし、`ComparableDataSetProducerWrapper`のサブクラス（`ComparableXlsxSchemaMetaDataProducer`/`ComparableFixedColumnDefMetaDataProducer`、`dataset/producer/`配下）でproducerをラップする。ラップされたproducerは`ParameterUnit.table.templateStream()`（`producer.lazyLoad(true)`経由）でのみ消費されるため、`unit=table`固定の2タイプ以外でoverrideしても反映されない点に注意。テーブルの実列メタデータから「列ごとに1行」を合成する変換（Excelセル位置計算・固定長定義生成など）が必要な場合はこのフックを使う。
+`xlsxSchema`/`fixedColumnDef`は追加で`wrapProducer(option, producer)`をoverrideし、`ComparableDataSetProducerWrapper`のサブクラス（`ComparableXlsxSchemaMetaDataProducer`/`ComparableFixedColumnDefMetaDataProducer`、`dataset/producer/`配下）でproducerをラップする。ラップされたproducerは`ParameterUnit.table.templateStream()`（`producer.lazyLoad(true)`経由）でのみ消費されるため、`unit=table`固定の2タイプ以外でoverrideしても反映されない点に注意。テーブルの実列メタデータから「列ごとに1行」を合成する変換（Excelセル位置計算・固定長定義生成など）が必要な場合はこのフックを使う。これら2つの`ComparableDataSetProducerWrapper`サブクラスはGenerate専用ではなく、`ScaffoldOption`（`scaffold-command`スキル参照）も`wrapProducer()`/`write()`を経由せず直接インスタンス化して、ダミーdataset生成の初期値算出に再利用している。
 
 固定成果物タイプはすべて`-template`での差し替えを持たない（組み込みテンプレート専用）。`ddl`/`javaBean`相当の内容を組み込み以外のテンプレートで生成したい場合は、`generateType=txt`＋`unit=table`＋`unitSetting`（既定値は各`defaultSettingsPath()`と同じ設定ファイルを流用可）を使う。
 
