@@ -1,0 +1,5 @@
+-srcType=csv
+-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv
+-encoding=UTF-8
+-generateType=fixedColumnDef
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/fixedColumnDef/result
