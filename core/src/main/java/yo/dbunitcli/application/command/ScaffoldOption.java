@@ -91,22 +91,9 @@ public record ScaffoldOption(
     // not an arbitrary real dataset.
     private static final String XLSX_SCHEMA_SAMPLE_SETTINGS_PATH = "xlsxschema/xlsxSchemaSettings.json";
     private static final String FIXED_COLUMN_DEF_SAMPLE_SETTINGS_PATH = "fixedcolumndef/fixedColumnDefSettings.json";
-    // fixedColumnDefTemplate.stg's columnEntry(col) macro is reused byte-for-byte (copied from the
-    // classpath); only this driving .txt differs from the built-in one, iterating "rows" (the per-column
-    // descriptor rows written by writeWrappedDatasetSrcFiles, already in name/length/align/pad shape)
-    // instead of the Java-precomputed "columns" list, since generateType=txt has no Java-side
-    // precomputation step.
-    // The unitSetting sample resource (fixedcolumndef/fixedColumnDefSettings.json) has nothing left to
-    // derive and is kept as an empty placeholder for callers who want to add filtering/renaming later.
-    private static final String FIXED_COLUMN_DEF_SCAFFOLD_TXT_PATH =
-            "fixedcolumndef/fixedColumnDefScaffoldTemplate.txt";
-    // Unlike fixedColumnDef/ddl/javaBean, xlsxSchema doesn't need a Scaffold-only *ScaffoldTemplate.stg/.txt:
-    // GenerateType.xlsxSchema.getStgPath()/getTemplatePath() (xlsxschema/xlsxSchemaTemplate.stg,.txt) are
-    // copied byte-for-byte. Their rowEntry(row)/cellEntry(row) macros read row.tableName/row.rows/
-    // row.dataset.PK.rows/row.dataset.CELLS.rows, and the driving .txt iterates "dataSet.values" — the same
-    // attribute names GenerateType.xlsxSchema.write() builds from real Column[]/primaryKeys[] metadata
-    // AND that unit=table's own ComparableTableDto.resolve() already exposes per table (tableName/rows/
-    // dataset), so the identical template works unmodified against either source.
+    // The fixedColumnDef unitSetting sample resource (fixedcolumndef/fixedColumnDefSettings.json) has
+    // nothing left to derive and is kept as an empty placeholder for callers who want to add
+    // filtering/renaming later.
 
     public ScaffoldOption {
         if (datasetType == ResultType.format) {
@@ -376,13 +363,9 @@ public record ScaffoldOption(
 
     private void writeSchemaTemplate(final File templateDir, final String name, final boolean isXlsxSchema)
             throws IOException {
-        this.copyClasspathResource(
-                isXlsxSchema ? GenerateType.xlsxSchema.getStgPath() : GenerateType.fixedColumnDef.getStgPath(),
-                new File(templateDir, name + ".stg"));
-        this.copyClasspathResource(
-                isXlsxSchema ? GenerateType.xlsxSchema.getTemplatePath()
-                        : ScaffoldOption.FIXED_COLUMN_DEF_SCAFFOLD_TXT_PATH,
-                new File(templateDir, name + ".txt"));
+        final GenerateType generateType = isXlsxSchema ? GenerateType.xlsxSchema : GenerateType.fixedColumnDef;
+        this.copyClasspathResource(generateType.getStgPath(), new File(templateDir, name + ".stg"));
+        this.copyClasspathResource(generateType.getTemplatePath(), new File(templateDir, name + ".txt"));
     }
 
     private void writeSchemaParamFile(final File paramDir, final String templateFileName,

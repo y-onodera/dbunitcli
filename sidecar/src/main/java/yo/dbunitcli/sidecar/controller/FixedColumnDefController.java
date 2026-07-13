@@ -24,7 +24,7 @@ public class FixedColumnDefController extends AbstractResourceFileController<Fix
     protected String serializeJson(final FixedColumnDefRequestDto body) {
         final ST st = new ST(GenerateType.fixedColumnDef.getStGroup(),
                 GenerateType.fixedColumnDef.getTemplateString(null));
-        st.add("columns", body.getInput().getColumns().stream()
+        st.add("rows", body.getInput().getColumns().stream()
                 .map(col -> new FixedColumnDef(col.name(), col.length(),
                         col.align(), col.pad()))
                 .toList());

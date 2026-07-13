@@ -267,16 +267,6 @@ public enum GenerateType {
                     Strings.isNotEmpty(option.fixedLength()) ? option.fixedLength().split(",") : new String[0];
             return new ComparableFixedColumnDefMetaDataProducer(producer, lengths, option.defaultLength(), option.align());
         }
-
-        // wrapProducer() above (ComparableFixedColumnDefMetaDataProducer) already produces one "rows" entry
-        // per column, shaped as name/length/align/pad - the same keys fixedColumnDefTemplate.stg expects on
-        // each "columns" entry - so write() only needs to rename the key.
-        @Override
-        @SuppressWarnings("unchecked")
-        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
-                throws IOException {
-            super.write(option, resultFile, param.add("columns", param.get("rows")));
-        }
     };
 
     private final String stgPath;

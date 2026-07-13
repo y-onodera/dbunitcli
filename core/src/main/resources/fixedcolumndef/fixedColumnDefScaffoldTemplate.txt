@@ -1,5 +1,0 @@
-{
-  "columns": [
-$rows:{col | $columnEntry(col)$}; separator=","$
-  ]
-}
