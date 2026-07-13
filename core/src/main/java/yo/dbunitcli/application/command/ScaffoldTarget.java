@@ -1,6 +1,8 @@
 package yo.dbunitcli.application.command;
 
 import org.dbunit.dataset.Column;
+import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
 import yo.dbunitcli.dataset.producer.ComparableDdlMetaDataProducer;
@@ -84,9 +86,6 @@ enum ScaffoldTarget {
         }
     },
     fixedColumnDef(GenerateType.fixedColumnDef) {
-        private static final int DEFAULT_LENGTH = 10;
-        private static final String DEFAULT_ALIGN = "left";
-
         // 空のプレースホルダー（列の絞り込み・改名を後から足したい利用者向け）
         @Override
         String sampleUnitSettingPath() {
@@ -100,12 +99,22 @@ enum ScaffoldTarget {
 
         @Override
         ComparableDataSetProducerWrapper wrapProducer(final ScaffoldOption option, final ComparableDataSetProducer source) {
-            return new ComparableFixedColumnDefMetaDataProducer(source, new String[0], DEFAULT_LENGTH, DEFAULT_ALIGN);
+            final String[] lengths = Strings.isNotEmpty(option.fixedLength())
+                    ? option.fixedLength().split(",") : new String[0];
+            return new ComparableFixedColumnDefMetaDataProducer(source, lengths,
+                                                                option.defaultLength(), option.align());
         }
 
         @Override
         String customTemplateResultPath() {
             return "$param.tableName$.json";
+        }
+
+        @Override
+        void putBuiltinExtraParams(final ScaffoldOption option, final Option.ParametersBuilder builder) {
+            builder.put("-fixedLength", option.fixedLength())
+                   .put("-defaultLength", Integer.toString(option.defaultLength()))
+                   .put("-align", option.align());
         }
     };
 
@@ -145,4 +154,8 @@ enum ScaffoldTarget {
 
     /** カスタムテンプレート（generateType=txt）駆動時の-resultPathパターン */
     abstract String customTemplateResultPath();
+
+    /** 組み込みgenerateType駆動の.paramに追記するtarget固有オプション */
+    void putBuiltinExtraParams(final ScaffoldOption option, final Option.ParametersBuilder builder) {
+    }
 }

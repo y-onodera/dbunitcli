@@ -24,11 +24,41 @@ public class ScaffoldDto extends CommandDto {
     private String parameterName;
     @CommandLine.Option(names = "-commandType", description = "commandType for parameter generation")
     private String commandType;
+    @CommandLine.Option(names = "-fixedLength", description = "comma-separated column lengths for fixedColumnDef dataset template")
+    private String fixedLength;
+    @CommandLine.Option(names = "-defaultLength", description = "default column length for fixedColumnDef dataset template (default: 10)")
+    private String defaultLength;
+    @CommandLine.Option(names = "-align", description = "column alignment for fixedColumnDef dataset template: left or right (default: left)")
+    private String align;
 
     private String[] commandInput = new String[0];
 
     public String getCommandType() {
         return this.commandType;
+    }
+
+    public String getFixedLength() {
+        return this.fixedLength;
+    }
+
+    public void setFixedLength(final String fixedLength) {
+        this.fixedLength = fixedLength;
+    }
+
+    public String getDefaultLength() {
+        return this.defaultLength;
+    }
+
+    public void setDefaultLength(final String defaultLength) {
+        this.defaultLength = defaultLength;
+    }
+
+    public String getAlign() {
+        return this.align;
+    }
+
+    public void setAlign(final String align) {
+        this.align = align;
     }
 
     public void setCommandType(final String commandType) {

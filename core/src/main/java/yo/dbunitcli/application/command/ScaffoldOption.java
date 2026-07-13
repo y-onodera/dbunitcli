@@ -41,6 +41,9 @@ public record ScaffoldOption(
         , DataSetLoadOption dataset
         , ResultType datasetType
         , String datasetEncoding
+        , String fixedLength
+        , int defaultLength
+        , String align
 ) implements CommandLineOption<ScaffoldDto> {
 
     private static final String COMMAND_INPUT_PREFIX = "-commandInput.";
@@ -65,6 +68,9 @@ public record ScaffoldOption(
                 , new DataSetLoadOption("dataset", dto.getDatasetDto(), true)
                 , dto.getDatasetType() != null ? dto.getDatasetType() : ResultType.csv
                 , Strings.isNotEmpty(dto.getDatasetEncoding()) ? dto.getDatasetEncoding() : "UTF-8"
+                , Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : ""
+                , Strings.isNotEmpty(dto.getDefaultLength()) ? Integer.parseInt(dto.getDefaultLength()) : 10
+                , Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left"
         );
     }
 
@@ -147,6 +153,11 @@ public record ScaffoldOption(
               .put("-template", this.templateName)
               .put("-parameter", this.parameterName);
         result.put("-commandType", this.commandType);
+        if (ScaffoldTarget.fixedColumnDef.name().equals(this.target)) {
+            result.put("-fixedLength", this.fixedLength)
+                  .put("-defaultLength", Integer.toString(this.defaultLength))
+                  .put("-align", this.align);
+        }
         Arrays.stream(this.commandInput)
               .filter(arg -> arg.startsWith("-"))
               .forEach(arg -> {
@@ -227,6 +238,7 @@ public record ScaffoldOption(
             // 組み込みgenerateTypeはloadData()=falseで元ソースのメタデータから記述子行を合成するため、
             // -settingを書くと変換ルールが合成前の元ソース列に対して評価されてしまう（unitSettingのみ有効）
             builder.put("-generateType", scaffoldTarget.generateType().name(), false);
+            scaffoldTarget.putBuiltinExtraParams(this, builder);
         }
         if (Strings.isNotEmpty(this.unitSettingName)) {
             builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");

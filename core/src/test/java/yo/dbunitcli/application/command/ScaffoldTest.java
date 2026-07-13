@@ -371,6 +371,26 @@ public class ScaffoldTest {
                 assertTrue(TestCase.this.resultFile("fixedColumnDef/unitSetting",
                                                      "resources/setting/fixedColumnDefUnit.json").exists());
             }
+
+            @Test
+            public void testLengthAndAlignOptions() throws Exception {
+                TestCase.this.scaffold("fixedColumnDef/length", "-target=fixedColumnDef",
+                                       "-parameter=fixedColumnDef", "-fixedLength=5",
+                                       "-defaultLength=20", "-align=right",
+                                       "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                final File srcFile = TestCase.this.resultFile("fixedColumnDef/length", "src/SAMPLE.csv");
+                assertTrue(srcFile.exists());
+                final List<String> srcLines = Files.readAllLines(srcFile.toPath(), StandardCharsets.UTF_8);
+                // 先頭列(id)は-fixedLengthの5、以降の列は-defaultLengthの20
+                assertTrue(srcLines.stream().anyMatch(l -> l.contains("\"id\",\"5\",\"right\"")));
+                assertTrue(srcLines.stream().anyMatch(l -> l.contains("\"name\",\"20\",\"right\"")));
+                final List<String> lines = Files.readAllLines(
+                        TestCase.this.resultFile("fixedColumnDef/length", "option/fixedColumnDef.param").toPath(),
+                        StandardCharsets.UTF_8);
+                assertTrue(lines.stream().anyMatch(l -> l.equals("-fixedLength=5")));
+                assertTrue(lines.stream().anyMatch(l -> l.equals("-defaultLength=20")));
+                assertTrue(lines.stream().anyMatch(l -> l.equals("-align=right")));
+            }
         }
 
         @Nested
