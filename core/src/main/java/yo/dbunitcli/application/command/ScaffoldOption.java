@@ -108,6 +108,13 @@ public record ScaffoldOption(
     // AND that unit=table's own ComparableTableDto.resolve() already exposes per table (tableName/rows/
     // dataset), so the identical template works unmodified against either source.
 
+    public ScaffoldOption {
+        if (datasetType == ResultType.format) {
+            throw new AssertionError("-datasetType=format is not supported. use csv, xls, xlsx, fixed or table",
+                                     new IllegalArgumentException(String.valueOf(datasetType)));
+        }
+    }
+
     public ScaffoldOption(final String resultFile, final ScaffoldDto dto, final Parameter param) {
         this(param
                 , Strings.isNotEmpty(dto.getResultDir()) ? dto.getResultDir() : resultFile
@@ -243,13 +250,6 @@ public record ScaffoldOption(
         return result;
     }
 
-    private DataSourceType resolveDataSourceType() {
-        return switch (this.datasetType) {
-            case csv, xls, xlsx, fixed, table -> this.datasetType.toDataSourceType();
-            default -> null;
-        };
-    }
-
     private boolean hasDataset() {
         return this.dataset != null
                 && this.dataset.srcType() != null
@@ -258,17 +258,11 @@ public record ScaffoldOption(
     }
 
     private boolean isHeaderlessDataset() {
-        return switch (this.datasetType) {
-            case format, fixed -> true;
-            case csv, xls, xlsx, table -> false;
-        };
+        return this.datasetType == ResultType.fixed;
     }
 
     private boolean usesDatasetEncoding() {
-        return switch (this.datasetType) {
-            case csv, format, fixed -> true;
-            case xls, xlsx, table -> false;
-        };
+        return this.datasetType == ResultType.csv || this.datasetType == ResultType.fixed;
     }
 
     private void writeDatasetSrcFiles(final File srcDir) throws IOException {
@@ -374,10 +368,7 @@ public record ScaffoldOption(
 
     private void addDatasetSrcParams(final ParametersBuilder builder) {
         builder.put("-src.src", DATASET_SRC_DIR);
-        final DataSourceType srcType = this.resolveDataSourceType();
-        if (srcType != null) {
-            builder.put("-src.srcType", srcType.name());
-        }
+        builder.put("-src.srcType", this.datasetType.toDataSourceType().name());
         if (this.usesDatasetEncoding()) {
             builder.put("-encoding", this.datasetEncoding);
         }

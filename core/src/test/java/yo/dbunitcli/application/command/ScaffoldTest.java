@@ -352,6 +352,16 @@ public class ScaffoldTest {
             }
 
             @Test
+            public void testDatasetTypeFormatRejected() {
+                final org.junit.jupiter.api.function.Executable scaffold = () ->
+                        TestCase.this.scaffold("dataset/ddl-format", "-target=ddl",
+                                               "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv",
+                                               "-datasetType=format");
+                final AssertionError error = org.junit.jupiter.api.Assertions.assertThrows(AssertionError.class, scaffold);
+                assertTrue(error.getMessage().contains("format"));
+            }
+
+            @Test
             public void testNoDatasetOptionNoSrcDir() {
                 TestCase.this.scaffold("dataset/no-dataset", "-target=ddl", "-parameter=ddl");
                 assertFalse(TestCase.this.resultFile("dataset/no-dataset", "src").exists());

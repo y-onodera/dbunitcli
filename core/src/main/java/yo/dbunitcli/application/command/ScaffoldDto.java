@@ -7,7 +7,7 @@ import yo.dbunitcli.dataset.ResultType;
 
 public class ScaffoldDto extends CommandDto {
 
-    @CommandLine.Option(names = "-datasetType", description = "output format for dataset src template (default: csv)")
+    @CommandLine.Option(names = "-datasetType", description = "output format for dataset src template: csv, xls, xlsx, fixed or table (default: csv)")
     private ResultType datasetType;
     @CommandLine.Option(names = "-datasetEncoding", description = "output encoding for dataset src template (not used for xls/xlsx, default: UTF-8)")
     private String datasetEncoding;
