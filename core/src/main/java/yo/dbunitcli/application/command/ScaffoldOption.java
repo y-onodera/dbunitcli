@@ -320,30 +320,49 @@ public record ScaffoldOption(
 
     private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {
         final ParametersBuilder builder = new ParametersBuilder();
-        if (Strings.isNotEmpty(this.templateName)) {
+        final boolean customTemplate = Strings.isNotEmpty(this.templateName);
+        if (customTemplate) {
             // A custom template is driven through generateType=txt + unitSetting, reusing the same
             // rows/tableName/dataset.PK attributes the built-in ddl/javaBean templates already rely on.
             this.putTemplateGenerationParams(builder, this.templateName);
             builder.put("-resultPath", isDdl ? "$param.tableName$.sql"
                     : new TemplateRender.Builder().build().getAttributeName("tableName", "snakeToUpperCamel") + ".java");
+            if (Strings.isNotEmpty(this.settingName)) {
+                builder.put("-setting", "resources/setting/" + this.settingName + ".json");
+            }
         } else {
+            // 組み込みgenerateTypeはloadData()=falseで元ソースのメタデータから記述子行を合成するため、
+            // -settingを書くと変換ルールが合成前の元ソース列に対して評価されてしまう（unitSettingのみ有効）
             builder.put("-generateType", isDdl ? GenerateType.ddl.name() : GenerateType.javaBean.name(), false);
-        }
-        if (Strings.isNotEmpty(this.settingName)) {
-            builder.put("-setting", "resources/setting/" + this.settingName + ".json");
         }
         if (Strings.isNotEmpty(this.unitSettingName)) {
             builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
         }
         builder.putDir("-result", this.resultDir, BaseDir.RESULT);
         if (this.hasDataset()) {
-            this.addDatasetSrcParams(builder);
-            if (this.isHeaderlessDataset()) {
-                builder.put("-headerName", ScaffoldOption.DDL_SCHEMA_HEADER_NAMES);
+            if (customTemplate) {
+                this.addDatasetSrcParams(builder);
+                if (this.isHeaderlessDataset()) {
+                    builder.put("-headerName", ScaffoldOption.DDL_SCHEMA_HEADER_NAMES);
+                }
+            } else {
+                this.addOriginalDatasetSrcParams(builder);
             }
         }
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
                     builder.build().toList(false), StandardCharsets.UTF_8);
+    }
+
+    // 組み込みgenerateTypeで駆動する.paramは、scaffoldが書き出した記述子datasetではなく
+    // 元の-dataset.*をsrc.*として再現する（組み込み型は元ソースから記述子行を合成するため）。
+    // .paramは別workspaceでも実行されるため-src.srcは絶対パスへ解決して書き出す
+    private void addOriginalDatasetSrcParams(final ParametersBuilder builder) {
+        this.dataset.toParametersBuilder().build().toList(false).forEach(line -> {
+            final int eqIdx = line.indexOf('=');
+            builder.put(line.substring(0, eqIdx).replaceFirst("^-dataset\\.", "-src."), line.substring(eqIdx + 1));
+        });
+        builder.put("-src.src",
+                    FileResources.searchDatasetBase(this.dataset.src()).getAbsolutePath().replace('\\', '/'));
     }
 
     private void putTemplateGenerationParams(final ParametersBuilder builder, final String templateFileName) {

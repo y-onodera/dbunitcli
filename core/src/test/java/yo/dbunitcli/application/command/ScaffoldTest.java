@@ -334,7 +334,20 @@ public class ScaffoldTest {
                 final File paramFile = TestCase.this.resultFile("dataset/ddl-param", "option/ddl.param");
                 assertTrue(paramFile.exists());
                 final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-src.src=src")));
+                // 組み込みgenerateTypeは元ソースから記述子行を合成するため、元datasetの絶対パスを参照する
+                assertTrue(lines.stream().anyMatch(l -> l.startsWith("-src.src=")
+                        && l.replace('\\', '/').endsWith("scaffold/src")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-src.srcType=csv")));
+            }
+
+            @Test
+            public void testDatasetParamFileWithTemplateReferencesScaffoldSrc() throws Exception {
+                TestCase.this.scaffold("dataset/ddl-param-template", "-target=ddl", "-parameter=ddl",
+                                       "-template=ddl", "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+                final File paramFile = TestCase.this.resultFile("dataset/ddl-param-template", "option/ddl.param");
+                assertTrue(paramFile.exists());
+                final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
+                assertTrue(lines.stream().anyMatch(l -> l.equals("-src.src=src")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-src.srcType=csv")));
             }
 
@@ -369,7 +382,7 @@ public class ScaffoldTest {
 
             @Test
             public void testDatasetEncodingInParamFile() throws Exception {
-                TestCase.this.scaffold("dataset/ddl-encoding", "-target=ddl", "-parameter=ddl",
+                TestCase.this.scaffold("dataset/ddl-encoding", "-target=ddl", "-parameter=ddl", "-template=ddl",
                                        "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv",
                                        "-datasetEncoding=Shift_JIS");
                 final List<String> lines = Files.readAllLines(

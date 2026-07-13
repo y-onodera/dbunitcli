@@ -5,6 +5,7 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.producer.ComparableDdlMetaDataProducer;
 import yo.dbunitcli.dataset.producer.ComparableFixedColumnDefMetaDataProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxSchemaMetaDataProducer;
 import yo.dbunitcli.resource.FileResources;
@@ -127,8 +128,18 @@ public enum GenerateType {
         }
 
         @Override
+        protected boolean loadData() {
+            return false;
+        }
+
+        @Override
         protected boolean useJdbcMetaData() {
             return true;
+        }
+
+        @Override
+        protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
+            return new ComparableDdlMetaDataProducer(producer);
         }
 
         @Override
@@ -232,8 +243,18 @@ public enum GenerateType {
         }
 
         @Override
+        protected boolean loadData() {
+            return false;
+        }
+
+        @Override
         protected boolean useJdbcMetaData() {
             return true;
+        }
+
+        @Override
+        protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
+            return new ComparableDdlMetaDataProducer(producer);
         }
 
         @Override

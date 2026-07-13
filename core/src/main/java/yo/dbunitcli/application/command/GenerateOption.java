@@ -178,7 +178,10 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
-        if (Strings.isEmpty(this.srcData.getSetting())) {
+        // defaultSettingsPath()のロード時適用は、実データ行をテンプレートへ渡す型（loadData=true）にのみ意味がある。
+        // wrapProducer()で記述子行を合成する型（loadData=false）に適用すると、変換ルールが合成前の
+        // 元ソース列に対して評価され、余計な列が記述子に混入する
+        if (this.generateType().loadData() && Strings.isEmpty(this.srcData.getSetting())) {
             final TableSeparators defaultTableSeparators = this.classpathDefaultTableSeparators(this.srcData.settingEncoding());
             if (defaultTableSeparators != null) {
                 builder.setTableSeparators(defaultTableSeparators);

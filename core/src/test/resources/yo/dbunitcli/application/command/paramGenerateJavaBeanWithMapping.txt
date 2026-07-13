@@ -4,5 +4,8 @@
 -setting=src/test/resources/yo/dbunitcli/application/command/javaBeanMappingSettings.json
 -unitSetting=src/test/resources/yo/dbunitcli/application/command/javaBeanMappingSettings.json
 -settingEncoding=UTF-8
--generateType=javaBean
--resultPath=target/test-classes/yo/dbunitcli/application/generate/javabean/result
+-generateType=txt
+-unit=table
+-template=src/main/resources/javabean/javaBeanTemplate.txt
+-template.templateGroup=src/main/resources/javabean/javaBeanTemplate.stg
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/javabean/result/$param.tableName; format="snakeToUpperCamel"$.java
