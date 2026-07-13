@@ -9,6 +9,7 @@
 | `command/ScaffoldDto.java` | `-target` の説明文（対応target一覧）を更新 |
 | `command/ScaffoldOption.java` | `execute()` に新規target分岐を追加。ddl/javaBeanは`-template`指定時、組み込み`.stg/.txt`をそのままコピーし`.param`は`generateType=txt`＋`unitSetting`で組み込みと同内容を再現する（`writeGenericParamFile()`） |
 | `src/main/resources/{typeName}/{typeName}ScaffoldTemplate.stg,.txt` | 組み込み`.stg/.txt`を無改造流用できない場合のみ必要な専用雛型（判定基準は本ファイル「専用ScaffoldTemplate要否の判定」節） |
+| `src/main/resources/{typeName}/{typeName}Settings.json` | `defaultSettingsPath()`を持たないtarget（wrapProducer型）のみ必要なScaffold専用サンプルunitSetting（本ファイル「setting雛型の再利用パターン」節） |
 | `command/ScaffoldTest.java` | targetごとの`@Nested`テストクラス。setting/unitSetting/template/parameterの単体・組み合わせ・カスタムファイル名パターン |
 
 ## 対応target と出力ファイル
@@ -24,8 +25,11 @@
 | `parameter` | なし（`-commandType`必須） | — | — | — | `CommandParameters(Type, commandInput).shrink()`で任意コマンドの`.param`を生成 |
 
 補足:
+- 出力先はsetting=`resources/setting/`、template=`resources/template/`、parameter=`option/`、dataset=`src/`。`.param`内の`-setting`/`-template`/`-src.src`はこの相対配置を前提に書き出されるため、ディレクトリ構成を変える場合は`.param`生成側も追従が必要
+- `ddl`/`javaBean`は各雛型が対応オプション指定で独立に出力されるが、`xlsxSchema`/`fixedColumnDef`は分岐全体が`hasDataset()`で括られており、`-dataset.*`未指定だとsetting/template/parameterも一切出力されない
 - `ddl`/`javaBean`のparameter雛型: `-template`未指定なら`-generateType=ddl`（javaBeanは`javaBean`）、指定時は組み込みテンプレートと同内容を`generateType=txt -unit=table`＋コピーしたtemplate/templateGroup＋unitSettingで再現し、`-resultPath`にファイル名パターンを付与する（ddl: `$param.tableName$.sql`、javaBean: `$param.tableName; format="snakeToUpperCamel"$.java`）
 - `xlsxSchema`のparameter雛型: xlsxSchema自体ではなくtxt経由で同内容を再現する点に注意
+- `parameter` targetの出力ファイル名は`{commandType}.param`固定で、`-parameter`で指定した名前は使われない（他targetは`-parameter`の名前で出力）
 
 ## dataset雛型の中身
 
@@ -42,7 +46,7 @@
 
 Scaffoldはtargetを`generateType=txt -unit=table`で駆動し、dataset(1行=1列)を`unitSetting`の`separate`でPK等のサブテーブル（`dataset.PK.rows`等）に分けてテンプレートに渡す。組み込みの`generateType.getStgPath()/getTemplatePath()`を無改造でコピーして使えるのは、次の2条件を両方満たす時のみ：
 
-1. **組み込みマクロの引数がスカラーのみか**: 例えば`fixedColumnDef`の`columnEntry(col)`が使う`col.name/length/align/pad`はスカラーのみなので、Scaffoldの1行=1列datasetの各行がそのままマクロ引数になり`.stg`は無改造で流用できる。逆にリスト値フィールド（`List<String>`等）を要求するマクロは、ST4のテンプレート構文だけでは組み立てられない（`[k:v]`のようなマップ/集約リテラルは実行時の式としては存在せず、`.stg`ファイル冒頭のdictionary宣言でしか使えない）。この場合は組み込み側の`write()`をリファクタリングし、`row.rows`（列毎の生行リスト）／`row.dataset.<name>.rows`（`separate`と同じ形の派生サブテーブル）のような、Scaffoldのdatasetがunit=tableで自然に提供する形へ寄せることで無改造流用に持ち込める。現`xlsxSchema`がこの形の採用例で、列ごとの行合成自体は`GenerateType.xlsxSchema.wrapProducer()`が返す`ComparableXlsxSchemaMetaDataProducer`が担い、`write()`はPK/CELLS分割のみを行う薄いアダプタになっている。
+1. **組み込みマクロの引数がスカラーのみか**: 例えば`fixedColumnDef`の`columnEntry(col)`が使う`col.name/length/align/pad`はスカラーのみなので、Scaffoldの1行=1列datasetの各行がそのままマクロ引数になり`.stg`は無改造で流用できる。逆にリスト値フィールド（`List<String>`等）を要求するマクロは、ST4のテンプレート構文だけでは組み立てられない（`[k:v]`のようなマップ/集約リテラルは実行時の式としては存在せず、`.stg`ファイル冒頭のdictionary宣言でしか使えない）。この場合は組み込み側の`write()`をリファクタリングし、`row.rows`（列毎の生行リスト）／`row.dataset.<name>.rows`（`separate`と同じ形の派生サブテーブル）のような、Scaffoldのdatasetがunit=tableで自然に提供する形へ寄せることで無改造流用に持ち込める（採用例: 現`xlsxSchema`。行合成とwrite()の分担は「setting雛型の再利用パターン」節を参照）。
 2. **固定unitが`table`か**: `isFixedTemplate()=true`で`getFixedUnit()`が`table`以外（`dataset`等）だと`-unitSetting`が一切効かない（`GenerateOption.parameterStream()`は`unit==table`の時のみ`unitTableSeparators()`を評価するため）。この場合、組み込み側の`getFixedUnit()`自体を`table`に変更できないか検討する。変更する際は`resultPath()`のtypeName別自動命名分岐も追従が必要（`generate-command`スキル参照）。
 
 両方を満たせない場合のみ`{typeName}ScaffoldTemplate.stg`および/または`.txt`を新設する。現状: `ddl`/`javaBean`/`xlsxSchema`はいずれも組み込みを完全流用（専用ファイルなし）、`fixedColumnDef`のみ`.stg`は流用・`.txt`のみ専用。
