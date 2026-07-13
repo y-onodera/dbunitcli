@@ -9,6 +9,7 @@ import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
@@ -75,7 +76,10 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                     ? this.unit().lazyLoadStream(this.getComparableDataSetLoader(), this.dataSetParam())
                     : this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
         }
-        return this.unit().templateStream(this.getComparableDataSetLoader(), this.dataSetParam(),
+        final ComparableDataSetLoader loader = this.getComparableDataSetLoader();
+        final ComparableDataSetProducer producer = this.generateType()
+                .wrapProducer(this, loader.getComparableDataSetProducer(this.dataSetParam()));
+        return this.unit().templateStream(loader, producer,
                                           this.unit() == ParameterUnit.table ? this.unitTableSeparators() : TableSeparators.NONE);
     }
 

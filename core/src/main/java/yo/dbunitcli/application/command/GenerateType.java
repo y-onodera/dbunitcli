@@ -1,12 +1,12 @@
 package yo.dbunitcli.application.command;
 
-import org.apache.poi.ss.util.CellReference;
-import org.dbunit.dataset.Column;
 import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.common.Parameter;
-import yo.dbunitcli.dataset.converter.FixedColumnDef;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.producer.ComparableFixedColumnDefMetaDataProducer;
+import yo.dbunitcli.dataset.producer.ComparableXlsxSchemaMetaDataProducer;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
@@ -15,11 +15,9 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public enum GenerateType {
@@ -179,7 +177,10 @@ public enum GenerateType {
             return GenerateType.tableFileResultPath(option, ".json");
         }
 
-        private static final int DATA_START_ROW = 1;
+        @Override
+        protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
+            return new ComparableXlsxSchemaMetaDataProducer(producer);
+        }
 
         // One output file per table (see resultPathTemplate() above), matching ddl/javaBean/fixedColumnDef
         // rather than the old single combined-schema file. unit=table's ComparableTableDto.resolve() hands
@@ -188,30 +189,23 @@ public enum GenerateType {
         // The shared xlsxSchemaTemplate.stg/.txt (also copied verbatim by Scaffold's xlsxSchema target, see
         // ScaffoldOption.writeSchemaTemplate) expect "dataSet" to hold, per table, a "one row per column"
         // shape: rows (COLUMN_NAME/SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS per column) plus
-        // dataset.PK/dataset.CELLS sub-tables. This keeps rowEntry(row)/cellEntry(row) identical whether
-        // "dataSet" was built here (from real Column[]/primaryKeys[] metadata) or by Scaffold's unit=table +
-        // unitSetting "separate" (from a user-edited dummy dataset).
+        // dataset.PK/dataset.CELLS sub-tables. wrapProducer() above already produces "rows" in that shape
+        // from real table metadata (ComparableXlsxSchemaMetaDataProducer); here we only split PK vs all.
         @Override
         @SuppressWarnings("unchecked")
         protected void write(final GenerateOption option, final File resultFile, final Parameter param)
                 throws IOException {
             final Map<String, Map<String, Object>> dataSet = (Map<String, Map<String, Object>>) param.get("dataSet");
             final Map<String, Object> schemaDataSet = new LinkedHashMap<>();
-            dataSet.forEach((tableName, table) -> schemaDataSet.put(tableName, this.toSchemaTable(table)));
+            dataSet.forEach((tableName, table) -> schemaDataSet.put(tableName,
+                    this.toSchemaTable(tableName, (List<Map<String, Object>>) table.get("rows"))));
             super.write(option, resultFile, param.add("dataSet", schemaDataSet));
         }
 
-        private Map<String, Object> toSchemaTable(final Map<String, Object> table) {
-            final Column[] columns = (Column[]) table.get("columns");
-            final Column[] primaryKeys = (Column[]) table.get("primaryKeys");
-            final String tableName = table.get("tableName").toString();
-            final List<Map<String, Object>> rows = IntStream.range(0, columns.length)
-                    .mapToObj(i -> this.toColumnRow(columns[i].getColumnName(), tableName, i))
+        private Map<String, Object> toSchemaTable(final String tableName, final List<Map<String, Object>> rows) {
+            final List<Map<String, Object>> pkRows = rows.stream()
+                    .filter(row -> Boolean.TRUE.equals(row.get("IS_PK")))
                     .toList();
-            final Map<String, Map<String, Object>> columnRows = new LinkedHashMap<>();
-            rows.forEach(row -> columnRows.put(row.get("COLUMN_NAME").toString(), row));
-            final List<Map<String, Object>> pkRows = Arrays.stream(primaryKeys)
-                    .map(pk -> columnRows.get(pk.getColumnName())).toList();
             final Map<String, Object> dataset = new LinkedHashMap<>();
             dataset.put("PK", Map.of("rows", pkRows));
             dataset.put("CELLS", Map.of("rows", rows));
@@ -220,16 +214,6 @@ public enum GenerateType {
             result.put("rows", rows);
             result.put("dataset", dataset);
             return result;
-        }
-
-        private Map<String, Object> toColumnRow(final String columnName, final String tableName, final int columnIndex) {
-            final Map<String, Object> row = new LinkedHashMap<>();
-            row.put("COLUMN_NAME", columnName);
-            row.put("SHEET_NAME", tableName);
-            row.put("DATA_START", String.valueOf(DATA_START_ROW));
-            row.put("COLUMN_INDEX", String.valueOf(columnIndex));
-            row.put("CELL_ADDRESS", new CellReference(DATA_START_ROW, columnIndex).formatAsString());
-            return row;
         }
     }, javaBean("javabean/javaBeanTemplate.stg", "javabean/javaBeanTemplate.txt") {
         @Override
@@ -278,16 +262,20 @@ public enum GenerateType {
         }
 
         @Override
-        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
-                throws IOException {
-            final Column[] columns = (Column[]) param.get("columns");
+        protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
             final String[] lengths =
                     Strings.isNotEmpty(option.fixedLength()) ? option.fixedLength().split(",") : new String[0];
-            final List<FixedColumnDef> defs = IntStream.range(0, columns.length).mapToObj(
-                    i -> new FixedColumnDef(columns[i].getColumnName(),
-                                            i < lengths.length ? Integer.parseInt(lengths[i].trim()) :
-                                                    option.defaultLength(), option.align(), " ")).toList();
-            super.write(option, resultFile, param.add("columns", defs));
+            return new ComparableFixedColumnDefMetaDataProducer(producer, lengths, option.defaultLength(), option.align());
+        }
+
+        // wrapProducer() above (ComparableFixedColumnDefMetaDataProducer) already produces one "rows" entry
+        // per column, shaped as name/length/align/pad - the same keys fixedColumnDefTemplate.stg expects on
+        // each "columns" entry - so write() only needs to rename the key.
+        @Override
+        @SuppressWarnings("unchecked")
+        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
+                throws IOException {
+            super.write(option, resultFile, param.add("columns", param.get("rows")));
         }
     };
 
@@ -347,6 +335,13 @@ public enum GenerateType {
 
     protected boolean useJdbcMetaData() {
         return false;
+    }
+
+    // ParameterUnit.table.templateStream()のみがこの戻り値を消費する(producer.lazyLoad(true)経由)。
+    // unit=record/datasetはdataSetToStream(loader, producer.param())にフォールバックするため、
+    // ここをoverrideしてもunit=table以外では反映されない。
+    protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
+        return producer;
     }
 
     protected String resultPathTemplate(final GenerateOption option) {

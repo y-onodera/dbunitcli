@@ -1,6 +1,8 @@
 package yo.dbunitcli.dataset;
 
+import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.DefaultTableMetaData;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
 
@@ -63,6 +65,26 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
 
     protected ComparableTableMapper createOutputMapper(final TableMetaDataWithSource metaData) {
         return this.outputContext.createMapper(metaData);
+    }
+
+    /**
+     * サブクラス共通の「列メタデータを1列1行に変換する」処理。tableNameのSource.NONEラップ・
+     * DefaultTableMetaData生成・startTable/addRow/endTableの反復を一括で行う。
+     */
+    protected void writeColumnRows(final String tableName, final Column[] outputSchema,
+                                   final Column[] sourceColumns, final RowBuilder rowBuilder) {
+        final ComparableTableMapper mapper = this.createOutputMapper(
+                Source.NONE.tableName(tableName).wrap(new DefaultTableMetaData(tableName, outputSchema)));
+        mapper.startTable();
+        for (int i = 0; i < sourceColumns.length; i++) {
+            mapper.addRow(rowBuilder.buildRow(sourceColumns[i], i));
+        }
+        mapper.endTable();
+    }
+
+    @FunctionalInterface
+    protected interface RowBuilder {
+        Object[] buildRow(Column column, int index);
     }
 
     private final class DelegateCaptureTask implements ComparableTableMappingTask {

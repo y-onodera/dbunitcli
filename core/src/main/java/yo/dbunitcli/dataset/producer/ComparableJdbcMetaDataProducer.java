@@ -2,13 +2,10 @@ package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
-import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
-import yo.dbunitcli.dataset.ComparableTableMapper;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -67,13 +64,10 @@ public class ComparableJdbcMetaDataProducer extends ComparableDataSetProducerWra
                     : Arrays.stream(metaData.getPrimaryKeys())
                             .collect(Collectors.toMap(Column::getColumnName, column -> (String) null, (a, b) -> a, LinkedHashMap::new));
             final Map<String, ColumnDetail> columnDetails = this.jdbcMetaData != null ? loadColumnDetails(this.jdbcMetaData, tableName) : Map.of();
-            final ComparableTableMapper mapper = this.createOutputMapper(
-                    Source.NONE.tableName(tableName).wrap(new DefaultTableMetaData(tableName, COLUMN_DEF_SCHEMA)));
-            mapper.startTable();
-            for (final Column column : metaData.getColumns()) {
+            this.writeColumnRows(tableName, COLUMN_DEF_SCHEMA, metaData.getColumns(), (column, index) -> {
                 final String columnName = column.getColumnName();
                 final ColumnDetail detail = columnDetails.get(columnName);
-                mapper.addRow(new Object[]{
+                return new Object[]{
                         tableName,
                         tableRemarks,
                         columnName,
@@ -84,9 +78,8 @@ public class ComparableJdbcMetaDataProducer extends ComparableDataSetProducerWra
                         detail != null ? detail.remarks() : "",
                         pkNames.containsKey(columnName),
                         pkNames.get(columnName)
-                });
-            }
-            mapper.endTable();
+                };
+            });
         } catch (final SQLException e) {
             throw new AssertionError(e);
         }
