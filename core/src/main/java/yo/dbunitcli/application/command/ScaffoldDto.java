@@ -16,8 +16,6 @@ public class ScaffoldDto extends CommandDto {
     private String resultDir;
     @CommandLine.Option(names = "-target", description = "target to generate: ddl, javaBean, xlsxSchema, fixedColumnDef, or parameter (required, no default)")
     private String target;
-    @CommandLine.Option(names = "-setting", description = "setting file name to scaffold (omit to skip)")
-    private String settingName;
     @CommandLine.Option(names = "-unitSetting", description = "unitSetting file name to scaffold (omit to skip)")
     private String unitSettingName;
     @CommandLine.Option(names = "-template", description = "template file name to scaffold (omit to skip)")
@@ -59,14 +57,6 @@ public class ScaffoldDto extends CommandDto {
 
     public void setTarget(final String target) {
         this.target = target;
-    }
-
-    public String getSettingName() {
-        return this.settingName;
-    }
-
-    public void setSettingName(final String settingName) {
-        this.settingName = settingName;
     }
 
     public String getUnitSettingName() {

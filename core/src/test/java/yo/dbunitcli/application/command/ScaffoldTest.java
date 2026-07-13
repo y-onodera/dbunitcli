@@ -74,9 +74,8 @@ public class ScaffoldTest {
 
             @Test
             public void testAllFiles() throws Exception {
-                TestCase.this.scaffold("ddl/all", "-target=ddl", "-setting=ddl", "-unitSetting=ddlUnit",
+                TestCase.this.scaffold("ddl/all", "-target=ddl", "-unitSetting=ddlUnit",
                                        "-template=ddl", "-parameter=ddl");
-                assertTrue(TestCase.this.resultFile("ddl/all", "resources/setting/ddl.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/all", "resources/setting/ddlUnit.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/all", "resources/template/ddl.stg").exists());
                 assertTrue(TestCase.this.resultFile("ddl/all", "resources/template/ddl.txt").exists());
@@ -87,18 +86,9 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/ddl.txt")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/ddl.stg")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-setting=resources/setting/ddl.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/ddlUnit.json")));
+                assertFalse(lines.stream().anyMatch(l -> l.startsWith("-setting=")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-resultPath=$param.tableName$.sql")));
-            }
-
-            @Test
-            public void testSettingOnly() {
-                TestCase.this.scaffold("ddl/setting", "-target=ddl", "-setting=ddl");
-                assertTrue(TestCase.this.resultFile("ddl/setting", "resources/setting/ddl.json").exists());
-                assertFalse(TestCase.this.resultFile("ddl/setting", "resources/template/ddl.stg").exists());
-                assertFalse(TestCase.this.resultFile("ddl/setting", "resources/template/ddl.txt").exists());
-                assertFalse(TestCase.this.resultFile("ddl/setting", "option/ddl.param").exists());
             }
 
             @Test
@@ -136,17 +126,8 @@ public class ScaffoldTest {
             }
 
             @Test
-            public void testSettingAndTemplate() {
-                TestCase.this.scaffold("ddl/setting-template", "-target=ddl", "-setting=ddl", "-template=ddl");
-                assertTrue(TestCase.this.resultFile("ddl/setting-template", "resources/setting/ddl.json").exists());
-                assertTrue(TestCase.this.resultFile("ddl/setting-template", "resources/template/ddl.stg").exists());
-                assertTrue(TestCase.this.resultFile("ddl/setting-template", "resources/template/ddl.txt").exists());
-                assertFalse(TestCase.this.resultFile("ddl/setting-template", "option/ddl.param").exists());
-            }
-
-            @Test
             public void testCustomFileName() throws Exception {
-                TestCase.this.scaffold("ddl/custom", "-target=ddl", "-setting=myDdl", "-template=myDdl",
+                TestCase.this.scaffold("ddl/custom", "-target=ddl", "-unitSetting=myDdl", "-template=myDdl",
                                        "-parameter=myDdl");
                 assertTrue(TestCase.this.resultFile("ddl/custom", "resources/setting/myDdl.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/custom", "resources/template/myDdl.stg").exists());
@@ -158,7 +139,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/myDdl.txt")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/myDdl.stg")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-setting=resources/setting/myDdl.json")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/myDdl.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-resultPath=$param.tableName$.sql")));
             }
         }
@@ -168,9 +149,8 @@ public class ScaffoldTest {
 
             @Test
             public void testAllFiles() throws Exception {
-                TestCase.this.scaffold("javaBean/all", "-target=javaBean", "-setting=javaBean",
+                TestCase.this.scaffold("javaBean/all", "-target=javaBean",
                                        "-unitSetting=javaBeanUnit", "-template=javaBean", "-parameter=javaBean");
-                assertTrue(TestCase.this.resultFile("javaBean/all", "resources/setting/javaBean.json").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/setting/javaBeanUnit.json").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/template/javaBean.stg").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/template/javaBean.txt").exists());
@@ -181,7 +161,6 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/javaBean.txt")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/javaBean.stg")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-setting=resources/setting/javaBean.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/javaBeanUnit.json")));
                 assertTrue(lines.stream()
                                    .anyMatch(l -> l.contains(
@@ -190,7 +169,7 @@ public class ScaffoldTest {
 
             @Test
             public void testCustomFileName() throws Exception {
-                TestCase.this.scaffold("javaBean/custom", "-target=javaBean", "-setting=myBean", "-template=myBean",
+                TestCase.this.scaffold("javaBean/custom", "-target=javaBean", "-unitSetting=myBean", "-template=myBean",
                                        "-parameter=myBean");
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/setting/myBean.json").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.stg").exists());
@@ -202,7 +181,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/myBean.txt")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/myBean.stg")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-setting=resources/setting/myBean.json")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/myBean.json")));
                 assertTrue(lines.stream()
                                    .anyMatch(l -> l.contains(
                                            "-resultPath=$param.tableName; format=\"snakeToUpperCamel\"$.java")));
@@ -594,7 +573,7 @@ public class ScaffoldTest {
 
             private void assertScaffoldGenerates(final String target, final String subDir,
                                                   final String expectedOutput) throws Exception {
-                TestCase.this.scaffold(subDir, "-target=" + target, "-setting=" + target,
+                TestCase.this.scaffold(subDir, "-target=" + target,
                                        "-unitSetting=" + target + "Unit", "-parameter=" + target,
                                        "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
                 final File paramFile = TestCase.this.resultFile(subDir, "option/" + target + ".param");

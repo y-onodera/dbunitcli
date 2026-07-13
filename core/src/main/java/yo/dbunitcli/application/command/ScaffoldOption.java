@@ -33,7 +33,6 @@ public record ScaffoldOption(
         Parameter parameter
         , String resultDir
         , String target
-        , String settingName
         , String unitSettingName
         , String templateName
         , String parameterName
@@ -58,7 +57,6 @@ public record ScaffoldOption(
         this(param
                 , Strings.isNotEmpty(dto.getResultDir()) ? dto.getResultDir() : resultFile
                 , Strings.isNotEmpty(dto.getTarget()) ? dto.getTarget() : ""
-                , Strings.isNotEmpty(dto.getSettingName()) ? dto.getSettingName() : ""
                 , Strings.isNotEmpty(dto.getUnitSettingName()) ? dto.getUnitSettingName() : ""
                 , Strings.isNotEmpty(dto.getTemplateName()) ? dto.getTemplateName() : ""
                 , Strings.isNotEmpty(dto.getParameterName()) ? dto.getParameterName() : ""
@@ -105,14 +103,8 @@ public record ScaffoldOption(
     // 4target共通フロー: unitSetting/template/dataset/parameterの各雛型を、対応オプションが
     // 明示指定された時のみ独立に出力する（dataset雛型のみ-dataset.src/-dataset.srcTypeの指定が条件）
     private void executeTarget(final ScaffoldTarget scaffoldTarget, final File baseDir) throws IOException {
-        final File settingDir = new File(baseDir, FileResources.RESOURCES_SETTING_PATH);
-        if (Strings.isNotEmpty(this.settingName) && scaffoldTarget.generateType().defaultSettingsPath() != null) {
-            if (settingDir.mkdirs() || settingDir.isDirectory()) {
-                this.copyClasspathResource(scaffoldTarget.generateType().defaultSettingsPath(),
-                                           new File(settingDir, this.settingName + ".json"));
-            }
-        }
         if (Strings.isNotEmpty(this.unitSettingName)) {
+            final File settingDir = new File(baseDir, FileResources.RESOURCES_SETTING_PATH);
             if (settingDir.mkdirs() || settingDir.isDirectory()) {
                 this.copyClasspathResource(scaffoldTarget.sampleUnitSettingPath(),
                                            new File(settingDir, this.unitSettingName + ".json"));
@@ -151,8 +143,7 @@ public record ScaffoldOption(
         final ParametersBuilder result = new ParametersBuilder();
         result.putDir("-result", this.resultDir, BaseDir.RESULT)
               .put("-target", this.target);
-        result.put("-setting", this.settingName)
-              .put("-unitSetting", this.unitSettingName)
+        result.put("-unitSetting", this.unitSettingName)
               .put("-template", this.templateName)
               .put("-parameter", this.parameterName);
         result.put("-commandType", this.commandType);
@@ -232,10 +223,6 @@ public record ScaffoldOption(
             // 読むのと同じrows/tableName/dataset.PK属性を再現する（入力はscaffoldが書き出した記述子dataset）
             this.putTemplateGenerationParams(builder, this.templateName);
             builder.put("-resultPath", scaffoldTarget.customTemplateResultPath());
-            if (Strings.isNotEmpty(this.settingName)
-                    && scaffoldTarget.generateType().defaultSettingsPath() != null) {
-                builder.put("-setting", "resources/setting/" + this.settingName + ".json");
-            }
         } else {
             // 組み込みgenerateTypeはloadData()=falseで元ソースのメタデータから記述子行を合成するため、
             // -settingを書くと変換ルールが合成前の元ソース列に対して評価されてしまう（unitSettingのみ有効）
