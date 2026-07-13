@@ -24,7 +24,7 @@ loadData/useJdbcMetaDataは`GenerateType`の`loadData()`/`useJdbcMetaData()`を�
 
 ## Scaffoldとの結合
 
-固定成果物型（`isFixedTemplate()=true`）の`getFixedUnit()`/`write()`/テンプレート形は、`Scaffold`コマンドが`-target`で同名targetを持つ場合に直接影響する（`ScaffoldOption`が同じ`.stg`/`.txt`を流用またはミラーするため）。これらを変更する際は`scaffold-command`スキルの`references/scaffold-targets.md`（専用ScaffoldTemplate要否の判定基準）を確認すること。`xlsxSchema`は好例: 元々`unit=dataset`固定＋Java事前計算依存の`row.header`（`List<String>`）形だったためScaffold専用の`xlsxSchemaScaffoldTemplate.stg,.txt`が必要だったが、`getFixedUnit()`を`table`に変更し`write()`を`row.rows`/`row.dataset.<name>.rows`形（Scaffoldのdatasetがunit=tableで自然に提供する形）へ組み立て直したことで、Scaffold側も組み込み`xlsxSchemaTemplate.stg,.txt`を無改造で流用でき、専用ファイルを廃止できた。
+固定成果物型（`isFixedTemplate()=true`）の`getFixedUnit()`/`write()`/テンプレート形は、`Scaffold`コマンドが`-target`で同名targetを持つ場合に直接影響する（`ScaffoldOption`が同じ`.stg`/`.txt`を流用またはミラーするため）。これらを変更する際は`scaffold-command`スキルの`references/scaffold-targets.md`（専用ScaffoldTemplate要否の判定基準）を確認すること。
 
 ## unit
 
