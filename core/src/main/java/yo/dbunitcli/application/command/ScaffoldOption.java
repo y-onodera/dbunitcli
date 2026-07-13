@@ -1,10 +1,7 @@
 package yo.dbunitcli.application.command;
 
 import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultTable;
 import org.dbunit.dataset.ITable;
-import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
@@ -12,7 +9,6 @@ import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
-import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
@@ -22,6 +18,7 @@ import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
+import yo.dbunitcli.dataset.producer.ComparableDdlMetaDataProducer;
 import yo.dbunitcli.dataset.producer.ComparableFixedColumnDefMetaDataProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxSchemaMetaDataProducer;
 import yo.dbunitcli.resource.FileResources;
@@ -33,9 +30,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public record ScaffoldOption(
@@ -55,33 +50,12 @@ public record ScaffoldOption(
 
     private static final String COMMAND_INPUT_PREFIX = "-commandInput.";
     private static final String DATASET_SRC_DIR = "src";
-    private static final Column[] DDL_SCHEMA_COLUMNS = {
-            new Column("COLUMN_NAME", DataType.VARCHAR),
-            new Column("TYPE_NAME", DataType.VARCHAR),
-            new Column("COLUMN_SIZE", DataType.VARCHAR),
-            new Column("DECIMAL_DIGITS", DataType.VARCHAR),
-            new Column("NULLABLE", DataType.VARCHAR),
-            new Column("IS_PK", DataType.VARCHAR),
-            new Column("PK_NAME", DataType.VARCHAR),
-            new Column("REMARKS", DataType.VARCHAR),
-            new Column("TABLE_REMARKS", DataType.VARCHAR),
-            new Column("TABLE_NAME", DataType.VARCHAR),
-            new Column("PACKAGE", DataType.VARCHAR)
-    };
-    private static final String DDL_SCHEMA_HEADER_NAMES = ScaffoldOption.headerNames(DDL_SCHEMA_COLUMNS);
-    // Unlike DDL_SCHEMA_COLUMNS (generic DDL-shaped dummy row, needed by ddl/javaBean's own settings
-    // json to derive TYPE_NAME/COLUMN_SIZE/... columns), xlsxSchema/fixedColumnDef drive a custom
-    // generateType=txt template with no Java-side precomputation, so writeWrappedDatasetSrcFiles
-    // instead sources dataset rows directly from ComparableXlsxSchemaMetaDataProducer/
-    // ComparableFixedColumnDefMetaDataProducer (dataset/producer/) — the same
-    // ComparableDataSetProducerWrapper subclasses GenerateType.xlsxSchema/fixedColumnDef.wrapProducer()
-    // uses, just instantiated directly here instead of via wrapProducer()/write() (generateType=txt has
-    // no Java-side precomputation step to hook into). SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS
-    // and IS_PK are therefore real computed values (real primary-key metadata when available, e.g. via
-    // -dataset.useJdbcMetaData=true) rather than blank placeholders — still plain editable cells the
-    // user can freely override, since the fixed generateType=xlsxSchema can never itself produce a
-    // sheetName that differs from tableName, a non-default dataStart, a non-contiguous columnIndex, or
-    // a cellAddress pointing anywhere but the default grid position.
+    private static final String DDL_SCHEMA_HEADER_NAMES =
+            ScaffoldOption.headerNames(ComparableDdlMetaDataProducer.outputSchema());
+    // dataset雛型は4target共通で、GenerateType.wrapProducer()と同じComparableDataSetProducerWrapper
+    // サブクラスを直接インスタンス化し、実メタデータから記述子行を合成する（generateType=txt駆動には
+    // wrapProducer()のフックが無いため）。実メタデータの取れないソースでは列名・テーブル名以外が
+    // 空になり、ユーザーが編集する出発点になる
     private static final int FIXED_COLUMN_DEF_DEFAULT_LENGTH = 10;
     private static final String FIXED_COLUMN_DEF_DEFAULT_ALIGN = "left";
     // These are scaffold-only sample resources, deliberately NOT wired through
@@ -157,7 +131,8 @@ public record ScaffoldOption(
                 }
             }
             if (this.hasDataset()) {
-                this.writeDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR));
+                this.writeWrappedDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR),
+                                                 new ComparableDdlMetaDataProducer(this.sourceProducer()));
             }
             if (Strings.isNotEmpty(this.parameterName)) {
                 if (paramDir.mkdirs() || paramDir.isDirectory()) {
@@ -252,24 +227,6 @@ public record ScaffoldOption(
         return this.datasetType == ResultType.csv || this.datasetType == ResultType.fixed;
     }
 
-    private void writeDatasetSrcFiles(final File srcDir) throws IOException {
-        final ComparableDataSet dataSet = this.loadDatasetForSrc();
-        final List<DefaultTable> tables = new ArrayList<>();
-        try {
-            for (final String tableName : dataSet.getTableNames()) {
-                final Column[] sourceColumns = dataSet.getTable(tableName).getTableMetaData().getColumns();
-                final DefaultTable schemaTable = new DefaultTable(tableName, DDL_SCHEMA_COLUMNS);
-                for (final Column column : sourceColumns) {
-                    schemaTable.addRow(this.buildSchemaRow(column.getColumnName(), tableName));
-                }
-                tables.add(schemaTable);
-            }
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
-        this.writeConverted(srcDir, tables);
-    }
-
     private void writeWrappedDatasetSrcFiles(final File srcDir,
                                               final ComparableDataSetProducerWrapper wrapped) throws IOException {
         this.writeConverted(srcDir, Arrays.asList(wrapped.loadDataSet().getTables()));
@@ -285,10 +242,6 @@ public record ScaffoldOption(
             converter.convert(table);
         }
         converter.endDataSet();
-    }
-
-    private ComparableDataSet loadDatasetForSrc() {
-        return this.sourceProducer().loadDataSet();
     }
 
     private ComparableDataSetProducer sourceProducer() {
@@ -310,12 +263,6 @@ public record ScaffoldOption(
                 .setOutputEncoding(this.datasetEncoding)
                 .build();
         return new DataSetConverterLoader().get(converterParam);
-    }
-
-    private Object[] buildSchemaRow(final String columnName, final String tableName) {
-        // order must match DDL_SCHEMA_COLUMNS: COLUMN_NAME, TYPE_NAME, COLUMN_SIZE, DECIMAL_DIGITS,
-        // NULLABLE, IS_PK, PK_NAME, REMARKS, TABLE_REMARKS, TABLE_NAME, PACKAGE
-        return new Object[]{columnName, "", "", "", "", "", "", "", "", tableName, ""};
     }
 
     private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {
