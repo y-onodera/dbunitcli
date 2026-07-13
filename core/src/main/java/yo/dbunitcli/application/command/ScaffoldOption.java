@@ -18,11 +18,7 @@ import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
-import yo.dbunitcli.dataset.producer.ComparableDdlMetaDataProducer;
-import yo.dbunitcli.dataset.producer.ComparableFixedColumnDefMetaDataProducer;
-import yo.dbunitcli.dataset.producer.ComparableXlsxSchemaMetaDataProducer;
 import yo.dbunitcli.resource.FileResources;
-import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,24 +46,6 @@ public record ScaffoldOption(
 
     private static final String COMMAND_INPUT_PREFIX = "-commandInput.";
     private static final String DATASET_SRC_DIR = "src";
-    private static final String DDL_SCHEMA_HEADER_NAMES =
-            ScaffoldOption.headerNames(ComparableDdlMetaDataProducer.outputSchema());
-    // dataset雛型は4target共通で、GenerateType.wrapProducer()と同じComparableDataSetProducerWrapper
-    // サブクラスを直接インスタンス化し、実メタデータから記述子行を合成する（generateType=txt駆動には
-    // wrapProducer()のフックが無いため）。実メタデータの取れないソースでは列名・テーブル名以外が
-    // 空になり、ユーザーが編集する出発点になる
-    private static final int FIXED_COLUMN_DEF_DEFAULT_LENGTH = 10;
-    private static final String FIXED_COLUMN_DEF_DEFAULT_ALIGN = "left";
-    // These are scaffold-only sample resources, deliberately NOT wired through
-    // GenerateType.defaultSettingsPath(): that hook is a global default applied to every plain
-    // -generateType=xlsxSchema/fixedColumnDef invocation (even outside scaffold), and the "separate into
-    // named PK/CELLS sub-tables" rules below only make sense against the dummy src this scaffold writes,
-    // not an arbitrary real dataset.
-    private static final String XLSX_SCHEMA_SAMPLE_SETTINGS_PATH = "xlsxschema/xlsxSchemaSettings.json";
-    private static final String FIXED_COLUMN_DEF_SAMPLE_SETTINGS_PATH = "fixedcolumndef/fixedColumnDefSettings.json";
-    // The fixedColumnDef unitSetting sample resource (fixedcolumndef/fixedColumnDefSettings.json) has
-    // nothing left to derive and is kept as an empty placeholder for callers who want to add
-    // filtering/renaming later.
 
     public ScaffoldOption {
         if (datasetType == ResultType.format) {
@@ -109,71 +87,52 @@ public record ScaffoldOption(
 
     public void execute() throws IOException {
         final File baseDir = FileResources.resultDir(this.resultDir);
-        final File settingDir = new File(baseDir, FileResources.RESOURCES_SETTING_PATH);
-        final File templateDir = new File(baseDir, FileResources.RESOURCES_TEMPLATE_PATH);
-        final File paramDir = new File(baseDir, "option");
-        final boolean generateDdl = GenerateType.ddl.name().equals(this.target);
-        final boolean generateJavaBean = GenerateType.javaBean.name().equals(this.target);
-        final boolean generateXlsxSchema = GenerateType.xlsxSchema.name().equals(this.target);
-        final boolean generateFixedColumnDef = GenerateType.fixedColumnDef.name().equals(this.target);
-        final boolean generateParameter = "parameter".equals(this.target)
-                && Strings.isNotEmpty(this.commandType);
-        if (generateJavaBean || generateDdl) {
-            GenerateType generateType = GenerateType.valueOf(this.target);
-            this.copySettingResource(settingDir, generateType, this.settingName);
-            this.copySettingResource(settingDir, generateType, this.unitSettingName);
-            if (Strings.isNotEmpty(this.templateName)) {
-                if (templateDir.mkdirs() || templateDir.isDirectory()) {
-                    this.copyClasspathResource(generateType.getStgPath(),
-                                               new File(templateDir, this.templateName + ".stg"));
-                    this.copyClasspathResource(generateType.getTemplatePath(),
-                                               new File(templateDir, this.templateName + ".txt"));
-                }
-            }
-            if (this.hasDataset()) {
-                this.writeWrappedDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR),
-                                                 new ComparableDdlMetaDataProducer(this.sourceProducer()));
-            }
-            if (Strings.isNotEmpty(this.parameterName)) {
-                if (paramDir.mkdirs() || paramDir.isDirectory()) {
-                    this.writeGenericParamFile(paramDir, generateDdl);
-                }
-            }
+        final ScaffoldTarget scaffoldTarget = ScaffoldTarget.fromString(this.target);
+        if (scaffoldTarget != null) {
+            this.executeTarget(scaffoldTarget, baseDir);
         }
-        if ((generateXlsxSchema || generateFixedColumnDef) && this.hasDataset()) {
-            final String name = Strings.isNotEmpty(this.templateName) ? this.templateName : this.target;
-            final String unitSettingFileName =
-                    Strings.isNotEmpty(this.unitSettingName) ? this.unitSettingName : this.target;
-            if (settingDir.mkdirs() || settingDir.isDirectory()) {
-                this.copyClasspathResource(
-                        generateXlsxSchema ? ScaffoldOption.XLSX_SCHEMA_SAMPLE_SETTINGS_PATH
-                                : ScaffoldOption.FIXED_COLUMN_DEF_SAMPLE_SETTINGS_PATH,
-                        new File(settingDir, unitSettingFileName + ".json"));
-            }
-            final Column[] datasetColumns = generateXlsxSchema
-                    ? ComparableXlsxSchemaMetaDataProducer.outputSchema()
-                    : ComparableFixedColumnDefMetaDataProducer.outputSchema();
-            final ComparableDataSetProducer sourceProducer = this.sourceProducer();
-            final ComparableDataSetProducerWrapper wrapped = generateXlsxSchema
-                    ? new ComparableXlsxSchemaMetaDataProducer(sourceProducer)
-                    : new ComparableFixedColumnDefMetaDataProducer(sourceProducer, new String[0],
-                                                                    FIXED_COLUMN_DEF_DEFAULT_LENGTH, FIXED_COLUMN_DEF_DEFAULT_ALIGN);
-            this.writeWrappedDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR), wrapped);
-            if (templateDir.mkdirs() || templateDir.isDirectory()) {
-                this.writeSchemaTemplate(templateDir, name, generateXlsxSchema);
-            }
-            if (Strings.isNotEmpty(this.parameterName)) {
-                if (paramDir.mkdirs() || paramDir.isDirectory()) {
-                    this.writeSchemaParamFile(paramDir, name, unitSettingFileName, datasetColumns);
-                }
-            }
-        }
-        if (generateParameter) {
+        if ("parameter".equals(this.target) && Strings.isNotEmpty(this.commandType)) {
+            final File paramDir = new File(baseDir, "option");
             if (paramDir.mkdirs() || paramDir.isDirectory()) {
                 final String[] shrunkArgs = new CommandParameters(Type.valueOf(this.commandType), this.commandInput)
                         .shrink().args();
                 Files.write(new File(paramDir, this.commandType + ".param").toPath(),
                             Arrays.asList(shrunkArgs), StandardCharsets.UTF_8);
+            }
+        }
+    }
+
+    // 4target共通フロー: unitSetting/template/dataset/parameterの各雛型を、対応オプションが
+    // 明示指定された時のみ独立に出力する（dataset雛型のみ-dataset.src/-dataset.srcTypeの指定が条件）
+    private void executeTarget(final ScaffoldTarget scaffoldTarget, final File baseDir) throws IOException {
+        final File settingDir = new File(baseDir, FileResources.RESOURCES_SETTING_PATH);
+        if (Strings.isNotEmpty(this.settingName) && scaffoldTarget.generateType().defaultSettingsPath() != null) {
+            if (settingDir.mkdirs() || settingDir.isDirectory()) {
+                this.copyClasspathResource(scaffoldTarget.generateType().defaultSettingsPath(),
+                                           new File(settingDir, this.settingName + ".json"));
+            }
+        }
+        if (Strings.isNotEmpty(this.unitSettingName)) {
+            if (settingDir.mkdirs() || settingDir.isDirectory()) {
+                this.copyClasspathResource(scaffoldTarget.sampleUnitSettingPath(),
+                                           new File(settingDir, this.unitSettingName + ".json"));
+            }
+        }
+        if (Strings.isNotEmpty(this.templateName)) {
+            final File templateDir = new File(baseDir, FileResources.RESOURCES_TEMPLATE_PATH);
+            if (templateDir.mkdirs() || templateDir.isDirectory()) {
+                this.copyClasspathResource(scaffoldTarget.stgPath(), new File(templateDir, this.templateName + ".stg"));
+                this.copyClasspathResource(scaffoldTarget.templatePath(), new File(templateDir, this.templateName + ".txt"));
+            }
+        }
+        if (this.hasDataset()) {
+            this.writeWrappedDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR),
+                                             scaffoldTarget.wrapProducer(this, this.sourceProducer()));
+        }
+        if (Strings.isNotEmpty(this.parameterName)) {
+            final File paramDir = new File(baseDir, "option");
+            if (paramDir.mkdirs() || paramDir.isDirectory()) {
+                this.writeParamFile(paramDir, scaffoldTarget);
             }
         }
     }
@@ -265,22 +224,22 @@ public record ScaffoldOption(
         return new DataSetConverterLoader().get(converterParam);
     }
 
-    private void writeGenericParamFile(final File paramDir, final boolean isDdl) throws IOException {
+    private void writeParamFile(final File paramDir, final ScaffoldTarget scaffoldTarget) throws IOException {
         final ParametersBuilder builder = new ParametersBuilder();
         final boolean customTemplate = Strings.isNotEmpty(this.templateName);
         if (customTemplate) {
-            // A custom template is driven through generateType=txt + unitSetting, reusing the same
-            // rows/tableName/dataset.PK attributes the built-in ddl/javaBean templates already rely on.
+            // カスタムテンプレートはgenerateType=txt＋unitSettingで駆動し、組み込みテンプレートが
+            // 読むのと同じrows/tableName/dataset.PK属性を再現する（入力はscaffoldが書き出した記述子dataset）
             this.putTemplateGenerationParams(builder, this.templateName);
-            builder.put("-resultPath", isDdl ? "$param.tableName$.sql"
-                    : new TemplateRender.Builder().build().getAttributeName("tableName", "snakeToUpperCamel") + ".java");
-            if (Strings.isNotEmpty(this.settingName)) {
+            builder.put("-resultPath", scaffoldTarget.customTemplateResultPath());
+            if (Strings.isNotEmpty(this.settingName)
+                    && scaffoldTarget.generateType().defaultSettingsPath() != null) {
                 builder.put("-setting", "resources/setting/" + this.settingName + ".json");
             }
         } else {
             // 組み込みgenerateTypeはloadData()=falseで元ソースのメタデータから記述子行を合成するため、
             // -settingを書くと変換ルールが合成前の元ソース列に対して評価されてしまう（unitSettingのみ有効）
-            builder.put("-generateType", isDdl ? GenerateType.ddl.name() : GenerateType.javaBean.name(), false);
+            builder.put("-generateType", scaffoldTarget.generateType().name(), false);
         }
         if (Strings.isNotEmpty(this.unitSettingName)) {
             builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
@@ -290,7 +249,7 @@ public record ScaffoldOption(
             if (customTemplate) {
                 this.addDatasetSrcParams(builder);
                 if (this.isHeaderlessDataset()) {
-                    builder.put("-headerName", ScaffoldOption.DDL_SCHEMA_HEADER_NAMES);
+                    builder.put("-headerName", ScaffoldOption.headerNames(scaffoldTarget.datasetSchema()));
                 }
             } else {
                 this.addOriginalDatasetSrcParams(builder);
@@ -324,37 +283,6 @@ public record ScaffoldOption(
         builder.put("-src.srcType", this.datasetType.toDataSourceType().name());
         if (this.usesDatasetEncoding()) {
             builder.put("-encoding", this.datasetEncoding);
-        }
-    }
-
-    private void writeSchemaTemplate(final File templateDir, final String name, final boolean isXlsxSchema)
-            throws IOException {
-        final GenerateType generateType = isXlsxSchema ? GenerateType.xlsxSchema : GenerateType.fixedColumnDef;
-        this.copyClasspathResource(generateType.getStgPath(), new File(templateDir, name + ".stg"));
-        this.copyClasspathResource(generateType.getTemplatePath(), new File(templateDir, name + ".txt"));
-    }
-
-    private void writeSchemaParamFile(final File paramDir, final String templateFileName,
-                                       final String unitSettingFileName, final Column[] datasetColumns) throws IOException {
-        final ParametersBuilder builder = new ParametersBuilder();
-        this.putTemplateGenerationParams(builder, templateFileName);
-        builder.put("-unitSetting", "resources/setting/" + unitSettingFileName + ".json");
-        builder.put("-resultPath", "$param.tableName$.json");
-        builder.putDir("-result", this.resultDir, BaseDir.RESULT);
-        this.addDatasetSrcParams(builder);
-        if (this.isHeaderlessDataset()) {
-            builder.put("-headerName", ScaffoldOption.headerNames(datasetColumns));
-        }
-        Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
-                    builder.build().toList(false), StandardCharsets.UTF_8);
-    }
-
-    private void copySettingResource(final File settingDir, final GenerateType generateType, final String name) throws IOException {
-        if (Strings.isEmpty(name)) {
-            return;
-        }
-        if (settingDir.mkdirs() || settingDir.isDirectory()) {
-            this.copyClasspathResource(generateType.defaultSettingsPath(), new File(settingDir, name + ".json"));
         }
     }
 
