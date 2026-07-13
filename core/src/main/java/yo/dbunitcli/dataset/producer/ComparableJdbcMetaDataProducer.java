@@ -1,22 +1,23 @@
 package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DefaultTableMetaData;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
-import yo.dbunitcli.common.Source;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableTableMappingContext;
-import yo.dbunitcli.dataset.ComparableTableMappingTask;
-import yo.dbunitcli.dataset.NameFilter;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer {
+public class ComparableJdbcMetaDataProducer extends ComparableDataSetProducerWrapper {
 
     private static final Column[] COLUMN_DEF_SCHEMA = {
             new Column("TABLE_NAME", DataType.VARCHAR),
@@ -31,116 +32,117 @@ public class ComparableJdbcMetaDataProducer extends ComparableDBDataSetProducer 
             new Column("PK_NAME", DataType.VARCHAR)
     };
 
-    public ComparableJdbcMetaDataProducer(final ComparableDataSetParam param) {
-        super(param);
+    private final DatabaseMetaData jdbcMetaData;
+
+    public ComparableJdbcMetaDataProducer(final ComparableDataSetProducer delegate) {
+        super(delegate);
+        this.jdbcMetaData = resolveJdbcMetaData(delegate);
     }
 
-    @Override
-    public Stream<? extends Source> getSourceStream() {
+    private static DatabaseMetaData resolveJdbcMetaData(final ComparableDataSetProducer delegate) {
         try {
-            final DatabaseMetaData meta = this.connection.getConnection().getMetaData();
-            final NameFilter filter = this.param().tableNameFilter();
-            final List<Source> sources = new ArrayList<>();
-            try (ResultSet rs = meta.getTables(null, null, "%", new String[]{"TABLE"})) {
-                while (rs.next()) {
-                    final String tableName = rs.getString("TABLE_NAME");
-                    sources.add(Source.NONE.tableName(tableName));
-                }
+            if (delegate instanceof final ComparableDBDataSetProducer dbProducer) {
+                return dbProducer.connection.getConnection().getMetaData();
             }
-            return sources.stream().filter(it -> filter.predicate(it.tableName()));
+            final var connectionLoader = delegate.param().databaseConnectionLoader();
+            if (connectionLoader == null) {
+                return null;
+            }
+            return connectionLoader.loadConnection().getConnection().getMetaData();
         } catch (final SQLException e) {
             throw new AssertionError(e);
         }
     }
 
     @Override
-    public ComparableTableMappingTask createTableMappingTask(final Source source) {
-        return new MetaDataTableExecutor(source, this.param, this.connection);
+    public void startTable(final ITableMetaData metaData) throws DataSetException {
+        try {
+            final String tableName = metaData.getTableName();
+            final String tableRemarks = this.jdbcMetaData != null ? loadTableRemarks(this.jdbcMetaData, tableName) : "";
+            final Map<String, String> pkNames = this.jdbcMetaData != null
+                    ? loadPrimaryKeyNames(this.jdbcMetaData, tableName)
+                    : Arrays.stream(metaData.getPrimaryKeys())
+                            .collect(Collectors.toMap(Column::getColumnName, column -> (String) null, (a, b) -> a, LinkedHashMap::new));
+            final Map<String, ColumnDetail> columnDetails = this.jdbcMetaData != null ? loadColumnDetails(this.jdbcMetaData, tableName) : Map.of();
+            this.writeColumnRows(tableName, COLUMN_DEF_SCHEMA, metaData.getColumns(), (column, index) -> {
+                final String columnName = column.getColumnName();
+                final ColumnDetail detail = columnDetails.get(columnName);
+                return new Object[]{
+                        tableName,
+                        tableRemarks,
+                        columnName,
+                        detail != null ? detail.typeName() : column.getDataType().toString(),
+                        detail != null ? detail.columnSize() : null,
+                        detail != null ? detail.decimalDigits() : null,
+                        !column.isNotNullable(),
+                        detail != null ? detail.remarks() : "",
+                        pkNames.containsKey(columnName),
+                        pkNames.get(columnName)
+                };
+            });
+        } catch (final SQLException e) {
+            throw new AssertionError(e);
+        }
     }
 
-    private static class MetaDataTableExecutor extends DBTableExecutor {
+    private static Map<String, String> loadPrimaryKeyNames(final DatabaseMetaData meta, final String tableName)
+            throws SQLException {
+        return collectByColumnName(meta.getPrimaryKeys(null, null, tableName), rs -> rs.getString("PK_NAME"));
+    }
 
-        private static Map<String, String> loadPrimaryKeys(final DatabaseMetaData meta, final String tableName)
-                throws SQLException {
-            final Map<String, String> pkColumns = new LinkedHashMap<>();
-            try (ResultSet pkRs = meta.getPrimaryKeys(null, null, tableName)) {
-                while (pkRs.next()) {
-                    pkColumns.put(pkRs.getString("COLUMN_NAME"), pkRs.getString("PK_NAME"));
-                }
-            }
-            return pkColumns;
-        }
-
-        private static String resolveColumnSize(final String typeName, final int jdbcType, final String columnSize) {
-            if (typeName.contains("(")) {
-                return null;
-            }
-            return switch (jdbcType) {
-                case Types.DATE, Types.TIME, Types.TIMESTAMP,
-                     Types.BLOB, Types.CLOB, Types.NCLOB,
-                     Types.BOOLEAN, Types.BIT -> null;
-                default -> columnSize;
-            };
-        }
-
-        private static String resolveDecimalDigits(final String decimalDigits) {
-            return "0".equals(decimalDigits) || decimalDigits == null ? null : decimalDigits;
-        }
-
-        private static String loadTableRemarks(final DatabaseMetaData meta, final String tableName)
-                throws SQLException {
-            try (ResultSet tableRs = meta.getTables(null, null, tableName, null)) {
-                if (tableRs.next()) {
-                    return Optional.ofNullable(tableRs.getString("REMARKS"))
-                                   .orElse("");
-                }
-            }
-            return "";
-        }
-
-        MetaDataTableExecutor(final Source source, final ComparableDataSetParam param,
-                              final org.dbunit.database.IDatabaseConnection connection) {
-            super(source, param, connection);
-        }
-
-        @Override
-        public void run(final ComparableTableMappingContext context) {
-            final String tableName = this.source.tableName();
-            try {
-                final DatabaseMetaData meta = this.connection.getConnection().getMetaData();
-                final Map<String, String> pkInfo = loadPrimaryKeys(meta, tableName);
-                final String tableRemarks = loadTableRemarks(meta, tableName);
-                final var metaData = new DefaultTableMetaData(tableName, COLUMN_DEF_SCHEMA);
-                final var mapper = context.createMapper(this.source.wrap(metaData));
-                mapper.startTable();
-                try (ResultSet colRs = meta.getColumns(null, null, tableName, "%")) {
-                    while (colRs.next()) {
-                        final String colName = colRs.getString("COLUMN_NAME");
-                        final String typeName = colRs.getString("TYPE_NAME");
-                        final int jdbcType = colRs.getInt("DATA_TYPE");
-                        final String colSize = resolveColumnSize(typeName, jdbcType, colRs.getString("COLUMN_SIZE"));
-                        final String decDigits = resolveDecimalDigits(colRs.getString("DECIMAL_DIGITS"));
-                        final boolean nullable = colRs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
-                        final String remarks = colRs.getString("REMARKS");
-                        final boolean isPk = pkInfo.containsKey(colName);
-                        mapper.addRow(new Object[]{
-                                tableName, tableRemarks,
-                                colName, typeName, colSize, decDigits, nullable,
-                                remarks != null ? remarks : "",
-                                isPk,
-                                isPk ? pkInfo.get(colName) : null
-                        });
-                    }
-                }
-                mapper.endTable();
-            } catch (final SQLException e) {
-                throw new AssertionError(e);
+    private static String loadTableRemarks(final DatabaseMetaData meta, final String tableName)
+            throws SQLException {
+        try (ResultSet tableRs = meta.getTables(null, null, tableName, null)) {
+            if (tableRs.next()) {
+                return Optional.ofNullable(tableRs.getString("REMARKS")).orElse("");
             }
         }
+        return "";
+    }
 
-        @Override
-        public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
-            return new MetaDataTableExecutor(this.source, builder.build(), this.connection);
+    private static Map<String, ColumnDetail> loadColumnDetails(final DatabaseMetaData meta, final String tableName)
+            throws SQLException {
+        return collectByColumnName(meta.getColumns(null, null, tableName, "%"), rs -> {
+            final String typeName = rs.getString("TYPE_NAME");
+            final String columnSize = resolveColumnSize(typeName, rs.getInt("DATA_TYPE"), rs.getString("COLUMN_SIZE"));
+            final String decimalDigits = resolveDecimalDigits(rs.getString("DECIMAL_DIGITS"));
+            final String remarks = rs.getString("REMARKS");
+            return new ColumnDetail(typeName, columnSize, decimalDigits, remarks != null ? remarks : "");
+        });
+    }
+
+    private static <T> Map<String, T> collectByColumnName(final ResultSet rs, final SqlValueMapper<T> valueMapper)
+            throws SQLException {
+        try (rs) {
+            final Map<String, T> result = new LinkedHashMap<>();
+            while (rs.next()) {
+                result.put(rs.getString("COLUMN_NAME"), valueMapper.map(rs));
+            }
+            return result;
         }
+    }
+
+    private static String resolveColumnSize(final String typeName, final int jdbcType, final String columnSize) {
+        if (typeName.contains("(")) {
+            return null;
+        }
+        return switch (jdbcType) {
+            case Types.DATE, Types.TIME, Types.TIMESTAMP,
+                 Types.BLOB, Types.CLOB, Types.NCLOB,
+                 Types.BOOLEAN, Types.BIT -> null;
+            default -> columnSize;
+        };
+    }
+
+    private static String resolveDecimalDigits(final String decimalDigits) {
+        return "0".equals(decimalDigits) || decimalDigits == null ? null : decimalDigits;
+    }
+
+    @FunctionalInterface
+    private interface SqlValueMapper<T> {
+        T map(ResultSet rs) throws SQLException;
+    }
+
+    private record ColumnDetail(String typeName, String columnSize, String decimalDigits, String remarks) {
     }
 }

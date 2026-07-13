@@ -25,19 +25,20 @@
 
 ## dataset雛型の中身
 
-`hasDataset()`（`-dataset.srcType`かつ`-dataset.src`が両方指定）の場合のみ`writeDatasetSrcFiles()`が動く。実データではなく、実データの列名から1テーブルにつき1行/カラムのダミー行を生成し、`-datasetType`（デフォルトcsv）の形式で`src/`配下に書き出す。列の形はtargetごとに異なる（各targetの`.stg`/`.txt`が消費する形に合わせてある）:
+`hasDataset()`（`-dataset.srcType`かつ`-dataset.src`が両方指定）の場合のみダミーdataset書き出しが動く。実データそのものではなく、実データの列名（と一部の実メタデータ）から1テーブルにつき1行/カラムのダミー行を生成し、`-datasetType`（デフォルトcsv）の形式で`src/`配下に書き出す。列の形はtargetごとに異なる（各targetの`.stg`/`.txt`が消費する形に合わせてある）:
 
-- `ddl`/`javaBean`: `DDL_SCHEMA_COLUMNS`（COLUMN_NAME/TYPE_NAME/COLUMN_SIZE/DECIMAL_DIGITS/NULLABLE/IS_PK/PK_NAME/REMARKS/TABLE_REMARKS/TABLE_NAME/PACKAGE の11列）
-- `xlsxSchema`: COLUMN_NAME/IS_PK/SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESSの6列。SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESSは組み込みgenerateType=xlsxSchemaと同じデフォルト値（テーブル名/1/連番/POI CellReference計算値）で初期化されるが、dataset値を編集するだけで自由に上書きできる
-- `fixedColumnDef`: name/length/align/padの4列（length=10/align=left/pad=半角スペースで初期化）
+- `ddl`/`javaBean`（`writeDatasetSrcFiles()`）: `DDL_SCHEMA_COLUMNS`（COLUMN_NAME/TYPE_NAME/COLUMN_SIZE/DECIMAL_DIGITS/NULLABLE/IS_PK/PK_NAME/REMARKS/TABLE_REMARKS/TABLE_NAME/PACKAGE の11列）。値はすべて空/機械生成のダミー（`buildSchemaRow()`）
+- `xlsxSchema`/`fixedColumnDef`（`writeWrappedDatasetSrcFiles()`）: `ComparableXlsxSchemaMetaDataProducer`/`ComparableFixedColumnDefMetaDataProducer`（`dataset/producer/`、Generate側`wrapProducer()`と共有— 詳細は次節）が実メタデータから直接算出した値。
+  - `xlsxSchema`: COLUMN_NAME/SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS/IS_PKの6列。SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESSは組み込みgenerateType=xlsxSchemaと同じ計算式（テーブル名/1/連番/POI CellReference計算値）。`IS_PK`は委譲先の`ITableMetaData.getPrimaryKeys()`由来の実値（実DB接続＋`-dataset.useJdbcMetaData=true`等でPKメタデータが取れれば`true`、取れなければ`false`）
+  - `fixedColumnDef`: name/length/align/padの4列。`length`/`align`はScaffold側が渡す固定デフォルト値（10/left、`ScaffoldOption.FIXED_COLUMN_DEF_DEFAULT_LENGTH/ALIGN`）で、実カラムサイズ由来ではない（Generate側`-fixedLength`と同じ仕組みだが、Scaffoldは列ごとの上書きリストを渡さないため）
 
-ユーザーはこのダミーcsvの各行を編集してテンプレートの入力データとして使う。
+いずれもユーザーはこのダミーcsvの各行を編集してテンプレートの入力データとして使う想定で、値は「編集の出発点として合理的な初期値」であり最終値の保証ではない。
 
 ## 専用ScaffoldTemplate要否の判定
 
 Scaffoldはtargetを`generateType=txt -unit=table`で駆動し、dataset(1行=1列)を`unitSetting`の`separate`でPK等のサブテーブル（`dataset.PK.rows`等）に分けてテンプレートに渡す。組み込みの`generateType.getStgPath()/getTemplatePath()`を無改造でコピーして使えるのは、次の2条件を両方満たす時のみ：
 
-1. **組み込みマクロの引数がスカラーのみか**: 例えば`fixedColumnDef`の`columnEntry(col)`が使う`col.name/length/align/pad`はスカラーのみなので、Scaffoldの1行=1列datasetの各行がそのままマクロ引数になり`.stg`は無改造で流用できる。逆に旧`xlsxSchema`の`row.header`（`List<String>`）のようなリスト値フィールドを要求するマクロは、ST4のテンプレート構文だけでは組み立てられない（`[k:v]`のようなマップ/集約リテラルは実行時の式としては存在せず、`.stg`ファイル冒頭のdictionary宣言でしか使えない）。この場合は組み込み側の`write()`をリファクタリングし、`row.rows`（列毎の生行リスト）／`row.dataset.<name>.rows`（`separate`と同じ形の派生サブテーブル）のような、Scaffoldのdatasetがunit=tableで自然に提供する形へ寄せることで無改造流用に持ち込める（現`xlsxSchema`はこの形。`GenerateType.xlsxSchema.write()`の`toSchemaTable()`/`toColumnRow()`参照）。
+1. **組み込みマクロの引数がスカラーのみか**: 例えば`fixedColumnDef`の`columnEntry(col)`が使う`col.name/length/align/pad`はスカラーのみなので、Scaffoldの1行=1列datasetの各行がそのままマクロ引数になり`.stg`は無改造で流用できる。逆に旧`xlsxSchema`の`row.header`（`List<String>`）のようなリスト値フィールドを要求するマクロは、ST4のテンプレート構文だけでは組み立てられない（`[k:v]`のようなマップ/集約リテラルは実行時の式としては存在せず、`.stg`ファイル冒頭のdictionary宣言でしか使えない）。この場合は組み込み側の`write()`をリファクタリングし、`row.rows`（列毎の生行リスト）／`row.dataset.<name>.rows`（`separate`と同じ形の派生サブテーブル）のような、Scaffoldのdatasetがunit=tableで自然に提供する形へ寄せることで無改造流用に持ち込める（現`xlsxSchema`はこの形。列ごとの行合成自体は`GenerateType.xlsxSchema.wrapProducer()`が返す`ComparableXlsxSchemaMetaDataProducer`が担い、`write()`はPK/CELLS分割のみを行う薄いアダプタ）。
 2. **固定unitが`table`か**: `isFixedTemplate()=true`で`getFixedUnit()`が`table`以外（`dataset`等）だと`-unitSetting`が一切効かない（`GenerateOption.parameterStream()`は`unit==table`の時のみ`unitTableSeparators()`を評価するため）。この場合、組み込み側の`getFixedUnit()`自体を`table`に変更できないか検討する（旧`xlsxSchema`は`dataset`固定だったが`table`固定に変更した。`resultPath()`のtypeName別自動命名分岐も要追従、`generate-command`スキル参照）。
 
 両方を満たせない場合のみ`{typeName}ScaffoldTemplate.stg`および/または`.txt`を新設する。現状: `ddl`/`javaBean`/`xlsxSchema`はいずれも組み込みを完全流用（専用ファイルなし）、`fixedColumnDef`のみ`.stg`は流用・`.txt`のみ専用。
@@ -47,9 +48,9 @@ Scaffoldはtargetを`generateType=txt -unit=table`で駆動し、dataset(1行=1�
 上記2条件を満たしテンプレートが流用できても、「1行=1カラム」のdatasetを最終形（PK/CELLSサブテーブル等）へ変換するロジックの所在によって、setting雛型の作り方・実装コストが変わる。
 
 - **`defaultSettingsPath()`の宣言的JSON（ddl/javaBean）**: `sql/ddlSettings.json`・`javabean/javaBeanSettings.json`は、列名キーの`separate`/`string`/`boolean`変換ルールだけで構成され、値が実DBメタデータ由来でもScaffoldのダミー空値でも同じルールで変換できる。そのため`copySettingResource()`で組み込みJSONをそのまま`-unitSetting`としてコピーするだけで済み、Scaffold側にJava変換コードは要らない
-- **`write()`内のJavaコード（xlsxSchema/fixedColumnDef）**: `defaultSettingsPath()`を持たず、`GenerateType.xxx.write()`内のJavaロジック（`toSchemaTable()`/`FixedColumnDef`構築等）が変換を担う。`generateType=txt`はこの`write()`を経由しないため、Scaffold側で同じ変換を`buildXlsxSchemaRow()`/`buildFixedColumnDefRow()`として複製し、専用のサンプルunitSetting（`xlsxSchemaSettings.json`等、`defaultSettingsPath()`とは別物）を用意している
+- **`wrapProducer()`側のJavaコード（xlsxSchema/fixedColumnDef）**: `defaultSettingsPath()`を持たず、`GenerateType.xxx.wrapProducer()`が返す`ComparableDataSetProducerWrapper`サブクラス（`ComparableXlsxSchemaMetaDataProducer`/`ComparableFixedColumnDefMetaDataProducer`）が変換を担う。`generateType=txt`は`wrapProducer()`/`write()`を経由しないため、Scaffold側は同じロジックを複製する代わりに、これらの producer クラスを`writeWrappedDatasetSrcFiles()`から直接インスタンス化して再利用している（`ScaffoldOption.sourceProducer()`で実producerを取得し、`new ComparableXlsxSchemaMetaDataProducer(sourceProducer)`のように包む）。専用のサンプルunitSetting（`xlsxSchemaSettings.json`等、`defaultSettingsPath()`とは別物）は引き続き必要
 
-新target追加時、対応するGenerateTypeが`defaultSettingsPath()`を持つなら実装コストは低い（JSONコピーのみ）。`write()`側にロジックがあるなら、Scaffold側でのJava変換複製が必要になる点を見積もりに入れる。
+新target追加時、対応するGenerateTypeが`defaultSettingsPath()`を持つなら実装コストは低い（JSONコピーのみ）。`wrapProducer()`側にロジックがあるなら、そのproducerクラスをScaffold側からも直接インスタンス化できないか検討する（`write()`内に埋め込まれたJavaコードとして複製する必要はない）。
 
 ## 未対応target・非対応の理由
 
