@@ -6533,7 +6533,16 @@
       "type": "yo.dbunitcli.application.command.GenerateDto",
       "fields": [
         {
+          "name": "align"
+        },
+        {
           "name": "commit"
+        },
+        {
+          "name": "defaultLength"
+        },
+        {
+          "name": "fixedLength"
         },
         {
           "name": "generateType"
@@ -6567,6 +6576,12 @@
         },
         {
           "name": "unit"
+        },
+        {
+          "name": "unitSetting"
+        },
+        {
+          "name": "unitSettingEncoding"
         }
       ]
     },
@@ -6597,6 +6612,44 @@
       ]
     },
     {
+      "type": "yo.dbunitcli.application.command.ScaffoldDto",
+      "fields": [
+        {
+          "name": "align"
+        },
+        {
+          "name": "commandType"
+        },
+        {
+          "name": "datasetEncoding"
+        },
+        {
+          "name": "datasetType"
+        },
+        {
+          "name": "defaultLength"
+        },
+        {
+          "name": "fixedLength"
+        },
+        {
+          "name": "parameterName"
+        },
+        {
+          "name": "resultDir"
+        },
+        {
+          "name": "target"
+        },
+        {
+          "name": "templateName"
+        },
+        {
+          "name": "unitSettingName"
+        }
+      ]
+    },
+    {
       "type": "yo.dbunitcli.application.command.RunDto",
       "fields": [
         {
@@ -6621,6 +6674,18 @@
         },
         {
           "name": "exportHeader"
+        },
+        {
+          "name": "extension"
+        },
+        {
+          "name": "fixedColumnDefFile"
+        },
+        {
+          "name": "fixedLengthType"
+        },
+        {
+          "name": "format"
         },
         {
           "name": "operation"
@@ -6656,6 +6721,9 @@
         },
         {
           "name": "fixedLength"
+        },
+        {
+          "name": "fixedLengthType"
         },
         {
           "name": "headerName"
@@ -6913,6 +6981,24 @@
       "glob": "META-INF/services/org.slf4j.spi.SLF4JServiceProvider"
     },
     {
+      "glob": "fixedcolumndef/fixedColumnDefSettings.json"
+    },
+    {
+      "glob": "fixedcolumndef/fixedColumnDefTemplate.stg"
+    },
+    {
+      "glob": "fixedcolumndef/fixedColumnDefTemplate.txt"
+    },
+    {
+      "glob": "javabean/javaBeanSettings.json"
+    },
+    {
+      "glob": "javabean/javaBeanTemplate.stg"
+    },
+    {
+      "glob": "javabean/javaBeanTemplate.txt"
+    },
+    {
       "glob": "oracle/jdbc/defaultConnectionProperties.properties"
     },
     {
@@ -6997,6 +7083,15 @@
       "glob": "sql/cleanInsertTemplate.txt"
     },
     {
+      "glob": "sql/ddlSettings.json"
+    },
+    {
+      "glob": "sql/ddlTemplate.stg"
+    },
+    {
+      "glob": "sql/ddlTemplate.txt"
+    },
+    {
       "glob": "sql/deleteInsertTemplate.txt"
     },
     {
@@ -7010,6 +7105,15 @@
     },
     {
       "glob": "sql/updateTemplate.txt"
+    },
+    {
+      "glob": "xlsxschema/xlsxSchemaSettings.json"
+    },
+    {
+      "glob": "xlsxschema/xlsxSchemaTemplate.stg"
+    },
+    {
+      "glob": "xlsxschema/xlsxSchemaTemplate.txt"
     },
     {
       "glob": "yo/dbunitcli/application/command"
