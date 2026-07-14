@@ -76,8 +76,7 @@
           "reg",
           "fixed",
           "xls",
-          "xlsx",
-          "jdbcMetadata"
+          "xlsx"
         ],
         "required": false,
         "defaultPath": "WORKSPACE"

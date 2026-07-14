@@ -36,6 +36,17 @@ public class ComparableDdlMetaDataProducer extends ComparableDataSetProducerWrap
         return COLUMN_DEF_SCHEMA.clone();
     }
 
+    /**
+     * DBソースはDatabaseMetaDataからCOLUMN_SIZE/PK_NAME/REMARKS等の実値を補完できる
+     * {@link ComparableJdbcMetaDataProducer}で、それ以外はdbunitメタデータのみから合成する
+     * このクラスでラップする（両者の出力スキーマは同一）
+     */
+    public static ComparableDataSetProducerWrapper forSource(final ComparableDataSetProducer source) {
+        return source instanceof ComparableDBDataSetProducer
+                ? new ComparableJdbcMetaDataProducer(source)
+                : new ComparableDdlMetaDataProducer(source);
+    }
+
     @Override
     public void startTable(final ITableMetaData metaData) throws DataSetException {
         final String tableName = metaData.getTableName();

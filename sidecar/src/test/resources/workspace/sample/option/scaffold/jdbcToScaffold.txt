@@ -1,3 +1,5 @@
--src.srcType=jdbcMetadata
--src.src=resources/src/csv
+-target=ddl
+-dataset.srcType=table
+-dataset.src=resources/src/table
+-dataset.jdbcProperties=sample.properties
 -result=target/scaffold/result

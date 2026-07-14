@@ -17,7 +17,7 @@
 
 | target | 対応する`GenerateType` | サンプルunitSetting | 記述子dataset用producer | 記述子列 | txt駆動時の`-resultPath` |
 |---|---|---|---|---|---|
-| `ddl` | `GenerateType.ddl` | `sql/ddlSettings.json`（=`defaultSettingsPath()`） | `ComparableDdlMetaDataProducer` | 11列（COLUMN_NAME/TYPE_NAME/COLUMN_SIZE/DECIMAL_DIGITS/NULLABLE/IS_PK/PK_NAME/REMARKS/TABLE_REMARKS/TABLE_NAME/PACKAGE） | `$param.tableName$.sql` |
+| `ddl` | `GenerateType.ddl` | `sql/ddlSettings.json`（=`defaultSettingsPath()`） | `ComparableDdlMetaDataProducer.forSource()`（DBソースは`ComparableJdbcMetaDataProducer`、他は`ComparableDdlMetaDataProducer`。出力スキーマは同一） | 11列（COLUMN_NAME/TYPE_NAME/COLUMN_SIZE/DECIMAL_DIGITS/NULLABLE/IS_PK/PK_NAME/REMARKS/TABLE_REMARKS/TABLE_NAME/PACKAGE） | `$param.tableName$.sql` |
 | `javaBean` | `GenerateType.javaBean` | `javabean/javaBeanSettings.json`（同上） | 同上 | 同上 | `$param.tableName; format="snakeToUpperCamel"$.java` |
 | `xlsxSchema` | `GenerateType.xlsxSchema` | `xlsxschema/xlsxSchemaSettings.json`（=`defaultSettingsPath()`。PK/CELLSへのseparateルール） | `ComparableXlsxSchemaMetaDataProducer` | 6列（COLUMN_NAME/SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS/IS_PK） | `$param.tableName$.json` |
 | `fixedColumnDef` | `GenerateType.fixedColumnDef` | `fixedcolumndef/fixedColumnDefSettings.json`（空のプレースホルダー） | `ComparableFixedColumnDefMetaDataProducer`（`-fixedLength`/`-defaultLength`/`-align`で値を変更可、デフォルト10/left） | 4列（name/length/align/pad） | `$param.tableName$.json` |
@@ -33,14 +33,15 @@
 `hasDataset()`（`-dataset.srcType`かつ`-dataset.src`が両方指定）の場合のみ書き出される。全targetが上表のproducer（`GenerateType.wrapProducer()`と共有）を直接インスタンス化し、元ソースの`ITableMetaData`から「1テーブルにつき1行/カラム」の記述子行を合成して`-datasetType`形式で`src/`配下に書き出す。
 
 - 実メタデータの取れるソースでは実値が入る: TYPE_NAME/NULLABLE/IS_PK（ddl/javaBean、JDBC＋`-dataset.useJdbcMetaData=true`等）、SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS/IS_PK（xlsxSchema、位置系は計算値）
-- dbunitメタデータに存在しない値は常に空: COLUMN_SIZE/DECIMAL_DIGITS/PK_NAME/REMARKS/TABLE_REMARKS/PACKAGE
+- ddl/javaBeanのDBソース（`-dataset.srcType=table`）では`ComparableJdbcMetaDataProducer`が`DatabaseMetaData`からCOLUMN_SIZE/DECIMAL_DIGITS/PK_NAME/REMARKS/TABLE_REMARKSの実値も補完する
+- 非DBソースでdbunitメタデータに存在しない値は常に空: COLUMN_SIZE/DECIMAL_DIGITS/PK_NAME/REMARKS/TABLE_REMARKS/PACKAGE
 - fixedColumnDefのlength/alignはScaffoldの`-fixedLength`/`-defaultLength`/`-align`由来（実カラムサイズ由来ではない）
 
 いずれもユーザーがこの記述子csvの各行を編集してtxt駆動テンプレートの入力データとして使う想定で、値は「編集の出発点として合理的な初期値」であり最終値の保証ではない。
 
 ## builtin駆動とtxt駆動の関係
 
-- **builtin駆動**（`.param`の`-generateType=<target>`）: 元ソースを`-src`に取り、`GenerateType.wrapProducer()`が生成時に記述子行を合成する。メタデータに無い値（カラムサイズ・コメント等）は空のまま
+- **builtin駆動**（`.param`の`-generateType=<target>`）: 元ソースを`-src`に取り、`GenerateType.wrapProducer()`が生成時に記述子行を合成する。メタデータに無い値（カラムサイズ・コメント等）は空のまま（ddl/javaBeanのDBソースはJDBCから補完される）
 - **txt駆動**（`.param`の`generateType=txt -unit=table`）: scaffoldが書き出した記述子dataset（編集済み）を`-src`に取り、コピーした組み込みテンプレート＋unitSettingで生成する。メタデータに無い値を人手で補える
 - 同じ元ソース・未編集の記述子datasetなら両駆動の出力はバイト一致する（`ScaffoldTest.ScaffoldToGenerate.assertScaffoldWithTemplateMatchesBuiltIn`が4target全てで検証）
 

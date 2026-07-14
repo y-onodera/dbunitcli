@@ -15,22 +15,19 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ComparableJdbcMetaDataProducer extends ComparableDataSetProducerWrapper {
 
-    private static final Column[] COLUMN_DEF_SCHEMA = {
-            new Column("TABLE_NAME", DataType.VARCHAR),
-            new Column("TABLE_REMARKS", DataType.VARCHAR),
-            new Column("COLUMN_NAME", DataType.VARCHAR),
-            new Column("TYPE_NAME", DataType.VARCHAR),
-            new Column("COLUMN_SIZE", DataType.VARCHAR),
-            new Column("DECIMAL_DIGITS", DataType.VARCHAR),
-            new Column("NULLABLE", DataType.BOOLEAN),
-            new Column("REMARKS", DataType.VARCHAR),
-            new Column("IS_PK", DataType.BOOLEAN),
-            new Column("PK_NAME", DataType.VARCHAR)
-    };
+    // 列集合・順序はComparableDdlMetaDataProducer.outputSchema()を唯一の定義として導出する
+    // （ScaffoldTarget.datasetSchema()の-headerNameやjavaBeanSettings.jsonのPACKAGE式と整合させるため）。
+    // JDBCから実値を取れるNULLABLE/IS_PKのみBOOLEAN型に差し替える
+    private static final Column[] COLUMN_DEF_SCHEMA = Arrays.stream(ComparableDdlMetaDataProducer.outputSchema())
+            .map(column -> Set.of("NULLABLE", "IS_PK").contains(column.getColumnName())
+                    ? new Column(column.getColumnName(), DataType.BOOLEAN)
+                    : column)
+            .toArray(Column[]::new);
 
     private final DatabaseMetaData jdbcMetaData;
 
@@ -68,16 +65,17 @@ public class ComparableJdbcMetaDataProducer extends ComparableDataSetProducerWra
                 final String columnName = column.getColumnName();
                 final ColumnDetail detail = columnDetails.get(columnName);
                 return new Object[]{
-                        tableName,
-                        tableRemarks,
                         columnName,
                         detail != null ? detail.typeName() : column.getDataType().toString(),
                         detail != null ? detail.columnSize() : null,
                         detail != null ? detail.decimalDigits() : null,
                         !column.isNotNullable(),
-                        detail != null ? detail.remarks() : "",
                         pkNames.containsKey(columnName),
-                        pkNames.get(columnName)
+                        pkNames.get(columnName),
+                        detail != null ? detail.remarks() : "",
+                        tableRemarks,
+                        tableName,
+                        ""
                 };
             });
         } catch (final SQLException e) {

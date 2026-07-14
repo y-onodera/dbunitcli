@@ -27,7 +27,7 @@ enum ScaffoldTarget {
 
         @Override
         ComparableDataSetProducerWrapper wrapProducer(final ScaffoldOption option, final ComparableDataSetProducer source) {
-            return new ComparableDdlMetaDataProducer(source);
+            return ComparableDdlMetaDataProducer.forSource(source);
         }
 
         @Override
@@ -43,7 +43,7 @@ enum ScaffoldTarget {
 
         @Override
         ComparableDataSetProducerWrapper wrapProducer(final ScaffoldOption option, final ComparableDataSetProducer source) {
-            return new ComparableDdlMetaDataProducer(source);
+            return ComparableDdlMetaDataProducer.forSource(source);
         }
 
         @Override
