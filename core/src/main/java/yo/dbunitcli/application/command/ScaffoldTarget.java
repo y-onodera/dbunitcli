@@ -21,11 +21,6 @@ import java.util.Arrays;
 enum ScaffoldTarget {
     ddl(GenerateType.ddl) {
         @Override
-        String sampleUnitSettingPath() {
-            return this.generateType().defaultSettingsPath();
-        }
-
-        @Override
         Column[] datasetSchema() {
             return ComparableDdlMetaDataProducer.outputSchema();
         }
@@ -41,11 +36,6 @@ enum ScaffoldTarget {
         }
     },
     javaBean(GenerateType.javaBean) {
-        @Override
-        String sampleUnitSettingPath() {
-            return this.generateType().defaultSettingsPath();
-        }
-
         @Override
         Column[] datasetSchema() {
             return ComparableDdlMetaDataProducer.outputSchema();
@@ -143,8 +133,10 @@ enum ScaffoldTarget {
         return this.generateType.getTemplatePath();
     }
 
-    /** unitSetting雛型としてコピーするclasspathリソース */
-    abstract String sampleUnitSettingPath();
+    /** unitSetting雛型としてコピーするclasspathリソース（既定はGenerateTypeのdefaultSettingsPath()） */
+    String sampleUnitSettingPath() {
+        return this.generateType.defaultSettingsPath();
+    }
 
     /** 記述子datasetの列定義（headerless出力時の-headerName用） */
     abstract Column[] datasetSchema();
