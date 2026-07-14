@@ -39,7 +39,7 @@
     <tr><td><a href="#type-settings">settings</a></td><td>固定成果物 / JSON</td><td>Dataset Settings ファイルのひな型を生成</td><td>dataset（固定）</td></tr>
     <tr><td><a href="#type-sql">sql</a></td><td>固定成果物 / テキスト</td><td>INSERT / UPDATE / DELETE / CLEAN_INSERT SQL ファイルを生成</td><td>table（固定）</td></tr>
     <tr><td><a href="#type-ddl">ddl</a></td><td>固定成果物 / テキスト</td><td>テーブルのカラム情報から CREATE TABLE 用の DDL ファイルを生成</td><td>table（固定）</td></tr>
-    <tr><td><a href="#type-xlsxSchema">xlsxSchema</a></td><td>固定成果物 / JSON</td><td>データセットのカラム情報から Xlsx Schema 設定ファイルのひな型を生成</td><td>dataset（固定）</td></tr>
+    <tr><td><a href="#type-xlsxSchema">xlsxSchema</a></td><td>固定成果物 / JSON</td><td>データセットのカラム情報から Xlsx Schema 設定ファイルのひな型を生成</td><td>table（固定）</td></tr>
     <tr><td><a href="#type-javaBean">javaBean</a></td><td>固定成果物 / テキスト</td><td>テーブルのカラム情報から JavaBean の <code>.java</code> ソースを生成</td><td>table（固定）</td></tr>
     <tr><td><a href="#type-fixedColumnDef">fixedColumnDef</a></td><td>固定成果物 / JSON</td><td>固定長出力用のカラム幅定義ファイルを生成</td><td>table（固定）</td></tr>
     <tr><td><a href="#type-xlsxTemplate">xlsxTemplate</a></td><td>固定成果物 / Excel</td><td>jxls テンプレートのひな型 <code>.xlsx</code> を生成</td><td>dataset（固定）</td></tr>
@@ -47,7 +47,7 @@
 
   <h2>unit</h2>
   <p>生成の単位を指定します。デフォルトは <code>record</code> です。<br>
-  <code>settings</code> / <code>xlsxSchema</code> / <code>xlsxTemplate</code> は <code>dataset</code>、<code>sql</code> / <code>ddl</code> / <code>javaBean</code> / <code>fixedColumnDef</code> は <code>table</code> に固定されます。</p>
+  <code>settings</code> / <code>xlsxTemplate</code> は <code>dataset</code>、<code>sql</code> / <code>ddl</code> / <code>xlsxSchema</code> / <code>javaBean</code> / <code>fixedColumnDef</code> は <code>table</code> に固定されます。</p>
   <table>
     <tr><th>値</th><th>説明</th></tr>
     <tr><td>record</td><td>行ごとに 1 ファイルを出力</td></tr>
@@ -164,7 +164,7 @@ COMMENT ON COLUMN EMPLOYEE.EMPLOYEE_NAME IS '氏名';
 COMMENT ON COLUMN EMPLOYEE.SALARY IS '給与';</pre>
 
   <h4 id="type-xlsxSchema">xlsxSchema</h4>
-  <p>データセットのカラム情報から <a href="xlsx-schema.html">Xlsx Schema</a> 設定ファイルのひな型を JSON 形式で生成します。<code>unit</code> は <code>dataset</code> に固定です。<code>template</code> は使用しません。</p>
+  <p>データセットのカラム情報から <a href="xlsx-schema.html">Xlsx Schema</a> 設定ファイルのひな型を JSON 形式で生成します。<code>unit</code> は <code>table</code> に固定で、テーブルごとに <code>{テーブル名}.json</code> を出力します。<code>template</code> は使用しません（組み込みテンプレートのみ使用されます）。組み込みの <code>unitSetting</code>（既定は <code>xlsxschema/xlsxSchemaSettings.json</code>）が PK / CELLS サブテーブルへの分割を担います。シート名やセル位置などを調整したい場合は、scaffold コマンドで書き出した記述子データセットを編集し、<code>generateType=txt</code> と <code>unitSetting</code>（既定と同じファイル）で生成してください。</p>
   <p><strong>生成イメージ:</strong></p>
   <pre>{
   "rows": [

@@ -52,14 +52,6 @@ enum ScaffoldTarget {
         }
     },
     xlsxSchema(GenerateType.xlsxSchema) {
-        // サンプルunitSettingはScaffold専用リソースで、GenerateType.defaultSettingsPath()には意図的に
-        // 接続しない: あちらは素の-generateType=xlsxSchema呼び出し全てに効く全体デフォルトであり、
-        // 「PK/CELLSサブテーブルへseparateする」ルールはScaffoldが書き出す記述子datasetに対してのみ意味を持つ
-        @Override
-        String sampleUnitSettingPath() {
-            return "xlsxschema/xlsxSchemaSettings.json";
-        }
-
         @Override
         Column[] datasetSchema() {
             return ComparableXlsxSchemaMetaDataProducer.outputSchema();

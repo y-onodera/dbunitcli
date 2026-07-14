@@ -15,10 +15,6 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 public enum GenerateType {
@@ -178,6 +174,13 @@ public enum GenerateType {
             return ParameterUnit.table;
         }
 
+        // separateルールでPK/CELLSサブテーブルを合成する（Scaffoldがコピーする雛型と同一ファイル。
+        // テンプレートのdataset.PK/dataset.CELLS参照はこの分割が前提）
+        @Override
+        public String defaultSettingsPath() {
+            return "xlsxschema/xlsxSchemaSettings.json";
+        }
+
         @Override
         protected boolean loadData() {
             return false;
@@ -191,40 +194,6 @@ public enum GenerateType {
         @Override
         protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
             return new ComparableXlsxSchemaMetaDataProducer(producer);
-        }
-
-        // One output file per table (see resultPathTemplate() above), matching ddl/javaBean/fixedColumnDef
-        // rather than the old single combined-schema file. unit=table's ComparableTableDto.resolve() hands
-        // write() a "dataSet" with exactly one entry per call, so the loop below (and the shared template's
-        // own "dataSet.values" iteration) needs no table-count-specific logic either way.
-        // The shared xlsxSchemaTemplate.stg/.txt (also copied verbatim by Scaffold's xlsxSchema target, see
-        // ScaffoldOption.writeSchemaTemplate) expect "dataSet" to hold, per table, a "one row per column"
-        // shape: rows (COLUMN_NAME/SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS per column) plus
-        // dataset.PK/dataset.CELLS sub-tables. wrapProducer() above already produces "rows" in that shape
-        // from real table metadata (ComparableXlsxSchemaMetaDataProducer); here we only split PK vs all.
-        @Override
-        @SuppressWarnings("unchecked")
-        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
-                throws IOException {
-            final Map<String, Map<String, Object>> dataSet = (Map<String, Map<String, Object>>) param.get("dataSet");
-            final Map<String, Object> schemaDataSet = new LinkedHashMap<>();
-            dataSet.forEach((tableName, table) -> schemaDataSet.put(tableName,
-                    this.toSchemaTable(tableName, (List<Map<String, Object>>) table.get("rows"))));
-            super.write(option, resultFile, param.add("dataSet", schemaDataSet));
-        }
-
-        private Map<String, Object> toSchemaTable(final String tableName, final List<Map<String, Object>> rows) {
-            final List<Map<String, Object>> pkRows = rows.stream()
-                    .filter(row -> Boolean.TRUE.equals(row.get("IS_PK")))
-                    .toList();
-            final Map<String, Object> dataset = new LinkedHashMap<>();
-            dataset.put("PK", Map.of("rows", pkRows));
-            dataset.put("CELLS", Map.of("rows", rows));
-            final Map<String, Object> result = new LinkedHashMap<>();
-            result.put("tableName", tableName);
-            result.put("rows", rows);
-            result.put("dataset", dataset);
-            return result;
         }
     }, javaBean("javabean/javaBeanTemplate.stg", "javabean/javaBeanTemplate.txt") {
         @Override
