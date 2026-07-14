@@ -9,7 +9,7 @@
 | settings | dataset固定 | false / true | true | 単一ファイル | `settings/settingTemplate.stg,.txt` |
 | sql | table固定 | true / true | true | テーブル毎（`<sqlFilePrefix><table><sqlFileSuffix>.sql`） | `sql/sqlTemplate.stg` + `sql/{insert,delete,update,cleanInsert,deleteInsert}Template.txt`（`-op`で分岐） |
 | ddl | table固定 | false / true | true | テーブル毎（`<sqlFilePrefix><table><sqlFileSuffix>.sql`） | `sql/ddlTemplate.stg,.txt`、既定settings`sql/ddlSettings.json` |
-| xlsxSchema | table固定 | false / false | true | テーブル毎（`<table>.json`） | `xlsxschema/xlsxSchemaTemplate.stg,.txt` |
+| xlsxSchema | table固定 | false / false | true | テーブル毎（`<table>.json`） | `xlsxschema/xlsxSchemaTemplate.stg,.txt`、既定settings`xlsxschema/xlsxSchemaSettings.json` |
 | javaBean | table固定 | false / true | true | テーブル毎（`<Table（snakeToUpperCamel）>.java`） | `javabean/javaBeanTemplate.stg,.txt`、既定settings`javabean/javaBeanSettings.json` |
 | fixedColumnDef | table固定 | false / false | true | テーブル毎（`<table>.json`） | `fixedcolumndef/fixedColumnDefTemplate.stg,.txt` |
 | xlsxTemplate | dataset固定 | false / false | true | 単一ファイル・コード生成専用（テンプレート不要、`write()`が`JxlsTemplateGenerator`でExcelを直接組み立てる） | （なし） |
@@ -20,7 +20,7 @@ loadData/useJdbcMetaDataは`GenerateType`の`loadData()`/`useJdbcMetaData()`を�
 
 固定成果物タイプはすべて`-template`での差し替えを持たない（組み込みテンプレート専用）。`ddl`/`javaBean`相当の内容を組み込み以外のテンプレートで生成したい場合は、`generateType=txt`＋`unit=table`＋`unitSetting`（既定値は各`defaultSettingsPath()`と同じ設定ファイルを流用可）を使う。
 
-`xlsxSchema`は`ddl`/`javaBean`/`fixedColumnDef`と同じくテーブル毎に1ファイル出力する（`GenerateType.xlsxSchema.resultPathTemplate()`が共有helper`tableFileResultPath()`経由で`<resultPath>/<tableName>.json`を自動生成）。`unit=table`なので`-unitSetting`でsrcデータセットの列を絞り込み/フィルタできる（`xlsxSchema`の`defaultSettingsPath()`は未定義なので既定は素通し）。
+`xlsxSchema`は`ddl`/`javaBean`/`fixedColumnDef`と同じくテーブル毎に1ファイル出力する（`GenerateType.xlsxSchema.resultPathTemplate()`が共有helper`tableFileResultPath()`経由で`<resultPath>/<tableName>.json`を自動生成）。既定unitSetting（`xlsxschema/xlsxSchemaSettings.json`）のseparateルールがPK/CELLSサブテーブルを合成し、テンプレートの`dataset.PK.rows`/`dataset.CELLS.rows`参照はこれが前提（ddlの`sql/ddlSettings.json`と同じ方式。Scaffoldがコピーする雛型とも同一ファイル）。`-unitSetting`を明示指定すると既定が丸ごと置き換わるため、PK/CELLS形状を保つにはseparateルールを含めること。
 
 ## Scaffoldとの結合
 
@@ -30,7 +30,7 @@ loadData/useJdbcMetaDataは`GenerateType`の`loadData()`/`useJdbcMetaData()`を�
 
 `ParameterUnit`（`application/ParameterUnit.java`）は record / table / dataset の3値。`GenerateOption.parameterStream()` が `generateType.isExcel()` と `lazyLoad` に応じて `dataSetToStream` / `lazyLoadStream` / `templateStream` を呼び分ける。`generateType.isFixedTemplate()` が true の場合、`unit` は `getFixedUnit()` に強制される（txt/xlsx/xlsのみユーザー指定可、デフォルトrecord）。
 
-`-unitSetting` / `-unitSettingEncoding` は `unit=table` かつ非Excel系タイプで有効。`GenerateOption.unitTableSeparators()` が `FromJsonTableSeparatorsBuilder` でテーブル区切り設定を構築し、未指定時は `generateType.defaultSettingsPath()`（ddl/javaBeanのみ定義）のクラスパス既定値を使う。
+`-unitSetting` / `-unitSettingEncoding` は `unit=table` かつ非Excel系タイプで有効。`GenerateOption.unitTableSeparators()` が `FromJsonTableSeparatorsBuilder` でテーブル区切り設定を構築し、未指定時は `generateType.defaultSettingsPath()`（ddl/javaBean/xlsxSchemaで定義）のクラスパス既定値を使う。
 
 ## オプションの所在
 
