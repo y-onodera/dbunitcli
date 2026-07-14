@@ -29,7 +29,6 @@ public record ComparableDataSetLoader(Parameter parameter) {
             case reg -> new ComparableRegexSplitDataSetProducer(param);
             case fixed -> new ComparableFixedFileDataSetProducer(param);
             case none -> new ComparableNoneDataSetProducer(param);
-            case jdbcMetadata -> new ComparableJdbcMetaDataProducer(new AllTablesDataSetProducer(param));
         };
     }
 

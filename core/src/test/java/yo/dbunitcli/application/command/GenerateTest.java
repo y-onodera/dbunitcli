@@ -234,6 +234,38 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateDdlFromDbMetaData() throws Exception {
+            final String url = "jdbc:h2:mem:generateddl;DB_CLOSE_DELAY=-1";
+            try (final java.sql.Connection conn = java.sql.DriverManager.getConnection(url, "sa", "sa")) {
+                try (final java.sql.Statement st = conn.createStatement()) {
+                    st.execute("DROP TABLE IF EXISTS PERSON");
+                    st.execute("CREATE TABLE PERSON (ID INT NOT NULL, NAME VARCHAR(50) NOT NULL, MEMO VARCHAR(100)"
+                            + ", CONSTRAINT PK_PERSON PRIMARY KEY (ID))");
+                    st.execute("COMMENT ON TABLE PERSON IS 'people table'");
+                    st.execute("COMMENT ON COLUMN PERSON.NAME IS 'person name'");
+                }
+                Generate.main(new String[]{
+                        "-generateType=ddl"
+                        , "-srcType=table"
+                        , "-src=" + GenerateTest.RESOURCES_DIR + "/src/generate/db/table"
+                        , "-jdbcUrl=" + url
+                        , "-jdbcUser=sa"
+                        , "-jdbcPass=sa"
+                        , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/ddl/db/result"
+                });
+                GenerateTest.subDirectory = "generate/ddl/db";
+                final String ddl = Files.readString(new File(this.getResult(), "PERSON.sql").toPath(),
+                                                    StandardCharsets.UTF_8);
+                Assertions.assertTrue(ddl.contains("CREATE TABLE PERSON ("), ddl);
+                Assertions.assertTrue(ddl.contains("VARYING(50) NOT NULL"), ddl);
+                Assertions.assertTrue(ddl.contains("VARYING(100)\n") || ddl.contains("VARYING(100)\r\n"), ddl);
+                Assertions.assertTrue(ddl.contains("CONSTRAINT PK_PERSON PRIMARY KEY (ID)"), ddl);
+                Assertions.assertTrue(ddl.contains("COMMENT ON TABLE PERSON IS 'people table';"), ddl);
+                Assertions.assertTrue(ddl.contains("COMMENT ON COLUMN PERSON.NAME IS 'person name';"), ddl);
+            }
+        }
+
+        @Test
         public void testGenerateDdlWithMapping() throws Exception {
             Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateDdlWithMapping.txt"});
             GenerateTest.subDirectory = "generate/ddl";

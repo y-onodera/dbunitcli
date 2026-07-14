@@ -45,7 +45,7 @@ public class DataSourceTypeOptionFactory {
                     , new AddFileInfoOption(prefix, dto)
                     , new TemplateRenderOption(prefix, dto.getTemplateRender())
             );
-            case table, sql, jdbcMetadata -> ComparableDataSetParamOption.join(
+            case table, sql -> ComparableDataSetParamOption.join(
                     new EncodingOption(prefix, dto)
                     , new FileTraverseOption(prefix, dto)
                     , new HeaderNameOption(prefix, dto)

@@ -135,7 +135,7 @@ public enum GenerateType {
 
         @Override
         protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
-            return new ComparableDdlMetaDataProducer(producer);
+            return ComparableDdlMetaDataProducer.forSource(producer);
         }
 
         @Override
@@ -223,7 +223,7 @@ public enum GenerateType {
 
         @Override
         protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
-            return new ComparableDdlMetaDataProducer(producer);
+            return ComparableDdlMetaDataProducer.forSource(producer);
         }
 
         @Override

@@ -11,10 +11,16 @@ import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.ComparableTableMappingTask;
 
+import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
+
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.Properties;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 class ComparableDdlMetaDataProducerTest {
 
@@ -70,6 +76,36 @@ class ComparableDdlMetaDataProducerTest {
                 "IS_PK", "PK_NAME", "REMARKS", "TABLE_REMARKS", "PACKAGE"}) {
             assertEquals("", row.get(emptyColumn), emptyColumn);
         }
+    }
+
+    @Test
+    void forSourceWrapsDbProducerWithJdbcMetaData() throws Exception {
+        final String url = "jdbc:h2:mem:forsource;DB_CLOSE_DELAY=-1";
+        try (final Connection conn = DriverManager.getConnection(url, "sa", "")) {
+            final Properties props = new Properties();
+            props.put("url", url);
+            props.put("user", "sa");
+            props.put("pass", "");
+            final File tableListFile = File.createTempFile("tables", ".txt");
+            tableListFile.deleteOnExit();
+            final ComparableDataSetParam dbParam = ComparableDataSetParam.builder()
+                    .setSrc(tableListFile)
+                    .setEncoding("UTF-8")
+                    .setDatabaseConnectionLoader(new DatabaseConnectionLoader(props))
+                    .build();
+            assertInstanceOf(ComparableJdbcMetaDataProducer.class,
+                             ComparableDdlMetaDataProducer.forSource(new ComparableDBDataSetProducer(dbParam)));
+        }
+    }
+
+    @Test
+    void forSourceWrapsOtherProducerWithDdlMetaData() {
+        final ComparableDataSetParam param = ComparableDataSetParam.builder()
+                .setSrc(new File("."))
+                .build();
+        final ComparableDataSetProducer delegate = new FixedMetaDataProducer(param, "SAMPLE",
+                new Column[]{new Column("id", DataType.UNKNOWN)}, new Column[0]);
+        assertInstanceOf(ComparableDdlMetaDataProducer.class, ComparableDdlMetaDataProducer.forSource(delegate));
     }
 
     private record FixedMetaDataProducer(ComparableDataSetParam param, String tableName,

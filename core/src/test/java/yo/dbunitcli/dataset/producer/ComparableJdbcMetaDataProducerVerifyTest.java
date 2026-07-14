@@ -58,6 +58,7 @@ class ComparableJdbcMetaDataProducerVerifyTest {
             final var idRow = table.getRowToMap(0);
             assertEquals("ID", idRow.get("COLUMN_NAME"));
             assertEquals(Boolean.TRUE, idRow.get("IS_PK"));
+            assertEquals("", idRow.get("PACKAGE"));
         }
     }
 
