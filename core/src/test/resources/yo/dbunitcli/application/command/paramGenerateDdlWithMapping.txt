@@ -4,5 +4,8 @@
 -setting=src/test/resources/yo/dbunitcli/application/command/ddlMappingSettings.json
 -unitSetting=src/test/resources/yo/dbunitcli/application/command/ddlMappingSettings.json
 -settingEncoding=UTF-8
--generateType=ddl
--resultPath=target/test-classes/yo/dbunitcli/application/generate/ddl/result
+-generateType=txt
+-unit=table
+-template=src/main/resources/sql/ddlTemplate.txt
+-template.templateGroup=src/main/resources/sql/ddlTemplate.stg
+-resultPath=target/test-classes/yo/dbunitcli/application/generate/ddl/result/$param.tableName$.sql

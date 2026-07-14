@@ -144,13 +144,13 @@ insert into Test1 (Key ,Column1 ,Column2 ,Column3 ) values ('1' ,'ああ' ,10000
 commit;</pre>
 
   <h4 id="type-ddl">ddl</h4>
-  <p>テーブルのカラム情報から CREATE TABLE 用の DDL ファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません（組み込み DDL テンプレートのみ使用されます）。ファイル名は <code>{sqlFilePrefix}{テーブル名}{sqlFileSuffix}.sql</code> になります。組み込みテンプレート以外の出力にしたい場合は、<code>generateType=txt</code> と <code>unitSetting</code>（既定は <code>sql/ddlSettings.json</code>）を使って同等の内容を再現してください。</p>
+  <p>データソースのメタデータ（テーブルのカラム情報）から CREATE TABLE 用の DDL ファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません（組み込み DDL テンプレートのみ使用されます）。ファイル名は <code>{sqlFilePrefix}{テーブル名}{sqlFileSuffix}.sql</code> になります。カラムの型・PK・NULL制約はソースのメタデータから取得します（JDBC ソースで <code>useJdbcMetaData</code> を有効にした場合に実値が入ります。CSV 等メタデータの無いソースではカラム名のみになります）。カラムサイズ・コメント・パッケージ名などメタデータに存在しない情報を含む完全な DDL を生成したい場合は、scaffold コマンドで書き出した記述子データセットを編集し、<code>generateType=txt</code> と <code>unitSetting</code>（既定は <code>sql/ddlSettings.json</code>）で生成してください。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>sqlFilePrefix</td><td>生成 DDL ファイル名のプレフィックス</td><td>（空）</td></tr>
     <tr><td>sqlFileSuffix</td><td>生成 DDL ファイル名のサフィックス</td><td>（空）</td></tr>
   </table>
-  <p><strong>生成イメージ（ファイル名: <code>EMPLOYEE.sql</code>）:</strong></p>
+  <p><strong>生成イメージ（カラムサイズ・コメント等をすべて与えた場合。ファイル名: <code>EMPLOYEE.sql</code>）:</strong></p>
   <pre>CREATE TABLE EMPLOYEE (
     EMPLOYEE_ID INTEGER(10) NOT NULL,
     EMPLOYEE_NAME VARCHAR(100),
@@ -188,8 +188,8 @@ COMMENT ON COLUMN EMPLOYEE.SALARY IS '給与';</pre>
 }</pre>
 
   <h4 id="type-javaBean">javaBean</h4>
-  <p>テーブルのカラム情報から JavaBean の <code>.java</code> ソースファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません（組み込み JavaBean テンプレートのみ使用されます）。ファイル名はテーブル名をアッパーキャメルケースに変換したものになります（例: <code>EMPLOYEE</code> → <code>Employee.java</code>）。組み込みテンプレート以外の出力にしたい場合は、<code>generateType=txt</code> と <code>unitSetting</code>（既定は <code>javabean/javaBeanSettings.json</code>）を使って同等の内容を再現してください。</p>
-  <p><strong>生成イメージ（ファイル名: <code>Employee.java</code>）:</strong></p>
+  <p>データソースのメタデータ（テーブルのカラム情報）から JavaBean の <code>.java</code> ソースファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません（組み込み JavaBean テンプレートのみ使用されます）。ファイル名はテーブル名をアッパーキャメルケースに変換したものになります（例: <code>EMPLOYEE</code> → <code>Employee.java</code>）。カラムの型（javaType 変換元）や PK・NULL制約はソースのメタデータから取得します（JDBC ソースで <code>useJdbcMetaData</code> を有効にした場合に実値が入ります。CSV 等メタデータの無いソースではカラム名のみになります）。コメントやパッケージ名などメタデータに存在しない情報を含む完全なソースを生成したい場合は、scaffold コマンドで書き出した記述子データセットを編集し、<code>generateType=txt</code> と <code>unitSetting</code>（既定は <code>javabean/javaBeanSettings.json</code>）で生成してください。</p>
+  <p><strong>生成イメージ（コメント等をすべて与えた場合。ファイル名: <code>Employee.java</code>）:</strong></p>
   <pre>/** 社員マスタ */
 public class Employee {
     /** 社員ID */

@@ -7,7 +7,7 @@ import yo.dbunitcli.dataset.ResultType;
 
 public class ScaffoldDto extends CommandDto {
 
-    @CommandLine.Option(names = "-datasetType", description = "output format for dataset src template (default: csv)")
+    @CommandLine.Option(names = "-datasetType", description = "output format for dataset src template: csv, xls, xlsx, fixed or table (default: csv)")
     private ResultType datasetType;
     @CommandLine.Option(names = "-datasetEncoding", description = "output encoding for dataset src template (not used for xls/xlsx, default: UTF-8)")
     private String datasetEncoding;
@@ -16,8 +16,6 @@ public class ScaffoldDto extends CommandDto {
     private String resultDir;
     @CommandLine.Option(names = "-target", description = "target to generate: ddl, javaBean, xlsxSchema, fixedColumnDef, or parameter (required, no default)")
     private String target;
-    @CommandLine.Option(names = "-setting", description = "setting file name to scaffold (omit to skip)")
-    private String settingName;
     @CommandLine.Option(names = "-unitSetting", description = "unitSetting file name to scaffold (omit to skip)")
     private String unitSettingName;
     @CommandLine.Option(names = "-template", description = "template file name to scaffold (omit to skip)")
@@ -26,11 +24,41 @@ public class ScaffoldDto extends CommandDto {
     private String parameterName;
     @CommandLine.Option(names = "-commandType", description = "commandType for parameter generation")
     private String commandType;
+    @CommandLine.Option(names = "-fixedLength", description = "comma-separated column lengths for fixedColumnDef dataset template")
+    private String fixedLength;
+    @CommandLine.Option(names = "-defaultLength", description = "default column length for fixedColumnDef dataset template (default: 10)")
+    private String defaultLength;
+    @CommandLine.Option(names = "-align", description = "column alignment for fixedColumnDef dataset template: left or right (default: left)")
+    private String align;
 
     private String[] commandInput = new String[0];
 
     public String getCommandType() {
         return this.commandType;
+    }
+
+    public String getFixedLength() {
+        return this.fixedLength;
+    }
+
+    public void setFixedLength(final String fixedLength) {
+        this.fixedLength = fixedLength;
+    }
+
+    public String getDefaultLength() {
+        return this.defaultLength;
+    }
+
+    public void setDefaultLength(final String defaultLength) {
+        this.defaultLength = defaultLength;
+    }
+
+    public String getAlign() {
+        return this.align;
+    }
+
+    public void setAlign(final String align) {
+        this.align = align;
     }
 
     public void setCommandType(final String commandType) {
@@ -59,14 +87,6 @@ public class ScaffoldDto extends CommandDto {
 
     public void setTarget(final String target) {
         this.target = target;
-    }
-
-    public String getSettingName() {
-        return this.settingName;
-    }
-
-    public void setSettingName(final String settingName) {
-        this.settingName = settingName;
     }
 
     public String getUnitSettingName() {

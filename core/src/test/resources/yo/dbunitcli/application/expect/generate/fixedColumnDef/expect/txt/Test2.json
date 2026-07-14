@@ -1,0 +1,5 @@
+{
+  "columns": [
+{"name": "PrimaryKey", "length": 10, "align": "left", "pad": " "},{"name": "ColumnA", "length": 10, "align": "left", "pad": " "},{"name": "ColumnB", "length": 10, "align": "left", "pad": " "}
+  ]
+}

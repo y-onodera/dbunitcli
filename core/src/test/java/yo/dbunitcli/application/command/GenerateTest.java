@@ -196,6 +196,15 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateFixedColumnDef() throws Exception {
+            Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateFixedColumnDef.txt"});
+            GenerateTest.subDirectory = "generate/fixedColumnDef";
+            this.assertGenerateFileEquals("Test1.json", "UTF-8");
+            this.assertGenerateFileEquals("Test2.json", "UTF-8");
+            this.assertGenerateFileEquals("Test3.json", "UTF-8");
+        }
+
+        @Test
         public void testGenerateDdl() throws Exception {
             Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateDdl.txt"});
             GenerateTest.subDirectory = "generate/ddl";
@@ -210,17 +219,18 @@ public class GenerateTest {
         }
 
         @Test
-        public void testGenerateDdlWithScaffoldSettings() throws Exception {
-            Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateDdlWithScaffoldSettings.txt"});
+        public void testGenerateDdlFromSourceMetaData() throws Exception {
+            Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateDdlFromSource.txt"});
             GenerateTest.subDirectory = "generate/ddl";
-            this.assertGenerateFileEquals("EMPLOYEE.sql", "UTF-8");
+            this.assertGenerateFileEquals("Test1.sql", "UTF-8");
+            this.assertGenerateFileEquals("Test3.sql", "UTF-8");
         }
 
         @Test
-        public void testGenerateJavaBeanWithScaffoldSettings() throws Exception {
-            Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateJavaBeanWithScaffoldSettings.txt"});
+        public void testGenerateJavaBeanFromSourceMetaData() throws Exception {
+            Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateJavaBeanFromSource.txt"});
             GenerateTest.subDirectory = "generate/javabean";
-            this.assertGenerateFileEquals("Employee.java", "UTF-8");
+            this.assertGenerateFileEquals("Test1.java", "UTF-8");
         }
 
         @Test
