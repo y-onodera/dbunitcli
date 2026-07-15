@@ -58,5 +58,6 @@
 ## テストの場所
 
 - テストクラス: `core/src/test/java/yo/dbunitcli/application/command/ScaffoldTest.java`（target別の`@Nested`クラス。`ScaffoldToGenerate`がE2E: scaffold出力の`.param`を`Generate.main()`に渡して検証、builtin/txt両駆動のバイト一致を4target全てで検証）
+- サンプルunitSettingの列定義ドリフト検証: `ScaffoldTargetSettingsTest.java`（テンプレートが参照する全列がサンプルに定義されていることを4target全てで検証）
 - producer単体テスト: `core/src/test/java/yo/dbunitcli/dataset/producer/ComparableDdlMetaDataProducerTest.java`等
 - 入力フィクスチャ: `core/src/test/resources/yo/dbunitcli/application/command/scaffold/src/SAMPLE.csv`
