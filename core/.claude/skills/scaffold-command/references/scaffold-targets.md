@@ -20,10 +20,11 @@
 | `ddl` | `GenerateType.ddl` | `sql/ddlSettings.json`（=`defaultSettingsPath()`） | `ComparableDdlMetaDataProducer.forSource()`（DBソースは`ComparableJdbcMetaDataProducer`、他は`ComparableDdlMetaDataProducer`。出力スキーマは同一） | 11列（COLUMN_NAME/TYPE_NAME/COLUMN_SIZE/DECIMAL_DIGITS/NULLABLE/IS_PK/PK_NAME/REMARKS/TABLE_REMARKS/TABLE_NAME/PACKAGE） | `$param.tableName$.sql` |
 | `javaBean` | `GenerateType.javaBean` | `javabean/javaBeanSettings.json`（同上） | 同上 | 同上 | `$param.tableName; format="snakeToUpperCamel"$.java` |
 | `xlsxSchema` | `GenerateType.xlsxSchema` | `xlsxschema/xlsxSchemaSettings.json`（=`defaultSettingsPath()`。PK/CELLSへのseparateルール） | `ComparableXlsxSchemaMetaDataProducer` | 6列（COLUMN_NAME/SHEET_NAME/DATA_START/COLUMN_INDEX/CELL_ADDRESS/IS_PK） | `$param.tableName$.json` |
-| `fixedColumnDef` | `GenerateType.fixedColumnDef` | `fixedcolumndef/fixedColumnDefSettings.json`（空のプレースホルダー） | `ComparableFixedColumnDefMetaDataProducer`（`-fixedLength`/`-defaultLength`/`-align`で値を変更可、デフォルト10/left） | 4列（name/length/align/pad） | `$param.tableName$.json` |
+| `fixedColumnDef` | `GenerateType.fixedColumnDef` | `fixedcolumndef/fixedColumnDefSettings.json`（Scaffold専用。`defaultSettingsPath()`なし） | `ComparableFixedColumnDefMetaDataProducer`（`-fixedLength`/`-defaultLength`/`-align`で値を変更可、デフォルト10/left） | 4列（name/length/align/pad） | `$param.tableName$.json` |
 | `parameter` | なし（`-commandType`必須） | — | — | — | — |
 
 補足:
+- サンプルunitSettingは、利用者が他のデータソースの列をテンプレートの読む列へマッピングする際のヒント。各サンプルはテンプレートで利用される全列を`string`/`boolean`式で定義しておく（値を変えない列は恒等マッピング）
 - 出力先はunitSetting=`resources/setting/`、template=`resources/template/`、parameter=`option/`、dataset=`src/`。`.param`内の相対パスはこの配置を前提に書き出されるため、ディレクトリ構成を変える場合は`.param`生成側も追従が必要
 - `parameter` targetは`CommandParameters(Type, commandInput).shrink()`で任意コマンドの`.param`を生成。出力ファイル名は`{commandType}.param`固定で`-parameter`の名前は使われない（他targetは`-parameter`の名前で出力）
 - `-datasetType`（記述子datasetの出力形式、デフォルトcsv）に`format`は指定不可（読み戻し先の`DataSourceType`が存在しないためコンストラクタで即エラー）

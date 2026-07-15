@@ -5,8 +5,12 @@
       "separate": [
         {
           "string": {
+            "COLUMN_NAME": "COLUMN_NAME",
+            "TYPE_NAME": "TYPE_NAME",
             "COLUMN_SIZE": "COLUMN_SIZE != null && !COLUMN_SIZE.isEmpty() ? COLUMN_SIZE : null",
-            "DECIMAL_DIGITS": "DECIMAL_DIGITS != null && !DECIMAL_DIGITS.isEmpty() ? DECIMAL_DIGITS : null"
+            "DECIMAL_DIGITS": "DECIMAL_DIGITS != null && !DECIMAL_DIGITS.isEmpty() ? DECIMAL_DIGITS : null",
+            "REMARKS": "REMARKS",
+            "TABLE_REMARKS": "TABLE_REMARKS"
           },
           "boolean": {
             "NULLABLE": "NULLABLE",
@@ -16,6 +20,10 @@
         {
           "tableName": "PK",
           "filter": ["IS_PK"],
+          "string": {
+            "COLUMN_NAME": "COLUMN_NAME",
+            "PK_NAME": "PK_NAME"
+          },
           "boolean": {
             "IS_PK": "IS_PK"
           }

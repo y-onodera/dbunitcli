@@ -1,2 +1,12 @@
 {
+  "commonSettings": [
+    {
+      "string": {
+        "name": "name",
+        "length": "length",
+        "align": "align",
+        "pad": "pad"
+      }
+    }
+  ]
 }
