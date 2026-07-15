@@ -4,6 +4,12 @@
       "pattern": {"regex": ".*", "exclude": ["PK", "CELLS"]},
       "separate": [
         {
+          "string": {
+            "COLUMN_NAME": "COLUMN_NAME",
+            "SHEET_NAME": "SHEET_NAME",
+            "DATA_START": "DATA_START",
+            "COLUMN_INDEX": "COLUMN_INDEX"
+          },
           "boolean": {
             "IS_PK": "IS_PK"
           }
@@ -11,12 +17,20 @@
         {
           "tableName": "PK",
           "filter": ["IS_PK"],
+          "string": {
+            "COLUMN_NAME": "COLUMN_NAME"
+          },
           "boolean": {
             "IS_PK": "IS_PK"
           }
         },
         {
-          "tableName": "CELLS"
+          "tableName": "CELLS",
+          "string": {
+            "COLUMN_NAME": "COLUMN_NAME",
+            "SHEET_NAME": "SHEET_NAME",
+            "CELL_ADDRESS": "CELL_ADDRESS"
+          }
         }
       ]
     }

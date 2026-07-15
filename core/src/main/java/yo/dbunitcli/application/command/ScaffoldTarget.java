@@ -68,7 +68,7 @@ enum ScaffoldTarget {
         }
     },
     fixedColumnDef(GenerateType.fixedColumnDef) {
-        // 空のプレースホルダー（列の絞り込み・改名を後から足したい利用者向け）
+        // GenerateType.fixedColumnDefはdefaultSettingsPath()を持たないため、Scaffold専用のサンプルを使う
         @Override
         String sampleUnitSettingPath() {
             return "fixedcolumndef/fixedColumnDefSettings.json";
@@ -125,7 +125,11 @@ enum ScaffoldTarget {
         return this.generateType.getTemplatePath();
     }
 
-    /** unitSetting雛型としてコピーするclasspathリソース（既定はGenerateTypeのdefaultSettingsPath()） */
+    /**
+     * unitSetting雛型としてコピーするclasspathリソース（既定はGenerateTypeのdefaultSettingsPath()）。
+     * 利用者が他のデータソースの列をテンプレートの読む列へマッピングする際のヒントとなるよう、
+     * 各サンプルはテンプレートで利用される全列を定義しておくこと
+     */
     String sampleUnitSettingPath() {
         return this.generateType.defaultSettingsPath();
     }
