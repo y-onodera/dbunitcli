@@ -36,6 +36,20 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
         this.workspace = workspace;
     }
 
+    /** フォーム値をコマンドのoptions構造へシリアライズしてJSON化する（refresh系の共通処理） */
+    static String optionsJson(final yo.dbunitcli.application.CommandType type,
+                              final Map<String, String> input) throws IOException {
+        return ObjectMapper.getDefault().writeValueAsString(new CommandParameters(type, input).serialize());
+    }
+
+    /** SETTING/TEMPLATE等のworkspaceリソース系相対パスを絶対パスへ解決する（コマンド実行前の共通処理） */
+    static CommandParameters resolveSidecarFilePaths(final CommandParameters parameters) {
+        return parameters.resolveFilePaths((baseDir, value) ->
+                SIDECAR_RESOLVE_BASEDIR.contains(baseDir) && !new File(value).isAbsolute()
+                        ? new File(Workspace.resolveBaseDir(baseDir), value).getAbsolutePath()
+                        : value);
+    }
+
     @Post(uri = "load", produces = MediaType.APPLICATION_JSON)
     public String load(@Body final CommandRequestDto input) {
         return this.load(this.getCommandType(), input.getName());
@@ -54,7 +68,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     @Post(uri = "refresh", produces = MediaType.APPLICATION_JSON)
     public String refresh(@Body final Map<String, String> input) {
         try {
-            return this.toJson(this.requestToResponse(input));
+            return AbstractCommandController.optionsJson(this.getCommandType(), input);
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -154,11 +168,8 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     public String exec(@Body final CommandRequestDto body) {
         try {
             LOGGER.info(System.getProperty(FileResources.PROPERTY_WORKSPACE));
-            final CommandParameters parameters = new CommandParameters(this.getCommandType(), body.getInput())
-                    .resolveFilePaths((baseDir, value) ->
-                            SIDECAR_RESOLVE_BASEDIR.contains(baseDir) && !new File(value).isAbsolute()
-                                    ? new File(Workspace.resolveBaseDir(baseDir), value).getAbsolutePath()
-                                    : value);
+            final CommandParameters parameters = AbstractCommandController.resolveSidecarFilePaths(
+                    new CommandParameters(this.getCommandType(), body.getInput()));
             try {
                 parameters.exec(body.getName());
             } catch (final Command.CommandFailException th) {
@@ -186,10 +197,6 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
 
     protected String parameterNames() throws IOException {
         return this.toJson(this.workspace.parameterNames(this.getCommandType()).toList());
-    }
-
-    protected Map<String, Object> requestToResponse(final Map<String, String> input) {
-        return new CommandParameters(this.getCommandType(), input).serialize();
     }
 
     protected String toJson(final Map<String, Object> object) throws IOException {

@@ -1,0 +1,11 @@
+{
+  "-generateType": "txt",
+  "-unit": "table",
+  "-template": "resources/template/scaffoldTpl.txt",
+  "-template.templateGroup": "resources/template/scaffoldTpl.stg",
+  "-resultPath": "$param.tableName$.sql",
+  "-unitSetting": "resources/setting/scaffoldUnit.json",
+  "-src.src": "src",
+  "-src.srcType": "csv",
+  "-src.encoding": "UTF-8"
+}

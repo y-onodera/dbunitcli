@@ -35,16 +35,30 @@ vi.mock("../../../hooks/useJdbc", () => ({
 	useDeleteJdbcProperties: () => vi.fn(),
 }));
 
-function makeGenerateProps(fixture: GenerateOptions = generateLoadResponseFixture): {
+function makeGenerateProps(
+	fixture: GenerateOptions = generateLoadResponseFixture,
+): {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
 	generate: GenerateOptions;
+	scaffoldPrefill: () => { [k: string]: FormDataEntryValue };
+	handleScaffoldReflect: (params: Record<string, string>) => Promise<void>;
 } {
 	return {
 		handleTypeSelect: vi.fn().mockResolvedValue(undefined),
 		name: "test",
 		generate: fixture,
+		scaffoldPrefill: vi.fn().mockReturnValue({ "-target": "ddl" }),
+		handleScaffoldReflect: vi.fn().mockResolvedValue(undefined),
 	};
+}
+
+function scaffoldButton(): Element | null {
+	return (
+		Array.from(document.querySelectorAll("button")).find(
+			(button) => button.textContent === "Scaffold",
+		) ?? null
+	);
 }
 
 describe("GenerateFormの描画テスト", () => {
@@ -121,6 +135,12 @@ describe("GenerateFormの描画テスト", () => {
 			expect(
 				document.querySelector('input[type="text"][name="-src.delimiter"]'),
 			).toBeVisible();
+		});
+
+		it("generateType=txtのときScaffoldボタンが表示される", () => {
+			render(<GenerateForm {...makeGenerateProps()} />);
+
+			expect(scaffoldButton()).toBeInTheDocument();
 		});
 	});
 
@@ -204,6 +224,16 @@ describe("GenerateFormの描画テスト", () => {
 					'input[type="checkbox"][name="-template.formulaProcess"]',
 				),
 			).toBeInTheDocument();
+		});
+
+		it("Scaffoldボタンは表示されない", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(generateRefreshGenerateTypeXlsxResponseFixture)}
+				/>,
+			);
+
+			expect(scaffoldButton()).not.toBeInTheDocument();
 		});
 	});
 
@@ -291,6 +321,16 @@ describe("GenerateFormの描画テスト", () => {
 			expect(
 				document.querySelector('select[name="-unit"]'),
 			).not.toBeInTheDocument();
+		});
+
+		it("Scaffoldボタンは表示されない", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(generateRefreshGenerateTypeSqlResponseFixture)}
+				/>,
+			);
+
+			expect(scaffoldButton()).not.toBeInTheDocument();
 		});
 	});
 });

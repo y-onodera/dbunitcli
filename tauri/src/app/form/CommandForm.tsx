@@ -6,6 +6,7 @@ import { ConvertForm } from "./ConvertForm";
 import { GenerateForm } from "./GenerateForm";
 import { ParameterizeForm } from "./ParameterizeForm";
 import { RunForm } from "./RunForm";
+import type { ScaffoldFormValues } from "./section/dialog/ScaffoldDialog";
 
 export default function CommandForm(prop: {
 	formData: (validate: boolean) => {
@@ -16,6 +17,19 @@ export default function CommandForm(prop: {
 	const select = useSelectParameter();
 	const refreshSelect = useRefreshSelectParameter(select.options?.command);
 	const handleTypeSelect = () => refreshSelect(prop.formData(false).values);
+	// generateフォームの-src.*をscaffoldダイアログの-dataset.*初期値として引き継ぐ
+	const scaffoldPrefill = (): ScaffoldFormValues => {
+		const prefill: ScaffoldFormValues = { "-target": "ddl" };
+		for (const [key, value] of Object.entries(prop.formData(false).values)) {
+			if (key.startsWith("-src.")) {
+				prefill[`-dataset.${key.substring("-src.".length)}`] = value;
+			}
+		}
+		return prefill;
+	};
+	// scaffold実行結果(txt駆動generateパラメータ)を現在のフォーム値へマージして再描画する
+	const handleScaffoldReflect = async (params: Record<string, string>) =>
+		refreshSelect({ ...prop.formData(false).values, ...params });
 
 	const renderCommandForm = () => {
 		switch (select.options?.command) {
@@ -41,6 +55,8 @@ export default function CommandForm(prop: {
 						handleTypeSelect={handleTypeSelect}
 						name={select.name}
 						generate={select.options}
+						scaffoldPrefill={scaffoldPrefill}
+						handleScaffoldReflect={handleScaffoldReflect}
 					/>
 				);
 			case "run":

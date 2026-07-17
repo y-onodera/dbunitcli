@@ -1,25 +1,15 @@
+import ParameterInputProvider from "../../context/ParameterInputProvider";
+import {
+	type CollectedFormValues,
+	collectFormValues,
+} from "../../utils/formValues";
 import Footer from "../footer/Footer";
 import CommandForm from "../form/CommandForm";
-import ParameterInputProvider from "../../context/ParameterInputProvider";
 
 const formid = "commandForm";
 export default function Form() {
-	const formData = (
-		validate: boolean,
-	): {
-		values: { [k: string]: FormDataEntryValue };
-		validationError: boolean;
-	} => {
-		const formElement = document.querySelector(`#${formid}`) as HTMLFormElement;
-		if (validate && !formElement.reportValidity()) {
-			return { values: {}, validationError: true };
-		}
-		const inputForm = new FormData(formElement);
-		return {
-			values: Object.fromEntries(inputForm.entries()),
-			validationError: false,
-		};
-	};
+	const formData = (validate: boolean): CollectedFormValues =>
+		collectFormValues(formid, validate);
 	return (
 		<div className="p-2 rounded-lg mt-10">
 			<ParameterInputProvider>

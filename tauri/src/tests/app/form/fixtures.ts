@@ -1,10 +1,14 @@
-import type { CommandOption } from "../../../model/CommandOption";
+import type {
+	CommandOption,
+	DatasetSource,
+} from "../../../model/CommandOption";
 import type {
 	CompareOptions,
 	ConvertOptions,
 	GenerateOptions,
 	ParameterizeOptions,
 	RunOptions,
+	ScaffoldOptions,
 } from "../../../model/SelectParameter";
 import type { DefaultPath } from "../../../model/WorkspaceResources";
 
@@ -952,7 +956,14 @@ export const runRefreshScriptTypeSqlResponseFixture = {
 	},
 } as RunOptions;
 
-const GENERATE_TYPE_OPTIONS = ["txt", "xlsx", "xls", "settings", "sql", "xlsxTemplate"];
+const GENERATE_TYPE_OPTIONS = [
+	"txt",
+	"xlsx",
+	"xls",
+	"settings",
+	"sql",
+	"xlsxTemplate",
+];
 const UNIT_OPTIONS = ["record", "table", "dataset"];
 
 function makeGenerateJxlsFixture(
@@ -969,7 +980,14 @@ function makeGenerateJxlsFixture(
 			false,
 			GENERATE_TYPE_OPTIONS,
 		),
-		unit: makeElement("unit", "ENUM", "record", "WORKSPACE", false, UNIT_OPTIONS),
+		unit: makeElement(
+			"unit",
+			"ENUM",
+			"record",
+			"WORKSPACE",
+			false,
+			UNIT_OPTIONS,
+		),
 		template: makeElement("template", "FILE", "", "TEMPLATE", true),
 		result: makeElement("result", "DIR", "", "RESULT", false),
 		resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
@@ -1024,3 +1042,75 @@ export const generateRefreshGenerateTypeSqlResponseFixture = {
 	sqlFileSuffix: makeElement("sqlFileSuffix", "TEXT", "", "WORKSPACE", false),
 	srcData: makeTableSrcData("src"),
 } as GenerateOptions;
+
+// sidecarのscaffold-refresh-*-response.jsonと同期させたscaffoldダイアログ用fixture
+const SCAFFOLD_TARGET_OPTIONS = [
+	"ddl",
+	"javaBean",
+	"xlsxSchema",
+	"fixedColumnDef",
+	"parameter",
+];
+
+const SCAFFOLD_DATASET_TYPE_OPTIONS = ["csv", "xls", "xlsx", "table", "fixed"];
+
+function makeScaffoldOptionsBase(target: string) {
+	return {
+		prefix: "",
+		result: makeElement("result", "DIR", "result", "RESULT", false),
+		target: makeElement(
+			"target",
+			"ENUM",
+			target,
+			"WORKSPACE",
+			true,
+			SCAFFOLD_TARGET_OPTIONS,
+		),
+		unitSetting: makeElement("unitSetting", "TEXT", "", "WORKSPACE", false),
+		template: makeElement("template", "TEXT", "", "WORKSPACE", false),
+		parameter: makeElement("parameter", "TEXT", "", "WORKSPACE", false),
+		commandType: makeElement("commandType", "TEXT", "", "WORKSPACE", false),
+		datasetType: makeElement(
+			"datasetType",
+			"ENUM",
+			"csv",
+			"WORKSPACE",
+			false,
+			SCAFFOLD_DATASET_TYPE_OPTIONS,
+		),
+		datasetEncoding: makeElement(
+			"datasetEncoding",
+			"TEXT",
+			"UTF-8",
+			"WORKSPACE",
+			false,
+		),
+		dataset: makeCsvSrcData("dataset", "resources/src/csv", [
+			"none",
+			...SRC_TYPE_OPTIONS,
+		]) as DatasetSource,
+	};
+}
+
+export const scaffoldRefreshTargetDdlResponseFixture = makeScaffoldOptionsBase(
+	"ddl",
+) as ScaffoldOptions;
+
+export const scaffoldRefreshTargetFixedColumnDefResponseFixture = {
+	...makeScaffoldOptionsBase("fixedColumnDef"),
+	fixedLength: makeElement("fixedLength", "TEXT", "", "WORKSPACE", false),
+	defaultLength: makeElement("defaultLength", "TEXT", "10", "WORKSPACE", false),
+	align: makeElement("align", "TEXT", "left", "WORKSPACE", false),
+} as ScaffoldOptions;
+
+export const scaffoldExecResponseFixture: Record<string, string> = {
+	"-generateType": "txt",
+	"-unit": "table",
+	"-template": "resources/template/scaffoldTpl.txt",
+	"-template.templateGroup": "resources/template/scaffoldTpl.stg",
+	"-resultPath": "$param.tableName$.sql",
+	"-unitSetting": "resources/setting/scaffoldUnit.json",
+	"-src.src": "src",
+	"-src.srcType": "csv",
+	"-src.encoding": "UTF-8",
+};
