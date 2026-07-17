@@ -41,6 +41,14 @@
     <tr><td>addFileInfo</td><td>抽出結果に元ファイル情報のカラムを追加するかどうか。</td></tr>
   </table>
 
+  <h2>雛型の生成</h2>
+  <p>xlsxSchema テキストボックス横のメニューの generate ボタンから、既存データセットのカラム構成をもとにスキーマの雛型を生成できます。</p>
+  <ol>
+    <li>データセット指定ダイアログで元にするデータセット（CSV / Excel / DB など）を指定し、Execute を押します。</li>
+    <li>テーブルごとのカラム構成から Rows Mapping / Random Cell Mapping の設定が生成され、このダイアログに反映された状態で開きます。</li>
+    <li>内容を確認・編集し、ファイル名を指定して保存すると、その名前が xlsxSchema テキストボックスに設定されます。</li>
+  </ol>
+
   <h2>保存</h2>
   <p>ダイアログ下部のファイル名を指定して保存すると、設定内容が JSON ファイルとして書き出されます。<code>sheetName</code> と <code>tableName</code> が共に入力されている行のみが保存対象です。</p>
 </body>

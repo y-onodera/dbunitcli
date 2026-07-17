@@ -3,6 +3,7 @@ import {
 	RemoveXlsxSchemaButton,
 	XlsxSchemaEditButton,
 } from "../dialog/XlsxSchemaDialog";
+import { XlsxSchemaGenerateButton } from "../dialog/XlsxSchemaGenerateDialog";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 
@@ -32,6 +33,11 @@ export default function XlsxSchemaText({
 					isValueInDatalist={isValueInDatalist}
 					editButtons={[
 						<XlsxSchemaEditButton key="edit" path={path} setPath={setPath} />,
+						<XlsxSchemaGenerateButton
+							key="generate"
+							path={path}
+							setPath={setPath}
+						/>,
 					]}
 					removeButton={() => (
 						<RemoveXlsxSchemaButton path={path} setPath={setPath} />
