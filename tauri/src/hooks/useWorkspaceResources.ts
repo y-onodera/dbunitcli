@@ -19,10 +19,19 @@ import {
 	handleFetchError,
 } from "../utils/fetchUtils";
 
-export const useWorkspaceUpdate = () => {
-	const setContext = useSetWorkspaceContext();
+// parameterList・resourcesSettingsへのWorkspaceResources反映（update/reload共通）
+const useApplyWorkspaceResources = () => {
 	const setParameterList = useSetParameterList();
 	const setResourcesSettings = useSetResourcesSettings();
+	return (resources: WorkspaceResources) => {
+		setParameterList(ParameterList.from(resources.parameterList));
+		setResourcesSettings(new ResourcesSettings(resources.resources));
+	};
+};
+
+export const useWorkspaceUpdate = () => {
+	const setContext = useSetWorkspaceContext();
+	const applyResources = useApplyWorkspaceResources();
 	const environment = useEnvironment();
 	return async (workspace: string, datasetBase: string, resultBase: string) => {
 		const fetchParams = {
@@ -43,16 +52,14 @@ export const useWorkspaceUpdate = () => {
 						resultBase,
 					}),
 				);
-				setParameterList(ParameterList.from(resources.parameterList));
-				setResourcesSettings(new ResourcesSettings(resources.resources));
+				applyResources(resources);
 			})
 			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
 	};
 };
 
 export const useWorkspaceResourcesReload = () => {
-	const setParameterList = useSetParameterList();
-	const setResourcesSettings = useSetResourcesSettings();
+	const applyResources = useApplyWorkspaceResources();
 	const environment = useEnvironment();
 	return async () => {
 		const fetchParams = {
@@ -63,10 +70,7 @@ export const useWorkspaceResourcesReload = () => {
 		};
 		await fetchData(fetchParams)
 			.then((response) => response.json())
-			.then((resources: WorkspaceResources) => {
-				setParameterList(ParameterList.from(resources.parameterList));
-				setResourcesSettings(new ResourcesSettings(resources.resources));
-			})
+			.then((resources: WorkspaceResources) => applyResources(resources))
 			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
 	};
 };

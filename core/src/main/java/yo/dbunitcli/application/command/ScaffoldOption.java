@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,6 +51,14 @@ public record ScaffoldOption(
 
     private static final String COMMAND_INPUT_PREFIX = "-commandInput.";
     private static final String DATASET_SRC_DIR = "src";
+    private static final List<String> SCAFFOLD_TARGETS = Arrays.stream(ScaffoldTarget.values())
+                                                               .map(Enum::name)
+                                                               .toList();
+
+    /** 雛型を出力できるtarget名（ScaffoldTargetの定数。parameterは含まない） */
+    public static List<String> scaffoldTargets() {
+        return SCAFFOLD_TARGETS;
+    }
 
     public ScaffoldOption {
         if (datasetType == ResultType.format) {
@@ -176,7 +185,7 @@ public record ScaffoldOption(
     }
 
     private static ArrayList<String> targetSelectOption() {
-        return Stream.concat(Arrays.stream(ScaffoldTarget.values()).map(Enum::name), Stream.of("parameter"))
+        return Stream.concat(SCAFFOLD_TARGETS.stream(), Stream.of("parameter"))
                      .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -242,9 +251,7 @@ public record ScaffoldOption(
             // -settingを書くと変換ルールが合成前の元ソース列に対して評価されてしまう（unitSettingのみ有効）
             builder.put("-generateType", scaffoldTarget.generateType().name(), false);
             scaffoldTarget.putBuiltinExtraParams(this, builder);
-            if (Strings.isNotEmpty(this.unitSettingName)) {
-                builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
-            }
+            this.putUnitSettingParam(builder);
             builder.putDir("-result", this.resultDir, BaseDir.RESULT);
             if (this.hasDataset()) {
                 this.addOriginalDatasetSrcParams(builder);
@@ -261,10 +268,10 @@ public record ScaffoldOption(
     public Parameters txtDrivenGenerateParams() {
         final ScaffoldTarget scaffoldTarget = ScaffoldTarget.fromString(this.target);
         if (scaffoldTarget == null || Strings.isEmpty(this.templateName)) {
-            throw new AssertionError("txt driven generate params require -target=" + ScaffoldOption.targetSelectOption()
-                                             .stream().filter(it -> !"parameter".equals(it)).collect(Collectors.joining(", "))
-                                             + " and -template", new IllegalStateException(
-                    "target=" + this.target + ", template=" + this.templateName));
+            throw new AssertionError("txt driven generate params require -target="
+                                             + String.join(", ", SCAFFOLD_TARGETS) + " and -template",
+                                     new IllegalStateException(
+                                             "target=" + this.target + ", template=" + this.templateName));
         }
         final ParametersBuilder builder = new ParametersBuilder();
         this.putTxtDrivenParams(builder, scaffoldTarget, false);
@@ -278,9 +285,7 @@ public record ScaffoldOption(
                                     final boolean withResult) {
         this.putTemplateGenerationParams(builder, this.templateName);
         builder.put("-resultPath", scaffoldTarget.customTemplateResultPath());
-        if (Strings.isNotEmpty(this.unitSettingName)) {
-            builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
-        }
+        this.putUnitSettingParam(builder);
         if (withResult) {
             builder.putDir("-result", this.resultDir, BaseDir.RESULT);
         }
@@ -289,6 +294,12 @@ public record ScaffoldOption(
             if (this.isHeaderlessDataset()) {
                 builder.put("-headerName", ScaffoldOption.headerNames(scaffoldTarget.datasetSchema()));
             }
+        }
+    }
+
+    private void putUnitSettingParam(final ParametersBuilder builder) {
+        if (Strings.isNotEmpty(this.unitSettingName)) {
+            builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
         }
     }
 

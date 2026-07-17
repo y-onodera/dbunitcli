@@ -11,13 +11,17 @@ import { useWorkspaceResourcesReload } from "../../../../hooks/useWorkspaceResou
 import type { CommandOption } from "../../../../model/CommandOption";
 import type { ScaffoldOptions } from "../../../../model/SelectParameter";
 import { fetchData, getErrorMessage } from "../../../../utils/fetchUtils";
+import {
+	collectFormValues,
+	type FormValues,
+} from "../../../../utils/formValues";
 import { DatasetLoadForm } from "../DatasetLoadForm";
 import PlainText from "../element/PlainText";
 import Select from "../element/Select";
 
 const formId = "scaffoldForm";
 
-export type ScaffoldFormValues = { [k: string]: FormDataEntryValue };
+export type ScaffoldFormValues = FormValues;
 
 type LoadState =
 	| { status: "loading" }
@@ -40,18 +44,27 @@ async function postScaffold<T>(
 	return (await response.json()) as T;
 }
 
-function collectFormValues(validate: boolean): {
-	values: ScaffoldFormValues;
-	validationError: boolean;
-} {
-	const formElement = document.querySelector(`#${formId}`) as HTMLFormElement;
-	if (validate && !formElement.reportValidity()) {
-		return { values: {}, validationError: true };
+// refresh結果をLoadStateへ反映する共通フロー（初期表示・target/srcType変更時の双方で使用）
+async function refreshScaffoldOptions(
+	apiUrl: string,
+	values: ScaffoldFormValues,
+	signal: AbortSignal | undefined,
+	setLoadState: (state: LoadState) => void,
+): Promise<void> {
+	try {
+		const options = await postScaffold<ScaffoldOptions>(
+			apiUrl,
+			"refresh",
+			values,
+		);
+		if (!signal?.aborted) {
+			setLoadState({ status: "loaded", options });
+		}
+	} catch (ex) {
+		if (!signal?.aborted) {
+			setLoadState({ status: "error", message: getErrorMessage(ex) });
+		}
 	}
-	return {
-		values: Object.fromEntries(new FormData(formElement).entries()),
-		validationError: false,
-	};
 }
 
 // scaffold実行結果はgenerateフォームへのtxt駆動反映が前提のため、parameter targetは選ばせない
@@ -91,42 +104,28 @@ function ScaffoldDialog({
 	useEffect(() => {
 		const controller = new AbortController();
 		abortControllerRef.current = controller;
-		postScaffold<ScaffoldOptions>(environment.apiUrl, "refresh", prefill)
-			.then((options) => {
-				if (!controller.signal.aborted) {
-					setLoadState({ status: "loaded", options });
-				}
-			})
-			.catch((ex) => {
-				if (!controller.signal.aborted) {
-					setLoadState({ status: "error", message: getErrorMessage(ex) });
-				}
-			});
+		refreshScaffoldOptions(
+			environment.apiUrl,
+			prefill,
+			controller.signal,
+			setLoadState,
+		);
 		return () => {
 			controller.abort();
 		};
 	}, [environment.apiUrl, prefill]);
 
 	const refreshDialog = async () => {
-		const { values } = collectFormValues(false);
-		try {
-			const options = await postScaffold<ScaffoldOptions>(
-				environment.apiUrl,
-				"refresh",
-				values,
-			);
-			if (!abortControllerRef.current?.signal.aborted) {
-				setLoadState({ status: "loaded", options });
-			}
-		} catch (ex) {
-			if (!abortControllerRef.current?.signal.aborted) {
-				setLoadState({ status: "error", message: getErrorMessage(ex) });
-			}
-		}
+		await refreshScaffoldOptions(
+			environment.apiUrl,
+			collectFormValues(formId, false).values,
+			abortControllerRef.current?.signal,
+			setLoadState,
+		);
 	};
 
 	const handleExecute = async () => {
-		const { values, validationError } = collectFormValues(true);
+		const { values, validationError } = collectFormValues(formId, true);
 		if (validationError) {
 			return;
 		}
@@ -138,8 +137,7 @@ function ScaffoldDialog({
 				"exec",
 				values,
 			);
-			await handleReflect(params);
-			await reloadResources();
+			await Promise.all([handleReflect(params), reloadResources()]);
 			if (!abortControllerRef.current?.signal.aborted) {
 				handleDialogClose();
 			}
