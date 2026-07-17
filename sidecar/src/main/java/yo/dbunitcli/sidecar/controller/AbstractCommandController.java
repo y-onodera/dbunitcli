@@ -36,6 +36,14 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
         this.workspace = workspace;
     }
 
+    /** SETTING/TEMPLATE等のworkspaceリソース系相対パスを絶対パスへ解決する（コマンド実行前の共通処理） */
+    static CommandParameters resolveSidecarFilePaths(final CommandParameters parameters) {
+        return parameters.resolveFilePaths((baseDir, value) ->
+                SIDECAR_RESOLVE_BASEDIR.contains(baseDir) && !new File(value).isAbsolute()
+                        ? new File(Workspace.resolveBaseDir(baseDir), value).getAbsolutePath()
+                        : value);
+    }
+
     @Post(uri = "load", produces = MediaType.APPLICATION_JSON)
     public String load(@Body final CommandRequestDto input) {
         return this.load(this.getCommandType(), input.getName());
@@ -154,11 +162,8 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     public String exec(@Body final CommandRequestDto body) {
         try {
             LOGGER.info(System.getProperty(FileResources.PROPERTY_WORKSPACE));
-            final CommandParameters parameters = new CommandParameters(this.getCommandType(), body.getInput())
-                    .resolveFilePaths((baseDir, value) ->
-                            SIDECAR_RESOLVE_BASEDIR.contains(baseDir) && !new File(value).isAbsolute()
-                                    ? new File(Workspace.resolveBaseDir(baseDir), value).getAbsolutePath()
-                                    : value);
+            final CommandParameters parameters = AbstractCommandController.resolveSidecarFilePaths(
+                    new CommandParameters(this.getCommandType(), body.getInput()));
             try {
                 parameters.exec(body.getName());
             } catch (final Command.CommandFailException th) {

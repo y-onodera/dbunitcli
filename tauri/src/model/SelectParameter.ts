@@ -76,6 +76,17 @@ export type CompareOptions = CommandOptions & {
 	convertResult: ResultOption;
 	expectData: DatasetSource;
 };
+export type ScaffoldOptions = CommandOptions & {
+	target: CommandOption;
+	unitSetting: CommandOption;
+	template: CommandOption;
+	datasetType: CommandOption;
+	datasetEncoding: CommandOption;
+	fixedLength?: CommandOption;
+	defaultLength?: CommandOption;
+	align?: CommandOption;
+	dataset: DatasetSource;
+};
 export type GenerateOptions = CommandOptions & {
 	command: "generate";
 	generateType: CommandOption;

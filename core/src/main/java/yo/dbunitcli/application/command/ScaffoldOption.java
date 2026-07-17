@@ -26,8 +26,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public record ScaffoldOption(
         Parameter parameter
@@ -148,7 +150,7 @@ public record ScaffoldOption(
     public ParametersBuilder toParametersBuilder() {
         final ParametersBuilder result = new ParametersBuilder();
         result.putDir("-result", this.resultDir, BaseDir.RESULT)
-              .put("-target", this.target);
+              .put("-target", this.target, new Attribute(ParamType.ENUM, ScaffoldOption.targetSelectOption(), true));
         result.put("-unitSetting", this.unitSettingName)
               .put("-template", this.templateName)
               .put("-parameter", this.parameterName);
@@ -165,12 +167,17 @@ public record ScaffoldOption(
                   final String key = COMMAND_INPUT_PREFIX + arg.substring(1, eqIdx > 0 ? eqIdx : arg.length());
                   result.put(key, eqIdx > 0 ? arg.substring(eqIdx + 1) : "true");
               });
-        if (this.hasDataset()) {
-            result.put("-datasetType", this.datasetType, ResultType.class);
-            result.put("-datasetEncoding", this.datasetEncoding);
+        result.put("-datasetType", this.datasetType, ResultType.class, Filter.exclude(ResultType.format), false);
+        result.put("-datasetEncoding", this.datasetEncoding);
+        if (this.dataset != null) {
             result.addComponent("dataset", this.dataset.toParametersBuilder().build());
         }
         return result;
+    }
+
+    private static ArrayList<String> targetSelectOption() {
+        return Stream.concat(Arrays.stream(ScaffoldTarget.values()).map(Enum::name), Stream.of("parameter"))
+                     .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private boolean hasDataset() {
@@ -228,34 +235,61 @@ public record ScaffoldOption(
 
     private void writeParamFile(final File paramDir, final ScaffoldTarget scaffoldTarget) throws IOException {
         final ParametersBuilder builder = new ParametersBuilder();
-        final boolean customTemplate = Strings.isNotEmpty(this.templateName);
-        if (customTemplate) {
-            // カスタムテンプレートはgenerateType=txt＋unitSettingで駆動し、組み込みテンプレートが
-            // 読むのと同じrows/tableName/dataset.PK属性を再現する（入力はscaffoldが書き出した記述子dataset）
-            this.putTemplateGenerationParams(builder, this.templateName);
-            builder.put("-resultPath", scaffoldTarget.customTemplateResultPath());
+        if (Strings.isNotEmpty(this.templateName)) {
+            this.putTxtDrivenParams(builder, scaffoldTarget, true);
         } else {
             // 組み込みgenerateTypeはloadData()=falseで元ソースのメタデータから記述子行を合成するため、
             // -settingを書くと変換ルールが合成前の元ソース列に対して評価されてしまう（unitSettingのみ有効）
             builder.put("-generateType", scaffoldTarget.generateType().name(), false);
             scaffoldTarget.putBuiltinExtraParams(this, builder);
-        }
-        if (Strings.isNotEmpty(this.unitSettingName)) {
-            builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
-        }
-        builder.putDir("-result", this.resultDir, BaseDir.RESULT);
-        if (this.hasDataset()) {
-            if (customTemplate) {
-                this.addDatasetSrcParams(builder);
-                if (this.isHeaderlessDataset()) {
-                    builder.put("-headerName", ScaffoldOption.headerNames(scaffoldTarget.datasetSchema()));
-                }
-            } else {
+            if (Strings.isNotEmpty(this.unitSettingName)) {
+                builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
+            }
+            builder.putDir("-result", this.resultDir, BaseDir.RESULT);
+            if (this.hasDataset()) {
                 this.addOriginalDatasetSrcParams(builder);
             }
         }
         Files.write(new File(paramDir, this.parameterName + ".param").toPath(),
                     builder.build().toList(false), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * カスタムテンプレート（generateType=txt）駆動のgenerateパラメータ（-resultを除く）。
+     * -targetが4target以外、または-template未指定の場合は組み立てられない
+     */
+    public Parameters txtDrivenGenerateParams() {
+        final ScaffoldTarget scaffoldTarget = ScaffoldTarget.fromString(this.target);
+        if (scaffoldTarget == null || Strings.isEmpty(this.templateName)) {
+            throw new AssertionError("txt driven generate params require -target=" + ScaffoldOption.targetSelectOption()
+                                             .stream().filter(it -> !"parameter".equals(it)).collect(Collectors.joining(", "))
+                                             + " and -template", new IllegalStateException(
+                    "target=" + this.target + ", template=" + this.templateName));
+        }
+        final ParametersBuilder builder = new ParametersBuilder();
+        this.putTxtDrivenParams(builder, scaffoldTarget, false);
+        return builder.build();
+    }
+
+    // カスタムテンプレートはgenerateType=txt＋unitSettingで駆動し、組み込みテンプレートが
+    // 読むのと同じrows/tableName/dataset.PK属性を再現する（入力はscaffoldが書き出した記述子dataset）。
+    // withResult=trueは.param書き出し用（既存.paramの出力順を維持して-resultを挿入する）
+    private void putTxtDrivenParams(final ParametersBuilder builder, final ScaffoldTarget scaffoldTarget,
+                                    final boolean withResult) {
+        this.putTemplateGenerationParams(builder, this.templateName);
+        builder.put("-resultPath", scaffoldTarget.customTemplateResultPath());
+        if (Strings.isNotEmpty(this.unitSettingName)) {
+            builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
+        }
+        if (withResult) {
+            builder.putDir("-result", this.resultDir, BaseDir.RESULT);
+        }
+        if (this.hasDataset()) {
+            this.addDatasetSrcParams(builder);
+            if (this.isHeaderlessDataset()) {
+                builder.put("-headerName", ScaffoldOption.headerNames(scaffoldTarget.datasetSchema()));
+            }
+        }
     }
 
     // 組み込みgenerateTypeで駆動する.paramは、scaffoldが書き出した記述子datasetではなく

@@ -721,6 +721,74 @@ public class ScaffoldTest {
     }
 
     @Nested
+    class TxtDrivenGenerateParamsTest {
+
+        private static final String SRC_DIR =
+                "src/test/resources/yo/dbunitcli/application/command/scaffold/src";
+
+        private List<String> txtDrivenParams(final String... args) {
+            return new Scaffold().parseOption(args).txtDrivenGenerateParams().toList(false);
+        }
+
+        @Test
+        public void testDdlWithCsvDataset() {
+            final List<String> lines = this.txtDrivenParams("-target=ddl", "-template=myDdl",
+                                                            "-unitSetting=myUnit",
+                                                            "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
+            assertEquals(List.of("-generateType=txt"
+                    , "-unit=table"
+                    , "-template=resources/template/myDdl.txt"
+                    , "-template.templateGroup=resources/template/myDdl.stg"
+                    , "-resultPath=$param.tableName$.sql"
+                    , "-unitSetting=resources/setting/myUnit.json"
+                    , "-src.src=src"
+                    , "-src.srcType=csv"
+                    , "-encoding=UTF-8"), lines);
+        }
+
+        @Test
+        public void testFixedColumnDefWithFixedDatasetAddsHeaderName() {
+            final List<String> lines = this.txtDrivenParams("-target=fixedColumnDef", "-template=myFixed",
+                                                            "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv",
+                                                            "-datasetType=fixed", "-datasetEncoding=Shift_JIS");
+            assertTrue(lines.contains("-src.srcType=fixed"));
+            assertTrue(lines.contains("-encoding=Shift_JIS"));
+            assertTrue(lines.contains("-headerName=name,length,align,pad"));
+            assertTrue(lines.contains("-resultPath=$param.tableName$.json"));
+        }
+
+        @Test
+        public void testWithoutUnitSettingAndDataset() {
+            final List<String> lines = this.txtDrivenParams("-target=ddl", "-template=myDdl");
+            assertEquals(List.of("-generateType=txt"
+                    , "-unit=table"
+                    , "-template=resources/template/myDdl.txt"
+                    , "-template.templateGroup=resources/template/myDdl.stg"
+                    , "-resultPath=$param.tableName$.sql"), lines);
+        }
+
+        @Test
+        public void testResultDirNotIncluded() {
+            final List<String> lines = this.txtDrivenParams("-target=ddl", "-template=myDdl",
+                                                            "-result=target/test-temp/scaffold/txt-params");
+            assertFalse(lines.stream().anyMatch(l -> l.startsWith("-result=")));
+        }
+
+        @Test
+        public void testTemplateNameRequired() {
+            org.junit.jupiter.api.Assertions.assertThrows(AssertionError.class,
+                                                          () -> this.txtDrivenParams("-target=ddl"));
+        }
+
+        @Test
+        public void testParameterTargetRejected() {
+            org.junit.jupiter.api.Assertions.assertThrows(AssertionError.class,
+                                                          () -> this.txtDrivenParams("-target=parameter",
+                                                                                     "-template=myDdl"));
+        }
+    }
+
+    @Nested
     class NoSystemPropertyTest extends TestCase {
     }
 

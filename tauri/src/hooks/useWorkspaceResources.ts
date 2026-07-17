@@ -50,6 +50,27 @@ export const useWorkspaceUpdate = () => {
 	};
 };
 
+export const useWorkspaceResourcesReload = () => {
+	const setParameterList = useSetParameterList();
+	const setResourcesSettings = useSetResourcesSettings();
+	const environment = useEnvironment();
+	return async () => {
+		const fetchParams = {
+			endpoint: `${environment.apiUrl}workspace/resources`,
+			options: {
+				method: "GET",
+			},
+		};
+		await fetchData(fetchParams)
+			.then((response) => response.json())
+			.then((resources: WorkspaceResources) => {
+				setParameterList(ParameterList.from(resources.parameterList));
+				setResourcesSettings(new ResourcesSettings(resources.resources));
+			})
+			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
+	};
+};
+
 export const useResolveAbsolutePath = () => {
 	const { apiUrl } = useEnvironment();
 	const context = useWorkspaceContext();
