@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
+import { DatasetSettingGenerateButton } from "../dialog/DatasetSettingGenerateDialog";
 import {
 	DatasetSettingEditButton,
 	RemoveDatasetSettingButton,
@@ -63,6 +64,11 @@ export default function DatasetSettingText({
 								? [
 										<DatasetSettingEditButton
 											key="edit"
+											path={path}
+											setPath={handleSetPath}
+										/>,
+										<DatasetSettingGenerateButton
+											key="generate"
 											path={path}
 											setPath={handleSetPath}
 										/>,

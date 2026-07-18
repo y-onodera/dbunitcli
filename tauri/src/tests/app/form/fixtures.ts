@@ -1066,6 +1066,29 @@ export const generateRefreshXlsxSchemaResponseFixture = {
 	srcData: makeCsvSrcData("src", ""),
 } as GenerateOptions;
 
+// dataset-setting生成ダイアログ（generate/refresh generateType=settings）用fixture
+export const generateRefreshSettingsResponseFixture = {
+	prefix: "",
+	generateType: makeElement(
+		"generateType",
+		"ENUM",
+		"settings",
+		"WORKSPACE",
+		false,
+		GENERATE_TYPE_OPTIONS,
+	),
+	result: makeElement("result", "DIR", "", "RESULT", false),
+	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
+	outputEncoding: makeElement(
+		"outputEncoding",
+		"TEXT",
+		"UTF-8",
+		"WORKSPACE",
+		false,
+	),
+	srcData: makeCsvSrcData("src", ""),
+} as GenerateOptions;
+
 // sidecarのscaffold-refresh-*-response.jsonと同期させたscaffoldダイアログ用fixture
 const SCAFFOLD_TARGET_OPTIONS = [
 	"ddl",

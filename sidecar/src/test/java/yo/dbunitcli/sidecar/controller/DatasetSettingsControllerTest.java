@@ -2,9 +2,11 @@ package yo.dbunitcli.sidecar.controller;
 
 import io.micronaut.context.annotation.Property;
 import io.micronaut.http.HttpRequest;
+import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.runtime.server.EmbeddedServer;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
@@ -90,6 +92,26 @@ class DatasetSettingsControllerTest {
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/setting-save-load-response.json"),
                 loadResponse);
+    }
+
+    @Test
+    void testGenerate_データセットからdataset_settingテンプレートを生成する() throws IOException {
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/generate",
+                        "{\"-src.src\":\"resources/src/csv\",\"-src.srcType\":\"csv\"}"));
+        System.out.println(response);
+        JsonTestHelper.assertJsonEquals(
+                Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/setting-generate-response.json"),
+                response);
+    }
+
+    @Test
+    void testGenerate_src未指定は400を返す() {
+        final HttpClientResponseException ex = Assertions.assertThrows(
+                HttpClientResponseException.class,
+                () -> this.client.toBlocking().retrieve(
+                        HttpRequest.POST("dbunit-cli/dataset-setting/generate", "{}")));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     }
 
     @Test

@@ -9,6 +9,8 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.ITableMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.command.GenerateType;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
@@ -24,6 +26,9 @@ import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +40,31 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
 
     public DatasetSettingsController(final Workspace workspace) {
         super(workspace);
+    }
+
+    /**
+     * データセットのカラムメタデータからdataset-settingテンプレートを生成して返す。
+     * generateコマンド（generateType=settings）を一時ディレクトリへ実行し、
+     * 出力された単一JSON（load応答と同形）をそのまま返す。保存は行わない。
+     */
+    @Post(uri = "generate", produces = MediaType.APPLICATION_JSON)
+    public String generate(@Body final Map<String, String> input) throws IOException {
+        if (Strings.isEmpty(input.get("-src.src"))) {
+            throw new ApplicationException(new IllegalArgumentException("-src.src is required"));
+        }
+        final Path tempDir = GenerateTemplateSupport.execToTempDir(
+                GenerateType.settings, input, "datasetSettingGenerate");
+        try {
+            final Path resultFile = tempDir.resolve("result");
+            return Files.exists(resultFile) ? Files.readString(resultFile) : "{}";
+        } catch (final IOException e) {
+            throw e;
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        } finally {
+            GenerateTemplateSupport.deleteRecursively(tempDir);
+        }
     }
 
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)

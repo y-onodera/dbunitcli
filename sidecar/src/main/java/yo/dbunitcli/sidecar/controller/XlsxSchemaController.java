@@ -8,10 +8,7 @@ import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
-import yo.dbunitcli.application.CommandParameters;
-import yo.dbunitcli.application.command.Generate;
 import yo.dbunitcli.application.command.GenerateType;
-import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
@@ -28,7 +25,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -55,16 +51,9 @@ public class XlsxSchemaController extends AbstractResourceFileController<JsonXls
         if (Strings.isEmpty(input.get("-src.src"))) {
             throw new ApplicationException(new IllegalArgumentException("-src.src is required"));
         }
-        final Path tempDir = Files.createTempDirectory("xlsxSchemaGenerate");
+        final Path tempDir = GenerateTemplateSupport.execToTempDir(
+                GenerateType.xlsxSchema, input, "xlsxSchemaGenerate");
         try {
-            final Map<String, String> params = new LinkedHashMap<>(input);
-            params.keySet().removeIf(key -> !key.startsWith("-src."));
-            params.put("-generateType", GenerateType.xlsxSchema.name());
-            params.put("-result", tempDir.toAbsolutePath().toString());
-            final Generate generate = new Generate();
-            generate.exec(generate.parseOption(
-                    AbstractCommandController.resolveSidecarFilePaths(
-                            new CommandParameters(Type.generate, params)).args()));
             return ObjectMapper.getDefault().writeValueAsString(this.mergeGenerated(tempDir));
         } catch (final IOException e) {
             throw e;
@@ -72,7 +61,7 @@ public class XlsxSchemaController extends AbstractResourceFileController<JsonXls
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
         } finally {
-            this.deleteRecursively(tempDir);
+            GenerateTemplateSupport.deleteRecursively(tempDir);
         }
     }
 
@@ -95,18 +84,6 @@ public class XlsxSchemaController extends AbstractResourceFileController<JsonXls
             }
         }
         return merged;
-    }
-
-    private void deleteRecursively(final Path tempDir) {
-        try (final Stream<Path> paths = Files.walk(tempDir)) {
-            paths.sorted(Comparator.reverseOrder()).forEach(path -> {
-                if (!path.toFile().delete()) {
-                    LOGGER.warn("failed to delete temp file: {}", path);
-                }
-            });
-        } catch (final IOException ex) {
-            LOGGER.warn("failed to clean up temp dir: {}", tempDir, ex);
-        }
     }
 
     @Post(uri = "sheets", produces = MediaType.APPLICATION_JSON)

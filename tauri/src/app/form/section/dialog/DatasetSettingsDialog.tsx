@@ -30,7 +30,7 @@ export default function DatasetSettingsDialog(props: {
 		return <div>Loading...</div>;
 	}
 	return (
-		<Dialog
+		<DatasetSettingsEditDialog
 			settings={settings}
 			fileName={props.fileName}
 			handleDialogClose={props.handleDialogClose}
@@ -38,15 +38,16 @@ export default function DatasetSettingsDialog(props: {
 		/>
 	);
 }
-function Dialog(props: {
+export function DatasetSettingsEditDialog(props: {
 	settings: DatasetSettings;
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
 	const saveSettings = useSaveDatasetSettings();
-	const [dataSettings, setDataSettings] =
-		useState<DatasetSettings>(props.settings);
+	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
+		props.settings,
+	);
 	return (
 		<SettingDialog
 			handleDialogClose={props.handleDialogClose}
