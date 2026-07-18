@@ -3,6 +3,7 @@ import {
 	FixedColumnDefEditButton,
 	RemoveFixedColumnDefButton,
 } from "../dialog/FixedColumnDefDialog";
+import { FixedColumnDefGenerateButton } from "../dialog/FixedColumnDefGenerateDialog";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 
@@ -31,7 +32,16 @@ export default function FixedColumnDefText({
 					element={element}
 					isValueInDatalist={isValueInDatalist}
 					editButtons={[
-						<FixedColumnDefEditButton key="edit" path={path} setPath={setPath} />,
+						<FixedColumnDefEditButton
+							key="edit"
+							path={path}
+							setPath={setPath}
+						/>,
+						<FixedColumnDefGenerateButton
+							key="generate"
+							path={path}
+							setPath={setPath}
+						/>,
 					]}
 					removeButton={() => (
 						<RemoveFixedColumnDefButton path={path} setPath={setPath} />

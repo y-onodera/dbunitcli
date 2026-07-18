@@ -10,7 +10,7 @@ import { useEnvironment } from "../../../../context/EnvironmentProvider";
 import { useWorkspaceResourcesReload } from "../../../../hooks/useWorkspaceResources";
 import type { CommandOption } from "../../../../model/CommandOption";
 import type { ScaffoldOptions } from "../../../../model/SelectParameter";
-import { fetchData, getErrorMessage } from "../../../../utils/fetchUtils";
+import { getErrorMessage } from "../../../../utils/fetchUtils";
 import {
 	collectFormValues,
 	type FormValues,
@@ -18,54 +18,17 @@ import {
 import { DatasetLoadForm } from "../DatasetLoadForm";
 import PlainText from "../element/PlainText";
 import Select from "../element/Select";
+import {
+	type DialogLoadState,
+	postDialogForm,
+	refreshDialogOptions,
+} from "./refreshableDialogForm";
 
 const formId = "scaffoldForm";
 
 export type ScaffoldFormValues = FormValues;
 
-type LoadState =
-	| { status: "loading" }
-	| { status: "error"; message: string }
-	| { status: "loaded"; options: ScaffoldOptions };
-
-async function postScaffold<T>(
-	apiUrl: string,
-	action: "refresh" | "exec",
-	values: ScaffoldFormValues,
-): Promise<T> {
-	const response = await fetchData({
-		endpoint: `${apiUrl}scaffold/${action}`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(values),
-		},
-	});
-	return (await response.json()) as T;
-}
-
-// refresh結果をLoadStateへ反映する共通フロー（初期表示・target/srcType変更時の双方で使用）
-async function refreshScaffoldOptions(
-	apiUrl: string,
-	values: ScaffoldFormValues,
-	signal: AbortSignal | undefined,
-	setLoadState: (state: LoadState) => void,
-): Promise<void> {
-	try {
-		const options = await postScaffold<ScaffoldOptions>(
-			apiUrl,
-			"refresh",
-			values,
-		);
-		if (!signal?.aborted) {
-			setLoadState({ status: "loaded", options });
-		}
-	} catch (ex) {
-		if (!signal?.aborted) {
-			setLoadState({ status: "error", message: getErrorMessage(ex) });
-		}
-	}
-}
+type LoadState = DialogLoadState<ScaffoldOptions>;
 
 // scaffold実行結果はgenerateフォームへのtxt駆動反映が前提のため、parameter targetは選ばせない
 function withoutParameterTarget(target: CommandOption): CommandOption {
@@ -104,8 +67,9 @@ function ScaffoldDialog({
 	useEffect(() => {
 		const controller = new AbortController();
 		abortControllerRef.current = controller;
-		refreshScaffoldOptions(
+		refreshDialogOptions(
 			environment.apiUrl,
+			"scaffold/refresh",
 			prefill,
 			controller.signal,
 			setLoadState,
@@ -116,8 +80,9 @@ function ScaffoldDialog({
 	}, [environment.apiUrl, prefill]);
 
 	const refreshDialog = async () => {
-		await refreshScaffoldOptions(
+		await refreshDialogOptions(
 			environment.apiUrl,
+			"scaffold/refresh",
 			collectFormValues(formId, false).values,
 			abortControllerRef.current?.signal,
 			setLoadState,
@@ -132,9 +97,9 @@ function ScaffoldDialog({
 		setExecuting(true);
 		setExecuteError("");
 		try {
-			const params = await postScaffold<Record<string, string>>(
+			const params = await postDialogForm<Record<string, string>>(
 				environment.apiUrl,
-				"exec",
+				"scaffold/exec",
 				values,
 			);
 			await Promise.all([handleReflect(params), reloadResources()]);

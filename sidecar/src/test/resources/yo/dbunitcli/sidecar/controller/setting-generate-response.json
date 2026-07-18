@@ -1,0 +1,6 @@
+{
+  "settings": [
+    { "name": "multi1", "keys": ["key", "column1", "column2", "column3"] },
+    { "name": "multi2", "keys": ["key", "columna", "columnb", "columnc"] }
+  ]
+}

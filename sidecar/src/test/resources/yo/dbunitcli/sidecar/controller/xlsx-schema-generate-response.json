@@ -1,0 +1,38 @@
+{
+  "rows": [
+    {
+      "sheetName": "multi1",
+      "tableName": "multi1",
+      "header": ["key", "column1", "column2", "column3"],
+      "dataStart": 1,
+      "columnIndex": [0, 1, 2, 3],
+      "breakKey": ["key"],
+      "addFileInfo": false
+    },
+    {
+      "sheetName": "multi2",
+      "tableName": "multi2",
+      "header": ["key", "columna", "columnb", "columnc"],
+      "dataStart": 1,
+      "columnIndex": [0, 1, 2, 3],
+      "breakKey": ["key"],
+      "addFileInfo": false
+    }
+  ],
+  "cells": [
+    {
+      "sheetName": "multi1",
+      "tableName": "multi1",
+      "header": ["key", "column1", "column2", "column3"],
+      "rows": [{ "cellAddress": ["A2", "B2", "C2", "D2"] }],
+      "addFileInfo": false
+    },
+    {
+      "sheetName": "multi2",
+      "tableName": "multi2",
+      "header": ["key", "columna", "columnb", "columnc"],
+      "rows": [{ "cellAddress": ["A2", "B2", "C2", "D2"] }],
+      "addFileInfo": false
+    }
+  ]
+}

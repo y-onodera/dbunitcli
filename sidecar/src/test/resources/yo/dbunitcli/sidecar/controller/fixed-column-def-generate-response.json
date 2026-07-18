@@ -1,0 +1,12 @@
+{
+  "columns": [
+    { "name": "key", "length": 10, "align": "left", "pad": " " },
+    { "name": "column1", "length": 10, "align": "left", "pad": " " },
+    { "name": "column2", "length": 10, "align": "left", "pad": " " },
+    { "name": "column3", "length": 10, "align": "left", "pad": " " },
+    { "name": "key", "length": 10, "align": "left", "pad": " " },
+    { "name": "columna", "length": 10, "align": "left", "pad": " " },
+    { "name": "columnb", "length": 10, "align": "left", "pad": " " },
+    { "name": "columnc", "length": 10, "align": "left", "pad": " " }
+  ]
+}

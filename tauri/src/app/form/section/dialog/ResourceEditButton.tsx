@@ -18,6 +18,7 @@ type ResourcesEditButtonProps = {
 		dialogOpen: boolean,
 		closeDialog: () => void,
 	) => ReactElement | null;
+	renderTrigger?: (openDialog: () => void) => ReactElement;
 };
 
 export function RemoveResource({
@@ -50,6 +51,7 @@ export function RemoveResource({
 
 export default function ResourceEditButton({
 	renderDialog,
+	renderTrigger,
 }: ResourcesEditButtonProps) {
 	const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -64,7 +66,11 @@ export default function ResourceEditButton({
 	return (
 		<>
 			{renderDialog(dialogOpen, closeDialog)}
-			<EditButton handleClick={openDialog} />
+			{renderTrigger ? (
+				renderTrigger(openDialog)
+			) : (
+				<EditButton handleClick={openDialog} />
+			)}
 		</>
 	);
 }

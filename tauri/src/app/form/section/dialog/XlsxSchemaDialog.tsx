@@ -33,7 +33,7 @@ export default function XlsxSchemaDialog(props: {
 		return <div>Loading...</div>;
 	}
 	return (
-		<Dialog
+		<XlsxSchemaEditDialog
 			schema={schema}
 			fileName={props.fileName}
 			handleDialogClose={props.handleDialogClose}
@@ -41,7 +41,7 @@ export default function XlsxSchemaDialog(props: {
 		/>
 	);
 }
-function Dialog(props: {
+export function XlsxSchemaEditDialog(props: {
 	schema: XlsxSchema;
 	fileName: string;
 	handleDialogClose: () => void;

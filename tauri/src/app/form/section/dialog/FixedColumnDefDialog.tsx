@@ -6,16 +6,16 @@ import {
 	useSaveFixedColumnDef,
 } from "../../../../hooks/useFixedColumnDef";
 import {
+	type ColumnDef,
 	createColumnDef,
 	FixedColumnDef,
-	type ColumnDef,
 } from "../../../../model/FixedColumnDef";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
+import ColumnDefSettingDialog from "./ColumnDefSettingDialog";
 import ResourceEditButton, {
 	RemoveResource,
 	type ResourceEditButtonProp,
 } from "./ResourceEditButton";
-import ColumnDefSettingDialog from "./ColumnDefSettingDialog";
 
 export default function FixedColumnDefDialog(props: {
 	fileName: string;
@@ -27,7 +27,7 @@ export default function FixedColumnDefDialog(props: {
 		return <div>Loading...</div>;
 	}
 	return (
-		<Dialog
+		<FixedColumnDefEditDialog
 			def={def}
 			fileName={props.fileName}
 			handleDialogClose={props.handleDialogClose}
@@ -36,7 +36,7 @@ export default function FixedColumnDefDialog(props: {
 	);
 }
 
-function Dialog(props: {
+export function FixedColumnDefEditDialog(props: {
 	def: FixedColumnDef;
 	fileName: string;
 	handleDialogClose: () => void;
@@ -63,7 +63,11 @@ function Dialog(props: {
 					setFixedColumnDef((cur) => new FixedColumnDef(convert(cur.columns)))
 				}
 				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={({ setting, handleDialogClose, handleCommit }) => (
+				SettingDialogComponent={({
+					setting,
+					handleDialogClose,
+					handleCommit,
+				}) => (
 					<ColumnDefSettingDialog
 						setting={setting}
 						handleDialogClose={handleDialogClose}
@@ -107,10 +111,6 @@ export function RemoveFixedColumnDefButton({
 	const deleteDef = useDeleteFixedColumnDef();
 
 	return (
-		<RemoveResource
-			path={path}
-			setPath={setPath}
-			deleteResource={deleteDef}
-		/>
+		<RemoveResource path={path} setPath={setPath} deleteResource={deleteDef} />
 	);
 }
