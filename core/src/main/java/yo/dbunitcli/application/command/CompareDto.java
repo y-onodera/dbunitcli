@@ -19,6 +19,9 @@ public class CompareDto extends CommandDto {
     @CommandLine.Option(names = "-targetType")
     private CompareOption.Type targetType = CompareOption.Type.data;
 
+    @CommandLine.Option(names = "-correctionSql", description = "generate correction sql when row diff found")
+    private boolean correctionSql = false;
+
     private ImageCompareDto imageOption = new ImageCompareDto();
 
     private DataSetLoadDto expectData = new DataSetLoadDto();
@@ -59,6 +62,14 @@ public class CompareDto extends CommandDto {
 
     public void setTargetType(final CompareOption.Type targetType) {
         this.targetType = targetType;
+    }
+
+    public boolean getCorrectionSql() {
+        return this.correctionSql;
+    }
+
+    public void setCorrectionSql(final boolean correctionSql) {
+        this.correctionSql = correctionSql;
     }
 
     public ImageCompareDto getImageOption() {

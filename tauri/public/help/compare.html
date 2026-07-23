@@ -33,6 +33,7 @@
     <tr><td>oldData</td><td>比較元（旧）データセット</td></tr>
     <tr><td>newData</td><td>比較対象となる新データセット</td></tr>
     <tr><td>expectData</td><td>期待値データセット（省略時はスキップ）</td></tr>
+    <tr><td>correctionSql</td><td>行レベルの差分（<code>MODIFY_VALUE</code> / <code>KEY_DELETE</code> / <code>KEY_ADD</code>）を旧データから新データへ補正する SQL を生成する（<code>data</code> モードのみ有効。デフォルト: 無効）</td></tr>
     <tr><td>imageOption</td><td>画像比較のオプション（<code>image</code> / <code>pdf</code> モード時のみ表示）</td></tr>
     <tr><td>convertResult</td><td>出力形式と出力先の設定</td></tr>
   </table>
@@ -187,6 +188,15 @@
     <tr><td>$ROW_INDEX</td><td>新データでの行番号（0 始まり）</td></tr>
     <tr><td>（元テーブルの全カラム）</td><td>新データ側の行の全カラム値</td></tr>
   </table>
+
+  <h3 id="result-correction-sql">correctionSql による補正 SQL の出力</h3>
+  <p><code>correctionSql</code> を有効にすると、行レベルの差分が検出されたテーブルごとに、旧データを新データへ補正する SQL 文が <code>{テーブル名}$CORRECTION.sql</code>（UTF-8）として <code>convertResult</code> の出力先に書き出されます。主キー（<code>setting</code> の <code>keys</code>）が設定されていないテーブルは対象外です。</p>
+  <ul>
+    <li><code>MODIFY_VALUE</code>（値が変化した行）→ <code>UPDATE</code> 文（主キー以外の全カラムを新データの値に更新）</li>
+    <li><code>KEY_DELETE</code>（旧データにのみ存在する行）→ <code>DELETE</code> 文</li>
+    <li><code>KEY_ADD</code>（新データにのみ存在する行）→ <code>INSERT</code> 文</li>
+  </ul>
+  <p>比較の結果が既に一致している行、およびテーブル・カラムの差分（<code>TABLE_ADD</code> 等）は SQL 生成の対象外です。</p>
 
   <h3 id="result-image-pdf">image / pdf モードの比較結果</h3>
   <p><code>targetType</code> が <code>image</code> または <code>pdf</code> のとき、<code>COMPARE_RESULT</code> のカラム構成と <code>DIFF</code> の意味が <code>data</code> モードと異なります。テーブルごとの詳細ファイル（<code>$MODIFY</code> / <code>$DELETE</code> / <code>$ADD</code>）は出力されません。</p>

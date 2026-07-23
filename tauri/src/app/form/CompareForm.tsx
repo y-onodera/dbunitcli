@@ -4,6 +4,7 @@ import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import Check from "./section/element/Check";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
@@ -24,6 +25,7 @@ export function CompareForm(prop: {
 	const targetType = prop.compare.targetType.value;
 	const settingElement = prop.compare.setting;
 	const settingEncodingElement = prop.compare.settingEncoding;
+	const correctionSqlElement = prop.compare.correctionSql;
 
 	const oldDataInitialInfo = buildDatasetSrcInfo(oldData);
 
@@ -52,6 +54,9 @@ export function CompareForm(prop: {
 					/>
 				)}
 				<PlainText prefix="" element={settingEncodingElement} />
+				{targetType === "data" && (
+					<Check prefix="" element={correctionSqlElement} />
+				)}
 			</SectionFieldset>
 			{prop.compare.imageOption && (
 				<SectionFieldset>
