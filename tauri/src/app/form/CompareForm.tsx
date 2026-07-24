@@ -25,7 +25,7 @@ export function CompareForm(prop: {
 	const targetType = prop.compare.targetType.value;
 	const settingElement = prop.compare.setting;
 	const settingEncodingElement = prop.compare.settingEncoding;
-	const correctionSqlElement = prop.compare.correctionSql;
+	const createPatchSqlElement = prop.compare.createPatchSql;
 
 	const oldDataInitialInfo = buildDatasetSrcInfo(oldData);
 
@@ -55,7 +55,7 @@ export function CompareForm(prop: {
 				)}
 				<PlainText prefix="" element={settingEncodingElement} />
 				{targetType === "data" && (
-					<Check prefix="" element={correctionSqlElement} />
+					<Check prefix="" element={createPatchSqlElement} />
 				)}
 			</SectionFieldset>
 			{prop.compare.imageOption && (

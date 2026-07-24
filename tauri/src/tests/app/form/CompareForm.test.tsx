@@ -88,11 +88,13 @@ describe("CompareFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
-		it("compareセクションにcorrectionSqlが含まれる", () => {
+		it("compareセクションにcreatePatchSqlが含まれる", () => {
 			render(<CompareForm {...makeCompareProps()} />);
 
 			expect(
-				document.querySelector('input[type="checkbox"][name="-correctionSql"]'),
+				document.querySelector(
+					'input[type="checkbox"][name="-createPatchSql"]',
+				),
 			).toBeInTheDocument();
 		});
 
@@ -174,7 +176,7 @@ describe("CompareFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
-		it("correctionSqlは表示されない", () => {
+		it("createPatchSqlは表示されない", () => {
 			render(
 				<CompareForm
 					{...makeCompareProps(compareRefreshTargetTypeImageResponseFixture)}
@@ -182,7 +184,9 @@ describe("CompareFormの描画テスト", () => {
 			);
 
 			expect(
-				document.querySelector('input[type="checkbox"][name="-correctionSql"]'),
+				document.querySelector(
+					'input[type="checkbox"][name="-createPatchSql"]',
+				),
 			).not.toBeInTheDocument();
 		});
 

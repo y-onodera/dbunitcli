@@ -14,14 +14,14 @@ import java.util.stream.Stream;
 
 public class DefaultCompareManager implements DataSetCompare.Manager {
 
-    private final boolean correctionSql;
+    private final boolean createPatchSql;
 
     public DefaultCompareManager() {
         this(false);
     }
 
-    public DefaultCompareManager(final boolean correctionSql) {
-        this.correctionSql = correctionSql;
+    public DefaultCompareManager(final boolean createPatchSql) {
+        this.createPatchSql = createPatchSql;
     }
 
     @Override
@@ -132,8 +132,8 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
 
     protected RowCompareResultHandler getRowResultHandler(final TableCompare it) {
         final RowCompareResultHandler handler = new DiffWriteRowCompareResultHandler(it).compose(new DataRowCompareResultHandler(it));
-        if (this.correctionSql) {
-            return handler.compose(new CorrectionSqlRowCompareResultHandler(it));
+        if (this.createPatchSql) {
+            return handler.compose(new CreatePatchSqlRowCompareResultHandler(it));
         }
         return handler;
     }

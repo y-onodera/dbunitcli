@@ -84,17 +84,17 @@ public class CompareOptionTest {
     }
 
     @Test
-    public void generateCorrectionSqlWhenRowDiffFound() throws IOException {
-        final File resultDir = new File("target/test-temp/compareoption/correctionsql");
+    public void generateCreatePatchSqlWhenRowDiffFound() throws IOException {
+        final File resultDir = new File("target/test-temp/compareoption/createpatchsql");
         final CompareOption option = this.target.parseOption(new String[]{
-                "-new.src=" + this.baseDir + "/src/compare/correctionsql/new"
-                , "-old.src=" + this.baseDir + "/src/compare/correctionsql/old"
-                , "-setting=" + this.baseDir + "/settings/correctionsql/setting.json"
-                , "-correctionSql=true"
+                "-new.src=" + this.baseDir + "/src/compare/createpatchsql/new"
+                , "-old.src=" + this.baseDir + "/src/compare/createpatchsql/old"
+                , "-setting=" + this.baseDir + "/settings/createpatchsql/setting.json"
+                , "-createPatchSql=true"
                 , "-result=" + resultDir.getPath()
         });
         option.compare();
-        final File sqlFile = new File(resultDir, "USERS$CORRECTION.sql");
+        final File sqlFile = new File(resultDir, "USERS$PATCH.sql");
         assertTrue(sqlFile.exists());
         final String content = Files.readString(sqlFile.toPath(), StandardCharsets.UTF_8);
         assertEquals("update USERS set name = 'Alice' ,age = '21'  where id = '1' ;\n"
@@ -103,16 +103,16 @@ public class CompareOptionTest {
     }
 
     @Test
-    public void skipCorrectionSqlWhenOptionDisabled() {
-        final File resultDir = new File("target/test-temp/compareoption/correctionsqldisabled");
+    public void skipCreatePatchSqlWhenOptionDisabled() {
+        final File resultDir = new File("target/test-temp/compareoption/createpatchsqldisabled");
         final CompareOption option = this.target.parseOption(new String[]{
-                "-new.src=" + this.baseDir + "/src/compare/correctionsql/new"
-                , "-old.src=" + this.baseDir + "/src/compare/correctionsql/old"
-                , "-setting=" + this.baseDir + "/settings/correctionsql/setting.json"
+                "-new.src=" + this.baseDir + "/src/compare/createpatchsql/new"
+                , "-old.src=" + this.baseDir + "/src/compare/createpatchsql/old"
+                , "-setting=" + this.baseDir + "/settings/createpatchsql/setting.json"
                 , "-result=" + resultDir.getPath()
         });
         option.compare();
-        assertTrue(!new File(resultDir, "USERS$CORRECTION.sql").exists());
+        assertTrue(!new File(resultDir, "USERS$PATCH.sql").exists());
     }
 
 }

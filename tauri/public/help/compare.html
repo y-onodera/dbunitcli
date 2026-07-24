@@ -33,7 +33,7 @@
     <tr><td>oldData</td><td>比較元（旧）データセット</td></tr>
     <tr><td>newData</td><td>比較対象となる新データセット</td></tr>
     <tr><td>expectData</td><td>期待値データセット（省略時はスキップ）</td></tr>
-    <tr><td>correctionSql</td><td>行レベルの差分（<code>MODIFY_VALUE</code> / <code>KEY_DELETE</code> / <code>KEY_ADD</code>）を旧データから新データへ補正する SQL を生成する（<code>data</code> モードのみ有効。デフォルト: 無効）</td></tr>
+    <tr><td>createPatchSql</td><td>行レベルの差分（<code>MODIFY_VALUE</code> / <code>KEY_DELETE</code> / <code>KEY_ADD</code>）を旧データから新データへ補正するパッチ SQL を生成する（<code>data</code> モードのみ有効。デフォルト: 無効）</td></tr>
     <tr><td>imageOption</td><td>画像比較のオプション（<code>image</code> / <code>pdf</code> モード時のみ表示）</td></tr>
     <tr><td>convertResult</td><td>出力形式と出力先の設定</td></tr>
   </table>
@@ -189,8 +189,8 @@
     <tr><td>（元テーブルの全カラム）</td><td>新データ側の行の全カラム値</td></tr>
   </table>
 
-  <h3 id="result-correction-sql">correctionSql による補正 SQL の出力</h3>
-  <p><code>correctionSql</code> を有効にすると、行レベルの差分が検出されたテーブルごとに、旧データを新データへ補正する SQL 文が <code>{テーブル名}$CORRECTION.sql</code>（UTF-8）として <code>convertResult</code> の出力先に書き出されます。主キー（<code>setting</code> の <code>keys</code>）が設定されていないテーブルは対象外です。</p>
+  <h3 id="result-create-patch-sql">createPatchSql によるパッチ SQL の出力</h3>
+  <p><code>createPatchSql</code> を有効にすると、行レベルの差分が検出されたテーブルごとに、旧データを新データへ補正するパッチ SQL 文が <code>{テーブル名}$PATCH.sql</code>（UTF-8）として <code>convertResult</code> の出力先に書き出されます。主キー（<code>setting</code> の <code>keys</code>）が設定されていないテーブルは対象外です。</p>
   <ul>
     <li><code>MODIFY_VALUE</code>（値が変化した行）→ <code>UPDATE</code> 文（主キー以外の全カラムを新データの値に更新）</li>
     <li><code>KEY_DELETE</code>（旧データにのみ存在する行）→ <code>DELETE</code> 文</li>

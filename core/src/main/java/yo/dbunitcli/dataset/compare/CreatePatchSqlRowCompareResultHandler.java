@@ -21,9 +21,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class CorrectionSqlRowCompareResultHandler implements RowCompareResultHandler {
+public class CreatePatchSqlRowCompareResultHandler implements RowCompareResultHandler {
 
-    private static final String FILE_SUFFIX = "$CORRECTION.sql";
+    private static final String FILE_SUFFIX = "$PATCH.sql";
 
     private final TableCompare tableCompare;
     private final Column[] columns;
@@ -33,7 +33,7 @@ public class CorrectionSqlRowCompareResultHandler implements RowCompareResultHan
     private final List<Map<String, Object>> deleteRows = new ArrayList<>();
     private final List<Map<String, Object>> insertRows = new ArrayList<>();
 
-    protected CorrectionSqlRowCompareResultHandler(final TableCompare tableCompare) {
+    protected CreatePatchSqlRowCompareResultHandler(final TableCompare tableCompare) {
         this.tableCompare = tableCompare;
         this.columns = IntStream.range(0, tableCompare.getColumnLength())
                 .mapToObj(tableCompare::getOldColumn)
@@ -112,7 +112,7 @@ public class CorrectionSqlRowCompareResultHandler implements RowCompareResultHan
         sql.append(this.render(stGroup, "update", this.updateRows));
         sql.append(this.render(stGroup, "insert", this.insertRows));
         sql.append(this.render(stGroup, "delete", this.deleteRows));
-        final File sqlFile = new File(dir, this.tableCompare.getTableName() + CorrectionSqlRowCompareResultHandler.FILE_SUFFIX);
+        final File sqlFile = new File(dir, this.tableCompare.getTableName() + CreatePatchSqlRowCompareResultHandler.FILE_SUFFIX);
         try {
             Files.writeString(sqlFile.toPath(), sql.toString(), StandardCharsets.UTF_8);
         } catch (final IOException e) {

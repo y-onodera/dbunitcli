@@ -68,7 +68,7 @@ export type ConvertOptions = {
 export type CompareOptions = CommandOptions & {
 	command: "compare";
 	targetType: CommandOption;
-	correctionSql: CommandOption;
+	createPatchSql: CommandOption;
 	setting: CommandOption;
 	settingEncoding: CommandOption;
 	newData: DatasetSource;

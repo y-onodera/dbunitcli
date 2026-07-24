@@ -454,8 +454,8 @@ export const compareLoadResponseFixture = {
 		false,
 		TARGET_TYPE_OPTIONS,
 	),
-	correctionSql: makeElement(
-		"correctionSql",
+	createPatchSql: makeElement(
+		"createPatchSql",
 		"FLG",
 		"false",
 		"WORKSPACE",
@@ -670,8 +670,8 @@ export const compareRefreshTargetTypeImageResponseFixture = {
 		false,
 		TARGET_TYPE_OPTIONS,
 	),
-	correctionSql: makeElement(
-		"correctionSql",
+	createPatchSql: makeElement(
+		"createPatchSql",
 		"FLG",
 		"false",
 		"WORKSPACE",
@@ -801,8 +801,8 @@ export const compareRefreshNewSrcTypeTableResponseFixture = {
 		false,
 		TARGET_TYPE_OPTIONS,
 	),
-	correctionSql: makeElement(
-		"correctionSql",
+	createPatchSql: makeElement(
+		"createPatchSql",
 		"FLG",
 		"false",
 		"WORKSPACE",
@@ -843,8 +843,8 @@ export const compareRefreshExpectSrcTypeCsvResponseFixture = {
 		false,
 		TARGET_TYPE_OPTIONS,
 	),
-	correctionSql: makeElement(
-		"correctionSql",
+	createPatchSql: makeElement(
+		"createPatchSql",
 		"FLG",
 		"false",
 		"WORKSPACE",
