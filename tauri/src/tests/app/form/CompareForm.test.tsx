@@ -88,6 +88,16 @@ describe("CompareFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
+		it("compareセクションにcreatePatchSqlが含まれる", () => {
+			render(<CompareForm {...makeCompareProps()} />);
+
+			expect(
+				document.querySelector(
+					'input[type="checkbox"][name="-createPatchSql"]',
+				),
+			).toBeInTheDocument();
+		});
+
 		it("imageオプションセクションは表示されない", () => {
 			render(<CompareForm {...makeCompareProps()} />);
 
@@ -164,6 +174,20 @@ describe("CompareFormの描画テスト", () => {
 					'input[type="text"][name="-image.pixelToleranceLevel"]',
 				),
 			).toBeInTheDocument();
+		});
+
+		it("createPatchSqlは表示されない", () => {
+			render(
+				<CompareForm
+					{...makeCompareProps(compareRefreshTargetTypeImageResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector(
+					'input[type="checkbox"][name="-createPatchSql"]',
+				),
+			).not.toBeInTheDocument();
 		});
 
 		it("newセクションのsrcTypeがfileになっている", () => {

@@ -14,6 +14,16 @@ import java.util.stream.Stream;
 
 public class DefaultCompareManager implements DataSetCompare.Manager {
 
+    private final boolean createPatchSql;
+
+    public DefaultCompareManager() {
+        this(false);
+    }
+
+    public DefaultCompareManager(final boolean createPatchSql) {
+        this.createPatchSql = createPatchSql;
+    }
+
     @Override
     public List<CompareDiff> compareTable(final TableCompare tableCompare) {
         return this.getTableCompareStrategies().map(it -> it.apply(tableCompare))
@@ -121,7 +131,11 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
     }
 
     protected RowCompareResultHandler getRowResultHandler(final TableCompare it) {
-        return new DiffWriteRowCompareResultHandler(it).compose(new DataRowCompareResultHandler(it));
+        final RowCompareResultHandler handler = new DiffWriteRowCompareResultHandler(it).compose(new DataRowCompareResultHandler(it));
+        if (this.createPatchSql) {
+            return handler.compose(new CreatePatchSqlRowCompareResultHandler(it));
+        }
+        return handler;
     }
 
     public static class RowCompare {

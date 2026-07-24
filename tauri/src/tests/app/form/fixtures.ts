@@ -454,6 +454,13 @@ export const compareLoadResponseFixture = {
 		false,
 		TARGET_TYPE_OPTIONS,
 	),
+	createPatchSql: makeElement(
+		"createPatchSql",
+		"FLG",
+		"false",
+		"WORKSPACE",
+		false,
+	),
 	setting: makeElement("setting", "FILE", "", "SETTING", false),
 	settingEncoding: makeElement(
 		"settingEncoding",
@@ -663,6 +670,13 @@ export const compareRefreshTargetTypeImageResponseFixture = {
 		false,
 		TARGET_TYPE_OPTIONS,
 	),
+	createPatchSql: makeElement(
+		"createPatchSql",
+		"FLG",
+		"false",
+		"WORKSPACE",
+		false,
+	),
 	setting: makeElement("setting", "FILE", "", "SETTING", false),
 	settingEncoding: makeElement(
 		"settingEncoding",
@@ -787,6 +801,13 @@ export const compareRefreshNewSrcTypeTableResponseFixture = {
 		false,
 		TARGET_TYPE_OPTIONS,
 	),
+	createPatchSql: makeElement(
+		"createPatchSql",
+		"FLG",
+		"false",
+		"WORKSPACE",
+		false,
+	),
 	setting: makeElement("setting", "FILE", "", "SETTING", false),
 	settingEncoding: makeElement(
 		"settingEncoding",
@@ -821,6 +842,13 @@ export const compareRefreshExpectSrcTypeCsvResponseFixture = {
 		"WORKSPACE",
 		false,
 		TARGET_TYPE_OPTIONS,
+	),
+	createPatchSql: makeElement(
+		"createPatchSql",
+		"FLG",
+		"false",
+		"WORKSPACE",
+		false,
 	),
 	setting: makeElement("setting", "FILE", "", "SETTING", false),
 	settingEncoding: makeElement(

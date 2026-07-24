@@ -12,6 +12,7 @@ import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.compare.CompareResult;
 import yo.dbunitcli.dataset.compare.DataSetCompareBuilder;
+import yo.dbunitcli.dataset.compare.DefaultCompareManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,7 @@ public record CompareOption(
         , String setting
         , String settingEncoding
         , Type targetType
+        , boolean createPatchSql
         , ImageCompareOption imageOption
         , DataSetLoadOption newData
         , DataSetLoadOption oldData
@@ -98,6 +100,7 @@ public record CompareOption(
                 , Strings.isNotEmpty(dto.getSettingEncoding())
                         ? dto.getSettingEncoding() : Charset.defaultCharset().displayName()
                 , CompareOption.getTargetType(dto)
+                , dto.getCreatePatchSql()
                 , CompareOption.getTargetType(dto).isAny(Type.image, Type.pdf)
                         ? new ImageCompareOption("image", dto.getImageOption()) : new ImageCompareOption("image")
                 , new DataSetLoadOption("new", dto.getNewData())
@@ -113,7 +116,8 @@ public record CompareOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         final ParametersBuilder result = new ParametersBuilder()
-                .put("-targetType", this.targetType, this.targetType.getDeclaringClass());
+                .put("-targetType", this.targetType, this.targetType.getDeclaringClass())
+                .put("-createPatchSql", this.createPatchSql);
         final ParametersBuilder newDataCommandLineArgs = this.newData.toParametersBuilder();
         final ParametersBuilder oldDataCommandLineArgs = this.oldData.toParametersBuilder();
         if (this.targetType.isAny(Type.pdf, Type.image)) {
@@ -221,7 +225,8 @@ public record CompareOption(
 
     public DataSetCompareBuilder getDataSetCompareBuilder() {
         if (this.targetType == Type.data) {
-            return new DataSetCompareBuilder();
+            return new DataSetCompareBuilder()
+                    .setCompareManagerFactory(() -> new DefaultCompareManager(this.createPatchSql));
         }
         return new DataSetCompareBuilder()
                 .setCompareManagerFactory(this.imageOption.createFactoryOf(this.targetType));

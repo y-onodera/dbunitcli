@@ -19,6 +19,9 @@ public class CompareDto extends CommandDto {
     @CommandLine.Option(names = "-targetType")
     private CompareOption.Type targetType = CompareOption.Type.data;
 
+    @CommandLine.Option(names = "-createPatchSql", description = "generate patch sql when row diff found")
+    private boolean createPatchSql = false;
+
     private ImageCompareDto imageOption = new ImageCompareDto();
 
     private DataSetLoadDto expectData = new DataSetLoadDto();
@@ -59,6 +62,14 @@ public class CompareDto extends CommandDto {
 
     public void setTargetType(final CompareOption.Type targetType) {
         this.targetType = targetType;
+    }
+
+    public boolean getCreatePatchSql() {
+        return this.createPatchSql;
+    }
+
+    public void setCreatePatchSql(final boolean createPatchSql) {
+        this.createPatchSql = createPatchSql;
     }
 
     public ImageCompareDto getImageOption() {
