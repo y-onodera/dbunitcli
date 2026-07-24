@@ -96,7 +96,8 @@ public class CompareOptionTest {
         option.compare();
         final File sqlFile = new File(resultDir, "USERS$PATCH.sql");
         assertTrue(sqlFile.exists());
-        final String content = Files.readString(sqlFile.toPath(), StandardCharsets.UTF_8);
+        final String content = Files.readString(sqlFile.toPath(), StandardCharsets.UTF_8)
+                .replace("\r\n", "\n").replace("\r", "\n");
         assertEquals("update USERS set name = 'Alice' ,age = '21'  where id = '1' ;\n"
                 + "insert into USERS (id ,name ,age ) values ('4' ,'Dave' ,'40' );\n"
                 + "delete from USERS where id = '2' ;\n", content);
