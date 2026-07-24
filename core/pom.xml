@@ -35,6 +35,11 @@
                                     <goal>test</goal>
                                 </goals>
                                 <phase>test</phase>
+                                <configuration>
+                                    <systemProperties>
+                                        <dbunitcli.noExit>true</dbunitcli.noExit>
+                                    </systemProperties>
+                                </configuration>
                             </execution>
                             <execution>
                                 <id>build-native</id>
