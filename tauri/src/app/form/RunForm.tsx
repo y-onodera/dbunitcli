@@ -1,4 +1,4 @@
-import { SectionFieldset, SectionHelpButton } from "../../components/dialog";
+import { SectionFieldset, SectionLegend } from "../../components/dialog";
 import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
 import type { RunOptions } from "../../model/SelectParameter";
 import FileText from "./section/element/FileText";
@@ -14,8 +14,7 @@ export function RunForm(prop: {
 	const run = prop.run;
 	return (
 		<SectionFieldset>
-			<legend>run</legend>
-			<SectionHelpButton command="run" label="Run" />
+			<SectionLegend title="run" command="run" label="Run" />
 			<Select
 				handleTypeSelect={prop.handleTypeSelect}
 				prefix=""
