@@ -14,7 +14,7 @@ export default function Layout() {
 			</nav>
 			<aside
 				id="logo-sidebar"
-				className="fixed top-0 left-0 z-sidebar h-screen pt-16 transition-transform -translate-x-full border-r border-border-subtle sm:translate-x-0"
+				className="fixed top-0 left-0 z-sidebar h-screen pt-16 transition-transform -translate-x-full sm:translate-x-0"
 				aria-label="Sidebar"
 				style={{ width: `${sidebarWidth}px` }}
 			>
