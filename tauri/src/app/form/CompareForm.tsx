@@ -1,5 +1,4 @@
-import { SectionFieldset } from "../../components/dialog";
-import { SectionHelpButton } from "../../components/dialog";
+import { SectionFieldset, SectionLegend } from "../../components/dialog";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
@@ -32,8 +31,7 @@ export function CompareForm(prop: {
 	return (
 		<>
 			<SectionFieldset>
-				<legend>compare</legend>
-				<SectionHelpButton command="compare" label="Compare" />
+				<SectionLegend title="compare" command="compare" label="Compare" />
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
 					prefix=""
@@ -60,8 +58,7 @@ export function CompareForm(prop: {
 			</SectionFieldset>
 			{prop.compare.imageOption && (
 				<SectionFieldset>
-					<legend>image</legend>
-					<SectionHelpButton command="image" label="Image Option" />
+					<SectionLegend title="image" command="image" label="Image Option" />
 					<ImageOptionFormSection imageOption={imageOption} />
 				</SectionFieldset>
 			)}

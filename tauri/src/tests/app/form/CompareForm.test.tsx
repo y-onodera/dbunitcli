@@ -102,8 +102,10 @@ describe("CompareFormの描画テスト", () => {
 			render(<CompareForm {...makeCompareProps()} />);
 
 			const legends = document.querySelectorAll("fieldset legend");
-			const legendTexts = Array.from(legends).map((l) => l.textContent);
-			expect(legendTexts).not.toContain("image");
+			const hasImageLegend = Array.from(legends).some((l) =>
+				l.textContent?.includes("image"),
+			);
+			expect(hasImageLegend).toBe(false);
 		});
 
 		it("newセクションにsrcType・src・encodingが含まれる", () => {
@@ -155,8 +157,10 @@ describe("CompareFormの描画テスト", () => {
 			);
 
 			const legends = document.querySelectorAll("fieldset legend");
-			const legendTexts = Array.from(legends).map((l) => l.textContent);
-			expect(legendTexts).toContain("image");
+			const hasImageLegend = Array.from(legends).some((l) =>
+				l.textContent?.includes("image"),
+			);
+			expect(hasImageLegend).toBe(true);
 		});
 
 		it("imageセクションにthreshold・pixelToleranceLevelが含まれる", () => {

@@ -6,6 +6,7 @@ export {
 	DialogTitle,
 	ModalOverlay,
 } from "./ModalOverlay";
+export { SectionFieldset, SectionLegend } from "./SectionFieldset";
 export type { SettingDialogProps } from "./SettingDialog";
 export {
 	Arrays,
@@ -18,5 +19,4 @@ export {
 	SettingDialog,
 	Text,
 } from "./SettingDialog";
-export { SectionFieldset } from "./SectionFieldset";
 export { default as SettingTable } from "./SettingTable";

@@ -1,4 +1,4 @@
-import { SectionFieldset, SectionHelpButton } from "../../components/dialog";
+import { SectionFieldset, SectionLegend } from "../../components/dialog";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import {
@@ -27,8 +27,7 @@ export function GenerateForm(prop: {
 	return (
 		<>
 			<SectionFieldset>
-				<legend>generate</legend>
-				<SectionHelpButton command="generate" label="Generate" />
+				<SectionLegend title="generate" command="generate" label="Generate" />
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
 					prefix=""
