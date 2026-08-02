@@ -1,4 +1,5 @@
-import { SectionFieldset, SectionLegend } from "../../components/dialog";
+import { SectionFieldset } from "../../components/dialog";
+import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
 import type { RunOptions } from "../../model/SelectParameter";
 import FileText from "./section/element/FileText";

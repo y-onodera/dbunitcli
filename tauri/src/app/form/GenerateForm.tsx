@@ -1,4 +1,5 @@
-import { SectionFieldset, SectionLegend } from "../../components/dialog";
+import { SectionFieldset } from "../../components/dialog";
+import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import {

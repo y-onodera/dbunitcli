@@ -1,17 +1,18 @@
-import { SectionFieldset, SectionLegend } from "../../components/dialog";
 import { useState } from "react";
+import { SectionFieldset } from "../../components/dialog";
+import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { useParameterList } from "../../context/WorkspaceResourcesProvider";
 import type { ParameterizeOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import {
+	resolveCommand,
+	TemplateCommandButton,
+} from "./section/dialog/TemplateCommandDialog";
 import Check from "./section/element/Check";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
 import Text, { TextDropDownMenu } from "./section/element/Text";
 import TemplateFormSection from "./section/TemplateFormSection";
-import {
-	TemplateCommandButton,
-	resolveCommand,
-} from "./section/dialog/TemplateCommandDialog";
 
 export function ParameterizeForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -62,10 +63,7 @@ export function ParameterizeForm(prop: {
 							element={parameterize.template}
 							isValueInDatalist={isValueInDatalist}
 							editButtons={[
-								<TemplateCommandButton
-									key="open-cmd"
-									name={path}
-								/>,
+								<TemplateCommandButton key="open-cmd" name={path} />,
 							]}
 						/>
 					)}

@@ -1,4 +1,5 @@
-import { SectionFieldset, SectionLegend } from "../../components/dialog";
+import { SectionFieldset } from "../../components/dialog";
+import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
