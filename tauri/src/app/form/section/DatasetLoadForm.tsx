@@ -1,4 +1,5 @@
 import { SectionFieldset } from "../../../components/dialog";
+import { SectionLegend } from "../../../components/dialog/SectionFieldset";
 import {
 	DatasetSrcInfoProvider,
 	useDatasetSrcInfo,
@@ -21,10 +22,14 @@ function DatasetLoadFormContent({
 	srcData,
 	handleTypeSelect,
 	defaultType,
+	helpCommand,
+	helpLabel,
 }: {
 	srcData: DatasetSource;
 	handleTypeSelect: () => Promise<void>;
 	defaultType?: SrcType;
+	helpCommand?: string;
+	helpLabel?: string;
 }) {
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const setDatasetSrcInfo = useSetDatasetSrcInfo();
@@ -51,7 +56,11 @@ function DatasetLoadFormContent({
 	const templateOption = srcData.templateGroup ? srcData : undefined;
 	return (
 		<SectionFieldset>
-			<legend>{srcData.prefix}</legend>
+			<SectionLegend
+				title={srcData.prefix}
+				command={helpCommand}
+				label={helpLabel}
+			/>
 			{srcData.srcType && (
 				<Select
 					handleTypeSelect={handleTypeSelect}
@@ -92,11 +101,17 @@ export function DatasetLoadForm(prop: {
 	name: string;
 	srcData: DatasetSource;
 	defalutType?: SrcType;
+	helpCommand?: string;
+	helpLabel?: string;
 }) {
 	if (prop.srcData.srcType?.value === "none") {
 		return (
 			<SectionFieldset>
-				<legend>{prop.srcData.prefix}</legend>
+				<SectionLegend
+					title={prop.srcData.prefix}
+					command={prop.helpCommand}
+					label={prop.helpLabel}
+				/>
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
 					prefix={prop.srcData.prefix}
@@ -116,6 +131,8 @@ export function DatasetLoadForm(prop: {
 				srcData={prop.srcData}
 				handleTypeSelect={prop.handleTypeSelect}
 				defaultType={prop.defalutType}
+				helpCommand={prop.helpCommand}
+				helpLabel={prop.helpLabel}
 			/>
 		</DatasetSrcInfoProvider>
 	);
