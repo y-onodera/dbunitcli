@@ -1,6 +1,5 @@
-import { SectionFieldset } from "../../../components/dialog";
 import { useState } from "react";
-import { SectionHelpButton } from "../../../components/dialog";
+import { SectionFieldset, SectionHelpButton } from "../../../components/dialog";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
 import type { GenerateTemplateOption } from "../../../model/SelectParameter";
 import Check from "./element/Check";

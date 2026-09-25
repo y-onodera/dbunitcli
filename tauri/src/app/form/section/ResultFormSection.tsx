@@ -1,7 +1,7 @@
 import type { ResultOption } from "../../../model/CommandOption";
 import Check from "./element/Check";
-import FixedColumnDefText from "./element/FixedColumnDefText";
 import FileText from "./element/FileText";
+import FixedColumnDefText from "./element/FixedColumnDefText";
 import PlainText from "./element/PlainText";
 import Select from "./element/Select";
 import JdbcFormSection from "./JdbcFormSection";
@@ -42,11 +42,15 @@ export default function ResultFormSection({
 			{excelTable && <PlainText prefix={prefix} element={excelTable} />}
 			{outputEncoding && <PlainText prefix={prefix} element={outputEncoding} />}
 			{format && <PlainText prefix={prefix} element={format} />}
-			{outputExtension && <PlainText prefix={prefix} element={outputExtension} />}
+			{outputExtension && (
+				<PlainText prefix={prefix} element={outputExtension} />
+			)}
 			{fixedColumnDef && (
 				<FixedColumnDefText prefix={prefix} element={fixedColumnDef} />
 			)}
-			{fixedLengthType && <PlainText prefix={prefix} element={fixedLengthType} />}
+			{fixedLengthType && (
+				<PlainText prefix={prefix} element={fixedLengthType} />
+			)}
 			{resultOption.op && (
 				<Select
 					prefix={prefix}

@@ -1,6 +1,5 @@
-import { SectionFieldset } from "../../../components/dialog";
 import { useState } from "react";
-import { SectionHelpButton } from "../../../components/dialog";
+import { SectionFieldset, SectionHelpButton } from "../../../components/dialog";
 import { BlueButton } from "../../../components/element/Button";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
 import { useSetJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
