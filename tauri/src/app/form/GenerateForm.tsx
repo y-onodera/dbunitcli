@@ -101,6 +101,8 @@ export function GenerateForm(prop: {
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={srcData}
+				helpCommand="dataset-load-form"
+				helpLabel="src"
 			/>
 		</>
 	);

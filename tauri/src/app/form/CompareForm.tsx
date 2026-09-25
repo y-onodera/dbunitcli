@@ -67,11 +67,15 @@ export function CompareForm(prop: {
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={newData}
+				helpCommand="dataset-load-form"
+				helpLabel="new"
 			/>
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={oldData}
+				helpCommand="dataset-load-form"
+				helpLabel="old"
 			/>
 			<SectionFieldset>
 				<legend>{convertResult.prefix}</legend>
@@ -84,6 +88,8 @@ export function CompareForm(prop: {
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={expectData}
+				helpCommand="dataset-load-form"
+				helpLabel="expect"
 			/>
 		</>
 	);

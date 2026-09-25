@@ -80,6 +80,8 @@ export function ParameterizeForm(prop: {
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={paramData}
+				helpCommand="dataset-load-form"
+				helpLabel="param"
 			/>
 		</>
 	);
