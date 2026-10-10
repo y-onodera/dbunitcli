@@ -3,30 +3,23 @@ import type {
 	JdbcOption,
 	SrcElements,
 	SrcType,
-	TemplateOption,
 } from "../../../model/CommandOption";
 import { isSqlRelatedType } from "../../../model/QueryDatasource";
 import FileText from "./element/FileText";
 import PlainText from "./element/PlainText";
 import SqlSrcText from "./element/SqlSrcText";
 import JdbcFormSection from "./JdbcFormSection";
-import TemplateFormSection from "./TemplateFormSection";
-import TraversalFormSection from "./TraversalFormSection";
 
 export default function SrcFormSection({
 	srcElements,
 	srcType,
 	jdbcOption,
-	templateOption,
 	handleValueChange,
-	handleToggleChecked,
 }: {
 	srcElements: SrcElements;
 	srcType?: SrcType;
 	jdbcOption?: JdbcOption;
-	templateOption?: TemplateOption;
 	handleValueChange: (param: CommandOption) => (newValue: string) => void;
-	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
 	const prefix = srcElements.prefix;
 
@@ -55,18 +48,6 @@ export default function SrcFormSection({
 					element={srcElements.encoding}
 					handleValueChange={handleValueChange(srcElements.encoding)}
 					hidden={false}
-				/>
-			)}
-			<TraversalFormSection
-				srcElements={srcElements}
-				handleValueChange={handleValueChange}
-				handleToggleChecked={handleToggleChecked}
-			/>
-			{templateOption && (
-				<TemplateFormSection
-					templateOption={templateOption}
-					showEncoding={!srcElements.encoding}
-					handleValueChange={handleValueChange}
 				/>
 			)}
 		</>

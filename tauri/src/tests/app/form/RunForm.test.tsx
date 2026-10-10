@@ -1,10 +1,12 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { RunForm } from "../../../app/form/RunForm";
 import type { RunOptions } from "../../../model/SelectParameter";
 import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	runLoadResponseFixture,
+	runRefreshScriptTypeAntResponseFixture,
 	runRefreshScriptTypeCmdResponseFixture,
 	runRefreshScriptTypeSqlResponseFixture,
 } from "./fixtures";
@@ -30,16 +32,15 @@ vi.mock("../../../hooks/useJdbc", () => ({
 	useDeleteJdbcProperties: () => vi.fn(),
 }));
 
-function makeRunProps(
-	fixture:
-		| typeof runLoadResponseFixture
-		| typeof runRefreshScriptTypeCmdResponseFixture
-		| typeof runRefreshScriptTypeSqlResponseFixture = runLoadResponseFixture,
-): { handleTypeSelect: () => Promise<void>; name: string; run: RunOptions } {
+function makeRunProps(fixture: RunOptions = runLoadResponseFixture): {
+	handleTypeSelect: () => Promise<void>;
+	name: string;
+	run: RunOptions;
+} {
 	return {
 		handleTypeSelect: vi.fn().mockResolvedValue(undefined),
 		name: "test",
-		run: fixture as unknown as RunOptions,
+		run: fixture,
 	};
 }
 
@@ -85,6 +86,14 @@ describe("RunFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
+		it("jdbcがあるためbaseDirは含まれない", () => {
+			render(<RunForm {...makeRunProps()} />);
+
+			expect(
+				document.querySelector('input[name="-baseDir"]'),
+			).not.toBeInTheDocument();
+		});
+
 		it("srcが含まれる", () => {
 			render(<RunForm {...makeRunProps()} />);
 
@@ -102,6 +111,46 @@ describe("RunFormの描画テスト", () => {
 			expect(
 				document.querySelector('input[type="text"][name="-src.regInclude"]'),
 			).not.toBeVisible();
+		});
+
+		it("srcはtraversalセクションより前のDOM位置に配置される", () => {
+			render(<RunForm {...makeRunProps()} />);
+
+			const src = document.querySelector('input[name="-src.src"]');
+			const traversal = Array.from(
+				document.querySelectorAll("fieldset legend"),
+			).find((l) => l.textContent === "traversal");
+			expect(src).toBeInTheDocument();
+			expect(traversal).toBeInTheDocument();
+			expect(
+				(src as Element).compareDocumentPosition(traversal as Element) &
+					Node.DOCUMENT_POSITION_FOLLOWING,
+			).toBeTruthy();
+		});
+
+		it("Show traversal optionをクリックするとtraversal option要素が表示される", async () => {
+			render(<RunForm {...makeRunProps()} />);
+
+			await userEvent.click(screen.getByText(/Show traversal option/));
+
+			expect(
+				document.querySelector('input[type="checkbox"][name="-src.recursive"]'),
+			).toBeVisible();
+			expect(
+				document.querySelector('input[type="text"][name="-src.regInclude"]'),
+			).toBeVisible();
+			expect(screen.getByText(/Hide traversal option/)).toBeInTheDocument();
+		});
+
+		it("Show template optionをクリックするとtemplate option要素が表示される", async () => {
+			render(<RunForm {...makeRunProps()} />);
+			const encoding = () =>
+				document.querySelector('input[type="text"][name="-template.encoding"]');
+			expect(encoding()).not.toBeVisible();
+
+			await userEvent.click(screen.getByText(/Show template option/));
+
+			expect(encoding()).toBeVisible();
 		});
 	});
 
@@ -127,7 +176,9 @@ describe("RunFormの描画テスト", () => {
 		});
 
 		it("srcが含まれる", () => {
-			render(<RunForm {...makeRunProps()} />);
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeCmdResponseFixture)} />,
+			);
 
 			expect(
 				document.querySelector('input[type="text"][name="-src.src"]'),
@@ -135,7 +186,9 @@ describe("RunFormの描画テスト", () => {
 		});
 
 		it("traversal option要素（recursive等）は初期状態でhiddenになっている", () => {
-			render(<RunForm {...makeRunProps()} />);
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeCmdResponseFixture)} />,
+			);
 
 			expect(
 				document.querySelector('input[type="checkbox"][name="-src.recursive"]'),
@@ -143,6 +196,53 @@ describe("RunFormの描画テスト", () => {
 			expect(
 				document.querySelector('input[type="text"][name="-src.regInclude"]'),
 			).not.toBeVisible();
+		});
+
+		it("scriptTypeがantではないためantTargetは含まれない", () => {
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeCmdResponseFixture)} />,
+			);
+
+			expect(
+				document.querySelector('input[name="-antTarget"]'),
+			).not.toBeInTheDocument();
+		});
+
+		it("jdbcがないためbaseDirが含まれる", () => {
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeCmdResponseFixture)} />,
+			);
+
+			expect(
+				document.querySelector('input[type="text"][name="-baseDir"]'),
+			).toBeInTheDocument();
+		});
+	});
+
+	describe("ant scriptType（scriptType=antのレスポンス）", () => {
+		it("baseDirとantTargetが含まれる", () => {
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeAntResponseFixture)} />,
+			);
+
+			expect(
+				document.querySelector('input[type="text"][name="-baseDir"]'),
+			).toBeInTheDocument();
+			expect(
+				document.querySelector('input[type="text"][name="-antTarget"]'),
+			).toBeInTheDocument();
+		});
+
+		it("jdbcとtemplateのセクションは表示されない", () => {
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeAntResponseFixture)} />,
+			);
+
+			const legendTexts = Array.from(
+				document.querySelectorAll("fieldset legend"),
+			).map((l) => l.textContent);
+			expect(legendTexts).not.toContain("jdbc");
+			expect(legendTexts).not.toContain("template");
 		});
 	});
 

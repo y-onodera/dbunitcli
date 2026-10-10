@@ -1,0 +1,111 @@
+{
+  "prefix": "",
+  "scriptType": {
+    "name": "scriptType",
+    "attribute": {
+      "type": "ENUM",
+      "selectOption": [
+        "cmd",
+        "bat",
+        "sql",
+        "ant"
+      ],
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": "ant"
+  },
+  "antTarget": {
+    "name": "antTarget",
+    "attribute": {
+      "type": "TEXT",
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": ""
+  },
+  "baseDir": {
+    "name": "baseDir",
+    "attribute": {
+      "type": "TEXT",
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": ""
+  },
+  "srcData": {
+    "prefix": "src",
+    "src": {
+      "name": "src",
+      "attribute": {
+        "type": "FILE_OR_DIR",
+        "required": true,
+        "defaultPath": "DATASET"
+      },
+      "value": ""
+    },
+    "recursive": {
+      "name": "recursive",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "false"
+    },
+    "regInclude": {
+      "name": "regInclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "regExclude": {
+      "name": "regExclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "setting": {
+      "name": "setting",
+      "attribute": {
+        "type": "FILE",
+        "required": false,
+        "defaultPath": "SETTING"
+      },
+      "value": ""
+    },
+    "settingEncoding": {
+      "name": "settingEncoding",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "UTF-8"
+    },
+    "regTableInclude": {
+      "name": "regTableInclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    },
+    "regTableExclude": {
+      "name": "regTableExclude",
+      "attribute": {
+        "type": "TEXT",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": ""
+    }
+  }
+}

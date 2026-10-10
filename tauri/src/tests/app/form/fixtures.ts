@@ -558,24 +558,11 @@ export const generateLoadResponseFixture = {
 	templateOption: makeTemplateOption(),
 } as GenerateOptions;
 
-// run-load-response.json をもとにしたフィクスチャ
-export const runLoadResponseFixture = {
-	prefix: "",
-	scriptType: makeElement("scriptType", "ENUM", "sql", "WORKSPACE", false, [
-		"cmd",
-		"bat",
-		"sql",
-		"ant",
-	]),
-	srcData: {
+// Run の sidecar レスポンス共通の srcData（src のみ値が異なる）
+function makeRunSrcData(src: string) {
+	return {
 		prefix: "src",
-		src: makeElement(
-			"src",
-			"FILE_OR_DIR",
-			"resources/sql/sample.sql",
-			"DATASET",
-			true,
-		),
+		src: makeElement("src", "FILE_OR_DIR", src, "DATASET", true),
 		recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
 		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
 		regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
@@ -601,7 +588,19 @@ export const runLoadResponseFixture = {
 			"WORKSPACE",
 			false,
 		),
-	},
+	};
+}
+
+// run-load-response.json をもとにしたフィクスチャ
+export const runLoadResponseFixture = {
+	prefix: "",
+	scriptType: makeElement("scriptType", "ENUM", "sql", "WORKSPACE", false, [
+		"cmd",
+		"bat",
+		"sql",
+		"ant",
+	]),
+	srcData: makeRunSrcData("resources/sql/sample.sql"),
 	templateOption: makeTemplateOption(),
 	jdbcOption: {
 		prefix: "jdbc",
@@ -905,36 +904,20 @@ export const runRefreshScriptTypeCmdResponseFixture = {
 		"ant",
 	]),
 	baseDir: makeElement("baseDir", "TEXT", "", "WORKSPACE", false),
-	srcData: {
-		prefix: "src",
-		src: makeElement("src", "FILE_OR_DIR", "", "DATASET", true),
-		recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
-		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
-		regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
-		setting: makeElement("setting", "FILE", "", "SETTING", false),
-		settingEncoding: makeElement(
-			"settingEncoding",
-			"TEXT",
-			"UTF-8",
-			"WORKSPACE",
-			false,
-		),
-		regTableInclude: makeElement(
-			"regTableInclude",
-			"TEXT",
-			"",
-			"WORKSPACE",
-			false,
-		),
-		regTableExclude: makeElement(
-			"regTableExclude",
-			"TEXT",
-			"",
-			"WORKSPACE",
-			false,
-		),
-	},
-} as unknown as RunOptions;
+	srcData: makeRunSrcData(""),
+} as RunOptions;
+
+// run-refresh-scriptType-ant-response.json をもとにしたフィクスチャ（cmd のレスポンスに antTarget を追加した構造）
+export const runRefreshScriptTypeAntResponseFixture = {
+	...runRefreshScriptTypeCmdResponseFixture,
+	scriptType: makeElement("scriptType", "ENUM", "ant", "WORKSPACE", false, [
+		"cmd",
+		"bat",
+		"sql",
+		"ant",
+	]),
+	antTarget: makeElement("antTarget", "TEXT", "", "WORKSPACE", false),
+} as RunOptions;
 
 // run-refresh-scriptType-sql-response.json をもとにしたフィクスチャ
 export const runRefreshScriptTypeSqlResponseFixture = {
@@ -945,35 +928,7 @@ export const runRefreshScriptTypeSqlResponseFixture = {
 		"sql",
 		"ant",
 	]),
-	srcData: {
-		prefix: "src",
-		src: makeElement("src", "FILE_OR_DIR", "", "DATASET", true),
-		recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
-		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
-		regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
-		setting: makeElement("setting", "FILE", "", "SETTING", false),
-		settingEncoding: makeElement(
-			"settingEncoding",
-			"TEXT",
-			"UTF-8",
-			"WORKSPACE",
-			false,
-		),
-		regTableInclude: makeElement(
-			"regTableInclude",
-			"TEXT",
-			"",
-			"WORKSPACE",
-			false,
-		),
-		regTableExclude: makeElement(
-			"regTableExclude",
-			"TEXT",
-			"",
-			"WORKSPACE",
-			false,
-		),
-	},
+	srcData: makeRunSrcData(""),
 	templateOption: makeTemplateOption(),
 	jdbcOption: {
 		prefix: "jdbc",
