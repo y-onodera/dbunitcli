@@ -934,7 +934,7 @@ export const runRefreshScriptTypeCmdResponseFixture = {
 			false,
 		),
 	},
-} as unknown as RunOptions;
+} as RunOptions;
 
 // run-refresh-scriptType-sql-response.json をもとにしたフィクスチャ
 export const runRefreshScriptTypeSqlResponseFixture = {

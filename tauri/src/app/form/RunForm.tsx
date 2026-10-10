@@ -45,13 +45,15 @@ export function RunForm(prop: {
 			</JdbcConnectionProvider>
 			{!run.jdbcOption && (
 				<>
-					<FileText
-						prefix=""
-						element={run.baseDir}
-						handleValueChange={() => {}}
-						hidden={false}
-					/>
-					{run.scriptType.value === "ant" && (
+					{run.baseDir && (
+						<FileText
+							prefix=""
+							element={run.baseDir}
+							handleValueChange={() => {}}
+							hidden={false}
+						/>
+					)}
+					{run.scriptType.value === "ant" && run.antTarget && (
 						<PlainText
 							prefix=""
 							element={run.antTarget}
