@@ -7,6 +7,11 @@
 					{
 						"type": "command",
 						"command": "bash /home/user/dbunitcli/.claude/start-maven-proxy.sh"
+					},
+					{
+						"type": "command",
+						"command": "cd /home/user/dbunitcli/tauri && bun install --frozen-lockfile 1>&2 || true",
+						"timeout": 120
 					}
 				]
 			}
