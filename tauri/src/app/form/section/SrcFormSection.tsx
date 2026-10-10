@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SectionFieldset, SectionLegend } from "../../../components/dialog";
+import { SectionFieldset, SectionHelpButton } from "../../../components/dialog";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
 import type {
 	CommandOption,
@@ -63,12 +63,15 @@ export default function SrcFormSection({
 				/>
 			)}
 			<SectionFieldset>
-				<SectionLegend title="traversal" command="traversal" label="Traversal" />
-				<ExpandButton
-					toggleOptional={toggleOptional}
-					showOptional={showOptional}
-					caption="traversal option"
-				/>
+				<legend>traversal</legend>
+				<div className="flex items-center gap-2">
+					<ExpandButton
+						toggleOptional={toggleOptional}
+						showOptional={showOptional}
+						caption="traversal option"
+					/>
+					<SectionHelpButton command="traversal" label="Traversal" />
+				</div>
 				{srcElements.extension && (
 					<PlainText
 						prefix={prefix}
