@@ -6,6 +6,7 @@ import type { RunOptions } from "../../../model/SelectParameter";
 import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	runLoadResponseFixture,
+	runRefreshScriptTypeAntResponseFixture,
 	runRefreshScriptTypeCmdResponseFixture,
 	runRefreshScriptTypeSqlResponseFixture,
 } from "./fixtures";
@@ -34,6 +35,7 @@ vi.mock("../../../hooks/useJdbc", () => ({
 function makeRunProps(
 	fixture:
 		| typeof runLoadResponseFixture
+		| typeof runRefreshScriptTypeAntResponseFixture
 		| typeof runRefreshScriptTypeCmdResponseFixture
 		| typeof runRefreshScriptTypeSqlResponseFixture = runLoadResponseFixture,
 ): { handleTypeSelect: () => Promise<void>; name: string; run: RunOptions } {
@@ -198,6 +200,16 @@ describe("RunFormの描画テスト", () => {
 			).not.toBeVisible();
 		});
 
+		it("scriptTypeがantではないためantTargetは含まれない", () => {
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeCmdResponseFixture)} />,
+			);
+
+			expect(
+				document.querySelector('input[name="-antTarget"]'),
+			).not.toBeInTheDocument();
+		});
+
 		it("jdbcがないためbaseDirが含まれる", () => {
 			render(
 				<RunForm {...makeRunProps(runRefreshScriptTypeCmdResponseFixture)} />,
@@ -206,6 +218,33 @@ describe("RunFormの描画テスト", () => {
 			expect(
 				document.querySelector('input[type="text"][name="-baseDir"]'),
 			).toBeInTheDocument();
+		});
+	});
+
+	describe("ant scriptType（scriptType=antのレスポンス）", () => {
+		it("baseDirとantTargetが含まれる", () => {
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeAntResponseFixture)} />,
+			);
+
+			expect(
+				document.querySelector('input[type="text"][name="-baseDir"]'),
+			).toBeInTheDocument();
+			expect(
+				document.querySelector('input[type="text"][name="-antTarget"]'),
+			).toBeInTheDocument();
+		});
+
+		it("jdbcとtemplateのセクションは表示されない", () => {
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeAntResponseFixture)} />,
+			);
+
+			const legendTexts = Array.from(
+				document.querySelectorAll("fieldset legend"),
+			).map((l) => l.textContent);
+			expect(legendTexts).not.toContain("jdbc");
+			expect(legendTexts).not.toContain("template");
 		});
 	});
 
