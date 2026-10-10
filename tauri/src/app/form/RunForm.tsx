@@ -1,7 +1,6 @@
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
-import type { CommandOption } from "../../model/CommandOption";
 import type { RunOptions } from "../../model/SelectParameter";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
@@ -48,14 +47,14 @@ export function RunForm(prop: {
 				<>
 					<FileText
 						prefix=""
-						element={run.baseDir as CommandOption}
+						element={run.baseDir}
 						handleValueChange={() => {}}
 						hidden={false}
 					/>
 					{run.scriptType.value === "ant" && (
 						<PlainText
 							prefix=""
-							element={run.antTarget as CommandOption}
+							element={run.antTarget}
 							handleValueChange={() => {}}
 							hidden={false}
 						/>
