@@ -32,17 +32,15 @@ vi.mock("../../../hooks/useJdbc", () => ({
 	useDeleteJdbcProperties: () => vi.fn(),
 }));
 
-function makeRunProps(
-	fixture:
-		| typeof runLoadResponseFixture
-		| typeof runRefreshScriptTypeAntResponseFixture
-		| typeof runRefreshScriptTypeCmdResponseFixture
-		| typeof runRefreshScriptTypeSqlResponseFixture = runLoadResponseFixture,
-): { handleTypeSelect: () => Promise<void>; name: string; run: RunOptions } {
+function makeRunProps(fixture: RunOptions = runLoadResponseFixture): {
+	handleTypeSelect: () => Promise<void>;
+	name: string;
+	run: RunOptions;
+} {
 	return {
 		handleTypeSelect: vi.fn().mockResolvedValue(undefined),
 		name: "test",
-		run: fixture as unknown as RunOptions,
+		run: fixture,
 	};
 }
 

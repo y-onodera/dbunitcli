@@ -934,7 +934,7 @@ export const runRefreshScriptTypeCmdResponseFixture = {
 			false,
 		),
 	},
-} as unknown as RunOptions;
+} as RunOptions;
 
 // run-refresh-scriptType-ant-response.json をもとにしたフィクスチャ（cmd のレスポンスに antTarget を追加した構造）
 export const runRefreshScriptTypeAntResponseFixture = {
@@ -946,7 +946,7 @@ export const runRefreshScriptTypeAntResponseFixture = {
 		"ant",
 	]),
 	antTarget: makeElement("antTarget", "TEXT", "", "WORKSPACE", false),
-} as unknown as RunOptions;
+} as RunOptions;
 
 // run-refresh-scriptType-sql-response.json をもとにしたフィクスチャ
 export const runRefreshScriptTypeSqlResponseFixture = {
