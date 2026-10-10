@@ -936,7 +936,7 @@ export const runRefreshScriptTypeCmdResponseFixture = {
 	},
 } as unknown as RunOptions;
 
-// scriptType=ant 用フィクスチャ（cmd のレスポンスに antTarget を追加したもの。sidecar の実レスポンス JSON は未用意）
+// run-refresh-scriptType-ant-response.json をもとにしたフィクスチャ（cmd のレスポンスに antTarget を追加した構造）
 export const runRefreshScriptTypeAntResponseFixture = {
 	...runRefreshScriptTypeCmdResponseFixture,
 	scriptType: makeElement("scriptType", "ENUM", "ant", "WORKSPACE", false, [

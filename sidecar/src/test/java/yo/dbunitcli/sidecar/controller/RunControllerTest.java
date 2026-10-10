@@ -134,6 +134,11 @@ class RunControllerTest {
         assertRefresh("{\"-scriptType\":\"cmd\"}", "run-refresh-scriptType-cmd-response.json");
     }
 
+    @Test
+    public void testRefresh_scriptTypeAnt_構造が返る() throws IOException {
+        assertRefresh("{\"-scriptType\":\"ant\"}", "run-refresh-scriptType-ant-response.json");
+    }
+
     private void assertRefresh(final String requestJson, final String expectedFile) throws IOException {
         final String jsonResponse = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/run/refresh", requestJson));
