@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SectionFieldset } from "../../../components/dialog";
+import { SectionFieldset, SectionLegend } from "../../../components/dialog";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
 import type {
 	CommandOption,
@@ -63,7 +63,7 @@ export default function SrcFormSection({
 				/>
 			)}
 			<SectionFieldset>
-				<legend>traversal</legend>
+				<SectionLegend title="traversal" command="traversal" label="Traversal" />
 				<ExpandButton
 					toggleOptional={toggleOptional}
 					showOptional={showOptional}
