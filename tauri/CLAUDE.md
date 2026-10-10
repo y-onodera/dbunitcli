@@ -31,6 +31,10 @@ src/
 - `src-tauri/tauri.conf.json` — Tauri 設定（CLI 引数、バンドルリソース）
 - `src-tauri/backend/` — Java sidecar 実行ファイルと依存 DLL
 
+## コマンド（`tauri/` で実行）
+`npx` は使わず `bunx` を使う（別パッケージを取得してしまう）。依存は SessionStart フックで `bun install --frozen-lockfile` 済み。
+- 型チェック `bunx tsc --noEmit` / テスト `bunx vitest run` / Lint `bunx biome check`
+
 ## 重要な実装ノート
 
 ### Tauri バックエンド
