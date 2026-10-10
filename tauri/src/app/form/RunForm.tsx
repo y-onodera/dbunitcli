@@ -6,6 +6,8 @@ import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
 import SrcFormSection from "./section/SrcFormSection";
+import TemplateFormSection from "./section/TemplateFormSection";
+import TraversalFormSection from "./section/TraversalFormSection";
 
 export function RunForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -26,10 +28,20 @@ export function RunForm(prop: {
 					srcElements={run.srcData}
 					srcType={run.scriptType.value === "sql" ? "sql" : undefined}
 					jdbcOption={run.jdbcOption}
-					templateOption={run.templateOption}
+					handleValueChange={() => (_: string) => {}}
+				/>
+				<TraversalFormSection
+					srcElements={run.srcData}
 					handleValueChange={() => (_: string) => {}}
 					handleToggleChecked={() => (_: boolean) => {}}
 				/>
+				{run.templateOption && (
+					<TemplateFormSection
+						templateOption={run.templateOption}
+						showEncoding={!run.srcData.encoding}
+						handleValueChange={() => (_: string) => {}}
+					/>
+				)}
 			</JdbcConnectionProvider>
 			{!run.jdbcOption && (
 				<>

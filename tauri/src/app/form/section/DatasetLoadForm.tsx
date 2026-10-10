@@ -17,6 +17,8 @@ import Select from "./element/Select";
 import SettingFormSection from "./SettingFormSection";
 import SrcFormSection from "./SrcFormSection";
 import SrcTypeFormSection from "./SrcTypeFormSection";
+import TemplateFormSection from "./TemplateFormSection";
+import TraversalFormSection from "./TraversalFormSection";
 
 function DatasetLoadFormContent({
 	srcData,
@@ -73,10 +75,20 @@ function DatasetLoadFormContent({
 				srcElements={srcData}
 				srcType={defaultType ?? srcData.srcType?.value}
 				jdbcOption={jdbcOption}
-				templateOption={templateOption}
+				handleValueChange={handleValueChange}
+			/>
+			<TraversalFormSection
+				srcElements={srcData}
 				handleValueChange={handleValueChange}
 				handleToggleChecked={handleToggleChecked}
 			/>
+			{templateOption && (
+				<TemplateFormSection
+					templateOption={templateOption}
+					showEncoding={!srcData.encoding}
+					handleValueChange={handleValueChange}
+				/>
+			)}
 			<DataLoadFormSection
 				options={srcData}
 				handleValueChange={handleValueChange}
