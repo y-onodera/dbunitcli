@@ -86,6 +86,14 @@ describe("RunFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
+		it("jdbcがあるためbaseDirは含まれない", () => {
+			render(<RunForm {...makeRunProps()} />);
+
+			expect(
+				document.querySelector('input[name="-baseDir"]'),
+			).not.toBeInTheDocument();
+		});
+
 		it("srcが含まれる", () => {
 			render(<RunForm {...makeRunProps()} />);
 
@@ -168,7 +176,9 @@ describe("RunFormの描画テスト", () => {
 		});
 
 		it("srcが含まれる", () => {
-			render(<RunForm {...makeRunProps()} />);
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeCmdResponseFixture)} />,
+			);
 
 			expect(
 				document.querySelector('input[type="text"][name="-src.src"]'),
@@ -176,7 +186,9 @@ describe("RunFormの描画テスト", () => {
 		});
 
 		it("traversal option要素（recursive等）は初期状態でhiddenになっている", () => {
-			render(<RunForm {...makeRunProps()} />);
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeCmdResponseFixture)} />,
+			);
 
 			expect(
 				document.querySelector('input[type="checkbox"][name="-src.recursive"]'),
@@ -184,6 +196,16 @@ describe("RunFormの描画テスト", () => {
 			expect(
 				document.querySelector('input[type="text"][name="-src.regInclude"]'),
 			).not.toBeVisible();
+		});
+
+		it("jdbcがないためbaseDirが含まれる", () => {
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeCmdResponseFixture)} />,
+			);
+
+			expect(
+				document.querySelector('input[type="text"][name="-baseDir"]'),
+			).toBeInTheDocument();
 		});
 	});
 
