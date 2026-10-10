@@ -1,10 +1,18 @@
-@theme {
-	/* Z-index layers */
-	--z-dropdown: 10;
-	--z-sidebar: 40;
-	--z-modal: 50;
-	--z-modal-nested: 60;
+/* Z-index layers (Tailwind v4 は --z-* から z-* を生成しないため @utility で定義) */
+@utility z-dropdown {
+	z-index: 10;
+}
+@utility z-sidebar {
+	z-index: 40;
+}
+@utility z-modal {
+	z-index: 50;
+}
+@utility z-modal-nested {
+	z-index: 60;
+}
 
+@theme {
 	/* Shadow layers */
 	--shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 	--shadow-dropdown: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
