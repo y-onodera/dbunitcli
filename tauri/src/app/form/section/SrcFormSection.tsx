@@ -1,6 +1,3 @@
-import { useState } from "react";
-import { SectionFieldset, SectionHelpButton } from "../../../components/dialog";
-import { ExpandButton } from "../../../components/element/ButtonIcon";
 import type {
 	CommandOption,
 	JdbcOption,
@@ -9,12 +6,12 @@ import type {
 	TemplateOption,
 } from "../../../model/CommandOption";
 import { isSqlRelatedType } from "../../../model/QueryDatasource";
-import Check from "./element/Check";
 import FileText from "./element/FileText";
 import PlainText from "./element/PlainText";
 import SqlSrcText from "./element/SqlSrcText";
 import JdbcFormSection from "./JdbcFormSection";
 import TemplateFormSection from "./TemplateFormSection";
+import TraversalFormSection from "./TraversalFormSection";
 
 export default function SrcFormSection({
 	srcElements,
@@ -31,8 +28,6 @@ export default function SrcFormSection({
 	handleValueChange: (param: CommandOption) => (newValue: string) => void;
 	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
-	const [showOptional, setShowOptional] = useState(false);
-	const toggleOptional = () => setShowOptional(!showOptional);
 	const prefix = srcElements.prefix;
 
 	return (
@@ -62,43 +57,11 @@ export default function SrcFormSection({
 					hidden={false}
 				/>
 			)}
-			<SectionFieldset>
-				<legend>traversal</legend>
-				<div className="flex items-center gap-2">
-					<ExpandButton
-						toggleOptional={toggleOptional}
-						showOptional={showOptional}
-						caption="traversal option"
-					/>
-					<SectionHelpButton command="traversal" label="Traversal" />
-				</div>
-				{srcElements.extension && (
-					<PlainText
-						prefix={prefix}
-						element={srcElements.extension}
-						handleValueChange={handleValueChange(srcElements.extension)}
-						hidden={!showOptional}
-					/>
-				)}
-				<Check
-					prefix={prefix}
-					element={srcElements.recursive}
-					handleOnChange={handleToggleChecked(srcElements.recursive)}
-					hidden={!showOptional}
-				/>
-				<PlainText
-					prefix={prefix}
-					element={srcElements.regInclude}
-					handleValueChange={handleValueChange(srcElements.regInclude)}
-					hidden={!showOptional}
-				/>
-				<PlainText
-					prefix={prefix}
-					element={srcElements.regExclude}
-					handleValueChange={handleValueChange(srcElements.regExclude)}
-					hidden={!showOptional}
-				/>
-			</SectionFieldset>
+			<TraversalFormSection
+				srcElements={srcElements}
+				handleValueChange={handleValueChange}
+				handleToggleChecked={handleToggleChecked}
+			/>
 			{templateOption && (
 				<TemplateFormSection
 					templateOption={templateOption}

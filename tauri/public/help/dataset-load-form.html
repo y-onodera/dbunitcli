@@ -23,10 +23,11 @@
   <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Dataset Load Form</h1>
   <p>各コマンドで「データセットの入力」を指定するための共通フォームです。<a href="compare.html">Compare</a> の <code>oldData</code> / <code>newData</code> / <code>expectData</code>、<a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> / <a href="run.html">Run</a> の <code>srcData</code>、<a href="parameterize.html">Parameterize</a> の <code>paramData</code> は、いずれもこのフォームによって構成されます。</p>
-  <p>1 つの入力は、以下の 4 つの領域から構成されます。</p>
+  <p>1 つの入力は、以下の 5 つの領域から構成されます。</p>
   <ul>
     <li><strong>Source Type 選択</strong> — 入力の形式（CSV / Table / SQL / Regex / Fixed / Xls / Xlsx）</li>
-    <li><strong>Source</strong> — 入力元ファイル・SQL、文字コード、<a href="traversal.html">ディレクトリ走査条件</a></li>
+    <li><strong>Source</strong> — 入力元ファイル・SQL、文字コード</li>
+    <li><strong><a href="traversal.html">Traversal</a></strong> — ディレクトリを <code>src</code> に指定した際の走査条件</li>
     <li><strong><a href="data-load.html">Data Load</a></strong> — ヘッダ・開始行・メタデータなど、読み込み時の挙動</li>
     <li><strong>Setting</strong> — Dataset Settings ファイルによるテーブル単位のメタデータ指定</li>
   </ul>
@@ -46,7 +47,7 @@
     <tr><td><a href="#srctype-file">file</a></td><td>ディレクトリ配下のファイル一覧を、ファイルメタ情報（パス・サイズ・更新日時など）のテーブルとして読み込む</td></tr>
     <tr><td><a href="#srctype-dir">dir</a></td><td>ディレクトリ配下のサブディレクトリ一覧を、メタ情報のテーブルとして読み込む</td></tr>
   </table>
-  <p>各節は「<strong>src の意味</strong> / <strong>テーブル名の決まり方</strong> / <strong>固有オプション</strong> / <strong>データイメージ例</strong>」の順で構成されています。共通オプション（<code>encoding</code>・<code>headerName</code>・<code>startRow</code>・<code>addFileInfo</code>・ディレクトリ走査系）は後続の <a href="#section-source">Source</a> / <a href="data-load.html">Data Load</a> を参照してください。</p>
+  <p>各節は「<strong>src の意味</strong> / <strong>テーブル名の決まり方</strong> / <strong>固有オプション</strong> / <strong>データイメージ例</strong>」の順で構成されています。共通オプション（<code>encoding</code>・<code>headerName</code>・<code>startRow</code>・<code>addFileInfo</code>）は後続の <a href="#section-source">Source</a> / <a href="traversal.html">Traversal</a> / <a href="data-load.html">Data Load</a> を参照してください。</p>
 
   <h3 id="srctype-csv">csv</h3>
   <p><strong>src の意味:</strong> CSV / TSV ファイル、または複数 CSV を含むディレクトリ。</p>
@@ -328,6 +329,8 @@ SQL (joinQuery.sql):
     <tr><td>jdbcProperties</td><td>Table / SQL を選んだ場合の <a href="jdbc.html">JDBC 接続情報</a>（URL・ユーザ・パスワードなど）</td></tr>
     <tr><td>templateGroup</td><td><a href="template.html">テンプレート処理</a>を行う場合の補助設定</td></tr>
   </table>
+
+  <h2 id="section-traversal">Traversal</h2>
   <p>ディレクトリを <code>src</code> に指定した際の走査条件（<code>extension</code> / <code>recursive</code> / <code>regInclude</code> / <code>regExclude</code>）は <a href="traversal.html">Traversal</a> を参照してください。</p>
 
   <h2 id="section-data-load">Data Load</h2>
