@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Source Type: table</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="dataset-load-form.html">&larr; Dataset Load Form に戻る</a></p>
+  <h1>Source Type: table</h1>
+  <p><strong>src の意味:</strong> 読み込み対象のテーブル名を 1 行 1 件で列挙したテキストファイル、または同種のファイルを含むディレクトリ。<strong>ファイル自体は DB テーブルの名前ではなく、テーブル名のリストを記述したテキストファイルです。</strong></p>
+  <p><strong>テーブル名:</strong> src ファイル内の各行に書かれたテーブル名がそのまま DBUnit 上のテーブル名になります。<code>jdbcProperties</code>（JDBC 接続設定）が必須です。</p>
+  <p><strong>固有オプション:</strong></p>
+  <ul>
+    <li><code>useJdbcMetaData</code> — DBUnit のメタデータ取得方法を切り替えるフラグ。デフォルトは OFF。
+      <ul>
+        <li>OFF（既定）: <code>connection.createTable(tableName)</code> を使用。対象テーブルのメタデータのみを JDBC から取得する軽量な経路</li>
+        <li>ON: <code>connection.createDataSet().getTable(tableName)</code> を使用。接続先スキーマ全体のデータセットを構築したうえで対象テーブルを取り出す。DBUnit 内部でのカラム型解決やプライマリキー情報の取得精度が上がる一方、スキーマが大きいと初期化コストが増える</li>
+      </ul>
+      通常は OFF で十分です。DB の種類や方言によってデフォルト経路でカラム型が想定と異なる場合にのみ ON を検討してください。
+    </li>
+  </ul>
+  <p><strong>注:</strong> <code>headerName</code> / <code>startRow</code> / <code>addFileInfo</code> は DB テーブルが対象のため無効です。src ファイル（テーブル名リスト）自体は空行・コメントを含まない前提で読み込まれます。</p>
+  <p><strong>データイメージ例:</strong> テーブル名リストファイル 1 件から複数テーブルを生成。</p>
+  <pre>入力 (tables.txt):
+USERS
+ORDERS
+
+JDBC 接続先:
+  USERS(id INT, name VARCHAR, age INT)
+    (1, 'Alice', 30), (2, 'Bob', 25)
+  ORDERS(id INT, amount INT)
+    (10, 500), (11, 800)
+
+指定:
+  srcType = table
+  src     = tables.txt
+
+生成テーブル:
+  テーブル名: USERS
+    カラム:     [id, name, age]
+    データ行:   [1, Alice, 30] / [2, Bob, 25]
+  テーブル名: ORDERS
+    カラム:     [id, amount]
+    データ行:   [10, 500] / [11, 800]</pre>
+</body>
+</html>
