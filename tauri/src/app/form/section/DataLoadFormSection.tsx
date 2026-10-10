@@ -1,5 +1,5 @@
-import { SectionFieldset } from "../../../components/dialog";
 import { useState } from "react";
+import { SectionFieldset, SectionHelpButton } from "../../../components/dialog";
 import { ExpandButton } from "../../../components/element/ButtonIcon";
 import type { CommandOption, SrcElements } from "../../../model/CommandOption";
 import Check from "./element/Check";
@@ -20,11 +20,14 @@ export default function DataLoadFormSection({
 	return (
 		<SectionFieldset>
 			<legend>data load</legend>
-			<ExpandButton
-				toggleOptional={toggleOptional}
-				showOptional={showOptional}
-				caption="data load option"
-			/>
+			<div className="flex items-center gap-2">
+				<ExpandButton
+					toggleOptional={toggleOptional}
+					showOptional={showOptional}
+					caption="data load option"
+				/>
+				<SectionHelpButton command="data-load" label="Data Load" />
+			</div>
 			{options.headerName && (
 				<PlainText
 					prefix={prefix}
