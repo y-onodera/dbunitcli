@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useEffect } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import CommandForm from "../../../app/form/CommandForm";
 import type { Command, Options } from "../../../model/SelectParameter";
@@ -21,7 +22,9 @@ const {
 	mockUseSelectParameter,
 	mockUseRefreshSelectParameter,
 	mockFormData,
+	mockMount,
 } = vi.hoisted(() => ({
+	mockMount: vi.fn(),
 	mockRefreshSelectFn: vi.fn(),
 	mockUseSelectParameter: vi.fn(),
 	mockUseRefreshSelectParameter: vi.fn(),
@@ -45,10 +48,16 @@ vi.mock("../../../app/form/CompareForm", () => ({
 	CompareForm: () => <div data-testid="mock-compare-form" />,
 }));
 vi.mock("../../../app/form/GenerateForm", () => ({
-	GenerateForm: () => <div data-testid="mock-generate-form" />,
+	GenerateForm: () => {
+		useEffect(() => mockMount("generate"), []);
+		return <div data-testid="mock-generate-form" />;
+	},
 }));
 vi.mock("../../../app/form/RunForm", () => ({
-	RunForm: () => <div data-testid="mock-run-form" />,
+	RunForm: () => {
+		useEffect(() => mockMount("run"), []);
+		return <div data-testid="mock-run-form" />;
+	},
 }));
 vi.mock("../../../app/form/ParameterizeForm", () => ({
 	ParameterizeForm: () => <div data-testid="mock-parameterize-form" />,
@@ -63,6 +72,7 @@ vi.mock("../../../hooks/useSelectParameter", () => ({
 }));
 
 beforeEach(() => {
+	mockMount.mockClear();
 	mockUseRefreshSelectParameter.mockReturnValue(mockRefreshSelectFn);
 	mockFormData.mockReturnValue({
 		values: mockFormValues,
@@ -196,5 +206,27 @@ describe("CommandFormのテスト", () => {
 		render(<CommandForm formData={mockFormData} />);
 
 		expect(screen.getByTestId(testId)).toBeInTheDocument();
+	});
+
+	it.each([
+		{ command: "generate", parameter: generateLoadResponseFixture },
+		{ command: "run", parameter: runLoadResponseFixture },
+	])("command=$commandで同種の別名コマンドを選択したとき、フォームが再マウントされる", ({
+		command,
+		parameter,
+	}) => {
+		const select = (name: string) =>
+			new SelectParameter(parameter, command as Command, name);
+		mockUseSelectParameter.mockReturnValue(select("first"));
+		const { rerender } = render(<CommandForm formData={mockFormData} />);
+		expect(mockMount).toHaveBeenCalledTimes(1);
+
+		mockUseSelectParameter.mockReturnValue(select("first"));
+		rerender(<CommandForm formData={mockFormData} />);
+		expect(mockMount).toHaveBeenCalledTimes(1);
+
+		mockUseSelectParameter.mockReturnValue(select("second"));
+		rerender(<CommandForm formData={mockFormData} />);
+		expect(mockMount).toHaveBeenCalledTimes(2);
 	});
 });

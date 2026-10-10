@@ -52,6 +52,7 @@ export default function CommandForm(prop: {
 			case "generate":
 				return (
 					<GenerateForm
+						key={`generate:${select.name}`}
 						handleTypeSelect={handleTypeSelect}
 						name={select.name}
 						generate={select.options}
@@ -62,6 +63,7 @@ export default function CommandForm(prop: {
 			case "run":
 				return (
 					<RunForm
+						key={`run:${select.name}`}
 						handleTypeSelect={handleTypeSelect}
 						name={select.name}
 						run={select.options}
