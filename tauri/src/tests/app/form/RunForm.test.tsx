@@ -1,4 +1,5 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { RunForm } from "../../../app/form/RunForm";
 import type { RunOptions } from "../../../model/SelectParameter";
@@ -102,6 +103,46 @@ describe("RunFormの描画テスト", () => {
 			expect(
 				document.querySelector('input[type="text"][name="-src.regInclude"]'),
 			).not.toBeVisible();
+		});
+
+		it("srcはtraversalセクションより前のDOM位置に配置される", () => {
+			render(<RunForm {...makeRunProps()} />);
+
+			const src = document.querySelector('input[name="-src.src"]');
+			const traversal = Array.from(
+				document.querySelectorAll("fieldset legend"),
+			).find((l) => l.textContent === "traversal");
+			expect(src).toBeInTheDocument();
+			expect(traversal).toBeInTheDocument();
+			expect(
+				(src as Element).compareDocumentPosition(traversal as Element) &
+					Node.DOCUMENT_POSITION_FOLLOWING,
+			).toBeTruthy();
+		});
+
+		it("Show traversal optionをクリックするとtraversal option要素が表示される", async () => {
+			render(<RunForm {...makeRunProps()} />);
+
+			await userEvent.click(screen.getByText(/Show traversal option/));
+
+			expect(
+				document.querySelector('input[type="checkbox"][name="-src.recursive"]'),
+			).toBeVisible();
+			expect(
+				document.querySelector('input[type="text"][name="-src.regInclude"]'),
+			).toBeVisible();
+			expect(screen.getByText(/Hide traversal option/)).toBeInTheDocument();
+		});
+
+		it("Show template optionをクリックするとtemplate option要素が表示される", async () => {
+			render(<RunForm {...makeRunProps()} />);
+			const encoding = () =>
+				document.querySelector('input[type="text"][name="-template.encoding"]');
+			expect(encoding()).not.toBeVisible();
+
+			await userEvent.click(screen.getByText(/Show template option/));
+
+			expect(encoding()).toBeVisible();
 		});
 	});
 
