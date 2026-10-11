@@ -11,7 +11,9 @@ export default function DropDownMenu({
 	const [showMenu, setShowMenu] = useState(false);
 	const [menuPosition, setMenuPosition] = useState<"right" | "left">("right");
 	const buttonRef = useRef<HTMLDivElement>(null);
-	const menuRef = useRef<HTMLDivElement>(null);
+	// React のイベントはポータルを越えて伝播するため、メニュー配下から
+	// createPortal されたダイアログ内の操作も「内側」として判定できる
+	const insideMouseDownRef = useRef(false);
 
 	useEffect(() => {
 		if (showMenu && buttonRef.current) {
@@ -23,17 +25,15 @@ export default function DropDownMenu({
 				setMenuPosition("right");
 			}
 		}
-		function handleClickOutside(event: MouseEvent) {
-			if (
-				menuRef.current &&
-				!menuRef.current.contains(event.target as Node) &&
-				buttonRef.current &&
-				!buttonRef.current.contains(event.target as Node)
-			) {
-				setShowMenu(false);
+		function handleClickOutside() {
+			if (insideMouseDownRef.current) {
+				insideMouseDownRef.current = false;
+				return;
 			}
+			setShowMenu(false);
 		}
 		if (showMenu) {
+			insideMouseDownRef.current = false;
 			document.addEventListener("mousedown", handleClickOutside);
 		}
 		return () => {
@@ -48,11 +48,13 @@ export default function DropDownMenu({
 		<div
 			className={`relative${className ? ` ${className}` : ""}`}
 			ref={buttonRef}
+			onMouseDownCapture={() => {
+				insideMouseDownRef.current = true;
+			}}
 		>
 			<BlueSettingButton handleClick={toggleMenu} />
 			{showMenu && (
 				<div
-					ref={menuRef}
 					className="absolute z-modal p-4 text-content bg-surface border border-border-faint rounded-lg shadow-dropdown"
 					style={
 						menuPosition === "right"
