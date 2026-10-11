@@ -51,7 +51,7 @@ export default function JdbcFormSection({
 					showOptional={showOptional}
 					caption="jdbc option"
 				/>
-				<SectionHelpButton command="jdbc" label="JDBC" />
+				<SectionHelpButton command="sections/jdbc" label="JDBC" />
 			</div>
 			<JdbcPropertiesTextField
 				prefix={prefix}

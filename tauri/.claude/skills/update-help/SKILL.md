@@ -8,12 +8,12 @@ DO NOT TRIGGER when: コンポーネントの見た目のみの変更（CSS/ク�
 
 | フォームコンポーネント | ヘルプファイル |
 |---|---|
-| `DatasetLoadForm.tsx` / `SrcFormSection.tsx` / `DataLoadFormSection.tsx` / `SrcTypeFormSection.tsx` / `SettingFormSection.tsx` / `srctype/*.tsx` | `dataset-load-form.html` |
-| `ResultFormSection.tsx` | `result-form.html` |
-| `TemplateFormSection.tsx` | `template.html` |
-| `JxlsFormSection.tsx` | `jxls.html` |
-| `JdbcFormSection.tsx` | `jdbc.html` |
-| `GenerateForm.tsx` | `generate.html` |
+| `DatasetLoadForm.tsx` / `SrcFormSection.tsx` / `DataLoadFormSection.tsx` / `SrcTypeFormSection.tsx` / `SettingFormSection.tsx` / `srctype/*.tsx` | `sections/dataset-load-form.html` |
+| `ResultFormSection.tsx` | `sections/result-form.html` |
+| `TemplateFormSection.tsx` | `sections/template.html` |
+| `JxlsFormSection.tsx` | `sections/jxls.html` |
+| `JdbcFormSection.tsx` | `sections/jdbc.html` |
+| `GenerateForm.tsx` | `commands/generate.html` |
 
 ## 更新手順
 
@@ -23,5 +23,6 @@ DO NOT TRIGGER when: コンポーネントの見た目のみの変更（CSS/ク�
    - 追加フィールド: 該当セクションの表に行を追加し、型・説明・デフォルト値を記載
    - 削除フィールド: 該当行を削除
    - 変更フィールド: 説明・デフォルト値を更新
-4. **クロスページリンクを使わない** — 他ページへのリンクは `page.html` のみ（`page.html#anchor` 形式は使用禁止）
-5. **同一ページ内アンカーはそのまま維持する** — `<h2 id="...">` と `href="#..."` の対応を壊さない
+4. **クロスページリンクにアンカーを付けない** — 他ページへのリンクは相対パスの `page.html`（例: `../sections/jdbc.html`）のみ。`page.html#anchor` 形式は使用禁止
+5. **ディレクトリ構成を守る** — `commands/`（各コマンド。`commands/<cmd>/types/` にそのコマンド固有のtype）、`sections/`（フォームセクション。`dataset-load-form/types/`=srcType、`result-form/types/`=resultType）、`dialogs/`、`reference/`、ルートは `index.html` のみ。アプリ側の呼び出しは `helpCommand`/`command` に `public/help` からの拡張子なしパス（例: `sections/jdbc`）を指定する
+6. **同一ページ内アンカーはそのまま維持する** — `<h2 id="...">` と `href="#..."` の対応を壊さない

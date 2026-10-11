@@ -32,7 +32,11 @@ export function CompareForm(prop: {
 	return (
 		<>
 			<SectionFieldset>
-				<SectionLegend title="compare" command="compare" label="Compare" />
+				<SectionLegend
+					title="compare"
+					command="commands/compare"
+					label="Compare"
+				/>
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
 					prefix=""
@@ -59,7 +63,11 @@ export function CompareForm(prop: {
 			</SectionFieldset>
 			{prop.compare.imageOption && (
 				<SectionFieldset>
-					<SectionLegend title="image" command="image" label="Image Option" />
+					<SectionLegend
+						title="image"
+						command="reference/image"
+						label="Image Option"
+					/>
 					<ImageOptionFormSection imageOption={imageOption} />
 				</SectionFieldset>
 			)}
@@ -67,14 +75,14 @@ export function CompareForm(prop: {
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={newData}
-				helpCommand="dataset-load-form"
+				helpCommand="sections/dataset-load-form"
 				helpLabel="new"
 			/>
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={oldData}
-				helpCommand="dataset-load-form"
+				helpCommand="sections/dataset-load-form"
 				helpLabel="old"
 			/>
 			<SectionFieldset>
@@ -88,7 +96,7 @@ export function CompareForm(prop: {
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={expectData}
-				helpCommand="dataset-load-form"
+				helpCommand="sections/dataset-load-form"
 				helpLabel="expect"
 			/>
 		</>

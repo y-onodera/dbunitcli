@@ -117,7 +117,7 @@ function FixedColumnDefGenerateDialog({
 		<FullDialog onClose={handleDialogClose}>
 			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
 				<DialogTitle
-					command="fixed-column-def-generate"
+					command="dialogs/fixed-column-def-generate"
 					label="Fixed Column Def Generate"
 				>
 					Generate Fixed Column Def

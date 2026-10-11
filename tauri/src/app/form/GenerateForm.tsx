@@ -28,7 +28,11 @@ export function GenerateForm(prop: {
 	return (
 		<>
 			<SectionFieldset>
-				<SectionLegend title="generate" command="generate" label="Generate" />
+				<SectionLegend
+					title="generate"
+					command="commands/generate"
+					label="Generate"
+				/>
 				<Select
 					handleTypeSelect={prop.handleTypeSelect}
 					prefix=""
@@ -101,7 +105,7 @@ export function GenerateForm(prop: {
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={srcData}
-				helpCommand="dataset-load-form"
+				helpCommand="sections/dataset-load-form"
 				helpLabel="src"
 			/>
 		</>

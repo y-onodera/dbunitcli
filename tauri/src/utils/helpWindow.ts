@@ -1,7 +1,7 @@
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 
 export async function openHelpWindow(command: string, label: string) {
-	const windowLabel = `help-${command}`;
+	const windowLabel = `help-${command.replace(/\//g, "-")}`;
 	const existing = await WebviewWindow.getByLabel(windowLabel);
 	if (existing !== null) {
 		await existing.setFocus();

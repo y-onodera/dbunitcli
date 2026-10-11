@@ -49,7 +49,7 @@ export function XlsxSchemaEditDialog(props: {
 	return (
 		<SettingDialog
 			title="Xlsx Schema"
-			helpCommand="xlsx-schema"
+			helpCommand="dialogs/xlsx-schema"
 			helpLabel="Xlsx Schema"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}

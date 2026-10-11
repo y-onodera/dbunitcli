@@ -26,7 +26,7 @@ export default function DataLoadFormSection({
 					showOptional={showOptional}
 					caption="data load option"
 				/>
-				<SectionHelpButton command="data-load" label="Data Load" />
+				<SectionHelpButton command="sections/data-load" label="Data Load" />
 			</div>
 			{options.headerName && (
 				<PlainText

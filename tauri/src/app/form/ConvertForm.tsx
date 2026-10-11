@@ -16,13 +16,13 @@ export function ConvertForm(prop: {
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={srcData}
-				helpCommand="convert"
+				helpCommand="commands/convert"
 				helpLabel="Convert"
 			/>
 			<SectionFieldset>
 				<SectionLegend
 					title={convertResult.prefix}
-					command="result-form"
+					command="sections/result-form"
 					label={convertResult.prefix}
 				/>
 				<ResultFormSection

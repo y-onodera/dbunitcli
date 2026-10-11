@@ -26,7 +26,7 @@ export default function TraversalFormSection({
 					showOptional={showOptional}
 					caption="traversal option"
 				/>
-				<SectionHelpButton command="traversal" label="Traversal" />
+				<SectionHelpButton command="sections/traversal" label="Traversal" />
 			</div>
 			{srcElements.extension && (
 				<PlainText

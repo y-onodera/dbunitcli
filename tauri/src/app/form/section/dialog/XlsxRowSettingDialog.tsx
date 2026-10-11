@@ -22,7 +22,7 @@ export default function XlsxRowSettingDialog(props: {
 	return (
 		<SettingDialog
 			title="Xlsx Row Setting"
-			helpCommand="xlsx-row-setting"
+			helpCommand="dialogs/xlsx-row-setting"
 			helpLabel="Xlsx Row Setting"
 			setting={target}
 			handleDialogClose={props.handleDialogClose}

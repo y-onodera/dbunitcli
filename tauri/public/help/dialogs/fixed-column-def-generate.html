@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Fixed Column Def Generate</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Fixed Column Def Generate</h1>
+  <p>既存データセット（CSV / Excel / DB など）のカラム構成から、固定長ファイル出力用のカラム幅定義（Fixed Column Def）の雛型を自動生成します。fixedColumnDef テキストボックス横のメニューの generate ボタンから開きます。</p>
+  <p><strong>できること</strong></p>
+  <ul>
+    <li>元データセットのカラム名を並び順どおりに取り込み、カラムごとの幅・寄せ方向・パディング文字の定義を一括で作成する。</li>
+    <li>生成結果を編集ダイアログで確認し、カラムごとの幅などを修正して名前を付けて保存する。</li>
+  </ul>
+  <p>生成直後は全カラムが同じ既定値（幅 10・左寄せ・空白パディング）になるため、実際の固定長レイアウトに合わせて各カラムの幅を手直しする使い方を想定しています。</p>
+
+  <h2>入力</h2>
+  <p>雛型の元にするデータセットを、共通の <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。ソースタイプの選択に応じて入力項目が切り替わります。データ行は読み込まず、カラム名のみを利用します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>srcData</td><td>雛型の元にするデータセット。ソースタイプ・パス・エンコーディング・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定します。</td></tr>
+  </table>
+
+  <h2>操作の流れ</h2>
+  <ol>
+    <li>元にするデータセットを指定します。</li>
+    <li>Execute を押すと、カラム構成から固定長の幅定義が生成されます。</li>
+    <li>生成結果は編集ダイアログに反映された状態で開きます。各カラムの内容を確認・修正してください。</li>
+    <li>ファイル名を指定して保存すると、その名前が fixedColumnDef テキストボックスに設定されます。</li>
+  </ol>
+
+  <h2>生成例</h2>
+  <p>たとえば <code>USERS</code> テーブル（カラム <code>ID</code> / <code>NAME</code> / <code>EMAIL</code>）を含むデータセットを指定して Execute すると、次のような定義が生成されます。</p>
+  <pre>{
+  "columns": [
+{"name": "ID", "length": 10, "align": "left", "pad": " "},{"name": "NAME", "length": 10, "align": "left", "pad": " "},{"name": "EMAIL", "length": 10, "align": "left", "pad": " "}
+  ]
+}</pre>
+  <h3>生成ルール</h3>
+  <table>
+    <tr><th>項目</th><th>生成される値</th></tr>
+    <tr><td>name</td><td>元データセットのカラム名。並び順がそのまま固定長ファイル上のカラム順になります。</td></tr>
+    <tr><td>length</td><td>常に <code>10</code>。実際のレイアウトに合わせて編集してください。</td></tr>
+    <tr><td>align</td><td>常に <code>left</code>（左寄せ）。数値などを右寄せにしたいカラムは <code>right</code> に変更します。</td></tr>
+    <tr><td>pad</td><td>常に半角スペース。値が幅に満たない部分を埋める文字です。</td></tr>
+  </table>
+  <p>データセットに複数のテーブルがある場合、全テーブルのカラムが 1 つの定義に連結されます。テーブルごとに別の定義が必要な場合は、テーブルを 1 つずつ指定して生成してください。</p>
+
+  <h2>この定義で出力される固定長ファイルのイメージ</h2>
+  <p>この定義を固定長出力の <code>fixedColumnDef</code> に指定すると、各行は定義したカラムの順に、幅ぴったりに揃えて出力されます。上の生成例（全カラム幅 10・左寄せ）で、次の 2 行を出力した場合の例です。</p>
+  <table>
+    <tr><th>ID</th><th>NAME</th><th>EMAIL</th></tr>
+    <tr><td>1</td><td>Alice</td><td>alice@example.com</td></tr>
+    <tr><td>2</td><td>Bob</td><td>bob@example.com</td></tr>
+  </table>
+  <pre>1         Alice     alice@exam
+2         Bob       bob@exampl</pre>
+  <ul>
+    <li>値が幅より短い場合は、<code>align</code> に従って <code>pad</code> で埋められます（左寄せなら右側が空白になります）。</li>
+    <li>値が幅より長い場合は、幅の位置で切り捨てられます。上の <code>EMAIL</code> のように値が欠けるカラムは、生成後に <code>length</code> を広げてください。</li>
+    <li>定義に無いカラムは出力されません。</li>
+  </ul>
+
+  <h2>注意</h2>
+  <ul>
+    <li>Execute が失敗した場合は、ダイアログ内にエラーメッセージが表示されます。入力内容を見直して再度実行してください。</li>
+    <li>Close を押すと、生成せずにダイアログを閉じます（fixedColumnDef テキストボックスは変更されません）。</li>
+  </ul>
+</body>
+</html>

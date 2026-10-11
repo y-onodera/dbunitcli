@@ -117,7 +117,7 @@ function DatasetSettingGenerateDialog({
 		<FullDialog onClose={handleDialogClose}>
 			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
 				<DialogTitle
-					command="dataset-setting-generate"
+					command="dialogs/dataset-setting-generate"
 					label="Dataset Setting Generate"
 				>
 					Generate Dataset Setting
