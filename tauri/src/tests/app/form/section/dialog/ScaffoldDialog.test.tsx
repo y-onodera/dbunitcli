@@ -91,7 +91,7 @@ async function openDialog(
 			handleReflect={handleReflect}
 		/>,
 	);
-	await user.click(screen.getByRole("button", { name: "Scaffold" }));
+	await user.click(screen.getByRole("button", { name: "generate" }));
 	await waitFor(() => {
 		expect(document.querySelector("#scaffoldForm")).toBeInTheDocument();
 	});

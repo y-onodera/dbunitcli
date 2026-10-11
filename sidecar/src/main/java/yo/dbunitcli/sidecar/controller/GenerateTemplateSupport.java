@@ -30,9 +30,16 @@ final class GenerateTemplateSupport {
     /** -src.*のみを引き継ぎ、generateType固定・一時ディレクトリ出力でgenerateを実行する */
     static Path execToTempDir(final GenerateType generateType, final Map<String, String> input,
                               final String tempDirPrefix) throws IOException {
+        return execToTempDir(generateType, input, tempDirPrefix, Map.of());
+    }
+
+    /** extraParamsは-src.*に加えてgenerateへ渡す固定パラメータ（-resultPath等） */
+    static Path execToTempDir(final GenerateType generateType, final Map<String, String> input,
+                              final String tempDirPrefix, final Map<String, String> extraParams) throws IOException {
         final Path tempDir = Files.createTempDirectory(tempDirPrefix);
         final Map<String, String> params = new LinkedHashMap<>(input);
         params.keySet().removeIf(key -> !key.startsWith("-src."));
+        params.putAll(extraParams);
         params.put("-generateType", generateType.name());
         params.put("-result", tempDir.toAbsolutePath().toString());
         final Generate generate = new Generate();

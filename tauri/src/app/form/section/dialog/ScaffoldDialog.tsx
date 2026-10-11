@@ -6,6 +6,7 @@ import {
 	FullDialog,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
+import { AddButton } from "../../../../components/element/ButtonIcon";
 import { useEnvironment } from "../../../../context/EnvironmentProvider";
 import { useWorkspaceResourcesReload } from "../../../../hooks/useWorkspaceResources";
 import type { CommandOption } from "../../../../model/CommandOption";
@@ -187,8 +188,8 @@ export function ScaffoldButton({
 	const [prefill, setPrefill] = useState<ScaffoldFormValues | null>(null);
 	return (
 		<div>
-			<BlueButton
-				title="Scaffold"
+			<AddButton
+				title="generate"
 				handleClick={() => setPrefill(scaffoldPrefill())}
 			/>
 			{prefill && (
