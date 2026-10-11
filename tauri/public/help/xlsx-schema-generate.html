@@ -39,6 +39,41 @@
     <li>ファイル名を指定して保存すると、その名前が xlsxSchema テキストボックスに設定されます。</li>
   </ol>
 
+  <h2>生成例</h2>
+  <p>たとえば <code>USERS</code> テーブル（カラム <code>ID</code> / <code>NAME</code> / <code>EMAIL</code>、主キーは <code>ID</code>）を含むデータセットを指定して Execute すると、次のようなスキーマが生成されます。</p>
+  <pre>{
+  "rows": [
+    {
+      "sheetName": "USERS"
+     ,"tableName": "USERS"
+     ,"header": ["ID","NAME","EMAIL"]
+     ,"dataStart": 1
+     ,"columnIndex": [0,1,2]
+     ,"breakKey": ["ID"]
+    }
+  ]
+ ,"cells": [
+    {
+      "sheetName": "USERS"
+     ,"tableName": "USERS"
+     ,"header": ["ID","NAME","EMAIL"]
+     ,"rows": [{"cellAddress": ["A2","B2","C2"]}]
+    }
+  ]
+}</pre>
+  <h3>生成ルール</h3>
+  <table>
+    <tr><th>項目</th><th>生成される値</th></tr>
+    <tr><td>sheetName</td><td>テーブル名と同じ値。実際の Xlsx のシート名に合わせて編集してください。</td></tr>
+    <tr><td>tableName</td><td>元データセットのテーブル名。</td></tr>
+    <tr><td>header</td><td>元テーブルのカラム名を並び順どおりに設定。</td></tr>
+    <tr><td>dataStart</td><td>常に <code>1</code>（ヘッダ行の次の行から、0 始まり）。</td></tr>
+    <tr><td>columnIndex</td><td>カラムの並び順に <code>0</code> から連番。</td></tr>
+    <tr><td>breakKey</td><td>主キーのカラム名。主キーが無い場合は先頭カラムのみ。</td></tr>
+    <tr><td>cellAddress</td><td><code>dataStart</code> 行の各カラムのセル位置（上の例では <code>A2</code>, <code>B2</code>, <code>C2</code>）。</td></tr>
+  </table>
+  <p>テーブルごとに <a href="xlsx-schema.html">Xlsx Schema</a> の Rows Mapping Tables と Random Cell Mapping Tables の両方に 1 件ずつ生成されます。不要な側の行は編集ダイアログで削除してください。</p>
+
   <h2>注意</h2>
   <ul>
     <li>Execute が失敗した場合は、ダイアログ内にエラーメッセージが表示されます。入力内容を見直して再度実行してください。</li>
