@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
 	DialogActions,
 	DialogTitle,
 	ModalOverlay,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import { FilterInput } from "../../../../components/element/Input";
+import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
 import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
+import SelectableTable from "./SelectableTable";
 import TableList from "./TableList";
 
 interface SqlTableInsertDialogProps {
@@ -100,14 +101,7 @@ function TablesContent({
 		table: string;
 		data: string[] | "loading";
 	} | null>(null);
-	const abortControllerRef = useRef<AbortController | null>(null);
-	useEffect(() => {
-		const controller = new AbortController();
-		abortControllerRef.current = controller;
-		return () => {
-			controller.abort();
-		};
-	}, []);
+	const abortControllerRef = useAbortSignalRef();
 
 	const handleInsert = () => {
 		const selectedTables = tables.filter((t) => selected.has(t));
@@ -188,7 +182,6 @@ function ColumnSelectDialog({
 	onInsert: (columns: string[]) => void;
 	onClose: () => void;
 }) {
-	const [filter, setFilter] = useState("");
 	const { selected, toggle, toggleAll } = useTableSelection();
 
 	if (columnData === "loading") {
@@ -202,13 +195,6 @@ function ColumnSelectDialog({
 		);
 	}
 
-	const filterLower = filter.toLowerCase();
-	const filteredColumns = filterLower
-		? columnData.filter((c) => c.toLowerCase().includes(filterLower))
-		: columnData;
-	const allSelected =
-		filteredColumns.length > 0 && filteredColumns.every((c) => selected.has(c));
-
 	return (
 		<ModalOverlay width="w-80" zClass="z-modal-nested">
 			<DialogTitle>Select Columns</DialogTitle>
@@ -216,58 +202,15 @@ function ColumnSelectDialog({
 				{table}
 			</p>
 			<div className="mb-4">
-				<FilterInput
-					value={filter}
-					onChange={setFilter}
-					placeholder="Filter columns..."
+				<SelectableTable
+					items={columnData}
+					selected={selected}
+					onToggle={toggle}
+					onToggleAll={toggleAll}
+					columnLabel="Column Name"
+					filterPlaceholder="Filter columns..."
+					emptyMessage="No columns found"
 				/>
-				<div className="relative overflow-x-auto max-h-72 overflow-y-auto border border-border-subtle rounded">
-					{columnData.length === 0 ? (
-						<p className="text-sm text-content-muted px-3 py-2">
-							No columns found
-						</p>
-					) : (
-						<table className="w-full text-sm text-left">
-							<thead className="bg-surface-subtle sticky top-0">
-								<tr>
-									<th className="px-3 py-2 w-8">
-										<input
-											type="checkbox"
-											checked={allSelected}
-											onChange={(e) =>
-												toggleAll(filteredColumns, e.target.checked)
-											}
-											className="w-4 h-4 accent-primary-hover"
-										/>
-									</th>
-									<th className="px-3 py-2 font-medium text-content-secondary">
-										Column Name
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								{filteredColumns.map((col) => (
-									<tr
-										key={col}
-										className="hover:bg-surface-subtle cursor-pointer border-t border-border-faint"
-										onClick={() => toggle(col)}
-									>
-										<td className="px-3 py-1.5">
-											<input
-												type="checkbox"
-												checked={selected.has(col)}
-												onChange={() => toggle(col)}
-												onClick={(e) => e.stopPropagation()}
-												className="w-4 h-4 accent-primary-hover"
-											/>
-										</td>
-										<td className="px-3 py-1.5">{col}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					)}
-				</div>
 			</div>
 			<DialogActions>
 				<BlueButton

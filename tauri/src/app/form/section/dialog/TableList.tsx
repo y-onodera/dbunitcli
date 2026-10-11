@@ -1,11 +1,8 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { ButtonIcon } from "../../../../components/element/ButtonIcon";
-import {
-	AddIcon,
-	ExpandIcon,
-	PreviewIcon,
-} from "../../../../components/element/Icon";
-import { FilterInput } from "../../../../components/element/Input";
+import { ExpandIcon, PreviewIcon } from "../../../../components/element/Icon";
+import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
+import SelectableTable from "./SelectableTable";
 
 export interface TableListProps {
 	tables: string[];
@@ -14,7 +11,6 @@ export interface TableListProps {
 	onToggle: (table: string) => void;
 	maxHeightClass?: string;
 	onQueryColumns?: (table: string) => Promise<string[]>;
-	onInsertColumn?: (column: string) => void;
 	onSelectTable?: (table: string) => void;
 }
 
@@ -25,28 +21,12 @@ export default function TableList({
 	onToggle,
 	maxHeightClass = "max-h-96",
 	onQueryColumns,
-	onInsertColumn,
 	onSelectTable,
 }: TableListProps) {
-	const [filter, setFilter] = useState("");
 	const [columnMap, setColumnMap] = useState<Map<string, string[] | "loading">>(
 		new Map(),
 	);
-	const abortControllerRef = useRef<AbortController | null>(null);
-	useEffect(() => {
-		const controller = new AbortController();
-		abortControllerRef.current = controller;
-		return () => {
-			controller.abort();
-		};
-	}, []);
-
-	const filterLower = filter.toLowerCase();
-	const filteredTables = filterLower
-		? tables.filter((t) => t.toLowerCase().includes(filterLower))
-		: tables;
-	const allSelected =
-		filteredTables.length > 0 && filteredTables.every((t) => selected.has(t));
+	const abortControllerRef = useAbortSignalRef();
 
 	const handleQueryColumns = (table: string) => {
 		if (!onQueryColumns) {
@@ -83,107 +63,60 @@ export default function TableList({
 	};
 
 	return (
-		<div>
-			<FilterInput
-				value={filter}
-				onChange={setFilter}
-				placeholder="Filter tables..."
-			/>
-			<div
-				className={`relative overflow-x-auto ${maxHeightClass} overflow-y-auto border border-border-subtle rounded`}
-			>
-				<table className="w-full text-sm text-left">
-					<thead className="bg-surface-subtle sticky top-0">
-						<tr>
-							<th className="px-3 py-2 w-8">
-								<input
-									type="checkbox"
-									checked={allSelected}
-									onChange={(e) =>
-										onToggleAll(filteredTables, e.target.checked)
-									}
-									className="w-4 h-4 accent-primary-hover"
-								/>
-							</th>
-							<th className="px-3 py-2 font-medium text-content-secondary">
-								Table Name
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{filteredTables.map((table) => (
-							<Fragment key={table}>
-								<tr
-									className="hover:bg-surface-subtle cursor-pointer border-t border-border-faint"
-									onClick={() => onToggle(table)}
-								>
-									<td className="px-3 py-1.5">
-										<input
-											type="checkbox"
-											checked={selected.has(table)}
-											onChange={() => onToggle(table)}
-											onClick={(e) => e.stopPropagation()}
-											className="w-4 h-4 accent-primary-hover"
-										/>
-									</td>
-									<td className="px-3 py-1.5">
-										<div className="flex items-center gap-1">
-											{table}
-											{onQueryColumns && (
-												<ButtonIcon
-													handleClick={(e) => {
-														e.stopPropagation();
-														handleQueryColumns(table);
-													}}
-												>
-													{columnMap.get(table) === "loading" ? (
-														<span className="text-xs text-content-disabled w-3 h-3">
-															…
-														</span>
-													) : (
-														<ExpandIcon close={!columnMap.has(table)} />
-													)}
-												</ButtonIcon>
-											)}
-											{onSelectTable && (
-												<ButtonIcon
-													handleClick={(e) => {
-														e.stopPropagation();
-														onSelectTable(table);
-													}}
-												>
-													<PreviewIcon title="Select columns" />
-												</ButtonIcon>
-											)}
-										</div>
-									</td>
-								</tr>
-								{Array.isArray(columnMap.get(table)) &&
-									(columnMap.get(table) as string[]).map((col) => (
-										<tr
-											key={`${table}::${col}`}
-											className="bg-surface-subtle border-t border-border-faint"
-										>
-											<td />
-											<td className="px-6 py-1">
-												<div className="flex items-center gap-2">
-													<span className="text-xs text-content-muted">
-														{col}
-													</span>
-													{onInsertColumn && (
-														<ButtonIcon handleClick={() => onInsertColumn(col)}>
-															<AddIcon title="Insert column" />
-														</ButtonIcon>
-													)}
-												</div>
-											</td>
-										</tr>
-									))}
-							</Fragment>
-						))}
-					</tbody>
-				</table>
-			</div>
-		</div>
+		<SelectableTable
+			items={tables}
+			selected={selected}
+			onToggle={onToggle}
+			onToggleAll={onToggleAll}
+			columnLabel="Table Name"
+			filterPlaceholder="Filter tables..."
+			maxHeightClass={maxHeightClass}
+			renderItem={(table) => (
+				<div className="flex items-center gap-1">
+					{table}
+					{onQueryColumns && (
+						<ButtonIcon
+							handleClick={(e) => {
+								e.stopPropagation();
+								handleQueryColumns(table);
+							}}
+						>
+							{columnMap.get(table) === "loading" ? (
+								<span className="text-xs text-content-disabled w-3 h-3">…</span>
+							) : (
+								<ExpandIcon close={!columnMap.has(table)} />
+							)}
+						</ButtonIcon>
+					)}
+					{onSelectTable && (
+						<ButtonIcon
+							handleClick={(e) => {
+								e.stopPropagation();
+								onSelectTable(table);
+							}}
+						>
+							<PreviewIcon title="Select columns" />
+						</ButtonIcon>
+					)}
+				</div>
+			)}
+			renderExtraRows={(table) => {
+				const columns = columnMap.get(table);
+				if (!Array.isArray(columns)) {
+					return null;
+				}
+				return columns.map((col) => (
+					<tr
+						key={`${table}::${col}`}
+						className="bg-surface-subtle border-t border-border-faint"
+					>
+						<td />
+						<td className="px-6 py-1">
+							<span className="text-xs text-content-muted">{col}</span>
+						</td>
+					</tr>
+				));
+			}}
+		/>
 	);
 }

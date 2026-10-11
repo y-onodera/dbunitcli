@@ -1,14 +1,8 @@
 import { useState } from "react";
-import {
-	Check,
-	Fieldset,
-	SettingDialog,
-	Text,
-} from "../../../../components/dialog";
-import { ResourceDatalist } from "../../../../components/element/Input";
-import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
-import { useSrcInfoSheets } from "../../../../hooks/useXlsxSchema";
+import { Fieldset, SettingDialog, Text } from "../../../../components/dialog";
 import type { RowSetting } from "../../../../model/XlsxSchema";
+import { CommaSeparatedText } from "./DialogFields";
+import { AddFileInfoCheck, XlsxTableFields } from "./XlsxSettingFields";
 
 export default function XlsxRowSettingDialog(props: {
 	setting: RowSetting;
@@ -16,8 +10,6 @@ export default function XlsxRowSettingDialog(props: {
 	handleCommit: (newSettings: RowSetting) => void;
 }) {
 	const [target, setTarget] = useState(props.setting);
-	const datasetSrcInfo = useDatasetSrcInfo();
-	const sheetNames = useSrcInfoSheets(datasetSrcInfo);
 
 	return (
 		<SettingDialog
@@ -29,31 +21,7 @@ export default function XlsxRowSettingDialog(props: {
 			handleCommit={props.handleCommit}
 		>
 			<Fieldset>
-				<Text
-					name="sheetName"
-					value={target.sheetName}
-					list={sheetNames.length > 0 ? "sheetName_list" : undefined}
-					handleChange={(ev) =>
-						setTarget((cur) => cur.with({ sheetName: ev.target.value }))
-					}
-				/>
-				{sheetNames.length > 0 && (
-					<ResourceDatalist id="sheetName" resources={sheetNames} />
-				)}
-				<Text
-					name="tableName"
-					value={target.tableName}
-					handleChange={(ev) =>
-						setTarget((cur) => cur.with({ tableName: ev.target.value }))
-					}
-				/>
-				<Text
-					name="header"
-					value={target.header.join(",")}
-					handleChange={(ev) =>
-						setTarget((cur) => cur.with({ header: ev.target.value.split(",") }))
-					}
-				/>
+				<XlsxTableFields target={target} setTarget={setTarget} />
 				<Text
 					name="dataStart"
 					value={target.dataStart}
@@ -61,31 +29,21 @@ export default function XlsxRowSettingDialog(props: {
 						setTarget((cur) => cur.with({ dataStart: ev.target.value }))
 					}
 				/>
-				<Text
+				<CommaSeparatedText
 					name="columnIndex"
-					value={target.columnIndex.join(",")}
-					handleChange={(ev) =>
-						setTarget((cur) =>
-							cur.with({ columnIndex: ev.target.value.split(",") }),
-						)
+					values={target.columnIndex}
+					handleChange={(columnIndex) =>
+						setTarget((cur) => cur.with({ columnIndex }))
 					}
 				/>
-				<Text
+				<CommaSeparatedText
 					name="breakKey"
-					value={target.breakKey.join(",")}
-					handleChange={(ev) =>
-						setTarget((cur) =>
-							cur.with({ breakKey: ev.target.value.split(",") }),
-						)
+					values={target.breakKey}
+					handleChange={(breakKey) =>
+						setTarget((cur) => cur.with({ breakKey }))
 					}
 				/>
-				<Check
-					name="addFileInfo"
-					value={target.addFileInfo ? "true" : "false"}
-					handleOnChange={(checked) =>
-						setTarget((cur) => cur.with({ addFileInfo: checked }))
-					}
-				/>
+				<AddFileInfoCheck target={target} setTarget={setTarget} />
 			</Fieldset>
 		</SettingDialog>
 	);
