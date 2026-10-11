@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { SectionFieldset, SectionHelpButton } from "../../../components/dialog";
-import { ExpandButton } from "../../../components/element/ButtonIcon";
+import {
+	SectionFieldset,
+	SectionOptionHeader,
+} from "../../../components/dialog";
 import type { GenerateTemplateOption } from "../../../model/SelectParameter";
 import Check from "./element/Check";
 import PlainText from "./element/PlainText";
@@ -15,14 +17,13 @@ export default function JxlsFormSection({
 	return (
 		<SectionFieldset>
 			<legend>jxls</legend>
-			<div className="flex items-center gap-2">
-				<ExpandButton
-					toggleOptional={toggleOptional}
-					showOptional={showOptional}
-					caption="jxls option"
-				/>
-				<SectionHelpButton command="sections/jxls" label="Jxls" />
-			</div>
+			<SectionOptionHeader
+				showOptional={showOptional}
+				toggleOptional={toggleOptional}
+				caption="jxls option"
+				command="sections/jxls"
+				label="Jxls"
+			/>
 			<PlainText
 				prefix={templateOption.prefix}
 				element={templateOption.templateParameterAttribute}

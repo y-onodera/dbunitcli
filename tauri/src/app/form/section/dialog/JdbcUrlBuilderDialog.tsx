@@ -1,5 +1,10 @@
 import { type Dispatch, type SetStateAction, useState } from "react";
-import { DialogTitle, SettingDialog } from "../../../../components/dialog";
+import {
+	DialogBody,
+	DialogField,
+	DialogTitle,
+	SettingDialog,
+} from "../../../../components/dialog";
 import { BlueEditButton } from "../../../../components/element/ButtonIcon";
 import {
 	ControllTextBox,
@@ -60,10 +65,10 @@ export default function JdbcUrlBuilderDialog({
 			}}
 			commitLabel="Apply"
 		>
-			<div className="w-[480px]">
+			<DialogBody size="sm">
 				<DialogTitle>JDBC URL Builder</DialogTitle>
 
-				<div className="mb-3">
+				<DialogField>
 					<InputLabel
 						text="Database"
 						id="jdbcUrlBuilder_rdbType"
@@ -80,9 +85,9 @@ export default function JdbcUrlBuilderDialog({
 						<option value="postgres">PostgreSQL</option>
 						<option value="h2">H2</option>
 					</SelectBox>
-				</div>
+				</DialogField>
 
-				<div className="mb-3">
+				<DialogField>
 					<InputLabel text="Host" id="jdbcUrlBuilder_host" required={true} />
 					<ControllTextBox
 						name="jdbcUrlBuilder_host"
@@ -93,9 +98,9 @@ export default function JdbcUrlBuilderDialog({
 							setState((prev) => ({ ...prev, host: ev.target.value }))
 						}
 					/>
-				</div>
+				</DialogField>
 
-				<div className="mb-3">
+				<DialogField>
 					<InputLabel text="Port" id="jdbcUrlBuilder_port" required={true} />
 					<ControllTextBox
 						name="jdbcUrlBuilder_port"
@@ -106,9 +111,9 @@ export default function JdbcUrlBuilderDialog({
 							setState((prev) => ({ ...prev, port: ev.target.value }))
 						}
 					/>
-				</div>
+				</DialogField>
 
-				<div className="mb-3">
+				<DialogField>
 					<InputLabel
 						text={SERVICE_NAME_LABEL[state.rdbType]}
 						id="jdbcUrlBuilder_serviceName"
@@ -123,17 +128,17 @@ export default function JdbcUrlBuilderDialog({
 							setState((prev) => ({ ...prev, serviceName: ev.target.value }))
 						}
 					/>
-				</div>
+				</DialogField>
 
-				<div className="mb-4">
+				<DialogField last>
 					<PreviewField
 						id="jdbcUrlBuilder_preview"
 						label="Preview"
 						value={builtUrl}
 						placeholder="(Enter host and service name)"
 					/>
-				</div>
-			</div>
+				</DialogField>
+			</DialogBody>
 		</SettingDialog>
 	);
 }

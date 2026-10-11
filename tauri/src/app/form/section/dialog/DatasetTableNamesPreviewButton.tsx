@@ -1,5 +1,15 @@
 import { useState } from "react";
-import { DialogFooter, DialogTitle, FullDialog } from "../../../../components/dialog";
+import {
+	DataTable,
+	DialogBody,
+	DialogFooter,
+	DialogTitle,
+	FullDialog,
+	StatusMessage,
+	Td,
+	Th,
+	Tr,
+} from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { PreviewButton } from "../../../../components/element/ButtonIcon";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
@@ -47,12 +57,10 @@ function DatasetTableNamesPreviewDialog({
 
 	function renderContent() {
 		if (loading) {
-			return <StatusMessage>Loading...</StatusMessage>;
+			return <StatusMessage kind="loading">Loading...</StatusMessage>;
 		}
 		if (tableNames.length === 0) {
-			return (
-				<StatusMessage>No tables found.</StatusMessage>
-			);
+			return <StatusMessage kind="empty">No tables found.</StatusMessage>;
 		}
 		return (
 			<ul className="text-sm bg-surface-subtle border border-border rounded-lg p-3 overflow-auto max-h-96 space-y-1">
@@ -71,10 +79,10 @@ function DatasetTableNamesPreviewDialog({
 
 	return (
 		<FullDialog onClose={handleDialogClose}>
-			<div className="p-4 rounded-lg mt-2">
+			<DialogBody size="fluid">
 				<DialogTitle>Table List Preview</DialogTitle>
 				{renderContent()}
-			</div>
+			</DialogBody>
 			<DialogFooter>
 				<WhiteButton title="Close" handleClick={handleDialogClose} />
 			</DialogFooter>
@@ -105,63 +113,42 @@ function TableDataPreviewDialog({
 
 	function renderContent() {
 		if (loading) {
-			return <StatusMessage>Loading...</StatusMessage>;
+			return <StatusMessage kind="loading">Loading...</StatusMessage>;
 		}
 		if (!preview?.headers || preview.headers.length === 0) {
-			return (
-				<StatusMessage>No data found.</StatusMessage>
-			);
+			return <StatusMessage kind="empty">No data found.</StatusMessage>;
 		}
 		return (
-			<div className="overflow-x-auto max-h-64 border border-border rounded-lg">
-				<table className="text-sm text-left w-full">
-					<thead className="bg-surface-muted sticky top-0">
-						<tr>
-							{preview.headers.map((header) => (
-								<th
-									key={header}
-									className="px-3 py-2 font-medium text-content-secondary whitespace-nowrap border-b border-border"
-								>
-									{header}
-								</th>
-							))}
-						</tr>
-					</thead>
-					<tbody>
-						{preview.rows?.map((row) => (
-							<tr
-								key={row.join("\x00")}
-								className="border-t border-border-faint hover:bg-surface-subtle"
-							>
-								{preview.headers.map((header, i) => (
-									<td
-										key={header}
-										className="px-3 py-1.5 text-content-muted whitespace-nowrap"
-									>
-										{row[i] ?? ""}
-									</td>
-								))}
-							</tr>
+			<DataTable
+				maxHeightClass="max-h-64"
+				head={preview.headers.map((header) => (
+					<Th key={header} nowrap>
+						{header}
+					</Th>
+				))}
+			>
+				{preview.rows?.map((row) => (
+					<Tr key={row.join("\x00")}>
+						{preview.headers.map((header, i) => (
+							<Td key={header} nowrap>
+								{row[i] ?? ""}
+							</Td>
 						))}
-					</tbody>
-				</table>
-			</div>
+					</Tr>
+				))}
+			</DataTable>
 		);
 	}
 
 	return (
 		<FullDialog onClose={handleClose}>
-			<div className="p-4 rounded-lg mt-2">
+			<DialogBody size="fluid">
 				<DialogTitle>{tableName} — Data Preview</DialogTitle>
 				{renderContent()}
-			</div>
+			</DialogBody>
 			<DialogFooter>
 				<WhiteButton title="Close" handleClick={handleClose} />
 			</DialogFooter>
 		</FullDialog>
 	);
-}
-
-function StatusMessage({ children }: { children: string }) {
-	return <p className="text-sm text-content-disabled p-3">{children}</p>;
 }

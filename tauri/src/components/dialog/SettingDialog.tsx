@@ -7,6 +7,7 @@ import {
 	InputLabel,
 	SelectBox,
 } from "../element/Input";
+import { DialogBody } from "./DialogLayout";
 import { FullDialog } from "./FullDialog";
 import { DialogFooter, DialogTitle } from "./ModalOverlay";
 
@@ -49,15 +50,13 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 					</DialogTitle>
 				</div>
 			)}
-			<div
-				className={
-					isFileMode
-						? "relative overflow-x-auto flex flex-col gap-4"
-						: "p-4 rounded-lg mt-2"
-				}
-			>
-				{props.children}
-			</div>
+			{isFileMode ? (
+				<div className="relative overflow-x-auto flex flex-col gap-4">
+					{props.children}
+				</div>
+			) : (
+				<DialogBody size="fluid">{props.children}</DialogBody>
+			)}
 			{isFileMode && (
 				<div className="px-4 pt-4">
 					<div className="grid grid-cols-5 pb-2">

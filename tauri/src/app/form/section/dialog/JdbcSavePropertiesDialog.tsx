@@ -1,4 +1,9 @@
-import { DialogTitle, SettingDialog } from "../../../../components/dialog";
+import {
+	DialogBody,
+	DialogField,
+	DialogTitle,
+	SettingDialog,
+} from "../../../../components/dialog";
 import { PreviewField } from "../../../../components/element/Input";
 import { useDeleteJdbcProperties } from "../../../../hooks/useJdbc";
 import { createRemoveButton } from "./ResourceEditButton";
@@ -20,47 +25,47 @@ export default function JdbcSavePropertiesDialog({
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
 		>
-			<div className="w-[480px] p-4">
+			<DialogBody size="sm">
 				<DialogTitle>Save JDBC Properties</DialogTitle>
 
 				{jdbcValues.jdbcProperties && (
-					<div className="mb-3">
+					<DialogField>
 						<PreviewField
 							id="jdbcSaveProperties_baseFile"
 							label="Base Properties File"
 							value={jdbcValues.jdbcProperties}
 							placeholder="(not set)"
 						/>
-					</div>
+					</DialogField>
 				)}
 
-				<div className="mb-3">
+				<DialogField>
 					<PreviewField
 						id="jdbcSaveProperties_url"
 						label="URL"
 						value={jdbcValues.jdbcUrl ?? ""}
 						placeholder="(not set)"
 					/>
-				</div>
+				</DialogField>
 
-				<div className="mb-3">
+				<DialogField>
 					<PreviewField
 						id="jdbcSaveProperties_user"
 						label="User"
 						value={jdbcValues.jdbcUser ?? ""}
 						placeholder="(not set)"
 					/>
-				</div>
+				</DialogField>
 
-				<div className="mb-4">
+				<DialogField last>
 					<PreviewField
 						id="jdbcSaveProperties_pass"
 						label="Pass"
 						value={jdbcValues.jdbcPass ? "********" : ""}
 						placeholder="(not set)"
 					/>
-				</div>
-			</div>
+				</DialogField>
+			</DialogBody>
 		</SettingDialog>
 	);
 }

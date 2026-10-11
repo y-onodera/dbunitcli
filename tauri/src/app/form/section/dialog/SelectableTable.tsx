@@ -1,4 +1,11 @@
 import { Fragment, type ReactNode, useState } from "react";
+import {
+	DataTable,
+	StatusMessage,
+	Td,
+	Th,
+	Tr,
+} from "../../../../components/dialog";
 import { FilterInput } from "../../../../components/element/Input";
 
 // フィルタ入力・全選択チェック・行クリックでの選択切替を持つ一覧（テーブル名・カラム名選択で共通）
@@ -42,55 +49,44 @@ export default function SelectableTable({
 				onChange={setFilter}
 				placeholder={filterPlaceholder}
 			/>
-			<div
-				className={`relative overflow-x-auto ${maxHeightClass} overflow-y-auto border border-border-subtle rounded`}
-			>
-				{items.length === 0 && emptyMessage ? (
-					<p className="text-sm text-content-muted px-3 py-2">{emptyMessage}</p>
-				) : (
-					<table className="w-full text-sm text-left">
-						<thead className="bg-surface-subtle sticky top-0">
-							<tr>
-								<th className="px-3 py-2 w-8">
+			{items.length === 0 && emptyMessage ? (
+				<StatusMessage kind="empty">{emptyMessage}</StatusMessage>
+			) : (
+				<DataTable
+					maxHeightClass={maxHeightClass}
+					head={
+						<>
+							<Th narrow>
+								<input
+									type="checkbox"
+									checked={allSelected}
+									onChange={(e) => onToggleAll(filteredItems, e.target.checked)}
+									className="w-4 h-4 accent-primary-hover"
+								/>
+							</Th>
+							<Th>{columnLabel}</Th>
+						</>
+					}
+				>
+					{filteredItems.map((item) => (
+						<Fragment key={item}>
+							<Tr onClick={() => onToggle(item)}>
+								<Td>
 									<input
 										type="checkbox"
-										checked={allSelected}
-										onChange={(e) =>
-											onToggleAll(filteredItems, e.target.checked)
-										}
+										checked={selected.has(item)}
+										onChange={() => onToggle(item)}
+										onClick={(e) => e.stopPropagation()}
 										className="w-4 h-4 accent-primary-hover"
 									/>
-								</th>
-								<th className="px-3 py-2 font-medium text-content-secondary">
-									{columnLabel}
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{filteredItems.map((item) => (
-								<Fragment key={item}>
-									<tr
-										className="hover:bg-surface-subtle cursor-pointer border-t border-border-faint"
-										onClick={() => onToggle(item)}
-									>
-										<td className="px-3 py-1.5">
-											<input
-												type="checkbox"
-												checked={selected.has(item)}
-												onChange={() => onToggle(item)}
-												onClick={(e) => e.stopPropagation()}
-												className="w-4 h-4 accent-primary-hover"
-											/>
-										</td>
-										<td className="px-3 py-1.5">{renderItem(item)}</td>
-									</tr>
-									{renderExtraRows?.(item)}
-								</Fragment>
-							))}
-						</tbody>
-					</table>
-				)}
-			</div>
+								</Td>
+								<Td>{renderItem(item)}</Td>
+							</Tr>
+							{renderExtraRows?.(item)}
+						</Fragment>
+					))}
+				</DataTable>
+			)}
 		</div>
 	);
 }

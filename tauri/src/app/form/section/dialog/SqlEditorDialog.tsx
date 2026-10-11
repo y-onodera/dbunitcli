@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { DialogTitle, SettingDialog } from "../../../../components/dialog";
+import {
+	DialogBody,
+	DialogField,
+	DialogTitle,
+	SettingDialog,
+} from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
 import { EditButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
@@ -58,17 +63,17 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 			fileName={props.fileName}
 			handleSave={handleCommit}
 		>
-			<div className="w-[640px] p-4">
+			<DialogBody size="md">
 				<DialogTitle>
 					{props.type === "sql" ? "Edit SQL" : "Edit Table Definition"}
 				</DialogTitle>
 				{connectionOk && (
-					<div className="mb-2">
+					<DialogField>
 						<BlueButton
 							title="Select Tables"
 							handleClick={() => setShowTableSelector(true)}
 						/>
-					</div>
+					</DialogField>
 				)}
 				<TextArea
 					id="contents"
@@ -81,7 +86,7 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 					}
 					spellCheck={false}
 				/>
-			</div>
+			</DialogBody>
 			{showTableSelector && (
 				<SqlTableInsertDialog
 					jdbcValues={jdbcValues}

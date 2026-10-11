@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Td, Tr } from "../../../../components/dialog";
 import { ButtonIcon } from "../../../../components/element/ButtonIcon";
 import { ExpandIcon, PreviewIcon } from "../../../../components/element/Icon";
 import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
@@ -106,15 +107,12 @@ export default function TableList({
 					return null;
 				}
 				return columns.map((col) => (
-					<tr
-						key={`${table}::${col}`}
-						className="bg-surface-subtle border-t border-border-faint"
-					>
-						<td />
-						<td className="px-6 py-1">
-							<span className="text-xs text-content-muted">{col}</span>
-						</td>
-					</tr>
+					<Tr key={`${table}::${col}`} muted>
+						<Td />
+						<Td>
+							<span className="text-xs">{col}</span>
+						</Td>
+					</Tr>
 				));
 			}}
 		/>

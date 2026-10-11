@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { InlineActions } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import { DatasetSettingGenerateButton } from "../dialog/DatasetSettingGenerateDialog";
@@ -31,7 +32,7 @@ export default function DatasetSettingText({
 			handleValueChange={handleValueChange}
 			afterContent={({ path }) =>
 				datasetSrcInfo.srcType && !hideDatasetSettingEdit ? (
-					<div className="mt-2 flex items-center gap-3">
+					<InlineActions>
 						<DatasetTableNamesPreviewButton
 							title="Preview Before Settings"
 							setting=""
@@ -42,7 +43,7 @@ export default function DatasetSettingText({
 								setting={path}
 							/>
 						)}
-					</div>
+					</InlineActions>
 				) : null
 			}
 		>

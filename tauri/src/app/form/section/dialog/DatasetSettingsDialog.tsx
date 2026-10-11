@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { SettingDialog, SettingTable } from "../../../../components/dialog";
+import {
+	SettingDialog,
+	SettingTable,
+	StatusMessage,
+} from "../../../../components/dialog";
 import {
 	useDatasetSettingsData,
 	useDeleteDatasetSettings,
@@ -21,7 +25,7 @@ export default function DatasetSettingsDialog(props: {
 }) {
 	const { settings, loading } = useDatasetSettingsData(props.fileName);
 	if (loading) {
-		return <div>Loading...</div>;
+		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
 	return (
 		<DatasetSettingsEditDialog

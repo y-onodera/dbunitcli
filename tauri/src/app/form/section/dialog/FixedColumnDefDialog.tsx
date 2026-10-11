@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { SettingDialog, SettingTable } from "../../../../components/dialog";
+import {
+	SettingDialog,
+	SettingTable,
+	StatusMessage,
+} from "../../../../components/dialog";
 import {
 	useDeleteFixedColumnDef,
 	useFixedColumnDefData,
@@ -21,7 +25,7 @@ export default function FixedColumnDefDialog(props: {
 }) {
 	const { def, loading } = useFixedColumnDefData(props.fileName);
 	if (loading) {
-		return <div>Loading...</div>;
+		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
 	return (
 		<FixedColumnDefEditDialog

@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { SettingDialog, SettingTable } from "../../../../components/dialog";
+import {
+	SettingDialog,
+	SettingTable,
+	StatusMessage,
+} from "../../../../components/dialog";
 import {
 	useDeleteXlsxSchema,
 	useSaveXlsxSchema,
@@ -23,7 +27,7 @@ export default function XlsxSchemaDialog(props: {
 }) {
 	const { schema, loading } = useXlsxSchemaData(props.fileName);
 	if (loading) {
-		return <div>Loading...</div>;
+		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
 	return (
 		<XlsxSchemaEditDialog

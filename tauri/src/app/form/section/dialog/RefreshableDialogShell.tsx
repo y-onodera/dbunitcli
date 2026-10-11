@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
+	DialogBody,
 	DialogFooter,
 	DialogTitle,
 	FullDialog,
+	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import type { DialogLoadState } from "./refreshableDialogForm";
@@ -34,15 +36,15 @@ export function RefreshableDialogShell<OPTIONS>({
 }) {
 	return createPortal(
 		<FullDialog onClose={onClose}>
-			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
+			<DialogBody size="auto" scrollable>
 				<DialogTitle command={command} label={label}>
 					{title}
 				</DialogTitle>
 				{loadState.status === "loading" && (
-					<div className="text-content-muted">Loading...</div>
+					<StatusMessage kind="loading">Loading...</StatusMessage>
 				)}
 				{loadState.status === "error" && (
-					<div className="text-error">Error: {loadState.message}</div>
+					<StatusMessage kind="error">Error: {loadState.message}</StatusMessage>
 				)}
 				{loadState.status === "loaded" && (
 					<form
@@ -57,9 +59,9 @@ export function RefreshableDialogShell<OPTIONS>({
 					</form>
 				)}
 				{executeError && (
-					<div className="text-error">Error: {executeError}</div>
+					<StatusMessage kind="error">Error: {executeError}</StatusMessage>
 				)}
-			</div>
+			</DialogBody>
 			<DialogFooter>
 				<BlueButton
 					title="Execute"
