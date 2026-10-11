@@ -81,6 +81,21 @@
   </table>
   <p>テーブルごとに <a href="xlsx-schema.html">Xlsx Schema</a> の Rows Mapping Tables と Random Cell Mapping Tables の両方に 1 件ずつ生成されます。不要な側の行は編集ダイアログで削除してください。</p>
 
+  <h2>対象となる Excel のイメージ</h2>
+  <p>上の生成例のスキーマは、次のようなシートを持つ Excel ファイルを読み込むための定義です。シート名は <code>sheetName</code> の値（この例では <code>USERS</code>）で、1 行目にカラム名、2 行目以降にデータが並ぶ一般的な表形式を想定しています。</p>
+  <table>
+    <tr><th>シート: USERS</th><th>A</th><th>B</th><th>C</th></tr>
+    <tr><td>1</td><td>ID</td><td>NAME</td><td>EMAIL</td></tr>
+    <tr><td>2</td><td>1</td><td>Alice</td><td>alice@example.com</td></tr>
+    <tr><td>3</td><td>2</td><td>Bob</td><td>bob@example.com</td></tr>
+    <tr><td>4</td><td>3</td><td>Carol</td><td>carol@example.com</td></tr>
+  </table>
+  <ul>
+    <li><strong>Rows Mapping</strong>（<code>rows</code>）: <code>dataStart</code> の 2 行目から、<code>columnIndex</code> で指定した A〜C 列を 1 行 1 レコードとして読み込みます。カラム名は <code>header</code> の定義が使われます。上の表なら 3 レコードの <code>USERS</code> テーブルになります。</li>
+    <li><strong>Random Cell Mapping</strong>（<code>cells</code>）: <code>cellAddress</code> に指定した A2・B2・C2 のセルだけを拾い、1 レコードの <code>USERS</code> テーブルにします。帳票のように、決まったセル位置に値が入っているシート向けの定義です。</li>
+  </ul>
+  <p>実際のシートの行・列の位置が生成結果と異なる場合は、<a href="xlsx-schema.html">Xlsx Schema</a> の編集ダイアログで <code>sheetName</code>・<code>dataStart</code>・<code>columnIndex</code>・<code>cellAddress</code> を修正してください。</p>
+
   <h2>注意</h2>
   <ul>
     <li>Execute が失敗した場合は、ダイアログ内にエラーメッセージが表示されます。入力内容を見直して再度実行してください。</li>
