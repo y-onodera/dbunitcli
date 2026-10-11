@@ -22,7 +22,14 @@
 <body>
   <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Xlsx Schema Generate</h1>
-  <p>既存データセットのテーブル・カラム構成をもとに、<a href="xlsx-schema.html">Xlsx Schema</a> の雛型を自動生成するダイアログです。xlsxSchema テキストボックス横のメニューの generate ボタンから開きます。</p>
+  <p>既存データセット（CSV / Excel / DB など）のテーブル・カラム構成から、<a href="xlsx-schema.html">Xlsx Schema</a> の雛型を自動生成します。xlsxSchema テキストボックス横のメニューの generate ボタンから開きます。</p>
+  <p><strong>できること</strong></p>
+  <ul>
+    <li>テーブルごとに、Rows Mapping（行形式）と Random Cell Mapping（セル指定形式）の設定を一括で作成する。</li>
+    <li>カラム名・カラムの並び順・主キー（<code>breakKey</code>）・先頭データ行・セル位置を、元データセットから引き継ぐ。</li>
+    <li>生成結果を Xlsx Schema の編集ダイアログで確認・修正し、名前を付けて保存する。</li>
+  </ul>
+  <p>一から手入力する代わりに、生成した雛型を実際の Xlsx に合わせて手直しする使い方を想定しています（特に <code>sheetName</code> はテーブル名が入るため、実際のシート名への修正が必要です）。</p>
 
   <h2>入力</h2>
   <p>雛型の元にするデータセットを、共通の <a href="dataset-load-form.html">Dataset Load Form</a> で指定します。ソースタイプの選択に応じて入力項目が切り替わります（CSV / Excel / テーブル / SQL など）。各ソースタイプの詳細は Dataset Load Form のページを参照してください。</p>
