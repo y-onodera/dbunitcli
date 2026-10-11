@@ -19,28 +19,22 @@ export default function DropDownMenu({
 	const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
 	const buttonRef = useRef<HTMLDivElement>(null);
 	const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
-	const menuRef = useRef<HTMLDivElement>(null);
 	// React のイベントはポータルを越えて伝播するため、メニュー配下から
 	// createPortal されたダイアログ内の操作も「内側」として判定できる
 	const insideMouseDownRef = useRef(false);
 
 	useEffect(() => {
-		if (showMenu && buttonRef.current) {
+		// スクロール領域に隠れないよう fixed で画面基準に配置する
+		function updatePosition() {
+			if (!buttonRef.current) {
+				return;
+			}
 			const rect = buttonRef.current.getBoundingClientRect();
 			const menuWidth = 96;
-			// showModal() 済みの dialog は top layer に載り z-index で越えられないため、
-			// dialog 内から開いた場合はその dialog 配下に描画する
-			setPortalTarget(buttonRef.current.closest("dialog") ?? document.body);
-			// スクロール領域に隠れないよう fixed で画面基準に配置する
 			if (rect.right + menuWidth > window.innerWidth) {
 				setMenuStyle({ right: window.innerWidth - rect.left, top: rect.top });
 			} else {
 				setMenuStyle({ left: rect.right, top: rect.top });
-			}
-		}
-		function handleScroll(e: Event) {
-			if (!menuRef.current?.contains(e.target as Node)) {
-				setShowMenu(false);
 			}
 		}
 		function handleClickOutside() {
@@ -52,12 +46,19 @@ export default function DropDownMenu({
 		}
 		if (showMenu) {
 			insideMouseDownRef.current = false;
+			// showModal() 済みの dialog は top layer に載り z-index で越えられないため、
+			// dialog 内から開いた場合はその dialog 配下に描画する
+			setPortalTarget(buttonRef.current?.closest("dialog") ?? document.body);
+			updatePosition();
 			document.addEventListener("mousedown", handleClickOutside);
-			window.addEventListener("scroll", handleScroll, true);
+			// スクロールしても閉じず追従させる (メニュー配下のダイアログごと消えるため)
+			window.addEventListener("scroll", updatePosition, true);
+			window.addEventListener("resize", updatePosition);
 		}
 		return () => {
 			document.removeEventListener("mousedown", handleClickOutside);
-			window.removeEventListener("scroll", handleScroll, true);
+			window.removeEventListener("scroll", updatePosition, true);
+			window.removeEventListener("resize", updatePosition);
 		};
 	}, [showMenu]);
 
@@ -77,7 +78,6 @@ export default function DropDownMenu({
 				portalTarget &&
 				createPortal(
 					<div
-						ref={menuRef}
 						className="fixed z-modal-nested p-4 text-content bg-surface border border-border-faint rounded-lg shadow-dropdown"
 						style={menuStyle}
 					>
