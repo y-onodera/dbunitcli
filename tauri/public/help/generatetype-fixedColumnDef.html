@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Generate Type: fixedColumnDef</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    h4 { font-size: 0.95rem; margin-top: 1rem; color: #4f46e5; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    .center { text-align: center; }
+    ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="generate.html">&larr; Generate に戻る</a></p>
+  <h1>generateType: fixedColumnDef</h1>
+  <p>固定長出力（<a href="result-form.html">Result Form</a> の fixed 形式）で使用するカラム幅定義ファイルを JSON 形式で生成します。<code>unit</code> は <code>table</code> に固定です。ファイル名は <code>{テーブル名}.json</code> になります。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>fixedLength</td><td>各カラムの幅をカンマ区切りで指定（例: <code>4,10,20</code>）。カラム数より少ない場合、残りのカラムには <code>defaultLength</code> が使われる</td></tr>
+    <tr><td>defaultLength</td><td><code>fixedLength</code> で幅が指定されなかったカラムに適用するデフォルト幅（数値）</td></tr>
+    <tr><td>align</td><td>パディングの方向: <code>left</code>（右余白）/ <code>right</code>（左余白）</td></tr>
+  </table>
+  <p><strong>生成イメージ（<code>fixedLength=5,10</code>, <code>align=left</code>, ファイル名: <code>Test1.json</code>）:</strong></p>
+  <pre>{
+  "columns": [
+    {"name": "key", "length": 5, "align": "left", "pad": " "},
+    {"name": "value", "length": 10, "align": "left", "pad": " "}
+  ]
+}</pre>
+</body>
+</html>

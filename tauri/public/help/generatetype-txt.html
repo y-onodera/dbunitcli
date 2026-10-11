@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Generate Type: txt</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    h4 { font-size: 0.95rem; margin-top: 1rem; color: #4f46e5; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    .center { text-align: center; }
+    ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="generate.html">&larr; Generate に戻る</a></p>
+  <h1>generateType: txt（テキストファイル生成）</h1>
+  <p>StringTemplate 4 テンプレートファイルを使い、テキストファイルを生成します。<code>template</code> オプションでテンプレートファイルを指定します。テンプレートエンジンの詳細設定は <code>template option</code> の展開ボタンから設定します（<a href="template.html">Template</a> 参照）。SQL・CSV・任意フォーマットのテキストなど、テンプレート次第で自由な成果物を作成できます。</p>
+
+  <h2>テンプレート変数</h2>
+  <p>unit の選択によってテンプレート内で使用できる変数が異なります。</p>
+  <table>
+    <tr><th>変数名</th><th>説明</th><th class="center">record</th><th class="center">table</th><th class="center">dataset</th></tr>
+    <tr><td>rowNumber</td><td>行 / テーブルのインデックス（0 始まり、dataset は常に 0）</td><td class="center">○</td><td class="center">○</td><td class="center">○</td></tr>
+    <tr><td>tableName</td><td>テーブル名</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
+    <tr><td>columns</td><td>カラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
+    <tr><td>primaryKeys</td><td>主キーカラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
+    <tr><td>columnsExcludeKey</td><td>主キー以外のカラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
+    <tr><td>row</td><td>現在行のデータ（列名 → 値 の Map）</td><td class="center">○</td><td class="center">—</td><td class="center">—</td></tr>
+    <tr><td>rows</td><td>テーブル全行のリスト（各要素は列名 → 値 の Map）</td><td class="center">—</td><td class="center">○</td><td class="center">—</td></tr>
+    <tr><td>dataSet</td><td>テーブル名をキーとする Map。各値は table スコープと同じ構造</td><td class="center">—</td><td class="center">—</td><td class="center">○</td></tr>
+  </table>
+
+  <h2>Scaffold ボタン</h2>
+  <p><code>generateType=txt</code> を選択すると <strong>Scaffold</strong> ボタンが表示されます。固定成果物タイプ（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）の組み込みテンプレートをカスタマイズ生成の出発点として書き出し、その結果をこのフォームへ反映するためのダイアログを開きます。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>target</td><td>雛型の生成対象（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）</td><td>ddl</td></tr>
+    <tr><td>template</td><td>書き出すテンプレートのファイル名（必須。<code>resources/template/{名前}.stg</code> と <code>{名前}.txt</code> をワークスペースへ出力）</td><td>—</td></tr>
+    <tr><td>unitSetting</td><td>書き出すサンプル unitSetting のファイル名（省略可。<code>resources/setting/{名前}.json</code> をワークスペースへ出力）</td><td>—</td></tr>
+    <tr><td>datasetType</td><td>記述子データセットの出力形式（<code>csv</code> / <code>xls</code> / <code>xlsx</code> / <code>table</code> / <code>fixed</code>）</td><td>csv</td></tr>
+    <tr><td>datasetEncoding</td><td>記述子データセットの出力文字コード（csv / fixed のみ）</td><td>UTF-8</td></tr>
+    <tr><td>fixedLength / defaultLength / align</td><td>target が <code>fixedColumnDef</code> の場合のみ表示。記述子データセットに書き出す桁数・デフォルト桁数・寄せ方向</td><td>— / 10 / left</td></tr>
+    <tr><td>dataset</td><td>記述子データセットの元になるデータソース。ダイアログを開いた時点の <code>src</code> セクションの内容が初期値として引き継がれます。指定するとテーブルごとの記述子データセット（1 カラム = 1 行）をワークスペースの <code>src</code> へ出力します</td><td>—</td></tr>
+  </table>
+  <p><strong>Execute</strong> を押すと雛型ファイルがワークスペースへ生成され、生成された雛型で駆動する設定（<code>generateType=txt</code>・<code>unit=table</code>・<code>template</code>・<code>template.templateGroup</code>・<code>unitSetting</code>・<code>resultPath</code>・<code>src</code>）がこのフォームへ反映されます。書き出された記述子データセットを編集してからそのまま <code>Exec</code> で生成できます。反映内容の保存は通常どおり <code>Save</code> ボタンで行ってください。</p>
+</body>
+</html>
