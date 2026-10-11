@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { SectionFieldset, SectionHelpButton } from "../../../components/dialog";
-import { ExpandButton } from "../../../components/element/ButtonIcon";
+import {
+	SectionFieldset,
+	SectionOptionHeader,
+} from "../../../components/dialog";
 import type { CommandOption, SrcElements } from "../../../model/CommandOption";
 import Check from "./element/Check";
 import PlainText from "./element/PlainText";
@@ -20,14 +22,13 @@ export default function TraversalFormSection({
 	return (
 		<SectionFieldset>
 			<legend>traversal</legend>
-			<div className="flex items-center gap-2">
-				<ExpandButton
-					toggleOptional={toggleOptional}
-					showOptional={showOptional}
-					caption="traversal option"
-				/>
-				<SectionHelpButton command="sections/traversal" label="Traversal" />
-			</div>
+			<SectionOptionHeader
+				showOptional={showOptional}
+				toggleOptional={toggleOptional}
+				caption="traversal option"
+				command="sections/traversal"
+				label="Traversal"
+			/>
 			{srcElements.extension && (
 				<PlainText
 					prefix={prefix}

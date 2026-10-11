@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { DialogFooter, DialogTitle, FullDialog } from "../../../../components/dialog";
+import {
+	DialogBody,
+	DialogFooter,
+	DialogTitle,
+	FullDialog,
+	StatusMessage,
+} from "../../../../components/dialog";
 import { WhiteButton } from "../../../../components/element/Button";
 import { PreviewButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
@@ -78,18 +84,18 @@ function ParameterizeTemplateDialog({
 
 	return (
 		<FullDialog onClose={handleDialogClose}>
-			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
+			<DialogBody size="auto" scrollable>
 				<DialogTitle>Template - {name}</DialogTitle>
 				{loadState.status === "loading" && (
-					<div className="text-content-muted">Loading...</div>
+					<StatusMessage kind="loading">Loading...</StatusMessage>
 				)}
 				{loadState.status === "error" && (
-					<div className="text-error">Error: {loadState.message}</div>
+					<StatusMessage kind="error">Error: {loadState.message}</StatusMessage>
 				)}
 				{loadState.status === "loaded" && (
 					<TextArea value={loadState.content} readOnly />
 				)}
-			</div>
+			</DialogBody>
 			<DialogFooter>
 				<WhiteButton title="Close" handleClick={handleDialogClose} />
 			</DialogFooter>

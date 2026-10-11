@@ -1,4 +1,11 @@
+export { DataTable, Td, Th, Tr } from "./DataTable";
 export { DialogHelpButton, SectionHelpButton } from "./DialogHelpButton";
+export {
+	DialogBody,
+	DialogField,
+	InlineActions,
+	StatusMessage,
+} from "./DialogLayout";
 export { FullDialog } from "./FullDialog";
 export {
 	DialogActions,
@@ -6,7 +13,11 @@ export {
 	DialogTitle,
 	ModalOverlay,
 } from "./ModalOverlay";
-export { SectionFieldset, SectionLegend } from "./SectionFieldset";
+export {
+	SectionFieldset,
+	SectionLegend,
+	SectionOptionHeader,
+} from "./SectionFieldset";
 export type { SettingDialogProps } from "./SettingDialog";
 export {
 	Arrays,

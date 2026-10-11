@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { DialogTitle, SettingDialog } from "../../../../components/dialog";
+import {
+	DialogBody,
+	DialogTitle,
+	SettingDialog,
+	StatusMessage,
+} from "../../../../components/dialog";
 import { EditButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
 import {
@@ -21,7 +26,7 @@ export default function TemplateEditDialog({
 }) {
 	const { content, loading } = useTemplateData(name);
 	if (loading) {
-		return <div>Loading...</div>;
+		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
 	return (
 		<Dialog
@@ -62,13 +67,13 @@ function Dialog({
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
 		>
-			<div className="w-[800px] p-4">
+			<DialogBody size="lg">
 				<DialogTitle>Template File Edit</DialogTitle>
 				<TextArea
 					value={content}
 					onChange={(e) => setContent(e.target.value)}
 				/>
-			</div>
+			</DialogBody>
 		</SettingDialog>
 	);
 }

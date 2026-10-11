@@ -1,8 +1,13 @@
 import { useState } from "react";
 import {
+	DataTable,
 	DialogActions,
+	DialogField,
 	DialogTitle,
 	ModalOverlay,
+	StatusMessage,
+	Td,
+	Tr,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
@@ -46,33 +51,27 @@ export default function ColumnDatalistDialog({
 
 	function renderRow(name: string) {
 		return (
-			<tr key={name} className="border-t border-border-faint">
-				<td className="px-3 py-1.5 text-sm text-content-muted">{name}</td>
-				<td className="px-3 py-1.5 text-right">
+			<Tr key={name}>
+				<Td>{name}</Td>
+				<Td align="right">
 					<BlueButton
 						title={loadingTable === name ? "Loading..." : "Load Columns"}
 						disabled={loadingTable !== null}
 						handleClick={() => handleLoadColumns(name)}
 					/>
-				</td>
-			</tr>
+				</Td>
+			</Tr>
 		);
 	}
 
 	function renderBody() {
 		if (filteredTables.length === 0) {
-			return (
-				<p className="text-sm text-content-disabled py-2">
-					No matching tables.
-				</p>
-			);
+			return <StatusMessage kind="empty">No matching tables.</StatusMessage>;
 		}
 		return (
-			<div className="overflow-y-auto max-h-72 border border-border-subtle rounded mb-4">
-				<table className="w-full text-sm text-left">
-					<tbody>{filteredTables.map(renderRow)}</tbody>
-				</table>
-			</div>
+			<DialogField last>
+				<DataTable>{filteredTables.map(renderRow)}</DataTable>
+			</DialogField>
 		);
 	}
 

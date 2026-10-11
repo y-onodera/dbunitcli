@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { SectionFieldset, SectionHelpButton } from "../../../components/dialog";
-import { ExpandButton } from "../../../components/element/ButtonIcon";
+import {
+	SectionFieldset,
+	SectionOptionHeader,
+} from "../../../components/dialog";
 import type {
 	CommandOption,
 	TemplateOption,
@@ -22,14 +24,13 @@ export default function TemplateFormSection({
 	return (
 		<SectionFieldset>
 			<legend>template</legend>
-			<div className="flex items-center gap-2">
-				<ExpandButton
-					toggleOptional={toggleOptional}
-					showOptional={showOptional}
-					caption="template option"
-				/>
-				<SectionHelpButton command="sections/template" label="Template" />
-			</div>
+			<SectionOptionHeader
+				showOptional={showOptional}
+				toggleOptional={toggleOptional}
+				caption="template option"
+				command="sections/template"
+				label="Template"
+			/>
 			{templateOption.encoding && showEncoding && (
 				<PlainText
 					prefix={templateOption.prefix}

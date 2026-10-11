@@ -1,8 +1,10 @@
 import { useState } from "react";
 import {
 	DialogActions,
+	DialogField,
 	DialogTitle,
 	ModalOverlay,
+	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
@@ -47,7 +49,7 @@ export default function SqlTableInsertDialog({
 		if (loading) {
 			return (
 				<>
-					<p className="text-sm text-content-muted mb-4">Loading...</p>
+					<StatusMessage kind="loading">Loading...</StatusMessage>
 					<DialogActions>
 						<WhiteButton title="Cancel" handleClick={onClose} />
 					</DialogActions>
@@ -75,9 +77,9 @@ export default function SqlTableInsertDialog({
 	return (
 		<ModalOverlay>
 			<DialogTitle>Select Tables</DialogTitle>
-			<div className="mb-4">
+			<DialogField last>
 				<BlueButton title="Load Tables" handleClick={handleLoad} />
-			</div>
+			</DialogField>
 			{renderBody()}
 		</ModalOverlay>
 	);
@@ -131,9 +133,9 @@ function TablesContent({
 
 	return (
 		<>
-			<div className="mb-4 min-h-8">
+			<DialogField last>
 				{tables.length === 0 ? (
-					<p className="text-sm text-content-muted">No tables found</p>
+					<StatusMessage kind="empty">No tables found</StatusMessage>
 				) : (
 					<TableList
 						tables={tables}
@@ -145,7 +147,7 @@ function TablesContent({
 						onSelectTable={onInsertColumn ? handleSelectTable : undefined}
 					/>
 				)}
-			</div>
+			</DialogField>
 			<DialogActions>
 				<BlueButton
 					title="Insert"
@@ -187,7 +189,7 @@ function ColumnSelectDialog({
 	if (columnData === "loading") {
 		return (
 			<ModalOverlay width="w-80" zClass="z-modal-nested">
-				<p className="text-sm text-content-muted mb-4">Loading...</p>
+				<StatusMessage kind="loading">Loading...</StatusMessage>
 				<DialogActions>
 					<WhiteButton title="Cancel" handleClick={onClose} />
 				</DialogActions>
@@ -201,7 +203,7 @@ function ColumnSelectDialog({
 			<p className="text-caption mb-4 truncate" title={table}>
 				{table}
 			</p>
-			<div className="mb-4">
+			<DialogField last>
 				<SelectableTable
 					items={columnData}
 					selected={selected}
@@ -211,7 +213,7 @@ function ColumnSelectDialog({
 					filterPlaceholder="Filter columns..."
 					emptyMessage="No columns found"
 				/>
-			</div>
+			</DialogField>
 			<DialogActions>
 				<BlueButton
 					title="Insert Columns"
