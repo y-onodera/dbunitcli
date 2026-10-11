@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Generate Type: xlsx</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    h4 { font-size: 0.95rem; margin-top: 1rem; color: #4f46e5; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    .center { text-align: center; }
+    ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="../../generate.html">&larr; Generate に戻る</a></p>
+  <h1>generateType: xlsx / xls（Excelファイル生成）</h1>
+  <p>jxls テンプレートファイルを使い、Excel ファイルを生成します。<code>template</code> オプションでテンプレートファイルを指定します。jxls 固有の設定は <code>jxls option</code> の展開ボタンから設定します（<a href="../../../sections/jxls.html">Jxls</a> 参照）。<code>xlsx</code> は Excel 2007 以降形式、<code>xls</code> は Excel 97-2003 形式で出力します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>lazyLoad</td><td>Excel データを遅延ロードする（大規模データセット向け）</td><td>false</td></tr>
+  </table>
+</body>
+</html>

@@ -48,7 +48,7 @@ export function DatasetSettingsEditDialog(props: {
 	return (
 		<SettingDialog
 			title="Dataset Settings"
-			helpCommand="dataset-settings"
+			helpCommand="dialogs/dataset-settings"
 			helpLabel="Dataset Settings"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}

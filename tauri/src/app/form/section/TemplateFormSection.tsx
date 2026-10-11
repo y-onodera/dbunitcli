@@ -28,7 +28,7 @@ export default function TemplateFormSection({
 					showOptional={showOptional}
 					caption="template option"
 				/>
-				<SectionHelpButton command="template" label="Template" />
+				<SectionHelpButton command="sections/template" label="Template" />
 			</div>
 			{templateOption.encoding && showEncoding && (
 				<PlainText

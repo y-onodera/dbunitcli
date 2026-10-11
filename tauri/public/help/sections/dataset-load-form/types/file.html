@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Source Type: file</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="../../dataset-load-form.html">&larr; Dataset Load Form に戻る</a></p>
+  <h1>Source Type: file</h1>
+  <p><strong>src の意味:</strong> 走査対象のディレクトリ。</p>
+  <p><strong>テーブル名:</strong> 対象ファイルの拡張子（<code>extension</code> でフィルタした場合はその拡張子名）。</p>
+  <p><strong>固有オプション:</strong> なし。<a href="../../traversal.html">ディレクトリ走査系</a>（<code>extension</code>・<code>recursive</code>・<code>regInclude</code>・<code>regExclude</code>）で対象を絞り込みます。</p>
+  <p><strong>データイメージ例:</strong> ディレクトリ配下のファイル一覧をメタ情報テーブルとして生成。</p>
+  <pre>入力 (src = project/):
+  project/a.txt         (2KB, 2026-04-01 10:00:00)
+  project/sub/b.txt     (5KB, 2026-04-02 11:00:00)
+  project/sub/c.log     (1KB, 2026-04-03 09:30:00)
+
+指定:
+  srcType   = file
+  recursive = true
+  extension = .txt
+
+テーブル名: txt
+カラム:     [PATH, NAME, DIR, RELATIVE_PATH, SIZE_KB, LAST_MODIFIED]
+データ行:
+  [/abs/project/a.txt,       a.txt, /abs/project,     a.txt,       2, 2026/04/01 10:00:00]
+  [/abs/project/sub/b.txt,   b.txt, /abs/project/sub, sub/b.txt,   5, 2026/04/02 11:00:00]</pre>
+</body>
+</html>

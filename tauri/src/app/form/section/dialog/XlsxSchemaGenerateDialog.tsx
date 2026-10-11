@@ -117,7 +117,7 @@ function XlsxSchemaGenerateDialog({
 		<FullDialog onClose={handleDialogClose}>
 			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
 				<DialogTitle
-					command="xlsx-schema-generate"
+					command="dialogs/xlsx-schema-generate"
 					label="Xlsx Schema Generate"
 				>
 					Generate Xlsx Schema

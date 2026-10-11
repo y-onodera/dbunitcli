@@ -1,4 +1,4 @@
-# generateType 詳細（出典: tauri/public/help/generate.html）
+# generateType 詳細（出典: tauri/public/help/commands/generate.html）
 
 ## 一覧（設計4軸での対応表）
 

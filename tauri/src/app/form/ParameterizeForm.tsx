@@ -33,7 +33,7 @@ export function ParameterizeForm(prop: {
 			<SectionFieldset>
 				<SectionLegend
 					title="execute"
-					command="parameterize"
+					command="commands/parameterize"
 					label="Parameterize"
 				/>
 				<Select
@@ -80,7 +80,7 @@ export function ParameterizeForm(prop: {
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}
 				srcData={paramData}
-				helpCommand="dataset-load-form"
+				helpCommand="sections/dataset-load-form"
 				helpLabel="param"
 			/>
 		</>

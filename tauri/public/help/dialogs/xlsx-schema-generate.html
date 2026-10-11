@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Xlsx Schema Generate</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Xlsx Schema Generate</h1>
+  <p>既存データセット（CSV / Excel / DB など）のテーブル・カラム構成から、<a href="xlsx-schema.html">Xlsx Schema</a> の雛型を自動生成します。xlsxSchema テキストボックス横のメニューの generate ボタンから開きます。</p>
+  <p><strong>できること</strong></p>
+  <ul>
+    <li>テーブルごとに、Rows Mapping（行形式）と Random Cell Mapping（セル指定形式）の設定を一括で作成する。</li>
+    <li>カラム名・カラムの並び順・主キー（<code>breakKey</code>）・先頭データ行・セル位置を、元データセットから引き継ぐ。</li>
+    <li>生成結果を Xlsx Schema の編集ダイアログで確認・修正し、名前を付けて保存する。</li>
+  </ul>
+  <p>一から手入力する代わりに、生成した雛型を実際の Xlsx に合わせて手直しする使い方を想定しています（特に <code>sheetName</code> はテーブル名が入るため、実際のシート名への修正が必要です）。</p>
+
+  <h2>入力</h2>
+  <p>雛型の元にするデータセットを、共通の <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。ソースタイプの選択に応じて入力項目が切り替わります（CSV / Excel / テーブル / SQL など）。各ソースタイプの詳細は Dataset Load Form のページを参照してください。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>srcData</td><td>雛型の元にするデータセット。ソースタイプ・パス・エンコーディング・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定します。</td></tr>
+  </table>
+
+  <h2>操作の流れ</h2>
+  <ol>
+    <li>元にするデータセットを指定します。</li>
+    <li>Execute を押すと、テーブルごとのカラム構成から Rows Mapping / Random Cell Mapping の設定が生成されます。</li>
+    <li>生成結果は <a href="xlsx-schema.html">Xlsx Schema</a> の編集ダイアログに反映された状態で開きます。内容を確認・編集してください。</li>
+    <li>ファイル名を指定して保存すると、その名前が xlsxSchema テキストボックスに設定されます。</li>
+  </ol>
+
+  <h2>生成例</h2>
+  <p>たとえば <code>USERS</code> テーブル（カラム <code>ID</code> / <code>NAME</code> / <code>EMAIL</code>、主キーは <code>ID</code>）を含むデータセットを指定して Execute すると、次のようなスキーマが生成されます。</p>
+  <pre>{
+  "rows": [
+    {
+      "sheetName": "USERS"
+     ,"tableName": "USERS"
+     ,"header": ["ID","NAME","EMAIL"]
+     ,"dataStart": 1
+     ,"columnIndex": [0,1,2]
+     ,"breakKey": ["ID"]
+    }
+  ]
+ ,"cells": [
+    {
+      "sheetName": "USERS"
+     ,"tableName": "USERS"
+     ,"header": ["ID","NAME","EMAIL"]
+     ,"rows": [{"cellAddress": ["A2","B2","C2"]}]
+    }
+  ]
+}</pre>
+  <h3>生成ルール</h3>
+  <table>
+    <tr><th>項目</th><th>生成される値</th></tr>
+    <tr><td>sheetName</td><td>テーブル名と同じ値。実際の Xlsx のシート名に合わせて編集してください。</td></tr>
+    <tr><td>tableName</td><td>元データセットのテーブル名。</td></tr>
+    <tr><td>header</td><td>元テーブルのカラム名を並び順どおりに設定。</td></tr>
+    <tr><td>dataStart</td><td>常に <code>1</code>（ヘッダ行の次の行から、0 始まり）。</td></tr>
+    <tr><td>columnIndex</td><td>カラムの並び順に <code>0</code> から連番。</td></tr>
+    <tr><td>breakKey</td><td>主キーのカラム名。主キーが無い場合は先頭カラムのみ。</td></tr>
+    <tr><td>cellAddress</td><td><code>dataStart</code> 行の各カラムのセル位置（上の例では <code>A2</code>, <code>B2</code>, <code>C2</code>）。</td></tr>
+  </table>
+  <p>テーブルごとに <a href="xlsx-schema.html">Xlsx Schema</a> の Rows Mapping Tables と Random Cell Mapping Tables の両方に 1 件ずつ生成されます。不要な側の行は編集ダイアログで削除してください。</p>
+
+  <h2>対象となる Excel のイメージ</h2>
+  <p>上の生成例のスキーマは、次のようなシートを持つ Excel ファイルを読み込むための定義です。シート名は <code>sheetName</code> の値（この例では <code>USERS</code>）で、1 行目にカラム名、2 行目以降にデータが並ぶ一般的な表形式を想定しています。</p>
+  <table>
+    <tr><th>シート: USERS</th><th>A</th><th>B</th><th>C</th></tr>
+    <tr><td>1</td><td>ID</td><td>NAME</td><td>EMAIL</td></tr>
+    <tr><td>2</td><td>1</td><td>Alice</td><td>alice@example.com</td></tr>
+    <tr><td>3</td><td>2</td><td>Bob</td><td>bob@example.com</td></tr>
+    <tr><td>4</td><td>3</td><td>Carol</td><td>carol@example.com</td></tr>
+  </table>
+  <ul>
+    <li><strong>Rows Mapping</strong>（<code>rows</code>）: <code>dataStart</code> の 2 行目から、<code>columnIndex</code> で指定した A〜C 列を 1 行 1 レコードとして読み込みます。カラム名は <code>header</code> の定義が使われます。上の表なら 3 レコードの <code>USERS</code> テーブルになります。</li>
+    <li><strong>Random Cell Mapping</strong>（<code>cells</code>）: <code>cellAddress</code> に指定した A2・B2・C2 のセルだけを拾い、1 レコードの <code>USERS</code> テーブルにします。帳票のように、決まったセル位置に値が入っているシート向けの定義です。</li>
+  </ul>
+  <p>実際のシートの行・列の位置が生成結果と異なる場合は、<a href="xlsx-schema.html">Xlsx Schema</a> の編集ダイアログで <code>sheetName</code>・<code>dataStart</code>・<code>columnIndex</code>・<code>cellAddress</code> を修正してください。</p>
+
+  <h2>注意</h2>
+  <ul>
+    <li>Execute が失敗した場合は、ダイアログ内にエラーメッセージが表示されます。入力内容を見直して再度実行してください。</li>
+    <li>Close を押すと、生成せずにダイアログを閉じます（xlsxSchema テキストボックスは変更されません）。</li>
+  </ul>
+</body>
+</html>

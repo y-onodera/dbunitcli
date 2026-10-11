@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Generate</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    h4 { font-size: 0.95rem; margin-top: 1rem; color: #4f46e5; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    .center { text-align: center; }
+    ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Generate</h1>
+  <p>テンプレートまたは組み込み定義からファイルを生成します。<code>generateType</code> は大きく 2 系統に分かれます。</p>
+  <ul>
+    <li><strong>テンプレート指定タイプ</strong>（<code>txt</code> / <code>xlsx</code> / <code>xls</code>）: <code>template</code> オプションで指定した任意のテンプレートファイルにデータを埋め込みます。出力内容はテンプレート次第で自由に設計できます。</li>
+    <li><strong>固定成果物タイプ</strong>（<code>settings</code> / <code>sql</code> / <code>ddl</code> / <code>xlsxTemplate</code> / <code>xlsxSchema</code> / <code>javaBean</code> / <code>fixedColumnDef</code>）: テーブルのカラム情報等から、決まった形式の成果物ファイルを自動生成します。<code>template</code> は使用しません。組み込みテンプレート以外の出力形式にしたい場合は、<code>generateType=txt</code> と <code>unitSetting</code> を組み合わせて同等の内容を再現してください。</li>
+  </ul>
+
+  <h2>generateType 一覧</h2>
+  <table>
+    <tr><th>値</th><th>分類</th><th>説明</th><th>unit</th></tr>
+    <tr><td><a href="generate/types/txt.html">txt</a></td><td>テンプレート指定 / テキスト</td><td>StringTemplate 4 を使ったテキストファイル生成（SQL・CSV・任意テキスト等）</td><td>record / table / dataset</td></tr>
+    <tr><td><a href="generate/types/xlsx.html">xlsx</a></td><td>テンプレート指定 / Excel</td><td>jxls を使った <code>.xlsx</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
+    <tr><td><a href="generate/types/xlsx.html">xls</a></td><td>テンプレート指定 / Excel</td><td>jxls を使った <code>.xls</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
+    <tr><td><a href="generate/types/settings.html">settings</a></td><td>固定成果物 / JSON</td><td>Dataset Settings ファイルのひな型を生成</td><td>dataset（固定）</td></tr>
+    <tr><td><a href="generate/types/sql.html">sql</a></td><td>固定成果物 / テキスト</td><td>INSERT / UPDATE / DELETE / CLEAN_INSERT SQL ファイルを生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="generate/types/ddl.html">ddl</a></td><td>固定成果物 / テキスト</td><td>テーブルのカラム情報から CREATE TABLE 用の DDL ファイルを生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="generate/types/xlsxSchema.html">xlsxSchema</a></td><td>固定成果物 / JSON</td><td>データセットのカラム情報から Xlsx Schema 設定ファイルのひな型を生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="generate/types/javaBean.html">javaBean</a></td><td>固定成果物 / テキスト</td><td>テーブルのカラム情報から JavaBean の <code>.java</code> ソースを生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="generate/types/fixedColumnDef.html">fixedColumnDef</a></td><td>固定成果物 / JSON</td><td>固定長出力用のカラム幅定義ファイルを生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="generate/types/xlsxTemplate.html">xlsxTemplate</a></td><td>固定成果物 / Excel</td><td>jxls テンプレートのひな型 <code>.xlsx</code> を生成</td><td>dataset（固定）</td></tr>
+  </table>
+
+  <h2>unit</h2>
+  <p>生成の単位を指定します。デフォルトは <code>record</code> です。<br>
+  <code>settings</code> / <code>xlsxTemplate</code> は <code>dataset</code>、<code>sql</code> / <code>ddl</code> / <code>xlsxSchema</code> / <code>javaBean</code> / <code>fixedColumnDef</code> は <code>table</code> に固定されます。</p>
+  <table>
+    <tr><th>値</th><th>説明</th></tr>
+    <tr><td>record</td><td>行ごとに 1 ファイルを出力</td></tr>
+    <tr><td>table</td><td>テーブルごとに 1 ファイルを出力</td></tr>
+    <tr><td>dataset</td><td>データセット全体から 1 ファイルを出力</td></tr>
+  </table>
+
+  <h3>unitSetting</h3>
+  <p><code>unit</code> が <code>table</code> かつ Excel 系（<code>xlsx</code> / <code>xls</code>）以外のタイプで表示されます。テーブル単位のテンプレート生成時に、テーブルの区切り方を定義する設定ファイルを指定します（未指定時は種類ごとの組み込み設定を使用）。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>unitSetting</td><td>テーブル区切り設定ファイルのパス</td><td>（空、組み込み設定を使用）</td></tr>
+    <tr><td>unitSettingEncoding</td><td>unitSetting ファイルの文字コード</td><td>システムデフォルト</td></tr>
+  </table>
+
+  <h2>共通オプション</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>template</td><td>テンプレートファイルのパス（<code>txt</code> / <code>xlsx</code> / <code>xls</code> タイプで使用）</td></tr>
+    <tr><td>result</td><td>生成結果ファイルを配置するディレクトリ</td></tr>
+    <tr><td>resultPath</td><td><code>result</code> ディレクトリからの相対パス（テンプレート変数を使用可能）</td></tr>
+    <tr><td>outputEncoding</td><td>出力ファイルの文字コード（<code>txt</code> タイプのみ、デフォルト: <code>UTF-8</code>）</td></tr>
+  </table>
+
+  <h2>テンプレート指定タイプ</h2>
+  <p><code>template</code> オプションで指定した任意のテンプレートファイルに、ソースデータを埋め込んで出力します。出力内容はテンプレートの記述次第です。詳細は各 generateType のページ（<a href="generate/types/txt.html">txt</a> / <a href="generate/types/xlsx.html">xlsx・xls</a>）を参照してください。</p>
+
+  <h2>固定成果物タイプ</h2>
+  <p>テーブルのカラム情報等から、決まった形式の成果物ファイルを組み込みロジック・組み込みテンプレートで自動生成します。<code>template</code> は使用しません。詳細は上記一覧の各 generateType のページを参照してください。</p>
+
+  <h2>関連ページ</h2>
+  <ul>
+    <li><a href="../sections/dataset-load-form.html">Dataset Load Form</a> — <code>srcData</code> 入力フォームの詳細</li>
+    <li><a href="../sections/template.html">Template</a> — <code>txt</code> タイプの StringTemplate 4 オプション</li>
+    <li><a href="../sections/jxls.html">Jxls</a> — <code>xlsx</code> / <code>xls</code> タイプの jxls オプション</li>
+    <li><a href="../dialogs/dataset-settings.html">Dataset Settings</a> — <code>settings</code> タイプが生成する設定ファイルの詳細</li>
+    <li><a href="../dialogs/xlsx-schema.html">Xlsx Schema</a> — <code>xlsxSchema</code> タイプが生成する設定ファイルの詳細</li>
+  </ul>
+</body>
+</html>

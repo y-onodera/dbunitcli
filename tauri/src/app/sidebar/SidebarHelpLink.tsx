@@ -5,11 +5,31 @@ import { HelpIcon } from "../../components/element/Icon";
 import { openHelpWindow } from "../../utils/helpWindow";
 
 const helpCommands = [
-	{ command: "convert", label: "Convert", description: "Convert data between formats" },
-	{ command: "compare", label: "Compare", description: "Compare datasets and detect differences" },
-	{ command: "generate", label: "Generate", description: "Generate files from templates" },
-	{ command: "run", label: "Run", description: "Execute SQL or scripts" },
-	{ command: "parameterize", label: "Parameterize", description: "Batch process with parameters" },
+	{
+		command: "commands/convert",
+		label: "Convert",
+		description: "Convert data between formats",
+	},
+	{
+		command: "commands/compare",
+		label: "Compare",
+		description: "Compare datasets and detect differences",
+	},
+	{
+		command: "commands/generate",
+		label: "Generate",
+		description: "Generate files from templates",
+	},
+	{
+		command: "commands/run",
+		label: "Run",
+		description: "Execute SQL or scripts",
+	},
+	{
+		command: "commands/parameterize",
+		label: "Parameterize",
+		description: "Batch process with parameters",
+	},
 ] as const;
 
 export default function SidebarHelpLink() {
@@ -52,8 +72,12 @@ export default function SidebarHelpLink() {
 										setShowMenu(false);
 									}}
 								>
-									<span className="block text-sm font-semibold text-content">{item.label}</span>
-									<span className="block text-xs text-content-secondary">{item.description}</span>
+									<span className="block text-sm font-semibold text-content">
+										{item.label}
+									</span>
+									<span className="block text-xs text-content-secondary">
+										{item.description}
+									</span>
 								</Button>
 							</li>
 						))}

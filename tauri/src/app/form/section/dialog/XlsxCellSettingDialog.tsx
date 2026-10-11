@@ -23,7 +23,7 @@ export default function XlsxCellSettingDialog(props: {
 	return (
 		<SettingDialog
 			title="Xlsx Cell Setting"
-			helpCommand="xlsx-cell-setting"
+			helpCommand="dialogs/xlsx-cell-setting"
 			helpLabel="Xlsx Cell Setting"
 			setting={target}
 			handleDialogClose={props.handleDialogClose}

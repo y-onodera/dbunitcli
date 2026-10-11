@@ -18,7 +18,7 @@ export function RunForm(prop: {
 	const run = prop.run;
 	return (
 		<SectionFieldset>
-			<SectionLegend title="run" command="run" label="Run" />
+			<SectionLegend title="run" command="commands/run" label="Run" />
 			<Select
 				handleTypeSelect={prop.handleTypeSelect}
 				prefix=""

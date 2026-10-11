@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Dataset Setting</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Dataset Setting</h1>
+  <p>個別テーブルに対するメタデータ設定を編集するダイアログです。対象指定、分割・リネーム、派生テーブルの分離、追加カラム、フィルタ／並び順を構成します。ファイル全体の構造（<code>settings</code> / <code>commonSettings</code> / <code>import</code>）については <a href="dataset-settings.html">Dataset Settings</a> を参照してください。</p>
+
+  <h2>Target</h2>
+  <p>処理対象のテーブルをどのように特定するかを選択します。</p>
+  <table>
+    <tr><th>種別</th><th>説明</th></tr>
+    <tr><td>name</td><td>テーブル名を1件以上列挙して指定します。<code>filePath</code> で設定ファイルからの相対パスを指定することも可能です。</td></tr>
+    <tr><td>pattern</td><td>テーブル名のマッチで対象を特定します。<code>pattern</code> オブジェクトには部分一致用の <code>string</code> または正規表現用の <code>regex</code> を指定し、<code>exclude</code> 配列で除外パターンを追加できます。</td></tr>
+    <tr><td>outerJoin / innerJoin / fullJoin</td><td>2テーブルを結合して1つの論理テーブルとして扱います。<code>left</code> と <code>right</code> に結合対象のテーブル名、条件は <code>on</code>（JeXL 式）か <code>column</code>（共通カラム名）で指定します。</td></tr>
+  </table>
+
+  <h3>変化の例</h3>
+
+  <p><strong>name（対象テーブルの絞り込み）</strong></p>
+  <p>入力に <code>users</code>、<code>orders</code>、<code>logs</code> がある状態で <code>name: ["users", "orders"]</code> を指定すると、<code>logs</code> は処理対象から外れます。</p>
+
+  <p><strong>pattern（正規表現マッチ）</strong></p>
+  <p><code>pattern: { string: "t_.*", exclude: ["t_tmp_.*"] }</code> を指定すると、<code>t_users</code> や <code>t_orders</code> は対象になり、<code>t_tmp_work</code> は除外されます。</p>
+
+  <p><strong>innerJoin（内部結合）</strong></p>
+<pre><code>Before (orders):
+order_id | item_id | qty
+---------+---------+----
+1        | 101     | 2
+2        | 102     | 3
+3        | 999     | 1
+
+Before (items):
+id  | name
+----+------
+101 | Pen
+102 | Book
+
+After innerJoin (left=orders, right=items, column=["item_id","id"]):
+orders_order_id | orders_item_id | orders_qty | items_id | items_name
+----------------+----------------+------------+----------+-----------
+1               | 101            | 2          | 101      | Pen
+2               | 102            | 3          | 102      | Book
+</code></pre>
+  <p><code>outerJoin</code> は左側（orders）の全行を残し、一致しない右側カラムは NULL になります。<code>fullJoin</code> は両側の未一致行も残します。</p>
+
+  <h2>Split / Rename</h2>
+  <p><code>split</code> を有効にすると、1つの入力から複数テーブルを派生させることができます。無効時はリネーム設定として機能します。</p>
+  <table>
+    <tr><th>フィールド</th><th>説明</th></tr>
+    <tr><td>prefix</td><td>出力テーブル名に付与する接頭辞</td></tr>
+    <tr><td>tableName</td><td>出力テーブル名のベース名</td></tr>
+    <tr><td>suffix</td><td>出力テーブル名に付与する接尾辞</td></tr>
+    <tr><td>limit</td><td>1 出力テーブルあたりに含める breakKey のグループ数（breakKey 未指定時は行数）の上限。上限に達すると次の行から新しい出力テーブルへ切り替わる。<code>0</code>（未指定）のとき split は行われない。</td></tr>
+    <tr><td>breakKey</td><td>split 時にテーブルを切り替えるキーとなるカラム。値が変化した回数が <code>limit</code> に達すると出力テーブルが切り替わる。未指定の場合は <code>limit</code> 行ごとに切り替わる。</td></tr>
+  </table>
+
+  <h3>変化の例</h3>
+
+  <p><strong>prefix / tableName / suffix（リネーム）</strong></p>
+  <p>入力 <code>users</code> に対し <code>prefix: "tmp_"</code>、<code>tableName: "accounts"</code>、<code>suffix: "_v1"</code> を指定すると、出力テーブル名は <code>tmp_accounts_v1</code> になります。データ内容はそのまま維持されます。</p>
+
+  <p><strong>split（breakKey でグループ単位に分割）</strong></p>
+  <p>出力テーブル名は <code>prefix</code> / <code>suffix</code> に <code>%d</code> を含めることで、分割順の連番（0, 1, 2, ...）が埋め込まれます。breakKey の値自体はテーブル名には使われません。</p>
+<pre><code>Before (orders, breakKey 昇順にソート済み):
+id | type | amount
+---+------+-------
+1  | A    | 100
+3  | A    | 150
+2  | B    | 200
+4  | C    | 80
+
+After (split: { tableName: "orders", suffix: "_%d", breakKey: ["type"], limit: 1 }):
+Table: orders_0
+id | type | amount
+---+------+-------
+1  | A    | 100
+3  | A    | 150
+
+Table: orders_1
+id | type | amount
+---+------+-------
+2  | B    | 200
+
+Table: orders_2
+id | type | amount
+---+------+-------
+4  | C    | 80
+</code></pre>
+
+  <p><strong>split.limit（1 テーブルに含めるグループ数の上限）</strong></p>
+  <p><code>limit</code> は「1 出力テーブルあたりに含める breakKey のグループ数の上限」です。上限に達すると、それ以降の行は新しい出力テーブルに振り分けられます（行は破棄されません）。上記と同じ入力に対して <code>limit: 2</code> を指定すると、2 グループ分（A と B）が 1 テーブル目に、残りのグループ（C）が 2 テーブル目に格納されます。</p>
+<pre><code>After (split: { tableName: "orders", suffix: "_%d", breakKey: ["type"], limit: 2 }):
+Table: orders_0
+id | type | amount
+---+------+-------
+1  | A    | 100
+3  | A    | 150
+2  | B    | 200
+
+Table: orders_1
+id | type | amount
+---+------+-------
+4  | C    | 80
+</code></pre>
+  <p>breakKey を指定しない場合、<code>limit</code> は「1 出力テーブルあたりの行数」として扱われ、<code>limit</code> 行ごとに新しい出力テーブルへ切り替わります。</p>
+
+  <h2>Separate</h2>
+  <p><code>separate</code> は配列で、各要素が 1 つの派生テーブル定義となり、1 つの入力から複数の派生テーブルを並列に生成します。<code>split</code> が <code>breakKey</code> / <code>limit</code> で連番テーブルを自動生成するのに対し、<code>separate</code> は派生テーブルごとに列・行・並び順などを明示的に自由定義できる点が異なります。</p>
+  <p>各派生テーブルでは、通常のテーブル設定と同じフィールドを指定できます。<code>include</code> / <code>exclude</code> による<strong>列方向の切り出し</strong>と、<code>filter</code> / <code>distinct</code> による<strong>行方向の切り出し</strong>の両方に利用でき、1 要素の中で同時に指定することも可能です。</p>
+  <table>
+    <tr><th>フィールド</th><th>説明</th></tr>
+    <tr><td>name</td><td>派生テーブルの出力テーブル名</td></tr>
+    <tr><td>keys</td><td>派生テーブルの主キーとなるカラム</td></tr>
+    <tr><td>include</td><td>派生テーブルに残すカラム（列の切り出し）。指定すると include 以外は除外される。</td></tr>
+    <tr><td>exclude</td><td>派生テーブルから除外するカラム</td></tr>
+    <tr><td>filter</td><td>派生テーブルに残す行の条件（JeXL 式）。複数指定した場合は AND 扱い。</td></tr>
+    <tr><td>order</td><td>派生テーブル内の並び順に使用するカラム</td></tr>
+    <tr><td>distinct</td><td>派生テーブルの重複行を排除するフラグ</td></tr>
+    <tr><td>string / number / boolean / function</td><td>追加カラム定義。派生テーブルごとに個別に指定できる（詳細は Additional Columns を参照）。</td></tr>
+  </table>
+
+  <h3>変化の例</h3>
+
+  <p><strong>列方向の切り出し（連絡先カラムを別テーブルへ）</strong></p>
+  <p>入力 <code>users</code> から連絡先関連のカラムだけを <code>user_profiles</code> に切り出します。元テーブル <code>users</code> 自体は <code>separate</code> の対象外になるため、連絡先カラムを残したい場合は別途 <code>settings</code> を追加してください。</p>
+<pre><code>Before (users):
+user_id | name  | address       | tel          | fax
+--------+-------+---------------+--------------+--------------
+1       | Alice | Tokyo         | 03-0000-0001 | 03-0000-0002
+2       | Bob   | Osaka         | 06-0000-0001 | 06-0000-0002
+
+After (separate: [{ name: "user_profiles", keys: ["user_id"], include: ["user_id", "address", "tel", "fax"] }]):
+Table: user_profiles
+user_id | address | tel          | fax
+--------+---------+--------------+--------------
+1       | Tokyo   | 03-0000-0001 | 03-0000-0002
+2       | Osaka   | 06-0000-0001 | 06-0000-0002
+</code></pre>
+
+  <p><strong>行方向の切り出し（ステータス別に派生テーブルを作成）</strong></p>
+  <p><code>separate</code> 配列に複数要素を定義することで、同じ入力から異なる条件の派生テーブルを並列に生成できます。</p>
+<pre><code>Before (orders):
+id | status   | amount
+---+----------+-------
+1  | APPROVED | 1500
+2  | REJECTED | 500
+3  | APPROVED | 2000
+4  | REJECTED | 300
+
+After (separate: [
+  { name: "orders_approved", keys: ["id"], filter: ["status == 'APPROVED'"] },
+  { name: "orders_rejected", keys: ["id"], filter: ["status == 'REJECTED'"] }
+]):
+Table: orders_approved
+id | status   | amount
+---+----------+-------
+1  | APPROVED | 1500
+3  | APPROVED | 2000
+
+Table: orders_rejected
+id | status   | amount
+---+----------+-------
+2  | REJECTED | 500
+4  | REJECTED | 300
+</code></pre>
+
+  <p><strong>列方向 + 行方向の組み合わせ</strong></p>
+  <p>1 つの派生テーブル定義の中で <code>include</code> と <code>filter</code> を同時に指定すると、「条件に合致する行」の「特定カラムだけ」を切り出せます。</p>
+<pre><code>Before (orders):
+id | status   | amount | memo
+---+----------+--------+------
+1  | APPROVED | 1500   | x
+2  | REJECTED | 500    | y
+3  | APPROVED | 2000   | z
+
+After (separate: [{ name: "orders_approved_summary", keys: ["id"], include: ["id", "amount"], filter: ["status == 'APPROVED'"] }]):
+Table: orders_approved_summary
+id | amount
+---+-------
+1  | 1500
+3  | 2000
+</code></pre>
+
+  <h2>Additional Columns</h2>
+  <p>元データに存在しないカラムを追加します。値には JeXL 式を記述できます。</p>
+  <table>
+    <tr><th>型</th><th>説明</th></tr>
+    <tr><td>string</td><td>文字列型カラム。既存カラムの連結や <code>substring</code> による抽出に利用します。</td></tr>
+    <tr><td>number</td><td>数値型カラム。算術演算で集計値や派生値を定義します。</td></tr>
+    <tr><td>boolean</td><td>真偽値型カラム。条件式で判定結果を持たせます。</td></tr>
+    <tr><td>function</td><td>関数表現によるカラム。複雑なロジックを JeXL 関数として定義します。</td></tr>
+  </table>
+
+  <h3>変化の例</h3>
+
+  <p><strong>string（文字列連結）</strong></p>
+<pre><code>Before (users):
+id | firstName | lastName
+---+-----------+---------
+1  | John      | Smith
+2  | Anna      | Lee
+
+After (string: { fullName: "firstName + ' ' + lastName" }):
+id | firstName | lastName | fullName
+---+-----------+----------+-----------
+1  | John      | Smith    | John Smith
+2  | Anna      | Lee      | Anna Lee
+</code></pre>
+
+  <p><strong>number（算術による派生カラム）</strong></p>
+<pre><code>Before (items):
+id | price | quantity
+---+-------+---------
+1  | 100   | 3
+2  | 250   | 2
+
+After (number: { subtotal: "price * quantity" }):
+id | price | quantity | subtotal
+---+-------+----------+---------
+1  | 100   | 3        | 300
+2  | 250   | 2        | 500
+</code></pre>
+
+  <p><strong>boolean（条件式による判定）</strong></p>
+<pre><code>Before (users):
+id | age
+---+----
+1  | 25
+2  | 17
+
+After (boolean: { adult: "age &gt;= 20" }):
+id | age | adult
+---+-----+------
+1  | 25  | true
+2  | 17  | false
+</code></pre>
+
+  <p><strong>function（条件分岐による区分値）</strong></p>
+<pre><code>Before (orders):
+id | status
+---+---------
+1  | APPROVED
+2  | REJECTED
+3  | PENDING
+
+After (function: { mark: "status == 'APPROVED' ? 'OK' : (status == 'REJECTED' ? 'NG' : 'HOLD')" }):
+id | status   | mark
+---+----------+-----
+1  | APPROVED | OK
+2  | REJECTED | NG
+3  | PENDING  | HOLD
+</code></pre>
+
+  <h2>Filter / Order</h2>
+  <table>
+    <tr><th>フィールド</th><th>説明</th></tr>
+    <tr><td>exclude</td><td>処理から除外するカラム</td></tr>
+    <tr><td>include</td><td>処理対象にするカラム（指定すると include 以外は除外）</td></tr>
+    <tr><td>keys</td><td>主キーのカラム名</td></tr>
+    <tr><td>filter</td><td>データ選択条件（JeXL 式）。複数指定した場合は AND 扱い。</td></tr>
+    <tr><td>order</td><td>並び順に使用するカラム</td></tr>
+  </table>
+
+  <h3>変化の例</h3>
+
+  <p><strong>exclude（カラム除外）</strong></p>
+<pre><code>Before (users):
+id | name  | created_at          | updated_at
+---+-------+---------------------+---------------------
+1  | Alice | 2024-01-01 10:00:00 | 2024-01-02 09:00:00
+
+After (exclude: ["created_at", "updated_at"]):
+id | name
+---+------
+1  | Alice
+</code></pre>
+
+  <p><strong>include（対象カラムの限定）</strong></p>
+<pre><code>Before (users):
+id | name  | email       | age
+---+-------+-------------+----
+1  | Alice | a@example   | 25
+
+After (include: ["id", "name"]):
+id | name
+---+------
+1  | Alice
+</code></pre>
+
+  <p><strong>keys（主キー指定）</strong></p>
+  <p>カラム構成や行数は変わりません。比較コマンドでの突合キーや、<code>distinct</code>・ソート挙動の基準として使われます。</p>
+
+  <p><strong>filter（行のフィルタ）</strong></p>
+<pre><code>Before (orders):
+id | amount | status
+---+--------+---------
+1  | 1500   | APPROVED
+2  | 500    | APPROVED
+3  | 2000   | REJECTED
+
+After (filter: ["amount &gt; 1000 &amp;&amp; status == 'APPROVED'"]):
+id | amount | status
+---+--------+---------
+1  | 1500   | APPROVED
+</code></pre>
+
+  <p><strong>order（並び替え）</strong></p>
+<pre><code>Before (users):
+id | name
+---+------
+3  | Carol
+1  | Alice
+2  | Bob
+
+After (order: ["id"]):
+id | name
+---+------
+1  | Alice
+2  | Bob
+3  | Carol
+</code></pre>
+
+  <h2>JeXL 式の書き方</h2>
+  <p><code>filter</code>、追加カラム（<code>string</code> / <code>number</code> / <code>boolean</code> / <code>function</code>）、結合条件 <code>on</code> では Apache Commons JEXL3 の式を利用できます。</p>
+
+  <h3>演算子</h3>
+  <table>
+    <tr><th>カテゴリ</th><th>演算子</th></tr>
+    <tr><td>比較</td><td><code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code></td></tr>
+    <tr><td>論理</td><td><code>&amp;&amp;</code> (AND), <code>||</code> (OR), <code>!</code> (NOT)</td></tr>
+    <tr><td>算術</td><td><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code></td></tr>
+    <tr><td>文字列連結</td><td><code>+</code></td></tr>
+    <tr><td>三項</td><td><code>condition ? valueIfTrue : valueIfFalse</code></td></tr>
+    <tr><td>NULL 比較</td><td><code>== null</code>, <code>!= null</code></td></tr>
+  </table>
+
+  <h3>文字列メソッド</h3>
+  <ul>
+    <li><code>contains(str)</code> — 指定文字列を含むか</li>
+    <li><code>startsWith(prefix)</code> — 指定文字列で始まるか</li>
+    <li><code>endsWith(suffix)</code> — 指定文字列で終わるか</li>
+    <li><code>matches(regex)</code> — 正規表現にマッチするか</li>
+    <li><code>substring(start, end)</code> — 部分文字列の取得</li>
+  </ul>
+  <p>文字列リテラルはシングルクォートで囲みます（例: <code>'APPROVED'</code>）。</p>
+
+  <h3>記述例</h3>
+
+  <p><strong>filter（金額とステータスの複合条件）</strong></p>
+<pre><code>amount &gt; 1000 &amp;&amp; status == 'APPROVED'</code></pre>
+
+  <p><strong>filter（NULL 判定と前方一致）</strong></p>
+<pre><code>type != null &amp;&amp; type.startsWith('SALE')</code></pre>
+
+  <p><strong>boolean（カラム名の接尾辞で判定）</strong></p>
+<pre><code>col.endsWith('_amount')</code></pre>
+
+  <p><strong>string（フルネーム連結）</strong></p>
+<pre><code>firstName + ' ' + lastName</code></pre>
+
+  <p><strong>string（日付の年月日部分を抽出）</strong></p>
+<pre><code>created_at.substring(0, 10)</code></pre>
+
+  <p><strong>number（小計の算出）</strong></p>
+<pre><code>price * quantity</code></pre>
+
+  <p><strong>boolean（三項演算子による区分判定）</strong></p>
+<pre><code>age &gt;= 20 ? true : false</code></pre>
+
+  <p><strong>function（条件に応じた区分値の生成）</strong></p>
+<pre><code>status == 'APPROVED' ? 'OK' : (status == 'REJECTED' ? 'NG' : 'PENDING')</code></pre>
+
+  <p><strong>join.on（結合条件）</strong></p>
+<pre><code>orders_item_id == items_id</code></pre>
+  <p>結合時のカラム参照は <code>&lt;テーブル名&gt;_&lt;カラム名&gt;</code> の形式を使用します。</p>
+
+  <h3>注意事項</h3>
+  <ol>
+    <li>文字列比較は大文字・小文字を区別します</li>
+    <li>日付比較は文字列として行われます（必要ならフォーマットを揃えてから比較）</li>
+    <li>NULL との比較は必ず <code>== null</code> / <code>!= null</code> を使用</li>
+    <li>複雑な条件は <code>filter</code> を複数行に分割して AND 合成することを推奨</li>
+  </ol>
+</body>
+</html>

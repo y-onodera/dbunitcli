@@ -45,7 +45,7 @@ export default function DatasetSettingDialog(props: {
 	return (
 		<SettingDialog
 			title="Dataset Setting"
-			helpCommand="dataset-setting"
+			helpCommand="dialogs/dataset-setting"
 			helpLabel="Dataset Setting"
 			setting={target}
 			handleDialogClose={props.handleDialogClose}
