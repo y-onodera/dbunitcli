@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
 	DialogActions,
 	DialogTitle,
@@ -6,6 +6,7 @@ import {
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
+import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
 import { useColumnNamesFetcher } from "../../../../hooks/useDatasetSettings";
 import type { DatasetSetting } from "../../../../model/DatasetSettings";
 
@@ -24,15 +25,7 @@ export default function ColumnDatalistDialog({
 	const [loadingTable, setLoadingTable] = useState<string | null>(null);
 	const srcInfo = useDatasetSrcInfo();
 	const fetchColumnNames = useColumnNamesFetcher();
-	const abortControllerRef = useRef<AbortController | null>(null);
-
-	useEffect(() => {
-		const controller = new AbortController();
-		abortControllerRef.current = controller;
-		return () => {
-			controller.abort();
-		};
-	}, []);
+	const abortControllerRef = useAbortSignalRef();
 
 	const handleLoadColumns = (tableName: string) => {
 		if (loadingTable !== null) {

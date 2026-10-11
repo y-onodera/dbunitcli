@@ -12,10 +12,7 @@ import {
 } from "../../../../model/FixedColumnDef";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import ColumnDefSettingDialog from "./ColumnDefSettingDialog";
-import ResourceEditButton, {
-	RemoveResource,
-	type ResourceEditButtonProp,
-} from "./ResourceEditButton";
+import { createEditButton, createRemoveButton } from "./ResourceEditButton";
 
 export default function FixedColumnDefDialog(props: {
 	fileName: string;
@@ -62,55 +59,14 @@ export function FixedColumnDefEditDialog(props: {
 				setSettings={(convert) =>
 					setFixedColumnDef((cur) => new FixedColumnDef(convert(cur.columns)))
 				}
-				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={({
-					setting,
-					handleDialogClose,
-					handleCommit,
-				}) => (
-					<ColumnDefSettingDialog
-						setting={setting}
-						handleDialogClose={handleDialogClose}
-						handleCommit={handleCommit}
-					/>
-				)}
+				SettingDialogComponent={ColumnDefSettingDialog}
 				newSetting={createColumnDef}
-				getKey={(setting) => setting.displayName()}
 			/>
 		</SettingDialog>
 	);
 }
 
-export function FixedColumnDefEditButton({
-	path,
-	setPath,
-}: ResourceEditButtonProp) {
-	const renderDialog = (open: boolean, closeDialog: () => void) => {
-		if (!open) {
-			return null;
-		}
-		return (
-			<FixedColumnDefDialog
-				fileName={path}
-				handleDialogClose={closeDialog}
-				handleSave={(newPath: string) => {
-					setPath(newPath);
-					closeDialog();
-				}}
-			/>
-		);
-	};
-
-	return <ResourceEditButton renderDialog={renderDialog} />;
-}
-
-export function RemoveFixedColumnDefButton({
-	path,
-	setPath,
-}: ResourceEditButtonProp) {
-	const deleteDef = useDeleteFixedColumnDef();
-
-	return (
-		<RemoveResource path={path} setPath={setPath} deleteResource={deleteDef} />
-	);
-}
+export const FixedColumnDefEditButton = createEditButton(FixedColumnDefDialog);
+export const RemoveFixedColumnDefButton = createRemoveButton(
+	useDeleteFixedColumnDef,
+);

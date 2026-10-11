@@ -47,11 +47,11 @@ function DatasetTableNamesPreviewDialog({
 
 	function renderContent() {
 		if (loading) {
-			return <p className="text-sm text-content-disabled p-3">Loading...</p>;
+			return <StatusMessage>Loading...</StatusMessage>;
 		}
 		if (tableNames.length === 0) {
 			return (
-				<p className="text-sm text-content-disabled p-3">No tables found.</p>
+				<StatusMessage>No tables found.</StatusMessage>
 			);
 		}
 		return (
@@ -105,11 +105,11 @@ function TableDataPreviewDialog({
 
 	function renderContent() {
 		if (loading) {
-			return <p className="text-sm text-content-disabled p-3">Loading...</p>;
+			return <StatusMessage>Loading...</StatusMessage>;
 		}
 		if (!preview?.headers || preview.headers.length === 0) {
 			return (
-				<p className="text-sm text-content-disabled p-3">No data found.</p>
+				<StatusMessage>No data found.</StatusMessage>
 			);
 		}
 		return (
@@ -160,4 +160,8 @@ function TableDataPreviewDialog({
 			</DialogFooter>
 		</FullDialog>
 	);
+}
+
+function StatusMessage({ children }: { children: string }) {
+	return <p className="text-sm text-content-disabled p-3">{children}</p>;
 }

@@ -12,10 +12,7 @@ import {
 } from "../../../../model/DatasetSettings";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
-import ResourceEditButton, {
-	RemoveResource,
-	type ResourceEditButtonProp,
-} from "./ResourceEditButton";
+import { createEditButton, createRemoveButton } from "./ResourceEditButton";
 
 export default function DatasetSettingsDialog(props: {
 	fileName: string;
@@ -68,20 +65,8 @@ export function DatasetSettingsEditDialog(props: {
 						return new DatasetSettings(updatedSettings, cur.commonSettings);
 					})
 				}
-				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={({
-					setting,
-					handleDialogClose,
-					handleCommit,
-				}) => (
-					<DatasetSettingDialog
-						setting={setting}
-						handleDialogClose={handleDialogClose}
-						handleCommit={handleCommit}
-					/>
-				)}
+				SettingDialogComponent={DatasetSettingDialog}
 				newSetting={newDatasetSetting}
-				getKey={(setting) => setting.displayName()}
 			/>
 			<SettingTable<DatasetSetting>
 				caption="Common Settings"
@@ -92,56 +77,13 @@ export function DatasetSettingsEditDialog(props: {
 						return new DatasetSettings(cur.settings, updatedCommonSettings);
 					})
 				}
-				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={({
-					setting,
-					handleDialogClose,
-					handleCommit,
-				}) => (
-					<DatasetSettingDialog
-						setting={setting}
-						handleDialogClose={handleDialogClose}
-						handleCommit={handleCommit}
-					/>
-				)}
+				SettingDialogComponent={DatasetSettingDialog}
 				newSetting={newDatasetSetting}
-				getKey={(setting) => setting.displayName()}
 			/>
 		</SettingDialog>
 	);
 }
-export function DatasetSettingEditButton({
-	path,
-	setPath,
-}: ResourceEditButtonProp) {
-	const renderDialog = (open: boolean, closeDialog: () => void) => {
-		if (!open) {
-			return null;
-		}
-		return (
-			<DatasetSettingsDialog
-				fileName={path}
-				handleDialogClose={closeDialog}
-				handleSave={(newPath: string) => {
-					setPath(newPath);
-					closeDialog();
-				}}
-			/>
-		);
-	};
-
-	return <ResourceEditButton renderDialog={renderDialog} />;
-}
-export function RemoveDatasetSettingButton({
-	path,
-	setPath,
-}: ResourceEditButtonProp) {
-	const deleteSettings = useDeleteDatasetSettings();
-	return (
-		<RemoveResource
-			path={path}
-			setPath={setPath}
-			deleteResource={deleteSettings}
-		/>
-	);
-}
+export const DatasetSettingEditButton = createEditButton(DatasetSettingsDialog);
+export const RemoveDatasetSettingButton = createRemoveButton(
+	useDeleteDatasetSettings,
+);

@@ -6,24 +6,30 @@ import {
 	EditButton,
 } from "../element/ButtonIcon";
 
-interface SettingTableProps<T> {
+export interface SettingDialogComponentProps<T> {
+	setting: T;
+	handleDialogClose: () => void;
+	handleCommit: (newSettings: T) => void;
+}
+
+interface Displayable {
+	displayName(): string;
+}
+
+interface SettingTableProps<T extends Displayable> {
 	caption: string;
 	settings: T[];
 	setSettings: (convertFunction: (currentSettings: T[]) => T[]) => void;
 	addSettings?: (current: T[], newSettings: T) => T[];
 	updateSettings?: (current: T[], beforeSettings: T, newSettings: T) => T[];
 	deleteSettings?: (current: T[], targetSettings: T) => T[];
-	renderSetting: (setting: T) => React.ReactNode;
-	SettingDialogComponent: React.ComponentType<{
-		setting: T;
-		handleDialogClose: () => void;
-		handleCommit: (newSettings: T) => void;
-	}>;
+	renderSetting?: (setting: T) => React.ReactNode;
+	SettingDialogComponent: React.ComponentType<SettingDialogComponentProps<T>>;
 	newSetting: () => T;
-	getKey: (setting: T) => string | number;
+	getKey?: (setting: T) => string | number;
 }
 
-export default function SettingTable<T>({
+export default function SettingTable<T extends Displayable>({
 	caption,
 	settings,
 	setSettings,
@@ -31,10 +37,10 @@ export default function SettingTable<T>({
 	updateSettings = (current, before, after) =>
 		current.map((s) => (s === before ? after : s)),
 	deleteSettings = (current, item) => current.filter((s) => s !== item),
-	renderSetting,
+	renderSetting = (setting) => setting.displayName(),
 	SettingDialogComponent,
 	newSetting,
-	getKey,
+	getKey = (setting) => setting.displayName(),
 }: SettingTableProps<T>) {
 	const defaultState = { setting: newSetting(), action: "" };
 	const [selectSettings, setSelectSettings] = useState(defaultState);
