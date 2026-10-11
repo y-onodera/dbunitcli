@@ -24,7 +24,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Generate</h1>
-  <p>テンプレートまたは組み込み定義からファイルを生成します。<code>generateType</code> は大きく 2 系統に分かれます。</p>
+  <p>テンプレートまたは組み込み定義からファイルを生成します。入力データ（<code>srcData</code>）は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。<code>generateType</code> は大きく 2 系統に分かれます。</p>
   <ul>
     <li><strong>テンプレート指定タイプ</strong>（<code>txt</code> / <code>xlsx</code> / <code>xls</code>）: <code>template</code> オプションで指定した任意のテンプレートファイルにデータを埋め込みます。出力内容はテンプレート次第で自由に設計できます。</li>
     <li><strong>固定成果物タイプ</strong>（<code>settings</code> / <code>sql</code> / <code>ddl</code> / <code>xlsxTemplate</code> / <code>xlsxSchema</code> / <code>javaBean</code> / <code>fixedColumnDef</code>）: テーブルのカラム情報等から、決まった形式の成果物ファイルを自動生成します。<code>template</code> は使用しません。組み込みテンプレート以外の出力形式にしたい場合は、<code>generateType=txt</code> と <code>unitSetting</code> を組み合わせて同等の内容を再現してください。</li>
@@ -33,13 +33,13 @@
   <h2>generateType 一覧</h2>
   <table>
     <tr><th>値</th><th>分類</th><th>説明</th><th>unit</th></tr>
-    <tr><td><a href="generate/types/txt.html">txt</a></td><td>テンプレート指定 / テキスト</td><td>StringTemplate 4 を使ったテキストファイル生成（SQL・CSV・任意テキスト等）</td><td>record / table / dataset</td></tr>
-    <tr><td><a href="generate/types/xlsx.html">xlsx</a></td><td>テンプレート指定 / Excel</td><td>jxls を使った <code>.xlsx</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
+    <tr><td><a href="generate/types/txt.html">txt</a></td><td>テンプレート指定 / テキスト</td><td><a href="../sections/template.html">StringTemplate 4</a> を使ったテキストファイル生成（SQL・CSV・任意テキスト等）</td><td>record / table / dataset</td></tr>
+    <tr><td><a href="generate/types/xlsx.html">xlsx</a></td><td>テンプレート指定 / Excel</td><td><a href="../sections/jxls.html">jxls</a> を使った <code>.xlsx</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
     <tr><td><a href="generate/types/xlsx.html">xls</a></td><td>テンプレート指定 / Excel</td><td>jxls を使った <code>.xls</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
-    <tr><td><a href="generate/types/settings.html">settings</a></td><td>固定成果物 / JSON</td><td>Dataset Settings ファイルのひな型を生成</td><td>dataset（固定）</td></tr>
+    <tr><td><a href="generate/types/settings.html">settings</a></td><td>固定成果物 / JSON</td><td><a href="../dialogs/dataset-settings.html">Dataset Settings</a> ファイルのひな型を生成</td><td>dataset（固定）</td></tr>
     <tr><td><a href="generate/types/sql.html">sql</a></td><td>固定成果物 / テキスト</td><td>INSERT / UPDATE / DELETE / CLEAN_INSERT SQL ファイルを生成</td><td>table（固定）</td></tr>
     <tr><td><a href="generate/types/ddl.html">ddl</a></td><td>固定成果物 / テキスト</td><td>テーブルのカラム情報から CREATE TABLE 用の DDL ファイルを生成</td><td>table（固定）</td></tr>
-    <tr><td><a href="generate/types/xlsxSchema.html">xlsxSchema</a></td><td>固定成果物 / JSON</td><td>データセットのカラム情報から Xlsx Schema 設定ファイルのひな型を生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="generate/types/xlsxSchema.html">xlsxSchema</a></td><td>固定成果物 / JSON</td><td>データセットのカラム情報から <a href="../dialogs/xlsx-schema.html">Xlsx Schema</a> 設定ファイルのひな型を生成</td><td>table（固定）</td></tr>
     <tr><td><a href="generate/types/javaBean.html">javaBean</a></td><td>固定成果物 / テキスト</td><td>テーブルのカラム情報から JavaBean の <code>.java</code> ソースを生成</td><td>table（固定）</td></tr>
     <tr><td><a href="generate/types/fixedColumnDef.html">fixedColumnDef</a></td><td>固定成果物 / JSON</td><td>固定長出力用のカラム幅定義ファイルを生成</td><td>table（固定）</td></tr>
     <tr><td><a href="generate/types/xlsxTemplate.html">xlsxTemplate</a></td><td>固定成果物 / Excel</td><td>jxls テンプレートのひな型 <code>.xlsx</code> を生成</td><td>dataset（固定）</td></tr>
@@ -66,7 +66,7 @@
   <h2>共通オプション</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>template</td><td>テンプレートファイルのパス（<code>txt</code> / <code>xlsx</code> / <code>xls</code> タイプで使用）</td></tr>
+    <tr><td>template</td><td><a href="../sections/template.html">テンプレート</a>ファイルのパス（<code>txt</code> / <code>xlsx</code> / <code>xls</code> タイプで使用）</td></tr>
     <tr><td>result</td><td>生成結果ファイルを配置するディレクトリ</td></tr>
     <tr><td>resultPath</td><td><code>result</code> ディレクトリからの相対パス（テンプレート変数を使用可能）</td></tr>
     <tr><td>outputEncoding</td><td>出力ファイルの文字コード（<code>txt</code> タイプのみ、デフォルト: <code>UTF-8</code>）</td></tr>
@@ -77,14 +77,5 @@
 
   <h2>固定成果物タイプ</h2>
   <p>テーブルのカラム情報等から、決まった形式の成果物ファイルを組み込みロジック・組み込みテンプレートで自動生成します。<code>template</code> は使用しません。詳細は上記一覧の各 generateType のページを参照してください。</p>
-
-  <h2>関連ページ</h2>
-  <ul>
-    <li><a href="../sections/dataset-load-form.html">Dataset Load Form</a> — <code>srcData</code> 入力フォームの詳細</li>
-    <li><a href="../sections/template.html">Template</a> — <code>txt</code> タイプの StringTemplate 4 オプション</li>
-    <li><a href="../sections/jxls.html">Jxls</a> — <code>xlsx</code> / <code>xls</code> タイプの jxls オプション</li>
-    <li><a href="../dialogs/dataset-settings.html">Dataset Settings</a> — <code>settings</code> タイプが生成する設定ファイルの詳細</li>
-    <li><a href="../dialogs/xlsx-schema.html">Xlsx Schema</a> — <code>xlsxSchema</code> タイプが生成する設定ファイルの詳細</li>
-  </ul>
 </body>
 </html>

@@ -22,7 +22,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>StringTemplate 4 書式リファレンス</h1>
-  <p>DBUnit CLI のテンプレート処理では <strong>StringTemplate 4 (ST4)</strong> を使用します。テンプレート内の値は <code>$値:書式名()$</code> の形式でフォーマットできます。ST4 標準の書式に加えて、DBUnit CLI 独自の拡張書式が利用可能です。</p>
+  <p>DBUnit CLI のテンプレート処理では <strong>StringTemplate 4 (ST4)</strong> を使用します。テンプレート内の値は <code>$値:書式名()$</code> の形式でフォーマットできます。ST4 標準の書式に加えて、DBUnit CLI 独自の拡張書式が利用可能です。テンプレートは <a href="../commands/generate.html">Generate</a> や <a href="../commands/run.html">Run</a> などで使用します。</p>
 
   <h2 id="section-syntax">基本構文</h2>
   <p>書式は ST4 のレンダラー呼び出しとして、属性参照の直後に <code>:</code> で連結します。</p>
@@ -247,12 +247,5 @@ $insert()$$commit()$</pre>
 insert into USERS (id, name, age) values (1, 'Alice', 30);
 insert into USERS (id, name, age) values (2, 'O''Brien', null);
 commit;</pre>
-
-  <h2>関連ページ</h2>
-  <ul>
-    <li><a href="../sections/template.html">Template</a> — ST4 テンプレートの設定項目・パラメータバインド・グループファイル</li>
-    <li><a href="../commands/generate.html">Generate</a> — テンプレートを使ったファイル生成コマンド</li>
-    <li><a href="../commands/run.html">Run</a> — SQL / ANT スクリプトの前処理として使用</li>
-  </ul>
 </body>
 </html>

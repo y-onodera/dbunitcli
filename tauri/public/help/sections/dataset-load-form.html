@@ -40,7 +40,7 @@
     <tr><td><a href="dataset-load-form/types/csv.html">csv</a></td><td>CSV / TSV など区切り文字付きテキスト。区切り文字・囲み文字を指定可能</td></tr>
     <tr><td><a href="dataset-load-form/types/fixed.html">fixed</a></td><td>固定長テキスト。カラム幅（バイト数）と <code>headerName</code> を指定して列に分割</td></tr>
     <tr><td><a href="dataset-load-form/types/reg.html">reg</a></td><td>正規表現でヘッダ行・データ行をパースして列に分割</td></tr>
-    <tr><td><a href="dataset-load-form/types/xlsx.html">xls / xlsx</a></td><td>Excel ファイル。シート単位でテーブル化</td></tr>
+    <tr><td><a href="dataset-load-form/types/xlsx.html">xls / xlsx</a></td><td>Excel ファイル。シート単位でテーブル化（マッピング定義は <a href="../dialogs/xlsx-schema.html">Xlsx Schema</a>）</td></tr>
     <tr><td><a href="dataset-load-form/types/table.html">table</a></td><td>テーブル名を列挙したテキストファイルに従い、JDBC 接続先のテーブルを読み込む</td></tr>
     <tr><td><a href="dataset-load-form/types/sql.html">sql</a></td><td>SQL クエリの実行結果。JDBC 接続設定と SQL ファイルを指定</td></tr>
     <tr><td><a href="dataset-load-form/types/csvq.html">csvq</a></td><td>H2 上で SQL を実行した結果を取得。SQL 内の <code>CSVREAD()</code> 関数で CSV ファイルを参照し、複数 CSV の JOIN などに使用</td></tr>
@@ -73,14 +73,5 @@
     <tr><td>settingEncoding</td><td>Dataset Settings ファイルの文字コード</td></tr>
   </table>
   <p>テキストボックス横の編集ボタンから <a href="../dialogs/dataset-setting.html">Dataset Setting</a> ダイアログを開き、テーブルごとの設定を GUI で編集できます。generate ボタンからは、既存データセットのテーブル・カラム構成をもとに設定の雛型を生成できます。</p>
-
-  <h2>関連ページ</h2>
-  <ul>
-    <li><a href="data-load.html">Data Load</a> — ヘッダ・開始行・メタデータなど読み込み時の挙動</li>
-    <li><a href="traversal.html">Traversal</a> — ディレクトリ走査条件</li>
-    <li><a href="../dialogs/dataset-settings.html">Dataset Settings</a> — 設定ファイル全体（<code>settings</code> / <code>commonSettings</code> / <code>import</code>）の書式</li>
-    <li><a href="../dialogs/dataset-setting.html">Dataset Setting</a> — テーブル単位の設定ダイアログ</li>
-    <li><a href="../dialogs/xlsx-schema.html">Xlsx Schema</a> — Xlsx 入力のマッピング定義</li>
-  </ul>
 </body>
 </html>
