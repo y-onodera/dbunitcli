@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
 	DialogFooter,
+	DialogHelpButton,
 	DialogTitle,
 	FullDialog,
 } from "../../../../components/dialog";
@@ -117,6 +118,10 @@ function XlsxSchemaGenerateDialog({
 		<FullDialog onClose={handleDialogClose}>
 			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
 				<DialogTitle>Generate Xlsx Schema</DialogTitle>
+				<DialogHelpButton
+					command="xlsx-schema-generate"
+					label="Xlsx Schema Generate"
+				/>
 				{loadState.status === "loading" && (
 					<div className="text-content-muted">Loading...</div>
 				)}
