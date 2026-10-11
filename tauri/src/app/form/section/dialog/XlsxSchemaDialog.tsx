@@ -12,10 +12,7 @@ import {
 	XlsxSchema,
 } from "../../../../model/XlsxSchema";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
-import ResourceEditButton, {
-	RemoveResource,
-	type ResourceEditButtonProp,
-} from "./ResourceEditButton";
+import { createEditButton, createRemoveButton } from "./ResourceEditButton";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 
@@ -69,20 +66,8 @@ export function XlsxSchemaEditDialog(props: {
 						return new XlsxSchema(updatedRows, cur.cells);
 					})
 				}
-				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={({
-					setting,
-					handleDialogClose,
-					handleCommit,
-				}) => (
-					<XlsxRowSettingDialog
-						setting={setting}
-						handleDialogClose={handleDialogClose}
-						handleCommit={handleCommit}
-					/>
-				)}
+				SettingDialogComponent={XlsxRowSettingDialog}
 				newSetting={createRowSetting}
-				getKey={(setting) => setting.displayName()}
 			/>
 			<SettingTable<CellSetting>
 				caption="Random Cell Mapping Tables"
@@ -93,57 +78,11 @@ export function XlsxSchemaEditDialog(props: {
 						return new XlsxSchema(cur.rows, updatedCells);
 					})
 				}
-				renderSetting={(setting) => setting.displayName()}
-				SettingDialogComponent={({
-					setting,
-					handleDialogClose,
-					handleCommit,
-				}) => (
-					<XlsxCellSettingDialog
-						setting={setting}
-						handleDialogClose={handleDialogClose}
-						handleCommit={handleCommit}
-					/>
-				)}
+				SettingDialogComponent={XlsxCellSettingDialog}
 				newSetting={createCellSetting}
-				getKey={(setting) => setting.displayName()}
 			/>
 		</SettingDialog>
 	);
 }
-export function XlsxSchemaEditButton({
-	path,
-	setPath,
-}: ResourceEditButtonProp) {
-	const renderDialog = (open: boolean, closeDialog: () => void) => {
-		if (!open) {
-			return null;
-		}
-		return (
-			<XlsxSchemaDialog
-				fileName={path}
-				handleDialogClose={closeDialog}
-				handleSave={(newPath: string) => {
-					setPath(newPath);
-					closeDialog();
-				}}
-			/>
-		);
-	};
-
-	return <ResourceEditButton renderDialog={renderDialog} />;
-}
-export function RemoveXlsxSchemaButton({
-	path,
-	setPath,
-}: ResourceEditButtonProp) {
-	const deleteSchema = useDeleteXlsxSchema();
-
-	return (
-		<RemoveResource
-			path={path}
-			setPath={setPath}
-			deleteResource={deleteSchema}
-		/>
-	);
-}
+export const XlsxSchemaEditButton = createEditButton(XlsxSchemaDialog);
+export const RemoveXlsxSchemaButton = createRemoveButton(useDeleteXlsxSchema);

@@ -268,10 +268,8 @@ function renderModeContent(
 				setSettings={(convert) =>
 					setTarget((cur) => cur.with({ separate: convert(cur.separate) }))
 				}
-				renderSetting={(setting) => setting.displayName()}
 				SettingDialogComponent={DatasetSettingDialog}
 				newSetting={newDatasetSetting}
-				getKey={(setting) => setting.displayName()}
 			/>
 		);
 	}

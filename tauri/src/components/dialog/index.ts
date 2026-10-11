@@ -19,4 +19,5 @@ export {
 	SettingDialog,
 	Text,
 } from "./SettingDialog";
+export type { SettingDialogComponentProps } from "./SettingTable";
 export { default as SettingTable } from "./SettingTable";

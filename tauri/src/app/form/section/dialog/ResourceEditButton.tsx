@@ -1,4 +1,4 @@
-import { type ReactElement, useState } from "react";
+import { type ComponentType, type ReactElement, useState } from "react";
 import {
 	DeleteButton,
 	EditButton,
@@ -73,4 +73,54 @@ export default function ResourceEditButton({
 			)}
 		</>
 	);
+}
+
+// ファイル名で開く編集ダイアログ（保存したらパスを反映して閉じる）を持つ編集ボタンを生成する
+export function createEditButton(
+	DialogComponent: ComponentType<{
+		fileName: string;
+		handleDialogClose: () => void;
+		handleSave: (path: string) => void;
+	}>,
+) {
+	return function EditResourceButton({
+		path,
+		setPath,
+	}: ResourceEditButtonProp) {
+		const renderDialog = (open: boolean, closeDialog: () => void) => {
+			if (!open) {
+				return null;
+			}
+			return (
+				<DialogComponent
+					fileName={path}
+					handleDialogClose={closeDialog}
+					handleSave={(newPath: string) => {
+						setPath(newPath);
+						closeDialog();
+					}}
+				/>
+			);
+		};
+		return <ResourceEditButton renderDialog={renderDialog} />;
+	};
+}
+
+// 削除用フックからRemoveResourceを使う削除ボタンを生成する
+export function createRemoveButton(
+	useDeleteResource: () => (path: string) => Promise<string>,
+) {
+	return function RemoveResourceButton({
+		path,
+		setPath,
+	}: ResourceEditButtonProp) {
+		const deleteResource = useDeleteResource();
+		return (
+			<RemoveResource
+				path={path}
+				setPath={setPath}
+				deleteResource={deleteResource}
+			/>
+		);
+	};
 }
