@@ -25,9 +25,9 @@ import {
 	refreshDialogOptions,
 } from "./refreshableDialogForm";
 
-const formId = "scaffoldForm";
+const formId = "txtTemplateGenerateForm";
 
-export type ScaffoldFormValues = FormValues;
+export type TxtTemplateGenerateFormValues = FormValues;
 
 type LoadState = DialogLoadState<ScaffoldOptions>;
 
@@ -49,12 +49,12 @@ function requiredOption(element: CommandOption): CommandOption {
 	return { ...element, attribute: { ...element.attribute, required: true } };
 }
 
-function ScaffoldDialog({
+function TxtTemplateGenerateDialog({
 	prefill,
 	handleReflect,
 	handleDialogClose,
 }: {
-	prefill: ScaffoldFormValues;
+	prefill: TxtTemplateGenerateFormValues;
 	handleReflect: (params: Record<string, string>) => Promise<void>;
 	handleDialogClose: () => void;
 }) {
@@ -153,7 +153,12 @@ function ScaffoldDialog({
 	return createPortal(
 		<FullDialog onClose={handleDialogClose}>
 			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
-				<DialogTitle>Scaffold</DialogTitle>
+				<DialogTitle
+					command="dialogs/txt-template-generate"
+					label="Txt Template Generate"
+				>
+					Generate Txt Template
+				</DialogTitle>
 				{loadState.status === "loading" && (
 					<div className="text-content-muted">Loading...</div>
 				)}
@@ -178,14 +183,16 @@ function ScaffoldDialog({
 	);
 }
 
-export function ScaffoldButton({
+export function TxtTemplateGenerateButton({
 	scaffoldPrefill,
 	handleReflect,
 }: {
-	scaffoldPrefill: () => ScaffoldFormValues;
+	scaffoldPrefill: () => TxtTemplateGenerateFormValues;
 	handleReflect: (params: Record<string, string>) => Promise<void>;
 }) {
-	const [prefill, setPrefill] = useState<ScaffoldFormValues | null>(null);
+	const [prefill, setPrefill] = useState<TxtTemplateGenerateFormValues | null>(
+		null,
+	);
 	return (
 		<div>
 			<AddButton
@@ -193,7 +200,7 @@ export function ScaffoldButton({
 				handleClick={() => setPrefill(scaffoldPrefill())}
 			/>
 			{prefill && (
-				<ScaffoldDialog
+				<TxtTemplateGenerateDialog
 					prefill={prefill}
 					handleReflect={handleReflect}
 					handleDialogClose={() => setPrefill(null)}

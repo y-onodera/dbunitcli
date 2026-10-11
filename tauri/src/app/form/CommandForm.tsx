@@ -6,7 +6,7 @@ import { ConvertForm } from "./ConvertForm";
 import { GenerateForm } from "./GenerateForm";
 import { ParameterizeForm } from "./ParameterizeForm";
 import { RunForm } from "./RunForm";
-import type { ScaffoldFormValues } from "./section/dialog/ScaffoldDialog";
+import type { TxtTemplateGenerateFormValues } from "./section/dialog/TxtTemplateGenerateDialog";
 
 export default function CommandForm(prop: {
 	formData: (validate: boolean) => {
@@ -18,8 +18,8 @@ export default function CommandForm(prop: {
 	const refreshSelect = useRefreshSelectParameter(select.options?.command);
 	const handleTypeSelect = () => refreshSelect(prop.formData(false).values);
 	// generateフォームの-src.*をscaffoldダイアログの-dataset.*初期値として引き継ぐ
-	const scaffoldPrefill = (): ScaffoldFormValues => {
-		const prefill: ScaffoldFormValues = { "-target": "ddl" };
+	const scaffoldPrefill = (): TxtTemplateGenerateFormValues => {
+		const prefill: TxtTemplateGenerateFormValues = { "-target": "ddl" };
 		for (const [key, value] of Object.entries(prop.formData(false).values)) {
 			if (key.startsWith("-src.")) {
 				prefill[`-dataset.${key.substring("-src.".length)}`] = value;

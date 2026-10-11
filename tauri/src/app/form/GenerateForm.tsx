@@ -5,9 +5,9 @@ import type { CommandOption } from "../../model/CommandOption";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import {
-	ScaffoldButton,
-	type ScaffoldFormValues,
-} from "./section/dialog/ScaffoldDialog";
+	TxtTemplateGenerateButton,
+	type TxtTemplateGenerateFormValues,
+} from "./section/dialog/TxtTemplateGenerateDialog";
 import { XlsxTemplateGenerateButton } from "./section/dialog/XlsxTemplateGenerateDialog";
 import Check from "./section/element/Check";
 import FileText from "./section/element/FileText";
@@ -43,7 +43,7 @@ export function GenerateForm(prop: {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
 	generate: GenerateOptions;
-	scaffoldPrefill: () => ScaffoldFormValues;
+	scaffoldPrefill: () => TxtTemplateGenerateFormValues;
 	handleScaffoldReflect: (params: Record<string, string>) => Promise<void>;
 }) {
 	const generate = prop.generate;
@@ -55,7 +55,7 @@ export function GenerateForm(prop: {
 	const templateGenerateButtons = (setPath: (value: string) => void) => {
 		if (generateTypeValue === "txt") {
 			return [
-				<ScaffoldButton
+				<TxtTemplateGenerateButton
 					key="generate"
 					scaffoldPrefill={prop.scaffoldPrefill}
 					handleReflect={prop.handleScaffoldReflect}
