@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FullDialog } from "../../components/dialog";
+import { DialogBody, FullDialog } from "../../components/dialog";
 import { DirectoryButton } from "../../components/element/ButtonIcon";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import StartupForm from "../startup/StartupForm";
@@ -29,9 +29,9 @@ export default function Header() {
 function WorkspaceDialog({ onClose }: { onClose: () => void }) {
 	return (
 		<FullDialog onClose={onClose} className="w-full max-w-4xl">
-			<div className="p-4 rounded-lg mt-2">
+			<DialogBody size="fluid">
 				<StartupForm onSelect={onClose} onClose={onClose} />
-			</div>
+			</DialogBody>
 		</FullDialog>
 	);
 }
