@@ -7,14 +7,17 @@ import {
 	InputLabel,
 	SelectBox,
 } from "../element/Input";
-import { DialogFooter } from "./ModalOverlay";
 import { FullDialog } from "./FullDialog";
+import { DialogFooter, DialogTitle } from "./ModalOverlay";
 
 type CommonProps = {
 	handleDialogClose: () => void;
 	children: ReactNode;
 	commitLabel?: string;
 	commitDisabled?: boolean;
+	title?: string;
+	helpCommand?: string;
+	helpLabel?: string;
 };
 
 type SettingMode<T> = {
@@ -39,6 +42,13 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 
 	return (
 		<FullDialog onClose={props.handleDialogClose}>
+			{props.title && (
+				<div className="px-4 pt-4">
+					<DialogTitle command={props.helpCommand} label={props.helpLabel}>
+						{props.title}
+					</DialogTitle>
+				</div>
+			)}
 			<div
 				className={
 					isFileMode
@@ -254,7 +264,9 @@ export function ArraysText(props: {
 		<>
 			{showLabel && (
 				<div className="grid grid-cols-5 pb-1">
-					<span className="col-start-2 text-xs text-content-secondary">column</span>
+					<span className="col-start-2 text-xs text-content-secondary">
+						column
+					</span>
 				</div>
 			)}
 			<div className="grid grid-cols-5 pb-2">
@@ -356,7 +368,9 @@ export function KeyValueText(props: {
 		<>
 			{props.index === 0 && (
 				<div className="grid grid-cols-5 pb-1">
-					<span className="col-start-2 text-xs text-content-secondary">name</span>
+					<span className="col-start-2 text-xs text-content-secondary">
+						name
+					</span>
 					<span className="col-start-3 col-span-2 ml-1 text-xs text-content-secondary">
 						expression
 					</span>
@@ -399,4 +413,3 @@ export function KeyValueText(props: {
 		</>
 	);
 }
-
