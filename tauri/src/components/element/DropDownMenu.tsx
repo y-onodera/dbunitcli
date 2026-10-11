@@ -18,6 +18,7 @@ export default function DropDownMenu({
 	const [showMenu, setShowMenu] = useState(false);
 	const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
 	const buttonRef = useRef<HTMLDivElement>(null);
+	const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
 	// React のイベントはポータルを越えて伝播するため、メニュー配下から
 	// createPortal されたダイアログ内の操作も「内側」として判定できる
@@ -27,6 +28,9 @@ export default function DropDownMenu({
 		if (showMenu && buttonRef.current) {
 			const rect = buttonRef.current.getBoundingClientRect();
 			const menuWidth = 96;
+			// showModal() 済みの dialog は top layer に載り z-index で越えられないため、
+			// dialog 内から開いた場合はその dialog 配下に描画する
+			setPortalTarget(buttonRef.current.closest("dialog") ?? document.body);
 			// スクロール領域に隠れないよう fixed で画面基準に配置する
 			if (rect.right + menuWidth > window.innerWidth) {
 				setMenuStyle({ right: window.innerWidth - rect.left, top: rect.top });
@@ -70,6 +74,7 @@ export default function DropDownMenu({
 		>
 			<BlueSettingButton handleClick={toggleMenu} />
 			{showMenu &&
+				portalTarget &&
 				createPortal(
 					<div
 						ref={menuRef}
@@ -78,7 +83,7 @@ export default function DropDownMenu({
 					>
 						<ul className="space-y-4">{children(closeMenu)}</ul>
 					</div>,
-					document.body,
+					portalTarget,
 				)}
 		</div>
 	);
