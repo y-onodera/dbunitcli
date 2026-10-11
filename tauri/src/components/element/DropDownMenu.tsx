@@ -73,7 +73,7 @@ export default function DropDownMenu({
 				createPortal(
 					<div
 						ref={menuRef}
-						className="fixed z-modal p-4 text-content bg-surface border border-border-faint rounded-lg shadow-dropdown"
+						className="fixed z-modal-nested p-4 text-content bg-surface border border-border-faint rounded-lg shadow-dropdown"
 						style={menuStyle}
 					>
 						<ul className="space-y-4">{children(closeMenu)}</ul>
