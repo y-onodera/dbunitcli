@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { SettingDialog, SettingTable } from "../../../../components/dialog";
-import { ButtonIcon } from "../../../../components/element/ButtonIcon";
-import { HelpIcon } from "../../../../components/element/Icon";
 import {
 	useDatasetSettingsData,
 	useDeleteDatasetSettings,
@@ -13,7 +11,6 @@ import {
 	newDatasetSetting,
 } from "../../../../model/DatasetSettings";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
-import { openHelpWindow } from "../../../../utils/helpWindow";
 import DatasetSettingDialog from "./DatasetSettingDialog";
 import ResourceEditButton, {
 	RemoveResource,
@@ -50,6 +47,9 @@ export function DatasetSettingsEditDialog(props: {
 	);
 	return (
 		<SettingDialog
+			title="Dataset Settings"
+			helpCommand="dataset-settings"
+			helpLabel="Dataset Settings"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
 			handleSave={(fileName) =>
@@ -59,16 +59,6 @@ export function DatasetSettingsEditDialog(props: {
 				)
 			}
 		>
-			<div className="flex justify-end px-4 pt-2">
-				<ButtonIcon
-					title="Help"
-					handleClick={() => {
-						openHelpWindow("dataset-settings", "Dataset Settings");
-					}}
-				>
-					<HelpIcon />
-				</ButtonIcon>
-			</div>
 			<SettingTable<DatasetSetting>
 				caption="Add Metadata Settings"
 				settings={dataSettings.settings}

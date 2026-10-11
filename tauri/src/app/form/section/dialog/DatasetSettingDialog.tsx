@@ -11,10 +11,9 @@ import {
 } from "../../../../components/dialog";
 import {
 	BlueButtonIcon,
-	ButtonIcon,
 	ExpandButton,
 } from "../../../../components/element/ButtonIcon";
-import { HelpIcon, PreviewIcon } from "../../../../components/element/Icon";
+import { PreviewIcon } from "../../../../components/element/Icon";
 import { ResourceDatalist } from "../../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useDatasetTableNames } from "../../../../hooks/useDatasetSettings";
@@ -23,7 +22,6 @@ import type {
 	DatasetSettingMode,
 } from "../../../../model/DatasetSettings";
 import { newDatasetSetting } from "../../../../model/DatasetSettings";
-import { openHelpWindow } from "../../../../utils/helpWindow";
 import ColumnDatalistDialog from "./ColumnDatalistDialog";
 
 export default function DatasetSettingDialog(props: {
@@ -46,20 +44,13 @@ export default function DatasetSettingDialog(props: {
 
 	return (
 		<SettingDialog
+			title="Dataset Setting"
+			helpCommand="dataset-setting"
+			helpLabel="Dataset Setting"
 			setting={target}
 			handleDialogClose={props.handleDialogClose}
 			handleCommit={props.handleCommit}
 		>
-			<div className="flex justify-end px-4 pt-2">
-				<ButtonIcon
-					title="Help"
-					handleClick={() => {
-						openHelpWindow("dataset-setting", "Dataset Setting");
-					}}
-				>
-					<HelpIcon />
-				</ButtonIcon>
-			</div>
 			<Fieldset legend="Target">
 				<Select
 					name="target"

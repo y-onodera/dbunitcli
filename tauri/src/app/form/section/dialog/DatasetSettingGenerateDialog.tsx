@@ -116,7 +116,12 @@ function DatasetSettingGenerateDialog({
 	return createPortal(
 		<FullDialog onClose={handleDialogClose}>
 			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
-				<DialogTitle>Generate Dataset Setting</DialogTitle>
+				<DialogTitle
+					command="dataset-setting-generate"
+					label="Dataset Setting Generate"
+				>
+					Generate Dataset Setting
+				</DialogTitle>
 				{loadState.status === "loading" && (
 					<div className="text-content-muted">Loading...</div>
 				)}

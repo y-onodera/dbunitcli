@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { SectionHelpButton } from "./DialogHelpButton";
 
 export function ModalOverlay({
 	children,
@@ -22,8 +23,19 @@ export function ModalOverlay({
 	);
 }
 
-export function DialogTitle({ children }: { children: ReactNode }) {
-	return <h2 className="text-lg font-semibold mb-4">{children}</h2>;
+export function DialogTitle(props: {
+	children: ReactNode;
+	command?: string;
+	label?: string;
+}) {
+	return (
+		<h2 className="flex items-center gap-1 text-lg font-semibold mb-4">
+			{props.children}
+			{props.command && props.label && (
+				<SectionHelpButton command={props.command} label={props.label} />
+			)}
+		</h2>
+	);
 }
 
 export function DialogActions({ children }: { children: ReactNode }) {
@@ -31,5 +43,7 @@ export function DialogActions({ children }: { children: ReactNode }) {
 }
 
 export function DialogFooter({ children }: { children: ReactNode }) {
-	return <div className="flex items-center gap-2 justify-end p-4">{children}</div>;
+	return (
+		<div className="flex items-center gap-2 justify-end p-4">{children}</div>
+	);
 }

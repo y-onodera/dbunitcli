@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
 	DialogFooter,
-	DialogHelpButton,
 	DialogTitle,
 	FullDialog,
 } from "../../../../components/dialog";
@@ -117,11 +116,12 @@ function FixedColumnDefGenerateDialog({
 	return createPortal(
 		<FullDialog onClose={handleDialogClose}>
 			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
-				<DialogTitle>Generate Fixed Column Def</DialogTitle>
-				<DialogHelpButton
+				<DialogTitle
 					command="fixed-column-def-generate"
 					label="Fixed Column Def Generate"
-				/>
+				>
+					Generate Fixed Column Def
+				</DialogTitle>
 				{loadState.status === "loading" && (
 					<div className="text-content-muted">Loading...</div>
 				)}

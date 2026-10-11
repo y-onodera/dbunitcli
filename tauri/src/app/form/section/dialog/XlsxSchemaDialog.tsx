@@ -1,9 +1,5 @@
 import { useState } from "react";
-import {
-	DialogHelpButton,
-	SettingDialog,
-	SettingTable,
-} from "../../../../components/dialog";
+import { SettingDialog, SettingTable } from "../../../../components/dialog";
 import {
 	useDeleteXlsxSchema,
 	useSaveXlsxSchema,
@@ -52,6 +48,9 @@ export function XlsxSchemaEditDialog(props: {
 
 	return (
 		<SettingDialog
+			title="Xlsx Schema"
+			helpCommand="xlsx-schema"
+			helpLabel="Xlsx Schema"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
 			handleSave={(fileName) =>
@@ -61,7 +60,6 @@ export function XlsxSchemaEditDialog(props: {
 				)
 			}
 		>
-			<DialogHelpButton command="xlsx-schema" label="Xlsx Schema" />
 			<SettingTable<RowSetting>
 				caption="Rows Mapping Tables"
 				settings={xlsxSchema.rows}
