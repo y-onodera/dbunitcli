@@ -134,7 +134,12 @@ function XlsxTemplateGenerateDialog({
 	return createPortal(
 		<FullDialog onClose={handleDialogClose}>
 			<div className="overflow-y-auto max-h-[80vh] min-w-[600px] p-4">
-				<DialogTitle>Generate Xlsx Template</DialogTitle>
+				<DialogTitle
+					command="dialogs/xlsx-template-generate"
+					label="Xlsx Template Generate"
+				>
+					Generate Xlsx Template
+				</DialogTitle>
 				{loadState.status === "loading" && (
 					<div className="text-content-muted">Loading...</div>
 				)}
