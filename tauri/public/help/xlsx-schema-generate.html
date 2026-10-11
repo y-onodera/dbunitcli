@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Xlsx Schema Generate</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Xlsx Schema Generate</h1>
+  <p>既存データセットのテーブル・カラム構成をもとに、<a href="xlsx-schema.html">Xlsx Schema</a> の雛型を自動生成するダイアログです。xlsxSchema テキストボックス横のメニューの generate ボタンから開きます。</p>
+
+  <h2>入力</h2>
+  <p>雛型の元にするデータセットを、共通の <a href="dataset-load-form.html">Dataset Load Form</a> で指定します。ソースタイプの選択に応じて入力項目が切り替わります（CSV / Excel / テーブル / SQL など）。各ソースタイプの詳細は Dataset Load Form のページを参照してください。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>srcData</td><td>雛型の元にするデータセット。ソースタイプ・パス・エンコーディング・ヘッダ指定などを <a href="dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定します。</td></tr>
+  </table>
+
+  <h2>操作の流れ</h2>
+  <ol>
+    <li>元にするデータセットを指定します。</li>
+    <li>Execute を押すと、テーブルごとのカラム構成から Rows Mapping / Random Cell Mapping の設定が生成されます。</li>
+    <li>生成結果は <a href="xlsx-schema.html">Xlsx Schema</a> の編集ダイアログに反映された状態で開きます。内容を確認・編集してください。</li>
+    <li>ファイル名を指定して保存すると、その名前が xlsxSchema テキストボックスに設定されます。</li>
+  </ol>
+
+  <h2>注意</h2>
+  <ul>
+    <li>Execute が失敗した場合は、ダイアログ内にエラーメッセージが表示されます。入力内容を見直して再度実行してください。</li>
+    <li>Close を押すと、生成せずにダイアログを閉じます（xlsxSchema テキストボックスは変更されません）。</li>
+  </ul>
+</body>
+</html>
