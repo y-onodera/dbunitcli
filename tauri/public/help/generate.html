@@ -33,16 +33,16 @@
   <h2>generateType 一覧</h2>
   <table>
     <tr><th>値</th><th>分類</th><th>説明</th><th>unit</th></tr>
-    <tr><td><a href="#type-txt">txt</a></td><td>テンプレート指定 / テキスト</td><td>StringTemplate 4 を使ったテキストファイル生成（SQL・CSV・任意テキスト等）</td><td>record / table / dataset</td></tr>
-    <tr><td><a href="#type-xlsx">xlsx</a></td><td>テンプレート指定 / Excel</td><td>jxls を使った <code>.xlsx</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
-    <tr><td><a href="#type-xls">xls</a></td><td>テンプレート指定 / Excel</td><td>jxls を使った <code>.xls</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
-    <tr><td><a href="#type-settings">settings</a></td><td>固定成果物 / JSON</td><td>Dataset Settings ファイルのひな型を生成</td><td>dataset（固定）</td></tr>
-    <tr><td><a href="#type-sql">sql</a></td><td>固定成果物 / テキスト</td><td>INSERT / UPDATE / DELETE / CLEAN_INSERT SQL ファイルを生成</td><td>table（固定）</td></tr>
-    <tr><td><a href="#type-ddl">ddl</a></td><td>固定成果物 / テキスト</td><td>テーブルのカラム情報から CREATE TABLE 用の DDL ファイルを生成</td><td>table（固定）</td></tr>
-    <tr><td><a href="#type-xlsxSchema">xlsxSchema</a></td><td>固定成果物 / JSON</td><td>データセットのカラム情報から Xlsx Schema 設定ファイルのひな型を生成</td><td>table（固定）</td></tr>
-    <tr><td><a href="#type-javaBean">javaBean</a></td><td>固定成果物 / テキスト</td><td>テーブルのカラム情報から JavaBean の <code>.java</code> ソースを生成</td><td>table（固定）</td></tr>
-    <tr><td><a href="#type-fixedColumnDef">fixedColumnDef</a></td><td>固定成果物 / JSON</td><td>固定長出力用のカラム幅定義ファイルを生成</td><td>table（固定）</td></tr>
-    <tr><td><a href="#type-xlsxTemplate">xlsxTemplate</a></td><td>固定成果物 / Excel</td><td>jxls テンプレートのひな型 <code>.xlsx</code> を生成</td><td>dataset（固定）</td></tr>
+    <tr><td><a href="generatetype-txt.html">txt</a></td><td>テンプレート指定 / テキスト</td><td>StringTemplate 4 を使ったテキストファイル生成（SQL・CSV・任意テキスト等）</td><td>record / table / dataset</td></tr>
+    <tr><td><a href="generatetype-xlsx.html">xlsx</a></td><td>テンプレート指定 / Excel</td><td>jxls を使った <code>.xlsx</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
+    <tr><td><a href="generatetype-xlsx.html">xls</a></td><td>テンプレート指定 / Excel</td><td>jxls を使った <code>.xls</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
+    <tr><td><a href="generatetype-settings.html">settings</a></td><td>固定成果物 / JSON</td><td>Dataset Settings ファイルのひな型を生成</td><td>dataset（固定）</td></tr>
+    <tr><td><a href="generatetype-sql.html">sql</a></td><td>固定成果物 / テキスト</td><td>INSERT / UPDATE / DELETE / CLEAN_INSERT SQL ファイルを生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="generatetype-ddl.html">ddl</a></td><td>固定成果物 / テキスト</td><td>テーブルのカラム情報から CREATE TABLE 用の DDL ファイルを生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="generatetype-xlsxSchema.html">xlsxSchema</a></td><td>固定成果物 / JSON</td><td>データセットのカラム情報から Xlsx Schema 設定ファイルのひな型を生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="generatetype-javaBean.html">javaBean</a></td><td>固定成果物 / テキスト</td><td>テーブルのカラム情報から JavaBean の <code>.java</code> ソースを生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="generatetype-fixedColumnDef.html">fixedColumnDef</a></td><td>固定成果物 / JSON</td><td>固定長出力用のカラム幅定義ファイルを生成</td><td>table（固定）</td></tr>
+    <tr><td><a href="generatetype-xlsxTemplate.html">xlsxTemplate</a></td><td>固定成果物 / Excel</td><td>jxls テンプレートのひな型 <code>.xlsx</code> を生成</td><td>dataset（固定）</td></tr>
   </table>
 
   <h2>unit</h2>
@@ -73,194 +73,10 @@
   </table>
 
   <h2>テンプレート指定タイプ</h2>
-  <p><code>template</code> オプションで指定した任意のテンプレートファイルに、ソースデータを埋め込んで出力します。出力されるファイルの内容はテンプレートの記述次第です。</p>
-
-  <h3 id="type-txt">txt（テキストファイル生成）</h3>
-  <p>StringTemplate 4 テンプレートファイルを使い、テキストファイルを生成します。<code>template</code> オプションでテンプレートファイルを指定します。テンプレートエンジンの詳細設定は <code>template option</code> の展開ボタンから設定します（<a href="template.html">Template</a> 参照）。SQL・CSV・任意フォーマットのテキストなど、テンプレート次第で自由な成果物を作成できます。</p>
-
-  <h4>テンプレート変数</h4>
-  <p>unit の選択によってテンプレート内で使用できる変数が異なります。</p>
-  <table>
-    <tr><th>変数名</th><th>説明</th><th class="center">record</th><th class="center">table</th><th class="center">dataset</th></tr>
-    <tr><td>rowNumber</td><td>行 / テーブルのインデックス（0 始まり、dataset は常に 0）</td><td class="center">○</td><td class="center">○</td><td class="center">○</td></tr>
-    <tr><td>tableName</td><td>テーブル名</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
-    <tr><td>columns</td><td>カラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
-    <tr><td>primaryKeys</td><td>主キーカラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
-    <tr><td>columnsExcludeKey</td><td>主キー以外のカラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
-    <tr><td>row</td><td>現在行のデータ（列名 → 値 の Map）</td><td class="center">○</td><td class="center">—</td><td class="center">—</td></tr>
-    <tr><td>rows</td><td>テーブル全行のリスト（各要素は列名 → 値 の Map）</td><td class="center">—</td><td class="center">○</td><td class="center">—</td></tr>
-    <tr><td>dataSet</td><td>テーブル名をキーとする Map。各値は table スコープと同じ構造</td><td class="center">—</td><td class="center">—</td><td class="center">○</td></tr>
-  </table>
-
-  <h4>Scaffold ボタン</h4>
-  <p><code>generateType=txt</code> を選択すると <strong>Scaffold</strong> ボタンが表示されます。固定成果物タイプ（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）の組み込みテンプレートをカスタマイズ生成の出発点として書き出し、その結果をこのフォームへ反映するためのダイアログを開きます。</p>
-  <table>
-    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>target</td><td>雛型の生成対象（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）</td><td>ddl</td></tr>
-    <tr><td>template</td><td>書き出すテンプレートのファイル名（必須。<code>resources/template/{名前}.stg</code> と <code>{名前}.txt</code> をワークスペースへ出力）</td><td>—</td></tr>
-    <tr><td>unitSetting</td><td>書き出すサンプル unitSetting のファイル名（省略可。<code>resources/setting/{名前}.json</code> をワークスペースへ出力）</td><td>—</td></tr>
-    <tr><td>datasetType</td><td>記述子データセットの出力形式（<code>csv</code> / <code>xls</code> / <code>xlsx</code> / <code>table</code> / <code>fixed</code>）</td><td>csv</td></tr>
-    <tr><td>datasetEncoding</td><td>記述子データセットの出力文字コード（csv / fixed のみ）</td><td>UTF-8</td></tr>
-    <tr><td>fixedLength / defaultLength / align</td><td>target が <code>fixedColumnDef</code> の場合のみ表示。記述子データセットに書き出す桁数・デフォルト桁数・寄せ方向</td><td>— / 10 / left</td></tr>
-    <tr><td>dataset</td><td>記述子データセットの元になるデータソース。ダイアログを開いた時点の <code>src</code> セクションの内容が初期値として引き継がれます。指定するとテーブルごとの記述子データセット（1 カラム = 1 行）をワークスペースの <code>src</code> へ出力します</td><td>—</td></tr>
-  </table>
-  <p><strong>Execute</strong> を押すと雛型ファイルがワークスペースへ生成され、生成された雛型で駆動する設定（<code>generateType=txt</code>・<code>unit=table</code>・<code>template</code>・<code>template.templateGroup</code>・<code>unitSetting</code>・<code>resultPath</code>・<code>src</code>）がこのフォームへ反映されます。書き出された記述子データセットを編集してからそのまま <code>Exec</code> で生成できます。反映内容の保存は通常どおり <code>Save</code> ボタンで行ってください。</p>
-
-  <h3 id="type-xlsx">xlsx / <span id="type-xls">xls</span>（Excelファイル生成）</h3>
-  <p>jxls テンプレートファイルを使い、Excel ファイルを生成します。<code>template</code> オプションでテンプレートファイルを指定します。jxls 固有の設定は <code>jxls option</code> の展開ボタンから設定します（<a href="jxls.html">Jxls</a> 参照）。<code>xlsx</code> は Excel 2007 以降形式、<code>xls</code> は Excel 97-2003 形式で出力します。</p>
-  <table>
-    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>lazyLoad</td><td>Excel データを遅延ロードする（大規模データセット向け）</td><td>false</td></tr>
-  </table>
+  <p><code>template</code> オプションで指定した任意のテンプレートファイルに、ソースデータを埋め込んで出力します。出力内容はテンプレートの記述次第です。詳細は各 generateType のページ（<a href="generatetype-txt.html">txt</a> / <a href="generatetype-xlsx.html">xlsx・xls</a>）を参照してください。</p>
 
   <h2>固定成果物タイプ</h2>
-  <p>テーブルのカラム情報等から、決まった形式の成果物ファイルを組み込みロジック・組み込みテンプレートで自動生成します。<code>template</code> は使用しません。生成されるファイル形式ごとに以下へ分けています。</p>
-
-  <h3>テキスト / JSON 成果物</h3>
-
-  <h4 id="type-settings">settings</h4>
-  <p>データセットのカラム情報から <a href="dataset-settings.html">Dataset Settings</a> ファイルのひな型を JSON 形式で生成します。<code>unit</code> は <code>dataset</code> に固定です。<code>template</code> は使用しません。</p>
-  <table>
-    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>includeAllColumns</td><td>設定生成時にすべてのカラムを <code>include</code> / <code>string</code> 等の詳細ブロックとして含める（false の場合は主キーの <code>keys</code> のみ）</td><td>false</td></tr>
-  </table>
-  <p><strong>生成イメージ（<code>includeAllColumns=false</code>）:</strong></p>
-  <pre>{
-  "settings": [
-    {
-      "name" : "Test1"
-     ,"keys":["Key"]
-    }
-  , {
-      "name" : "Test2"
-     ,"keys":["PrimaryKey"]
-    }
-  ]
-}</pre>
-
-  <h4 id="type-sql">sql</h4>
-  <p>テーブルのカラム情報から SQL ファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません。ファイル名は <code>{sqlFilePrefix}{テーブル名}{sqlFileSuffix}.sql</code> になります。</p>
-  <table>
-    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>commit</td><td>生成した SQL の末尾に <code>commit;</code> を付与するかどうか</td><td>false</td></tr>
-    <tr><td>op</td><td>生成する SQL の種別: <code>INSERT</code> / <code>UPDATE</code> / <code>DELETE</code> / <code>REFRESH</code> / <code>CLEAN_INSERT</code></td><td>（未指定）</td></tr>
-    <tr><td>sqlFilePrefix</td><td>生成 SQL ファイル名のプレフィックス</td><td>（空）</td></tr>
-    <tr><td>sqlFileSuffix</td><td>生成 SQL ファイル名のサフィックス</td><td>（空）</td></tr>
-  </table>
-  <p><strong>生成イメージ（<code>op=INSERT</code>, ファイル名: <code>Test1.sql</code>）:</strong></p>
-  <pre>insert into Test1 (Key ,Column1 ,Column2 ,Column3 ) values ('1' ,'ああ' ,10000 ,'false' );
-insert into Test1 (Key ,Column1 ,Column2 ,Column3 ) values ('15' ,'テスト' ,null ,'true' );
-commit;</pre>
-  <p><strong>生成イメージ（<code>op=CLEAN_INSERT</code>）:</strong></p>
-  <pre>delete from Test1;
-
-insert into Test1 (Key ,Column1 ,Column2 ,Column3 ) values ('1' ,'ああ' ,10000 ,'false' );
-commit;</pre>
-
-  <h4 id="type-ddl">ddl</h4>
-  <p>データソースのメタデータ（テーブルのカラム情報）から CREATE TABLE 用の DDL ファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません（組み込み DDL テンプレートのみ使用されます）。ファイル名は <code>{sqlFilePrefix}{テーブル名}{sqlFileSuffix}.sql</code> になります。カラムの型・PK・NULL制約はソースのメタデータから取得します（JDBC ソースで <code>useJdbcMetaData</code> を有効にした場合に実値が入ります。CSV 等メタデータの無いソースではカラム名のみになります）。カラムサイズ・コメント・パッケージ名などメタデータに存在しない情報を含む完全な DDL を生成したい場合は、scaffold コマンドで書き出した記述子データセットを編集し、<code>generateType=txt</code> と <code>unitSetting</code>（既定は <code>sql/ddlSettings.json</code>）で生成してください。</p>
-  <table>
-    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>sqlFilePrefix</td><td>生成 DDL ファイル名のプレフィックス</td><td>（空）</td></tr>
-    <tr><td>sqlFileSuffix</td><td>生成 DDL ファイル名のサフィックス</td><td>（空）</td></tr>
-  </table>
-  <p><strong>生成イメージ（カラムサイズ・コメント等をすべて与えた場合。ファイル名: <code>EMPLOYEE.sql</code>）:</strong></p>
-  <pre>CREATE TABLE EMPLOYEE (
-    EMPLOYEE_ID INTEGER(10) NOT NULL,
-    EMPLOYEE_NAME VARCHAR(100),
-    SALARY DECIMAL(10,2)
-    ,CONSTRAINT PK_EMPLOYEE PRIMARY KEY (EMPLOYEE_ID)
-);
-COMMENT ON TABLE EMPLOYEE IS '社員マスタ';
-
-COMMENT ON COLUMN EMPLOYEE.EMPLOYEE_ID IS '社員ID';
-COMMENT ON COLUMN EMPLOYEE.EMPLOYEE_NAME IS '氏名';
-COMMENT ON COLUMN EMPLOYEE.SALARY IS '給与';</pre>
-
-  <h4 id="type-xlsxSchema">xlsxSchema</h4>
-  <p>データセットのカラム情報から <a href="xlsx-schema.html">Xlsx Schema</a> 設定ファイルのひな型を JSON 形式で生成します。<code>unit</code> は <code>table</code> に固定で、テーブルごとに <code>{テーブル名}.json</code> を出力します。<code>template</code> は使用しません（組み込みテンプレートのみ使用されます）。組み込みの <code>unitSetting</code>（既定は <code>xlsxschema/xlsxSchemaSettings.json</code>）が PK / CELLS サブテーブルへの分割を担います。シート名やセル位置などを調整したい場合は、scaffold コマンドで書き出した記述子データセットを編集し、<code>generateType=txt</code> と <code>unitSetting</code>（既定と同じファイル）で生成してください。</p>
-  <p><strong>生成イメージ:</strong></p>
-  <pre>{
-  "rows": [
-    {
-      "sheetName": "Test1"
-     ,"tableName": "Test1"
-     ,"header": ["Key","Column1","Column2","Column3"]
-     ,"dataStart": 1
-     ,"columnIndex": [0,1,2,3]
-     ,"breakKey": ["Key"]
-    }
-  ]
- ,"cells": [
-    {
-      "sheetName": "Test1"
-     ,"tableName": "Test1"
-     ,"header": ["Key","Column1","Column2","Column3"]
-     ,"rows": [{"cellAddress": ["A2","B2","C2","D2"]}]
-    }
-  ]
-}</pre>
-
-  <h4 id="type-javaBean">javaBean</h4>
-  <p>データソースのメタデータ（テーブルのカラム情報）から JavaBean の <code>.java</code> ソースファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません（組み込み JavaBean テンプレートのみ使用されます）。ファイル名はテーブル名をアッパーキャメルケースに変換したものになります（例: <code>EMPLOYEE</code> → <code>Employee.java</code>）。カラムの型（javaType 変換元）や PK・NULL制約はソースのメタデータから取得します（JDBC ソースで <code>useJdbcMetaData</code> を有効にした場合に実値が入ります。CSV 等メタデータの無いソースではカラム名のみになります）。コメントやパッケージ名などメタデータに存在しない情報を含む完全なソースを生成したい場合は、scaffold コマンドで書き出した記述子データセットを編集し、<code>generateType=txt</code> と <code>unitSetting</code>（既定は <code>javabean/javaBeanSettings.json</code>）で生成してください。</p>
-  <p><strong>生成イメージ（コメント等をすべて与えた場合。ファイル名: <code>Employee.java</code>）:</strong></p>
-  <pre>/** 社員マスタ */
-public class Employee {
-    /** 社員ID */
-    private Integer employeeId;
-    /** 氏名 */
-    private String employeeName;
-    /** 給与 */
-    private java.math.BigDecimal salary;
-
-    public Integer getEmployeeId() {
-        return this.employeeId;
-    }
-
-    public void setEmployeeId(Integer employeeId) {
-        this.employeeId = employeeId;
-    }
-    public String getEmployeeName() {
-        return this.employeeName;
-    }
-
-    public void setEmployeeName(String employeeName) {
-        this.employeeName = employeeName;
-    }
-    public java.math.BigDecimal getSalary() {
-        return this.salary;
-    }
-
-    public void setSalary(java.math.BigDecimal salary) {
-        this.salary = salary;
-    }
-}</pre>
-
-  <h4 id="type-fixedColumnDef">fixedColumnDef</h4>
-  <p>固定長出力（<a href="result-form.html">Result Form</a> の fixed 形式）で使用するカラム幅定義ファイルを JSON 形式で生成します。<code>unit</code> は <code>table</code> に固定です。ファイル名は <code>{テーブル名}.json</code> になります。</p>
-  <table>
-    <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>fixedLength</td><td>各カラムの幅をカンマ区切りで指定（例: <code>4,10,20</code>）。カラム数より少ない場合、残りのカラムには <code>defaultLength</code> が使われる</td></tr>
-    <tr><td>defaultLength</td><td><code>fixedLength</code> で幅が指定されなかったカラムに適用するデフォルト幅（数値）</td></tr>
-    <tr><td>align</td><td>パディングの方向: <code>left</code>（右余白）/ <code>right</code>（左余白）</td></tr>
-  </table>
-  <p><strong>生成イメージ（<code>fixedLength=5,10</code>, <code>align=left</code>, ファイル名: <code>Test1.json</code>）:</strong></p>
-  <pre>{
-  "columns": [
-    {"name": "key", "length": 5, "align": "left", "pad": " "},
-    {"name": "value", "length": 10, "align": "left", "pad": " "}
-  ]
-}</pre>
-
-  <h3>Excel 成果物</h3>
-  <h4 id="type-xlsxTemplate">xlsxTemplate</h4>
-  <p>jxls テンプレートのひな型となる <code>.xlsx</code> ファイルを生成します。<code>unit</code> は <code>dataset</code> に固定です。<code>template</code> は使用しません。テーブルごとに 1 シートを作成し、1 行目にヘッダー（カラム名）、2 行目に jxls の埋め込み式を配置したうえで、jxls の繰り返し範囲をセルコメントとして付与します。生成された <code>.xlsx</code> はそのまま <a href="#type-xlsx">xlsx / xls タイプ</a>の <code>template</code> として利用できます。</p>
-  <p><strong>生成イメージ（テーブル <code>Test1</code>、カラム <code>Key, Column1, Column2, Column3</code>）:</strong></p>
-  <pre>シート "Test1"
-  A1: Key                 B1: Column1             C1: Column2             D1: Column3
-      （A1セルコメント: jx:area(lastCell="D2")）
-  A2: ${row.get('Key')}   B2: ${row.get('Column1')}  C2: ${row.get('Column2')}  D2: ${row.get('Column3')}
-      （A2セルコメント: jx:each(items="param.dataSet.get('Test1').rows" var="row" varIndex="index" lastCell="D2")）</pre>
+  <p>テーブルのカラム情報等から、決まった形式の成果物ファイルを組み込みロジック・組み込みテンプレートで自動生成します。<code>template</code> は使用しません。詳細は上記一覧の各 generateType のページを参照してください。</p>
 
   <h2>関連ページ</h2>
   <ul>

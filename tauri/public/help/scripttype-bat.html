@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Script Type: bat / cmd</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+  </style>
+</head>
+<body>
+  <p><a href="run.html">&larr; Run に戻る</a></p>
+  <h1>Script Type: bat / cmd</h1>
+  <p>Windows バッチファイル（.bat / .cmd）を実行します。<code>srcData</code> で指定したファイル一覧が対象となり、各ファイルを <code>baseDir</code> を作業ディレクトリとして順に実行します。パラメータは環境変数として渡されます。<code>bat</code> と <code>cmd</code> は動作が同様で、<code>srcData</code> の拡張子のみ異なります（bat→.bat, cmd→.cmd）。</p>
+  <h2>固有オプション</h2>
+  <table>
+    <tr><th>オプション</th><th>説明</th></tr>
+    <tr><td>srcData</td><td>実行対象ファイル（拡張子は scriptType に応じて <code>.bat</code> / <code>.cmd</code> に自動設定）</td></tr>
+    <tr><td>baseDir</td><td>スクリプトの作業ディレクトリ</td></tr>
+  </table>
+  <p><code>srcData</code> の入力フォーム詳細は <a href="dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
+  <h2>設定例</h2>
+  <table>
+    <tr><th>設定項目</th><th>値の例</th></tr>
+    <tr><td>scriptType</td><td>bat</td></tr>
+    <tr><td>srcData.src</td><td>scripts/（.bat ファイルを格納したディレクトリ）</td></tr>
+    <tr><td>baseDir</td><td>work/（バッチ実行時の作業ディレクトリ）</td></tr>
+  </table>
+  <p><code>srcData</code> で渡したデータセットの各行は環境変数としてバッチファイル内から <code>%COLUMN_NAME%</code> の形式で参照できます。</p>
+</body>
+</html>
