@@ -34,8 +34,8 @@
     <tr><td>newData</td><td>比較対象となる新データセット</td></tr>
     <tr><td>expectData</td><td>期待値データセット（省略時はスキップ）</td></tr>
     <tr><td>createPatchSql</td><td>行レベルの差分（<code>MODIFY_VALUE</code> / <code>KEY_DELETE</code> / <code>KEY_ADD</code>）を旧データから新データへ補正するパッチ SQL を生成する（<code>data</code> モードのみ有効。デフォルト: 無効）</td></tr>
-    <tr><td>imageOption</td><td>画像比較のオプション（<code>image</code> / <code>pdf</code> モード時のみ表示）</td></tr>
-    <tr><td>convertResult</td><td>出力形式と出力先の設定</td></tr>
+    <tr><td>imageOption</td><td><a href="../reference/image.html">画像比較のオプション</a>（<code>image</code> / <code>pdf</code> モード時のみ表示）</td></tr>
+    <tr><td>convertResult</td><td><a href="../sections/result-form.html">出力形式と出力先の設定</a></td></tr>
   </table>
   <p><code>oldData</code> / <code>newData</code> / <code>expectData</code> の入力フォーム詳細は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
 
@@ -58,13 +58,5 @@
 
   <h2 id="section-expect">expectData を指定した場合（共通）</h2>
   <p><code>expectData</code> に期待値データセットを指定すると、<code>convertResult</code> の出力結果と期待値を再度突き合わせて検証します。期待値と一致しない差分は <code>convertResult</code> 配下の <code>expectedDiff/</code> ディレクトリに同形式で出力されます。</p>
-
-  <h2>関連ページ</h2>
-  <ul>
-    <li><a href="../sections/dataset-load-form.html">Dataset Load Form</a> — oldData / newData / expectData の入力フォーム</li>
-    <li><a href="../dialogs/dataset-settings.html">Dataset Settings</a> — setting ファイルの形式</li>
-    <li><a href="../reference/image.html">Image Option</a> — image / pdf モードの詳細オプション</li>
-    <li><a href="../sections/result-form.html">Result Form</a> — convertResult の出力形式設定</li>
-  </ul>
 </body>
 </html>

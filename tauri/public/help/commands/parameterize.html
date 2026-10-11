@@ -30,11 +30,11 @@
     <tr><td>unit</td><td>テンプレートへのパラメータ受け渡し単位（行・テーブル・データセット）</td></tr>
     <tr><td>parameterize</td><td>cmdParam をパラメータで展開するテンプレートとして扱うかどうか</td></tr>
     <tr><td>ignoreFail</td><td>compare で想定外の差分が出た場合も他のコマンドを続行する</td></tr>
-    <tr><td>cmd</td><td>データ駆動で実行する対象コマンド</td></tr>
+    <tr><td>cmd</td><td>データ駆動で実行する対象コマンド（<a href="compare.html">Compare</a> / <a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> など）</td></tr>
     <tr><td>cmdParam</td><td>コマンド用パラメータファイル。ファイル名はパラメータデータセットから動的に決定</td></tr>
     <tr><td>template</td><td>既定のテンプレートファイル（cmdParam がある場合は無視）</td></tr>
     <tr><td>paramData</td><td>パラメータデータセットのソース</td></tr>
-    <tr><td>templateOption</td><td>テンプレートエンジンのオプション</td></tr>
+    <tr><td>templateOption</td><td><a href="../sections/template.html">テンプレートエンジン</a>のオプション</td></tr>
   </table>
   <p><code>paramData</code> の入力フォーム詳細は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
 
@@ -111,14 +111,5 @@ data/products,csv,result/products</pre>
     <tr><td>paramData.src</td><td>params/tables.csv</td></tr>
   </table>
   <p>各行の <code>SRC</code>・<code>SRC_TYPE</code>・<code>RESULT</code> がテンプレートに渡され、テーブルごとに Generate が実行されます。</p>
-
-  <h2>関連ページ</h2>
-  <ul>
-    <li><a href="../sections/dataset-load-form.html">Dataset Load Form</a> — <code>paramData</code> の入力フォーム詳細</li>
-    <li><a href="../sections/template.html">Template</a> — テンプレートエンジンのオプション</li>
-    <li><a href="compare.html">Compare</a> — Compare コマンドのオプション</li>
-    <li><a href="convert.html">Convert</a> — Convert コマンドのオプション</li>
-    <li><a href="generate.html">Generate</a> — Generate コマンドのオプション</li>
-  </ul>
 </body>
 </html>

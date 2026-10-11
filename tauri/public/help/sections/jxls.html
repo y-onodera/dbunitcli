@@ -21,7 +21,7 @@
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Jxls</h1>
   <p><a href="../commands/generate.html">Generate</a> で <code>generateType = xlsx</code> または <code>xls</code> を選んだ場合に使用するテンプレートエンジンです。Excel ファイル（<code>.xlsx</code> / <code>.xls</code>）をテンプレートとして、入力データセットの各行を埋め込んで出力します。</p>
-  <p>テンプレートには jxls のコメント記法（セルのコメントに <code>jx:each</code> 等のディレクティブを記述）を使います。</p>
+  <p>テンプレートには jxls のコメント記法（セルのコメントに <code>jx:each</code> 等のディレクティブを記述）を使います。テキスト出力で使う StringTemplate 4 のテンプレートは <a href="template.html">Template</a> を参照してください。</p>
 
   <h2 id="section-fields">設定項目</h2>
   <p>フォームの <strong>jxls option</strong> 展開ボタンから設定します。</p>
@@ -44,11 +44,5 @@
 セル B1: $[param.name]
 セル C1: $[param.value]</pre>
   <p>データセットの各行が <code>items</code> として渡され、行ごとに展開されます。</p>
-
-  <h2>関連ページ</h2>
-  <ul>
-    <li><a href="../commands/generate.html">Generate</a> — generateType の選択と generate コマンド全体の設定</li>
-    <li><a href="template.html">Template (StringTemplate 4)</a> — <code>generateType = txt</code> で使うテンプレートエンジン</li>
-  </ul>
 </body>
 </html>

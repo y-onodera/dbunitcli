@@ -22,7 +22,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>JDBC</h1>
-  <p>データベースへ接続するための設定を指定します。以下の場面で必要になります。</p>
+  <p>データベースへ接続するための設定を指定します。入力は <a href="dataset-load-form.html">Dataset Load Form</a> の Source Type で指定し、以下の場面で必要になります。</p>
   <ul>
     <li><a href="dataset-load-form/types/table.html">Source Type = table</a>（テーブル名リストから読み込む）</li>
     <li><a href="dataset-load-form/types/sql.html">Source Type = sql</a>（SQL クエリ結果を読み込む）</li>
@@ -67,12 +67,5 @@ pass=app_password</pre>
 
   <h2 id="section-save-properties">Save as Properties</h2>
   <p>現在入力中の URL / User / Pass を新規 <code>.properties</code> ファイルとしてワークスペースの <code>jdbc/</code> に保存します。保存後は <code>jdbcProperties</code> で再利用できます。ダイアログには保存される内容のプレビュー（Pass はマスク）とファイル名入力欄が表示されます。</p>
-
-  <h2>関連ページ</h2>
-  <ul>
-    <li><a href="dataset-load-form.html">Dataset Load Form</a> — <code>srcType</code> に応じた JDBC の要否と <code>useJdbcMetaData</code> の詳細</li>
-    <li><a href="../commands/run.html">Run</a> — <code>scriptType = sql</code> で JDBC を使用</li>
-    <li><a href="../commands/compare.html">Compare</a> / <a href="../commands/convert.html">Convert</a> / <a href="../commands/generate.html">Generate</a> — 結果を DB テーブルに出力する場合に JDBC を使用</li>
-  </ul>
 </body>
 </html>
