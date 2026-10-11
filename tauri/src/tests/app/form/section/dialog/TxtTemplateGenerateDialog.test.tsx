@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { ScaffoldButton } from "../../../../../app/form/section/dialog/ScaffoldDialog";
+import { TxtTemplateGenerateButton } from "../../../../../app/form/section/dialog/TxtTemplateGenerateDialog";
 import type { FetchParams } from "../../../../../utils/fetchUtils";
 import {
 	environmentFixture,
@@ -86,19 +86,21 @@ async function openDialog(
 ) {
 	const user = userEvent.setup();
 	render(
-		<ScaffoldButton
+		<TxtTemplateGenerateButton
 			scaffoldPrefill={() => ({ "-target": "ddl" })}
 			handleReflect={handleReflect}
 		/>,
 	);
-	await user.click(screen.getByRole("button", { name: "Scaffold" }));
+	await user.click(screen.getByRole("button", { name: "generate" }));
 	await waitFor(() => {
-		expect(document.querySelector("#scaffoldForm")).toBeInTheDocument();
+		expect(
+			document.querySelector("#txtTemplateGenerateForm"),
+		).toBeInTheDocument();
 	});
 	return user;
 }
 
-describe("ScaffoldDialogの描画テスト", () => {
+describe("TxtTemplateGenerateDialogの描画テスト", () => {
 	it("target=ddlのrefreshレスポンスでダイアログの各フィールドが描画される", async () => {
 		refreshResponse.current = scaffoldRefreshTargetDdlResponseFixture;
 		await openDialog();
@@ -167,7 +169,7 @@ describe("ScaffoldDialogの描画テスト", () => {
 	});
 });
 
-describe("ScaffoldDialogの実行テスト", () => {
+describe("TxtTemplateGenerateDialogの実行テスト", () => {
 	it("Executeで/scaffold/execを呼び、結果を反映してダイアログを閉じる", async () => {
 		refreshResponse.current = scaffoldRefreshTargetDdlResponseFixture;
 		execResponse.current = scaffoldExecResponseFixture;
@@ -192,7 +194,9 @@ describe("ScaffoldDialogの実行テスト", () => {
 		expect(requestBody["-template"]).toBe("scaffoldTpl");
 		expect(mockReloadResources).toHaveBeenCalled();
 		await waitFor(() => {
-			expect(document.querySelector("#scaffoldForm")).not.toBeInTheDocument();
+			expect(
+				document.querySelector("#txtTemplateGenerateForm"),
+			).not.toBeInTheDocument();
 		});
 	});
 });

@@ -1,23 +1,49 @@
+import type { ReactNode } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
+import type { CommandOption } from "../../model/CommandOption";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import {
-	ScaffoldButton,
-	type ScaffoldFormValues,
-} from "./section/dialog/ScaffoldDialog";
+	TxtTemplateGenerateButton,
+	type TxtTemplateGenerateFormValues,
+} from "./section/dialog/TxtTemplateGenerateDialog";
+import { XlsxTemplateGenerateButton } from "./section/dialog/XlsxTemplateGenerateDialog";
 import Check from "./section/element/Check";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
+import Text, { TextDropDownMenu } from "./section/element/Text";
 import JxlsFormSection from "./section/JxlsFormSection";
 import TemplateFormSection from "./section/TemplateFormSection";
+
+function TemplateFileText({
+	element,
+	editButtons,
+}: {
+	element: CommandOption;
+	editButtons: (setPath: (value: string) => void) => ReactNode[] | undefined;
+}) {
+	return (
+		<Text prefix="" element={element} showDefaulePath={true}>
+			{({ path, setPath }) => (
+				<TextDropDownMenu
+					path={path}
+					setPath={setPath}
+					prefix=""
+					element={element}
+					editButtons={editButtons(setPath)}
+				/>
+			)}
+		</Text>
+	);
+}
 
 export function GenerateForm(prop: {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
 	generate: GenerateOptions;
-	scaffoldPrefill: () => ScaffoldFormValues;
+	scaffoldPrefill: () => TxtTemplateGenerateFormValues;
 	handleScaffoldReflect: (params: Record<string, string>) => Promise<void>;
 }) {
 	const generate = prop.generate;
@@ -25,6 +51,22 @@ export function GenerateForm(prop: {
 	const generateTypeValue = generate.generateType.value;
 	const isExcelGenerate =
 		generateTypeValue === "xlsx" || generateTypeValue === "xls";
+	// template欄のdropdownに出すgenerate: txtはScaffold、xlsx/xlsはxlsxTemplate生成
+	const templateGenerateButtons = (setPath: (value: string) => void) => {
+		if (generateTypeValue === "txt") {
+			return [
+				<TxtTemplateGenerateButton
+					key="generate"
+					scaffoldPrefill={prop.scaffoldPrefill}
+					handleReflect={prop.handleScaffoldReflect}
+				/>,
+			];
+		}
+		if (isExcelGenerate) {
+			return [<XlsxTemplateGenerateButton key="generate" setPath={setPath} />];
+		}
+		return undefined;
+	};
 	return (
 		<>
 			<SectionFieldset>
@@ -52,12 +94,9 @@ export function GenerateForm(prop: {
 					<PlainText prefix="" element={generate.unitSettingEncoding} />
 				)}
 				{generate.template && (
-					<FileText prefix="" element={generate.template} />
-				)}
-				{generateTypeValue === "txt" && (
-					<ScaffoldButton
-						scaffoldPrefill={prop.scaffoldPrefill}
-						handleReflect={prop.handleScaffoldReflect}
+					<TemplateFileText
+						element={generate.template}
+						editButtons={templateGenerateButtons}
 					/>
 				)}
 				{prop.generate.templateOption && generateTypeValue === "txt" && (

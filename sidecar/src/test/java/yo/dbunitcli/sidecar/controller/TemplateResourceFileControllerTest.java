@@ -11,7 +11,14 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import yo.dbunitcli.resource.FileResources;
 
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @MicronautTest
@@ -43,5 +50,44 @@ class TemplateResourceFileControllerTest {
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/template-load-response.json"),
                 response);
+    }
+
+    @AfterEach
+    void tearDown() {
+        try {
+            this.client.toBlocking().retrieve(
+                    HttpRequest.POST("dbunit-cli/template/delete", "generatedTemplate.xlsx")
+                            .contentType(MediaType.TEXT_PLAIN_TYPE));
+        } catch (final Exception ignored) {
+        }
+    }
+
+    @Test
+    void testGenerate_データセットからxlsxテンプレートを生成して保存する() {
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/template/generate",
+                        "{\"-src.src\":\"resources/src/csv\",\"-src.srcType\":\"csv\",\"-fileName\":\"generatedTemplate\"}"));
+        Assertions.assertTrue(response.contains("generatedTemplate.xlsx"), response);
+        final Path saved = Paths.get("target/test-temp/workspace/sample/resources/template/generatedTemplate.xlsx");
+        Assertions.assertTrue(Files.exists(saved), "拡張子が補われて保存されること");
+    }
+
+    @Test
+    void testGenerate_src未指定は400を返す() {
+        final HttpClientResponseException ex = Assertions.assertThrows(
+                HttpClientResponseException.class,
+                () -> this.client.toBlocking().retrieve(
+                        HttpRequest.POST("dbunit-cli/template/generate", "{\"-fileName\":\"a.xlsx\"}")));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
+    @Test
+    void testGenerate_fileNameにパス区切りは400を返す() {
+        final HttpClientResponseException ex = Assertions.assertThrows(
+                HttpClientResponseException.class,
+                () -> this.client.toBlocking().retrieve(
+                        HttpRequest.POST("dbunit-cli/template/generate",
+                                "{\"-src.src\":\"resources/src/csv\",\"-src.srcType\":\"csv\",\"-fileName\":\"../a\"}")));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     }
 }

@@ -1,4 +1,5 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { GenerateForm } from "../../../app/form/GenerateForm";
 import type { GenerateOptions } from "../../../model/SelectParameter";
@@ -53,12 +54,17 @@ function makeGenerateProps(
 	};
 }
 
-function scaffoldButton(): Element | null {
-	return (
-		Array.from(document.querySelectorAll("button")).find(
-			(button) => button.textContent === "Scaffold",
-		) ?? null
-	);
+// template欄のdropdownを開き、generate項目の有無を返す
+async function templateGenerateMenuItem(): Promise<HTMLElement | null> {
+	const templateInput = document.querySelector('input[name="-template"]');
+	const menuButton = templateInput
+		?.closest("div.flex")
+		?.querySelector('button[title="setting"], button:has(title)');
+	if (!menuButton) {
+		return null;
+	}
+	await userEvent.setup().click(menuButton);
+	return screen.queryByRole("button", { name: "generate" });
 }
 
 describe("GenerateFormの描画テスト", () => {
@@ -137,10 +143,10 @@ describe("GenerateFormの描画テスト", () => {
 			).toBeVisible();
 		});
 
-		it("generateType=txtのときScaffoldボタンが表示される", () => {
+		it("generateType=txtのときtemplateのdropdownにgenerate項目が表示される", async () => {
 			render(<GenerateForm {...makeGenerateProps()} />);
 
-			expect(scaffoldButton()).toBeInTheDocument();
+			expect(await templateGenerateMenuItem()).toBeInTheDocument();
 		});
 	});
 
@@ -226,14 +232,14 @@ describe("GenerateFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
-		it("Scaffoldボタンは表示されない", () => {
+		it("templateのdropdownにgenerate項目が表示される", async () => {
 			render(
 				<GenerateForm
 					{...makeGenerateProps(generateRefreshGenerateTypeXlsxResponseFixture)}
 				/>,
 			);
 
-			expect(scaffoldButton()).not.toBeInTheDocument();
+			expect(await templateGenerateMenuItem()).toBeInTheDocument();
 		});
 	});
 
@@ -323,14 +329,14 @@ describe("GenerateFormの描画テスト", () => {
 			).not.toBeInTheDocument();
 		});
 
-		it("Scaffoldボタンは表示されない", () => {
+		it("templateのdropdownにgenerate項目は表示されない", async () => {
 			render(
 				<GenerateForm
 					{...makeGenerateProps(generateRefreshGenerateTypeSqlResponseFixture)}
 				/>,
 			);
 
-			expect(scaffoldButton()).not.toBeInTheDocument();
+			expect(await templateGenerateMenuItem()).not.toBeInTheDocument();
 		});
 	});
 });

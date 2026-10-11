@@ -70,6 +70,12 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         Files.writeString(saveTo, contents, StandardCharsets.UTF_8);
     }
 
+    /** バイナリ等、既存ファイルの内容をそのまま取り込む（同名は上書き） */
+    public void updateFrom(final String name, final Path source) throws IOException {
+        final Path saveTo = this.prepareUpdate(name);
+        Files.copy(source, saveTo, StandardCopyOption.REPLACE_EXISTING);
+    }
+
     public void delete(final String name) throws IOException {
         final Path filePath = new File(this.baseDir, name).toPath();
         if (!filePath.toFile().exists()) {
