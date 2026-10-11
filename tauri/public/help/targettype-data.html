@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Target Type: data</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="compare.html">&larr; Compare に戻る</a></p>
+  <h1>Target Type: data</h1>
+  <p>CSV・Excel・DB テーブルなど、表形式のデータセットを比較します。<code>setting</code> に指定した <a href="dataset-settings.html">Dataset Settings</a> ファイルで主キー・カラム選択・ソート順などを制御できます。</p>
+  <ul>
+    <li><code>oldData</code> と <code>newData</code> で対応するテーブルを 1 対 1 に突き合わせます</li>
+    <li>テーブルの一致は名前で行われます。名前が対応しないテーブルは追加／削除として検出されます</li>
+    <li><code>setting</code> を省略するとすべてのカラムを対象に順序比較します</li>
+  </ul>
+  <p>主キー・除外カラムなどの <code>setting</code> の書き方は <a href="compare.html#section-setting">Compare の setting による比較内容の変更</a>、比較結果の形式は <a href="compare.html#section-result">比較結果の形式</a>を参照してください。</p>
+</body>
+</html>
