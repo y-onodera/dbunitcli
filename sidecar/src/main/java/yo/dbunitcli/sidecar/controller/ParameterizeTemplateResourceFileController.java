@@ -11,12 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
-import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
+import yo.dbunitcli.sidecar.dto.TemplateRequestDto;
 
+import java.io.IOException;
 import java.io.StringWriter;
 
 @Controller("parameterize/template")
-public class ParameterizeTemplateResourceFileController extends AbstractResourceFileController<ResourceSaveRequest<?>> {
+public class ParameterizeTemplateResourceFileController extends AbstractResourceFileController<TemplateRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParameterizeTemplateResourceFileController.class);
 
     @Inject
@@ -38,6 +39,21 @@ public class ParameterizeTemplateResourceFileController extends AbstractResource
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
         }
+    }
+
+    /** loadの{"content": ...}形式とは非対称に、contentを生テキストとして保存する。応答は更新後のファイル一覧 */
+    @Post(uri = "save", produces = MediaType.APPLICATION_JSON)
+    @Override
+    public String save(@Body final TemplateRequestDto body) throws IOException {
+        try {
+            this.getResourceFile().update(body.getName(), body.getInput().getContent());
+        } catch (final IOException e) {
+            throw e;
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
+        return this.currentFileList();
     }
 
     @Override
