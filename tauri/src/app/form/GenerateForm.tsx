@@ -71,6 +71,12 @@ export function GenerateForm(prop: {
 					prefix=""
 					element={generate.generateType}
 				/>
+				{generateTypeValue === "txt" && (
+					<TxtTemplateGenerateButton
+						scaffoldPrefill={prop.scaffoldPrefill}
+						handleReflect={prop.handleScaffoldReflect}
+					/>
+				)}
 				{generate.unit && (
 					<Select
 						handleTypeSelect={prop.handleTypeSelect}
@@ -83,12 +89,6 @@ export function GenerateForm(prop: {
 				)}
 				{generate.unitSettingEncoding && (
 					<PlainText prefix="" element={generate.unitSettingEncoding} />
-				)}
-				{generateTypeValue === "txt" && (
-					<TxtTemplateGenerateButton
-						scaffoldPrefill={prop.scaffoldPrefill}
-						handleReflect={prop.handleScaffoldReflect}
-					/>
 				)}
 				{generate.template && (
 					<TemplateFileText

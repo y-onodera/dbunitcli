@@ -22,7 +22,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Scaffold</h1>
-  <p>固定成果物タイプ（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）の組み込みテンプレートを、カスタマイズ生成の出発点としてワークスペースへ書き出し、その結果を generate フォームへ反映します。generateType が <code>txt</code> のとき、template テキストボックスの前にある Scaffold ボタンから開きます（scaffold コマンドを実行します）。</p>
+  <p>固定成果物タイプ（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）の組み込みテンプレートを、カスタマイズ生成の出発点としてワークスペースへ書き出し、その結果を generate フォームへ反映します。generateType が <code>txt</code> のとき、unit の上にある Scaffold ボタンから開きます（scaffold コマンドを実行します）。</p>
   <p><strong>できること</strong></p>
   <ul>
     <li>組み込みテンプレート（<code>.stg</code> / <code>.txt</code>）と、サンプルの unitSetting をワークスペースへ書き出す。</li>
@@ -58,7 +58,7 @@
     <tr><td>src</td><td>datasetType</td><td><code>src.srcType</code></td></tr>
     <tr><td>src</td><td>datasetEncoding</td><td><code>src.encoding</code>（csv / fixed のみ）</td></tr>
   </table>
-  <p>チェックを外した unitSetting / src に対応する result は生成されないため反映されません。上記以外の result（<code>generateType</code> / <code>unit</code> / <code>resultPath</code> など）は generate フォームへ反映されません。</p>
+  <p>チェックを外した unitSetting / src に対応する result は生成されないため反映されません。scaffold の雛型は <code>unit=table</code> で駆動するため、反映時に <code>unit</code> は常に <code>table</code> に変更されます。上記以外の result（<code>generateType</code> / <code>resultPath</code> など）は generate フォームへ反映されません。</p>
 
   <h2>操作の流れ</h2>
   <ol>
