@@ -143,10 +143,10 @@ describe("GenerateFormの描画テスト", () => {
 			).toBeVisible();
 		});
 
-		it("generateType=txtのときtemplateの前にgenerateボタンが表示される", () => {
+		it("generateType=txtのときtemplateの前にScaffoldボタンが表示される", () => {
 			render(<GenerateForm {...makeGenerateProps()} />);
 
-			const button = screen.getByRole("button", { name: "generate" });
+			const button = screen.getByRole("button", { name: "Scaffold" });
 			const templateInput = document.querySelector('input[name="-template"]');
 			expect(button).toBeInTheDocument();
 			expect(

@@ -76,7 +76,7 @@ function ReflectSectionSelect({
 }) {
 	return (
 		<fieldset className="flex gap-4">
-			<legend>反映先セクション</legend>
+			<legend>generate section</legend>
 			{reflectSections.map((section) => (
 				<label key={section.id} className="flex items-center gap-1">
 					<input
@@ -137,8 +137,8 @@ function TxtTemplateGenerateDialog({
 	return (
 		<RefreshableDialogShell
 			command="dialogs/txt-template-generate"
-			label="Txt Template Generate"
-			title="Generate Txt Template"
+			label="Scaffold"
+			title="Scaffold"
 			formId={formId}
 			loadState={dialog.loadState}
 			executing={dialog.executing}
@@ -193,7 +193,7 @@ export function TxtTemplateGenerateButton({
 	return (
 		<div>
 			<AddButton
-				title="generate"
+				title="Scaffold"
 				handleClick={() => setPrefill(scaffoldPrefill())}
 			/>
 			{prefill && (

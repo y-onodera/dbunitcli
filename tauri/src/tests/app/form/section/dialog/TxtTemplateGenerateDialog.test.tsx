@@ -91,7 +91,7 @@ async function openDialog(
 			handleReflect={handleReflect}
 		/>,
 	);
-	await user.click(screen.getByRole("button", { name: "generate" }));
+	await user.click(screen.getByRole("button", { name: "Scaffold" }));
 	await waitFor(() => {
 		expect(
 			document.querySelector("#txtTemplateGenerateForm"),
