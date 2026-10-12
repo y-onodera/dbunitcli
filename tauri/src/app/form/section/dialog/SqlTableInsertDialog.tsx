@@ -142,7 +142,6 @@ function TablesContent({
 						selected={selected}
 						onToggleAll={toggleAll}
 						onToggle={toggle}
-						maxHeightClass="max-h-72"
 						onQueryColumns={onInsertColumn ? undefined : onQueryColumns}
 						onSelectTable={onInsertColumn ? handleSelectTable : undefined}
 					/>
