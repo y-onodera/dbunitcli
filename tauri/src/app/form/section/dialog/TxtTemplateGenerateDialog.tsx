@@ -33,6 +33,72 @@ function requiredOption(element: CommandOption): CommandOption {
 	return { ...element, attribute: { ...element.attribute, required: true } };
 }
 
+// scaffold実行結果のうちgenerateフォームへ反映するセクション。どれにも属さないキーは反映しない
+const reflectSections = [
+	{
+		id: "template",
+		label: "template",
+		match: (key: string) => key === "-template" || key.startsWith("-template."),
+	},
+	{
+		id: "unitSetting",
+		label: "unitSetting",
+		match: (key: string) => key.startsWith("-unitSetting"),
+	},
+	{
+		id: "src",
+		label: "src",
+		match: (key: string) => key.startsWith("-src."),
+	},
+] as const;
+
+type ReflectSectionId = (typeof reflectSections)[number]["id"];
+
+export function filterReflectParams(
+	params: Record<string, string>,
+	selected: ReadonlySet<ReflectSectionId>,
+): Record<string, string> {
+	return Object.fromEntries(
+		Object.entries(params).filter(([key]) =>
+			reflectSections.some(
+				(section) => selected.has(section.id) && section.match(key),
+			),
+		),
+	);
+}
+
+function ReflectSectionSelect({
+	selected,
+	onChange,
+}: {
+	selected: ReadonlySet<ReflectSectionId>;
+	onChange: (next: Set<ReflectSectionId>) => void;
+}) {
+	return (
+		<fieldset className="flex gap-4">
+			<legend>反映先セクション</legend>
+			{reflectSections.map((section) => (
+				<label key={section.id} className="flex items-center gap-1">
+					<input
+						type="checkbox"
+						checked={selected.has(section.id)}
+						onChange={(e) => {
+							const next = new Set(selected);
+							if (e.target.checked) {
+								next.add(section.id);
+							} else {
+								next.delete(section.id);
+							}
+							onChange(next);
+						}}
+					/>
+					{section.label}
+				</label>
+			))}
+		</fieldset>
+	);
+}
+
 function TxtTemplateGenerateDialog({
 	prefill,
 	handleReflect,
@@ -43,6 +109,9 @@ function TxtTemplateGenerateDialog({
 	handleDialogClose: () => void;
 }) {
 	const reloadResources = useWorkspaceResourcesReload();
+	const [selected, setSelected] = useState<Set<ReflectSectionId>>(
+		new Set(reflectSections.map((section) => section.id)),
+	);
 	const dialog = useRefreshableDialog<ScaffoldOptions>({
 		refreshEndpoint: "scaffold/refresh",
 		formId,
@@ -56,7 +125,10 @@ function TxtTemplateGenerateDialog({
 				"scaffold/exec",
 				values,
 			);
-			await Promise.all([handleReflect(params), reloadResources()]);
+			await Promise.all([
+				handleReflect(filterReflectParams(params, selected)),
+				reloadResources(),
+			]);
 			if (!dialog.isAborted()) {
 				handleDialogClose();
 			}
@@ -76,6 +148,7 @@ function TxtTemplateGenerateDialog({
 		>
 			{(options) => (
 				<>
+					<ReflectSectionSelect selected={selected} onChange={setSelected} />
 					<Select
 						handleTypeSelect={dialog.refresh}
 						prefix=""
