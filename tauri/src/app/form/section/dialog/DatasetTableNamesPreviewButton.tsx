@@ -120,7 +120,6 @@ function TableDataPreviewDialog({
 		}
 		return (
 			<DataTable
-				maxHeightClass="max-h-64"
 				head={preview.headers.map((header) => (
 					<Th key={header} nowrap>
 						{header}

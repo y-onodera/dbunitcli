@@ -10,7 +10,6 @@ export interface TableListProps {
 	selected: Set<string>;
 	onToggleAll: (tables: string[], checked: boolean) => void;
 	onToggle: (table: string) => void;
-	maxHeightClass?: string;
 	onQueryColumns?: (table: string) => Promise<string[]>;
 	onSelectTable?: (table: string) => void;
 }
@@ -20,7 +19,6 @@ export default function TableList({
 	selected,
 	onToggleAll,
 	onToggle,
-	maxHeightClass = "max-h-96",
 	onQueryColumns,
 	onSelectTable,
 }: TableListProps) {
@@ -71,7 +69,6 @@ export default function TableList({
 			onToggleAll={onToggleAll}
 			columnLabel="Table Name"
 			filterPlaceholder="Filter tables..."
-			maxHeightClass={maxHeightClass}
 			renderItem={(table) => (
 				<div className="flex items-center gap-1">
 					{table}

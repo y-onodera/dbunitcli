@@ -2,17 +2,15 @@ import type { ReactNode } from "react";
 
 // 枠・スクロール・sticky ヘッダを持つテーブルの土台。maxHeightClass は max-h-xx を渡す
 export function DataTable({
-	maxHeightClass = "max-h-72",
 	head,
 	children,
 }: {
-	maxHeightClass?: string;
 	head?: ReactNode;
 	children: ReactNode;
 }) {
 	return (
 		<div
-			className={`relative overflow-auto ${maxHeightClass} border border-border-subtle rounded-lg`}
+			className={`relative overflow-auto max-h-72 border border-border-subtle rounded-lg`}
 		>
 			<table className="w-full text-sm text-left">
 				{head && (

@@ -16,7 +16,6 @@ export default function SelectableTable({
 	onToggleAll,
 	columnLabel,
 	filterPlaceholder,
-	maxHeightClass = "max-h-72",
 	emptyMessage,
 	renderItem = (item) => item,
 	renderExtraRows,
@@ -53,7 +52,6 @@ export default function SelectableTable({
 				<StatusMessage kind="empty">{emptyMessage}</StatusMessage>
 			) : (
 				<DataTable
-					maxHeightClass={maxHeightClass}
 					head={
 						<>
 							<Th narrow>
