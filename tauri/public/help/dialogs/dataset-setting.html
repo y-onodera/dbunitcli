@@ -281,6 +281,15 @@ id | status   | mark
     <tr><td>order</td><td>並び順に使用するカラム</td></tr>
   </table>
 
+  <h3>Load Columns</h3>
+  <p>Filter / Order の先頭にある Load Columns ボタンで、各フィールドのカラム名入力の候補（入力補助）を読み込めます。</p>
+  <ol>
+    <li>Load Columns を押すと、Target の指定に該当するテーブルの一覧が表示されます。Target でテーブル名やパターンを指定していない場合は、データセット内のすべてのテーブルが表示されます。</li>
+    <li>候補にしたいテーブルの行で Load Columns を押すと、そのテーブルのカラム名が取得されます。</li>
+    <li>取得後は <code>exclude</code> / <code>include</code> / <code>keys</code> / <code>filter</code> / <code>order</code> の入力欄でカラム名が候補として表示されます。</li>
+  </ol>
+  <p>候補は入力補助のみで、フィールドの値自体は変更されません。</p>
+
   <h3>変化の例</h3>
 
   <p><strong>exclude（カラム除外）</strong></p>

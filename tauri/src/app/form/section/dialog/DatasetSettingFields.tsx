@@ -3,17 +3,15 @@ import { useState } from "react";
 import type { SettingDialogComponentProps } from "../../../../components/dialog";
 import {
 	Arrays,
+	DialogField,
 	Fieldset,
 	KeyValues,
 	Select,
 	SettingTable,
 	Text,
 } from "../../../../components/dialog";
-import {
-	BlueButtonIcon,
-	ExpandButton,
-} from "../../../../components/element/ButtonIcon";
-import { PreviewIcon } from "../../../../components/element/Icon";
+import { BlueButton } from "../../../../components/element/Button";
+import { ExpandButton } from "../../../../components/element/ButtonIcon";
 import { ResourceDatalist } from "../../../../components/element/Input";
 import type {
 	DatasetSetting,
@@ -193,14 +191,9 @@ export function FilterOrderFields({
 }) {
 	return (
 		<Fieldset legend="Filter / Order">
-			<div className="flex justify-end pb-1">
-				<BlueButtonIcon
-					title="Load column datalist"
-					handleClick={onLoadColumns}
-				>
-					<PreviewIcon title="Load column datalist" fill="white" />
-				</BlueButtonIcon>
-			</div>
+			<DialogField>
+				<BlueButton title="Load Columns" handleClick={onLoadColumns} />
+			</DialogField>
 			{filterOrderFields.map((field) => (
 				<Arrays
 					key={field.name}
