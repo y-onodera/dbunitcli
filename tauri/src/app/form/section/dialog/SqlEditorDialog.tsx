@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
 	DialogBody,
 	DialogField,
-	DialogTitle,
 	SettingDialog,
 } from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
@@ -59,14 +58,14 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 
 	return (
 		<SettingDialog
+			title={props.type === "sql" ? "Edit SQL" : "Edit Table Definition"}
+			helpCommand="dialogs/sql-editor"
+			helpLabel="SQL Editor"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
 			handleSave={handleCommit}
 		>
 			<DialogBody size="md">
-				<DialogTitle>
-					{props.type === "sql" ? "Edit SQL" : "Edit Table Definition"}
-				</DialogTitle>
 				{connectionOk && (
 					<DialogField>
 						<BlueButton
