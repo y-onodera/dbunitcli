@@ -77,16 +77,18 @@ export function filterReflectParams(
 }
 
 function ReflectSectionSelect({
+	sections,
 	selected,
 	onChange,
 }: {
+	sections: readonly { id: string; label: string }[];
 	selected: ReadonlySet<OptionalSectionId>;
 	onChange: (next: Set<OptionalSectionId>) => void;
 }) {
 	return (
 		<fieldset className="flex gap-4">
 			<legend>generate section</legend>
-			{optionalSections.map((section) => (
+			{sections.map((section) => (
 				<label key={section.id} className="flex items-center gap-1">
 					<input
 						type="checkbox"
@@ -110,16 +112,23 @@ function ReflectSectionSelect({
 
 function TxtTemplateGenerateDialog({
 	prefill,
+	withUnitSetting,
 	handleReflect,
 	handleDialogClose,
 }: {
 	prefill: TxtTemplateGenerateFormValues;
+	withUnitSetting: boolean;
 	handleReflect: (params: Record<string, string>) => Promise<void>;
 	handleDialogClose: () => void;
 }) {
 	const reloadResources = useWorkspaceResourcesReload();
+	const availableSections = optionalSections.filter(
+		(section) => withUnitSetting || section.id !== "unitSetting",
+	);
 	const [selected, setSelected] = useState<Set<OptionalSectionId>>(
-		new Set(optionalSections.map((section) => section.id as OptionalSectionId)),
+		new Set(
+			availableSections.map((section) => section.id as OptionalSectionId),
+		),
 	);
 	const withSrc = selected.has("src");
 	const dialog = useRefreshableDialog<ScaffoldOptions>({
@@ -158,7 +167,11 @@ function TxtTemplateGenerateDialog({
 		>
 			{(options) => (
 				<>
-					<ReflectSectionSelect selected={selected} onChange={setSelected} />
+					<ReflectSectionSelect
+						sections={availableSections}
+						selected={selected}
+						onChange={setSelected}
+					/>
 					<Select
 						handleTypeSelect={dialog.refresh}
 						prefix=""
@@ -199,7 +212,9 @@ function TxtTemplateGenerateDialog({
 export function TxtTemplateGenerateButton({
 	scaffoldPrefill,
 	handleReflect,
+	withUnitSetting = true,
 }: {
+	withUnitSetting?: boolean;
 	scaffoldPrefill: () => TxtTemplateGenerateFormValues;
 	handleReflect: (params: Record<string, string>) => Promise<void>;
 }) {
@@ -215,6 +230,7 @@ export function TxtTemplateGenerateButton({
 			{prefill && (
 				<TxtTemplateGenerateDialog
 					prefill={prefill}
+					withUnitSetting={withUnitSetting}
 					handleReflect={handleReflect}
 					handleDialogClose={() => setPrefill(null)}
 				/>

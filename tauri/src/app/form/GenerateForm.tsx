@@ -78,17 +78,19 @@ export function GenerateForm(prop: {
 						element={generate.unit}
 					/>
 				)}
+				{generateTypeValue === "txt" && (
+					<TxtTemplateGenerateButton
+						scaffoldPrefill={prop.scaffoldPrefill}
+						handleReflect={prop.handleScaffoldReflect}
+						// unit=recordはunitSettingを使わないため、ダイアログでunitSettingを扱わない
+						withUnitSetting={generate.unit?.value !== "record"}
+					/>
+				)}
 				{generate.unitSetting && (
 					<FileText prefix="" element={generate.unitSetting} />
 				)}
 				{generate.unitSettingEncoding && (
 					<PlainText prefix="" element={generate.unitSettingEncoding} />
-				)}
-				{generateTypeValue === "txt" && (
-					<TxtTemplateGenerateButton
-						scaffoldPrefill={prop.scaffoldPrefill}
-						handleReflect={prop.handleScaffoldReflect}
-					/>
 				)}
 				{generate.template && (
 					<TemplateFileText

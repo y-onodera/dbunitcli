@@ -83,12 +83,14 @@ async function openDialog(
 	handleReflect: (params: Record<string, string>) => Promise<void> = vi
 		.fn()
 		.mockResolvedValue(undefined),
+	withUnitSetting = true,
 ) {
 	const user = userEvent.setup();
 	render(
 		<TxtTemplateGenerateButton
 			scaffoldPrefill={() => ({ "-target": "ddl" })}
 			handleReflect={handleReflect}
+			withUnitSetting={withUnitSetting}
 		/>,
 	);
 	await user.click(screen.getByRole("button", { name: "Scaffold" }));
@@ -166,6 +168,39 @@ describe("TxtTemplateGenerateDialogの描画テスト", () => {
 		expect(
 			document.querySelector('input[type="text"][name="-align"]'),
 		).toBeInTheDocument();
+	});
+});
+
+describe("TxtTemplateGenerateDialogのunit=recordテスト", () => {
+	it("withUnitSetting=falseのときunitSettingのチェックボックスと入力欄が表示されない", async () => {
+		refreshResponse.current = scaffoldRefreshTargetDdlResponseFixture;
+		await openDialog(undefined, false);
+
+		expect(
+			screen.queryByRole("checkbox", { name: "unitSetting" }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("checkbox", { name: "src" })).toBeInTheDocument();
+		expect(
+			document.querySelector('input[name="-unitSetting"]'),
+		).not.toBeInTheDocument();
+	});
+
+	it("withUnitSetting=falseのときunitSettingは反映されない", async () => {
+		refreshResponse.current = scaffoldRefreshTargetDdlResponseFixture;
+		execResponse.current = scaffoldExecResponseFixture;
+		const handleReflect = vi.fn().mockResolvedValue(undefined);
+		const user = await openDialog(handleReflect, false);
+
+		const templateInput = document.querySelector(
+			'input[type="text"][name="-template"]',
+		) as HTMLInputElement;
+		await user.type(templateInput, "scaffoldTpl");
+		await user.click(screen.getByRole("button", { name: "Execute" }));
+
+		await waitFor(() => {
+			expect(handleReflect).toHaveBeenCalled();
+		});
+		expect(handleReflect.mock.calls[0][0]["-unitSetting"]).toBeUndefined();
 	});
 });
 
