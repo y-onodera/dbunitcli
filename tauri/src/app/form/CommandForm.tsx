@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "../../App.css";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import { useRefreshSelectParameter } from "../../hooks/useSelectParameter";
@@ -28,8 +29,12 @@ export default function CommandForm(prop: {
 		return prefill;
 	};
 	// scaffold実行結果(txt駆動generateパラメータ)を現在のフォーム値へマージして再描画する
-	const handleScaffoldReflect = async (params: Record<string, string>) =>
-		refreshSelect({ ...prop.formData(false).values, ...params });
+	// 入力欄は初期値のみstateへ取り込むため、keyを更新して再マウントし反映値を表示させる
+	const [scaffoldReflectCount, setScaffoldReflectCount] = useState(0);
+	const handleScaffoldReflect = async (params: Record<string, string>) => {
+		await refreshSelect({ ...prop.formData(false).values, ...params });
+		setScaffoldReflectCount((count) => count + 1);
+	};
 
 	const renderCommandForm = () => {
 		switch (select.options?.command) {
@@ -52,7 +57,7 @@ export default function CommandForm(prop: {
 			case "generate":
 				return (
 					<GenerateForm
-						key={`generate:${select.name}`}
+						key={`generate:${select.name}:${scaffoldReflectCount}`}
 						handleTypeSelect={handleTypeSelect}
 						name={select.name}
 						generate={select.options}
