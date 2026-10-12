@@ -205,6 +205,7 @@ export function FilterOrderFields({
 				<Arrays
 					key={field.name}
 					name={field.name}
+					showCaption={true}
 					values={target[field.name]}
 					list={columnList}
 					handleChange={(text, index) =>

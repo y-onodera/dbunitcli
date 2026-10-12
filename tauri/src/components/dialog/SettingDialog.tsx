@@ -199,6 +199,7 @@ export function Arrays(props: {
 	handleChange: (text: string, index: number) => void;
 	handleRemove: (index: number) => void;
 	ignoreLabel?: boolean;
+	showCaption?: boolean;
 	list?: string;
 }) {
 	return (
@@ -212,6 +213,7 @@ export function Arrays(props: {
 					handleChange={props.handleChange}
 					handleRemove={props.handleRemove}
 					ignoreLabel={props.ignoreLabel}
+					showCaption={props.showCaption}
 					list={props.list}
 				/>
 			) : (
@@ -225,6 +227,7 @@ export function Arrays(props: {
 							handleChange={props.handleChange}
 							handleRemove={props.handleRemove}
 							ignoreLabel={props.ignoreLabel}
+							showCaption={props.showCaption}
 							list={props.list}
 						/>
 					);
@@ -252,6 +255,7 @@ export function ArraysText(props: {
 	handleChange: (text: string, index: number) => void;
 	handleRemove: (index: number) => void;
 	ignoreLabel?: boolean;
+	showCaption?: boolean;
 	list?: string;
 }) {
 	const [text, setText] = useState(props.val);
@@ -261,7 +265,7 @@ export function ArraysText(props: {
 	const showLabel = !props.ignoreLabel && props.index === 0;
 	return (
 		<>
-			{showLabel && (
+			{showLabel && props.showCaption && (
 				<div className="grid grid-cols-5 pb-1">
 					<span className="col-start-2 text-xs text-content-secondary">
 						column
