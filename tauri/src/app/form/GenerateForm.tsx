@@ -51,17 +51,8 @@ export function GenerateForm(prop: {
 	const generateTypeValue = generate.generateType.value;
 	const isExcelGenerate =
 		generateTypeValue === "xlsx" || generateTypeValue === "xls";
-	// template欄のdropdownに出すgenerate: txtはScaffold、xlsx/xlsはxlsxTemplate生成
+	// template欄のdropdownに出すgenerate: xlsx/xlsはxlsxTemplate生成
 	const templateGenerateButtons = (setPath: (value: string) => void) => {
-		if (generateTypeValue === "txt") {
-			return [
-				<TxtTemplateGenerateButton
-					key="generate"
-					scaffoldPrefill={prop.scaffoldPrefill}
-					handleReflect={prop.handleScaffoldReflect}
-				/>,
-			];
-		}
 		if (isExcelGenerate) {
 			return [<XlsxTemplateGenerateButton key="generate" setPath={setPath} />];
 		}
@@ -92,6 +83,12 @@ export function GenerateForm(prop: {
 				)}
 				{generate.unitSettingEncoding && (
 					<PlainText prefix="" element={generate.unitSettingEncoding} />
+				)}
+				{generateTypeValue === "txt" && (
+					<TxtTemplateGenerateButton
+						scaffoldPrefill={prop.scaffoldPrefill}
+						handleReflect={prop.handleScaffoldReflect}
+					/>
 				)}
 				{generate.template && (
 					<TemplateFileText
