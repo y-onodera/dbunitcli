@@ -1158,8 +1158,8 @@ export const scaffoldRefreshTargetFixedColumnDefResponseFixture = {
 export const scaffoldExecResponseFixture: Record<string, string> = {
 	"-generateType": "txt",
 	"-unit": "table",
-	"-template": "resources/template/scaffoldTpl.txt",
-	"-template.templateGroup": "resources/template/scaffoldTpl.stg",
+	"-template": "scaffoldTpl.txt",
+	"-template.templateGroup": "scaffoldTpl.stg",
 	"-resultPath": "$param.tableName$.sql",
 	"-unitSetting": "resources/setting/scaffoldUnit.json",
 	"-src.src": "src",

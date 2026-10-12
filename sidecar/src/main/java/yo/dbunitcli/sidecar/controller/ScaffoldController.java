@@ -18,6 +18,7 @@ import yo.dbunitcli.resource.FileResources;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Generate画面のScaffoldダイアログ用API。名前付きパラメータ管理（load/save等）を持たないため
@@ -32,6 +33,10 @@ public class ScaffoldController implements ControllerExceptionHandler {
     private static final Map<String, String> GENERATE_FORM_KEY_REMAP = Map.of(
             "-encoding", "-src.encoding",
             "-headerName", "-src.headerName");
+
+    /** テンプレート検索はresources/template配下を基準にするため、generateフォームでは接頭辞を省略した名前で扱う */
+    private static final String TEMPLATE_DIR_PREFIX = FileResources.RESOURCES_TEMPLATE_PATH + "/";
+    private static final Set<String> TEMPLATE_KEYS = Set.of("-template", "-template.templateGroup");
 
     @Post(uri = "refresh", produces = MediaType.APPLICATION_JSON)
     public String refresh(@Body final Map<String, String> input) {
@@ -80,7 +85,15 @@ public class ScaffoldController implements ControllerExceptionHandler {
         final Option.Parameters params = option.txtDrivenGenerateParams();
         params.keySet().stream()
               .filter(params::hasValue)
-              .forEach(key -> result.put(GENERATE_FORM_KEY_REMAP.getOrDefault(key, key), params.get(key)));
+              .forEach(key -> result.put(GENERATE_FORM_KEY_REMAP.getOrDefault(key, key),
+                                         this.toFormValue(key, params.get(key))));
         return result;
+    }
+
+    private String toFormValue(final String key, final String value) {
+        if (TEMPLATE_KEYS.contains(key) && value.startsWith(TEMPLATE_DIR_PREFIX)) {
+            return value.substring(TEMPLATE_DIR_PREFIX.length());
+        }
+        return value;
     }
 }

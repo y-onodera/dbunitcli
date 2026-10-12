@@ -210,8 +210,8 @@ describe("TxtTemplateGenerateDialogの実行テスト", () => {
 
 		await waitFor(() => {
 			expect(handleReflect).toHaveBeenCalledWith({
-				"-template": "resources/template/scaffoldTpl.txt",
-				"-template.templateGroup": "resources/template/scaffoldTpl.stg",
+				"-template": "scaffoldTpl.txt",
+				"-template.templateGroup": "scaffoldTpl.stg",
 			});
 		});
 		const execCall = mockFetchData.mock.calls.find(([params]) =>
@@ -239,8 +239,8 @@ describe("TxtTemplateGenerateDialogの実行テスト", () => {
 
 		await waitFor(() => {
 			expect(handleReflect).toHaveBeenCalledWith({
-				"-template": "resources/template/scaffoldTpl.txt",
-				"-template.templateGroup": "resources/template/scaffoldTpl.stg",
+				"-template": "scaffoldTpl.txt",
+				"-template.templateGroup": "scaffoldTpl.stg",
 				"-unitSetting": "resources/setting/scaffoldUnit.json",
 				"-src.src": "src",
 				"-src.srcType": "csv",
