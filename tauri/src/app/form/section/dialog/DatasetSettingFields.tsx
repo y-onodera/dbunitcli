@@ -398,6 +398,7 @@ function TargetContent({
 				/>
 				<Arrays
 					name="patternExclue"
+					hideCaption={true}
 					values={target.pattern?.exclude ?? []}
 					list={tableList}
 					handleChange={(text, index) =>
@@ -414,6 +415,7 @@ function TargetContent({
 		<>
 			<Arrays
 				name="name"
+				hideCaption={true}
 				values={target.name ?? []}
 				list={tableList}
 				handleChange={(text, index) =>
