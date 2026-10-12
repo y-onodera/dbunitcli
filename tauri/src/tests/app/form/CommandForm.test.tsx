@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useEffect } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -48,9 +48,23 @@ vi.mock("../../../app/form/CompareForm", () => ({
 	CompareForm: () => <div data-testid="mock-compare-form" />,
 }));
 vi.mock("../../../app/form/GenerateForm", () => ({
-	GenerateForm: () => {
+	GenerateForm: ({
+		handleScaffoldReflect,
+	}: {
+		handleScaffoldReflect: (params: Record<string, string>) => Promise<void>;
+	}) => {
 		useEffect(() => mockMount("generate"), []);
-		return <div data-testid="mock-generate-form" />;
+		return (
+			<div data-testid="mock-generate-form">
+				<button
+					type="button"
+					data-testid="scaffold-reflect-btn"
+					onClick={() => handleScaffoldReflect({ "-template": "tpl.txt" })}
+				>
+					reflect
+				</button>
+			</div>
+		);
 	},
 }));
 vi.mock("../../../app/form/RunForm", () => ({
@@ -228,5 +242,21 @@ describe("CommandFormのテスト", () => {
 		mockUseSelectParameter.mockReturnValue(select("second"));
 		rerender(<CommandForm formData={mockFormData} />);
 		expect(mockMount).toHaveBeenCalledTimes(2);
+	});
+
+	it("scaffold結果の反映後、入力欄へ値を表示するためgenerateフォームが再マウントされる", async () => {
+		mockUseSelectParameter.mockReturnValue(
+			makeSelectParameter("generate", generateLoadResponseFixture),
+		);
+		render(<CommandForm formData={mockFormData} />);
+		expect(mockMount).toHaveBeenCalledTimes(1);
+
+		await userEvent.click(screen.getByTestId("scaffold-reflect-btn"));
+
+		expect(mockRefreshSelectFn).toHaveBeenCalledWith({
+			...mockFormValues,
+			"-template": "tpl.txt",
+		});
+		await waitFor(() => expect(mockMount).toHaveBeenCalledTimes(2));
 	});
 });
