@@ -18,7 +18,6 @@ import yo.dbunitcli.resource.FileResources;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Generate画面のScaffoldダイアログ用API。名前付きパラメータ管理（load/save等）を持たないため
@@ -34,9 +33,11 @@ public class ScaffoldController implements ControllerExceptionHandler {
             "-encoding", "-src.encoding",
             "-headerName", "-src.headerName");
 
-    /** テンプレート検索はresources/template配下を基準にするため、generateフォームでは接頭辞を省略した名前で扱う */
-    private static final String TEMPLATE_DIR_PREFIX = FileResources.RESOURCES_TEMPLATE_PATH + "/";
-    private static final Set<String> TEMPLATE_KEYS = Set.of("-template", "-template.templateGroup");
+    /** template・unitSettingの検索はresources/template・resources/setting配下を基準にするため、generateフォームでは接頭辞を省略した名前で扱う */
+    private static final Map<String, String> OMITTABLE_DIR_PREFIX = Map.of(
+            "-template", FileResources.RESOURCES_TEMPLATE_PATH + "/",
+            "-template.templateGroup", FileResources.RESOURCES_TEMPLATE_PATH + "/",
+            "-unitSetting", FileResources.RESOURCES_SETTING_PATH + "/");
 
     @Post(uri = "refresh", produces = MediaType.APPLICATION_JSON)
     public String refresh(@Body final Map<String, String> input) {
@@ -91,8 +92,9 @@ public class ScaffoldController implements ControllerExceptionHandler {
     }
 
     private String toFormValue(final String key, final String value) {
-        if (TEMPLATE_KEYS.contains(key) && value.startsWith(TEMPLATE_DIR_PREFIX)) {
-            return value.substring(TEMPLATE_DIR_PREFIX.length());
+        final String prefix = OMITTABLE_DIR_PREFIX.get(key);
+        if (prefix != null && value.startsWith(prefix)) {
+            return value.substring(prefix.length());
         }
         return value;
     }

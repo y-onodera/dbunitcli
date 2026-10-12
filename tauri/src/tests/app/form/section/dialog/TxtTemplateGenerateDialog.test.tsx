@@ -241,7 +241,7 @@ describe("TxtTemplateGenerateDialogの実行テスト", () => {
 			expect(handleReflect).toHaveBeenCalledWith({
 				"-template": "scaffoldTpl.txt",
 				"-template.templateGroup": "scaffoldTpl.stg",
-				"-unitSetting": "resources/setting/scaffoldUnit.json",
+				"-unitSetting": "scaffoldUnit.json",
 				"-src.src": "src",
 				"-src.srcType": "csv",
 				"-src.encoding": "UTF-8",
