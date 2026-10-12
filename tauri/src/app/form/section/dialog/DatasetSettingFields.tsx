@@ -205,6 +205,7 @@ export function FilterOrderFields({
 				<Arrays
 					key={field.name}
 					name={field.name}
+					showCaption={true}
 					values={target[field.name]}
 					list={columnList}
 					handleChange={(text, index) =>
@@ -398,7 +399,6 @@ function TargetContent({
 				/>
 				<Arrays
 					name="patternExclue"
-					hideCaption={true}
 					values={target.pattern?.exclude ?? []}
 					list={tableList}
 					handleChange={(text, index) =>
@@ -415,7 +415,6 @@ function TargetContent({
 		<>
 			<Arrays
 				name="name"
-				hideCaption={true}
 				values={target.name ?? []}
 				list={tableList}
 				handleChange={(text, index) =>
