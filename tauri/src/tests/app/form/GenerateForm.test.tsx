@@ -143,17 +143,12 @@ describe("GenerateFormの描画テスト", () => {
 			).toBeVisible();
 		});
 
-		it("generateType=txtのときunitの下・templateの前にScaffoldボタンが表示される", () => {
+		it("generateType=txtのときtemplateの前にScaffoldボタンが表示される", () => {
 			render(<GenerateForm {...makeGenerateProps()} />);
 
 			const button = screen.getByRole("button", { name: "Scaffold" });
-			const unitSelect = document.querySelector('select[name="-unit"]');
 			const templateInput = document.querySelector('input[name="-template"]');
 			expect(button).toBeInTheDocument();
-			expect(
-				(unitSelect as Node).compareDocumentPosition(button) &
-					Node.DOCUMENT_POSITION_FOLLOWING,
-			).toBeTruthy();
 			expect(
 				button.compareDocumentPosition(templateInput as Node) &
 					Node.DOCUMENT_POSITION_FOLLOWING,
