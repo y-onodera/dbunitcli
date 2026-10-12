@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-// 枠・スクロール・sticky ヘッダを持つテーブルの土台。maxHeightClass は max-h-xx を渡す
 export function DataTable({
 	head,
 	children,
