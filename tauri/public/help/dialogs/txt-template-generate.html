@@ -43,8 +43,13 @@
   </table>
   <p>target に <code>parameter</code> は選択できません。</p>
 
-  <h2>generate section（反映先セクション）</h2>
-  <p>ダイアログ上部の <strong>generate section</strong> のチェックボックスで、scaffold コマンドの result を generate フォームのどのセクションへ反映するかを任意の数だけ選べます（初期状態は全て選択）。チェックを外したセクションは、generate フォームの現在の値のまま変更されません。</p>
+  <h2>generate section</h2>
+  <p>ダイアログ上部の <strong>generate section</strong> のチェックボックスで、unitSetting と src を生成対象にするかを選べます（初期状態は両方選択）。template は常に生成・反映されるため選択できません。</p>
+  <ul>
+    <li>チェックを外したセクションの入力欄はダイアログから非表示になり、そのファイルは生成されません。</li>
+    <li>unitSetting を外すと unitSetting の入力欄、src を外すと datasetType・datasetEncoding・fixedLength / defaultLength / align・dataset の入力欄が非表示になります。</li>
+    <li>scaffold コマンドの result は、生成した分だけ generate フォームへ反映されます。</li>
+  </ul>
   <table>
     <tr><th>generate section</th><th>ダイアログの入力</th><th>result（generate フォームへ反映される項目）</th></tr>
     <tr><td>template</td><td>template</td><td><code>template</code>（<code>resources/template/{名前}.txt</code>）、<code>template.templateGroup</code>（<code>resources/template/{名前}.stg</code>）</td></tr>
@@ -53,7 +58,7 @@
     <tr><td>src</td><td>datasetType</td><td><code>src.srcType</code></td></tr>
     <tr><td>src</td><td>datasetEncoding</td><td><code>src.encoding</code>（csv / fixed のみ）</td></tr>
   </table>
-  <p>上記以外の result（<code>generateType</code> / <code>unit</code> / <code>resultPath</code> など）は generate フォームへ反映されません。反映の有無にかかわらず、雛型ファイルはワークスペースへ書き出されます。</p>
+  <p>チェックを外した unitSetting / src に対応する result は生成されないため反映されません。上記以外の result（<code>generateType</code> / <code>unit</code> / <code>resultPath</code> など）は generate フォームへ反映されません。</p>
 
   <h2>操作の流れ</h2>
   <ol>

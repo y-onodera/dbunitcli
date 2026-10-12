@@ -33,35 +33,44 @@ function requiredOption(element: CommandOption): CommandOption {
 	return { ...element, attribute: { ...element.attribute, required: true } };
 }
 
-// scaffold実行結果のうちgenerateフォームへ反映するセクション。どれにも属さないキーは反映しない
-const reflectSections = [
+// templateは常に生成・反映する。unitSetting・srcは選択した場合のみダイアログに入力欄を表示して生成し、
+// scaffold実行結果もgenerateフォームへ反映する（どのセクションにも属さないキーは反映しない）
+const generateSections = [
 	{
 		id: "template",
 		label: "template",
+		optional: false,
 		match: (key: string) => key === "-template" || key.startsWith("-template."),
 	},
 	{
 		id: "unitSetting",
 		label: "unitSetting",
+		optional: true,
 		match: (key: string) => key.startsWith("-unitSetting"),
 	},
 	{
 		id: "src",
 		label: "src",
+		optional: true,
 		match: (key: string) => key.startsWith("-src."),
 	},
 ] as const;
 
-type ReflectSectionId = (typeof reflectSections)[number]["id"];
+type OptionalSectionId = "unitSetting" | "src";
+
+const optionalSections = generateSections.filter((section) => section.optional);
 
 export function filterReflectParams(
 	params: Record<string, string>,
-	selected: ReadonlySet<ReflectSectionId>,
+	selected: ReadonlySet<OptionalSectionId>,
 ): Record<string, string> {
 	return Object.fromEntries(
 		Object.entries(params).filter(([key]) =>
-			reflectSections.some(
-				(section) => selected.has(section.id) && section.match(key),
+			generateSections.some(
+				(section) =>
+					(!section.optional ||
+						selected.has(section.id as OptionalSectionId)) &&
+					section.match(key),
 			),
 		),
 	);
@@ -71,23 +80,23 @@ function ReflectSectionSelect({
 	selected,
 	onChange,
 }: {
-	selected: ReadonlySet<ReflectSectionId>;
-	onChange: (next: Set<ReflectSectionId>) => void;
+	selected: ReadonlySet<OptionalSectionId>;
+	onChange: (next: Set<OptionalSectionId>) => void;
 }) {
 	return (
 		<fieldset className="flex gap-4">
 			<legend>generate section</legend>
-			{reflectSections.map((section) => (
+			{optionalSections.map((section) => (
 				<label key={section.id} className="flex items-center gap-1">
 					<input
 						type="checkbox"
-						checked={selected.has(section.id)}
+						checked={selected.has(section.id as OptionalSectionId)}
 						onChange={(e) => {
 							const next = new Set(selected);
 							if (e.target.checked) {
-								next.add(section.id);
+								next.add(section.id as OptionalSectionId);
 							} else {
-								next.delete(section.id);
+								next.delete(section.id as OptionalSectionId);
 							}
 							onChange(next);
 						}}
@@ -109,9 +118,10 @@ function TxtTemplateGenerateDialog({
 	handleDialogClose: () => void;
 }) {
 	const reloadResources = useWorkspaceResourcesReload();
-	const [selected, setSelected] = useState<Set<ReflectSectionId>>(
-		new Set(reflectSections.map((section) => section.id)),
+	const [selected, setSelected] = useState<Set<OptionalSectionId>>(
+		new Set(optionalSections.map((section) => section.id as OptionalSectionId)),
 	);
+	const withSrc = selected.has("src");
 	const dialog = useRefreshableDialog<ScaffoldOptions>({
 		refreshEndpoint: "scaffold/refresh",
 		formId,
@@ -155,25 +165,31 @@ function TxtTemplateGenerateDialog({
 						element={withoutParameterTarget(options.target)}
 					/>
 					<PlainText prefix="" element={requiredOption(options.template)} />
-					<PlainText prefix="" element={options.unitSetting} />
-					<Select
-						handleTypeSelect={dialog.refresh}
-						prefix=""
-						element={options.datasetType}
-					/>
-					<PlainText prefix="" element={options.datasetEncoding} />
-					{[options.fixedLength, options.defaultLength, options.align]
-						.filter(
-							(field): field is NonNullable<typeof field> => field != null,
-						)
-						.map((field) => (
-							<PlainText key={field.name} prefix="" element={field} />
-						))}
-					<DatasetLoadForm
-						handleTypeSelect={dialog.refresh}
-						name="scaffold"
-						srcData={options.dataset}
-					/>
+					{selected.has("unitSetting") && (
+						<PlainText prefix="" element={options.unitSetting} />
+					)}
+					{withSrc && (
+						<>
+							<Select
+								handleTypeSelect={dialog.refresh}
+								prefix=""
+								element={options.datasetType}
+							/>
+							<PlainText prefix="" element={options.datasetEncoding} />
+							{[options.fixedLength, options.defaultLength, options.align]
+								.filter(
+									(field): field is NonNullable<typeof field> => field != null,
+								)
+								.map((field) => (
+									<PlainText key={field.name} prefix="" element={field} />
+								))}
+							<DatasetLoadForm
+								handleTypeSelect={dialog.refresh}
+								name="scaffold"
+								srcData={options.dataset}
+							/>
+						</>
+					)}
 				</>
 			)}
 		</RefreshableDialogShell>
