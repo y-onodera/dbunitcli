@@ -1,3 +1,3 @@
 {
-    "content" : "group sample;\nhello(name) ::= \"Hello, <name>!\"\n"
+    "content": "{\n    \"content\" : \"group sample;\\nhello(name) ::= \\\"Hello, <name>!\\\"\\n\"\n}\n"
 }

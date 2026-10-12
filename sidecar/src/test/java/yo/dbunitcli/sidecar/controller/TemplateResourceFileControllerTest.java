@@ -60,6 +60,12 @@ class TemplateResourceFileControllerTest {
                             .contentType(MediaType.TEXT_PLAIN_TYPE));
         } catch (final Exception ignored) {
         }
+        try {
+            this.client.toBlocking().retrieve(
+                    HttpRequest.POST("dbunit-cli/template/delete", "savedTemplate.stg")
+                            .contentType(MediaType.TEXT_PLAIN_TYPE));
+        } catch (final Exception ignored) {
+        }
     }
 
     @Test
@@ -89,5 +95,22 @@ class TemplateResourceFileControllerTest {
                         HttpRequest.POST("dbunit-cli/template/generate",
                                 "{\"-src.src\":\"resources/src/csv\",\"-src.srcType\":\"csv\",\"-fileName\":\"../a\"}")));
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
+    @Test
+    void testSave_生テキストとして保存しloadで取得できる() throws IOException {
+        final String template = "ddlType(row) ::= <<$row.TYPE_NAME$>>\n";
+        final String saveBody = "{\"name\":\"savedTemplate.stg\",\"input\":{\"content\":"
+                + "\"ddlType(row) ::= <<$row.TYPE_NAME$>>\\n\"}}";
+        final String list = this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/template/save", saveBody));
+        Assertions.assertTrue(list.contains("savedTemplate.stg"), list);
+        final Path saved = Paths.get("target/test-temp/workspace/sample/resources/template/savedTemplate.stg");
+        Assertions.assertEquals(template, Files.readString(saved));
+
+        final String loaded = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/template/load", "savedTemplate.stg")
+                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+        Assertions.assertTrue(loaded.contains("\"content\""), loaded);
+        Assertions.assertTrue(loaded.contains("ddlType(row) ::= <<$row.TYPE_NAME$>>"), loaded);
     }
 }
