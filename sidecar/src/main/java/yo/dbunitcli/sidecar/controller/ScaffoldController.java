@@ -33,6 +33,12 @@ public class ScaffoldController implements ControllerExceptionHandler {
             "-encoding", "-src.encoding",
             "-headerName", "-src.headerName");
 
+    /** template・unitSettingの検索はresources/template・resources/setting配下を基準にするため、generateフォームでは接頭辞を省略した名前で扱う */
+    private static final Map<String, String> OMITTABLE_DIR_PREFIX = Map.of(
+            "-template", FileResources.RESOURCES_TEMPLATE_PATH + "/",
+            "-template.templateGroup", FileResources.RESOURCES_TEMPLATE_PATH + "/",
+            "-unitSetting", FileResources.RESOURCES_SETTING_PATH + "/");
+
     @Post(uri = "refresh", produces = MediaType.APPLICATION_JSON)
     public String refresh(@Body final Map<String, String> input) {
         try {
@@ -80,7 +86,16 @@ public class ScaffoldController implements ControllerExceptionHandler {
         final Option.Parameters params = option.txtDrivenGenerateParams();
         params.keySet().stream()
               .filter(params::hasValue)
-              .forEach(key -> result.put(GENERATE_FORM_KEY_REMAP.getOrDefault(key, key), params.get(key)));
+              .forEach(key -> result.put(GENERATE_FORM_KEY_REMAP.getOrDefault(key, key),
+                                         this.toFormValue(key, params.get(key))));
         return result;
+    }
+
+    private String toFormValue(final String key, final String value) {
+        final String prefix = OMITTABLE_DIR_PREFIX.get(key);
+        if (prefix != null && value.startsWith(prefix)) {
+            return value.substring(prefix.length());
+        }
+        return value;
     }
 }

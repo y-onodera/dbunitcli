@@ -136,7 +136,10 @@ function TxtTemplateGenerateDialog({
 				values,
 			);
 			await Promise.all([
-				handleReflect(filterReflectParams(params, selected)),
+				handleReflect({
+					...filterReflectParams(params, selected),
+					"-unit": "table",
+				}),
 				reloadResources(),
 			]);
 			if (!dialog.isAborted()) {
