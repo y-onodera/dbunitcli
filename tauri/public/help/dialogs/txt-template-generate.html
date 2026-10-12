@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ヘルプ - Txt Template Generate</title>
+  <title>ヘルプ - Scaffold</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
     h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
@@ -21,8 +21,8 @@
 </head>
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
-  <h1>Txt Template Generate</h1>
-  <p>固定成果物タイプ（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）の組み込みテンプレートを、カスタマイズ生成の出発点としてワークスペースへ書き出し、その結果を generate フォームへ反映します。generateType が <code>txt</code> のとき、template テキストボックス横のメニューの generate ボタンから開きます（内部的には scaffold コマンドを実行します）。</p>
+  <h1>Scaffold</h1>
+  <p>固定成果物タイプ（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）の組み込みテンプレートを、カスタマイズ生成の出発点としてワークスペースへ書き出し、その結果を generate フォームへ反映します。generateType が <code>txt</code> のとき、template テキストボックスの前にある Scaffold ボタンから開きます（scaffold コマンドを実行します）。</p>
   <p><strong>できること</strong></p>
   <ul>
     <li>組み込みテンプレート（<code>.stg</code> / <code>.txt</code>）と、サンプルの unitSetting をワークスペースへ書き出す。</li>
@@ -43,11 +43,28 @@
   </table>
   <p>target に <code>parameter</code> は選択できません。</p>
 
+  <h2>generate section</h2>
+  <p>ダイアログ上部の <strong>generate section</strong> のチェックボックスで、unitSetting と src を生成対象にするかを選べます（初期状態は両方選択）。template は常に生成・反映されるため選択できません。</p>
+  <ul>
+    <li>チェックを外したセクションの入力欄はダイアログから非表示になり、そのファイルは生成されません。</li>
+    <li>unitSetting を外すと unitSetting の入力欄、src を外すと datasetType・datasetEncoding・fixedLength / defaultLength / align・dataset の入力欄が非表示になります。</li>
+    <li>scaffold コマンドの result は、生成した分だけ generate フォームへ反映されます。</li>
+  </ul>
+  <table>
+    <tr><th>generate section</th><th>ダイアログの入力</th><th>result（generate フォームへ反映される項目）</th></tr>
+    <tr><td>template</td><td>template</td><td><code>template</code>（<code>resources/template/{名前}.txt</code>）、<code>template.templateGroup</code>（<code>resources/template/{名前}.stg</code>）</td></tr>
+    <tr><td>unitSetting</td><td>unitSetting</td><td><code>unitSetting</code>（<code>resources/setting/{名前}.json</code>）</td></tr>
+    <tr><td>src</td><td>dataset</td><td><code>src.src</code>（書き出した記述子データセットのディレクトリ。入力した dataset のパスではありません）</td></tr>
+    <tr><td>src</td><td>datasetType</td><td><code>src.srcType</code></td></tr>
+    <tr><td>src</td><td>datasetEncoding</td><td><code>src.encoding</code>（csv / fixed のみ）</td></tr>
+  </table>
+  <p>チェックを外した unitSetting / src に対応する result は生成されないため反映されません。上記以外の result（<code>generateType</code> / <code>unit</code> / <code>resultPath</code> など）は generate フォームへ反映されません。</p>
+
   <h2>操作の流れ</h2>
   <ol>
     <li>target と、書き出すテンプレートのファイル名（必須）を指定します。必要に応じて unitSetting・記述子データセットの形式・データソースを指定します。</li>
     <li>Execute を押すと雛型ファイルがワークスペースへ生成されます。</li>
-    <li>生成された雛型で駆動する設定（<code>generateType=txt</code>・<code>unit=table</code>・<code>template</code>・<code>template.templateGroup</code>・<code>unitSetting</code>・<code>resultPath</code>・<code>src</code>）が generate フォームへ反映され、ダイアログが閉じます。</li>
+    <li>選択した generate section に対応する result（上表）が generate フォームへ反映され、ダイアログが閉じます。</li>
     <li>書き出された記述子データセットを編集してから <code>Exec</code> で生成します。反映内容の保存は通常どおり <code>Save</code> ボタンで行ってください。</li>
   </ol>
 

@@ -91,7 +91,7 @@ async function openDialog(
 			handleReflect={handleReflect}
 		/>,
 	);
-	await user.click(screen.getByRole("button", { name: "generate" }));
+	await user.click(screen.getByRole("button", { name: "Scaffold" }));
 	await waitFor(() => {
 		expect(
 			document.querySelector("#txtTemplateGenerateForm"),
@@ -170,7 +170,17 @@ describe("TxtTemplateGenerateDialogの描画テスト", () => {
 });
 
 describe("TxtTemplateGenerateDialogの実行テスト", () => {
-	it("チェックを外したセクションは反映されない", async () => {
+	it("templateのチェックボックスはなくunitSetting・srcのみ選択できる", async () => {
+		refreshResponse.current = scaffoldRefreshTargetDdlResponseFixture;
+		await openDialog();
+
+		expect(screen.getAllByRole("checkbox").length).toBeGreaterThanOrEqual(2);
+		expect(
+			screen.queryByRole("checkbox", { name: "template" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("チェックを外したセクションは入力欄が非表示になり生成対象外としてexecへ送られない", async () => {
 		refreshResponse.current = scaffoldRefreshTargetDdlResponseFixture;
 		execResponse.current = scaffoldExecResponseFixture;
 		const handleReflect = vi.fn().mockResolvedValue(undefined);
@@ -182,6 +192,20 @@ describe("TxtTemplateGenerateDialogの実行テスト", () => {
 		await user.type(templateInput, "scaffoldTpl");
 		await user.click(screen.getByRole("checkbox", { name: "src" }));
 		await user.click(screen.getByRole("checkbox", { name: "unitSetting" }));
+
+		expect(
+			document.querySelector('input[name="-unitSetting"]'),
+		).not.toBeInTheDocument();
+		expect(
+			document.querySelector('select[name="-datasetType"]'),
+		).not.toBeInTheDocument();
+		expect(
+			document.querySelector('input[name="-dataset.src"]'),
+		).not.toBeInTheDocument();
+		expect(
+			document.querySelector('input[name="-template"]'),
+		).toBeInTheDocument();
+
 		await user.click(screen.getByRole("button", { name: "Execute" }));
 
 		await waitFor(() => {
@@ -190,6 +214,15 @@ describe("TxtTemplateGenerateDialogの実行テスト", () => {
 				"-template.templateGroup": "resources/template/scaffoldTpl.stg",
 			});
 		});
+		const execCall = mockFetchData.mock.calls.find(([params]) =>
+			params.endpoint.includes("scaffold/exec"),
+		);
+		const requestBody = JSON.parse(String(execCall?.[0].options.body));
+		expect(requestBody["-unitSetting"]).toBeUndefined();
+		expect(requestBody["-datasetType"]).toBeUndefined();
+		expect(
+			Object.keys(requestBody).filter((key) => key.startsWith("-dataset.")),
+		).toEqual([]);
 	});
 
 	it("Executeで/scaffold/execを呼び、結果を反映してダイアログを閉じる", async () => {
