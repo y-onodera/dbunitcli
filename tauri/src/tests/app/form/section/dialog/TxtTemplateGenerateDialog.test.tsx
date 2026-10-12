@@ -170,6 +170,28 @@ describe("TxtTemplateGenerateDialogの描画テスト", () => {
 });
 
 describe("TxtTemplateGenerateDialogの実行テスト", () => {
+	it("チェックを外したセクションは反映されない", async () => {
+		refreshResponse.current = scaffoldRefreshTargetDdlResponseFixture;
+		execResponse.current = scaffoldExecResponseFixture;
+		const handleReflect = vi.fn().mockResolvedValue(undefined);
+		const user = await openDialog(handleReflect);
+
+		const templateInput = document.querySelector(
+			'input[type="text"][name="-template"]',
+		) as HTMLInputElement;
+		await user.type(templateInput, "scaffoldTpl");
+		await user.click(screen.getByRole("checkbox", { name: "src" }));
+		await user.click(screen.getByRole("checkbox", { name: "unitSetting" }));
+		await user.click(screen.getByRole("button", { name: "Execute" }));
+
+		await waitFor(() => {
+			expect(handleReflect).toHaveBeenCalledWith({
+				"-template": "resources/template/scaffoldTpl.txt",
+				"-template.templateGroup": "resources/template/scaffoldTpl.stg",
+			});
+		});
+	});
+
 	it("Executeで/scaffold/execを呼び、結果を反映してダイアログを閉じる", async () => {
 		refreshResponse.current = scaffoldRefreshTargetDdlResponseFixture;
 		execResponse.current = scaffoldExecResponseFixture;
@@ -183,7 +205,14 @@ describe("TxtTemplateGenerateDialogの実行テスト", () => {
 		await user.click(screen.getByRole("button", { name: "Execute" }));
 
 		await waitFor(() => {
-			expect(handleReflect).toHaveBeenCalledWith(scaffoldExecResponseFixture);
+			expect(handleReflect).toHaveBeenCalledWith({
+				"-template": "resources/template/scaffoldTpl.txt",
+				"-template.templateGroup": "resources/template/scaffoldTpl.stg",
+				"-unitSetting": "resources/setting/scaffoldUnit.json",
+				"-src.src": "src",
+				"-src.srcType": "csv",
+				"-src.encoding": "UTF-8",
+			});
 		});
 		const execCall = mockFetchData.mock.calls.find(([params]) =>
 			params.endpoint.includes("scaffold/exec"),
