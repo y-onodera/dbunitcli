@@ -143,10 +143,16 @@ describe("GenerateFormの描画テスト", () => {
 			).toBeVisible();
 		});
 
-		it("generateType=txtのときtemplateのdropdownにgenerate項目が表示される", async () => {
+		it("generateType=txtのときtemplateの前にgenerateボタンが表示される", () => {
 			render(<GenerateForm {...makeGenerateProps()} />);
 
-			expect(await templateGenerateMenuItem()).toBeInTheDocument();
+			const button = screen.getByRole("button", { name: "generate" });
+			const templateInput = document.querySelector('input[name="-template"]');
+			expect(button).toBeInTheDocument();
+			expect(
+				button.compareDocumentPosition(templateInput as Node) &
+					Node.DOCUMENT_POSITION_FOLLOWING,
+			).toBeTruthy();
 		});
 	});
 
