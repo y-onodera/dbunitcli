@@ -79,7 +79,7 @@ public interface Option {
         }
 
         public List<String> parameterizeArgs(final boolean containDefaultValue) {
-            return this.toList(containDefaultValue, key -> key + "$param." + this.templateEscape(key) + "$");
+            return this.toList(containDefaultValue, key -> key + "=$param." + this.templateEscape(key) + "$");
         }
 
         public Map<String, ?> toMap(final boolean containDefaultValue) {
@@ -148,7 +148,7 @@ public interface Option {
         }
 
         private String templateEscape(final String key) {
-            return key.replace(".", "_");
+            return (key.startsWith("-") ? key.substring(1) : key).replace(".", "_");
         }
     }
 
