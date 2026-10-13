@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Edit Parameterize Template</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ol, ul { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Edit Parameterize Template</h1>
+  <p><a href="../commands/parameterize.html">Parameterize</a> の <code>template</code> に指定するコマンド用パラメータファイルのテンプレートを作成・編集するダイアログです。</p>
+
+  <h2>開き方</h2>
+  <p><code>template</code> のテキストボックス横の編集ボタンから開きます。テキストボックスの値が候補リストに含まれる有効なパスの場合はそのファイルの内容が読み込まれ、それ以外の場合は空のエディタが開きます。</p>
+
+  <h2>記述内容</h2>
+  <p>対象コマンド（<code>cmd</code>）のパラメータを、<code>paramData</code> の値で展開できる形で記述します。記述例は <a href="../commands/parameterize.html">Parameterize</a> の「具体例」を参照してください。</p>
+
+  <h2>保存</h2>
+  <p>ダイアログ下部の name に保存先のファイル名を指定して Save を押すと、内容がファイルとして書き出され、元のテキストボックスにそのファイル名が設定されます。存在しない名前を指定すると新規ファイルとして作成され、既存のファイル名を指定すると上書きされます。</p>
+
+  <h2>関連</h2>
+  <ul>
+    <li><a href="template-edit.html">Template File Edit</a> — Generate 用テンプレートの編集</li>
+  </ul>
+</body>
+</html>

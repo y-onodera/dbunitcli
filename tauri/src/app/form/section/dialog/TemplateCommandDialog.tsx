@@ -74,6 +74,8 @@ function Dialog({
 	return (
 		<SettingDialog
 			title="Edit Parameterize Template"
+			helpCommand="dialogs/parameterize-template-edit"
+			helpLabel="Edit Parameterize Template"
 			fileName={name}
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
