@@ -66,6 +66,7 @@ export function ParameterizeForm(prop: {
 								<TemplateCommandButton
 									key="open-cmd"
 									name={path}
+									setPath={setPath}
 									isValidPath={isValueInDatalist ?? false}
 								/>,
 							]}
