@@ -1,117 +1,117 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
 	DialogBody,
-	DialogFooter,
-	DialogTitle,
-	FullDialog,
+	SettingDialog,
 	StatusMessage,
 } from "../../../../components/dialog";
-import { WhiteButton } from "../../../../components/element/Button";
-import { PreviewButton } from "../../../../components/element/ButtonIcon";
+import { EditButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
-import { useEnvironment } from "../../../../context/EnvironmentProvider";
+import {
+	useParameterizeTemplateData,
+	useParameterizeTemplateSaveContent,
+} from "../../../../hooks/useTemplate";
 import type { Command } from "../../../../model/SelectParameter";
 import { COMMANDS } from "../../../../model/SelectParameter";
-import { fetchData, getErrorMessage } from "../../../../utils/fetchUtils";
-
-type LoadState =
-	| { status: "loading" }
-	| { status: "error"; message: string }
-	| { status: "loaded"; content: string };
-
-async function loadParameterizeTemplateContent(
-	apiUrl: string,
-	name: string,
-): Promise<string> {
-	const fetchParams = {
-		endpoint: `${apiUrl}parameterize/template/load`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "text/plain" },
-			body: name,
-		},
-	};
-	const response = await fetchData(fetchParams);
-	const data = (await response.json()) as { content?: string };
-	return data.content ?? "";
-}
+import { saveOnSuccess } from "../../../../utils/fetchUtils";
 
 export function resolveCommand(cmdValue: string): Command | null {
 	const lower = cmdValue.trim().toLowerCase() as Command;
 	return COMMANDS.includes(lower) ? lower : null;
 }
 
-function extractNameFromTemplatePath(templatePath: string): string {
-	const filename =
-		templatePath.replace(/\\/g, "/").split("/").pop() ?? templatePath;
-	return filename.replace(/\.[^.]+$/, "");
+function extractFileNameFromTemplatePath(templatePath: string): string {
+	return templatePath.replace(/\\/g, "/").split("/").pop() ?? templatePath;
 }
 
 function ParameterizeTemplateDialog({
 	name,
+	loadName,
+	setPath,
 	handleDialogClose,
 }: {
 	name: string;
+	loadName: string;
+	setPath: (path: string) => void;
 	handleDialogClose: () => void;
 }) {
-	const environment = useEnvironment();
-	const [loadState, setLoadState] = useState<LoadState>({ status: "loading" });
-
-	useEffect(() => {
-		if (!name) {
-			setLoadState({ status: "error", message: "No template selected" });
-			return;
-		}
-		const controller = new AbortController();
-		async function load() {
-			const content = await loadParameterizeTemplateContent(
-				environment.apiUrl,
-				name,
-			);
-			if (!controller.signal.aborted) {
-				setLoadState({ status: "loaded", content });
-			}
-		}
-		load().catch((ex) => {
-			if (!controller.signal.aborted) {
-				setLoadState({ status: "error", message: getErrorMessage(ex) });
-			}
-		});
-		return () => {
-			controller.abort();
-		};
-	}, [name, environment.apiUrl]);
-
+	const { content, loading } = useParameterizeTemplateData(loadName);
+	if (loading) {
+		return <StatusMessage kind="loading">Loading...</StatusMessage>;
+	}
 	return (
-		<FullDialog onClose={handleDialogClose}>
-			<DialogBody size="auto" scrollable>
-				<DialogTitle>Template - {name}</DialogTitle>
-				{loadState.status === "loading" && (
-					<StatusMessage kind="loading">Loading...</StatusMessage>
-				)}
-				{loadState.status === "error" && (
-					<StatusMessage kind="error">Error: {loadState.message}</StatusMessage>
-				)}
-				{loadState.status === "loaded" && (
-					<TextArea value={loadState.content} readOnly />
-				)}
-			</DialogBody>
-			<DialogFooter>
-				<WhiteButton title="Close" handleClick={handleDialogClose} />
-			</DialogFooter>
-		</FullDialog>
+		<Dialog
+			content={content}
+			name={name}
+			setPath={setPath}
+			handleDialogClose={handleDialogClose}
+		/>
 	);
 }
 
-export function TemplateCommandButton({ name }: { name: string }) {
+function Dialog({
+	content: initialContent,
+	name,
+	setPath,
+	handleDialogClose,
+}: {
+	content: string;
+	name: string;
+	setPath: (path: string) => void;
+	handleDialogClose: () => void;
+}) {
+	const [content, setContent] = useState<string>(initialContent);
+	const saveContent = useParameterizeTemplateSaveContent();
+
+	const handleSave = (path: string) =>
+		saveOnSuccess(
+			() => saveContent(path, content),
+			() => {
+				setPath(path);
+				handleDialogClose();
+			},
+		);
+
+	return (
+		<SettingDialog
+			title="Edit Parameterize Template"
+			helpCommand="dialogs/parameterize-template-edit"
+			helpLabel="Edit Parameterize Template"
+			fileName={name}
+			handleDialogClose={handleDialogClose}
+			handleSave={handleSave}
+		>
+			<DialogBody size="lg">
+				<TextArea
+					id="contents"
+					value={content}
+					onChange={(e) => setContent(e.target.value)}
+					placeholder="Enter template..."
+					spellCheck={false}
+				/>
+			</DialogBody>
+		</SettingDialog>
+	);
+}
+
+export function TemplateCommandButton({
+	name,
+	setPath,
+	isValidPath,
+}: {
+	name: string;
+	setPath: (path: string) => void;
+	isValidPath: boolean;
+}) {
 	const [showDialog, setShowDialog] = useState(false);
-	const paramName = extractNameFromTemplatePath(name);
+	const fileName = extractFileNameFromTemplatePath(name);
 	return (
 		<>
-			<PreviewButton handleClick={() => setShowDialog(true)} />
+			<EditButton handleClick={() => setShowDialog(true)} />
 			{showDialog && (
 				<ParameterizeTemplateDialog
-					name={paramName}
+					name={fileName}
+					loadName={isValidPath ? fileName : ""}
+					setPath={setPath}
 					handleDialogClose={() => setShowDialog(false)}
 				/>
 			)}

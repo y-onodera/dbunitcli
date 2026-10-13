@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
 	DialogBody,
-	DialogTitle,
 	SettingDialog,
 	StatusMessage,
 } from "../../../../components/dialog";
@@ -63,12 +62,14 @@ function Dialog({
 
 	return (
 		<SettingDialog
+			title="Template File Edit"
+			helpCommand="dialogs/template-edit"
+			helpLabel="Template File Edit"
 			fileName={name}
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
 		>
 			<DialogBody size="lg">
-				<DialogTitle>Template File Edit</DialogTitle>
 				<TextArea
 					value={content}
 					onChange={(e) => setContent(e.target.value)}

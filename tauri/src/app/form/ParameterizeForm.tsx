@@ -63,7 +63,12 @@ export function ParameterizeForm(prop: {
 							element={parameterize.template}
 							isValueInDatalist={isValueInDatalist}
 							editButtons={[
-								<TemplateCommandButton key="open-cmd" name={path} />,
+								<TemplateCommandButton
+									key="open-cmd"
+									name={path}
+									setPath={setPath}
+									isValidPath={isValueInDatalist ?? false}
+								/>,
 							]}
 						/>
 					)}

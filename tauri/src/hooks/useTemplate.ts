@@ -9,7 +9,15 @@ import {
 	type OperationResult,
 } from "../utils/fetchUtils";
 
-export const useTemplateData = (name: string): { content: string; loading: boolean } => {
+export const useTemplateData = (name: string) => useResourceContent("template", name);
+
+export const useParameterizeTemplateData = (name: string) =>
+	useResourceContent("parameterize/template", name);
+
+const useResourceContent = (
+	resource: string,
+	name: string,
+): { content: string; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
 	const [content, setContent] = useState("");
 	const [loading, setLoading] = useState(name !== "");
@@ -22,7 +30,7 @@ export const useTemplateData = (name: string): { content: string; loading: boole
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		loadTemplateContent(apiUrl, name).then((result) => {
+		loadTemplateContent(apiUrl, resource, name).then((result) => {
 			if (!controller.signal.aborted) {
 				setContent(result);
 				setLoading(false);
@@ -31,7 +39,7 @@ export const useTemplateData = (name: string): { content: string; loading: boole
 		return () => {
 			controller.abort();
 		};
-	}, [name, apiUrl]);
+	}, [resource, name, apiUrl]);
 
 	return { content, loading };
 };
@@ -49,6 +57,19 @@ export const useDeleteTemplate = () => {
 		);
 };
 
+// parameterize/template の保存応答(ファイル一覧)は画面状態に保持しないため反映しない
+export const useParameterizeTemplateSaveContent = () => {
+	const { apiUrl } = useEnvironment();
+	return async (name: string, content: string): Promise<OperationResult> =>
+		fetchAndUpdate<string[]>(
+			{
+				endpoint: `${apiUrl}parameterize/template/save`,
+				options: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, input: { content } }) },
+			},
+			() => {},
+		);
+};
+
 export const useTemplateSaveContent = () => {
 	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();
@@ -62,9 +83,9 @@ export const useTemplateSaveContent = () => {
 		);
 };
 
-async function loadTemplateContent(apiUrl: string, name: string): Promise<string> {
+async function loadTemplateContent(apiUrl: string, resource: string, name: string): Promise<string> {
 	const params = {
-		endpoint: `${apiUrl}template/load`,
+		endpoint: `${apiUrl}${resource}/load`,
 		options: {
 			method: "POST",
 			headers: { "Content-Type": "text/plain" },
