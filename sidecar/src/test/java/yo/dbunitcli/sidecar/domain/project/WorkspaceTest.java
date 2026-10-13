@@ -152,7 +152,9 @@ class WorkspaceTest {
 
         // Assert: テンプレートの各行はキーと値の間に = がある
         final String template = Files.readString(this.tempDir.resolve("option/parameterize/template/myConvert.txt"));
-        assertTrue(template.contains("-src.srcType=$param."), "template の各行が key=$param.xxx$ 形式になること");
+        assertTrue(template.contains("-src.srcType=$param.src_srcType$"), "template の各行が key=$param.xxx$ 形式で変数名に - を含まないこと");
+        final String header = Files.readAllLines(this.tempDir.resolve("myConvert.csv")).getFirst();
+        assertTrue(header.contains("src_srcType") && !header.contains("-src"), "CSVヘッダ名に - を含まないこと");
     }
 
     @Test

@@ -148,7 +148,7 @@ public interface Option {
         }
 
         private String templateEscape(final String key) {
-            return key.replace(".", "_");
+            return (key.startsWith("-") ? key.substring(1) : key).replace(".", "_");
         }
     }
 
