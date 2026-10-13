@@ -7,7 +7,7 @@ import {
 	StatusMessage,
 } from "../../../../components/dialog";
 import { WhiteButton } from "../../../../components/element/Button";
-import { PreviewButton } from "../../../../components/element/ButtonIcon";
+import { EditButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
 import { useEnvironment } from "../../../../context/EnvironmentProvider";
 import type { Command } from "../../../../model/SelectParameter";
@@ -103,12 +103,18 @@ function ParameterizeTemplateDialog({
 	);
 }
 
-export function TemplateCommandButton({ name }: { name: string }) {
+export function TemplateCommandButton({
+	name,
+	isValidPath,
+}: {
+	name: string;
+	isValidPath: boolean;
+}) {
 	const [showDialog, setShowDialog] = useState(false);
-	const paramName = extractNameFromTemplatePath(name);
+	const paramName = isValidPath ? extractNameFromTemplatePath(name) : "";
 	return (
 		<>
-			<PreviewButton handleClick={() => setShowDialog(true)} />
+			<EditButton handleClick={() => setShowDialog(true)} />
 			{showDialog && (
 				<ParameterizeTemplateDialog
 					name={paramName}
