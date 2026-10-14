@@ -18,6 +18,7 @@ import type {
 	DatasetSettingMode,
 } from "../../../../model/DatasetSettings";
 import { newDatasetSetting } from "../../../../model/DatasetSettings";
+import ColumnSelectDialog from "./ColumnSelectDialog";
 
 export type DatasetSettingFieldsProps = {
 	target: DatasetSetting;
@@ -189,6 +190,28 @@ export function FilterOrderFields({
 	columnList: string | undefined;
 	onLoadColumns: () => void;
 }) {
+	const [selecting, setSelecting] = useState<{
+		field: (typeof filterOrderFields)[number];
+		index: number;
+	} | null>(null);
+	// 先頭の選択項目をクリックした行に設定し、残りは既存値と重複しないものを末尾に追加する
+	const applySelected = (selected: string[]) => {
+		if (!selecting) {
+			return;
+		}
+		const { field, index } = selecting;
+		setTarget((cur) => {
+			const [first, ...rest] = selected;
+			let next = field.replace(cur, first, index);
+			for (const column of rest) {
+				const values = next[field.name];
+				if (!values.includes(column)) {
+					next = field.replace(next, column, values.length);
+				}
+			}
+			return next;
+		});
+	};
 	return (
 		<Fieldset legend="Filter / Order">
 			<DialogField>
@@ -205,10 +228,22 @@ export function FilterOrderFields({
 						setTarget((cur) => field.replace(cur, text, index))
 					}
 					handleRemove={(index) => setTarget((cur) => field.remove(cur, index))}
+					handleSelect={
+						columnDatalist.length > 0
+							? (index) => setSelecting({ field, index })
+							: undefined
+					}
 				/>
 			))}
 			{columnDatalist.length > 0 && (
 				<ResourceDatalist id="column_datalist" resources={columnDatalist} />
+			)}
+			{selecting && (
+				<ColumnSelectDialog
+					columns={columnDatalist}
+					onApply={applySelected}
+					onClose={() => setSelecting(null)}
+				/>
 			)}
 		</Fieldset>
 	);
