@@ -1,6 +1,10 @@
 import { type ReactNode, useState } from "react";
 import { BlueButton, WhiteButton } from "../element/Button";
-import { AddButton, RemoveButton, SettingButton } from "../element/ButtonIcon";
+import {
+	AddButton,
+	FactCheckButton,
+	RemoveButton,
+} from "../element/ButtonIcon";
 import {
 	CheckBox,
 	ControllTextBox,
@@ -298,7 +302,7 @@ export function ArraysText(props: {
 				{(props.handleSelect || props.index > 0) && (
 					<div className="col-start-3 flex items-center">
 						{props.handleSelect && (
-							<SettingButton
+							<FactCheckButton
 								title="select"
 								handleClick={() => props.handleSelect?.(props.index)}
 							/>

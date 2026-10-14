@@ -9,8 +9,7 @@ import {
 	Td,
 	Tr,
 } from "../../../../components/dialog";
-import { WhiteButton } from "../../../../components/element/Button";
-import { FactCheckButton } from "../../../../components/element/ButtonIcon";
+import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 
 export default function ColumnSelectDialog({
 	columns,
@@ -61,15 +60,14 @@ export default function ColumnSelectDialog({
 			<DialogTitle>Select Columns</DialogTitle>
 			{renderBody()}
 			<DialogActions>
-				{selected.length > 0 && (
-					<FactCheckButton
-						title="Apply"
-						handleClick={() => {
-							onApply(selected);
-							onClose();
-						}}
-					/>
-				)}
+				<BlueButton
+					title="Apply"
+					disabled={selected.length === 0}
+					handleClick={() => {
+						onApply(selected);
+						onClose();
+					}}
+				/>
 				<WhiteButton title="Close" handleClick={onClose} />
 			</DialogActions>
 		</ModalOverlay>
