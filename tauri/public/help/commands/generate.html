@@ -72,6 +72,16 @@
   </ul>
   <p>用途の例: DDL・JavaBean・固定長定義など、<code>unit=table</code> のテンプレートで「1 テーブル（1 カラム = 1 行の記述子データセット）から 1 ファイル」を作るときに、カラム情報をテンプレートが扱いやすい形へ整えます。</p>
 
+  <h4>unitSetting が無いとできないこと</h4>
+  <p>組み込み設定が自動適用されるのは固定成果物タイプ（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code>）だけです。<code>generateType=txt</code> で <code>unitSetting</code> を指定しない場合、テーブルは入力データのまま（式による変数の導出も、サブテーブルへの分割もなし）でテンプレートに渡されます。</p>
+  <table>
+    <tr><th>やりたいこと</th><th>unitSetting なし（txt）</th><th>unitSetting あり</th></tr>
+    <tr><td>カラム値から加工した変数をテンプレートで使う（例: <code>TYPE_NAME</code> → <code>javaType</code>、<code>TABLE_NAME</code> → <code>className</code>）</td><td>できない。テンプレートで参照できるのは入力データの列そのものだけ</td><td><code>string</code> / <code>boolean</code> の式で変数を定義でき、テンプレートから参照できる</td></tr>
+    <tr><td>主キーなど一部の行を別テーブルとして扱う（例: CREATE TABLE の主キー句）</td><td>できない。1 テーブルは 1 つの塊のまま</td><td><code>separate</code> + <code>filter</code> で <code>PK</code> などのサブテーブルに分割し、テンプレートから参照できる</td></tr>
+    <tr><td>テーブルごとに異なる変数定義を適用する</td><td>できない</td><td><code>settings</code> の <code>pattern</code> でテーブル名ごとに定義を切り替えられる</td></tr>
+  </table>
+  <p>たとえば Scaffold で書き出した DDL 用のテンプレートは、<code>PK</code> サブテーブルの存在を前提に書かれているため、<code>ddlSettings.json</code> 相当の unitSetting を指定しないと主キー句を出力できません。Scaffold で template と一緒に unitSetting も書き出し、フォームへ反映するのはこのためです。</p>
+
   <h4>組み込みファイルの例（Scaffold で書き出されるもの）</h4>
   <p><a href="../dialogs/txt-template-generate.html">Scaffold</a> ダイアログ（<code>generateType=txt</code> のとき unit の上の Scaffold ボタンから開く）は、固定成果物タイプが内部で使っている組み込みの unitSetting を、サンプルとしてワークスペースへ書き出します（<code>resources/setting/{名前}.json</code>）。書き出したファイルを編集し、generate フォームの <code>unitSetting</code> に指定して使います。</p>
   <table>
