@@ -13,7 +13,6 @@ public class TableJoinDto {
     private List<String> column;
     private String on;
     private String filePath;
-    private String leftFilePath;
     private String rightFilePath;
 
     public String getFilePath() {
@@ -22,14 +21,6 @@ public class TableJoinDto {
 
     public void setFilePath(final String filePath) {
         this.filePath = filePath;
-    }
-
-    public String getLeftFilePath() {
-        return this.leftFilePath;
-    }
-
-    public void setLeftFilePath(final String leftFilePath) {
-        this.leftFilePath = leftFilePath;
     }
 
     public String getRightFilePath() {

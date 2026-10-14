@@ -342,17 +342,6 @@ function TargetContent({
 					}
 				/>
 				<Text
-					name="leftFilePath"
-					value={target.join()?.leftFilePath ?? ""}
-					handleChange={(newVal) =>
-						setTarget((cur) =>
-							cur.replaceJoin({
-								leftFilePath: newVal.target.value || undefined,
-							}),
-						)
-					}
-				/>
-				<Text
 					name="right"
 					value={target.join()?.right ?? ""}
 					list={tableList}

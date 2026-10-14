@@ -97,7 +97,7 @@ public class FromJsonTableSeparatorsBuilderTest {
                     "settings": [{
                         "innerJoin": {
                             "left": "TABLE1",
-                            "leftFilePath": ".*/a/.*",
+                            "filePath": ".*/a/.*",
                             "right": "TABLE2",
                             "rightFilePath": ".*/b/.*",
                             "column": ["id"]

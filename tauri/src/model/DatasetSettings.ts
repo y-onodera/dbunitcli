@@ -9,7 +9,6 @@ export type TableJoin = {
 	column?: string[];
 	on?: string;
 	filePath?: string;
-	leftFilePath?: string;
 	rightFilePath?: string;
 };
 export type Split = {
@@ -229,7 +228,7 @@ export class DatasetSetting {
 	private targetFilePath(): string | undefined {
 		const join = this.join();
 		if (join) {
-			return join.leftFilePath ?? join.filePath;
+			return join.filePath;
 		}
 		if (this.pattern) {
 			return this.pattern.filePath;

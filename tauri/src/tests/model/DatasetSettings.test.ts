@@ -422,18 +422,18 @@ describe("DatasetSettingクラス", () => {
 		expect(json.pattern).toEqual({ string: "p", filePath: ".*/dir/.*" });
 	});
 
-	it("toJSONはjoinのleftFilePath/rightFilePathを出力すること", () => {
+	it("toJSONはjoinのfilePath/rightFilePathを出力すること", () => {
 		const setting = new DatasetSetting({
 			innerJoin: {
 				left: "a",
 				right: "b",
-				leftFilePath: ".*/a/.*",
+				filePath: ".*/a/.*",
 				rightFilePath: ".*/b/.*",
 				column: ["id"],
 			},
 		});
 		const json = JSON.parse(JSON.stringify(setting));
-		expect(json.innerJoin.leftFilePath).toBe(".*/a/.*");
+		expect(json.innerJoin.filePath).toBe(".*/a/.*");
 		expect(json.innerJoin.rightFilePath).toBe(".*/b/.*");
 	});
 
