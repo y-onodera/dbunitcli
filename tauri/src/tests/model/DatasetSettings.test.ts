@@ -279,13 +279,13 @@ describe("DatasetSettingクラス", () => {
 	it("関数設定を置換できること", () => {
 		const setting = newDatasetSetting();
 		const updatedSetting = setting.replaceFunction(0, { prop: "newFunction" });
-		expect(updatedSetting.function).toEqual({ prop: "newFunction" });
+		expect(updatedSetting.sqlFunction).toEqual({ prop: "newFunction" });
 	});
 
 	it("関数設定を削除できること", () => {
 		const setting = newDatasetSetting();
 		const updatedSetting = setting.removeFunction(0);
-		expect(updatedSetting.function).toEqual({});
+		expect(updatedSetting.sqlFunction).toEqual({});
 	});
 
 	it("フィルター設定を置換できること", () => {

@@ -111,7 +111,7 @@ const additionalColumnFields = [
 		remove: (s: DatasetSetting, i: number) => s.removeBoolean(i),
 	},
 	{
-		name: "function",
+		name: "sqlFunction",
 		replace: (s: DatasetSetting, i: number, v: { [prop: string]: string }) =>
 			s.replaceFunction(i, v),
 		remove: (s: DatasetSetting, i: number) => s.removeFunction(i),

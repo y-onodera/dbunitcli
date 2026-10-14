@@ -44,7 +44,7 @@ export type DatasetSettingBuilder = {
 	string?: object;
 	number?: object;
 	boolean?: object;
-	function?: object;
+	sqlFunction?: object;
 	exclude?: string[];
 	include?: string[];
 	filter?: string[];
@@ -138,7 +138,7 @@ export class DatasetSetting {
 	readonly string: object;
 	readonly number: object;
 	readonly boolean: object;
-	readonly function: object;
+	readonly sqlFunction: object;
 	readonly name?: string[];
 	readonly filePath?: string;
 	readonly pattern?: Pattern;
@@ -163,7 +163,7 @@ export class DatasetSetting {
 		this.string = builder.string ?? {};
 		this.number = builder.number ?? {};
 		this.boolean = builder.boolean ?? {};
-		this.function = builder.function ?? {};
+		this.sqlFunction = builder.sqlFunction ?? {};
 		const nameVal = builder.name;
 		if (isNameFilter(nameVal)) {
 			const anyVal = nameVal.any;
@@ -448,13 +448,13 @@ export class DatasetSetting {
 		value: { [prop: string]: string },
 	): DatasetSetting {
 		return this.with({
-			function: replaceObject(this.function, index, value),
+			sqlFunction: replaceObject(this.sqlFunction, index, value),
 		});
 	}
 
 	removeFunction(index: number): DatasetSetting {
 		return this.with({
-			function: removeObject(this.function, index),
+			sqlFunction: removeObject(this.sqlFunction, index),
 		});
 	}
 
