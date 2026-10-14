@@ -9,7 +9,8 @@ import {
 	type OperationResult,
 } from "../utils/fetchUtils";
 
-export const useTemplateData = (name: string) => useResourceContent("template", name);
+export const useTemplateData = (name: string) =>
+	useResourceContent("template", name);
 
 export const useParameterizeTemplateData = (name: string) =>
 	useResourceContent("parameterize/template", name);
@@ -51,9 +52,16 @@ export const useDeleteTemplate = () => {
 		fetchAndUpdate<string[]>(
 			{
 				endpoint: `${apiUrl}template/delete`,
-				options: { method: "POST", headers: { "Content-Type": "text/plain" }, body: name },
+				options: {
+					method: "POST",
+					headers: { "Content-Type": "text/plain" },
+					body: name,
+				},
 			},
-			(settings) => setResourcesSettings((current) => current.with({ templateFiles: settings })),
+			(settings) =>
+				setResourcesSettings((current) =>
+					current.with({ templateFiles: settings }),
+				),
 		);
 };
 
@@ -64,7 +72,11 @@ export const useParameterizeTemplateSaveContent = () => {
 		fetchAndUpdate<string[]>(
 			{
 				endpoint: `${apiUrl}parameterize/template/save`,
-				options: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, input: { content } }) },
+				options: {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ name, input: { content } }),
+				},
 			},
 			() => {},
 		);
@@ -77,13 +89,24 @@ export const useTemplateSaveContent = () => {
 		fetchAndUpdate<string[]>(
 			{
 				endpoint: `${apiUrl}template/save`,
-				options: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, input: { content } }) },
+				options: {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ name, input: { content } }),
+				},
 			},
-			(settings) => setResourcesSettings((current) => current.with({ templateFiles: settings })),
+			(settings) =>
+				setResourcesSettings((current) =>
+					current.with({ templateFiles: settings }),
+				),
 		);
 };
 
-async function loadTemplateContent(apiUrl: string, resource: string, name: string): Promise<string> {
+async function loadTemplateContent(
+	apiUrl: string,
+	resource: string,
+	name: string,
+): Promise<string> {
 	const params = {
 		endpoint: `${apiUrl}${resource}/load`,
 		options: {

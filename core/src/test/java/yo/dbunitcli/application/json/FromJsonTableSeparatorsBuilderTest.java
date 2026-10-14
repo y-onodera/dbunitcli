@@ -145,6 +145,35 @@ public class FromJsonTableSeparatorsBuilderTest {
         assertTrue(condition.isRight(this.metaData("TABLE2", "/work/b/TABLE2.csv")));
     }
 
+    @Test
+    public void configureSettingWhenJoinHasCommonFilePathShouldApplyToSidesWithoutOwnFilePath() {
+        final String json = """
+                {
+                    "settings": [{
+                        "innerJoin": {
+                            "left": "TABLE1",
+                            "right": "TABLE2",
+                            "filePath": ".*/a/.*",
+                            "rightFilePath": ".*/b/.*",
+                            "column": ["id"]
+                        }
+                    }]
+                }
+                """;
+
+        final jakarta.json.JsonObject jsonObject = jakarta.json.Json.createReader(new StringReader(json))
+                .readObject();
+        final var condition = new FromJsonTableSeparatorsBuilder("UTF-8")
+                .configureSetting(jsonObject)
+                .build()
+                .joinConditions().getFirst();
+
+        assertTrue(condition.isLeft(this.metaData("TABLE1", "/work/a/TABLE1.csv")), "left falls back to filePath");
+        assertFalse(condition.isLeft(this.metaData("TABLE1", "/work/b/TABLE1.csv")));
+        assertTrue(condition.isRight(this.metaData("TABLE2", "/work/b/TABLE2.csv")), "rightFilePath wins over filePath");
+        assertFalse(condition.isRight(this.metaData("TABLE2", "/work/a/TABLE2.csv")));
+    }
+
     private AddSettingTableMetaData metaData(final String tableName, final String filePath) {
         return TableSeparator.NONE.addSetting(new Source(filePath, "", "", "", false, false)
                 .wrap(new DefaultTableMetaData(tableName, new Column[0])));

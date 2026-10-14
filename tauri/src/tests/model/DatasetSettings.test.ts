@@ -446,7 +446,7 @@ describe("DatasetSettingクラス", () => {
 		expect(pattern.filePath).toBeUndefined();
 
 		const join = pattern.replace("innerJoin");
-		expect(join.innerJoin).toEqual({ left: "t", leftFilePath: ".*/dir/.*" });
+		expect(join.innerJoin).toEqual({ left: "t", filePath: ".*/dir/.*" });
 		expect(join.pattern).toBeUndefined();
 
 		const back = join.replace("name");

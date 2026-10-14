@@ -30,7 +30,7 @@
     <tr><th>種別</th><th>説明</th></tr>
     <tr><td>name</td><td>テーブル名を1件以上列挙して指定します。<code>filePath</code> で設定ファイルからの相対パスを指定することも可能です。</td></tr>
     <tr><td>pattern</td><td>テーブル名のマッチで対象を特定します。<code>pattern</code> オブジェクトには部分一致用の <code>string</code> または正規表現用の <code>regex</code> を指定し、<code>exclude</code> 配列で除外パターンを追加できます。<code>filePath</code>（正規表現）を指定すると、そのパスに一致するファイル由来のテーブルのみが対象になります。</td></tr>
-    <tr><td>outerJoin / innerJoin / fullJoin</td><td>2テーブルを結合して1つの論理テーブルとして扱います。<code>left</code> と <code>right</code> に結合対象のテーブル名、条件は <code>on</code>（JeXL 式）か <code>column</code>（共通カラム名）で指定します。<code>leftFilePath</code> / <code>rightFilePath</code>（正規表現）を指定すると、left / right それぞれ、そのパスに一致するファイル由来のテーブルのみを結合対象にします。</td></tr>
+    <tr><td>outerJoin / innerJoin / fullJoin</td><td>2テーブルを結合して1つの論理テーブルとして扱います。<code>left</code> と <code>right</code> に結合対象のテーブル名、条件は <code>on</code>（JeXL 式）か <code>column</code>（共通カラム名）で指定します。<code>leftFilePath</code> / <code>rightFilePath</code>（正規表現）を指定すると、left / right それぞれ、そのパスに一致するファイル由来のテーブルのみを結合対象にします。両方に同じパスを使う場合は <code>filePath</code> を指定します（<code>leftFilePath</code> / <code>rightFilePath</code> が未指定の側に適用されます）。</td></tr>
   </table>
 
   <h3>変化の例</h3>

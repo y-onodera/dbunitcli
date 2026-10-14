@@ -333,6 +333,15 @@ function TargetContent({
 					}
 				/>
 				<Text
+					name="filePath"
+					value={target.join()?.filePath ?? ""}
+					handleChange={(newVal) =>
+						setTarget((cur) =>
+							cur.replaceJoin({ filePath: newVal.target.value || undefined }),
+						)
+					}
+				/>
+				<Text
 					name="leftFilePath"
 					value={target.join()?.leftFilePath ?? ""}
 					handleChange={(newVal) =>

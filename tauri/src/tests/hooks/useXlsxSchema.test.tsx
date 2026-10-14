@@ -71,9 +71,7 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 			return Promise.resolve(new Response(JSON.stringify(mockXlsxSchema)));
 		}
 		if (params.endpoint.includes("/xlsx-schema/save")) {
-			return Promise.resolve(
-				new Response(JSON.stringify(mockUpdatedSettings)),
-			);
+			return Promise.resolve(new Response(JSON.stringify(mockUpdatedSettings)));
 		}
 		if (params.endpoint.includes("/xlsx-schema/delete")) {
 			return Promise.resolve(

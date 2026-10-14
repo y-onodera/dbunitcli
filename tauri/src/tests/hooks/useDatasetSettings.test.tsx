@@ -58,9 +58,7 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 			);
 		}
 		if (params.endpoint.includes("/dataset-setting/save")) {
-			return Promise.resolve(
-				new Response(JSON.stringify(mockUpdatedSettings)),
-			);
+			return Promise.resolve(new Response(JSON.stringify(mockUpdatedSettings)));
 		}
 		if (params.endpoint.includes("/dataset-setting/delete")) {
 			return Promise.resolve(

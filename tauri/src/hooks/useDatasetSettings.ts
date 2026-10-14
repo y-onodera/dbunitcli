@@ -303,7 +303,12 @@ async function loadAllColumnNames(
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
 ): Promise<string[]> {
-	const tableNames = await fetchTableNames(apiUrl, info, jdbcValues, paramInputs);
+	const tableNames = await fetchTableNames(
+		apiUrl,
+		info,
+		jdbcValues,
+		paramInputs,
+	);
 	const previews = await Promise.all(
 		tableNames.map((tableName) =>
 			fetchTablePreview(apiUrl, info, tableName, jdbcValues, paramInputs),

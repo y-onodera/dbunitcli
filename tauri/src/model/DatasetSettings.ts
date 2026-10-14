@@ -8,6 +8,7 @@ export type TableJoin = {
 	right?: string;
 	column?: string[];
 	on?: string;
+	filePath?: string;
 	leftFilePath?: string;
 	rightFilePath?: string;
 };
@@ -220,7 +221,7 @@ export class DatasetSetting {
 			left = "";
 		}
 		return this.replaceTarget({
-			[newTarget]: { left, leftFilePath: filePath },
+			[newTarget]: { left, filePath },
 		});
 	}
 
@@ -228,7 +229,7 @@ export class DatasetSetting {
 	private targetFilePath(): string | undefined {
 		const join = this.join();
 		if (join) {
-			return join.leftFilePath;
+			return join.leftFilePath ?? join.filePath;
 		}
 		if (this.pattern) {
 			return this.pattern.filePath;
