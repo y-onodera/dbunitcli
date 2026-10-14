@@ -67,7 +67,6 @@ export function ParameterizeForm(prop: {
 									key="open-cmd"
 									name={path}
 									setPath={setPath}
-									isValidPath={isValueInDatalist ?? false}
 								/>,
 							]}
 						/>

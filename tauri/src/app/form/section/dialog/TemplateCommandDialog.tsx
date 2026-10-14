@@ -96,11 +96,9 @@ function Dialog({
 export function TemplateCommandButton({
 	name,
 	setPath,
-	isValidPath,
 }: {
 	name: string;
 	setPath: (path: string) => void;
-	isValidPath: boolean;
 }) {
 	const [showDialog, setShowDialog] = useState(false);
 	const fileName = extractFileNameFromTemplatePath(name);
@@ -110,7 +108,7 @@ export function TemplateCommandButton({
 			{showDialog && (
 				<ParameterizeTemplateDialog
 					name={fileName}
-					loadName={isValidPath ? fileName : ""}
+					loadName={fileName}
 					setPath={setPath}
 					handleDialogClose={() => setShowDialog(false)}
 				/>
