@@ -69,7 +69,7 @@ function Dialog({
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
 		>
-			<DialogBody size="lg">
+			<DialogBody size="md">
 				<TextArea
 					value={content}
 					onChange={(e) => setContent(e.target.value)}
