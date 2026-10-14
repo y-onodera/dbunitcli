@@ -183,6 +183,47 @@ dataset
     <li><strong>主キー句が出ない</strong>: <code>PK</code> サブテーブルが作られないため <code>dataset.PK.rows</code> が空になります。</li>
     <li><strong>空欄の判定ができない</strong>: <code>DECIMAL_DIGITS</code> の空文字が値ありと扱われ、<code>VARCHAR(100,)</code> のような出力になる可能性があります。</li>
   </ul>
+  <h4>unitSetting で変更できる構造（仕様）と組み込みテンプレートでの使われ方</h4>
+  <p><code>unit=table</code> では、unitSetting はテーブルごとにテンプレートへ渡す前に適用されます。変更できるのは次の 3 点です。</p>
+  <ul>
+    <li><strong>rows</strong>: 各行の列（値・型）と、残る行・並び順</li>
+    <li><strong>dataset</strong>: どのテーブルが存在するか（サブテーブルの追加・名前）と、各テーブルのメタ情報（<code>columns</code> / <code>primaryKeys</code> / <code>columnsExcludeKey</code>）</li>
+    <li>どのテーブルに適用するか（適用範囲）</li>
+  </ul>
+  <p>一方、トップレベルの <code>tableName</code> / <code>columns</code> / <code>primaryKeys</code> / <code>columnsExcludeKey</code> は入力データのままで、unitSetting では変わりません（設定後のメタ情報は <code>dataset.{テーブル名}.columns</code> などで参照します）。</p>
+  <p>各キーの書式は <a href="../dialogs/dataset-settings.html">Dataset Settings</a> と共通です。テンプレート変数への影響は次のとおりです。</p>
+  <table>
+    <tr><th>キー</th><th>テンプレート変数への影響</th><th>組み込みでの使用例</th></tr>
+    <tr><td>string / boolean / number</td><td><code>rows</code> の各行に変数を追加（同名の列は上書き）。値は JEXL 式で、同じ行の列名を変数として参照できる。型は string / Boolean / BigDecimal になる</td><td>
+      ddl: <code>COLUMN_SIZE</code> の空文字を null に、<code>NULLABLE</code> / <code>IS_PK</code> を Boolean に変換<br>
+      javaBean: <code>className</code> / <code>javaType</code> / <code>isBoolean</code> を新規追加<br>
+      fixedColumnDef: <code>name</code> / <code>length</code> / <code>align</code> / <code>pad</code> を明示（変換なしの最小例）</td></tr>
+    <tr><td>filter</td><td>条件（JEXL 式。複数指定は AND）に合う行だけを残す</td><td>ddl: <code>"filter": ["IS_PK"]</code> で主キーの行だけを <code>PK</code> テーブルに残す</td></tr>
+    <tr><td>separate</td><td>1 つの入力から複数のテーブルを作り、<code>dataset</code> に追加する。各エントリは独自の <code>string</code> / <code>filter</code> などと <code>tableName</code>（名前）を持てる。<code>tableName</code> を持たないエントリは元のテーブル名のまま</td><td>
+      ddl: 元のテーブル + <code>PK</code><br>
+      xlsxSchema: 元のテーブル + <code>PK</code> + <code>CELLS</code></td></tr>
+    <tr><td>tableName / prefix / suffix</td><td>テーブル名を変更する。<code>rows</code> は「元のテーブル名と同じ名前のテーブル」の行だけなので、元のテーブルを改名すると <code>rows</code> は空になり、行は <code>dataset.{新しい名前}.rows</code> から参照することになる</td><td>ddl / xlsxSchema: サブテーブルの <code>tableName</code>（<code>PK</code> / <code>CELLS</code>）に使用</td></tr>
+    <tr><td>include / exclude</td><td><code>rows</code> に残す列を絞り込む（式の評価後に適用されるため、除外する列も式では参照できる）</td><td>組み込みでは未使用</td></tr>
+    <tr><td>order</td><td>行の並び順を指定する</td><td>組み込みでは未使用</td></tr>
+    <tr><td>distinct</td><td>重複行を除去する</td><td>組み込みでは未使用</td></tr>
+    <tr><td>keys</td><td>そのテーブルの主キーを指定した列に置き換える（<code>dataset.{テーブル名}.primaryKeys</code> に反映）</td><td>組み込みでは未使用</td></tr>
+    <tr><td>split / innerJoin / outerJoin / fullJoin</td><td>行の分割・テーブルの結合。仕様は Dataset Settings と共通</td><td>組み込みでは未使用（テンプレート変数への現れ方は本ページでは未確認）</td></tr>
+    <tr><td>name / pattern</td><td>設定を適用するテーブルを選ぶ（変数の構造自体は変えない）</td><td>
+      ddl / xlsxSchema: <code>"pattern": {"regex": ".*", ...}</code> + <code>exclude</code>。生成したサブテーブル（<code>PK</code> / <code>CELLS</code>）を適用対象から外している</td></tr>
+    <tr><td>commonSettings</td><td>全テーブルに適用する（<code>settings</code> は <code>name</code> / <code>pattern</code> に一致したテーブルのみ）</td><td>javaBean / fixedColumnDef: <code>commonSettings</code> を使用</td></tr>
+    <tr><td>import</td><td>別の設定ファイルを取り込んで再利用する</td><td>組み込みでは未使用</td></tr>
+  </table>
+
+  <p><strong>組み込みテンプレートは、この構造のどこを参照しているか</strong></p>
+  <table>
+    <tr><th>generateType</th><th>テンプレートの参照</th><th>unitSetting が用意している構造</th></tr>
+    <tr><td>ddl</td><td><code>rows</code>、<code>row.NULLABLE</code>、<code>row.COLUMN_SIZE</code>、<code>dataset.PK.rows</code></td><td>Boolean 化した <code>NULLABLE</code>、null 化した <code>COLUMN_SIZE</code> / <code>DECIMAL_DIGITS</code>、<code>PK</code> サブテーブル</td></tr>
+    <tr><td>javaBean</td><td><code>first(rows).className</code>、<code>first(rows).PACKAGE</code>、<code>row.javaType</code>、<code>row.isBoolean</code></td><td>式で導出した <code>className</code> / <code>javaType</code> / <code>isBoolean</code>、null 化した <code>PACKAGE</code></td></tr>
+    <tr><td>xlsxSchema</td><td><code>dataSet.values:{row | ...}</code> の中で <code>row.rows</code>、<code>row.dataset.PK.rows</code>、<code>row.dataset.CELLS.rows</code></td><td><code>PK</code> / <code>CELLS</code> サブテーブル（<code>dataSet</code> はテーブル名をキーにした、トップレベルの変数群と同じ内容の入れ物）</td></tr>
+    <tr><td>fixedColumnDef</td><td><code>rows:{col | col.name ...}</code></td><td><code>name</code> / <code>length</code> / <code>align</code> / <code>pad</code> を文字列として明示（構造の変更はなし）</td></tr>
+  </table>
+  <p>カスタムテンプレートで同様の構造が必要な場合は、Scaffold で書き出したテンプレートと unitSetting をペアで編集してください。テンプレートだけを変えて、参照する変数・サブテーブルが unitSetting 側に無いと、空の出力や期待と異なる出力になります。</p>
+
   <p>テンプレートを自作・改造するときは、テンプレートに複雑な式を書く前に「unitSetting でカラム値を整形・分割できないか」を検討してください。変数を足したい（例: <code>javaBean</code> の <code>className</code> / <code>javaType</code>）、行を分けたい（例: <code>xlsxSchema</code> の <code>PK</code> / <code>CELLS</code>）といった場合も同じ仕組みで対応できます。組み込み設定は <code>javabean/javaBeanSettings.json</code>、<code>xlsxschema/xlsxSchemaSettings.json</code>、<code>fixedcolumndef/fixedColumnDefSettings.json</code> も Scaffold で書き出せます。</p>
 
   <h2>共通オプション</h2>
