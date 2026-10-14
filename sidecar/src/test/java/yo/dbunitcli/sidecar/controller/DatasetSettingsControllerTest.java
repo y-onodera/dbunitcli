@@ -40,6 +40,7 @@ class DatasetSettingsControllerTest {
     void tearDown() {
         this.tryDelete("savedSetting.json");
         this.tryDelete("deleteSetting.json");
+        this.tryDelete("sqlFunctionSetting.json");
     }
 
     private void tryDelete(final String name) {
@@ -92,6 +93,19 @@ class DatasetSettingsControllerTest {
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/setting-save-load-response.json"),
                 loadResponse);
+    }
+
+    @Test
+    void testSave_sqlFunctionキーで保存され旧functionキーも受け付ける() throws IOException {
+        for (final String key : new String[]{"sqlFunction", "function"}) {
+            this.client.toBlocking()
+                    .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/save",
+                            "{\"name\":\"sqlFunctionSetting.json\",\"input\":{\"settings\":[{\"name\":{\"any\":[\"TABLE_B\"]},\"" + key + "\":{\"mark\":\"1\"}}],\"commonSettings\":[]}}"));
+
+            final String saved = Files.readString(SETTING_DIR.resolve("sqlFunctionSetting.json"));
+            Assertions.assertTrue(saved.contains("\"sqlFunction\""), key + " で渡した値が sqlFunction キーで保存されること: " + saved);
+            Assertions.assertFalse(saved.contains("\"function\""), "function キーでは保存されないこと: " + saved);
+        }
     }
 
     @Test

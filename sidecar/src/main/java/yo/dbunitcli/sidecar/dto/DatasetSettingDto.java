@@ -1,5 +1,6 @@
 package yo.dbunitcli.sidecar.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.serde.annotation.Serdeable;
@@ -29,7 +30,8 @@ public class DatasetSettingDto {
     private Map<String, String> numberColumns;
     @JsonProperty("boolean")
     private Map<String, String> booleanColumns;
-    @JsonProperty("function")
+    @JsonProperty("sqlFunction")
+    @JsonAlias("function")
     private Map<String, String> functionColumns;
     private List<String> exclude;
     private List<String> include;

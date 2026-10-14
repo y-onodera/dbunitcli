@@ -136,7 +136,7 @@ id | type | amount
     <tr><td>filter</td><td>派生テーブルに残す行の条件（JeXL 式）。複数指定した場合は AND 扱い。</td></tr>
     <tr><td>order</td><td>派生テーブル内の並び順に使用するカラム</td></tr>
     <tr><td>distinct</td><td>派生テーブルの重複行を排除するフラグ</td></tr>
-    <tr><td>string / number / boolean / function</td><td>追加カラム定義。派生テーブルごとに個別に指定できる（詳細は Additional Columns を参照）。</td></tr>
+    <tr><td>string / number / boolean / sqlFunction</td><td>追加カラム定義。派生テーブルごとに個別に指定できる（詳細は Additional Columns を参照）。</td></tr>
   </table>
 
   <h3>変化の例</h3>
@@ -208,7 +208,7 @@ id | amount
     <tr><td>string</td><td>文字列型カラム。既存カラムの連結や <code>substring</code> による抽出に利用します。</td></tr>
     <tr><td>number</td><td>数値型カラム。算術演算で集計値や派生値を定義します。</td></tr>
     <tr><td>boolean</td><td>真偽値型カラム。条件式で判定結果を持たせます。</td></tr>
-    <tr><td>function</td><td>関数表現によるカラム。複雑なロジックを JeXL 関数として定義します。</td></tr>
+    <tr><td>sqlFunction</td><td>関数表現によるカラム。複雑なロジックを JeXL 関数として定義します。</td></tr>
   </table>
 
   <h3>変化の例</h3>
@@ -255,7 +255,7 @@ id | age | adult
 2  | 17  | false
 </code></pre>
 
-  <p><strong>function（条件分岐による区分値）</strong></p>
+  <p><strong>sqlFunction（条件分岐による区分値）</strong></p>
 <pre><code>Before (orders):
 id | status
 ---+---------
@@ -263,7 +263,7 @@ id | status
 2  | REJECTED
 3  | PENDING
 
-After (function: { mark: "status == 'APPROVED' ? 'OK' : (status == 'REJECTED' ? 'NG' : 'HOLD')" }):
+After (sqlFunction: { mark: "status == 'APPROVED' ? 'OK' : (status == 'REJECTED' ? 'NG' : 'HOLD')" }):
 id | status   | mark
 ---+----------+-----
 1  | APPROVED | OK
@@ -359,7 +359,7 @@ id | name
 </code></pre>
 
   <h2>JeXL 式の書き方</h2>
-  <p><code>filter</code>、追加カラム（<code>string</code> / <code>number</code> / <code>boolean</code> / <code>function</code>）、結合条件 <code>on</code> では Apache Commons JEXL3 の式を利用できます。</p>
+  <p><code>filter</code>、追加カラム（<code>string</code> / <code>number</code> / <code>boolean</code> / <code>sqlFunction</code>）、結合条件 <code>on</code> では Apache Commons JEXL3 の式を利用できます。</p>
 
   <h3>演算子</h3>
   <table>
@@ -405,7 +405,7 @@ id | name
   <p><strong>boolean（三項演算子による区分判定）</strong></p>
 <pre><code>age &gt;= 20 ? true : false</code></pre>
 
-  <p><strong>function（条件に応じた区分値の生成）</strong></p>
+  <p><strong>sqlFunction（条件に応じた区分値の生成）</strong></p>
 <pre><code>status == 'APPROVED' ? 'OK' : (status == 'REJECTED' ? 'NG' : 'PENDING')</code></pre>
 
   <p><strong>join.on（結合条件）</strong></p>
