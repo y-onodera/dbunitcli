@@ -66,10 +66,10 @@
   <h4>unitSetting の役割 — ddl の組み込み設定とテンプレートで見る</h4>
   <p>unitSetting は <a href="../dialogs/dataset-settings.html">Dataset Settings</a> と同じ JSON 形式の設定ファイルで、入力データを<strong>テンプレートに渡す前に整形</strong>します。テンプレートは整形後の姿を前提に書けるため、テンプレート側の式が単純になります。ここでは <a href="generate/types/ddl.html">ddl</a> の組み込み設定（<code>sql/ddlSettings.json</code>）と組み込みテンプレート（<code>sql/ddlTemplate.stg</code>）を例に、unitSetting の有無で何が変わるかを示します。これらは <a href="../dialogs/txt-template-generate.html">Scaffold</a> ダイアログ（<code>generateType=txt</code> のとき unit の上の Scaffold ボタンから開く）で <code>resources/setting/{名前}.json</code> / <code>resources/template/{名前}.stg</code> としてワークスペースへ書き出せ、編集して <code>unitSetting</code> / <code>template</code> に指定して使えます。</p>
 
-  <p><strong>1. 入力（記述子データセット）</strong> — 1 カラム = 1 行で、テーブルごとに渡されます（例: <code>EMPLOYEE</code>）。</p>
+  <p><strong>1. 入力（記述子データセット）</strong> — 1 カラム = 1 行で、テーブルごとに渡されます（例: <code>EMPLOYEE</code>）。以降の出力例は、この入力を CSV にして実際に生成した結果です。</p>
   <table>
     <tr><th>COLUMN_NAME</th><th>TYPE_NAME</th><th>COLUMN_SIZE</th><th>DECIMAL_DIGITS</th><th>NULLABLE</th><th>IS_PK</th><th>PK_NAME</th><th>REMARKS</th><th>TABLE_REMARKS</th></tr>
-    <tr><td>EMPLOYEE_ID</td><td>INTEGER</td><td>10</td><td>（空）</td><td>false</td><td>true</td><td>（空）</td><td>社員ID</td><td>社員マスタ</td></tr>
+    <tr><td>EMPLOYEE_ID</td><td>INTEGER</td><td>10</td><td>（空）</td><td>false</td><td>true</td><td>PK_EMPLOYEE</td><td>社員ID</td><td>社員マスタ</td></tr>
     <tr><td>EMPLOYEE_NAME</td><td>VARCHAR</td><td>100</td><td>（空）</td><td>true</td><td>false</td><td>（空）</td><td>氏名</td><td>社員マスタ</td></tr>
     <tr><td>SALARY</td><td>DECIMAL</td><td>10</td><td>2</td><td>true</td><td>false</td><td>（空）</td><td>給与</td><td>社員マスタ</td></tr>
   </table>
@@ -116,8 +116,8 @@ CREATE TABLE $tableName; format="upper"$ (
     <tr><th>変数</th><th>内容</th><th>unitSetting の影響</th></tr>
     <tr><td>tableName</td><td>テーブル名（例: <code>EMPLOYEE</code>）</td><td>なし</td></tr>
     <tr><td>columns / primaryKeys / columnsExcludeKey</td><td>テーブルのカラム定義</td><td>なし（入力データ側のカラム定義）</td></tr>
-    <tr><td>rows</td><td>このテーブルの行（<code>row.列名</code> で参照）</td><td>あり。<code>string</code> / <code>boolean</code> で定義した変数が各行に追加される（同名の列は上書き）。元の列は残る</td></tr>
-    <tr><td>dataset</td><td>このテーブルから生成されたテーブルの一覧（<code>dataset.{テーブル名}.rows</code>）</td><td>あり。<code>separate</code> で分割したサブテーブルが <code>dataset.PK</code> のように追加される</td></tr>
+    <tr><td>rows</td><td>このテーブルの行（<code>row.列名</code> で参照）</td><td>あり。<code>string</code> / <code>boolean</code> / <code>number</code> で定義した変数が各行の末尾に追加される（同名の列は上書き）。元の列は残る。<code>include</code> / <code>exclude</code> / <code>filter</code> / <code>order</code> / <code>distinct</code> もここに反映される</td></tr>
+    <tr><td>dataset</td><td>このテーブルから生成されたテーブルの一覧（<code>dataset.{テーブル名}.rows</code>）</td><td>あり。<code>separate</code> で分割したサブテーブルが <code>dataset.PK</code> のように追加される。テーブルはテーブル名の昇順で並ぶ。各テーブルの <code>columns</code> / <code>primaryKeys</code> にも設定が反映される</td></tr>
   </table>
   <p>ddl の例（<code>EMPLOYEE</code>）での、テンプレートから見た構造の違いです。</p>
   <table>
@@ -130,13 +130,17 @@ CREATE TABLE $tableName; format="upper"$ (
   DECIMAL_DIGITS = null        ← 空文字から変換
   NULLABLE       = false       ← 真偽値
   IS_PK          = true        ← 真偽値
+  PK_NAME        = "PK_EMPLOYEE"
   REMARKS        = "社員ID"
+  TABLE_REMARKS  = "社員マスタ"
 
-dataset
-  EMPLOYEE.rows ... 上記の rows と同じ
-  PK.rows[0]
+dataset（キーは EMPLOYEE, PK の順）
+  EMPLOYEE.rows ... 上記の rows と同じ（3 行）
+  PK.rows[0]    ... 元の全カラムを持つ（1 行）
     COLUMN_NAME = "EMPLOYEE_ID"
-    IS_PK       = true         ← 主キー行だけ</pre></td>
+    NULLABLE    = false        ← PK 側は NULLABLE を変換しない
+    IS_PK       = true         ← 主キーの行だけが残る
+    PK_NAME     = "PK_EMPLOYEE"</pre></td>
       <td><pre>rows[0]
   COLUMN_NAME    = "EMPLOYEE_ID"
   TYPE_NAME      = "INTEGER"
@@ -144,25 +148,27 @@ dataset
   DECIMAL_DIGITS = ""          ← 空文字のまま
   NULLABLE       = "false"     ← 文字列
   IS_PK          = "true"      ← 文字列
+  PK_NAME        = "PK_EMPLOYEE"
   REMARKS        = "社員ID"
+  TABLE_REMARKS  = "社員マスタ"
 
-dataset
-  EMPLOYEE.rows ... 上記の rows と同じ
+dataset（キーは EMPLOYEE のみ）
+  EMPLOYEE.rows ... 上記の rows と同じ（3 行）
   （PK は存在しない）</pre></td>
     </tr>
   </table>
   <p>テンプレートを書くうえでの違いは次のとおりです。</p>
   <table>
     <tr><th>テンプレートの記述</th><th>unitSetting あり</th><th>unitSetting なし</th></tr>
-    <tr><td><code>$if(row.DECIMAL_DIGITS)$</code></td><td>値があるときだけ真</td><td>空文字も値ありとして扱われる可能性がある</td></tr>
+    <tr><td><code>$if(row.DECIMAL_DIGITS)$</code></td><td>null（空欄）のときは偽、値があるときは真</td><td>空文字 <code>""</code> も真として扱われる（空欄でも常に真）</td></tr>
     <tr><td><code>$if(!row.NULLABLE)$</code></td><td><code>false</code> のときだけ真（NOT NULL を出力）</td><td>文字列 <code>"false"</code> も真となり、常に偽になる</td></tr>
-    <tr><td><code>$dataset.PK.rows$</code></td><td>主キーのカラムだけの一覧</td><td>参照先が無く、空になる（主キー句を出せない）</td></tr>
+    <tr><td><code>$dataset.PK.rows$</code></td><td>主キーの行だけの一覧</td><td>参照先が無く、空になる（主キー句を出せない）</td></tr>
   </table>
   <p>つまり unitSetting は「テンプレートが参照する変数の型（文字列 / 真偽値 / null）と、<code>dataset</code> 以下に何が存在するか」を決める役割を持ちます。テンプレートを書くときは、使いたい変数が unitSetting で定義されているかを先に確認してください。</p>
 
   <p><strong>5. レンダリング結果の比較</strong></p>
   <table>
-    <tr><th>unitSetting あり（<code>ddlSettings.json</code>）</th><th>unitSetting なし（<code>generateType=txt</code> で未指定。想定される出力）</th></tr>
+    <tr><th>unitSetting あり（<code>ddlSettings.json</code>）</th><th>unitSetting なし（<code>generateType=txt</code> で未指定）</th></tr>
     <tr>
       <td><pre>CREATE TABLE EMPLOYEE (
     EMPLOYEE_ID INTEGER(10) NOT NULL,
@@ -171,17 +177,17 @@ dataset
     ,CONSTRAINT PK_EMPLOYEE PRIMARY KEY (EMPLOYEE_ID)
 );</pre></td>
       <td><pre>CREATE TABLE EMPLOYEE (
-    EMPLOYEE_ID INTEGER(10),
-        EMPLOYEE_NAME VARCHAR(100),
+    EMPLOYEE_ID INTEGER(10,),
+        EMPLOYEE_NAME VARCHAR(100,),
         SALARY DECIMAL(10,2)
 );</pre></td>
     </tr>
   </table>
   <p>unitSetting が無いと、テンプレートが前提とする整形が行われないため、次のようにテンプレートを書いても期待どおりに動きません。</p>
   <ul>
-    <li><strong>NOT NULL が付かない</strong>: <code>NULLABLE</code> が文字列のままだと <code>"false"</code> も真として扱われ、<code>$if(!row.NULLABLE)$</code> が常に偽になります。</li>
+    <li><strong>NOT NULL が付かない</strong>（<code>EMPLOYEE_ID</code> に付かない）: <code>NULLABLE</code> が文字列のままだと <code>"false"</code> も真として扱われ、<code>$if(!row.NULLABLE)$</code> が常に偽になります。</li>
     <li><strong>主キー句が出ない</strong>: <code>PK</code> サブテーブルが作られないため <code>dataset.PK.rows</code> が空になります。</li>
-    <li><strong>空欄の判定ができない</strong>: <code>DECIMAL_DIGITS</code> の空文字が値ありと扱われ、<code>VARCHAR(100,)</code> のような出力になる可能性があります。</li>
+    <li><strong>空欄の判定ができない</strong>: <code>DECIMAL_DIGITS</code> の空文字が値ありと扱われ、<code>INTEGER(10,)</code> や <code>VARCHAR(100,)</code> のように不正な型指定が出力されます。</li>
   </ul>
   <h4>unitSetting で変更できる構造（仕様）と組み込みテンプレートでの使われ方</h4>
   <p><code>unit=table</code> では、unitSetting はテーブルごとにテンプレートへ渡す前に適用されます。変更できるのは次の 3 点です。</p>
@@ -194,24 +200,24 @@ dataset
   <p>各キーの書式は <a href="../dialogs/dataset-settings.html">Dataset Settings</a> と共通です。テンプレート変数への影響は次のとおりです。</p>
   <table>
     <tr><th>キー</th><th>テンプレート変数への影響</th><th>組み込みでの使用例</th></tr>
-    <tr><td>string / boolean / number</td><td><code>rows</code> の各行に変数を追加（同名の列は上書き）。値は JEXL 式で、同じ行の列名を変数として参照できる。型は string / Boolean / BigDecimal になる</td><td>
+    <tr><td>string / boolean / number</td><td><code>rows</code> の各行の末尾に変数を追加（同名の列は上書き）。値は JEXL 式で、同じ行の列名を変数として参照できる。型は string / Boolean / 数値になり、<code>dataset.{テーブル名}.columns</code> にも追加される。<strong>入力に存在しない列名を式で参照するとエラー</strong>になる（<code>NOPE</code>、<code>NOPE != null ? NOPE : null</code> で確認。<code>NAME.toUpperCase()</code> のようにメソッドを呼ぶ形では null になった）</td><td>
       ddl: <code>COLUMN_SIZE</code> の空文字を null に、<code>NULLABLE</code> / <code>IS_PK</code> を Boolean に変換<br>
       javaBean: <code>className</code> / <code>javaType</code> / <code>isBoolean</code> を新規追加<br>
       fixedColumnDef: <code>name</code> / <code>length</code> / <code>align</code> / <code>pad</code> を明示（変換なしの最小例）</td></tr>
     <tr><td>filter</td><td>条件（JEXL 式。複数指定は AND）に合う行だけを残す</td><td>ddl: <code>"filter": ["IS_PK"]</code> で主キーの行だけを <code>PK</code> テーブルに残す</td></tr>
-    <tr><td>separate</td><td>1 つの入力から複数のテーブルを作り、<code>dataset</code> に追加する。各エントリは独自の <code>string</code> / <code>filter</code> などと <code>tableName</code>（名前）を持てる。<code>tableName</code> を持たないエントリは元のテーブル名のまま</td><td>
+    <tr><td>separate</td><td>1 つの入力から複数のテーブルを作り、<code>dataset</code> に追加する。各エントリは独自の <code>string</code> / <code>filter</code> などと <code>tableName</code>（名前）を持てる。<code>tableName</code> を持たないエントリは元のテーブル名のまま。サブテーブルは元の全カラムを引き継ぎ、そのエントリで定義した式・<code>filter</code> などだけが適用される（<code>dataset</code> のキーはテーブル名の昇順）</td><td>
       ddl: 元のテーブル + <code>PK</code><br>
       xlsxSchema: 元のテーブル + <code>PK</code> + <code>CELLS</code></td></tr>
-    <tr><td>tableName / prefix / suffix</td><td>テーブル名を変更する。<code>rows</code> は「元のテーブル名と同じ名前のテーブル」の行だけなので、元のテーブルを改名すると <code>rows</code> は空になり、行は <code>dataset.{新しい名前}.rows</code> から参照することになる</td><td>ddl / xlsxSchema: サブテーブルの <code>tableName</code>（<code>PK</code> / <code>CELLS</code>）に使用</td></tr>
-    <tr><td>include / exclude</td><td><code>rows</code> に残す列を絞り込む（式の評価後に適用されるため、除外する列も式では参照できる）</td><td>組み込みでは未使用</td></tr>
-    <tr><td>order</td><td>行の並び順を指定する</td><td>組み込みでは未使用</td></tr>
-    <tr><td>distinct</td><td>重複行を除去する</td><td>組み込みでは未使用</td></tr>
-    <tr><td>keys</td><td>そのテーブルの主キーを指定した列に置き換える（<code>dataset.{テーブル名}.primaryKeys</code> に反映）</td><td>組み込みでは未使用</td></tr>
-    <tr><td>split / innerJoin / outerJoin / fullJoin</td><td>行の分割・テーブルの結合。仕様は Dataset Settings と共通</td><td>組み込みでは未使用（テンプレート変数への現れ方は本ページでは未確認）</td></tr>
+    <tr><td>tableName / prefix / suffix</td><td>テーブル名を変更する。<code>rows</code> は「元のテーブル名と同じ名前のテーブル」の行だけなので、元のテーブルを改名すると <code>rows</code> は空になり（<code>tableName</code> は元の名前のまま）、行は <code>dataset.{新しい名前}.rows</code> から参照することになる。<code>separate</code> と併用して元のテーブルを残したまま別名のテーブルを追加することもできる</td><td>ddl / xlsxSchema: サブテーブルの <code>tableName</code>（<code>PK</code> / <code>CELLS</code>）に使用</td></tr>
+    <tr><td>include / exclude</td><td><code>rows</code> と <code>dataset.{テーブル名}.columns</code> に残す列を絞り込む。<code>include</code> → <code>exclude</code> の順に効く。式で追加した列も対象なので、<code>include</code> に書かない追加列は残らない。式の評価は絞り込みより前なので、除外した列も式では参照できる（<code>top.columns</code> は変わらない）</td><td>組み込みでは未使用</td></tr>
+    <tr><td>order</td><td>指定した列で行を昇順に並べ替える（<code>rows</code> と <code>dataset.{テーブル名}.rows</code> の両方）</td><td>組み込みでは未使用</td></tr>
+    <tr><td>distinct</td><td>重複行を除去する。<code>include</code> / <code>exclude</code> で絞り込んだ後の列で判定する（例: <code>include</code> で <code>ID</code> を外すと、同じ内容の行が 1 行になる）</td><td>組み込みでは未使用</td></tr>
+    <tr><td>keys</td><td>そのテーブルの主キーを指定した列にする。反映されるのは <code>dataset.{テーブル名}.primaryKeys</code> だけで、トップレベルの <code>primaryKeys</code> と <code>rows</code> の内容は変わらない</td><td>組み込みでは未使用</td></tr>
+    <tr><td>split / innerJoin / outerJoin / fullJoin</td><td><strong>split</strong>: 行数（<code>limit</code>）で分割しても、分割後の断片は同じテーブル名になり、<code>dataset</code> には<strong>最後の断片だけ</strong>が残る（4 行を <code>limit=2</code> で分けると後ろの 2 行のみ）。名前を変えない場合 <code>rows</code> には全行が残るが、<code>suffix</code> などで改名すると <code>rows</code> は空になる。テンプレートでの利用には向かない。<br><strong>innerJoin / outerJoin / fullJoin</strong>: <code>unit=table</code> では結合結果のテーブルは <code>dataset</code> に現れず、結合元のテーブルもそのまま渡される（<code>ITEM</code> と <code>CAT</code> の内部結合で確認）</td><td>組み込みでは未使用</td></tr>
     <tr><td>name / pattern</td><td>設定を適用するテーブルを選ぶ（変数の構造自体は変えない）</td><td>
-      ddl / xlsxSchema: <code>"pattern": {"regex": ".*", ...}</code> + <code>exclude</code>。生成したサブテーブル（<code>PK</code> / <code>CELLS</code>）を適用対象から外している</td></tr>
+      ddl / xlsxSchema: <code>"pattern": {"regex": ".*", ...}</code> + <code>exclude</code>。生成したサブテーブル（<code>PK</code> / <code>CELLS</code>）を適用対象から外している。外さないと <code>PK</code> に設定が再度適用され、主キーの行が重複して入る（<code>ddlSettings.json</code> から <code>exclude</code> を外して確認）</td></tr>
     <tr><td>commonSettings</td><td>全テーブルに適用する（<code>settings</code> は <code>name</code> / <code>pattern</code> に一致したテーブルのみ）</td><td>javaBean / fixedColumnDef: <code>commonSettings</code> を使用</td></tr>
-    <tr><td>import</td><td>別の設定ファイルを取り込んで再利用する</td><td>組み込みでは未使用</td></tr>
+    <tr><td>import</td><td>別の設定ファイルを取り込んで再利用する（<code>{"import": [{"path": "./common.json"}]}</code>。<code>commonSettings</code> が取り込まれて全テーブルに適用されることを確認）</td><td>組み込みでは未使用</td></tr>
   </table>
 
   <p><strong>組み込みテンプレートは、この構造のどこを参照しているか</strong></p>
@@ -222,6 +228,11 @@ dataset
     <tr><td>xlsxSchema</td><td><code>dataSet.values:{row | ...}</code> の中で <code>row.rows</code>、<code>row.dataset.PK.rows</code>、<code>row.dataset.CELLS.rows</code></td><td><code>PK</code> / <code>CELLS</code> サブテーブル（<code>dataSet</code> はテーブル名をキーにした、トップレベルの変数群と同じ内容の入れ物）</td></tr>
     <tr><td>fixedColumnDef</td><td><code>rows:{col | col.name ...}</code></td><td><code>name</code> / <code>length</code> / <code>align</code> / <code>pad</code> を文字列として明示（構造の変更はなし）</td></tr>
   </table>
+  <p>同じテンプレートを unitSetting なしで実行した場合の実際の出力は次のとおりです（記述子データセットを CSV で用意して確認）。</p>
+  <ul>
+    <li><strong>javaBean</strong>: <code>className</code> / <code>javaType</code> が存在しないため、<code>public class  {</code>、<code>private  employeeId;</code> のようにクラス名と型が空になる。設定ありでは <code>public class Employee {</code>、<code>private Integer employeeId;</code>、<code>private java.math.BigDecimal salary;</code> になる。</li>
+    <li><strong>xlsxSchema</strong>: <code>dataSet</code> 自体は渡るが <code>PK</code> / <code>CELLS</code> サブテーブルが無いため、<code>cells</code> 側は <code>"sheetName": ""</code>、<code>"header": []</code>、<code>"cellAddress": []</code> と空になる。<code>rows</code> 側の <code>breakKey</code> は主キーを判別できず、先頭カラムが入る。</li>
+  </ul>
   <p>カスタムテンプレートで同様の構造が必要な場合は、Scaffold で書き出したテンプレートと unitSetting をペアで編集してください。テンプレートだけを変えて、参照する変数・サブテーブルが unitSetting 側に無いと、空の出力や期待と異なる出力になります。</p>
 
   <p>テンプレートを自作・改造するときは、テンプレートに複雑な式を書く前に「unitSetting でカラム値を整形・分割できないか」を検討してください。変数を足したい（例: <code>javaBean</code> の <code>className</code> / <code>javaType</code>）、行を分けたい（例: <code>xlsxSchema</code> の <code>PK</code> / <code>CELLS</code>）といった場合も同じ仕組みで対応できます。組み込み設定は <code>javabean/javaBeanSettings.json</code>、<code>xlsxschema/xlsxSchemaSettings.json</code>、<code>fixedcolumndef/fixedColumnDefSettings.json</code> も Scaffold で書き出せます。</p>
