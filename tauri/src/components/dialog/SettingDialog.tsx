@@ -1,6 +1,6 @@
 import { type ReactNode, useState } from "react";
 import { BlueButton, WhiteButton } from "../element/Button";
-import { AddButton, RemoveButton } from "../element/ButtonIcon";
+import { AddButton, RemoveButton, SettingButton } from "../element/ButtonIcon";
 import {
 	CheckBox,
 	ControllTextBox,
@@ -201,6 +201,7 @@ export function Arrays(props: {
 	ignoreLabel?: boolean;
 	showCaption?: boolean;
 	list?: string;
+	handleSelect?: (index: number) => void;
 }) {
 	return (
 		<>
@@ -215,6 +216,7 @@ export function Arrays(props: {
 					ignoreLabel={props.ignoreLabel}
 					showCaption={props.showCaption}
 					list={props.list}
+					handleSelect={props.handleSelect}
 				/>
 			) : (
 				props.values.map((val, index) => {
@@ -229,6 +231,7 @@ export function Arrays(props: {
 							ignoreLabel={props.ignoreLabel}
 							showCaption={props.showCaption}
 							list={props.list}
+							handleSelect={props.handleSelect}
 						/>
 					);
 				})
@@ -257,6 +260,7 @@ export function ArraysText(props: {
 	ignoreLabel?: boolean;
 	showCaption?: boolean;
 	list?: string;
+	handleSelect?: (index: number) => void;
 }) {
 	const [text, setText] = useState(props.val);
 	const handleBlur = (newVal: React.FocusEvent<HTMLInputElement>) =>
@@ -291,9 +295,15 @@ export function ArraysText(props: {
 					handleBlur={handleBlur}
 					list={props.list}
 				/>
-				{props.index > 0 && (
-					<div className="col-start-3">
-						<RemoveButton handleClick={handleRemove} />
+				{(props.handleSelect || props.index > 0) && (
+					<div className="col-start-3 flex items-center">
+						{props.handleSelect && (
+							<SettingButton
+								title="select"
+								handleClick={() => props.handleSelect?.(props.index)}
+							/>
+						)}
+						{props.index > 0 && <RemoveButton handleClick={handleRemove} />}
 					</div>
 				)}
 			</div>

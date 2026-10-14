@@ -7,6 +7,7 @@ import {
 	DirIcon,
 	EditIcon,
 	ExpandIcon,
+	FactCheckIcon,
 	FileIcon,
 	FixIcon,
 	OpenIcon,
@@ -29,6 +30,7 @@ export type IconType =
 	| "remove"
 	| "setting"
 	| "fix"
+	| "factCheck"
 	| "file"
 	| "dir"
 	| "settingsApplication"
@@ -43,6 +45,7 @@ const IconComponents: Record<IconType, React.FC<{ title: string }>> = {
 	remove: RemoveIcon,
 	setting: SettingIcon,
 	fix: FixIcon,
+	factCheck: FactCheckIcon,
 	file: FileIcon,
 	dir: DirIcon,
 	settingsApplication: SettingsApplicationIcon,
@@ -100,6 +103,10 @@ export function SettingButton(props: IconButtonProps) {
 
 export function FixButton(props: IconButtonProps) {
 	return <IconButton iconType="fix" {...props} />;
+}
+
+export function FactCheckButton(props: IconButtonProps) {
+	return <IconButton iconType="factCheck" {...props} />;
 }
 
 export function ParameterizeButton(props: IconButtonProps) {
