@@ -80,7 +80,7 @@ function Dialog({
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
 		>
-			<DialogBody size="lg">
+			<DialogBody size="md">
 				<TextArea
 					id="contents"
 					value={content}
