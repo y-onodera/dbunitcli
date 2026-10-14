@@ -1,9 +1,5 @@
 import { useState } from "react";
-import {
-	Fieldset,
-	KeyValues,
-	SettingDialog,
-} from "../../../../components/dialog";
+import { Fieldset, KeyValues, SettingDialog } from "../../../../components/dialog";
 
 export function ParameterInputDialog(props: {
 	params: { [key: string]: string };
@@ -12,7 +8,10 @@ export function ParameterInputDialog(props: {
 }) {
 	const [params, setParams] = useState(props.params);
 
-	const removeEntry = (index: number, current: { [key: string]: string }) => {
+	const removeEntry = (
+		index: number,
+		current: { [key: string]: string },
+	) => {
 		const entries = Object.entries(current);
 		entries.splice(index, 1);
 		return Object.fromEntries(entries);

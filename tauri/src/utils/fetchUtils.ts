@@ -79,22 +79,14 @@ export async function fetchAndUpdate<T>(
 		});
 }
 
-export const fetchData = async ({
-	endpoint,
-	options,
-	signal,
-	timeoutMs,
-}: FetchParams) => {
+export const fetchData = async ({ endpoint, options, signal, timeoutMs }: FetchParams) => {
 	let controller: AbortController | null = null;
 	let timeoutId: ReturnType<typeof setTimeout> | null = null;
 	if (!signal && timeoutMs !== undefined) {
 		controller = new AbortController();
 		timeoutId = setTimeout(() => controller!.abort(), timeoutMs);
 	}
-	const mergedOptions = {
-		...options,
-		signal: signal ?? controller?.signal ?? options.signal,
-	};
+	const mergedOptions = { ...options, signal: signal ?? controller?.signal ?? options.signal };
 	try {
 		let response: Response;
 		try {

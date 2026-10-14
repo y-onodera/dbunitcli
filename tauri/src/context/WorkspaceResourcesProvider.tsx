@@ -6,11 +6,7 @@ import {
 	WorkspaceContext,
 	type WorkspaceResources,
 } from "../model/WorkspaceResources";
-import {
-	fetchData,
-	getErrorMessage,
-	handleFetchError,
-} from "../utils/fetchUtils";
+import { fetchData, getErrorMessage, handleFetchError } from "../utils/fetchUtils";
 import { useEnvironment } from "./EnvironmentProvider";
 
 const workspaceContext = createContext<WorkspaceContext>(

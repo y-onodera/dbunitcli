@@ -16,11 +16,7 @@ import {
 import { ParameterInputDialog } from "../form/section/dialog/ParameterInputDialog";
 import ResultDialog from "./ResultDialog";
 
-const RESET_RUNNING: Running = {
-	command: "",
-	resultMessage: "",
-	resultDir: "",
-};
+const RESET_RUNNING: Running = { command: "", resultMessage: "", resultDir: "" };
 const PARAMS_LABEL = "Edit Parameters (-P)";
 
 export default function Footer(prop: {

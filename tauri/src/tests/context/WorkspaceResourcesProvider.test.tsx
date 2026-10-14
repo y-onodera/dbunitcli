@@ -125,4 +125,5 @@ describe("WorkspaceResourcesProviderのテスト", () => {
 			expect(result.current.context.resultBase).toBe("new-result");
 		});
 	});
+
 });

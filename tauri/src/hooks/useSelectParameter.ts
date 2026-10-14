@@ -243,8 +243,6 @@ export const useExecParameter = () => {
 
 export const useSaveShell = () => {
 	const execute = useParameterAction();
-	return async (
-		handleResult: (result: Running) => void,
-		signal?: AbortSignal,
-	) => execute("shell", {}, handleResult, signal);
+	return async (handleResult: (result: Running) => void, signal?: AbortSignal) =>
+		execute("shell", {}, handleResult, signal);
 };
