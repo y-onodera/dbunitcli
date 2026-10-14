@@ -63,42 +63,29 @@
     <tr><td>unitSettingEncoding</td><td>unitSetting ファイルの文字コード</td><td>システムデフォルト</td></tr>
   </table>
 
-  <h4>unitSetting でできること</h4>
-  <p>unitSetting は <a href="../dialogs/dataset-settings.html">Dataset Settings</a> と同じ JSON 形式（<code>settings</code> / <code>commonSettings</code>）の設定ファイルで、入力データをテンプレートへ渡す前の「テーブルの見せ方」を定義します。</p>
-  <ul>
-    <li><strong>テンプレート変数の定義</strong>: <code>string</code> / <code>boolean</code> に「変数名: 式」を書くと、カラム値から加工した値をテンプレートで使えます（例: 型名から Java の型を判定、空文字を <code>null</code> に変換）。</li>
-    <li><strong>テーブルの分割</strong>: <code>pattern</code> で対象テーブルを選び、<code>separate</code> で 1 つのテーブルを複数のサブテーブルに分けられます。<code>filter</code> で行を絞り込めます（例: 主キーのカラムだけを <code>PK</code> テーブルに分ける）。</li>
-    <li><strong>対象の絞り込み</strong>: <code>settings</code> は <code>pattern</code> に一致したテーブルのみ、<code>commonSettings</code> は全テーブルに適用されます。</li>
-  </ul>
-  <p>用途の例: DDL・JavaBean・固定長定義など、<code>unit=table</code> のテンプレートで「1 テーブル（1 カラム = 1 行の記述子データセット）から 1 ファイル」を作るときに、カラム情報をテンプレートが扱いやすい形へ整えます。</p>
+  <h4>unitSetting の役割 — ddl の組み込み設定とテンプレートで見る</h4>
+  <p>unitSetting は <a href="../dialogs/dataset-settings.html">Dataset Settings</a> と同じ JSON 形式の設定ファイルで、入力データを<strong>テンプレートに渡す前に整形</strong>します。テンプレートは整形後の姿を前提に書けるため、テンプレート側の式が単純になります。ここでは <a href="generate/types/ddl.html">ddl</a> の組み込み設定（<code>sql/ddlSettings.json</code>）と組み込みテンプレート（<code>sql/ddlTemplate.stg</code>）を例に、unitSetting の有無で何が変わるかを示します。これらは <a href="../dialogs/txt-template-generate.html">Scaffold</a> ダイアログ（<code>generateType=txt</code> のとき unit の上の Scaffold ボタンから開く）で <code>resources/setting/{名前}.json</code> / <code>resources/template/{名前}.stg</code> としてワークスペースへ書き出せ、編集して <code>unitSetting</code> / <code>template</code> に指定して使えます。</p>
 
-  <h4>unitSetting が無いとできないこと</h4>
-  <p>組み込み設定が自動適用されるのは固定成果物タイプ（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code>）だけです。<code>generateType=txt</code> で <code>unitSetting</code> を指定しない場合、テーブルは入力データのまま（式による変数の導出も、サブテーブルへの分割もなし）でテンプレートに渡されます。</p>
+  <p><strong>1. 入力（記述子データセット）</strong> — 1 カラム = 1 行で、テーブルごとに渡されます（例: <code>EMPLOYEE</code>）。</p>
   <table>
-    <tr><th>やりたいこと</th><th>unitSetting なし（txt）</th><th>unitSetting あり</th></tr>
-    <tr><td>カラム値から加工した変数をテンプレートで使う（例: <code>TYPE_NAME</code> → <code>javaType</code>、<code>TABLE_NAME</code> → <code>className</code>）</td><td>できない。テンプレートで参照できるのは入力データの列そのものだけ</td><td><code>string</code> / <code>boolean</code> の式で変数を定義でき、テンプレートから参照できる</td></tr>
-    <tr><td>主キーなど一部の行を別テーブルとして扱う（例: CREATE TABLE の主キー句）</td><td>できない。1 テーブルは 1 つの塊のまま</td><td><code>separate</code> + <code>filter</code> で <code>PK</code> などのサブテーブルに分割し、テンプレートから参照できる</td></tr>
-    <tr><td>テーブルごとに異なる変数定義を適用する</td><td>できない</td><td><code>settings</code> の <code>pattern</code> でテーブル名ごとに定義を切り替えられる</td></tr>
+    <tr><th>COLUMN_NAME</th><th>TYPE_NAME</th><th>COLUMN_SIZE</th><th>DECIMAL_DIGITS</th><th>NULLABLE</th><th>IS_PK</th><th>PK_NAME</th><th>REMARKS</th><th>TABLE_REMARKS</th></tr>
+    <tr><td>EMPLOYEE_ID</td><td>INTEGER</td><td>10</td><td>（空）</td><td>false</td><td>true</td><td>（空）</td><td>社員ID</td><td>社員マスタ</td></tr>
+    <tr><td>EMPLOYEE_NAME</td><td>VARCHAR</td><td>100</td><td>（空）</td><td>true</td><td>false</td><td>（空）</td><td>氏名</td><td>社員マスタ</td></tr>
+    <tr><td>SALARY</td><td>DECIMAL</td><td>10</td><td>2</td><td>true</td><td>false</td><td>（空）</td><td>給与</td><td>社員マスタ</td></tr>
   </table>
-  <p>たとえば Scaffold で書き出した DDL 用のテンプレートは、<code>PK</code> サブテーブルの存在を前提に書かれているため、<code>ddlSettings.json</code> 相当の unitSetting を指定しないと主キー句を出力できません。Scaffold で template と一緒に unitSetting も書き出し、フォームへ反映するのはこのためです。</p>
 
-  <h4>組み込みファイルの例（Scaffold で書き出されるもの）</h4>
-  <p><a href="../dialogs/txt-template-generate.html">Scaffold</a> ダイアログ（<code>generateType=txt</code> のとき unit の上の Scaffold ボタンから開く）は、固定成果物タイプが内部で使っている組み込みの unitSetting を、サンプルとしてワークスペースへ書き出します（<code>resources/setting/{名前}.json</code>）。書き出したファイルを編集し、generate フォームの <code>unitSetting</code> に指定して使います。</p>
-  <table>
-    <tr><th>target</th><th>組み込みファイル</th><th>内容</th></tr>
-    <tr><td>ddl</td><td><code>sql/ddlSettings.json</code></td><td>全テーブルを対象に、カラム情報（<code>COLUMN_NAME</code> / <code>TYPE_NAME</code> / <code>COLUMN_SIZE</code> など）を <code>string</code>、<code>NULLABLE</code> / <code>IS_PK</code> を <code>boolean</code> として定義。さらに <code>IS_PK</code> が真の行だけを <code>PK</code> テーブルに分割し、CREATE TABLE の主キー句を作れるようにします。</td></tr>
-    <tr><td>javaBean</td><td><code>javabean/javaBeanSettings.json</code></td><td><code>commonSettings</code> で、<code>TABLE_NAME</code> からクラス名（<code>className</code>。先頭大文字化）、<code>TYPE_NAME</code> から Java の型（<code>javaType</code>。<code>VARCHAR</code>→<code>String</code>、<code>INT</code>→<code>Integer</code> など）を式で導出し、<code>javaType == 'Boolean'</code> を <code>isBoolean</code> として定義します。</td></tr>
-    <tr><td>xlsxSchema</td><td><code>xlsxschema/xlsxSchemaSettings.json</code></td><td>カラム行（<code>SHEET_NAME</code> / <code>DATA_START</code> / <code>COLUMN_INDEX</code>）、主キー（<code>PK</code>）、セル位置（<code>CELLS</code>）の 3 つのテーブルに分割します。</td></tr>
-    <tr><td>fixedColumnDef</td><td><code>fixedcolumndef/fixedColumnDefSettings.json</code></td><td><code>commonSettings</code> で <code>name</code> / <code>length</code> / <code>align</code> / <code>pad</code> をそのままテンプレート変数にします。固定長のカラム幅定義を組み立てる最小構成の例です。</td></tr>
-  </table>
-  <p>例（<code>ddlSettings.json</code> の抜粋。主キーのカラムだけを <code>PK</code> テーブルに切り出す部分）:</p>
+  <p><strong>2. unitSetting（<code>ddlSettings.json</code> の抜粋）</strong></p>
 <pre>{
   "settings": [
     {
       "pattern": {"regex": ".*", "exclude": ["PK"]},
       "separate": [
-        { "string": {"COLUMN_NAME": "COLUMN_NAME", "TYPE_NAME": "TYPE_NAME"},
-          "boolean": {"NULLABLE": "NULLABLE", "IS_PK": "IS_PK"} },
+        { "string": {
+            "COLUMN_NAME": "COLUMN_NAME",
+            "TYPE_NAME": "TYPE_NAME",
+            "COLUMN_SIZE": "COLUMN_SIZE != null &amp;&amp; !COLUMN_SIZE.isEmpty() ? COLUMN_SIZE : null",
+            "DECIMAL_DIGITS": "DECIMAL_DIGITS != null &amp;&amp; !DECIMAL_DIGITS.isEmpty() ? DECIMAL_DIGITS : null" },
+          "boolean": { "NULLABLE": "NULLABLE", "IS_PK": "IS_PK" } },
         { "tableName": "PK",
           "filter": ["IS_PK"],
           "string": {"COLUMN_NAME": "COLUMN_NAME", "PK_NAME": "PK_NAME"} }
@@ -106,6 +93,48 @@
     }
   ]
 }</pre>
+  <p>これにより次の 3 つの整形が行われます。</p>
+  <ul>
+    <li><strong>空文字を null に変換</strong>（<code>COLUMN_SIZE</code> / <code>DECIMAL_DIGITS</code>）: 空欄のカラムをテンプレートの <code>$if(row.COLUMN_SIZE)$</code> で「値なし」と判定できるようにします。</li>
+    <li><strong>真偽値へ変換</strong>（<code>NULLABLE</code> / <code>IS_PK</code>）: 文字列 <code>"false"</code> を偽として <code>$if(!row.NULLABLE)$</code> で判定できるようにします。</li>
+    <li><strong>主キー行を <code>PK</code> サブテーブルへ分割</strong>（<code>separate</code> + <code>filter</code>）: テンプレートから <code>dataset.PK.rows</code> として主キーのカラムだけを参照できます。</li>
+  </ul>
+
+  <p><strong>3. テンプレート（<code>ddlTemplate.stg</code> の抜粋）</strong></p>
+<pre>ddlType(row) ::= &lt;&lt;$row.TYPE_NAME$$if(row.COLUMN_SIZE)$($row.COLUMN_SIZE$$if(row.DECIMAL_DIGITS)$,$row.DECIMAL_DIGITS$$endif$)$endif$&gt;&gt;
+createTable() ::= &lt;&lt;
+CREATE TABLE $tableName; format="upper"$ (
+    $rows:{row | $row.COLUMN_NAME; format="upper"$ $ddlType(row)$$if(!row.NULLABLE)$ NOT NULL$endif$}; separator=",\n    "$
+    $if(dataset.PK.rows)$,CONSTRAINT PK_$tableName; format="upper"$ PRIMARY KEY ($dataset.PK.rows:{row | $row.COLUMN_NAME; format="upper"$}; separator=", "$)
+    $endif$
+);
+&gt;&gt;</pre>
+  <p>テンプレートに書かれているのは「サイズがあれば <code>(サイズ)</code> を付ける」「NOT NULL ならそう出力する」「<code>dataset.PK</code> があれば主キー句を出す」だけで、型の判定や主キー行の抽出といったロジックは unitSetting 側が受け持っています（組み込みテンプレートは <code>PK_NAME</code> があればそれを制約名に使いますが、抜粋では省略しています）。</p>
+
+  <p><strong>4. レンダリング結果の比較</strong></p>
+  <table>
+    <tr><th>unitSetting あり（<code>ddlSettings.json</code>）</th><th>unitSetting なし（<code>generateType=txt</code> で未指定。想定される出力）</th></tr>
+    <tr>
+      <td><pre>CREATE TABLE EMPLOYEE (
+    EMPLOYEE_ID INTEGER(10) NOT NULL,
+        EMPLOYEE_NAME VARCHAR(100),
+        SALARY DECIMAL(10,2)
+    ,CONSTRAINT PK_EMPLOYEE PRIMARY KEY (EMPLOYEE_ID)
+);</pre></td>
+      <td><pre>CREATE TABLE EMPLOYEE (
+    EMPLOYEE_ID INTEGER(10),
+        EMPLOYEE_NAME VARCHAR(100),
+        SALARY DECIMAL(10,2)
+);</pre></td>
+    </tr>
+  </table>
+  <p>unitSetting が無いと、テンプレートが前提とする整形が行われないため、次のようにテンプレートを書いても期待どおりに動きません。</p>
+  <ul>
+    <li><strong>NOT NULL が付かない</strong>: <code>NULLABLE</code> が文字列のままだと <code>"false"</code> も真として扱われ、<code>$if(!row.NULLABLE)$</code> が常に偽になります。</li>
+    <li><strong>主キー句が出ない</strong>: <code>PK</code> サブテーブルが作られないため <code>dataset.PK.rows</code> が空になります。</li>
+    <li><strong>空欄の判定ができない</strong>: <code>DECIMAL_DIGITS</code> の空文字が値ありと扱われ、<code>VARCHAR(100,)</code> のような出力になる可能性があります。</li>
+  </ul>
+  <p>テンプレートを自作・改造するときは、テンプレートに複雑な式を書く前に「unitSetting でカラム値を整形・分割できないか」を検討してください。変数を足したい（例: <code>javaBean</code> の <code>className</code> / <code>javaType</code>）、行を分けたい（例: <code>xlsxSchema</code> の <code>PK</code> / <code>CELLS</code>）といった場合も同じ仕組みで対応できます。組み込み設定は <code>javabean/javaBeanSettings.json</code>、<code>xlsxschema/xlsxSchemaSettings.json</code>、<code>fixedcolumndef/fixedColumnDefSettings.json</code> も Scaffold で書き出せます。</p>
 
   <h2>共通オプション</h2>
   <table>
