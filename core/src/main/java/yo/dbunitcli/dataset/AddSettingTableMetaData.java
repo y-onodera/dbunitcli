@@ -4,6 +4,7 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.NoSuchColumnException;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -21,7 +22,8 @@ public record AddSettingTableMetaData(
         List<Integer> filteredColumnIndex,
         TableSeparator tableSeparator,
         Boolean distinct,
-        AddSettingTableMetaData preset) implements ITableMetaData {
+        AddSettingTableMetaData preset,
+        String sourceFilePath) implements ITableMetaData {
 
     public static Builder builder(final ITableMetaData originMetaData, final Column[] primaryKey, final TableSeparator tableSeparator) {
         return new Builder(originMetaData, primaryKey, tableSeparator);
@@ -38,6 +40,7 @@ public record AddSettingTableMetaData(
                 , builder.getTableSeparator()
                 , builder.getDistinct()
                 , builder.getPreset()
+                , builder.getSourceFilePath()
         );
     }
 
@@ -52,6 +55,7 @@ public record AddSettingTableMetaData(
                 , this.tableSeparator
                 , this.distinct
                 , this.preset
+                , this.sourceFilePath
         );
     }
 
@@ -252,6 +256,7 @@ public record AddSettingTableMetaData(
         private final TableSeparator tableSeparator;
         private final Boolean distinct;
         private AddSettingTableMetaData preset;
+        private String sourceFilePath;
 
         public Builder(final ITableMetaData originMetaData, final Column[] primaryKeys, final TableSeparator tableSeparator) {
             this.tableSeparator = tableSeparator;
@@ -263,6 +268,9 @@ public record AddSettingTableMetaData(
             this.filteredColumnIndex = this.createFilteredColumnIndex();
             if (originMetaData instanceof final AddSettingTableMetaData delegate) {
                 this.preset = delegate;
+                this.sourceFilePath = delegate.sourceFilePath();
+            } else if (originMetaData instanceof final TableMetaDataWithSource withSource) {
+                this.sourceFilePath = withSource.source().filePath();
             }
             this.distinct = this.tableSeparator.distinct();
             this.columnIndexes = this.createColumnIndexes();
@@ -310,6 +318,10 @@ public record AddSettingTableMetaData(
 
         public AddSettingTableMetaData getPreset() {
             return this.preset;
+        }
+
+        public String getSourceFilePath() {
+            return this.sourceFilePath;
         }
 
         private Column[] getAllColumns(final ITableMetaData delegate) {

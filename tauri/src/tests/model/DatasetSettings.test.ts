@@ -404,4 +404,65 @@ describe("DatasetSettingクラス", () => {
 		expect(Array.isArray(json.separate)).toBe(true);
 		expect(json.separate.length).toBe(1);
 	});
+
+	it("パターンのfilePathを置換でき、空文字ならundefinedになること", () => {
+		const setting = new DatasetSetting({ pattern: "p" });
+		const updated = setting.replacePatternFilePath(".*/dir/.*");
+		expect(updated.pattern).toEqual({ string: "p", filePath: ".*/dir/.*" });
+		expect(
+			updated.replacePatternFilePath("").pattern?.filePath,
+		).toBeUndefined();
+	});
+
+	it("toJSONはpatternのfilePathを出力すること", () => {
+		const setting = new DatasetSetting({
+			pattern: { string: "p", filePath: ".*/dir/.*" },
+		});
+		const json = JSON.parse(JSON.stringify(setting));
+		expect(json.pattern).toEqual({ string: "p", filePath: ".*/dir/.*" });
+	});
+
+	it("toJSONはjoinのleftFilePath/rightFilePathを出力すること", () => {
+		const setting = new DatasetSetting({
+			innerJoin: {
+				left: "a",
+				right: "b",
+				leftFilePath: ".*/a/.*",
+				rightFilePath: ".*/b/.*",
+				column: ["id"],
+			},
+		});
+		const json = JSON.parse(JSON.stringify(setting));
+		expect(json.innerJoin.leftFilePath).toBe(".*/a/.*");
+		expect(json.innerJoin.rightFilePath).toBe(".*/b/.*");
+	});
+
+	it("name→pattern→joinと切り替えてもfilePathが引き継がれること", () => {
+		const name = new DatasetSetting({
+			name: { any: "t", filePath: ".*/dir/.*" },
+		});
+		const pattern = name.replace("pattern");
+		expect(pattern.pattern).toEqual({ string: "t", filePath: ".*/dir/.*" });
+		expect(pattern.filePath).toBeUndefined();
+
+		const join = pattern.replace("innerJoin");
+		expect(join.innerJoin).toEqual({ left: "t", leftFilePath: ".*/dir/.*" });
+		expect(join.pattern).toBeUndefined();
+
+		const back = join.replace("name");
+		expect(back.name).toEqual(["t"]);
+		expect(back.filePath).toBe(".*/dir/.*");
+	});
+
+	it("join間の切り替えでjoinの内容が保持されること", () => {
+		const setting = new DatasetSetting({
+			innerJoin: { left: "a", right: "b", rightFilePath: "r", column: ["id"] },
+		});
+		expect(setting.replace("outerJoin").outerJoin).toEqual({
+			left: "a",
+			right: "b",
+			rightFilePath: "r",
+			column: ["id"],
+		});
+	});
 });

@@ -243,6 +243,8 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         return ComparableTableJoinCondition.builder()
                 .setLeft(json.getString("left"))
                 .setRight(json.getString("right"))
+                .setLeftFilePath(json.getString("leftFilePath", null))
+                .setRightFilePath(json.getString("rightFilePath", null))
                 .setStrategy(strategy)
                 .addTableSeparators(tableSeparator)
                 .build();

@@ -3,6 +3,9 @@ package yo.dbunitcli.application.json;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.junit.jupiter.api.Test;
+import yo.dbunitcli.common.Source;
+import yo.dbunitcli.dataset.AddSettingTableMetaData;
+import yo.dbunitcli.dataset.TableSeparator;
 import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.StringReader;
@@ -85,6 +88,66 @@ public class FromJsonTableSeparatorsBuilderTest {
         assertEquals("TABLE2", tableSeparators.joinConditions().getFirst().right(), "Should have correct right table");
         assertEquals("InnerJoin", tableSeparators.joinConditions().getFirst().strategy().getClass().getSimpleName(),
                 "Should have inner join strategy");
+    }
+
+    @Test
+    public void configureSettingWhenJoinHasFilePathShouldMatchOnlyTablesFromTheFile() {
+        final String json = """
+                {
+                    "settings": [{
+                        "innerJoin": {
+                            "left": "TABLE1",
+                            "leftFilePath": ".*/a/.*",
+                            "right": "TABLE2",
+                            "rightFilePath": ".*/b/.*",
+                            "column": ["id"]
+                        }
+                    }]
+                }
+                """;
+
+        final jakarta.json.JsonObject jsonObject = jakarta.json.Json.createReader(new StringReader(json))
+                .readObject();
+        final var condition = new FromJsonTableSeparatorsBuilder("UTF-8")
+                .configureSetting(jsonObject)
+                .build()
+                .joinConditions().getFirst();
+
+        assertTrue(condition.isLeft(this.metaData("TABLE1", "/work/a/TABLE1.csv")), "left table from left file path");
+        assertFalse(condition.isLeft(this.metaData("TABLE1", "/work/b/TABLE1.csv")), "left table from other file path");
+        assertTrue(condition.isRight(this.metaData("TABLE2", "/work/b/TABLE2.csv")), "right table from right file path");
+        assertFalse(condition.isRight(this.metaData("TABLE2", "/work/a/TABLE2.csv")), "right table from other file path");
+        assertFalse(condition.hasRelation(this.metaData("TABLE3", "/work/a/TABLE3.csv")), "unrelated table");
+    }
+
+    @Test
+    public void configureSettingWhenJoinHasNoFilePathShouldMatchByTableNameOnly() {
+        final String json = """
+                {
+                    "settings": [{
+                        "innerJoin": {
+                            "left": "TABLE1",
+                            "right": "TABLE2",
+                            "column": ["id"]
+                        }
+                    }]
+                }
+                """;
+
+        final jakarta.json.JsonObject jsonObject = jakarta.json.Json.createReader(new StringReader(json))
+                .readObject();
+        final var condition = new FromJsonTableSeparatorsBuilder("UTF-8")
+                .configureSetting(jsonObject)
+                .build()
+                .joinConditions().getFirst();
+
+        assertTrue(condition.isLeft(this.metaData("TABLE1", "/work/a/TABLE1.csv")));
+        assertTrue(condition.isRight(this.metaData("TABLE2", "/work/b/TABLE2.csv")));
+    }
+
+    private AddSettingTableMetaData metaData(final String tableName, final String filePath) {
+        return TableSeparator.NONE.addSetting(new Source(filePath, "", "", "", false, false)
+                .wrap(new DefaultTableMetaData(tableName, new Column[0])));
     }
 
     @Test
