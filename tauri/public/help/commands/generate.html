@@ -111,7 +111,56 @@ CREATE TABLE $tableName; format="upper"$ (
 &gt;&gt;</pre>
   <p>テンプレートに書かれているのは「サイズがあれば <code>(サイズ)</code> を付ける」「NOT NULL ならそう出力する」「<code>dataset.PK</code> があれば主キー句を出す」だけで、型の判定や主キー行の抽出といったロジックは unitSetting 側が受け持っています（組み込みテンプレートは <code>PK_NAME</code> があればそれを制約名に使いますが、抜粋では省略しています）。</p>
 
-  <p><strong>4. レンダリング結果の比較</strong></p>
+  <p><strong>4. テンプレートから参照できる変数の構造</strong> — <code>unit=table</code> では、テーブルごとに次の変数がテンプレートへ渡されます。unitSetting は主に <code>rows</code> の中身と <code>dataset</code> の構成を変えます。</p>
+  <table>
+    <tr><th>変数</th><th>内容</th><th>unitSetting の影響</th></tr>
+    <tr><td>tableName</td><td>テーブル名（例: <code>EMPLOYEE</code>）</td><td>なし</td></tr>
+    <tr><td>columns / primaryKeys / columnsExcludeKey</td><td>テーブルのカラム定義</td><td>なし（入力データ側のカラム定義）</td></tr>
+    <tr><td>rows</td><td>このテーブルの行（<code>row.列名</code> で参照）</td><td>あり。<code>string</code> / <code>boolean</code> で定義した変数が各行に追加される（同名の列は上書き）。元の列は残る</td></tr>
+    <tr><td>dataset</td><td>このテーブルから生成されたテーブルの一覧（<code>dataset.{テーブル名}.rows</code>）</td><td>あり。<code>separate</code> で分割したサブテーブルが <code>dataset.PK</code> のように追加される</td></tr>
+  </table>
+  <p>ddl の例（<code>EMPLOYEE</code>）での、テンプレートから見た構造の違いです。</p>
+  <table>
+    <tr><th>unitSetting あり（<code>ddlSettings.json</code>）</th><th>unitSetting なし（<code>generateType=txt</code> で未指定）</th></tr>
+    <tr>
+      <td><pre>rows[0]
+  COLUMN_NAME    = "EMPLOYEE_ID"
+  TYPE_NAME      = "INTEGER"
+  COLUMN_SIZE    = "10"
+  DECIMAL_DIGITS = null        ← 空文字から変換
+  NULLABLE       = false       ← 真偽値
+  IS_PK          = true        ← 真偽値
+  REMARKS        = "社員ID"
+
+dataset
+  EMPLOYEE.rows ... 上記の rows と同じ
+  PK.rows[0]
+    COLUMN_NAME = "EMPLOYEE_ID"
+    IS_PK       = true         ← 主キー行だけ</pre></td>
+      <td><pre>rows[0]
+  COLUMN_NAME    = "EMPLOYEE_ID"
+  TYPE_NAME      = "INTEGER"
+  COLUMN_SIZE    = "10"
+  DECIMAL_DIGITS = ""          ← 空文字のまま
+  NULLABLE       = "false"     ← 文字列
+  IS_PK          = "true"      ← 文字列
+  REMARKS        = "社員ID"
+
+dataset
+  EMPLOYEE.rows ... 上記の rows と同じ
+  （PK は存在しない）</pre></td>
+    </tr>
+  </table>
+  <p>テンプレートを書くうえでの違いは次のとおりです。</p>
+  <table>
+    <tr><th>テンプレートの記述</th><th>unitSetting あり</th><th>unitSetting なし</th></tr>
+    <tr><td><code>$if(row.DECIMAL_DIGITS)$</code></td><td>値があるときだけ真</td><td>空文字も値ありとして扱われる可能性がある</td></tr>
+    <tr><td><code>$if(!row.NULLABLE)$</code></td><td><code>false</code> のときだけ真（NOT NULL を出力）</td><td>文字列 <code>"false"</code> も真となり、常に偽になる</td></tr>
+    <tr><td><code>$dataset.PK.rows$</code></td><td>主キーのカラムだけの一覧</td><td>参照先が無く、空になる（主キー句を出せない）</td></tr>
+  </table>
+  <p>つまり unitSetting は「テンプレートが参照する変数の型（文字列 / 真偽値 / null）と、<code>dataset</code> 以下に何が存在するか」を決める役割を持ちます。テンプレートを書くときは、使いたい変数が unitSetting で定義されているかを先に確認してください。</p>
+
+  <p><strong>5. レンダリング結果の比較</strong></p>
   <table>
     <tr><th>unitSetting あり（<code>ddlSettings.json</code>）</th><th>unitSetting なし（<code>generateType=txt</code> で未指定。想定される出力）</th></tr>
     <tr>
