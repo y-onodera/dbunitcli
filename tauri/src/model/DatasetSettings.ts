@@ -1,12 +1,15 @@
 export type Pattern = {
 	string: string;
 	exclude?: string[];
+	filePath?: string;
 };
 export type TableJoin = {
 	left?: string;
 	right?: string;
 	column?: string[];
 	on?: string;
+	filePath?: string;
+	rightFilePath?: string;
 };
 export type Split = {
 	prefix?: string;
@@ -184,30 +187,53 @@ export class DatasetSetting {
 		if (this.handler() === newTarget) {
 			return this;
 		}
+		const filePath = this.targetFilePath();
 		if (this.join()) {
-			const value =
-				newTarget === "name" || newTarget === "pattern"
-					? this.join()?.left
-					: this.join();
-			return this.replaceTarget({ [newTarget]: value });
-		}
-		let value: string | string[] | { left: string };
-		if (newTarget === "name") {
-			value = this.pattern?.string ?? [""];
-		} else if (newTarget === "pattern") {
-			value = this.name ? this.name[0] : "";
-		} else {
-			let left: string;
-			if (this.name) {
-				left = this.name[0];
-			} else if (this.pattern) {
-				left = this.pattern.string;
-			} else {
-				left = "";
+			const join = this.join();
+			if (newTarget === "name") {
+				return this.replaceTarget({ name: join?.left, filePath });
 			}
-			value = { left };
+			if (newTarget === "pattern") {
+				return this.replaceTarget({
+					pattern: { string: join?.left ?? "", filePath },
+				});
+			}
+			return this.replaceTarget({ [newTarget]: join });
 		}
-		return this.replaceTarget({ [newTarget]: value });
+		if (newTarget === "name") {
+			return this.replaceTarget({
+				name: this.pattern?.string ?? [""],
+				filePath,
+			});
+		}
+		if (newTarget === "pattern") {
+			return this.replaceTarget({
+				pattern: { string: this.name ? this.name[0] : "", filePath },
+			});
+		}
+		let left: string;
+		if (this.name) {
+			left = this.name[0];
+		} else if (this.pattern) {
+			left = this.pattern.string;
+		} else {
+			left = "";
+		}
+		return this.replaceTarget({
+			[newTarget]: { left, filePath },
+		});
+	}
+
+	// target(name/pattern/join)種別をまたいで引き継ぐfilePath。joinはleft側を採用する
+	private targetFilePath(): string | undefined {
+		const join = this.join();
+		if (join) {
+			return join.filePath;
+		}
+		if (this.pattern) {
+			return this.pattern.filePath;
+		}
+		return this.filePath;
 	}
 
 	replaceName(newOne: string, index: number): DatasetSetting {
@@ -239,6 +265,13 @@ export class DatasetSetting {
 		});
 	}
 
+	replacePatternFilePath(filePath: string): DatasetSetting {
+		return this.replacePattern({
+			string: this.pattern?.string ?? "",
+			filePath: filePath || undefined,
+		});
+	}
+
 	removePatternExclude(index: number): DatasetSetting {
 		return this.replacePattern({
 			string: this.pattern?.string ?? "",
@@ -267,7 +300,7 @@ export class DatasetSetting {
 	replaceTarget(builder: DatasetSettingBuilder): DatasetSetting {
 		return this.with({
 			name: toNameArray(builder.name as string | string[] | undefined),
-			filePath: undefined,
+			filePath: builder.filePath,
 			pattern: toPattern(builder.pattern),
 			innerJoin: builder.innerJoin,
 			outerJoin: builder.outerJoin,

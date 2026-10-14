@@ -1,15 +1,35 @@
 package yo.dbunitcli.sidecar.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.micronaut.serde.annotation.Serdeable;
 
 import java.util.List;
 
 @Serdeable
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TableJoinDto {
     private String left;
     private String right;
     private List<String> column;
     private String on;
+    private String filePath;
+    private String rightFilePath;
+
+    public String getFilePath() {
+        return this.filePath;
+    }
+
+    public void setFilePath(final String filePath) {
+        this.filePath = filePath;
+    }
+
+    public String getRightFilePath() {
+        return this.rightFilePath;
+    }
+
+    public void setRightFilePath(final String rightFilePath) {
+        this.rightFilePath = rightFilePath;
+    }
 
     public String getLeft() {
         return this.left;

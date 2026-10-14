@@ -333,11 +333,31 @@ function TargetContent({
 					}
 				/>
 				<Text
+					name="filePath"
+					value={target.join()?.filePath ?? ""}
+					handleChange={(newVal) =>
+						setTarget((cur) =>
+							cur.replaceJoin({ filePath: newVal.target.value || undefined }),
+						)
+					}
+				/>
+				<Text
 					name="right"
 					value={target.join()?.right ?? ""}
 					list={tableList}
 					handleChange={(newVal) =>
 						setTarget((cur) => cur.replaceJoin({ right: newVal.target.value }))
+					}
+				/>
+				<Text
+					name="rightFilePath"
+					value={target.join()?.rightFilePath ?? ""}
+					handleChange={(newVal) =>
+						setTarget((cur) =>
+							cur.replaceJoin({
+								rightFilePath: newVal.target.value || undefined,
+							}),
+						)
 					}
 				/>
 				<Select
@@ -399,6 +419,13 @@ function TargetContent({
 					}
 					handleRemove={(index) =>
 						setTarget((cur) => cur.removePatternExclude(index))
+					}
+				/>
+				<Text
+					name="filePath"
+					value={target.pattern?.filePath ?? ""}
+					handleChange={(newVal) =>
+						setTarget((cur) => cur.replacePatternFilePath(newVal.target.value))
 					}
 				/>
 			</>

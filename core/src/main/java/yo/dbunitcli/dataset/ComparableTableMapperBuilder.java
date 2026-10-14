@@ -48,7 +48,7 @@ public class ComparableTableMapperBuilder {
         final List<? extends ComparableTableMapper> results = addSettingTableMetaData
                 .map(target -> {
                     final List<ComparableTableJoin> targetJoins = this.joins.stream()
-                            .filter(join -> join.hasRelation(target.getTableName()))
+                            .filter(join -> join.hasRelation(target))
                             .collect(Collectors.toList());
                     final boolean enableRowProcessing = this.converter != null && this.converter.isEnableRowProcessing(target, this.joins);
                     if (count[0] > 0 && this.isSplittable()) {

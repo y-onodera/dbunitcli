@@ -83,11 +83,15 @@ public class ComparableTableJoin {
     }
 
     public void setIfRelated(final ComparableTable table) {
-        if (table.getTableName().equals(this.condition.right())) {
+        if (this.condition.isRight(table.getTableMetaData())) {
             this.setRight(table);
-        } else if (table.getTableName().equals(this.condition.left())) {
+        } else if (this.condition.isLeft(table.getTableMetaData())) {
             this.setLeft(table);
         }
+    }
+
+    public boolean hasRelation(final AddSettingTableMetaData metaData) {
+        return this.getCondition().hasRelation(metaData);
     }
 
     public interface ConditionBuilder {
