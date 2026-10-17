@@ -78,7 +78,7 @@
     <tr><td>tableName</td><td>テーブル名（例: <code>EMPLOYEE</code>）</td><td>なし（元のテーブル名のまま）</td></tr>
     <tr><td>columns / primaryKeys / columnsExcludeKey</td><td>入力データのカラム定義</td><td>なし。設定後のカラム情報は <code>dataset.{テーブル名}.columns</code> などで参照する</td></tr>
     <tr><td>rows</td><td>このテーブルの行（<code>row.列名</code> で参照）</td><td>あり。追加した列は各行の末尾に付き、同名の列は上書きされる。元の列は残る。<code>include</code> / <code>exclude</code> / <code>filter</code> / <code>order</code> / <code>distinct</code> もここに反映される</td></tr>
-    <tr><td>dataset</td><td>設定の結果できたテーブルの一覧（<code>dataset.{テーブル名}.rows</code>）。キーはテーブル名の昇順</td><td>あり。<code>separate</code> で作ったサブテーブルが <code>dataset.PK</code> のように加わる。各テーブルの <code>columns</code> / <code>primaryKeys</code> にも設定が反映される</td></tr>
+    <tr><td>dataset</td><td>設定の結果できたテーブルの一覧（<code>dataset.{テーブル名}.rows</code>）。キーはテーブル名の昇順。<code>unit=table</code> では、そのテーブル単位と、unitSetting の <code>separate</code> で作ったサブテーブルだけが入る（src の setting で分けた他のテーブルは、別名を付けたかどうかに関わらず含まれない）</td><td>あり。<code>separate</code> で作ったサブテーブルが <code>dataset.PK</code> のように加わる。各テーブルの <code>columns</code> / <code>primaryKeys</code> にも設定が反映される</td></tr>
   </table>
 
   <p><strong>設定キーとテンプレートへの影響</strong></p>
