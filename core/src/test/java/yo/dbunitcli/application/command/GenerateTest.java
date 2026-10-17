@@ -192,6 +192,27 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateTxtPerTableSrcSplitWithSuffixThenUnitSetting() throws Exception {
+            // srcのsplitはsuffix/prefixでテーブル名を分ければunit=tableでも使え、unitSettingは分割後のテーブルごとに適用される
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table_src_unit_order/csv"
+                    , "-encoding=UTF-8"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/src_split.json"
+                    , "-unitSetting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/unit.json"
+                    , "-generateType=txt"
+                    , "-unit=table"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/template_split.txt"
+                    , "-templateParameterAttribute="
+                    , "-outputEncoding=UTF-8"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/table_src_unit_split/result/$tableName$.txt"
+            });
+            GenerateTest.subDirectory = "generate/table_src_unit_split";
+            this.assertGenerateFileEquals("T_0.txt", "UTF-8");
+            this.assertGenerateFileEquals("T_1.txt", "UTF-8");
+        }
+
+        @Test
         public void testGenerateTxtWithMetaData() throws Exception {
             Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateTxtWithMetaData.txt"});
             GenerateTest.subDirectory = "generate/with_metadata";

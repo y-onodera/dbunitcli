@@ -119,11 +119,16 @@ public record AddSettingTableMetaData(
     }
 
     public TableSplitter getTableSplitter() {
-        return this.tableSeparator.splitter();
+        // 後段がsplitしない場合は、前段のsplitを引き継ぐ
+        if (this.tableSeparator.splitter().isSplit() || this.preset == null) {
+            return this.tableSeparator.splitter();
+        }
+        final TableSplitter presetSplitter = this.preset.getTableSplitter();
+        return presetSplitter.isSplit() ? presetSplitter : this.tableSeparator.splitter();
     }
 
     public List<String> getBreakKeys(final Object[] applySetting) {
-        return this.tableSeparator.splitter().breakKeys().stream()
+        return this.getTableSplitter().breakKeys().stream()
                 .map(name -> {
                     try {
                         return this.getColumnIndex(name);

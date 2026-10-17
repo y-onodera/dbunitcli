@@ -92,7 +92,7 @@ public record TableSeparators(List<TableSeparator> settings
         if (this.next == null) {
             return stage;
         }
-        return (this.stageTableName == null ? stage : stage.filter(it -> it.getTableName().equals(this.stageTableName)))
+        return (this.stageTableName == null ? stage : stage.filter(it -> it.getTableName().equals(this.stageTableName) || it.getTableSplitter().isSplit()))
                 .flatMap(this.next::getAddSettingTableMetaData);
     }
 
