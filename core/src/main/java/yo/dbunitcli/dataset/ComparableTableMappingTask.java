@@ -1,17 +1,13 @@
 package yo.dbunitcli.dataset;
 
-import org.dbunit.dataset.ITable;
 import yo.dbunitcli.common.Source;
-import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
 
 public interface ComparableTableMappingTask {
 
@@ -68,48 +64,18 @@ public interface ComparableTableMappingTask {
             return this.param().tableSeparators();
         }
 
-        /**
-         * tableSeparatorsを適用した状態のテーブルに、さらに2段目（{@link TableSeparators#next()}）を重ねて行を解決する。
-         */
-        public List<Map<String, Object>> resolveRows() {
+        public List<Map<String, Object>> resolveRows(final TableSeparators unitTableSeparators) {
             final TableRowsCollector collector = new TableRowsCollector(this.targetTableName());
-            this.applyNext(collector).close();
+            this.runWith(new ComparableTableMappingContext(this.targetTableSeparators().then(unitTableSeparators, this.targetTableName()), collector)).close();
             return collector.getRows();
         }
 
-        public Map<String, Object> resolveDataSet() {
-            final TreeMap<String, ComparableTable> tableMap = this.applyNext(null).close();
+        public Map<String, Object> resolveDataSet(final TableSeparators unitTableSeparators) {
+            final TreeMap<String, ComparableTable> tableMap = this.runWith(
+                    new ComparableTableMappingContext(this.targetTableSeparators().then(unitTableSeparators, this.targetTableName()), null)).close();
             final Map<String, Object> result = new LinkedHashMap<>();
-            // each ComparableTable.toMap(true) is a one-element list holding the table's own metadata+rows wrapper
             tableMap.forEach((tableName, table) -> result.put(tableName, table.toMap(true).getFirst()));
             return result;
-        }
-
-        private ComparableTableMappingContext applyNext(final IDataSetConverter converter) {
-            final ComparableTable srcApplied = this.runWith(new ComparableTableMappingContext(this.targetTableSeparators(), null))
-                    .close()
-                    .get(this.targetTableName());
-            final ComparableTableMappingContext nextContext = new ComparableTableMappingContext(this.targetTableSeparators().nextOrNone(), converter);
-            nextContext.open();
-            if (srcApplied != null) {
-                this.feed(nextContext, srcApplied);
-            }
-            return nextContext;
-        }
-
-        private void feed(final ComparableTableMappingContext context, final ComparableTable table) {
-            final AddSettingTableMetaData metaData = table.getTableMetaData();
-            final ComparableTableMapper mapper = context.createMapper(
-                    new TableMetaDataWithSource(metaData.getTableName(), metaData.getColumns(), metaData.getPrimaryKeys(), this.source()));
-            mapper.startTable();
-            IntStream.range(0, table.getRowCount())
-                    .mapToObj(i -> Arrays.stream(metaData.getColumns())
-                            .map(column -> table.getValue(i, column.getColumnName()))
-                            // ComparableTable#getValueはnullをNO_VALUEで返すため、行データとしてはnullに戻す
-                            .map(value -> value == ITable.NO_VALUE ? null : value)
-                            .toArray())
-                    .forEach(mapper::addRow);
-            mapper.endTable();
         }
 
         private ComparableTableMappingContext runWith(final ComparableTableMappingContext context) {

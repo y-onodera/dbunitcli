@@ -173,6 +173,26 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateTxtPerTableSrcOrderDistinctThenUnitSetting() throws Exception {
+            // srcのorder/distinctは、unitSettingで列を追加した後も有効
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table_src_unit_order/csv"
+                    , "-encoding=UTF-8"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/src.json"
+                    , "-unitSetting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/unit.json"
+                    , "-generateType=txt"
+                    , "-unit=table"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/template.txt"
+                    , "-templateParameterAttribute="
+                    , "-outputEncoding=UTF-8"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/table_src_unit_order/result/$tableName$.txt"
+            });
+            GenerateTest.subDirectory = "generate/table_src_unit_order";
+            this.assertGenerateFileEquals("T.txt", "UTF-8");
+        }
+
+        @Test
         public void testGenerateTxtWithMetaData() throws Exception {
             Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateTxtWithMetaData.txt"});
             GenerateTest.subDirectory = "generate/with_metadata";

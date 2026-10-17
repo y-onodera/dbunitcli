@@ -12,6 +12,12 @@ public class ComparableTableMapperBuilder {
     private List<ComparableTableMappingTask> chain = new ArrayList<>();
     private TreeMap<String, ComparableTable> contextShareTableMap = new TreeMap<>();
     private boolean chainRun = false;
+    private TableSeparators tableSeparators = TableSeparators.NONE;
+
+    public ComparableTableMapperBuilder setTableSeparators(final TableSeparators tableSeparators) {
+        this.tableSeparators = tableSeparators;
+        return this;
+    }
 
     public ComparableTableMapperBuilder setConverter(final IDataSetConverter converter) {
         this.converter = converter;
@@ -52,9 +58,9 @@ public class ComparableTableMapperBuilder {
                             .collect(Collectors.toList());
                     final boolean enableRowProcessing = this.converter != null && this.converter.isEnableRowProcessing(target, this.joins);
                     if (count[0] > 0 && this.isSplittable()) {
-                        return new ComparableTableMapperSingle(target, this.converter.split(), this.contextShareTableMap, this.alreadyWrite, targetJoins, new ArrayList<>(), false, enableRowProcessing);
+                        return new ComparableTableMapperSingle(target, this.converter.split(), this.contextShareTableMap, this.alreadyWrite, targetJoins, new ArrayList<>(), false, enableRowProcessing, this.tableSeparators);
                     }
-                    return new ComparableTableMapperSingle(target, this.converter, this.contextShareTableMap, this.alreadyWrite, targetJoins, this.chain, this.chainRun, enableRowProcessing);
+                    return new ComparableTableMapperSingle(target, this.converter, this.contextShareTableMap, this.alreadyWrite, targetJoins, this.chain, this.chainRun, enableRowProcessing, this.tableSeparators);
                 })
                 .peek(it -> count[0]++)
                 .toList();

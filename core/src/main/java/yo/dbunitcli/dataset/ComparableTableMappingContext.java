@@ -40,6 +40,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
     public ComparableTableMapper createMapper(final TableMetaDataWithSource metaData) {
         return new ComparableTableMapperBuilder()
                 .setConverter(this.converter)
+                .setTableSeparators(this.tableSeparators)
                 .setAlreadyWrite(this.alreadyWrite)
                 .setJoins(this.joins)
                 .setChain(this.chain)
@@ -83,6 +84,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
                             .toList();
                     final ComparableTableMapper joinMapper = new ComparableTableMapperBuilder()
                             .setConverter(this.converter)
+                            .setTableSeparators(this.tableSeparators)
                             .setContextShareTableMap(this.tableMap)
                             .setAlreadyWrite(this.alreadyWrite)
                             .setJoins(newRemaining)

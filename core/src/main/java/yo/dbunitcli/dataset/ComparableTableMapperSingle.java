@@ -15,6 +15,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private final List<ComparableTableMappingTask> chain;
     private final boolean chainRun;
     private final boolean enableRowProcessing;
+    private final TableSeparators tableSeparators;
     private final AddSettingTableMetaData baseMetaData;
     private final List<Integer> filteredRowIndexes;
     private final Collection<Object[]> rows;
@@ -27,7 +28,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private int addRowCount = 0;
     private int breakKeyCount = 0;
 
-    public ComparableTableMapperSingle(final AddSettingTableMetaData metaData, final IDataSetConverter converter, final TreeMap<String, ComparableTable> contextShareTableMap, final Map<String, Integer> alreadyWrite, final List<ComparableTableJoin> joins, final List<ComparableTableMappingTask> chain, final boolean chainRun, final boolean enableRowProcessing) {
+    public ComparableTableMapperSingle(final AddSettingTableMetaData metaData, final IDataSetConverter converter, final TreeMap<String, ComparableTable> contextShareTableMap, final Map<String, Integer> alreadyWrite, final List<ComparableTableJoin> joins, final List<ComparableTableMappingTask> chain, final boolean chainRun, final boolean enableRowProcessing, final TableSeparators tableSeparators) {
         this.baseMetaData = metaData;
         this.splitter = metaData.getTableSplitter();
         this.metaData = this.splitter.getMetaData(this.baseMetaData, this.no);
@@ -40,6 +41,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         this.chain = chain;
         this.chainRun = chainRun;
         this.enableRowProcessing = enableRowProcessing;
+        this.tableSeparators = tableSeparators;
     }
 
     @Override
@@ -69,7 +71,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                 final List<ComparableTableMappingTask> restChain = this.chain.size() <= 1
                         ? List.of()
                         : this.chain.subList(1, this.chain.size());
-                next.run(new ComparableTableMappingContext(next.param().tableSeparators()
+                next.run(new ComparableTableMappingContext(this.chainSeparators(next)
                         , this.converter
                         , this.contextShareTableMap
                         , this.alreadyWrite
@@ -102,7 +104,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                             final List<ComparableTableMappingTask> restChain = this.chain.size() <= 1
                                     ? List.of()
                                     : this.chain.subList(1, this.chain.size());
-                            next.run(new ComparableTableMappingContext(next.param().tableSeparators()
+                            next.run(new ComparableTableMappingContext(this.chainSeparators(next)
                                     , null
                                     , this.contextShareTableMap
                                     , this.alreadyWrite
@@ -118,6 +120,14 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             }
             this.joins.forEach(it -> it.setIfRelated(this.contextShareTableMap.get(this.metaData.getTableName())));
         }
+    }
+
+    // 連鎖実行するタスクにも、実行中のcontextが持つ2段目(next)を引き継ぐ
+    private TableSeparators chainSeparators(final ComparableTableMappingTask task) {
+        final TableSeparators base = task.param().tableSeparators();
+        return this.tableSeparators.next() == null
+                ? base
+                : base.then(this.tableSeparators.next(), this.tableSeparators.stageTableName());
     }
 
     protected void addSplitResult() throws AmbiguousTableNameException {

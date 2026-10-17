@@ -81,7 +81,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         final ComparableDataSetLoader loader = this.getComparableDataSetLoader();
         final ComparableDataSetProducer producer = this.generateType()
                 .wrapProducer(this, loader.getComparableDataSetProducer(this.dataSetParam()));
-        return this.unit().templateStream(loader, producer);
+        return this.unit().templateStream(loader, producer,
+                                          this.unit() == ParameterUnit.table ? this.unitTableSeparators() : TableSeparators.NONE);
     }
 
     public TableSeparators unitTableSeparators() {
@@ -187,10 +188,6 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             if (defaultTableSeparators != null) {
                 builder.setTableSeparators(defaultTableSeparators);
             }
-        }
-        // unit=tableはsrcのsetting適用後のテーブルにunitSettingを2段目として重ねる
-        if (this.unit() == ParameterUnit.table && !this.generateType().isExcel()) {
-            builder.setTableSeparators(builder.getTableSeparators().then(this.unitTableSeparators()));
         }
         builder.setUseJdbcMetaData(this.generateType().useJdbcMetaData())
                .setLoadData(this.generateType().loadData());
