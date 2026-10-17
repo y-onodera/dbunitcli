@@ -151,6 +151,28 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateTxtPerTableSrcSettingThenUnitSetting() throws Exception {
+            // unit=tableでは、srcのsetting適用後のテーブル（サブテーブル含む）にunitSettingを重ねて適用する
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
+                    , "-encoding=UTF-8"
+                    , "-regTableInclude=Test1"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit/src.json"
+                    , "-unitSetting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit/unit.json"
+                    , "-generateType=txt"
+                    , "-unit=table"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit/template.txt"
+                    , "-templateParameterAttribute="
+                    , "-outputEncoding=UTF-8"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/table_src_unit/result/$tableName$.txt"
+            });
+            GenerateTest.subDirectory = "generate/table_src_unit";
+            this.assertGenerateFileEquals("Test1.txt", "UTF-8");
+            this.assertGenerateFileEquals("SUB.txt", "UTF-8");
+        }
+
+        @Test
         public void testGenerateTxtWithMetaData() throws Exception {
             Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateTxtWithMetaData.txt"});
             GenerateTest.subDirectory = "generate/with_metadata";
