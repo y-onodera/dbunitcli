@@ -74,7 +74,7 @@ public class ScaffoldTest {
 
             @Test
             public void testAllFiles() throws Exception {
-                TestCase.this.scaffold("ddl/all", "-target=ddl", "-unitSetting=ddlUnit",
+                TestCase.this.scaffold("ddl/all", "-target=ddl", "-subTableSetting=ddlUnit",
                                        "-template=ddl", "-parameter=ddl");
                 assertTrue(TestCase.this.resultFile("ddl/all", "resources/setting/ddlUnit.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/all", "resources/template/ddl.stg").exists());
@@ -92,12 +92,12 @@ public class ScaffoldTest {
             }
 
             @Test
-            public void testUnitSettingOnly() {
-                TestCase.this.scaffold("ddl/unitSetting", "-target=ddl", "-unitSetting=ddlUnit");
-                assertTrue(TestCase.this.resultFile("ddl/unitSetting", "resources/setting/ddlUnit.json").exists());
-                assertFalse(TestCase.this.resultFile("ddl/unitSetting", "resources/setting/ddl.json").exists());
-                assertFalse(TestCase.this.resultFile("ddl/unitSetting", "resources/template/ddl.stg").exists());
-                assertFalse(TestCase.this.resultFile("ddl/unitSetting", "option/ddl.param").exists());
+            public void testSubTableSettingOnly() {
+                TestCase.this.scaffold("ddl/subTableSetting", "-target=ddl", "-subTableSetting=ddlUnit");
+                assertTrue(TestCase.this.resultFile("ddl/subTableSetting", "resources/setting/ddlUnit.json").exists());
+                assertFalse(TestCase.this.resultFile("ddl/subTableSetting", "resources/setting/ddl.json").exists());
+                assertFalse(TestCase.this.resultFile("ddl/subTableSetting", "resources/template/ddl.stg").exists());
+                assertFalse(TestCase.this.resultFile("ddl/subTableSetting", "option/ddl.param").exists());
             }
 
             @Test
@@ -127,7 +127,7 @@ public class ScaffoldTest {
 
             @Test
             public void testCustomFileName() throws Exception {
-                TestCase.this.scaffold("ddl/custom", "-target=ddl", "-unitSetting=myDdl", "-template=myDdl",
+                TestCase.this.scaffold("ddl/custom", "-target=ddl", "-subTableSetting=myDdl", "-template=myDdl",
                                        "-parameter=myDdl");
                 assertTrue(TestCase.this.resultFile("ddl/custom", "resources/setting/myDdl.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/custom", "resources/template/myDdl.stg").exists());
@@ -150,7 +150,7 @@ public class ScaffoldTest {
             @Test
             public void testAllFiles() throws Exception {
                 TestCase.this.scaffold("javaBean/all", "-target=javaBean",
-                                       "-unitSetting=javaBeanUnit", "-template=javaBean", "-parameter=javaBean");
+                                       "-subTableSetting=javaBeanUnit", "-template=javaBean", "-parameter=javaBean");
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/setting/javaBeanUnit.json").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/template/javaBean.stg").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/template/javaBean.txt").exists());
@@ -169,7 +169,7 @@ public class ScaffoldTest {
 
             @Test
             public void testCustomFileName() throws Exception {
-                TestCase.this.scaffold("javaBean/custom", "-target=javaBean", "-unitSetting=myBean", "-template=myBean",
+                TestCase.this.scaffold("javaBean/custom", "-target=javaBean", "-subTableSetting=myBean", "-template=myBean",
                                        "-parameter=myBean");
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/setting/myBean.json").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.stg").exists());
@@ -193,7 +193,7 @@ public class ScaffoldTest {
 
             @Test
             public void testAllFiles() throws Exception {
-                TestCase.this.scaffold("xlsxSchema/all", "-target=xlsxSchema", "-unitSetting=xlsxSchema",
+                TestCase.this.scaffold("xlsxSchema/all", "-target=xlsxSchema", "-subTableSetting=xlsxSchema",
                                        "-template=xlsxSchema", "-parameter=xlsxSchema",
                                        "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
                 final File srcFile = TestCase.this.resultFile("xlsxSchema/all", "src/SAMPLE.csv");
@@ -219,15 +219,15 @@ public class ScaffoldTest {
             }
 
             @Test
-            public void testUnitSettingOnly() {
-                TestCase.this.scaffold("xlsxSchema/unitSetting-only", "-target=xlsxSchema",
-                                       "-unitSetting=xlsxSchema");
-                assertTrue(TestCase.this.resultFile("xlsxSchema/unitSetting-only",
+            public void testSubTableSettingOnly() {
+                TestCase.this.scaffold("xlsxSchema/subTableSetting-only", "-target=xlsxSchema",
+                                       "-subTableSetting=xlsxSchema");
+                assertTrue(TestCase.this.resultFile("xlsxSchema/subTableSetting-only",
                                                     "resources/setting/xlsxSchema.json").exists());
-                assertFalse(TestCase.this.resultFile("xlsxSchema/unitSetting-only",
+                assertFalse(TestCase.this.resultFile("xlsxSchema/subTableSetting-only",
                                                      "resources/template/xlsxSchema.stg").exists());
-                assertFalse(TestCase.this.resultFile("xlsxSchema/unitSetting-only", "src").exists());
-                assertFalse(TestCase.this.resultFile("xlsxSchema/unitSetting-only", "option/xlsxSchema.param")
+                assertFalse(TestCase.this.resultFile("xlsxSchema/subTableSetting-only", "src").exists());
+                assertFalse(TestCase.this.resultFile("xlsxSchema/subTableSetting-only", "option/xlsxSchema.param")
                                     .exists());
             }
 
@@ -286,14 +286,14 @@ public class ScaffoldTest {
             }
 
             @Test
-            public void testCustomUnitSettingName() throws Exception {
-                TestCase.this.scaffold("xlsxSchema/unitSetting", "-target=xlsxSchema", "-parameter=xlsxSchema",
-                                       "-template=xlsxSchema", "-unitSetting=xlsxSchemaUnit",
+            public void testCustomSubTableSettingName() throws Exception {
+                TestCase.this.scaffold("xlsxSchema/subTableSetting", "-target=xlsxSchema", "-parameter=xlsxSchema",
+                                       "-template=xlsxSchema", "-subTableSetting=xlsxSchemaUnit",
                                        "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
-                assertTrue(TestCase.this.resultFile("xlsxSchema/unitSetting", "resources/setting/xlsxSchemaUnit.json")
+                assertTrue(TestCase.this.resultFile("xlsxSchema/subTableSetting", "resources/setting/xlsxSchemaUnit.json")
                                    .exists());
                 final List<String> lines = Files.readAllLines(
-                        TestCase.this.resultFile("xlsxSchema/unitSetting", "option/xlsxSchema.param").toPath(),
+                        TestCase.this.resultFile("xlsxSchema/subTableSetting", "option/xlsxSchema.param").toPath(),
                         StandardCharsets.UTF_8);
                 assertTrue(lines.stream().anyMatch(l -> l.contains(
                         "-subTableSetting=resources/setting/xlsxSchemaUnit.json")));
@@ -306,7 +306,7 @@ public class ScaffoldTest {
             @Test
             public void testAllFiles() throws Exception {
                 TestCase.this.scaffold("fixedColumnDef/all", "-target=fixedColumnDef",
-                                       "-unitSetting=fixedColumnDef", "-template=fixedColumnDef",
+                                       "-subTableSetting=fixedColumnDef", "-template=fixedColumnDef",
                                        "-parameter=fixedColumnDef",
                                        "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
                 final File srcFile = TestCase.this.resultFile("fixedColumnDef/all", "src/SAMPLE.csv");
@@ -364,11 +364,11 @@ public class ScaffoldTest {
             }
 
             @Test
-            public void testCustomUnitSettingName() {
-                TestCase.this.scaffold("fixedColumnDef/unitSetting", "-target=fixedColumnDef",
-                                       "-parameter=fixedColumnDef", "-unitSetting=fixedColumnDefUnit",
+            public void testCustomSubTableSettingName() {
+                TestCase.this.scaffold("fixedColumnDef/subTableSetting", "-target=fixedColumnDef",
+                                       "-parameter=fixedColumnDef", "-subTableSetting=fixedColumnDefUnit",
                                        "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
-                assertTrue(TestCase.this.resultFile("fixedColumnDef/unitSetting",
+                assertTrue(TestCase.this.resultFile("fixedColumnDef/subTableSetting",
                                                      "resources/setting/fixedColumnDefUnit.json").exists());
             }
 
@@ -579,9 +579,9 @@ public class ScaffoldTest {
                                                                    final String templateOutput) throws Exception {
                 final String builtInDir = subDir + "/builtin";
                 final String templateDir = subDir + "/template";
-                TestCase.this.scaffold(builtInDir, "-target=" + target, "-unitSetting=" + target + "Unit",
+                TestCase.this.scaffold(builtInDir, "-target=" + target, "-subTableSetting=" + target + "Unit",
                                        "-parameter=" + target, "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
-                TestCase.this.scaffold(templateDir, "-target=" + target, "-unitSetting=" + target + "Unit",
+                TestCase.this.scaffold(templateDir, "-target=" + target, "-subTableSetting=" + target + "Unit",
                                        "-template=" + target, "-parameter=" + target,
                                        "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
                 final File builtInParam = TestCase.this.resultFile(builtInDir, "option/" + target + ".param");
@@ -594,7 +594,7 @@ public class ScaffoldTest {
             private void assertScaffoldGenerates(final String target, final String subDir,
                                                   final String expectedOutput) throws Exception {
                 TestCase.this.scaffold(subDir, "-target=" + target,
-                                       "-unitSetting=" + target + "Unit", "-parameter=" + target,
+                                       "-subTableSetting=" + target + "Unit", "-parameter=" + target,
                                        "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
                 final File paramFile = TestCase.this.resultFile(subDir, "option/" + target + ".param");
                 assertTrue(paramFile.exists());
@@ -733,7 +733,7 @@ public class ScaffoldTest {
         @Test
         public void testDdlWithCsvDataset() {
             final List<String> lines = this.txtDrivenParams("-target=ddl", "-template=myDdl",
-                                                            "-unitSetting=myUnit",
+                                                            "-subTableSetting=myUnit",
                                                             "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
             assertEquals(List.of("-generateType=txt"
                     , "-unit=table"
@@ -758,7 +758,7 @@ public class ScaffoldTest {
         }
 
         @Test
-        public void testWithoutUnitSettingAndDataset() {
+        public void testWithoutSubTableSettingAndDataset() {
             final List<String> lines = this.txtDrivenParams("-target=ddl", "-template=myDdl");
             assertEquals(List.of("-generateType=txt"
                     , "-unit=table"

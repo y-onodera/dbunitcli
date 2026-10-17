@@ -33,7 +33,7 @@ public class ScaffoldController implements ControllerExceptionHandler {
             "-encoding", "-src.encoding",
             "-headerName", "-src.headerName");
 
-    /** template・unitSettingの検索はresources/template・resources/setting配下を基準にするため、generateフォームでは接頭辞を省略した名前で扱う */
+    /** template・subTableSettingの検索はresources/template・resources/setting配下を基準にするため、generateフォームでは接頭辞を省略した名前で扱う */
     private static final Map<String, String> OMITTABLE_DIR_PREFIX = Map.of(
             "-template", FileResources.RESOURCES_TEMPLATE_PATH + "/",
             "-template.templateGroup", FileResources.RESOURCES_TEMPLATE_PATH + "/",

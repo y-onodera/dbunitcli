@@ -25,7 +25,7 @@
   <p>固定成果物タイプ（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）の組み込みテンプレートを、カスタマイズ生成の出発点としてワークスペースへ書き出し、その結果を generate フォームへ反映します。generateType が <code>txt</code> のとき、unit の上にある Scaffold ボタンから開きます（scaffold コマンドを実行します）。</p>
   <p><strong>できること</strong></p>
   <ul>
-    <li>組み込みテンプレート（<code>.stg</code> / <code>.txt</code>）と、サンプルの unitSetting をワークスペースへ書き出す。</li>
+    <li>組み込みテンプレート（<code>.stg</code> / <code>.txt</code>）と、サンプルの subTableSetting をワークスペースへ書き出す。</li>
     <li>データソースから、テーブルごとの記述子データセット（1 カラム = 1 行）を書き出す。</li>
     <li>書き出した雛型で駆動する設定を generate フォームへ反映する。そのまま <code>Exec</code> で生成できます。</li>
   </ul>
@@ -35,7 +35,7 @@
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>target</td><td>雛型の生成対象（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）</td><td>ddl</td></tr>
     <tr><td>template</td><td>書き出すテンプレートのファイル名（必須。<code>resources/template/{名前}.stg</code> と <code>{名前}.txt</code> をワークスペースへ出力）</td><td>—</td></tr>
-    <tr><td>unitSetting</td><td>書き出すサンプル unitSetting のファイル名（省略可。<code>resources/setting/{名前}.json</code> をワークスペースへ出力）</td><td>—</td></tr>
+    <tr><td>subTableSetting</td><td>書き出すサンプル subTableSetting のファイル名（省略可。<code>resources/setting/{名前}.json</code> をワークスペースへ出力）</td><td>—</td></tr>
     <tr><td>datasetType</td><td>記述子データセットの出力形式（<code>csv</code> / <code>xls</code> / <code>xlsx</code> / <code>table</code> / <code>fixed</code>）</td><td>csv</td></tr>
     <tr><td>datasetEncoding</td><td>記述子データセットの出力文字コード（csv / fixed のみ）</td><td>UTF-8</td></tr>
     <tr><td>fixedLength / defaultLength / align</td><td>target が <code>fixedColumnDef</code> の場合のみ表示。記述子データセットに書き出す桁数・デフォルト桁数・寄せ方向</td><td>— / 10 / left</td></tr>
@@ -44,25 +44,25 @@
   <p>target に <code>parameter</code> は選択できません。</p>
 
   <h2>generate section</h2>
-  <p>ダイアログ上部の <strong>generate section</strong> のチェックボックスで、unitSetting と src を生成対象にするかを選べます（初期状態は両方選択）。template は常に生成・反映されるため選択できません。</p>
+  <p>ダイアログ上部の <strong>generate section</strong> のチェックボックスで、subTableSetting と src を生成対象にするかを選べます（初期状態は両方選択）。template は常に生成・反映されるため選択できません。</p>
   <ul>
     <li>チェックを外したセクションの入力欄はダイアログから非表示になり、そのファイルは生成されません。</li>
-    <li>unitSetting を外すと unitSetting の入力欄、src を外すと datasetType・datasetEncoding・fixedLength / defaultLength / align・dataset の入力欄が非表示になります。</li>
+    <li>subTableSetting を外すと subTableSetting の入力欄、src を外すと datasetType・datasetEncoding・fixedLength / defaultLength / align・dataset の入力欄が非表示になります。</li>
     <li>scaffold コマンドの result は、生成した分だけ generate フォームへ反映されます。</li>
   </ul>
   <table>
     <tr><th>generate section</th><th>ダイアログの入力</th><th>result（generate フォームへ反映される項目）</th></tr>
     <tr><td>template</td><td>template</td><td><code>template</code>（<code>{名前}.txt</code>）、<code>template.templateGroup</code>（<code>{名前}.stg</code>）。<code>resources/template</code> 配下を基準に検索されるため、接頭辞は省略した名前が入ります</td></tr>
-    <tr><td>unitSetting</td><td>unitSetting</td><td><code>subTableSetting</code>（<code>{名前}.json</code>。<code>resources/setting</code> 配下を基準に検索されるため接頭辞は省略した名前が入ります）</td></tr>
+    <tr><td>subTableSetting</td><td>subTableSetting</td><td><code>subTableSetting</code>（<code>{名前}.json</code>。<code>resources/setting</code> 配下を基準に検索されるため接頭辞は省略した名前が入ります）</td></tr>
     <tr><td>src</td><td>dataset</td><td><code>src.src</code>（書き出した記述子データセットのディレクトリ。入力した dataset のパスではありません）</td></tr>
     <tr><td>src</td><td>datasetType</td><td><code>src.srcType</code></td></tr>
     <tr><td>src</td><td>datasetEncoding</td><td><code>src.encoding</code>（csv / fixed のみ）</td></tr>
   </table>
-  <p>チェックを外した unitSetting / src に対応する result は生成されないため反映されません。scaffold の雛型は <code>unit=table</code> で駆動するため、反映時に <code>unit</code> は常に <code>table</code> に変更されます。上記以外の result（<code>generateType</code> / <code>resultPath</code> など）は generate フォームへ反映されません。</p>
+  <p>チェックを外した subTableSetting / src に対応する result は生成されないため反映されません。scaffold の雛型は <code>unit=table</code> で駆動するため、反映時に <code>unit</code> は常に <code>table</code> に変更されます。上記以外の result（<code>generateType</code> / <code>resultPath</code> など）は generate フォームへ反映されません。</p>
 
   <h2>操作の流れ</h2>
   <ol>
-    <li>target と、書き出すテンプレートのファイル名（必須）を指定します。必要に応じて unitSetting・記述子データセットの形式・データソースを指定します。</li>
+    <li>target と、書き出すテンプレートのファイル名（必須）を指定します。必要に応じて subTableSetting・記述子データセットの形式・データソースを指定します。</li>
     <li>Execute を押すと雛型ファイルがワークスペースへ生成されます。</li>
     <li>選択した generate section に対応する result（上表）が generate フォームへ反映され、ダイアログが閉じます。</li>
     <li>書き出された記述子データセットを編集してから <code>Exec</code> で生成します。反映内容の保存は通常どおり <code>Save</code> ボタンで行ってください。</li>

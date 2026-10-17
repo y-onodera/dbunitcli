@@ -1110,7 +1110,7 @@ function makeScaffoldOptionsBase(target: string) {
 			true,
 			SCAFFOLD_TARGET_OPTIONS,
 		),
-		unitSetting: makeElement("unitSetting", "TEXT", "", "WORKSPACE", false),
+		subTableSetting: makeElement("subTableSetting", "TEXT", "", "WORKSPACE", false),
 		template: makeElement("template", "TEXT", "", "WORKSPACE", false),
 		parameter: makeElement("parameter", "TEXT", "", "WORKSPACE", false),
 		commandType: makeElement("commandType", "TEXT", "", "WORKSPACE", false),
