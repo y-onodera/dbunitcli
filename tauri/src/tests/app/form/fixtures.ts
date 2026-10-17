@@ -996,14 +996,6 @@ export const generateRefreshGenerateTypeSqlResponseFixture = {
 		false,
 		GENERATE_TYPE_OPTIONS,
 	),
-	unitSetting: makeElement("unitSetting", "FILE", "", "SETTING", false),
-	unitSettingEncoding: makeElement(
-		"unitSettingEncoding",
-		"TEXT",
-		"UTF-8",
-		"WORKSPACE",
-		false,
-	),
 	result: makeElement("result", "DIR", "", "RESULT", false),
 	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
 	outputEncoding: makeElement(
