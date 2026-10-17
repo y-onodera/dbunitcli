@@ -112,7 +112,7 @@ describe("TxtTemplateGenerateDialogの描画テスト", () => {
 			document.querySelector('input[type="text"][name="-template"]'),
 		).toBeRequired();
 		expect(
-			document.querySelector('input[type="text"][name="-unitSetting"]'),
+			document.querySelector('input[type="text"][name="-subTableSetting"]'),
 		).toBeInTheDocument();
 		expect(
 			document.querySelector('select[name="-datasetType"]'),
@@ -170,7 +170,7 @@ describe("TxtTemplateGenerateDialogの描画テスト", () => {
 });
 
 describe("TxtTemplateGenerateDialogの実行テスト", () => {
-	it("templateのチェックボックスはなくunitSetting・srcのみ選択できる", async () => {
+	it("templateのチェックボックスはなくsubTableSetting・srcのみ選択できる", async () => {
 		refreshResponse.current = scaffoldRefreshTargetDdlResponseFixture;
 		await openDialog();
 
@@ -191,10 +191,10 @@ describe("TxtTemplateGenerateDialogの実行テスト", () => {
 		) as HTMLInputElement;
 		await user.type(templateInput, "scaffoldTpl");
 		await user.click(screen.getByRole("checkbox", { name: "src" }));
-		await user.click(screen.getByRole("checkbox", { name: "unitSetting" }));
+		await user.click(screen.getByRole("checkbox", { name: "subTableSetting" }));
 
 		expect(
-			document.querySelector('input[name="-unitSetting"]'),
+			document.querySelector('input[name="-subTableSetting"]'),
 		).not.toBeInTheDocument();
 		expect(
 			document.querySelector('select[name="-datasetType"]'),
@@ -219,7 +219,7 @@ describe("TxtTemplateGenerateDialogの実行テスト", () => {
 			params.endpoint.includes("scaffold/exec"),
 		);
 		const requestBody = JSON.parse(String(execCall?.[0].options.body));
-		expect(requestBody["-unitSetting"]).toBeUndefined();
+		expect(requestBody["-subTableSetting"]).toBeUndefined();
 		expect(requestBody["-datasetType"]).toBeUndefined();
 		expect(
 			Object.keys(requestBody).filter((key) => key.startsWith("-dataset.")),
@@ -243,7 +243,7 @@ describe("TxtTemplateGenerateDialogの実行テスト", () => {
 				"-template": "scaffoldTpl.txt",
 				"-template.templateGroup": "scaffoldTpl.stg",
 				"-unit": "table",
-				"-unitSetting": "scaffoldUnit.json",
+				"-subTableSetting": "scaffoldUnit.json",
 				"-src.src": "src",
 				"-src.srcType": "csv",
 				"-src.encoding": "UTF-8",

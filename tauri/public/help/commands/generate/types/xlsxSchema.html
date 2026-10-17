@@ -24,7 +24,7 @@
 <body>
   <p><a href="../../generate.html">&larr; Generate に戻る</a></p>
   <h1>generateType: xlsxSchema</h1>
-  <p>データセットのカラム情報から <a href="../../../dialogs/xlsx-schema.html">Xlsx Schema</a> 設定ファイルのひな型を JSON 形式で生成します。<code>unit</code> は <code>table</code> に固定で、テーブルごとに <code>{テーブル名}.json</code> を出力します。<code>template</code> は使用しません（組み込みテンプレートのみ使用されます）。組み込みの <code>unitSetting</code>（既定は <code>xlsxschema/xlsxSchemaSettings.json</code>）が PK / CELLS サブテーブルへの分割を担います。シート名やセル位置などを調整したい場合は、<a href="../../../dialogs/txt-template-generate.html">Scaffold</a>（scaffold コマンド）で書き出した記述子データセットを編集し、<code>generateType=txt</code> と <code>unitSetting</code>（既定と同じファイル）で生成してください。</p>
+  <p>データセットのカラム情報から <a href="../../../dialogs/xlsx-schema.html">Xlsx Schema</a> 設定ファイルのひな型を JSON 形式で生成します。<code>unit</code> は <code>table</code> に固定で、テーブルごとに <code>{テーブル名}.json</code> を出力します。<code>template</code> は使用しません（組み込みテンプレートのみ使用されます）。組み込みの <code>subTableSetting</code>（既定は <code>xlsxschema/xlsxSchemaSettings.json</code>）が PK / CELLS サブテーブルへの分割を担います。シート名やセル位置などを調整したい場合は、<a href="../../../dialogs/txt-template-generate.html">Scaffold</a>（scaffold コマンド）で書き出した記述子データセットを編集し、<code>generateType=txt</code> と <code>subTableSetting</code>（既定と同じファイル）で生成してください。</p>
   <p><strong>生成イメージ:</strong></p>
   <pre>{
   "rows": [
