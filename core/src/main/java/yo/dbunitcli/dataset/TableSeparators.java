@@ -7,16 +7,31 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * @param next このtableSeparatorsを適用した結果のテーブルに対し、続けて適用する2段目のtableSeparators（無ければnull）。
+ *             同一段の{@code settings}は元のカラムに並列に適用されるため、前段で追加した列やサブテーブルを
+ *             後段が参照・加工する場合に使う。解釈するのはunit=tableの行解決のみで、他の経路は自段だけを使う
+ */
 public record TableSeparators(List<TableSeparator> settings
         , List<TableSeparator> commonSettings
-        , List<ComparableTableJoinCondition> joinConditions) {
+        , List<ComparableTableJoinCondition> joinConditions
+        , TableSeparators next) {
 
     public static final TableSeparators NONE = new Builder().build();
 
     TableSeparators(final Builder builder) {
         this(new ArrayList<>(builder.getSettings())
                 , new ArrayList<>(builder.getCommonSettings())
-                , new ArrayList<>(builder.getJoinConditions()));
+                , new ArrayList<>(builder.getJoinConditions())
+                , builder.getNext());
+    }
+
+    public TableSeparators then(final TableSeparators next) {
+        return this.builder().setNext(next).build();
+    }
+
+    public TableSeparators nextOrNone() {
+        return this.next == null ? NONE : this.next;
     }
 
     public Builder builder() {
@@ -112,12 +127,25 @@ public record TableSeparators(List<TableSeparator> settings
         private final List<TableSeparator> settings = new ArrayList<>();
         private final List<ComparableTableJoinCondition> joinConditions = new ArrayList<>();
         private List<TableSeparator> commonSettings = new ArrayList<>();
+        private TableSeparators next;
 
         public Builder add(final TableSeparators tableSeparators) {
             this.settings.addAll(tableSeparators.settings());
             this.commonSettings.addAll(tableSeparators.commonSettings());
             this.joinConditions.addAll(tableSeparators.joinConditions());
+            if (tableSeparators.next() != null) {
+                this.next = this.next == null ? tableSeparators.next() : this.next.builder().add(tableSeparators.next()).build();
+            }
             return this;
+        }
+
+        public Builder setNext(final TableSeparators next) {
+            this.next = next;
+            return this;
+        }
+
+        public TableSeparators getNext() {
+            return this.next;
         }
 
         public TableSeparators build() {

@@ -30,7 +30,7 @@ loadData/useJdbcMetaDataは`GenerateType`の`loadData()`/`useJdbcMetaData()`を�
 
 `ParameterUnit`（`application/ParameterUnit.java`）は record / table / dataset の3値。`GenerateOption.parameterStream()` が `generateType.isExcel()` と `lazyLoad` に応じて `dataSetToStream` / `lazyLoadStream` / `templateStream` を呼び分ける。`generateType.isFixedTemplate()` が true の場合、`unit` は `getFixedUnit()` に強制される（txt/xlsx/xlsのみユーザー指定可、デフォルトrecord）。
 
-`-unitSetting` / `-unitSettingEncoding` は `unit=table` かつ非Excel系・非固定成果物タイプ（`isFixedTemplate()==false`）のみ有効。固定成果物ではコンストラクタで`unitSetting`を無視し（フォームにも出ない）、`unitTableSeparators()`は組み込み設定（`defaultSettingsPath()`）を使う。`unit=table`の行解決（`ComparableTableMappingTask.WithTargetTable#resolveRows/resolveDataSet`）は2段階で、まずsrcの`-setting`（`param().tableSeparators()`）を適用し、その結果テーブル（`separate`/`tableName`変更後を含む）に`unitTableSeparators()`を重ねる。したがってsrcの`string/number/boolean/sqlFunction`・`filter`・サブテーブルは`unit=table`でもそのまま参照でき、unitSettingは「srcの適用後の状態」に対する列追加・削除・絞り込み・`dataset`サブテーブル追加に使う。
+`-unitSetting` / `-unitSettingEncoding` は `unit=table` かつ非Excel系・非固定成果物タイプ（`isFixedTemplate()==false`）のみ有効。固定成果物ではコンストラクタで`unitSetting`を無視し（フォームにも出ない）、`unitTableSeparators()`は組み込み設定（`defaultSettingsPath()`）を使う。`unit=table`の行解決（`ComparableTableMappingTask.WithTargetTable#resolveRows/resolveDataSet`）は2段階で、まずsrcの`-setting`（`param().tableSeparators()`）を適用し、その結果テーブル（`separate`/`tableName`変更後を含む）に2段目（`TableSeparators#next()`）を重ねる。`GenerateOption.dataSetParam()`が`srcのTableSeparators.then(unitTableSeparators())`をparamに載せる（同一段の`settings`は元カラムに並列適用されるため、`Builder.add`での連結では前段の追加列を参照できない）。`next`を解釈するのはunit=tableの行解決のみ。したがってsrcの`string/number/boolean/sqlFunction`・`filter`・サブテーブルは`unit=table`でもそのまま参照でき、unitSettingは「srcの適用後の状態」に対する列追加・削除・絞り込み・`dataset`サブテーブル追加に使う。
 
 ## オプションの所在
 

@@ -69,32 +69,32 @@ public interface ComparableTableMappingTask {
         }
 
         /**
-         * srcのtableSeparatorsを適用した状態のテーブルに、さらにunitのtableSeparatorsを重ねて行を解決する。
+         * tableSeparatorsを適用した状態のテーブルに、さらに2段目（{@link TableSeparators#next()}）を重ねて行を解決する。
          */
-        public List<Map<String, Object>> resolveRows(final TableSeparators unitTableSeparators) {
+        public List<Map<String, Object>> resolveRows() {
             final TableRowsCollector collector = new TableRowsCollector(this.targetTableName());
-            this.applyUnit(unitTableSeparators, collector).close();
+            this.applyNext(collector).close();
             return collector.getRows();
         }
 
-        public Map<String, Object> resolveDataSet(final TableSeparators unitTableSeparators) {
-            final TreeMap<String, ComparableTable> tableMap = this.applyUnit(unitTableSeparators, null).close();
+        public Map<String, Object> resolveDataSet() {
+            final TreeMap<String, ComparableTable> tableMap = this.applyNext(null).close();
             final Map<String, Object> result = new LinkedHashMap<>();
             // each ComparableTable.toMap(true) is a one-element list holding the table's own metadata+rows wrapper
             tableMap.forEach((tableName, table) -> result.put(tableName, table.toMap(true).getFirst()));
             return result;
         }
 
-        private ComparableTableMappingContext applyUnit(final TableSeparators unitTableSeparators, final IDataSetConverter converter) {
+        private ComparableTableMappingContext applyNext(final IDataSetConverter converter) {
             final ComparableTable srcApplied = this.runWith(new ComparableTableMappingContext(this.targetTableSeparators(), null))
                     .close()
                     .get(this.targetTableName());
-            final ComparableTableMappingContext unitContext = new ComparableTableMappingContext(unitTableSeparators, converter);
-            unitContext.open();
+            final ComparableTableMappingContext nextContext = new ComparableTableMappingContext(this.targetTableSeparators().nextOrNone(), converter);
+            nextContext.open();
             if (srcApplied != null) {
-                this.feed(unitContext, srcApplied);
+                this.feed(nextContext, srcApplied);
             }
-            return unitContext;
+            return nextContext;
         }
 
         private void feed(final ComparableTableMappingContext context, final ComparableTable table) {
