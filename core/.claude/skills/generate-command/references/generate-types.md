@@ -30,7 +30,7 @@ loadData/useJdbcMetaDataは`GenerateType`の`loadData()`/`useJdbcMetaData()`を�
 
 `ParameterUnit`（`application/ParameterUnit.java`）は record / table / dataset の3値。`GenerateOption.parameterStream()` が `generateType.isExcel()` と `lazyLoad` に応じて `dataSetToStream` / `lazyLoadStream` / `templateStream` を呼び分ける。`generateType.isFixedTemplate()` が true の場合、`unit` は `getFixedUnit()` に強制される（txt/xlsx/xlsのみユーザー指定可、デフォルトrecord）。
 
-`-unitSetting` / `-unitSettingEncoding` は `unit=table` かつ非Excel系・非固定成果物タイプ（`isFixedTemplate()==false`）のみ`toParametersBuilder()`が出力する（固定成果物は組み込み設定固定のためフォームにも出ない）。`GenerateOption.unitTableSeparators()` が `FromJsonTableSeparatorsBuilder` でテーブル区切り設定を構築し、未指定時は `generateType.defaultSettingsPath()`（ddl/javaBean/xlsxSchemaで定義）のクラスパス既定値を使う。
+`-unitSetting` / `-unitSettingEncoding` は `unit=table` かつ非Excel系・非固定成果物タイプ（`isFixedTemplate()==false`）のみ有効。固定成果物ではコンストラクタで`unitSetting`を無視し（フォームにも出ない）、`unitTableSeparators()`は組み込み設定、無ければ`-setting`（src）を使う。`GenerateOption.unitTableSeparators()` が `FromJsonTableSeparatorsBuilder` でテーブル区切り設定を構築し、未指定時は `generateType.defaultSettingsPath()`（ddl/javaBean/xlsxSchemaで定義）のクラスパス既定値を使う。
 
 ## オプションの所在
 
