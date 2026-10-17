@@ -137,7 +137,6 @@ public class GenerateTest {
                     , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table/source/csv"
                     , "-encoding=MS932"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_table_with_separate.json"
-                    , "-unitSetting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/merge_table_with_separate.json"
                     , "-generateType=txt"
                     , "-unit=table"
                     , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/table_dataset_shape/template.txt"
@@ -148,6 +147,69 @@ public class GenerateTest {
             GenerateTest.subDirectory = "generate/table_dataset_shape";
             this.assertGenerateFileEqualsIgnoringRowOrder("merge.txt", "UTF-8");
             this.assertGenerateFileEqualsIgnoringRowOrder("dataType.txt", "UTF-8");
+        }
+
+        @Test
+        public void testGenerateTxtPerTableSrcSettingThenUnitSetting() throws Exception {
+            // unit=tableでは、srcのsetting適用後のテーブル（サブテーブル含む）にunitSettingを重ねて適用する
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
+                    , "-encoding=UTF-8"
+                    , "-regTableInclude=Test1"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit/src.json"
+                    , "-unitSetting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit/unit.json"
+                    , "-generateType=txt"
+                    , "-unit=table"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit/template.txt"
+                    , "-templateParameterAttribute="
+                    , "-outputEncoding=UTF-8"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/table_src_unit/result/$tableName$.txt"
+            });
+            GenerateTest.subDirectory = "generate/table_src_unit";
+            this.assertGenerateFileEquals("Test1.txt", "UTF-8");
+            this.assertGenerateFileEquals("SUB.txt", "UTF-8");
+        }
+
+        @Test
+        public void testGenerateTxtPerTableSrcOrderDistinctThenUnitSetting() throws Exception {
+            // srcのorder/distinctは、unitSettingで列を追加した後も有効
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table_src_unit_order/csv"
+                    , "-encoding=UTF-8"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/src.json"
+                    , "-unitSetting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/unit.json"
+                    , "-generateType=txt"
+                    , "-unit=table"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/template.txt"
+                    , "-templateParameterAttribute="
+                    , "-outputEncoding=UTF-8"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/table_src_unit_order/result/$tableName$.txt"
+            });
+            GenerateTest.subDirectory = "generate/table_src_unit_order";
+            this.assertGenerateFileEquals("T.txt", "UTF-8");
+        }
+
+        @Test
+        public void testGenerateTxtPerTableSrcSplitWithSuffixThenUnitSetting() throws Exception {
+            // srcのsplitはsuffix/prefixでテーブル名を分ければunit=tableでも使え、unitSettingは分割後のテーブルごとに適用される
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table_src_unit_order/csv"
+                    , "-encoding=UTF-8"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/src_split.json"
+                    , "-unitSetting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/unit.json"
+                    , "-generateType=txt"
+                    , "-unit=table"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/template_split.txt"
+                    , "-templateParameterAttribute="
+                    , "-outputEncoding=UTF-8"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/table_src_unit_split/result/$tableName$.txt"
+            });
+            GenerateTest.subDirectory = "generate/table_src_unit_split";
+            this.assertGenerateFileEquals("T_0.txt", "UTF-8");
+            this.assertGenerateFileEquals("T_1.txt", "UTF-8");
         }
 
         @Test

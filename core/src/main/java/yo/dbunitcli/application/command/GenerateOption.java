@@ -92,16 +92,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                 return defaultTableSeparators;
             }
         }
-        // 組み込み設定を持たない固定テンプレート（sql）はunitSettingを指定できないため、srcのsettingを区切り設定として使う
-        if (this.generateType().isFixedTemplate() && Strings.isNotEmpty(this.srcData.getSetting())) {
-            return this.fromJson(this.srcData.settingEncoding(), this.srcData.getSetting());
-        }
-        return this.fromJson(this.unitSettingEncoding, this.unitSetting);
-    }
-
-    private TableSeparators fromJson(final String encoding, final String setting) {
         try {
-            return new FromJsonTableSeparatorsBuilder(encoding).build(setting);
+            return new FromJsonTableSeparatorsBuilder(this.unitSettingEncoding).build(this.unitSetting);
         } catch (final IOException e) {
             throw new AssertionError(e);
         }

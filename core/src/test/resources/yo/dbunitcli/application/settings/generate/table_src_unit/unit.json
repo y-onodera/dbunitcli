@@ -1,0 +1,11 @@
+{
+  "settings": [
+    {
+      "name": "Test1",
+      "separate": [
+        {"filter": ["Key != '29'"], "string": {"U": "LABEL + '!'"}, "exclude": ["Column2", "Column3"]},
+        {"tableName": "PK2", "filter": ["Key == '15'"]}
+      ]
+    }
+  ]
+}

@@ -56,7 +56,7 @@
   </table>
 
   <h3>unitSetting</h3>
-  <p><code>unit</code> が <code>table</code> かつ Excel 系（<code>xlsx</code> / <code>xls</code>）および固定成果物タイプ以外（<code>txt</code> など）で表示されます。固定成果物タイプでは組み込み設定が使われ、指定できません。テーブル単位のテンプレート生成時に、テーブルの区切り方を定義する設定ファイルを指定します（未指定時は種類ごとの組み込み設定を使用）。</p>
+  <p><code>unit</code> が <code>table</code> かつ Excel 系（<code>xlsx</code> / <code>xls</code>）および固定成果物タイプ以外（<code>txt</code> など）で表示されます。固定成果物タイプでは組み込み設定が使われ、指定できません。テーブル単位のテンプレート生成時に、テーブルの区切り方を定義する設定ファイルを指定します（未指定時は種類ごとの組み込み設定を使用）。<strong>src の setting を適用した後の状態</strong>に対して適用されるため、src の setting で追加した列やサブテーブルを前提に、さらに列の追加・削除、行の絞り込み、<code>dataset</code> のサブテーブル追加を行えます。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>unitSetting</td><td>テーブル区切り設定ファイルのパス</td><td>（空、組み込み設定を使用）</td></tr>
@@ -78,7 +78,7 @@
     <tr><td>tableName</td><td>テーブル名（例: <code>EMPLOYEE</code>）</td><td>なし（元のテーブル名のまま）</td></tr>
     <tr><td>columns / primaryKeys / columnsExcludeKey</td><td>入力データのカラム定義</td><td>なし。設定後のカラム情報は <code>dataset.{テーブル名}.columns</code> などで参照する</td></tr>
     <tr><td>rows</td><td>このテーブルの行（<code>row.列名</code> で参照）</td><td>あり。追加した列は各行の末尾に付き、同名の列は上書きされる。元の列は残る。<code>include</code> / <code>exclude</code> / <code>filter</code> / <code>order</code> / <code>distinct</code> もここに反映される</td></tr>
-    <tr><td>dataset</td><td>設定の結果できたテーブルの一覧（<code>dataset.{テーブル名}.rows</code>）。キーはテーブル名の昇順</td><td>あり。<code>separate</code> で作ったサブテーブルが <code>dataset.PK</code> のように加わる。各テーブルの <code>columns</code> / <code>primaryKeys</code> にも設定が反映される</td></tr>
+    <tr><td>dataset</td><td>設定の結果できたテーブルの一覧（<code>dataset.{テーブル名}.rows</code>）。キーはテーブル名の昇順。<code>unit=table</code> では、そのテーブル単位と、unitSetting の <code>separate</code> で作ったサブテーブルだけが入る（src の setting で分けた他のテーブルは、別名を付けたかどうかに関わらず含まれない）</td><td>あり。<code>separate</code> で作ったサブテーブルが <code>dataset.PK</code> のように加わる。各テーブルの <code>columns</code> / <code>primaryKeys</code> にも設定が反映される</td></tr>
   </table>
 
   <p><strong>設定キーとテンプレートへの影響</strong></p>

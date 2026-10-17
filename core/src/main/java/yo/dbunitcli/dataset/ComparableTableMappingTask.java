@@ -64,16 +64,16 @@ public interface ComparableTableMappingTask {
             return this.param().tableSeparators();
         }
 
-        public List<Map<String, Object>> resolveRows(final TableSeparators tableSeparators) {
+        public List<Map<String, Object>> resolveRows(final TableSeparators unitTableSeparators) {
             final TableRowsCollector collector = new TableRowsCollector(this.targetTableName());
-            this.runWith(new ComparableTableMappingContext(tableSeparators, collector)).close();
+            this.runWith(new ComparableTableMappingContext(this.targetTableSeparators().then(unitTableSeparators, this.targetTableName()), collector)).close();
             return collector.getRows();
         }
 
-        public Map<String, Object> resolveDataSet(final TableSeparators tableSeparators) {
-            final TreeMap<String, ComparableTable> tableMap = this.runWith(new ComparableTableMappingContext(tableSeparators, null)).close();
+        public Map<String, Object> resolveDataSet(final TableSeparators unitTableSeparators) {
+            final TreeMap<String, ComparableTable> tableMap = this.runWith(
+                    new ComparableTableMappingContext(this.targetTableSeparators().then(unitTableSeparators, this.targetTableName()), null)).close();
             final Map<String, Object> result = new LinkedHashMap<>();
-            // each ComparableTable.toMap(true) is a one-element list holding the table's own metadata+rows wrapper
             tableMap.forEach((tableName, table) -> result.put(tableName, table.toMap(true).getFirst()));
             return result;
         }

@@ -106,7 +106,10 @@ public record AddSettingTableMetaData(
             target = this.preset.distinct(values, filteredRowIndexes);
         }
         if (!this.distinct) {
-            return target;
+            // 前段がdistinctで行を確定させた場合、その出力行にも自段の設定（式・列の絞り込み・filter）を適用する
+            return this.isPresetNeedDistinct()
+                    ? target.map(row -> this.applySetting(row, false), (newRows, row) -> true)
+                    : target;
         }
         return target.distinct(row -> this.applySetting(row, this.preset != null && !this.preset.isNeedDistinct()));
     }
@@ -116,11 +119,16 @@ public record AddSettingTableMetaData(
     }
 
     public TableSplitter getTableSplitter() {
-        return this.tableSeparator.splitter();
+        // 後段がsplitしない場合は、前段のsplitを引き継ぐ
+        if (this.tableSeparator.splitter().isSplit() || this.preset == null) {
+            return this.tableSeparator.splitter();
+        }
+        final TableSplitter presetSplitter = this.preset.getTableSplitter();
+        return presetSplitter.isSplit() ? presetSplitter : this.tableSeparator.splitter();
     }
 
     public List<String> getBreakKeys(final Object[] applySetting) {
-        return this.tableSeparator.splitter().breakKeys().stream()
+        return this.getTableSplitter().breakKeys().stream()
                 .map(name -> {
                     try {
                         return this.getColumnIndex(name);
@@ -133,7 +141,14 @@ public record AddSettingTableMetaData(
     }
 
     public Column[] getOrderColumns() {
-        return this.tableSeparator.getOrderColumns();
+        final Column[] own = this.tableSeparator.getOrderColumns();
+        if (own.length > 0 || this.preset == null) {
+            return own;
+        }
+        // 自段にorderが無ければ前段のorderを引き継ぐ（自段で除外された列は対象外）
+        return Arrays.stream(this.preset.getOrderColumns())
+                .filter(it -> this.columnIndexes.containsKey(it.getColumnName().toUpperCase()))
+                .toArray(Column[]::new);
     }
 
     public boolean isSorted() {

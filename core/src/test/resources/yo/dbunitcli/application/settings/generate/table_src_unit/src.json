@@ -1,0 +1,11 @@
+{
+  "settings": [
+    {
+      "name": "Test1",
+      "separate": [
+        {"string": {"LABEL": "Column1 + '-x'"}},
+        {"tableName": "SUB", "filter": ["Key == '1'"]}
+      ]
+    }
+  ]
+}
