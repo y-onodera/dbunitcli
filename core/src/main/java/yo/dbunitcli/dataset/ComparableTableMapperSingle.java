@@ -127,7 +127,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         final TableSeparators base = task.param().tableSeparators();
         return this.tableSeparators.next() == null
                 ? base
-                : base.then(this.tableSeparators.next());
+                : base.then(this.tableSeparators.next(), this.tableSeparators.stageTableName());
     }
 
     protected void addSplitResult() throws AmbiguousTableNameException {

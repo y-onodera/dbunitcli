@@ -1,4 +1,4 @@
 tableName=SUB
 rows=1//
-dataset=PK2,SUB,Test1
-PK2=15
+dataset=SUB
+PK2=

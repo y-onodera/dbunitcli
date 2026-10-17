@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ * @param stageTableName {@code next}を連鎖させる際、自段の結果のうちこの名前のテーブルだけを後段へ流す（nullなら全て）。
+ *                      同名テーブルは合流してしまうため、対象テーブルの系統だけを後段へ流す用途に使う
  * @param next このtableSeparatorsを適用した結果のテーブルに対し、続けて適用する2段目のtableSeparators（無ければnull）。
  *             同一段の{@code settings}は元のカラムに並列に適用されるため、前段で追加した列やサブテーブルを
  *             後段が参照・加工する場合に使う。解釈するのはunit=tableの行解決のみで、他の経路は自段だけを使う
@@ -15,7 +17,8 @@ import java.util.stream.Stream;
 public record TableSeparators(List<TableSeparator> settings
         , List<TableSeparator> commonSettings
         , List<ComparableTableJoinCondition> joinConditions
-        , TableSeparators next) {
+        , TableSeparators next
+        , String stageTableName) {
 
     public static final TableSeparators NONE = new Builder().build();
 
@@ -23,11 +26,16 @@ public record TableSeparators(List<TableSeparator> settings
         this(new ArrayList<>(builder.getSettings())
                 , new ArrayList<>(builder.getCommonSettings())
                 , new ArrayList<>(builder.getJoinConditions())
-                , builder.getNext());
+                , builder.getNext()
+                , builder.getStageTableName());
     }
 
     public TableSeparators then(final TableSeparators next) {
         return this.builder().setNext(next).build();
+    }
+
+    public TableSeparators then(final TableSeparators next, final String stageTableName) {
+        return this.builder().setNext(next).setStageTableName(stageTableName).build();
     }
 
     public TableSeparators nextOrNone() {
@@ -84,7 +92,8 @@ public record TableSeparators(List<TableSeparator> settings
         if (this.next == null) {
             return stage;
         }
-        return stage.flatMap(this.next::getAddSettingTableMetaData);
+        return (this.stageTableName == null ? stage : stage.filter(it -> it.getTableName().equals(this.stageTableName) || it.getTableSplitter().isSplit()))
+                .flatMap(this.next::getAddSettingTableMetaData);
     }
 
     private Stream<AddSettingTableMetaData> addNewNameSetting(final Stream<AddSettingTableMetaData> target, final String beforeTableName) {
@@ -135,11 +144,15 @@ public record TableSeparators(List<TableSeparator> settings
         private final List<ComparableTableJoinCondition> joinConditions = new ArrayList<>();
         private List<TableSeparator> commonSettings = new ArrayList<>();
         private TableSeparators next;
+        private String stageTableName;
 
         public Builder add(final TableSeparators tableSeparators) {
             this.settings.addAll(tableSeparators.settings());
             this.commonSettings.addAll(tableSeparators.commonSettings());
             this.joinConditions.addAll(tableSeparators.joinConditions());
+            if (tableSeparators.stageTableName() != null) {
+                this.stageTableName = tableSeparators.stageTableName();
+            }
             if (tableSeparators.next() != null) {
                 this.next = this.next == null ? tableSeparators.next() : this.next.builder().add(tableSeparators.next()).build();
             }
@@ -153,6 +166,15 @@ public record TableSeparators(List<TableSeparator> settings
 
         public TableSeparators getNext() {
             return this.next;
+        }
+
+        public Builder setStageTableName(final String stageTableName) {
+            this.stageTableName = stageTableName;
+            return this;
+        }
+
+        public String getStageTableName() {
+            return this.stageTableName;
         }
 
         public TableSeparators build() {
