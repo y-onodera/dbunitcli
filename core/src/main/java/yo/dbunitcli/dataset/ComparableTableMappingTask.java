@@ -66,13 +66,13 @@ public interface ComparableTableMappingTask {
 
         public List<Map<String, Object>> resolveRows(final TableSeparators unitTableSeparators) {
             final TableRowsCollector collector = new TableRowsCollector(this.targetTableName());
-            this.runWith(new ComparableTableMappingContext(this.targetTableSeparators().then(unitTableSeparators, this.targetTableName()), collector)).close();
+            this.runWith(new ComparableTableMappingContext(this.targetTableSeparators().then(unitTableSeparators), collector)).close();
             return collector.getRows();
         }
 
         public Map<String, Object> resolveDataSet(final TableSeparators unitTableSeparators) {
             final TreeMap<String, ComparableTable> tableMap = this.runWith(
-                    new ComparableTableMappingContext(this.targetTableSeparators().then(unitTableSeparators, this.targetTableName()), null)).close();
+                    new ComparableTableMappingContext(this.targetTableSeparators().then(unitTableSeparators), null)).close();
             final Map<String, Object> result = new LinkedHashMap<>();
             tableMap.forEach((tableName, table) -> result.put(tableName, table.toMap(true).getFirst()));
             return result;
