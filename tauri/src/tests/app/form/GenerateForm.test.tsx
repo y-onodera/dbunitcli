@@ -294,7 +294,7 @@ describe("GenerateFormの描画テスト", () => {
 	});
 
 	describe("sqlタイプ（generateType=sql）", () => {
-		it("unitSetting・unitSettingEncodingが表示される", () => {
+		it("unitSetting・unitSettingEncodingは表示されない（固定テンプレートのため設定不可）", () => {
 			render(
 				<GenerateForm
 					{...makeGenerateProps(generateRefreshGenerateTypeSqlResponseFixture)}
@@ -303,12 +303,12 @@ describe("GenerateFormの描画テスト", () => {
 
 			expect(
 				document.querySelector('input[type="text"][name="-unitSetting"]'),
-			).toBeInTheDocument();
+			).not.toBeInTheDocument();
 			expect(
 				document.querySelector(
 					'input[type="text"][name="-unitSettingEncoding"]',
 				),
-			).toBeInTheDocument();
+			).not.toBeInTheDocument();
 		});
 
 		it("opがselectとして表示される", () => {

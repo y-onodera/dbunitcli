@@ -140,7 +140,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         if (!this.generateType.isFixedTemplate()) {
             result.put("-unit", this.unit, ParameterUnit.class);
         }
-        if (this.unit == ParameterUnit.table && !this.generateType.isExcel()) {
+        if (this.unit == ParameterUnit.table && !this.generateType.isExcel() && !this.generateType.isFixedTemplate()) {
             result.putFile("-unitSetting", this.unitSetting, BaseDir.SETTING);
             result.put("-unitSettingEncoding", this.unitSettingEncoding);
         }
