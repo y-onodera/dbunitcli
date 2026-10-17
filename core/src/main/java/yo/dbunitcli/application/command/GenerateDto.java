@@ -16,10 +16,10 @@ public class GenerateDto extends CommandDto {
     private String resultPath;
     @CommandLine.Option(names = "-unit", description = "generate by row or table or dataset")
     private ParameterUnit unit;
-    @CommandLine.Option(names = "-unitSetting", description = "settings file used to resolve rows for table unit template generation")
-    private String unitSetting;
-    @CommandLine.Option(names = "-unitSettingEncoding", description = "encoding of unitSetting file")
-    private String unitSettingEncoding;
+    @CommandLine.Option(names = "-subTableSetting", description = "settings file used to resolve rows for table unit template generation")
+    private String subTableSetting;
+    @CommandLine.Option(names = "-subTableSettingEncoding", description = "encoding of subTableSetting file")
+    private String subTableSettingEncoding;
     @CommandLine.Option(names = "-commit", description = "default commit;whether commit or not generate sql")
     private String commit;
     @CommandLine.Option(names = "-sqlFileSuffix", description = "generate sqlFile fileName suffix")
@@ -78,20 +78,20 @@ public class GenerateDto extends CommandDto {
         this.unit = unit;
     }
 
-    public String getUnitSetting() {
-        return this.unitSetting;
+    public String getSubTableSetting() {
+        return this.subTableSetting;
     }
 
-    public void setUnitSetting(final String unitSetting) {
-        this.unitSetting = unitSetting;
+    public void setSubTableSetting(final String subTableSetting) {
+        this.subTableSetting = subTableSetting;
     }
 
-    public String getUnitSettingEncoding() {
-        return this.unitSettingEncoding;
+    public String getSubTableSettingEncoding() {
+        return this.subTableSettingEncoding;
     }
 
-    public void setUnitSettingEncoding(final String unitSettingEncoding) {
-        this.unitSettingEncoding = unitSettingEncoding;
+    public void setSubTableSettingEncoding(final String subTableSettingEncoding) {
+        this.subTableSettingEncoding = subTableSettingEncoding;
     }
 
     public String getCommit() {

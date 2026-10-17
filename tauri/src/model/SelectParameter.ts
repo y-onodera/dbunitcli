@@ -92,8 +92,8 @@ export type GenerateOptions = CommandOptions & {
 	command: "generate";
 	generateType: CommandOption;
 	unit?: CommandOption;
-	unitSetting?: CommandOption;
-	unitSettingEncoding?: CommandOption;
+	subTableSetting?: CommandOption;
+	subTableSettingEncoding?: CommandOption;
 	template?: CommandOption;
 	fixedLength?: CommandOption;
 	defaultLength?: CommandOption;

@@ -243,7 +243,7 @@ describe("TxtTemplateGenerateDialogの実行テスト", () => {
 				"-template": "scaffoldTpl.txt",
 				"-template.templateGroup": "scaffoldTpl.stg",
 				"-unit": "table",
-				"-unitSetting": "scaffoldUnit.json",
+				"-subTableSetting": "scaffoldUnit.json",
 				"-src.src": "src",
 				"-src.srcType": "csv",
 				"-src.encoding": "UTF-8",

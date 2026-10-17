@@ -10,7 +10,7 @@ Scaffoldは、Generateの固定成果物型（`isFixedTemplate()=true`）を`gen
 
 `ScaffoldOption.executeTarget()`が全targetで同一フローを実行し、target差分は`ScaffoldTarget`のフックに集約。各雛型は**対応オプションを明示指定した時のみ独立出力**（名前フォールバック・target間の非対称なし）:
 
-- `-unitSetting=U` → サンプルunitSettingを`resources/setting/U.json`へコピー
+- `-unitSetting=U` → サンプルunitSettingを`resources/setting/U.json`へコピー（`.param`には`-subTableSetting=resources/setting/U.json`として書き出す）
 - `-template=T` → 組み込みstg/txtを`resources/template/`へ無改造コピー
 - `-dataset.src`+`-dataset.srcType` → `src/`に記述子dataset（1カラム=1行。`GenerateType.wrapProducer()`と同じproducerを直接インスタンス化し実メタデータから合成）
 - `-parameter=P` → `option/P.param`。`-template`指定時はtxt駆動（記述子dataset入力）、未指定時はbuiltin駆動（元datasetの絶対パス入力）を書き出す

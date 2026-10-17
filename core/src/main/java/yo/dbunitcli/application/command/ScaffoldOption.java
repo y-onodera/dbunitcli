@@ -299,7 +299,7 @@ public record ScaffoldOption(
 
     private void putUnitSettingParam(final ParametersBuilder builder) {
         if (Strings.isNotEmpty(this.unitSettingName)) {
-            builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
+            builder.put("-subTableSetting", "resources/setting/" + this.unitSettingName + ".json");
         }
     }
 

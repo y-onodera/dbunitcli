@@ -86,7 +86,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/ddl.txt")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/ddl.stg")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/ddlUnit.json")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-subTableSetting=resources/setting/ddlUnit.json")));
                 assertFalse(lines.stream().anyMatch(l -> l.startsWith("-setting=")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-resultPath=$param.tableName$.sql")));
             }
@@ -121,7 +121,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-generateType=ddl")));
                 assertFalse(lines.stream().anyMatch(l -> l.contains("-template=")));
                 assertFalse(lines.stream().anyMatch(l -> l.contains("-setting=")));
-                assertFalse(lines.stream().anyMatch(l -> l.contains("-unitSetting=")));
+                assertFalse(lines.stream().anyMatch(l -> l.contains("-subTableSetting=")));
                 assertFalse(lines.stream().anyMatch(l -> l.contains("-resultPath=")));
             }
 
@@ -139,7 +139,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/myDdl.txt")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/myDdl.stg")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/myDdl.json")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-subTableSetting=resources/setting/myDdl.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-resultPath=$param.tableName$.sql")));
             }
         }
@@ -161,7 +161,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/javaBean.txt")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/javaBean.stg")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/javaBeanUnit.json")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-subTableSetting=resources/setting/javaBeanUnit.json")));
                 assertTrue(lines.stream()
                                    .anyMatch(l -> l.contains(
                                            "-resultPath=$param.tableName; format=\"snakeToUpperCamel\"$.java")));
@@ -181,7 +181,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/myBean.txt")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/myBean.stg")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/myBean.json")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-subTableSetting=resources/setting/myBean.json")));
                 assertTrue(lines.stream()
                                    .anyMatch(l -> l.contains(
                                            "-resultPath=$param.tableName; format=\"snakeToUpperCamel\"$.java")));
@@ -213,7 +213,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains(
                         "templateGroup=resources/template/xlsxSchema.stg")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains(
-                        "-unitSetting=resources/setting/xlsxSchema.json")));
+                        "-subTableSetting=resources/setting/xlsxSchema.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-resultPath=$param.tableName$.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.equals("-src.src=src")));
             }
@@ -296,7 +296,7 @@ public class ScaffoldTest {
                         TestCase.this.resultFile("xlsxSchema/unitSetting", "option/xlsxSchema.param").toPath(),
                         StandardCharsets.UTF_8);
                 assertTrue(lines.stream().anyMatch(l -> l.contains(
-                        "-unitSetting=resources/setting/xlsxSchemaUnit.json")));
+                        "-subTableSetting=resources/setting/xlsxSchemaUnit.json")));
             }
         }
 
@@ -330,7 +330,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains(
                         "templateGroup=resources/template/fixedColumnDef.stg")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains(
-                        "-unitSetting=resources/setting/fixedColumnDef.json")));
+                        "-subTableSetting=resources/setting/fixedColumnDef.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-resultPath=$param.tableName$.json")));
             }
 
@@ -740,7 +740,7 @@ public class ScaffoldTest {
                     , "-template=resources/template/myDdl.txt"
                     , "-template.templateGroup=resources/template/myDdl.stg"
                     , "-resultPath=$param.tableName$.sql"
-                    , "-unitSetting=resources/setting/myUnit.json"
+                    , "-subTableSetting=resources/setting/myUnit.json"
                     , "-src.src=src"
                     , "-src.srcType=csv"
                     , "-encoding=UTF-8"), lines);

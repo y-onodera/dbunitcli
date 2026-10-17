@@ -1153,7 +1153,7 @@ export const scaffoldExecResponseFixture: Record<string, string> = {
 	"-template": "scaffoldTpl.txt",
 	"-template.templateGroup": "scaffoldTpl.stg",
 	"-resultPath": "$param.tableName$.sql",
-	"-unitSetting": "scaffoldUnit.json",
+	"-subTableSetting": "scaffoldUnit.json",
 	"-src.src": "src",
 	"-src.srcType": "csv",
 	"-src.encoding": "UTF-8",

@@ -37,7 +37,7 @@ public class ScaffoldController implements ControllerExceptionHandler {
     private static final Map<String, String> OMITTABLE_DIR_PREFIX = Map.of(
             "-template", FileResources.RESOURCES_TEMPLATE_PATH + "/",
             "-template.templateGroup", FileResources.RESOURCES_TEMPLATE_PATH + "/",
-            "-unitSetting", FileResources.RESOURCES_SETTING_PATH + "/");
+            "-subTableSetting", FileResources.RESOURCES_SETTING_PATH + "/");
 
     @Post(uri = "refresh", produces = MediaType.APPLICATION_JSON)
     public String refresh(@Body final Map<String, String> input) {

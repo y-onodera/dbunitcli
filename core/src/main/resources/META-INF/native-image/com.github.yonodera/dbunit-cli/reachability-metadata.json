@@ -6578,10 +6578,10 @@
           "name": "unit"
         },
         {
-          "name": "unitSetting"
+          "name": "subTableSetting"
         },
         {
-          "name": "unitSettingEncoding"
+          "name": "subTableSettingEncoding"
         }
       ]
     },

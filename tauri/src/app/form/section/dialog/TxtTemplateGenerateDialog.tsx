@@ -46,7 +46,7 @@ const generateSections = [
 		id: "unitSetting",
 		label: "unitSetting",
 		optional: true,
-		match: (key: string) => key.startsWith("-unitSetting"),
+		match: (key: string) => key.startsWith("-subTableSetting"),
 	},
 	{
 		id: "src",

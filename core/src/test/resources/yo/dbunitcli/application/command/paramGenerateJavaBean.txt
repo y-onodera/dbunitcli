@@ -5,5 +5,5 @@
 -unit=table
 -template=src/main/resources/javabean/javaBeanTemplate.txt
 -template.templateGroup=src/main/resources/javabean/javaBeanTemplate.stg
--unitSetting=src/main/resources/javabean/javaBeanSettings.json
+-subTableSetting=src/main/resources/javabean/javaBeanSettings.json
 -resultPath=target/test-classes/yo/dbunitcli/application/generate/javabean/result/$param.tableName; format="snakeToUpperCamel"$.java
