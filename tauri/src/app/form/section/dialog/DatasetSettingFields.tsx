@@ -445,6 +445,13 @@ function TargetContent({
 						)
 					}
 				/>
+				<Text
+					name="regex"
+					value={target.pattern?.regex ?? ""}
+					handleChange={(text) =>
+						setTarget((cur) => cur.replacePatternRegex(text.target.value))
+					}
+				/>
 				<Arrays
 					name="patternExclue"
 					values={target.pattern?.exclude ?? []}

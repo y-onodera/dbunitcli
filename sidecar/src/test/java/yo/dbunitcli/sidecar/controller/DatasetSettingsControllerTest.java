@@ -42,6 +42,7 @@ class DatasetSettingsControllerTest {
         this.tryDelete("deleteSetting.json");
         this.tryDelete("sqlFunctionSetting.json");
         this.tryDelete("outputFilterSetting.json");
+        this.tryDelete("importSetting.json");
     }
 
     private void tryDelete(final String name) {
@@ -113,7 +114,8 @@ class DatasetSettingsControllerTest {
     void testSave_outputFilterが保存され再ロードで復元される() throws IOException {
         for (final String filter : new String[]{
                 "{\"name\":{\"any\":[\"TABLE_B\"]}}",
-                "{\"pattern\":{\"string\":\"TABLE\",\"exclude\":[\"TABLE_X\"]}}"}) {
+                "{\"pattern\":{\"string\":\"TABLE\",\"exclude\":[\"TABLE_X\"]}}",
+                "{\"pattern\":{\"regex\":\"^T_.*\",\"exclude\":[\"T_X\"]}}"}) {
             this.client.toBlocking()
                     .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/save",
                             "{\"name\":\"outputFilterSetting.json\",\"input\":{\"settings\":[],\"commonSettings\":[],\"outputFilter\":" + filter + "}}"));
@@ -123,6 +125,19 @@ class DatasetSettingsControllerTest {
                             .contentType(MediaType.TEXT_PLAIN_TYPE));
             JsonTestHelper.assertJsonEquals("{\"outputFilter\":" + filter + "}", loaded);
         }
+    }
+
+    @Test
+    void testSave_importが保存され再ロードで復元される() throws IOException {
+        final String imports = "[{\"path\":\"a.json\"},{\"path\":\"b.json\",\"outputFilterCombine\":\"or\"}]";
+        this.client.toBlocking()
+                .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/save",
+                        "{\"name\":\"importSetting.json\",\"input\":{\"settings\":[],\"commonSettings\":[],\"import\":" + imports + "}}"));
+
+        final String loaded = this.client.toBlocking()
+                .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/load", "importSetting.json")
+                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+        JsonTestHelper.assertJsonEquals("{\"import\":" + imports + "}", loaded);
     }
 
     @Test

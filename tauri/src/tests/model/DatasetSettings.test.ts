@@ -132,6 +132,60 @@ describe("DatasetSettings outputFilter", () => {
 	});
 });
 
+describe("DatasetSettings regex/import", () => {
+	it("outputFilterのregexを読み込みJSONに戻せること", () => {
+		const settings = DatasetSettings.build({
+			settings: [],
+			commonSettings: [],
+			outputFilter: { pattern: { regex: "^T_.*", exclude: ["T_X"] } },
+		});
+		expect(settings.toJSON().outputFilter).toEqual({
+			pattern: { regex: "^T_.*", exclude: ["T_X"] },
+		});
+	});
+
+	it("settingsのpatternのregexが保持されstringが出力されないこと", () => {
+		const setting = new DatasetSetting({
+			pattern: { regex: "^A" },
+		}).replacePatternExclude("B", 0);
+		expect(setting.pattern).toEqual({ regex: "^A", exclude: ["B"] });
+		const json = setting.toJSON();
+		expect(json.pattern?.regex).toBe("^A");
+		expect(json.pattern?.string).toBeUndefined();
+	});
+
+	it("importを読み込みJSONに戻せること", () => {
+		const imports = [
+			{ path: "a.json" },
+			{ path: "b.json", outputFilterCombine: "or" as const },
+		];
+		const settings = DatasetSettings.build({
+			settings: [],
+			commonSettings: [],
+			import: imports,
+		});
+		expect(settings.imports).toEqual(imports);
+		expect(settings.toJSON().import).toEqual(imports);
+	});
+
+	it("pathが空のimportは出力せず、未設定ならimportを出力しないこと", () => {
+		expect(DatasetSettings.create().toJSON()).not.toHaveProperty("import");
+		const empty = DatasetSettings.create().replaceImports([{ path: "" }]);
+		expect(empty.toJSON()).not.toHaveProperty("import");
+	});
+
+	it("settingsやoutputFilterの更新でimportが保持されること", () => {
+		const settings = DatasetSettings.create().replaceImports([
+			{ path: "a.json" },
+		]);
+		const updated = settings
+			.add(newDatasetSetting())
+			.replaceCommonSettings([newDatasetSetting()])
+			.replaceOutputFilter({ name: ["A"] });
+		expect(updated.imports).toEqual([{ path: "a.json" }]);
+	});
+});
+
 describe("DatasetSettingクラス", () => {
 	it("新しいDatasetSettingインスタンスを作成できること", () => {
 		const setting = newDatasetSetting();
