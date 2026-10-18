@@ -41,6 +41,7 @@ class DatasetSettingsControllerTest {
         this.tryDelete("savedSetting.json");
         this.tryDelete("deleteSetting.json");
         this.tryDelete("sqlFunctionSetting.json");
+        this.tryDelete("outputFilterSetting.json");
     }
 
     private void tryDelete(final String name) {
@@ -105,6 +106,22 @@ class DatasetSettingsControllerTest {
             final String saved = Files.readString(SETTING_DIR.resolve("sqlFunctionSetting.json"));
             Assertions.assertTrue(saved.contains("\"sqlFunction\""), key + " で渡した値が sqlFunction キーで保存されること: " + saved);
             Assertions.assertFalse(saved.contains("\"function\""), "function キーでは保存されないこと: " + saved);
+        }
+    }
+
+    @Test
+    void testSave_outputFilterが保存され再ロードで復元される() throws IOException {
+        for (final String filter : new String[]{
+                "{\"name\":{\"any\":[\"TABLE_B\"]}}",
+                "{\"pattern\":{\"string\":\"TABLE\",\"exclude\":[\"TABLE_X\"]}}"}) {
+            this.client.toBlocking()
+                    .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/save",
+                            "{\"name\":\"outputFilterSetting.json\",\"input\":{\"settings\":[],\"commonSettings\":[],\"outputFilter\":" + filter + "}}"));
+
+            final String loaded = this.client.toBlocking()
+                    .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/load", "outputFilterSetting.json")
+                            .contentType(MediaType.TEXT_PLAIN_TYPE));
+            JsonTestHelper.assertJsonEquals("{\"outputFilter\":" + filter + "}", loaded);
         }
     }
 

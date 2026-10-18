@@ -1,17 +1,24 @@
 import { useState } from "react";
 import {
+	Arrays,
+	Fieldset,
+	Select,
 	SettingDialog,
 	SettingTable,
 	StatusMessage,
+	Text,
 } from "../../../../components/dialog";
 import {
 	useDatasetSettingsData,
 	useDeleteDatasetSettings,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
-import type { DatasetSetting } from "../../../../model/DatasetSettings";
+import type {
+	DatasetSetting,
+	OutputFilter,
+} from "../../../../model/DatasetSettings";
 import {
-	DatasetSettings,
+	type DatasetSettings,
 	newDatasetSetting,
 } from "../../../../model/DatasetSettings";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
@@ -66,7 +73,7 @@ export function DatasetSettingsEditDialog(props: {
 				setSettings={(convertSettings) =>
 					setDataSettings((cur) => {
 						const updatedSettings = convertSettings(cur.settings);
-						return new DatasetSettings(updatedSettings, cur.commonSettings);
+						return cur.replaceSettings(updatedSettings);
 					})
 				}
 				SettingDialogComponent={DatasetSettingDialog}
@@ -78,15 +85,121 @@ export function DatasetSettingsEditDialog(props: {
 				setSettings={(convertCommon) =>
 					setDataSettings((cur) => {
 						const updatedCommonSettings = convertCommon(cur.commonSettings);
-						return new DatasetSettings(cur.settings, updatedCommonSettings);
+						return cur.replaceCommonSettings(updatedCommonSettings);
 					})
 				}
 				SettingDialogComponent={DatasetSettingDialog}
 				newSetting={newDatasetSetting}
 			/>
+			<OutputFilterFields
+				outputFilter={dataSettings.outputFilter}
+				setOutputFilter={(outputFilter) =>
+					setDataSettings((cur) => cur.replaceOutputFilter(outputFilter))
+				}
+			/>
 		</SettingDialog>
 	);
 }
+
+// separate/join後の出力テーブルを絞る。nameは完全一致、patternは部分一致(exclude付き)
+function OutputFilterFields(props: {
+	outputFilter: OutputFilter;
+	setOutputFilter: (outputFilter: OutputFilter) => void;
+}) {
+	const { outputFilter, setOutputFilter } = props;
+	const kind = outputFilterKind(outputFilter);
+	return (
+		<Fieldset legend="Output Filter">
+			<Select
+				name="outputFilter"
+				defaultValue={kind}
+				handleOnChange={async (select) => {
+					if (select === "name") {
+						setOutputFilter({ name: [""] });
+					} else if (select === "pattern") {
+						setOutputFilter({ pattern: { string: "" } });
+					} else {
+						setOutputFilter({});
+					}
+				}}
+			>
+				<option value="">none</option>
+				<option value="name">name</option>
+				<option value="pattern">pattern</option>
+			</Select>
+			{kind === "name" && (
+				<Arrays
+					name="name"
+					values={outputFilter.name ?? []}
+					handleChange={(text, index) =>
+						setOutputFilter({
+							name: replaceAt(outputFilter.name ?? [], text, index),
+						})
+					}
+					handleRemove={(index) =>
+						setOutputFilter({
+							name: (outputFilter.name ?? []).filter((_, i) => i !== index),
+						})
+					}
+				/>
+			)}
+			{kind === "pattern" && (
+				<>
+					<Text
+						name="pattern"
+						ignoreLabel={true}
+						value={outputFilter.pattern?.string ?? ""}
+						handleChange={(text) =>
+							setOutputFilter({
+								pattern: { ...outputFilter.pattern, string: text.target.value },
+							})
+						}
+					/>
+					<Arrays
+						name="patternExclude"
+						values={outputFilter.pattern?.exclude ?? []}
+						handleChange={(text, index) =>
+							setOutputFilter({
+								pattern: {
+									string: outputFilter.pattern?.string ?? "",
+									exclude: replaceAt(
+										outputFilter.pattern?.exclude ?? [],
+										text,
+										index,
+									),
+								},
+							})
+						}
+						handleRemove={(index) =>
+							setOutputFilter({
+								pattern: {
+									string: outputFilter.pattern?.string ?? "",
+									exclude: (outputFilter.pattern?.exclude ?? []).filter(
+										(_, i) => i !== index,
+									),
+								},
+							})
+						}
+					/>
+				</>
+			)}
+		</Fieldset>
+	);
+}
+
+function outputFilterKind(outputFilter: OutputFilter): string {
+	if (outputFilter.pattern) {
+		return "pattern";
+	}
+	return outputFilter.name ? "name" : "";
+}
+
+function replaceAt(array: string[], text: string, index: number): string[] {
+	const result = [...array];
+	result[index] = text;
+	return result;
+}
+
 export const DatasetSettingEditButton = createEditButton(DatasetSettingsDialog);
 export const RemoveDatasetSettingButton = createRemoveButton(
 	useDeleteDatasetSettings,

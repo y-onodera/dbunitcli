@@ -85,6 +85,53 @@ describe("DatasetSettingsクラス", () => {
 	});
 });
 
+describe("DatasetSettings outputFilter", () => {
+	it("サーバー形式(name.any)から読み込みJSONに戻せること", () => {
+		const settings = DatasetSettings.build({
+			settings: [],
+			commonSettings: [],
+			outputFilter: { name: { any: ["A", "B"] } },
+		});
+		expect(settings.outputFilter).toEqual({ name: ["A", "B"] });
+		expect(settings.toJSON().outputFilter).toEqual({
+			name: { any: ["A", "B"] },
+		});
+	});
+
+	it("patternとexcludeを読み込みJSONに戻せること", () => {
+		const settings = DatasetSettings.build({
+			settings: [],
+			commonSettings: [],
+			outputFilter: { pattern: { string: "T_", exclude: ["T_X", ""] } },
+		});
+		expect(settings.toJSON().outputFilter).toEqual({
+			pattern: { string: "T_", exclude: ["T_X"] },
+		});
+	});
+
+	it("未設定または空ならoutputFilterをJSONに出力しないこと", () => {
+		expect(DatasetSettings.create().toJSON()).not.toHaveProperty(
+			"outputFilter",
+		);
+		const empty = DatasetSettings.create().replaceOutputFilter({
+			name: [""],
+		});
+		expect(empty.toJSON()).not.toHaveProperty("outputFilter");
+	});
+
+	it("settingsやcommonSettingsの更新でoutputFilterが保持されること", () => {
+		const settings = DatasetSettings.create().replaceOutputFilter({
+			name: ["A"],
+		});
+		const updated = settings
+			.add(newDatasetSetting())
+			.addCommon(newDatasetSetting())
+			.replaceSettings([newDatasetSetting()])
+			.replaceCommonSettings([newDatasetSetting()]);
+		expect(updated.outputFilter).toEqual({ name: ["A"] });
+	});
+});
+
 describe("DatasetSettingクラス", () => {
 	it("新しいDatasetSettingインスタンスを作成できること", () => {
 		const setting = newDatasetSetting();
