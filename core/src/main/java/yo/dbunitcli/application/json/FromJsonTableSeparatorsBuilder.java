@@ -44,16 +44,16 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
     }
 
     public FromJsonTableSeparatorsBuilder load(final File setting) {
-        try {
-            final JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(setting), this.settingEncoding));
-            final JsonObject settingJson = jsonReader.read().asJsonObject();
-            return this.configureSetting(settingJson)
-                    .configureCommonSetting(settingJson)
-                    .configureOutputFilter(settingJson)
-                    .importSetting(settingJson, setting);
-        } catch (final UnsupportedEncodingException | FileNotFoundException e) {
+        final JsonObject settingJson;
+        try (final JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(setting), this.settingEncoding))) {
+            settingJson = jsonReader.read().asJsonObject();
+        } catch (final IOException e) {
             throw new AssertionError(e);
         }
+        return this.configureSetting(settingJson)
+                .configureCommonSetting(settingJson)
+                .configureOutputFilter(settingJson)
+                .importSetting(settingJson, setting);
     }
 
     public FromJsonTableSeparatorsBuilder loadFromClasspath(final String resource) {
