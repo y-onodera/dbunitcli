@@ -7,7 +7,6 @@ import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -78,26 +77,15 @@ public enum ParameterUnit {
             final int[] row = new int[]{0};
             return tables.keySet().stream()
                          .map(tableName -> {
-                             Consumer<TableSeparators.Builder> builder = origin ->
-                                     origin.setFilter(origin.getFilter().and(new SplitOrNameFilter(
-                                                   tableName)))
-                                           .setNext(origin.getNext().then(unitTableSeparators));
                              ComparableTableDto dto = (ComparableTableDto) tables.get(tableName);
-                             final TableRowsCollector collector = new TableRowsCollector(tableName);
-                             dto.getTask().runWith(builder, collector);
-                             final Map<String, Object> subTables = new LinkedHashMap<>();
-                             dto.getTask().runWith(builder, null)
-                                .forEach((name, table) -> subTables.put(name, table.toMap(true).getFirst()));
-                             final Map<String, Object> resolved = new LinkedHashMap<>(dto);
-                             resolved.put("dataset", subTables);
-                             resolved.put("rows", collector.getRows());
-                             final Map<String, Object> dataSet = new LinkedHashMap<>();
-                             dataSet.put(tableName, resolved);
+                             dto.applyDataSetSeparators(unitTableSeparators);
+                             Map<String, Object> dataset = new LinkedHashMap<>();
+                             dataset.put(tableName, dto);
                              return loader.parameter()
                                           .asInputParam()
                                           .withRowNumber(row[0]++)
-                                          .addAll(resolved)
-                                          .add("dataSet", dataSet);
+                                          .addAll(dto)
+                                          .add("dataSet", dataset);
                          });
         }
     },

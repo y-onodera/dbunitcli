@@ -3,11 +3,10 @@ package yo.dbunitcli.dataset;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
+import yo.dbunitcli.application.SplitOrNameFilter;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class ComparableTableDto extends HashMap<String, Object> {
 
@@ -85,4 +84,27 @@ public class ComparableTableDto extends HashMap<String, Object> {
         this.task = task;
         this.put("rows", task);
     }
+
+    public Map<?, ?> getSubTables() {
+        return (Map<?, ?>) this.get("dataset");
+    }
+
+    public void setSubTables(Map<String, Object> subTables) {
+        this.put("dataset", subTables);
+    }
+
+    public void applyDataSetSeparators(TableSeparators dataSetSeparators) {
+        String tableName = this.task.targetTableName();
+        Consumer<TableSeparators.Builder> builder = origin ->
+                origin.setFilter(origin.getFilter().and(new SplitOrNameFilter(tableName)))
+                      .setNext(origin.getNext().then(dataSetSeparators));
+        final TableRowsCollector collector = new TableRowsCollector(tableName);
+        this.task.runWith(builder, collector);
+        this.setRows(collector.getRows());
+        final Map<String, Object> subTables = new LinkedHashMap<>();
+        this.task.runWith(builder, null)
+                 .forEach((name, table) -> subTables.put(name, table.toMap(true).getFirst()));
+        this.setSubTables(subTables);
+    }
+
 }
