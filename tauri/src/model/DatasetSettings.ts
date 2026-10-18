@@ -1,7 +1,13 @@
 export type Pattern = {
-	string: string;
+	string?: string;
+	regex?: string;
 	exclude?: string[];
 	filePath?: string;
+};
+// 他の設定ファイルの取り込み。outputFilterCombineは未指定ならand
+export type ImportSetting = {
+	path: string;
+	outputFilterCombine?: "and" | "or";
 };
 export type TableJoin = {
 	left?: string;
@@ -37,6 +43,7 @@ export type DatasetSettingsBuilder = {
 	settings: DatasetSettingBuilder[];
 	commonSettings: DatasetSettingBuilder[];
 	outputFilter?: OutputFilterBuilder;
+	import?: ImportSetting[];
 };
 export type DatasetSettingBuilder = {
 	name?: string | string[] | NameFilter;
@@ -72,6 +79,7 @@ export class DatasetSettings {
 		readonly settings: DatasetSetting[],
 		readonly commonSettings: DatasetSetting[],
 		readonly outputFilter: OutputFilter = {},
+		readonly imports: ImportSetting[] = [],
 	) {}
 
 	static build(builder: DatasetSettingsBuilder): DatasetSettings {
@@ -83,6 +91,7 @@ export class DatasetSettings {
 				? builder.commonSettings.map((it) => new DatasetSetting(it))
 				: [new DatasetSetting({})],
 			toOutputFilter(builder.outputFilter),
+			builder.import ?? [],
 		);
 	}
 
@@ -91,6 +100,7 @@ export class DatasetSettings {
 			this.settings.concat(setting),
 			this.commonSettings,
 			this.outputFilter,
+			this.imports,
 		);
 	}
 
@@ -100,6 +110,7 @@ export class DatasetSettings {
 			newSettings.length > 0 ? newSettings : [new DatasetSetting({})],
 			this.commonSettings,
 			this.outputFilter,
+			this.imports,
 		);
 	}
 
@@ -108,6 +119,7 @@ export class DatasetSettings {
 			this.settings.map((it) => (it === before ? after : it)),
 			this.commonSettings,
 			this.outputFilter,
+			this.imports,
 		);
 	}
 
@@ -116,6 +128,7 @@ export class DatasetSettings {
 			this.settings,
 			this.commonSettings.concat(setting),
 			this.outputFilter,
+			this.imports,
 		);
 	}
 
@@ -125,6 +138,7 @@ export class DatasetSettings {
 			this.settings,
 			newSettings.length > 0 ? newSettings : [new DatasetSetting({})],
 			this.outputFilter,
+			this.imports,
 		);
 	}
 
@@ -133,6 +147,7 @@ export class DatasetSettings {
 			this.settings,
 			this.commonSettings.map((it) => (it === before ? after : it)),
 			this.outputFilter,
+			this.imports,
 		);
 	}
 
@@ -141,6 +156,7 @@ export class DatasetSettings {
 			settings,
 			this.commonSettings,
 			this.outputFilter,
+			this.imports,
 		);
 	}
 
@@ -149,6 +165,7 @@ export class DatasetSettings {
 			this.settings,
 			commonSettings,
 			this.outputFilter,
+			this.imports,
 		);
 	}
 
@@ -157,6 +174,15 @@ export class DatasetSettings {
 			this.settings,
 			this.commonSettings,
 			outputFilter,
+			this.imports,
+		);
+	}
+	replaceImports(imports: ImportSetting[]): DatasetSettings {
+		return new DatasetSettings(
+			this.settings,
+			this.commonSettings,
+			this.outputFilter,
+			imports,
 		);
 	}
 	toJSON() {
@@ -168,18 +194,23 @@ export class DatasetSettings {
 		let outputFilter: object | undefined;
 		if (names?.length) {
 			outputFilter = { name: { any: names } };
-		} else if (pattern?.string) {
+		} else if (pattern?.regex || pattern?.string) {
 			const exclude = pattern.exclude?.filter((it) => it);
 			outputFilter = {
-				pattern: exclude?.length
-					? { string: pattern.string, exclude }
-					: { string: pattern.string },
+				pattern: {
+					...(pattern.regex
+						? { regex: pattern.regex }
+						: { string: pattern.string }),
+					...(exclude?.length ? { exclude } : {}),
+				},
 			};
 		}
+		const imports = this.imports.filter((it) => it.path);
 		return {
 			settings: filterSettings(this.settings),
 			commonSettings: filterSettings(this.commonSettings),
 			...(outputFilter ? { outputFilter } : {}),
+			...(imports.length ? { import: imports } : {}),
 		};
 	}
 }
@@ -271,7 +302,7 @@ export class DatasetSetting {
 		if (this.name) {
 			left = this.name[0];
 		} else if (this.pattern) {
-			left = this.pattern.string;
+			left = this.pattern.string ?? this.pattern.regex ?? "";
 		} else {
 			left = "";
 		}
@@ -314,23 +345,24 @@ export class DatasetSetting {
 		});
 	}
 
+	replacePatternRegex(regex: string): DatasetSetting {
+		return this.replacePattern({ regex: regex || undefined });
+	}
+
 	replacePatternExclude(newOne: string, index: number): DatasetSetting {
 		return this.replacePattern({
-			string: this.pattern?.string ?? "",
 			exclude: replaceArray(this.pattern?.exclude ?? [], newOne, index),
 		});
 	}
 
 	replacePatternFilePath(filePath: string): DatasetSetting {
 		return this.replacePattern({
-			string: this.pattern?.string ?? "",
 			filePath: filePath || undefined,
 		});
 	}
 
 	removePatternExclude(index: number): DatasetSetting {
 		return this.replacePattern({
-			string: this.pattern?.string ?? "",
 			exclude: removeArray(this.pattern?.exclude ?? [], index),
 		});
 	}
@@ -546,13 +578,20 @@ export class DatasetSetting {
 	}
 
 	toJSON() {
-		const { filePath, name, separate, ...rest } = this;
+		const { filePath, name, separate, pattern, ...rest } = this;
 		let nameValue: NameFilter | undefined;
 		if (name?.length) {
 			nameValue = filePath ? { any: name, filePath } : { any: name };
 		}
 		return {
 			...rest,
+			...(pattern
+				? {
+						pattern: pattern.regex
+							? { ...pattern, string: undefined }
+							: pattern,
+					}
+				: {}),
 			name: nameValue,
 			...(separate.length > 0 ? { separate } : {}),
 		};
@@ -597,7 +636,10 @@ function target(setting: DatasetSetting): string {
 			return `pattern :${setting.pattern}`;
 		}
 		const pattern = setting.pattern as Pattern;
-		return `pattern :${pattern.string} exclude :[${pattern.exclude ? pattern.exclude.join(",") : ""}]`;
+		const matcher = pattern.regex
+			? `regex :${pattern.regex}`
+			: `pattern :${pattern.string}`;
+		return `${matcher} exclude :[${pattern.exclude ? pattern.exclude.join(",") : ""}]`;
 	}
 	if (setting.innerJoin) {
 		return `innerJoin :${setting.innerJoin.left} ${setting.innerJoin.right} on ${setting.innerJoin.column ? setting.innerJoin.column.join(",") : setting.innerJoin.on}`;
@@ -687,7 +729,13 @@ function toOutputFilter(
 		return { name };
 	}
 	return pattern
-		? { pattern: { string: pattern.string, exclude: pattern.exclude } }
+		? {
+				pattern: {
+					string: pattern.string,
+					regex: pattern.regex,
+					exclude: pattern.exclude,
+				},
+			}
 		: {};
 }
 function isNameFilter(name: unknown): name is NameFilter {

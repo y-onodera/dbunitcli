@@ -9,12 +9,17 @@ import {
 	Text,
 } from "../../../../components/dialog";
 import {
+	AddButton,
+	RemoveButton,
+} from "../../../../components/element/ButtonIcon";
+import {
 	useDatasetSettingsData,
 	useDeleteDatasetSettings,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
 import type {
 	DatasetSetting,
+	ImportSetting,
 	OutputFilter,
 } from "../../../../model/DatasetSettings";
 import {
@@ -97,7 +102,61 @@ export function DatasetSettingsEditDialog(props: {
 					setDataSettings((cur) => cur.replaceOutputFilter(outputFilter))
 				}
 			/>
+			<ImportFields
+				imports={dataSettings.imports}
+				setImports={(imports) =>
+					setDataSettings((cur) => cur.replaceImports(imports))
+				}
+			/>
 		</SettingDialog>
+	);
+}
+
+// 他の設定ファイルの取り込み。outputFilterCombineは取り込み先のoutputFilterとの結合方法(既定and)
+function ImportFields(props: {
+	imports: ImportSetting[];
+	setImports: (imports: ImportSetting[]) => void;
+}) {
+	const { imports, setImports } = props;
+	const rows = imports.length > 0 ? imports : [{ path: "" }];
+	const update = (index: number, row: ImportSetting) =>
+		setImports(rows.map((it, i) => (i === index ? row : it)));
+	return (
+		<Fieldset legend="Import">
+			{rows.map((row, index) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: 行は追加・削除のみで並び替えない
+				<div key={index}>
+					<Text
+						name={`importPath${index}`}
+						value={row.path}
+						handleChange={(text) =>
+							update(index, { ...row, path: text.target.value })
+						}
+					/>
+					<Select
+						name={`importOutputFilterCombine${index}`}
+						defaultValue={row.outputFilterCombine ?? "and"}
+						handleOnChange={async (select) =>
+							update(index, {
+								...row,
+								outputFilterCombine: select === "or" ? "or" : undefined,
+							})
+						}
+					>
+						<option value="and">and</option>
+						<option value="or">or</option>
+					</Select>
+					{rows.length > 1 && (
+						<RemoveButton
+							handleClick={() => setImports(rows.filter((_, i) => i !== index))}
+						/>
+					)}
+				</div>
+			))}
+			{rows[rows.length - 1].path && (
+				<AddButton handleClick={() => setImports([...rows, { path: "" }])} />
+			)}
+		</Fieldset>
 	);
 }
 
@@ -147,11 +206,22 @@ function OutputFilterFields(props: {
 				<>
 					<Text
 						name="pattern"
-						ignoreLabel={true}
 						value={outputFilter.pattern?.string ?? ""}
 						handleChange={(text) =>
 							setOutputFilter({
 								pattern: { ...outputFilter.pattern, string: text.target.value },
+							})
+						}
+					/>
+					<Text
+						name="regex"
+						value={outputFilter.pattern?.regex ?? ""}
+						handleChange={(text) =>
+							setOutputFilter({
+								pattern: {
+									...outputFilter.pattern,
+									regex: text.target.value || undefined,
+								},
 							})
 						}
 					/>
@@ -161,7 +231,7 @@ function OutputFilterFields(props: {
 						handleChange={(text, index) =>
 							setOutputFilter({
 								pattern: {
-									string: outputFilter.pattern?.string ?? "",
+									...outputFilter.pattern,
 									exclude: replaceAt(
 										outputFilter.pattern?.exclude ?? [],
 										text,
@@ -173,7 +243,7 @@ function OutputFilterFields(props: {
 						handleRemove={(index) =>
 							setOutputFilter({
 								pattern: {
-									string: outputFilter.pattern?.string ?? "",
+									...outputFilter.pattern,
 									exclude: (outputFilter.pattern?.exclude ?? []).filter(
 										(_, i) => i !== index,
 									),

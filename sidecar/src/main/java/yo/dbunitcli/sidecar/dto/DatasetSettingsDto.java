@@ -1,6 +1,7 @@
 package yo.dbunitcli.sidecar.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.serde.annotation.Serdeable;
 
 import java.util.List;
@@ -14,6 +15,18 @@ public class DatasetSettingsDto {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private OutputFilterDto outputFilter;
+
+    @JsonProperty("import")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<ImportDto> imports;
+
+    public List<ImportDto> getImports() {
+        return this.imports;
+    }
+
+    public void setImports(final List<ImportDto> imports) {
+        this.imports = imports;
+    }
 
     public List<DatasetSettingDto> getSettings() {
         return this.settings;

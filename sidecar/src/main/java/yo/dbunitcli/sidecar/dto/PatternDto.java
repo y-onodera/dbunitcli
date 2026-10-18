@@ -9,6 +9,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PatternDto {
     private String string;
+    private String regex;
     private List<String> exclude;
     private String filePath;
 
@@ -26,6 +27,14 @@ public class PatternDto {
 
     public void setString(final String string) {
         this.string = string;
+    }
+
+    public String getRegex() {
+        return this.regex;
+    }
+
+    public void setRegex(final String regex) {
+        this.regex = regex;
     }
 
     public List<String> getExclude() {
