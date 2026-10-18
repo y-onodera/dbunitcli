@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * サンプルsubTableSettingは利用者が他のデータソースの列をテンプレートの読む列へマッピングする際の
+ * サンプルunitSettingは利用者が他のデータソースの列をテンプレートの読む列へマッピングする際の
  * ヒントであるため、テンプレートが参照する全列がstring/boolean等の式として定義されている必要がある。
  * テンプレート側へ列参照が追加された際にサンプルとのドリフトを検出する。
  */
@@ -27,24 +27,24 @@ public class ScaffoldTargetSettingsTest {
     private static final Pattern ROW_ATTRIBUTE =
             Pattern.compile("\\b(?:row|r|col)\\.(\\w+)|first\\([^)]*\\)\\.(\\w+)");
     /** 列名ではない行変数の属性（unit=tableのテーブル構造アクセス） */
-    private static final Set<String> NON_COLUMN_ATTRIBUTES = Set.of("rows", "tableName", "dataset", "values");
+    private static final Set<String> NON_COLUMN_ATTRIBUTES = Set.of("rows", "tableName", "subTable", "values");
     private static final Set<String> EXPRESSION_KEYS = Set.of("string", "boolean", "number", "sqlFunction");
 
     @ParameterizedTest
     @EnumSource(ScaffoldTarget.class)
-    public void testSampleSubTableSettingDefinesAllTemplateColumns(final ScaffoldTarget target) {
+    public void testSampleUnitSettingDefinesAllTemplateColumns(final ScaffoldTarget target) {
         final Set<String> templateColumns = new TreeSet<>();
         this.collectTemplateColumns(FileResources.readClasspathResource(target.stgPath()), templateColumns);
         this.collectTemplateColumns(FileResources.readClasspathResource(target.templatePath()), templateColumns);
         final Set<String> definedColumns = new TreeSet<>();
         try (final JsonReader reader = Json.createReader(
-                new StringReader(FileResources.readClasspathResource(target.sampleSubTableSettingPath())))) {
+                new StringReader(FileResources.readClasspathResource(target.sampleUnitSettingPath())))) {
             this.collectDefinedColumns(reader.readObject(), definedColumns);
         }
         final Set<String> missing = new TreeSet<>(templateColumns);
         missing.removeAll(definedColumns);
         assertTrue(missing.isEmpty(),
-                () -> target + ": " + target.sampleSubTableSettingPath() + " はテンプレートが参照する列 "
+                () -> target + ": " + target.sampleUnitSettingPath() + " はテンプレートが参照する列 "
                         + missing + " を定義していない");
     }
 

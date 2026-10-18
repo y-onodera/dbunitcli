@@ -175,7 +175,7 @@ public enum GenerateType {
         }
 
         // separateルールでPK/CELLSサブテーブルを合成する（Scaffoldがコピーする雛型と同一ファイル。
-        // テンプレートのdataset.PK/dataset.CELLS参照はこの分割が前提）
+        // テンプレートのsubTable.PK/subTable.CELLS参照はこの分割が前提）
         @Override
         public String defaultSettingsPath() {
             return "xlsxschema/xlsxSchemaSettings.json";

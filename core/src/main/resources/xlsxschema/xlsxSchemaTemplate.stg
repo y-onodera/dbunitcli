@@ -5,15 +5,15 @@ rowEntry(row) ::= <<
      ,"header": [$row.rows:{r | "$r.COLUMN_NAME$"}; separator=","$]
      ,"dataStart": $first(row.rows).DATA_START$
      ,"columnIndex": [$row.rows:{r | $r.COLUMN_INDEX$}; separator=","$]
-     ,"breakKey": [$if(row.dataset.PK.rows)$$row.dataset.PK.rows:{r | "$r.COLUMN_NAME$"}; separator=","$$else$"$first(row.rows).COLUMN_NAME$"$endif$]
+     ,"breakKey": [$if(row.subTable.PK.rows)$$row.subTable.PK.rows:{r | "$r.COLUMN_NAME$"}; separator=","$$else$"$first(row.rows).COLUMN_NAME$"$endif$]
     }
 >>
 
 cellEntry(row) ::= <<
     {
-      "sheetName": "$first(row.dataset.CELLS.rows).SHEET_NAME$"
+      "sheetName": "$first(row.subTable.CELLS.rows).SHEET_NAME$"
      ,"tableName": "$row.tableName$"
-     ,"header": [$row.dataset.CELLS.rows:{r | "$r.COLUMN_NAME$"}; separator=","$]
-     ,"rows": [{"cellAddress": [$row.dataset.CELLS.rows:{r | "$r.CELL_ADDRESS$"}; separator=","$]}]
+     ,"header": [$row.subTable.CELLS.rows:{r | "$r.COLUMN_NAME$"}; separator=","$]
+     ,"rows": [{"cellAddress": [$row.subTable.CELLS.rows:{r | "$r.CELL_ADDRESS$"}; separator=","$]}]
     }
 >>

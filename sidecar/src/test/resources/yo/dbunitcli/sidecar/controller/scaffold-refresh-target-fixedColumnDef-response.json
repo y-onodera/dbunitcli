@@ -25,8 +25,8 @@
     },
     "value": "fixedColumnDef"
   },
-  "subTableSetting": {
-    "name": "subTableSetting",
+  "unitSetting": {
+    "name": "unitSetting",
     "attribute": {
       "type": "TEXT",
       "required": false,

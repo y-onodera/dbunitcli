@@ -13,9 +13,9 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 import java.util.Arrays;
 
 /**
- * Scaffoldの-targetごとの差分を集約するenum。4target共通のフロー（subTableSetting/template/dataset/parameterの
+ * Scaffoldの-targetごとの差分を集約するenum。4target共通のフロー（unitSetting/template/dataset/parameterの
  * 各雛型を対応オプション指定時のみ独立出力）は{@link ScaffoldOption}が担い、targetごとに異なる
- * 「対応するGenerateType・サンプルsubTableSetting・記述子dataset用producer・カスタムテンプレート駆動時の出力パス」
+ * 「対応するGenerateType・サンプルunitSetting・記述子dataset用producer・カスタムテンプレート駆動時の出力パス」
  * だけをここで定義する。
  */
 enum ScaffoldTarget {
@@ -70,7 +70,7 @@ enum ScaffoldTarget {
     fixedColumnDef(GenerateType.fixedColumnDef) {
         // GenerateType.fixedColumnDefはdefaultSettingsPath()を持たないため、Scaffold専用のサンプルを使う
         @Override
-        String sampleSubTableSettingPath() {
+        String sampleUnitSettingPath() {
             return "fixedcolumndef/fixedColumnDefSettings.json";
         }
 
@@ -126,11 +126,11 @@ enum ScaffoldTarget {
     }
 
     /**
-     * subTableSetting雛型としてコピーするclasspathリソース（既定はGenerateTypeのdefaultSettingsPath()）。
+     * unitSetting雛型としてコピーするclasspathリソース（既定はGenerateTypeのdefaultSettingsPath()）。
      * 利用者が他のデータソースの列をテンプレートの読む列へマッピングする際のヒントとなるよう、
      * 各サンプルはテンプレートで利用される全列を定義しておくこと
      */
-    String sampleSubTableSettingPath() {
+    String sampleUnitSettingPath() {
         return this.generateType.defaultSettingsPath();
     }
 

@@ -79,7 +79,7 @@ export type CompareOptions = CommandOptions & {
 };
 export type ScaffoldOptions = CommandOptions & {
 	target: CommandOption;
-	subTableSetting: CommandOption;
+	unitSetting: CommandOption;
 	template: CommandOption;
 	datasetType: CommandOption;
 	datasetEncoding: CommandOption;
@@ -92,8 +92,8 @@ export type GenerateOptions = CommandOptions & {
 	command: "generate";
 	generateType: CommandOption;
 	unit?: CommandOption;
-	subTableSetting?: CommandOption;
-	subTableSettingEncoding?: CommandOption;
+	unitSetting?: CommandOption;
+	unitSettingEncoding?: CommandOption;
 	template?: CommandOption;
 	fixedLength?: CommandOption;
 	defaultLength?: CommandOption;

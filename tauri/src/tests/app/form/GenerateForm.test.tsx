@@ -294,7 +294,7 @@ describe("GenerateFormの描画テスト", () => {
 	});
 
 	describe("sqlタイプ（generateType=sql）", () => {
-		it("subTableSetting・subTableSettingEncodingは表示されない（固定テンプレートのため設定不可）", () => {
+		it("unitSetting・unitSettingEncodingは表示されない（固定テンプレートのため設定不可）", () => {
 			render(
 				<GenerateForm
 					{...makeGenerateProps(generateRefreshGenerateTypeSqlResponseFixture)}
@@ -302,11 +302,11 @@ describe("GenerateFormの描画テスト", () => {
 			);
 
 			expect(
-				document.querySelector('input[type="text"][name="-subTableSetting"]'),
+				document.querySelector('input[type="text"][name="-unitSetting"]'),
 			).not.toBeInTheDocument();
 			expect(
 				document.querySelector(
-					'input[type="text"][name="-subTableSettingEncoding"]',
+					'input[type="text"][name="-unitSettingEncoding"]',
 				),
 			).not.toBeInTheDocument();
 		});

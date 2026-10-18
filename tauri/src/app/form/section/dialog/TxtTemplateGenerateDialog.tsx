@@ -33,7 +33,7 @@ function requiredOption(element: CommandOption): CommandOption {
 	return { ...element, attribute: { ...element.attribute, required: true } };
 }
 
-// templateは常に生成・反映する。subTableSetting・srcは選択した場合のみダイアログに入力欄を表示して生成し、
+// templateは常に生成・反映する。unitSetting・srcは選択した場合のみダイアログに入力欄を表示して生成し、
 // scaffold実行結果もgenerateフォームへ反映する（どのセクションにも属さないキーは反映しない）
 const generateSections = [
 	{
@@ -43,10 +43,10 @@ const generateSections = [
 		match: (key: string) => key === "-template" || key.startsWith("-template."),
 	},
 	{
-		id: "subTableSetting",
-		label: "subTableSetting",
+		id: "unitSetting",
+		label: "unitSetting",
 		optional: true,
-		match: (key: string) => key.startsWith("-subTableSetting"),
+		match: (key: string) => key.startsWith("-unitSetting"),
 	},
 	{
 		id: "src",
@@ -56,7 +56,7 @@ const generateSections = [
 	},
 ] as const;
 
-type OptionalSectionId = "subTableSetting" | "src";
+type OptionalSectionId = "unitSetting" | "src";
 
 const optionalSections = generateSections.filter((section) => section.optional);
 
@@ -168,8 +168,8 @@ function TxtTemplateGenerateDialog({
 						element={withoutParameterTarget(options.target)}
 					/>
 					<PlainText prefix="" element={requiredOption(options.template)} />
-					{selected.has("subTableSetting") && (
-						<PlainText prefix="" element={options.subTableSetting} />
+					{selected.has("unitSetting") && (
+						<PlainText prefix="" element={options.unitSetting} />
 					)}
 					{withSrc && (
 						<>
