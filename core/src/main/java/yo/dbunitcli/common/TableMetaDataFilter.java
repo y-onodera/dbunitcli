@@ -4,37 +4,25 @@ import org.dbunit.dataset.ITableMetaData;
 
 import java.util.List;
 
-/**
- * テーブル名やシート名に対するフィルタリング機能を提供するインターフェース。
- */
 public interface TableMetaDataFilter extends yo.dbunitcli.common.TargetFilter {
 
-    /**
-     * 指定された名前のリストを除外するフィルタを作成
-     *
-     * @param names 除外する名前のリスト
-     * @return フィルタのインスタンス
-     */
+    default TableMetaDataFilter or(final TableMetaDataFilter other) {
+        return new OrFilter(this, other);
+    }
+
+    default TableMetaDataFilter and(final TableMetaDataFilter other) {
+        return new AndFilter(this, other);
+    }
+
     @Override
     default TableMetaDataFilter exclude(final List<String> names) {
         return new ExcludeFilter(this, names);
     }
 
-    /**
-     * フィルタの判定を実行
-     *
-     * @return フィルタ条件に一致する場合true
-     */
-    default boolean test(final ITableMetaData originMetaData) {
-        return this.test(originMetaData.getTableName());
+    default boolean test(final ITableMetaData metaData) {
+        return this.test(metaData.getTableName());
     }
 
-    /**
-     * 指定された名前のリストを除外するフィルタ
-     *
-     * @param base  基本となるフィルタ
-     * @param names 除外する名前のリスト
-     */
     record ExcludeFilter(TableMetaDataFilter base, List<String> names) implements TableMetaDataFilter {
         @Override
         public boolean test(final String tableName) {
@@ -42,4 +30,27 @@ public interface TableMetaDataFilter extends yo.dbunitcli.common.TargetFilter {
         }
     }
 
+    record OrFilter(TableMetaDataFilter some, TableMetaDataFilter other) implements TableMetaDataFilter {
+        @Override
+        public boolean test(final ITableMetaData metaData) {
+            return this.some.test(metaData) || this.other.test(metaData);
+        }
+
+        @Override
+        public boolean test(final String tableName) {
+            return this.some.test(tableName) || this.other.test(tableName);
+        }
+    }
+
+    record AndFilter(TableMetaDataFilter some, TableMetaDataFilter other) implements TableMetaDataFilter {
+        @Override
+        public boolean test(final ITableMetaData metaData) {
+            return this.some.test(metaData) && this.other.test(metaData);
+        }
+
+        @Override
+        public boolean test(final String tableName) {
+            return this.some.test(tableName) && this.other.test(tableName);
+        }
+    }
 }

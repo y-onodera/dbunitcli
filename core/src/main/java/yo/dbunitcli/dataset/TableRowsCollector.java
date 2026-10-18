@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-final class TableRowsCollector implements IDataSetConverter {
+public final class TableRowsCollector implements IDataSetConverter {
 
     private final String targetTableName;
     private final List<Map<String, Object>> rows;
     private AddSettingTableMetaData currentMetaData;
 
-    TableRowsCollector(final String targetTableName) {
+    public TableRowsCollector(final String targetTableName) {
         this(targetTableName, new ArrayList<>());
     }
 
@@ -21,7 +21,7 @@ final class TableRowsCollector implements IDataSetConverter {
         this.rows = rows;
     }
 
-    List<Map<String, Object>> getRows() {
+    public List<Map<String, Object>> getRows() {
         return this.rows;
     }
 

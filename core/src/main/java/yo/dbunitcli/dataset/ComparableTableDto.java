@@ -6,7 +6,6 @@ import org.dbunit.dataset.ITableMetaData;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,8 +30,8 @@ public class ComparableTableDto extends HashMap<String, Object> {
             this.setPrimaryKeys(tableMetaData.getPrimaryKeys());
             final List<Column> keys = Arrays.asList(tableMetaData.getPrimaryKeys());
             this.setColumnsExcludeKey(Arrays.stream(tableMetaData.getColumns())
-                    .filter(it -> !keys.contains(it))
-                    .toArray(Column[]::new));
+                                            .filter(it -> !keys.contains(it))
+                                            .toArray(Column[]::new));
         } catch (final DataSetException e) {
             throw new RuntimeException(e);
         }
@@ -46,36 +45,36 @@ public class ComparableTableDto extends HashMap<String, Object> {
         return this.get("tableName").toString();
     }
 
-    public Column[] getColumns() {
-        return (Column[]) this.get("columns");
-    }
-
-    public Column[] getPrimaryKeys() {
-        return (Column[]) this.get("primaryKeys");
-    }
-
-    public Column[] getColumnsExcludeKey() {
-        return (Column[]) this.get("columnsExcludeKey");
-    }
-
-    public Object getRows() {
-        return this.get("rows");
-    }
-
     public void setTableName(final String tableName) {
         this.put("tableName", tableName);
+    }
+
+    public Column[] getColumns() {
+        return (Column[]) this.get("columns");
     }
 
     public void setColumns(final Column[] columns) {
         this.put("columns", columns);
     }
 
+    public Column[] getPrimaryKeys() {
+        return (Column[]) this.get("primaryKeys");
+    }
+
     public void setPrimaryKeys(final Column[] primaryKeys) {
         this.put("primaryKeys", primaryKeys);
     }
 
+    public Column[] getColumnsExcludeKey() {
+        return (Column[]) this.get("columnsExcludeKey");
+    }
+
     public void setColumnsExcludeKey(final Column[] columnsExcludeKey) {
         this.put("columnsExcludeKey", columnsExcludeKey);
+    }
+
+    public Object getRows() {
+        return this.get("rows");
     }
 
     public void setRows(final List<Map<String, Object>> rows) {
@@ -86,15 +85,4 @@ public class ComparableTableDto extends HashMap<String, Object> {
         this.task = task;
         this.put("rows", task);
     }
-
-    public Map<String, Object> resolve(final TableSeparators tableSeparators) {
-        if (this.task == null) {
-            return this;
-        }
-        final Map<String, Object> result = new LinkedHashMap<>(this);
-        result.put("rows", this.task.resolveRows(tableSeparators));
-        result.put("dataset", this.task.resolveDataSet(tableSeparators));
-        return result;
-    }
-
 }

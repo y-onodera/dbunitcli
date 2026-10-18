@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * null値または空文字列の場合、セル自体を作成しないCellDataデコレータ
  */
-class CaptureWriteCellCellData extends PoiCellData {
+public class CaptureWriteCellCellData extends PoiCellData {
     private final PoiCellData delegate;
     private Cell cell;
 
@@ -26,7 +26,7 @@ class CaptureWriteCellCellData extends PoiCellData {
     }
 
     public Cell getCell() {
-        return cell;
+        return this.cell;
     }
 
     @Override

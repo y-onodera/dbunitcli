@@ -2,11 +2,7 @@ package yo.dbunitcli.dataset;
 
 import yo.dbunitcli.common.Source;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Consumer;
 
 public interface ComparableTableMappingTask {
@@ -15,7 +11,21 @@ public interface ComparableTableMappingTask {
 
     ComparableDataSetParam param();
 
+    default TableSeparators targetTableSeparators() {
+        return this.param().tableSeparators();
+    }
+
     void run(ComparableTableMappingContext context);
+
+    default TreeMap<String, ComparableTable> runWith(final Consumer<TableSeparators.Builder> editor,
+                                                     IDataSetConverter converter) {
+        ComparableTableMappingContext context = new ComparableTableMappingContext(
+                this.targetTableSeparators().map(editor)
+                , converter);
+        context.open();
+        this.run(context);
+        return context.close();
+    }
 
     default ComparableTableMappingTask with(final Consumer<ComparableDataSetParam.Builder> consumer) {
         final ComparableDataSetParam.Builder builder = this.param().toBuilder();
@@ -51,37 +61,15 @@ public interface ComparableTableMappingTask {
         }
 
         @Override
-        public ComparableTableMappingTask with(final Consumer<ComparableDataSetParam.Builder> consumer) {
-            return new WithTargetTable(this.targetTableName, this.head().with(consumer), this.rest.stream().map(it -> it.with(consumer)).toList());
+        public ComparableTableMappingTask.WithTargetTable with(
+                final Consumer<ComparableDataSetParam.Builder> consumer) {
+            return new WithTargetTable(this.targetTableName, this.head().with(consumer),
+                                       this.rest.stream().map(it -> it.with(consumer)).toList());
         }
 
         @Override
         public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
             return this.head().with(builder);
-        }
-
-        public TableSeparators targetTableSeparators() {
-            return this.param().tableSeparators();
-        }
-
-        public List<Map<String, Object>> resolveRows(final TableSeparators unitTableSeparators) {
-            final TableRowsCollector collector = new TableRowsCollector(this.targetTableName());
-            this.runWith(new ComparableTableMappingContext(this.targetTableSeparators().then(unitTableSeparators, this.targetTableName()), collector)).close();
-            return collector.getRows();
-        }
-
-        public Map<String, Object> resolveDataSet(final TableSeparators unitTableSeparators) {
-            final TreeMap<String, ComparableTable> tableMap = this.runWith(
-                    new ComparableTableMappingContext(this.targetTableSeparators().then(unitTableSeparators, this.targetTableName()), null)).close();
-            final Map<String, Object> result = new LinkedHashMap<>();
-            tableMap.forEach((tableName, table) -> result.put(tableName, table.toMap(true).getFirst()));
-            return result;
-        }
-
-        private ComparableTableMappingContext runWith(final ComparableTableMappingContext context) {
-            context.open();
-            this.run(context);
-            return context;
         }
 
         public WithTargetTable chain(final WithTargetTable target) {

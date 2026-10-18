@@ -12,15 +12,15 @@ public record WithFilePathMatchFilter(TableMetaDataFilter base, Pattern filePath
     }
 
     @Override
-    public boolean test(final ITableMetaData originMetaData) {
-        if (originMetaData instanceof final TableMetaDataWithSource withSource) {
+    public boolean test(final ITableMetaData metaData) {
+        if (metaData instanceof final TableMetaDataWithSource withSource) {
             if (!this.filePath().matcher(withSource.source().filePath()).matches()) {
                 return false;
             }
         } else {
             return false;
         }
-        return this.base.test(originMetaData);
+        return this.base.test(metaData);
     }
 
     @Override

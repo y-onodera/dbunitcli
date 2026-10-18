@@ -18,6 +18,7 @@ import yo.dbunitcli.resource.FileResources;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -35,7 +36,6 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
              GenerateOption.getGenerateType(dto), GenerateOption.getGenerateType(dto).isFixedTemplate() ?
                      GenerateOption.getGenerateType(dto).getFixedUnit() :
                      dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record,
-             // 固定テンプレートは組み込み設定（defaultSettingsPath）固定のため、指定されたsubTableSettingは無視する
              !GenerateOption.getGenerateType(dto).isFixedTemplate() && Strings.isNotEmpty(dto.getSubTableSetting())
                      ? dto.getSubTableSetting() : "",
              !GenerateOption.getGenerateType(dto).isFixedTemplate() && Strings.isNotEmpty(dto.getSubTableSettingEncoding())
@@ -87,7 +87,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
 
     public TableSeparators unitTableSeparators() {
         if (Strings.isEmpty(this.subTableSetting)) {
-            final TableSeparators defaultTableSeparators = this.classpathDefaultTableSeparators(this.subTableSettingEncoding);
+            final TableSeparators defaultTableSeparators = this.classpathDefaultTableSeparators();
             if (defaultTableSeparators != null) {
                 return defaultTableSeparators;
             }
@@ -99,10 +99,10 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         }
     }
 
-    private TableSeparators classpathDefaultTableSeparators(final String settingEncoding) {
+    private TableSeparators classpathDefaultTableSeparators() {
         final String defaultSettings = this.generateType().defaultSettingsPath();
         return defaultSettings == null ? null
-                : new FromJsonTableSeparatorsBuilder(settingEncoding).loadFromClasspath(defaultSettings).build();
+                : new FromJsonTableSeparatorsBuilder(StandardCharsets.UTF_8.toString()).loadFromClasspath(defaultSettings).build();
     }
 
     public File resultFile(final Parameter param) {
@@ -180,11 +180,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
-        // defaultSettingsPath()のロード時適用は、実データ行をテンプレートへ渡す型（loadData=true）にのみ意味がある。
-        // wrapProducer()で記述子行を合成する型（loadData=false）に適用すると、変換ルールが合成前の
-        // 元ソース列に対して評価され、余計な列が記述子に混入する
         if (this.generateType().loadData() && Strings.isEmpty(this.srcData.getSetting())) {
-            final TableSeparators defaultTableSeparators = this.classpathDefaultTableSeparators(this.srcData.settingEncoding());
+            final TableSeparators defaultTableSeparators = this.classpathDefaultTableSeparators();
             if (defaultTableSeparators != null) {
                 builder.setTableSeparators(defaultTableSeparators);
             }
@@ -211,5 +208,4 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         }
         return templateComponent.build();
     }
-
 }
