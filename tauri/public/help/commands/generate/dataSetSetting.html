@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ヘルプ - Generate: subTableSetting</title>
+  <title>ヘルプ - Generate: dataSetSetting</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
     h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
@@ -23,34 +23,34 @@
 </head>
 <body>
   <p><a href="../generate.html">&larr; Generate に戻る</a></p>
-  <h1>subTableSetting</h1>
+  <h1>dataSetSetting</h1>
   <p><a href="../generate.html">Generate</a> の <code>unit=table</code> で、<strong>テンプレートに渡す前に、1 つのテーブルから条件別の「サブテーブル」を作り、列の値も整形しておく</strong>ための設定ファイルです。<code>generateType=txt</code> などテンプレート指定タイプで使います（<code>xlsx</code> / <code>xls</code> と固定成果物タイプでは指定できません。固定成果物タイプには組み込み設定が使われます）。</p>
 
   <h2>概要</h2>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>subTableSetting</td><td>サブテーブル設定ファイルのパス</td><td>（空、組み込み設定を使用）</td></tr>
-    <tr><td>subTableSettingEncoding</td><td>subTableSetting ファイルの文字コード</td><td>システムデフォルト</td></tr>
+    <tr><td>dataSetSetting</td><td>サブテーブル設定ファイルのパス</td><td>（空、組み込み設定を使用）</td></tr>
+    <tr><td>dataSetSettingEncoding</td><td>dataSetSetting ファイルの文字コード</td><td>システムデフォルト</td></tr>
   </table>
   <p>未指定のときは、<code>generateType</code> に応じた組み込み設定が使われます（<code>ddl</code> / <code>xlsxSchema</code> / <code>javaBean</code> のみ。<code>txt</code> では何も適用されません）。</p>
 
   <h3>何のための設定か</h3>
   <p><code>unit=table</code> のテンプレートが受け取る <code>rows</code> は「そのテーブルの全行」の 1 つだけです。StringTemplate には行を条件で絞って繰り返す書き方がないため、<strong>テンプレートの中で「条件を変えて複数回ループする」ことはできません</strong>（例: 状態が <code>OPEN</code> の行と <code>CLOSED</code> の行を別々のブロックに出力する、主キーの行だけを <code>PRIMARY KEY (...)</code> に並べる）。</p>
-  <p>subTableSetting は、この絞り込みを<strong>テンプレートの外で先に済ませる</strong>ための設定です。条件ごとに<strong>サブテーブル</strong>を作っておくと、テンプレートは <code>subTable.{サブテーブル名}.rows</code> を条件の数だけ繰り返すだけで済みます。元のテーブルは <code>rows</code>、サブテーブルは <code>subTable.{サブテーブル名}.rows</code> として参照できます。</p>
+  <p>dataSetSetting は、この絞り込みを<strong>テンプレートの外で先に済ませる</strong>ための設定です。条件ごとに<strong>サブテーブル</strong>を作っておくと、テンプレートは <code>subTable.{サブテーブル名}.rows</code> を条件の数だけ繰り返すだけで済みます。元のテーブルは <code>rows</code>、サブテーブルは <code>subTable.{サブテーブル名}.rows</code> として参照できます。</p>
   <table>
     <tr><th>ステップ</th><th>やること</th></tr>
-    <tr><td>(1)</td><td>subTableSetting の <code>separate</code> に、条件ごとの要素を並べる（<code>tableName</code> でサブテーブル名、<code>filter</code> で残す行の条件）</td></tr>
+    <tr><td>(1)</td><td>dataSetSetting の <code>separate</code> に、条件ごとの要素を並べる（<code>tableName</code> でサブテーブル名、<code>filter</code> で残す行の条件）</td></tr>
     <tr><td>(2)</td><td>テーブルごとのテンプレート呼び出しで、元のテーブルは <code>rows</code>、サブテーブルは <code>subTable.{サブテーブル名}.rows</code> としてテンプレートに渡される</td></tr>
     <tr><td>(3)</td><td>テンプレートで <code>rows</code> や <code>subTable.{サブテーブル名}.rows</code> をそれぞれ繰り返す</td></tr>
   </table>
   <p>サブテーブルを作らなくても、テンプレートが読む前のデータを整えるために使えます。</p>
   <table>
-    <tr><th>やりたいこと</th><th>subTableSetting での書き方</th><th>テンプレートでの使い方</th></tr>
+    <tr><th>やりたいこと</th><th>dataSetSetting での書き方</th><th>テンプレートでの使い方</th></tr>
     <tr><td>空欄を「値なし」、<code>"false"</code> を偽として判定したい</td><td><code>string</code> / <code>boolean</code> で式を書き、null や真偽値に変換した列を作る</td><td><code>$if(row.列名)$</code> / <code>$if(!row.列名)$</code> で判定する</td></tr>
     <tr><td>テンプレートに書きたくない判定・変換をまとめたい（型の読み替え、クラス名の組み立てなど）</td><td><code>string</code> に式を書いて派生列を足す</td><td><code>$row.派生列$</code> を出力するだけにできる</td></tr>
     <tr><td>使う列・行を絞りたい、並べ替えたい</td><td><code>include</code> / <code>exclude</code> / <code>filter</code> / <code>order</code> / <code>distinct</code></td><td>そのまま <code>rows</code> を繰り返す</td></tr>
   </table>
-  <p>判定や抽出のロジックを subTableSetting に寄せると、テンプレート側の式が単純になります。<strong>逆に、テンプレートが参照する列・サブテーブルは subTableSetting が用意しておく必要があります。</strong></p>
+  <p>判定や抽出のロジックを dataSetSetting に寄せると、テンプレート側の式が単純になります。<strong>逆に、テンプレートが参照する列・サブテーブルは dataSetSetting が用意しておく必要があります。</strong></p>
 
   <h2>基本の例: 条件別に 2 回ループする</h2>
   <p><strong>入力</strong>（<code>ORDERS.csv</code>）</p>
@@ -60,7 +60,7 @@
     <tr><td>2</td><td>Banana</td><td>CLOSED</td></tr>
     <tr><td>3</td><td>Cherry</td><td>OPEN</td></tr>
   </table>
-  <p><strong>subTableSetting</strong> — 状態ごとのサブテーブルを作ります。</p>
+  <p><strong>dataSetSetting</strong> — 状態ごとのサブテーブルを作ります。</p>
 <pre>{
   "settings": [
     {
@@ -100,7 +100,7 @@ $rows:{row | $row.ID$: $row.NAME$ ($row.STATUS$)}; separator="\n"$</pre>
   <p>設定の <code>pattern</code> が <code>.*</code> のときの重複に注意してください（「仕様」の注意点を参照）。</p>
 
   <h2>仕様</h2>
-  <p>subTableSetting は <a href="../../dialogs/dataset-settings.html">Dataset Settings</a> と同じ JSON 形式（<code>settings</code> / <code>commonSettings</code>）の設定ファイルです。<strong>src の setting を適用した後の状態</strong>に対して、テーブルごとにテンプレートへ渡す前に適用され、<strong>テンプレートから見えるデータの形</strong>を次の 3 点で変えられます。</p>
+  <p>dataSetSetting は <a href="../../dialogs/dataset-settings.html">Dataset Settings</a> と同じ JSON 形式（<code>settings</code> / <code>commonSettings</code>）の設定ファイルです。<strong>src の setting を適用した後の状態</strong>に対して、テーブルごとにテンプレートへ渡す前に適用され、<strong>テンプレートから見えるデータの形</strong>を次の 3 点で変えられます。</p>
   <ul>
     <li><strong>rows</strong>: 各行に持たせる列（値・型）、残す行、並び順</li>
     <li><strong>subTable</strong>: どのテーブルがあるか（サブテーブルの追加・名前）と、各テーブルのカラム情報</li>
@@ -109,11 +109,11 @@ $rows:{row | $row.ID$: $row.NAME$ ($row.STATUS$)}; separator="\n"$</pre>
 
   <h3>テンプレートに渡る変数</h3>
   <table>
-    <tr><th>変数</th><th>内容</th><th>subTableSetting の影響</th></tr>
+    <tr><th>変数</th><th>内容</th><th>dataSetSetting の影響</th></tr>
     <tr><td>tableName</td><td>テーブル名（例: <code>EMPLOYEE</code>）</td><td>なし（元のテーブル名のまま）</td></tr>
     <tr><td>columns / primaryKeys / columnsExcludeKey</td><td>入力データのカラム定義</td><td>なし。設定後のカラム情報は <code>subTable.{テーブル名}.columns</code> などで参照する</td></tr>
     <tr><td>rows</td><td>このテーブルの行（<code>row.列名</code> で参照）</td><td>あり。追加した列は各行の末尾に付き、同名の列は上書きされる。元の列は残る。<code>include</code> / <code>exclude</code> / <code>filter</code> / <code>order</code> / <code>distinct</code> もここに反映される</td></tr>
-    <tr><td>subTable</td><td>設定の結果できたテーブルの一覧（<code>subTable.{テーブル名}.rows</code>）。キーはテーブル名の昇順。<code>unit=table</code> では、そのテーブル単位と、subTableSetting の <code>separate</code> で作ったサブテーブルだけが入る（src の setting で分けた他のテーブルは、別名を付けたかどうかに関わらず含まれない）</td><td>あり。<code>separate</code> で作ったサブテーブルが <code>subTable.PK</code> のように加わる。各テーブルの <code>columns</code> / <code>primaryKeys</code> にも設定が反映される</td></tr>
+    <tr><td>subTable</td><td>設定の結果できたテーブルの一覧（<code>subTable.{テーブル名}.rows</code>）。キーはテーブル名の昇順。<code>unit=table</code> では、そのテーブル単位と、dataSetSetting の <code>separate</code> で作ったサブテーブルだけが入る（src の setting で分けた他のテーブルは、別名を付けたかどうかに関わらず含まれない）</td><td>あり。<code>separate</code> で作ったサブテーブルが <code>subTable.PK</code> のように加わる。各テーブルの <code>columns</code> / <code>primaryKeys</code> にも設定が反映される</td></tr>
   </table>
 
   <h3>設定キーとテンプレートへの影響</h3>
@@ -141,7 +141,7 @@ $rows:{row | $row.ID$: $row.NAME$ ($row.STATUS$)}; separator="\n"$</pre>
   </ul>
 
   <h2>組み込みでの使われ方</h2>
-  <p><code>ddl</code> / <code>xlsxSchema</code> / <code>javaBean</code> は、次のような subTableSetting を内蔵しています（<a href="../../dialogs/txt-template-generate.html">Scaffold</a> でワークスペースへ書き出せます）。上の考え方をそのまま使っており、自分でテンプレートを書くときの手本になります。</p>
+  <p><code>ddl</code> / <code>xlsxSchema</code> / <code>javaBean</code> は、次のような dataSetSetting を内蔵しています（<a href="../../dialogs/txt-template-generate.html">Scaffold</a> でワークスペースへ書き出せます）。上の考え方をそのまま使っており、自分でテンプレートを書くときの手本になります。</p>
   <table>
     <tr><th>generateType</th><th>組み込みの設定ファイル</th><th>条件別ループとしての使われ方</th></tr>
     <tr><td>ddl</td><td><code>sql/ddlSettings.json</code></td><td>全カラムを <code>rows</code> で繰り返して列定義を出し、<code>filter: ["IS_PK"]</code> で作った <code>PK</code> サブテーブルを <code>subTable.PK.rows</code> で繰り返して <code>PRIMARY KEY (...)</code> を出す（<strong>全行ループと主キーのみループの 2 回</strong>）。あわせて空欄の null 化と <code>NULLABLE</code> / <code>IS_PK</code> の真偽値化も行う</td></tr>
@@ -149,10 +149,10 @@ $rows:{row | $row.ID$: $row.NAME$ ($row.STATUS$)}; separator="\n"$</pre>
     <tr><td>javaBean</td><td><code>javabean/javaBeanSettings.json</code></td><td>サブテーブルは作らず、全テーブルに共通で派生列（<code>className</code> / <code>javaType</code> / <code>isBoolean</code> など）を足して、テンプレートの判定を不要にする</td></tr>
     <tr><td>fixedColumnDef</td><td>（組み込みなし。Scaffold のサンプル <code>fixedcolumndef/fixedColumnDefSettings.json</code>）</td><td>テンプレートが読む列（<code>name</code> / <code>length</code> / <code>align</code> / <code>pad</code>）をそのまま通すだけのサンプル。他のデータソースの列名に合わせて書き換える起点にする</td></tr>
   </table>
-  <p>固定成果物タイプの設定は、<code>generateType=txt</code> に切り替えて <code>subTableSetting</code> に自作のファイルを指定すると差し替えられます（下の例 1・例 2 参照）。</p>
+  <p>固定成果物タイプの設定は、<code>generateType=txt</code> に切り替えて <code>dataSetSetting</code> に自作のファイルを指定すると差し替えられます（下の例 1・例 2 参照）。</p>
 
   <h2>例 1: ddl の組み込み設定とテンプレートを読み解く</h2>
-  <p><a href="types/ddl.html">ddl</a> の組み込み設定（<code>sql/ddlSettings.json</code>）とテンプレート（<code>sql/ddlTemplate.stg</code>）で、subTableSetting の有無によるテンプレートの動きの違いを示します。どちらも <a href="../../dialogs/txt-template-generate.html">Scaffold</a> ダイアログ（<code>generateType=txt</code> のとき unit の上の Scaffold ボタンから開く）でワークスペースに書き出して編集でき、フォームの <code>subTableSetting</code> / <code>template</code> に指定して使います。</p>
+  <p><a href="types/ddl.html">ddl</a> の組み込み設定（<code>sql/ddlSettings.json</code>）とテンプレート（<code>sql/ddlTemplate.stg</code>）で、dataSetSetting の有無によるテンプレートの動きの違いを示します。どちらも <a href="../../dialogs/txt-template-generate.html">Scaffold</a> ダイアログ（<code>generateType=txt</code> のとき unit の上の Scaffold ボタンから開く）でワークスペースに書き出して編集でき、フォームの <code>dataSetSetting</code> / <code>template</code> に指定して使います。</p>
 
   <p><strong>1. 入力（記述子データセット）</strong> — 1 カラム = 1 行で、テーブルごとに渡されます（例: <code>EMPLOYEE</code>）。以降の出力例は、この入力を CSV にして実際に生成した結果です。</p>
   <table>
@@ -162,7 +162,7 @@ $rows:{row | $row.ID$: $row.NAME$ ($row.STATUS$)}; separator="\n"$</pre>
     <tr><td>SALARY</td><td>DECIMAL</td><td>10</td><td>2</td><td>true</td><td>false</td><td>（空）</td><td>給与</td><td>社員マスタ</td></tr>
   </table>
 
-  <p><strong>2. subTableSetting（<code>ddlSettings.json</code> の抜粋）</strong></p>
+  <p><strong>2. dataSetSetting（<code>ddlSettings.json</code> の抜粋）</strong></p>
 <pre>{
   "settings": [
     {
@@ -197,11 +197,11 @@ CREATE TABLE $tableName; format="upper"$ (
     $endif$
 );
 &gt;&gt;</pre>
-  <p>テンプレートに書かれているのは「サイズがあれば <code>(サイズ)</code> を付ける」「NOT NULL ならそう出力する」「<code>subTable.PK</code> があれば主キー句を出す」だけで、型の判定や主キー行の抽出といったロジックは subTableSetting 側が受け持っています（組み込みテンプレートは <code>PK_NAME</code> があればそれを制約名に使いますが、抜粋では省略しています）。</p>
+  <p>テンプレートに書かれているのは「サイズがあれば <code>(サイズ)</code> を付ける」「NOT NULL ならそう出力する」「<code>subTable.PK</code> があれば主キー句を出す」だけで、型の判定や主キー行の抽出といったロジックは dataSetSetting 側が受け持っています（組み込みテンプレートは <code>PK_NAME</code> があればそれを制約名に使いますが、抜粋では省略しています）。</p>
 
   <p><strong>4. テンプレートから見たデータの形</strong> — 上の入力・設定・テンプレートの組み合わせで、テンプレートに渡る <code>rows</code> と <code>subTable</code> の違いです。</p>
   <table>
-    <tr><th>subTableSetting あり（<code>ddlSettings.json</code>）</th><th>subTableSetting なし（<code>generateType=txt</code> で未指定）</th></tr>
+    <tr><th>dataSetSetting あり（<code>ddlSettings.json</code>）</th><th>dataSetSetting なし（<code>generateType=txt</code> で未指定）</th></tr>
     <tr>
       <td><pre>rows[0]
   COLUMN_NAME    = "EMPLOYEE_ID"
@@ -239,14 +239,14 @@ subTable（キーは EMPLOYEE のみ）
   </table>
   <p>テンプレートを書くうえでの違いは次のとおりです。</p>
   <table>
-    <tr><th>テンプレートの記述</th><th>subTableSetting あり</th><th>subTableSetting なし</th></tr>
+    <tr><th>テンプレートの記述</th><th>dataSetSetting あり</th><th>dataSetSetting なし</th></tr>
     <tr><td><code>$if(row.DECIMAL_DIGITS)$</code></td><td>null（空欄）のときは偽、値があるときは真</td><td>空文字 <code>""</code> も真として扱われる（空欄でも常に真）</td></tr>
     <tr><td><code>$if(!row.NULLABLE)$</code></td><td><code>false</code> のときだけ真（NOT NULL を出力）</td><td>文字列 <code>"false"</code> も真となり、常に偽になる</td></tr>
     <tr><td><code>$subTable.PK.rows$</code></td><td>主キーの行だけの一覧</td><td>参照先が無く、空になる（主キー句を出せない）</td></tr>
   </table>
   <p><strong>5. レンダリング結果の比較</strong></p>
   <table>
-    <tr><th>subTableSetting あり（<code>ddlSettings.json</code>）</th><th>subTableSetting なし（<code>generateType=txt</code> で未指定）</th></tr>
+    <tr><th>dataSetSetting あり（<code>ddlSettings.json</code>）</th><th>dataSetSetting なし（<code>generateType=txt</code> で未指定）</th></tr>
     <tr>
       <td><pre>CREATE TABLE EMPLOYEE (
     EMPLOYEE_ID INTEGER(10) NOT NULL,
@@ -261,7 +261,7 @@ subTable（キーは EMPLOYEE のみ）
 );</pre></td>
     </tr>
   </table>
-  <p>subTableSetting が無いと、テンプレートが前提とする整形が行われないため、次のようにテンプレートを書いても期待どおりに動きません。</p>
+  <p>dataSetSetting が無いと、テンプレートが前提とする整形が行われないため、次のようにテンプレートを書いても期待どおりに動きません。</p>
   <ul>
     <li><strong>NOT NULL が付かない</strong>（<code>EMPLOYEE_ID</code> に付かない）: <code>NULLABLE</code> が文字列のままだと <code>"false"</code> も真として扱われ、<code>$if(!row.NULLABLE)$</code> が常に偽になります。</li>
     <li><strong>主キー句が出ない</strong>: <code>PK</code> サブテーブルが作られないため <code>subTable.PK.rows</code> が空になります。</li>
@@ -269,8 +269,8 @@ subTable（キーは EMPLOYEE のみ）
   </ul>
 
   <h2>例 2: 組み込みを改造する（コメントの既定値を追加）</h2>
-  <p>組み込みの DDL では、備考（<code>REMARKS</code>）が空のカラムは <code>COMMENT ON COLUMN ... IS ''</code> と空のコメントになります。ここでは、備考が空なら<strong>カラム名をコメントにする</strong>ように、subTableSetting とテンプレートの両方に手を加えます。</p>
-  <p><strong>1. subTableSetting: 判定を設定側に追加する</strong> — <code>ddlSettings.json</code> の最初の <code>separate</code> の <code>string</code> に、<code>COMMENT_TEXT</code> を 1 行足します。</p>
+  <p>組み込みの DDL では、備考（<code>REMARKS</code>）が空のカラムは <code>COMMENT ON COLUMN ... IS ''</code> と空のコメントになります。ここでは、備考が空なら<strong>カラム名をコメントにする</strong>ように、dataSetSetting とテンプレートの両方に手を加えます。</p>
+  <p><strong>1. dataSetSetting: 判定を設定側に追加する</strong> — <code>ddlSettings.json</code> の最初の <code>separate</code> の <code>string</code> に、<code>COMMENT_TEXT</code> を 1 行足します。</p>
 <pre>"string": {
   "COLUMN_NAME": "COLUMN_NAME",
   "TYPE_NAME": "TYPE_NAME",
@@ -294,12 +294,12 @@ COMMENT ON COLUMN EMPLOYEE.EMPLOYEE_NAME IS '氏名';
 COMMENT ON COLUMN EMPLOYEE.SALARY IS 'SALARY';</pre></td>
     </tr>
   </table>
-  <p>テンプレートだけを書き換えて subTableSetting に <code>COMMENT_TEXT</code> を足さないと、テンプレートが参照する変数が存在しないため、コメントはすべて空（<code>IS ''</code>）になります。<strong>テンプレートが参照する変数・サブテーブルは、対応する subTableSetting とペアで編集してください。</strong>書き出した設定とテンプレートは、フォームの <code>subTableSetting</code> / <code>template</code> に指定すると組み込みの代わりに使われます。</p>
+  <p>テンプレートだけを書き換えて dataSetSetting に <code>COMMENT_TEXT</code> を足さないと、テンプレートが参照する変数が存在しないため、コメントはすべて空（<code>IS ''</code>）になります。<strong>テンプレートが参照する変数・サブテーブルは、対応する dataSetSetting とペアで編集してください。</strong>書き出した設定とテンプレートは、フォームの <code>dataSetSetting</code> / <code>template</code> に指定すると組み込みの代わりに使われます。</p>
   <p>手を加える範囲の目安は次のとおりです。</p>
   <ul>
     <li>表示を変えるだけ（文言・並び・インデント）: テンプレートだけを編集する。</li>
-    <li>判定や変換を足したい（空欄の既定値、型の読み替え、条件分岐の元になるフラグ）: subTableSetting に <code>string</code> / <code>boolean</code> を足し、テンプレートで参照する。</li>
-    <li>一部の行を別に扱いたい（主キーだけ、特定の列だけ）: subTableSetting の <code>separate</code> + <code>filter</code> でサブテーブルを作り、テンプレートで <code>subTable.{名前}.rows</code> を参照する。</li>
+    <li>判定や変換を足したい（空欄の既定値、型の読み替え、条件分岐の元になるフラグ）: dataSetSetting に <code>string</code> / <code>boolean</code> を足し、テンプレートで参照する。</li>
+    <li>一部の行を別に扱いたい（主キーだけ、特定の列だけ）: dataSetSetting の <code>separate</code> + <code>filter</code> でサブテーブルを作り、テンプレートで <code>subTable.{名前}.rows</code> を参照する。</li>
   </ul>
 </body>
 </html>

@@ -6578,10 +6578,10 @@
           "name": "unit"
         },
         {
-          "name": "subTableSetting"
+          "name": "dataSetSetting"
         },
         {
-          "name": "subTableSettingEncoding"
+          "name": "dataSetSettingEncoding"
         }
       ]
     },
@@ -6645,7 +6645,7 @@
           "name": "templateName"
         },
         {
-          "name": "subTableSettingName"
+          "name": "dataSetSettingName"
         }
       ]
     },

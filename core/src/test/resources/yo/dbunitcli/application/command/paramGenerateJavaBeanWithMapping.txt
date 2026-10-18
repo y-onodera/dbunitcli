@@ -2,7 +2,7 @@
 -src=src/test/resources/yo/dbunitcli/application/src/generate/jdbc_metadata_mapped
 -encoding=UTF-8
 -setting=src/test/resources/yo/dbunitcli/application/command/javaBeanMappingSettings.json
--subTableSetting=src/main/resources/javabean/javaBeanSettings.json
+-dataSetSetting=src/main/resources/javabean/javaBeanSettings.json
 -settingEncoding=UTF-8
 -generateType=txt
 -unit=table

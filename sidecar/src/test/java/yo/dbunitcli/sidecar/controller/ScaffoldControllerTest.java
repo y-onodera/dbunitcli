@@ -63,7 +63,7 @@ class ScaffoldControllerTest {
     public void testExec_雛型を生成しtxt駆動generateパラメータを返す() throws IOException {
         final String jsonResponse = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/scaffold/exec",
-                        "{\"-target\":\"ddl\",\"-template\":\"scaffoldTpl\",\"-subTableSetting\":\"scaffoldUnit\""
+                        "{\"-target\":\"ddl\",\"-template\":\"scaffoldTpl\",\"-dataSetSetting\":\"scaffoldUnit\""
                                 + ",\"-dataset.src\":\"resources/src/csv\",\"-dataset.srcType\":\"csv\"}"));
         System.out.println(jsonResponse);
         JsonTestHelper.assertJsonEquals(
@@ -74,7 +74,7 @@ class ScaffoldControllerTest {
         Assertions.assertTrue(Files.exists(Paths.get(WORKSPACE, "resources/template/scaffoldTpl.txt")),
                 "テンプレート.txtがworkspaceのresources/templateに作成されること");
         Assertions.assertTrue(Files.exists(Paths.get(WORKSPACE, "resources/setting/scaffoldUnit.json")),
-                "subTableSettingがworkspaceのresources/settingに作成されること");
+                "dataSetSettingがworkspaceのresources/settingに作成されること");
         Assertions.assertTrue(Files.exists(Paths.get(WORKSPACE, "src/multi1.csv")),
                 "記述子datasetがworkspaceのsrcに作成されること");
         Assertions.assertTrue(Files.exists(Paths.get(WORKSPACE, "src/multi2.csv")),

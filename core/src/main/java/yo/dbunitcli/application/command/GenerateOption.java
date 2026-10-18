@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public record GenerateOption(Parameter parameter, String resultDir, String resultPath, GenerateType generateType,
-                             ParameterUnit unit, String subTableSetting, String subTableSettingEncoding, DbOperation operation,
+                             ParameterUnit unit, String dataSetSetting, String dataSetSettingEncoding, DbOperation operation,
                              String sqlFilePrefix, String sqlFileSuffix,
                              boolean commit, String template, String outputEncoding, DataSetLoadOption srcData,
                              TemplateRenderOption templateOption, boolean includeAllColumns, boolean lazyLoad,
@@ -36,10 +36,10 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
              GenerateOption.getGenerateType(dto), GenerateOption.getGenerateType(dto).isFixedTemplate() ?
                      GenerateOption.getGenerateType(dto).getFixedUnit() :
                      dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record,
-             !GenerateOption.getGenerateType(dto).isFixedTemplate() && Strings.isNotEmpty(dto.getSubTableSetting())
-                     ? dto.getSubTableSetting() : "",
-             !GenerateOption.getGenerateType(dto).isFixedTemplate() && Strings.isNotEmpty(dto.getSubTableSettingEncoding())
-                     ? dto.getSubTableSettingEncoding()
+             !GenerateOption.getGenerateType(dto).isFixedTemplate() && Strings.isNotEmpty(dto.getDataSetSetting())
+                     ? dto.getDataSetSetting() : "",
+             !GenerateOption.getGenerateType(dto).isFixedTemplate() && Strings.isNotEmpty(dto.getDataSetSettingEncoding())
+                     ? dto.getDataSetSettingEncoding()
                      : Charset.defaultCharset().displayName(),
              dto.getOperation(),
              Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : "",
@@ -86,14 +86,14 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     public TableSeparators unitTableSeparators() {
-        if (Strings.isEmpty(this.subTableSetting)) {
+        if (Strings.isEmpty(this.dataSetSetting)) {
             final TableSeparators defaultTableSeparators = this.classpathDefaultTableSeparators();
             if (defaultTableSeparators != null) {
                 return defaultTableSeparators;
             }
         }
         try {
-            return new FromJsonTableSeparatorsBuilder(this.subTableSettingEncoding).build(this.subTableSetting);
+            return new FromJsonTableSeparatorsBuilder(this.dataSetSettingEncoding).build(this.dataSetSetting);
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
@@ -143,8 +143,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             result.put("-unit", this.unit, ParameterUnit.class);
         }
         if (this.unit == ParameterUnit.table && !this.generateType.isExcel() && !this.generateType.isFixedTemplate()) {
-            result.putFile("-subTableSetting", this.subTableSetting, BaseDir.SETTING);
-            result.put("-subTableSettingEncoding", this.subTableSettingEncoding);
+            result.putFile("-dataSetSetting", this.dataSetSetting, BaseDir.SETTING);
+            result.put("-dataSetSettingEncoding", this.dataSetSettingEncoding);
         }
         if (!this.generateType.isFixedTemplate()) {
             result.putFile("-template", this.template, true, BaseDir.TEMPLATE);

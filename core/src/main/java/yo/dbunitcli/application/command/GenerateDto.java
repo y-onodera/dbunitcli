@@ -16,10 +16,10 @@ public class GenerateDto extends CommandDto {
     private String resultPath;
     @CommandLine.Option(names = "-unit", description = "generate by row or table or dataset")
     private ParameterUnit unit;
-    @CommandLine.Option(names = "-subTableSetting", description = "settings file used to resolve rows for table unit template generation")
-    private String subTableSetting;
-    @CommandLine.Option(names = "-subTableSettingEncoding", description = "encoding of subTableSetting file")
-    private String subTableSettingEncoding;
+    @CommandLine.Option(names = "-dataSetSetting", description = "settings file used to resolve rows for table unit template generation")
+    private String dataSetSetting;
+    @CommandLine.Option(names = "-dataSetSettingEncoding", description = "encoding of dataSetSetting file")
+    private String dataSetSettingEncoding;
     @CommandLine.Option(names = "-commit", description = "default commit;whether commit or not generate sql")
     private String commit;
     @CommandLine.Option(names = "-sqlFileSuffix", description = "generate sqlFile fileName suffix")
@@ -78,20 +78,20 @@ public class GenerateDto extends CommandDto {
         this.unit = unit;
     }
 
-    public String getSubTableSetting() {
-        return this.subTableSetting;
+    public String getDataSetSetting() {
+        return this.dataSetSetting;
     }
 
-    public void setSubTableSetting(final String subTableSetting) {
-        this.subTableSetting = subTableSetting;
+    public void setDataSetSetting(final String dataSetSetting) {
+        this.dataSetSetting = dataSetSetting;
     }
 
-    public String getSubTableSettingEncoding() {
-        return this.subTableSettingEncoding;
+    public String getDataSetSettingEncoding() {
+        return this.dataSetSettingEncoding;
     }
 
-    public void setSubTableSettingEncoding(final String subTableSettingEncoding) {
-        this.subTableSettingEncoding = subTableSettingEncoding;
+    public void setDataSetSettingEncoding(final String dataSetSettingEncoding) {
+        this.dataSetSettingEncoding = dataSetSettingEncoding;
     }
 
     public String getCommit() {

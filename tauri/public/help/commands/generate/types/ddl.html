@@ -24,7 +24,7 @@
 <body>
   <p><a href="../../generate.html">&larr; Generate に戻る</a></p>
   <h1>generateType: ddl</h1>
-  <p>データソースのメタデータ（テーブルのカラム情報）から CREATE TABLE 用の DDL ファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません（組み込み DDL テンプレートのみ使用されます）。ファイル名は <code>{sqlFilePrefix}{テーブル名}{sqlFileSuffix}.sql</code> になります。カラムの型・PK・NULL制約はソースのメタデータから取得します（JDBC ソースで <code>useJdbcMetaData</code> を有効にした場合に実値が入ります。CSV 等メタデータの無いソースではカラム名のみになります）。カラムサイズ・コメント・パッケージ名などメタデータに存在しない情報を含む完全な DDL を生成したい場合は、<a href="../../../dialogs/txt-template-generate.html">Scaffold</a>（scaffold コマンド）で書き出した記述子データセットを編集し、<code>generateType=txt</code> と <code>subTableSetting</code>（既定は <code>sql/ddlSettings.json</code>）で生成してください。</p>
+  <p>データソースのメタデータ（テーブルのカラム情報）から CREATE TABLE 用の DDL ファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません（組み込み DDL テンプレートのみ使用されます）。ファイル名は <code>{sqlFilePrefix}{テーブル名}{sqlFileSuffix}.sql</code> になります。カラムの型・PK・NULL制約はソースのメタデータから取得します（JDBC ソースで <code>useJdbcMetaData</code> を有効にした場合に実値が入ります。CSV 等メタデータの無いソースではカラム名のみになります）。カラムサイズ・コメント・パッケージ名などメタデータに存在しない情報を含む完全な DDL を生成したい場合は、<a href="../../../dialogs/txt-template-generate.html">Scaffold</a>（scaffold コマンド）で書き出した記述子データセットを編集し、<code>generateType=txt</code> と <code>dataSetSetting</code>（既定は <code>sql/ddlSettings.json</code>）で生成してください。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>sqlFilePrefix</td><td>生成 DDL ファイル名のプレフィックス</td><td>（空）</td></tr>

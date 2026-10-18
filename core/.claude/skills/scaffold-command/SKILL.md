@@ -4,13 +4,13 @@ TRIGGER when: command/Scaffold*.java の変更、またはscaffoldのtarget追�
 DO NOT TRIGGER when: 読み取りのみ、または他コマンド（Compare/Convert/Generate/Run/Parameterize）のみの変更。
 ---
 
-Scaffoldは、Generateの固定成果物型（`isFixedTemplate()=true`）を`generateType=txt`でカスタマイズ生成できるよう、subTableSetting/template/dataset/parameterの雛型を書き出すコマンド。`-target`対応は`ScaffoldTarget` enum（`command/ScaffoldTarget.java`）の定数＋`parameter`のみ。target追加はGenerate側の設計（`generate-command`スキルの4軸）に従属する。
+Scaffoldは、Generateの固定成果物型（`isFixedTemplate()=true`）を`generateType=txt`でカスタマイズ生成できるよう、dataSetSetting/template/dataset/parameterの雛型を書き出すコマンド。`-target`対応は`ScaffoldTarget` enum（`command/ScaffoldTarget.java`）の定数＋`parameter`のみ。target追加はGenerate側の設計（`generate-command`スキルの4軸）に従属する。
 
 ## 統一された4target共通仕様
 
 `ScaffoldOption.executeTarget()`が全targetで同一フローを実行し、target差分は`ScaffoldTarget`のフックに集約。各雛型は**対応オプションを明示指定した時のみ独立出力**（名前フォールバック・target間の非対称なし）:
 
-- `-subTableSetting=U` → サンプルsubTableSettingを`resources/setting/U.json`へコピー（`.param`には`-subTableSetting=resources/setting/U.json`として書き出す）
+- `-dataSetSetting=U` → サンプルdataSetSettingを`resources/setting/U.json`へコピー（`.param`には`-dataSetSetting=resources/setting/U.json`として書き出す）
 - `-template=T` → 組み込みstg/txtを`resources/template/`へ無改造コピー
 - `-dataset.src`+`-dataset.srcType` → `src/`に記述子dataset（1カラム=1行。`GenerateType.wrapProducer()`と同じproducerを直接インスタンス化し実メタデータから合成）
 - `-parameter=P` → `option/P.param`。`-template`指定時はtxt駆動（記述子dataset入力）、未指定時はbuiltin駆動（元datasetの絶対パス入力）を書き出す

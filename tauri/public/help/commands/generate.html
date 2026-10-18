@@ -27,7 +27,7 @@
   <p>テンプレートまたは組み込み定義からファイルを生成します。入力データ（<code>srcData</code>）は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。<code>generateType</code> は大きく 2 系統に分かれます。</p>
   <ul>
     <li><strong>テンプレート指定タイプ</strong>（<code>txt</code> / <code>xlsx</code> / <code>xls</code>）: <code>template</code> オプションで指定した任意のテンプレートファイルにデータを埋め込みます。出力内容はテンプレート次第で自由に設計できます。</li>
-    <li><strong>固定成果物タイプ</strong>（<code>settings</code> / <code>sql</code> / <code>ddl</code> / <code>xlsxTemplate</code> / <code>xlsxSchema</code> / <code>javaBean</code> / <code>fixedColumnDef</code>）: テーブルのカラム情報等から、決まった形式の成果物ファイルを自動生成します。<code>template</code> は使用しません。組み込みテンプレート以外の出力形式にしたい場合は、<code>generateType=txt</code> と <a href="generate/subTableSetting.html">subTableSetting</a> を組み合わせて同等の内容を再現してください。</li>
+    <li><strong>固定成果物タイプ</strong>（<code>settings</code> / <code>sql</code> / <code>ddl</code> / <code>xlsxTemplate</code> / <code>xlsxSchema</code> / <code>javaBean</code> / <code>fixedColumnDef</code>）: テーブルのカラム情報等から、決まった形式の成果物ファイルを自動生成します。<code>template</code> は使用しません。組み込みテンプレート以外の出力形式にしたい場合は、<code>generateType=txt</code> と <a href="generate/dataSetSetting.html">dataSetSetting</a> を組み合わせて同等の内容を再現してください。</li>
   </ul>
 
   <h2>generateType 一覧</h2>
@@ -55,14 +55,14 @@
     <tr><td>dataset</td><td>データセット全体から 1 ファイルを出力</td></tr>
   </table>
 
-  <h2>subTableSetting</h2>
+  <h2>dataSetSetting</h2>
   <p><code>unit=table</code> でテンプレート指定タイプ（<code>txt</code> など。<code>xlsx</code> / <code>xls</code> を除く）を使うときに表示されます。テンプレートに渡す前に、1 つのテーブルから条件別のサブテーブルを作ったり、列の値を整形したりするための設定ファイルです。固定成果物タイプでは組み込み設定が使われ、指定できません。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>subTableSetting</td><td>サブテーブル設定ファイルのパス</td><td>（空、組み込み設定を使用）</td></tr>
-    <tr><td>subTableSettingEncoding</td><td>subTableSetting ファイルの文字コード</td><td>システムデフォルト</td></tr>
+    <tr><td>dataSetSetting</td><td>サブテーブル設定ファイルのパス</td><td>（空、組み込み設定を使用）</td></tr>
+    <tr><td>dataSetSettingEncoding</td><td>dataSetSetting ファイルの文字コード</td><td>システムデフォルト</td></tr>
   </table>
-  <p>書式・使い方・例は <a href="generate/subTableSetting.html">subTableSetting</a> のページを参照してください。</p>
+  <p>書式・使い方・例は <a href="generate/dataSetSetting.html">dataSetSetting</a> のページを参照してください。</p>
 
   <h2>共通オプション</h2>
   <table>
