@@ -27,7 +27,7 @@ public class ScaffoldTargetSettingsTest {
     private static final Pattern ROW_ATTRIBUTE =
             Pattern.compile("\\b(?:row|r|col)\\.(\\w+)|first\\([^)]*\\)\\.(\\w+)");
     /** 列名ではない行変数の属性（unit=tableのテーブル構造アクセス） */
-    private static final Set<String> NON_COLUMN_ATTRIBUTES = Set.of("rows", "tableName", "dataset", "values");
+    private static final Set<String> NON_COLUMN_ATTRIBUTES = Set.of("rows", "tableName", "subTable", "values");
     private static final Set<String> EXPRESSION_KEYS = Set.of("string", "boolean", "number", "sqlFunction");
 
     @ParameterizedTest

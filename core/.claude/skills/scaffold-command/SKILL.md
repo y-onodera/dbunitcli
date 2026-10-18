@@ -21,7 +21,7 @@ Scaffoldは、Generateの固定成果物型（`isFixedTemplate()=true`）を`gen
 
 1. **テンプレートが`rows`を「列定義」として読むか**: `sql`のように「実データレコード」として読む型は対象外
 2. **`getFixedUnit()`がtable**: `dataset`固定（settings/xlsxTemplate）はまずGenerate側の変更を検討
-3. **テンプレートがunit=tableの自然な形（`rows`/`tableName`/`dataset.<name>.rows`）を読むか**: 読まない場合はGenerate側テンプレート/write()のリファクタで寄せる（前例: xlsxSchema・fixedColumnDef。これにより全targetが組み込みテンプレートを無改造コピーできている）
+3. **テンプレートがunit=tableの自然な形（`rows`/`tableName`/`subTable.<name>.rows`）を読むか**: 読まない場合はGenerate側テンプレート/write()のリファクタで寄せる（前例: xlsxSchema・fixedColumnDef。これにより全targetが組み込みテンプレートを無改造コピーできている）
 
 ## 関連スキル
 

@@ -1,4 +1,4 @@
 tableName=$tableName$
 rows=$rows:{row | $row.Key$/$row.LABEL$/$row.U$}; separator=","$
-dataset=$dataset.keys; separator=","$
-PK2=$dataset.PK2.rows:{row | $row.Key$}; separator=","$
+dataset=$subTable.keys; separator=","$
+PK2=$subTable.PK2.rows:{row | $row.Key$}; separator=","$

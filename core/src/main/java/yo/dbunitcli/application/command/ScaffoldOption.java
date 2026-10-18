@@ -279,7 +279,7 @@ public record ScaffoldOption(
     }
 
     // カスタムテンプレートはgenerateType=txt＋subTableSettingで駆動し、組み込みテンプレートが
-    // 読むのと同じrows/tableName/dataset.PK属性を再現する（入力はscaffoldが書き出した記述子dataset）。
+    // 読むのと同じrows/tableName/subTable.PK属性を再現する（入力はscaffoldが書き出した記述子dataset）。
     // withResult=trueは.param書き出し用（既存.paramの出力順を維持して-resultを挿入する）
     private void putTxtDrivenParams(final ParametersBuilder builder, final ScaffoldTarget scaffoldTarget,
                                     final boolean withResult) {

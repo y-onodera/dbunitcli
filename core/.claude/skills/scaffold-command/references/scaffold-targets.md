@@ -46,7 +46,7 @@
 - **txt駆動**（`.param`の`generateType=txt -unit=table`）: scaffoldが書き出した記述子dataset（編集済み）を`-src`に取り、コピーした組み込みテンプレート＋subTableSettingで生成する。メタデータに無い値を人手で補える
 - 同じ元ソース・未編集の記述子datasetなら両駆動の出力はバイト一致する（`ScaffoldTest.ScaffoldToGenerate.assertScaffoldWithTemplateMatchesBuiltIn`が4target全てで検証）
 
-この一致が成り立つ前提: 組み込みテンプレートがunit=tableの自然な形（`rows`/`tableName`/`dataset.<name>.rows`）だけを読むこと。前例: xlsxSchemaはテンプレートを`dataSet.values`読みへ、fixedColumnDefは`$columns$`→`$rows$`（`write()`のキー改名を削除）へリファクタして達成した。組み込み`.txt`の末尾改行にも注意（classpath読込（builtin）は末尾改行を落とすがファイル読込（txt駆動）は保持するため、テンプレートは末尾改行なしで統一）。
+この一致が成り立つ前提: 組み込みテンプレートがunit=tableの自然な形（`rows`/`tableName`/`subTable.<name>.rows`）だけを読むこと。前例: xlsxSchemaはテンプレートを`dataSet.values`読みへ、fixedColumnDefは`$columns$`→`$rows$`（`write()`のキー改名を削除）へリファクタして達成した。組み込み`.txt`の末尾改行にも注意（classpath読込（builtin）は末尾改行を落とすがファイル読込（txt駆動）は保持するため、テンプレートは末尾改行なしで統一）。
 
 ## 未対応target・非対応の理由
 

@@ -1,2 +1,2 @@
 rows=$rows:{row | $row.Key$:$row.V$:$row.W$}; separator=","$
-dataset=$dataset.T.rows:{row | $row.Key$:$row.V$:$row.W$}; separator=","$
+dataset=$subTable.T.rows:{row | $row.Key$:$row.V$:$row.W$}; separator=","$

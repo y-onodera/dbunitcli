@@ -20,11 +20,11 @@ loadData/useJdbcMetaDataは`GenerateType`の`loadData()`/`useJdbcMetaData()`を�
 
 固定成果物タイプはすべて`-template`での差し替えを持たない（組み込みテンプレート専用）。`ddl`/`javaBean`相当の内容を組み込み以外のテンプレートで生成したい場合は、`generateType=txt`＋`unit=table`＋`subTableSetting`（既定値は各`defaultSettingsPath()`と同じ設定ファイルを流用可）を使う。
 
-`xlsxSchema`は`ddl`/`javaBean`/`fixedColumnDef`と同じくテーブル毎に1ファイル出力する（`GenerateType.xlsxSchema.resultPathTemplate()`が共有helper`tableFileResultPath()`経由で`<resultPath>/<tableName>.json`を自動生成）。既定subTableSetting（`xlsxschema/xlsxSchemaSettings.json`）のseparateルールがPK/CELLSサブテーブルを合成し、テンプレートの`dataset.PK.rows`/`dataset.CELLS.rows`参照はこれが前提（ddlの`sql/ddlSettings.json`と同じ方式。Scaffoldがコピーする雛型とも同一ファイル）。`-subTableSetting`を明示指定すると既定が丸ごと置き換わるため、PK/CELLS形状を保つにはseparateルールを含めること。
+`xlsxSchema`は`ddl`/`javaBean`/`fixedColumnDef`と同じくテーブル毎に1ファイル出力する（`GenerateType.xlsxSchema.resultPathTemplate()`が共有helper`tableFileResultPath()`経由で`<resultPath>/<tableName>.json`を自動生成）。既定subTableSetting（`xlsxschema/xlsxSchemaSettings.json`）のseparateルールがPK/CELLSサブテーブルを合成し、テンプレートの`subTable.PK.rows`/`subTable.CELLS.rows`参照はこれが前提（ddlの`sql/ddlSettings.json`と同じ方式。Scaffoldがコピーする雛型とも同一ファイル）。`-subTableSetting`を明示指定すると既定が丸ごと置き換わるため、PK/CELLS形状を保つにはseparateルールを含めること。
 
 ## Scaffoldとの結合
 
-固定成果物型（`isFixedTemplate()=true`）の`getFixedUnit()`/`wrapProducer()`/テンプレート形は、`Scaffold`コマンドが`-target`で同名targetを持つ場合に直接影響する（`ScaffoldTarget`が同じ`.stg`/`.txt`をbyte-for-byteコピーし、同じproducerサブクラスを直接インスタンス化するため）。テンプレートはunit=tableの自然な形（`rows`/`tableName`/`dataset.<name>.rows`）だけを読むよう保ち、末尾改行を付けないこと（classpath読込は末尾改行を落とすがファイル読込は保持するため、両駆動のバイト一致が崩れる）。変更時は`scaffold-command`スキルの`references/scaffold-targets.md`と`ScaffoldTest.ScaffoldToGenerate`のバイト一致検証を確認すること。
+固定成果物型（`isFixedTemplate()=true`）の`getFixedUnit()`/`wrapProducer()`/テンプレート形は、`Scaffold`コマンドが`-target`で同名targetを持つ場合に直接影響する（`ScaffoldTarget`が同じ`.stg`/`.txt`をbyte-for-byteコピーし、同じproducerサブクラスを直接インスタンス化するため）。テンプレートはunit=tableの自然な形（`rows`/`tableName`/`subTable.<name>.rows`）だけを読むよう保ち、末尾改行を付けないこと（classpath読込は末尾改行を落とすがファイル読込は保持するため、両駆動のバイト一致が崩れる）。変更時は`scaffold-command`スキルの`references/scaffold-targets.md`と`ScaffoldTest.ScaffoldToGenerate`のバイト一致検証を確認すること。
 
 ## unit
 

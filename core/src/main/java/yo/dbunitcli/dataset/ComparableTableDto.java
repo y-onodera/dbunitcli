@@ -35,7 +35,7 @@ public class ComparableTableDto extends HashMap<String, Object> {
         } catch (final DataSetException e) {
             throw new RuntimeException(e);
         }
-        this.put("dataset", this.subTables);
+        this.put("subTable", this.subTables);
     }
 
     public ComparableTableMappingTask.WithTargetTable getTask() {
