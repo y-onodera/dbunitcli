@@ -49,6 +49,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
             final JsonObject settingJson = jsonReader.read().asJsonObject();
             return this.configureSetting(settingJson)
                     .configureCommonSetting(settingJson)
+                    .configureOutputFilter(settingJson)
                     .importSetting(settingJson, setting);
         } catch (final UnsupportedEncodingException | FileNotFoundException e) {
             throw new AssertionError(e);
@@ -60,7 +61,8 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
              final JsonReader jsonReader = Json.createReader(new InputStreamReader(is, this.settingEncoding))) {
             final JsonObject settingJson = jsonReader.read().asJsonObject();
             return this.configureSetting(settingJson)
-                    .configureCommonSetting(settingJson);
+                    .configureCommonSetting(settingJson)
+                    .configureOutputFilter(settingJson);
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
@@ -87,12 +89,19 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         return this;
     }
 
+    public FromJsonTableSeparatorsBuilder configureOutputFilter(final JsonObject setting) {
+        new OutputFilterParser(setting).parse()
+                .ifPresent(filter -> this.addFilter(filter, TableSeparators.FilterCombine.AND));
+        return this;
+    }
+
     protected FromJsonTableSeparatorsBuilder importSetting(final JsonObject setting, final File file) {
         if (setting.containsKey("import")) {
-            setting.getJsonArray("import").forEach(v ->
-                    new FromJsonTableSeparatorsBuilder(this.settingEncoding).load(new File(file.getParent(), v.asJsonObject().getString("path")))
-                            .appendTo(this)
-            );
+            setting.getJsonArray("import").forEach(v -> {
+                final JsonObject importJson = v.asJsonObject();
+                new FromJsonTableSeparatorsBuilder(this.settingEncoding).load(new File(file.getParent(), importJson.getString("path")))
+                        .appendTo(this, TableSeparators.FilterCombine.of(importJson.getString("outputFilterCombine", "and")));
+            });
         }
         return this;
     }
@@ -134,8 +143,10 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         return new ArrayList<>();
     }
 
-    protected void appendTo(final FromJsonTableSeparatorsBuilder other) {
-        other.add(this.build());
+    protected void appendTo(final FromJsonTableSeparatorsBuilder other, final TableSeparators.FilterCombine combine) {
+        final TableSeparators imported = this.build();
+        other.add(imported.filter(TableSeparator.ACCEPT_ALL));
+        other.addFilter(imported.filter(), combine);
     }
 
     protected void addTableSeparate(final JsonObject json, final TableMetaDataFilter tableMetaDataFilter) {
