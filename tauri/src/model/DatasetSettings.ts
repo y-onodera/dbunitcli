@@ -23,10 +23,20 @@ export type NameFilter = {
 	any: string | string[];
 	filePath?: string;
 };
+// separate/join後の出力テーブルを絞る(name/patternのどちらか。filePathは非対応)
+export type OutputFilter = {
+	name?: string[];
+	pattern?: Pattern;
+};
+export type OutputFilterBuilder = {
+	name?: string | string[] | NameFilter;
+	pattern?: string | Pattern;
+};
 export type DatasetSettingMode = "rename" | "split" | "separate";
 export type DatasetSettingsBuilder = {
 	settings: DatasetSettingBuilder[];
 	commonSettings: DatasetSettingBuilder[];
+	outputFilter?: OutputFilterBuilder;
 };
 export type DatasetSettingBuilder = {
 	name?: string | string[] | NameFilter;
@@ -61,6 +71,7 @@ export class DatasetSettings {
 	constructor(
 		readonly settings: DatasetSetting[],
 		readonly commonSettings: DatasetSetting[],
+		readonly outputFilter: OutputFilter = {},
 	) {}
 
 	static build(builder: DatasetSettingsBuilder): DatasetSettings {
@@ -71,6 +82,7 @@ export class DatasetSettings {
 			builder.commonSettings?.length > 0
 				? builder.commonSettings.map((it) => new DatasetSetting(it))
 				: [new DatasetSetting({})],
+			toOutputFilter(builder.outputFilter),
 		);
 	}
 
@@ -78,6 +90,7 @@ export class DatasetSettings {
 		return new DatasetSettings(
 			this.settings.concat(setting),
 			this.commonSettings,
+			this.outputFilter,
 		);
 	}
 
@@ -86,6 +99,7 @@ export class DatasetSettings {
 		return new DatasetSettings(
 			newSettings.length > 0 ? newSettings : [new DatasetSetting({})],
 			this.commonSettings,
+			this.outputFilter,
 		);
 	}
 
@@ -93,6 +107,7 @@ export class DatasetSettings {
 		return new DatasetSettings(
 			this.settings.map((it) => (it === before ? after : it)),
 			this.commonSettings,
+			this.outputFilter,
 		);
 	}
 
@@ -100,6 +115,7 @@ export class DatasetSettings {
 		return new DatasetSettings(
 			this.settings,
 			this.commonSettings.concat(setting),
+			this.outputFilter,
 		);
 	}
 
@@ -108,6 +124,7 @@ export class DatasetSettings {
 		return new DatasetSettings(
 			this.settings,
 			newSettings.length > 0 ? newSettings : [new DatasetSetting({})],
+			this.outputFilter,
 		);
 	}
 
@@ -115,15 +132,54 @@ export class DatasetSettings {
 		return new DatasetSettings(
 			this.settings,
 			this.commonSettings.map((it) => (it === before ? after : it)),
+			this.outputFilter,
+		);
+	}
+
+	replaceSettings(settings: DatasetSetting[]): DatasetSettings {
+		return new DatasetSettings(
+			settings,
+			this.commonSettings,
+			this.outputFilter,
+		);
+	}
+
+	replaceCommonSettings(commonSettings: DatasetSetting[]): DatasetSettings {
+		return new DatasetSettings(
+			this.settings,
+			commonSettings,
+			this.outputFilter,
+		);
+	}
+
+	replaceOutputFilter(outputFilter: OutputFilter): DatasetSettings {
+		return new DatasetSettings(
+			this.settings,
+			this.commonSettings,
+			outputFilter,
 		);
 	}
 	toJSON() {
 		const filterSettings = (settings: DatasetSetting[]) =>
 			settings.filter((setting) => setting.displayName());
 
+		const names = this.outputFilter.name?.filter((it) => it);
+		const pattern = this.outputFilter.pattern;
+		let outputFilter: object | undefined;
+		if (names?.length) {
+			outputFilter = { name: { any: names } };
+		} else if (pattern?.string) {
+			const exclude = pattern.exclude?.filter((it) => it);
+			outputFilter = {
+				pattern: exclude?.length
+					? { string: pattern.string, exclude }
+					: { string: pattern.string },
+			};
+		}
 		return {
 			settings: filterSettings(this.settings),
 			commonSettings: filterSettings(this.commonSettings),
+			...(outputFilter ? { outputFilter } : {}),
 		};
 	}
 }
@@ -615,6 +671,24 @@ function toPattern(pattern: string | Pattern | undefined): Pattern | undefined {
 	return typeof pattern === "string"
 		? ({ string: pattern } as Pattern)
 		: pattern;
+}
+function toOutputFilter(
+	builder: OutputFilterBuilder | undefined,
+): OutputFilter {
+	if (!builder) {
+		return {};
+	}
+	const nameVal = builder.name;
+	const name = isNameFilter(nameVal)
+		? toNameArray(nameVal.any)
+		: toNameArray(nameVal as string | string[] | undefined);
+	const pattern = toPattern(builder.pattern);
+	if (name) {
+		return { name };
+	}
+	return pattern
+		? { pattern: { string: pattern.string, exclude: pattern.exclude } }
+		: {};
 }
 function isNameFilter(name: unknown): name is NameFilter {
 	return (

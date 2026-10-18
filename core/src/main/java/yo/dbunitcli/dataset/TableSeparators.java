@@ -15,6 +15,14 @@ public record TableSeparators(List<TableSeparator> settings
         , TableMetaDataFilter filter
         , TableSeparators next) {
 
+    public enum FilterCombine {
+        AND, OR;
+
+        public static FilterCombine of(final String name) {
+            return "or".equalsIgnoreCase(name) ? OR : AND;
+        }
+    }
+
     public static final TableSeparators NONE = new Builder().build();
 
     TableSeparators(final Builder builder) {
@@ -151,9 +159,31 @@ public record TableSeparators(List<TableSeparator> settings
             this.settings.addAll(tableSeparators.settings());
             this.commonSettings.addAll(tableSeparators.commonSettings());
             this.joinConditions.addAll(tableSeparators.joinConditions());
-            this.filter = tableSeparators.filter.and(tableSeparators.filter());
+            this.filter = this.combine(this.filter, tableSeparators.filter(), FilterCombine.AND);
             this.next = this.next.then(tableSeparators.next());
             return this;
+        }
+
+        public Builder addFilter(final TableMetaDataFilter other, final FilterCombine combine) {
+            this.filter = this.combine(this.filter, other, combine);
+            return this;
+        }
+
+        /**
+         * 絞り込み未設定(常にtrue)の側は結合結果に影響させない。
+         */
+        private TableMetaDataFilter combine(final TableMetaDataFilter base, final TableMetaDataFilter other, final FilterCombine combine) {
+            if (isUnset(other)) {
+                return base;
+            }
+            if (isUnset(base)) {
+                return other;
+            }
+            return combine == FilterCombine.OR ? base.or(other) : base.and(other);
+        }
+
+        private static boolean isUnset(final TableMetaDataFilter filter) {
+            return filter instanceof final AlwaysFilter always && always.result();
         }
 
         public TableSeparators getNext() {

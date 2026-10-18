@@ -1,5 +1,6 @@
 package yo.dbunitcli.sidecar.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.micronaut.serde.annotation.Serdeable;
 
 import java.util.List;
@@ -10,6 +11,9 @@ public class DatasetSettingsDto {
     private List<DatasetSettingDto> settings;
 
     private List<DatasetSettingDto> commonSettings;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private OutputFilterDto outputFilter;
 
     public List<DatasetSettingDto> getSettings() {
         return this.settings;
@@ -25,5 +29,13 @@ public class DatasetSettingsDto {
 
     public void setCommonSettings(final List<DatasetSettingDto> commonSettings) {
         this.commonSettings = commonSettings;
+    }
+
+    public OutputFilterDto getOutputFilter() {
+        return this.outputFilter;
+    }
+
+    public void setOutputFilter(final OutputFilterDto outputFilter) {
+        this.outputFilter = outputFilter;
     }
 }

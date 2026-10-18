@@ -324,4 +324,71 @@ public class FromJsonTableSeparatorsBuilderTest {
         assertEquals("id", commonSetting.orderColumns().getFirst(), "Should have common order column");
         assertTrue(commonSetting.sourceFilter().test("ANY_TABLE"), "Should match any table name");
     }
+
+    private static TableSeparators fromJson(final String json) {
+        return new FromJsonTableSeparatorsBuilder("UTF-8")
+                .configureSetting(jakarta.json.Json.createReader(new StringReader(json)).readObject())
+                .configureOutputFilter(jakarta.json.Json.createReader(new StringReader(json)).readObject())
+                .build();
+    }
+
+    private static long outputCount(final TableSeparators separators, final String tableName) {
+        return separators.getAddSettingTableMetaData(new DefaultTableMetaData(tableName, new Column[0])).count();
+    }
+
+    @Test
+    public void outputFilterWhenNotConfiguredShouldOutputAllTables() {
+        final TableSeparators separators = fromJson("{\"settings\": [{\"name\": \"A\", \"keys\": [\"id\"]}]}");
+        assertEquals(1, outputCount(separators, "A"));
+        assertEquals(1, outputCount(separators, "B"));
+    }
+
+    @Test
+    public void outputFilterWhenNameShouldOutputOnlyMatchedTables() {
+        final TableSeparators separators = fromJson("{\"outputFilter\": {\"name\": [\"A\", \"B\"]}}");
+        assertEquals(1, outputCount(separators, "A"));
+        assertEquals(1, outputCount(separators, "B"));
+        assertEquals(0, outputCount(separators, "C"));
+    }
+
+    @Test
+    public void outputFilterWhenPatternShouldSupportRegexAndExclude() {
+        final TableSeparators separators = fromJson("{\"outputFilter\": {\"pattern\": {\"regex\": \"^DATA_\\\\d+$\", \"exclude\": [\"DATA_2\"]}}}");
+        assertEquals(1, outputCount(separators, "DATA_1"));
+        assertEquals(0, outputCount(separators, "DATA_2"));
+        assertEquals(0, outputCount(separators, "OTHER"));
+    }
+
+    @Test
+    public void outputFilterShouldBeAppliedToRenamedTable() {
+        final TableSeparators separators = fromJson("""
+                {"settings": [{"name": "A", "tableName": "NEW_A"}],
+                 "outputFilter": {"name": "NEW_A"}}
+                """);
+        assertEquals(1, outputCount(separators, "A"));
+    }
+
+    @Test
+    public void outputFilterWhenInvalidShouldThrow() {
+        assertThrows(IllegalArgumentException.class, () -> fromJson("{\"outputFilter\": {}}"));
+        assertThrows(IllegalArgumentException.class, () -> fromJson("{\"outputFilter\": {\"name\": {\"any\": \"A\", \"filePath\": \".*\"}}}"));
+    }
+
+    @Test
+    public void outputFilterOfImportShouldBeCombinedWithAndByDefaultAndOrWhenSpecified(@org.junit.jupiter.api.io.TempDir final java.nio.file.Path dir) throws java.io.IOException {
+        java.nio.file.Files.writeString(dir.resolve("child.json"), "{\"outputFilter\": {\"name\": [\"A\", \"B\"]}}");
+        java.nio.file.Files.writeString(dir.resolve("and.json"), "{\"outputFilter\": {\"name\": [\"B\", \"C\"]}, \"import\": [{\"path\": \"child.json\"}]}");
+        java.nio.file.Files.writeString(dir.resolve("or.json"), "{\"outputFilter\": {\"name\": [\"B\", \"C\"]}, \"import\": [{\"path\": \"child.json\", \"outputFilterCombine\": \"or\"}]}");
+
+        final TableSeparators and = new FromJsonTableSeparatorsBuilder("UTF-8").build(dir.resolve("and.json").toFile());
+        assertEquals(0, outputCount(and, "A"));
+        assertEquals(1, outputCount(and, "B"));
+        assertEquals(0, outputCount(and, "C"));
+
+        final TableSeparators or = new FromJsonTableSeparatorsBuilder("UTF-8").build(dir.resolve("or.json").toFile());
+        assertEquals(1, outputCount(or, "A"));
+        assertEquals(1, outputCount(or, "B"));
+        assertEquals(1, outputCount(or, "C"));
+        assertEquals(0, outputCount(or, "D"));
+    }
 }
