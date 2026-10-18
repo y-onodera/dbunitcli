@@ -4,7 +4,7 @@
   "-template": "scaffoldTpl.txt",
   "-template.templateGroup": "scaffoldTpl.stg",
   "-resultPath": "$param.tableName$.sql",
-  "-dataSetSetting": "scaffoldUnit.json",
+  "-unitSetting": "scaffoldUnit.json",
   "-src.src": "src",
   "-src.srcType": "csv",
   "-src.encoding": "UTF-8"

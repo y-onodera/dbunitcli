@@ -25,8 +25,8 @@
     },
     "value": "ddl"
   },
-  "dataSetSetting": {
-    "name": "dataSetSetting",
+  "unitSetting": {
+    "name": "unitSetting",
     "attribute": {
       "type": "TEXT",
       "required": false,

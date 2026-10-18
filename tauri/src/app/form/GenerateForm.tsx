@@ -84,11 +84,11 @@ export function GenerateForm(prop: {
 						element={generate.unit}
 					/>
 				)}
-				{generate.dataSetSetting && (
-					<FileText prefix="" element={generate.dataSetSetting} />
+				{generate.unitSetting && (
+					<FileText prefix="" element={generate.unitSetting} />
 				)}
-				{generate.dataSetSettingEncoding && (
-					<PlainText prefix="" element={generate.dataSetSettingEncoding} />
+				{generate.unitSettingEncoding && (
+					<PlainText prefix="" element={generate.unitSettingEncoding} />
 				)}
 				{generate.template && (
 					<TemplateFileText

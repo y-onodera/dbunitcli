@@ -150,15 +150,15 @@ public class GenerateTest {
         }
 
         @Test
-        public void testGenerateTxtPerTableSrcSettingThenDataSetSetting() throws Exception {
-            // unit=tableでは、srcのsetting適用後のテーブル（サブテーブル含む）にdataSetSettingを重ねて適用する
+        public void testGenerateTxtPerTableSrcSettingThenUnitSetting() throws Exception {
+            // unit=tableでは、srcのsetting適用後のテーブル（サブテーブル含む）にunitSettingを重ねて適用する
             Generate.main(new String[]{
                     "-srcType=csv"
                     , "-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
                     , "-encoding=UTF-8"
                     , "-regTableInclude=Test1"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit/src.json"
-                    , "-dataSetSetting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit/unit.json"
+                    , "-unitSetting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit/unit.json"
                     , "-generateType=txt"
                     , "-unit=table"
                     , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit/template.txt"
@@ -172,14 +172,14 @@ public class GenerateTest {
         }
 
         @Test
-        public void testGenerateTxtPerTableSrcOrderDistinctThenDataSetSetting() throws Exception {
-            // srcのorder/distinctは、dataSetSettingで列を追加した後も有効
+        public void testGenerateTxtPerTableSrcOrderDistinctThenUnitSetting() throws Exception {
+            // srcのorder/distinctは、unitSettingで列を追加した後も有効
             Generate.main(new String[]{
                     "-srcType=csv"
                     , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table_src_unit_order/csv"
                     , "-encoding=UTF-8"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/src.json"
-                    , "-dataSetSetting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/unit.json"
+                    , "-unitSetting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/unit.json"
                     , "-generateType=txt"
                     , "-unit=table"
                     , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/template.txt"
@@ -192,14 +192,14 @@ public class GenerateTest {
         }
 
         @Test
-        public void testGenerateTxtPerTableSrcSplitWithSuffixThenDataSetSetting() throws Exception {
-            // srcのsplitはsuffix/prefixでテーブル名を分ければunit=tableでも使え、dataSetSettingは分割後のテーブルごとに適用される
+        public void testGenerateTxtPerTableSrcSplitWithSuffixThenUnitSetting() throws Exception {
+            // srcのsplitはsuffix/prefixでテーブル名を分ければunit=tableでも使え、unitSettingは分割後のテーブルごとに適用される
             Generate.main(new String[]{
                     "-srcType=csv"
                     , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table_src_unit_order/csv"
                     , "-encoding=UTF-8"
                     , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/src_split.json"
-                    , "-dataSetSetting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/unit.json"
+                    , "-unitSetting=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/unit.json"
                     , "-generateType=txt"
                     , "-unit=table"
                     , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/table_src_unit_order/template_split.txt"

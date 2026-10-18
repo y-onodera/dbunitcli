@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * サンプルdataSetSettingは利用者が他のデータソースの列をテンプレートの読む列へマッピングする際の
+ * サンプルunitSettingは利用者が他のデータソースの列をテンプレートの読む列へマッピングする際の
  * ヒントであるため、テンプレートが参照する全列がstring/boolean等の式として定義されている必要がある。
  * テンプレート側へ列参照が追加された際にサンプルとのドリフトを検出する。
  */
@@ -32,19 +32,19 @@ public class ScaffoldTargetSettingsTest {
 
     @ParameterizedTest
     @EnumSource(ScaffoldTarget.class)
-    public void testSampleDataSetSettingDefinesAllTemplateColumns(final ScaffoldTarget target) {
+    public void testSampleUnitSettingDefinesAllTemplateColumns(final ScaffoldTarget target) {
         final Set<String> templateColumns = new TreeSet<>();
         this.collectTemplateColumns(FileResources.readClasspathResource(target.stgPath()), templateColumns);
         this.collectTemplateColumns(FileResources.readClasspathResource(target.templatePath()), templateColumns);
         final Set<String> definedColumns = new TreeSet<>();
         try (final JsonReader reader = Json.createReader(
-                new StringReader(FileResources.readClasspathResource(target.sampleDataSetSettingPath())))) {
+                new StringReader(FileResources.readClasspathResource(target.sampleUnitSettingPath())))) {
             this.collectDefinedColumns(reader.readObject(), definedColumns);
         }
         final Set<String> missing = new TreeSet<>(templateColumns);
         missing.removeAll(definedColumns);
         assertTrue(missing.isEmpty(),
-                () -> target + ": " + target.sampleDataSetSettingPath() + " はテンプレートが参照する列 "
+                () -> target + ": " + target.sampleUnitSettingPath() + " はテンプレートが参照する列 "
                         + missing + " を定義していない");
     }
 

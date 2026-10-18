@@ -5,5 +5,5 @@
 -unit=table
 -template=src/main/resources/sql/ddlTemplate.txt
 -template.templateGroup=src/main/resources/sql/ddlTemplate.stg
--dataSetSetting=src/main/resources/sql/ddlSettings.json
+-unitSetting=src/main/resources/sql/ddlSettings.json
 -resultPath=target/test-classes/yo/dbunitcli/application/generate/ddl/result/$param.tableName$.sql
