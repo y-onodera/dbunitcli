@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 public class ComparableTableDto extends HashMap<String, Object> {
 
+    private final Map<String, Map<String, Object>> subTables = new LinkedHashMap<>();
     private ComparableTableMappingTask.WithTargetTable task;
 
     public ComparableTableDto(final ITableMetaData tableMetaData, final ComparableTableMappingTask task) {
@@ -34,6 +35,7 @@ public class ComparableTableDto extends HashMap<String, Object> {
         } catch (final DataSetException e) {
             throw new RuntimeException(e);
         }
+        this.put("dataset", this.subTables);
     }
 
     public ComparableTableMappingTask.WithTargetTable getTask() {
@@ -85,12 +87,8 @@ public class ComparableTableDto extends HashMap<String, Object> {
         this.put("rows", task);
     }
 
-    public Map<?, ?> getSubTables() {
-        return (Map<?, ?>) this.get("dataset");
-    }
-
-    public void setSubTables(Map<String, Object> subTables) {
-        this.put("dataset", subTables);
+    public Map<String, Map<String, Object>> getSubTables() {
+        return this.subTables;
     }
 
     public void applyDataSetSeparators(TableSeparators dataSetSeparators) {
@@ -101,10 +99,8 @@ public class ComparableTableDto extends HashMap<String, Object> {
         final TableRowsCollector collector = new TableRowsCollector(tableName);
         this.task.runWith(builder, collector);
         this.setRows(collector.getRows());
-        final Map<String, Object> subTables = new LinkedHashMap<>();
         this.task.runWith(builder, null)
-                 .forEach((name, table) -> subTables.put(name, table.toMap(true).getFirst()));
-        this.setSubTables(subTables);
+                 .forEach((name, table) -> this.getSubTables().put(name, table.toMap(true).getFirst()));
     }
 
 }
