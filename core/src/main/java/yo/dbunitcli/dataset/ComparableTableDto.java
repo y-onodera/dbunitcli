@@ -96,11 +96,12 @@ public class ComparableTableDto extends HashMap<String, Object> {
         Consumer<TableSeparators.Builder> builder = origin ->
                 origin.setFilter(origin.getFilter().and(new SplitOrNameFilter(tableName)))
                       .setNext(origin.getNext().then(dataSetSeparators));
-        final TableRowsCollector collector = new TableRowsCollector(tableName);
-        this.task.runWith(builder, collector);
-        this.setRows(collector.getRows());
-        this.task.runWith(builder, null)
-                 .forEach((name, table) -> this.getSubTables().put(name, table.toMap(true).getFirst()));
+        final TreeMap<String, ComparableTable> tables = this.task.runWith(builder, null);
+        final ComparableTable target = tables.get(tableName);
+        this.setRows(target == null ? new ArrayList<>() : target.toMap(false));
+        tables.entrySet().stream()
+              .filter(it -> !it.getKey().equals(tableName))
+              .forEach(it -> this.getSubTables().put(it.getKey(), it.getValue().toMap(true).getFirst()));
     }
 
 }

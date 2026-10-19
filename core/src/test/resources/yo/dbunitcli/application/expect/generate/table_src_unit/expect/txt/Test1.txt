@@ -1,4 +1,4 @@
 tableName=Test1
 rows=1/ああ-x/ああ-x!,15/テスト-x/テスト-x!
-dataset=PK2,Test1
+dataset=PK2
 PK2=15
