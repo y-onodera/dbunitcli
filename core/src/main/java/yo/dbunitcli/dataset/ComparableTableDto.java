@@ -99,7 +99,9 @@ public class ComparableTableDto extends HashMap<String, Object> {
         final TreeMap<String, ComparableTable> tables = this.task.runWith(builder, null);
         final ComparableTable target = tables.get(tableName);
         this.setRows(target == null ? new ArrayList<>() : target.toMap(false));
-        tables.forEach((name, table) -> this.getSubTables().put(name, table.toMap(true).getFirst()));
+        tables.entrySet().stream()
+              .filter(it -> !it.getKey().equals(tableName))
+              .forEach(it -> this.getSubTables().put(it.getKey(), it.getValue().toMap(true).getFirst()));
     }
 
 }

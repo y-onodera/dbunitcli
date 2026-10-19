@@ -111,9 +111,9 @@ $rows:{row | $row.ID$: $row.NAME$ ($row.STATUS$)}; separator="\n"$</pre>
   <table>
     <tr><th>変数</th><th>内容</th><th>unitSetting の影響</th></tr>
     <tr><td>tableName</td><td>テーブル名（例: <code>EMPLOYEE</code>）</td><td>なし（元のテーブル名のまま）</td></tr>
-    <tr><td>columns / primaryKeys / columnsExcludeKey</td><td>入力データのカラム定義</td><td>なし。設定後のカラム情報は <code>subTable.{テーブル名}.columns</code> などで参照する</td></tr>
+    <tr><td>columns / primaryKeys / columnsExcludeKey</td><td>入力データのカラム定義</td><td>なし。<code>separate</code> で作ったサブテーブルのカラム情報は <code>subTable.{サブテーブル名}.columns</code> などで参照する</td></tr>
     <tr><td>rows</td><td>このテーブルの行（<code>row.列名</code> で参照）</td><td>あり。追加した列は各行の末尾に付き、同名の列は上書きされる。元の列は残る。<code>include</code> / <code>exclude</code> / <code>filter</code> / <code>order</code> / <code>distinct</code> もここに反映される</td></tr>
-    <tr><td>subTable</td><td>設定の結果できたテーブルの一覧（<code>subTable.{テーブル名}.rows</code>）。キーはテーブル名の昇順。<code>unit=table</code> では、そのテーブル単位と、unitSetting の <code>separate</code> で作ったサブテーブルだけが入る（src の setting で分けた他のテーブルは、別名を付けたかどうかに関わらず含まれない）</td><td>あり。<code>separate</code> で作ったサブテーブルが <code>subTable.PK</code> のように加わる。各テーブルの <code>columns</code> / <code>primaryKeys</code> にも設定が反映される</td></tr>
+    <tr><td>subTable</td><td>設定の結果できたテーブルの一覧（<code>subTable.{テーブル名}.rows</code>）。キーはテーブル名の昇順。そのテーブル自身（<code>rows</code> と同じ内容）は含まれない。<code>unit=table</code> では、unitSetting の <code>separate</code> で作ったサブテーブルだけが入る（src の setting で分けた他のテーブルは、別名を付けたかどうかに関わらず含まれない）</td><td>あり。<code>separate</code> で作ったサブテーブルが <code>subTable.PK</code> のように加わる。各サブテーブルの <code>columns</code> / <code>primaryKeys</code> にも設定が反映される</td></tr>
   </table>
 
   <h3>設定キーとテンプレートへの影響</h3>
@@ -124,9 +124,9 @@ $rows:{row | $row.ID$: $row.NAME$ ($row.STATUS$)}; separator="\n"$</pre>
     <tr><td>separate</td><td><code>"separate": [{...}, {"tableName": "PK", ...}]</code></td><td>1 つのテーブルから複数のテーブルを作り、<code>subTable</code> に加える。各要素は独自の <code>string</code> / <code>filter</code> などを持てる。<code>tableName</code> の無い要素は元のテーブル名のまま。サブテーブルは元の全カラムを引き継ぐ</td></tr>
     <tr><td>tableName / prefix / suffix</td><td><code>"tableName": "PK"</code></td><td>テーブル名を変える。元のテーブルを改名すると <code>rows</code> は空になり、行は <code>subTable.{新しい名前}.rows</code> から参照する（<code>separate</code> でサブテーブルとして足す使い方なら元のテーブルは残る）</td></tr>
     <tr><td>include / exclude</td><td><code>"include": ["ID", "NAME"]</code></td><td>残す列を絞る。<code>include</code> → <code>exclude</code> の順に効き、式で追加した列も対象になる（<code>include</code> に書かない追加列は残らない）。式の評価は絞り込みより前なので、除外した列も式では使える</td></tr>
-    <tr><td>order</td><td><code>"order": ["ID"]</code></td><td>指定した列で行を並べ替える（<code>rows</code> と <code>subTable.{テーブル名}.rows</code>）</td></tr>
+    <tr><td>order</td><td><code>"order": ["ID"]</code></td><td>指定した列で行を並べ替える（<code>rows</code> と <code>subTable.{サブテーブル名}.rows</code>）</td></tr>
     <tr><td>distinct</td><td><code>"distinct": true</code></td><td>重複行を除く。<code>include</code> / <code>exclude</code> で絞った後の列で判定する</td></tr>
-    <tr><td>keys</td><td><code>"keys": ["ID"]</code></td><td><code>subTable.{テーブル名}.primaryKeys</code> を指定した列にする。トップレベルの <code>primaryKeys</code> と <code>rows</code> は変わらない</td></tr>
+    <tr><td>keys</td><td><code>"keys": ["ID"]</code></td><td><code>subTable.{サブテーブル名}.primaryKeys</code> を指定した列にする。トップレベルの <code>primaryKeys</code> と <code>rows</code> は変わらない</td></tr>
     <tr><td>name / pattern</td><td><code>"name": "ITEM"</code><br><code>"pattern": {"regex": ".*", "exclude": ["PK"]}</code></td><td>設定を適用するテーブルを選ぶ（データの形は変えない）</td></tr>
     <tr><td>commonSettings</td><td><code>"commonSettings": [{...}]</code></td><td>全テーブルに適用する（<code>settings</code> は <code>name</code> / <code>pattern</code> に一致したテーブルのみ）</td></tr>
     <tr><td>import</td><td><code>"import": [{"path": "./common.json"}]</code></td><td>別の設定ファイルを取り込む</td></tr>
@@ -214,8 +214,7 @@ CREATE TABLE $tableName; format="upper"$ (
   REMARKS        = "社員ID"
   TABLE_REMARKS  = "社員マスタ"
 
-subTable（キーは EMPLOYEE, PK の順）
-  EMPLOYEE.rows ... 上記の rows と同じ（3 行）
+subTable（キーは PK のみ。EMPLOYEE 自身は含まれない）
   PK.rows[0]    ... 元の全カラムを持つ（1 行）
     COLUMN_NAME = "EMPLOYEE_ID"
     NULLABLE    = false        ← PK 側は NULLABLE を変換しない
@@ -232,9 +231,7 @@ subTable（キーは EMPLOYEE, PK の順）
   REMARKS        = "社員ID"
   TABLE_REMARKS  = "社員マスタ"
 
-subTable（キーは EMPLOYEE のみ）
-  EMPLOYEE.rows ... 上記の rows と同じ（3 行）
-  （PK は存在しない）</pre></td>
+subTable（空。EMPLOYEE 自身は含まれず、PK も存在しない）</pre></td>
     </tr>
   </table>
   <p>テンプレートを書くうえでの違いは次のとおりです。</p>
