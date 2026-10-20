@@ -15,10 +15,7 @@ import {
 } from "../../../../hooks/useQueryDatasource";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
-import {
-	type InsertResult,
-	insertAtCursor,
-} from "../../../../utils/textInsert";
+import { insertAtCursor } from "../../../../utils/textInsert";
 import {
 	RemoveResource,
 	type ResourceEditButtonProp,
@@ -37,7 +34,7 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 	const [content, setContent] = useState<string>(props.value);
 	const [showTableSelector, setShowTableSelector] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
-	const pendingRef = useRef<InsertResult | null>(null);
+	const pendingCursorRef = useRef<number | null>(null);
 	const saveDataSource = useSaveDataSource();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 
@@ -48,24 +45,21 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 		);
 
 	const insertToContent = (text: string) => {
-		// 同一イベント内で連続挿入されても最新の内容・位置から続けられるよう pending を優先する
-		const pending = pendingRef.current;
 		const textarea = textareaRef.current;
-		const base = pending?.value ?? content;
-		const start = pending?.cursor ?? textarea?.selectionStart ?? base.length;
-		const end = pending?.cursor ?? textarea?.selectionEnd ?? base.length;
-		const result = insertAtCursor(base, text, start, end);
-		pendingRef.current = result;
+		const start = textarea?.selectionStart ?? content.length;
+		const end = textarea?.selectionEnd ?? content.length;
+		const result = insertAtCursor(content, text, start, end);
+		pendingCursorRef.current = result.cursor;
 		setContent(result.value);
 	};
 
 	useLayoutEffect(() => {
-		const pending = pendingRef.current;
-		if (pending === null) {
+		const cursor = pendingCursorRef.current;
+		if (cursor === null) {
 			return;
 		}
-		pendingRef.current = null;
-		textareaRef.current?.setSelectionRange(pending.cursor, pending.cursor);
+		pendingCursorRef.current = null;
+		textareaRef.current?.setSelectionRange(cursor, cursor);
 	});
 
 	const handleInsert = (tables: string[]) => {
@@ -73,8 +67,8 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 		setShowTableSelector(false);
 	};
 
-	const handleInsertColumn = (column: string) => {
-		insertToContent(column);
+	const handleInsertColumn = (columns: string[]) => {
+		insertToContent(columns.join("\n"));
 	};
 
 	return (

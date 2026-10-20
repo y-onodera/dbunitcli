@@ -16,7 +16,7 @@ import TableList from "./TableList";
 interface SqlTableInsertDialogProps {
 	jdbcValues: Record<string, string>;
 	onInsert: (tables: string[]) => void;
-	onInsertColumn?: (column: string) => void;
+	onInsertColumn?: (columns: string[]) => void;
 	onClose: () => void;
 }
 
@@ -94,7 +94,7 @@ function TablesContent({
 }: {
 	tables: string[];
 	onInsert: (tables: string[]) => void;
-	onInsertColumn?: (column: string) => void;
+	onInsertColumn?: (columns: string[]) => void;
 	onQueryColumns?: (table: string) => Promise<string[]>;
 	onClose: () => void;
 }) {
@@ -160,9 +160,7 @@ function TablesContent({
 					table={columnDialog.table}
 					columnData={columnDialog.data}
 					onInsert={(columns) => {
-						for (const col of columns) {
-							onInsertColumn(col);
-						}
+						onInsertColumn(columns);
 						setColumnDialog(null);
 					}}
 					onClose={() => setColumnDialog(null)}
