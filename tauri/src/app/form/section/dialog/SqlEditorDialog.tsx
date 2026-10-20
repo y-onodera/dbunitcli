@@ -107,6 +107,7 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 					jdbcValues={jdbcValues}
 					onInsert={handleInsert}
 					onInsertColumn={handleInsertColumn}
+					plain={props.type === "table"}
 					onClose={() => setShowTableSelector(false)}
 				/>
 			)}

@@ -33,6 +33,7 @@ interface SqlTableInsertDialogProps {
 	jdbcValues: Record<string, string>;
 	onInsert: (tables: string[]) => void;
 	onInsertColumn?: (columns: string[]) => void;
+	plain?: boolean;
 	onClose: () => void;
 }
 
@@ -40,6 +41,7 @@ export default function SqlTableInsertDialog({
 	jdbcValues,
 	onInsert,
 	onInsertColumn,
+	plain = false,
 	onClose,
 }: SqlTableInsertDialogProps) {
 	const [tables, setTables] = useState<string[] | null>(null);
@@ -78,6 +80,7 @@ export default function SqlTableInsertDialog({
 					tables={tables}
 					onInsert={onInsert}
 					onInsertColumn={onInsertColumn}
+					plain={plain}
 					onQueryColumns={queryColumns}
 					onClose={onClose}
 				/>
@@ -105,12 +108,14 @@ function TablesContent({
 	tables,
 	onInsert,
 	onInsertColumn,
+	plain,
 	onQueryColumns,
 	onClose,
 }: {
 	tables: string[];
 	onInsert: (tables: string[]) => void;
 	onInsertColumn?: (columns: string[]) => void;
+	plain: boolean;
 	onQueryColumns?: (table: string) => Promise<string[]>;
 	onClose: () => void;
 }) {
@@ -151,7 +156,7 @@ function TablesContent({
 
 	return (
 		<>
-			<DialogField>
+			<DialogField last={plain}>
 				{tables.length === 0 ? (
 					<StatusMessage kind="empty">No tables found</StatusMessage>
 				) : (
@@ -165,13 +170,15 @@ function TablesContent({
 					/>
 				)}
 			</DialogField>
-			<AffixSelects
-				idPrefix="sqlTableInsert"
-				prefixOptions={TABLE_PREFIXES}
-				suffixOptions={TABLE_SUFFIXES}
-				onPrefixChange={setPrefix}
-				onSuffixChange={setSuffix}
-			/>
+			{!plain && (
+				<AffixSelects
+					idPrefix="sqlTableInsert"
+					prefixOptions={TABLE_PREFIXES}
+					suffixOptions={TABLE_SUFFIXES}
+					onPrefixChange={setPrefix}
+					onSuffixChange={setSuffix}
+				/>
+			)}
 			<DialogActions>
 				<BlueButton
 					title="Insert"
@@ -184,6 +191,7 @@ function TablesContent({
 				<ColumnSelectDialog
 					table={columnDialog.table}
 					columnData={columnDialog.data}
+					plain={plain}
 					onInsert={(columns) => {
 						onInsertColumn(columns);
 						setColumnDialog(null);
@@ -198,11 +206,13 @@ function TablesContent({
 function ColumnSelectDialog({
 	table,
 	columnData,
+	plain,
 	onInsert,
 	onClose,
 }: {
 	table: string;
 	columnData: string[] | "loading";
+	plain: boolean;
 	onInsert: (columns: string[]) => void;
 	onClose: () => void;
 }) {
@@ -228,21 +238,23 @@ function ColumnSelectDialog({
 			<p className="text-caption mb-4 truncate" title={table}>
 				{table}
 			</p>
-			<DialogField>
-				<InputLabel
-					text="Table alias"
-					id="sqlColumnInsert_alias"
-					required={false}
-				/>
-				<ControllTextBox
-					name="sqlColumnInsert_alias"
-					id="sqlColumnInsert_alias"
-					required={false}
-					value={alias}
-					handleChange={(ev) => setAlias(ev.target.value)}
-				/>
-			</DialogField>
-			<DialogField>
+			{!plain && (
+				<DialogField>
+					<InputLabel
+						text="Table alias"
+						id="sqlColumnInsert_alias"
+						required={false}
+					/>
+					<ControllTextBox
+						name="sqlColumnInsert_alias"
+						id="sqlColumnInsert_alias"
+						required={false}
+						value={alias}
+						handleChange={(ev) => setAlias(ev.target.value)}
+					/>
+				</DialogField>
+			)}
+			<DialogField last={plain}>
 				<SelectableTable
 					items={columnData}
 					selected={selected}
@@ -253,13 +265,15 @@ function ColumnSelectDialog({
 					emptyMessage="No columns found"
 				/>
 			</DialogField>
-			<AffixSelects
-				idPrefix="sqlColumnInsert"
-				prefixOptions={COLUMN_PREFIXES}
-				suffixOptions={COLUMN_SUFFIXES}
-				onPrefixChange={setPrefix}
-				onSuffixChange={setSuffix}
-			/>
+			{!plain && (
+				<AffixSelects
+					idPrefix="sqlColumnInsert"
+					prefixOptions={COLUMN_PREFIXES}
+					suffixOptions={COLUMN_SUFFIXES}
+					onPrefixChange={setPrefix}
+					onSuffixChange={setSuffix}
+				/>
+			)}
 			<DialogActions>
 				<BlueButton
 					title="Insert Columns"
