@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
 	DialogBody,
 	DialogField,
@@ -15,6 +15,7 @@ import {
 } from "../../../../hooks/useQueryDatasource";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
+import { insertAtCursor } from "../../../../utils/textInsert";
 import {
 	RemoveResource,
 	type ResourceEditButtonProp,
@@ -32,6 +33,8 @@ type SqlEditorDialogProps = {
 export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 	const [content, setContent] = useState<string>(props.value);
 	const [showTableSelector, setShowTableSelector] = useState(false);
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const pendingCursorRef = useRef<number | null>(null);
 	const saveDataSource = useSaveDataSource();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 
@@ -41,19 +44,31 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 			() => props.handleSave(path),
 		);
 
-	const appendToContent = (text: string) => {
-		setContent((prev) =>
-			prev === "" || prev.endsWith("\n") ? prev + text : `${prev}\n${text}`,
-		);
+	const insertToContent = (text: string) => {
+		const textarea = textareaRef.current;
+		const start = textarea?.selectionStart ?? content.length;
+		const end = textarea?.selectionEnd ?? content.length;
+		const result = insertAtCursor(content, text, start, end);
+		pendingCursorRef.current = result.cursor;
+		setContent(result.value);
 	};
 
+	useLayoutEffect(() => {
+		const cursor = pendingCursorRef.current;
+		if (cursor === null) {
+			return;
+		}
+		pendingCursorRef.current = null;
+		textareaRef.current?.setSelectionRange(cursor, cursor);
+	});
+
 	const handleInsert = (tables: string[]) => {
-		appendToContent(tables.join("\n"));
+		insertToContent(tables.join("\n"));
 		setShowTableSelector(false);
 	};
 
-	const handleInsertColumn = (column: string) => {
-		appendToContent(column);
+	const handleInsertColumn = (columns: string[]) => {
+		insertToContent(columns.join("\n"));
 	};
 
 	return (
@@ -76,6 +91,7 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 				)}
 				<TextArea
 					id="contents"
+					ref={textareaRef}
 					value={content}
 					onChange={(e) => setContent(e.target.value)}
 					placeholder={
@@ -91,6 +107,7 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 					jdbcValues={jdbcValues}
 					onInsert={handleInsert}
 					onInsertColumn={handleInsertColumn}
+					plain={props.type === "table"}
 					onClose={() => setShowTableSelector(false)}
 				/>
 			)}

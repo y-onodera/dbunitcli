@@ -57,7 +57,7 @@ export function SelectBox(props: {
 	hidden?: boolean;
 	wStyle?: string;
 	defaultValue?: string;
-	handleOnChange?: (selected: string) => Promise<void>;
+	handleOnChange?: (selected: string) => void | Promise<void>;
 	children: ReactNode;
 }) {
 	const [selected, setSelected] = useState(
@@ -163,6 +163,7 @@ export function PreviewField({
 }
 export function TextArea(props: {
 	id?: string;
+	ref?: React.Ref<HTMLTextAreaElement>;
 	value: string;
 	readOnly?: boolean;
 	placeholder?: string;
@@ -172,8 +173,9 @@ export function TextArea(props: {
 	return (
 		<textarea
 			id={props.id}
+			ref={props.ref}
 			className="p-2.5
-                       w-full h-96 
+                       w-full h-96
                        text-sm text-content
                        rounded-lg
                        bg-input
