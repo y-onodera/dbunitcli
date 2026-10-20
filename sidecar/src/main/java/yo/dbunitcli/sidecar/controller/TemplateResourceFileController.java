@@ -14,7 +14,7 @@ import yo.dbunitcli.application.command.GenerateType;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.TemplateRequestDto;
-import yo.dbunitcli.sidecar.job.JobManager;
+import yo.dbunitcli.sidecar.job.JobTracked;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -29,8 +29,8 @@ public class TemplateResourceFileController extends AbstractResourceFileControll
     private static final String XLSX_EXTENSION = ".xlsx";
 
     @Inject
-    public TemplateResourceFileController(final Workspace workspace, final JobManager jobs) {
-        super(workspace, jobs);
+    public TemplateResourceFileController(final Workspace workspace) {
+        super(workspace);
     }
 
     @Override
@@ -73,17 +73,12 @@ public class TemplateResourceFileController extends AbstractResourceFileControll
         return this.currentFileList();
     }
 
-    /** generate をジョブとして開始する（JobManager.start 参照） */
-    @Post(uri = "generate/job", produces = MediaType.APPLICATION_JSON)
-    public Map<String, String> generateJob(@Body final Map<String, String> input) {
-        return this.jobs.start(() -> this.generate(input));
-    }
-
     /**
      * データセットのカラムメタデータからxlsxテンプレート（jxls）を生成し、-fileNameでtemplateリソースへ保存する。
      * generateコマンド（generateType=xlsxTemplate）を一時ディレクトリへ実行して取り込む。
      * xlsxTemplateは常に.xlsx形式で出力するため、拡張子が無ければ.xlsxを補う。応答はsave同様に更新後のファイル一覧。
      */
+    @JobTracked
     @Post(uri = "generate", produces = MediaType.APPLICATION_JSON)
     public String generate(@Body final Map<String, String> input) throws IOException {
         if (Strings.isEmpty(input.get("-src.src"))) {

@@ -25,7 +25,7 @@ import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
-import yo.dbunitcli.sidecar.job.JobManager;
+import yo.dbunitcli.sidecar.job.JobTracked;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,14 +39,8 @@ import java.util.Map;
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetSettingsController.class);
 
-    public DatasetSettingsController(final Workspace workspace, final JobManager jobs) {
-        super(workspace, jobs);
-    }
-
-    /** generate をジョブとして開始する（JobManager.start 参照） */
-    @Post(uri = "generate/job", produces = MediaType.APPLICATION_JSON)
-    public Map<String, String> generateJob(@Body final Map<String, String> input) {
-        return this.jobs.start(() -> this.generate(input));
+    public DatasetSettingsController(final Workspace workspace) {
+        super(workspace);
     }
 
     /**
@@ -54,6 +48,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
      * generateコマンド（generateType=settings）を一時ディレクトリへ実行し、
      * 出力された単一JSON（load応答と同形）をそのまま返す。保存は行わない。
      */
+    @JobTracked
     @Post(uri = "generate", produces = MediaType.APPLICATION_JSON)
     public String generate(@Body final Map<String, String> input) throws IOException {
         if (Strings.isEmpty(input.get("-src.src"))) {
@@ -74,12 +69,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
-    /** table-names をジョブとして開始する（JobManager.start 参照） */
-    @Post(uri = "table-names/job", produces = MediaType.APPLICATION_JSON)
-    public Map<String, String> tableNamesJob(@Body final DatasetTableNamesRequestDto request) {
-        return this.jobs.start(() -> this.tableNames(request));
-    }
-
+    @JobTracked
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
         try {
@@ -92,12 +82,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
-    /** table-preview をジョブとして開始する（JobManager.start 参照） */
-    @Post(uri = "table-preview/job", produces = MediaType.APPLICATION_JSON)
-    public Map<String, String> tablePreviewJob(@Body final DatasetTablePreviewRequestDto request) {
-        return this.jobs.start(() -> this.tablePreview(request));
-    }
-
+    @JobTracked
     @Post(uri = "table-preview", produces = MediaType.APPLICATION_JSON)
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {

@@ -15,7 +15,7 @@ import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.FixedColumnDefDto;
 import yo.dbunitcli.sidecar.dto.FixedColumnDefRequestDto;
-import yo.dbunitcli.sidecar.job.JobManager;
+import yo.dbunitcli.sidecar.job.JobTracked;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,8 +30,8 @@ public class FixedColumnDefController extends AbstractResourceFileController<Fix
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FixedColumnDefController.class);
 
-    public FixedColumnDefController(final Workspace workspace, final JobManager jobs) {
-        super(workspace, jobs);
+    public FixedColumnDefController(final Workspace workspace) {
+        super(workspace);
     }
 
     @Override
@@ -50,17 +50,12 @@ public class FixedColumnDefController extends AbstractResourceFileController<Fix
         return st.render();
     }
 
-    /** generate をジョブとして開始する（JobManager.start 参照） */
-    @Post(uri = "generate/job", produces = MediaType.APPLICATION_JSON)
-    public Map<String, String> generateJob(@Body final Map<String, String> input) {
-        return this.jobs.start(() -> this.generate(input));
-    }
-
     /**
      * データセットのカラムメタデータからfixedColumnDefテンプレートを生成して返す。
      * generateコマンド（generateType=fixedColumnDef）を一時ディレクトリへ実行し、
      * テーブル別に出力されたJSONのcolumnsをload応答と同形へマージする。保存は行わない。
      */
+    @JobTracked
     @Post(uri = "generate", produces = MediaType.APPLICATION_JSON)
     public String generate(@Body final Map<String, String> input) throws IOException {
         if (Strings.isEmpty(input.get("-src.src"))) {

@@ -14,7 +14,7 @@ import yo.dbunitcli.application.command.Scaffold;
 import yo.dbunitcli.application.command.ScaffoldOption;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.resource.FileResources;
-import yo.dbunitcli.sidecar.job.JobManager;
+import yo.dbunitcli.sidecar.job.JobTracked;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -40,12 +40,6 @@ public class ScaffoldController implements ControllerExceptionHandler {
             "-template.templateGroup", FileResources.RESOURCES_TEMPLATE_PATH + "/",
             "-unitSetting", FileResources.RESOURCES_SETTING_PATH + "/");
 
-    private final JobManager jobs;
-
-    public ScaffoldController(final JobManager jobs) {
-        this.jobs = jobs;
-    }
-
     @Post(uri = "refresh", produces = MediaType.APPLICATION_JSON)
     public String refresh(@Body final Map<String, String> input) {
         try {
@@ -56,12 +50,7 @@ public class ScaffoldController implements ControllerExceptionHandler {
         }
     }
 
-    /** exec をジョブとして開始する（JobManager.start 参照） */
-    @Post(uri = "exec/job", produces = MediaType.APPLICATION_JSON)
-    public Map<String, String> execJob(@Body final Map<String, String> input) {
-        return this.jobs.start(() -> this.exec(input));
-    }
-
+    @JobTracked
     @Post(uri = "exec", produces = MediaType.APPLICATION_JSON)
     public String exec(@Body final Map<String, String> input) throws IOException {
         final ScaffoldOption option = this.parseOption(input);

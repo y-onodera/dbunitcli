@@ -16,13 +16,12 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.JdbcColumnsRequestDto;
 import yo.dbunitcli.sidecar.dto.JdbcDto;
 import yo.dbunitcli.sidecar.dto.JdbcSavePropertiesRequestDto;
-import yo.dbunitcli.sidecar.job.JobManager;
+import yo.dbunitcli.sidecar.job.JobTracked;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Properties;
 
 @Controller("jdbc")
@@ -41,8 +40,8 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
     }
 
     @Inject
-    public JdbcResourceFileController(final Workspace workspace, final JobManager jobs) {
-        super(workspace, jobs);
+    public JdbcResourceFileController(final Workspace workspace) {
+        super(workspace);
     }
 
     @Post(uri = "save-properties", produces = MediaType.APPLICATION_JSON)
@@ -70,12 +69,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         }
     }
 
-    /** tables をジョブとして開始する（JobManager.start 参照） */
-    @Post(uri = "tables/job", produces = MediaType.APPLICATION_JSON)
-    public Map<String, String> tablesJob(@Body final JdbcDto body) {
-        return this.jobs.start(() -> this.tables(body));
-    }
-
+    @JobTracked
     @Post(uri = "tables", produces = MediaType.APPLICATION_JSON)
     public String tables(@Body final JdbcDto body) {
         IDatabaseConnection conn = null;
@@ -97,12 +91,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         }
     }
 
-    /** columns をジョブとして開始する（JobManager.start 参照） */
-    @Post(uri = "columns/job", produces = MediaType.APPLICATION_JSON)
-    public Map<String, String> columnsJob(@Body final JdbcColumnsRequestDto body) {
-        return this.jobs.start(() -> this.columns(body));
-    }
-
+    @JobTracked
     @Post(uri = "columns", produces = MediaType.APPLICATION_JSON)
     public String columns(@Body final JdbcColumnsRequestDto body) {
         IDatabaseConnection conn = null;
@@ -127,12 +116,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         }
     }
 
-    /** test をジョブとして開始する（JobManager.start 参照） */
-    @Post(uri = "test/job", produces = MediaType.APPLICATION_JSON)
-    public Map<String, String> testJob(@Body final JdbcDto body) {
-        return this.jobs.start(() -> this.test(body));
-    }
-
+    @JobTracked
     @Post(uri = "test", produces = MediaType.APPLICATION_JSON)
     public String test(@Body final JdbcDto body) {
         try {

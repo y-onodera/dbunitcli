@@ -5,16 +5,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.sidecar.controller.ApplicationException;
-import yo.dbunitcli.sidecar.dto.JobEventDto;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 class JobManagerTest {
 
@@ -24,7 +19,7 @@ class JobManagerTest {
 
     @BeforeEach
     void setUp() {
-        this.jobs = new JobManager("");
+        this.jobs = new JobManager();
     }
 
     @AfterEach
@@ -33,89 +28,64 @@ class JobManagerTest {
     }
 
     @Test
-    void testStart_仮想スレッドで実行しログと結果をイベントで返す() throws Exception {
-        final AtomicBoolean virtual = new AtomicBoolean();
-        final Job job = this.start(() -> {
-            virtual.set(Thread.currentThread().isVirtual());
+    void testRun_実行中のログを流し結果はそのまま返す() {
+        final String result = this.jobs.run("job-1", () -> {
             LoggerFactory.getLogger("JobManagerTest").info("hello job");
             return "result";
         });
-        final List<JobEventDto> events = job.events().collectList().block(TIMEOUT);
+        final List<String> logs = this.jobs.logs("job-1").collectList().block(TIMEOUT);
 
-        Assertions.assertTrue(virtual.get(), "仮想スレッドで実行されること");
-        Assertions.assertEquals(2, events.size());
-        Assertions.assertEquals(JobEventDto.TYPE_LOG, events.get(0).type());
-        Assertions.assertTrue(events.get(0).message().endsWith("INFO  JobManagerTest - hello job"), events.get(0).message());
-        final JobEventDto done = events.get(1);
-        Assertions.assertEquals(JobEventDto.TYPE_DONE, done.type());
-        Assertions.assertEquals("SUCCEEDED", done.status());
-        Assertions.assertEquals(200, done.httpStatus());
-        Assertions.assertEquals("result", done.result());
+        Assertions.assertEquals("result", result);
+        Assertions.assertEquals(1, logs.size());
+        Assertions.assertTrue(logs.get(0).endsWith("INFO  JobManagerTest - hello job"), logs.get(0));
     }
 
     @Test
-    void testStart_ジョブ外のスレッドのログは転送しない() throws Exception {
-        final CountDownLatch logged = new CountDownLatch(1);
-        final Job job = this.start(() -> {
-            Assertions.assertTrue(logged.await(10, TimeUnit.SECONDS));
-            return "result";
-        });
+    void testRun_ジョブ外のログは流さない() {
+        this.jobs.run("job-1", () -> "result");
         LoggerFactory.getLogger("JobManagerTest").info("outside job");
-        logged.countDown();
-        final List<JobEventDto> events = job.events().collectList().block(TIMEOUT);
 
-        Assertions.assertEquals(1, events.size());
-        Assertions.assertEquals(JobEventDto.TYPE_DONE, events.get(0).type());
+        Assertions.assertEquals(List.of(), this.jobs.logs("job-1").collectList().block(TIMEOUT));
     }
 
     @Test
-    void testStart_ApplicationExceptionは400で失敗() throws Exception {
-        final Job job = this.start(() -> {
-            throw new ApplicationException(new IllegalArgumentException("bad input"));
-        });
-        final JobEventDto done = job.events().blockLast(TIMEOUT);
+    void testRun_例外はそのまま呼び出し元へ伝えログは終端する() {
+        final IllegalStateException error = Assertions.assertThrows(IllegalStateException.class,
+                () -> this.jobs.run("job-1", () -> {
+                    throw new IllegalStateException("bad");
+                }));
 
-        Assertions.assertEquals("FAILED", done.status());
-        Assertions.assertEquals(400, done.httpStatus());
-        Assertions.assertEquals("Fix Input Parameter", done.reason());
-        Assertions.assertEquals("Execution failed. cause: java.lang.IllegalArgumentException: bad input", done.message());
+        Assertions.assertEquals("bad", error.getMessage());
+        Assertions.assertEquals(List.of(), this.jobs.logs("job-1").collectList().block(TIMEOUT));
     }
 
     @Test
-    void testStart_IOExceptionは500で失敗() throws Exception {
-        final Job job = this.start(() -> {
-            throw new IOException("disk error");
-        });
-        final JobEventDto done = job.events().blockLast(TIMEOUT);
-
-        Assertions.assertEquals("FAILED", done.status());
-        Assertions.assertEquals(500, done.httpStatus());
-        Assertions.assertEquals("File operation failed. cause: disk error", done.message());
-    }
-
-    @Test
-    void testCancel_実行中のジョブへinterruptを送り中断扱いにする() throws Exception {
+    void testCancel_実行中のスレッドへinterruptを送る() throws Exception {
         final CountDownLatch started = new CountDownLatch(1);
         final CountDownLatch interrupted = new CountDownLatch(1);
-        final Job job = this.start(() -> {
+        final Thread worker = Thread.ofVirtual().start(() -> this.jobs.run("job-1", () -> {
             started.countDown();
             try {
                 Thread.sleep(Duration.ofMinutes(1));
             } catch (final InterruptedException e) {
                 interrupted.countDown();
             }
-            return "never";
-        });
+            return null;
+        }));
         Assertions.assertTrue(started.await(10, TimeUnit.SECONDS));
-        this.jobs.cancel(job.getId());
-        final JobEventDto done = job.events().blockLast(TIMEOUT);
+        this.jobs.cancel("job-1");
 
-        Assertions.assertTrue(interrupted.await(10, TimeUnit.SECONDS), "仮想スレッドへinterruptが届くこと");
-        Assertions.assertEquals("CANCELLED", done.status());
-        Assertions.assertNull(done.result());
+        Assertions.assertTrue(interrupted.await(10, TimeUnit.SECONDS), "実行中のスレッドへinterruptが届くこと");
+        worker.join(TIMEOUT);
     }
 
-    private Job start(final Callable<String> task) {
-        return this.jobs.find(this.jobs.start(task).get("jobId")).orElseThrow();
+    @Test
+    void testCancel_開始前に中断済みなら開始時に割り込む() {
+        this.jobs.cancel("job-1");
+
+        final boolean interrupted = this.jobs.run("job-1", () -> Thread.currentThread().isInterrupted());
+
+        Assertions.assertTrue(interrupted);
+        Assertions.assertFalse(Thread.currentThread().isInterrupted(), "完了後は割り込み状態を持ち越さないこと");
     }
 }

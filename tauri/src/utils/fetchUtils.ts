@@ -1,4 +1,5 @@
 import { fetch } from "@tauri-apps/plugin-http";
+import { API_CONTEXT_PATH } from "./apiPath";
 
 type ErrorInfo = {
 	message: string;
@@ -7,7 +8,7 @@ type ErrorInfo = {
 	requestBody: string;
 };
 
-// sidecarの「<endpoint>/job」で処理を仮想スレッドのジョブとして開始し、SSEでログと結果を受け取る
+// X-Job-Id を付けて呼ぶと、sidecarは処理中のログをSSEで流し、中断（cancel）を受け付ける。結果は通常の応答で返る
 export type JobOptions = {
 	onLog?: (line: string) => void;
 };
@@ -18,15 +19,6 @@ export type FetchParams = {
 	signal?: AbortSignal;
 	timeoutMs?: number;
 	job?: JobOptions;
-};
-
-type JobEvent = {
-	type: "log" | "done";
-	message?: string;
-	status?: "SUCCEEDED" | "FAILED" | "CANCELLED";
-	httpStatus?: number;
-	reason?: string;
-	result?: string;
 };
 
 const createErrorInfo = (
@@ -94,9 +86,6 @@ export async function fetchAndUpdate<T>(
 		});
 }
 
-const toStatusError = (status: number, reason: string | undefined) =>
-	new Error(`Status: ${status}\nDetails: ${reason || "Fetch request failed"}`);
-
 const fetchWithRetry = async (endpoint: string, options: RequestInit) => {
 	let response: Response;
 	try {
@@ -110,103 +99,97 @@ const fetchWithRetry = async (endpoint: string, options: RequestInit) => {
 		response = await fetch(endpoint, options);
 	}
 	if (!response.ok) {
-		throw toStatusError(response.status, response.statusText);
+		throw new Error(
+			`Status: ${response.status}\nDetails: ${response.statusText || "Fetch request failed"}`,
+		);
 	}
 	return response;
 };
 
-// SSEの1イベント分（空行区切りのブロック）からdata行を取り出してJSONとして解釈する
-const parseSseBlock = (block: string): JobEvent | null => {
+const JOB_HEADER = "X-Job-Id";
+
+// 処理完了後、末尾のログが届くのを待ってからログの購読を打ち切るまでの猶予
+const LOG_DRAIN_MS = 1000;
+
+// SSEの1イベント分（空行区切りのブロック）からdata行を取り出す
+const parseSseData = (block: string): string | null => {
 	const data = block
 		.split("\n")
 		.filter((line) => line.startsWith("data:"))
-		.map((line) => line.slice("data:".length).trimStart())
-		.join("\n");
-	return data ? (JSON.parse(data) as JobEvent) : null;
+		.map((line) => line.slice("data:".length).trimStart());
+	return data.length > 0 ? data.join("\n") : null;
 };
 
-const readDoneEvent = async (
-	reader: ReadableStreamDefaultReader<Uint8Array>,
-	onLog: ((line: string) => void) | undefined,
-): Promise<JobEvent | null> => {
-	const decoder = new TextDecoder();
-	let buffer = "";
-	for (;;) {
-		const { done, value } = await reader.read();
-		if (done) {
-			return null;
+// ログは補助情報のため、購読の失敗は処理結果に影響させない
+const streamJobLogs = async (
+	url: string,
+	signal: AbortSignal,
+	onLog: (line: string) => void,
+) => {
+	try {
+		const response = await fetch(url, {
+			method: "GET",
+			headers: { Accept: "text/event-stream" },
+			signal,
+		});
+		if (!response.ok || !response.body) {
+			return;
 		}
-		buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
-		let separator = buffer.indexOf("\n\n");
-		while (separator >= 0) {
-			const event = parseSseBlock(buffer.slice(0, separator));
-			buffer = buffer.slice(separator + 2);
-			if (event?.type === "done") {
-				return event;
+		const reader = response.body.getReader();
+		signal.addEventListener("abort", () => {
+			reader.cancel().catch(() => undefined);
+		});
+		const decoder = new TextDecoder();
+		let buffer = "";
+		for (;;) {
+			const { done, value } = await reader.read();
+			if (done || signal.aborted) {
+				return;
 			}
-			if (event?.type === "log") {
-				onLog?.(event.message ?? "");
+			buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
+			let separator = buffer.indexOf("\n\n");
+			while (separator >= 0) {
+				const line = parseSseData(buffer.slice(0, separator));
+				buffer = buffer.slice(separator + 2);
+				if (line !== null) {
+					onLog(line);
+				}
+				separator = buffer.indexOf("\n\n");
 			}
-			separator = buffer.indexOf("\n\n");
 		}
+	} catch {
+		// 何もしない
 	}
 };
 
-const abortError = () => new DOMException("Aborted", "AbortError");
-
-// ジョブを開始してSSEで完了まで待ち、結果を通常のレスポンスと同じ形で返す。
-// 中断（signalのabort）時はsidecarへcancelを送り、AbortErrorを投げる
-const fetchJob = async (
+// jobIdを発行して X-Job-Id 付きで呼ぶ。onLogがあればログを購読し、abort時はsidecarへcancelを送る
+const fetchWithJob = async (
 	endpoint: string,
 	options: RequestInit,
 	signal: AbortSignal | undefined,
 	{ onLog }: JobOptions,
 ): Promise<Response> => {
-	const started = await fetchWithRetry(`${endpoint}/job`, {
-		...options,
-		signal,
-	});
-	// events/cancelはsidecarのコンテキストパスを含む絶対パスで返るため、endpointを基準に解決する
-	const paths = (await started.json()) as { events: string; cancel: string };
-	const events = await fetchWithRetry(new URL(paths.events, endpoint).href, {
-		method: "GET",
-		headers: { Accept: "text/event-stream" },
-		signal,
-	});
-	if (!events.body) {
-		throw new Error("Job event stream is not available");
+	const jobId = crypto.randomUUID();
+	const jobUrl = new URL(`${API_CONTEXT_PATH}job/${jobId}/`, endpoint);
+	const logs = new AbortController();
+	if (onLog) {
+		streamJobLogs(new URL("events", jobUrl).href, logs.signal, onLog);
 	}
-	const reader = events.body.getReader();
 	const handleAbort = () => {
-		fetch(new URL(paths.cancel, endpoint).href, { method: "POST" }).catch(
+		logs.abort();
+		fetch(new URL("cancel", jobUrl).href, { method: "POST" }).catch(
 			() => undefined,
 		);
-		reader.cancel().catch(() => undefined);
 	};
-	if (signal?.aborted) {
-		handleAbort();
-		throw abortError();
-	}
 	signal?.addEventListener("abort", handleAbort, { once: true });
+	const headers = new Headers(options.headers);
+	headers.set(JOB_HEADER, jobId);
 	try {
-		const done = await readDoneEvent(reader, onLog);
-		if (signal?.aborted) {
-			throw abortError();
-		}
-		if (!done) {
-			throw new Error("Job event stream closed before completion");
-		}
-		if (done.status !== "SUCCEEDED") {
-			throw toStatusError(done.httpStatus ?? 500, done.reason);
-		}
-		return new Response(done.result ?? "", { status: 200 });
-	} catch (ex) {
-		if (signal?.aborted) {
-			throw abortError();
-		}
-		throw ex;
+		return await fetchWithRetry(endpoint, { ...options, headers, signal });
 	} finally {
 		signal?.removeEventListener("abort", handleAbort);
+		// 正常時はsidecarが購読を閉じる。処理まで届かなかった場合に備えて購読を残さない
+		setTimeout(() => logs.abort(), LOG_DRAIN_MS);
 	}
 };
 
@@ -227,7 +210,7 @@ export const fetchData = async ({
 		signal ?? controller?.signal ?? options.signal ?? undefined;
 	try {
 		if (job) {
-			return await fetchJob(endpoint, options, mergedSignal, job);
+			return await fetchWithJob(endpoint, options, mergedSignal, job);
 		}
 		return await fetchWithRetry(endpoint, { ...options, signal: mergedSignal });
 	} finally {

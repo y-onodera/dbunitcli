@@ -1,23 +1,20 @@
 package yo.dbunitcli.sidecar.controller;
 
-import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Post;
-import io.micronaut.http.exceptions.HttpStatusException;
 import io.micronaut.http.sse.Event;
 import org.reactivestreams.Publisher;
-import yo.dbunitcli.sidecar.dto.JobEventDto;
 import yo.dbunitcli.sidecar.job.JobManager;
 
 /**
- * 各コントローラの {@code .../job} で開始したジョブの進捗参照・中断API。
- * events はSSEでログ行（event: log）と完了（event: done）をpushする。
+ * X-Job-Id 付きで呼んだ {@code @JobTracked} エンドポイントの、実行中ログ配信と中断API。
+ * 結果は元のエンドポイントの応答で返る。
  */
 @Controller("/job")
-public class JobController implements ControllerExceptionHandler {
+public class JobController {
 
     private final JobManager jobs;
 
@@ -25,11 +22,10 @@ public class JobController implements ControllerExceptionHandler {
         this.jobs = jobs;
     }
 
+    /** ログ行を event: log で push し、処理が終わったら閉じる。処理の開始前に購読してもよい */
     @Get(uri = "{id}/events", produces = MediaType.TEXT_EVENT_STREAM)
-    public Publisher<Event<JobEventDto>> events(@PathVariable final String id) {
-        return this.jobs.find(id)
-                .map(job -> job.events().map(event -> Event.of(event).name(event.type())))
-                .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "job not found: " + id));
+    public Publisher<Event<String>> events(@PathVariable final String id) {
+        return this.jobs.logs(id).map(line -> Event.of(line).name("log"));
     }
 
     @Post(uri = "{id}/cancel", produces = MediaType.TEXT_PLAIN)

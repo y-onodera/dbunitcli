@@ -12,27 +12,13 @@ public interface ControllerExceptionHandler {
 
     @Error
     default HttpResponse<JsonError> handleException(final HttpRequest<?> request, final ApplicationException ex) {
-        return ErrorResult.of(ex).toResponse();
+        return HttpResponse.<JsonError>status(HttpStatus.BAD_REQUEST, "Fix Input Parameter")
+                           .body(new JsonError("Execution failed. cause: " + ex.getMessage()));
     }
 
     @Error
     default HttpResponse<JsonError> handleIOException(final HttpRequest<?> request, final IOException ex) {
-        return ErrorResult.of(ex).toResponse();
-    }
-
-    /** 例外→応答の対応。同期APIのエラーハンドラとジョブの完了イベントで共有する */
-    record ErrorResult(HttpStatus status, String reason, String message) {
-
-        public static ErrorResult of(final ApplicationException ex) {
-            return new ErrorResult(HttpStatus.BAD_REQUEST, "Fix Input Parameter", "Execution failed. cause: " + ex.getMessage());
-        }
-
-        public static ErrorResult of(final IOException ex) {
-            return new ErrorResult(HttpStatus.INTERNAL_SERVER_ERROR, "File Operation Failed", "File operation failed. cause: " + ex.getMessage());
-        }
-
-        HttpResponse<JsonError> toResponse() {
-            return HttpResponse.<JsonError>status(this.status, this.reason).body(new JsonError(this.message));
-        }
+        return HttpResponse.<JsonError>status(HttpStatus.INTERNAL_SERVER_ERROR, "File Operation Failed")
+                           .body(new JsonError("File operation failed. cause: " + ex.getMessage()));
     }
 }

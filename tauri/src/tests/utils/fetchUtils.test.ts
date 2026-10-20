@@ -1,11 +1,12 @@
 import { fetch } from "@tauri-apps/plugin-http";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchData, isAbortError } from "../../utils/fetchUtils";
 
 vi.mock("@tauri-apps/plugin-http", () => ({ fetch: vi.fn() }));
 
 const mockFetch = vi.mocked(fetch);
 const API_URL = "http://localhost:8080/dbunit-cli/";
+const JOB_URL = `${API_URL}job/job-1/`;
 
 // SSEの本文を任意の位置で分割したチャンクとして流すストリーム（close=falseなら閉じずに待ち続ける）
 const sseStream = (chunks: string[], close = true) =>
@@ -21,81 +22,84 @@ const sseStream = (chunks: string[], close = true) =>
 		},
 	});
 
-const sseEvent = (type: string, data: Record<string, unknown>) =>
-	`event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`;
-
-const mockJob = (events: ReadableStream<Uint8Array>) => {
-	mockFetch.mockImplementation(async (input) => {
-		const url = String(input);
-		if (url.endsWith("/exec/job")) {
-			return new Response(
-				JSON.stringify({
-					jobId: "job-1",
-					events: "/dbunit-cli/job/job-1/events",
-					cancel: "/dbunit-cli/job/job-1/cancel",
-				}),
-				{ status: 200 },
-			);
-		}
-		if (url.endsWith("job/job-1/events")) {
-			return new Response(events, { status: 200 });
-		}
-		return new Response("success", { status: 200 });
-	});
-};
+const sseLog = (line: string) => `event: log\ndata: ${line}\n\n`;
 
 const execParams = {
 	endpoint: `${API_URL}compare/exec`,
-	options: { method: "POST", body: "{}" },
+	options: {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: "{}",
+	},
 };
+
+// 本体の応答とログのSSEを返すfetchのモック
+const mockJob = (
+	execResponse: () => Promise<Response>,
+	events: ReadableStream<Uint8Array> = sseStream([]),
+) => {
+	mockFetch.mockImplementation(async (input) => {
+		const url = String(input);
+		if (url === `${JOB_URL}events`) {
+			return new Response(events, { status: 200 });
+		}
+		if (url === `${JOB_URL}cancel`) {
+			return new Response("success", { status: 200 });
+		}
+		return execResponse();
+	});
+};
+
+const execCall = () =>
+	mockFetch.mock.calls.find(([url]) => String(url) === execParams.endpoint);
 
 describe("fetchData（job指定）", () => {
 	beforeEach(() => {
 		mockFetch.mockReset();
+		vi.spyOn(crypto, "randomUUID").mockReturnValue(
+			"job-1" as ReturnType<typeof crypto.randomUUID>,
+		);
 	});
 
-	it("<endpoint>/jobで開始し、SSEのログをonLogへ渡して完了結果をレスポンスとして返す", async () => {
-		const done = sseEvent("done", {
-			status: "SUCCEEDED",
-			httpStatus: 200,
-			result: "/result/dir",
-		});
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("X-Job-Id付きで本体を呼び、結果は本体の応答をそのまま返す", async () => {
+		mockJob(async () => new Response("/result/dir", { status: 200 }));
+
+		const response = await fetchData({ ...execParams, job: {} });
+
+		expect(await response.text()).toBe("/result/dir");
+		const headers = new Headers(execCall()?.[1]?.headers);
+		expect(headers.get("X-Job-Id")).toBe("job-1");
+		expect(headers.get("Content-Type")).toBe("application/json");
+		expect(mockFetch).toHaveBeenCalledTimes(1);
+	});
+
+	it("onLogがあればSSEのログ行（チャンク境界をまたぐものを含む）を渡す", async () => {
+		const log1 = sseLog("line 1");
 		mockJob(
-			sseStream([
-				sseEvent("log", { message: "line 1" }).slice(0, 10),
-				sseEvent("log", { message: "line 1" }).slice(10),
-				sseEvent("log", { message: "line 2" }) + done.slice(0, 20),
-				done.slice(20),
-			]),
+			async () => new Response("ok", { status: 200 }),
+			sseStream([log1.slice(0, 10), log1.slice(10), sseLog("line 2")]),
 		);
 		const onLog = vi.fn();
 
-		const response = await fetchData({
-			...execParams,
-			job: { onLog },
-		});
+		await fetchData({ ...execParams, job: { onLog } });
 
-		expect(await response.text()).toBe("/result/dir");
-		expect(onLog.mock.calls).toEqual([["line 1"], ["line 2"]]);
-		expect(mockFetch).toHaveBeenCalledWith(
-			`${API_URL}compare/exec/job`,
-			expect.objectContaining({ method: "POST", body: "{}" }),
+		await vi.waitFor(() =>
+			expect(onLog.mock.calls).toEqual([["line 1"], ["line 2"]]),
 		);
 		expect(mockFetch).toHaveBeenCalledWith(
-			`${API_URL}job/job-1/events`,
+			`${JOB_URL}events`,
 			expect.objectContaining({ method: "GET" }),
 		);
 	});
 
-	it("失敗の完了イベントは同期APIと同じ形式のエラーにする", async () => {
+	it("エラー応答は従来と同じ形式のエラーにする", async () => {
 		mockJob(
-			sseStream([
-				sseEvent("done", {
-					status: "FAILED",
-					httpStatus: 400,
-					reason: "Fix Input Parameter",
-				}),
-			]),
+			async () =>
+				new Response("", { status: 400, statusText: "Fix Input Parameter" }),
 		);
 
 		await expect(fetchData({ ...execParams, job: {} })).rejects.toThrow(
@@ -103,41 +107,38 @@ describe("fetchData（job指定）", () => {
 		);
 	});
 
-	it("完了イベントの前にストリームが閉じたらエラーにする", async () => {
-		mockJob(sseStream([sseEvent("log", { message: "line 1" })]));
-
-		await expect(fetchData({ ...execParams, job: {} })).rejects.toThrow(
-			"Job event stream closed before completion",
-		);
-	});
-
 	it("中断するとsidecarへcancelを送りAbortErrorにする", async () => {
-		mockJob(sseStream([sseEvent("log", { message: "line 1" })], false));
 		const controller = new AbortController();
-		const onLog = vi.fn(() => controller.abort());
-
-		const error = await fetchData({
+		mockJob(
+			() =>
+				new Promise<Response>((_, reject) => {
+					controller.signal.addEventListener("abort", () =>
+						reject(new DOMException("Aborted", "AbortError")),
+					);
+				}),
+			sseStream([], false),
+		);
+		const pending = fetchData({
 			...execParams,
 			signal: controller.signal,
-			job: { onLog },
+			job: { onLog: vi.fn() },
 		}).catch((ex) => ex);
 
-		expect(isAbortError(error)).toBe(true);
-		expect(mockFetch).toHaveBeenCalledWith(`${API_URL}job/job-1/cancel`, {
+		controller.abort();
+
+		expect(isAbortError(await pending)).toBe(true);
+		expect(mockFetch).toHaveBeenCalledWith(`${JOB_URL}cancel`, {
 			method: "POST",
 		});
 	});
 
-	it("job未指定なら従来どおりendpointへ直接リクエストする", async () => {
+	it("job未指定ならヘッダを付けず従来どおり呼ぶ", async () => {
 		mockFetch.mockResolvedValue(new Response("ok", { status: 200 }));
 
 		const response = await fetchData(execParams);
 
 		expect(await response.text()).toBe("ok");
 		expect(mockFetch).toHaveBeenCalledTimes(1);
-		expect(mockFetch).toHaveBeenCalledWith(
-			`${API_URL}compare/exec`,
-			expect.anything(),
-		);
+		expect(new Headers(execCall()?.[1]?.headers).has("X-Job-Id")).toBe(false);
 	});
 });

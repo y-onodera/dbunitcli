@@ -17,7 +17,7 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.JsonXlsxSchemaDto;
 import yo.dbunitcli.sidecar.dto.JsonXlsxSchemaRequestDto;
 import yo.dbunitcli.sidecar.dto.XlsxSheetsRequestDto;
-import yo.dbunitcli.sidecar.job.JobManager;
+import yo.dbunitcli.sidecar.job.JobTracked;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,8 +33,8 @@ import java.util.stream.Stream;
 public class XlsxSchemaController extends AbstractResourceFileController<JsonXlsxSchemaRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(XlsxSchemaController.class);
 
-    public XlsxSchemaController(final Workspace workspace, final JobManager jobs) {
-        super(workspace, jobs);
+    public XlsxSchemaController(final Workspace workspace) {
+        super(workspace);
     }
 
     @Override
@@ -42,17 +42,12 @@ public class XlsxSchemaController extends AbstractResourceFileController<JsonXls
         return this.workspace.resources().xlsxSchema();
     }
 
-    /** generate をジョブとして開始する（JobManager.start 参照） */
-    @Post(uri = "generate/job", produces = MediaType.APPLICATION_JSON)
-    public Map<String, String> generateJob(@Body final Map<String, String> input) {
-        return this.jobs.start(() -> this.generate(input));
-    }
-
     /**
      * データセットのカラムメタデータからxlsxSchemaテンプレートを生成して返す。
      * generateコマンド（generateType=xlsxSchema）を一時ディレクトリへ実行し、
      * テーブル別に出力されたJSONをload応答と同形（rows/cells）へマージする。保存は行わない。
      */
+    @JobTracked
     @Post(uri = "generate", produces = MediaType.APPLICATION_JSON)
     public String generate(@Body final Map<String, String> input) throws IOException {
         if (Strings.isEmpty(input.get("-src.src"))) {

@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.TemplateRequestDto;
-import yo.dbunitcli.sidecar.job.JobManager;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -22,8 +21,8 @@ public class ParameterizeTemplateResourceFileController extends AbstractResource
     private static final Logger LOGGER = LoggerFactory.getLogger(ParameterizeTemplateResourceFileController.class);
 
     @Inject
-    public ParameterizeTemplateResourceFileController(final Workspace workspace, final JobManager jobs) {
-        super(workspace, jobs);
+    public ParameterizeTemplateResourceFileController(final Workspace workspace) {
+        super(workspace);
     }
 
     @Post(uri = "load", consumes = MediaType.TEXT_PLAIN, produces = MediaType.APPLICATION_JSON)

@@ -31,10 +31,9 @@ DBUnit CLI のREST APIサーバー。Micronaut ベースで、Tauri アプリケ
 リソース系 `/{res}`: `GET /list`, `POST /load`, `POST /save`, `POST /delete`
 ワークスペース: `GET /workspace/resources`, `POST /workspace/update`
 
-### ジョブ（`<uri>/job`、同期版は残す）
+### ジョブ（`X-Job-Id` ヘッダ、`@JobTracked` を付けたメソッドが対象）
 - 対象: `/{cmd}/exec`, `scaffold/exec`, `{dataset-setting,xlsx-schema,fixed-column-def,template}/generate`, `dataset-setting/{table-names,table-preview}`, `jdbc/{tables,columns,test}`
-- `POST <uri>/job`→`{"jobId"}`、`GET /job/{id}/events`→SSE（`log` 行、最後に `done`）、`POST /job/{id}/cancel`→interrupt
-- 失敗時の値は `ControllerExceptionHandler` と揃える
+- 結果は通常の応答。実行中のログは `GET /job/{id}/events`（SSE）、中断は `POST /job/{id}/cancel`（interrupt）
 
 ## 技術スタック
 - Micronaut 4.x + Netty + Serde Jackson
