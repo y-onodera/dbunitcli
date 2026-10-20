@@ -25,7 +25,7 @@ import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
-import yo.dbunitcli.sidecar.job.JobTracked;
+import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,7 +48,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
      * generateコマンド（generateType=settings）を一時ディレクトリへ実行し、
      * 出力された単一JSON（load応答と同形）をそのまま返す。保存は行わない。
      */
-    @JobTracked
+    @Interruptible
     @Post(uri = "generate", produces = MediaType.APPLICATION_JSON)
     public String generate(@Body final Map<String, String> input) throws IOException {
         if (Strings.isEmpty(input.get("-src.src"))) {
@@ -69,7 +69,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
-    @JobTracked
+    @Interruptible
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
         try {
@@ -82,7 +82,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
-    @JobTracked
+    @Interruptible
     @Post(uri = "table-preview", produces = MediaType.APPLICATION_JSON)
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {

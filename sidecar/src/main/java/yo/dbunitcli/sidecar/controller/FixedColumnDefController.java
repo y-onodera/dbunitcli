@@ -15,7 +15,7 @@ import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.FixedColumnDefDto;
 import yo.dbunitcli.sidecar.dto.FixedColumnDefRequestDto;
-import yo.dbunitcli.sidecar.job.JobTracked;
+import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,7 +55,7 @@ public class FixedColumnDefController extends AbstractResourceFileController<Fix
      * generateコマンド（generateType=fixedColumnDef）を一時ディレクトリへ実行し、
      * テーブル別に出力されたJSONのcolumnsをload応答と同形へマージする。保存は行わない。
      */
-    @JobTracked
+    @Interruptible
     @Post(uri = "generate", produces = MediaType.APPLICATION_JSON)
     public String generate(@Body final Map<String, String> input) throws IOException {
         if (Strings.isEmpty(input.get("-src.src"))) {

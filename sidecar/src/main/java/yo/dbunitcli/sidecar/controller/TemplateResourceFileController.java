@@ -14,7 +14,7 @@ import yo.dbunitcli.application.command.GenerateType;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.TemplateRequestDto;
-import yo.dbunitcli.sidecar.job.JobTracked;
+import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -78,7 +78,7 @@ public class TemplateResourceFileController extends AbstractResourceFileControll
      * generateコマンド（generateType=xlsxTemplate）を一時ディレクトリへ実行して取り込む。
      * xlsxTemplateは常に.xlsx形式で出力するため、拡張子が無ければ.xlsxを補う。応答はsave同様に更新後のファイル一覧。
      */
-    @JobTracked
+    @Interruptible
     @Post(uri = "generate", produces = MediaType.APPLICATION_JSON)
     public String generate(@Body final Map<String, String> input) throws IOException {
         if (Strings.isEmpty(input.get("-src.src"))) {

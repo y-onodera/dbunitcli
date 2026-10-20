@@ -14,7 +14,7 @@ import yo.dbunitcli.application.command.Scaffold;
 import yo.dbunitcli.application.command.ScaffoldOption;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.resource.FileResources;
-import yo.dbunitcli.sidecar.job.JobTracked;
+import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -50,7 +50,7 @@ public class ScaffoldController implements ControllerExceptionHandler {
         }
     }
 
-    @JobTracked
+    @Interruptible
     @Post(uri = "exec", produces = MediaType.APPLICATION_JSON)
     public String exec(@Body final Map<String, String> input) throws IOException {
         final ScaffoldOption option = this.parseOption(input);

@@ -53,7 +53,7 @@ const mockJob = (
 const execCall = () =>
 	mockFetch.mock.calls.find(([url]) => String(url) === execParams.endpoint);
 
-describe("fetchData（job指定）", () => {
+describe("fetchData（X-Job-Id）", () => {
 	beforeEach(() => {
 		mockFetch.mockReset();
 		vi.spyOn(crypto, "randomUUID").mockReturnValue(
@@ -65,10 +65,13 @@ describe("fetchData（job指定）", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("X-Job-Id付きで本体を呼び、結果は本体の応答をそのまま返す", async () => {
+	it("signal付きならX-Job-Idを付けて本体を呼び、結果は本体の応答をそのまま返す", async () => {
 		mockJob(async () => new Response("/result/dir", { status: 200 }));
 
-		const response = await fetchData({ ...execParams, job: {} });
+		const response = await fetchData({
+			...execParams,
+			signal: new AbortController().signal,
+		});
 
 		expect(await response.text()).toBe("/result/dir");
 		const headers = new Headers(execCall()?.[1]?.headers);
@@ -86,7 +89,7 @@ describe("fetchData（job指定）", () => {
 		);
 		const onLog = vi.fn();
 
-		await fetchData({ ...execParams, job: { onLog } });
+		await fetchData({ ...execParams, onLog });
 
 		await vi.waitFor(() =>
 			expect(onLog.mock.calls).toEqual([["line 1"], ["line 2"]]),
@@ -104,9 +107,9 @@ describe("fetchData（job指定）", () => {
 				new Response("", { status: 400, statusText: "Fix Input Parameter" }),
 		);
 
-		await expect(fetchData({ ...execParams, job: {} })).rejects.toThrow(
-			"Status: 400\nDetails: Fix Input Parameter",
-		);
+		await expect(
+			fetchData({ ...execParams, signal: new AbortController().signal }),
+		).rejects.toThrow("Status: 400\nDetails: Fix Input Parameter");
 	});
 
 	it("中断するとsidecarへcancelを送りAbortErrorにする", async () => {
@@ -123,7 +126,7 @@ describe("fetchData（job指定）", () => {
 		const pending = fetchData({
 			...execParams,
 			signal: controller.signal,
-			job: { onLog: vi.fn() },
+			onLog: vi.fn(),
 		}).catch((ex) => ex);
 
 		controller.abort();
@@ -134,7 +137,7 @@ describe("fetchData（job指定）", () => {
 		});
 	});
 
-	it("job未指定ならヘッダを付けず従来どおり呼ぶ", async () => {
+	it("signalもonLogも無ければヘッダを付けず従来どおり呼ぶ", async () => {
 		mockFetch.mockResolvedValue(new Response("ok", { status: 200 }));
 
 		const response = await fetchData(execParams);

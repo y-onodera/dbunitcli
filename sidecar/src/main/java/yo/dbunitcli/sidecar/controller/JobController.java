@@ -10,7 +10,7 @@ import org.reactivestreams.Publisher;
 import yo.dbunitcli.sidecar.job.JobManager;
 
 /**
- * X-Job-Id 付きで呼んだ {@code @JobTracked} エンドポイントの、実行中ログ配信と中断API。
+ * X-Job-Id 付きで呼んだ {@code @Interruptible} エンドポイントの、実行中ログ配信と中断API。
  * 結果は元のエンドポイントの応答で返る。
  */
 @Controller("/job")

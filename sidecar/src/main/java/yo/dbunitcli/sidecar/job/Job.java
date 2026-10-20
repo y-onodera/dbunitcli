@@ -61,8 +61,14 @@ class Job {
         this.logs.tryEmitComplete();
     }
 
-    /** 完了から、または未実行のまま作成から一定時間経ったか */
-    synchronized boolean isExpired(final long time) {
-        return this.finishedAt != 0 ? this.finishedAt < time : this.thread == null && this.createdAt < time;
+    /**
+     * 破棄してよいか。完了済みはfinishedBefore以前に完了したもの、
+     * 未実行（中断・ログ購読が処理より先に届いた、または対象外のエンドポイントだった）はcreatedBefore以前に作成されたもの
+     */
+    synchronized boolean isExpired(final long finishedBefore, final long createdBefore) {
+        if (this.finishedAt != 0) {
+            return this.finishedAt < finishedBefore;
+        }
+        return this.thread == null && this.createdAt < createdBefore;
     }
 }

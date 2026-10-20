@@ -8,18 +8,13 @@ type ErrorInfo = {
 	requestBody: string;
 };
 
-// X-Job-Id を付けて呼ぶと、sidecarは処理中のログをSSEで流し、中断（cancel）を受け付ける。結果は通常の応答で返る
-export type JobOptions = {
-	onLog?: (line: string) => void;
-};
-
 export type FetchParams = {
 	endpoint: string;
 	options: RequestInit;
 	signal?: AbortSignal;
 	timeoutMs?: number;
-	// @JobTracked のエンドポイント向け。{} ならabort時にsidecar側も中断し、onLogを渡すと実行中のログも受け取る
-	job?: JobOptions;
+	// 実行中のログを受け取る（sidecarの @Interruptible エンドポイントのみログが流れる）
+	onLog?: (line: string) => void;
 };
 
 const createErrorInfo = (
@@ -165,12 +160,13 @@ const streamJobLogs = async (
 	}
 };
 
-// jobIdを発行して X-Job-Id 付きで呼ぶ。onLogがあればログを購読し、abort時はsidecarへcancelを送る
+// jobIdを発行して X-Job-Id 付きで呼ぶ。onLogがあればログを購読し、abort時はsidecarへcancelを送る。
+// 中断・ログの対象にするかはsidecarが @Interruptible で決め、対象外のエンドポイントはヘッダを無視する
 const fetchWithJob = async (
 	endpoint: string,
 	options: RequestInit,
 	signal: AbortSignal | undefined,
-	{ onLog }: JobOptions,
+	onLog: ((line: string) => void) | undefined,
 ): Promise<Response> => {
 	const jobId = crypto.randomUUID();
 	const jobUrl = new URL(`${API_CONTEXT_PATH}job/${jobId}/`, endpoint);
@@ -204,7 +200,7 @@ export const fetchData = async ({
 	options,
 	signal,
 	timeoutMs,
-	job,
+	onLog,
 }: FetchParams) => {
 	let controller: AbortController | null = null;
 	let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -215,8 +211,9 @@ export const fetchData = async ({
 	const mergedSignal =
 		signal ?? controller?.signal ?? options.signal ?? undefined;
 	try {
-		if (job) {
-			return await fetchWithJob(endpoint, options, mergedSignal, job);
+		// 中断できる（signalがある）か、ログが欲しい呼び出しだけジョブとして扱う
+		if (mergedSignal || onLog) {
+			return await fetchWithJob(endpoint, options, mergedSignal, onLog);
 		}
 		return await fetchWithRetry(endpoint, { ...options, signal: mergedSignal });
 	} finally {

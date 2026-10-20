@@ -31,8 +31,8 @@ DBUnit CLI のREST APIサーバー。Micronaut ベースで、Tauri アプリケ
 リソース系 `/{res}`: `GET /list`, `POST /load`, `POST /save`, `POST /delete`
 ワークスペース: `GET /workspace/resources`, `POST /workspace/update`
 
-### ジョブ（`X-Job-Id` ヘッダ、`@JobTracked` を付けたメソッドが対象）
-- 長時間化しうるメソッド（`/{cmd}/exec`、各 `generate`、JDBC系など）に付ける
+### ジョブ（`X-Job-Id` ヘッダ、`@Interruptible` を付けたメソッドが対象）
+- 長時間化しうる、かつ割り込んでも安全なメソッド（読み取りのみ・出力を作り直せる）に付ける。save等の書き込み系には付けない
 - 結果は通常の応答。中断は `POST /job/{id}/cancel`（interrupt）。`X-Job-Log` 付きなら実行中のログを `GET /job/{id}/events`（SSE）で流す
 
 ## 技術スタック

@@ -14,7 +14,7 @@ import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.CommandRequestDto;
-import yo.dbunitcli.sidecar.job.JobTracked;
+import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.File;
 import java.io.IOException;
@@ -165,7 +165,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
         }
     }
 
-    @JobTracked
+    @Interruptible
     @Post(uri = "exec", produces = MediaType.TEXT_PLAIN)
     public String exec(@Body final CommandRequestDto body) {
         try {

@@ -7,11 +7,11 @@ import io.micronaut.http.context.ServerRequestContext;
 import jakarta.inject.Singleton;
 
 /**
- * {@link JobTracked} の付いたメソッドを、リクエストの X-Job-Id に対応するジョブとして実行する。
+ * {@link Interruptible} の付いたメソッドを、リクエストの X-Job-Id に対応するジョブとして実行する。
  * ヘッダが無ければそのまま実行する。
  */
 @Singleton
-@InterceptorBean(JobTracked.class)
+@InterceptorBean(Interruptible.class)
 public class JobInterceptor implements MethodInterceptor<Object, Object> {
 
     public static final String HEADER = "X-Job-Id";

@@ -23,8 +23,14 @@ public class JobManager {
 
     static final String MDC_JOB_ID = "jobId";
 
-    /** 完了したジョブ（または実行されなかったジョブ）を保持する時間。経過後は次の実行開始時に破棄する */
+    /** 完了したジョブのログを、遅れて購読したクライアント向けに保持する時間 */
     private static final long RETENTION_MILLIS = TimeUnit.MINUTES.toMillis(10);
+
+    /**
+     * 処理より先に届いたcancel・購読を待つ時間。
+     * tauriはabort時に対象外のエンドポイントにもcancelを送るため、実行されないまま残る分は早めに破棄する
+     */
+    private static final long PENDING_MILLIS = TimeUnit.MINUTES.toMillis(1);
 
     private final Map<String, Job> jobs = new ConcurrentHashMap<>();
 
@@ -43,8 +49,6 @@ public class JobManager {
      * loggingがtrueならログを /job/{id}/events 用に保持する。falseなら完了時にすぐ破棄する
      */
     public <T> T run(final String jobId, final boolean logging, final Supplier<T> task) {
-        final long expired = System.currentTimeMillis() - RETENTION_MILLIS;
-        this.jobs.values().removeIf(job -> job.isExpired(expired));
         final Job job = this.job(jobId);
         job.attach(Thread.currentThread(), logging);
         MDC.put(MDC_JOB_ID, jobId);
@@ -75,6 +79,8 @@ public class JobManager {
     }
 
     private Job job(final String jobId) {
+        final long now = System.currentTimeMillis();
+        this.jobs.values().removeIf(job -> job.isExpired(now - RETENTION_MILLIS, now - PENDING_MILLIS));
         return this.jobs.computeIfAbsent(jobId, id -> new Job());
     }
 

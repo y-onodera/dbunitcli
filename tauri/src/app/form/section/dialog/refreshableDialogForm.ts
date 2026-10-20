@@ -1,8 +1,4 @@
-import {
-	fetchData,
-	getErrorMessage,
-	type JobOptions,
-} from "../../../../utils/fetchUtils";
+import { fetchData, getErrorMessage } from "../../../../utils/fetchUtils";
 import type { FormValues } from "../../../../utils/formValues";
 
 // refresh系エンドポイントで再構成するダイアログフォーム（Scaffold・XlsxSchema生成）の共通基盤
@@ -11,15 +7,16 @@ export type DialogLoadState<OPTIONS> =
 	| { status: "error"; message: string }
 	| { status: "loaded"; options: OPTIONS };
 
-export type DialogJob = JobOptions & {
+export type DialogJob = {
 	signal?: AbortSignal;
+	onLog?: (line: string) => void;
 };
 
 export async function postDialogForm<T>(
 	apiUrl: string,
 	endpoint: string,
 	values: FormValues,
-	// 実行系（generate・scaffold）はジョブとして実行し、ログのpushと中断を受け付ける
+	// 実行系（generate・scaffold）はsignalでsidecar側も中断し、onLogで実行中のログを受け取る
 	job?: DialogJob,
 ): Promise<T> {
 	const response = await fetchData({
@@ -30,7 +27,7 @@ export async function postDialogForm<T>(
 			body: JSON.stringify(values),
 		},
 		signal: job?.signal,
-		job,
+		onLog: job?.onLog,
 	});
 	return (await response.json()) as T;
 }

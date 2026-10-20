@@ -55,7 +55,7 @@ class JobControllerTest {
     }
 
     @Test
-    public void testJobTracked_ヘッダ付きでも結果は通常の応答で返る() throws Exception {
+    public void testInterruptible_ヘッダ付きでも結果は通常の応答で返る() throws Exception {
         final String jobId = UUID.randomUUID().toString();
         final String response = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/scaffold/exec",
@@ -71,7 +71,7 @@ class JobControllerTest {
     }
 
     @Test
-    public void testJobTracked_継承したexecのログもjobIdへ振り分ける() throws Exception {
+    public void testInterruptible_継承したexecのログもjobIdへ振り分ける() throws Exception {
         final String jobId = UUID.randomUUID().toString();
         final CompletableFuture<HttpResponse<String>> events = this.sseAsync(jobId);
         Assertions.assertThrows(HttpClientResponseException.class, () -> this.client.toBlocking().retrieve(

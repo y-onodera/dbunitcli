@@ -209,8 +209,8 @@ const useParameterAction = () => {
 				body: JSON.stringify({ name: parameter.name, ...extraBody }),
 			},
 			signal,
-			// execは長時間化しうるため、ジョブとして実行しログをpushで受け取る
-			job: action === "exec" ? { onLog } : undefined,
+			// execは実行中のログをpushで受け取る
+			onLog: action === "exec" ? onLog : undefined,
 		};
 		try {
 			const response = await fetchData(fetchParams);
