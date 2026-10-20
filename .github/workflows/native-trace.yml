@@ -38,3 +38,22 @@ jobs:
           name: native-image-config
           path: |
             ./core/target/native/agent-output/**/*.json
+      # sidecarはcoreのSNAPSHOTに依存するため、親pomとcoreをローカルへインストールしてからトレースする
+      - name: Install core for sidecar
+        run: |
+          mvn install "-DskipTests" --projects core --also-make
+      - name: Save sidecar native-image-config
+        run: |
+          mvn test -Pnative-trace "-fsidecar/pom.xml"
+      # 既存のreachability-metadata.jsonへマージした結果も確認できるようにする
+      - name: Merge sidecar native-image-config
+        continue-on-error: true
+        run: |
+          mvn native:metadata-copy -Pnative-trace "-fsidecar/pom.xml"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: native-image-config-sidecar
+          path: |
+            ./sidecar/target/native/agent-output/**/*.json
+            ./sidecar/src/main/resources/META-INF/native-image/**/reachability-metadata.json
