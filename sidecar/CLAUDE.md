@@ -15,7 +15,8 @@ DBUnit CLI のREST APIサーバー。Micronaut ベースで、Tauri アプリケ
 - `AbstractResourceFileController` — リソースファイル管理の共通基底
 - コマンド系: `CompareController`(`/compare`), `ConvertController`(`/convert`), `GenerateController`(`/generate`), `RunController`(`/run`), `ParameterizeController`(`/parameterize`)
 - リソース系: `DatasetSettingsController`(`/dataset-setting`), `JdbcResourceFileController`(`/jdbc`), `TemplateResourceFileController`(`/template`), `XlsxSchemaController`(`/xlsx-schema`)
-- 専用: `QueryDatasourceController`(`/query-datasource`), `WorkspaceController`(`/workspace`)
+- 専用: `QueryDatasourceController`(`/query-datasource`), `WorkspaceController`(`/workspace`), `JobController`(`/job`)
+- 全コントローラに `@ExecuteOn(TaskExecutors.BLOCKING)`（仮想スレッド）を付与する。新規コントローラも同様
 
 ### `yo.dbunitcli.sidecar.domain.project`
 `Workspace`, `Options`, `Resources`, `ResourceFile`, `Datasource`, `CommandType`
@@ -30,6 +31,11 @@ DBUnit CLI のREST APIサーバー。Micronaut ベースで、Tauri アプリケ
 コマンド系 `/{cmd}`: `GET /add`, `GET /reset`, `POST /load`, `POST /refresh`, `POST /save`, `POST /delete`, `POST /copy`, `POST /rename`, `POST /exec`
 リソース系 `/{res}`: `GET /list`, `POST /load`, `POST /save`, `POST /delete`
 ワークスペース: `GET /workspace/resources`, `POST /workspace/update`
+
+### ジョブ（`<uri>/job`、同期版は残す）
+- 対象: `/{cmd}/exec`, `scaffold/exec`, `{dataset-setting,xlsx-schema,fixed-column-def,template}/generate`, `dataset-setting/{table-names,table-preview}`, `jdbc/{tables,columns,test}`
+- `POST <uri>/job`→`{"jobId"}`、`GET /job/{id}/events`→SSE（`log` 行、最後に `done`）、`POST /job/{id}/cancel`→interrupt
+- 失敗時の値は `ControllerExceptionHandler` と揃える
 
 ## 技術スタック
 - Micronaut 4.x + Netty + Serde Jackson
