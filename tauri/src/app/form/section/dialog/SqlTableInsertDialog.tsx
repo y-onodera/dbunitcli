@@ -22,11 +22,12 @@ import TableList from "./TableList";
 type AffixOption = { label: string; value: string };
 
 const NONE: AffixOption = { label: "None", value: "" };
+const AS: AffixOption = { label: "as", value: " as " };
 const COMMA: AffixOption = { label: ",", value: "," };
 const TABLE_PREFIXES = [NONE, COMMA];
-const TABLE_SUFFIXES = [NONE, COMMA];
+const TABLE_SUFFIXES = [NONE, COMMA, AS];
 const COLUMN_PREFIXES = [NONE, COMMA, { label: "and", value: "and " }];
-const COLUMN_SUFFIXES = [NONE, COMMA, { label: "=", value: " = " }];
+const COLUMN_SUFFIXES = [NONE, COMMA, AS, { label: "=", value: " = " }];
 
 interface SqlTableInsertDialogProps {
 	jdbcValues: Record<string, string>;
