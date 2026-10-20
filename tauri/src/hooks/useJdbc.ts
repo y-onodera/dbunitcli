@@ -38,7 +38,7 @@ export const useJdbcTables = () => {
 				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
 			},
 			timeoutMs: JDBC_TIMEOUT_MS,
-			job: { apiUrl },
+			job: {},
 		};
 		try {
 			const response = await fetchData(params);
@@ -61,7 +61,7 @@ export const useJdbcColumns = () => {
 				body: JSON.stringify({ ...toJdbcRequestBody(jdbcValues), table }),
 			},
 			timeoutMs: JDBC_TIMEOUT_MS,
-			job: { apiUrl },
+			job: {},
 		};
 		try {
 			const response = await fetchData(params);
@@ -86,7 +86,7 @@ export const useJdbcConnectionTest = () => {
 				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
 			},
 			timeoutMs: JDBC_TIMEOUT_MS,
-			job: { apiUrl },
+			job: {},
 		};
 		try {
 			const response = await fetchData(params);

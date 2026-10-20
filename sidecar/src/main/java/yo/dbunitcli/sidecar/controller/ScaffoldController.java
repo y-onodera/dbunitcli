@@ -4,8 +4,6 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
-import io.micronaut.scheduling.TaskExecutors;
-import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +24,6 @@ import java.util.Map;
  * Generate画面のScaffoldダイアログ用API。名前付きパラメータ管理（load/save等）を持たないため
  * AbstractCommandControllerは継承しない（WorkspaceのOptionsはscaffoldを保持しない）。
  */
-@ExecuteOn(TaskExecutors.BLOCKING)
 @Controller("/scaffold")
 public class ScaffoldController implements ControllerExceptionHandler {
 
@@ -59,9 +56,9 @@ public class ScaffoldController implements ControllerExceptionHandler {
         }
     }
 
-    /** exec をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    /** exec をジョブとして開始する（JobManager.start 参照） */
     @Post(uri = "exec/job", produces = MediaType.APPLICATION_JSON)
-    public String execJob(@Body final Map<String, String> input) throws IOException {
+    public Map<String, String> execJob(@Body final Map<String, String> input) {
         return this.jobs.start(() -> this.exec(input));
     }
 

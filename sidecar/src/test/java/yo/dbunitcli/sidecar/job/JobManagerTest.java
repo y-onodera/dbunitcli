@@ -11,6 +11,7 @@ import yo.dbunitcli.sidecar.dto.JobEventDto;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,7 +24,7 @@ class JobManagerTest {
 
     @BeforeEach
     void setUp() {
-        this.jobs = new JobManager();
+        this.jobs = new JobManager("");
     }
 
     @AfterEach
@@ -43,13 +44,13 @@ class JobManagerTest {
 
         Assertions.assertTrue(virtual.get(), "仮想スレッドで実行されること");
         Assertions.assertEquals(2, events.size());
-        Assertions.assertEquals(JobEventDto.TYPE_LOG, events.get(0).getType());
-        Assertions.assertTrue(events.get(0).getMessage().endsWith("INFO  JobManagerTest - hello job"), events.get(0).getMessage());
+        Assertions.assertEquals(JobEventDto.TYPE_LOG, events.get(0).type());
+        Assertions.assertTrue(events.get(0).message().endsWith("INFO  JobManagerTest - hello job"), events.get(0).message());
         final JobEventDto done = events.get(1);
-        Assertions.assertEquals(JobEventDto.TYPE_DONE, done.getType());
-        Assertions.assertEquals("SUCCEEDED", done.getStatus());
-        Assertions.assertEquals(200, done.getHttpStatus());
-        Assertions.assertEquals("result", done.getResult());
+        Assertions.assertEquals(JobEventDto.TYPE_DONE, done.type());
+        Assertions.assertEquals("SUCCEEDED", done.status());
+        Assertions.assertEquals(200, done.httpStatus());
+        Assertions.assertEquals("result", done.result());
     }
 
     @Test
@@ -64,7 +65,7 @@ class JobManagerTest {
         final List<JobEventDto> events = job.events().collectList().block(TIMEOUT);
 
         Assertions.assertEquals(1, events.size());
-        Assertions.assertEquals(JobEventDto.TYPE_DONE, events.get(0).getType());
+        Assertions.assertEquals(JobEventDto.TYPE_DONE, events.get(0).type());
     }
 
     @Test
@@ -74,10 +75,10 @@ class JobManagerTest {
         });
         final JobEventDto done = job.events().blockLast(TIMEOUT);
 
-        Assertions.assertEquals("FAILED", done.getStatus());
-        Assertions.assertEquals(400, done.getHttpStatus());
-        Assertions.assertEquals("Fix Input Parameter", done.getReason());
-        Assertions.assertEquals("Execution failed. cause: java.lang.IllegalArgumentException: bad input", done.getMessage());
+        Assertions.assertEquals("FAILED", done.status());
+        Assertions.assertEquals(400, done.httpStatus());
+        Assertions.assertEquals("Fix Input Parameter", done.reason());
+        Assertions.assertEquals("Execution failed. cause: java.lang.IllegalArgumentException: bad input", done.message());
     }
 
     @Test
@@ -87,9 +88,9 @@ class JobManagerTest {
         });
         final JobEventDto done = job.events().blockLast(TIMEOUT);
 
-        Assertions.assertEquals("FAILED", done.getStatus());
-        Assertions.assertEquals(500, done.getHttpStatus());
-        Assertions.assertEquals("File operation failed. cause: disk error", done.getMessage());
+        Assertions.assertEquals("FAILED", done.status());
+        Assertions.assertEquals(500, done.httpStatus());
+        Assertions.assertEquals("File operation failed. cause: disk error", done.message());
     }
 
     @Test
@@ -110,14 +111,11 @@ class JobManagerTest {
         final JobEventDto done = job.events().blockLast(TIMEOUT);
 
         Assertions.assertTrue(interrupted.await(10, TimeUnit.SECONDS), "仮想スレッドへinterruptが届くこと");
-        Assertions.assertEquals("CANCELLED", done.getStatus());
-        Assertions.assertNull(done.getResult());
-        Assertions.assertEquals(Job.Status.CANCELLED, job.getStatus());
+        Assertions.assertEquals("CANCELLED", done.status());
+        Assertions.assertNull(done.result());
     }
 
-    private Job start(final java.util.concurrent.Callable<String> task) throws IOException {
-        final String json = this.jobs.start(task);
-        final String id = json.replaceAll(".*\"jobId\"\\s*:\\s*\"([^\"]+)\".*", "$1");
-        return this.jobs.find(id).orElseThrow();
+    private Job start(final Callable<String> task) {
+        return this.jobs.find(this.jobs.start(task).get("jobId")).orElseThrow();
     }
 }

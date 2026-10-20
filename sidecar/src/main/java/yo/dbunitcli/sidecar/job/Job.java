@@ -6,6 +6,7 @@ import org.slf4j.MDC;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 import yo.dbunitcli.sidecar.controller.ApplicationException;
+import yo.dbunitcli.sidecar.controller.ControllerExceptionHandler.ErrorResult;
 import yo.dbunitcli.sidecar.dto.JobEventDto;
 
 import java.io.IOException;
@@ -13,11 +14,10 @@ import java.util.concurrent.Callable;
 
 /**
  * 仮想スレッドで実行する1件の処理。実行中のログと完了結果をSSE用のイベントとして保持する。
- * 失敗時のstatus/reason/messageは同期APIのControllerExceptionHandlerと揃える。
  */
 public class Job {
 
-    public enum Status {RUNNING, SUCCEEDED, FAILED, CANCELLED}
+    enum Status {RUNNING, SUCCEEDED, FAILED, CANCELLED}
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Job.class);
 
@@ -42,10 +42,6 @@ public class Job {
         return this.id;
     }
 
-    public synchronized Status getStatus() {
-        return this.status;
-    }
-
     public Flux<JobEventDto> events() {
         return this.events.asFlux();
     }
@@ -57,18 +53,14 @@ public class Job {
         this.thread = Thread.ofVirtual().name("job-" + this.id).unstarted(() -> {
             MDC.put(JobManager.MDC_JOB_ID, this.id);
             try {
-                final String result = task.call();
-                this.finish(Status.SUCCEEDED, JobEventDto.done(Status.SUCCEEDED.name(), 200, "OK", result, null));
+                this.finish(Status.SUCCEEDED, 200, "OK", task.call(), null);
             } catch (final ApplicationException ex) {
-                this.finish(Status.FAILED, JobEventDto.done(Status.FAILED.name(), 400, "Fix Input Parameter",
-                        null, "Execution failed. cause: " + ex.getMessage()));
+                this.fail(ErrorResult.of(ex));
             } catch (final IOException ex) {
-                this.finish(Status.FAILED, JobEventDto.done(Status.FAILED.name(), 500, "File Operation Failed",
-                        null, "File operation failed. cause: " + ex.getMessage()));
+                this.fail(ErrorResult.of(ex));
             } catch (final Throwable th) {
                 LOGGER.error("cause:", th);
-                this.finish(Status.FAILED, JobEventDto.done(Status.FAILED.name(), 500, "Internal Server Error",
-                        null, th.toString()));
+                this.finish(Status.FAILED, 500, "Internal Server Error", null, th.toString());
             } finally {
                 MDC.remove(JobManager.MDC_JOB_ID);
             }
@@ -78,10 +70,9 @@ public class Job {
 
     /** 実行中なら中断扱いにして仮想スレッドへinterruptを送る（割り込みを確認しない処理は最後まで動く） */
     synchronized void cancel() {
-        if (this.finish(Status.CANCELLED, JobEventDto.done(Status.CANCELLED.name(), 499, "Cancelled", null, "Execution cancelled."))) {
-            if (this.thread != null) {
-                this.thread.interrupt();
-            }
+        final Thread running = this.thread;
+        if (this.finish(Status.CANCELLED, 499, "Cancelled", null, "Execution cancelled.") && running != null) {
+            running.interrupt();
         }
     }
 
@@ -95,13 +86,19 @@ public class Job {
         return this.status != Status.RUNNING && this.finishedAt < time;
     }
 
-    private synchronized boolean finish(final Status status, final JobEventDto done) {
+    private void fail(final ErrorResult error) {
+        this.finish(Status.FAILED, error.status().getCode(), error.reason(), null, error.message());
+    }
+
+    private synchronized boolean finish(final Status status, final int httpStatus, final String reason,
+                                        final String result, final String message) {
         if (this.status != Status.RUNNING) {
             return false;
         }
         this.status = status;
         this.finishedAt = System.currentTimeMillis();
-        this.events.tryEmitNext(done);
+        this.thread = null;
+        this.events.tryEmitNext(JobEventDto.done(status.name(), httpStatus, reason, result, message));
         this.events.tryEmitComplete();
         return true;
     }

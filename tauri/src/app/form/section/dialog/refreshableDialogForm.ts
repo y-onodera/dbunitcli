@@ -11,7 +11,7 @@ export type DialogLoadState<OPTIONS> =
 	| { status: "error"; message: string }
 	| { status: "loaded"; options: OPTIONS };
 
-export type DialogJob = Omit<JobOptions, "apiUrl"> & {
+export type DialogJob = JobOptions & {
 	signal?: AbortSignal;
 };
 
@@ -30,7 +30,7 @@ export async function postDialogForm<T>(
 			body: JSON.stringify(values),
 		},
 		signal: job?.signal,
-		job: job && { apiUrl, onLog: job.onLog },
+		job,
 	});
 	return (await response.json()) as T;
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useEnvironment } from "../../../../context/EnvironmentProvider";
+import { useJobLog } from "../../../../hooks/useJobLog";
 import { getErrorMessage } from "../../../../utils/fetchUtils";
 import {
 	collectFormValues,
@@ -35,7 +36,7 @@ export function useRefreshableDialog<OPTIONS>({
 	});
 	const [executing, setExecuting] = useState(false);
 	const [executeError, setExecuteError] = useState("");
-	const [logs, setLogs] = useState<string[]>([]);
+	const jobLog = useJobLog();
 	const abortControllerRef = useRef<AbortController | null>(null);
 
 	const withGenerateType = useCallback(
@@ -62,14 +63,10 @@ export function useRefreshableDialog<OPTIONS>({
 	const isAborted = () => abortControllerRef.current?.signal.aborted ?? false;
 
 	// 実行をジョブとして送るためのオプション。ダイアログを閉じると（アンマウントでabort）sidecar側も中断する
-	const job = (): DialogJob => ({
-		signal: abortControllerRef.current?.signal,
-		onLog: (line) => {
-			if (!isAborted()) {
-				setLogs((current) => [...current, line]);
-			}
-		},
-	});
+	const job = (): DialogJob => {
+		const signal = abortControllerRef.current?.signal;
+		return { signal, onLog: jobLog.onLog(signal) };
+	};
 
 	const refresh = async () => {
 		await refreshDialogOptions(
@@ -89,7 +86,7 @@ export function useRefreshableDialog<OPTIONS>({
 		}
 		setExecuting(true);
 		setExecuteError("");
-		setLogs([]);
+		jobLog.reset();
 		try {
 			await run(values);
 		} catch (ex) {
@@ -105,7 +102,7 @@ export function useRefreshableDialog<OPTIONS>({
 		loadState,
 		executing,
 		executeError,
-		logs,
+		logs: jobLog.logs,
 		job,
 		isAborted,
 		refresh,

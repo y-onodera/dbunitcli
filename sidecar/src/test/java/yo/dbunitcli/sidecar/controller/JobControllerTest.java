@@ -60,17 +60,17 @@ class JobControllerTest {
                         + ",\"-dataset.src\":\"resources/src/csv\",\"-dataset.srcType\":\"csv\"}");
         final JobEventDto done = this.lastEvent(jobId);
 
-        Assertions.assertEquals("SUCCEEDED", done.getStatus());
+        Assertions.assertEquals("SUCCEEDED", done.status());
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/scaffold-exec-response.json"),
-                done.getResult());
+                done.result());
         Assertions.assertTrue(Files.exists(Paths.get(WORKSPACE, "resources/template/scaffoldTpl.stg")));
     }
 
     @Test
     public void testEvents_ログは処理の完了を待たずにpushされる() throws Exception {
         final CountDownLatch received = new CountDownLatch(1);
-        final String started = this.jobs.start(() -> {
+        final Map<String, String> started = this.jobs.start(() -> {
             LoggerFactory.getLogger("JobControllerTest").info("first line");
             // クライアントがログを受け取るまで完了しない（逐次pushされなければタイムアウトで失敗する）
             if (!received.await(20, TimeUnit.SECONDS)) {
@@ -78,7 +78,7 @@ class JobControllerTest {
             }
             return "done";
         });
-        final String jobId = (String) ObjectMapper.getDefault().readValue(started, Map.class).get("jobId");
+        final String jobId = started.get("jobId");
         try (java.net.http.HttpClient http = java.net.http.HttpClient.newHttpClient()) {
             final HttpResponse<Stream<String>> response = http.send(java.net.http.HttpRequest.newBuilder(
                                     URI.create(this.server.getURL() + "/dbunit-cli/job/" + jobId + "/events"))
@@ -106,9 +106,9 @@ class JobControllerTest {
         final String jobId = this.startJob("dbunit-cli/scaffold/exec/job", "{\"-target\":\"ddl\"}");
         final JobEventDto done = this.lastEvent(jobId);
 
-        Assertions.assertEquals("FAILED", done.getStatus());
-        Assertions.assertEquals(400, done.getHttpStatus());
-        Assertions.assertEquals("Fix Input Parameter", done.getReason());
+        Assertions.assertEquals("FAILED", done.status());
+        Assertions.assertEquals(400, done.httpStatus());
+        Assertions.assertEquals("Fix Input Parameter", done.reason());
     }
 
     @Test
@@ -125,13 +125,17 @@ class JobControllerTest {
                 HttpRequest.POST("dbunit-cli/job/" + jobId + "/cancel", ""));
 
         Assertions.assertEquals("success", response);
-        Assertions.assertEquals("FAILED", this.lastEvent(jobId).getStatus());
+        Assertions.assertEquals("FAILED", this.lastEvent(jobId).status());
     }
 
     @SuppressWarnings("unchecked")
     private String startJob(final String uri, final String body) throws IOException {
         final String response = this.client.toBlocking().retrieve(HttpRequest.POST(uri, body));
-        return (String) ObjectMapper.getDefault().readValue(response, Map.class).get("jobId");
+        final Map<String, String> started = ObjectMapper.getDefault().readValue(response, Map.class);
+        final String jobId = started.get("jobId");
+        Assertions.assertEquals("/dbunit-cli/job/" + jobId + "/events", started.get("events"));
+        Assertions.assertEquals("/dbunit-cli/job/" + jobId + "/cancel", started.get("cancel"));
+        return jobId;
     }
 
     private JobEventDto lastEvent(final String jobId) throws Exception {
@@ -144,7 +148,7 @@ class JobControllerTest {
             }
         }
         final JobEventDto last = events.get(events.size() - 1);
-        Assertions.assertEquals(JobEventDto.TYPE_DONE, last.getType());
+        Assertions.assertEquals(JobEventDto.TYPE_DONE, last.type());
         return last;
     }
 

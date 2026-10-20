@@ -4,8 +4,6 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
-import io.micronaut.scheduling.TaskExecutors;
-import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,16 +29,12 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Stream;
 
-@ExecuteOn(TaskExecutors.BLOCKING)
 @Controller("xlsx-schema")
 public class XlsxSchemaController extends AbstractResourceFileController<JsonXlsxSchemaRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(XlsxSchemaController.class);
 
-    private final JobManager jobs;
-
     public XlsxSchemaController(final Workspace workspace, final JobManager jobs) {
-        super(workspace);
-        this.jobs = jobs;
+        super(workspace, jobs);
     }
 
     @Override
@@ -48,9 +42,9 @@ public class XlsxSchemaController extends AbstractResourceFileController<JsonXls
         return this.workspace.resources().xlsxSchema();
     }
 
-    /** generate をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    /** generate をジョブとして開始する（JobManager.start 参照） */
     @Post(uri = "generate/job", produces = MediaType.APPLICATION_JSON)
-    public String generateJob(@Body final Map<String, String> input) throws IOException {
+    public Map<String, String> generateJob(@Body final Map<String, String> input) {
         return this.jobs.start(() -> this.generate(input));
     }
 

@@ -9,7 +9,6 @@ type ErrorInfo = {
 
 // sidecarの「<endpoint>/job」で処理を仮想スレッドのジョブとして開始し、SSEでログと結果を受け取る
 export type JobOptions = {
-	apiUrl: string;
 	onLog?: (line: string) => void;
 };
 
@@ -161,14 +160,15 @@ const fetchJob = async (
 	endpoint: string,
 	options: RequestInit,
 	signal: AbortSignal | undefined,
-	{ apiUrl, onLog }: JobOptions,
+	{ onLog }: JobOptions,
 ): Promise<Response> => {
 	const started = await fetchWithRetry(`${endpoint}/job`, {
 		...options,
 		signal,
 	});
-	const { jobId } = (await started.json()) as { jobId: string };
-	const events = await fetchWithRetry(`${apiUrl}job/${jobId}/events`, {
+	// events/cancelはsidecarのコンテキストパスを含む絶対パスで返るため、endpointを基準に解決する
+	const paths = (await started.json()) as { events: string; cancel: string };
+	const events = await fetchWithRetry(new URL(paths.events, endpoint).href, {
 		method: "GET",
 		headers: { Accept: "text/event-stream" },
 		signal,
@@ -178,7 +178,7 @@ const fetchJob = async (
 	}
 	const reader = events.body.getReader();
 	const handleAbort = () => {
-		fetch(`${apiUrl}job/${jobId}/cancel`, { method: "POST" }).catch(
+		fetch(new URL(paths.cancel, endpoint).href, { method: "POST" }).catch(
 			() => undefined,
 		);
 		reader.cancel().catch(() => undefined);

@@ -28,7 +28,14 @@ const mockJob = (events: ReadableStream<Uint8Array>) => {
 	mockFetch.mockImplementation(async (input) => {
 		const url = String(input);
 		if (url.endsWith("/exec/job")) {
-			return new Response(JSON.stringify({ jobId: "job-1" }), { status: 200 });
+			return new Response(
+				JSON.stringify({
+					jobId: "job-1",
+					events: "/dbunit-cli/job/job-1/events",
+					cancel: "/dbunit-cli/job/job-1/cancel",
+				}),
+				{ status: 200 },
+			);
 		}
 		if (url.endsWith("job/job-1/events")) {
 			return new Response(events, { status: 200 });
@@ -65,7 +72,7 @@ describe("fetchData（job指定）", () => {
 
 		const response = await fetchData({
 			...execParams,
-			job: { apiUrl: API_URL, onLog },
+			job: { onLog },
 		});
 
 		expect(await response.text()).toBe("/result/dir");
@@ -91,17 +98,17 @@ describe("fetchData（job指定）", () => {
 			]),
 		);
 
-		await expect(
-			fetchData({ ...execParams, job: { apiUrl: API_URL } }),
-		).rejects.toThrow("Status: 400\nDetails: Fix Input Parameter");
+		await expect(fetchData({ ...execParams, job: {} })).rejects.toThrow(
+			"Status: 400\nDetails: Fix Input Parameter",
+		);
 	});
 
 	it("完了イベントの前にストリームが閉じたらエラーにする", async () => {
 		mockJob(sseStream([sseEvent("log", { message: "line 1" })]));
 
-		await expect(
-			fetchData({ ...execParams, job: { apiUrl: API_URL } }),
-		).rejects.toThrow("Job event stream closed before completion");
+		await expect(fetchData({ ...execParams, job: {} })).rejects.toThrow(
+			"Job event stream closed before completion",
+		);
 	});
 
 	it("中断するとsidecarへcancelを送りAbortErrorにする", async () => {
@@ -112,7 +119,7 @@ describe("fetchData（job指定）", () => {
 		const error = await fetchData({
 			...execParams,
 			signal: controller.signal,
-			job: { apiUrl: API_URL, onLog },
+			job: { onLog },
 		}).catch((ex) => ex);
 
 		expect(isAbortError(error)).toBe(true);

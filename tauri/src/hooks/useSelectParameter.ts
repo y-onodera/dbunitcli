@@ -210,8 +210,7 @@ const useParameterAction = () => {
 			},
 			signal,
 			// execは長時間化しうるため、ジョブとして実行しログをpushで受け取る
-			job:
-				action === "exec" ? { apiUrl: environment.apiUrl, onLog } : undefined,
+			job: action === "exec" ? { onLog } : undefined,
 		};
 		try {
 			const response = await fetchData(fetchParams);

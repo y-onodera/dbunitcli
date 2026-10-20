@@ -16,7 +16,6 @@ DBUnit CLI のREST APIサーバー。Micronaut ベースで、Tauri アプリケ
 - コマンド系: `CompareController`(`/compare`), `ConvertController`(`/convert`), `GenerateController`(`/generate`), `RunController`(`/run`), `ParameterizeController`(`/parameterize`)
 - リソース系: `DatasetSettingsController`(`/dataset-setting`), `JdbcResourceFileController`(`/jdbc`), `TemplateResourceFileController`(`/template`), `XlsxSchemaController`(`/xlsx-schema`)
 - 専用: `QueryDatasourceController`(`/query-datasource`), `WorkspaceController`(`/workspace`), `JobController`(`/job`)
-- 全コントローラに `@ExecuteOn(TaskExecutors.BLOCKING)`（仮想スレッド）を付与する。新規コントローラも同様
 
 ### `yo.dbunitcli.sidecar.domain.project`
 `Workspace`, `Options`, `Resources`, `ResourceFile`, `Datasource`, `CommandType`

@@ -8,8 +8,6 @@ import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.exceptions.HttpStatusException;
 import io.micronaut.http.sse.Event;
-import io.micronaut.scheduling.TaskExecutors;
-import io.micronaut.scheduling.annotation.ExecuteOn;
 import org.reactivestreams.Publisher;
 import yo.dbunitcli.sidecar.dto.JobEventDto;
 import yo.dbunitcli.sidecar.job.JobManager;
@@ -18,7 +16,6 @@ import yo.dbunitcli.sidecar.job.JobManager;
  * 各コントローラの {@code .../job} で開始したジョブの進捗参照・中断API。
  * events はSSEでログ行（event: log）と完了（event: done）をpushする。
  */
-@ExecuteOn(TaskExecutors.BLOCKING)
 @Controller("/job")
 public class JobController implements ControllerExceptionHandler {
 
@@ -31,7 +28,7 @@ public class JobController implements ControllerExceptionHandler {
     @Get(uri = "{id}/events", produces = MediaType.TEXT_EVENT_STREAM)
     public Publisher<Event<JobEventDto>> events(@PathVariable final String id) {
         return this.jobs.find(id)
-                .map(job -> job.events().map(event -> Event.of(event).name(event.getType())))
+                .map(job -> job.events().map(event -> Event.of(event).name(event.type())))
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "job not found: " + id));
     }
 

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
+import yo.dbunitcli.sidecar.job.JobManager;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -23,9 +24,11 @@ import java.util.Collections;
 public abstract class AbstractResourceFileController<DTO extends ResourceSaveRequest<?>> implements ControllerExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractResourceFileController.class);
     protected final Workspace workspace;
+    protected final JobManager jobs;
 
-    protected AbstractResourceFileController(final Workspace workspace) {
+    protected AbstractResourceFileController(final Workspace workspace, final JobManager jobs) {
         this.workspace = workspace;
+        this.jobs = jobs;
     }
 
     @Get(uri = "list", produces = MediaType.APPLICATION_JSON)

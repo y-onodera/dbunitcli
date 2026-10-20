@@ -4,8 +4,6 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
-import io.micronaut.scheduling.TaskExecutors;
-import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.serde.ObjectMapper;
 import jakarta.inject.Inject;
 import org.dbunit.database.IDatabaseConnection;
@@ -24,9 +22,9 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 
-@ExecuteOn(TaskExecutors.BLOCKING)
 @Controller("jdbc")
 public class JdbcResourceFileController extends AbstractResourceFileController<JdbcSavePropertiesRequestDto> {
 
@@ -42,12 +40,9 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
                 .replace("\r", "\\r") + "\"";
     }
 
-    private final JobManager jobs;
-
     @Inject
     public JdbcResourceFileController(final Workspace workspace, final JobManager jobs) {
-        super(workspace);
-        this.jobs = jobs;
+        super(workspace, jobs);
     }
 
     @Post(uri = "save-properties", produces = MediaType.APPLICATION_JSON)
@@ -75,9 +70,9 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         }
     }
 
-    /** tables をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    /** tables をジョブとして開始する（JobManager.start 参照） */
     @Post(uri = "tables/job", produces = MediaType.APPLICATION_JSON)
-    public String tablesJob(@Body final JdbcDto body) throws IOException {
+    public Map<String, String> tablesJob(@Body final JdbcDto body) {
         return this.jobs.start(() -> this.tables(body));
     }
 
@@ -102,9 +97,9 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         }
     }
 
-    /** columns をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    /** columns をジョブとして開始する（JobManager.start 参照） */
     @Post(uri = "columns/job", produces = MediaType.APPLICATION_JSON)
-    public String columnsJob(@Body final JdbcColumnsRequestDto body) throws IOException {
+    public Map<String, String> columnsJob(@Body final JdbcColumnsRequestDto body) {
         return this.jobs.start(() -> this.columns(body));
     }
 
@@ -132,9 +127,9 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         }
     }
 
-    /** test をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    /** test をジョブとして開始する（JobManager.start 参照） */
     @Post(uri = "test/job", produces = MediaType.APPLICATION_JSON)
-    public String testJob(@Body final JdbcDto body) throws IOException {
+    public Map<String, String> testJob(@Body final JdbcDto body) {
         return this.jobs.start(() -> this.test(body));
     }
 

@@ -72,7 +72,7 @@ async function fetchTableNames(
 		},
 		signal,
 		// DB・大きなファイルでは長時間化しうるため、ジョブとして実行し中断（abort）をsidecarへ伝える
-		job: { apiUrl },
+		job: {},
 	};
 	return fetchData(fetchParams)
 		.then((r) => r.json())
@@ -147,7 +147,7 @@ async function fetchTablePreview(
 			}),
 		},
 		signal,
-		job: { apiUrl },
+		job: {},
 	};
 	return fetchData(fetchParams)
 		.then((r) => r.json())

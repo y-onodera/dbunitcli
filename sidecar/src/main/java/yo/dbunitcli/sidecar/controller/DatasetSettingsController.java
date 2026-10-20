@@ -4,8 +4,6 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
-import io.micronaut.scheduling.TaskExecutors;
-import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.serde.ObjectMapper;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.ITableMetaData;
@@ -37,21 +35,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@ExecuteOn(TaskExecutors.BLOCKING)
 @Controller("dataset-setting")
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetSettingsController.class);
 
-    private final JobManager jobs;
-
     public DatasetSettingsController(final Workspace workspace, final JobManager jobs) {
-        super(workspace);
-        this.jobs = jobs;
+        super(workspace, jobs);
     }
 
-    /** generate をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    /** generate をジョブとして開始する（JobManager.start 参照） */
     @Post(uri = "generate/job", produces = MediaType.APPLICATION_JSON)
-    public String generateJob(@Body final Map<String, String> input) throws IOException {
+    public Map<String, String> generateJob(@Body final Map<String, String> input) {
         return this.jobs.start(() -> this.generate(input));
     }
 
@@ -80,9 +74,9 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
-    /** table-names をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    /** table-names をジョブとして開始する（JobManager.start 参照） */
     @Post(uri = "table-names/job", produces = MediaType.APPLICATION_JSON)
-    public String tableNamesJob(@Body final DatasetTableNamesRequestDto request) throws IOException {
+    public Map<String, String> tableNamesJob(@Body final DatasetTableNamesRequestDto request) {
         return this.jobs.start(() -> this.tableNames(request));
     }
 
@@ -98,9 +92,9 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
-    /** table-preview をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    /** table-preview をジョブとして開始する（JobManager.start 参照） */
     @Post(uri = "table-preview/job", produces = MediaType.APPLICATION_JSON)
-    public String tablePreviewJob(@Body final DatasetTablePreviewRequestDto request) throws IOException {
+    public Map<String, String> tablePreviewJob(@Body final DatasetTablePreviewRequestDto request) {
         return this.jobs.start(() -> this.tablePreview(request));
     }
 

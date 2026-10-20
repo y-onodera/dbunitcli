@@ -16,7 +16,7 @@ export function JobLog({ lines }: { lines: string[] }) {
 			ref={ref}
 			role="log"
 			aria-label="execution log"
-			className="w-full max-h-60 overflow-auto rounded border border-border bg-surface-subtle p-2 text-xs text-content whitespace-pre-wrap break-all"
+			className="w-full max-h-60 overflow-auto rounded-lg border border-border-subtle bg-surface-subtle p-2 text-xs text-content whitespace-pre-wrap break-all"
 		>
 			{lines.join("\n")}
 		</pre>

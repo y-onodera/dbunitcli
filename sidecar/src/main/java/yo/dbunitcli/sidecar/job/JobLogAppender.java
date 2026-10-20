@@ -3,6 +3,7 @@ package yo.dbunitcli.sidecar.job;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
+import org.slf4j.MDC;
 
 /**
  * MDCにjobIdを持つログイベントを、該当ジョブのイベントへ転送するappender。
@@ -35,7 +36,8 @@ class JobLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
 
     @Override
     protected void append(final ILoggingEvent event) {
-        final String jobId = event.getMDCPropertyMap().get(JobManager.MDC_JOB_ID);
+        // appenderはログ出力元のスレッドで同期的に呼ばれるため、イベントのMDCコピーを作らずに参照する
+        final String jobId = MDC.get(JobManager.MDC_JOB_ID);
         if (jobId != null) {
             this.jobs.find(jobId).ifPresent(job -> job.log(this.layout.doLayout(event).stripTrailing()));
         }

@@ -8,6 +8,7 @@ import {
 	useSetParamInputs,
 } from "../../context/ParameterInputProvider";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
+import { useJobLog } from "../../hooks/useJobLog";
 import {
 	type Running,
 	useExecParameter,
@@ -31,7 +32,7 @@ export default function Footer(prop: {
 	const [showParamDialog, setShowParamDialog] = useState(false);
 	const [running, setRunning] = useState<Running>(RESET_RUNNING);
 	const [isLoading, setIsLoading] = useState(false);
-	const [logs, setLogs] = useState<string[]>([]);
+	const jobLog = useJobLog();
 	const executingRef = useRef(false);
 	const abortControllerRef = useRef<AbortController | null>(null);
 	const parameter = useSelectParameter();
@@ -42,9 +43,11 @@ export default function Footer(prop: {
 	const execParameterRef = useRef(execParameter);
 	const saveParameterRef = useRef(saveParameter);
 	const saveShellRef = useRef(saveShell);
+	const jobLogRef = useRef(jobLog);
 	execParameterRef.current = execParameter;
 	saveParameterRef.current = saveParameter;
 	saveShellRef.current = saveShell;
+	jobLogRef.current = jobLog;
 
 	useEffect(() => {
 		setParamInputs({});
@@ -56,7 +59,7 @@ export default function Footer(prop: {
 		}
 		executingRef.current = true;
 		setIsLoading(true);
-		setLogs([]);
+		jobLogRef.current.reset();
 		const controller = new AbortController();
 		abortControllerRef.current = controller;
 
@@ -78,11 +81,7 @@ export default function Footer(prop: {
 				{ ...formValues, ...paramExtra },
 				handleResult,
 				controller.signal,
-				(line) => {
-					if (!controller.signal.aborted) {
-						setLogs((current) => [...current, line]);
-					}
-				},
+				jobLogRef.current.onLog(controller.signal),
 			);
 		} else if (running.command === "save") {
 			saveParameterRef.current(
@@ -122,9 +121,9 @@ export default function Footer(prop: {
 								Now Execution
 							</h3>
 							<div className="block animate-spin h-10 w-10 border-4 border-link rounded-full border-t-transparent" />
-							{logs.length > 0 && (
+							{jobLog.logs.length > 0 && (
 								<div className="mt-4 w-full">
-									<JobLog lines={logs} />
+									<JobLog lines={jobLog.logs} />
 								</div>
 							)}
 							<div className="mt-4">

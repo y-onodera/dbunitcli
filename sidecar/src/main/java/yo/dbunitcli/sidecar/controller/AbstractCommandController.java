@@ -168,9 +168,9 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
         }
     }
 
-    /** exec をジョブとして開始し、jobIdを返す。進捗・結果（resultDir）は /job/{id}/events で受け取る */
+    /** exec をジョブとして開始する（JobManager.start 参照） */
     @Post(uri = "exec/job", produces = MediaType.APPLICATION_JSON)
-    public String execJob(@Body final CommandRequestDto body) throws IOException {
+    public Map<String, String> execJob(@Body final CommandRequestDto body) {
         return this.jobs.start(() -> this.exec(body));
     }
 

@@ -1,13 +1,12 @@
 package yo.dbunitcli.sidecar.job;
 
 import ch.qos.logback.classic.LoggerContext;
-import io.micronaut.serde.ObjectMapper;
+import io.micronaut.context.annotation.Value;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +30,10 @@ public class JobManager {
 
     private final JobLogAppender appender;
 
-    public JobManager() {
+    private final String contextPath;
+
+    public JobManager(@Value("${micronaut.server.context-path:}") final String contextPath) {
+        this.contextPath = contextPath;
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         this.appender = new JobLogAppender(this);
         this.appender.setContext(context);
@@ -39,14 +41,15 @@ public class JobManager {
         context.getLogger(Logger.ROOT_LOGGER_NAME).addAppender(this.appender);
     }
 
-    /** 処理を開始し、{"jobId": "..."} を返す */
-    public String start(final Callable<String> task) throws IOException {
+    /** 処理を開始し、jobIdと進捗参照(events)・中断(cancel)のパスを返す */
+    public Map<String, String> start(final Callable<String> task) {
         final long expired = System.currentTimeMillis() - RETENTION_MILLIS;
         this.jobs.values().removeIf(job -> job.isFinishedBefore(expired));
         final Job job = new Job(UUID.randomUUID().toString());
         this.jobs.put(job.getId(), job);
         job.start(task);
-        return ObjectMapper.getDefault().writeValueAsString(Map.of("jobId", job.getId()));
+        final String base = this.contextPath + "/job/" + job.getId();
+        return Map.of("jobId", job.getId(), "events", base + "/events", "cancel", base + "/cancel");
     }
 
     public Optional<Job> find(final String id) {
