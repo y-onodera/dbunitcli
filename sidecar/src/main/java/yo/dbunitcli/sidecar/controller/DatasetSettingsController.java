@@ -4,6 +4,8 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.serde.ObjectMapper;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.ITableMetaData;
@@ -34,6 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@ExecuteOn(TaskExecutors.BLOCKING)
 @Controller("dataset-setting")
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetSettingsController.class);

@@ -5,6 +5,8 @@ import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import yo.dbunitcli.sidecar.dto.ResolvePathRequestDto;
 import java.io.File;
 import java.io.IOException;
 
+@ExecuteOn(TaskExecutors.BLOCKING)
 @Controller("/workspace")
 public class WorkspaceController implements ControllerExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkspaceController.class);

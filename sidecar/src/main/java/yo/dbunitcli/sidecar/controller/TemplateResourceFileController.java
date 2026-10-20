@@ -4,6 +4,8 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonWriter;
@@ -20,6 +22,7 @@ import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.Map;
 
+@ExecuteOn(TaskExecutors.BLOCKING)
 @Controller("template")
 public class TemplateResourceFileController extends AbstractResourceFileController<TemplateRequestDto> {
 

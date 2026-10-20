@@ -4,6 +4,8 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,7 @@ import java.util.Map;
  * Generate画面のScaffoldダイアログ用API。名前付きパラメータ管理（load/save等）を持たないため
  * AbstractCommandControllerは継承しない（WorkspaceのOptionsはscaffoldを保持しない）。
  */
+@ExecuteOn(TaskExecutors.BLOCKING)
 @Controller("/scaffold")
 public class ScaffoldController implements ControllerExceptionHandler {
 

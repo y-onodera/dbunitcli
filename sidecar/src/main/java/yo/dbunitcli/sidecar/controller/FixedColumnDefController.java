@@ -4,6 +4,8 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Stream;
 
+@ExecuteOn(TaskExecutors.BLOCKING)
 @Controller("fixed-column-def")
 public class FixedColumnDefController extends AbstractResourceFileController<FixedColumnDefRequestDto> {
 
