@@ -2,6 +2,7 @@ import { useEnvironment } from "../context/EnvironmentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import { fetchAndUpdate, fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
+// タイムアウト時はジョブへcancelを送り、sidecar側の処理も中断する
 const JDBC_TIMEOUT_MS = 60_000;
 
 function toJdbcRequestBody(jdbcValues: Record<string, string>) {
@@ -37,6 +38,7 @@ export const useJdbcTables = () => {
 				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
 			},
 			timeoutMs: JDBC_TIMEOUT_MS,
+			job: { apiUrl },
 		};
 		try {
 			const response = await fetchData(params);
@@ -59,6 +61,7 @@ export const useJdbcColumns = () => {
 				body: JSON.stringify({ ...toJdbcRequestBody(jdbcValues), table }),
 			},
 			timeoutMs: JDBC_TIMEOUT_MS,
+			job: { apiUrl },
 		};
 		try {
 			const response = await fetchData(params);
@@ -83,6 +86,7 @@ export const useJdbcConnectionTest = () => {
 				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
 			},
 			timeoutMs: JDBC_TIMEOUT_MS,
+			job: { apiUrl },
 		};
 		try {
 			const response = await fetchData(params);

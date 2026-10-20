@@ -134,6 +134,7 @@ function TxtTemplateGenerateDialog({
 				dialog.apiUrl,
 				"scaffold/exec",
 				values,
+				dialog.job(),
 			);
 			await Promise.all([
 				handleReflect({
@@ -156,6 +157,7 @@ function TxtTemplateGenerateDialog({
 			loadState={dialog.loadState}
 			executing={dialog.executing}
 			executeError={dialog.executeError}
+			logs={dialog.logs}
 			onExecute={handleExecute}
 			onClose={handleDialogClose}
 		>

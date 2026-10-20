@@ -27,6 +27,7 @@ import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
+import yo.dbunitcli.sidecar.job.JobManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,8 +42,17 @@ import java.util.Map;
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetSettingsController.class);
 
-    public DatasetSettingsController(final Workspace workspace) {
+    private final JobManager jobs;
+
+    public DatasetSettingsController(final Workspace workspace, final JobManager jobs) {
         super(workspace);
+        this.jobs = jobs;
+    }
+
+    /** generate をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    @Post(uri = "generate/job", produces = MediaType.APPLICATION_JSON)
+    public String generateJob(@Body final Map<String, String> input) throws IOException {
+        return this.jobs.start(() -> this.generate(input));
     }
 
     /**
@@ -70,6 +80,12 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
+    /** table-names をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    @Post(uri = "table-names/job", produces = MediaType.APPLICATION_JSON)
+    public String tableNamesJob(@Body final DatasetTableNamesRequestDto request) throws IOException {
+        return this.jobs.start(() -> this.tableNames(request));
+    }
+
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
         try {
@@ -80,6 +96,12 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             LOGGER.warn("Could not get table names", th);
             return "[]";
         }
+    }
+
+    /** table-preview をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    @Post(uri = "table-preview/job", produces = MediaType.APPLICATION_JSON)
+    public String tablePreviewJob(@Body final DatasetTablePreviewRequestDto request) throws IOException {
+        return this.jobs.start(() -> this.tablePreview(request));
     }
 
     @Post(uri = "table-preview", produces = MediaType.APPLICATION_JSON)

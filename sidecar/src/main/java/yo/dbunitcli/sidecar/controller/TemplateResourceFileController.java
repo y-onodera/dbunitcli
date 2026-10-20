@@ -16,6 +16,7 @@ import yo.dbunitcli.application.command.GenerateType;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.TemplateRequestDto;
+import yo.dbunitcli.sidecar.job.JobManager;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -30,9 +31,12 @@ public class TemplateResourceFileController extends AbstractResourceFileControll
     private static final String GENERATED_FILE = "template.xlsx";
     private static final String XLSX_EXTENSION = ".xlsx";
 
+    private final JobManager jobs;
+
     @Inject
-    public TemplateResourceFileController(final Workspace workspace) {
+    public TemplateResourceFileController(final Workspace workspace, final JobManager jobs) {
         super(workspace);
+        this.jobs = jobs;
     }
 
     @Override
@@ -73,6 +77,12 @@ public class TemplateResourceFileController extends AbstractResourceFileControll
             throw new ApplicationException(th);
         }
         return this.currentFileList();
+    }
+
+    /** generate をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    @Post(uri = "generate/job", produces = MediaType.APPLICATION_JSON)
+    public String generateJob(@Body final Map<String, String> input) throws IOException {
+        return this.jobs.start(() -> this.generate(input));
     }
 
     /**

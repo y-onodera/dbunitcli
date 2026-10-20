@@ -14,6 +14,7 @@ import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.CommandRequestDto;
+import yo.dbunitcli.sidecar.job.JobManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +33,11 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
 
     private final Workspace workspace;
 
-    public AbstractCommandController(final Workspace workspace) {
+    private final JobManager jobs;
+
+    public AbstractCommandController(final Workspace workspace, final JobManager jobs) {
         this.workspace = workspace;
+        this.jobs = jobs;
     }
 
     /** フォーム値をコマンドのoptions構造へシリアライズしてJSON化する（refresh系の共通処理） */
@@ -162,6 +166,12 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
         }
+    }
+
+    /** exec をジョブとして開始し、jobIdを返す。進捗・結果（resultDir）は /job/{id}/events で受け取る */
+    @Post(uri = "exec/job", produces = MediaType.APPLICATION_JSON)
+    public String execJob(@Body final CommandRequestDto body) throws IOException {
+        return this.jobs.start(() -> this.exec(body));
     }
 
     @Post(uri = "exec", produces = MediaType.TEXT_PLAIN)

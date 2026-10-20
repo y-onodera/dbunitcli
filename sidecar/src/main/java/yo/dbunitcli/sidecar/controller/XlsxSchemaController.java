@@ -19,6 +19,7 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.JsonXlsxSchemaDto;
 import yo.dbunitcli.sidecar.dto.JsonXlsxSchemaRequestDto;
 import yo.dbunitcli.sidecar.dto.XlsxSheetsRequestDto;
+import yo.dbunitcli.sidecar.job.JobManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,13 +36,22 @@ import java.util.stream.Stream;
 public class XlsxSchemaController extends AbstractResourceFileController<JsonXlsxSchemaRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(XlsxSchemaController.class);
 
-    public XlsxSchemaController(final Workspace workspace) {
+    private final JobManager jobs;
+
+    public XlsxSchemaController(final Workspace workspace, final JobManager jobs) {
         super(workspace);
+        this.jobs = jobs;
     }
 
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().xlsxSchema();
+    }
+
+    /** generate をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    @Post(uri = "generate/job", produces = MediaType.APPLICATION_JSON)
+    public String generateJob(@Body final Map<String, String> input) throws IOException {
+        return this.jobs.start(() -> this.generate(input));
     }
 
     /**

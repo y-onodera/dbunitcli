@@ -2,6 +2,7 @@ import { core } from "@tauri-apps/api";
 import { useEffect, useRef, useState } from "react";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
 import { BlueEditButton } from "../../components/element/ButtonIcon";
+import { JobLog } from "../../components/element/JobLog";
 import {
 	useParamInputs,
 	useSetParamInputs,
@@ -30,6 +31,7 @@ export default function Footer(prop: {
 	const [showParamDialog, setShowParamDialog] = useState(false);
 	const [running, setRunning] = useState<Running>(RESET_RUNNING);
 	const [isLoading, setIsLoading] = useState(false);
+	const [logs, setLogs] = useState<string[]>([]);
 	const executingRef = useRef(false);
 	const abortControllerRef = useRef<AbortController | null>(null);
 	const parameter = useSelectParameter();
@@ -54,6 +56,7 @@ export default function Footer(prop: {
 		}
 		executingRef.current = true;
 		setIsLoading(true);
+		setLogs([]);
 		const controller = new AbortController();
 		abortControllerRef.current = controller;
 
@@ -75,6 +78,11 @@ export default function Footer(prop: {
 				{ ...formValues, ...paramExtra },
 				handleResult,
 				controller.signal,
+				(line) => {
+					if (!controller.signal.aborted) {
+						setLogs((current) => [...current, line]);
+					}
+				},
 			);
 		} else if (running.command === "save") {
 			saveParameterRef.current(
@@ -114,6 +122,11 @@ export default function Footer(prop: {
 								Now Execution
 							</h3>
 							<div className="block animate-spin h-10 w-10 border-4 border-link rounded-full border-t-transparent" />
+							{logs.length > 0 && (
+								<div className="mt-4 w-full">
+									<JobLog lines={logs} />
+								</div>
+							)}
 							<div className="mt-4">
 								<WhiteButton title="Abandoned" handleClick={handleCancel} />
 							</div>

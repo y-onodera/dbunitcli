@@ -199,6 +199,7 @@ const useParameterAction = () => {
 		extraBody: Record<string, unknown>,
 		handleResult: (result: Running) => void,
 		signal?: AbortSignal,
+		onLog?: (line: string) => void,
 	) => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl + parameter.command}/${action}`,
@@ -208,6 +209,9 @@ const useParameterAction = () => {
 				body: JSON.stringify({ name: parameter.name, ...extraBody }),
 			},
 			signal,
+			// execは長時間化しうるため、ジョブとして実行しログをpushで受け取る
+			job:
+				action === "exec" ? { apiUrl: environment.apiUrl, onLog } : undefined,
 		};
 		try {
 			const response = await fetchData(fetchParams);
@@ -238,7 +242,8 @@ export const useExecParameter = () => {
 		input: { [k: string]: FormDataEntryValue },
 		handleResult: (result: Running) => void,
 		signal?: AbortSignal,
-	) => execute("exec", { input }, handleResult, signal);
+		onLog?: (line: string) => void,
+	) => execute("exec", { input }, handleResult, signal, onLog);
 };
 
 export const useSaveShell = () => {

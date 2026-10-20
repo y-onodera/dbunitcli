@@ -17,6 +17,7 @@ import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.FixedColumnDefDto;
 import yo.dbunitcli.sidecar.dto.FixedColumnDefRequestDto;
+import yo.dbunitcli.sidecar.job.JobManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,8 +33,11 @@ public class FixedColumnDefController extends AbstractResourceFileController<Fix
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FixedColumnDefController.class);
 
-    public FixedColumnDefController(final Workspace workspace) {
+    private final JobManager jobs;
+
+    public FixedColumnDefController(final Workspace workspace, final JobManager jobs) {
         super(workspace);
+        this.jobs = jobs;
     }
 
     @Override
@@ -50,6 +54,12 @@ public class FixedColumnDefController extends AbstractResourceFileController<Fix
                         col.align(), col.pad()))
                 .toList());
         return st.render();
+    }
+
+    /** generate をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    @Post(uri = "generate/job", produces = MediaType.APPLICATION_JSON)
+    public String generateJob(@Body final Map<String, String> input) throws IOException {
+        return this.jobs.start(() -> this.generate(input));
     }
 
     /**

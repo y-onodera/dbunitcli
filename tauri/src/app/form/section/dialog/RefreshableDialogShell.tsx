@@ -8,6 +8,7 @@ import {
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
+import { JobLog } from "../../../../components/element/JobLog";
 import type { DialogLoadState } from "./refreshableDialogForm";
 
 // refresh系ダイアログ（Generate・Scaffold）共通の枠: タイトル・読込/エラー表示・form・Execute/Closeフッタ
@@ -19,6 +20,7 @@ export function RefreshableDialogShell<OPTIONS>({
 	loadState,
 	executing,
 	executeError,
+	logs,
 	onExecute,
 	onClose,
 	children,
@@ -30,6 +32,7 @@ export function RefreshableDialogShell<OPTIONS>({
 	loadState: DialogLoadState<OPTIONS>;
 	executing: boolean;
 	executeError: string;
+	logs: string[];
 	onExecute: () => void;
 	onClose: () => void;
 	children: (options: OPTIONS) => ReactNode;
@@ -58,6 +61,7 @@ export function RefreshableDialogShell<OPTIONS>({
 						{children(loadState.options)}
 					</form>
 				)}
+				{executing && <JobLog lines={logs} />}
 				{executeError && (
 					<StatusMessage kind="error">Error: {executeError}</StatusMessage>
 				)}

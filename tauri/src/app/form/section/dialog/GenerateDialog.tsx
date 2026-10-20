@@ -7,7 +7,7 @@ import { RefreshableDialogShell } from "./RefreshableDialogShell";
 import ResourceEditButton, {
 	type ResourceEditButtonProp,
 } from "./ResourceEditButton";
-import { postDialogForm } from "./refreshableDialogForm";
+import { type DialogJob, postDialogForm } from "./refreshableDialogForm";
 import { useRefreshableDialog } from "./useRefreshableDialog";
 
 type GenerateDialogConfig = {
@@ -25,6 +25,8 @@ type GenerateExecuteContext = {
 	isAborted: () => boolean;
 	// generate/refreshと同じgenerateType付きで値を送る
 	withGenerateType: (values: FormValues) => FormValues;
+	// 生成をジョブとして送るためのオプション（ログ表示・ダイアログを閉じたときの中断）
+	job: DialogJob;
 };
 
 function GenerateFormDialog({
@@ -55,12 +57,14 @@ function GenerateFormDialog({
 			loadState={dialog.loadState}
 			executing={dialog.executing}
 			executeError={dialog.executeError}
+			logs={dialog.logs}
 			onExecute={() =>
 				dialog.execute((values) =>
 					onExecute(values, {
 						apiUrl: dialog.apiUrl,
 						isAborted: dialog.isAborted,
 						withGenerateType: dialog.withGenerateType,
+						job: dialog.job(),
 					}),
 				)
 			}
@@ -148,11 +152,15 @@ export function createModelGenerateButton<BUILDER, MODEL>(
 			<GenerateFormDialog
 				config={config}
 				onClose={handleDialogClose}
-				onExecute={async (values, { apiUrl, isAborted, withGenerateType }) => {
+				onExecute={async (
+					values,
+					{ apiUrl, isAborted, withGenerateType, job },
+				) => {
 					const builder = await postDialogForm<BUILDER>(
 						apiUrl,
 						config.endpoint,
 						withGenerateType(values),
+						job,
 					);
 					if (!isAborted()) {
 						setGenerated(config.build(builder));

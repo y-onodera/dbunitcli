@@ -18,6 +18,7 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.JdbcColumnsRequestDto;
 import yo.dbunitcli.sidecar.dto.JdbcDto;
 import yo.dbunitcli.sidecar.dto.JdbcSavePropertiesRequestDto;
+import yo.dbunitcli.sidecar.job.JobManager;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -41,9 +42,12 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
                 .replace("\r", "\\r") + "\"";
     }
 
+    private final JobManager jobs;
+
     @Inject
-    public JdbcResourceFileController(final Workspace workspace) {
+    public JdbcResourceFileController(final Workspace workspace, final JobManager jobs) {
         super(workspace);
+        this.jobs = jobs;
     }
 
     @Post(uri = "save-properties", produces = MediaType.APPLICATION_JSON)
@@ -71,6 +75,12 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         }
     }
 
+    /** tables をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    @Post(uri = "tables/job", produces = MediaType.APPLICATION_JSON)
+    public String tablesJob(@Body final JdbcDto body) throws IOException {
+        return this.jobs.start(() -> this.tables(body));
+    }
+
     @Post(uri = "tables", produces = MediaType.APPLICATION_JSON)
     public String tables(@Body final JdbcDto body) {
         IDatabaseConnection conn = null;
@@ -90,6 +100,12 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
                 }
             }
         }
+    }
+
+    /** columns をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    @Post(uri = "columns/job", produces = MediaType.APPLICATION_JSON)
+    public String columnsJob(@Body final JdbcColumnsRequestDto body) throws IOException {
+        return this.jobs.start(() -> this.columns(body));
     }
 
     @Post(uri = "columns", produces = MediaType.APPLICATION_JSON)
@@ -114,6 +130,12 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
                 }
             }
         }
+    }
+
+    /** test をジョブとして開始し、jobIdを返す。進捗・結果は /job/{id}/events で受け取る */
+    @Post(uri = "test/job", produces = MediaType.APPLICATION_JSON)
+    public String testJob(@Body final JdbcDto body) throws IOException {
+        return this.jobs.start(() -> this.test(body));
     }
 
     @Post(uri = "test", produces = MediaType.APPLICATION_JSON)

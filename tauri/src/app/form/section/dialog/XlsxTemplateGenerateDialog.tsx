@@ -7,7 +7,7 @@ import { useSetResourcesSettings } from "../../../../context/WorkspaceResourcesP
 import type { FormValues } from "../../../../utils/formValues";
 import { FileGenerateButton } from "./GenerateDialog";
 import type { ResourceEditButtonProp } from "./ResourceEditButton";
-import { postDialogForm } from "./refreshableDialogForm";
+import { type DialogJob, postDialogForm } from "./refreshableDialogForm";
 
 const fileNameField = "-fileName";
 const xlsxExtension = ".xlsx";
@@ -53,12 +53,17 @@ function useGenerateXlsxTemplate() {
 	const setResourcesSettings = useSetResourcesSettings();
 	return async (
 		values: FormValues,
-		{ apiUrl, isAborted }: { apiUrl: string; isAborted: () => boolean },
+		{
+			apiUrl,
+			isAborted,
+			job,
+		}: { apiUrl: string; isAborted: () => boolean; job: DialogJob },
 	) => {
 		const templateFiles = await postDialogForm<string[]>(
 			apiUrl,
 			"template/generate",
 			values,
+			job,
 		);
 		setResourcesSettings((current) => current.with({ templateFiles }));
 		return isAborted() ? null : toSavedFileName(String(values[fileNameField]));

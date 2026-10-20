@@ -6,6 +6,7 @@ import {
 	type FormValues,
 } from "../../../../utils/formValues";
 import {
+	type DialogJob,
 	type DialogLoadState,
 	refreshDialogOptions,
 } from "./refreshableDialogForm";
@@ -34,6 +35,7 @@ export function useRefreshableDialog<OPTIONS>({
 	});
 	const [executing, setExecuting] = useState(false);
 	const [executeError, setExecuteError] = useState("");
+	const [logs, setLogs] = useState<string[]>([]);
 	const abortControllerRef = useRef<AbortController | null>(null);
 
 	const withGenerateType = useCallback(
@@ -59,6 +61,16 @@ export function useRefreshableDialog<OPTIONS>({
 
 	const isAborted = () => abortControllerRef.current?.signal.aborted ?? false;
 
+	// 実行をジョブとして送るためのオプション。ダイアログを閉じると（アンマウントでabort）sidecar側も中断する
+	const job = (): DialogJob => ({
+		signal: abortControllerRef.current?.signal,
+		onLog: (line) => {
+			if (!isAborted()) {
+				setLogs((current) => [...current, line]);
+			}
+		},
+	});
+
 	const refresh = async () => {
 		await refreshDialogOptions(
 			apiUrl,
@@ -77,6 +89,7 @@ export function useRefreshableDialog<OPTIONS>({
 		}
 		setExecuting(true);
 		setExecuteError("");
+		setLogs([]);
 		try {
 			await run(values);
 		} catch (ex) {
@@ -92,6 +105,8 @@ export function useRefreshableDialog<OPTIONS>({
 		loadState,
 		executing,
 		executeError,
+		logs,
+		job,
 		isAborted,
 		refresh,
 		execute,
