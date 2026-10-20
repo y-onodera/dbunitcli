@@ -7,7 +7,7 @@ import {
 	type FormValues,
 } from "../../../../utils/formValues";
 import {
-	type DialogJob,
+	type DialogFetchOptions,
 	type DialogLoadState,
 	refreshDialogOptions,
 } from "./refreshableDialogForm";
@@ -62,8 +62,8 @@ export function useRefreshableDialog<OPTIONS>({
 
 	const isAborted = () => abortControllerRef.current?.signal.aborted ?? false;
 
-	// 実行をジョブとして送るためのオプション。ダイアログを閉じると（アンマウントでabort）sidecar側も中断する
-	const job = (): DialogJob => ({
+	// 実行に渡すfetchオプション。ダイアログを閉じると（アンマウントでabort）sidecar側も中断する
+	const fetchOptions = (): DialogFetchOptions => ({
 		signal: abortControllerRef.current?.signal,
 		onLog: jobLog.append,
 	});
@@ -103,7 +103,7 @@ export function useRefreshableDialog<OPTIONS>({
 		executing,
 		executeError,
 		logs: jobLog.logs,
-		job,
+		fetchOptions,
 		isAborted,
 		refresh,
 		execute,

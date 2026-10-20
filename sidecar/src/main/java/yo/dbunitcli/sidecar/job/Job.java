@@ -20,8 +20,6 @@ class Job {
 
     private boolean cancelled;
 
-    private boolean logging;
-
     /** 0なら未完了 */
     private long finishedAt;
 
@@ -30,9 +28,8 @@ class Job {
     }
 
     /** 処理を実行するスレッドを登録する。開始前に中断済みなら、そのスレッドへ即座に割り込む */
-    synchronized void attach(final Thread thread, final boolean logging) {
+    synchronized void attach(final Thread thread) {
         this.thread = thread;
-        this.logging = logging;
         if (this.cancelled) {
             thread.interrupt();
         }
@@ -46,13 +43,12 @@ class Job {
         }
     }
 
-    /** ログの購読が要求された実行中ジョブか（不要ならログの整形・保持を省く） */
-    synchronized boolean isLogging() {
-        return this.logging && this.finishedAt == 0;
-    }
-
     synchronized void log(final String line) {
         this.logs.tryEmitNext(line);
+    }
+
+    synchronized boolean isFinished() {
+        return this.finishedAt != 0;
     }
 
     synchronized void finish() {

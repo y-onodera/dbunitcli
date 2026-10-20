@@ -8,6 +8,10 @@ export const useJobLog = () => {
 	const [logs, setLogs] = useState<string[]>([]);
 	const reset = () => setLogs([]);
 	const append = (line: string) =>
-		setLogs((current) => [...current, line].slice(-MAX_LOG_LINES));
+		setLogs((current) =>
+			current.length < MAX_LOG_LINES
+				? [...current, line]
+				: [...current.slice(1), line],
+		);
 	return { logs, reset, append };
 };

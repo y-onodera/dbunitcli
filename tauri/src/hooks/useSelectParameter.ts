@@ -209,8 +209,7 @@ const useParameterAction = () => {
 				body: JSON.stringify({ name: parameter.name, ...extraBody }),
 			},
 			signal,
-			// execは実行中のログをpushで受け取る
-			onLog: action === "exec" ? onLog : undefined,
+			onLog,
 		};
 		try {
 			const response = await fetchData(fetchParams);

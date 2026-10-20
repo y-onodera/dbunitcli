@@ -39,9 +39,7 @@ class JobLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
         // appenderはログ出力元のスレッドで同期的に呼ばれるため、イベントのMDCコピーを作らずに参照する
         final String jobId = MDC.get(JobManager.MDC_JOB_ID);
         if (jobId != null) {
-            this.jobs.find(jobId)
-                    .filter(Job::isLogging)
-                    .ifPresent(job -> job.log(this.layout.doLayout(event).stripTrailing()));
+            this.jobs.find(jobId).ifPresent(job -> job.log(this.layout.doLayout(event).stripTrailing()));
         }
     }
 }

@@ -50,8 +50,11 @@ public class JobManager {
      */
     public <T> T run(final String jobId, final boolean logging, final Supplier<T> task) {
         final Job job = this.job(jobId);
-        job.attach(Thread.currentThread(), logging);
-        MDC.put(MDC_JOB_ID, jobId);
+        job.attach(Thread.currentThread());
+        // ログの振り分け（JobLogAppender）はMDCで判定するため、ログ不要ならMDCに入れない
+        if (logging) {
+            MDC.put(MDC_JOB_ID, jobId);
+        }
         try {
             return task.get();
         } finally {
@@ -65,9 +68,14 @@ public class JobManager {
         }
     }
 
-    /** jobIdのログ行。処理の完了で終端する */
+    /** jobIdのログ行。処理の完了で終端し、完了後に購読が終われば保持していたログを破棄する */
     public Flux<String> logs(final String jobId) {
-        return this.job(jobId).logs();
+        final Job job = this.job(jobId);
+        return job.logs().doFinally(signal -> {
+            if (job.isFinished()) {
+                this.jobs.remove(jobId, job);
+            }
+        });
     }
 
     public void cancel(final String jobId) {

@@ -67,7 +67,7 @@ class JobControllerTest {
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/scaffold-exec-response.json"),
                 response);
-        Assertions.assertEquals(200, this.sse(jobId).statusCode(), "処理の完了後に購読してもイベントが閉じること");
+        Assertions.assertEquals(200, this.sseAsync(jobId).get(30, TimeUnit.SECONDS).statusCode(), "処理の完了後に購読してもイベントが閉じること");
     }
 
     @Test
@@ -139,10 +139,6 @@ class JobControllerTest {
 
         Assertions.assertEquals("success", response);
         Assertions.assertTrue(interrupted.get(10, TimeUnit.SECONDS));
-    }
-
-    private HttpResponse<String> sse(final String jobId) throws Exception {
-        return this.sseAsync(jobId).get(30, TimeUnit.SECONDS);
     }
 
     private CompletableFuture<HttpResponse<String>> sseAsync(final String jobId) {

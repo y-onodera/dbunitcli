@@ -134,7 +134,7 @@ function TxtTemplateGenerateDialog({
 				dialog.apiUrl,
 				"scaffold/exec",
 				values,
-				dialog.job(),
+				dialog.fetchOptions(),
 			);
 			await Promise.all([
 				handleReflect({

@@ -172,8 +172,9 @@ const fetchWithJob = async (
 	const jobUrl = new URL(`${API_CONTEXT_PATH}job/${jobId}/`, endpoint);
 	const headers = new Headers(options.headers);
 	headers.set(JOB_HEADER, jobId);
-	const logs = onLog ? new AbortController() : null;
-	if (logs && onLog) {
+	let logs: AbortController | null = null;
+	if (onLog) {
+		logs = new AbortController();
 		headers.set(JOB_LOG_HEADER, "true");
 		streamJobLogs(new URL("events", jobUrl).href, logs.signal, onLog);
 	}
