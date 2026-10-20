@@ -16,17 +16,6 @@
 				]
 			}
 		],
-		"PostToolUse": [
-			{
-				"matcher": "Write|Edit",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "jq -r '.tool_input.file_path // \"\"' | { read -r f; if echo \"$f\" | grep -qE '\\.(ts|tsx|js|jsx|java|rs)$'; then printf '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"[post-impl reminder] コードファイルを編集しました。タスク完了後に /post-impl を呼び出してください。\"}}'; fi; } 2>/dev/null || true"
-					}
-				]
-			}
-		],
 		"Stop": [
 			{
 				"hooks": [
