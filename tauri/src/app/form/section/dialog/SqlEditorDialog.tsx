@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
 	DialogBody,
 	DialogField,
@@ -16,6 +16,10 @@ import {
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import {
+	type InsertResult,
+	insertAtCursor,
+} from "../../../../utils/textInsert";
+import {
 	RemoveResource,
 	type ResourceEditButtonProp,
 } from "./ResourceEditButton";
@@ -32,6 +36,8 @@ type SqlEditorDialogProps = {
 export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 	const [content, setContent] = useState<string>(props.value);
 	const [showTableSelector, setShowTableSelector] = useState(false);
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const pendingRef = useRef<InsertResult | null>(null);
 	const saveDataSource = useSaveDataSource();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 
@@ -41,19 +47,34 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 			() => props.handleSave(path),
 		);
 
-	const appendToContent = (text: string) => {
-		setContent((prev) =>
-			prev === "" || prev.endsWith("\n") ? prev + text : `${prev}\n${text}`,
-		);
+	const insertToContent = (text: string) => {
+		// 同一イベント内で連続挿入されても最新の内容・位置から続けられるよう pending を優先する
+		const pending = pendingRef.current;
+		const textarea = textareaRef.current;
+		const base = pending?.value ?? content;
+		const start = pending?.cursor ?? textarea?.selectionStart ?? base.length;
+		const end = pending?.cursor ?? textarea?.selectionEnd ?? base.length;
+		const result = insertAtCursor(base, text, start, end);
+		pendingRef.current = result;
+		setContent(result.value);
 	};
 
+	useLayoutEffect(() => {
+		const pending = pendingRef.current;
+		if (pending === null) {
+			return;
+		}
+		pendingRef.current = null;
+		textareaRef.current?.setSelectionRange(pending.cursor, pending.cursor);
+	});
+
 	const handleInsert = (tables: string[]) => {
-		appendToContent(tables.join("\n"));
+		insertToContent(tables.join("\n"));
 		setShowTableSelector(false);
 	};
 
 	const handleInsertColumn = (column: string) => {
-		appendToContent(column);
+		insertToContent(column);
 	};
 
 	return (
@@ -76,6 +97,7 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 				)}
 				<TextArea
 					id="contents"
+					ref={textareaRef}
 					value={content}
 					onChange={(e) => setContent(e.target.value)}
 					placeholder={
