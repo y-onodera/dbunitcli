@@ -61,7 +61,8 @@ class JobControllerTest {
                 HttpRequest.POST("dbunit-cli/scaffold/exec",
                                 "{\"-target\":\"ddl\",\"-template\":\"scaffoldTpl\",\"-unitSetting\":\"scaffoldUnit\""
                                         + ",\"-dataset.src\":\"resources/src/csv\",\"-dataset.srcType\":\"csv\"}")
-                        .header(JobInterceptor.HEADER, jobId));
+                        .header(JobInterceptor.HEADER, jobId)
+                        .header(JobInterceptor.LOG_HEADER, "true"));
 
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/scaffold-exec-response.json"),
@@ -75,7 +76,8 @@ class JobControllerTest {
         final CompletableFuture<HttpResponse<String>> events = this.sseAsync(jobId);
         Assertions.assertThrows(HttpClientResponseException.class, () -> this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/run/exec", "{\"name\":\"none\",\"input\":{\"-unknown\":\"x\"}}")
-                        .header(JobInterceptor.HEADER, jobId)));
+                        .header(JobInterceptor.HEADER, jobId)
+                        .header(JobInterceptor.LOG_HEADER, "true")));
 
         final String body = events.get(30, TimeUnit.SECONDS).body();
         Assertions.assertTrue(body.contains("event: log"), body);
@@ -87,7 +89,7 @@ class JobControllerTest {
     public void testEvents_ログは処理の完了を待たずにpushされる() throws Exception {
         final String jobId = UUID.randomUUID().toString();
         final CountDownLatch received = new CountDownLatch(1);
-        final CompletableFuture<String> result = CompletableFuture.supplyAsync(() -> this.jobs.run(jobId, () -> {
+        final CompletableFuture<String> result = CompletableFuture.supplyAsync(() -> this.jobs.run(jobId, true, () -> {
             LoggerFactory.getLogger("JobControllerTest").info("first line");
             // クライアントがログを受け取るまで完了しない（逐次pushされなければタイムアウトで失敗する）
             try {
@@ -121,7 +123,7 @@ class JobControllerTest {
     public void testCancel_実行中のジョブへinterruptを送る() throws Exception {
         final String jobId = UUID.randomUUID().toString();
         final CountDownLatch started = new CountDownLatch(1);
-        final CompletableFuture<Boolean> interrupted = CompletableFuture.supplyAsync(() -> this.jobs.run(jobId, () -> {
+        final CompletableFuture<Boolean> interrupted = CompletableFuture.supplyAsync(() -> this.jobs.run(jobId, true, () -> {
             started.countDown();
             try {
                 Thread.sleep(Duration.ofMinutes(1));

@@ -20,7 +20,7 @@ type GenerateDialogConfig = {
 	title: string;
 };
 
-type GenerateExecuteContext = {
+export type GenerateExecuteContext = {
 	apiUrl: string;
 	isAborted: () => boolean;
 	// generate/refreshと同じgenerateType付きで値を送る

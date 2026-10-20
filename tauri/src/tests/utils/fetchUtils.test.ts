@@ -74,6 +74,7 @@ describe("fetchData（job指定）", () => {
 		const headers = new Headers(execCall()?.[1]?.headers);
 		expect(headers.get("X-Job-Id")).toBe("job-1");
 		expect(headers.get("Content-Type")).toBe("application/json");
+		expect(headers.has("X-Job-Log")).toBe(false);
 		expect(mockFetch).toHaveBeenCalledTimes(1);
 	});
 
@@ -94,6 +95,7 @@ describe("fetchData（job指定）", () => {
 			`${JOB_URL}events`,
 			expect.objectContaining({ method: "GET" }),
 		);
+		expect(new Headers(execCall()?.[1]?.headers).get("X-Job-Log")).toBe("true");
 	});
 
 	it("エラー応答は従来と同じ形式のエラーにする", async () => {

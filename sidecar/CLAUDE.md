@@ -32,8 +32,8 @@ DBUnit CLI のREST APIサーバー。Micronaut ベースで、Tauri アプリケ
 ワークスペース: `GET /workspace/resources`, `POST /workspace/update`
 
 ### ジョブ（`X-Job-Id` ヘッダ、`@JobTracked` を付けたメソッドが対象）
-- 対象: `/{cmd}/exec`, `scaffold/exec`, `{dataset-setting,xlsx-schema,fixed-column-def,template}/generate`, `dataset-setting/{table-names,table-preview}`, `jdbc/{tables,columns,test}`
-- 結果は通常の応答。実行中のログは `GET /job/{id}/events`（SSE）、中断は `POST /job/{id}/cancel`（interrupt）
+- 長時間化しうるメソッド（`/{cmd}/exec`、各 `generate`、JDBC系など）に付ける
+- 結果は通常の応答。中断は `POST /job/{id}/cancel`（interrupt）。`X-Job-Log` 付きなら実行中のログを `GET /job/{id}/events`（SSE）で流す
 
 ## 技術スタック
 - Micronaut 4.x + Netty + Serde Jackson

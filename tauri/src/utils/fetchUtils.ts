@@ -18,6 +18,7 @@ export type FetchParams = {
 	options: RequestInit;
 	signal?: AbortSignal;
 	timeoutMs?: number;
+	// @JobTracked のエンドポイント向け。{} ならabort時にsidecar側も中断し、onLogを渡すと実行中のログも受け取る
 	job?: JobOptions;
 };
 
@@ -107,6 +108,7 @@ const fetchWithRetry = async (endpoint: string, options: RequestInit) => {
 };
 
 const JOB_HEADER = "X-Job-Id";
+const JOB_LOG_HEADER = "X-Job-Log";
 
 // 処理完了後、末尾のログが届くのを待ってからログの購読を打ち切るまでの猶予
 const LOG_DRAIN_MS = 1000;
@@ -151,7 +153,8 @@ const streamJobLogs = async (
 			while (separator >= 0) {
 				const line = parseSseData(buffer.slice(0, separator));
 				buffer = buffer.slice(separator + 2);
-				if (line !== null) {
+				// 中断後に届いた行は渡さない
+				if (line !== null && !signal.aborted) {
 					onLog(line);
 				}
 				separator = buffer.indexOf("\n\n");
@@ -171,25 +174,28 @@ const fetchWithJob = async (
 ): Promise<Response> => {
 	const jobId = crypto.randomUUID();
 	const jobUrl = new URL(`${API_CONTEXT_PATH}job/${jobId}/`, endpoint);
-	const logs = new AbortController();
-	if (onLog) {
+	const headers = new Headers(options.headers);
+	headers.set(JOB_HEADER, jobId);
+	const logs = onLog ? new AbortController() : null;
+	if (logs && onLog) {
+		headers.set(JOB_LOG_HEADER, "true");
 		streamJobLogs(new URL("events", jobUrl).href, logs.signal, onLog);
 	}
 	const handleAbort = () => {
-		logs.abort();
-		fetch(new URL("cancel", jobUrl).href, { method: "POST" }).catch(
+		logs?.abort();
+		fetchWithRetry(new URL("cancel", jobUrl).href, { method: "POST" }).catch(
 			() => undefined,
 		);
 	};
 	signal?.addEventListener("abort", handleAbort, { once: true });
-	const headers = new Headers(options.headers);
-	headers.set(JOB_HEADER, jobId);
 	try {
 		return await fetchWithRetry(endpoint, { ...options, headers, signal });
 	} finally {
 		signal?.removeEventListener("abort", handleAbort);
-		// 正常時はsidecarが購読を閉じる。処理まで届かなかった場合に備えて購読を残さない
-		setTimeout(() => logs.abort(), LOG_DRAIN_MS);
+		if (logs) {
+			// 正常時はsidecarが購読を閉じる。処理まで届かなかった場合に備えて購読を残さない
+			setTimeout(() => logs.abort(), LOG_DRAIN_MS);
+		}
 	}
 };
 

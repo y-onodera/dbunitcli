@@ -38,18 +38,24 @@ public class JobManager {
         context.getLogger(Logger.ROOT_LOGGER_NAME).addAppender(this.appender);
     }
 
-    /** 現在のスレッドでtaskをjobIdのジョブとして実行する（ログの振り分けと中断の対象にする） */
-    public <T> T run(final String jobId, final Supplier<T> task) {
+    /**
+     * 現在のスレッドでtaskをjobIdのジョブとして実行し、中断の対象にする。
+     * loggingがtrueならログを /job/{id}/events 用に保持する。falseなら完了時にすぐ破棄する
+     */
+    public <T> T run(final String jobId, final boolean logging, final Supplier<T> task) {
         final long expired = System.currentTimeMillis() - RETENTION_MILLIS;
         this.jobs.values().removeIf(job -> job.isExpired(expired));
         final Job job = this.job(jobId);
-        job.attach(Thread.currentThread());
+        job.attach(Thread.currentThread(), logging);
         MDC.put(MDC_JOB_ID, jobId);
         try {
             return task.get();
         } finally {
             MDC.remove(MDC_JOB_ID);
             job.finish();
+            if (!logging) {
+                this.jobs.remove(jobId, job);
+            }
             // 中断用の割り込みが処理完了と競合して残った場合に、後続処理へ持ち越さない
             Thread.interrupted();
         }

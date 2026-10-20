@@ -20,8 +20,9 @@ class Job {
 
     private boolean cancelled;
 
-    private boolean finished;
+    private boolean logging;
 
+    /** 0なら未完了 */
     private long finishedAt;
 
     Flux<String> logs() {
@@ -29,8 +30,9 @@ class Job {
     }
 
     /** 処理を実行するスレッドを登録する。開始前に中断済みなら、そのスレッドへ即座に割り込む */
-    synchronized void attach(final Thread thread) {
+    synchronized void attach(final Thread thread, final boolean logging) {
         this.thread = thread;
+        this.logging = logging;
         if (this.cancelled) {
             thread.interrupt();
         }
@@ -44,14 +46,16 @@ class Job {
         }
     }
 
+    /** ログの購読が要求された実行中ジョブか（不要ならログの整形・保持を省く） */
+    synchronized boolean isLogging() {
+        return this.logging && this.finishedAt == 0;
+    }
+
     synchronized void log(final String line) {
-        if (!this.finished) {
-            this.logs.tryEmitNext(line);
-        }
+        this.logs.tryEmitNext(line);
     }
 
     synchronized void finish() {
-        this.finished = true;
         this.finishedAt = System.currentTimeMillis();
         this.thread = null;
         this.logs.tryEmitComplete();
@@ -59,6 +63,6 @@ class Job {
 
     /** 完了から、または未実行のまま作成から一定時間経ったか */
     synchronized boolean isExpired(final long time) {
-        return this.finished ? this.finishedAt < time : this.thread == null && this.createdAt < time;
+        return this.finishedAt != 0 ? this.finishedAt < time : this.thread == null && this.createdAt < time;
     }
 }

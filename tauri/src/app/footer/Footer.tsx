@@ -81,7 +81,7 @@ export default function Footer(prop: {
 				{ ...formValues, ...paramExtra },
 				handleResult,
 				controller.signal,
-				jobLogRef.current.onLog(controller.signal),
+				jobLogRef.current.append,
 			);
 		} else if (running.command === "save") {
 			saveParameterRef.current(
@@ -121,11 +121,7 @@ export default function Footer(prop: {
 								Now Execution
 							</h3>
 							<div className="block animate-spin h-10 w-10 border-4 border-link rounded-full border-t-transparent" />
-							{jobLog.logs.length > 0 && (
-								<div className="mt-4 w-full">
-									<JobLog lines={jobLog.logs} />
-								</div>
-							)}
+							<JobLog lines={jobLog.logs} className="mt-4" />
 							<div className="mt-4">
 								<WhiteButton title="Abandoned" handleClick={handleCancel} />
 							</div>
