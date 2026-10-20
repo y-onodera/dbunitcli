@@ -16,3 +16,11 @@ export function insertAtCursor(
 		cursor: before.length + inserted.length,
 	};
 }
+
+export function decorateLines(
+	items: string[],
+	prefix: string,
+	suffix: string,
+): string[] {
+	return items.map((item) => `${prefix}${item}${suffix}`);
+}

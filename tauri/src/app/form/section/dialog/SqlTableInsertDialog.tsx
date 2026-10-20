@@ -7,11 +7,22 @@ import {
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
+import { InputLabel, SelectBox } from "../../../../components/element/Input";
 import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
 import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
+import { decorateLines } from "../../../../utils/textInsert";
 import SelectableTable from "./SelectableTable";
 import TableList from "./TableList";
+
+type AffixOption = { label: string; value: string };
+
+const NONE: AffixOption = { label: "None", value: "" };
+const COMMA: AffixOption = { label: ",", value: "," };
+const TABLE_PREFIXES = [NONE, COMMA];
+const TABLE_SUFFIXES = [NONE, COMMA];
+const COLUMN_PREFIXES = [NONE, COMMA, { label: "and", value: "and " }];
+const COLUMN_SUFFIXES = [NONE, COMMA, { label: "=", value: " = " }];
 
 interface SqlTableInsertDialogProps {
 	jdbcValues: Record<string, string>;
@@ -104,10 +115,12 @@ function TablesContent({
 		data: string[] | "loading";
 	} | null>(null);
 	const abortControllerRef = useAbortSignalRef();
+	const [prefix, setPrefix] = useState("");
+	const [suffix, setSuffix] = useState("");
 
 	const handleInsert = () => {
 		const selectedTables = tables.filter((t) => selected.has(t));
-		onInsert(selectedTables);
+		onInsert(decorateLines(selectedTables, prefix, suffix));
 	};
 
 	const handleSelectTable = (table: string) => {
@@ -133,7 +146,8 @@ function TablesContent({
 
 	return (
 		<>
-			<DialogField last>
+			<DialogField>
+				{" "}
 				{tables.length === 0 ? (
 					<StatusMessage kind="empty">No tables found</StatusMessage>
 				) : (
@@ -145,9 +159,17 @@ function TablesContent({
 						onQueryColumns={onInsertColumn ? undefined : onQueryColumns}
 						onSelectTable={onInsertColumn ? handleSelectTable : undefined}
 					/>
-				)}
+				)}{" "}
 			</DialogField>
+			<AffixSelects
+				idPrefix="sqlTableInsert"
+				prefixOptions={TABLE_PREFIXES}
+				suffixOptions={TABLE_SUFFIXES}
+				onPrefixChange={setPrefix}
+				onSuffixChange={setSuffix}
+			/>
 			<DialogActions>
+				{" "}
 				<BlueButton
 					title="Insert"
 					handleClick={handleInsert}
@@ -182,6 +204,8 @@ function ColumnSelectDialog({
 	onClose: () => void;
 }) {
 	const { selected, toggle, toggleAll } = useTableSelection();
+	const [prefix, setPrefix] = useState("");
+	const [suffix, setSuffix] = useState("");
 
 	if (columnData === "loading") {
 		return (
@@ -200,7 +224,8 @@ function ColumnSelectDialog({
 			<p className="text-caption mb-4 truncate" title={table}>
 				{table}
 			</p>
-			<DialogField last>
+			<DialogField>
+				{" "}
 				<SelectableTable
 					items={columnData}
 					selected={selected}
@@ -211,16 +236,94 @@ function ColumnSelectDialog({
 					emptyMessage="No columns found"
 				/>
 			</DialogField>
+			<AffixSelects
+				idPrefix="sqlColumnInsert"
+				prefixOptions={COLUMN_PREFIXES}
+				suffixOptions={COLUMN_SUFFIXES}
+				onPrefixChange={setPrefix}
+				onSuffixChange={setSuffix}
+			/>
 			<DialogActions>
+				{" "}
 				<BlueButton
 					title="Insert Columns"
 					handleClick={() =>
-						onInsert(columnData.filter((c) => selected.has(c)))
+						onInsert(
+							decorateLines(
+								columnData.filter((c) => selected.has(c)),
+								prefix,
+								suffix,
+							),
+						)
 					}
 					disabled={selected.size === 0}
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
 		</ModalOverlay>
+	);
+}
+
+function AffixSelects({
+	idPrefix,
+	prefixOptions,
+	suffixOptions,
+	onPrefixChange,
+	onSuffixChange,
+}: {
+	idPrefix: string;
+	prefixOptions: AffixOption[];
+	suffixOptions: AffixOption[];
+	onPrefixChange: (value: string) => void;
+	onSuffixChange: (value: string) => void;
+}) {
+	return (
+		<DialogField last>
+			<div className="flex gap-3">
+				<AffixSelect
+					id={`${idPrefix}_prefix`}
+					label="Prefix"
+					options={prefixOptions}
+					onChange={onPrefixChange}
+				/>
+				<AffixSelect
+					id={`${idPrefix}_suffix`}
+					label="Suffix"
+					options={suffixOptions}
+					onChange={onSuffixChange}
+				/>
+			</div>
+		</DialogField>
+	);
+}
+
+function AffixSelect({
+	id,
+	label,
+	options,
+	onChange,
+}: {
+	id: string;
+	label: string;
+	options: AffixOption[];
+	onChange: (value: string) => void;
+}) {
+	return (
+		<div className="flex-1">
+			<InputLabel text={label} id={id} required={false} />
+			<SelectBox
+				name={id}
+				id={id}
+				required={false}
+				wStyle="w-full"
+				handleOnChange={onChange}
+			>
+				{options.map((o) => (
+					<option key={o.label} value={o.value}>
+						{o.label}
+					</option>
+				))}
+			</SelectBox>
+		</div>
 	);
 }

@@ -57,7 +57,7 @@ export function SelectBox(props: {
 	hidden?: boolean;
 	wStyle?: string;
 	defaultValue?: string;
-	handleOnChange?: (selected: string) => Promise<void>;
+	handleOnChange?: (selected: string) => void | Promise<void>;
 	children: ReactNode;
 }) {
 	const [selected, setSelected] = useState(

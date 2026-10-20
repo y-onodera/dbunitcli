@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { insertAtCursor } from "../../utils/textInsert";
+import { decorateLines, insertAtCursor } from "../../utils/textInsert";
 
 describe("insertAtCursor", () => {
 	it("空文字ならそのまま挿入し末尾に改行を付ける", () => {
@@ -46,5 +46,18 @@ describe("insertAtCursor", () => {
 			first.cursor,
 		);
 		expect(second.value).toBe("c1\nc2\n");
+	});
+});
+
+describe("decorateLines", () => {
+	it("全行の前後に文字列を付ける", () => {
+		expect(decorateLines(["a", "b"], "and ", " = ")).toEqual([
+			"and a = ",
+			"and b = ",
+		]);
+	});
+
+	it("前後が空なら元のまま", () => {
+		expect(decorateLines(["a", "b"], "", "")).toEqual(["a", "b"]);
 	});
 });
