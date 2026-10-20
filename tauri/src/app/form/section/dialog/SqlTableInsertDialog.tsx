@@ -7,11 +7,15 @@ import {
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import { InputLabel, SelectBox } from "../../../../components/element/Input";
+import {
+	ControllTextBox,
+	InputLabel,
+	SelectBox,
+} from "../../../../components/element/Input";
 import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
 import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
-import { decorateLines } from "../../../../utils/textInsert";
+import { decorateLines, qualifyColumn } from "../../../../utils/textInsert";
 import SelectableTable from "./SelectableTable";
 import TableList from "./TableList";
 
@@ -147,7 +151,6 @@ function TablesContent({
 	return (
 		<>
 			<DialogField>
-				{" "}
 				{tables.length === 0 ? (
 					<StatusMessage kind="empty">No tables found</StatusMessage>
 				) : (
@@ -159,7 +162,7 @@ function TablesContent({
 						onQueryColumns={onInsertColumn ? undefined : onQueryColumns}
 						onSelectTable={onInsertColumn ? handleSelectTable : undefined}
 					/>
-				)}{" "}
+				)}
 			</DialogField>
 			<AffixSelects
 				idPrefix="sqlTableInsert"
@@ -169,7 +172,6 @@ function TablesContent({
 				onSuffixChange={setSuffix}
 			/>
 			<DialogActions>
-				{" "}
 				<BlueButton
 					title="Insert"
 					handleClick={handleInsert}
@@ -206,6 +208,7 @@ function ColumnSelectDialog({
 	const { selected, toggle, toggleAll } = useTableSelection();
 	const [prefix, setPrefix] = useState("");
 	const [suffix, setSuffix] = useState("");
+	const [alias, setAlias] = useState("");
 
 	if (columnData === "loading") {
 		return (
@@ -225,7 +228,20 @@ function ColumnSelectDialog({
 				{table}
 			</p>
 			<DialogField>
-				{" "}
+				<InputLabel
+					text="Table alias"
+					id="sqlColumnInsert_alias"
+					required={false}
+				/>
+				<ControllTextBox
+					name="sqlColumnInsert_alias"
+					id="sqlColumnInsert_alias"
+					required={false}
+					value={alias}
+					handleChange={(ev) => setAlias(ev.target.value)}
+				/>
+			</DialogField>
+			<DialogField>
 				<SelectableTable
 					items={columnData}
 					selected={selected}
@@ -244,13 +260,14 @@ function ColumnSelectDialog({
 				onSuffixChange={setSuffix}
 			/>
 			<DialogActions>
-				{" "}
 				<BlueButton
 					title="Insert Columns"
 					handleClick={() =>
 						onInsert(
 							decorateLines(
-								columnData.filter((c) => selected.has(c)),
+								columnData
+									.filter((c) => selected.has(c))
+									.map((c) => qualifyColumn(c, alias)),
 								prefix,
 								suffix,
 							),

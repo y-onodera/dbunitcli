@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { decorateLines, insertAtCursor } from "../../utils/textInsert";
+import {
+	decorateLines,
+	insertAtCursor,
+	qualifyColumn,
+} from "../../utils/textInsert";
 
 describe("insertAtCursor", () => {
 	it("空文字ならそのまま挿入し末尾に改行を付ける", () => {
@@ -59,5 +63,16 @@ describe("decorateLines", () => {
 
 	it("前後が空なら元のまま", () => {
 		expect(decorateLines(["a", "b"], "", "")).toEqual(["a", "b"]);
+	});
+});
+
+describe("qualifyColumn", () => {
+	it("エイリアス指定時は エイリアス.カラム名 にする", () => {
+		expect(qualifyColumn("ID", "t1")).toBe("t1.ID");
+	});
+
+	it("エイリアスが空または空白のみならカラム名のまま", () => {
+		expect(qualifyColumn("ID", "")).toBe("ID");
+		expect(qualifyColumn("ID", "  ")).toBe("ID");
 	});
 });

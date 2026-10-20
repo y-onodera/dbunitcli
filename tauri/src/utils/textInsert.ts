@@ -24,3 +24,8 @@ export function decorateLines(
 ): string[] {
 	return items.map((item) => `${prefix}${item}${suffix}`);
 }
+
+export function qualifyColumn(column: string, alias: string): string {
+	const trimmed = alias.trim();
+	return trimmed === "" ? column : `${trimmed}.${column}`;
+}
