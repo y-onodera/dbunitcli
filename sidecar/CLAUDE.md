@@ -15,7 +15,7 @@ DBUnit CLI のREST APIサーバー。Micronaut ベースで、Tauri アプリケ
 - `AbstractResourceFileController` — リソースファイル管理の共通基底
 - コマンド系: `CompareController`(`/compare`), `ConvertController`(`/convert`), `GenerateController`(`/generate`), `RunController`(`/run`), `ParameterizeController`(`/parameterize`)
 - リソース系: `DatasetSettingsController`(`/dataset-setting`), `JdbcResourceFileController`(`/jdbc`), `TemplateResourceFileController`(`/template`), `XlsxSchemaController`(`/xlsx-schema`)
-- 専用: `QueryDatasourceController`(`/query-datasource`), `WorkspaceController`(`/workspace`), `JobController`(`/job`)
+- 専用: `QueryDatasourceController`(`/query-datasource`), `WorkspaceController`(`/workspace`)
 
 ### `yo.dbunitcli.sidecar.domain.project`
 `Workspace`, `Options`, `Resources`, `ResourceFile`, `Datasource`, `CommandType`
@@ -31,9 +31,11 @@ DBUnit CLI のREST APIサーバー。Micronaut ベースで、Tauri アプリケ
 リソース系 `/{res}`: `GET /list`, `POST /load`, `POST /save`, `POST /delete`
 ワークスペース: `GET /workspace/resources`, `POST /workspace/update`
 
-### ジョブ（`X-Job-Id` ヘッダ、`@Interruptible` を付けたメソッドが対象）
+### ジョブ（`@Interruptible` を付けたメソッドを `Accept: text/event-stream` で呼ぶ）
 - 長時間化しうる、かつ割り込んでも安全なメソッド（読み取りのみ・出力を作り直せる）に付ける。save等の書き込み系には付けない
-- 結果は通常の応答。中断は `POST /job/{id}/cancel`（interrupt）。`X-Job-Log` 付きなら実行中のログを `GET /job/{id}/events`（SSE）で流す
+- `job.JobStreamFilter` が1本のSSEで返す: `event: log`（`X-Job-Log` 付きのみ）→ `event: result`（data: `{"status","reason","body"}`。エラー応答も同じ）。1秒ごとにハートビート。他のAcceptは通常の応答
+- 中断はクライアントの切断（ハートビートの書き込みで検知し、実行スレッドへinterrupt）
+- filterは応答を返す前に `chain.proceed` を購読する（後だとControllerが動かない）。Micronaut版上げ時は `JobStreamTest` で確認
 
 ## 技術スタック
 - Micronaut 4.x + Netty + Serde Jackson
