@@ -54,6 +54,12 @@ jobs:
         continue-on-error: true
         run: |
           mvn native:metadata-copy -Pnative-trace "-fsidecar/pom.xml"
+      # artifactを取得しなくても、既存メタデータからの追加分をジョブのログで確認できるようにする
+      - name: Show sidecar native-image-config diff
+        if: ${{ !cancelled() }}
+        run: |
+          git --no-pager diff --stat -- sidecar/src/main/resources/META-INF/native-image
+          git --no-pager diff --no-color -- sidecar/src/main/resources/META-INF/native-image
       - uses: actions/upload-artifact@v7
         if: always()
         with:
