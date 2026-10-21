@@ -88,6 +88,16 @@
                             </agent>
                         </configuration>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <!-- agent有効時はargLineがagent指定に置き換わり親pomの-Ddbunitcli.noExit=trueが渡らないため、argLineとは別経路で渡す -->
+                            <systemPropertyVariables>
+                                <dbunitcli.noExit>true</dbunitcli.noExit>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
