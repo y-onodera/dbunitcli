@@ -2,11 +2,13 @@ import { core } from "@tauri-apps/api";
 import { useEffect, useRef, useState } from "react";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
 import { BlueEditButton } from "../../components/element/ButtonIcon";
+import { JobLog } from "../../components/element/JobLog";
 import {
 	useParamInputs,
 	useSetParamInputs,
 } from "../../context/ParameterInputProvider";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
+import { useJobLog } from "../../hooks/useJobLog";
 import {
 	type Running,
 	useExecParameter,
@@ -30,6 +32,7 @@ export default function Footer(prop: {
 	const [showParamDialog, setShowParamDialog] = useState(false);
 	const [running, setRunning] = useState<Running>(RESET_RUNNING);
 	const [isLoading, setIsLoading] = useState(false);
+	const jobLog = useJobLog();
 	const executingRef = useRef(false);
 	const abortControllerRef = useRef<AbortController | null>(null);
 	const parameter = useSelectParameter();
@@ -40,9 +43,11 @@ export default function Footer(prop: {
 	const execParameterRef = useRef(execParameter);
 	const saveParameterRef = useRef(saveParameter);
 	const saveShellRef = useRef(saveShell);
+	const jobLogRef = useRef(jobLog);
 	execParameterRef.current = execParameter;
 	saveParameterRef.current = saveParameter;
 	saveShellRef.current = saveShell;
+	jobLogRef.current = jobLog;
 
 	useEffect(() => {
 		setParamInputs({});
@@ -54,6 +59,7 @@ export default function Footer(prop: {
 		}
 		executingRef.current = true;
 		setIsLoading(true);
+		jobLogRef.current.reset();
 		const controller = new AbortController();
 		abortControllerRef.current = controller;
 
@@ -75,6 +81,7 @@ export default function Footer(prop: {
 				{ ...formValues, ...paramExtra },
 				handleResult,
 				controller.signal,
+				jobLogRef.current.append,
 			);
 		} else if (running.command === "save") {
 			saveParameterRef.current(
@@ -114,6 +121,7 @@ export default function Footer(prop: {
 								Now Execution
 							</h3>
 							<div className="block animate-spin h-10 w-10 border-4 border-link rounded-full border-t-transparent" />
+							<JobLog lines={jobLog.logs} className="mt-4" />
 							<div className="mt-4">
 								<WhiteButton title="Abandoned" handleClick={handleCancel} />
 							</div>

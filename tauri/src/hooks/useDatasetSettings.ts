@@ -56,6 +56,7 @@ async function fetchTableNames(
 	info: DatasetSrcInfo,
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
+	signal?: AbortSignal,
 ): Promise<string[]> {
 	if (!info.srcPath) {
 		return [];
@@ -69,6 +70,7 @@ async function fetchTableNames(
 				parameters: paramInputs,
 			}),
 		},
+		signal,
 	};
 	return fetchData(fetchParams)
 		.then((r) => r.json())
@@ -96,7 +98,13 @@ export const useDatasetTableNames = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		fetchTableNames(apiUrl, srcInfo, jdbcValues, paramInputs).then((names) => {
+		fetchTableNames(
+			apiUrl,
+			srcInfo,
+			jdbcValues,
+			paramInputs,
+			controller.signal,
+		).then((names) => {
 			if (!controller.signal.aborted) {
 				setTableNames(names);
 				setLoading(false);
@@ -121,6 +129,7 @@ async function fetchTablePreview(
 	tableName: string,
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
+	signal?: AbortSignal,
 ): Promise<TablePreview> {
 	if (!info.srcPath || !tableName) {
 		return { headers: [], rows: [] };
@@ -135,6 +144,7 @@ async function fetchTablePreview(
 				parameters: paramInputs,
 			}),
 		},
+		signal,
 	};
 	return fetchData(fetchParams)
 		.then((r) => r.json())
@@ -169,14 +179,19 @@ export const useDatasetTablePreview = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		fetchTablePreview(apiUrl, srcInfo, tableName, jdbcValues, paramInputs).then(
-			(result) => {
-				if (!controller.signal.aborted) {
-					setPreview(result);
-					setLoading(false);
-				}
-			},
-		);
+		fetchTablePreview(
+			apiUrl,
+			srcInfo,
+			tableName,
+			jdbcValues,
+			paramInputs,
+			controller.signal,
+		).then((result) => {
+			if (!controller.signal.aborted) {
+				setPreview(result);
+				setLoading(false);
+			}
+		});
 		return () => {
 			controller.abort();
 		};
@@ -282,13 +297,17 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 			return;
 		}
 		const controller = new AbortController();
-		loadAllColumnNames(apiUrl, srcInfo, jdbcValues, paramInputs).then(
-			(names) => {
-				if (!controller.signal.aborted) {
-					setColumnNames(names);
-				}
-			},
-		);
+		loadAllColumnNames(
+			apiUrl,
+			srcInfo,
+			jdbcValues,
+			paramInputs,
+			controller.signal,
+		).then((names) => {
+			if (!controller.signal.aborted) {
+				setColumnNames(names);
+			}
+		});
 		return () => {
 			controller.abort();
 		};
@@ -302,11 +321,25 @@ async function loadAllColumnNames(
 	info: DatasetSrcInfo,
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
+	signal: AbortSignal,
 ): Promise<string[]> {
-	const tableNames = await fetchTableNames(apiUrl, info, jdbcValues, paramInputs);
+	const tableNames = await fetchTableNames(
+		apiUrl,
+		info,
+		jdbcValues,
+		paramInputs,
+		signal,
+	);
 	const previews = await Promise.all(
 		tableNames.map((tableName) =>
-			fetchTablePreview(apiUrl, info, tableName, jdbcValues, paramInputs),
+			fetchTablePreview(
+				apiUrl,
+				info,
+				tableName,
+				jdbcValues,
+				paramInputs,
+				signal,
+			),
 		),
 	);
 	const seen = new Set<string>();
@@ -340,6 +373,7 @@ export const useColumnNamesFetcher = () => {
 			tableName,
 			jdbcValues,
 			paramInputs,
+			signal,
 		);
 		return preview.headers;
 	};

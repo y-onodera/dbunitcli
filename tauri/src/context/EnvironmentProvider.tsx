@@ -1,6 +1,7 @@
 import { getMatches } from "@tauri-apps/plugin-cli";
 import type { ReactNode } from "react";
 import { createContext, Suspense, use } from "react";
+import { API_CONTEXT_PATH } from "../utils/apiPath";
 
 export type Environment = {
 	apiUrl: string;
@@ -23,7 +24,7 @@ export default function EnvironmentProvider(props: { children: ReactNode }) {
 			? (matches.args["result.base"].value as string)
 			: ".";
 		return {
-			apiUrl: `${`http://localhost:${port}` as string}/dbunit-cli/`,
+			apiUrl: `http://localhost:${port}${API_CONTEXT_PATH}`,
 			workspace,
 			dataset_base,
 			result_base,

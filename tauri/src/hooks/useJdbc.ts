@@ -2,6 +2,7 @@ import { useEnvironment } from "../context/EnvironmentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import { fetchAndUpdate, fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
+// タイムアウト時はsidecarへcancelも送られ、sidecar側の処理も中断する
 const JDBC_TIMEOUT_MS = 60_000;
 
 function toJdbcRequestBody(jdbcValues: Record<string, string>) {

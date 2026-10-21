@@ -16,6 +16,7 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.JdbcColumnsRequestDto;
 import yo.dbunitcli.sidecar.dto.JdbcDto;
 import yo.dbunitcli.sidecar.dto.JdbcSavePropertiesRequestDto;
+import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -68,6 +69,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         }
     }
 
+    @Interruptible
     @Post(uri = "tables", produces = MediaType.APPLICATION_JSON)
     public String tables(@Body final JdbcDto body) {
         IDatabaseConnection conn = null;
@@ -89,6 +91,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         }
     }
 
+    @Interruptible
     @Post(uri = "columns", produces = MediaType.APPLICATION_JSON)
     public String columns(@Body final JdbcColumnsRequestDto body) {
         IDatabaseConnection conn = null;
@@ -113,6 +116,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         }
     }
 
+    @Interruptible
     @Post(uri = "test", produces = MediaType.APPLICATION_JSON)
     public String test(@Body final JdbcDto body) {
         try {

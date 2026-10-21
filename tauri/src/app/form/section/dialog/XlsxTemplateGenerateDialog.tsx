@@ -5,7 +5,10 @@ import {
 } from "../../../../components/element/Input";
 import { useSetResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import type { FormValues } from "../../../../utils/formValues";
-import { FileGenerateButton } from "./GenerateDialog";
+import {
+	FileGenerateButton,
+	type GenerateExecuteContext,
+} from "./GenerateDialog";
 import type { ResourceEditButtonProp } from "./ResourceEditButton";
 import { postDialogForm } from "./refreshableDialogForm";
 
@@ -53,12 +56,13 @@ function useGenerateXlsxTemplate() {
 	const setResourcesSettings = useSetResourcesSettings();
 	return async (
 		values: FormValues,
-		{ apiUrl, isAborted }: { apiUrl: string; isAborted: () => boolean },
+		{ apiUrl, isAborted, fetchOptions }: GenerateExecuteContext,
 	) => {
 		const templateFiles = await postDialogForm<string[]>(
 			apiUrl,
 			"template/generate",
 			values,
+			fetchOptions,
 		);
 		setResourcesSettings((current) => current.with({ templateFiles }));
 		return isAborted() ? null : toSavedFileName(String(values[fileNameField]));

@@ -17,6 +17,7 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.JsonXlsxSchemaDto;
 import yo.dbunitcli.sidecar.dto.JsonXlsxSchemaRequestDto;
 import yo.dbunitcli.sidecar.dto.XlsxSheetsRequestDto;
+import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +47,7 @@ public class XlsxSchemaController extends AbstractResourceFileController<JsonXls
      * generateコマンド（generateType=xlsxSchema）を一時ディレクトリへ実行し、
      * テーブル別に出力されたJSONをload応答と同形（rows/cells）へマージする。保存は行わない。
      */
+    @Interruptible
     @Post(uri = "generate", produces = MediaType.APPLICATION_JSON)
     public String generate(@Body final Map<String, String> input) throws IOException {
         if (Strings.isEmpty(input.get("-src.src"))) {
@@ -86,6 +88,7 @@ public class XlsxSchemaController extends AbstractResourceFileController<JsonXls
         return merged;
     }
 
+    @Interruptible
     @Post(uri = "sheets", produces = MediaType.APPLICATION_JSON)
     public String sheets(@Body final XlsxSheetsRequestDto request) {
         try {
