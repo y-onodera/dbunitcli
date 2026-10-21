@@ -33,6 +33,8 @@ class JobLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
     @Override
     protected void append(final ILoggingEvent event) {
         // appenderはログ出力元のスレッドで同期的に呼ばれるため、そのスレッドのジョブを参照できる
-        JobContext.current().ifPresent(job -> job.log(this.layout.doLayout(event).stripTrailing()));
+        JobContext.current()
+                  .filter(JobContext::wantsLogs)
+                  .ifPresent(job -> job.log(this.layout.doLayout(event).stripTrailing()));
     }
 }

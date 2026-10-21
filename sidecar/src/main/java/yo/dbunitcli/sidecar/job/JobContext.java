@@ -15,6 +15,7 @@ final class JobContext {
     /** ログの振り分け（JobLogAppender）用。runの範囲内だけ束縛されるため、core内部で別スレッドから出力されたログは対象外 */
     private static final ScopedValue<JobContext> CURRENT = ScopedValue.newInstance();
 
+    /** ログを求められていなければnull */
     private final Consumer<String> logs;
 
     private Thread thread;
@@ -23,6 +24,11 @@ final class JobContext {
 
     JobContext(final Consumer<String> logs) {
         this.logs = logs;
+    }
+
+    /** 中断の対象にするだけで、ログは流さないジョブ */
+    static JobContext withoutLogs() {
+        return new JobContext(null);
     }
 
     static Optional<JobContext> current() {
@@ -50,8 +56,15 @@ final class JobContext {
         }
     }
 
+    /** ログを流す必要があるか。求められていない、または中断済み（送り先が無い）なら整形を省くために使う */
+    synchronized boolean wantsLogs() {
+        return this.logs != null && !this.cancelled;
+    }
+
     void log(final String line) {
-        this.logs.accept(line);
+        if (this.logs != null) {
+            this.logs.accept(line);
+        }
     }
 
     private synchronized void attach(final Thread thread) {

@@ -33,7 +33,7 @@ DBUnit CLI のREST APIサーバー。Micronaut ベースで、Tauri アプリケ
 
 ### ジョブ（`@Interruptible` を付けたメソッドを `Accept: text/event-stream` で呼ぶ）
 - 長時間化しうる、かつ割り込んでも安全なメソッド（読み取りのみ・出力を作り直せる）に付ける。save等の書き込み系には付けない
-- `job.JobStreamFilter` が1本のSSEで返す: `event: log` → `event: result`（data: `{"status","reason","body"}`。エラー応答も同じ）。1秒ごとにハートビート。他のAcceptは通常の応答
+- `job.JobStreamFilter` が1本のSSEで返す: `event: log`（`X-Job-Log` 付きのみ）→ `event: result`（data: `{"status","reason","body"}`。エラー応答も同じ）。1秒ごとにハートビート。他のAcceptは通常の応答
 - 中断はクライアントの切断（ハートビートの書き込みで検知し、実行スレッドへinterrupt）
 - filterは応答を返す前に `chain.proceed` を購読する（後だとControllerが動かない）。Micronaut版上げ時は `JobStreamTest` で確認
 

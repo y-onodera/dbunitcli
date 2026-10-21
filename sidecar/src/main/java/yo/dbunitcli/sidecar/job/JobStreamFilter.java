@@ -28,16 +28,19 @@ import java.util.Map;
 
 /**
  * {@link Interruptible} の付いたエンドポイントを Accept: text/event-stream で呼ぶと、
- * 実行中のログ（event: log）と最終結果（event: result）を1本のSSEで返す。
+ * 最終結果（event: result）をSSEで返す。{@link #LOG_HEADER} があれば実行中のログ（event: log）も流す。
  * resultのdataは {"status","reason","body"} で、通常の応答のステータスと本文をそのまま運ぶ（エラー応答も同じ）。
  * クライアントが切断すると実行スレッドへinterruptを送る。それ以外の呼び出しは通常どおり処理する。
  */
 @Filter("/**")
 public class JobStreamFilter implements HttpServerFilter {
 
-    static final String LOG_EVENT = "log";
+    /** 実行中のログを求めるときに付ける。無ければ中断の対象にするだけでログは整形・送信しない */
+    public static final String LOG_HEADER = "X-Job-Log";
 
-    static final String RESULT_EVENT = "result";
+    private static final String LOG_EVENT = "log";
+
+    private static final String RESULT_EVENT = "result";
 
     /**
      * Nettyは書き込み時にしか切断に気付かないため、ログが出ない間も定期的に書き込む。
@@ -63,7 +66,9 @@ public class JobStreamFilter implements HttpServerFilter {
             return chain.proceed(request);
         }
         final Sinks.Many<Event<String>> events = Sinks.many().unicast().onBackpressureBuffer();
-        final JobContext job = new JobContext(line -> emit(events, Event.of(line).name(LOG_EVENT)));
+        final JobContext job = request.getHeaders().contains(LOG_HEADER)
+                ? new JobContext(line -> emit(events, Event.of(line).name(LOG_EVENT)))
+                : JobContext.withoutLogs();
         request.setAttribute(JobContext.ATTRIBUTE, job);
         // 応答を返した後にchainを進めるとControllerが実行されないため、応答を返す前に購読しておく
         final Disposable proceed = Flux.from(chain.proceed(request)).subscribe(
@@ -87,10 +92,11 @@ public class JobStreamFilter implements HttpServerFilter {
     }
 
     private boolean isTarget(final HttpRequest<?> request) {
-        return request.getHeaders().accept().stream().anyMatch(MediaType.TEXT_EVENT_STREAM_TYPE::equals)
-                && RouteAttributes.getRouteInfo(request)
-                                  .map(route -> route.getAnnotationMetadata().hasAnnotation(Interruptible.class))
-                                  .orElse(false);
+        // 注釈はコンパイル時のメタデータで安く判定できるため、Acceptの解析より先に見る
+        return RouteAttributes.getRouteInfo(request)
+                              .map(route -> route.getAnnotationMetadata().hasAnnotation(Interruptible.class))
+                              .orElse(false)
+                && request.getHeaders().accept().stream().anyMatch(MediaType.TEXT_EVENT_STREAM_TYPE::equals);
     }
 
     private void complete(final Sinks.Many<Event<String>> events, final int status, final String reason, final Object body) {
@@ -98,10 +104,8 @@ public class JobStreamFilter implements HttpServerFilter {
         result.put("status", status);
         result.put("reason", reason);
         result.put("body", this.toText(body));
+        // ストリームはtakeUntilでresultの送出後に閉じる
         emit(events, Event.of(this.toText(result)).name(RESULT_EVENT));
-        synchronized (events) {
-            events.tryEmitComplete();
-        }
     }
 
     private String toText(final Object body) {

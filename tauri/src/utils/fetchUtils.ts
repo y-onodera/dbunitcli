@@ -62,8 +62,11 @@ export async function saveOnSuccess(
 	}
 }
 
+// 名前で判定する（signal.reasonのDOMExceptionは実行環境によって別realmのクラスになり、instanceofで判定できない）
 export const isAbortError = (error: unknown): boolean =>
-	error instanceof DOMException && error.name === "AbortError";
+	typeof error === "object" &&
+	error !== null &&
+	(error as { name?: unknown }).name === "AbortError";
 
 export async function fetchAndUpdate<T>(
 	fetchParams: FetchParams,
@@ -108,6 +111,8 @@ const fetchWithRetry = async (endpoint: string, options: RequestInit) => {
 // 中断・ログの対象（sidecarの @Interruptible）ならSSEで、対象外なら通常の応答で返る。
 // 対象外のエンドポイントが406にならないよう、ワイルドカードを低い優先度で併記する
 const JOB_ACCEPT = "text/event-stream, */*;q=0.1";
+// 実行中のログを求めるときだけ付ける（無ければsidecarはログを整形・送信しない）
+const JOB_LOG_HEADER = "X-Job-Log";
 
 type SseEvent = { name: string | null; data: string | null };
 
@@ -126,13 +131,6 @@ const parseSseEvent = (block: string): SseEvent => {
 
 type JobResult = { status: number; reason: string | null; body: string };
 
-// 中断はisAbortErrorで判定できる例外にする（signal.reasonは実行環境によってDOMExceptionと判定できない）
-const throwIfAborted = (signal: AbortSignal | undefined) => {
-	if (signal?.aborted) {
-		throw new DOMException("Aborted", "AbortError");
-	}
-};
-
 // ジョブのSSEを読み、logはonLogへ渡し、最後のresultから通常の応答を組み立て直す
 const readJobStream = async (
 	body: ReadableStream<Uint8Array>,
@@ -149,7 +147,7 @@ const readJobStream = async (
 	try {
 		for (;;) {
 			const { done, value } = await reader.read();
-			throwIfAborted(signal);
+			signal?.throwIfAborted();
 			if (done) {
 				throw new Error("Job stream closed without result");
 			}
@@ -173,7 +171,7 @@ const readJobStream = async (
 		}
 	} catch (ex) {
 		// 中断で読み取りが失敗した場合は、通常の呼び出しと同じくAbortErrorとして扱う
-		throwIfAborted(signal);
+		signal?.throwIfAborted();
 		throw ex;
 	} finally {
 		signal?.removeEventListener("abort", handleAbort);
@@ -189,6 +187,9 @@ const fetchWithJob = async (
 ): Promise<Response> => {
 	const headers = new Headers(options.headers);
 	headers.set("Accept", JOB_ACCEPT);
+	if (onLog) {
+		headers.set(JOB_LOG_HEADER, "true");
+	}
 	const response = await fetchWithRetry(endpoint, {
 		...options,
 		headers,

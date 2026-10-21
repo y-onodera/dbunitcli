@@ -62,6 +62,7 @@ describe("fetchData（ジョブのSSE）", () => {
 		expect(await response.text()).toBe("/result/dir");
 		expect(requestHeaders().get("Accept")).toBe("text/event-stream, */*;q=0.1");
 		expect(requestHeaders().get("Content-Type")).toBe("application/json");
+		expect(requestHeaders().has("X-Job-Log")).toBe(false);
 		expect(mockFetch).toHaveBeenCalledTimes(1);
 	});
 
@@ -85,6 +86,7 @@ describe("fetchData（ジョブのSSE）", () => {
 		const response = await fetchData({ ...execParams, onLog });
 
 		expect(onLog.mock.calls).toEqual([["line 1"], ["line 2"]]);
+		expect(requestHeaders().get("X-Job-Log")).toBe("true");
 		expect(await response.text()).toBe("ok");
 	});
 
