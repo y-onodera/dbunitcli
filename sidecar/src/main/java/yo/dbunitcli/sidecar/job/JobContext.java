@@ -12,8 +12,8 @@ final class JobContext {
 
     static final String ATTRIBUTE = "dbunitcli.job";
 
-    /** ログの振り分け（JobLogAppender）用。MDCと同じくスレッド単位のため、core内部で別スレッドから出力されたログは対象外 */
-    private static final ThreadLocal<JobContext> CURRENT = new ThreadLocal<>();
+    /** ログの振り分け（JobLogAppender）用。runの範囲内だけ束縛されるため、core内部で別スレッドから出力されたログは対象外 */
+    private static final ScopedValue<JobContext> CURRENT = ScopedValue.newInstance();
 
     private final Consumer<String> logs;
 
@@ -26,17 +26,16 @@ final class JobContext {
     }
 
     static Optional<JobContext> current() {
-        return Optional.ofNullable(CURRENT.get());
+        // ScopedValue#orElse はnullを受け付けないため、束縛の有無で判定する
+        return CURRENT.isBound() ? Optional.of(CURRENT.get()) : Optional.empty();
     }
 
     /** 現在のスレッドでtaskを実行し、中断とログ振り分けの対象にする */
     <T> T run(final Supplier<T> task) {
         this.attach(Thread.currentThread());
-        CURRENT.set(this);
         try {
-            return task.get();
+            return ScopedValue.where(CURRENT, this).call(task::get);
         } finally {
-            CURRENT.remove();
             this.detach();
             // 中断用の割り込みが処理完了と競合して残った場合に、後続処理へ持ち越さない
             Thread.interrupted();
