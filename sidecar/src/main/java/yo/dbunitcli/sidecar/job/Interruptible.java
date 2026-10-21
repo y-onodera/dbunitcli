@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
 
 /**
  * 実行スレッドへ割り込んで中断しても安全なエンドポイント（読み取りのみ、または出力を作り直せる処理）に付ける。
- * リクエストに {@link JobInterceptor#HEADER} があれば /job/{id}/cancel で中断でき、
- * {@link JobInterceptor#LOG_HEADER} もあれば実行中のログを /job/{id}/events へ流す。
+ * Accept: text/event-stream で呼ぶと、{@link JobStreamFilter} が実行中のログと結果を1本のSSEで返し、
+ * クライアントの切断で中断する。それ以外のAcceptでは通常の応答を返す。
  * 設定ファイルを書き換える処理（save・delete・rename等）には付けない（中断で中途半端な状態が残りうる）。
  */
 @Documented
