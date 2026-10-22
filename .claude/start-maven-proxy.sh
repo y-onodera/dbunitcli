@@ -5,6 +5,12 @@
 #   Maven を 127.0.0.1:3128 経由にする（上流プロキシの認証を maven-proxy.py が肩代わりする）
 # web 環境のプロキシ方式や JDK の配布 URL が変わって動かなくなったら、ここをメンテする
 
+# ローカル（CLAUDE_CODE_REMOTE が true 以外）では何もしない
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 IS_WEB_PROXY=false
 if echo "${JAVA_TOOL_OPTIONS:-}" | grep -q "jwt_"; then
   IS_WEB_PROXY=true
@@ -17,7 +23,7 @@ fi
 
 if [ "$IS_WEB_PROXY" = true ]; then
   # ローカルプロキシを先に起動（JDK ダウンロードで使用するため）
-  nohup python3 /home/user/dbunitcli/.claude/maven-proxy.py >> /tmp/maven-proxy.log 2>&1 &
+  nohup python3 "$SCRIPT_DIR/maven-proxy.py" >> /tmp/maven-proxy.log 2>&1 &
   PROXY_PID=$!
   echo "Maven proxy setup complete (PID: $PROXY_PID)"
 
