@@ -166,18 +166,14 @@ export default function Footer(prop: {
                                 flex items-center p-4 gap-2"
 				>
 					<div className="ml-auto flex items-center gap-2">
-						<BlueEditButton
-							title={PARAMS_LABEL}
+						<ParamsButton
+							count={paramCount}
 							handleClick={() => setShowParamDialog(true)}
 						/>
 						<span className="text-sm font-medium text-content-muted">
 							{PARAMS_LABEL}
 						</span>
-						{paramCount > 0 && (
-							<span className="text-sm text-content-muted">
-								— {paramCount} parameter(s) set
-							</span>
-						)}
+						<ParamsStatus count={paramCount} />
 						<SectionHelpButton
 							command="dialogs/parameters"
 							label="Parameters (-P)"
@@ -230,5 +226,32 @@ export default function Footer(prop: {
 				/>
 			)}
 		</>
+	);
+}
+
+function ParamsButton(prop: { count: number; handleClick: () => void }) {
+	return (
+		<div className="relative">
+			<BlueEditButton title={PARAMS_LABEL} handleClick={prop.handleClick} />
+			{prop.count > 0 && (
+				<span
+					data-testid="params-badge"
+					className="absolute -top-2 -right-2 min-w-5 h-5 px-1 flex items-center justify-center rounded-full bg-success text-content-inverse text-xs font-semibold pointer-events-none"
+				>
+					{prop.count}
+				</span>
+			)}
+		</div>
+	);
+}
+
+function ParamsStatus(prop: { count: number }) {
+	if (prop.count === 0) {
+		return <span className="text-sm text-content-muted">— No parameters</span>;
+	}
+	return (
+		<span className="text-sm font-semibold text-content">
+			— {prop.count} parameter(s) set
+		</span>
 	);
 }
