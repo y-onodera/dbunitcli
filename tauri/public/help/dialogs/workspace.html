@@ -183,14 +183,14 @@
     <tr><th>オプションの種類</th><th>相対パスの解決方法</th></tr>
     <tr><td>入力データ（-src）</td><td>Dataset Base、Workspace、起動ディレクトリの順に探す</td></tr>
     <tr><td>出力先（-result）</td><td>常に Result Base の下に出力する</td></tr>
-    <tr><td>設定・テンプレート・JDBC など（<code>resources/</code> 系）</td><td>GUI の Exec では、基準ディレクトリの下にあるものとして扱う</td></tr>
+    <tr><td>設定・テンプレート・JDBC など（<code>resources/</code> 系）</td><td>基準ディレクトリ、Workspace の順に探す（GUI の Exec と Save Shell で作った .bat で同じ）</td></tr>
   </table>
 
   <h3 id="chooser-tips">再利用のためのポイント</h3>
   <ul>
     <li>相対パスで保存したオプションは、Workspace / Dataset Base / Result Base を切り替えると、切り替え先の同じ相対位置を指します。<a href="#step-reuse">7. の使い分け</a>はこの仕組みを使っています</li>
     <li>Workspace の外を選ぶと絶対パスになり、切り替えても同じ場所を指したままになります。環境ごとに変えたいファイルは Workspace（入力データなら Dataset Base）の中に置いてください</li>
-    <li>設定・テンプレート・JDBC などのファイルは、<a href="#chooser-base">基準ディレクトリ</a>の中に置いてください。Workspace 直下など基準ディレクトリの外に置くと、Workspace からの相対パスになり、GUI の Exec で見つからない場合があります</li>
+    <li>設定・テンプレート・JDBC などのファイルは、<a href="#chooser-base">基準ディレクトリ</a>の中に置くと、ファイル名だけで指定できて管理しやすくなります</li>
   </ul>
 
   <h2 id="sidebar">サイドバーの操作</h2>

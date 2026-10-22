@@ -63,6 +63,14 @@ public record FileResources() {
         return FileResources.searchInOrder(templatePath, templateFileDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
+    // GUIと同じくoption/parameterize/template→resources/template→workspaceの順に探す
+    public static File searchParameterizeTemplate(final String templatePath) {
+        if (Strings.isEmpty(templatePath)) {
+            return null;
+        }
+        return FileResources.searchInOrder(templatePath, parameterizeTemplateDir().toPath().normalize().toString(), FileResources::searchTemplate);
+    }
+
     public static File searchJdbc(final String jdbcPath) {
         return FileResources.searchInOrder(jdbcPath, jdbcPropDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
