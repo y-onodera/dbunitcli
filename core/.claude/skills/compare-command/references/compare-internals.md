@@ -52,3 +52,7 @@ image/pdfのsrcType強制は`CompareOption.IMAGE_TYPE_PARAM_MAPPER`/`PDF_TYPE_PA
 - 入力フィクスチャ: `core/src/test/resources/yo/dbunitcli/application/src/compare/`
 - 期待値（差分レポート）: `core/src/test/resources/yo/dbunitcli/application/expect/compare/`・`expect/multidiff/`・`expect/nodiff/`・`expect/pattern/`
 - DB絡みは`DBIntegrationTest`/`H2IntegrationTest`
+
+## `-setting` の outputFilter / import
+
+設定ファイル最上位の`outputFilter`（`name`完全一致 / `pattern`部分一致・`regex`・`exclude`、`filePath`は不可。`OutputFilterParser`）でseparate/join後の出力テーブルを絞る。`import`は既定AND結合、`{"path":..., "outputFilterCombine":"or"}`でOR結合。

@@ -4,23 +4,23 @@ TRIGGER when: command/Parameterize*.java・application/ParameterUnit.java の変
 DO NOT TRIGGER when: 読み取りのみ、または他コマンド（Compare/Convert/Generate/Run/Scaffold）のみの変更。
 ---
 
-Parameterizeは、パラメータデータセット（`-param`）の各単位を引数へ展開し、別コマンド（compare/convert/generate/run/parameterize）を繰り返し実行するデータ駆動オーケストレータ。`loadParams()`が`unit`でParameterストリームを作り、各Parameterごとに`createCommand()`（`-cmd`をST4展開して種別決定）＋`createArgs()`（引数構築）でサブコマンドを`exec()`する。以下の4軸で設計する。
+Parameterizeは、`-param`の各単位を引数へ展開して別コマンドを繰り返し実行するオーケストレータ。`loadParams()`が`unit`でParameterストリームを作り、各Parameterで`createCommand()`（`-cmd`をST4展開）＋`createArgs()`でサブコマンドを`exec()`する。
 
 ## 設計の4軸
 
-1. **unit（粒度）**: `ParameterUnit`（record/table/dataset。Generateと共有）。`-param`を何単位で1実行に落とすか。record=行毎/table=テーブル毎/dataset=全体1回
-2. **引数テンプレート供給元**: `-cmdParam`（各Parameterでファイル名自体を展開し動的選択）＞ `-template`（固定既定）。どちらも無ければ`-arg`のみ
-3. **展開の有無（`-parameterize`）**: `true`（既定）は供給テンプレートをST4展開してから引数化、`false`は生のまま。`-arg`/`-A`（Map）はキー一致で最終引数を上書きマージ
-4. **失敗継続（`-ignoreFail`）**: サブコマンドの`CommandFailException`時、`true`で記録継続/`false`で即中断。最後に失敗総数>0で全体失敗
+1. **unit**: `ParameterUnit`（record/table/dataset。Generateと共有）
+2. **引数テンプレート供給元**: `-cmdParam`（ファイル名をParameterで動的決定）＞`-template`（固定）。どちらも無ければ`-arg`のみ
+3. **展開（`-parameterize`）**: true（既定）はST4展開してから引数化。`-arg`/`-A`はキー一致で上書きマージ
+4. **失敗継続（`-ignoreFail`）**: `CommandFailException`時に記録継続か即中断。失敗総数>0で全体失敗
 
 ## 実装の骨格
 
-- **駆動対象コマンドの追加**: `createCommand(String)`のswitch（compare/convert/generate/run/parameterize）に分岐追加。`command/Type.java`（CLIサブコマンド一覧）と同期が要る
-- **unit挙動の変更**: `ParameterUnit`はGenerateと共有のため両コマンドへ波及
-- **パラメータなし駆動**: `NONE_PARAM_MAPPER`が`srcType=none`検出時に`src=.`/`parameterize=false`を補い、データ無しで1回実行
+- 駆動対象の追加: `createCommand(String)`のswitchに分岐追加し、`command/Type.java`と同期
+- unit変更はGenerateへ波及
+- `srcType=none`は`NONE_PARAM_MAPPER`が`src=.`/`parameterize=false`を補い1回実行
 
-`-cmd`もST4展開されるため`-param`の値でサブコマンドを動的切替できる。駆動フロー・引数マージ・変更箇所チェックリスト・テスト場所は `references/parameterize-internals.md`。
+駆動フロー・引数マージ・変更箇所・テスト場所は `references/parameterize-internals.md`。
 
 ## 関連スキル
 
-駆動対象の内部仕様は`compare-command`/`convert-command`/`generate-command`/`run-command`。unit意味論はGenerateと共通。影響確認は`check-application-impact`、tauriヘルプは`tauri:update-help`。
+駆動対象は各`*-command`スキル。影響確認は`check-application-impact`、tauriヘルプは`tauri:update-help`。
