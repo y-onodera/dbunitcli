@@ -41,7 +41,7 @@
     <tr><td>Save Shell</td><td>保存済みの値が .bat の実行でも使われる（Apply しただけで Save していない値は使われない）</td></tr>
     <tr><td>パラメータを開く</td><td>サイドバーでパラメータを開くと、そのパラメータに保存された値に置き換わる（保存された値がなければ空になる）。Save していない入力は失われる</td></tr>
   </table>
-  <p>-P の値はパラメータごとに保存されます。同じ値を複数のパラメータや環境で切り替えたい場合は、<a href="workspace.html">Workspace</a> の Env（<code>${env.変数名}</code>）も検討してください。CLI から実行する場合は、引数に <code>-Pキー=値</code> を付けて渡します。</p>
+  <p>-P の値はパラメータごとに保存されます。同じ値を複数のパラメータや環境で切り替えたい場合は Env を使います（<a href="#env-vs-p">Env との使い分け</a> を参照）。CLI から実行する場合は、引数に <code>-Pキー=値</code> を付けて渡します。</p>
 
   <h2 id="reference">値の参照方法</h2>
   <p>参照する場所によって書き方が変わります。テンプレートの区切り文字は既定の <code>$</code>、変数をまとめる属性名（templateParameterAttribute）は既定の <code>param</code> の場合の例です。</p>
@@ -60,5 +60,25 @@ SELECT * FROM ORDERS
 $if(param.orderDate)$WHERE ORDER_DATE = '$param.orderDate$'$endif$</pre>
   <p>Edit Parameters (-P) でキー <code>orderDate</code>、値 <code>2026-10-01</code> を入力して Exec すると、<code>-PorderDate=2026-10-01</code> が渡され、その日付で絞り込まれます。値を入力しなければ条件なしで実行されます。</p>
   <p>テンプレートの書き方は <a href="../reference/st4.html">StringTemplate 4</a> を参照してください。</p>
+
+  <h2 id="env-vs-p">Env との使い分け</h2>
+  <p>Env（<a href="workspace.html">Workspace</a> の ChangeWorkspace で選ぶ環境変数ファイル）と -P は、どちらも値を外から渡す仕組みですが、適用範囲と効く場所が違います。</p>
+  <table>
+    <tr><th>観点</th><th>Env（<code>${env.変数名}</code>）</th><th>Parameters（<code>-Pキー=値</code>）</th></tr>
+    <tr><td>定義する場所</td><td>Workspace 内の .properties ファイル（既定は <code>env.properties</code>）</td><td>Edit Parameters (-P) ダイアログ。Save で <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に保存</td></tr>
+    <tr><td>適用範囲</td><td><strong>Workspace 全体</strong>。選んだ Env ファイルが、その Workspace のすべてのパラメータの実行に使われる</td><td><strong>1 ファイル（そのパラメータ）だけ</strong></td></tr>
+    <tr><td>切り替え方</td><td>ChangeWorkspace で Env ファイルを選び直す。パラメータは書き換えない</td><td>パラメータごとに値を編集して Save する</td></tr>
+    <tr><td>オプションの置換</td><td><strong>する</strong>。どのオプションの値でも、<code>${env.変数名}</code> を実行前に置き換える</td><td><strong>しない</strong>。例外は Generate の resultPath と、Parameterize の cmd / cmdParam / テンプレート（テンプレートとして処理されるため）</td></tr>
+    <tr><td>テンプレート処理の変数</td><td><strong>使えない</strong>。SQL ファイルや Generate のテンプレートの中身は置き換えない</td><td><strong>使える</strong>。<a href="#reference">値の参照方法</a> の書き方で参照する。Run の cmd / bat / ant にも渡される</td></tr>
+    <tr><td>未定義のとき</td><td>エラーになる</td><td>空として扱われる（<code>$if(param.キー)$</code> で分岐できる）</td></tr>
+    <tr><td>Save Shell の .bat</td><td>選んでいる Env ファイルの指定が .bat に書き込まれる</td><td>保存済みのパラメータに含まれるので、.bat の実行でも使われる</td></tr>
+  </table>
+
+  <h3>どちらを使うか</h3>
+  <ul>
+    <li><strong>環境ごとに違う値</strong>（接続先・ユーザー・スキーマ・出力先のフォルダなど）で、オプションに直接書く値 → Env</li>
+    <li><strong>そのパラメータの実行条件</strong>（対象日・ID・テーブル名など）で、SQL やテンプレートの中で使う値 → -P</li>
+    <li>環境ごとに違う値を SQL やテンプレートの中で使いたい → 両方を組み合わせて、-P の値に Env を書く（例：<code>-PorderDate=${env.orderDate}</code>）。-P の値も引数の一部なので、実行前に Env の値に置き換わってから SQL やテンプレートに渡される</li>
+  </ul>
 </body>
 </html>

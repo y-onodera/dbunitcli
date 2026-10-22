@@ -234,5 +234,7 @@ user=app</pre>
     <li>保存したシェル（.bat）にも Env の指定が出力されます</li>
     <li>CLI から実行する場合は Java システムプロパティ <code>-Dyo.dbunit.cli.env=env/staging.properties</code> で指定します</li>
   </ul>
+  <h3>Parameters (-P) との使い分け</h3>
+  <p>Env は Workspace 全体に効き、オプションの値を置き換えます。SQL やテンプレートの中では使えません。パラメータ 1 ファイルだけに効き、SQL やテンプレートの変数として使う値は Parameters (-P) で渡します。比較表と組み合わせ方は <a href="parameters.html">Parameters (-P)</a> の「Env との使い分け」を参照してください。</p>
 </body>
 </html>
