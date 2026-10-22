@@ -1,5 +1,6 @@
 import { core } from "@tauri-apps/api";
 import { useEffect, useRef, useState } from "react";
+import { SectionHelpButton } from "../../components/dialog";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
 import { BlueEditButton } from "../../components/element/ButtonIcon";
 import { JobLog } from "../../components/element/JobLog";
@@ -177,6 +178,10 @@ export default function Footer(prop: {
 								— {paramCount} parameter(s) set
 							</span>
 						)}
+						<SectionHelpButton
+							command="dialogs/parameters"
+							label="Parameters (-P)"
+						/>
 						<BlueButton
 							title="Exec"
 							handleClick={() => {
