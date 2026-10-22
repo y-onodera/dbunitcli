@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Workspace</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; font-weight: 600; color: #374151; }
+    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+    a { color: #4f46e5; }
+    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: monospace; color: #4f46e5; }
+    ul, ol { color: #4b5563; }
+  </style>
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Workspace</h1>
+  <p>パラメータやリソースファイルを置く作業ディレクトリを切り替えます。ヘッダーの ChangeWorkspace ボタンからダイアログを開き、<code>confirm</code> で反映します。</p>
+
+  <h2 id="fields">入力項目</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>Workspace</td><td>作業ディレクトリ（必須）。存在しない場合は作成されます。<code>%USERPROFILE%</code> / <code>%HOME%</code> を使えます</td><td>起動ディレクトリ</td></tr>
+    <tr><td>Dataset Base</td><td>データセット（入力ファイル）を相対パスで指定したときの基準ディレクトリ</td><td>Workspace</td></tr>
+    <tr><td>Result Base</td><td>出力先を相対パスで指定したときの基準ディレクトリ</td><td>Workspace</td></tr>
+    <tr><td>Env</td><td>環境変数ファイル（<code>.properties</code>）のパス。Workspace からの相対パスで指定します（絶対パスも可）。ファイル選択で Workspace 配下を選ぶと相対パスに変換されます。空欄にするとデフォルトに戻ります</td><td><code>env.properties</code></td></tr>
+  </table>
+  <p>Workspace を変更すると、Workspace で始まる Dataset Base / Result Base は新しい Workspace に合わせて書き換わります。</p>
+
+  <h2 id="structure">Workspace のディレクトリ構成</h2>
+  <pre>&lt;workspace&gt;/
+├── env.properties             環境変数ファイル（デフォルト）
+├── option/
+│   ├── &lt;command&gt;/             コマンドごとの保存済みパラメータ
+│   └── parameterize/template/ Parameterize 用テンプレート
+└── resources/
+    ├── setting/               Dataset Settings
+    ├── template/              テンプレート
+    ├── jdbc/                  JDBC 接続設定
+    ├── xlsxSchema/            Xlsx Schema
+    └── fixed-column-def/      固定長カラム定義</pre>
+  <p>各入力欄でファイル名だけ指定した場合は、対応するディレクトリ、Workspace の順に探します。</p>
+
+  <h2 id="env">環境変数（Env）</h2>
+  <p>コマンドの引数に <code>${env.変数名}</code> と書くと、実行時に Env ファイルに定義した値に置き換わります。JDBC の接続先などを変数にしておき、Env ファイルを切り替えるだけで同じパラメータを複数の環境で使い回せます。</p>
+  <h3>Env ファイルの例</h3>
+  <pre># env/staging.properties
+host=staging-db
+port=5432
+user=app</pre>
+  <h3>パラメータでの使い方</h3>
+  <pre>-jdbc.url=jdbc:postgresql://${env.host}:${env.port}/app
+-jdbc.user=${env.user}</pre>
+  <ul>
+    <li>ファイルは UTF-8 の properties 形式で記述します</li>
+    <li>Env ファイルに定義されていない変数を参照するとエラーになります</li>
+    <li>置き換えの対象はコマンドの引数です。JDBC 設定ファイル（<code>resources/jdbc</code>）の中身は置き換わりません</li>
+    <li>保存したシェル（.bat）にも Env の指定が出力されます</li>
+    <li>CLI から実行する場合は Java システムプロパティ <code>-Dyo.dbunit.cli.env=env/staging.properties</code> で指定します</li>
+  </ul>
+</body>
+</html>

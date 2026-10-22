@@ -45,6 +45,13 @@ vi.mock("@tauri-apps/plugin-dialog", () => ({
 	open: vi.fn(),
 }));
 
+const { mockOpenHelpWindow } = vi.hoisted(() => {
+	return { mockOpenHelpWindow: vi.fn() };
+});
+vi.mock("../../../utils/helpWindow", () => ({
+	openHelpWindow: mockOpenHelpWindow,
+}));
+
 // jsdomにはshowModal/closeが未実装のためモック
 HTMLDialogElement.prototype.showModal = vi.fn(function (
 	this: HTMLDialogElement,
@@ -74,6 +81,18 @@ describe("Headerのテスト", () => {
 		).toBeInTheDocument();
 	});
 
+	it("ChangeWorkspaceの横のHelpボタンでWorkspaceのヘルプが開く", async () => {
+		const { rerender } = render(<Header />, { wrapper });
+		await act(async () => {
+			rerender(<Header />);
+		});
+		await userEvent.click(screen.getByRole("button", { name: "Help" }));
+		expect(mockOpenHelpWindow).toHaveBeenCalledWith(
+			"dialogs/workspace",
+			"Workspace",
+		);
+	});
+
 	it("ChangeWorkspaceボタンをクリックするとダイアログが表示される", async () => {
 		const { rerender } = render(<Header />, { wrapper });
 		await act(async () => {
@@ -97,6 +116,7 @@ describe("Headerのテスト", () => {
 		expect(screen.getByDisplayValue("test-workspace")).toBeInTheDocument();
 		expect(screen.getByDisplayValue("dataset")).toBeInTheDocument();
 		expect(screen.getByDisplayValue("result")).toBeInTheDocument();
+		expect(document.getElementById("env")).toBeInTheDocument();
 	});
 
 	it("Closeボタンをクリックするとダイアログが閉じる", async () => {

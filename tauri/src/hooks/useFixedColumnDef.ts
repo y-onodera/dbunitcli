@@ -36,7 +36,10 @@ export const useDeleteFixedColumnDef = () => {
 export const useSaveFixedColumnDef = () => {
 	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string, input: FixedColumnDef): Promise<OperationResult> =>
+	return async (
+		name: string,
+		input: FixedColumnDef,
+	): Promise<OperationResult> =>
 		fetchAndUpdate<string[]>(
 			{
 				endpoint: `${apiUrl}fixed-column-def/save`,

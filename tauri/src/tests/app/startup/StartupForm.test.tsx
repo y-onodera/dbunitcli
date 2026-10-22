@@ -7,7 +7,9 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import StartupForm from "../../../app/startup/StartupForm";
+import StartupForm, {
+	toWorkspaceRelative,
+} from "../../../app/startup/StartupForm";
 import {
 	type Environment,
 	environmentContext,
@@ -175,5 +177,61 @@ describe("StartupFormのテスト", () => {
 		await waitFor(() => {
 			expect(screen.getByDisplayValue("C:/selected/path")).toBeInTheDocument();
 		});
+	});
+
+	it("EnvのFileChooserでworkspace配下のファイルを選ぶと相対パスになる", async () => {
+		mockOpen.mockResolvedValue("C:/project/old/env/staging.properties");
+		const { rerender } = render(<StartupForm onSelect={vi.fn()} />, {
+			wrapper,
+		});
+		await act(async () => {
+			rerender(<StartupForm onSelect={vi.fn()} />);
+		});
+		await userEvent.click(screen.getByTitle("FileChooser"));
+		await waitFor(() => {
+			expect(mockOpen).toHaveBeenCalledWith({
+				defaultPath: "C:/project/old",
+				directory: false,
+				filters: [{ name: "properties", extensions: ["properties"] }],
+			});
+		});
+		await waitFor(() => {
+			expect(
+				screen.getByDisplayValue("env/staging.properties"),
+			).toBeInTheDocument();
+		});
+	});
+
+	it("confirmでenvがworkspace/updateに送られる", async () => {
+		const { rerender } = render(<StartupForm onSelect={vi.fn()} />, {
+			wrapper,
+		});
+		await act(async () => {
+			rerender(<StartupForm onSelect={vi.fn()} />);
+		});
+		fireEvent.change(document.getElementById("env") as HTMLInputElement, {
+			target: { value: "env/staging.properties" },
+		});
+		mockFetchData.mockClear();
+		await userEvent.click(screen.getByText("confirm"));
+		const body = JSON.parse(
+			mockFetchData.mock.calls[0][0].options?.body as string,
+		);
+		expect(body.env).toBe("env/staging.properties");
+	});
+
+	it("toWorkspaceRelativeはworkspace配下だけ相対パスに変換する", () => {
+		expect(
+			toWorkspaceRelative(
+				"C:\\project\\old\\env.properties",
+				"C:/Project/old/",
+			),
+		).toBe("env.properties");
+		expect(
+			toWorkspaceRelative("D:/other/env.properties", "C:/project/old"),
+		).toBe("D:/other/env.properties");
+		expect(
+			toWorkspaceRelative("C:/project/older/env.properties", "C:/project/old"),
+		).toBe("C:/project/older/env.properties");
 	});
 });

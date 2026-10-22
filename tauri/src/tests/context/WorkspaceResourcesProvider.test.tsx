@@ -118,12 +118,13 @@ describe("WorkspaceResourcesProviderのテスト", () => {
 					"new-workspace",
 					"new-dataset",
 					"new-result",
+					"env/staging.properties",
 				);
 			});
 			expect(result.current.context.workspace).toBe("new-workspace");
 			expect(result.current.context.datasetBase).toBe("new-dataset");
 			expect(result.current.context.resultBase).toBe("new-result");
+			expect(result.current.context.env).toBe("env/staging.properties");
 		});
 	});
-
 });

@@ -40,6 +40,10 @@ public class Application {
                 .get(FileResources.PROPERTY_RESULT_BASE, String.class)
                 .filter(Strings::isNotEmpty)
                 .ifPresent(v -> System.setProperty(FileResources.PROPERTY_RESULT_BASE, v));
+        context.getEnvironment()
+                .get(FileResources.PROPERTY_ENV, String.class)
+                .filter(Strings::isNotEmpty)
+                .ifPresent(v -> System.setProperty(FileResources.PROPERTY_ENV, v));
         return Workspace.builder().setPath(workspace).build();
     }
 }

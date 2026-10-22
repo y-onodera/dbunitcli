@@ -12,7 +12,7 @@ import {
 	ButtonWithIcon,
 	WhiteButton,
 } from "../../components/element/Button";
-import { DirIcon } from "../../components/element/Icon";
+import { DirIcon, FileIcon } from "../../components/element/Icon";
 import { ControllTextBox, InputLabel } from "../../components/element/Input";
 import { useWorkspaceContext } from "../../context/WorkspaceResourcesProvider";
 import { useWorkspaceUpdate } from "../../hooks/useWorkspaceResources";
@@ -26,6 +26,7 @@ const StartupForm: React.FC<{ onSelect: () => void; onClose?: () => void }> = ({
 	const [workspace, setWorkspace] = useState(context.workspace);
 	const [datasetBase, setDatasetBase] = useState(context.datasetBase);
 	const [resultBase, setResultBase] = useState(context.resultBase);
+	const [env, setEnv] = useState(context.env);
 	const [errors, setErrors] = useState<{ [key: string]: string }>({});
 	const prevWorkspaceRef = useRef(workspace);
 
@@ -59,7 +60,7 @@ const StartupForm: React.FC<{ onSelect: () => void; onClose?: () => void }> = ({
 		setErrors(newErrors);
 
 		if (Object.keys(newErrors).length === 0) {
-			workspaceUpdate(workspace, datasetBase, resultBase);
+			workspaceUpdate(workspace, datasetBase, resultBase, env);
 			onSelect();
 		}
 	};
@@ -91,6 +92,22 @@ const StartupForm: React.FC<{ onSelect: () => void; onClose?: () => void }> = ({
 					setValue={setResultBase}
 					error={errors.resultBase}
 				/>
+				<InputField
+					id="env"
+					label="Env"
+					required={false}
+					value={env}
+					setValue={setEnv}
+					error={errors.env}
+					chooser={
+						<EnvFileChooser
+							id="env"
+							workspace={workspace}
+							text={env}
+							setPath={setEnv}
+						/>
+					}
+				/>
 			</div>
 			<div
 				className={`flex items-center gap-2 ${onClose ? "justify-end" : "justify-center"}`}
@@ -109,7 +126,8 @@ const InputField: React.FC<{
 	value: string;
 	setValue: Dispatch<SetStateAction<string>>;
 	error?: string;
-}> = ({ id, label, required, value, setValue, error }) => {
+	chooser?: React.ReactNode;
+}> = ({ id, label, required, value, setValue, error, chooser }) => {
 	return (
 		<>
 			<InputLabel
@@ -126,7 +144,9 @@ const InputField: React.FC<{
 					value={value}
 					handleChange={(e) => setValue(e.target.value)}
 				/>
-				<DirectoryChooser id={id} text={value} setPath={setValue} />
+				{chooser ?? (
+					<DirectoryChooser id={id} text={value} setPath={setValue} />
+				)}
 			</div>
 			{error && (
 				<div className="col-start-2 col-span-4 text-red-500">{error}</div>
@@ -161,6 +181,58 @@ function DirectoryChooser(prop: {
 			id={`${prop.id}DirectoryChooser`}
 		>
 			<DirIcon title="DirectoryChooser" fill="white" />
+		</ButtonWithIcon>
+	);
+}
+
+// envはworkspaceからの相対パスで扱うため、workspace配下のファイルは相対パスに変換する
+export const toWorkspaceRelative = (path: string, workspace: string) => {
+	const normalize = (p: string) => p.replace(/\\/g, "/").replace(/\/+$/, "");
+	const base = normalize(workspace);
+	const target = normalize(path);
+	if (base && target.toLowerCase().startsWith(`${base.toLowerCase()}/`)) {
+		return target.slice(base.length + 1);
+	}
+	return path;
+};
+
+function EnvFileChooser(prop: {
+	id: string;
+	workspace: string;
+	text: string;
+	setPath: Dispatch<SetStateAction<string>>;
+}) {
+	const abortControllerRef = useRef<AbortController | null>(null);
+	useEffect(() => {
+		const controller = new AbortController();
+		abortControllerRef.current = controller;
+		return () => {
+			controller.abort();
+		};
+	}, []);
+	const handleFileChooserClick = () => {
+		let defaultPath = prop.workspace;
+		if (/^([a-zA-Z]:)?[\\/]/.test(prop.text)) {
+			defaultPath = prop.text;
+		} else if (prop.text) {
+			defaultPath = `${prop.workspace}/${prop.text}`;
+		}
+		open({
+			defaultPath,
+			directory: false,
+			filters: [{ name: "properties", extensions: ["properties"] }],
+		}).then((file) => {
+			if (file && !abortControllerRef.current?.signal.aborted) {
+				prop.setPath(toWorkspaceRelative(file as string, prop.workspace));
+			}
+		});
+	};
+	return (
+		<ButtonWithIcon
+			handleClick={handleFileChooserClick}
+			id={`${prop.id}FileChooser`}
+		>
+			<FileIcon title="FileChooser" fill="white" />
 		</ButtonWithIcon>
 	);
 }

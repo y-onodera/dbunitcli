@@ -7,6 +7,7 @@ public class ContextDto {
     private String workspace;
     private String datasetBase;
     private String resultBase;
+    private String env;
     private String settingBase;
     private String templateBase;
     private String parameterizeTemplateBase;
@@ -36,6 +37,14 @@ public class ContextDto {
 
     public void setResultBase(final String resultBase) {
         this.resultBase = resultBase;
+    }
+
+    public String getEnv() {
+        return this.env;
+    }
+
+    public void setEnv(final String env) {
+        this.env = env;
     }
 
     public String getSettingBase() {

@@ -38,7 +38,7 @@ public class WorkspaceController implements ControllerExceptionHandler {
     @Post(uri = "update", produces = MediaType.APPLICATION_JSON)
     public String update(@Body final ContextDto context) {
         try {
-            this.workspace.contextReload(context.getWorkspace(), context.getDatasetBase(), context.getResultBase());
+            this.workspace.contextReload(context.getWorkspace(), context.getDatasetBase(), context.getResultBase(), context.getEnv());
             return this.currentResources();
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);

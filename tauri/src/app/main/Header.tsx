@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { DialogBody, FullDialog } from "../../components/dialog";
+import {
+	DialogBody,
+	FullDialog,
+	SectionHelpButton,
+} from "../../components/dialog";
 import { DirectoryButton } from "../../components/element/ButtonIcon";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import StartupForm from "../startup/StartupForm";
@@ -16,6 +20,7 @@ export default function Header() {
 						title="ChangeWorkspace"
 						handleClick={() => setShowWorkspaceDialog(true)}
 					/>
+					<SectionHelpButton command="dialogs/workspace" label="Workspace" />
 				</div>
 				{selected.name && <h1>{`${selected.command}: ${selected.name}`}</h1>}
 			</div>

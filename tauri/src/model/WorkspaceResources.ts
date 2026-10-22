@@ -23,6 +23,7 @@ export type WorkspaceContextBuilder = {
 	jdbcBase: string;
 	xlsxSchemaBase: string;
 	fixedColumnDefBase?: string;
+	env?: string;
 };
 export class WorkspaceContext {
 	getPath(defaultPath: DefaultPath): string {
@@ -48,7 +49,7 @@ export class WorkspaceContext {
 		}
 	}
 	static create(): WorkspaceContext {
-		return new WorkspaceContext("", "", "", "", "", "", "", "", "");
+		return new WorkspaceContext("", "", "", "", "", "", "", "", "", "");
 	}
 	static from(builder: WorkspaceContextBuilder): WorkspaceContext {
 		return new WorkspaceContext(
@@ -61,6 +62,7 @@ export class WorkspaceContext {
 			builder.jdbcBase,
 			builder.xlsxSchemaBase,
 			builder.fixedColumnDefBase ?? "",
+			builder.env ?? "",
 		);
 	}
 	readonly workspace: string;
@@ -72,6 +74,7 @@ export class WorkspaceContext {
 	readonly jdbcBase: string;
 	readonly xlsxSchemaBase: string;
 	readonly fixedColumnDefBase: string;
+	readonly env: string;
 	constructor(
 		workspace: string,
 		datasetBase: string,
@@ -82,6 +85,7 @@ export class WorkspaceContext {
 		jdbcBase: string,
 		xlsxSchemaBase: string,
 		fixedColumnDefBase: string,
+		env: string,
 	) {
 		this.workspace = workspace;
 		this.datasetBase = datasetBase;
@@ -92,6 +96,7 @@ export class WorkspaceContext {
 		this.jdbcBase = jdbcBase;
 		this.xlsxSchemaBase = xlsxSchemaBase;
 		this.fixedColumnDefBase = fixedColumnDefBase;
+		this.env = env;
 	}
 	with(overrides: Partial<WorkspaceContextBuilder>): WorkspaceContext {
 		return new WorkspaceContext(
@@ -104,6 +109,7 @@ export class WorkspaceContext {
 			overrides.jdbcBase ?? this.jdbcBase,
 			overrides.xlsxSchemaBase ?? this.xlsxSchemaBase,
 			overrides.fixedColumnDefBase ?? this.fixedColumnDefBase,
+			overrides.env ?? this.env,
 		);
 	}
 }
