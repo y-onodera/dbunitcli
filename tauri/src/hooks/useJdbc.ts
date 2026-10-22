@@ -1,12 +1,6 @@
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
-import {
-	fetchAndUpdate,
-	fetchData,
-	getErrorMessage,
-	handleFetchError,
-	type OperationResult,
-} from "../utils/fetchUtils";
+import { fetchAndUpdate, fetchData, getErrorMessage, handleFetchError, type OperationResult } from "../utils/fetchUtils";
 
 // タイムアウト時はsidecarへcancelも送られ、sidecar側の処理も中断する
 const JDBC_TIMEOUT_MS = 60_000;
@@ -27,14 +21,9 @@ export const useDeleteJdbcProperties = () => {
 		fetchAndUpdate<string[]>(
 			{
 				endpoint: `${apiUrl}jdbc/delete`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "text/plain" },
-					body: name,
-				},
+				options: { method: "POST", headers: { "Content-Type": "text/plain" }, body: name },
 			},
-			(files) =>
-				setResourcesSettings((current) => current.with({ jdbcFiles: files })),
+			(files) => setResourcesSettings((current) => current.with({ jdbcFiles: files })),
 		);
 };
 
@@ -62,10 +51,7 @@ export const useJdbcTables = () => {
 
 export const useJdbcColumns = () => {
 	const { apiUrl } = useEnvironment();
-	return async (
-		jdbcValues: Record<string, string>,
-		table: string,
-	): Promise<string[]> => {
+	return async (jdbcValues: Record<string, string>, table: string): Promise<string[]> => {
 		const params = {
 			endpoint: `${apiUrl}jdbc/columns`,
 			options: {
@@ -112,20 +98,12 @@ export const useJdbcConnectionTest = () => {
 export const useJdbcSaveProperties = () => {
 	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();
-	return async (
-		name: string,
-		jdbcValues: Record<string, string>,
-	): Promise<OperationResult> =>
+	return async (name: string, jdbcValues: Record<string, string>): Promise<OperationResult> =>
 		fetchAndUpdate<string[]>(
 			{
 				endpoint: `${apiUrl}jdbc/save-properties`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name, input: toJdbcRequestBody(jdbcValues) }),
-				},
+				options: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, input: toJdbcRequestBody(jdbcValues) }) },
 			},
-			(files) =>
-				setResourcesSettings((current) => current.with({ jdbcFiles: files })),
+			(files) => setResourcesSettings((current) => current.with({ jdbcFiles: files })),
 		);
 };

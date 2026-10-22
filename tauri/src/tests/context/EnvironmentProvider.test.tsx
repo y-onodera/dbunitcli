@@ -40,9 +40,7 @@ const wrapper = ({ children }: { children: ReactNode }) => (
 
 describe("EnvironmentProviderのテスト", () => {
 	it("環境設定が正しく読み込まれることを確認", async () => {
-		const { result, rerender } = renderHook(() => useEnvironment(), {
-			wrapper,
-		});
+		const { result, rerender } = renderHook(() => useEnvironment(), { wrapper });
 
 		await act(async () => {
 			rerender();
@@ -63,9 +61,7 @@ describe("EnvironmentProviderのテスト", () => {
 			"dataset.base": { value: "" },
 			"result.base": { value: "" },
 		};
-		const { result, rerender } = renderHook(() => useEnvironment(), {
-			wrapper,
-		});
+		const { result, rerender } = renderHook(() => useEnvironment(), { wrapper });
 
 		await act(async () => {
 			rerender();
