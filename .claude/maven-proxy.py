@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Local proxy that adds auth when forwarding to upstream proxy."""
+"""Local proxy that adds auth when forwarding to upstream proxy.
+
+Claude Code on the web 用。start-maven-proxy.sh から起動され、127.0.0.1:3128 で受けた
+接続に HTTPS_PROXY の認証情報を付けて上流プロキシへ中継する（Maven の代わりに認証する）。
+web 環境のプロキシ方式が変わって不要・動作不良になったらメンテまたは削除する。
+"""
 import socket, threading, os, base64, select, sys
 from urllib.parse import urlparse
 

@@ -12,7 +12,7 @@
 
 ## 引数リストの組み立て（`createArgs()`）
 
-1. **供給テンプレート決定**（`getTemplateArgs()`）: `-cmdParam`があればそのファイル名を`render`して`FileResources.searchTemplate()`で取得、無ければ`-template`、どちらも無ければ空文字
+1. **供給テンプレート決定**（`getTemplateArgs()`）: `-cmdParam`があればそのファイル名を`render`して`FileResources.searchTemplate()`で取得、無ければ`-template`を`FileResources.searchParameterizeTemplate()`（`option/parameterize/template`→`resources/template`→workspace。GUIの基準ディレクトリと同じ）で取得、どちらも無ければ空文字
 2. **展開**: `-parameterize=true`なら`templateRender.render(templateArgs, param)`でST4展開、`false`なら生のまま
 3. **行分割**: 結果を`\r?\n`でsplitして引数配列に
 4. **`-arg`/`-A`マージ**: `-arg`が空でなければ、引数配列を`key=`→`key=value`のMapにし、`-arg`のエントリ（`key`→`key=value`）で上書きマージ。キー抽出は`ARGS_IGNORE_FILTER`（`-P`/`-A`/`-arg`を無視）

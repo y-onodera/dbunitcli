@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Claude Code on the web 用（SessionStart フックから実行。ローカルでは不要）
+# - JDK 25 未満なら $HOME/jdk-25 に導入し、~/.mavenrc で JAVA_HOME を設定する
+# - JAVA_TOOL_OPTIONS に認証付きプロキシ（jwt_）がある環境では maven-proxy.py を起動し、
+#   Maven を 127.0.0.1:3128 経由にする（上流プロキシの認証を maven-proxy.py が肩代わりする）
+# web 環境のプロキシ方式や JDK の配布 URL が変わって動かなくなったら、ここをメンテする
 
 IS_WEB_PROXY=false
 if echo "${JAVA_TOOL_OPTIONS:-}" | grep -q "jwt_"; then

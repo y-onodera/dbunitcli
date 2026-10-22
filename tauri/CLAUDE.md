@@ -14,14 +14,13 @@ src/
 ├── app/
 │   ├── form/       — コマンド別フォーム（Compare, Convert, Generate, Run, Parameterize）
 │   ├── main/       — コアレイアウト（Layout, Header, Sidebar, Form）
-│   ├── settings/   — 設定ダイアログ（Dataset, JDBC, XlsxSchema, SqlEditor）
 │   ├── sidebar/    — NamedParameters, NameEditMenu
 │   ├── footer/     — Footer, ResultDialog
 │   └── startup/    — StartupForm（初期ワークスペース選択）
 ├── components/     — 再利用可能 UI（dialog/, element/）
 ├── context/        — React Context プロバイダ（Provider コンポーネントを持つもののみ）
 ├── hooks/          — カスタムフック（APIコール・状態操作。JSXなし → .ts）
-├── model/          — TypeScript 型定義（CommandParam, DatasetSettings 等）
+├── model/          — TypeScript 型定義（SelectParameter, CommandOption 等）
 ├── utils/          — fetchUtils.ts（HTTP API 呼び出し）
 └── tests/          — ソース構造をミラーしたテスト
 ```
@@ -34,6 +33,8 @@ src/
 ## コマンド（`tauri/` で実行）
 `npx` は使わず `bunx` を使う（別パッケージを取得してしまう）。依存は SessionStart フックで `bun install --frozen-lockfile` 済み。
 - 型チェック `bunx tsc --noEmit` / テスト `bunx vitest run` / Lint `bunx biome check`
+- `bunx biome check --write` は変更したファイルだけに使う（未整形の既存ファイルに無関係な差分が出る）
+- アプリ起動 `bun tauri dev` / 配布ビルド `bun tauri build`
 
 ## 重要な実装ノート
 

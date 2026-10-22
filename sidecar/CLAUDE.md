@@ -3,33 +3,16 @@
 DBUnit CLI のREST APIサーバー。Micronaut ベースで、Tauri アプリケーションのバックエンドとして機能。
 
 ## 主要機能
-- **コマンドAPI**: Compare / Convert / Generate / Run / Parameterize をHTTP APIとして提供
+- **コマンドAPI**: core の各コマンドをHTTP APIとして提供（パラメータの追加・読込・保存・実行・.bat出力など）
 - **ワークスペース管理**: ディレクトリベースの作業環境管理・コンテキスト切り替え
-- **リソース管理**: JDBC設定・テンプレート・Excelスキーマ・データセット設定の CRUD
-- **パラメータ管理**: コマンド別パラメータセットの作成・読込・更新・削除・リネーム
+- **リソース管理**: JDBC設定・テンプレート・Excelスキーマ・データセット設定・固定長カラム定義の CRUD
 
-## パッケージ構成
-
-### `yo.dbunitcli.sidecar.controller`
-- `AbstractCommandController` — コマンド実行の共通基底
-- `AbstractResourceFileController` — リソースファイル管理の共通基底
-- コマンド系: `CompareController`(`/compare`), `ConvertController`(`/convert`), `GenerateController`(`/generate`), `RunController`(`/run`), `ParameterizeController`(`/parameterize`)
-- リソース系: `DatasetSettingsController`(`/dataset-setting`), `JdbcResourceFileController`(`/jdbc`), `TemplateResourceFileController`(`/template`), `XlsxSchemaController`(`/xlsx-schema`)
-- 専用: `QueryDatasourceController`(`/query-datasource`), `WorkspaceController`(`/workspace`)
-
-### `yo.dbunitcli.sidecar.domain.project`
-`Workspace`, `Options`, `Resources`, `ResourceFile`, `Datasource`, `CommandType`
-
-### `yo.dbunitcli.sidecar.dto`
-`WorkspaceDto`, `ContextDto`, `CommandRequestDto`, `DatasetSettingDto`, `JsonXlsxSchemaDto`
-
-## REST API パターン
+## パッケージ構成（`yo.dbunitcli.sidecar`）
+- `controller/` — `AbstractCommandController`（コマンド系の共通基底）/ `AbstractResourceFileController`（リソース系の共通基底）と各コントローラー。パスは各クラスの `@Controller`
+- `domain/project/` — `Workspace`（ワークスペースとシステムプロパティの管理）ほか
+- `dto/` — リクエスト/レスポンス DTO
 
 コンテキストパス: `/dbunit-cli`
-
-コマンド系 `/{cmd}`: `GET /add`, `GET /reset`, `POST /load`, `POST /refresh`, `POST /save`, `POST /delete`, `POST /copy`, `POST /rename`, `POST /exec`
-リソース系 `/{res}`: `GET /list`, `POST /load`, `POST /save`, `POST /delete`
-ワークスペース: `GET /workspace/resources`, `POST /workspace/update`
 
 ### ジョブ（`@Interruptible` を付けたメソッドを `Accept: text/event-stream` で呼ぶ）
 - 長時間化しうる、かつ割り込んでも安全なメソッド（読み取りのみ・出力を作り直せる）に付ける。save等の書き込み系には付けない
@@ -39,12 +22,13 @@ DBUnit CLI のREST APIサーバー。Micronaut ベースで、Tauri アプリケ
 
 ## 技術スタック
 - Micronaut 4.x + Netty + Serde Jackson
-- Java 21、GraalVM Native Image 対応
+- Java 25、GraalVM Native Image 対応
 
-## 環境変数
-- `workspace`: ワークスペースディレクトリパス
-- `dataset.base`: データセットベースディレクトリ
-- `result.base`: 結果出力ベースディレクトリ
+## システムプロパティ（定数は `FileResources.PROPERTY_*`）
+- `yo.dbunit.cli.workspace`: ワークスペースディレクトリパス
+- `yo.dbunit.cli.dataset.base`: データセットベースディレクトリ
+- `yo.dbunit.cli.result.base`: 結果出力ベースディレクトリ
+- `yo.dbunit.cli.env`: 環境変数ファイル（workspaceからの相対パス。既定 `env.properties`）
 
-## ログ
-`src/main/resources/logback.xml`（Logback + SLF4J）
+## テスト
+ルートで `mvn test -pl sidecar -am`（`-am` が無いと親pom・coreを解決できず失敗する）。テスト方針は `.claude/rules/test-conventions.md`
