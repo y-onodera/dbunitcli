@@ -48,6 +48,50 @@
     └── fixed-column-def/      固定長カラム定義</pre>
   <p>各入力欄でファイル名だけ指定した場合は、対応するディレクトリ、Workspace の順に探します。</p>
 
+  <h2 id="scope">Workspace の影響範囲</h2>
+  <p>Workspace を切り替えると、次の画面要素が新しい Workspace の内容に切り替わります。どのボタンがどこを読み書きするかは <a href="#sidebar">サイドバー</a> と <a href="#footer">フッター</a> を参照してください。</p>
+  <table>
+    <tr><th>画面要素</th><th>読み書きする場所</th></tr>
+    <tr><td>サイドバー</td><td><code>option/&lt;command&gt;/*.txt</code>（パラメータ一覧）</td></tr>
+    <tr><td>フォームの各設定ダイアログ</td><td><code>resources/</code> 配下（Dataset Settings・テンプレート・JDBC・Xlsx Schema・固定長カラム定義）</td></tr>
+    <tr><td>フォームの相対パス</td><td>入力ファイルは Dataset Base、出力先は Result Base、それ以外は Workspace を基準に解決</td></tr>
+    <tr><td>Exec / Save Shell</td><td>Env ファイル（<code>${env.変数名}</code> の置き換え）</td></tr>
+  </table>
+
+  <h2 id="sidebar">サイドバーの使い方</h2>
+  <p>コマンド（Convert / Compare / Generate / Run / Parameterize）ごとに、Workspace の <code>option/&lt;command&gt;/</code> に保存されたパラメータを一覧表示します。コマンド名をクリックすると一覧を開閉します。</p>
+  <table>
+    <tr><th>操作</th><th>動作</th><th>Workspace への影響</th></tr>
+    <tr><td>パラメータ名</td><td>パラメータを読み込んでフォームに表示</td><td>読み込みのみ</td></tr>
+    <tr><td>＋（Add）</td><td>空のパラメータ <code>new item</code> を追加（同名があれば <code>new item(1)</code> のように連番）</td><td><code>option/&lt;command&gt;/new item.txt</code> を作成</td></tr>
+    <tr><td>⚙（設定）</td><td>パラメータ名の横のボタン。次の操作メニューを開く</td><td>—</td></tr>
+    <tr><td>Delete</td><td>パラメータを削除</td><td><code>option/&lt;command&gt;/&lt;name&gt;.txt</code> を削除</td></tr>
+    <tr><td>rename</td><td>入力欄に新しい名前を入れて確定ボタンで変更（同名があれば連番）</td><td>ファイル名を変更</td></tr>
+    <tr><td>Copy</td><td>パラメータを複製（<code>&lt;name&gt;(1)</code> のように連番）</td><td>複製したファイルを作成</td></tr>
+    <tr><td>Parameterize</td><td>パラメータから Parameterize 用のパラメータを作成して開く（Parameterize 以外のコマンドのみ）</td><td><code>option/parameterize/template/&lt;name&gt;.txt</code>（テンプレート）、Workspace 直下の <code>&lt;name&gt;.csv</code>（パラメータ値）、<code>option/parameterize/&lt;name&gt;.txt</code> を作成</td></tr>
+    <tr><td>Help</td><td>サイドバー下部のボタン。各コマンドのヘルプを開く</td><td>—</td></tr>
+  </table>
+
+  <h2 id="footer">フッターの使い方</h2>
+  <p>パラメータを選択しているときに画面下部に表示されます。</p>
+  <table>
+    <tr><th>ボタン</th><th>動作</th><th>Workspace への影響</th></tr>
+    <tr><td>Edit Parameters (-P)</td><td>テンプレートなどに渡す <code>-P</code> パラメータを入力（設定数が右に表示されます）</td><td>Exec / Save の内容に含まれる</td></tr>
+    <tr><td>Exec</td><td>フォームに表示中の内容でコマンドを実行。保存は不要です。実行中は Abandoned で中断でき、完了後は Open Directory で出力先を開けます</td><td>相対パスは Workspace / Dataset Base / Result Base を基準に解決し、<code>${env.変数名}</code> は Env ファイルの値に置き換わる。結果は Result Base 配下に出力</td></tr>
+    <tr><td>Save</td><td>フォームに表示中の内容をパラメータに上書き保存</td><td><code>option/&lt;command&gt;/&lt;name&gt;.txt</code> を上書き</td></tr>
+    <tr><td>Save Shell</td><td>保存済みのパラメータを CLI で実行する .bat を作成。未保存の変更は含まれないため、先に Save してください</td><td>.bat はアプリの起動ディレクトリに <code>&lt;command&gt;_&lt;name&gt;.bat</code> で作成（Workspace の中ではない）。現在の Workspace / Dataset Base / Result Base / Env が埋め込まれる</td></tr>
+  </table>
+
+  <h2 id="usage">使い方の流れ</h2>
+  <ol>
+    <li>ヘッダーの ChangeWorkspace で Workspace を選び、必要なら Dataset Base / Result Base / Env を指定して <code>confirm</code></li>
+    <li>サイドバーでコマンドを開き、＋ で新しいパラメータを作るか、既存のパラメータ名をクリックして開く</li>
+    <li>フォームを入力し、Exec で実行して結果を確認</li>
+    <li>Save でパラメータを保存（必要ならサイドバーの ⚙ から rename）</li>
+    <li>同じパラメータを別の環境で使うときは、ChangeWorkspace で Env だけを切り替えて Exec</li>
+    <li>CLI で繰り返し実行するときは Save Shell で .bat を作成</li>
+  </ol>
+
   <h2 id="env">環境変数（Env）</h2>
   <p>コマンドの引数に <code>${env.変数名}</code> と書くと、実行時に Env ファイルに定義した値に置き換わります。JDBC の接続先などを変数にしておき、Env ファイルを切り替えるだけで同じパラメータを複数の環境で使い回せます。</p>
   <h3>Env ファイルの例</h3>
