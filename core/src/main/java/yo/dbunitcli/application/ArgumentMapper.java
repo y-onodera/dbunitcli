@@ -1,8 +1,21 @@
 package yo.dbunitcli.application;
 
 import picocli.CommandLine;
+import yo.dbunitcli.resource.FileResources;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public record ArgumentMapper(String prefix, ArgumentFunction function, ArgumentFilter filter) {
+
+    private static final Pattern ENV_VARIABLE = Pattern.compile("\\$\\{env\\.([^}]+)}");
 
     public ArgumentMapper(final String prefix) {
         this(prefix, new DefaultArgumentFunction(), new DefaultArgumentFilter());
@@ -18,7 +31,45 @@ public record ArgumentMapper(String prefix, ArgumentFunction function, ArgumentF
 
     public void populate(final String[] args, final Object dto) {
         final CommandLine cmdLine = new CommandLine(dto);
-        final String[] targetArgs = this.function().apply(args, this.prefix());
+        final String[] targetArgs = this.replaceEnv(this.function().apply(args, this.prefix()));
         cmdLine.parseArgs(this.filter().filterArguments(this.prefix(), cmdLine, targetArgs));
+    }
+
+    private String[] replaceEnv(final String[] args) {
+        if (Arrays.stream(args).noneMatch(it -> ENV_VARIABLE.matcher(it).find())) {
+            return args;
+        }
+        final Properties env = ArgumentMapper.loadEnv();
+        return Arrays.stream(args)
+                .map(it -> ArgumentMapper.replaceEnv(it, env))
+                .toArray(String[]::new);
+    }
+
+    private static String replaceEnv(final String arg, final Properties env) {
+        final Matcher matcher = ENV_VARIABLE.matcher(arg);
+        final StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            final String value = env.getProperty(matcher.group(1));
+            if (value == null) {
+                throw new AssertionError("env variable not defined :" + matcher.group(1)
+                        + " in " + FileResources.envFile().getPath());
+            }
+            matcher.appendReplacement(result, Matcher.quoteReplacement(value));
+        }
+        matcher.appendTail(result);
+        return result.toString();
+    }
+
+    private static Properties loadEnv() {
+        final Properties result = new Properties();
+        final File envFile = FileResources.envFile();
+        if (envFile.exists()) {
+            try (final Reader reader = Files.newBufferedReader(envFile.toPath(), StandardCharsets.UTF_8)) {
+                result.load(reader);
+            } catch (final IOException ex) {
+                throw new AssertionError("Failed to load " + envFile, ex);
+            }
+        }
+        return result;
     }
 }

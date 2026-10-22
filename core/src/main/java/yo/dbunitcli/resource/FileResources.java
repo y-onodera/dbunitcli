@@ -15,6 +15,8 @@ public record FileResources() {
     public static final String PROPERTY_WORKSPACE = "yo.dbunit.cli.workspace";
     public static final String PROPERTY_DATASET_BASE = "yo.dbunit.cli.dataset.base";
     public static final String PROPERTY_RESULT_BASE = "yo.dbunit.cli.result.base";
+    public static final String PROPERTY_ENV = "yo.dbunit.cli.env";
+    public static final String DEFAULT_ENV_PATH = "env.properties";
     public static final String RESOURCES_SETTING_PATH = "resources/setting";
     public static final String RESOURCES_TEMPLATE_PATH = "resources/template";
     public static final String RESOURCES_JDBC_PATH = "resources/jdbc";
@@ -145,6 +147,17 @@ public record FileResources() {
                 .map(FileResources::expandEnvironmentVariables)
                 .map(File::new)
                 .orElse(new File("."));
+    }
+
+    public static File envFile() {
+        final String path = Optional.ofNullable(System.getProperty(PROPERTY_ENV))
+                .filter(it -> !it.isEmpty())
+                .map(FileResources::expandEnvironmentVariables)
+                .orElse(DEFAULT_ENV_PATH);
+        if (new File(path).isAbsolute()) {
+            return new File(path);
+        }
+        return new File(baseDir(), path);
     }
 
     public static File settingDir() {
