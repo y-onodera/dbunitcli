@@ -165,7 +165,12 @@ export const useRefreshSelectParameter = (command: string) => {
 			const parameter: Options = await response.json();
 			setParameter(
 				(current) =>
-					new SelectParameter(parameter, current.command, current.name),
+					new SelectParameter(
+						parameter,
+						current.command,
+						current.name,
+						current.inputParam,
+					),
 			);
 		} catch (ex) {
 			handleFetchError(getErrorMessage(ex), fetchParams);

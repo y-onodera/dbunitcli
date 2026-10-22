@@ -107,6 +107,19 @@ class ConvertControllerTest {
     }
 
     @Test
+    public void testSaveAndLoad_Pオプションを保存して読み込む() {
+        final String saveResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/convert/save",
+                        "{\"name\":\"savedConvert\",\"input\":{\"-src\":\"resources/src/csv\",\"-srcType\":\"csv\",\"-PorderDate\":\"2026-10-01\"}}"));
+        Assertions.assertEquals("success", saveResponse);
+
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/convert/load", "{\"name\":\"savedConvert\"}"));
+
+        Assertions.assertTrue(jsonResponse.contains("\"inputParam\":{\"orderDate\":\"2026-10-01\"}"), jsonResponse);
+    }
+
+    @Test
     public void testLoad() throws IOException {
         final String jsonResponse = this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/convert/load"
                 , "{\"name\":\"csvToXlsx\"}"));

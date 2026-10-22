@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -57,13 +58,29 @@ public record CommandParameters(CommandType type, String[] args) {
         if (!changed) {
             return this;
         }
-        Arrays.stream(this.args).filter(it -> it.startsWith("-P")).forEach(newArgs::add);
+        newArgs.addAll(this.inputParamArgs());
         return new CommandParameters(this.type, newArgs.toArray(new String[0]));
     }
 
     public CommandParameters shrink() {
-        return new CommandParameters(this.type, this.toOptionParameters()
-                                                    .toArgs(false));
+        final List<String> newArgs = new ArrayList<>(Arrays.asList(this.toOptionParameters().toArgs(false)));
+        newArgs.addAll(this.inputParamArgs());
+        return new CommandParameters(this.type, newArgs.toArray(new String[0]));
+    }
+
+    public Map<String, String> inputParam() {
+        final Map<String, String> result = new LinkedHashMap<>();
+        this.inputParamArgs().forEach(it -> {
+            final int separator = it.indexOf('=');
+            if (separator > 2) {
+                result.put(it.substring(2, separator), it.substring(separator + 1));
+            }
+        });
+        return result;
+    }
+
+    private List<String> inputParamArgs() {
+        return Arrays.stream(this.args).filter(it -> it.startsWith("-P")).toList();
     }
 
     public Map<String,Object> serialize() {

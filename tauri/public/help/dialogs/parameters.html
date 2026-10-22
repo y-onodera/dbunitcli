@@ -29,7 +29,7 @@
     <li>フッターの Edit Parameters (-P) ボタンを押してダイアログを開く</li>
     <li>キーと値を入力する。キーを空にした行は削除される</li>
     <li>Apply で反映する。設定した数がボタンの右に <code>— N parameter(s) set</code> と表示される</li>
-    <li>Exec で実行する</li>
+    <li>Exec で実行する。値を残す場合は Save で保存する</li>
   </ol>
 
   <h2 id="scope">影響範囲</h2>
@@ -37,11 +37,11 @@
     <tr><th>対象</th><th>影響</th></tr>
     <tr><td>Exec</td><td>入力した値が <code>-Pキー=値</code> として渡される</td></tr>
     <tr><td>フォームの設定ダイアログ</td><td>Dataset Setting やカラム定義などのダイアログで、テーブル名・プレビュー・カラム名を読み込むときにも渡される（SQL でデータを読み込む場合に、Exec と同じ値で確認できる）</td></tr>
-    <tr><td>Save</td><td><strong>保存されない</strong>。保存されるのはフォームの内容だけ</td></tr>
-    <tr><td>Save Shell</td><td><strong>.bat に含まれない</strong>（.bat は保存済みのパラメータを実行するため）</td></tr>
-    <tr><td>パラメータの切り替え</td><td>サイドバーで別のパラメータを開くと、入力した値は消える</td></tr>
+    <tr><td>Save</td><td>フォームの内容と一緒に <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に <code>-Pキー=値</code> の行として保存される</td></tr>
+    <tr><td>Save Shell</td><td>保存済みの値が .bat の実行でも使われる（Apply しただけで Save していない値は使われない）</td></tr>
+    <tr><td>パラメータを開く</td><td>サイドバーでパラメータを開くと、そのパラメータに保存された値に置き換わる（保存された値がなければ空になる）。Save していない入力は失われる</td></tr>
   </table>
-  <p>-P の値は、そのとき開いているパラメータで試すための一時的な値です。保存して繰り返し使う値や .bat でも使う値は、フォームのオプションか <a href="workspace.html">Workspace</a> の Env（<code>${env.変数名}</code>）で指定してください。CLI から実行する場合は、引数に <code>-Pキー=値</code> を付けて渡します。</p>
+  <p>-P の値はパラメータごとに保存されます。同じ値を複数のパラメータや環境で切り替えたい場合は、<a href="workspace.html">Workspace</a> の Env（<code>${env.変数名}</code>）も検討してください。CLI から実行する場合は、引数に <code>-Pキー=値</code> を付けて渡します。</p>
 
   <h2 id="reference">値の参照方法</h2>
   <p>参照する場所によって書き方が変わります。テンプレートの区切り文字は既定の <code>$</code>、変数をまとめる属性名（templateParameterAttribute）は既定の <code>param</code> の場合の例です。</p>

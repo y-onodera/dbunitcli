@@ -51,8 +51,8 @@ export default function Footer(prop: {
 	jobLogRef.current = jobLog;
 
 	useEffect(() => {
-		setParamInputs({});
-	}, [parameter.name]);
+		setParamInputs(parameter.inputParam ?? {});
+	}, [parameter.inputParam, setParamInputs]);
 
 	useEffect(() => {
 		if (running.command === "" || executingRef.current) {

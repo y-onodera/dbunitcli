@@ -63,13 +63,13 @@
   <p>フォームでオプションを入力し、フッターの Exec を押して実行します。Exec はフォームに表示中の内容をそのまま実行するので、保存していなくても試せます。結果のダイアログにある Open Directory で出力先を開いて、出力を確認します。期待どおりになるまで、オプションを変えて Exec を繰り返してください。</p>
   <ul>
     <li>時間がかかる処理は、実行中に Abandoned を押すと中断できます</li>
-    <li>SQL やテンプレートに渡す値は Edit Parameters (-P) で入力できます。ただし Save では保存されないので、残したい値はフォームのオプションか Env で指定してください（<a href="parameters.html">Parameters (-P)</a> を参照）</li>
+    <li>SQL やテンプレートに渡す値は Edit Parameters (-P) で入力できます。入力した値は Save でパラメータと一緒に保存されます（<a href="parameters.html">Parameters (-P)</a> を参照）</li>
     <li>入力欄の横のファイル選択・ディレクトリ選択ボタンで選んだパスは、オプションごとの基準ディレクトリからの相対パスで入ります（<a href="#chooser">ファイル選択と Workspace</a> を参照）</li>
     <li>あとで別の環境やデータで使い回す予定があるなら、この段階でパスを相対パスにし、接続先などを <code>${env.変数名}</code> にしておきます（<a href="#step-reuse">7.</a> を参照）</li>
   </ul>
 
   <h3 id="step-save">4. Save で保存する</h3>
-  <p>オプションが決まったら、フッターの Save を押します。フォームの内容が <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に上書き保存されます。名前は、サイドバーの ⚙ から rename で分かりやすいものに変えてください。</p>
+  <p>オプションが決まったら、フッターの Save を押します。フォームの内容と Edit Parameters (-P) の値が <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に上書き保存されます。名前は、サイドバーの ⚙ から rename で分かりやすいものに変えてください。</p>
 
   <h3 id="step-shell">5. Save Shell で .bat を保存する</h3>
   <p>GUI を使わずに別のシェルやタスクスケジューラから実行したい場合は、フッターの Save Shell を押します。</p>
@@ -211,7 +211,7 @@
   <p>パラメータを選択しているときに画面下部に表示されます。</p>
   <table>
     <tr><th>ボタン</th><th>動作</th><th>Workspace への影響</th></tr>
-    <tr><td>Edit Parameters (-P)</td><td>SQL やテンプレートに渡す <code>-P</code> パラメータを入力（設定数が右に表示されます）。詳細は <a href="parameters.html">Parameters (-P)</a> を参照</td><td>Exec にだけ渡される。Save では保存されず、.bat にも含まれない。別のパラメータを開くと消える</td></tr>
+    <tr><td>Edit Parameters (-P)</td><td>SQL やテンプレートに渡す <code>-P</code> パラメータを入力（設定数が右に表示されます）。詳細は <a href="parameters.html">Parameters (-P)</a> を参照</td><td>Exec に渡され、Save でパラメータと一緒に保存される（保存後は .bat でも使われる）。パラメータを開くと保存済みの値に置き換わる</td></tr>
     <tr><td>Exec</td><td>フォームに表示中の内容でコマンドを実行。保存は不要です。実行中は Abandoned で中断でき、完了後は Open Directory で出力先を開けます</td><td>相対パスは Workspace / Dataset Base / Result Base を基準に解決し、<code>${env.変数名}</code> は Env ファイルの値に置き換わる。結果は Result Base 配下に出力</td></tr>
     <tr><td>Save</td><td>フォームに表示中の内容をパラメータに上書き保存</td><td><code>option/&lt;command&gt;/&lt;name&gt;.txt</code> を上書き</td></tr>
     <tr><td>Save Shell</td><td>保存済みのパラメータを CLI で実行する .bat を作成。未保存の変更は含まれないため、先に Save してください</td><td>.bat はアプリの起動ディレクトリに <code>&lt;command&gt;_&lt;name&gt;.bat</code> で作成（Workspace の中ではない）。現在の Workspace / Dataset Base / Result Base / Env が埋め込まれる</td></tr>

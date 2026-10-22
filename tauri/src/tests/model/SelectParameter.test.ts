@@ -136,4 +136,42 @@ describe("SelectParameterクラス", () => {
 		expect(param.name).toBe("testParameterize");
 		expect(param.command).toBe("parameterize");
 	});
+
+	it("レスポンスのinputParamを保存済みの-Pとして持つこと", () => {
+		const param = new SelectParameter(
+			{ ...rawConvert, inputParam: { orderDate: "2026-10-01" } },
+			"convert",
+			"testConvert",
+		);
+		expect(param.inputParam).toStrictEqual({ orderDate: "2026-10-01" });
+	});
+
+	it("inputParamがなければ読み込みごとに別の空オブジェクトになること", () => {
+		// コンストラクタがレスポンスにinputParamを書き込むため、未設定のレスポンスを都度作る
+		const first = new SelectParameter(
+			{ ...rawConvert, inputParam: undefined },
+			"convert",
+			"a",
+		);
+		const second = new SelectParameter(
+			{ ...rawConvert, inputParam: undefined },
+			"convert",
+			"b",
+		);
+		expect(first.inputParam).toStrictEqual({});
+		expect(first.inputParam).not.toBe(second.inputParam);
+	});
+
+	it("引数のinputParamを優先し、optionsを引き継いでも同じinputParamを保つこと", () => {
+		const inputParam = { key: "value" };
+		const param = new SelectParameter(
+			{ ...rawConvert },
+			"convert",
+			"a",
+			inputParam,
+		);
+		expect(param.inputParam).toBe(inputParam);
+		const renamed = new SelectParameter(param.options, "convert", "renamed");
+		expect(renamed.inputParam).toBe(inputParam);
+	});
 });

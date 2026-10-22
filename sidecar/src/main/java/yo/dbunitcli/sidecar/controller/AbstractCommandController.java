@@ -203,7 +203,12 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     protected String load(final yo.dbunitcli.application.CommandType commandType, final String name) {
         return this.workspace.options().select(commandType, name).map(target -> {
             try {
-                return this.toJson(target.serialize());
+                final Map<String, Object> result = target.serialize();
+                final Map<String, String> inputParam = target.inputParam();
+                if (!inputParam.isEmpty()) {
+                    result.put("inputParam", inputParam);
+                }
+                return this.toJson(result);
             } catch (final IOException th) {
                 AbstractCommandController.LOGGER.error("cause:", th);
                 throw new ApplicationException(th);
