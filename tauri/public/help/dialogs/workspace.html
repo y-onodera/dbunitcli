@@ -40,6 +40,7 @@
     <li><a href="#fields">ChangeWorkspace の入力項目</a></li>
     <li><a href="#structure">Workspace のディレクトリ構成</a></li>
     <li><a href="#scope">Workspace の影響範囲</a></li>
+    <li><a href="#chooser">ファイル選択と Workspace</a></li>
     <li><a href="#sidebar">サイドバーの操作</a></li>
     <li><a href="#footer">フッターの操作</a></li>
     <li><a href="#env">環境変数（Env）</a></li>
@@ -63,6 +64,7 @@
   <ul>
     <li>時間がかかる処理は、実行中に Abandoned を押すと中断できます</li>
     <li>テンプレートに渡す値は Edit Parameters (-P) で入力できます</li>
+    <li>入力欄の横のファイル選択・ディレクトリ選択ボタンで選んだパスは、オプションごとの基準ディレクトリからの相対パスで入ります（<a href="#chooser">ファイル選択と Workspace</a> を参照）</li>
     <li>あとで別の環境やデータで使い回す予定があるなら、この段階でパスを相対パスにし、接続先などを <code>${env.変数名}</code> にしておきます（<a href="#step-reuse">7.</a> を参照）</li>
   </ul>
 
@@ -143,6 +145,53 @@
     <tr><td>フォームの相対パス</td><td>入力ファイルは Dataset Base、出力先は Result Base、それ以外は Workspace を基準に解決</td></tr>
     <tr><td>Exec / Save Shell</td><td>Env ファイル（<code>${env.変数名}</code> の置き換え）</td></tr>
   </table>
+
+  <h2 id="chooser">ファイル選択と Workspace</h2>
+  <p>フォームでオプションを組み立てるとき、入力欄の横のファイル選択・ディレクトリ選択ボタンは、オプションごとに決まった<strong>基準ディレクトリ</strong>を使います。基準ディレクトリは ChangeWorkspace の設定で決まるので、Workspace / Dataset Base / Result Base を切り替えると、選択ダイアログの開く場所と相対パスの意味も変わります。</p>
+
+  <h3 id="chooser-base">オプションごとの基準ディレクトリ</h3>
+  <table>
+    <tr><th>オプション</th><th>基準ディレクトリ</th></tr>
+    <tr><td>-src（入力データ）</td><td>Dataset Base</td></tr>
+    <tr><td>-result（出力先）</td><td>Result Base</td></tr>
+    <tr><td>-setting / -unitSetting</td><td><code>&lt;workspace&gt;/resources/setting</code></td></tr>
+    <tr><td>-template（Generate）/ -templateGroup</td><td><code>&lt;workspace&gt;/resources/template</code></td></tr>
+    <tr><td>-template（Parameterize）</td><td><code>&lt;workspace&gt;/option/parameterize/template</code></td></tr>
+    <tr><td>-jdbcProperties</td><td><code>&lt;workspace&gt;/resources/jdbc</code></td></tr>
+    <tr><td>-xlsxSchema</td><td><code>&lt;workspace&gt;/resources/xlsxSchema</code></td></tr>
+    <tr><td>-fixedColumnDef</td><td><code>&lt;workspace&gt;/resources/fixed-column-def</code></td></tr>
+    <tr><td>上記以外</td><td>Workspace</td></tr>
+  </table>
+
+  <h3 id="chooser-open">選択ダイアログが開く場所</h3>
+  <ul>
+    <li>入力欄が空なら、基準ディレクトリを開きます</li>
+    <li>値が入っていれば、その場所を開きます。相対パスの場合は、基準ディレクトリ、Workspace、アプリの起動ディレクトリの順に探し、見つかった場所を開きます</li>
+    <li>入力欄の横の開くボタンも、同じ方法で場所を決めてエクスプローラーで開きます</li>
+  </ul>
+
+  <h3 id="chooser-value">選択後に入る値</h3>
+  <table>
+    <tr><th>選んだ場所</th><th>入力欄に入る値</th></tr>
+    <tr><td>基準ディレクトリの中</td><td>基準ディレクトリからの相対パス（例：<code>resources/setting/orders.json</code> を選ぶと <code>orders.json</code>）</td></tr>
+    <tr><td>基準ディレクトリの外で、Workspace の中</td><td>Workspace からの相対パス</td></tr>
+    <tr><td>Workspace の外</td><td>絶対パス</td></tr>
+  </table>
+
+  <h3 id="chooser-exec">実行時のパスの解決</h3>
+  <table>
+    <tr><th>オプションの種類</th><th>相対パスの解決方法</th></tr>
+    <tr><td>入力データ（-src）</td><td>Dataset Base、Workspace、起動ディレクトリの順に探す</td></tr>
+    <tr><td>出力先（-result）</td><td>常に Result Base の下に出力する</td></tr>
+    <tr><td>設定・テンプレート・JDBC など（<code>resources/</code> 系）</td><td>GUI の Exec では、基準ディレクトリの下にあるものとして扱う</td></tr>
+  </table>
+
+  <h3 id="chooser-tips">再利用のためのポイント</h3>
+  <ul>
+    <li>相対パスで保存したオプションは、Workspace / Dataset Base / Result Base を切り替えると、切り替え先の同じ相対位置を指します。<a href="#step-reuse">7. の使い分け</a>はこの仕組みを使っています</li>
+    <li>Workspace の外を選ぶと絶対パスになり、切り替えても同じ場所を指したままになります。環境ごとに変えたいファイルは Workspace（入力データなら Dataset Base）の中に置いてください</li>
+    <li>設定・テンプレート・JDBC などのファイルは、<a href="#chooser-base">基準ディレクトリ</a>の中に置いてください。Workspace 直下など基準ディレクトリの外に置くと、Workspace からの相対パスになり、GUI の Exec で見つからない場合があります</li>
+  </ul>
 
   <h2 id="sidebar">サイドバーの操作</h2>
   <p>コマンド（Convert / Compare / Generate / Run / Parameterize）ごとに、Workspace の <code>option/&lt;command&gt;/</code> に保存されたパラメータを一覧表示します。コマンド名をクリックすると一覧を開閉します。</p>
