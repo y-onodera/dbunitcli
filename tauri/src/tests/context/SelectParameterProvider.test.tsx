@@ -27,7 +27,11 @@ import type {
 	GenerateOptions,
 } from "../../model/SelectParameter";
 import { SelectParameter } from "../../model/SelectParameter";
-import type { FetchParams } from "../../utils/fetchUtils";
+import {
+	type FetchParams,
+	handleFetchError,
+	isAbortError,
+} from "../../utils/fetchUtils";
 import {
 	environmentFixture,
 	makeMinimalParam,
@@ -289,7 +293,6 @@ describe("SelectParameterProviderのテスト", () => {
 			{ command: "convert", params: mockConvertParams },
 			{ command: "generate", params: mockGenerateParams },
 		])("パラメータを保存できることを確認", async ({ command, params }) => {
-			const mockHandleResult = vi.fn();
 			const { result } = renderHook(
 				() => ({
 					parameter: useSelectParameter(),
@@ -304,13 +307,9 @@ describe("SelectParameterProviderのテスト", () => {
 
 			result.current.setParameter(params, command as Command, "test-param");
 			const mockInput = { test: "value" };
-			await result.current.saveParameter(mockInput, mockHandleResult);
-
-			await waitFor(() => {
-				expect(mockHandleResult).toHaveBeenCalledWith({
-					resultMessage: "Save Success",
-					resultDir: "",
-				});
+			expect(await result.current.saveParameter(mockInput)).toStrictEqual({
+				resultMessage: "Save Success",
+				resultDir: "",
 			});
 		});
 
@@ -321,7 +320,6 @@ describe("SelectParameterProviderのテスト", () => {
 			const mockError = new Error("Save Failed");
 			mockFetchData.mockRejectedValueOnce(mockError);
 
-			const mockHandleResult = vi.fn();
 			const { result } = renderHook(
 				() => ({
 					parameter: useSelectParameter(),
@@ -333,13 +331,9 @@ describe("SelectParameterProviderのテスト", () => {
 
 			result.current.setParameter(params, command as Command, "test-param");
 			const mockInput = { test: "value" };
-			await result.current.saveParameter(mockInput, mockHandleResult);
-
-			await waitFor(() => {
-				expect(mockHandleResult).toHaveBeenCalledWith({
-					resultMessage: mockError.message,
-					resultDir: "",
-				});
+			expect(await result.current.saveParameter(mockInput)).toStrictEqual({
+				resultMessage: mockError.message,
+				resultDir: "",
 			});
 		});
 	});
@@ -349,7 +343,6 @@ describe("SelectParameterProviderのテスト", () => {
 			{ command: "convert", params: mockConvertParams },
 			{ command: "generate", params: mockGenerateParams },
 		])("パラメータを実行できることを確認", async ({ command, params }) => {
-			const mockHandleResult = vi.fn();
 			const { result } = renderHook(
 				() => ({
 					parameter: useSelectParameter(),
@@ -364,13 +357,9 @@ describe("SelectParameterProviderのテスト", () => {
 
 			result.current.setParameter(params, command as Command, "test-param");
 			const mockInput = { test: "value" };
-			await result.current.execParameter(mockInput, mockHandleResult);
-
-			await waitFor(() => {
-				expect(mockHandleResult).toHaveBeenCalledWith({
-					resultMessage: "Execution Success",
-					resultDir: "",
-				});
+			expect(await result.current.execParameter(mockInput)).toStrictEqual({
+				resultMessage: "Execution Success",
+				resultDir: "",
 			});
 		});
 
@@ -381,7 +370,6 @@ describe("SelectParameterProviderのテスト", () => {
 			const mockError = new Error("Execution Failed");
 			mockFetchData.mockRejectedValueOnce(mockError);
 
-			const mockHandleResult = vi.fn();
 			const { result } = renderHook(
 				() => ({
 					parameter: useSelectParameter(),
@@ -393,14 +381,29 @@ describe("SelectParameterProviderのテスト", () => {
 
 			result.current.setParameter(params, command as Command, "test-param");
 			const mockInput = { test: "value" };
-			await result.current.execParameter(mockInput, mockHandleResult);
-
-			await waitFor(() => {
-				expect(mockHandleResult).toHaveBeenCalledWith({
-					resultMessage: mockError.message,
-					resultDir: "",
-				});
+			expect(await result.current.execParameter(mockInput)).toStrictEqual({
+				resultMessage: mockError.message,
+				resultDir: "",
 			});
+		});
+	});
+
+	describe("中断時の戻り値", () => {
+		it("中断されたときはnullを返しエラー扱いしないことを確認", async () => {
+			mockFetchData.mockRejectedValueOnce(new DOMException("", "AbortError"));
+			vi.mocked(isAbortError).mockReturnValueOnce(true);
+			const { result } = renderHook(
+				() => ({
+					setParameter: useSetSelectParameter(),
+					execParameter: useExecParameter(),
+				}),
+				{ wrapper },
+			);
+
+			result.current.setParameter(mockConvertParams, "convert", "test-param");
+
+			expect(await result.current.execParameter({ test: "value" })).toBeNull();
+			expect(handleFetchError).not.toHaveBeenCalled();
 		});
 	});
 

@@ -194,16 +194,16 @@ const parseResponse = async (
 	};
 };
 
+// 結果（失敗時はエラーメッセージ）を返す。中断されたときはnull
 const useParameterAction = () => {
 	const parameter = useSelectParameter();
 	const environment = useEnvironment();
 	return async (
 		action: ParameterAction,
 		extraBody: Record<string, unknown>,
-		handleResult: (result: Running) => void,
 		signal?: AbortSignal,
 		onLog?: (line: string) => void,
-	) => {
+	): Promise<Running | null> => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl + parameter.command}/${action}`,
 			options: {
@@ -216,14 +216,14 @@ const useParameterAction = () => {
 		};
 		try {
 			const response = await fetchData(fetchParams);
-			handleResult(await parseResponse(action, response));
+			return await parseResponse(action, response);
 		} catch (ex) {
 			if (isAbortError(ex)) {
-				return;
+				return null;
 			}
 			const errorMessage = getErrorMessage(ex);
 			handleFetchError(errorMessage, fetchParams);
-			handleResult({ resultMessage: errorMessage, resultDir: "" });
+			return { resultMessage: errorMessage, resultDir: "" };
 		}
 	};
 };
@@ -232,25 +232,20 @@ export const useSaveParameter = () => {
 	const execute = useParameterAction();
 	return async (
 		input: { [k: string]: FormDataEntryValue },
-		handleResult: (result: Running) => void,
 		signal?: AbortSignal,
-	) => execute("save", { input }, handleResult, signal);
+	) => execute("save", { input }, signal);
 };
 
 export const useExecParameter = () => {
 	const execute = useParameterAction();
 	return async (
 		input: { [k: string]: FormDataEntryValue },
-		handleResult: (result: Running) => void,
 		signal?: AbortSignal,
 		onLog?: (line: string) => void,
-	) => execute("exec", { input }, handleResult, signal, onLog);
+	) => execute("exec", { input }, signal, onLog);
 };
 
 export const useSaveShell = () => {
 	const execute = useParameterAction();
-	return async (
-		handleResult: (result: Running) => void,
-		signal?: AbortSignal,
-	) => execute("shell", {}, handleResult, signal);
+	return async (signal?: AbortSignal) => execute("shell", {}, signal);
 };

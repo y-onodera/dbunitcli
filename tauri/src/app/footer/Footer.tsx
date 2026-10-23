@@ -50,20 +50,19 @@ export default function Footer(prop: {
 	}, []);
 
 	// 実行ごとにAbortControllerを作り、中断・置き換え後の結果は捨てる
-	const startRunning = () => {
+	const run = async (
+		call: (signal: AbortSignal) => Promise<Running | null>,
+	) => {
 		const controller = new AbortController();
 		abortControllerRef.current = controller;
 		jobLog.reset();
 		setIsLoading(true);
-		return {
-			signal: controller.signal,
-			handleResult: (result: Running) => {
-				if (!controller.signal.aborted) {
-					setRunning(result);
-					setIsLoading(false);
-				}
-			},
-		};
+		const result = await call(controller.signal);
+		// 応答後の処理中に中断されることもあるため、nullでなくてもsignalを確認する
+		if (result && !controller.signal.aborted) {
+			setRunning(result);
+			setIsLoading(false);
+		}
 	};
 
 	const withParamInputs = (values: FormValues): FormValues => ({
@@ -78,28 +77,17 @@ export default function Footer(prop: {
 		if (input.validationError) {
 			return;
 		}
-		const { signal, handleResult } = startRunning();
-		execParameter(
-			withParamInputs(input.values),
-			handleResult,
-			signal,
-			jobLog.append,
+		run((signal) =>
+			execParameter(withParamInputs(input.values), signal, jobLog.append),
 		);
 	};
 
-	const handleSave = () => {
-		const { signal, handleResult } = startRunning();
-		saveParameter(
-			withParamInputs(prop.formData(false).values),
-			handleResult,
-			signal,
+	const handleSave = () =>
+		run((signal) =>
+			saveParameter(withParamInputs(prop.formData(false).values), signal),
 		);
-	};
 
-	const handleSaveShell = () => {
-		const { signal, handleResult } = startRunning();
-		saveShell(handleResult, signal);
-	};
+	const handleSaveShell = () => run((signal) => saveShell(signal));
 
 	const openDirectory = async (path: string) => {
 		await core.invoke("open_directory", { path });
