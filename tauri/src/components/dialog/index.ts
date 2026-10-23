@@ -1,5 +1,5 @@
 export { DataTable, Td, Th, Tr } from "./DataTable";
-export { DialogHelpButton, SectionHelpButton } from "./DialogHelpButton";
+export { SectionHelpButton } from "./DialogHelpButton";
 export {
 	DialogBody,
 	DialogField,
