@@ -12,6 +12,29 @@
 }
 
 @layer base {
+	:root {
+		font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+		font-size: 16px;
+		line-height: 24px;
+		font-weight: 400;
+
+		color: var(--color-content);
+		background-color: var(--color-surface-muted);
+
+		font-synthesis: none;
+		text-rendering: optimizeLegibility;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		-webkit-text-size-adjust: 100%;
+	}
+	/* フォーカス表示は ring ユーティリティで行う */
+	input,
+	button {
+		outline: none;
+	}
+	button {
+		cursor: pointer;
+	}
 	[type="text"]:focus,
 	[type="email"]:focus,
 	[type="url"]:focus,

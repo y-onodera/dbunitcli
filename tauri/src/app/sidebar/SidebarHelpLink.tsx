@@ -66,7 +66,7 @@ export default function SidebarHelpLink() {
 									buttonstyle="w-full text-left px-3 py-2"
 									bgcolor="hover:bg-surface-subtle"
 									textstyle=""
-									border="outline-hidden"
+									border="border border-transparent outline-hidden"
 									handleClick={() => {
 										openHelpWindow(item.command, item.label);
 										setShowMenu(false);

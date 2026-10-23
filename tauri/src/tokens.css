@@ -61,14 +61,3 @@
 	--color-link: oklch(0.623 0.214 259.77); /* blue-500 */
 	--color-link-hover: oklch(0.546 0.243 262.88); /* blue-600 */
 }
-
-@layer base {
-	:root {
-		--base-text: #0f0f0f;
-		--base-bg: #f6f6f6;
-		--base-link: #646cff;
-		--base-link-hover: #535bf2;
-		--base-btn-border-hover: #396cd8;
-		--base-btn-active-bg: #e8e8e8;
-	}
-}

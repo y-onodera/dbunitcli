@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "../../App.css";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import { useRefreshSelectParameter } from "../../hooks/useSelectParameter";
 import { CompareForm } from "./CompareForm";

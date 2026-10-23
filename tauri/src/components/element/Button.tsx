@@ -25,7 +25,7 @@ export function BlueButton(props: {
 }) {
 	return (
 		<Button
-			buttonstyle=""
+			buttonstyle="px-4 py-2"
 			bgcolor="bg-primary hover:bg-primary-hover"
 			textstyle="text-center text-sm font-semibold text-content-inverse"
 			border="border border-border"
@@ -43,7 +43,7 @@ export function WhiteButton(props: {
 }) {
 	return (
 		<Button
-			buttonstyle=""
+			buttonstyle="px-4 py-2"
 			bgcolor="bg-surface hover:bg-surface-hover"
 			textstyle="text-center text-sm font-semibold text-content-muted"
 			border="border border-border"
@@ -62,7 +62,7 @@ export function LinkButton(props: {
 			buttonstyle="flex items-center justify-start w-full p-1 ms-2"
 			bgcolor="hover:bg-surface-muted"
 			textstyle="text-left text-content-muted hover:text-link-hover"
-			border="outline-hidden"
+			border="border border-transparent outline-hidden"
 			handleClick={props.handleClick}
 		>
 			{props.title}
