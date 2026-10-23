@@ -49,10 +49,14 @@ export default function Footer(prop: {
 	const saveParameterRef = useRef(saveParameter);
 	const saveShellRef = useRef(saveShell);
 	const jobLogRef = useRef(jobLog);
+	const formDataRef = useRef(prop.formData);
+	const paramInputsRef = useRef(paramInputs);
 	execParameterRef.current = execParameter;
 	saveParameterRef.current = saveParameter;
 	saveShellRef.current = saveShell;
 	jobLogRef.current = jobLog;
+	formDataRef.current = prop.formData;
+	paramInputsRef.current = paramInputs;
 
 	useEffect(() => {
 		setParamInputs(parameter.inputParam ?? {});
@@ -77,9 +81,9 @@ export default function Footer(prop: {
 			}
 		};
 
-		const formValues = prop.formData(false).values;
+		const formValues = formDataRef.current(false).values;
 		const paramExtra = Object.fromEntries(
-			Object.entries(paramInputs).map(([k, v]) => [`-P${k}`, v]),
+			Object.entries(paramInputsRef.current).map(([k, v]) => [`-P${k}`, v]),
 		);
 		if (running.command === "exec") {
 			execParameterRef.current(

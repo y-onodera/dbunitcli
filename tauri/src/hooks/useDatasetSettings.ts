@@ -311,7 +311,7 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 		return () => {
 			controller.abort();
 		};
-	}, [apiUrl, srcPath, srcType, sqlNotReady, jdbcValues, paramInputs]);
+	}, [apiUrl, srcInfo, srcPath, srcType, sqlNotReady, jdbcValues, paramInputs]);
 
 	return columnNames;
 };

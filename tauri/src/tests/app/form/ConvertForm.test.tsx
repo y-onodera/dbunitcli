@@ -54,7 +54,13 @@ function makeConvertProps(
 }
 
 // DOM順序の検証: precedingEl が followingEl より前にあることを確認する
-function expectPrecedesInDom(precedingEl: Element, followingEl: Element) {
+function expectPrecedesInDom(
+	precedingEl: Element,
+	followingEl: Element | null,
+) {
+	if (followingEl === null) {
+		throw new Error("followingEl not found");
+	}
 	expect(
 		precedingEl.compareDocumentPosition(followingEl) &
 			Node.DOCUMENT_POSITION_FOLLOWING,
@@ -106,9 +112,7 @@ describe("ConvertFormの描画テスト", () => {
 
 			expectPrecedesInDom(
 				screen.getByText(/Show traversal option/),
-				document.querySelector(
-					'input[type="checkbox"][name="-src.recursive"]',
-				)!,
+				document.querySelector('input[type="checkbox"][name="-src.recursive"]'),
 			);
 		});
 
@@ -159,7 +163,7 @@ describe("ConvertFormの描画テスト", () => {
 
 			expectPrecedesInDom(
 				screen.getByText(/Show data load option/),
-				document.querySelector('input[type="text"][name="-src.headerName"]')!,
+				document.querySelector('input[type="text"][name="-src.headerName"]'),
 			);
 		});
 

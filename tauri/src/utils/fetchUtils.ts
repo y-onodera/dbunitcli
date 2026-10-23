@@ -212,8 +212,9 @@ export const fetchData = async ({
 	let controller: AbortController | null = null;
 	let timeoutId: ReturnType<typeof setTimeout> | null = null;
 	if (!signal && timeoutMs !== undefined) {
-		controller = new AbortController();
-		timeoutId = setTimeout(() => controller!.abort(), timeoutMs);
+		const timeoutController = new AbortController();
+		controller = timeoutController;
+		timeoutId = setTimeout(() => timeoutController.abort(), timeoutMs);
 	}
 	const mergedSignal =
 		signal ?? controller?.signal ?? options.signal ?? undefined;
