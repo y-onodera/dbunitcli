@@ -14,11 +14,3 @@ export function SectionHelpButton(props: { command: string; label: string }) {
 		</ButtonIcon>
 	);
 }
-
-export function DialogHelpButton(props: { command: string; label: string }) {
-	return (
-		<div className="flex justify-end px-4 pt-2">
-			<SectionHelpButton command={props.command} label={props.label} />
-		</div>
-	);
-}

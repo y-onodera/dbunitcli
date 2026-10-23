@@ -226,18 +226,6 @@ export function isSqlType(options: SrcTypeOptions): options is SqlOptions {
 export function isTableType(options: SrcTypeOptions): options is TableOptions {
 	return options.srcType?.value === "table";
 }
-export function isCsvqType(options: SrcTypeOptions): options is CsvqOptions {
-	return options.srcType?.value === "csvq";
-}
-export function isNoneType(options: SrcTypeOptions): options is NoneOptions {
-	return options.srcType?.value === "none";
-}
-export function isFileType(options: SrcTypeOptions): options is FileOptions {
-	return !options.srcType || options.srcType.value === "file";
-}
-export function isDirType(options: SrcTypeOptions): options is DirOptions {
-	return options.srcType?.value === "dir";
-}
 export function buildDatasetSrcInfo(datasrc: DatasetSource): DatasetSrcInfo {
 	const xlsxSchema =
 		isXlsType(datasrc) || isXlsxType(datasrc) ? datasrc.xlsxSchema.value : "";
