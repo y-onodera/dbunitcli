@@ -16,22 +16,15 @@ import {
 	useSaveParameter,
 	useSaveShell,
 } from "../../hooks/useSelectParameter";
-import type { FormValues } from "../../utils/formValues";
+import type { CollectedFormValues, FormValues } from "../../utils/formValues";
 import { ParameterInputDialog } from "../form/section/dialog/ParameterInputDialog";
 import ResultDialog from "./ResultDialog";
 
-const RESET_RUNNING: Running = {
-	command: "",
-	resultMessage: "",
-	resultDir: "",
-};
+const RESET_RUNNING: Running = { resultMessage: "", resultDir: "" };
 const PARAMS_LABEL = "Edit Parameters (-P)";
 
 export default function Footer(prop: {
-	formData: (validate: boolean) => {
-		values: { [k: string]: FormDataEntryValue };
-		validationError: boolean;
-	};
+	formData: (validate: boolean) => CollectedFormValues;
 }) {
 	const paramInputs = useParamInputs();
 	const setParamInputs = useSetParamInputs();

@@ -308,7 +308,6 @@ describe("SelectParameterProviderのテスト", () => {
 
 			await waitFor(() => {
 				expect(mockHandleResult).toHaveBeenCalledWith({
-					command: "",
 					resultMessage: "Save Success",
 					resultDir: "",
 				});
@@ -338,7 +337,6 @@ describe("SelectParameterProviderのテスト", () => {
 
 			await waitFor(() => {
 				expect(mockHandleResult).toHaveBeenCalledWith({
-					command: "",
 					resultMessage: mockError.message,
 					resultDir: "",
 				});
@@ -370,7 +368,6 @@ describe("SelectParameterProviderのテスト", () => {
 
 			await waitFor(() => {
 				expect(mockHandleResult).toHaveBeenCalledWith({
-					command: "",
 					resultMessage: "Execution Success",
 					resultDir: "",
 				});
@@ -400,7 +397,6 @@ describe("SelectParameterProviderのテスト", () => {
 
 			await waitFor(() => {
 				expect(mockHandleResult).toHaveBeenCalledWith({
-					command: "",
 					resultMessage: mockError.message,
 					resultDir: "",
 				});

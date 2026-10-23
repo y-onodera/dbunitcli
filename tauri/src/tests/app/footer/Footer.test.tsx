@@ -14,6 +14,7 @@ import SelectParameterProvider, {
 import WorkspaceResourcesProvider from "../../../context/WorkspaceResourcesProvider";
 import { type Options, SelectParameter } from "../../../model/SelectParameter";
 import type { FetchParams } from "../../../utils/fetchUtils";
+import type { CollectedFormValues } from "../../../utils/formValues";
 import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 
 const mockEnvironment: Environment = { ...environmentFixture };
@@ -52,14 +53,9 @@ function SelectConvert({
 	return null;
 }
 
-type FormDataResult = {
-	values: { [k: string]: FormDataEntryValue };
-	validationError: boolean;
-};
-
 function renderFooter(
 	inputParam?: Record<string, string>,
-	formData: (validate: boolean) => FormDataResult = () => ({
+	formData: (validate: boolean) => CollectedFormValues = () => ({
 		values: {},
 		validationError: false,
 	}),

@@ -19,7 +19,6 @@ import {
 } from "../utils/fetchUtils";
 
 export type Running = {
-	command: string;
 	resultMessage: string;
 	resultDir: string;
 };
@@ -185,11 +184,10 @@ const parseResponse = async (
 	response: Response,
 ): Promise<Running> => {
 	if (action === "save") {
-		return { command: "", resultMessage: "Save Success", resultDir: "" };
+		return { resultMessage: "Save Success", resultDir: "" };
 	}
 	const resultDir = await response.text();
 	return {
-		command: "",
 		resultMessage:
 			action === "exec" ? "Execution Success" : "Save Shell Success",
 		resultDir,
@@ -225,7 +223,7 @@ const useParameterAction = () => {
 			}
 			const errorMessage = getErrorMessage(ex);
 			handleFetchError(errorMessage, fetchParams);
-			handleResult({ command: "", resultMessage: errorMessage, resultDir: "" });
+			handleResult({ resultMessage: errorMessage, resultDir: "" });
 		}
 	};
 };
