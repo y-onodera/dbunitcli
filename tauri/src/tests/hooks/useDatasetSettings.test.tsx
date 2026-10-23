@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
 	type Environment,
 	environmentContext,
@@ -213,10 +213,6 @@ describe("DatasetSettingsProviderのテスト", () => {
 			</environmentContext.Provider>
 		);
 
-		beforeEach(() => {
-			mockFetchData.mockClear();
-		});
-
 		it("全テーブルの列名を重複なく出現順で返すことを確認", async () => {
 			const { result } = renderHook(() => useSrcInfoColumnNames(srcInfo), {
 				wrapper: envWrapper,
@@ -227,23 +223,13 @@ describe("DatasetSettingsProviderのテスト", () => {
 			expect(callsTo("/dataset-setting/table-preview")).toHaveLength(2);
 		});
 
-		it("srcPathが空のときは取得せず空配列を返すことを確認", async () => {
-			const noPath: DatasetSrcInfo = { ...srcInfo, srcPath: "" };
+		// 入力は毎レンダー同一参照にする（新規オブジェクトだとeffectが再発火し続ける）
+		it.each<[string, DatasetSrcInfo]>([
+			["srcPathが空", { ...srcInfo, srcPath: "" }],
+			["JDBC未接続のsqlソース", { ...srcInfo, srcType: "sql" }],
+		])("%sのときは取得せず空配列を返すことを確認", async (_, info) => {
 			const { result, rerender } = renderHook(
-				() => useSrcInfoColumnNames(noPath),
-				{ wrapper: envWrapper },
-			);
-			await act(async () => {
-				rerender();
-			});
-			expect(result.current).toStrictEqual([]);
-			expect(callsTo("/dataset-setting/table-names")).toHaveLength(0);
-		});
-
-		it("JDBC未接続のsqlソースでは取得しないことを確認", async () => {
-			const sqlSrc: DatasetSrcInfo = { ...srcInfo, srcType: "sql" };
-			const { result, rerender } = renderHook(
-				() => useSrcInfoColumnNames(sqlSrc),
+				() => useSrcInfoColumnNames(info),
 				{ wrapper: envWrapper },
 			);
 			await act(async () => {

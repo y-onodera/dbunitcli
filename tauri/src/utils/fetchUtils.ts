@@ -209,15 +209,14 @@ export const fetchData = async ({
 	timeoutMs,
 	onLog,
 }: FetchParams) => {
-	let controller: AbortController | null = null;
+	let timeoutSignal: AbortSignal | undefined;
 	let timeoutId: ReturnType<typeof setTimeout> | null = null;
 	if (!signal && timeoutMs !== undefined) {
-		const timeoutController = new AbortController();
-		controller = timeoutController;
-		timeoutId = setTimeout(() => timeoutController.abort(), timeoutMs);
+		const controller = new AbortController();
+		timeoutSignal = controller.signal;
+		timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 	}
-	const mergedSignal =
-		signal ?? controller?.signal ?? options.signal ?? undefined;
+	const mergedSignal = signal ?? timeoutSignal ?? options.signal ?? undefined;
 	try {
 		// 中断できる（signalがある）か、ログが欲しい呼び出しだけジョブとして扱う
 		if (mergedSignal || onLog) {

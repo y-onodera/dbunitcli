@@ -53,14 +53,16 @@ function makeConvertProps(
 	};
 }
 
-// DOM順序の検証: precedingEl が followingEl より前にあることを確認する
-function expectPrecedesInDom(
-	precedingEl: Element,
-	followingEl: Element | null,
-) {
-	if (followingEl === null) {
-		throw new Error("followingEl not found");
+function querySelectorOrThrow(selector: string): Element {
+	const el = document.querySelector(selector);
+	if (el === null) {
+		throw new Error(`element not found: ${selector}`);
 	}
+	return el;
+}
+
+// DOM順序の検証: precedingEl が followingEl より前にあることを確認する
+function expectPrecedesInDom(precedingEl: Element, followingEl: Element) {
 	expect(
 		precedingEl.compareDocumentPosition(followingEl) &
 			Node.DOCUMENT_POSITION_FOLLOWING,
@@ -112,7 +114,7 @@ describe("ConvertFormの描画テスト", () => {
 
 			expectPrecedesInDom(
 				screen.getByText(/Show traversal option/),
-				document.querySelector('input[type="checkbox"][name="-src.recursive"]'),
+				querySelectorOrThrow('input[type="checkbox"][name="-src.recursive"]'),
 			);
 		});
 
@@ -163,7 +165,7 @@ describe("ConvertFormの描画テスト", () => {
 
 			expectPrecedesInDom(
 				screen.getByText(/Show data load option/),
-				document.querySelector('input[type="text"][name="-src.headerName"]'),
+				querySelectorOrThrow('input[type="text"][name="-src.headerName"]'),
 			);
 		});
 
