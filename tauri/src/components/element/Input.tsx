@@ -214,7 +214,6 @@ function inputStyle(wStyle: string) {
 	return `block
                p-2.5
                ${wStyle}
-               z-20
                text-sm text-content
                rounded-lg
                bg-input

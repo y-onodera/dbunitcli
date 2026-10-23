@@ -12,7 +12,7 @@ export function ModalOverlay({
 }) {
 	return (
 		<div
-			className={`fixed inset-0 bg-black/50 flex items-center justify-center ${zClass}`}
+			className={`fixed inset-0 bg-overlay flex items-center justify-center ${zClass}`}
 		>
 			<div
 				className={`bg-surface rounded-lg shadow-modal p-6 max-w-full ${width}`}

@@ -11,7 +11,7 @@ export default function ResultDialog(props: {
 			className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-modal "
 		>
 			<div className="relative p-4 w-full max-w-md max-h-full">
-				<div className="relative bg-surface rounded-lg shadow-card">
+				<div className="relative bg-surface rounded-lg shadow-modal">
 					{props.children}
 				</div>
 			</div>

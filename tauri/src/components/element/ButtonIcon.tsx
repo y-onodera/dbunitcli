@@ -146,7 +146,7 @@ export function ButtonIcon(props: {
 			buttonstyle="flex items-center group p-1"
 			bgcolor=""
 			textstyle="text-content-muted hover:text-link-hover"
-			border="outline-hidden"
+			border="border border-transparent outline-hidden"
 			ariaLabel={props.title || undefined}
 			handleClick={props.handleClick}
 		>

@@ -76,7 +76,7 @@ export default function ColumnDatalistDialog({
 	}
 
 	return (
-		<ModalOverlay width="w-[32rem]" zClass="z-modal-nested">
+		<ModalOverlay width="w-lg" zClass="z-modal-nested">
 			<DialogTitle>Load Column Datalist</DialogTitle>
 			{renderBody()}
 			<DialogActions>

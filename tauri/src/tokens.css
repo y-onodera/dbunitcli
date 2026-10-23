@@ -13,8 +13,13 @@
 }
 
 @theme {
+	/* Dialog width (--container-* から w-* / min-w-* が生成される) */
+	--container-dialog-sm: 480px;
+	--container-dialog-md: 640px;
+	--container-dialog-lg: 800px;
+	--container-dialog-min: 600px;
+
 	/* Shadow layers */
-	--shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 	--shadow-dropdown:
 		0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 	--shadow-modal:
@@ -37,6 +42,8 @@
 	--color-surface-subtle: oklch(0.985 0 0); /* gray-50 */
 	--color-surface-muted: oklch(0.961 0 0); /* gray-100 */
 	--color-surface-disabled: oklch(0.922 0 0); /* gray-200 */
+	--color-surface-hover: oklch(0.872 0 0); /* gray-300 */
+	--color-overlay: oklch(0 0 0 / 0.5); /* black/50 */
 
 	/* Input */
 	--color-input: oklch(0.985 0 0); /* gray-50 */
@@ -52,15 +59,4 @@
 	--color-success: oklch(0.528 0.182 142.5); /* green-600 */
 	--color-link: oklch(0.623 0.214 259.77); /* blue-500 */
 	--color-link-hover: oklch(0.546 0.243 262.88); /* blue-600 */
-}
-
-@layer base {
-	:root {
-		--base-text: #0f0f0f;
-		--base-bg: #f6f6f6;
-		--base-link: #646cff;
-		--base-link-hover: #535bf2;
-		--base-btn-border-hover: #396cd8;
-		--base-btn-active-bg: #e8e8e8;
-	}
 }

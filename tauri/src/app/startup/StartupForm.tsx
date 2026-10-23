@@ -149,7 +149,7 @@ const InputField: React.FC<{
 				)}
 			</div>
 			{error && (
-				<div className="col-start-2 col-span-4 text-red-500">{error}</div>
+				<div className="col-start-2 col-span-4 text-error">{error}</div>
 			)}
 		</>
 	);
