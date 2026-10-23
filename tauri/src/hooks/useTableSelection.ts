@@ -1,9 +1,7 @@
 import { useState } from "react";
 
 export function useTableSelection(initial: string[] = []) {
-	const [selected, setSelected] = useState<Set<string>>(
-		() => new Set(initial),
-	);
+	const [selected, setSelected] = useState<Set<string>>(() => new Set(initial));
 
 	const toggle = (table: string) => {
 		setSelected((prev) => {
