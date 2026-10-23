@@ -4,11 +4,15 @@ import { createContext, use, useState } from "react";
 type ParamInputs = { [key: string]: string };
 
 const paramInputsContext = createContext<ParamInputs>({});
-const setParamInputsContext = createContext<Dispatch<SetStateAction<ParamInputs>>>(
-	() => undefined,
-);
+const setParamInputsContext = createContext<
+	Dispatch<SetStateAction<ParamInputs>>
+>(() => undefined);
 
-export default function ParameterInputProvider({ children }: { children: ReactNode }) {
+export default function ParameterInputProvider({
+	children,
+}: {
+	children: ReactNode;
+}) {
 	const [paramInputs, setParamInputs] = useState<ParamInputs>({});
 	return (
 		<paramInputsContext.Provider value={paramInputs}>

@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
 	type Environment,
@@ -11,7 +11,9 @@ import {
 	useDatasetSettingsData,
 	useDeleteDatasetSettings,
 	useSaveDatasetSettings,
+	useSrcInfoColumnNames,
 } from "../../hooks/useDatasetSettings";
+import type { DatasetSrcInfo } from "../../model/CommandOption";
 import { DatasetSettings } from "../../model/DatasetSettings";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
 import type { FetchParams } from "../../utils/fetchUtils";
@@ -58,13 +60,21 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 			);
 		}
 		if (params.endpoint.includes("/dataset-setting/save")) {
-			return Promise.resolve(
-				new Response(JSON.stringify(mockUpdatedSettings)),
-			);
+			return Promise.resolve(new Response(JSON.stringify(mockUpdatedSettings)));
 		}
 		if (params.endpoint.includes("/dataset-setting/delete")) {
 			return Promise.resolve(
 				new Response(JSON.stringify(mockRemainingSettings)),
+			);
+		}
+		if (params.endpoint.includes("/dataset-setting/table-names")) {
+			return Promise.resolve(new Response(JSON.stringify(["t1", "t2"])));
+		}
+		if (params.endpoint.includes("/dataset-setting/table-preview")) {
+			const { tableName } = JSON.parse(String(params.options.body));
+			const headers = tableName === "t1" ? ["id", "name"] : ["id", "age"];
+			return Promise.resolve(
+				new Response(JSON.stringify({ headers, rows: [] })),
 			);
 		}
 		return Promise.resolve(new Response());
@@ -164,6 +174,87 @@ describe("DatasetSettingsProviderのテスト", () => {
 			expect(result.current.resources.datasetSettings).toStrictEqual(
 				mockRemainingSettings,
 			);
+		});
+	});
+
+	describe("useSrcInfoColumnNamesのテスト", () => {
+		const srcInfo: DatasetSrcInfo = {
+			srcPath: "data/src",
+			srcType: "csv",
+			setting: "",
+			settingEncoding: "",
+			encoding: "UTF-8",
+			regInclude: "",
+			regExclude: "",
+			recursive: "false",
+			extension: "",
+			regTableInclude: "",
+			regTableExclude: "",
+			xlsxSchema: "",
+			fixedLength: "",
+			fixedLengthType: "",
+			regHeaderSplit: "",
+			regDataSplit: "",
+			delimiter: ",",
+			ignoreQuoted: false,
+			headerName: "",
+			startRow: "",
+			addFileInfo: false,
+		};
+		const callsTo = (endpoint: string) =>
+			mockFetchData.mock.calls.filter(([params]) =>
+				params.endpoint.includes(endpoint),
+			);
+
+		// フックはWorkspaceResourcesに依存しないため環境設定だけを渡す
+		const envWrapper = ({ children }: { children: React.ReactNode }) => (
+			<environmentContext.Provider value={mockEnvironment}>
+				{children}
+			</environmentContext.Provider>
+		);
+
+		it("全テーブルの列名を重複なく出現順で返すことを確認", async () => {
+			const { result } = renderHook(() => useSrcInfoColumnNames(srcInfo), {
+				wrapper: envWrapper,
+			});
+			await waitFor(() => {
+				expect(result.current).toStrictEqual(["id", "name", "age"]);
+			});
+			expect(callsTo("/dataset-setting/table-preview")).toHaveLength(2);
+		});
+
+		// 入力は毎レンダー同一参照にする（新規オブジェクトだとeffectが再発火し続ける）
+		it.each<[string, DatasetSrcInfo]>([
+			["srcPathが空", { ...srcInfo, srcPath: "" }],
+			["JDBC未接続のsqlソース", { ...srcInfo, srcType: "sql" }],
+		])("%sのときは取得せず空配列を返すことを確認", async (_, info) => {
+			const { result, rerender } = renderHook(
+				() => useSrcInfoColumnNames(info),
+				{ wrapper: envWrapper },
+			);
+			await act(async () => {
+				rerender();
+			});
+			expect(result.current).toStrictEqual([]);
+			expect(callsTo("/dataset-setting/table-names")).toHaveLength(0);
+		});
+
+		it("srcPath・srcType以外の項目が変わっても再取得されることを確認", async () => {
+			const { rerender } = renderHook(
+				(info: DatasetSrcInfo) => useSrcInfoColumnNames(info),
+				{ wrapper: envWrapper, initialProps: srcInfo },
+			);
+			await waitFor(() => {
+				expect(callsTo("/dataset-setting/table-names")).toHaveLength(1);
+			});
+			rerender({ ...srcInfo, regTableInclude: "^t1$" });
+			await waitFor(() => {
+				expect(callsTo("/dataset-setting/table-names")).toHaveLength(2);
+			});
+			const [lastParams] = callsTo("/dataset-setting/table-names")[1];
+			expect(JSON.parse(String(lastParams.options.body))).toMatchObject({
+				regTableInclude: "^t1$",
+			});
 		});
 	});
 });

@@ -16,17 +16,15 @@ import {
 	useSaveParameter,
 	useSaveShell,
 } from "../../hooks/useSelectParameter";
+import type { CollectedFormValues, FormValues } from "../../utils/formValues";
 import { ParameterInputDialog } from "../form/section/dialog/ParameterInputDialog";
 import ResultDialog from "./ResultDialog";
 
-const RESET_RUNNING: Running = { command: "", resultMessage: "", resultDir: "" };
+const RESET_RUNNING: Running = { resultMessage: "", resultDir: "" };
 const PARAMS_LABEL = "Edit Parameters (-P)";
 
 export default function Footer(prop: {
-	formData: (validate: boolean) => {
-		values: { [k: string]: FormDataEntryValue };
-		validationError: boolean;
-	};
+	formData: (validate: boolean) => CollectedFormValues;
 }) {
 	const paramInputs = useParamInputs();
 	const setParamInputs = useSetParamInputs();
@@ -34,71 +32,62 @@ export default function Footer(prop: {
 	const [running, setRunning] = useState<Running>(RESET_RUNNING);
 	const [isLoading, setIsLoading] = useState(false);
 	const jobLog = useJobLog();
-	const executingRef = useRef(false);
 	const abortControllerRef = useRef<AbortController | null>(null);
 	const parameter = useSelectParameter();
 	const saveParameter = useSaveParameter();
 	const execParameter = useExecParameter();
 	const saveShell = useSaveShell();
 
-	const execParameterRef = useRef(execParameter);
-	const saveParameterRef = useRef(saveParameter);
-	const saveShellRef = useRef(saveShell);
-	const jobLogRef = useRef(jobLog);
-	execParameterRef.current = execParameter;
-	saveParameterRef.current = saveParameter;
-	saveShellRef.current = saveShell;
-	jobLogRef.current = jobLog;
-
 	useEffect(() => {
 		setParamInputs(parameter.inputParam ?? {});
 	}, [parameter.inputParam, setParamInputs]);
 
+	// アンマウント時に実行中の処理を中断する
 	useEffect(() => {
-		if (running.command === "" || executingRef.current) {
-			return;
-		}
-		executingRef.current = true;
-		setIsLoading(true);
-		jobLogRef.current.reset();
-		const controller = new AbortController();
-		abortControllerRef.current = controller;
-
-		const handleResult = (result: Running) => {
-			if (!controller.signal.aborted) {
-				executingRef.current = false;
-				abortControllerRef.current = null;
-				setRunning(result);
-				setIsLoading(false);
-			}
-		};
-
-		const formValues = prop.formData(false).values;
-		const paramExtra = Object.fromEntries(
-			Object.entries(paramInputs).map(([k, v]) => [`-P${k}`, v]),
-		);
-		if (running.command === "exec") {
-			execParameterRef.current(
-				{ ...formValues, ...paramExtra },
-				handleResult,
-				controller.signal,
-				jobLogRef.current.append,
-			);
-		} else if (running.command === "save") {
-			saveParameterRef.current(
-				{ ...formValues, ...paramExtra },
-				handleResult,
-				controller.signal,
-			);
-		} else if (running.command === "saveShell") {
-			saveShellRef.current(handleResult, controller.signal);
-		}
-
 		return () => {
 			abortControllerRef.current?.abort();
-			abortControllerRef.current = null;
 		};
-	}, [running.command]);
+	}, []);
+
+	// 実行ごとにAbortControllerを作り、中断・置き換え後の結果は捨てる
+	const run = async (
+		call: (signal: AbortSignal) => Promise<Running | null>,
+	) => {
+		const controller = new AbortController();
+		abortControllerRef.current = controller;
+		jobLog.reset();
+		setIsLoading(true);
+		const result = await call(controller.signal);
+		// 応答後の処理中に中断されることもあるため、nullでなくてもsignalを確認する
+		if (result && !controller.signal.aborted) {
+			setRunning(result);
+			setIsLoading(false);
+		}
+	};
+
+	const withParamInputs = (values: FormValues): FormValues => ({
+		...values,
+		...Object.fromEntries(
+			Object.entries(paramInputs).map(([k, v]) => [`-P${k}`, v]),
+		),
+	});
+
+	const handleExec = () => {
+		const input = prop.formData(true);
+		if (input.validationError) {
+			return;
+		}
+		run((signal) =>
+			execParameter(withParamInputs(input.values), signal, jobLog.append),
+		);
+	};
+
+	const handleSave = () =>
+		run((signal) =>
+			saveParameter(withParamInputs(prop.formData(false).values), signal),
+		);
+
+	const handleSaveShell = () => run((signal) => saveShell(signal));
 
 	const openDirectory = async (path: string) => {
 		await core.invoke("open_directory", { path });
@@ -106,8 +95,6 @@ export default function Footer(prop: {
 
 	const handleCancel = () => {
 		abortControllerRef.current?.abort();
-		abortControllerRef.current = null;
-		executingRef.current = false;
 		setIsLoading(false);
 		setRunning(RESET_RUNNING);
 	};
@@ -178,39 +165,9 @@ export default function Footer(prop: {
 							command="dialogs/parameters"
 							label="Parameters (-P)"
 						/>
-						<BlueButton
-							title="Exec"
-							handleClick={() => {
-								const input = prop.formData(true);
-								if (!input.validationError) {
-									setRunning({
-										command: "exec",
-										resultMessage: "",
-										resultDir: "",
-									});
-								}
-							}}
-						/>
-						<BlueButton
-							title="Save"
-							handleClick={() => {
-								setRunning({
-									command: "save",
-									resultMessage: "",
-									resultDir: "",
-								});
-							}}
-						/>
-						<BlueButton
-							title="Save Shell"
-							handleClick={() => {
-								setRunning({
-									command: "saveShell",
-									resultMessage: "",
-									resultDir: "",
-								});
-							}}
-						/>
+						<BlueButton title="Exec" handleClick={handleExec} />
+						<BlueButton title="Save" handleClick={handleSave} />
+						<BlueButton title="Save Shell" handleClick={handleSaveShell} />
 						<span className="text-sm text-content-muted">*Required</span>
 					</div>
 				</div>
