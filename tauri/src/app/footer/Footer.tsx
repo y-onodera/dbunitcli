@@ -101,22 +101,18 @@ export default function Footer(prop: {
 
 	if (isLoading) {
 		return (
-			<div className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-modal ">
-				<div className="relative p-4 w-full max-w-md max-h-full">
-					<div className="relative bg-surface rounded-lg shadow-card ">
-						<div className="p-4 md:p-5 flex flex-col justify-center items-center">
-							<h3 className="mb-5 text-lg font-normal text-content-muted ">
-								Now Execution
-							</h3>
-							<div className="block animate-spin h-10 w-10 border-4 border-primary rounded-full border-t-transparent" />
-							<JobLog lines={jobLog.logs} className="mt-4" />
-							<div className="mt-4">
-								<WhiteButton title="Abandoned" handleClick={handleCancel} />
-							</div>
-						</div>
+			<ResultDialog hidden={false}>
+				<div className="p-4 md:p-5 flex flex-col justify-center items-center">
+					<h3 className="mb-5 text-lg font-normal text-content-muted ">
+						Now Execution
+					</h3>
+					<div className="block animate-spin h-10 w-10 border-4 border-primary rounded-full border-t-transparent" />
+					<JobLog lines={jobLog.logs} className="mt-4" />
+					<div className="mt-4">
+						<WhiteButton title="Abandoned" handleClick={handleCancel} />
 					</div>
 				</div>
-			</div>
+			</ResultDialog>
 		);
 	}
 
