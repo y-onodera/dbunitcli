@@ -37,6 +37,8 @@
 	--color-surface-subtle: oklch(0.985 0 0); /* gray-50 */
 	--color-surface-muted: oklch(0.961 0 0); /* gray-100 */
 	--color-surface-disabled: oklch(0.922 0 0); /* gray-200 */
+	--color-surface-hover: oklch(0.872 0 0); /* gray-300 */
+	--color-overlay: oklch(0 0 0 / 0.5); /* black/50 */
 
 	/* Input */
 	--color-input: oklch(0.985 0 0); /* gray-50 */

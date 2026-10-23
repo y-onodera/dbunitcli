@@ -103,7 +103,7 @@ export function Fieldset(props: { children: ReactNode; legend?: string }) {
 	return (
 		<fieldset className="border border-border-subtle p-2.5 m-2">
 			{props.legend && (
-				<legend className="text-xs font-semibold text-content-secondary px-1">
+				<legend className="text-caption font-semibold px-1">
 					{props.legend}
 				</legend>
 			)}
@@ -275,9 +275,7 @@ export function ArraysText(props: {
 		<>
 			{showLabel && props.showCaption && (
 				<div className="grid grid-cols-5 pb-1">
-					<span className="col-start-2 text-xs text-content-secondary">
-						column
-					</span>
+					<span className="col-start-2 text-caption">column</span>
 				</div>
 			)}
 			<div className="grid grid-cols-5 pb-2">
@@ -385,10 +383,8 @@ export function KeyValueText(props: {
 		<>
 			{props.index === 0 && (
 				<div className="grid grid-cols-5 pb-1">
-					<span className="col-start-2 text-xs text-content-secondary">
-						name
-					</span>
-					<span className="col-start-3 col-span-2 ml-1 text-xs text-content-secondary">
+					<span className="col-start-2 text-caption">name</span>
+					<span className="col-start-3 col-span-2 ml-1 text-caption">
 						expression
 					</span>
 				</div>

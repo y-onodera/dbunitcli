@@ -108,7 +108,7 @@ export default function Footer(prop: {
 							<h3 className="mb-5 text-lg font-normal text-content-muted ">
 								Now Execution
 							</h3>
-							<div className="block animate-spin h-10 w-10 border-4 border-link rounded-full border-t-transparent" />
+							<div className="block animate-spin h-10 w-10 border-4 border-primary rounded-full border-t-transparent" />
 							<JobLog lines={jobLog.logs} className="mt-4" />
 							<div className="mt-4">
 								<WhiteButton title="Abandoned" handleClick={handleCancel} />
@@ -206,9 +206,5 @@ function ParamsStatus(prop: { count: number }) {
 	if (prop.count === 0) {
 		return <span className="text-sm text-content-muted">— No parameters</span>;
 	}
-	return (
-		<span className="text-sm font-semibold text-content">
-			— {prop.count} parameter(s) set
-		</span>
-	);
+	return <span className="text-label">— {prop.count} parameter(s) set</span>;
 }

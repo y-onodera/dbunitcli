@@ -72,12 +72,8 @@ export default function SidebarHelpLink() {
 										setShowMenu(false);
 									}}
 								>
-									<span className="block text-sm font-semibold text-content">
-										{item.label}
-									</span>
-									<span className="block text-xs text-content-secondary">
-										{item.description}
-									</span>
+									<span className="block text-label">{item.label}</span>
+									<span className="block text-caption">{item.description}</span>
 								</Button>
 							</li>
 						))}

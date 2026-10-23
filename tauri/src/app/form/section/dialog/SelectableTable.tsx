@@ -59,7 +59,7 @@ export default function SelectableTable({
 									type="checkbox"
 									checked={allSelected}
 									onChange={(e) => onToggleAll(filteredItems, e.target.checked)}
-									className="w-4 h-4 accent-primary-hover"
+									className="w-4 h-4 text-primary"
 								/>
 							</Th>
 							<Th>{columnLabel}</Th>
@@ -75,7 +75,7 @@ export default function SelectableTable({
 										checked={selected.has(item)}
 										onChange={() => onToggle(item)}
 										onClick={(e) => e.stopPropagation()}
-										className="w-4 h-4 accent-primary-hover"
+										className="w-4 h-4 text-primary"
 									/>
 								</Td>
 								<Td>{renderItem(item)}</Td>

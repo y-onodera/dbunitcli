@@ -63,7 +63,7 @@ export default function SettingTable<T extends Displayable>({
 				/>
 			)}
 			<table className="table-fixed w-full">
-				<caption className="caption-top text-sm font-semibold text-content text-left px-2 py-1">
+				<caption className="caption-top text-label text-left px-2 py-1">
 					{caption}
 				</caption>
 				<thead className="text-xs text-content uppercase bg-surface-subtle">

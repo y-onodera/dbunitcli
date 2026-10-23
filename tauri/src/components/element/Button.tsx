@@ -44,7 +44,7 @@ export function WhiteButton(props: {
 	return (
 		<Button
 			buttonstyle=""
-			bgcolor="bg-surface hover:bg-input-disabled"
+			bgcolor="bg-surface hover:bg-surface-hover"
 			textstyle="text-center text-sm font-semibold text-content-muted"
 			border="border border-border"
 			handleClick={props.handleClick}
@@ -94,7 +94,7 @@ export function Button(props: {
                          transition duration-100
                          ring-primary-ring
                          focus-visible:ring-3
-                         disabled:bg-surface-disabled disabled:text-content-disabled disabled:border-surface-disabled disabled:cursor-not-allowed disabled:hover:bg-surface-disabled`}
+                         disabled:bg-surface-disabled disabled:text-content-disabled disabled:border-border-subtle disabled:cursor-not-allowed disabled:hover:bg-surface-disabled`}
 			onClick={props.handleClick}
 		>
 			{props.children}
