@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 
 const BODY_SIZE = {
-	sm: "w-[480px] p-4",
-	md: "w-[640px] p-4",
-	lg: "w-[800px] p-4",
+	sm: "w-dialog-sm p-4",
+	md: "w-dialog-md p-4",
+	lg: "w-dialog-lg p-4",
 	// 幅固定ではなく最小幅のみ指定し、内容に応じて広がる
-	auto: "min-w-[600px] p-4",
+	auto: "min-w-dialog-min p-4",
 	// 幅は親に任せる
 	fluid: "p-4 rounded-lg mt-2",
 } as const;

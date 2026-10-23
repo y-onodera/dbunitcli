@@ -56,7 +56,7 @@ export default function ColumnSelectDialog({
 	}
 
 	return (
-		<ModalOverlay width="w-[32rem]" zClass="z-modal-nested">
+		<ModalOverlay width="w-lg" zClass="z-modal-nested">
 			<DialogTitle>Select Columns</DialogTitle>
 			{renderBody()}
 			<DialogActions>
