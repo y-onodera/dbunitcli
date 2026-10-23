@@ -87,13 +87,19 @@ public class Workspace {
         System.setProperty(FileResources.PROPERTY_WORKSPACE, this.path().toString());
     }
 
-    public void contextReload(final String workspace, final String datasetBase, final String resultBase) {
+    public void contextReload(final String workspace, final String datasetBase, final String resultBase, final String env) {
         System.setProperty(FileResources.PROPERTY_WORKSPACE, workspace);
         if (Strings.isNotEmpty(datasetBase)) {
             System.setProperty(FileResources.PROPERTY_DATASET_BASE, datasetBase);
         }
         if (Strings.isNotEmpty(resultBase)) {
             System.setProperty(FileResources.PROPERTY_RESULT_BASE, resultBase);
+        }
+        // 未指定ならworkspace直下のenv.propertiesを使うためプロパティを消す
+        if (Strings.isNotEmpty(env)) {
+            System.setProperty(FileResources.PROPERTY_ENV, env);
+        } else {
+            System.clearProperty(FileResources.PROPERTY_ENV);
         }
         FileResources.baseDir().mkdirs();
         final var newWorkspace = Workspace.builder().setPath(workspace).build();
@@ -135,6 +141,7 @@ public class Workspace {
                 () -> FileResources.datasetDir().toPath()));
         context.setResultBase(rawOrAbsolute(FileResources.PROPERTY_RESULT_BASE,
                 () -> FileResources.resultDir().toPath()));
+        context.setEnv(Optional.ofNullable(System.getProperty(FileResources.PROPERTY_ENV)).orElse(""));
         context.setSettingBase(withRawWorkspacePrefix(
                 FileResources.settingDir().toPath().toAbsolutePath().normalize().toString(),
                 expandedWorkspace, rawWorkspace));
@@ -193,6 +200,8 @@ public class Workspace {
         template.add("datasetBase", rawOrRelative(launchDir, FileResources.PROPERTY_DATASET_BASE, () -> FileResources.datasetDir().toPath().toAbsolutePath().normalize()));
         template.add("resultBaseProperty", FileResources.PROPERTY_RESULT_BASE);
         template.add("resultBase", rawOrRelative(launchDir, FileResources.PROPERTY_RESULT_BASE, () -> FileResources.resultDir().toPath().toAbsolutePath().normalize()));
+        template.add("envProperty", FileResources.PROPERTY_ENV);
+        template.add("env", System.getProperty(FileResources.PROPERTY_ENV));
         template.add("commandType", commandType.name());
         template.add("name", name);
         final String content = template.render();

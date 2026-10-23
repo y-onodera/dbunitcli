@@ -8,12 +8,13 @@ CSV・Excel・DB間のデータ比較・変換・生成のためのCLIツール�
 - **Generate**: StringTemplate 4 によるテンプレートベース生成（SQL・設定ファイル等）
 - **Run**: SQL / ANT スクリプト / バッチファイルの実行
 - **Parameterize**: 設定ファイルベースのバッチ処理
+- **Scaffold**: Generate固定成果物型をカスタマイズするための雛型生成
 
 ## パッケージ構成
 
 ### `yo.dbunitcli.application`
-- `command/` — Compare / Convert / Generate / Run / Parameterize の実装
-- `dto/` — コマンド用DTO、`json/` — JSON設定パーサー、`option/` — Picocli オプション
+- `command/` — 各コマンドの実装とコマンドDTO
+- `dto/` — オプション用DTO、`json/` — JSON設定パーサー、`option/` — Picocli オプション
 
 ### `yo.dbunitcli.dataset`
 - `compare/` — 差分検出・レポート生成
@@ -34,8 +35,8 @@ CSV・Excel・DB間のデータ比較・変換・生成のためのCLIツール�
 
 ## 技術スタック
 - DBUnit、Apache POI、StringTemplate 4、Picocli
-- SLF4J + Logback、JUnit 5 + JMockit
-- Java 21、GraalVM Native Image 対応
+- SLF4J + Logback、JUnit 5
+- Java 25、GraalVM Native Image 対応
 
-## ログ
-`src/main/resources/logback.xml`（Logback + SLF4J）
+## テスト
+ルートで `mvn test -pl core`（`-Dtest=クラス名$ネスト#メソッド` で絞り込み）。統合テストは `-PIntegrationTest`

@@ -1,9 +1,13 @@
 package yo.dbunitcli.resource;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 
 class FileResourcesTest {
@@ -411,6 +415,51 @@ class FileResourcesTest {
             Assertions.assertEquals(expected, result);
 
             FileResourcesTest.restore();
+        }
+    }
+
+    @Nested
+    class SearchParameterizeTemplateTest {
+        @TempDir
+        Path workspace;
+
+        @BeforeEach
+        void setProperty() throws IOException {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(FileResourcesTest.backup);
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, this.workspace.toString());
+            System.setProperties(newProperty);
+            Files.createDirectories(this.workspace.resolve(FileResources.OPTION_PARAMETERIZE_TEMPLATE_PATH));
+            Files.createDirectories(this.workspace.resolve(FileResources.RESOURCES_TEMPLATE_PATH));
+        }
+
+        @AfterEach
+        void restore() {
+            FileResourcesTest.restore();
+        }
+
+        @Test
+        void searchParameterizeTemplateDir() throws IOException {
+            final Path expected = Files.createFile(this.workspace.resolve(FileResources.OPTION_PARAMETERIZE_TEMPLATE_PATH).resolve("param.txt"));
+            Files.createFile(this.workspace.resolve(FileResources.RESOURCES_TEMPLATE_PATH).resolve("param.txt"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchParameterizeTemplate("param.txt"));
+        }
+
+        @Test
+        void searchTemplateDirIfNotFoundParameterizeTemplateDir() throws IOException {
+            final Path expected = Files.createFile(this.workspace.resolve(FileResources.RESOURCES_TEMPLATE_PATH).resolve("param.txt"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchParameterizeTemplate("param.txt"));
+        }
+
+        @Test
+        void searchWorkspaceIfNotFoundTemplateDir() throws IOException {
+            final Path expected = Files.createFile(this.workspace.resolve("param.txt"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchParameterizeTemplate("param.txt"));
+        }
+
+        @Test
+        void emptyPath() {
+            Assertions.assertNull(FileResources.searchParameterizeTemplate(""));
         }
     }
 }

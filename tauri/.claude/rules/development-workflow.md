@@ -6,12 +6,6 @@ paths:
 
 # 作業方法
 
-## 新コマンド追加
-1. `src/app/form/` にフォームコンポーネントを作成
-2. `src/model/CommandParam.ts` にモデル型を追加
-3. Context プロバイダを更新
-4. `Form.tsx` のルーティングに追加
-
 ## バックエンド統合
 - Java プロセス引数は `lib.rs` で設定
 - HTTP API → fetch ユーティリティ、FS操作 → Tauri dialog プラグイン

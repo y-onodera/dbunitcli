@@ -19,16 +19,26 @@ export const COMMANDS: Command[] = [
 	"run",
 	"parameterize",
 ];
+export type InputParam = { [key: string]: string };
 export class SelectParameter {
 	readonly name: string;
 	readonly command: Command;
-	readonly options: Options;
+	readonly options: Options & { inputParam?: InputParam };
+	// 保存済みの-Pオプション。読み込みごとに別インスタンスにしてFooterの入力を初期化する
+	readonly inputParam: InputParam;
 
-	constructor(response: Options, command: Command, name: string) {
+	constructor(
+		response: Options & { inputParam?: InputParam },
+		command: Command,
+		name: string,
+		inputParam?: InputParam,
+	) {
 		this.name = name;
 		this.command = command;
 		this.options = response;
 		this.options.command = this.command;
+		this.inputParam = inputParam ?? response.inputParam ?? {};
+		this.options.inputParam = this.inputParam;
 	}
 }
 export type Options =

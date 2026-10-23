@@ -28,6 +28,7 @@ class WorkspaceTest {
         System.clearProperty(FileResources.PROPERTY_WORKSPACE);
         System.clearProperty(FileResources.PROPERTY_DATASET_BASE);
         System.clearProperty(FileResources.PROPERTY_RESULT_BASE);
+        System.clearProperty(FileResources.PROPERTY_ENV);
         this.workspace = Workspace.builder()
                 .setPath(this.tempDir.toString())
                 .build();
@@ -39,9 +40,10 @@ class WorkspaceTest {
         final String newWorkspace = this.tempDir.resolve("new").toString();
         final String datasetBase = "dataset";
         final String resultBase = "result";
+        final String env = "env/staging.properties";
 
         // Act
-        this.workspace.contextReload(newWorkspace, datasetBase, resultBase);
+        this.workspace.contextReload(newWorkspace, datasetBase, resultBase, env);
 
         // Assert
         final WorkspaceDto dto = this.workspace.toDto();
@@ -49,7 +51,22 @@ class WorkspaceTest {
         assertEquals(newWorkspace, context.getWorkspace());
         assertEquals(new File(datasetBase).getAbsolutePath(), context.getDatasetBase());
         assertEquals(new File(resultBase).getAbsolutePath(), context.getResultBase());
+        assertEquals(env, context.getEnv());
         assertEquals(Path.of(newWorkspace), this.workspace.path());
+    }
+
+    @Test
+    void contextReload_envが空ならデフォルトのenvプロパティに戻る() {
+        // Arrange
+        this.workspace.contextReload(this.tempDir.toString(), "", "", "env/staging.properties");
+
+        // Act
+        this.workspace.contextReload(this.tempDir.toString(), "", "", "");
+
+        // Assert
+        assertNull(System.getProperty(FileResources.PROPERTY_ENV));
+        assertEquals("", this.workspace.toDto().getContext().getEnv());
+        assertEquals(new File(this.tempDir.toString(), FileResources.DEFAULT_ENV_PATH), FileResources.envFile());
     }
 
     @Test

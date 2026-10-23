@@ -140,7 +140,7 @@ public record ParameterizeOption(
         } else if (Strings.isEmpty(this.template)) {
             return "";
         } else {
-            template = FileResources.searchTemplate(this.template);
+            template = FileResources.searchParameterizeTemplate(this.template);
         }
         if(template == null) {
             return "";

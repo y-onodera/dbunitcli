@@ -33,13 +33,18 @@ export const useWorkspaceUpdate = () => {
 	const setContext = useSetWorkspaceContext();
 	const applyResources = useApplyWorkspaceResources();
 	const environment = useEnvironment();
-	return async (workspace: string, datasetBase: string, resultBase: string) => {
+	return async (
+		workspace: string,
+		datasetBase: string,
+		resultBase: string,
+		env: string,
+	) => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl}workspace/update`,
 			options: {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ workspace, datasetBase, resultBase }),
+				body: JSON.stringify({ workspace, datasetBase, resultBase, env }),
 			},
 		};
 		await fetchData(fetchParams)
@@ -50,6 +55,7 @@ export const useWorkspaceUpdate = () => {
 						workspace,
 						datasetBase,
 						resultBase,
+						env,
 					}),
 				);
 				applyResources(resources);

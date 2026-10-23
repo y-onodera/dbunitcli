@@ -67,4 +67,26 @@ class CommandParametersTest {
         Assertions.assertTrue(Arrays.stream(args).anyMatch(it -> it.equals("-Pkey2=value2")),
                 "-Pkey2=value2 が保持されること");
     }
+
+    @Test
+    void shrink_Pオプションが保持される() {
+        final Map<String, String> input = new LinkedHashMap<>();
+        input.put("-src.src", "some/path");
+        input.put("-Pkey1", "value1");
+        input.put("-Pkey2", "a=b");
+
+        final String[] args = new CommandParameters(Type.convert, input).shrink().args();
+
+        Assertions.assertTrue(Arrays.asList(args).contains("-src.src=some/path"));
+        Assertions.assertTrue(Arrays.asList(args).contains("-Pkey1=value1"));
+        Assertions.assertTrue(Arrays.asList(args).contains("-Pkey2=a=b"));
+    }
+
+    @Test
+    void inputParam_Pオプションをキーと値で返す() {
+        final CommandParameters params = new CommandParameters(Type.convert
+                , new String[]{"-src.src=some/path", "-Pkey1=value1", "-Pkey2=a=b"});
+
+        Assertions.assertEquals(Map.of("key1", "value1", "key2", "a=b"), params.inputParam());
+    }
 }
