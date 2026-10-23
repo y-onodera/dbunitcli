@@ -51,6 +51,14 @@ function buildDatasetRequestBody(
 	});
 }
 
+// ソース未指定・none・JDBC未接続のsqlではsidecarへ問い合わせない
+function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
+	if (!info.srcPath || !info.srcType || info.srcType === "none") {
+		return false;
+	}
+	return info.srcType !== "sql" || connectionOk;
+}
+
 async function fetchTableNames(
 	apiUrl: string,
 	info: DatasetSrcInfo,
@@ -86,12 +94,10 @@ export const useDatasetTableNames = (
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const paramInputs = useParamInputs();
 
-	const srcPath = srcInfo.srcPath;
-	const srcType = srcInfo.srcType;
-	const sqlNotReady = srcType === "sql" && !connectionOk;
+	const srcReady = isSrcReady(srcInfo, connectionOk);
 
 	useEffect(() => {
-		if (!srcPath || !srcType || srcType === "none" || sqlNotReady) {
+		if (!srcReady) {
 			setTableNames([]);
 			setLoading(false);
 			return;
@@ -113,7 +119,7 @@ export const useDatasetTableNames = (
 		return () => {
 			controller.abort();
 		};
-	}, [apiUrl, srcPath, srcType, srcInfo, sqlNotReady, jdbcValues, paramInputs]);
+	}, [apiUrl, srcInfo, srcReady, jdbcValues, paramInputs]);
 
 	return { tableNames, loading };
 };
@@ -161,18 +167,10 @@ export const useDatasetTablePreview = (
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const paramInputs = useParamInputs();
 
-	const srcPath = srcInfo.srcPath;
-	const srcType = srcInfo.srcType;
-	const sqlNotReady = srcType === "sql" && !connectionOk;
+	const srcReady = isSrcReady(srcInfo, connectionOk);
 
 	useEffect(() => {
-		if (
-			!srcPath ||
-			!srcType ||
-			srcType === "none" ||
-			sqlNotReady ||
-			!tableName
-		) {
+		if (!srcReady || !tableName) {
 			setPreview(null);
 			setLoading(false);
 			return;
@@ -195,16 +193,7 @@ export const useDatasetTablePreview = (
 		return () => {
 			controller.abort();
 		};
-	}, [
-		apiUrl,
-		srcPath,
-		srcType,
-		srcInfo,
-		sqlNotReady,
-		jdbcValues,
-		tableName,
-		paramInputs,
-	]);
+	}, [apiUrl, srcInfo, srcReady, jdbcValues, tableName, paramInputs]);
 
 	return { preview, loading };
 };
@@ -287,12 +276,10 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const paramInputs = useParamInputs();
 
-	const srcPath = srcInfo.srcPath;
-	const srcType = srcInfo.srcType;
-	const sqlNotReady = srcType === "sql" && !connectionOk;
+	const srcReady = isSrcReady(srcInfo, connectionOk);
 
 	useEffect(() => {
-		if (!srcPath || !srcType || srcType === "none" || sqlNotReady) {
+		if (!srcReady) {
 			setColumnNames([]);
 			return;
 		}
@@ -311,7 +298,7 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 		return () => {
 			controller.abort();
 		};
-	}, [apiUrl, srcInfo, srcPath, srcType, sqlNotReady, jdbcValues, paramInputs]);
+	}, [apiUrl, srcInfo, srcReady, jdbcValues, paramInputs]);
 
 	return columnNames;
 };
