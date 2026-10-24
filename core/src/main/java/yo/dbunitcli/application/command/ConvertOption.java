@@ -40,6 +40,7 @@ public record ConvertOption(Parameter parameter, ResultOption result,
         this.getComparableDataSetLoader()
                 .loadDataSet(this.srcData.getParam()
                         .setConverter(this.result().converter(it -> it.setResultPath(this.result().getResultPath())))
+                        .setParallel(this.result().convertResult().parallelism())
                         .build());
     }
 

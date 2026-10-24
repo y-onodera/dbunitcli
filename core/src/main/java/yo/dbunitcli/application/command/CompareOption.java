@@ -185,7 +185,9 @@ public record CompareOption(
                                                 .build())
                         )
                 );
-        return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
+        return this.getComparableDataSetLoader().loadDataSet(loadParam
+                .setParallel(this.result().convertResult().parallelism())
+                .build());
     }
 
     public ComparableDataSet oldDataSet() {
@@ -198,7 +200,9 @@ public record CompareOption(
                                                 .build())
                         )
                 );
-        return this.getComparableDataSetLoader().loadDataSet(loadParam.build());
+        return this.getComparableDataSetLoader().loadDataSet(loadParam
+                .setParallel(this.result().convertResult().parallelism())
+                .build());
     }
 
     public ComparableDataSet resultDataSet() {

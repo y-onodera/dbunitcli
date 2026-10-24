@@ -17,6 +17,11 @@ public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableRegexSplitDataSetProducer.class);
 
     @Override
+    public boolean isParallelizableSource() {
+        return true;
+    }
+
+    @Override
     public ComparableTableMappingTask createTableMappingTask(final Source source) {
         return new RegexSplitTableExecutor(source, this.param);
     }

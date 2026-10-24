@@ -31,13 +31,14 @@ public class XlsConverter implements IDataSetConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XlsConverter.class);
     private static final String ZEROS = "0000000000000000000000000000000000000000000000000000";
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     protected final File resultDir;
     protected final TableExportType tableExport;
     protected final boolean exportEmptyTable;
     protected final boolean exportHeader;
     private final Map<Workbook, Map<Short, CellStyle>> cellStyleMap = new HashMap<>();
+    // SimpleDateFormatはスレッドセーフでないため、インスタンスごとに持つ
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     protected String filename;
     private Workbook workbook;
 
@@ -99,6 +100,11 @@ public class XlsConverter implements IDataSetConverter {
     @Override
     public boolean isSplittable() {
         return this.tableExport != TableExportType.SHEET;
+    }
+
+    @Override
+    public boolean isParallelizable() {
+        return this.tableExport == TableExportType.BOOK;
     }
 
     @Override
@@ -225,7 +231,7 @@ public class XlsConverter implements IDataSetConverter {
     }
 
     protected void setDateCell(final Cell cell, final Date value) {
-        cell.setCellValue(XlsConverter.SDF.format(value));
+        cell.setCellValue(this.dateFormat.format(value));
     }
 
     protected Workbook createWorkbook() {

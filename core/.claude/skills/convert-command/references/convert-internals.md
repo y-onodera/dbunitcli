@@ -14,6 +14,8 @@
 
 全resultType共通: `resultDir`（`-result`）/ `resultPath` / `exportEmptyTable` / `exportHeader`（`table`除く）。
 
+`parallel`（`table`除く）: ソースの並列読込数（`ComparableDataSetParam.parallel`へ渡す。Compareはnew/oldの読込に適用）。未指定はCPUコア数、`1`は逐次。並列化の可否は`ParallelTableMapping.lanes`が判定し、出力テーブルを共有するソースは同じレーン（同一スレッド・元の順）にまとめる。対象はproducerが`isParallelizableSource()`（csv/fixed/reg）かつconverterが`isParallelizable()`（FlatFile系・xls/xlsxのBOOK）またはnull、join・件数分割なしのとき。
+
 ## 実装チェックリスト（変換仕様の変更箇所）
 
 | ファイル（`application/`・`dataset/`配下） | 内容 |

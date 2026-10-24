@@ -17,6 +17,11 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
 
     @Override
+    public boolean isParallelizableSource() {
+        return true;
+    }
+
+    @Override
     public ComparableTableMappingTask createTableMappingTask(final Source source) {
         return new CsvTableExecutor(source, this.param);
     }

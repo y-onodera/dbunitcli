@@ -73,6 +73,13 @@ public interface IDataSetConverter extends IDataSetConsumer {
 
     IDataSetConverter split();
 
+    /**
+     * split()した複数のインスタンスを別スレッドで同時に使えるか（出力先が互いに独立しているか）
+     */
+    default boolean isParallelizable() {
+        return false;
+    }
+
     default boolean isEnableRowProcessing(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
         return metaData.getOrderColumns().length == 0
                 && !metaData.isNeedDistinct()

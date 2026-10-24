@@ -28,6 +28,11 @@ public record ComparableFixedFileDataSetProducer(ComparableDataSetParam param,
     }
 
     @Override
+    public boolean isParallelizableSource() {
+        return true;
+    }
+
+    @Override
     public ComparableTableMappingTask createTableMappingTask(final Source source) {
         return new FixedFileTableExecutor(source, this.param, this.columnLengths);
     }

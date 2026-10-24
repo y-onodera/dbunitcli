@@ -25,6 +25,7 @@ public record DataSetConverterOption(
         , String extension
         , String fixedColumnDefFile
         , String fixedLengthType
+        , String parallel
 ) implements Option {
 
     public DataSetConverterOption(final String prefix, final DataSetConverterDto dto) {
@@ -43,7 +44,22 @@ public record DataSetConverterOption(
                 , dto.getExtension()
                 , dto.getFixedColumnDefFile()
                 , Strings.isNotEmpty(dto.getFixedLengthType()) ? dto.getFixedLengthType() : "char"
+                , DataSetConverterOption.parallel(dto)
         );
+    }
+
+    private static String parallel(final DataSetConverterDto dto) {
+        if (Strings.isEmpty(dto.getParallel())) {
+            return "";
+        }
+        try {
+            if (Integer.parseInt(dto.getParallel().trim()) < 1) {
+                throw new IllegalArgumentException("-parallel must be 1 or more: " + dto.getParallel());
+            }
+        } catch (final NumberFormatException e) {
+            throw new IllegalArgumentException("-parallel must be a number: " + dto.getParallel(), e);
+        }
+        return dto.getParallel().trim();
     }
 
     private static ResultType resultType(final DataSetConverterDto dto) {
@@ -87,6 +103,7 @@ public record DataSetConverterOption(
             } else {
                 result.put("-excelTable", this.excelTable);
             }
+            result.put("-parallel", this.parallel);
         }
         return result;
     }
@@ -107,6 +124,13 @@ public record DataSetConverterOption(
                                     .setFixedColumnDefFile(this.fixedColumnDefFile)
                                     .setFixedLengthType(this.fixedLengthType)
                 ;
+    }
+
+    /**
+     * @return ソースの並列読込数。未指定ならnull（並列化できればCPUコア数で自動）
+     */
+    public Integer parallelism() {
+        return Strings.isEmpty(this.parallel) ? null : Integer.valueOf(this.parallel);
     }
 
     public File getResultDir() {

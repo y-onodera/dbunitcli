@@ -43,6 +43,11 @@ public abstract class FlatFileConverter implements IDataSetConverter {
     }
 
     @Override
+    public boolean isParallelizable() {
+        return true;
+    }
+
+    @Override
     public boolean isExportEmptyTable() {
         return this.exportEmptyTable;
     }
