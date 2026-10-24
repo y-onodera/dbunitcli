@@ -45,17 +45,20 @@
     <tr><td>resultPath</td><td>出力先パスのテンプレート文字列。テーブル名などを変数として使用可能</td></tr>
     <tr><td>exportEmptyTable</td><td>ON にすると、データ行が 0 件のテーブルも出力する（デフォルト: ON）</td></tr>
     <tr><td>exportHeader</td><td>ON にすると、出力ファイルにヘッダ行を含める（デフォルト: ON）</td></tr>
-    <tr><td>parallel</td><td>入力ソース（ファイル）を並列に読み込むスレッド数（table でも表示）。<code>1</code> で逐次処理。空欄なら、並列化できる場合に CPU コア数で並列化する（デフォルト: 空欄）。詳細は下記「並列読込」を参照</td></tr>
+    <tr><td>parallel</td><td>入力ソース（ファイル）を並列に読み込むスレッド数（並列化できる組み合わせのときだけ表示。table でも表示）。<code>1</code> で逐次処理。空欄なら、並列化できる場合に CPU コア数で並列化する（デフォルト: 空欄）。詳細は下記「並列読込」を参照</td></tr>
   </table>
 
   <h2 id="section-parallel">並列読込（parallel）</h2>
   <p>入力ソースが複数ある場合に、ソースごとに別スレッドで読み込み・出力します。出力先のテーブルが同じになるソース同士は同じスレッドで元の順に処理するため、追記の順序は逐次処理と変わりません。</p>
-  <p>次のいずれかに当たる場合は、<code>parallel</code> の指定にかかわらず逐次処理になります。</p>
+  <p><code>parallel</code> は次の組み合わせのときだけ表示されます。</p>
   <ul>
-    <li>入力の srcType が <code>csv</code> / <code>fixed</code> / <code>reg</code> 以外（xls・xlsx・table・sql 等）</li>
+    <li>Convert: 入力の srcType が <code>csv</code> / <code>fixed</code> / <code>reg</code> で、出力形式が <code>xls</code> / <code>xlsx</code> 以外、または <code>excelTable</code> が <code>BOOK</code>（<code>excelTable</code> を <code>SHEET</code> / <code>BOOK</code> に切り替えるとフォームが再構成されます）</li>
+    <li>Compare: new / old のどちらかの srcType が <code>csv</code> / <code>fixed</code> / <code>reg</code>（出力形式は問わない）</li>
+  </ul>
+  <p>表示されていても、次の場合は実行時に逐次処理になります。</p>
+  <ul>
     <li>入力ソースが 1 つだけ、または全ソースが同じテーブルへ出力される</li>
     <li>設定ファイルで join または件数分割（split）を使っている</li>
-    <li>Convert で、出力形式が <code>xls</code> / <code>xlsx</code> で <code>excelTable</code> が <code>SHEET</code>（1 ブックにまとめる）</li>
   </ul>
   <p>Compare では、new / old それぞれの読み込みに適用されます（比較結果の出力自体は並列化しません）。並び替え・重複除去を指定したテーブルは全行をメモリに保持するため、並列数を増やすとメモリ使用量も増えます。</p>
   <p>出力形式が <code>table</code> の場合は、スレッドごとに DB 接続を張って書き込みます（詳細は <a href="result-form/types/table.html">table</a> を参照）。</p>

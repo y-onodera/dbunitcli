@@ -31,4 +31,12 @@ public enum DataSourceType {
     public String getExtension() {
         return null;
     }
+
+    /**
+     * ソースを並列に読み込めるか（{@link ComparableDataSetProducer#isParallelizableSource()}がtrueのproducerを使う形式）。
+     * 画面でparallelを表示するかの判定に使う
+     */
+    public boolean isParallelizable() {
+        return this == csv || this == reg || this == fixed;
+    }
 }

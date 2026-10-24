@@ -6,6 +6,7 @@ import type { ConvertOptions } from "../../../model/SelectParameter";
 import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	convertLoadResponseFixture,
+	convertRefreshExcelTableBookResponseFixture,
 	convertRefreshResultTypeXlsxResponseFixture,
 	convertRefreshSrcTypeTableResponseFixture,
 	convertRefreshSrcTypeXlsxResponseFixture,
@@ -40,7 +41,8 @@ function makeConvertProps(
 		| typeof convertLoadResponseFixture
 		| typeof convertRefreshSrcTypeXlsxResponseFixture
 		| typeof convertRefreshSrcTypeTableResponseFixture
-		| typeof convertRefreshResultTypeXlsxResponseFixture = convertLoadResponseFixture,
+		| typeof convertRefreshResultTypeXlsxResponseFixture
+		| typeof convertRefreshExcelTableBookResponseFixture = convertLoadResponseFixture,
 ): {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
@@ -289,10 +291,51 @@ describe("ConvertFormの描画テスト", () => {
 			).not.toBeInTheDocument();
 		});
 
-		it("resultセクションにparallelが含まれる", () => {
+		it("excelTable=SHEETではparallelを表示しない", () => {
 			render(
 				<ConvertForm
 					{...makeConvertProps(convertRefreshResultTypeXlsxResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector('[name="-result.parallel"]'),
+			).not.toBeInTheDocument();
+		});
+
+		it("excelTableはSHEET・BOOKを候補に持つ", () => {
+			render(
+				<ConvertForm
+					{...makeConvertProps(convertRefreshResultTypeXlsxResponseFixture)}
+				/>,
+			);
+
+			const options = Array.from(
+				document.querySelectorAll("#result_excelTable_list option"),
+			).map((it) => it.getAttribute("value"));
+			expect(options).toEqual(["SHEET", "BOOK"]);
+		});
+
+		it("excelTableをBOOKに変えると再構成する", async () => {
+			const props = makeConvertProps(
+				convertRefreshResultTypeXlsxResponseFixture,
+			);
+			render(<ConvertForm {...props} />);
+
+			const excelTable = querySelectorOrThrow(
+				'input[type="text"][name="-result.excelTable"]',
+			);
+			await userEvent.clear(excelTable);
+			await userEvent.type(excelTable, "BOO");
+			expect(props.handleTypeSelect).not.toHaveBeenCalled();
+			await userEvent.type(excelTable, "K");
+			expect(props.handleTypeSelect).toHaveBeenCalledTimes(1);
+		});
+
+		it("excelTable=BOOKではparallelを表示する", () => {
+			render(
+				<ConvertForm
+					{...makeConvertProps(convertRefreshExcelTableBookResponseFixture)}
 				/>,
 			);
 
@@ -302,28 +345,11 @@ describe("ConvertFormの描画テスト", () => {
 		});
 	});
 
-	describe("parallel（レスポンスに含まれるときだけ表示）", () => {
-		it("csv resultではparallelが表示される", () => {
+	describe("parallel（並列化できるときだけ表示）", () => {
+		it("並列化できない入力（xlsx）ではparallelを表示しない", () => {
 			render(
 				<ConvertForm
 					{...makeConvertProps(convertRefreshSrcTypeXlsxResponseFixture)}
-				/>,
-			);
-
-			expect(
-				document.querySelector('input[type="text"][name="-result.parallel"]'),
-			).toBeInTheDocument();
-		});
-
-		it("レスポンスにparallelが無ければ表示しない", () => {
-			const { parallel: _, ...withoutParallel } =
-				convertLoadResponseFixture.convertResult;
-			render(
-				<ConvertForm
-					{...makeConvertProps({
-						...convertLoadResponseFixture,
-						convertResult: withoutParallel,
-					})}
 				/>,
 			);
 

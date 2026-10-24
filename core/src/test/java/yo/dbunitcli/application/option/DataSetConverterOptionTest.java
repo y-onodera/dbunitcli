@@ -11,7 +11,7 @@ class DataSetConverterOptionTest {
     void parallelismIsNullWhenOmitted() {
         final DataSetConverterOption target = new DataSetConverterOption("result", new DataSetConverterDto());
         Assertions.assertNull(target.parallelism());
-        Assertions.assertEquals("", target.toParameters().get("-parallel"));
+        Assertions.assertEquals("", target.toParametersBuilder(true).build().get("-parallel"));
     }
 
     @Test
@@ -20,7 +20,7 @@ class DataSetConverterOptionTest {
         dto.setParallel(" 4 ");
         final DataSetConverterOption target = new DataSetConverterOption("result", dto);
         Assertions.assertEquals(4, target.parallelism());
-        Assertions.assertEquals("4", target.toParameters().get("-parallel"));
+        Assertions.assertEquals("4", target.toParametersBuilder(true).build().get("-parallel"));
     }
 
     @Test
@@ -34,10 +34,23 @@ class DataSetConverterOptionTest {
     }
 
     @Test
-    void parallelIsShownForTable() {
+    void parallelIsShownOnlyWhenRequested() {
         final DataSetConverterDto dto = new DataSetConverterDto();
         dto.setResultType(ResultType.table);
-        Assertions.assertTrue(new DataSetConverterOption("result", dto).toParameters()
-                .options().containsKey("-result.parallel"));
+        final DataSetConverterOption target = new DataSetConverterOption("result", dto);
+        Assertions.assertTrue(target.toParametersBuilder(true).build().options().containsKey("-result.parallel"));
+        Assertions.assertFalse(target.toParameters().options().containsKey("-result.parallel"));
+    }
+
+    @Test
+    void excelIsParallelizableOnlyForBook() {
+        final DataSetConverterDto dto = new DataSetConverterDto();
+        dto.setResultType(ResultType.xlsx);
+        Assertions.assertFalse(new DataSetConverterOption("result", dto).isParallelizable());
+        dto.setExcelTable("BOOK");
+        Assertions.assertTrue(new DataSetConverterOption("result", dto).isParallelizable());
+        dto.setResultType(ResultType.csv);
+        dto.setExcelTable(null);
+        Assertions.assertTrue(new DataSetConverterOption("result", dto).isParallelizable());
     }
 }

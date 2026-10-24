@@ -33,7 +33,10 @@ public record ConvertOption(Parameter parameter, ResultOption result,
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder()
                 .addComponent("srcData", this.srcData.toParameters())
-                .addComponent("convertResult", this.result().convertResult().toParameters());
+                .addComponent("convertResult", this.result().convertResult()
+                        .toParametersBuilder(this.srcData.srcType().isParallelizable()
+                                && this.result().convertResult().isParallelizable())
+                        .build());
     }
 
     public void convertDataset() {

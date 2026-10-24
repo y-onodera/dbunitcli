@@ -6,6 +6,7 @@ import yo.dbunitcli.application.dto.DataSetConverterDto;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.ResultType;
+import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -73,6 +74,13 @@ public record DataSetConverterOption(
 
     @Override
     public ParametersBuilder toParametersBuilder() {
+        return this.toParametersBuilder(false);
+    }
+
+    /**
+     * @param showParallel -parallel を含めるか（入力側も並列化できるかは呼び出し側が判定する）
+     */
+    public ParametersBuilder toParametersBuilder(final boolean showParallel) {
         final ParametersBuilder result = new ParametersBuilder(this.getPrefix());
         result.put("-resultType", this.resultType, ResultType.class);
         if (this.resultType == null) {
@@ -81,9 +89,11 @@ public record DataSetConverterOption(
         final ResultType type = ResultType.valueOf(this.resultType.name());
         if (type == ResultType.table) {
             result.put("-op", this.operation == null ? DbOperation.CLEAN_INSERT : this.operation
-                          , DbOperation.class)
-                  .put("-parallel", this.parallel)
-                  .addComponent("jdbc", this.jdbcOption.toParameters());
+                          , DbOperation.class);
+            if (showParallel) {
+                result.put("-parallel", this.parallel);
+            }
+            result.addComponent("jdbc", this.jdbcOption.toParameters());
         } else {
             result.putDir("-result", this.resultDir, BaseDir.RESULT)
                   .put("-resultPath", this.resultPath)
@@ -104,9 +114,19 @@ public record DataSetConverterOption(
             } else {
                 result.put("-excelTable", this.excelTable);
             }
-            result.put("-parallel", this.parallel);
+            if (showParallel) {
+                result.put("-parallel", this.parallel);
+            }
         }
         return result;
+    }
+
+    /**
+     * 出力側が並列書込に対応するか（xls/xlsxは1ブックにまとめるSHEETでは不可）
+     */
+    public boolean isParallelizable() {
+        return (this.resultType != ResultType.xls && this.resultType != ResultType.xlsx)
+                || XlsConverter.TableExportType.BOOK.name().equals(this.excelTable);
     }
 
     public DataSetConverterParam.Builder getParam() {

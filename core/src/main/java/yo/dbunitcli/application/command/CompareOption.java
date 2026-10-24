@@ -130,7 +130,10 @@ public record CompareOption(
                 .put("-settingEncoding", this.settingEncoding)
                 .addComponent("newData", newDataCommandLineArgs.build())
                 .addComponent("oldData", oldDataCommandLineArgs.build())
-                .addComponent("convertResult", this.result().convertResult().toParametersBuilder()
+                // 比較では出力は並列化せず、new/oldの読込だけが対象
+                .addComponent("convertResult", this.result().convertResult()
+                        .toParametersBuilder(this.newData.srcType().isParallelizable()
+                                || this.oldData.srcType().isParallelizable())
                         .put("-resultType", this.result().convertResult().resultType()
                                 , ResultType.class, Filter.exclude(ResultType.table), true)
                         .build())

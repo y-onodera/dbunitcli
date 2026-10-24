@@ -276,4 +276,26 @@ describe("CompareFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 	});
+
+	describe("parallel（new/oldのどちらかを並列に読み込めるときだけ表示）", () => {
+		it("csvのnew/oldではparallelを表示する", () => {
+			render(<CompareForm {...makeCompareProps()} />);
+
+			expect(
+				document.querySelector('input[type="text"][name="-result.parallel"]'),
+			).toBeInTheDocument();
+		});
+
+		it("image比較ではparallelを表示しない", () => {
+			render(
+				<CompareForm
+					{...makeCompareProps(compareRefreshTargetTypeImageResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector('[name="-result.parallel"]'),
+			).not.toBeInTheDocument();
+		});
+	});
 });
