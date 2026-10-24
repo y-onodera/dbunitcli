@@ -5,6 +5,7 @@ import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
+import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
@@ -32,7 +33,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                              String sqlFilePrefix, String sqlFileSuffix,
                              boolean commit, String template, String outputEncoding, DataSetLoadOption srcData,
                              TemplateRenderOption templateOption, boolean includeAllColumns, boolean lazyLoad,
-                             String fixedLength, int defaultLength, String align)
+                             String fixedLength, int defaultLength, String align, String parallel)
         implements CommandLineOption<GenerateDto> {
 
     public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
@@ -57,7 +58,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
              !Strings.isNotEmpty(dto.getLazyLoad()) || Boolean.parseBoolean(dto.getLazyLoad()),
              Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : "",
              Strings.isNotEmpty(dto.getDefaultLength()) ? Integer.parseInt(dto.getDefaultLength()) : 10,
-             Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left");
+             Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left",
+             DataSetConverterOption.parallel(dto.getParallel()));
     }
 
     public static GenerateDto toDto(final String[] args) {
@@ -91,28 +93,43 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     /**
-     * 出力単位のパラメータを順に渡す。unit=tableのテンプレート出力は、並列化できればテーブルごとに別スレッドで
-     * 読込から出力まで行う（処理順は不定）。並列化できる条件はsrcの並列読込と同じで、加えて出力先がテーブルごとに異なること。
-     * 読込タスクを共有するテーブル（1つのソースから複数のテーブルを作る場合）は同じレーンにまとめ、レーン内は元の順に逐次処理する
-     * （タスクは状態を持ちうるため、同じタスクを同時に実行しない）
+     * 出力単位のパラメータを順に渡す。unit=tableは、並列化できればテーブルごとに別スレッドで出力する（処理順は不定）。
+     * <ul>
+     *     <li>テキスト・Excel（lazyLoad）: 読込から出力までをテーブルごとに行う。並列化できる条件はsrcの並列読込と同じ</li>
+     *     <li>Excel（lazyLoadなし）: 読込は全件まとめて済ませ（srcの並列読込の対象）、出力だけを並列にする</li>
+     * </ul>
+     * いずれも出力先がテーブルごとに異なる場合に限る。読込タスクを共有するテーブル（1つのソースから複数のテーブルを作る場合）は
+     * 同じレーンにまとめ、レーン内は元の順に逐次処理する（タスクは状態を持ちうるため、同じタスクを同時に実行しない）
      */
     public void forEachParameter(final Consumer<Parameter> action) {
-        if (this.generateType.isExcel() || this.unit() != ParameterUnit.table) {
+        if (this.unit() != ParameterUnit.table) {
             this.parameterStream().forEach(action);
             return;
         }
         final ComparableDataSetLoader loader = this.getComparableDataSetLoader();
-        final ComparableDataSetProducer producer = this.generateType()
-                .wrapProducer(this, loader.getComparableDataSetProducer(this.dataSetParam()));
-        final List<ParameterUnit.TableTemplate> templates = ParameterUnit.tableTemplates(loader, producer,
-                                                                                         this.unitTableSeparators()).toList();
+        final ComparableDataSetParam param = this.dataSetParam();
+        final List<ParameterUnit.TableTemplate> templates;
+        final boolean parallelizable;
+        if (this.generateType.isExcel() && !this.lazyLoad) {
+            templates = ParameterUnit.loadedTableTemplates(loader, loader.loadDataSet(param)).toList();
+            parallelizable = ParallelTableMapping.parallelism(param) > 1;
+        } else if (this.generateType.isExcel()) {
+            final ComparableDataSetProducer producer = loader.getComparableDataSetProducer(param);
+            templates = ParameterUnit.streamingTableTemplates(loader, producer).toList();
+            parallelizable = ParallelTableMapping.isParallelizable(producer);
+        } else {
+            final ComparableDataSetProducer producer = this.generateType()
+                    .wrapProducer(this, loader.getComparableDataSetProducer(param));
+            templates = ParameterUnit.tableTemplates(loader, producer, this.unitTableSeparators()).toList();
+            parallelizable = ParallelTableMapping.isParallelizable(producer);
+        }
         final List<List<ParameterUnit.TableTemplate>> lanes = ParallelTableMapping.groupByShared(templates,
-                templates.stream().map(it -> it.dto().getTask().tasks().toList()).toList());
-        if (lanes.size() < 2 || !ParallelTableMapping.isParallelizable(producer) || this.hasSameResultFile(templates)) {
+                templates.stream().map(it -> it.tasks().toList()).toList());
+        if (lanes.size() < 2 || !parallelizable || this.hasSameResultFile(templates)) {
             templates.forEach(it -> action.accept(it.load()));
             return;
         }
-        ParallelTableMapping.forEach(producer.param(), lanes,
+        ParallelTableMapping.forEach(param, lanes,
                                      (lane, resources, first) -> lane.forEach(
                                              it -> action.accept((first ? it : it.forWorker(resources)).load())));
     }
@@ -157,8 +174,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         return this.templateOption.getTemplateRender().render(this.generateType().resultPathTemplate(this), param);
     }
 
-    public void write(final File resultFile, final Parameter param) throws IOException {
-        this.generateType().write(this, resultFile, param);
+    public GenerateType.Writer writer() throws IOException {
+        return this.generateType().writer(this);
     }
 
     @Override
@@ -207,6 +224,9 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             default -> {
             }
         }
+        if (this.isParallelizable()) {
+            result.put("-parallel", this.parallel);
+        }
         result.addComponent("srcData", srcComponent.build());
         if (!this.generateType.isFixedTemplate()) {
             result.addComponent("templateOption", this.templateOptionArgs());
@@ -218,6 +238,21 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         return result;
     }
 
+    /**
+     * -parallelを表示するか。srcを並列に読み込める形式で、generateTypeが並列化に対応する場合
+     */
+    public boolean isParallelizable() {
+        return this.srcData.srcType() != null && this.srcData.srcType().isParallelizable()
+                && this.generateType.isParallelizable();
+    }
+
+    /**
+     * @return 並列数。未指定ならnull（並列化できればCPUコア数で自動）
+     */
+    public Integer parallelism() {
+        return Strings.isEmpty(this.parallel) ? null : Integer.valueOf(this.parallel);
+    }
+
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
         if (this.generateType().loadData() && Strings.isEmpty(this.srcData.getSetting())) {
@@ -227,7 +262,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             }
         }
         builder.setUseJdbcMetaData(this.generateType().useJdbcMetaData())
-               .setLoadData(this.generateType().loadData());
+               .setLoadData(this.generateType().loadData())
+               .setParallel(this.parallelism());
         return builder.build();
     }
 

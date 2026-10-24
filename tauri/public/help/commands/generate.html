@@ -68,9 +68,24 @@
   <table>
     <tr><th>項目</th><th>説明</th></tr>
     <tr><td>template</td><td><a href="../sections/template.html">テンプレート</a>ファイルのパス（<code>txt</code> / <code>xlsx</code> / <code>xls</code> タイプで使用）</td></tr>
+    <tr><td>parallel</td><td>並列処理のスレッド数（並列化できる組み合わせのときだけ表示）。<code>1</code> で逐次処理。空欄なら、並列化できる場合に CPU コア数で並列化する（デフォルト: 空欄）。詳細は下記「並列処理」を参照</td></tr>
     <tr><td>result</td><td>生成結果ファイルを配置するディレクトリ</td></tr>
     <tr><td>resultPath</td><td><code>result</code> ディレクトリからの相対パス（テンプレート変数を使用可能）</td></tr>
     <tr><td>outputEncoding</td><td>出力ファイルの文字コード（<code>txt</code> タイプのみ、デフォルト: <code>UTF-8</code>）</td></tr>
   </table>
+
+  <h2 id="section-parallel">並列処理（parallel）</h2>
+  <p><code>parallel</code> は、src の srcType が <code>file</code> / <code>dir</code> 以外で、generateType が <code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code> 以外のときだけ表示されます。指定したスレッド数は次の両方に使われます。</p>
+  <ul>
+    <li><strong>src の読み込み</strong>: Convert の <a href="../sections/result-form.html">並列読込</a> と同じ条件・方法で、ソースごとに別スレッドで読み込みます</li>
+    <li><strong><code>unit=table</code> の出力</strong>: テーブルごとに別スレッドで出力します（<code>txt</code> / <code>xlsx</code> / <code>xls</code> と固定成果物の <code>sql</code>）。<code>txt</code> と、<code>lazyLoad</code> を ON にした <code>xlsx</code> / <code>xls</code> では、テーブルごとの読み込みから出力までを並列に行います。<code>lazyLoad</code> が OFF の <code>xlsx</code> / <code>xls</code> は、全件を読み込んでから出力だけを並列にします</li>
+  </ul>
+  <p>テーブルごとの出力ファイルは並列に書かれるため、書き込まれる順番は不定です（各ファイルの内容は逐次処理と同じです）。表示されていても、次の場合は <code>unit=table</code> の出力を逐次処理します。</p>
+  <ul>
+    <li>出力するテーブルが 1 つだけ</li>
+    <li>複数のテーブルが同じファイルへ出力される（<code>resultPath</code> にテーブル名などが含まれていない）。この場合は逐次処理と同じく最後のテーブルの内容が残ります</li>
+    <li>src の設定ファイルで join または件数分割（split）を使っている（<code>lazyLoad</code> が OFF の <code>xlsx</code> / <code>xls</code> を除く）</li>
+  </ul>
+  <p>1 つのソースから複数のテーブルを作る場合（サブテーブルへの分割など）、それらのテーブルは同じスレッドで元の順に処理します。src の srcType が <code>table</code> / <code>sql</code> の場合は、スレッドごとに DB 接続を張って読み込みます（接続数は最大で並列数）。テーブルごとの出力を並列にすると、同時に読み込む・保持するテーブルの数だけメモリ使用量も増えます。</p>
 </body>
 </html>

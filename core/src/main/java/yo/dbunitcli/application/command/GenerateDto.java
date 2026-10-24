@@ -42,6 +42,8 @@ public class GenerateDto extends CommandDto {
     private String defaultLength;
     @CommandLine.Option(names = "-align", description = "column alignment for fixedColumnDef generation (left or right)")
     private String align;
+    @CommandLine.Option(names = "-parallel", description = "number of threads to load sources and generate per table in parallel. 1 is sequential (default: CPU cores if possible)")
+    private String parallel;
     private DataSetLoadDto srcData = new DataSetLoadDto();
 
     private TemplateRenderDto templateOption = new TemplateRenderDto();
@@ -180,6 +182,14 @@ public class GenerateDto extends CommandDto {
 
     public void setAlign(final String align) {
         this.align = align;
+    }
+
+    public String getParallel() {
+        return this.parallel;
+    }
+
+    public void setParallel(final String parallel) {
+        this.parallel = parallel;
     }
 
     public DataSetLoadDto getSrcData() {

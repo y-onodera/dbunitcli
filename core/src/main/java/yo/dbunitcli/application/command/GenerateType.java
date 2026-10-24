@@ -1,5 +1,6 @@
 package yo.dbunitcli.application.command;
 
+import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ParameterUnit;
@@ -15,6 +16,7 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.stream.Stream;
 
 public enum GenerateType {
@@ -30,31 +32,13 @@ public enum GenerateType {
         }
     }, xlsx(null, null) {
         @Override
-        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
-                throws IOException {
-            JxlsTemplateRender.builder()
-                              .setTemplateParameterAttribute(option.templateOption().templateParameterAttribute())
-                              .setFormulaProcess(option.templateOption().formulaProcess())
-                              .setEvaluateFormulas(option.templateOption().evaluateFormulas())
-                              .setForceFormulaRecalc(option.templateOption().forceFormulaRecalc())
-                              .setFastFormulaProcess(option.templateOption().fastFormulaProcess())
-                              .setDeleteBlankCells(option.templateOption().deleteBlankCells()).build()
-                              .render(option.getTemplatePath(), resultFile, param,
-                                      option.unit() != ParameterUnit.record);
+        public Writer writer(final GenerateOption option) throws IOException {
+            return GenerateType.excelWriter(option);
         }
     }, xls(null, null) {
         @Override
-        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
-                throws IOException {
-            JxlsTemplateRender.builder()
-                              .setTemplateParameterAttribute(option.templateOption().templateParameterAttribute())
-                              .setFormulaProcess(option.templateOption().formulaProcess())
-                              .setEvaluateFormulas(option.templateOption().evaluateFormulas())
-                              .setForceFormulaRecalc(option.templateOption().forceFormulaRecalc())
-                              .setFastFormulaProcess(option.templateOption().fastFormulaProcess())
-                              .setDeleteBlankCells(option.templateOption().deleteBlankCells()).build()
-                              .render(option.getTemplatePath(), resultFile, param,
-                                      option.unit() != ParameterUnit.record);
+        public Writer writer(final GenerateOption option) throws IOException {
+            return GenerateType.excelWriter(option);
         }
     }, settings("settings/settingTemplate.stg", "settings/settingTemplate.txt") {
         @Override
@@ -134,6 +118,11 @@ public enum GenerateType {
         }
 
         @Override
+        public boolean isParallelizable() {
+            return false;
+        }
+
+        @Override
         protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
             return ComparableDdlMetaDataProducer.forSource(producer);
         }
@@ -159,9 +148,8 @@ public enum GenerateType {
         }
 
         @Override
-        protected void write(final GenerateOption option, final File resultFile, final Parameter param)
-                throws IOException {
-            JxlsTemplateGenerator.createTemplate(resultFile, param);
+        public Writer writer(final GenerateOption option) {
+            return JxlsTemplateGenerator::createTemplate;
         }
     }, xlsxSchema("xlsxschema/xlsxSchemaTemplate.stg", "xlsxschema/xlsxSchemaTemplate.txt") {
         @Override
@@ -189,6 +177,11 @@ public enum GenerateType {
         @Override
         protected String resultPathTemplate(final GenerateOption option) {
             return GenerateType.tableFileResultPath(option, ".json");
+        }
+
+        @Override
+        public boolean isParallelizable() {
+            return false;
         }
 
         @Override
@@ -222,6 +215,11 @@ public enum GenerateType {
         }
 
         @Override
+        public boolean isParallelizable() {
+            return false;
+        }
+
+        @Override
         protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
             return ComparableDdlMetaDataProducer.forSource(producer);
         }
@@ -249,6 +247,11 @@ public enum GenerateType {
         @Override
         protected String resultPathTemplate(final GenerateOption option) {
             return GenerateType.tableFileResultPath(option, ".json");
+        }
+
+        @Override
+        public boolean isParallelizable() {
+            return false;
         }
 
         @Override
@@ -289,6 +292,13 @@ public enum GenerateType {
 
     public String defaultSettingsPath() {
         return null;
+    }
+
+    /**
+     * 並列化に対応するか。srcのproducerを包む形式（wrapProducer）は、包んだproducerが並列読込に対応しないため不可
+     */
+    public boolean isParallelizable() {
+        return true;
     }
 
     public boolean isExcel() {
@@ -349,9 +359,31 @@ public enum GenerateType {
         return GenerateType.tableFileResultPath(option, option.sqlFilePrefix(), option.sqlFileSuffix(), ".sql");
     }
 
-    protected void write(final GenerateOption option, final File resultFile, final Parameter param) throws IOException {
-        option.templateOption().getTemplateRender()
-              .write(this.getStGroup(), option.templateString(), param, resultFile, option.outputEncoding());
+    /**
+     * テンプレートの読込・コンパイルを1回だけ行い、出力処理を返す。戻り値は複数スレッドから同時に呼ばれうる
+     */
+    public Writer writer(final GenerateOption option) throws IOException {
+        final TemplateRender render = option.templateOption().getTemplateRender();
+        final ST template = render.compile(this.getStGroup(), option.templateString());
+        return (resultFile, param) -> render.write(template, param, resultFile, option.outputEncoding());
+    }
+
+    private static Writer excelWriter(final GenerateOption option) throws IOException {
+        final JxlsTemplateRender render = JxlsTemplateRender.builder()
+                .setTemplateParameterAttribute(option.templateOption().templateParameterAttribute())
+                .setFormulaProcess(option.templateOption().formulaProcess())
+                .setEvaluateFormulas(option.templateOption().evaluateFormulas())
+                .setForceFormulaRecalc(option.templateOption().forceFormulaRecalc())
+                .setFastFormulaProcess(option.templateOption().fastFormulaProcess())
+                .setDeleteBlankCells(option.templateOption().deleteBlankCells()).build();
+        final byte[] template = Files.readAllBytes(option.getTemplatePath().toPath());
+        final boolean useStreamingEach = option.unit() != ParameterUnit.record;
+        return (resultFile, param) -> render.render(template, resultFile, param, useStreamingEach);
+    }
+
+    @FunctionalInterface
+    public interface Writer {
+        void write(File resultFile, Parameter param) throws IOException;
     }
 
 }

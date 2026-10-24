@@ -50,17 +50,24 @@ public record DataSetConverterOption(
     }
 
     private static String parallel(final DataSetConverterDto dto) {
-        if (Strings.isEmpty(dto.getParallel())) {
+        return DataSetConverterOption.parallel(dto.getParallel());
+    }
+
+    /**
+     * -parallelの値を検証する。未指定は空文字（並列化できればCPUコア数で自動）
+     */
+    public static String parallel(final String parallel) {
+        if (Strings.isEmpty(parallel)) {
             return "";
         }
         try {
-            if (Integer.parseInt(dto.getParallel().trim()) < 1) {
-                throw new IllegalArgumentException("-parallel must be 1 or more: " + dto.getParallel());
+            if (Integer.parseInt(parallel.trim()) < 1) {
+                throw new IllegalArgumentException("-parallel must be 1 or more: " + parallel);
             }
         } catch (final NumberFormatException e) {
-            throw new IllegalArgumentException("-parallel must be a number: " + dto.getParallel(), e);
+            throw new IllegalArgumentException("-parallel must be a number: " + parallel, e);
         }
-        return dto.getParallel().trim();
+        return parallel.trim();
     }
 
     private static ResultType resultType(final DataSetConverterDto dto) {

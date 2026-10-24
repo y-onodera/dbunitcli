@@ -44,6 +44,15 @@
     },
     "value": "sample.stg"
   },
+  "parallel": {
+    "name": "parallel",
+    "attribute": {
+      "type": "TEXT",
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": ""
+  },
   "result": {
     "name": "result",
     "attribute": {

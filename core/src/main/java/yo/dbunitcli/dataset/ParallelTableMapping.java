@@ -125,7 +125,10 @@ public final class ParallelTableMapping {
         }
     }
 
-    static int parallelism(final ComparableDataSetParam param) {
+    /**
+     * @return 並列数。paramで未指定（null・0以下）ならCPUコア数
+     */
+    public static int parallelism(final ComparableDataSetParam param) {
         if (param.parallel() == null || param.parallel() <= 0) {
             return Runtime.getRuntime().availableProcessors();
         }

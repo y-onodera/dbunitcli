@@ -102,6 +102,25 @@ describe("GenerateFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
+		it("parallelがgenerateセクションに表示される（並列化できる組み合わせのときだけレスポンスに含まれる）", () => {
+			render(<GenerateForm {...makeGenerateProps()} />);
+
+			expect(
+				document.querySelector('input[type="text"][name="-parallel"]'),
+			).toBeInTheDocument();
+		});
+
+		it("parallelがレスポンスに無いときは表示しない", () => {
+			const { parallel: _, ...withoutParallel } = generateLoadResponseFixture;
+			render(
+				<GenerateForm
+					{...makeGenerateProps(withoutParallel as GenerateOptions)}
+				/>,
+			);
+
+			expect(document.querySelector('[name="-parallel"]')).toBeNull();
+		});
+
 		it("templateセクションにencodingが含まれる", () => {
 			render(<GenerateForm {...makeGenerateProps()} />);
 

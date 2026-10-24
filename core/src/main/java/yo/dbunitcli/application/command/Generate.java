@@ -15,12 +15,18 @@ public class Generate implements Command<GenerateDto, GenerateOption> {
 
     @Override
     public void exec(final GenerateOption options) {
+        final GenerateType.Writer writer;
+        try {
+            writer = options.writer();
+        } catch (final IOException e) {
+            throw new AssertionError(e);
+        }
         // unit=tableでは複数スレッドから呼ばれる
         options.forEachParameter(param -> {
             final File resultFile = options.resultFile(param);
             try {
                 Files.createDirectories(resultFile.getParentFile().toPath());
-                options.write(resultFile, param);
+                writer.write(resultFile, param);
             } catch (final IOException e) {
                 throw new AssertionError(e);
             }
