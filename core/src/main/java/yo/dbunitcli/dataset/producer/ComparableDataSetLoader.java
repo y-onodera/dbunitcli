@@ -13,7 +13,9 @@ public record ComparableDataSetLoader(Parameter parameter) {
 
     public ComparableDataSet loadDataSet(final ComparableDataSetParam param) {
         ComparableDataSetLoader.LOGGER.info("create DataSetLoader from {}", param);
-        return this.getComparableDataSetProducer(param).loadDataSet();
+        try (final ComparableDataSetProducer producer = this.getComparableDataSetProducer(param)) {
+            return producer.loadDataSet();
+        }
     }
 
     public ComparableDataSetProducer getComparableDataSetProducer(final ComparableDataSetParam param) {

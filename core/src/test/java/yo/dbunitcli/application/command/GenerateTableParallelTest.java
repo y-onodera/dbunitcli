@@ -109,8 +109,8 @@ public class GenerateTableParallelTest {
                     , "-result=" + result.getAbsolutePath()
                     , "-resultPath=sql"
             });
-            // 2つ目以降の作業スレッドで張った接続は処理終了時に閉じる（残るのはsrcを読む元の接続だけ。逐次でも同じく残る）
-            Assertions.assertEquals(before + 1, this.count(stmt, "information_schema.sessions"));
+            // srcを読む元の接続も、2つ目以降の作業スレッドで張った接続も、処理終了時に閉じる
+            Assertions.assertEquals(before, this.count(stmt, "information_schema.sessions"));
             for (final String table : List.of("T1", "T2", "T3", "T4")) {
                 final String sql = Files.readString(new File(result, "sql/" + table + ".sql").toPath(), StandardCharsets.UTF_8);
                 for (int i = 1; i <= 100; i++) {

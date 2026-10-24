@@ -24,6 +24,11 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
     }
 
     @Override
+    public void close() {
+        this.delegate.close();
+    }
+
+    @Override
     public Stream<? extends Source> getSourceStream() {
         return this.delegate.getSourceStream();
     }

@@ -12,9 +12,17 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public interface ComparableDataSetProducer {
+public interface ComparableDataSetProducer extends AutoCloseable {
 
     Logger LOGGER = LoggerFactory.getLogger(ComparableDataSetProducer.class);
+
+    /**
+     * 読込に使った資源（DB接続など）を解放する。作った側が読込の完了後（遅延読込なら出力の完了後）に呼ぶ
+     */
+    @Override
+    default void close() {
+        // nothing default
+    }
 
     default ComparableDataSet loadDataSet() {
         return new ComparableDataSet(this.param(), this.produce(), this.getSrc());

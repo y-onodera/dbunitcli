@@ -1,5 +1,6 @@
 package yo.dbunitcli.dataset.producer;
 
+import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
@@ -31,23 +32,41 @@ public class ComparableJdbcMetaDataProducer extends ComparableDataSetProducerWra
 
     private final DatabaseMetaData jdbcMetaData;
 
+    /**
+     * delegateがDB以外のときにメタデータ取得用に張った接続（closeで閉じる）。delegateの接続を使う場合はnull
+     */
+    private final IDatabaseConnection ownConnection;
+
     public ComparableJdbcMetaDataProducer(final ComparableDataSetProducer delegate) {
         super(delegate);
-        this.jdbcMetaData = resolveJdbcMetaData(delegate);
+        final var connectionLoader = delegate.param().databaseConnectionLoader();
+        this.ownConnection = delegate instanceof ComparableDBDataSetProducer || connectionLoader == null
+                ? null
+                : connectionLoader.loadConnection();
+        this.jdbcMetaData = this.resolveJdbcMetaData(delegate);
     }
 
-    private static DatabaseMetaData resolveJdbcMetaData(final ComparableDataSetProducer delegate) {
+    private DatabaseMetaData resolveJdbcMetaData(final ComparableDataSetProducer delegate) {
         try {
             if (delegate instanceof final ComparableDBDataSetProducer dbProducer) {
                 return dbProducer.connection.getConnection().getMetaData();
             }
-            final var connectionLoader = delegate.param().databaseConnectionLoader();
-            if (connectionLoader == null) {
-                return null;
-            }
-            return connectionLoader.loadConnection().getConnection().getMetaData();
+            return this.ownConnection == null ? null : this.ownConnection.getConnection().getMetaData();
         } catch (final SQLException e) {
             throw new AssertionError(e);
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            if (this.ownConnection != null) {
+                this.ownConnection.close();
+            }
+        } catch (final SQLException e) {
+            ComparableDataSetProducer.LOGGER.warn("failed to close connection", e);
+        } finally {
+            super.close();
         }
     }
 

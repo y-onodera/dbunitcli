@@ -55,8 +55,11 @@ public enum ParameterUnit {
         @Override
         public Stream<Parameter> lazyLoadStream(final ComparableDataSetLoader loader,
                                                 final ComparableDataSetParam param) {
-            return ParameterUnit.streamingTableTemplates(loader, loader.getComparableDataSetProducer(param))
-                                .map(TableTemplate::load);
+            final ComparableDataSetProducer producer = loader.getComparableDataSetProducer(param);
+            // 行は出力（StreamingEachCommand）の中で読むため、ストリームを閉じるまで接続を保つ
+            return ParameterUnit.streamingTableTemplates(loader, producer)
+                                .map(TableTemplate::load)
+                                .onClose(producer::close);
         }
 
         @Override
@@ -80,10 +83,13 @@ public enum ParameterUnit {
     }
 
     public Stream<Parameter> lazyLoadStream(final ComparableDataSetLoader loader, final ComparableDataSetParam param) {
+        final ComparableDataSetProducer producer = loader.getComparableDataSetProducer(param);
+        // 行は出力の中で読むため、ストリームを閉じるまで接続を保つ
         return Stream.of(loader.parameter()
                                .asInputParam()
                                .withRowNumber(0)
-                               .add("dataSet", loader.getComparableDataSetProducer(param).lazyLoad(true)));
+                               .add("dataSet", producer.lazyLoad(true)))
+                     .onClose(producer::close);
     }
 
     public Stream<Parameter> templateStream(final ComparableDataSetLoader loader,

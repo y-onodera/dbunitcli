@@ -86,10 +86,13 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                     : this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
         }
         final ComparableDataSetLoader loader = this.getComparableDataSetLoader();
+        if (this.unit() != ParameterUnit.table) {
+            // record/datasetは全件を読み込んでから出力する（producerは読込後に閉じる）
+            return this.unit().dataSetToStream(loader, this.dataSetParam());
+        }
         final ComparableDataSetProducer producer = this.generateType()
                 .wrapProducer(this, loader.getComparableDataSetProducer(this.dataSetParam()));
-        return this.unit().templateStream(loader, producer,
-                                          this.unit() == ParameterUnit.table ? this.unitTableSeparators() : TableSeparators.NONE);
+        return this.unit().templateStream(loader, producer, this.unitTableSeparators()).onClose(producer::close);
     }
 
     /**
@@ -103,26 +106,31 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
      */
     public void forEachParameter(final Consumer<Parameter> action) {
         if (this.unit() != ParameterUnit.table) {
-            this.parameterStream().forEach(action);
+            try (final Stream<Parameter> parameters = this.parameterStream()) {
+                parameters.forEach(action);
+            }
             return;
         }
         final ComparableDataSetLoader loader = this.getComparableDataSetLoader();
         final ComparableDataSetParam param = this.dataSetParam();
-        final List<ParameterUnit.TableTemplate> templates;
-        final boolean parallelizable;
         if (this.generateType.isExcel() && !this.lazyLoad) {
-            templates = ParameterUnit.loadedTableTemplates(loader, loader.loadDataSet(param)).toList();
-            parallelizable = ParallelTableMapping.parallelism(param) > 1;
-        } else if (this.generateType.isExcel()) {
-            final ComparableDataSetProducer producer = loader.getComparableDataSetProducer(param);
-            templates = ParameterUnit.streamingTableTemplates(loader, producer).toList();
-            parallelizable = ParallelTableMapping.isParallelizable(producer);
-        } else {
-            final ComparableDataSetProducer producer = this.generateType()
-                    .wrapProducer(this, loader.getComparableDataSetProducer(param));
-            templates = ParameterUnit.tableTemplates(loader, producer, this.unitTableSeparators()).toList();
-            parallelizable = ParallelTableMapping.isParallelizable(producer);
+            this.forEachTable(ParameterUnit.loadedTableTemplates(loader, loader.loadDataSet(param)).toList(),
+                              param, ParallelTableMapping.parallelism(param) > 1, action);
+            return;
         }
+        // 行はテーブルごとの出力の中で読むため、全テーブルの出力が終わるまで接続を保つ
+        try (final ComparableDataSetProducer producer = this.generateType.isExcel()
+                ? loader.getComparableDataSetProducer(param)
+                : this.generateType().wrapProducer(this, loader.getComparableDataSetProducer(param))) {
+            final List<ParameterUnit.TableTemplate> templates = this.generateType.isExcel()
+                    ? ParameterUnit.streamingTableTemplates(loader, producer).toList()
+                    : ParameterUnit.tableTemplates(loader, producer, this.unitTableSeparators()).toList();
+            this.forEachTable(templates, param, ParallelTableMapping.isParallelizable(producer), action);
+        }
+    }
+
+    private void forEachTable(final List<ParameterUnit.TableTemplate> templates, final ComparableDataSetParam param,
+                              final boolean parallelizable, final Consumer<Parameter> action) {
         final List<List<ParameterUnit.TableTemplate>> lanes = ParallelTableMapping.groupByShared(templates,
                 templates.stream().map(it -> it.tasks().toList()).toList());
         if (lanes.size() < 2 || !parallelizable || this.hasSameResultFile(templates)) {

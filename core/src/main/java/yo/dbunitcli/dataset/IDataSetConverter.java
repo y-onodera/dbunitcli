@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public interface IDataSetConverter extends IDataSetConsumer {
+public interface IDataSetConverter extends IDataSetConsumer, AutoCloseable {
 
     boolean isExportEmptyTable();
 
@@ -19,6 +19,14 @@ public interface IDataSetConverter extends IDataSetConsumer {
     }
 
     default void endDataSet() {
+        // nothing default
+    }
+
+    /**
+     * 出力に使った資源（DB接続など）を解放する。作った側が出力の完了後に呼ぶ
+     */
+    @Override
+    default void close() {
         // nothing default
     }
 
