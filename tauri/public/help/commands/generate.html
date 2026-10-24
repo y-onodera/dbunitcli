@@ -78,10 +78,10 @@
   <p><code>parallel</code> は、src の srcType が <code>file</code> / <code>dir</code> / <code>none</code> 以外のとき、または <code>unit=record</code> のとき（srcType が <code>none</code> の場合を除く）に表示されます。指定したスレッド数は次のすべてに使われます。</p>
   <ul>
     <li><strong>src の読み込み</strong>: Convert の <a href="../sections/result-form.html">並列読込</a> と同じ条件・方法で、ソースごとに別スレッドで読み込みます</li>
-    <li><strong><code>unit=record</code> の出力</strong>: 全件を読み込んだ後、行ごとの描画・書き込みを並列にします（<code>txt</code> / <code>xlsx</code> / <code>xls</code>）。行番号（<code>rowNumber</code>）と出力先は読み込んだ順に決めるため、逐次処理と同じです。1 行ごとに 1 ブックを作る <code>xlsx</code> / <code>xls</code> で特に効果があります</li>
+    <li><strong><code>unit=record</code> の出力</strong>: 読み込んだ行をその場で出力し、データセット全体はメモリに保持しません（<code>-src.includeMetaData</code> が ON の場合は、各行にテーブル全体を渡すためテーブル単位で保持します）。src の読み込みは上記の並列読込と同じくソースごとに並列にし、行ごとの描画・書き込みも並列にします（<code>txt</code> / <code>xlsx</code> / <code>xls</code>）。行番号（<code>rowNumber</code>）はテーブルごとに 0 から振り、テーブル名は <code>tableName</code> で参照できます。1 行ごとに 1 ブックを作る <code>xlsx</code> / <code>xls</code> で特に効果があります</li>
     <li><strong><code>unit=table</code> の出力</strong>: テーブルごとに別スレッドで出力します（<code>txt</code> / <code>xlsx</code> / <code>xls</code> と、<code>unit=table</code> 固定の固定成果物タイプ）。<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code> は、カラム情報の取得（src が <code>table</code> / <code>sql</code> なら DB のメタデータ照会）をテーブルごとの出力の中で行うため、その部分も並列になります。<code>txt</code> と、<code>lazyLoad</code> を ON にした <code>xlsx</code> / <code>xls</code> では、テーブルごとの読み込みから出力までを並列に行います。<code>lazyLoad</code> が OFF の <code>xlsx</code> / <code>xls</code> は、全件を読み込んでから出力だけを並列にします</li>
   </ul>
-  <p>出力ファイルは並列に書かれるため、書き込まれる順番は不定です（各ファイルの内容は逐次処理と同じです）。同じファイルへ出力する行・テーブル（<code>resultPath</code> に行やテーブルを区別する値が含まれていない場合）は、同じスレッドで元の順に書くため、逐次処理と同じく最後の行・テーブルの内容が残ります。</p>
+  <p>出力ファイルは並列に書かれるため、書き込まれる順番は不定です（各ファイルの内容は逐次処理と同じです）。<code>resultPath</code> に行やテーブルを区別する値が含まれておらず、複数の行・テーブルが同じファイルへ出力される場合、同じテーブル（<code>unit=record</code>）または同じソースを読むテーブル（<code>unit=table</code>）同士は同じスレッドで元の順に書くため最後の内容が残ります。それ以外（別のソースから同じファイルへ出力する場合）は、どの内容が残るかは不定です（制限事項）。</p>
   <p><code>unit=table</code> の出力は、次の場合に逐次処理します。</p>
   <ul>
     <li>出力するテーブルが 1 つだけ</li>

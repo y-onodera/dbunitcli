@@ -199,7 +199,7 @@ public class GenerateTableParallelTest {
                     , "-template=" + template.getAbsolutePath()
                     , "-templateParameterAttribute="
                     , "-result=" + result.getAbsolutePath()
-                    , "-resultPath=$rowNumber$_$ID$." + generateType
+                    , "-resultPath=$tableName$_$rowNumber$." + generateType
             });
             try (final Stream<Path> files = Files.list(result.toPath())) {
                 for (final Path file : files.toList()) {
@@ -211,12 +211,17 @@ public class GenerateTableParallelTest {
                 }
             }
         }
-        Assertions.assertEquals(("txt".equals(generateType) ? GenerateTableParallelTest.TABLES.size() : 1) * 100, results.size());
+        // rowNumberはテーブルごとに0から振る
+        final List<String> tables = "txt".equals(generateType) ? GenerateTableParallelTest.TABLES : List.of("a");
+        Assertions.assertEquals(tables.stream()
+                                      .flatMap(table -> IntStream.range(0, 100).mapToObj(i -> table + "_" + i + "." + generateType))
+                                      .collect(Collectors.toSet()), results.keySet());
     }
 
     @Test
     public void generate_record_to_same_file_keeps_last_row() throws IOException {
-        // 全行が同じファイルへ出力する場合も、並列では同じスレッドで元の順に書くため最後の行の内容が残る
+        // 同じレーン（同じテーブル）の行が同じファイルへ出力する場合は、同じスレッドで元の順に書くため最後の行の内容が残る
+        // （別のレーンから同じファイルへ書く場合、残る内容は不定）
         final File template = this.tempDir.resolve("record.txt").toFile();
         Files.writeString(template.toPath(), "$ID$", StandardCharsets.UTF_8);
         final File result = this.tempDir.resolve("result").toFile();
@@ -224,6 +229,7 @@ public class GenerateTableParallelTest {
                 "-srcType=csv"
                 , "-src=" + this.src.getAbsolutePath()
                 , "-encoding=UTF-8"
+                , "-regInclude=a"
                 , "-generateType=txt"
                 , "-unit=record"
                 , "-template=" + template.getAbsolutePath()
@@ -231,7 +237,7 @@ public class GenerateTableParallelTest {
                 , "-result=" + result.getAbsolutePath()
                 , "-resultPath=all.txt"
         });
-        Assertions.assertEquals("d99", Files.readString(new File(result, "all.txt").toPath(), StandardCharsets.UTF_8));
+        Assertions.assertEquals("a99", Files.readString(new File(result, "all.txt").toPath(), StandardCharsets.UTF_8));
     }
 
     private byte[] cellValues(final Path file) throws IOException {

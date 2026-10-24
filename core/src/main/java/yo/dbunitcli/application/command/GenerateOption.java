@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public record GenerateOption(Parameter parameter, String resultDir, String resultPath, GenerateType generateType,
@@ -79,7 +80,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     /**
-     * 出力単位ごとに、出力先とパラメータを渡す。unit=recordは、読込は全件まとめて済ませ、並列数が2以上なら描画・書込を並列にする。
+     * 出力単位ごとに、出力先とパラメータを渡す。unit=recordは読み込んだ行をその場で出力する（forEachRecord）。
      * unit=tableは、並列化できればテーブルごとに別スレッドで出力する（いずれも処理順は不定）。
      * <ul>
      *     <li>テキスト・Excel（lazyLoad）: 読込から出力までをテーブルごとに行う。並列化できる条件はsrcの並列読込と同じ</li>
@@ -89,16 +90,13 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
      * （タスクは状態を持ちうるため同じタスクを同時に実行せず、同じ出力先は逐次と同じく最後のテーブルの内容が残る）
      */
     public void forEachParameter(final BiConsumer<File, Parameter> action) {
+        if (this.unit() == ParameterUnit.record && this.srcData.srcType() != DataSourceType.none) {
+            this.forEachRecord(action);
+            return;
+        }
         if (this.unit() != ParameterUnit.table) {
-            try (final Stream<RecordOutput> outputs = this.parameterStream().map(it -> new RecordOutput(this.resultFile(it), it))) {
-                final int threads = ParallelTableMapping.parallelism(this.dataSetParam());
-                if (this.unit() == ParameterUnit.record && threads > 1) {
-                    // 行番号と出力先は読込順に決め、描画・書込だけを並列にする（同じ出力先は同じスレッドで元の順に書く）
-                    ParallelTableMapping.forEachByKey(threads, outputs, RecordOutput::resultFile
-                            , it -> action.accept(it.resultFile(), it.parameter()));
-                } else {
-                    outputs.forEach(it -> action.accept(it.resultFile(), it.parameter()));
-                }
+            try (final Stream<Parameter> parameters = this.parameterStream()) {
+                parameters.forEach(it -> action.accept(this.resultFile(it), it));
             }
             return;
         }
@@ -122,7 +120,38 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     /**
-     * record/datasetの出力単位。全件を読み込んでから出力する（Excelのdataset+lazyLoadは出力の中で読む）
+     * unit=recordは、読み込んだ行をその場で出力する（データセット全体を保持しない。includeMetaDataはテーブル単位で溜める）。
+     * srcの読込は並列化できればレーンごとに並列にし、描画・書込は並列数が2以上なら出力先ごとに決まった作業スレッドで投入順に行う。
+     * 別のレーンから同じ出力先へ書く場合、書く順（残る内容）は不定
+     */
+    private void forEachRecord(final BiConsumer<File, Parameter> action) {
+        final ComparableDataSetLoader loader = this.getComparableDataSetLoader();
+        final ComparableDataSetParam param = this.dataSetParam();
+        final int threads = ParallelTableMapping.parallelism(param);
+        if (threads < 2) {
+            this.loadRecords(loader, param, it -> action.accept(this.resultFile(it), it));
+            return;
+        }
+        final ParallelTableMapping.KeyedWorkers<RecordOutput> workers = new ParallelTableMapping.KeyedWorkers<>(
+                threads, RecordOutput::resultFile, it -> action.accept(it.resultFile(), it.parameter()));
+        try {
+            this.loadRecords(loader, param, it -> workers.submit(new RecordOutput(this.resultFile(it), it)));
+            workers.finish();
+        } catch (final RuntimeException | Error e) {
+            workers.abort();
+            throw e;
+        }
+    }
+
+    private void loadRecords(final ComparableDataSetLoader loader, final ComparableDataSetParam param
+            , final Consumer<Parameter> action) {
+        loader.loadDataSet(param.toBuilder()
+                                .setConverter(new RecordConverter(loader.parameter().asInputParam(), action, param.mapIncludeMetaData()))
+                                .build());
+    }
+
+    /**
+     * dataset（またはsrcのないrecord）の出力単位。全件を読み込んでから出力する（Excelのdataset+lazyLoadは出力の中で読む）
      */
     private Stream<Parameter> parameterStream() {
         return this.generateType.isExcel() && this.lazyLoad
