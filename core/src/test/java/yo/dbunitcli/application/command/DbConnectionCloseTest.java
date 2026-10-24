@@ -139,6 +139,27 @@ public class DbConnectionCloseTest {
                 , "-result=" + this.tempDir.resolve("compare").toFile().getAbsolutePath()}));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"", "2"})
+    public void runSqlClosesConnection(final String parallel) throws Exception {
+        final File sqlDir = this.tempDir.resolve("sql").toFile();
+        Assertions.assertTrue(sqlDir.mkdirs());
+        for (final String table : DbConnectionCloseTest.TABLES) {
+            Files.writeString(new File(sqlDir, table + ".sql").toPath()
+                    , "update " + table + " set VAL = 'run';", StandardCharsets.UTF_8);
+        }
+        this.assertNoConnectionLeft(() -> Run.main(new String[]{
+                "-scriptType=sql"
+                , "-src=" + sqlDir.getAbsolutePath()
+                , "-parallel=" + parallel
+                , "-jdbcUrl=" + DbConnectionCloseTest.URL
+                , "-jdbcUser=sa"
+                , "-jdbcPass=sa"}));
+        for (final String table : DbConnectionCloseTest.TABLES) {
+            Assertions.assertEquals(10, TestJdbc.count(this.stmt, table + " where VAL = 'run'"));
+        }
+    }
+
     private String[] dbSrcArgs(final String... args) {
         final List<String> result = new ArrayList<>(List.of(
                 "-srcType=table"

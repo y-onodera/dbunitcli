@@ -3,6 +3,7 @@ package yo.dbunitcli.dataset;
 import org.dbunit.dataset.Column;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
+import yo.dbunitcli.resource.Workers;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -32,7 +33,7 @@ public interface ComparableTableMappingTask {
      * 並列実行で2つ目以降の作業スレッドが使うタスクを返す。スレッド間で共有できない資源（DB接続など）は
      * resourcesからそのスレッド専用のものを取得して差し替える
      */
-    default ComparableTableMappingTask forWorker(final ParallelTableMapping.WorkerResources resources) {
+    default ComparableTableMappingTask forWorker(final Workers.WorkerResources resources) {
         return this;
     }
 
@@ -111,7 +112,7 @@ public interface ComparableTableMappingTask {
         }
 
         @Override
-        public WithTargetTable forWorker(final ParallelTableMapping.WorkerResources resources) {
+        public WithTargetTable forWorker(final Workers.WorkerResources resources) {
             return new WithTargetTable(this.targetTableName, this.head.forWorker(resources),
                                        this.rest.stream().map(it -> it.forWorker(resources)).toList());
         }

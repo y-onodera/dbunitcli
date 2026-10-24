@@ -4,6 +4,7 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.stream.IDataSetConsumer;
+import yo.dbunitcli.resource.Workers;
 
 import java.io.File;
 import java.util.Arrays;
@@ -92,7 +93,7 @@ public interface IDataSetConverter extends IDataSetConsumer, AutoCloseable {
      * 別スレッドで使うインスタンスを作る。startDataSet()は呼び出し側が行う。
      * スレッド間で共有できない資源（DB接続など）はresourcesから取得する（スレッドの処理終了時に閉じられる）
      */
-    default IDataSetConverter splitForParallel(final ParallelTableMapping.WorkerResources resources) {
+    default IDataSetConverter splitForParallel(final Workers.WorkerResources resources) {
         return this.split();
     }
 

@@ -11,7 +11,7 @@ public class Run implements Command<RunDto, RunOption> {
 
     @Override
     public void exec(final RunOption option) {
-        option.runner().run(option.targetFiles());
+        option.runner().run(option.targetFiles(), option.parallelism());
     }
 
     @Override

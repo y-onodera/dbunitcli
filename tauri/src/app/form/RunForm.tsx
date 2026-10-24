@@ -24,6 +24,7 @@ export function RunForm(prop: {
 				prefix=""
 				element={run.scriptType}
 			/>
+			{run.parallel && <PlainText prefix="" element={run.parallel} />}
 			<JdbcConnectionProvider>
 				<SrcFormSection
 					srcElements={run.srcData}

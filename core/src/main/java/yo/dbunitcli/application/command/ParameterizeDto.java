@@ -12,6 +12,8 @@ import java.util.Map;
 public class ParameterizeDto extends CommandDto {
     @CommandLine.Option(names = "-ignoreFail", description = "case when cmd is compare and unexpected diff found, then continue other cmd")
     private String ignoreFail;
+    @CommandLine.Option(names = "-parallel", description = "number of cmd to run in parallel. execution order is not guaranteed when 2 or more (default: 1 = sequential)")
+    private String parallel;
     @CommandLine.Option(names = "-cmd", description = "data driven target cmd")
     private String cmd;
     @CommandLine.Option(names = "-cmdParam", description = "columnName parameterFile for cmd. dynamically set fileName from param dataset")
@@ -35,6 +37,14 @@ public class ParameterizeDto extends CommandDto {
 
     public void setIgnoreFail(final String ignoreFail) {
         this.ignoreFail = ignoreFail;
+    }
+
+    public String getParallel() {
+        return this.parallel;
+    }
+
+    public void setParallel(final String parallel) {
+        this.parallel = parallel;
     }
 
     public String getCmd() {

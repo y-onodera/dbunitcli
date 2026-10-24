@@ -9,6 +9,7 @@ import yo.dbunitcli.dataset.DataSourceType;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class RunOptionTest {
 
@@ -128,6 +129,32 @@ class RunOptionTest {
             assertEquals(RunOptionTest.this.src.getJdbcOption().getJdbcProperties(), result.getArg("-jdbc.jdbcProperties").value());
             assertNull(result.getArg("-antTarget"));
             assertNull(result.getArg("-baseDir"));
+        }
+    }
+
+    @Nested
+    class Parallel {
+
+        @Test
+        void defaultIsSequential() {
+            final RunOption target = RunOptionTest.this.createTarget();
+            assertEquals(1, target.parallelism());
+            assertEquals("", target.toParameters().getArg("-parallel").value());
+        }
+
+        @Test
+        void specified() {
+            RunOptionTest.this.src.setParallel("3");
+            final RunOption target = RunOptionTest.this.createTarget();
+            assertEquals(3, target.parallelism());
+            assertEquals("3", target.toParameters().getArg("-parallel").value());
+            assertEquals("3", target.toDto().getParallel());
+        }
+
+        @Test
+        void invalid() {
+            RunOptionTest.this.src.setParallel("0");
+            assertThrows(IllegalArgumentException.class, RunOptionTest.this::createTarget);
         }
     }
 }

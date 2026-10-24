@@ -24,6 +24,7 @@
   <table>
     <tr><th>オプション</th><th>説明</th></tr>
     <tr><td>scriptType</td><td>実行するスクリプトの種類。<code>sql</code> / <code>ant</code> / <code>bat</code> / <code>cmd</code> から選択（デフォルト: <code>sql</code>）</td></tr>
+    <tr><td>parallel</td><td>同時に実行するスクリプト数。<code>2</code> 以上で srcData の各ファイルを並列に実行する（実行順は不定。いずれかが失敗したら未着手のスクリプトは始めず、実行中のスクリプトが終わるのを待ってから失敗する）。空欄または <code>1</code> なら見つかった順に 1 ファイルずつ実行（デフォルト: 空欄＝逐次）。DDL→DML のように実行順に依存するスクリプトは並列にしないこと</td></tr>
     <tr><td>srcData</td><td>実行対象ファイルの指定。拡張子は scriptType に応じて自動設定（sql→.sql, ant→.xml, bat→.bat, cmd→.cmd）</td></tr>
     <tr><td>templateOption</td><td>テンプレートエンジンのオプション（<code>sql</code> のみ有効）</td></tr>
     <tr><td>jdbcOption</td><td>JDBC 接続設定（<code>sql</code> のみ有効）</td></tr>

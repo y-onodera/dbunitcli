@@ -10,6 +10,8 @@
 
 最後に失敗カウント>0なら全体を`CommandFailException`で失敗させる。
 
+`-parallel`が2以上ならパラメータを全件リスト化して`Workers.forEachUntilFailure`で並列実行する（スレッド名`parameterize-N`）。ignoreFail=falseの失敗は未着手を始めず、実行中のサブコマンドには割り込まず完了を待ってから投げる（Runの並列も同じ）。失敗カウントは`AtomicInteger`で集計。サブコマンドは作業スレッドで動くため、並列数が未指定の自動並列（generate`-parallel`・compare/convert`-result.parallel`）は1になり入れ子で並列化しない（明示した値はそのまま使う）
+
 ## 引数リストの組み立て（`createArgs()`）
 
 1. **供給テンプレート決定**（`getTemplateArgs()`）: `-cmdParam`があればそのファイル名を`render`して`FileResources.searchTemplate()`で取得、無ければ`-template`を`FileResources.searchParameterizeTemplate()`（`option/parameterize/template`→`resources/template`→workspace。GUIの基準ディレクトリと同じ）で取得、どちらも無ければ空文字
@@ -46,6 +48,7 @@
 | `-unit` | `unit` | `ParameterUnit`（record/table/dataset） |
 | `-arg` / `-A` | `arg`（Map） | 最終引数のキー上書きマージ |
 | `-ignoreFail` | `ignoreFail` | サブコマンド失敗時の継続可否 |
+| `-parallel` | `parallel` | 並列数（既定1＝逐次） |
 | `-param.*` | `paramData` | `DataSetLoadOption`（パラメータデータの読み込み。共通ロード基盤） |
 | `-template.*` | `templateOption` | `TemplateRenderOption`（ST4レンダリング設定。encoding等） |
 

@@ -30,6 +30,7 @@
     <tr><td>unit</td><td>テンプレートへのパラメータ受け渡し単位（行・テーブル・データセット）</td></tr>
     <tr><td>parameterize</td><td>cmdParam をパラメータで展開するテンプレートとして扱うかどうか</td></tr>
     <tr><td>ignoreFail</td><td>compare で想定外の差分が出た場合も他のコマンドを続行する</td></tr>
+    <tr><td>parallel</td><td>同時に実行するコマンド数。<code>2</code> 以上でパラメータ（unit の単位）ごとのコマンドを並列に実行する（実行順は不定）。空欄または <code>1</code> なら 1 件ずつ順に実行（デフォルト: 空欄＝逐次）。詳細は下記「並列実行」を参照</td></tr>
     <tr><td>cmd</td><td>データ駆動で実行する対象コマンド（<a href="compare.html">Compare</a> / <a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> など）</td></tr>
     <tr><td>cmdParam</td><td>コマンド用パラメータファイル。ファイル名はパラメータデータセットから動的に決定</td></tr>
     <tr><td>template</td><td>既定のテンプレートファイル（cmdParam がある場合は無視）</td></tr>
@@ -37,6 +38,14 @@
     <tr><td>templateOption</td><td><a href="../sections/template.html">テンプレートエンジン</a>のオプション</td></tr>
   </table>
   <p><code>paramData</code> の入力フォーム詳細は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
+
+  <h2 id="section-parallel">並列実行（parallel）</h2>
+  <ul>
+    <li>テーブル作成→データ投入のように実行順に依存するコマンドは並列にしないこと。</li>
+    <li><code>ignoreFail</code> が false のときは、1 件失敗すると未着手のコマンドは始めず、実行中のコマンドが終わるのを待ってから失敗します（実行中のコマンドは途中で止めません）。true のときは全件を実行し、最後に失敗件数があれば失敗します。</li>
+    <li>並列実行中のコマンドの中では、compare / convert / generate の並列数（generate は <code>-parallel</code>、compare / convert は <code>-result.parallel</code>）が空欄なら逐次になります（CPU コア数で並列化せず、parameterize の並列数と掛け合わせた数のスレッドが動かないようにする）。値を書いた場合はその並列数で動きます。</li>
+    <li>複数のパラメータが同じ出力先へ書くテンプレートでは、最後に残る内容は不定です。</li>
+  </ul>
 
   <h2 id="section-unit">unit の動作</h2>
   <p><code>unit</code> はテンプレートへのパラメータ受け渡し単位を指定します。</p>

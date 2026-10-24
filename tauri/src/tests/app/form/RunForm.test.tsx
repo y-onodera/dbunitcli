@@ -64,6 +64,14 @@ describe("RunFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
+		it("runセクションにparallelが含まれる", () => {
+			render(<RunForm {...makeRunProps()} />);
+
+			expect(
+				document.querySelector('input[type="text"][name="-parallel"]'),
+			).toBeInTheDocument();
+		});
+
 		it("templateセクションにencodingが含まれる", () => {
 			render(<RunForm {...makeRunProps()} />);
 
@@ -215,6 +223,16 @@ describe("RunFormの描画テスト", () => {
 
 			expect(
 				document.querySelector('input[type="text"][name="-baseDir"]'),
+			).toBeInTheDocument();
+		});
+
+		it("parallelが含まれる", () => {
+			render(
+				<RunForm {...makeRunProps(runRefreshScriptTypeCmdResponseFixture)} />,
+			);
+
+			expect(
+				document.querySelector('input[type="text"][name="-parallel"]'),
 			).toBeInTheDocument();
 		});
 	});

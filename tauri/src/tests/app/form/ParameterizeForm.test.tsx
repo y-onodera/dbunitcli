@@ -54,7 +54,7 @@ describe("ParameterizeFormの描画テスト", () => {
 			expect(legends[2]).toHaveTextContent("param");
 		});
 
-		it("executeセクションにunit・parameterize・ignoreFail・cmd・cmdParam・templateが含まれる", () => {
+		it("executeセクションにunit・parameterize・ignoreFail・parallel・cmd・cmdParam・templateが含まれる", () => {
 			render(<ParameterizeForm {...makeParameterizeProps()} />);
 
 			expect(
@@ -65,6 +65,9 @@ describe("ParameterizeFormの描画テスト", () => {
 			).toBeInTheDocument();
 			expect(
 				document.querySelector('input[type="checkbox"][name="-ignoreFail"]'),
+			).toBeInTheDocument();
+			expect(
+				document.querySelector('input[type="text"][name="-parallel"]'),
 			).toBeInTheDocument();
 			expect(
 				document.querySelector('input[type="text"][name="-cmd"]'),

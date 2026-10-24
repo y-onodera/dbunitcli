@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.resource.Workers;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.IOException;
@@ -116,7 +117,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         }
 
         @Override
-        public ComparableTableMappingTask forWorker(final ParallelTableMapping.WorkerResources resources) {
+        public ComparableTableMappingTask forWorker(final Workers.WorkerResources resources) {
             final DatabaseConnectionLoader loader = this.param.databaseConnectionLoader();
             return this.withConnection(resources.get(loader, loader::loadConnection, IDatabaseConnection::close));
         }

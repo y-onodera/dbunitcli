@@ -7,8 +7,8 @@ import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.IDataSetConverter;
-import yo.dbunitcli.dataset.ParallelTableMapping;
 import yo.dbunitcli.dataset.converter.db.*;
+import yo.dbunitcli.resource.Workers;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.util.List;
@@ -85,7 +85,7 @@ public class DBConverter implements IDataSetConverter {
      * 読込側（同じスレッドで結果セットを読みながら書き込む）とは別の接続にするため、keyにDBConverterを含める
      */
     @Override
-    public IDataSetConverter splitForParallel(final ParallelTableMapping.WorkerResources resources) {
+    public IDataSetConverter splitForParallel(final Workers.WorkerResources resources) {
         final IDatabaseConnection connection = resources.get(List.of(DBConverter.class, this.connectionLoader)
                 , this.connectionLoader::loadConnection, IDatabaseConnection::close);
         // 接続はWorkerResourcesが作業スレッドの終了時に閉じる

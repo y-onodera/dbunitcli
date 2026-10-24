@@ -3,6 +3,7 @@ package yo.dbunitcli.application;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
+import yo.dbunitcli.resource.Workers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -142,7 +143,7 @@ public enum ParameterUnit {
         /**
          * 並列実行で2つ目以降の作業スレッドが使うTableTemplateを返す
          */
-        TableTemplate forWorker(ParallelTableMapping.WorkerResources resources);
+        TableTemplate forWorker(Workers.WorkerResources resources);
     }
 
     /**
@@ -167,7 +168,7 @@ public enum ParameterUnit {
         }
 
         @Override
-        public TableTemplate forWorker(final ParallelTableMapping.WorkerResources resources) {
+        public TableTemplate forWorker(final Workers.WorkerResources resources) {
             return new SeparatedTableTemplate(this.base, this.dto.forWorker(resources), this.unitTableSeparators);
         }
 
@@ -199,7 +200,7 @@ public enum ParameterUnit {
         }
 
         @Override
-        public TableTemplate forWorker(final ParallelTableMapping.WorkerResources resources) {
+        public TableTemplate forWorker(final Workers.WorkerResources resources) {
             return new StreamingTableTemplate(this.base, this.dto.forWorker(resources));
         }
     }
@@ -225,7 +226,7 @@ public enum ParameterUnit {
         }
 
         @Override
-        public TableTemplate forWorker(final ParallelTableMapping.WorkerResources resources) {
+        public TableTemplate forWorker(final Workers.WorkerResources resources) {
             return this;
         }
     }

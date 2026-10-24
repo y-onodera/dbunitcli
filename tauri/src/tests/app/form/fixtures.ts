@@ -617,6 +617,7 @@ export const runLoadResponseFixture = {
 		"sql",
 		"ant",
 	]),
+	parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
 	srcData: makeRunSrcData("resources/sql/sample.sql"),
 	templateOption: makeTemplateOption(),
 	jdbcOption: {
@@ -638,6 +639,7 @@ export const parameterizeLoadResponseFixture = {
 	]),
 	parameterize: makeElement("parameterize", "FLG", "true", "WORKSPACE", false),
 	ignoreFail: makeElement("ignoreFail", "FLG", "false", "WORKSPACE", false),
+	parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
 	cmd: makeElement("cmd", "TEXT", "convert", "WORKSPACE", false),
 	cmdParam: makeElement("cmdParam", "TEXT", "", "WORKSPACE", false),
 	template: makeElement(
@@ -927,6 +929,7 @@ export const runRefreshScriptTypeCmdResponseFixture = {
 		"sql",
 		"ant",
 	]),
+	parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
 	baseDir: makeElement("baseDir", "TEXT", "", "WORKSPACE", false),
 	srcData: makeRunSrcData(""),
 } as RunOptions;
@@ -952,6 +955,7 @@ export const runRefreshScriptTypeSqlResponseFixture = {
 		"sql",
 		"ant",
 	]),
+	parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
 	srcData: makeRunSrcData(""),
 	templateOption: makeTemplateOption(),
 	jdbcOption: {

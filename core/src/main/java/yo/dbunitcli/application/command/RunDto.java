@@ -17,6 +17,9 @@ public class RunDto extends CommandDto {
     @CommandLine.Option(names = "-baseDir")
     private String baseDir;
 
+    @CommandLine.Option(names = "-parallel", description = "number of scripts to run in parallel. execution order is not guaranteed when 2 or more (default: 1 = sequential)")
+    private String parallel;
+
     private DataSetLoadDto srcData = new DataSetLoadDto();
 
     private TemplateRenderDto templateOption = new TemplateRenderDto();
@@ -45,6 +48,14 @@ public class RunDto extends CommandDto {
 
     public void setAntTarget(final String antTarget) {
         this.antTarget = antTarget;
+    }
+
+    public String getParallel() {
+        return this.parallel;
+    }
+
+    public void setParallel(final String parallel) {
+        this.parallel = parallel;
     }
 
     public DataSetLoadDto getSrcData() {

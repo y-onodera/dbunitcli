@@ -15,6 +15,15 @@
     },
     "value": "sql"
   },
+  "parallel": {
+    "name": "parallel",
+    "attribute": {
+      "type": "TEXT",
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": ""
+  },
   "srcData": {
     "prefix": "src",
     "src": {

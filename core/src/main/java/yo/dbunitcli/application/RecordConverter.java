@@ -8,7 +8,7 @@ import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.ComparableTableDto;
 import yo.dbunitcli.dataset.IDataSetConverter;
-import yo.dbunitcli.dataset.ParallelTableMapping;
+import yo.dbunitcli.resource.Workers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -124,7 +124,7 @@ public final class RecordConverter implements IDataSetConverter {
     }
 
     @Override
-    public IDataSetConverter splitForParallel(final ParallelTableMapping.WorkerResources resources) {
+    public IDataSetConverter splitForParallel(final Workers.WorkerResources resources) {
         return new RecordConverter(this.base, this.action, this.includeMetaData);
     }
 

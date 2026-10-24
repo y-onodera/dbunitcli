@@ -124,6 +124,7 @@ export type GenerateOptions = CommandOptions & {
 export type RunOptions = CommandOptions & {
 	command: "run";
 	scriptType: CommandOption;
+	parallel?: CommandOption;
 	baseDir?: CommandOption;
 	antTarget?: CommandOption;
 	srcData: DatasetSource;
@@ -135,6 +136,7 @@ export type ParameterizeOptions = CommandOptions & {
 	unit: CommandOption;
 	parameterize: CommandOption;
 	ignoreFail: CommandOption;
+	parallel?: CommandOption;
 	cmd: CommandOption;
 	cmdParam: CommandOption;
 	template: CommandOption;
