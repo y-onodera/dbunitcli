@@ -48,6 +48,13 @@ public final class Workers {
     }
 
     /**
+     * @param requested 指定された並列数。null・0以下は未指定として{@link #defaultParallelism()}
+     */
+    public static int parallelism(final Integer requested) {
+        return requested == null || requested <= 0 ? Workers.defaultParallelism() : requested;
+    }
+
+    /**
      * threads個の作業スレッドでworker(i)を実行し、全ての結果を返す。投入元の文脈を引き継ぎ、
      * いずれかが失敗したら残りを中断して例外を投げる。戻る前に作業スレッドの終了を待つ
      */
@@ -56,9 +63,9 @@ public final class Workers {
         final ExecutorService executor = Workers.newExecutor(threads, threadNamePrefix);
         // executeは投入元のスレッドで呼ばれるため、ここで投入元の文脈を包む
         final CompletionService<R> completion = new ExecutorCompletionService<>(
-                command -> executor.execute(ThreadContexts.propagate(command)));
+                command -> executor.execute(Workers.task(command)));
         final List<Future<R>> futures = IntStream.range(0, threads)
-                .mapToObj(i -> completion.submit(Workers.inWorker(worker.apply(i))))
+                .mapToObj(i -> completion.submit(worker.apply(i)))
                 .toList();
         final List<R> result = new ArrayList<>();
         try {
@@ -188,8 +195,11 @@ public final class Workers {
         }
     }
 
-    private static <R> Callable<R> inWorker(final Callable<R> worker) {
-        return () -> ScopedValue.where(Workers.IN_WORKER, Boolean.TRUE).call(worker::call);
+    /**
+     * 投入元スレッドで呼び、作業スレッドで実行するtaskを包む。投入元の文脈を引き継ぎ、作業スレッドで実行中の目印を付ける
+     */
+    private static Runnable task(final Runnable task) {
+        return ThreadContexts.propagate(() -> ScopedValue.where(Workers.IN_WORKER, Boolean.TRUE).run(task));
     }
 
     private static final class KeyedWorkers<T> {
@@ -210,8 +220,7 @@ public final class Workers {
             this.executor = Workers.newExecutor(threads, "output-");
             // submitは作成元のスレッドで呼ばれるため、ここで作成元の文脈を包む
             this.futures = this.queues.stream()
-                    .<Future<?>>map(queue -> this.executor.submit(ThreadContexts.propagate(
-                            () -> ScopedValue.where(Workers.IN_WORKER, Boolean.TRUE).run(() -> KeyedWorkers.drain(queue, action)))))
+                    .<Future<?>>map(queue -> this.executor.submit(Workers.task(() -> KeyedWorkers.drain(queue, action))))
                     .toList();
         }
 

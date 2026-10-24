@@ -28,6 +28,7 @@ import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.TestThreadContextPropagator;
+import yo.dbunitcli.resource.Workers;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
@@ -292,52 +293,10 @@ public class ParallelTableMappingTest {
     }
 
     @Test
-    public void forEach_processes_all_items_on_workers_with_context() {
-        final Map<String, String> actual = new ConcurrentHashMap<>();
-        final Set<String> threads = ConcurrentHashMap.newKeySet();
-        final Set<Boolean> firsts = ConcurrentHashMap.newKeySet();
-        ScopedValue.where(TestThreadContextPropagator.VALUE, "submitter")
-                .run(() -> ParallelTableMapping.forEach(this.producer(TableSeparators.NONE, null, 2).param()
-                        , List.of("a", "b", "c", "d")
-                        , (item, resources, first) -> {
-                            actual.put(item, TestThreadContextPropagator.VALUE.orElse("unbound"));
-                            threads.add(Thread.currentThread().getName());
-                            firsts.add(first);
-                            try {
-                                // 1つのワーカーが全件を取り切らないよう待つ
-                                Thread.sleep(50);
-                            } catch (final InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                        }));
-        Assertions.assertEquals(Map.of("a", "submitter", "b", "submitter", "c", "submitter", "d", "submitter"), actual);
-        Assertions.assertEquals(2, threads.size());
-        Assertions.assertEquals(Set.of(true, false), firsts);
-    }
-
-    @Test
-    public void parallelism_is_sequential_inside_worker_unless_specified() {
-        final ComparableDataSetParam unspecified = this.producer(TableSeparators.NONE, null, null).param();
-        final ComparableDataSetParam specified = this.producer(TableSeparators.NONE, null, 3).param();
-        Assertions.assertEquals(Runtime.getRuntime().availableProcessors(), ParallelTableMapping.parallelism(unspecified));
-        final Map<String, Integer> actual = new ConcurrentHashMap<>();
-        ParallelTableMapping.forEach(specified, List.of("unspecified", "specified"), (item, resources, first) ->
-                actual.put(item, ParallelTableMapping.parallelism(item.equals("specified") ? specified : unspecified)));
-        // 作業スレッドの中では未指定を1にして入れ子で並列化しない。指定した並列数はそのまま使う
-        Assertions.assertEquals(Map.of("unspecified", 1, "specified", 3), actual);
-    }
-
-    @Test
-    public void forEach_rethrows_failure_of_item() {
-        final AssertionError actual = Assertions.assertThrows(AssertionError.class
-                , () -> ParallelTableMapping.forEach(this.producer(TableSeparators.NONE, null, 2).param()
-                        , List.of("a", "b", "c", "d")
-                        , (item, resources, first) -> {
-                            if (item.equals("c")) {
-                                throw new AssertionError("failed " + item);
-                            }
-                        }));
-        Assertions.assertEquals("failed c", actual.getMessage());
+    public void parallelism_uses_specified_value_or_workers_default() {
+        Assertions.assertEquals(3, ParallelTableMapping.parallelism(this.producer(TableSeparators.NONE, null, 3).param()));
+        Assertions.assertEquals(Workers.defaultParallelism()
+                , ParallelTableMapping.parallelism(this.producer(TableSeparators.NONE, null, null).param()));
     }
 
     private ComparableTableMappingTask captureTask(final String name, final Consumer<ComparableTableMappingContext> body) {

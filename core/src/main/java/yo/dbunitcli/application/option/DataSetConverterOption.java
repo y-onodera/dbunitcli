@@ -50,7 +50,7 @@ public record DataSetConverterOption(
     }
 
     /**
-     * -parallelの値を検証する。未指定は空文字（未指定時の並列数はコマンドごとに決める。convert/compare/generateはCPUコア数で自動、run/parameterizeは逐次）
+     * -parallelの値を検証する。未指定は空文字（未指定時の並列数はコマンドごとに決める。convert/compare/generateはCPUコア数で自動（作業スレッドの中では逐次）、run/parameterizeは逐次）
      */
     public static String parallel(final String parallel) {
         if (Strings.isEmpty(parallel)) {

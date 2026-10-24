@@ -61,21 +61,10 @@ public final class ParallelTableMapping {
     }
 
     /**
-     * itemsを作業スレッドで並列に処理する（{@link Workers#forEach}を参照）。並列数はparamで決める
-     */
-    public static <T> void forEach(final ComparableDataSetParam param, final List<T> items, final Workers.WorkerAction<T> action) {
-        Workers.forEach(ParallelTableMapping.parallelism(param), "generate-", items, action);
-    }
-
-    /**
-     * @return 並列数。paramで未指定（null・0以下）なら{@link Workers#defaultParallelism()}
-     * （CPUコア数。作業スレッドの中では1にして、入れ子で並列化しない）
+     * @return paramの並列数。未指定なら{@link Workers#defaultParallelism()}（CPUコア数。作業スレッドの中では1）
      */
     public static int parallelism(final ComparableDataSetParam param) {
-        if (param.parallel() == null || param.parallel() <= 0) {
-            return Workers.defaultParallelism();
-        }
-        return param.parallel();
+        return Workers.parallelism(param.parallel());
     }
 
     /**

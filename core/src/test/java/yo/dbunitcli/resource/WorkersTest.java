@@ -30,6 +30,53 @@ public class WorkersTest {
     }
 
     @Test
+    public void parallelism_uses_requested_or_default() {
+        Assertions.assertEquals(3, Workers.parallelism(3));
+        Assertions.assertEquals(Workers.defaultParallelism(), Workers.parallelism(null));
+        Assertions.assertEquals(Workers.defaultParallelism(), Workers.parallelism(0));
+        final Map<String, Integer> actual = new ConcurrentHashMap<>();
+        Workers.forEach(2, "test-", List.of("unspecified", "specified"), (item, resources, first) ->
+                actual.put(item, Workers.parallelism(item.equals("specified") ? 3 : null)));
+        // 作業スレッドの中では未指定を1にして入れ子で並列化しない。指定した並列数はそのまま使う
+        Assertions.assertEquals(Map.of("unspecified", 1, "specified", 3), actual);
+    }
+
+    @Test
+    public void forEach_processes_all_items_on_workers_with_context() {
+        final Map<String, String> actual = new ConcurrentHashMap<>();
+        final Set<String> threads = ConcurrentHashMap.newKeySet();
+        final Set<Boolean> firsts = ConcurrentHashMap.newKeySet();
+        // 2件が同時に実行中にならないとlatchが0にならない（1つのワーカーが全件を取り切らない）
+        final CountDownLatch bothStarted = new CountDownLatch(2);
+        ScopedValue.where(TestThreadContextPropagator.VALUE, "submitter")
+                .run(() -> Workers.forEach(2, "test-", List.of("a", "b", "c", "d"), (item, resources, first) -> {
+                    actual.put(item, TestThreadContextPropagator.VALUE.orElse("unbound"));
+                    threads.add(Thread.currentThread().getName());
+                    firsts.add(first);
+                    bothStarted.countDown();
+                    try {
+                        Assertions.assertTrue(bothStarted.await(10, TimeUnit.SECONDS));
+                    } catch (final InterruptedException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }));
+        Assertions.assertEquals(Map.of("a", "submitter", "b", "submitter", "c", "submitter", "d", "submitter"), actual);
+        Assertions.assertEquals(2, threads.size());
+        Assertions.assertEquals(Set.of(true, false), firsts);
+    }
+
+    @Test
+    public void forEach_rethrows_failure_of_item() {
+        final AssertionError actual = Assertions.assertThrows(AssertionError.class
+                , () -> Workers.forEach(2, "test-", List.of("a", "b", "c", "d"), (item, resources, first) -> {
+                    if (item.equals("c")) {
+                        throw new AssertionError("failed " + item);
+                    }
+                }));
+        Assertions.assertEquals("failed c", actual.getMessage());
+    }
+
+    @Test
     public void forEachUntilFailure_runs_sequentially_on_caller_when_parallelism_or_items_less_than_two() {
         final Thread caller = Thread.currentThread();
         final List<String> actual = new ArrayList<>();

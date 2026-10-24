@@ -166,7 +166,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                     .map(it -> Stream.concat(it.template().tasks(), Stream.of(it.resultFile())).toList())
                     .toList());
             if (lanes.size() > 1) {
-                ParallelTableMapping.forEach(param, lanes, (lane, resources, first) -> lane.forEach(
+                Workers.forEach(ParallelTableMapping.parallelism(param), "generate-", lanes, (lane, resources, first) -> lane.forEach(
                         it -> action.accept(it.resultFile(), (first ? it.template() : it.template().forWorker(resources)).load())));
                 return;
             }
