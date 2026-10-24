@@ -1,6 +1,7 @@
 package yo.dbunitcli.dataset;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.dbunit.database.IDatabaseConnection;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -139,8 +140,14 @@ public class ParallelTableMappingTest {
     @Test
     public void lanes_empty_when_db_converter_has_no_connection_loader() throws SQLException {
         final String url = "jdbc:h2:mem:parallelNoLoader;DB_CLOSE_DELAY=-1";
-        final DBConverter converter = new DBConverter(this.connectionLoader(url).loadConnection(), DbOperation.INSERT, true);
-        Assertions.assertTrue(ParallelTableMapping.lanes(this.producer(TableSeparators.NONE, converter, null), this.tasks(TableSeparators.NONE)).isEmpty());
+        // 受け取った接続はDBConverterが閉じないため、渡した側で閉じる
+        final IDatabaseConnection connection = this.connectionLoader(url).loadConnection();
+        try {
+            final DBConverter converter = new DBConverter(connection, DbOperation.INSERT, true);
+            Assertions.assertTrue(ParallelTableMapping.lanes(this.producer(TableSeparators.NONE, converter, null), this.tasks(TableSeparators.NONE)).isEmpty());
+        } finally {
+            DatabaseConnectionLoader.close(connection);
+        }
     }
 
     @Test

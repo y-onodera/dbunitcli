@@ -21,8 +21,8 @@ public record SqlRunner(DatabaseConnectionLoader connectionLoader, Parameter par
 
     @Override
     public void runScript(final File target) {
-        try {
-            final Connection conn = this.getConnection();
+        // SQLExec.execute()も接続を閉じるが、execute()より前で失敗しても残らないようにここでも閉じる
+        try (final Connection conn = this.getConnection()) {
             final SQLExec exec = this.createExecInstance(conn);
             exec.setSrc(target);
             if (target.getName().endsWith("plsql")) {
