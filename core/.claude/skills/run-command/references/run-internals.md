@@ -17,7 +17,7 @@
 - `-baseDir`は`sql`では出力されない（`scriptType != sql`のときのみ出力）。sqlの実行はJDBC接続に依存
 - SQLは実行前にST4レンダリングされるため`$param.xxx$`でParameter（Parameterize等由来）を埋め込める
 - Runnerは`runScript(File)`でファイル単位に実行し、失敗時は`AssertionError`。Parameterize経由なら`-ignoreFail`で継続可
-- `-parallel`（全scriptType共通）: 未指定/1は逐次（convert/generateと違い既定は自動並列にしない＝スクリプトは実行順に依存しやすいため）。2以上は`Runner.run()`が`ParallelTableMapping.forEachUntilFailure`でファイルを並列実行（順不定。1件失敗したら未着手は始めず、実行中の完了を待って失敗）。stderrのログ転送は`StdErrToLog`が参照数で管理し、Runnerが同時に動いても（Parameterize並列）差し替え・復元が1回になる
+- `-parallel`（全scriptType共通）: 未指定/1は逐次（convert/generateと違い既定は自動並列にしない＝スクリプトは実行順に依存しやすいため）。2以上は`Runner.run()`が`Workers.forEachUntilFailure`でファイルを並列実行（順不定。1件失敗したら未着手は始めず、実行中の完了を待って失敗）。stderrのログ転送は`StdErrToLog`が参照数で管理し、Runnerが同時に動いても（Parameterize並列）差し替え・復元が1回になる
 
 ## 実装チェックリスト（run修正時の変更箇所）
 

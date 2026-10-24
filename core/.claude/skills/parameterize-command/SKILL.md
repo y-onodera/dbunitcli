@@ -12,7 +12,7 @@ Parameterizeは、`-param`の各単位を引数へ展開して別コマンドを
 2. **引数テンプレート供給元**: `-cmdParam`（ファイル名をParameterで動的決定）＞`-template`（固定）。どちらも無ければ`-arg`のみ
 3. **展開（`-parameterize`）**: true（既定）はST4展開してから引数化。`-arg`/`-A`はキー一致で上書きマージ
 4. **失敗継続（`-ignoreFail`）**: `CommandFailException`時に記録継続か即中断。失敗総数>0で全体失敗
-5. **並列（`-parallel`）**: 既定1＝逐次。2以上は`ParallelTableMapping.forEachUntilFailure`で並列（順不定。失敗時は未着手を始めず実行中の完了を待つ）
+5. **並列（`-parallel`）**: 既定1＝逐次。2以上は`Workers.forEachUntilFailure`で並列（順不定。失敗時は未着手を始めず実行中の完了を待つ）
 
 ## 実装の骨格
 

@@ -4,6 +4,7 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import yo.dbunitcli.application.SplitOrNameFilter;
+import yo.dbunitcli.resource.Workers;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -101,7 +102,7 @@ public class ComparableTableDto extends HashMap<String, Object> {
     /**
      * 並列実行で2つ目以降の作業スレッドが使うDTOを返す（タスクをそのスレッド専用の資源を使うものに差し替える）
      */
-    public ComparableTableDto forWorker(final ParallelTableMapping.WorkerResources resources) {
+    public ComparableTableDto forWorker(final Workers.WorkerResources resources) {
         final ComparableTableDto result = new ComparableTableDto(this);
         result.setRows(this.task.forWorker(resources));
         return result;

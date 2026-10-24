@@ -43,7 +43,7 @@
   <ul>
     <li>テーブル作成→データ投入のように実行順に依存するコマンドは並列にしないこと。</li>
     <li><code>ignoreFail</code> が false のときは、1 件失敗すると未着手のコマンドは始めず、実行中のコマンドが終わるのを待ってから失敗します（実行中のコマンドは途中で止めません）。true のときは全件を実行し、最後に失敗件数があれば失敗します。</li>
-    <li>compare / convert / generate は自身の並列数（generate は <code>-parallel</code>、compare / convert は <code>-result.parallel</code>）が空欄だと CPU コア数で並列化するため、parameterize の並列数と掛け合わせた数のスレッドが動くことがあります。抑えたい場合は、引数テンプレート（template / cmdParam）にそのオプションを <code>1</code> で書いてください（CLI なら <code>-A-parallel=1</code> 等でも指定できます）。</li>
+    <li>並列実行中のコマンドの中では、compare / convert / generate の並列数（generate は <code>-parallel</code>、compare / convert は <code>-result.parallel</code>）が空欄なら逐次になります（CPU コア数で並列化せず、parameterize の並列数と掛け合わせた数のスレッドが動かないようにする）。値を書いた場合はその並列数で動きます。</li>
     <li>複数のパラメータが同じ出力先へ書くテンプレートでは、最後に残る内容は不定です。</li>
   </ul>
 

@@ -3,7 +3,7 @@ package yo.dbunitcli.fileprocessor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.dataset.ParallelTableMapping;
+import yo.dbunitcli.resource.Workers;
 
 import java.io.File;
 import java.util.stream.Stream;
@@ -19,7 +19,7 @@ public interface Runner {
     default void run(final Stream<File> targetFiles, final int parallelism) {
         StdErrToLog.begin();
         try {
-            ParallelTableMapping.forEachUntilFailure(parallelism, "run-", targetFiles, this::runScript);
+            Workers.forEachUntilFailure(parallelism, "run-", targetFiles, this::runScript);
         } finally {
             StdErrToLog.end();
         }

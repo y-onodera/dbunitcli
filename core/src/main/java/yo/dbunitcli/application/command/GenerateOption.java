@@ -18,6 +18,7 @@ import yo.dbunitcli.dataset.ParallelTableMapping;
 import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.resource.Workers;
 
 import java.io.File;
 import java.io.IOException;
@@ -133,7 +134,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             this.loadRecords(loader, param, it -> action.accept(this.resultFile(it), it));
             return;
         }
-        ParallelTableMapping.<RecordOutput>forEachByKey(threads, RecordOutput::resultFile
+        Workers.<RecordOutput>forEachByKey(threads, RecordOutput::resultFile
                 , it -> action.accept(it.resultFile(), it.parameter())
                 , submit -> this.loadRecords(loader, param, it -> submit.accept(new RecordOutput(this.resultFile(it), it))));
     }
@@ -161,7 +162,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                 .map(it -> new TableOutput(it, this.resultFile(it.unloaded())))
                 .toList();
         if (parallelizable) {
-            final List<List<TableOutput>> lanes = ParallelTableMapping.groupByShared(outputs, outputs.stream()
+            final List<List<TableOutput>> lanes = Workers.groupByShared(outputs, outputs.stream()
                     .map(it -> Stream.concat(it.template().tasks(), Stream.of(it.resultFile())).toList())
                     .toList());
             if (lanes.size() > 1) {

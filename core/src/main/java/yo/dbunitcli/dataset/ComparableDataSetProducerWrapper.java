@@ -6,6 +6,7 @@ import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
+import yo.dbunitcli.resource.Workers;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -140,16 +141,16 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
 
         private final List<ConvertedTable> tables = new ArrayList<>();
 
-        private final ParallelTableMapping.WorkerResources resources;
+        private final Workers.WorkerResources resources;
 
-        private Conversion(final ParallelTableMapping.WorkerResources resources) {
+        private Conversion(final Workers.WorkerResources resources) {
             this.resources = resources;
         }
 
         /**
          * @return 作業スレッド用に差し替えたタスクの変換なら、その作業スレッドの資源（DB接続など）。元のタスク（最初の作業スレッド・逐次実行）ならnull
          */
-        public ParallelTableMapping.WorkerResources workerResources() {
+        public Workers.WorkerResources workerResources() {
             return this.resources;
         }
 
@@ -182,10 +183,10 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
          * delegateは行を使わないため常に読まない。このタスクが行（変換結果）を出力するかはparam.loadData()で表す
          */
         private final ComparableDataSetParam param;
-        private final ParallelTableMapping.WorkerResources resources;
+        private final Workers.WorkerResources resources;
 
         DelegateCaptureTask(final Source source, final ComparableTableMappingTask delegateTask, final boolean loadRows
-                , final ParallelTableMapping.WorkerResources resources) {
+                , final Workers.WorkerResources resources) {
             this.source = source;
             this.delegateTask = delegateTask;
             this.param = delegateTask.param().toBuilder().setLoadData(loadRows).build();
@@ -230,7 +231,7 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
         }
 
         @Override
-        public ComparableTableMappingTask forWorker(final ParallelTableMapping.WorkerResources resources) {
+        public ComparableTableMappingTask forWorker(final Workers.WorkerResources resources) {
             return new DelegateCaptureTask(this.source, this.delegateTask.forWorker(resources), this.param.loadData(), resources);
         }
 

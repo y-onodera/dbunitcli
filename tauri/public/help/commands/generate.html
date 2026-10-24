@@ -68,7 +68,7 @@
   <table>
     <tr><th>項目</th><th>説明</th></tr>
     <tr><td>template</td><td><a href="../sections/template.html">テンプレート</a>ファイルのパス（<code>txt</code> / <code>xlsx</code> / <code>xls</code> タイプで使用）</td></tr>
-    <tr><td>parallel</td><td>並列処理のスレッド数（並列化できる組み合わせのときだけ表示）。<code>1</code> で逐次処理。空欄なら、並列化できる場合に CPU コア数で並列化する（デフォルト: 空欄）。詳細は下記「並列処理」を参照</td></tr>
+    <tr><td>parallel</td><td>並列処理のスレッド数（並列化できる組み合わせのときだけ表示）。<code>1</code> で逐次処理。空欄なら、並列化できる場合に CPU コア数で並列化する（parameterize の並列実行の中では逐次）（デフォルト: 空欄）。詳細は下記「並列処理」を参照</td></tr>
     <tr><td>result</td><td>生成結果ファイルを配置するディレクトリ</td></tr>
     <tr><td>resultPath</td><td><code>result</code> ディレクトリからの相対パス（テンプレート変数を使用可能）</td></tr>
     <tr><td>outputEncoding</td><td>出力ファイルの文字コード（<code>txt</code> タイプのみ、デフォルト: <code>UTF-8</code>）</td></tr>

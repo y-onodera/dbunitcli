@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.Command;
 import yo.dbunitcli.common.Parameter;
-import yo.dbunitcli.dataset.ParallelTableMapping;
+import yo.dbunitcli.resource.Workers;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -37,7 +37,7 @@ public class Parameterize implements Command<ParameterizeDto, ParameterizeOption
             }
         };
         try (final Stream<Parameter> params = options.loadParams()) {
-            ParallelTableMapping.forEachUntilFailure(options.parallelism(), "parameterize-", params, action);
+            Workers.forEachUntilFailure(options.parallelism(), "parameterize-", params, action);
         }
         if (failCount.get() > 0) {
             Parameterize.LOGGER.info("total fail count:{}", failCount.get());

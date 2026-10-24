@@ -7,7 +7,7 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
-import yo.dbunitcli.dataset.ParallelTableMapping;
+import yo.dbunitcli.resource.Workers;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.sql.DatabaseMetaData;
@@ -66,7 +66,7 @@ public class ComparableJdbcMetaDataProducer extends ComparableDataSetProducerWra
      * （DBTableExecutor#forWorkerと同じkeyで、作業スレッドに1つの接続を共有する）
      */
     private DatabaseMetaData jdbcMetaData(final Conversion conversion) {
-        final ParallelTableMapping.WorkerResources resources = conversion.workerResources();
+        final Workers.WorkerResources resources = conversion.workerResources();
         if (this.jdbcMetaData == null || resources == null) {
             return this.jdbcMetaData;
         }
