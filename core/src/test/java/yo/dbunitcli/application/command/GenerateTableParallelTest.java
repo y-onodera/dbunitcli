@@ -35,7 +35,10 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -120,6 +123,64 @@ public class GenerateTableParallelTest {
                         .filter(other -> !other.equals(table))
                         .forEach(other -> Assertions.assertFalse(sql.contains("'" + other + "-"), table + " contains " + other));
             }
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"ddl,.sql", "javaBean,.java"})
+    public void generate_wrapped_type_from_db_same_as_sequential(final String generateType, final String extension) throws SQLException, IOException {
+        final String url = "jdbc:h2:mem:generateWrappedParallel" + generateType + ";DB_CLOSE_DELAY=-1";
+        final File listFile = this.tempDir.resolve("tables.txt").toFile();
+        final List<String> tables = List.of("T1", "T2", "T3", "T4");
+        try (final Connection conn = DriverManager.getConnection(url, "sa", "sa");
+             final Statement stmt = conn.createStatement()) {
+            for (final String table : tables) {
+                stmt.execute("create table " + table + " (ID int not null, NAME varchar(" + (10 + tables.indexOf(table))
+                        + ") not null, MEMO varchar(100), constraint PK_" + table + " primary key (ID))");
+                stmt.execute("comment on table " + table + " is '" + table + " remarks'");
+                stmt.execute("comment on column " + table + ".NAME is '" + table + " name'");
+            }
+            Files.writeString(listFile.toPath(), String.join("\n", tables), StandardCharsets.UTF_8);
+            final int before = this.count(stmt, "information_schema.sessions");
+            final Map<String, String> results = new HashMap<>();
+            for (final String parallel : List.of("", "1")) {
+                final File result = this.tempDir.resolve("result-" + generateType + parallel).toFile();
+                Generate.main(new String[]{
+                        "-generateType=" + generateType
+                        , "-srcType=table"
+                        , "-src=" + listFile.getAbsolutePath()
+                        , "-jdbcUrl=" + url
+                        , "-jdbcUser=sa"
+                        , "-jdbcPass=sa"
+                        , "-parallel=" + parallel
+                        , "-result=" + result.getAbsolutePath()
+                        , "-resultPath=out"
+                });
+                try (final Stream<Path> files = Files.list(result.toPath().resolve("out"))) {
+                    for (final Path file : files.toList()) {
+                        final String content = Files.readString(file, StandardCharsets.UTF_8);
+                        final String previous = results.putIfAbsent(file.getFileName().toString(), content);
+                        if (previous != null) {
+                            Assertions.assertEquals(previous, content, file.getFileName().toString());
+                        }
+                    }
+                }
+            }
+            Assertions.assertEquals(tables.size(), results.size(), results.keySet().toString());
+            // テーブルごとのコメント・桁数が混ざらない（作業スレッドごとの接続からメタデータを取る）
+            for (final String table : tables) {
+                final String content = results.entrySet().stream()
+                        .filter(it -> it.getKey().toUpperCase().startsWith(table) && it.getKey().endsWith(extension))
+                        .map(Map.Entry::getValue)
+                        .findFirst().orElseThrow(() -> new AssertionError(table + " " + results.keySet()));
+                if ("ddl".equals(generateType)) {
+                    Assertions.assertTrue(content.contains(table + " remarks"), content);
+                    Assertions.assertTrue(content.contains("VARYING(" + (10 + tables.indexOf(table)) + ")"), content);
+                    Assertions.assertTrue(content.contains("PK_" + table), content);
+                }
+            }
+            // 作業スレッドで張った接続も閉じる
+            Assertions.assertEquals(before, this.count(stmt, "information_schema.sessions"));
         }
     }
 

@@ -247,11 +247,10 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     /**
-     * -parallelを表示するか。srcを並列に読み込める形式で、generateTypeが並列化に対応する場合
+     * -parallelを表示するか。srcを並列に読み込める形式の場合
      */
     public boolean isParallelizable() {
-        return this.srcData.srcType() != null && this.srcData.srcType().isParallelizable()
-                && this.generateType.isParallelizable();
+        return this.srcData.srcType() != null && this.srcData.srcType().isParallelizable();
     }
 
     /**

@@ -368,7 +368,7 @@ function makeImageFileSrcData(prefix: string) {
 	};
 }
 
-// parallelは並列化できるときだけレスポンスに含まれる（convertは入力・出力とも、generateはsrcとgenerateTypeとも）
+// parallelは並列化できるときだけレスポンスに含まれる（convertは入力・出力とも、generateはsrcが並列読込できるとき）
 function parallelElement(parallel: boolean) {
 	return parallel
 		? { parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false) }
@@ -1055,6 +1055,7 @@ export const generateRefreshXlsxSchemaResponseFixture = {
 		false,
 		GENERATE_TYPE_OPTIONS,
 	),
+	...parallelElement(true),
 	result: makeElement("result", "DIR", "", "RESULT", false),
 	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
 	outputEncoding: makeElement(
@@ -1102,6 +1103,7 @@ export const generateRefreshFixedColumnDefResponseFixture = {
 		false,
 		GENERATE_TYPE_OPTIONS,
 	),
+	...parallelElement(true),
 	result: makeElement("result", "DIR", "", "RESULT", false),
 	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
 	outputEncoding: makeElement(

@@ -34,6 +34,11 @@ public class ComparableXlsxSchemaMetaDataProducer extends ComparableDataSetProdu
     }
 
     @Override
+    protected Column[] columnDefSchema() {
+        return COLUMN_DEF_SCHEMA;
+    }
+
+    @Override
     public void startTable(final ITableMetaData metaData) throws DataSetException {
         final String tableName = metaData.getTableName();
         final Set<String> primaryKeyNames = Arrays.stream(metaData.getPrimaryKeys())

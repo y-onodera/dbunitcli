@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * unit=tableで、ラッパーの変換（DB入力ならメタデータ照会を伴う）をテーブルごとに1回だけ行うこと
+ * unit=tableで、ラッパーの変換（DB入力ならメタデータ照会を伴う）をテーブル一覧の作成では行わず、テーブルごとの出力で1回だけ行うこと
  */
 public class WrapperConvertOnceTest {
 
@@ -51,9 +51,11 @@ public class WrapperConvertOnceTest {
                 .setEncoding("UTF-8")
                 .setLoadData(false)
                 .build()), counts);
-        final List<Parameter> loaded = ParameterUnit.tableTemplates(new ComparableDataSetLoader(Parameter.none()), producer, TableSeparators.NONE)
-                .map(ParameterUnit.TableTemplate::load)
-                .toList();
+        final List<ParameterUnit.TableTemplate> templates = ParameterUnit.tableTemplates(
+                new ComparableDataSetLoader(Parameter.none()), producer, TableSeparators.NONE).toList();
+        // テーブル一覧の作成ではテーブル名とスキーマだけを求め、変換しない
+        Assertions.assertTrue(counts.isEmpty(), counts.toString());
+        final List<Parameter> loaded = templates.stream().map(ParameterUnit.TableTemplate::load).toList();
         Assertions.assertEquals(WrapperConvertOnceTest.TABLES.size(), loaded.size());
         WrapperConvertOnceTest.TABLES.forEach(it -> Assertions.assertEquals(1, counts.get(it).get(), it));
         // 1回目の変換結果から行を作る（列ごとに1行）

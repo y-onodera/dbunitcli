@@ -7,6 +7,8 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
+import yo.dbunitcli.dataset.ParallelTableMapping;
+import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -57,6 +59,19 @@ public class ComparableJdbcMetaDataProducer extends ComparableDataSetProducerWra
         }
     }
 
+    /**
+     * JDBC接続は複数スレッドから同時に使えないため、作業スレッドではdelegateのタスクと同じ作業スレッド専用の接続から取得する
+     * （DBTableExecutor#forWorkerと同じkeyで、作業スレッドに1つの接続を共有する）
+     */
+    private DatabaseMetaData jdbcMetaData() throws SQLException {
+        final ParallelTableMapping.WorkerResources resources = this.workerResources();
+        if (this.jdbcMetaData == null || resources == null) {
+            return this.jdbcMetaData;
+        }
+        final DatabaseConnectionLoader loader = this.delegate.param().databaseConnectionLoader();
+        return resources.get(loader, loader::loadConnection, IDatabaseConnection::close).getConnection().getMetaData();
+    }
+
     @Override
     public void close() {
         try {
@@ -71,15 +86,21 @@ public class ComparableJdbcMetaDataProducer extends ComparableDataSetProducerWra
     }
 
     @Override
+    protected Column[] columnDefSchema() {
+        return COLUMN_DEF_SCHEMA;
+    }
+
+    @Override
     public void startTable(final ITableMetaData metaData) throws DataSetException {
         try {
             final String tableName = metaData.getTableName();
-            final String tableRemarks = this.jdbcMetaData != null ? loadTableRemarks(this.jdbcMetaData, tableName) : "";
-            final Map<String, String> pkNames = this.jdbcMetaData != null
-                    ? loadPrimaryKeyNames(this.jdbcMetaData, tableName)
+            final DatabaseMetaData jdbcMetaData = this.jdbcMetaData();
+            final String tableRemarks = jdbcMetaData != null ? loadTableRemarks(jdbcMetaData, tableName) : "";
+            final Map<String, String> pkNames = jdbcMetaData != null
+                    ? loadPrimaryKeyNames(jdbcMetaData, tableName)
                     : Arrays.stream(metaData.getPrimaryKeys())
                             .collect(Collectors.toMap(Column::getColumnName, column -> (String) null, (a, b) -> a, LinkedHashMap::new));
-            final Map<String, ColumnDetail> columnDetails = this.jdbcMetaData != null ? loadColumnDetails(this.jdbcMetaData, tableName) : Map.of();
+            final Map<String, ColumnDetail> columnDetails = jdbcMetaData != null ? loadColumnDetails(jdbcMetaData, tableName) : Map.of();
             this.writeColumnRows(tableName, COLUMN_DEF_SCHEMA, metaData.getColumns(), (column, index) -> {
                 final String columnName = column.getColumnName();
                 final ColumnDetail detail = columnDetails.get(columnName);

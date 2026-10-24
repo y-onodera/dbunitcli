@@ -56,16 +56,17 @@ public class ParallelParameterTest {
         Assertions.assertTrue(this.generateHasParallel("-srcType=csv", "-generateType=txt"));
         Assertions.assertTrue(this.generateHasParallel("-srcType=xlsx", "-generateType=xlsx", "-unit=table"));
         Assertions.assertTrue(this.generateHasParallel("-srcType=table", "-generateType=sql"));
+        // srcのproducerを包むgenerateTypeも、包んだproducerが並列読込できれば並列化する
+        Assertions.assertTrue(this.generateHasParallel("-srcType=table", "-generateType=ddl"));
+        Assertions.assertTrue(this.generateHasParallel("-srcType=table", "-generateType=javaBean"));
+        Assertions.assertTrue(this.generateHasParallel("-srcType=csv", "-generateType=xlsxSchema"));
+        Assertions.assertTrue(this.generateHasParallel("-srcType=csv", "-generateType=fixedColumnDef"));
     }
 
     @Test
-    public void generateHidesParallelWhenSourceOrGenerateTypeIsNotParallelizable() {
+    public void generateHidesParallelWhenSourceIsNotParallelizable() {
         Assertions.assertFalse(this.generateHasParallel("-srcType=file", "-generateType=txt", "-unit=table"));
-        // srcのproducerを包むgenerateTypeは並列化しない
-        Assertions.assertFalse(this.generateHasParallel("-srcType=csv", "-generateType=ddl"));
-        Assertions.assertFalse(this.generateHasParallel("-srcType=csv", "-generateType=javaBean"));
-        Assertions.assertFalse(this.generateHasParallel("-srcType=csv", "-generateType=xlsxSchema"));
-        Assertions.assertFalse(this.generateHasParallel("-srcType=csv", "-generateType=fixedColumnDef"));
+        Assertions.assertFalse(this.generateHasParallel("-srcType=dir", "-generateType=fixedColumnDef"));
     }
 
     @Test

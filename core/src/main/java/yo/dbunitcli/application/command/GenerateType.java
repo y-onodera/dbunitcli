@@ -118,11 +118,6 @@ public enum GenerateType {
         }
 
         @Override
-        public boolean isParallelizable() {
-            return false;
-        }
-
-        @Override
         protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
             return ComparableDdlMetaDataProducer.forSource(producer);
         }
@@ -180,11 +175,6 @@ public enum GenerateType {
         }
 
         @Override
-        public boolean isParallelizable() {
-            return false;
-        }
-
-        @Override
         protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
             return new ComparableXlsxSchemaMetaDataProducer(producer);
         }
@@ -215,11 +205,6 @@ public enum GenerateType {
         }
 
         @Override
-        public boolean isParallelizable() {
-            return false;
-        }
-
-        @Override
         protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
             return ComparableDdlMetaDataProducer.forSource(producer);
         }
@@ -247,11 +232,6 @@ public enum GenerateType {
         @Override
         protected String resultPathTemplate(final GenerateOption option) {
             return GenerateType.tableFileResultPath(option, ".json");
-        }
-
-        @Override
-        public boolean isParallelizable() {
-            return false;
         }
 
         @Override
@@ -292,13 +272,6 @@ public enum GenerateType {
 
     public String defaultSettingsPath() {
         return null;
-    }
-
-    /**
-     * 並列化に対応するか。srcのproducerを包む形式（wrapProducer）は、包んだproducerが並列読込に対応しないため不可
-     */
-    public boolean isParallelizable() {
-        return true;
     }
 
     public boolean isExcel() {

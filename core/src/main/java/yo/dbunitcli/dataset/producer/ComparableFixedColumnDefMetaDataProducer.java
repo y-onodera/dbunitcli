@@ -33,6 +33,11 @@ public class ComparableFixedColumnDefMetaDataProducer extends ComparableDataSetP
     }
 
     @Override
+    protected Column[] columnDefSchema() {
+        return COLUMN_DEF_SCHEMA;
+    }
+
+    @Override
     public void startTable(final ITableMetaData metaData) throws DataSetException {
         this.writeColumnRows(metaData.getTableName(), COLUMN_DEF_SCHEMA, metaData.getColumns(), (column, index) -> {
             final int length = index < this.lengths.length ? Integer.parseInt(this.lengths[index].trim()) : this.defaultLength;
