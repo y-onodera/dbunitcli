@@ -24,9 +24,9 @@ export default function ResultFormSection({
 	const fixedColumnDef = resultOption.fixedColumnDef;
 	const fixedLengthType = resultOption.fixedLengthType;
 	const parallel = resultOption.parallel;
-	// BOOKのときだけ並列化できparallelの表示が変わるため、候補の値へ変わったら再構成する
+	// 環境変数で値を渡せるよう自由入力のまま。SHEETのときだけparallelを隠すため、SHEETかどうかが変わったら再構成する
 	const handleExcelTableChange = (value: string) => {
-		if (EXCEL_TABLE_TYPES.includes(value) && value !== excelTable?.value) {
+		if ((value === "SHEET") !== (excelTable?.value === "SHEET")) {
 			void handleTypeSelect(value);
 		}
 	};

@@ -52,7 +52,7 @@
   <p>入力ソースが複数ある場合に、ソースごとに別スレッドで読み込み・出力します。出力先のテーブルが同じになるソース同士は同じスレッドで元の順に処理するため、追記の順序は逐次処理と変わりません。</p>
   <p><code>parallel</code> は次の組み合わせのときだけ表示されます。</p>
   <ul>
-    <li>Convert: 入力の srcType が <code>file</code> / <code>dir</code> 以外で、出力形式が <code>xls</code> / <code>xlsx</code> 以外、または <code>excelTable</code> が <code>BOOK</code>（<code>excelTable</code> を <code>SHEET</code> / <code>BOOK</code> に切り替えるとフォームが再構成されます）</li>
+    <li>Convert: 入力の srcType が <code>file</code> / <code>dir</code> 以外で、出力形式が <code>xls</code> / <code>xlsx</code> 以外、または <code>excelTable</code> が <code>SHEET</code> 以外（<code>excelTable</code> は環境変数などで値を渡せるよう自由入力のため、<code>SHEET</code> と入力されているときだけ非表示にします。<code>SHEET</code> かどうかが変わるとフォームが再構成されます。実行時に値が <code>SHEET</code> になった場合は逐次処理です）</li>
     <li>Compare: new / old のどちらかの srcType が <code>file</code> / <code>dir</code> 以外（出力形式は問わない）</li>
   </ul>
   <p>表示されていても、次の場合は実行時に逐次処理になります。</p>

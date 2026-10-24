@@ -16,7 +16,7 @@
 
 `parallel`: ソースの並列読込数（`ComparableDataSetParam.parallel`へ渡す。Compareはnew/oldの読込に適用）。未指定はCPUコア数、`1`は逐次。
 
-- 表示: 並列化できる組み合わせのときだけ。Convertは`DataSourceType.isParallelizable()`かつ`DataSetConverterOption.isParallelizable()`、Compareはnew/oldのどちらかが`DataSourceType.isParallelizable()`
+- 表示: 並列化できる組み合わせのときだけ。Convertは`DataSourceType.isParallelizable()`かつ`DataSetConverterOption.isParallelizable()`（xls/xlsxはexcelTableが環境変数等を含む自由入力のため、`SHEET`と確定しているときだけ非表示）、Compareはnew/oldのどちらかが`DataSourceType.isParallelizable()`
 - 実行: `ParallelTableMapping`。producerの`isParallelizableSource()`（`DataSourceType.isParallelizable()`と一致させる。`ParallelTableMappingTest`で検証）、converterの`isParallelizable()`（FlatFile系・xls/xlsxのBOOK・table）、join・件数分割なしのとき、出力テーブルを共有するソースを同じレーン（同一スレッド・元の順）にまとめて作業スレッドで処理する
 - 出力テーブルの先読み: タスクの`outputTableCandidates()`（xls/xlsxはシート名とxlsxSchemaから）
 - スレッド間で共有できない資源: DB接続は作業スレッドごとに張る（入力は`ComparableTableMappingTask.forWorker()`、出力は`IDataSetConverter.splitForParallel()`。どちらも`ParallelTableMapping.WorkerResources`から取得し終了時に閉じる）。`FileResources`のContextとsidecarのログ振り分けは作業スレッドへ引き継ぐ

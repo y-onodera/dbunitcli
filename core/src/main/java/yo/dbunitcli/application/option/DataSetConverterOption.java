@@ -119,11 +119,12 @@ public record DataSetConverterOption(
     }
 
     /**
-     * 出力側が並列書込に対応するか（xls/xlsxは1ブックにまとめるSHEETでは不可）
+     * 出力側が並列書込に対応するか。xls/xlsxは1ブックにまとめるSHEETでは不可。
+     * excelTableは環境変数で渡せる自由入力のため、SHEETと確定しているときだけ不可とする（実行時はconverterが判定する）
      */
     public boolean isParallelizable() {
         return (this.resultType != ResultType.xls && this.resultType != ResultType.xlsx)
-                || XlsConverter.TableExportType.BOOK.name().equals(this.excelTable);
+                || !XlsConverter.TableExportType.SHEET.name().equals(this.excelTable);
     }
 
     public DataSetConverterParam.Builder getParam() {

@@ -16,6 +16,7 @@ public class ParallelParameterTest {
         Assertions.assertTrue(this.convertHasParallel("-srcType=reg", "-resultType=format"));
         Assertions.assertTrue(this.convertHasParallel("-srcType=csv", "-resultType=table"));
         Assertions.assertTrue(this.convertHasParallel("-srcType=csv", "-resultType=xlsx", "-excelTable=BOOK"));
+        Assertions.assertTrue(this.convertHasParallel("-srcType=csv", "-resultType=xlsx", "-excelTable=${EXCEL_TABLE}"));
         Assertions.assertTrue(this.convertHasParallel("-srcType=xlsx", "-resultType=csv"));
         Assertions.assertTrue(this.convertHasParallel("-srcType=xls", "-resultType=csv"));
         Assertions.assertTrue(this.convertHasParallel("-srcType=csvq", "-resultType=csv"));
