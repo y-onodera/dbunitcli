@@ -16,7 +16,8 @@
 - `-src`の内部固定4項目（srcType=file / loadData=true / includeMetaData=false / extension）は`toParametersBuilder()`で`remove()`され出力されない。ユーザーが触るのは実質`-src.src`（探索ルート）と`-baseDir`
 - `-baseDir`は`sql`では出力されない（`scriptType != sql`のときのみ出力）。sqlの実行はJDBC接続に依存
 - SQLは実行前にST4レンダリングされるため`$param.xxx$`でParameter（Parameterize等由来）を埋め込める
-- Runnerはファイル単位で`forEach`実行し、失敗時は`AssertionError`。Parameterize経由なら`-ignoreFail`で継続可
+- Runnerは`runScript(File)`でファイル単位に実行し、失敗時は`AssertionError`。Parameterize経由なら`-ignoreFail`で継続可
+- `-parallel`（全scriptType共通）: 未指定/1は逐次（convert/generateと違い既定は自動並列にしない＝スクリプトは実行順に依存しやすいため）。2以上は`Runner.run()`が`ParallelTableMapping.forEach`でファイルを並列実行（順不定・1件失敗で残りを中断）
 
 ## 実装チェックリスト（run修正時の変更箇所）
 
@@ -24,7 +25,7 @@
 |---|---|
 | `command/RunOption.java` | `ScriptType`定数＋`createRunner()`/`getExtension()`オーバーライド。固有オプションは`toParametersBuilder()`分岐＋recordフィールド |
 | `command/RunDto.java` | `-scriptType`ほか`@CommandLine.Option`フィールド |
-| `fileprocessor/{Type}Runner.java` | `Runner`実装（`runScript(Stream<File>)`）。Sql/Ant/Cmdが参考 |
+| `fileprocessor/{Type}Runner.java` | `Runner`実装（`runScript(File)`＝1ファイル分。並列/逐次の切替は`Runner.run()`）。Sql/Ant/Cmdが参考 |
 | `option/JdbcOption.java`・`AntOption.java`・`TemplateRenderOption.java` | 実行方式固有オプションの追加時 |
 | `command/RunOptionTest.java`・`RunTest.java` | 単体（toParameters往復）/統合（`paramRun*.txt`） |
 

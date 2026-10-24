@@ -79,10 +79,20 @@ public final class ParallelTableMapping {
      * @param action 最初のワーカー（first=true）は元の資源をそのまま使う（DB接続を余分に張らない）
      */
     public static <T> void forEach(final ComparableDataSetParam param, final List<T> items, final WorkerAction<T> action) {
-        final int threads = Math.min(ParallelTableMapping.parallelism(param), items.size());
+        ParallelTableMapping.forEach(ParallelTableMapping.parallelism(param), "generate-", items, action);
+    }
+
+    /**
+     * forEach(param, items, action)の並列数とスレッド名を直接指定する版
+     *
+     * @param parallelism 並列数（2以上。itemsの件数を上限にする）
+     */
+    public static <T> void forEach(final int parallelism, final String threadNamePrefix, final List<T> items
+            , final WorkerAction<T> action) {
+        final int threads = Math.min(parallelism, items.size());
         ParallelTableMapping.LOGGER.info("forEach() - parallel items={}, threads={}", items.size(), threads);
         final Queue<T> queue = new ConcurrentLinkedQueue<>(items);
-        ParallelTableMapping.runWorkers(threads, "generate-", i -> () -> {
+        ParallelTableMapping.runWorkers(threads, threadNamePrefix, i -> () -> {
             try (final WorkerResources resources = new WorkerResources()) {
                 T item;
                 while ((item = queue.poll()) != null) {

@@ -15,6 +15,15 @@
     },
     "value": "cmd"
   },
+  "parallel": {
+    "name": "parallel",
+    "attribute": {
+      "type": "TEXT",
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": ""
+  },
   "baseDir": {
     "name": "baseDir",
     "attribute": {

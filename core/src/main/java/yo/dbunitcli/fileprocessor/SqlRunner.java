@@ -12,7 +12,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public record SqlRunner(DatabaseConnectionLoader connectionLoader, Parameter parameter,
                         TemplateRender templateRender) implements Runner {
@@ -21,25 +20,23 @@ public record SqlRunner(DatabaseConnectionLoader connectionLoader, Parameter par
     private static final Pattern SQLPLUS_EXIT_OR_COMMIT = Pattern.compile("(EXIT|COMMIT)(\\s|\\s*;)", Pattern.CASE_INSENSITIVE);
 
     @Override
-    public void runScript(final Stream<File> targetFiles) {
-        targetFiles.forEach(target -> {
-            try {
-                final Connection conn = this.getConnection();
-                final SQLExec exec = this.createExecInstance(conn);
-                exec.setSrc(target);
-                if (target.getName().endsWith("plsql")) {
-                    final SQLExec.DelimiterType delimiterType = new SQLExec.DelimiterType();
-                    delimiterType.setValue("row");
-                    exec.setDelimiterType(delimiterType);
-                    exec.setDelimiter("/");
-                    exec.setKeepformat(true);
-                }
-                exec.execute();
-            } catch (final Throwable var30) {
-                LOGGER.error("error {}", target.getName(), var30);
-                throw new AssertionError(var30);
+    public void runScript(final File target) {
+        try {
+            final Connection conn = this.getConnection();
+            final SQLExec exec = this.createExecInstance(conn);
+            exec.setSrc(target);
+            if (target.getName().endsWith("plsql")) {
+                final SQLExec.DelimiterType delimiterType = new SQLExec.DelimiterType();
+                delimiterType.setValue("row");
+                exec.setDelimiterType(delimiterType);
+                exec.setDelimiter("/");
+                exec.setKeepformat(true);
             }
-        });
+            exec.execute();
+        } catch (final Throwable var30) {
+            LOGGER.error("error {}", target.getName(), var30);
+            throw new AssertionError(var30);
+        }
     }
 
     private SQLExec createExecInstance(final Connection conn) {

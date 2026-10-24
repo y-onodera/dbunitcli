@@ -10,7 +10,7 @@ Runは、`-src`で集めたスクリプト群を`scriptType`ごとのRunnerで�
 
 1. **scriptType**: `RunOption.ScriptType`。Runner・拡張子・必要オプションを決める（sql=`SqlRunner`で`Parameter`をST4展開して実行、ant=`AntRunner`、cmd/bat=`CmdRunner`）
 2. **固有オプションの出し分け**: `toParametersBuilder()`がscriptTypeで分岐（`-baseDir`はsql以外のみ）
-3. **Runner実装（`fileprocessor/`）**: `Runner.run()`がstderrをログ転送して`runScript()`を呼ぶ
+3. **Runner実装（`fileprocessor/`）**: `Runner.run()`がstderrをログ転送して`runScript(File)`を呼ぶ（`-parallel`が2以上ならファイルを並列実行、既定は逐次）
 
 scriptType追加＝`ScriptType`定数＋`createRunner()`（必要なら`getExtension()`）＋Runner実装＋（固有オプションがあれば）`toParametersBuilder()`分岐。scriptType別対応表・注意点・テスト場所は `references/run-internals.md`。
 

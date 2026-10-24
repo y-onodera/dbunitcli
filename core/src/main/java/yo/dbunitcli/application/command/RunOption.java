@@ -4,6 +4,7 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.option.AntOption;
+import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.JdbcOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
@@ -27,6 +28,7 @@ public record RunOption(
         , JdbcOption jdbcOption
         , AntOption antOption
         , String baseDir
+        , String parallel
 ) implements CommandLineOption<RunDto> {
 
     public static RunDto toDto(final String[] args) {
@@ -50,6 +52,7 @@ public record RunOption(
                 , new JdbcOption("jdbc", dto.getJdbcOption())
                 , new AntOption(dto.getAntTarget())
                 , dto.getBaseDir()
+                , DataSetConverterOption.parallel(dto.getParallel())
         );
     }
 
@@ -63,6 +66,13 @@ public record RunOption(
                                 .build())
                 .toMap()
                 .map(it -> FileResources.searchDatasetBase(it.get(ComparableFileTableMetaData.PK.getColumnName()).toString()));
+    }
+
+    /**
+     * @return 並列数。未指定なら1（スクリプトは実行順に依存しやすいため、convert/generateと違い既定は逐次）
+     */
+    public int parallelism() {
+        return Strings.isEmpty(this.parallel) ? 1 : Integer.parseInt(this.parallel);
     }
 
     public Runner runner() {
@@ -84,7 +94,8 @@ public record RunOption(
                         .remove("-src.loadData")
                         .build()
                 )
-                .put("-scriptType", this.scriptType, ScriptType.class);
+                .put("-scriptType", this.scriptType, ScriptType.class)
+                .put("-parallel", this.parallel);
         if (this.scriptType == ScriptType.sql) {
             result.addComponent("templateOption", this.templateOption.toParameters())
                     .addComponent("jdbcOption", this.jdbcOption.toParameters());
