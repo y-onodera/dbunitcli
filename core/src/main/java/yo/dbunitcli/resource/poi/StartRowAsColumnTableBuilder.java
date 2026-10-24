@@ -40,6 +40,11 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
     }
 
     @Override
+    public String[] getTableNames() {
+        return new String[]{this.tableName};
+    }
+
+    @Override
     public TableMetaDataWithSource startNewTable() {
         this.nowProcessing = this.source.wrap(new DefaultTableMetaData(this.tableName, this.getColumns()));
         return this.nowProcessing;

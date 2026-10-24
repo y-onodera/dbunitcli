@@ -1,9 +1,12 @@
 package yo.dbunitcli.dataset;
 
+import org.dbunit.dataset.Column;
 import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public interface ComparableTableMappingTask {
 
@@ -16,6 +19,22 @@ public interface ComparableTableMappingTask {
     }
 
     void run(ComparableTableMappingContext context);
+
+    /**
+     * runで作るテーブルのメタデータ（列は空）。出力テーブルが同じタスクを同じスレッドへまとめるため、実行前に求める。
+     * 実際に作るテーブルを漏らしてはならない（余分に含むのは可）
+     */
+    default Stream<TableMetaDataWithSource> outputTableCandidates() {
+        return Stream.of(this.source().createMetaData(new Column[0]));
+    }
+
+    /**
+     * 並列実行で2つ目以降のレーンが使うタスクを返す。スレッド間で共有できない資源（DB接続など）は
+     * resourcesからレーン専用のものを取得して差し替える
+     */
+    default ComparableTableMappingTask forLane(final ParallelTableMapping.LaneResources resources) {
+        return this;
+    }
 
     default TreeMap<String, ComparableTable> runWith(final Consumer<TableSeparators.Builder> editor,
                                                      IDataSetConverter converter) {
@@ -58,6 +77,12 @@ public interface ComparableTableMappingTask {
 
         public void run(final ComparableTableMappingContext mappingContext) {
             this.head().run(mappingContext.addChain(this.rest()));
+        }
+
+        @Override
+        public Stream<TableMetaDataWithSource> outputTableCandidates() {
+            return Stream.concat(Stream.of(this.head), this.rest.stream())
+                    .flatMap(ComparableTableMappingTask::outputTableCandidates);
         }
 
         @Override

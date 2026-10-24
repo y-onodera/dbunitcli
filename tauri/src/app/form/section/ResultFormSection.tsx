@@ -4,7 +4,10 @@ import FileText from "./element/FileText";
 import FixedColumnDefText from "./element/FixedColumnDefText";
 import PlainText from "./element/PlainText";
 import Select from "./element/Select";
+import Text from "./element/Text";
 import JdbcFormSection from "./JdbcFormSection";
+
+const EXCEL_TABLE_TYPES = ["SHEET", "BOOK"];
 
 export default function ResultFormSection({
 	resultOption,
@@ -20,6 +23,13 @@ export default function ResultFormSection({
 	const outputExtension = resultOption.outputExtension;
 	const fixedColumnDef = resultOption.fixedColumnDef;
 	const fixedLengthType = resultOption.fixedLengthType;
+	const parallel = resultOption.parallel;
+	// BOOKのときだけ並列化できparallelの表示が変わるため、候補の値へ変わったら再構成する
+	const handleExcelTableChange = (value: string) => {
+		if (EXCEL_TABLE_TYPES.includes(value) && value !== excelTable?.value) {
+			void handleTypeSelect(value);
+		}
+	};
 	return (
 		<>
 			<Select
@@ -39,7 +49,14 @@ export default function ResultFormSection({
 			{resultOption.exportHeader && (
 				<Check prefix={prefix} element={resultOption.exportHeader} />
 			)}
-			{excelTable && <PlainText prefix={prefix} element={excelTable} />}
+			{excelTable && (
+				<Text
+					prefix={prefix}
+					element={excelTable}
+					resourceFiles={EXCEL_TABLE_TYPES}
+					handleValueChange={handleExcelTableChange}
+				/>
+			)}
 			{outputEncoding && <PlainText prefix={prefix} element={outputEncoding} />}
 			{format && <PlainText prefix={prefix} element={format} />}
 			{outputExtension && (
@@ -51,6 +68,7 @@ export default function ResultFormSection({
 			{fixedLengthType && (
 				<PlainText prefix={prefix} element={fixedLengthType} />
 			)}
+			{parallel && <PlainText prefix={prefix} element={parallel} />}
 			{resultOption.op && (
 				<Select
 					prefix={prefix}

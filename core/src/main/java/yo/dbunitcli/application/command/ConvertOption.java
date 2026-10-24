@@ -33,13 +33,17 @@ public record ConvertOption(Parameter parameter, ResultOption result,
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder()
                 .addComponent("srcData", this.srcData.toParameters())
-                .addComponent("convertResult", this.result().convertResult().toParameters());
+                .addComponent("convertResult", this.result().convertResult()
+                        .toParametersBuilder(this.srcData.srcType().isParallelizable()
+                                && this.result().convertResult().isParallelizable())
+                        .build());
     }
 
     public void convertDataset() {
         this.getComparableDataSetLoader()
                 .loadDataSet(this.srcData.getParam()
                         .setConverter(this.result().converter(it -> it.setResultPath(this.result().getResultPath())))
+                        .setParallel(this.result().convertResult().parallelism())
                         .build());
     }
 

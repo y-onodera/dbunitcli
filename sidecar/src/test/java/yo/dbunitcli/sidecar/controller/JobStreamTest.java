@@ -115,6 +115,9 @@ class JobStreamTest {
         Files.deleteIfExists(Paths.get(WORKSPACE, "src/multi1.csv"));
         Files.deleteIfExists(Paths.get(WORKSPACE, "src/multi2.csv"));
         Files.deleteIfExists(Paths.get(WORKSPACE, "src"));
+        Files.deleteIfExists(Paths.get(WORKSPACE, "target/convert/parallel/multi1.csv"));
+        Files.deleteIfExists(Paths.get(WORKSPACE, "target/convert/parallel/multi2.csv"));
+        Files.deleteIfExists(Paths.get(WORKSPACE, "target/convert/parallel"));
     }
 
     @Test
@@ -139,6 +142,20 @@ class JobStreamTest {
                 "コントローラのログが流れること: " + stream.logs());
         Assertions.assertTrue(stream.logs().stream().anyMatch(line -> line.contains("INFO  ComparableDataSetLoader - ")),
                 "core内のログも流れること: " + stream.logs());
+    }
+
+    @Test
+    public void testStream_並列読込の作業スレッドのログも流す() throws Exception {
+        final Stream stream = this.stream(HttpRequest.POST("dbunit-cli/convert/exec",
+                        "{\"name\":\"parallel\",\"input\":{\"-src.src\":\"resources/src/csv\",\"-src.srcType\":\"csv\""
+                                + ",\"-result.result\":\"target/convert/parallel\",\"-result.resultType\":\"csv\",\"-result.parallel\":\"2\"}}")
+                .header(JobStreamFilter.LOG_HEADER, "true"));
+
+        Assertions.assertEquals(200, stream.result().get("status"));
+        Assertions.assertTrue(stream.logs().stream().anyMatch(line -> line.contains("parallel lanes=2, threads=2")),
+                "並列に読み込むこと: " + stream.logs());
+        Assertions.assertEquals(2, stream.logs().stream().filter(line -> line.contains("ComparableCsvDataSetProducer - produce - start")).count(),
+                "作業スレッドで出力したログも流れること: " + stream.logs());
     }
 
     @Test

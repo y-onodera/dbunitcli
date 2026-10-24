@@ -8,14 +8,19 @@ import org.apache.poi.hssf.record.Record;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DefaultTableMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -27,6 +32,11 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
     public Stream<Source> getSourceStream() {
         return this.getSrcFiles()
                 .map(this::getSource);
+    }
+
+    @Override
+    public boolean isParallelizableSource() {
+        return true;
     }
 
     @Override
@@ -90,6 +100,43 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
                 throw new AssertionError(e);
             }
             ComparableXlsDataSetProducer.LOGGER.info("produce - end   fileName={}", this.sourceFile);
+        }
+
+        /**
+         * ブック先頭のシート一覧（BoundSheetRecord）だけを読み（最初のシートに達したら打ち切る）、
+         * runと同じ絞り込みとスキーマでテーブル名を求める
+         */
+        @Override
+        public Stream<TableMetaDataWithSource> outputTableCandidates() {
+            final File file = new File(this.source.filePath());
+            final List<String> sheetNames = new ArrayList<>();
+            try (final POIFSFileSystem fs = new POIFSFileSystem(file, true)) {
+                final HSSFRequest request = new HSSFRequest();
+                request.addListenerForAllRecords(new AbortableHSSFListener() {
+                    @Override
+                    public short abortableProcessRecord(final Record record) {
+                        if (record instanceof final BoundSheetRecord boundSheet) {
+                            sheetNames.add(boundSheet.getSheetname());
+                        } else if (record instanceof final BOFRecord bof && bof.getType() == BOFRecord.TYPE_WORKSHEET) {
+                            return 1;
+                        }
+                        return 0;
+                    }
+                });
+                new HSSFEventFactory().abortableProcessWorkbookEvents(request, fs);
+            } catch (final IOException | HSSFUserException e) {
+                throw new AssertionError(e);
+            }
+            final XlsxSchema schema = this.param.xlsxSchema();
+            return sheetNames.stream()
+                    .filter(this.sheetNameFilter::predicate)
+                    .flatMap(sheetName -> {
+                        final Source sheet = new Source(file, this.addFileInfo).sheetName(sheetName);
+                        return Stream.concat(Arrays.stream(schema.getRowsTableBuilder(this.param.startRow(), this.headerNames, sheet).getTableNames())
+                                        , Arrays.stream(schema.getCellRecordBuilder(this.headerNames, sheet).getTableNames()))
+                                .distinct()
+                                .map(tableName -> sheet.wrap(new DefaultTableMetaData(tableName, new Column[0])));
+                    });
         }
 
         @Override

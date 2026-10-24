@@ -6,8 +6,10 @@ import yo.dbunitcli.common.Source;
 
 import java.io.File;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface ComparableDataSetProducer {
@@ -26,13 +28,27 @@ public interface ComparableDataSetProducer {
 
     default TreeMap<String, ComparableTable> produce() {
         LOGGER.info("produce() - start");
-        final ComparableTableMappingContext context = new ComparableTableMappingContext(this.param().tableSeparators(), this.param().converter());
-        context.open();
-        this.getSourceStream()
+        final List<ComparableTableMappingTask> tasks = this.getSourceStream()
                 .map(this::createTableMappingTask)
-                .forEach(it -> it.run(context));
+                .collect(Collectors.toList());
+        final TreeMap<String, ComparableTable> result = ParallelTableMapping.lanes(this, tasks)
+                .map(lanes -> ParallelTableMapping.run(this.param(), lanes))
+                .orElseGet(() -> {
+                    final ComparableTableMappingContext context = new ComparableTableMappingContext(this.param().tableSeparators(), this.param().converter());
+                    context.open();
+                    tasks.forEach(it -> it.run(context));
+                    return context.close();
+                });
         LOGGER.info("produce() - end");
-        return context.close();
+        return result;
+    }
+
+    /**
+     * ソースごとのタスクを別スレッドで同時に実行できるか。
+     * 出力テーブル名がソースの読込前に決まり（{@link yo.dbunitcli.common.Source#getTableName()}）、タスク間で資源を共有しない場合のみtrueにする
+     */
+    default boolean isParallelizableSource() {
+        return false;
     }
 
     default Map<String, Object> lazyLoad(final boolean includeMetaData) {

@@ -11,6 +11,8 @@ import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.Styles;
 import org.apache.poi.xssf.model.StylesTable;
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DefaultTableMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
@@ -18,12 +20,16 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implements ComparableDataSetProducer {
@@ -33,6 +39,11 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
     public Stream<Source> getSourceStream() {
         return this.getSrcFiles()
                 .map(this::getSource);
+    }
+
+    @Override
+    public boolean isParallelizableSource() {
+        return true;
     }
 
     @Override
@@ -74,6 +85,32 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
                 throw new AssertionError(e);
             }
             ComparableXlsxDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());
+        }
+
+        /**
+         * シート名だけを先に読み（シートの中身は読まない）、runと同じ絞り込みとスキーマでテーブル名を求める
+         */
+        @Override
+        public Stream<TableMetaDataWithSource> outputTableCandidates() {
+            final List<TableMetaDataWithSource> result = new ArrayList<>();
+            try (final OPCPackage pkg = OPCPackage.open(this.source.filePath(), PackageAccess.READ)) {
+                final XSSFReader.SheetIterator iterator = (XSSFReader.SheetIterator) new XSSFReader(pkg).getSheetsData();
+                while (iterator.hasNext()) {
+                    try (final InputStream ignored = iterator.next()) {
+                        final String sheetName = iterator.getSheetName();
+                        if (this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName)) {
+                            final Source sheet = this.source.sheetName(sheetName);
+                            Stream.concat(Arrays.stream(this.schema.getRowsTableBuilder(this.param.startRow(), this.param.headerNames(), sheet).getTableNames())
+                                            , Arrays.stream(this.schema.getCellRecordBuilder(this.param.headerNames(), sheet).getTableNames()))
+                                    .distinct()
+                                    .forEach(tableName -> result.add(sheet.wrap(new DefaultTableMetaData(tableName, new Column[0]))));
+                        }
+                    }
+                }
+            } catch (final IOException | OpenXML4JException e) {
+                throw new AssertionError(e);
+            }
+            return result.stream();
         }
 
         @Override

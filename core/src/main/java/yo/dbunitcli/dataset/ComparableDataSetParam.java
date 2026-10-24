@@ -39,6 +39,7 @@ public record ComparableDataSetParam(
         , TemplateRender templateRender
         , DatabaseConnectionLoader databaseConnectionLoader
         , IDataSetConverter converter
+        , Integer parallel
 ) {
 
     public static Builder builder() {
@@ -70,6 +71,7 @@ public record ComparableDataSetParam(
                 , builder.getStTemplateLoader()
                 , builder.getDatabaseConnectionLoader()
                 , builder.getConverter()
+                , builder.getParallel()
         );
     }
 
@@ -130,7 +132,8 @@ public record ComparableDataSetParam(
                 .setRecursive(this.recursive)
                 .setSTTemplateLoader(this.templateRender)
                 .setDatabaseConnectionLoader(this.databaseConnectionLoader)
-                .setConverter(this.converter);
+                .setConverter(this.converter)
+                .setParallel(this.parallel);
     }
 
     public static class Builder {
@@ -160,6 +163,7 @@ public record ComparableDataSetParam(
         private String regTableInclude;
         private String regTableExclude;
         private boolean ignoreQuoted = false;
+        private Integer parallel;
 
         public ComparableDataSetParam build() {
             return new ComparableDataSetParam(this);
@@ -267,6 +271,10 @@ public record ComparableDataSetParam(
 
         public IDataSetConverter getConverter() {
             return this.converter;
+        }
+
+        public Integer getParallel() {
+            return this.parallel;
         }
 
         public Builder ifMatch(final boolean condition, final Function<Builder, Builder> function) {
@@ -412,6 +420,14 @@ public record ComparableDataSetParam(
 
         public Builder setIgnoreQuoted(final boolean ignoreQuoted) {
             this.ignoreQuoted = ignoreQuoted;
+            return this;
+        }
+
+        /**
+         * @param parallel ソースの並列読込数。nullは自動（並列化できればCPUコア数）、1は逐次
+         */
+        public Builder setParallel(final Integer parallel) {
+            this.parallel = parallel;
             return this;
         }
 

@@ -150,6 +150,7 @@ export type ResultOption = CommandOptions & {
 	outputExtension?: CommandOption;
 	fixedColumnDef?: CommandOption;
 	fixedLengthType?: CommandOption;
+	parallel?: CommandOption;
 	op?: CommandOption;
 	jdbc?: JdbcOption;
 };

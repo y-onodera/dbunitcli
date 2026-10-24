@@ -12,7 +12,7 @@ final class JobContext {
 
     static final String ATTRIBUTE = "dbunitcli.job";
 
-    /** ログの振り分け（JobLogAppender）用。runの範囲内だけ束縛されるため、core内部で別スレッドから出力されたログは対象外 */
+    /** ログの振り分け（JobLogAppender）用。runの範囲内だけ束縛される。core内部の別スレッドへはpropagateで包んだタスクだけ引き継ぐ */
     private static final ScopedValue<JobContext> CURRENT = ScopedValue.newInstance();
 
     /** ログを求められていなければnull */
@@ -34,6 +34,15 @@ final class JobContext {
     static Optional<JobContext> current() {
         // ScopedValue#orElse はnullを受け付けないため、束縛の有無で判定する
         return CURRENT.isBound() ? Optional.of(CURRENT.get()) : Optional.empty();
+    }
+
+    /**
+     * 現在のスレッドのジョブを、別スレッドで実行されるtaskのログ振り分け先として引き継ぐ。
+     * 中断は投入元のスレッドへの割り込みを契機に、投入元が作業スレッドへ伝える
+     */
+    static Runnable propagate(final Runnable task) {
+        return current().<Runnable>map(job -> () -> ScopedValue.where(CURRENT, job).run(task))
+                        .orElse(task);
     }
 
     /** 現在のスレッドでtaskを実行し、中断とログ振り分けの対象にする */

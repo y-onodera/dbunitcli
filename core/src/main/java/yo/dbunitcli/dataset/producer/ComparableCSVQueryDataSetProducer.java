@@ -26,6 +26,14 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
         return "jdbc:h2:file:" + FileResources.datasetDir().getAbsolutePath() + ";MODE=Oracle";
     }
 
+    /**
+     * タスクごとにH2へ接続し、テンプレートもタスクごとに描画するため、タスク間で共有する状態は無い
+     */
+    @Override
+    public boolean isParallelizableSource() {
+        return true;
+    }
+
     @Override
     public ComparableTableMappingTask createTableMappingTask(final Source source) {
         return new CsvQueryTableExecutor(source, this.param, this.parameter);

@@ -368,7 +368,14 @@ function makeImageFileSrcData(prefix: string) {
 	};
 }
 
-function makeCsvConvertResult(required = false) {
+// parallelは入力・出力とも並列化できるときだけレスポンスに含まれる
+function parallelElement(parallel: boolean) {
+	return parallel
+		? { parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false) }
+		: {};
+}
+
+function makeCsvConvertResult(required = false, parallel = true) {
 	return {
 		prefix: "result",
 		resultType: makeElement(
@@ -402,10 +409,11 @@ function makeCsvConvertResult(required = false) {
 			"WORKSPACE",
 			false,
 		),
+		...parallelElement(parallel),
 	};
 }
 
-function makeXlsxConvertResult(resultValue: string) {
+function makeXlsxConvertResult(resultValue: string, excelTable = "SHEET") {
 	return {
 		prefix: "result",
 		resultType: makeElement("resultType", "ENUM", "xlsx", "WORKSPACE", false, [
@@ -430,7 +438,14 @@ function makeXlsxConvertResult(resultValue: string) {
 			"WORKSPACE",
 			false,
 		),
-		excelTable: makeElement("excelTable", "TEXT", "SHEET", "WORKSPACE", false),
+		excelTable: makeElement(
+			"excelTable",
+			"TEXT",
+			excelTable,
+			"WORKSPACE",
+			false,
+		),
+		...parallelElement(excelTable === "BOOK"),
 	};
 }
 
@@ -507,6 +522,7 @@ export const compareLoadResponseFixture = {
 			"WORKSPACE",
 			false,
 		),
+		parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
 	},
 	expectData: {
 		prefix: "expect",
@@ -658,6 +674,12 @@ export const convertRefreshResultTypeXlsxResponseFixture = {
 	convertResult: makeXlsxConvertResult(""),
 } as ConvertOptions;
 
+// convert-refresh-resultType-xlsx-response.json でexcelTableをBOOKにしてrefreshしたレスポンス相当
+export const convertRefreshExcelTableBookResponseFixture = {
+	srcData: makeCsvSrcData("src", ""),
+	convertResult: makeXlsxConvertResult("", "BOOK"),
+} as ConvertOptions;
+
 // compare-refresh-targetType-image-response.json をもとにしたフィクスチャ
 export const compareRefreshTargetTypeImageResponseFixture = {
 	prefix: "",
@@ -775,7 +797,7 @@ export const compareRefreshTargetTypeImageResponseFixture = {
 	},
 	newData: makeImageFileSrcData("new"),
 	oldData: makeImageFileSrcData("old"),
-	convertResult: makeCsvConvertResult(true),
+	convertResult: makeCsvConvertResult(true, false),
 	expectData: {
 		prefix: "expect",
 		srcType: makeElement(

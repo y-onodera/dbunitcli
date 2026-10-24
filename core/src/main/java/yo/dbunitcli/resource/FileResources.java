@@ -65,6 +65,14 @@ public record FileResources() {
     }
 
     /**
+     * 呼び出し元スレッドのContextを、別スレッドで実行されるactionへ引き継ぐ
+     */
+    public static Runnable propagateContext(final Runnable action) {
+        final Context context = FileResources.context();
+        return () -> ScopedValue.where(CONTEXT, context).run(action);
+    }
+
+    /**
      * Context内で実行中ならそのContext、そうでなければ現在のシステムプロパティから作ったContext
      */
     public static Context context() {

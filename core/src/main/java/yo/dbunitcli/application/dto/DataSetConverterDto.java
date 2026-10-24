@@ -33,6 +33,8 @@ public class DataSetConverterDto implements CompositeDto {
     private String fixedColumnDefFile;
     @CommandLine.Option(names = "-fixedLengthType", description = "char or byte (default: char)")
     private String fixedLengthType;
+    @CommandLine.Option(names = "-parallel", description = "number of threads to load sources in parallel. 1 is sequential (default: CPU cores if possible)")
+    private String parallel;
 
     private JdbcDto jdbc = new JdbcDto();
 
@@ -135,6 +137,14 @@ public class DataSetConverterDto implements CompositeDto {
 
     public void setFixedLengthType(final String fixedLengthType) {
         this.fixedLengthType = fixedLengthType;
+    }
+
+    public String getParallel() {
+        return this.parallel;
+    }
+
+    public void setParallel(final String parallel) {
+        this.parallel = parallel;
     }
 
     public JdbcDto getJdbc() {
