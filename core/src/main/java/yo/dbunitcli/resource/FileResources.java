@@ -23,6 +23,54 @@ public record FileResources() {
     public static final String RESOURCES_XLSX_SCHEMA_PATH = "resources/xlsxSchema";
     public static final String OPTION_PARAMETERIZE_TEMPLATE_PATH = "option/parameterize/template";
 
+    private static final ScopedValue<Context> CONTEXT = ScopedValue.newInstance();
+
+    /**
+     * コマンド実行中に参照するディレクトリ類。実行開始時点のシステムプロパティから作り、実行中は変わらない
+     */
+    public record Context(File baseDir, File datasetDir, File resultDir, File envFile) {
+
+        public static Context fromSystemProperties() {
+            final File baseDir = Optional.ofNullable(System.getProperty(PROPERTY_WORKSPACE))
+                    .filter(it -> !it.isEmpty())
+                    .map(FileResources::expandEnvironmentVariables)
+                    .map(File::new)
+                    .orElse(new File("."));
+            final File datasetDir = Optional.ofNullable(System.getProperty(PROPERTY_DATASET_BASE))
+                    .map(FileResources::expandEnvironmentVariables)
+                    .map(File::new)
+                    .orElse(baseDir);
+            final File resultDir = Optional.ofNullable(System.getProperty(PROPERTY_RESULT_BASE))
+                    .map(FileResources::expandEnvironmentVariables)
+                    .map(File::new)
+                    .orElse(baseDir);
+            final String envPath = Optional.ofNullable(System.getProperty(PROPERTY_ENV))
+                    .filter(it -> !it.isEmpty())
+                    .map(FileResources::expandEnvironmentVariables)
+                    .orElse(DEFAULT_ENV_PATH);
+            final File envFile = new File(envPath).isAbsolute() ? new File(envPath) : new File(baseDir, envPath);
+            return new Context(baseDir, datasetDir, resultDir, envFile);
+        }
+    }
+
+    /**
+     * 実行開始時点のContextを固定してactionを実行する。既にContext内で実行中なら（parameterizeから呼ばれたコマンド等）そのContextを引き継ぐ
+     */
+    public static void runInContext(final Runnable action) {
+        if (CONTEXT.isBound()) {
+            action.run();
+        } else {
+            ScopedValue.where(CONTEXT, Context.fromSystemProperties()).run(action);
+        }
+    }
+
+    /**
+     * Context内で実行中ならそのContext、そうでなければ現在のシステムプロパティから作ったContext
+     */
+    public static Context context() {
+        return CONTEXT.isBound() ? CONTEXT.get() : Context.fromSystemProperties();
+    }
+
     public static String readClasspathResource(final String aURL) {
         return FileResources.readClasspathResource(aURL, StandardCharsets.UTF_8);
     }
@@ -136,36 +184,19 @@ public record FileResources() {
     }
 
     public static File resultDir() {
-        return Optional.ofNullable(System.getProperty(PROPERTY_RESULT_BASE))
-                .map(FileResources::expandEnvironmentVariables)
-                .map(File::new)
-                .orElse(FileResources.baseDir());
+        return FileResources.context().resultDir();
     }
 
     public static File datasetDir() {
-        return Optional.ofNullable(System.getProperty(PROPERTY_DATASET_BASE))
-                .map(FileResources::expandEnvironmentVariables)
-                .map(File::new)
-                .orElse(FileResources.baseDir());
+        return FileResources.context().datasetDir();
     }
 
     public static File baseDir() {
-        return Optional.ofNullable(System.getProperty(PROPERTY_WORKSPACE))
-                .filter(it -> !it.isEmpty())
-                .map(FileResources::expandEnvironmentVariables)
-                .map(File::new)
-                .orElse(new File("."));
+        return FileResources.context().baseDir();
     }
 
     public static File envFile() {
-        final String path = Optional.ofNullable(System.getProperty(PROPERTY_ENV))
-                .filter(it -> !it.isEmpty())
-                .map(FileResources::expandEnvironmentVariables)
-                .orElse(DEFAULT_ENV_PATH);
-        if (new File(path).isAbsolute()) {
-            return new File(path);
-        }
-        return new File(baseDir(), path);
+        return FileResources.context().envFile();
     }
 
     public static File settingDir() {

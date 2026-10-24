@@ -462,4 +462,46 @@ class FileResourcesTest {
             Assertions.assertNull(FileResources.searchParameterizeTemplate(""));
         }
     }
+
+    @Nested
+    class RunInContextTest {
+        @BeforeEach
+        void setProperty() {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(FileResourcesTest.backup);
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, "src");
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "src/main");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "target");
+            System.setProperties(newProperty);
+        }
+
+        @AfterEach
+        void restore() {
+            FileResourcesTest.restore();
+        }
+
+        @Test
+        void keepContextWhenSystemPropertyChanged() {
+            FileResources.runInContext(() -> {
+                System.setProperty(FileResources.PROPERTY_WORKSPACE, "changed");
+                System.setProperty(FileResources.PROPERTY_DATASET_BASE, "changed/dataset");
+                System.setProperty(FileResources.PROPERTY_RESULT_BASE, "changed/result");
+                System.setProperty(FileResources.PROPERTY_ENV, "changed.properties");
+                Assertions.assertEquals(new File("src"), FileResources.baseDir());
+                Assertions.assertEquals(new File("src/main"), FileResources.datasetDir());
+                Assertions.assertEquals(new File("target"), FileResources.resultDir());
+                Assertions.assertEquals(new File("src", FileResources.DEFAULT_ENV_PATH), FileResources.envFile());
+                Assertions.assertEquals(new File("src/resources/setting"), FileResources.settingDir());
+            });
+            Assertions.assertEquals(new File("changed"), FileResources.baseDir());
+        }
+
+        @Test
+        void nestedRunInheritsOuterContext() {
+            FileResources.runInContext(() -> {
+                System.setProperty(FileResources.PROPERTY_WORKSPACE, "changed");
+                FileResources.runInContext(() -> Assertions.assertEquals(new File("src"), FileResources.baseDir()));
+            });
+        }
+    }
 }

@@ -20,7 +20,7 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
 
     default void exec(final String[] args) {
         try {
-            this.exec(this.parseOption(args, Parameter.none()));
+            FileResources.runInContext(() -> this.exec(this.parseOption(args, Parameter.none())));
         } catch (final CommandFailException ex) {
             Command.LOGGER.info(ex.getMessage());
             if (Boolean.getBoolean("dbunitcli.noExit")) {
@@ -37,11 +37,11 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
     void exec(T options);
 
     default void exec(final String[] args, final Parameter param) {
-        this.exec(this.parseOption(args, param));
+        FileResources.runInContext(() -> this.exec(this.parseOption(args, param)));
     }
 
     default void exec(final String resultFile, final String[] args, final Parameter param) {
-        this.exec(this.parseOption(resultFile, args, param));
+        FileResources.runInContext(() -> this.exec(this.parseOption(resultFile, args, param)));
     }
 
     DTO createDto(String[] args);
