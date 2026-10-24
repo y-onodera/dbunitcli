@@ -12,7 +12,6 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * ソースを別スレッドで並列に読み込む。
@@ -27,7 +26,7 @@ public final class ParallelTableMapping {
     private static final AtomicInteger THREAD_NO = new AtomicInteger();
 
     /**
-     * KeyedWorkersの作業スレッドごとの待ち行列の上限
+     * forEachByKeyの作業スレッドごとの待ち行列の上限
      */
     private static final int QUEUE_CAPACITY = 64;
 
@@ -96,27 +95,27 @@ public final class ParallelTableMapping {
     }
 
     /**
-     * itemsを順に読み、keyが同じitemは同じ作業スレッドへ渡して並列に処理する（{@link KeyedWorkers}）。
+     * sourceが渡すitemを並列に処理する。keyが同じitemは同じ作業スレッドへ渡し、同じ投入元から渡した順に処理するため、
+     * 同じ出力先へ書くitemは投入順になる。作業スレッドごとの待ち行列に上限を設け、投入元を待たせる（先読みしすぎない）。
+     * sourceは受け取った関数を複数スレッドから呼んでよい。呼び出し元の文脈を作業スレッドへ引き継ぎ、
      * いずれかが失敗したら残りを中断して例外を投げる。戻る前に作業スレッドの終了を待つ
      */
-    public static <T> void forEachByKey(final int threads, final Stream<T> items, final Function<? super T, ?> key
-            , final Consumer<? super T> action) {
+    public static <T> void forEachByKey(final int threads, final Function<? super T, ?> key
+            , final Consumer<? super T> action, final Consumer<Consumer<T>> source) {
+        ParallelTableMapping.LOGGER.info("forEachByKey() - parallel threads={}", threads);
         final KeyedWorkers<T> workers = new KeyedWorkers<>(threads, key, action);
         try {
-            items.forEach(workers::submit);
+            source.accept(workers::submit);
             workers.finish();
         } catch (final RuntimeException | Error e) {
-            workers.abort();
+            workers.cancel();
             throw e;
+        } finally {
+            ParallelTableMapping.shutdown(workers.executor);
         }
     }
 
-    /**
-     * keyが同じitemを同じ作業スレッドで投入順に処理する作業スレッド群。同じ投入元から入れた同じkeyのitemは投入順に処理するため、
-     * 同じ出力先へ書くitemは投入順になる。作業スレッドごとの待ち行列に上限を設け、投入元を待たせる（先読みしすぎない）。
-     * submitは複数スレッドから呼べる。作成したスレッドの文脈を作業スレッドへ引き継ぐ
-     */
-    public static final class KeyedWorkers<T> {
+    private static final class KeyedWorkers<T> {
 
         private final List<BlockingQueue<Object>> queues;
 
@@ -126,8 +125,7 @@ public final class ParallelTableMapping {
 
         private final List<Future<?>> futures;
 
-        public KeyedWorkers(final int threads, final Function<? super T, ?> key, final Consumer<? super T> action) {
-            ParallelTableMapping.LOGGER.info("KeyedWorkers - parallel threads={}", threads);
+        private KeyedWorkers(final int threads, final Function<? super T, ?> key, final Consumer<? super T> action) {
             this.key = key;
             this.queues = IntStream.range(0, threads)
                     .<BlockingQueue<Object>>mapToObj(i -> new ArrayBlockingQueue<>(ParallelTableMapping.QUEUE_CAPACITY))
@@ -142,53 +140,29 @@ public final class ParallelTableMapping {
         /**
          * itemをkeyに対応する作業スレッドの待ち行列へ入れる（空くまで待つ）。作業スレッドが失敗していれば、その例外を投げる
          */
-        public void submit(final T item) {
+        private void submit(final T item) {
             this.put(this.queues.get(Math.floorMod(Objects.hashCode(this.key.apply(item)), this.queues.size())), item);
         }
 
         /**
          * 投入の終わりを伝え、全ての作業スレッドの処理が終わるまで待つ。失敗していればその例外を投げる
          */
-        public void finish() {
-            try {
-                this.queues.forEach(queue -> this.put(queue, ParallelTableMapping.END_OF_ITEMS));
-                for (final Future<?> future : this.futures) {
-                    future.get();
-                }
-            } catch (final ExecutionException e) {
-                this.abort();
-                throw ParallelTableMapping.rethrow(e.getCause());
-            } catch (final InterruptedException e) {
-                this.abort();
-                Thread.currentThread().interrupt();
-                throw new CancellationException("output-interrupted");
-            } finally {
-                ParallelTableMapping.shutdown(this.executor);
-            }
+        private void finish() {
+            this.queues.forEach(queue -> this.put(queue, ParallelTableMapping.END_OF_ITEMS));
+            this.futures.forEach(ParallelTableMapping::await);
         }
 
-        /**
-         * 残りの処理を中断し、作業スレッドの終了を待つ
-         */
-        public void abort() {
+        private void cancel() {
             this.futures.forEach(it -> it.cancel(true));
-            ParallelTableMapping.shutdown(this.executor);
         }
 
         private void put(final BlockingQueue<Object> queue, final Object item) {
             try {
                 while (!queue.offer(item, 100, TimeUnit.MILLISECONDS)) {
-                    for (final Future<?> future : this.futures) {
-                        if (future.isDone()) {
-                            future.get();
-                        }
-                    }
+                    this.futures.stream().filter(Future::isDone).forEach(ParallelTableMapping::await);
                 }
-            } catch (final ExecutionException e) {
-                throw ParallelTableMapping.rethrow(e.getCause());
             } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new CancellationException("output-interrupted");
+                throw ParallelTableMapping.unchecked(e);
             }
         }
 
@@ -200,8 +174,7 @@ public final class ParallelTableMapping {
                     action.accept((T) item);
                 }
             } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new CancellationException("interrupted");
+                throw ParallelTableMapping.unchecked(e);
             }
         }
     }
@@ -222,19 +195,39 @@ public final class ParallelTableMapping {
         final List<R> result = new ArrayList<>();
         try {
             for (int i = 0; i < threads; i++) {
-                result.add(completion.take().get());
+                result.add(ParallelTableMapping.await(completion.take()));
             }
-        } catch (final ExecutionException e) {
-            futures.forEach(it -> it.cancel(true));
-            throw ParallelTableMapping.rethrow(e.getCause());
         } catch (final InterruptedException e) {
             futures.forEach(it -> it.cancel(true));
-            Thread.currentThread().interrupt();
-            throw new CancellationException(threadNamePrefix + "interrupted");
+            throw ParallelTableMapping.unchecked(e);
+        } catch (final RuntimeException | Error e) {
+            futures.forEach(it -> it.cancel(true));
+            throw e;
         } finally {
             ParallelTableMapping.shutdown(executor);
         }
         return result;
+    }
+
+    /**
+     * 作業スレッドの結果を待つ。失敗していればその原因を、割り込まれたら中断を投げる
+     */
+    private static <R> R await(final Future<R> future) {
+        try {
+            return future.get();
+        } catch (final ExecutionException e) {
+            throw ParallelTableMapping.rethrow(e.getCause());
+        } catch (final InterruptedException e) {
+            throw ParallelTableMapping.unchecked(e);
+        }
+    }
+
+    /**
+     * 割り込みを非検査例外にする（割り込み状態は戻す）
+     */
+    private static CancellationException unchecked(final InterruptedException e) {
+        Thread.currentThread().interrupt();
+        return new CancellationException("interrupted");
     }
 
     private static void checkInterrupted() {

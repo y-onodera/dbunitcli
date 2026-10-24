@@ -4,6 +4,7 @@ import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,29 +17,22 @@ import java.util.stream.Stream;
 public enum ParameterUnit {
     record {
         /**
-         * 行ごとのパラメータ。inputParam・tableName・rowNumber（テーブルごとの0始まりの番号）と行の列の値
-         * （includeMetaDataではテーブル全体（tableName等）とrow）。Generateの読込中の出力（RecordConverter）と同じ形
+         * 行ごとのパラメータ（RecordConverterと同じ形）。テーブルは名前順に、1テーブルずつパラメータを作る
          */
         @Override
         public Stream<Parameter> dataSetToStream(final ComparableDataSetLoader loader,
                                                  final ComparableDataSetParam loadParam) {
             final ComparableDataSet dataSet = loader.loadDataSet(loadParam);
+            final Parameter base = loader.parameter().asInputParam();
             if (loadParam.source() == DataSourceType.none) {
-                return dataSet.toMap().map(it -> loader.parameter().asInputParam().withRowNumber(0).addAll(it));
+                return dataSet.toMap().map(it -> base.withRowNumber(0).addAll(it));
             }
-            return Arrays.stream(dataSet.getTableNames()).flatMap(tableName -> {
-                final ComparableTable table = dataSet.getTable(tableName);
-                if (loadParam.mapIncludeMetaData()) {
-                    final Map<String, Object> tableMap = table.toMap(true).getFirst();
-                    final List<Map<String, Object>> rows = (List<Map<String, Object>>) tableMap.get("rows");
-                    return IntStream.range(0, rows.size())
-                                    .mapToObj(i -> loader.parameter().asInputParam().withRowNumber(i)
-                                                         .addAll(tableMap).add("row", rows.get(i)));
-                }
-                // 列の値を後に入れる（tableNameという列があれば列の値を優先する）
-                return IntStream.range(0, table.getRowCount())
-                                .mapToObj(i -> loader.parameter().asInputParam().withRowNumber(i)
-                                                     .add("tableName", tableName).addAll(table.getRowToMap(i)));
+            return Arrays.stream(dataSet.getTables()).flatMap(table -> {
+                final List<Parameter> result = new ArrayList<>();
+                final RecordConverter converter = new RecordConverter(base, result::add, loadParam.mapIncludeMetaData());
+                converter.convert(table);
+                converter.endDataSet();
+                return result.stream();
             });
         }
 

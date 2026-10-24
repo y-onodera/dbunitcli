@@ -4,6 +4,7 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.ParameterUnit;
+import yo.dbunitcli.application.RecordConverter;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
@@ -120,7 +121,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     /**
-     * unit=recordは、読み込んだ行をその場で出力する（データセット全体を保持しない。includeMetaDataはテーブル単位で溜める）。
+     * unit=recordは、読み込んだ行をその場で出力する（データセット全体を保持しない。includeMetaDataは読込を終えるまで溜める）。
      * srcの読込は並列化できればレーンごとに並列にし、描画・書込は並列数が2以上なら出力先ごとに決まった作業スレッドで投入順に行う。
      * 別のレーンから同じ出力先へ書く場合、書く順（残る内容）は不定
      */
@@ -132,15 +133,9 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             this.loadRecords(loader, param, it -> action.accept(this.resultFile(it), it));
             return;
         }
-        final ParallelTableMapping.KeyedWorkers<RecordOutput> workers = new ParallelTableMapping.KeyedWorkers<>(
-                threads, RecordOutput::resultFile, it -> action.accept(it.resultFile(), it.parameter()));
-        try {
-            this.loadRecords(loader, param, it -> workers.submit(new RecordOutput(this.resultFile(it), it)));
-            workers.finish();
-        } catch (final RuntimeException | Error e) {
-            workers.abort();
-            throw e;
-        }
+        ParallelTableMapping.<RecordOutput>forEachByKey(threads, RecordOutput::resultFile
+                , it -> action.accept(it.resultFile(), it.parameter())
+                , submit -> this.loadRecords(loader, param, it -> submit.accept(new RecordOutput(this.resultFile(it), it))));
     }
 
     private void loadRecords(final ComparableDataSetLoader loader, final ComparableDataSetParam param

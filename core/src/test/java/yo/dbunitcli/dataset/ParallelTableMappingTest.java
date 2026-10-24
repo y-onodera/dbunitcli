@@ -315,11 +315,11 @@ public class ParallelTableMappingTest {
         final Set<String> threads = ConcurrentHashMap.newKeySet();
         final Set<String> contexts = ConcurrentHashMap.newKeySet();
         ScopedValue.where(TestThreadContextPropagator.VALUE, "submitter")
-                .run(() -> ParallelTableMapping.forEachByKey(4, IntStream.range(0, 1000).boxed(), it -> it % 7, it -> {
+                .run(() -> ParallelTableMapping.<Integer>forEachByKey(4, it -> it % 7, it -> {
                     actual.computeIfAbsent(it % 7, k -> Collections.synchronizedList(new ArrayList<>())).add(it);
                     threads.add(Thread.currentThread().getName());
                     contexts.add(TestThreadContextPropagator.VALUE.orElse("unbound"));
-                }));
+                }, submit -> IntStream.range(0, 1000).boxed().forEach(submit)));
         Assertions.assertEquals(7, actual.size());
         actual.forEach((key, values) -> Assertions.assertEquals(
                 IntStream.range(0, 1000).filter(it -> it % 7 == key).boxed().toList(), values, "key=" + key));
@@ -330,16 +330,16 @@ public class ParallelTableMappingTest {
     @Test
     public void forEachByKey_rethrows_failure_of_worker() {
         final AssertionError actual = Assertions.assertThrows(AssertionError.class
-                , () -> ParallelTableMapping.forEachByKey(2, IntStream.range(0, 10000).boxed(), it -> it, it -> {
+                , () -> ParallelTableMapping.<Integer>forEachByKey(2, it -> it, it -> {
                     if (it == 10) {
                         throw new AssertionError("failed " + it);
                     }
-                }));
+                }, submit -> IntStream.range(0, 10000).boxed().forEach(submit)));
         Assertions.assertEquals("failed 10", actual.getMessage());
     }
 
     @Test
-    public void forEachByKey_rethrows_failure_of_items() {
+    public void forEachByKey_rethrows_failure_of_source() {
         final Stream<Integer> items = IntStream.range(0, 100).boxed().map(it -> {
             if (it == 50) {
                 throw new IllegalStateException("failed " + it);
@@ -347,8 +347,8 @@ public class ParallelTableMappingTest {
             return it;
         });
         final IllegalStateException actual = Assertions.assertThrows(IllegalStateException.class
-                , () -> ParallelTableMapping.forEachByKey(2, items, it -> it, it -> {
-                }));
+                , () -> ParallelTableMapping.<Integer>forEachByKey(2, it -> it, it -> {
+                }, items::forEach));
         Assertions.assertEquals("failed 50", actual.getMessage());
     }
 
