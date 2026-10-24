@@ -62,6 +62,9 @@ public record SqlRunner(DatabaseConnectionLoader connectionLoader, Parameter par
                 return conn;
             }
         };
+        // Projectが無いとAntはメッセージをSystem.errへ直接出すため、ログへ流すProjectを渡す
+        exec.setProject(AntLogListener.newProject());
+        exec.setTaskName("sql");
         exec.setExpandProperties(false);
         exec.setEncoding(this.templateRender().encoding());
         return exec;
@@ -87,7 +90,7 @@ public record SqlRunner(DatabaseConnectionLoader connectionLoader, Parameter par
                 sb.append(stmt.getString(1));
             }
         }
-        System.err.println(sb);
+        LOGGER.info("{}", sb);
         stmt.close();
     }
 }

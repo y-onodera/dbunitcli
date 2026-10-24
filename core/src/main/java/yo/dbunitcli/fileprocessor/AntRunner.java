@@ -10,7 +10,7 @@ import java.io.File;
 public record AntRunner(File baseDir, String target, Parameter parameter) implements Runner {
     @Override
     public void runScript(final File target) {
-        final Project p = new Project();
+        final Project p = AntLogListener.newProject();
         p.setUserProperty("ant.file", target.getAbsolutePath());
         p.init();
         final ProjectHelper helper = ProjectHelper.getProjectHelper();

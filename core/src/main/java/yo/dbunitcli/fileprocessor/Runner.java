@@ -17,12 +17,7 @@ public interface Runner {
      *                    並列時に失敗したら未着手のファイルは始めず、実行中のファイルが終わるのを待ってから失敗させる
      */
     default void run(final Stream<File> targetFiles, final int parallelism) {
-        StdErrToLog.begin();
-        try {
-            Workers.forEachUntilFailure(parallelism, "run-", targetFiles, this::runScript);
-        } finally {
-            StdErrToLog.end();
-        }
+        Workers.forEachUntilFailure(parallelism, "run-", targetFiles, this::runScript);
     }
 
     void runScript(File target);
