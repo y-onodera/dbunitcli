@@ -67,8 +67,9 @@ public class ParameterizeParallelTest {
                 , "-result=" + this.path("result") + "/$name$");
         this.exec("-cmd=convert", "-template=" + template.getAbsolutePath(), "-parallel=3");
         for (final String name : ParameterizeParallelTest.NAMES) {
-            Assertions.assertEquals("\"ID\",\"VAL\"\n\"1\",\"" + name + "\"\n"
-                    , Files.readString(this.tempDir.resolve("result/" + name + "/" + name + ".csv"), StandardCharsets.UTF_8), name);
+            // 改行コードはOSに依存するため行単位で比べる
+            Assertions.assertEquals(List.of("\"ID\",\"VAL\"", "\"1\",\"" + name + "\"")
+                    , Files.readAllLines(this.tempDir.resolve("result/" + name + "/" + name + ".csv"), StandardCharsets.UTF_8), name);
         }
     }
 
