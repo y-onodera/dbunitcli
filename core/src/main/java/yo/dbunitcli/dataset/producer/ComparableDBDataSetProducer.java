@@ -36,11 +36,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
 
     @Override
     public void close() {
-        try {
-            this.connection.close();
-        } catch (final SQLException e) {
-            ComparableDBDataSetProducer.LOGGER.warn("failed to close connection", e);
-        }
+        DatabaseConnectionLoader.close(this.connection);
     }
 
     @Override

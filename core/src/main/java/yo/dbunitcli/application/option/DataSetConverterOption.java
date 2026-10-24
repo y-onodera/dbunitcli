@@ -45,12 +45,8 @@ public record DataSetConverterOption(
                 , dto.getExtension()
                 , dto.getFixedColumnDefFile()
                 , Strings.isNotEmpty(dto.getFixedLengthType()) ? dto.getFixedLengthType() : "char"
-                , DataSetConverterOption.parallel(dto)
+                , DataSetConverterOption.parallel(dto.getParallel())
         );
-    }
-
-    private static String parallel(final DataSetConverterDto dto) {
-        return DataSetConverterOption.parallel(dto.getParallel());
     }
 
     /**
@@ -156,7 +152,15 @@ public record DataSetConverterOption(
      * @return ソースの並列読込数。未指定ならnull（並列化できればCPUコア数で自動）
      */
     public Integer parallelism() {
-        return Strings.isEmpty(this.parallel) ? null : Integer.valueOf(this.parallel);
+        return DataSetConverterOption.parallelism(this.parallel);
+    }
+
+    /**
+     * @param parallel parallel(String)で検証した値
+     * @return ソースの並列読込数。未指定ならnull（並列化できればCPUコア数で自動）
+     */
+    public static Integer parallelism(final String parallel) {
+        return Strings.isEmpty(parallel) ? null : Integer.valueOf(parallel);
     }
 
     public File getResultDir() {

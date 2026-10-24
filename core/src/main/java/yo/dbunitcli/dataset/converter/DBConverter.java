@@ -3,8 +3,6 @@ package yo.dbunitcli.dataset.converter;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DbOperation;
@@ -13,12 +11,9 @@ import yo.dbunitcli.dataset.ParallelTableMapping;
 import yo.dbunitcli.dataset.converter.db.*;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class DBConverter implements IDataSetConverter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DBConverter.class);
 
     private final IDatabaseConnection connection;
     private final DbOperation operation;
@@ -53,13 +48,8 @@ public class DBConverter implements IDataSetConverter {
 
     @Override
     public void close() {
-        if (!this.ownsConnection) {
-            return;
-        }
-        try {
-            this.connection.close();
-        } catch (final SQLException e) {
-            DBConverter.LOGGER.warn("failed to close connection", e);
+        if (this.ownsConnection) {
+            DatabaseConnectionLoader.close(this.connection);
         }
     }
 

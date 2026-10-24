@@ -61,13 +61,6 @@ public enum ParameterUnit {
                                 .map(TableTemplate::load)
                                 .onClose(producer::close);
         }
-
-        @Override
-        public Stream<Parameter> templateStream(final ComparableDataSetLoader loader,
-                                                final ComparableDataSetProducer producer,
-                                                final TableSeparators unitTableSeparators) {
-            return ParameterUnit.tableTemplates(loader, producer, unitTableSeparators).map(TableTemplate::load);
-        }
     },
     dataset;
 
@@ -90,12 +83,6 @@ public enum ParameterUnit {
                                .withRowNumber(0)
                                .add("dataSet", producer.lazyLoad(true)))
                      .onClose(producer::close);
-    }
-
-    public Stream<Parameter> templateStream(final ComparableDataSetLoader loader,
-                                            final ComparableDataSetProducer producer,
-                                            final TableSeparators unitTableSeparators) {
-        return this.dataSetToStream(loader, producer.param());
     }
 
     /**

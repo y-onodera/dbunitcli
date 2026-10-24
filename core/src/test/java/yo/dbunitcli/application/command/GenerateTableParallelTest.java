@@ -1,20 +1,15 @@
 package yo.dbunitcli.application.command;
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.Comment;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import yo.dbunitcli.TestJdbc;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
@@ -25,14 +20,12 @@ import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
@@ -99,7 +92,7 @@ public class GenerateTableParallelTest {
                 stmt.execute("insert into " + table + " select '" + table + "-' || x, x from system_range(1, 100)");
             }
             Files.writeString(listFile.toPath(), String.join("\n", "T1", "T2", "T3", "T4"), StandardCharsets.UTF_8);
-            final int before = this.count(stmt, "information_schema.sessions");
+            final int before = TestJdbc.sessions(stmt);
             final File result = this.tempDir.resolve("result").toFile();
             Generate.main(new String[]{
                     "-generateType=sql"
@@ -113,7 +106,7 @@ public class GenerateTableParallelTest {
                     , "-resultPath=sql"
             });
             // srcを読む元の接続も、2つ目以降の作業スレッドで張った接続も、処理終了時に閉じる
-            Assertions.assertEquals(before, this.count(stmt, "information_schema.sessions"));
+            Assertions.assertEquals(before, TestJdbc.sessions(stmt));
             for (final String table : List.of("T1", "T2", "T3", "T4")) {
                 final String sql = Files.readString(new File(result, "sql/" + table + ".sql").toPath(), StandardCharsets.UTF_8);
                 for (int i = 1; i <= 100; i++) {
@@ -141,7 +134,7 @@ public class GenerateTableParallelTest {
                 stmt.execute("comment on column " + table + ".NAME is '" + table + " name'");
             }
             Files.writeString(listFile.toPath(), String.join("\n", tables), StandardCharsets.UTF_8);
-            final int before = this.count(stmt, "information_schema.sessions");
+            final int before = TestJdbc.sessions(stmt);
             final Map<String, String> results = new HashMap<>();
             for (final String parallel : List.of("", "1")) {
                 final File result = this.tempDir.resolve("result-" + generateType + parallel).toFile();
@@ -180,7 +173,7 @@ public class GenerateTableParallelTest {
                 }
             }
             // 作業スレッドで張った接続も閉じる
-            Assertions.assertEquals(before, this.count(stmt, "information_schema.sessions"));
+            Assertions.assertEquals(before, TestJdbc.sessions(stmt));
         }
     }
 
@@ -207,7 +200,7 @@ public class GenerateTableParallelTest {
     @ParameterizedTest
     @CsvSource({"xlsx,true", "xlsx,false", "xls,true", "xls,false"})
     public void generate_excel_per_table(final String extension, final boolean lazyLoad) throws IOException {
-        final File template = this.excelTemplate(extension);
+        final File template = TestJxlsTemplates.create(this.tempDir, extension);
         for (final String parallel : List.of("", "1")) {
             final File result = this.tempDir.resolve("result-" + extension + lazyLoad + parallel).toFile();
             Generate.main(new String[]{
@@ -236,34 +229,6 @@ public class GenerateTableParallelTest {
         }
     }
 
-    private File excelTemplate(final String extension) throws IOException {
-        final File result = this.tempDir.resolve("template." + extension).toFile();
-        try (final Workbook workbook = "xls".equals(extension) ? new HSSFWorkbook() : new XSSFWorkbook();
-             final FileOutputStream out = new FileOutputStream(result)) {
-            final Sheet sheet = workbook.createSheet("table");
-            sheet.createRow(0).createCell(0).setCellValue("${tableName}");
-            final Row row = sheet.createRow(1);
-            row.createCell(0).setCellValue("${row.ID}");
-            row.createCell(1).setCellValue("${row.VAL}");
-            this.addComment(sheet, 0, "jx:area(lastCell=\"B2\")");
-            this.addComment(sheet, 1, "jx:each(items=\"rows\" var=\"row\" lastCell=\"B2\")");
-            workbook.write(out);
-        }
-        return result;
-    }
-
-    private void addComment(final Sheet sheet, final int rowIndex, final String text) {
-        final CreationHelper factory = sheet.getWorkbook().getCreationHelper();
-        final ClientAnchor anchor = factory.createClientAnchor();
-        anchor.setCol1(0);
-        anchor.setCol2(2);
-        anchor.setRow1(rowIndex);
-        anchor.setRow2(rowIndex + 2);
-        final Comment comment = sheet.createDrawingPatriarch().createCellComment(anchor);
-        comment.setString(factory.createRichTextString(text));
-        sheet.getRow(rowIndex).getCell(0).setCellComment(comment);
-    }
-
     private String[] txtArgs(final File result, final String resultPath) {
         return new String[]{
                 "-srcType=csv"
@@ -282,12 +247,5 @@ public class GenerateTableParallelTest {
 
     private String expected(final String name) {
         return name + ":" + IntStream.range(0, 100).mapToObj(i -> name + i).collect(Collectors.joining(","));
-    }
-
-    private int count(final Statement stmt, final String from) throws SQLException {
-        try (final ResultSet rs = stmt.executeQuery("select count(*) from " + from)) {
-            rs.next();
-            return rs.getInt(1);
-        }
     }
 }

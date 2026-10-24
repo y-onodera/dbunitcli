@@ -15,9 +15,14 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public abstract class ComparableDataSetProducerWrapper implements ComparableDataSetProducer, IDataSetConverter {
+/**
+ * 包んだproducerが読み込んだテーブルのメタデータを、列ごとに1行の記述子テーブル（列はcolumnDefSchema）に変換する
+ */
+public abstract class ComparableDataSetProducerWrapper implements ComparableDataSetProducer {
 
     protected final ComparableDataSetProducer delegate;
+
+    private final Column[] columnDefSchema;
 
     /**
      * ソースごとの変換結果。1つのソースから複数のテーブルを作る場合、unit=tableはテーブルごとにソースのタスクを実行するため、
@@ -25,18 +30,9 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
      */
     private final Map<Source, List<ConvertedTable>> converted = new ConcurrentHashMap<>();
 
-    /**
-     * 変換中のソースの結果を受け取る（startTable→writeColumnRowsで追加する）。変換はスレッドごとに独立して行う
-     */
-    private final ThreadLocal<List<ConvertedTable>> converting = new ThreadLocal<>();
-
-    /**
-     * 変換中のタスクが作業スレッド用に差し替えられていれば、その作業スレッドの資源（DB接続など）
-     */
-    private final ThreadLocal<ParallelTableMapping.WorkerResources> workerResources = new ThreadLocal<>();
-
-    protected ComparableDataSetProducerWrapper(final ComparableDataSetProducer delegate) {
+    protected ComparableDataSetProducerWrapper(final ComparableDataSetProducer delegate, final Column[] columnDefSchema) {
         this.delegate = delegate;
+        this.columnDefSchema = columnDefSchema;
     }
 
     @Override
@@ -65,65 +61,21 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
     @Override
     public ComparableTableMappingTask createTableMappingTask(final Source source) {
         return new DelegateCaptureTask(source, this.delegate.createTableMappingTask(source)
-                .with(builder -> builder.setLoadData(false)));
-    }
-
-    @Override
-    public boolean isExportEmptyTable() {
-        return true;
-    }
-
-    @Override
-    public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
-        try {
-            this.startTable(tableMetaData);
-        } catch (final DataSetException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    @Override
-    public void row(final Object[] values) {
-        // 加工結果はstartTable()で確定済みのため行データは使用しない
-    }
-
-    @Override
-    public void endTable() {
-        // 加工結果はstartTable()で確定済み
-    }
-
-    @Override
-    public IDataSetConverter split() {
-        return this;
+                .with(builder -> builder.setLoadData(false)), true, null);
     }
 
     /**
-     * writeColumnRowsで出力するテーブルの列。テーブル一覧の作成（行を読まない）では、変換せずにこの列だけを返す
+     * 読み込んだテーブル1つを変換し、conversion.writeColumnRowsで出力する
      */
-    protected abstract Column[] columnDefSchema();
+    protected abstract void convertTable(ITableMetaData metaData, Conversion conversion) throws DataSetException;
 
-    /**
-     * 変換中のタスクが使う作業スレッドの資源。元のタスク（最初の作業スレッド・逐次実行）ならnull
-     */
-    protected ParallelTableMapping.WorkerResources workerResources() {
-        return this.workerResources.get();
+    private TableMetaDataWithSource outputMetaData(final String tableName) {
+        return Source.NONE.tableName(tableName).wrap(new DefaultTableMetaData(tableName, this.columnDefSchema));
     }
 
-    /**
-     * サブクラス共通の「列メタデータを1列1行に変換する」処理。tableNameのSource.NONEラップ・
-     * DefaultTableMetaData生成・startTable/addRow/endTableの反復を一括で行う。
-     */
-    protected void writeColumnRows(final String tableName, final Column[] outputSchema,
-                                   final Column[] sourceColumns, final RowBuilder rowBuilder) {
-        final List<Object[]> rows = new ArrayList<>();
-        for (int i = 0; i < sourceColumns.length; i++) {
-            rows.add(rowBuilder.buildRow(sourceColumns[i], i));
-        }
-        this.converting.get().add(new ConvertedTable(ComparableDataSetProducerWrapper.outputMetaData(tableName, outputSchema), rows));
-    }
-
-    private static TableMetaDataWithSource outputMetaData(final String tableName, final Column[] outputSchema) {
-        return Source.NONE.tableName(tableName).wrap(new DefaultTableMetaData(tableName, outputSchema));
+    @FunctionalInterface
+    protected interface RowBuilder {
+        Object[] buildRow(Column column, int index);
     }
 
     private record ConvertedTable(TableMetaDataWithSource metaData, List<Object[]> rows) {
@@ -136,31 +88,107 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
         }
     }
 
-    @FunctionalInterface
-    protected interface RowBuilder {
-        Object[] buildRow(Column column, int index);
+    /**
+     * delegateのタスクが読み込んだテーブルのメタデータを受け取る（行データは使わない）
+     */
+    private abstract static class MetaDataCapture implements IDataSetConverter {
+
+        @Override
+        public boolean isExportEmptyTable() {
+            return true;
+        }
+
+        @Override
+        public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
+            try {
+                this.startTable(tableMetaData);
+            } catch (final DataSetException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        @Override
+        public void row(final Object[] values) {
+            // メタデータだけを使う
+        }
+
+        @Override
+        public void endTable() {
+            // メタデータだけを使う
+        }
+
+        @Override
+        public IDataSetConverter split() {
+            return this;
+        }
+    }
+
+    private static final class TableNameCollector extends MetaDataCapture {
+
+        private final Set<String> tableNames = new LinkedHashSet<>();
+
+        @Override
+        public void startTable(final ITableMetaData metaData) {
+            this.tableNames.add(metaData.getTableName());
+        }
+    }
+
+    /**
+     * 1ソース分の変換。変換結果と、変換を実行する作業スレッドの資源を持つ
+     */
+    protected final class Conversion extends MetaDataCapture {
+
+        private final List<ConvertedTable> tables = new ArrayList<>();
+
+        private final ParallelTableMapping.WorkerResources resources;
+
+        private Conversion(final ParallelTableMapping.WorkerResources resources) {
+            this.resources = resources;
+        }
+
+        /**
+         * @return 作業スレッド用に差し替えたタスクの変換なら、その作業スレッドの資源（DB接続など）。元のタスク（最初の作業スレッド・逐次実行）ならnull
+         */
+        public ParallelTableMapping.WorkerResources workerResources() {
+            return this.resources;
+        }
+
+        /**
+         * サブクラス共通の「列メタデータを1列1行に変換する」処理。sourceColumnsの各列をrowBuilderで1行にする
+         */
+        public void writeColumnRows(final String tableName, final Column[] sourceColumns, final RowBuilder rowBuilder) {
+            final List<Object[]> rows = new ArrayList<>();
+            for (int i = 0; i < sourceColumns.length; i++) {
+                rows.add(rowBuilder.buildRow(sourceColumns[i], i));
+            }
+            this.tables.add(new ConvertedTable(ComparableDataSetProducerWrapper.this.outputMetaData(tableName), rows));
+        }
+
+        @Override
+        public void startTable(final ITableMetaData metaData) throws DataSetException {
+            ComparableDataSetProducerWrapper.this.convertTable(metaData, this);
+        }
     }
 
     /**
      * delegateのタスクを実行し、読み込んだテーブルのメタデータを1列1行に変換して出力する。
-     * テーブル一覧の作成（loadRows=false）では変換せず、テーブル名とcolumnDefSchema()だけを出力する
+     * 行を読まないタスク（テーブル一覧の作成）では変換せず、テーブル名とcolumnDefSchemaだけを出力する
      */
     private final class DelegateCaptureTask implements ComparableTableMappingTask {
 
         private final Source source;
         private final ComparableTableMappingTask delegateTask;
-        private final boolean loadRows;
+        /**
+         * delegateは行を使わないため常に読まない。このタスクが行（変換結果）を出力するかはparam.loadData()で表す
+         */
+        private final ComparableDataSetParam param;
         private final ParallelTableMapping.WorkerResources resources;
 
-        DelegateCaptureTask(final Source source, final ComparableTableMappingTask delegateTask) {
-            this(source, delegateTask, true, null);
-        }
-
-        private DelegateCaptureTask(final Source source, final ComparableTableMappingTask delegateTask, final boolean loadRows
+        DelegateCaptureTask(final Source source, final ComparableTableMappingTask delegateTask, final boolean loadRows
                 , final ParallelTableMapping.WorkerResources resources) {
             this.source = source;
             this.delegateTask = delegateTask;
-            this.loadRows = loadRows;
+            this.param = delegateTask.param().toBuilder().setLoadData(loadRows).build();
             this.resources = resources;
         }
 
@@ -171,15 +199,15 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
 
         @Override
         public ComparableDataSetParam param() {
-            return this.delegateTask.param();
+            return this.param;
         }
 
         @Override
         public void run(final ComparableTableMappingContext context) {
-            if (!this.loadRows) {
+            if (!this.param.loadData()) {
                 this.tableNames().forEach(tableName -> {
                     final ComparableTableMapper mapper = context.createMapper(
-                            ComparableDataSetProducerWrapper.outputMetaData(tableName, ComparableDataSetProducerWrapper.this.columnDefSchema()));
+                            ComparableDataSetProducerWrapper.this.outputMetaData(tableName));
                     mapper.startTable();
                     mapper.endTable();
                 });
@@ -203,37 +231,21 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
 
         @Override
         public ComparableTableMappingTask forWorker(final ParallelTableMapping.WorkerResources resources) {
-            return new DelegateCaptureTask(this.source, this.delegateTask.forWorker(resources), this.loadRows, resources);
+            return new DelegateCaptureTask(this.source, this.delegateTask.forWorker(resources), this.param.loadData(), resources);
         }
 
-        /**
-         * テーブル一覧の作成ではbuilderで行を読まない指定になる。delegateは行を使わないため常に読まない
-         */
         @Override
         public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
-            final boolean rows = builder.isLoadData();
-            return new DelegateCaptureTask(this.source, this.delegateTask.with(builder.setLoadData(false)), rows, this.resources);
+            final boolean loadRows = builder.isLoadData();
+            return new DelegateCaptureTask(this.source, this.delegateTask.with(builder.setLoadData(false)), loadRows, this.resources);
         }
 
-        /**
-         * delegateのタスクを実行し、読み込んだテーブルのメタデータを変換する（行データは使わない）
-         */
         private List<ConvertedTable> convert() {
-            final List<ConvertedTable> result = new ArrayList<>();
-            ComparableDataSetProducerWrapper.this.converting.set(result);
-            ComparableDataSetProducerWrapper.this.workerResources.set(this.resources);
-            try {
-                this.runDelegate(ComparableDataSetProducerWrapper.this);
-            } finally {
-                ComparableDataSetProducerWrapper.this.converting.remove();
-                ComparableDataSetProducerWrapper.this.workerResources.remove();
-            }
-            return result;
+            final Conversion conversion = new Conversion(this.resources);
+            this.runDelegate(conversion);
+            return conversion.tables;
         }
 
-        /**
-         * delegateのタスクを実行し、読み込んだテーブルの名前だけを集める
-         */
         private Set<String> tableNames() {
             final TableNameCollector collector = new TableNameCollector();
             this.runDelegate(collector);
@@ -246,41 +258,6 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
             captureContext.open();
             this.delegateTask.run(captureContext);
             captureContext.close();
-        }
-    }
-
-    private static final class TableNameCollector implements IDataSetConverter {
-
-        private final Set<String> tableNames = new LinkedHashSet<>();
-
-        @Override
-        public boolean isExportEmptyTable() {
-            return true;
-        }
-
-        @Override
-        public void startTable(final ITableMetaData metaData) {
-            this.tableNames.add(metaData.getTableName());
-        }
-
-        @Override
-        public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
-            this.startTable(tableMetaData);
-        }
-
-        @Override
-        public void row(final Object[] values) {
-            // テーブル名だけを集める
-        }
-
-        @Override
-        public void endTable() {
-            // テーブル名だけを集める
-        }
-
-        @Override
-        public IDataSetConverter split() {
-            return this;
         }
     }
 }

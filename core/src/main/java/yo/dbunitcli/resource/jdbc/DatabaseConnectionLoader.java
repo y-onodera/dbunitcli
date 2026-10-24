@@ -9,6 +9,8 @@ import org.dbunit.ext.h2.H2DataTypeFactory;
 import org.dbunit.ext.mssql.MsSqlDataTypeFactory;
 import org.dbunit.ext.oracle.Oracle10DataTypeFactory;
 import org.dbunit.ext.postgresql.PostgresqlDataTypeFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,7 +19,20 @@ import java.util.Properties;
 
 public record DatabaseConnectionLoader(Properties jdbcProp) {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConnectionLoader.class);
+
     private static final int CONNECT_TIMEOUT_SECONDS = 30;
+
+    /**
+     * 接続を閉じる。閉じられなくても処理は続けられるため、失敗は警告ログに残すだけにする
+     */
+    public static void close(final IDatabaseConnection connection) {
+        try {
+            connection.close();
+        } catch (final SQLException e) {
+            DatabaseConnectionLoader.LOGGER.warn("failed to close connection", e);
+        }
+    }
 
     public IDatabaseConnection loadConnection() {
         final String url = this.jdbcProp.get("url").toString();

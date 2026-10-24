@@ -21,11 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 public record GenerateOption(Parameter parameter, String resultDir, String resultPath, GenerateType generateType,
@@ -79,35 +77,19 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         return this.generateType.getTemplateString(this);
     }
 
-    public Stream<Parameter> parameterStream() {
-        if (this.generateType.isExcel()) {
-            return this.lazyLoad
-                    ? this.unit().lazyLoadStream(this.getComparableDataSetLoader(), this.dataSetParam())
-                    : this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
-        }
-        final ComparableDataSetLoader loader = this.getComparableDataSetLoader();
-        if (this.unit() != ParameterUnit.table) {
-            // record/datasetは全件を読み込んでから出力する（producerは読込後に閉じる）
-            return this.unit().dataSetToStream(loader, this.dataSetParam());
-        }
-        final ComparableDataSetProducer producer = this.generateType()
-                .wrapProducer(this, loader.getComparableDataSetProducer(this.dataSetParam()));
-        return this.unit().templateStream(loader, producer, this.unitTableSeparators()).onClose(producer::close);
-    }
-
     /**
-     * 出力単位のパラメータを順に渡す。unit=tableは、並列化できればテーブルごとに別スレッドで出力する（処理順は不定）。
+     * 出力単位ごとに、出力先とパラメータを渡す。unit=tableは、並列化できればテーブルごとに別スレッドで出力する（処理順は不定）。
      * <ul>
      *     <li>テキスト・Excel（lazyLoad）: 読込から出力までをテーブルごとに行う。並列化できる条件はsrcの並列読込と同じ</li>
      *     <li>Excel（lazyLoadなし）: 読込は全件まとめて済ませ（srcの並列読込の対象）、出力だけを並列にする</li>
      * </ul>
-     * いずれも出力先がテーブルごとに異なる場合に限る。読込タスクを共有するテーブル（1つのソースから複数のテーブルを作る場合）は
-     * 同じレーンにまとめ、レーン内は元の順に逐次処理する（タスクは状態を持ちうるため、同じタスクを同時に実行しない）
+     * 読込タスクまたは出力先を共有するテーブルは同じレーンにまとめ、レーン内は元の順に逐次処理する
+     * （タスクは状態を持ちうるため同じタスクを同時に実行せず、同じ出力先は逐次と同じく最後のテーブルの内容が残る）
      */
-    public void forEachParameter(final Consumer<Parameter> action) {
+    public void forEachParameter(final BiConsumer<File, Parameter> action) {
         if (this.unit() != ParameterUnit.table) {
             try (final Stream<Parameter> parameters = this.parameterStream()) {
-                parameters.forEach(action);
+                parameters.forEach(it -> action.accept(this.resultFile(it), it));
             }
             return;
         }
@@ -118,10 +100,11 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                               param, ParallelTableMapping.parallelism(param) > 1, action);
             return;
         }
+        final ComparableDataSetProducer source = loader.getComparableDataSetProducer(param);
         // 行はテーブルごとの出力の中で読むため、全テーブルの出力が終わるまで接続を保つ
         try (final ComparableDataSetProducer producer = this.generateType.isExcel()
-                ? loader.getComparableDataSetProducer(param)
-                : this.generateType().wrapProducer(this, loader.getComparableDataSetProducer(param))) {
+                ? source
+                : this.generateType().wrapProducer(this, source)) {
             final List<ParameterUnit.TableTemplate> templates = this.generateType.isExcel()
                     ? ParameterUnit.streamingTableTemplates(loader, producer).toList()
                     : ParameterUnit.tableTemplates(loader, producer, this.unitTableSeparators()).toList();
@@ -129,25 +112,35 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         }
     }
 
-    private void forEachTable(final List<ParameterUnit.TableTemplate> templates, final ComparableDataSetParam param,
-                              final boolean parallelizable, final Consumer<Parameter> action) {
-        final List<List<ParameterUnit.TableTemplate>> lanes = ParallelTableMapping.groupByShared(templates,
-                templates.stream().map(it -> it.tasks().toList()).toList());
-        if (lanes.size() < 2 || !parallelizable || this.hasSameResultFile(templates)) {
-            templates.forEach(it -> action.accept(it.load()));
-            return;
-        }
-        ParallelTableMapping.forEach(param, lanes,
-                                     (lane, resources, first) -> lane.forEach(
-                                             it -> action.accept((first ? it : it.forWorker(resources)).load())));
+    /**
+     * record/datasetの出力単位。全件を読み込んでから出力する（Excelのdataset+lazyLoadは出力の中で読む）
+     */
+    private Stream<Parameter> parameterStream() {
+        return this.generateType.isExcel() && this.lazyLoad
+                ? this.unit().lazyLoadStream(this.getComparableDataSetLoader(), this.dataSetParam())
+                : this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
     }
 
-    /**
-     * 同じファイルへ出力するテーブルがあると、並列では最後に書くテーブルが不定になる
-     */
-    private boolean hasSameResultFile(final List<ParameterUnit.TableTemplate> templates) {
-        final Set<String> resultFiles = new HashSet<>();
-        return !templates.stream().allMatch(it -> resultFiles.add(this.resultFile(it.unloaded()).getAbsolutePath()));
+    private void forEachTable(final List<ParameterUnit.TableTemplate> templates, final ComparableDataSetParam param,
+                              final boolean parallelizable, final BiConsumer<File, Parameter> action) {
+        // 出力先は行を読む前に決める（行を含むパラメータで描画すると、行を文字列化する分だけ無駄になる）
+        final List<TableOutput> outputs = templates.stream()
+                .map(it -> new TableOutput(it, this.resultFile(it.unloaded())))
+                .toList();
+        if (parallelizable) {
+            final List<List<TableOutput>> lanes = ParallelTableMapping.groupByShared(outputs, outputs.stream()
+                    .map(it -> Stream.concat(it.template().tasks(), Stream.of(it.resultFile())).toList())
+                    .toList());
+            if (lanes.size() > 1) {
+                ParallelTableMapping.forEach(param, lanes, (lane, resources, first) -> lane.forEach(
+                        it -> action.accept(it.resultFile(), (first ? it.template() : it.template().forWorker(resources)).load())));
+                return;
+            }
+        }
+        outputs.forEach(it -> action.accept(it.resultFile(), it.template().load()));
+    }
+
+    private record TableOutput(ParameterUnit.TableTemplate template, File resultFile) {
     }
 
     public TableSeparators unitTableSeparators() {
@@ -257,7 +250,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
      * @return 並列数。未指定ならnull（並列化できればCPUコア数で自動）
      */
     public Integer parallelism() {
-        return Strings.isEmpty(this.parallel) ? null : Integer.valueOf(this.parallel);
+        return DataSetConverterOption.parallelism(this.parallel);
     }
 
     public ComparableDataSetParam dataSetParam() {

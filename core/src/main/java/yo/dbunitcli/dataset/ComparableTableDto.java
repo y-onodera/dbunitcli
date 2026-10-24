@@ -38,11 +38,11 @@ public class ComparableTableDto extends HashMap<String, Object> {
         this.put("subTable", this.subTables);
     }
 
-    private ComparableTableDto(final ComparableTableDto origin, final ComparableTableMappingTask.WithTargetTable task) {
+    private ComparableTableDto(final ComparableTableDto origin) {
         super(origin);
+        this.task = origin.task;
         this.subTables.putAll(origin.subTables);
         this.put("subTable", this.subTables);
-        this.setRows(task);
     }
 
     public ComparableTableMappingTask.WithTargetTable getTask() {
@@ -102,7 +102,9 @@ public class ComparableTableDto extends HashMap<String, Object> {
      * 並列実行で2つ目以降の作業スレッドが使うDTOを返す（タスクをそのスレッド専用の資源を使うものに差し替える）
      */
     public ComparableTableDto forWorker(final ParallelTableMapping.WorkerResources resources) {
-        return new ComparableTableDto(this, this.task.forWorker(resources));
+        final ComparableTableDto result = new ComparableTableDto(this);
+        result.setRows(this.task.forWorker(resources));
+        return result;
     }
 
     /**
@@ -115,7 +117,7 @@ public class ComparableTableDto extends HashMap<String, Object> {
                 origin.setFilter(origin.getFilter().and(new SplitOrNameFilter(tableName)))
                       .setNext(origin.getNext().then(dataSetSeparators));
         final TreeMap<String, ComparableTable> tables = this.task.runWith(builder, null);
-        final ComparableTableDto result = new ComparableTableDto(this, this.task);
+        final ComparableTableDto result = new ComparableTableDto(this);
         final ComparableTable target = tables.get(tableName);
         result.setRows(target == null ? new ArrayList<>() : target.toMap(false));
         tables.entrySet().stream()

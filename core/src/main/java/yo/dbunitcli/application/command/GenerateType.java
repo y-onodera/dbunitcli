@@ -300,8 +300,7 @@ public enum GenerateType {
         return false;
     }
 
-    // ParameterUnit.table.templateStream()のみがこの戻り値を消費する(producer.lazyLoad(true)経由)。
-    // unit=record/datasetはdataSetToStream(loader, producer.param())にフォールバックするため、
+    // GenerateOption.forEachParameter()のunit=table（Excel以外）だけがこの戻り値を消費する(ParameterUnit.tableTemplates()経由)。
     // ここをoverrideしてもunit=table以外では反映されない。
     protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
         return producer;

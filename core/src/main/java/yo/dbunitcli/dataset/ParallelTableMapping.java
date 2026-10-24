@@ -7,6 +7,7 @@ import yo.dbunitcli.resource.ThreadContexts;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
@@ -56,28 +57,9 @@ public final class ParallelTableMapping {
         final int threads = Math.min(ParallelTableMapping.parallelism(param), lanes.size());
         ParallelTableMapping.LOGGER.info("produce() - parallel lanes={}, threads={}", lanes.size(), threads);
         final Queue<List<ComparableTableMappingTask>> queue = new ConcurrentLinkedQueue<>(lanes);
-        final ExecutorService executor = ParallelTableMapping.newExecutor(threads, "produce-");
-        // executeは投入元のスレッドで呼ばれるため、ここで投入元の文脈を包む
-        final CompletionService<TreeMap<String, ComparableTable>> completion = new ExecutorCompletionService<>(
-                command -> executor.execute(ThreadContexts.propagate(command)));
-        final List<Future<TreeMap<String, ComparableTable>>> futures = IntStream.range(0, threads)
-                .mapToObj(i -> completion.submit(() -> ParallelTableMapping.runWorker(param, queue, i == 0)))
-                .toList();
         final TreeMap<String, ComparableTable> result = new TreeMap<>();
-        try {
-            for (int i = 0; i < threads; i++) {
-                result.putAll(completion.take().get());
-            }
-        } catch (final ExecutionException e) {
-            futures.forEach(it -> it.cancel(true));
-            throw ParallelTableMapping.rethrow(e.getCause());
-        } catch (final InterruptedException e) {
-            futures.forEach(it -> it.cancel(true));
-            Thread.currentThread().interrupt();
-            throw new CancellationException("produce interrupted");
-        } finally {
-            ParallelTableMapping.shutdown(executor);
-        }
+        ParallelTableMapping.runWorkers(threads, "produce-", i -> () -> ParallelTableMapping.runWorker(param, queue, i == 0))
+                .forEach(result::putAll);
         return result;
     }
 
@@ -91,27 +73,35 @@ public final class ParallelTableMapping {
         final int threads = Math.min(ParallelTableMapping.parallelism(param), items.size());
         ParallelTableMapping.LOGGER.info("forEach() - parallel items={}, threads={}", items.size(), threads);
         final Queue<T> queue = new ConcurrentLinkedQueue<>(items);
-        final ExecutorService executor = ParallelTableMapping.newExecutor(threads, "generate-");
+        ParallelTableMapping.runWorkers(threads, "generate-", i -> () -> {
+            try (final WorkerResources resources = new WorkerResources()) {
+                T item;
+                while ((item = queue.poll()) != null) {
+                    ParallelTableMapping.checkInterrupted();
+                    action.accept(item, resources, i == 0);
+                }
+            }
+            return null;
+        });
+    }
+
+    /**
+     * threads個の作業スレッドでworker(i)を実行し、全ての結果を返す。投入元の文脈を引き継ぎ、
+     * いずれかが失敗したら残りを中断して例外を投げる。戻る前に作業スレッドの終了を待つ
+     */
+    private static <R> List<R> runWorkers(final int threads, final String threadNamePrefix
+            , final IntFunction<Callable<R>> worker) {
+        final ExecutorService executor = ParallelTableMapping.newExecutor(threads, threadNamePrefix);
         // executeは投入元のスレッドで呼ばれるため、ここで投入元の文脈を包む
-        final CompletionService<Void> completion = new ExecutorCompletionService<>(
+        final CompletionService<R> completion = new ExecutorCompletionService<>(
                 command -> executor.execute(ThreadContexts.propagate(command)));
-        final List<Future<Void>> futures = IntStream.range(0, threads)
-                .mapToObj(i -> completion.submit(() -> {
-                    try (final WorkerResources resources = new WorkerResources()) {
-                        T item;
-                        while ((item = queue.poll()) != null) {
-                            if (Thread.currentThread().isInterrupted()) {
-                                throw new CancellationException("forEach interrupted");
-                            }
-                            action.accept(item, resources, i == 0);
-                        }
-                    }
-                    return (Void) null;
-                }))
+        final List<Future<R>> futures = IntStream.range(0, threads)
+                .mapToObj(i -> completion.submit(worker.apply(i)))
                 .toList();
+        final List<R> result = new ArrayList<>();
         try {
             for (int i = 0; i < threads; i++) {
-                completion.take().get();
+                result.add(completion.take().get());
             }
         } catch (final ExecutionException e) {
             futures.forEach(it -> it.cancel(true));
@@ -119,9 +109,16 @@ public final class ParallelTableMapping {
         } catch (final InterruptedException e) {
             futures.forEach(it -> it.cancel(true));
             Thread.currentThread().interrupt();
-            throw new CancellationException("forEach interrupted");
+            throw new CancellationException(threadNamePrefix + "interrupted");
         } finally {
             ParallelTableMapping.shutdown(executor);
+        }
+        return result;
+    }
+
+    private static void checkInterrupted() {
+        if (Thread.currentThread().isInterrupted()) {
+            throw new CancellationException("interrupted");
         }
     }
 
@@ -220,9 +217,7 @@ public final class ParallelTableMapping {
             List<ComparableTableMappingTask> lane;
             while ((lane = queue.poll()) != null) {
                 for (final ComparableTableMappingTask task : lane) {
-                    if (Thread.currentThread().isInterrupted()) {
-                        throw new CancellationException("produce interrupted");
-                    }
+                    ParallelTableMapping.checkInterrupted();
                     (first ? task : task.forWorker(resources)).run(context);
                 }
             }

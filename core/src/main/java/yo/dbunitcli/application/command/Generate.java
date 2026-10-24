@@ -22,8 +22,7 @@ public class Generate implements Command<GenerateDto, GenerateOption> {
             throw new AssertionError(e);
         }
         // unit=tableでは複数スレッドから呼ばれる
-        options.forEachParameter(param -> {
-            final File resultFile = options.resultFile(param);
+        options.forEachParameter((resultFile, param) -> {
             try {
                 Files.createDirectories(resultFile.getParentFile().toPath());
                 writer.write(resultFile, param);

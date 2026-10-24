@@ -75,9 +75,9 @@ public class WrapperConvertOnceTest {
         }
 
         @Override
-        public void startTable(final ITableMetaData metaData) throws DataSetException {
+        protected void convertTable(final ITableMetaData metaData, final Conversion conversion) throws DataSetException {
             this.counts.computeIfAbsent(metaData.getTableName(), k -> new AtomicInteger()).incrementAndGet();
-            super.startTable(metaData);
+            super.convertTable(metaData, conversion);
         }
     }
 }

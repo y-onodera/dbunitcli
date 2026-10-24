@@ -1,10 +1,5 @@
 package yo.dbunitcli.application.command;
 
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.Comment;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,16 +8,15 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import yo.dbunitcli.TestJdbc;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -83,7 +77,7 @@ public class DbConnectionCloseTest {
     @ParameterizedTest
     @CsvSource({"table,true", "table,false", "dataset,true", "dataset,false"})
     public void generateXlsxClosesSourceConnection(final String unit, final boolean lazyLoad) throws Exception {
-        final File template = this.excelTemplate();
+        final File template = TestJxlsTemplates.create(this.tempDir, "xlsx");
         this.assertNoConnectionLeft(() -> Generate.main(this.dbSrcArgs(
                 "-generateType=xlsx"
                 , "-unit=" + unit
@@ -125,7 +119,7 @@ public class DbConnectionCloseTest {
                     , "-jdbcUser=sa"
                     , "-jdbcPass=sa"}));
         }
-        Assertions.assertEquals(10, this.count("T2"));
+        Assertions.assertEquals(10, TestJdbc.count(this.stmt, "T2"));
     }
 
     @Test
@@ -157,43 +151,9 @@ public class DbConnectionCloseTest {
     }
 
     private void assertNoConnectionLeft(final ThrowingRunnable command) throws Exception {
-        final int before = this.sessions();
+        final int before = TestJdbc.sessions(this.stmt);
         command.run();
-        Assertions.assertEquals(before, this.sessions());
-    }
-
-    private int sessions() throws SQLException {
-        try (final ResultSet rs = this.stmt.executeQuery("select count(*) from information_schema.sessions")) {
-            rs.next();
-            return rs.getInt(1);
-        }
-    }
-
-    private int count(final String table) throws SQLException {
-        try (final ResultSet rs = this.stmt.executeQuery("select count(*) from " + table)) {
-            rs.next();
-            return rs.getInt(1);
-        }
-    }
-
-    private File excelTemplate() throws IOException {
-        final File result = this.tempDir.resolve("template.xlsx").toFile();
-        try (final XSSFWorkbook workbook = new XSSFWorkbook();
-             final FileOutputStream out = new FileOutputStream(result)) {
-            final Sheet sheet = workbook.createSheet("table");
-            sheet.createRow(0).createCell(0).setCellValue("${tableName}");
-            final CreationHelper factory = workbook.getCreationHelper();
-            final ClientAnchor anchor = factory.createClientAnchor();
-            anchor.setCol1(0);
-            anchor.setCol2(2);
-            anchor.setRow1(0);
-            anchor.setRow2(2);
-            final Comment comment = sheet.createDrawingPatriarch().createCellComment(anchor);
-            comment.setString(factory.createRichTextString("jx:area(lastCell=\"A1\")"));
-            sheet.getRow(0).getCell(0).setCellComment(comment);
-            workbook.write(out);
-        }
-        return result;
+        Assertions.assertEquals(before, TestJdbc.sessions(this.stmt));
     }
 
     @FunctionalInterface
