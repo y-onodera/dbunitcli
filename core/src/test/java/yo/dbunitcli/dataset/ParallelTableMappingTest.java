@@ -6,15 +6,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import yo.dbunitcli.application.json.TableMetaDataFilterParser;
 import yo.dbunitcli.dataset.converter.CsvConverter;
+import yo.dbunitcli.dataset.converter.DBConverter;
+import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.dataset.converter.XlsxConverter;
 import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
+import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -32,7 +40,7 @@ public class ParallelTableMappingTest {
         for (final String name : List.of("a", "b", "c", "d")) {
             final String body = IntStream.range(0, 100)
                     .mapToObj(i -> "\"" + name + i + "\",\"" + i + "\"")
-                    .collect(Collectors.joining("\n", "\"KEY\",\"VALUE\"\n", "\n"));
+                    .collect(Collectors.joining("\n", "\"ID\",\"VAL\"\n", "\n"));
             Files.writeString(new File(this.src, name + ".csv").toPath(), body, StandardCharsets.UTF_8);
         }
     }
@@ -106,6 +114,58 @@ public class ParallelTableMappingTest {
         for (final String file : files) {
             Assertions.assertEquals(Files.readString(new File(sequentialDir, file).toPath())
                     , Files.readString(new File(parallelDir, file).toPath()));
+        }
+    }
+
+    @Test
+    public void lanes_empty_when_db_converter_has_no_connection_loader() throws SQLException {
+        final String url = "jdbc:h2:mem:parallelNoLoader;DB_CLOSE_DELAY=-1";
+        final DBConverter converter = new DBConverter(this.connectionLoader(url).loadConnection(), DbOperation.INSERT, true);
+        Assertions.assertTrue(ParallelTableMapping.lanes(this.producer(TableSeparators.NONE, converter, null), this.tasks(TableSeparators.NONE)).isEmpty());
+    }
+
+    @Test
+    public void produce_to_table_with_connection_per_lane() throws SQLException {
+        final String url = "jdbc:h2:mem:parallelTable;DB_CLOSE_DELAY=-1";
+        try (final Connection conn = DriverManager.getConnection(url, "sa", "");
+             final Statement stmt = conn.createStatement()) {
+            for (final String table : List.of("a", "c", "d")) {
+                stmt.execute("create table " + table + " (ID varchar(10) primary key, VAL varchar(10))");
+                stmt.execute("insert into " + table + " values ('old', '0')");
+            }
+            final IDataSetConverter converter = new DataSetConverterLoader().get(DataSetConverterParam.builder()
+                    .setResultType(ResultType.table)
+                    .setOperation(DbOperation.CLEAN_INSERT)
+                    .setDatabaseConnectionLoader(this.connectionLoader(url))
+                    .setExportEmptyTable(true)
+                    .build());
+            Assertions.assertTrue(converter.isParallelizable());
+            final ComparableCsvDataSetProducer producer = this.producer(this.renameBToA(), converter, 4);
+            Assertions.assertEquals(3, ParallelTableMapping.lanes(producer, this.tasks(this.renameBToA())).orElseThrow().size());
+
+            producer.loadDataSet();
+
+            // CLEAN_INSERTはテーブルごとに1度だけtruncateし、同じテーブルへの2ソース目は追記する
+            Assertions.assertEquals(200, this.count(stmt, "a"));
+            Assertions.assertEquals(100, this.count(stmt, "c"));
+            Assertions.assertEquals(100, this.count(stmt, "d"));
+            Assertions.assertEquals(0, this.count(stmt, "a where ID = 'old'"));
+            Assertions.assertEquals(100, this.count(stmt, "a where ID like 'b%'"));
+        }
+    }
+
+    private DatabaseConnectionLoader connectionLoader(final String url) {
+        final Properties prop = new Properties();
+        prop.put("url", url);
+        prop.put("user", "sa");
+        prop.put("pass", "");
+        return new DatabaseConnectionLoader(prop);
+    }
+
+    private int count(final Statement stmt, final String from) throws SQLException {
+        try (final ResultSet rs = stmt.executeQuery("select count(*) from " + from)) {
+            rs.next();
+            return rs.getInt(1);
         }
     }
 

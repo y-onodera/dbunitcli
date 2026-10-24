@@ -34,10 +34,10 @@ class DataSetConverterOptionTest {
     }
 
     @Test
-    void parallelIsNotShownForTable() {
+    void parallelIsShownForTable() {
         final DataSetConverterDto dto = new DataSetConverterDto();
         dto.setResultType(ResultType.table);
-        Assertions.assertFalse(new DataSetConverterOption("result", dto).toParameters()
+        Assertions.assertTrue(new DataSetConverterOption("result", dto).toParameters()
                 .options().containsKey("-result.parallel"));
     }
 }

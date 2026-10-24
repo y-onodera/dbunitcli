@@ -28,7 +28,9 @@
     <tr><th>項目</th><th>説明</th></tr>
     <tr><td>op</td><td>DB への書き込み操作（下表参照）</td></tr>
     <tr><td>jdbc</td><td>接続先の <a href="../../jdbc.html">JDBC 接続情報</a>（URL・ユーザ・パスワードなど）</td></tr>
+    <tr><td>parallel</td><td>入力ソースを並列に読み込み・書き込むスレッド数（<a href="../../result-form.html">Result Form</a> の「並列読込」参照）。並列時はスレッドごとに DB 接続を張るため、接続数は最大で並列数になる</td></tr>
   </table>
+  <p>並列時は出力先テーブルごとにスレッドが分かれ、テーブル単位で書き込み（CLEAN_INSERT の削除を含む）が同時に進みます。外部キー制約で親子関係のあるテーブルへ書き込む場合は、<code>parallel</code> に <code>1</code> を指定して逐次処理にしてください。</p>
   <h3>op（DB 操作）</h3>
   <table>
     <tr><th>値</th><th>説明</th></tr>

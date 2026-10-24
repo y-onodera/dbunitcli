@@ -315,7 +315,7 @@ describe("ConvertFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
-		it("レスポンスにparallelが無ければ表示しない（table result）", () => {
+		it("レスポンスにparallelが無ければ表示しない", () => {
 			const { parallel: _, ...withoutParallel } =
 				convertLoadResponseFixture.convertResult;
 			render(

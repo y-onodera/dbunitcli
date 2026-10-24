@@ -65,8 +65,10 @@ public final class ParallelTableMapping {
         });
         final List<FutureTask<TreeMap<String, ComparableTable>>> futures = new ArrayList<>();
         try {
-            lanes.forEach(lane -> {
-                final FutureTask<TreeMap<String, ComparableTable>> future = new FutureTask<>(() -> ParallelTableMapping.runLane(param, lane)) {
+            for (int i = 0; i < lanes.size(); i++) {
+                final List<ComparableTableMappingTask> lane = lanes.get(i);
+                final boolean first = i == 0;
+                final FutureTask<TreeMap<String, ComparableTable>> future = new FutureTask<>(() -> ParallelTableMapping.runLane(param, lane, first)) {
                     @Override
                     protected void done() {
                         completed.add(this);
@@ -74,7 +76,7 @@ public final class ParallelTableMapping {
                 };
                 futures.add(future);
                 executor.execute(ParallelTableMapping.taskDecorator.apply(future));
-            });
+            }
             for (int i = 0; i < futures.size(); i++) {
                 completed.take().get();
             }
@@ -155,18 +157,34 @@ public final class ParallelTableMapping {
         parent[Math.max(rootA, rootB)] = Math.min(rootA, rootB);
     }
 
+    /**
+     * @param first 最初のレーンは元のconverterをそのまま使う（DB出力で接続を余分に張らない）
+     */
     private static TreeMap<String, ComparableTable> runLane(final ComparableDataSetParam param
-            , final List<ComparableTableMappingTask> lane) {
-        final IDataSetConverter converter = param.converter() == null ? null : param.converter().split();
-        final ComparableTableMappingContext context = new ComparableTableMappingContext(param.tableSeparators(), converter);
-        context.open();
-        for (final ComparableTableMappingTask task : lane) {
-            if (Thread.currentThread().isInterrupted()) {
-                throw new CancellationException("produce interrupted");
+            , final List<ComparableTableMappingTask> lane, final boolean first) {
+        final IDataSetConverter converter = ParallelTableMapping.laneConverter(param.converter(), first);
+        try {
+            final ComparableTableMappingContext context = new ComparableTableMappingContext(param.tableSeparators(), converter);
+            context.open();
+            for (final ComparableTableMappingTask task : lane) {
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new CancellationException("produce interrupted");
+                }
+                task.run(context);
             }
-            task.run(context);
+            return context.close();
+        } finally {
+            if (converter != null && converter != param.converter()) {
+                converter.release();
+            }
         }
-        return context.close();
+    }
+
+    private static IDataSetConverter laneConverter(final IDataSetConverter converter, final boolean first) {
+        if (converter == null || first) {
+            return converter;
+        }
+        return converter.splitForParallel();
     }
 
     private static RuntimeException rethrow(final Throwable cause) {

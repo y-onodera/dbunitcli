@@ -82,6 +82,7 @@ public record DataSetConverterOption(
         if (type == ResultType.table) {
             result.put("-op", this.operation == null ? DbOperation.CLEAN_INSERT : this.operation
                           , DbOperation.class)
+                  .put("-parallel", this.parallel)
                   .addComponent("jdbc", this.jdbcOption.toParameters());
         } else {
             result.putDir("-result", this.resultDir, BaseDir.RESULT)
